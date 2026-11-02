@@ -1,0 +1,68 @@
+from __future__ import annotations
+
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
+from sqlalchemy.dialects.postgresql import CITEXT, INET, UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
+from handball_api.core.db import Base, EntityMixin
+from handball_api.models._types import str_enum
+from handball_api.models.enums import TokenPurpose
+
+
+class User(Base, EntityMixin):
+    __tablename__ = "users"
+
+    email: Mapped[str] = mapped_column(CITEXT, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    locale: Mapped[str] = mapped_column(String(10), nullable=False, default="de-CH")
+    password_hash: Mapped[str | None] = mapped_column(String(255))
+    totp_secret_enc: Mapped[str | None] = mapped_column(String(255))
+    totp_enabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    is_platform_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    @property
+    def totp_enabled(self) -> bool:
+        return self.totp_enabled_at is not None
+
+
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    # True while only the TOTP step is allowed (password ok, second factor pending)
+    mfa_pending: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    mfa_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    user_agent: Mapped[str | None] = mapped_column(String(300))
+    ip: Mapped[str | None] = mapped_column(INET)
+
+
+class AuthToken(Base):
+    """Single-use tokens (magic links). Only the hash is stored."""
+
+    __tablename__ = "auth_tokens"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    purpose: Mapped[TokenPurpose] = mapped_column(str_enum(TokenPurpose, 30), nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    email: Mapped[str] = mapped_column(CITEXT, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -4,7 +4,7 @@ import uuid
 from collections.abc import AsyncIterator
 from datetime import datetime
 
-from sqlalchemy import DateTime, MetaData, func
+from sqlalchemy import DateTime, ForeignKey, MetaData, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -40,11 +40,19 @@ class EntityMixin:
 
 
 class TenantMixin:
-    """Tenant-scoped entities carry organization_id; Postgres RLS uses it (ADR 005)."""
+    """Tenant-scoped entities carry organization_id; Postgres RLS uses it (ADR 005).
 
-    organization_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), index=True, nullable=False
-    )
+    Deleting an organisation cascades to all its tenant rows (BRIEF 12, deletion).
+    """
+
+    @declared_attr
+    def organization_id(cls) -> Mapped[uuid.UUID]:  # noqa: N805
+        return mapped_column(
+            UUID(as_uuid=True),
+            ForeignKey("organizations.id", ondelete="CASCADE"),
+            index=True,
+            nullable=False,
+        )
 
 
 _engine: AsyncEngine | None = None
@@ -73,7 +81,38 @@ async def dispose_engine() -> None:
 
 
 async def get_session() -> AsyncIterator[AsyncSession]:
+    """Request-scoped session in one transaction: commit on success, rollback on error.
+
+    Tenant context is transaction-local (``set_config(..., true)``), so it can never leak to
+    another request through the connection pool.
+    """
     if _sessionmaker is None:
         raise RuntimeError("database engine not initialised")
-    async with _sessionmaker() as session:
+    async with _sessionmaker() as session, session.begin():
         yield session
+
+
+async def set_tenant(session: AsyncSession, organization_id: uuid.UUID) -> None:
+    await session.execute(
+        text("SELECT set_config('app.current_org', :v, true)"), {"v": str(organization_id)}
+    )
+
+
+async def set_current_user(session: AsyncSession, user_id: uuid.UUID) -> None:
+    await session.execute(
+        text("SELECT set_config('app.current_user', :v, true)"), {"v": str(user_id)}
+    )
+
+
+async def enable_system_access(session: AsyncSession, reason: str) -> None:
+    """Explicit RLS bypass for system paths (org creation, invitation lookup by token).
+
+    Every call site names a reason; it is logged by the caller via the audit log where relevant.
+    """
+    if not reason:
+        raise ValueError("system access requires a reason")
+    await session.execute(text("SELECT set_config('app.bypass_rls', 'on', true)"))
+
+
+async def disable_system_access(session: AsyncSession) -> None:
+    await session.execute(text("SELECT set_config('app.bypass_rls', 'off', true)"))

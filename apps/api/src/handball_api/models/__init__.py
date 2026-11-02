@@ -1,3 +1,29 @@
-"""SQLAlchemy models. Entities are added from M1 on (BRIEF 5)."""
+"""SQLAlchemy models (BRIEF 5)."""
 
-__all__: list[str] = []
+from handball_api.models.audit import AuditLog
+from handball_api.models.identity import AuthSession, AuthToken, User
+from handball_api.models.roster import Consent, Player, RosterEntry
+from handball_api.models.tenancy import (
+    Invitation,
+    Membership,
+    Organization,
+    OrgMembership,
+    Season,
+    Team,
+)
+
+__all__ = [
+    "AuditLog",
+    "AuthSession",
+    "AuthToken",
+    "Consent",
+    "Invitation",
+    "Membership",
+    "OrgMembership",
+    "Organization",
+    "Player",
+    "RosterEntry",
+    "Season",
+    "Team",
+    "User",
+]

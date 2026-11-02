@@ -1,9 +1,18 @@
 import "server-only";
 import { createApiClient, type Readiness } from "@handball/api-client";
+import { cookies } from "next/headers";
+import { apiBaseUrl } from "./api-base";
 
-/** Server-side base URL (inside docker compose: http://api:8000). */
-export function apiBaseUrl(): string {
-  return process.env.HB_API_INTERNAL_URL ?? "http://localhost:8000";
+export { apiBaseUrl };
+
+/** API client for server components, forwarding the user's cookies. */
+export async function serverApi() {
+  const store = await cookies();
+  const cookie = store
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+  return createApiClient(apiBaseUrl(), { headers: cookie ? { cookie } : {} });
 }
 
 export async function fetchReadiness(timeoutMs = 3000): Promise<Readiness | null> {
@@ -14,7 +23,6 @@ export async function fetchReadiness(timeoutMs = 3000): Promise<Readiness | null
       cache: "no-store",
     });
     if (data) return data;
-    // 503 still carries a Readiness body
     if (response.status === 503 && error) return error as Readiness;
     return null;
   } catch {

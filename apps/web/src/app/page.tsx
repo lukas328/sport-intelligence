@@ -11,8 +11,8 @@ export default async function HomePage() {
         <p className="max-w-2xl text-lg text-muted">{t("app.description")}</p>
         <p className="text-sm text-muted">{t("home.foundation")}</p>
         <Link
-          href="/status"
-          className="inline-block rounded-md bg-accent px-4 py-2 text-sm font-medium text-white dark:text-background"
+          href="/register"
+          className="inline-block rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-contrast"
         >
           {t("home.cta")}
         </Link>

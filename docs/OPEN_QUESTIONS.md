@@ -25,6 +25,19 @@ Each question has the **assumption** I work with until it is answered. Status: o
 - **Q-DATA-5 handball.ch**: is there an official data access (API, export, partnership)? *Assumption:* stub
   adapter only, nothing is scraped (BRIEF 7.4).
 
+## Accounts and roles (M1)
+- **Q-AUTH-1 Google and Apple sign-in** are optional in the brief. *Assumption:* postponed until after M2;
+  the session model supports additional login methods without changes.
+- **Q-AUTH-2 2FA for org admins**: enforced for org-level write actions after a 14-day grace period
+  (configurable), so the 5-minute onboarding is not blocked. Is that acceptable, or must 2FA be set up
+  during onboarding?
+- **Q-ROLES-1 Players see the roster** (names, numbers, positions) of their team. Statistics visibility
+  follows `players_see_team_stats` from M4. *Assumption:* roster is not sensitive within a team.
+- **Q-ROLES-2 Coaches can invite** analysts, players and goalkeepers to their own team, and other
+  coaches. Only org admins can invite org admins. Confirm.
+- **Q-ROLES-3 Season** defaults to 1 July to 30 June and is created with the team. Other cut-offs needed
+  (e.g. youth tournaments)?
+
 ## Infrastructure
 - **Q-INFRA-1 Hosting provider** (ADR 002 proposed: Exoscale or Infomaniak in CH, AWS Zurich fallback) and
   **GPU provider** with CH/EU processing and DPA. Needs price/availability check.

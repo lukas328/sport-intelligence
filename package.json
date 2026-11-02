@@ -10,7 +10,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "build": "pnpm -r --if-present build",
-    "circular": "madge --circular --extensions ts,tsx --ts-config tsconfig.base.json apps/web/src packages/court/src",
+    "circular": "madge --circular --extensions ts,tsx --ts-config apps/web/tsconfig.json apps/web/src packages/court/src packages/api-client/src",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

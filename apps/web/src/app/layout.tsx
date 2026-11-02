@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { NextIntlClientProvider } from "next-intl";
+import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import "./globals.css";
@@ -23,6 +24,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
   const t = await getTranslations();
+  const signedIn = Boolean((await cookies()).get("hb_session"));
   return (
     <html lang={locale}>
       <body className="min-h-dvh antialiased">
@@ -36,9 +38,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <Link href="/" className="font-semibold tracking-tight">
                   {t("app.name")}
                 </Link>
-                <Link href="/status" className="text-sm text-muted hover:text-foreground">
-                  {t("nav.status")}
-                </Link>
+                <div className="flex items-center gap-4 text-sm">
+                  <Link href="/status" className="text-muted hover:text-foreground">
+                    {t("nav.status")}
+                  </Link>
+                  <Link href={signedIn ? "/app" : "/login"} className="font-medium text-accent">
+                    {signedIn ? t("nav.app") : t("nav.login")}
+                  </Link>
+                </div>
               </nav>
             </header>
             <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>

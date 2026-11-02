@@ -20,6 +20,16 @@ jobs:
   python:
     name: Python (lint, types, tests)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: handball
+          POSTGRES_PASSWORD: handball
+          POSTGRES_DB: handball
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U handball" --health-interval 5s --health-timeout 3s --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -31,7 +41,10 @@ jobs:
       - name: Import contracts (no circular or cross-app imports)
         run: uv run lint-imports
       - run: make typecheck-py
-      - run: make test-py
+      - name: Tests (coverage gate 80 %)
+        run: |
+          uv run python packages/court/scripts/generate.py --check
+          uv run pytest apps packages --cov --cov-report=term
       - name: OpenAPI client is up to date
         run: |
           uv run python -m handball_api.openapi /tmp/openapi.json
@@ -51,7 +64,7 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U handball" --health-interval 5s --health-timeout 3s --health-retries 20
     env:
-      HB_DATABASE_URL: postgresql+asyncpg://handball:handball@localhost:5432/handball
+      HB_MIGRATION_DATABASE_URL: postgresql+asyncpg://handball:handball@localhost:5432/handball
     defaults:
       run:
         working-directory: apps/api
@@ -60,6 +73,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --all-packages --frozen
       - run: uv run alembic upgrade head
+      - name: App role is not a superuser
+        run: psql postgresql://handball:handball@localhost:5432/handball -tAc "select rolsuper or rolbypassrls from pg_roles where rolname='handball_app'" | grep -qx f
       - name: Models and migrations are in sync
         run: uv run alembic check
       - name: Downgrade and upgrade again
@@ -80,6 +95,10 @@ jobs:
       - run: pnpm circular
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Generated TS client matches openapi.json
+        run: |
+          pnpm --filter @handball/api-client generate
+          git diff --exit-code packages/api-client/src/schema.ts
       - run: pnpm --filter @handball/web build
 
   images:

@@ -27,6 +27,9 @@ api-client: ## Export OpenAPI and regenerate the TS client
 	uv run python -m handball_api.openapi packages/api-client/openapi.json
 	pnpm --filter @handball/api-client generate
 
+policy-doc: ## Regenerate docs/policy-matrix.md from the policy table
+	uv run python -c "from handball_api.services.policies import matrix_markdown; print(matrix_markdown(), end='')" > docs/policy-matrix.md
+
 lint: ## Lint Python and TS, check formatting, import contracts, circular deps
 	uv run ruff check .
 	uv run ruff format --check .
@@ -47,7 +50,10 @@ typecheck-py:
 
 test: test-py test-js ## Run all unit tests (no running services needed)
 
-test-py: ## Python tests with coverage gate (80 %)
+db: ## Start only Postgres (needed by the API tests)
+	docker compose up -d --wait postgres
+
+test-py: db ## Python tests with coverage gate (80 %), needs Postgres
 	uv run python packages/court/scripts/generate.py --check
 	uv run pytest apps packages --cov --cov-report=term
 
@@ -71,4 +77,4 @@ seed: ## Demo data (from M1 on)
 
 check: lint typecheck test ## Everything CI runs without services
 
-.PHONY: help install up down logs court api-client lint fmt typecheck typecheck-py test test-py test-js test-integration test-e2e migrate migration seed check
+.PHONY: help install up down logs court api-client lint fmt typecheck typecheck-py db policy-doc test test-py test-js test-integration test-e2e migrate migration seed check

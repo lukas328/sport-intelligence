@@ -37,7 +37,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 - [x] Web: Next.js 15, i18n (de-CH/en/fr), dark mode tokens, status page, Vitest + Playwright + axe
 - [x] Docker Compose for all services, ADRs 001 to 007, ARCHITECTURE, OPEN_QUESTIONS
 
-### M1 Accounts, tenants, roster
+### M1 Accounts, tenants, roster ✅ (see docs/progress/M1.md)
 - Models + migrations: Organization, User, Team, Season, Player, RosterEntry, Membership, Consent, AuditLog, Invitation; RLS policies
 - Auth: email + Argon2, magic link, sessions (httpOnly cookie), CSRF, TOTP for org_admin, invitations (signed token), rate limits
 - Policy layer + policy test matrix (role × endpoint), cross-tenant test suite

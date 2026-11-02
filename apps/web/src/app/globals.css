@@ -8,7 +8,8 @@
   --muted: #64748b;
   --surface: #f8fafc;
   --border: #e2e8f0;
-  --accent: #0b6bcb; /* club colour, overridden per organisation from M1 */
+  --accent: #0b6bcb; /* club colour, overridden per organisation */
+  --accent-contrast: #ffffff;
   --ok: #15803d;
   --error: #b91c1c;
   --court: #e6f0e8;
@@ -23,6 +24,7 @@
     --surface: #111827;
     --border: #1f2937;
     --accent: #60a5fa;
+  --accent-contrast: #0b1120;
     --ok: #4ade80;
     --error: #f87171;
     --court: #10261a;
@@ -37,6 +39,7 @@
   --surface: #111827;
   --border: #1f2937;
   --accent: #60a5fa;
+  --accent-contrast: #0b1120;
   --ok: #4ade80;
   --error: #f87171;
   --court: #10261a;
@@ -50,6 +53,7 @@
   --color-surface: var(--surface);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
   --color-ok: var(--ok);
   --color-error: var(--error);
 }

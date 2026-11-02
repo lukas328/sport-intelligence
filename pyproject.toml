@@ -15,6 +15,7 @@ dev = [
   "import-linter>=2.1",
   "fakeredis>=2.26",
   "pre-commit>=4.0",
+  "asyncpg>=0.32.0",
 ]
 
 [tool.uv]
@@ -54,7 +55,7 @@ explicit_package_bases = true
 namespace_packages = true
 
 [[tool.mypy.overrides]]
-module = ["rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*"]
+module = ["rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
@@ -65,6 +66,7 @@ addopts = "-m 'not integration' --import-mode=importlib"
 
 [tool.coverage.run]
 branch = true
+concurrency = ["greenlet", "thread"]
 source = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court"]
 omit = ["**/migrations/**", "**/__main__.py"]
 
@@ -88,6 +90,13 @@ type = "independence"
 modules = ["handball_api", "handball_worker", "handball_gpu_worker"]
 
 [[tool.importlinter.contracts]]
-name = "API layers (routers above services above core)"
+name = "API layers (routers > services > schemas > models > core)"
 type = "layers"
-layers = ["handball_api.main", "handball_api.routers", "handball_api.services", "handball_api.core"]
+layers = [
+  "handball_api.main",
+  "handball_api.routers",
+  "handball_api.services",
+  "handball_api.schemas",
+  "handball_api.models",
+  "handball_api.core",
+]

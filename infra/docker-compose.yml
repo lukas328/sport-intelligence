@@ -2,7 +2,8 @@ name: handball-ai
 
 x-python-env: &python-env
   HB_ENV: local
-  HB_DATABASE_URL: postgresql+asyncpg://handball:handball@postgres:5432/handball
+  HB_DATABASE_URL: postgresql+asyncpg://handball_app:handball_app@postgres:5432/handball
+  HB_MIGRATION_DATABASE_URL: postgresql+asyncpg://handball:handball@postgres:5432/handball
   HB_REDIS_URL: redis://redis:6379/0
   HB_S3_ENDPOINT_URL: http://s3:9000
   HB_S3_ACCESS_KEY: handball
@@ -16,7 +17,9 @@ services:
       POSTGRES_PASSWORD: handball
       POSTGRES_DB: handball
     ports: ["5432:5432"]
-    volumes: [pgdata:/var/lib/postgresql/data]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U handball -d handball"]
       interval: 5s
@@ -68,6 +71,14 @@ services:
       <<: *python-env
       HB_LOG_JSON: "true"
       HB_CORS_ORIGINS: '["http://localhost:3000"]'
+      HB_WEB_BASE_URL: http://localhost:3000
+      HB_EMAIL_BACKEND: smtp
+      HB_SMTP_HOST: mailpit
+      HB_SMTP_PORT: "1025"
+      HB_EMAIL_FROM: "Handball AI <noreply@handball.local>"
+      # only the web container talks to the API inside the compose network
+      FORWARDED_ALLOW_IPS: "*"
+      HB_RATE_LIMIT_AUTH: "60/60"
     ports: ["8000:8000"]
     depends_on:
       migrate: { condition: service_completed_successfully }

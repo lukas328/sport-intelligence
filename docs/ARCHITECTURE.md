@@ -1,6 +1,6 @@
 # Architecture
 
-Status: M0 (foundation). This document grows with each milestone.
+Status: M1 (accounts, tenants, roster). This document grows with each milestone.
 
 ## System overview
 
@@ -53,9 +53,27 @@ Status: M0 (foundation). This document grows with each milestone.
 - Probes: `GET /healthz` (liveness), `GET /readyz` and `GET /v1/health` (readiness: Postgres, Redis, S3,
   each with latency, 503 when degraded).
 
+## Identity, tenancy, permissions (M1)
+- Data model: `users`, `auth_sessions`, `auth_tokens` are global. Tenant tables carry `organization_id`
+  with `ON DELETE CASCADE` from `organizations`: `org_memberships`, `teams`, `seasons`, `memberships`,
+  `players`, `roster_entries`, `invitations`, `consents`. `audit_logs` is append-only.
+- Every member of a club has an `org_memberships` row (`org_admin` or `member`); team roles live in
+  `memberships` (`coach`, `analyst`, `player`, `goalkeeper`, `guest`).
+- URLs carry the tenant: `/v1/orgs/{org_id}/...`. The `org_scope` dependency resolves the caller's
+  roles (404 if not a member) and sets `app.current_org` for the transaction.
+- **Permissions**: one table in `services/policies.py` (rendered to `docs/policy-matrix.md`), enforced in
+  the service layer; `tests/test_policy_matrix.py` runs every role against every endpoint.
+- **RLS** (ADR 005): the API connects as `handball_app` (no superuser, no BYPASSRLS). Policies allow rows
+  of `app_current_org()`; `org_memberships` and `organizations` are also visible for the current user's
+  own memberships. Two audited system paths switch on `app.bypass_rls` for one transaction: organisation
+  creation and invitation lookup by token.
+- Auth details: ADR 008. E-mail: ADR 009.
+- Web: the browser calls `/v1/*` on the web origin; a Next.js route handler proxies to the API. Server
+  components call the API directly with the user's cookies (`serverApi()`).
+
 ## Module boundaries (checked in CI)
 - Python (import-linter): apps are independent of each other; `handball_court` imports no app; API layers
-  `main > routers > services > core`.
+  `main > routers > services > schemas > models > core`.
 - TypeScript (madge): no circular imports in `apps/web/src` and `packages/*/src`.
 
 ## Local environment
