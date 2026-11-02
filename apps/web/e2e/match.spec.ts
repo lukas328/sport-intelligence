@@ -70,11 +70,17 @@ test("match: create, upload with pause and resume, processing, player, comment, 
 
   // clip with I and O keys
   await page.getByRole("tab", { name: "Clips" }).click();
+  const seekTo = async (s: number) => {
+    await video.evaluate((v: HTMLVideoElement, t: number) => (v.currentTime = t), s);
+    await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => Math.round(v.currentTime))).toBe(s);
+  };
+  await seekTo(2);
+  await page.getByRole("button", { name: "Start setzen (I)" }).click();
+  await expect(page.getByRole("button", { name: "0:02" })).toBeVisible();
+  await seekTo(6);
   await page.getByTestId("player").focus();
-  await video.evaluate((v: HTMLVideoElement) => (v.currentTime = 2));
-  await page.keyboard.press("i");
-  await video.evaluate((v: HTMLVideoElement) => (v.currentTime = 6));
-  await page.keyboard.press("o");
+  await page.keyboard.press("o"); // keyboard shortcut for the end mark
+  await expect(page.getByRole("button", { name: "0:06" })).toBeVisible();
   await page.getByLabel("Titel").fill("Gegenstoss");
   await page.getByRole("button", { name: "Clip speichern" }).click();
   await expect(page.getByTestId("clips")).toContainText("Gegenstoss");

@@ -11,6 +11,7 @@ import { DrawLayer } from "@/components/video/draw-layer";
 import { VideoPlayer, type Marker, type PlayerHandle } from "@/components/video/player";
 import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
+import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
   const [markIn, setMarkIn] = useState<number | null>(null);
   const [markOut, setMarkOut] = useState<number | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [failure, setFailure] = useState<ErrorKey | null>(null);
   const m = { org_id: orgId, match_id: match.id };
   const media = `/v1/orgs/${orgId}/videos/${video.id}/media`;
 
@@ -83,10 +85,12 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
 
   async function saveDrawing() {
     if (shapes.length === 0) return;
-    await api.POST("/v1/orgs/{org_id}/matches/{match_id}/annotations", {
+    const { error } = await api.POST("/v1/orgs/{org_id}/matches/{match_id}/annotations", {
       params: { path: m },
       body: { t_ms: Math.round(player.current?.time() ?? now), duration_ms: 4000, shapes: shapes.map((s) => ({ ...s, text: s.text ?? null })) },
     });
+    if (error) return setFailure(errorKey(error));
+    setFailure(null);
     setShapes([]);
     setDrawing(false);
     setNotice(t("draw.saved"));
@@ -101,15 +105,15 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
     const title = String(f.get("title") ?? "").trim() || null;
     const playlistId = String(f.get("playlist") ?? "");
     const clip = { match_id: match.id, start_ms: Math.round(markIn), end_ms: Math.round(markOut), title };
-    if (playlistId) {
-      await api.POST("/v1/orgs/{org_id}/playlists/{playlist_id}/items", {
-        params: { path: { org_id: orgId, playlist_id: playlistId } },
-        body: { clip },
-      });
-      void qc.invalidateQueries({ queryKey: ["playlists", match.team_id] });
-    } else {
-      await api.POST("/v1/orgs/{org_id}/clips", { params: { path: { org_id: orgId } }, body: clip });
-    }
+    const { error } = playlistId
+      ? await api.POST("/v1/orgs/{org_id}/playlists/{playlist_id}/items", {
+          params: { path: { org_id: orgId, playlist_id: playlistId } },
+          body: { clip },
+        })
+      : await api.POST("/v1/orgs/{org_id}/clips", { params: { path: { org_id: orgId } }, body: clip });
+    if (error) return setFailure(errorKey(error));
+    setFailure(null);
+    if (playlistId) void qc.invalidateQueries({ queryKey: ["playlists", match.team_id] });
     setMarkIn(null);
     setMarkOut(null);
     form.reset();
@@ -145,6 +149,7 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
           overlay={drawing ? <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} /> : undefined}
         />
         <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
+        {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
         {notice && (
           <Alert kind="success" className="py-2">
             {notice}
