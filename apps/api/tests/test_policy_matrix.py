@@ -38,6 +38,7 @@ class World:
     season: str
     dummy_user: str
     counter: itertools.count[int]
+    match: str = ""
 
     def t(self, path: str = "") -> str:
         return f"/v1/orgs/{self.org}/teams/{self.team}{path}"
@@ -173,6 +174,66 @@ async def _delete_team(a: Api, w: World) -> Any:
 
 
 ENDPOINTS += [
+    ("GET opponents", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/opponents")),
+    (
+        "POST opponent",
+        STAFF,
+        lambda a, w: a.post(f"/v1/orgs/{w.org}/opponents", json={"name": f"O{_seq(w)}"}),
+    ),
+    ("GET matches", READERS, lambda a, w: a.get(w.t("/matches"))),
+    (
+        "POST match",
+        STAFF,
+        lambda a, w: a.post(
+            w.t("/matches"),
+            json={"opponent_name": "Gegner", "kickoff_at": "2026-11-07T18:00:00+01:00"},
+        ),
+    ),
+    ("GET match", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}")),
+    (
+        "PATCH match",
+        STAFF,
+        lambda a, w: a.patch(f"/v1/orgs/{w.org}/matches/{w.match}", json={"venue": "Halle"}),
+    ),
+    (
+        "POST video upload",
+        STAFF,
+        lambda a, w: a.post(
+            f"/v1/orgs/{w.org}/matches/{w.match}/videos",
+            json={"filename": "a.mp4", "size_bytes": 100},
+        ),
+    ),
+    ("GET clips", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/clips")),
+    (
+        "POST clip",
+        STAFF,
+        lambda a, w: a.post(
+            f"/v1/orgs/{w.org}/clips", json={"match_id": w.match, "start_ms": 0, "end_ms": 1000}
+        ),
+    ),
+    ("GET playlists", READERS, lambda a, w: a.get(w.t("/playlists"))),
+    ("POST playlist", STAFF, lambda a, w: a.post(w.t("/playlists"), json={"title": "P"})),
+    ("GET comments", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/comments")),
+    (
+        "POST comment",
+        READERS,
+        lambda a, w: a.post(
+            f"/v1/orgs/{w.org}/matches/{w.match}/comments", json={"t_ms": 1, "body": "x"}
+        ),
+    ),
+    (
+        "GET annotations",
+        READERS,
+        lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/annotations"),
+    ),
+    (
+        "POST annotation",
+        STAFF,
+        lambda a, w: a.post(
+            f"/v1/orgs/{w.org}/matches/{w.match}/annotations",
+            json={"t_ms": 1, "shapes": [{"kind": "circle", "points": [[0.5, 0.5], [0.6, 0.6]]}]},
+        ),
+    ),
     ("PATCH roster entry", COACHES, _patch_entry),
     ("DELETE roster entry", COACHES, _delete_entry),
     ("GET consents", COACHES, _get_consents),
@@ -214,6 +275,12 @@ async def build_world(
             w.dummy_user = api.user["id"]
         else:
             clients[role] = api
+    w.match = (
+        await admin.post(
+            w.t("/matches"),
+            json={"opponent_name": "Matrix Gegner", "kickoff_at": "2026-11-07T18:00:00+01:00"},
+        )
+    ).json()["id"]
     outsider = make_api()
     await outsider.register("outsider@hc-test.ch")
     await outsider.post("/v1/orgs", json={"name": "Other Club"})

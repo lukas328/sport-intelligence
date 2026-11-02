@@ -18,6 +18,7 @@ from pydantic import SecretStr
 
 from handball_api.core.config import Settings
 from handball_api.core.email import MemoryEmailSender
+from handball_api.core.jobs import MemoryEventBus, MemoryJobQueue
 from handball_api.core.oidc import OidcClient
 from handball_api.core.ratelimit import MemoryRateLimiter
 from handball_api.core.storage import MemoryStorage
@@ -113,6 +114,8 @@ async def oauth_app(db_settings: Settings, clean_db: None, idp: FakeIdp) -> Asyn
     oidc = OidcClient(httpx.AsyncClient(transport=httpx.MockTransport(idp.handler)))
     app = create_app(
         settings,
+        jobs=MemoryJobQueue(),
+        events=MemoryEventBus(),
         email=MemoryEmailSender(),
         storage=MemoryStorage(),
         rate_limiter=MemoryRateLimiter(),

@@ -18,6 +18,7 @@ from sqlalchemy import event
 from handball_api.core.config import Settings
 from handball_api.core.db import get_engine
 from handball_api.core.email import MemoryEmailSender
+from handball_api.core.jobs import MemoryEventBus, MemoryJobQueue
 from handball_api.core.ratelimit import MemoryRateLimiter
 from handball_api.core.storage import MemoryStorage
 from handball_api.main import create_app
@@ -47,7 +48,9 @@ def settings() -> Settings:
 
 @pytest.fixture
 def app(settings: Settings) -> FastAPI:
-    return create_app(settings, storage=MemoryStorage())
+    return create_app(
+        settings, storage=MemoryStorage(), jobs=MemoryJobQueue(), events=MemoryEventBus()
+    )
 
 
 @pytest.fixture
@@ -158,6 +161,8 @@ async def db_app(db_settings: Settings, clean_db: None) -> AsyncIterator[FastAPI
         email=MemoryEmailSender(),
         storage=MemoryStorage(),
         rate_limiter=MemoryRateLimiter(),
+        jobs=MemoryJobQueue(),
+        events=MemoryEventBus(),
     )
     async with app.router.lifespan_context(app):
         yield app

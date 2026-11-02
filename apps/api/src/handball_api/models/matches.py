@@ -1,0 +1,202 @@
+from __future__ import annotations
+
+import uuid
+from datetime import datetime
+from typing import Any
+
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+)
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column
+
+from handball_api.core.db import Base, EntityMixin, TenantMixin
+from handball_api.models._types import str_enum
+from handball_api.models.enums import ClipSource, JobStatus, MatchStatus, VideoRole, VideoStatus
+
+
+class Opponent(Base, EntityMixin, TenantMixin):
+    __tablename__ = "opponents"
+
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    primary_color: Mapped[str | None] = mapped_column(String(7))
+    secondary_color: Mapped[str | None] = mapped_column(String(7))
+    notes: Mapped[str | None] = mapped_column(Text)
+
+
+class Match(Base, EntityMixin, TenantMixin):
+    __tablename__ = "matches"
+    __table_args__ = (
+        CheckConstraint("score_own IS NULL OR score_own >= 0", name="score_own_positive"),
+        CheckConstraint("score_opponent IS NULL OR score_opponent >= 0", name="score_opp_positive"),
+    )
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    season_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("seasons.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    opponent_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("opponents.id", ondelete="RESTRICT"), index=True, nullable=False
+    )
+    kickoff_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+    is_home: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    competition: Mapped[str | None] = mapped_column(String(120))
+    venue: Mapped[str | None] = mapped_column(String(160))
+    # Kit colours help team assignment in the pipeline (BRIEF 7.2 stage 5)
+    kit_own: Mapped[str] = mapped_column(String(7), nullable=False, default="#0b6bcb")
+    kit_own_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#f59e0b")
+    kit_opponent: Mapped[str] = mapped_column(String(7), nullable=False, default="#dc2626")
+    kit_opponent_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#16a34a")
+    score_own: Mapped[int | None] = mapped_column(SmallInteger)
+    score_opponent: Mapped[int | None] = mapped_column(SmallInteger)
+    halftime_own: Mapped[int | None] = mapped_column(SmallInteger)
+    halftime_opponent: Mapped[int | None] = mapped_column(SmallInteger)
+    status: Mapped[MatchStatus] = mapped_column(
+        str_enum(MatchStatus), nullable=False, default=MatchStatus.SCHEDULED
+    )
+    # paper_report, video, demo: where the match data comes from (BRIEF 15)
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="video")
+    is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class VideoAsset(Base, EntityMixin, TenantMixin):
+    __tablename__ = "video_assets"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    role: Mapped[VideoRole] = mapped_column(str_enum(VideoRole), nullable=False)
+    status: Mapped[VideoStatus] = mapped_column(
+        str_enum(VideoStatus), nullable=False, default=VideoStatus.UPLOADING
+    )
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    storage_key: Mapped[str] = mapped_column(String(400), nullable=False)
+    upload_id: Mapped[str | None] = mapped_column(String(400))
+    part_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_url: Mapped[str | None] = mapped_column(String(2000))
+    checksum_sha256: Mapped[str | None] = mapped_column(String(64))
+    duration_s: Mapped[float | None] = mapped_column(Float)
+    fps: Mapped[float | None] = mapped_column(Float)
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    codec: Mapped[str | None] = mapped_column(String(40))
+    hls_prefix: Mapped[str | None] = mapped_column(String(400))
+    proxy_key: Mapped[str | None] = mapped_column(String(400))
+    poster_key: Mapped[str | None] = mapped_column(String(400))
+    time_offset_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    quality_report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    error: Mapped[str | None] = mapped_column(Text)
+
+
+class ProcessingJob(Base, EntityMixin, TenantMixin):
+    __tablename__ = "processing_jobs"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    video_asset_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("video_assets.id", ondelete="CASCADE"), index=True
+    )
+    kind: Mapped[str] = mapped_column(String(40), nullable=False)
+    pipeline_version: Mapped[str] = mapped_column(String(20), nullable=False)
+    status: Mapped[JobStatus] = mapped_column(
+        str_enum(JobStatus), nullable=False, default=JobStatus.QUEUED
+    )
+    progress: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    stages: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    error: Mapped[str | None] = mapped_column(Text)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    gpu_seconds: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    cost_chf: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+
+class Clip(Base, EntityMixin, TenantMixin):
+    """A time window in a match video. Clips are not cut; they are played from HLS (BRIEF 6.2)."""
+
+    __tablename__ = "clips"
+    __table_args__ = (CheckConstraint("end_ms > start_ms", name="window"),)
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    start_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    title: Mapped[str | None] = mapped_column(String(200))
+    source: Mapped[ClipSource] = mapped_column(
+        str_enum(ClipSource), nullable=False, default=ClipSource.MANUAL
+    )
+    source_ref: Mapped[uuid.UUID | None] = mapped_column()
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+
+
+class Playlist(Base, EntityMixin, TenantMixin):
+    __tablename__ = "playlists"
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    shared_with_players: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class PlaylistItem(Base, EntityMixin, TenantMixin):
+    __tablename__ = "playlist_items"
+
+    playlist_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("playlists.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    clip_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("clips.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+
+
+class Comment(Base, EntityMixin, TenantMixin):
+    """Time-stamped comment on a match video (BRIEF 11.5)."""
+
+    __tablename__ = "comments"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    author_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    t_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    clip_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("clips.id", ondelete="CASCADE"))
+
+
+class Annotation(Base, EntityMixin, TenantMixin):
+    """Drawing on the video at a point in time: shapes in normalised [0,1] coordinates."""
+
+    __tablename__ = "annotations"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    author_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    t_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    duration_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=3000)
+    shapes: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)

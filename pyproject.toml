@@ -46,6 +46,10 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 "**/tests/**" = ["S", "PTH"]
 "packages/court/scripts/*.py" = ["E501"]
 "**/mail_templates.py" = ["E501"]
+# ffmpeg/ffprobe are called with fixed argument lists, never through a shell
+"apps/worker/src/handball_worker/media/*.py" = ["S603", "S404"]
+# local development defaults, overridden by environment in deployments
+"apps/worker/src/handball_worker/config.py" = ["S105", "S108"]
 
 [tool.mypy]
 python_version = "3.12"

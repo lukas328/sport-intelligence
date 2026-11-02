@@ -22,6 +22,15 @@ Enforced server-side; verified by `apps/api/tests/test_policy_matrix.py`.
 | `consent.write` | ✓ | ✓ |  |  |  |  |
 | `team.members.manage` | ✓ | ✓ |  |  |  |  |
 | `invite.team` | ✓ | ✓ |  |  |  |  |
+| `match.read` | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| `match.write` | ✓ | ✓ | ✓ |  |  |  |
+| `video.upload` | ✓ | ✓ | ✓ |  |  |  |
+| `clip.write` | ✓ | ✓ | ✓ |  |  |  |
+| `playlist.read_all` | ✓ | ✓ | ✓ |  |  |  |
+| `playlist.write` | ✓ | ✓ | ✓ |  |  |  |
+| `comment.write` | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| `comment.moderate` | ✓ | ✓ | ✓ |  |  |  |
+| `annotation.write` | ✓ | ✓ | ✓ |  |  |  |
 
 - Team actions apply to the teams where the user has that role; org admins act in every team.
 - Org admins need two-factor sign-in for org-level write actions after the grace period (`HB_ORG_ADMIN_2FA_GRACE_DAYS`, default 14).

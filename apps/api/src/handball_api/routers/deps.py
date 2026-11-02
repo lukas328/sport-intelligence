@@ -37,6 +37,8 @@ async def csrf_protect(request: Request, settings: SettingsDep) -> None:
         return
     if OAUTH_CALLBACK.match(request.url.path):
         return  # Apple posts the callback cross-site; the signed state cookie protects it
+    if request.url.path.startswith("/internal/"):
+        return  # worker callbacks: shared-secret header, never reachable via the web origin
     origin = request.headers.get("origin")
     if origin:
         allowed = {_origin(o) for o in [*settings.cors_origins, settings.web_base_url]}
@@ -62,6 +64,8 @@ def get_ctx(request: Request, db: DbDep, settings: SettingsDep) -> Ctx:
         settings=settings,
         email=request.app.state.email,
         storage=request.app.state.storage,
+        jobs=request.app.state.jobs,
+        events=request.app.state.events,
         ip=client_ip(request),
     )
 

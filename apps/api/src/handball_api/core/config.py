@@ -32,6 +32,14 @@ class Settings(BaseSettings):
     s3_secret_key: SecretStr = SecretStr("handball-secret")
     s3_bucket_videos: str = "videos"
     s3_bucket_artifacts: str = "artifacts"
+    # Endpoint the browser uses for presigned uploads (direct to storage, BRIEF 6.2)
+    s3_public_endpoint_url: str | None = None
+    upload_part_size: int = 16 * 1024 * 1024  # min 5 MiB (S3), 2 GB = 128 parts
+    max_video_bytes: int = 40 * 1024**3
+    presign_ttl_s: int = 3600
+
+    # Internal callbacks from workers (never exposed through the web origin)
+    internal_token: SecretStr = SecretStr("dev-only-internal-token")
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     sentry_dsn: SecretStr | None = None

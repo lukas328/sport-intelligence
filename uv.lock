@@ -606,6 +606,7 @@ dependencies = [
     { name = "pyotp" },
     { name = "python-multipart" },
     { name = "redis" },
+    { name = "rq" },
     { name = "sentry-sdk", extra = ["fastapi"] },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "structlog" },
@@ -635,6 +636,7 @@ requires-dist = [
     { name = "pyotp", specifier = ">=2.9" },
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "redis", specifier = ">=5.2" },
+    { name = "rq", specifier = ">=2.1" },
     { name = "sentry-sdk", extras = ["fastapi"], specifier = ">=2.20" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
     { name = "structlog", specifier = ">=24.4" },
@@ -683,7 +685,10 @@ name = "handball-worker"
 version = "0.1.0"
 source = { editable = "apps/worker" }
 dependencies = [
+    { name = "boto3" },
     { name = "handball-court" },
+    { name = "httpx" },
+    { name = "numpy" },
     { name = "pydantic-settings" },
     { name = "redis" },
     { name = "rq" },
@@ -692,7 +697,10 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "boto3", specifier = ">=1.36" },
     { name = "handball-court", editable = "packages/court" },
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "numpy", specifier = ">=2.1" },
     { name = "pydantic-settings", specifier = ">=2.7" },
     { name = "redis", specifier = ">=5.2" },
     { name = "rq", specifier = ">=2.1" },

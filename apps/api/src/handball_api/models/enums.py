@@ -68,3 +68,41 @@ class TokenPurpose(StrEnum):
 class OAuthProvider(StrEnum):
     GOOGLE = "google"
     APPLE = "apple"
+
+
+class MatchStatus(StrEnum):
+    SCHEDULED = "scheduled"
+    UPLOADING = "uploading"
+    PROCESSING = "processing"
+    READY = "ready"
+    FAILED = "failed"
+
+
+class VideoRole(StrEnum):
+    MAIN = "main"
+    GOAL_CAM_LEFT = "goal_cam_left"
+    GOAL_CAM_RIGHT = "goal_cam_right"
+    OTHER = "other"
+
+
+class VideoStatus(StrEnum):
+    UPLOADING = "uploading"
+    UPLOADED = "uploaded"
+    PROCESSING = "processing"
+    READY = "ready"
+    FAILED = "failed"
+
+
+class JobStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class ClipSource(StrEnum):
+    MANUAL = "manual"
+    EVENT = "event"
+    POSSESSION = "possession"
+    PLAY = "play"

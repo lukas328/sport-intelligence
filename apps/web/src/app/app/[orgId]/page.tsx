@@ -29,18 +29,25 @@ export default async function OrgHome({ params }: { params: Promise<{ orgId: str
                   {[t(`genders.${team.gender}`), team.league, team.current_season?.label].filter(Boolean).join(" · ")}
                 </p>
                 {team.my_role && <p className="text-sm">{t("dashboard.myRole", { role: t(`roles.${team.my_role}`) })}</p>}
-                <Link
-                  href={`/app/${orgId}/teams/${team.id}`}
-                  className="inline-block text-sm font-medium text-accent underline underline-offset-4"
-                >
-                  {t("dashboard.openRoster")}
-                </Link>
+                <div className="flex gap-4">
+                  <Link
+                    href={`/app/${orgId}/teams/${team.id}/matches`}
+                    className="inline-block text-sm font-medium text-accent underline underline-offset-4"
+                  >
+                    {t("team.matches")}
+                  </Link>
+                  <Link
+                    href={`/app/${orgId}/teams/${team.id}`}
+                    className="inline-block text-sm font-medium text-accent underline underline-offset-4"
+                  >
+                    {t("dashboard.openRoster")}
+                  </Link>
+                </div>
               </Card>
             </li>
           ))}
         </ul>
       )}
-      <p className="text-sm text-muted">{t("dashboard.nextUp")}</p>
     </div>
   );
 }

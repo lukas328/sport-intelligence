@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, MetaData, func, text
@@ -86,6 +87,15 @@ async def get_session() -> AsyncIterator[AsyncSession]:
     Tenant context is transaction-local (``set_config(..., true)``), so it can never leak to
     another request through the connection pool.
     """
+    if _sessionmaker is None:
+        raise RuntimeError("database engine not initialised")
+    async with _sessionmaker() as session, session.begin():
+        yield session
+
+
+@asynccontextmanager
+async def open_session() -> AsyncIterator[AsyncSession]:
+    """Short-lived session outside the request scope (e.g. before a long SSE stream)."""
     if _sessionmaker is None:
         raise RuntimeError("database engine not initialised")
     async with _sessionmaker() as session, session.begin():

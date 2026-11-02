@@ -1,0 +1,99 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useId, useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Alert, Card } from "@/components/ui/card";
+import { Checkbox, Input } from "@/components/ui/field";
+import { api } from "@/lib/client";
+import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
+
+function localNow(): string {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+
+export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string }) {
+  const t = useTranslations();
+  const router = useRouter();
+  const listId = useId();
+  const [error, setError] = useState<ErrorKey | null>(null);
+  const [fields, setFields] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const opponents = useQuery({
+    queryKey: ["opponents", orgId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/opponents", { params: { path: { org_id: orgId } } })).data ?? [],
+  });
+
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const name = String(f.get("opponent")).trim();
+    const known = opponents.data?.find((o) => o.name.toLowerCase() === name.toLowerCase());
+    const optional = (k: string) => String(f.get(k) ?? "").trim() || null;
+    setBusy(true);
+    const { data, error } = await api.POST("/v1/orgs/{org_id}/teams/{team_id}/matches", {
+      params: { path: { org_id: orgId, team_id: teamId } },
+      body: {
+        ...(known ? { opponent_id: known.id } : { opponent_name: name }),
+        kickoff_at: new Date(String(f.get("kickoff"))).toISOString(),
+        is_home: f.get("away") !== "on",
+        competition: optional("competition"),
+        venue: optional("venue"),
+        kit_own: String(f.get("kit_own")),
+        kit_own_gk: String(f.get("kit_own_gk")),
+        kit_opponent: String(f.get("kit_opponent")),
+        kit_opponent_gk: String(f.get("kit_opponent_gk")),
+      },
+    });
+    setBusy(false);
+    if (error || !data) {
+      setFields(fieldErrors(error));
+      return setError(errorKey(error));
+    }
+    router.push(`/app/${orgId}/matches/${data.id}`);
+  }
+
+  return (
+    <Card>
+      <h2 className="mb-4 text-lg font-semibold">{t("matches.new")}</h2>
+      {error && <Alert className="mb-4">{t(`errors.${error}`)}</Alert>}
+      <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2" aria-label={t("matches.new")}>
+        <Input
+          label={t("matches.opponent")}
+          name="opponent"
+          required
+          list={listId}
+          placeholder={t("matches.opponentPlaceholder")}
+          autoComplete="off"
+          error={fields.opponent_name}
+        />
+        <datalist id={listId}>
+          {opponents.data?.map((o) => <option key={o.id} value={o.name} />)}
+        </datalist>
+        <Input label={t("matches.kickoff")} name="kickoff" type="datetime-local" required defaultValue={localNow()} />
+        <Input label={`${t("matches.competition")} (${t("common.optional")})`} name="competition" />
+        <Input label={`${t("matches.venue")} (${t("common.optional")})`} name="venue" />
+        <div className="sm:col-span-2">
+          <Checkbox name="away" label={t("matches.away")} />
+        </div>
+        <fieldset className="grid grid-cols-2 gap-3 sm:col-span-2 sm:grid-cols-4">
+          <legend className="mb-1 text-sm font-medium">{t("matches.kits")}</legend>
+          <Input label={t("matches.kitOwn")} name="kit_own" type="color" defaultValue="#0b6bcb" className="h-10 p-1" />
+          <Input label={t("matches.kitOwnGk")} name="kit_own_gk" type="color" defaultValue="#f59e0b" className="h-10 p-1" />
+          <Input label={t("matches.kitOpp")} name="kit_opponent" type="color" defaultValue="#dc2626" className="h-10 p-1" />
+          <Input label={t("matches.kitOppGk")} name="kit_opponent_gk" type="color" defaultValue="#16a34a" className="h-10 p-1" />
+          <p className="col-span-full text-xs text-muted">{t("matches.kitsHint")}</p>
+        </fieldset>
+        <div className="sm:col-span-2">
+          <Button type="submit" loading={busy}>
+            {t("matches.create")}
+          </Button>
+        </div>
+      </form>
+    </Card>
+  );
+}

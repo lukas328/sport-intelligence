@@ -28,10 +28,10 @@ describe("translation keys used in code", () => {
     const missing: string[] = [];
     for (const file of files(SRC)) {
       const code = readFileSync(file, "utf8");
-      const ns = /(?:useTranslations|getTranslations)\("([\w.]+)"\)/.exec(code)?.[1];
+      const namespaces = [...code.matchAll(/(?:useTranslations|getTranslations)\("([\w.]+)"\)/g)].map((m) => m[1]!);
       for (const m of code.matchAll(/\bt\("([\w.-]+)"/g)) {
         const key = m[1]!;
-        if (!has(key) && !(ns && has(`${ns}.${key}`))) missing.push(`${file.replace(SRC, "")}: ${key}`);
+        if (!has(key) && !namespaces.some((ns) => has(`${ns}.${key}`))) missing.push(`${file.replace(SRC, "")}: ${key}`);
       }
     }
     expect(missing).toEqual([]);

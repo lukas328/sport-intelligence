@@ -36,6 +36,15 @@ class Action(StrEnum):
     TEAM_MEMBERS_READ = "team.members.read"
     TEAM_MEMBERS_MANAGE = "team.members.manage"
     INVITE_TEAM = "invite.team"
+    MATCH_READ = "match.read"
+    MATCH_WRITE = "match.write"
+    VIDEO_UPLOAD = "video.upload"
+    CLIP_WRITE = "clip.write"
+    PLAYLIST_READ_ALL = "playlist.read_all"
+    PLAYLIST_WRITE = "playlist.write"
+    COMMENT_WRITE = "comment.write"
+    COMMENT_MODERATE = "comment.moderate"
+    ANNOTATION_WRITE = "annotation.write"
 
 
 ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
@@ -63,6 +72,15 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.CONSENT_WRITE: _COACH,
     Action.TEAM_MEMBERS_MANAGE: _COACH,
     Action.INVITE_TEAM: _COACH,
+    Action.MATCH_READ: _READERS,
+    Action.MATCH_WRITE: _STAFF,
+    Action.VIDEO_UPLOAD: _STAFF,
+    Action.CLIP_WRITE: _STAFF,
+    Action.PLAYLIST_READ_ALL: _STAFF,
+    Action.PLAYLIST_WRITE: _STAFF,
+    Action.COMMENT_WRITE: _READERS,
+    Action.COMMENT_MODERATE: _STAFF,
+    Action.ANNOTATION_WRITE: _STAFF,
 }
 
 # Actions that change rights, billing or the organisation.
@@ -127,6 +145,11 @@ def authorize(
         raise ProblemError(
             403, "two-factor-required", "Organisation admins must enable two-factor authentication"
         )
+
+
+def is_staff_somewhere(actor: Actor) -> bool:
+    """Org admins, or coach/analyst of at least one team (e.g. may manage opponents)."""
+    return actor.is_org_admin or any(r in _STAFF for r in actor.team_roles.values())
 
 
 def visible_team_ids(actor: Actor) -> set[uuid.UUID] | None:

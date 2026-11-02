@@ -16,6 +16,8 @@ class BucketClient(Protocol):
 
     def create_bucket(self, *, Bucket: str) -> Any: ...  # noqa: N803
 
+    def put_bucket_cors(self, *, Bucket: str, CORSConfiguration: Any) -> Any: ...  # noqa: N803
+
 
 def s3_client(settings: Settings) -> BucketClient:
     client: BucketClient = boto3.client(
@@ -37,6 +39,21 @@ def ensure_buckets(settings: Settings, client: BucketClient | None = None) -> li
         except ClientError:
             s3.create_bucket(Bucket=bucket)
             created.append(bucket)
+    # Browsers upload parts directly to storage (presigned URLs) and need the ETag header.
+    s3.put_bucket_cors(
+        Bucket=settings.s3_bucket_videos,
+        CORSConfiguration={
+            "CORSRules": [
+                {
+                    "AllowedOrigins": [settings.web_base_url, *settings.cors_origins],
+                    "AllowedMethods": ["PUT", "GET", "HEAD"],
+                    "AllowedHeaders": ["*"],
+                    "ExposeHeaders": ["ETag"],
+                    "MaxAgeSeconds": 3600,
+                }
+            ]
+        },
+    )
     return created
 
 

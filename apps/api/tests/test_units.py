@@ -173,7 +173,10 @@ def test_production_refuses_dev_secrets() -> None:
     with pytest.raises(RuntimeError, match="COOKIE_SECURE"):
         check_production_secrets(
             Settings(
-                env="production", secret_key=SecretStr("x" * 40), encryption_key=SecretStr("y" * 44)
+                env="production",
+                secret_key=SecretStr("x" * 40),
+                encryption_key=SecretStr("y" * 44),
+                internal_token=SecretStr("z" * 32),
             )
         )
     check_production_secrets(
@@ -182,6 +185,7 @@ def test_production_refuses_dev_secrets() -> None:
             cookie_secure=True,
             secret_key=SecretStr("x" * 40),
             encryption_key=SecretStr("y" * 44),
+            internal_token=SecretStr("z" * 32),
         )
     )
 

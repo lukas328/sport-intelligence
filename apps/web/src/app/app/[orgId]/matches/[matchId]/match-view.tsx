@@ -1,0 +1,217 @@
+"use client";
+
+import type { Schemas } from "@handball/api-client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useFormatter, useTranslations } from "next-intl";
+import { useEffect, useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Alert, Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/field";
+import { api } from "@/lib/client";
+import { cn } from "@/lib/utils";
+import { UploadPanel } from "./upload-panel";
+import { Workspace } from "./workspace";
+
+type Match = Schemas["MatchOut"];
+type Video = Schemas["VideoOut"];
+type Job = Schemas["JobOut"];
+
+const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnails", "upload"] as const;
+
+export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; initial: Match; teamName: string; staff: boolean }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const qc = useQueryClient();
+  const key = ["match", initial.id];
+  const { data: match = initial } = useQuery({
+    queryKey: key,
+    initialData: initial,
+    queryFn: async () =>
+      (await api.GET("/v1/orgs/{org_id}/matches/{match_id}", { params: { path: { org_id: orgId, match_id: initial.id } } }))
+        .data ?? initial,
+  });
+  const [live, setLive] = useState<Record<string, Partial<Job>>>({});
+
+  // live job progress via Server-Sent Events
+  useEffect(() => {
+    const es = new EventSource(`/v1/orgs/${orgId}/matches/${initial.id}/stream`);
+    es.addEventListener("job", (e) => {
+      const ev = JSON.parse((e as MessageEvent).data) as Job & { job_id: string };
+      setLive((l) => ({ ...l, [ev.job_id]: ev }));
+      if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
+    });
+    return () => es.close();
+  }, [orgId, initial.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const jobs = match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job);
+  const main = match.videos.find((v) => v.role === "main" && v.status === "ready");
+  const pendingVideos = match.videos.filter((v) => v.status !== "ready");
+  const ourName = teamName;
+  const [home, away] = match.is_home ? [ourName, match.opponent.name] : [match.opponent.name, ourName];
+  const [hs, as] = match.is_home ? [match.score_own, match.score_opponent] : [match.score_opponent, match.score_own];
+
+  return (
+    <div className="space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-sm text-muted">
+            {format.dateTime(new Date(match.kickoff_at), { dateStyle: "full", timeStyle: "short" })}
+            {match.competition && ` · ${match.competition}`}
+            {match.venue && ` · ${match.venue}`}
+          </p>
+          <h1 className="text-2xl font-semibold">
+            {home} <span className="text-muted">{t("matches.vs")}</span> {away}
+          </h1>
+        </div>
+        <div className="flex items-center gap-3">
+          {hs != null && as != null && (
+            <p className="text-3xl font-bold tabular-nums" data-testid="score">
+              {hs}:{as}
+            </p>
+          )}
+          <span className="rounded-full bg-surface px-3 py-1 text-sm">{t(`matches.status_${match.status}`)}</span>
+        </div>
+      </header>
+
+      {main ? (
+        <Workspace orgId={orgId} match={match} video={main} staff={staff} />
+      ) : (
+        <Alert kind="info">{t("player.notReady")}</Alert>
+      )}
+
+      {jobs.filter((j) => j.status !== "succeeded").length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
+
+      {staff && (pendingVideos.length > 0 || !main) && (
+        <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+      )}
+
+      {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
+
+      {staff && <MatchAdmin orgId={orgId} match={match} teamName={teamName} />}
+    </div>
+  );
+}
+
+function Processing({ jobs, orgId, staff }: { jobs: Job[]; orgId: string; staff: boolean }) {
+  const t = useTranslations("processing");
+  return (
+    <Card className="space-y-4" aria-live="polite">
+      <h2 className="text-lg font-semibold">{t("title")}</h2>
+      {jobs
+        .filter((j) => j.status !== "succeeded")
+        .map((j) => (
+          <div key={j.id} className="space-y-2" data-testid="job">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">{t(j.status as "running")}</span>
+              <span className="tabular-nums">{Math.round(j.progress * 100)} %</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded bg-surface">
+              <div className={cn("h-full transition-all", j.status === "failed" ? "bg-error" : "bg-accent")} style={{ width: `${j.progress * 100}%` }} />
+            </div>
+            {j.kind === "ingest" && (
+              <ol className="grid grid-cols-2 gap-1 text-xs sm:grid-cols-4 lg:grid-cols-7">
+                {STAGES.map((s) => {
+                  const st = (j.stages as Record<string, { status?: string }>)[s]?.status ?? "pending";
+                  return (
+                    <li key={s} className={cn("rounded px-2 py-1", st === "done" ? "bg-ok/10 text-ok" : st === "running" ? "bg-accent/10 font-medium" : st === "failed" ? "bg-error/10 text-error" : "bg-surface text-muted")}>
+                      {t(`stage_${s}`)}
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+            {j.error && <Alert>{j.error}</Alert>}
+            {j.status === "failed" && staff && j.video_asset_id && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  api.POST("/v1/orgs/{org_id}/videos/{video_id}/reprocess", {
+                    params: { path: { org_id: orgId, video_id: j.video_asset_id! } },
+                  })
+                }
+              >
+                {t("retry")}
+              </Button>
+            )}
+          </div>
+        ))}
+    </Card>
+  );
+}
+
+function QualityReport({ video }: { video: Video }) {
+  const t = useTranslations("quality");
+  const report = video.quality_report as {
+    overall: "ok" | "warn" | "fail";
+    checks: { id: string; level: string; value: number | null; tip: string | null }[];
+  };
+  const color = { ok: "text-ok", warn: "text-accent", fail: "text-error" }[report.overall];
+  return (
+    <Card className="space-y-3">
+      <details>
+        <summary className="cursor-pointer">
+          <span className="font-semibold">{t("title")}: </span>
+          <span className={color}>{t(`overall_${report.overall}`)}</span>
+          <span className="ml-2 text-xs text-muted">({t("heuristic")})</span>
+        </summary>
+        <ul className="mt-3 space-y-2 text-sm">
+          {report.checks.map((c) => (
+            <li key={c.id} className="flex flex-wrap gap-2">
+              <span className="w-40 font-medium">{t(`check_${c.id}` as "check_fps")}</span>
+              <span className={c.level === "ok" ? "text-ok" : c.level === "fail" ? "text-error" : c.level === "warn" ? "text-accent" : "text-muted"}>
+                {c.level === "not_evaluated" ? t("not_evaluated") : c.tip ? t(`tip_${c.tip}` as "tip_blurry") : "OK"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </Card>
+  );
+}
+
+function MatchAdmin({ orgId, match, teamName }: { orgId: string; match: Match; teamName: string }) {
+  const t = useTranslations();
+  const router = useRouter();
+  const qc = useQueryClient();
+  async function saveScore(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const n = (k: string) => (String(f.get(k) ?? "") === "" ? null : Number(f.get(k)));
+    await api.PATCH("/v1/orgs/{org_id}/matches/{match_id}", {
+      params: { path: { org_id: orgId, match_id: match.id } },
+      body: { score_own: n("score_own"), score_opponent: n("score_opponent"), halftime_own: n("ht_own"), halftime_opponent: n("ht_opp") },
+    });
+    void qc.invalidateQueries({ queryKey: ["match", match.id] });
+  }
+  return (
+    <Card className="space-y-4">
+      <form onSubmit={saveScore} className="flex flex-wrap items-end gap-3" aria-label={t("matches.score")}>
+        <fieldset className="flex items-end gap-2">
+          <legend className="mb-1 text-sm font-medium">{t("matches.score")}</legend>
+          <Input label={teamName} name="score_own" type="number" min={0} max={99} defaultValue={match.score_own ?? ""} className="w-20" />
+          <Input label={match.opponent.name} name="score_opponent" type="number" min={0} max={99} defaultValue={match.score_opponent ?? ""} className="w-20" />
+        </fieldset>
+        <fieldset className="flex items-end gap-2">
+          <legend className="mb-1 text-sm font-medium">{t("matches.halftime")}</legend>
+          <Input label={teamName} name="ht_own" type="number" min={0} max={99} defaultValue={match.halftime_own ?? ""} className="w-20" />
+          <Input label={match.opponent.name} name="ht_opp" type="number" min={0} max={99} defaultValue={match.halftime_opponent ?? ""} className="w-20" />
+        </fieldset>
+        <Button type="submit" variant="secondary">
+          {t("matches.saveScore")}
+        </Button>
+      </form>
+      <Button
+        variant="danger"
+        onClick={async () => {
+          if (!window.confirm(t("matches.deleteConfirm"))) return;
+          await api.DELETE("/v1/orgs/{org_id}/matches/{match_id}", { params: { path: { org_id: orgId, match_id: match.id } } });
+          router.push(`/app/${orgId}/teams/${match.team_id}/matches`);
+          router.refresh();
+        }}
+      >
+        {t("matches.deleteMatch")}
+      </Button>
+    </Card>
+  );
+}

@@ -20,6 +20,9 @@ class FakeS3:
         self.buckets.add(Bucket)
         return {}
 
+    def put_bucket_cors(self, *, Bucket: str, CORSConfiguration: Any) -> None:  # noqa: N803
+        self.cors = (Bucket, CORSConfiguration)
+
 
 def test_ensure_buckets_is_idempotent() -> None:
     s3 = FakeS3({"videos"})
@@ -27,3 +30,4 @@ def test_ensure_buckets_is_idempotent() -> None:
     assert ensure_buckets(settings, s3) == ["artifacts"]
     assert ensure_buckets(settings, s3) == []
     assert s3.buckets == {"videos", "artifacts"}
+    assert s3.cors[1]["CORSRules"][0]["ExposeHeaders"] == ["ETag"]

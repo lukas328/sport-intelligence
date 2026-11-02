@@ -44,7 +44,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 - E-mail port (ADR: Postmark vs Resend), mailpit locally
 - Web: auth pages, onboarding (club, logo, colours, team, roster form + CSV import, invites), settings skeleton, shadcn/ui setup
 - `make seed` (demo club, 2 teams, roster), Playwright: onboarding under 5 minutes
-### M2 Matches, upload, player
+### M2 Matches, upload, player ✅ (see docs/progress/M2.md)
 - Match CRUD, opponents, kit colours; S3 multipart upload (resumable, presigned), link import port
 - Ingest stage (ffprobe, checksum, HLS 720p/1080p, proxy, thumbnails), heuristic quality check with tips
 - HLS player (hls.js + native Safari), timeline, playlists, comments, drawing tool, keyboard shortcuts; SSE job progress

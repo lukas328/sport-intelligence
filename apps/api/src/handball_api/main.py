@@ -18,12 +18,13 @@ from handball_api.core.email import (
     SmtpEmailSender,
 )
 from handball_api.core.errors import install_error_handlers
+from handball_api.core.jobs import EventBus, JobQueue, RedisEventBus, RqJobQueue
 from handball_api.core.logging import configure_logging, get_logger
 from handball_api.core.oidc import OidcClient
 from handball_api.core.ratelimit import MemoryRateLimiter, RateLimiter, RedisRateLimiter
 from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
-from handball_api.routers import auth, health, orgs, teams
+from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers.deps import csrf_protect
 
 
@@ -74,6 +75,7 @@ def check_production_secrets(settings: Settings) -> None:
         for name, value in (
             ("HB_SECRET_KEY", settings.secret_key.get_secret_value()),
             ("HB_ENCRYPTION_KEY", settings.encryption_key.get_secret_value()),
+            ("HB_INTERNAL_TOKEN", settings.internal_token.get_secret_value()),
         )
         if any(m in value for m in DEV_SECRET_MARKERS)
     ]
@@ -88,6 +90,8 @@ def create_app(
     storage: ObjectStorage | None = None,
     rate_limiter: RateLimiter | None = None,
     oidc: OidcClient | None = None,
+    jobs: JobQueue | None = None,
+    events: EventBus | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     check_production_secrets(settings)
@@ -118,6 +122,8 @@ def create_app(
     app.state.storage = storage or S3Storage(settings)
     app.state.rate_limiter = rate_limiter or _rate_limiter(settings)
     app.state.oidc = oidc or OidcClient()
+    app.state.jobs = jobs or RqJobQueue(settings.redis_url)
+    app.state.events = events or RedisEventBus(settings.redis_url)
     app.dependency_overrides[get_settings] = lambda: settings
     app.add_middleware(
         CORSMiddleware,
@@ -149,4 +155,6 @@ def create_app(
     app.include_router(auth.router)
     app.include_router(orgs.router)
     app.include_router(teams.router)
+    app.include_router(matches.router)
+    app.include_router(internal.router)
     return app
