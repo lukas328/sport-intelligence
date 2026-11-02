@@ -45,6 +45,7 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S", "PTH"]
 "packages/court/scripts/*.py" = ["E501"]
+"**/mail_templates.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

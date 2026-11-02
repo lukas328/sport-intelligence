@@ -193,3 +193,35 @@ def test_policy_doc_is_up_to_date() -> None:
 
     doc = Path(__file__).resolve().parents[3] / "docs" / "policy-matrix.md"
     assert doc.read_text() == matrix_markdown(), "run `make policy-doc`"
+
+
+def test_signing_roundtrip() -> None:
+    from handball_api.core.signing import sign, unsign
+
+    v = sign("k", {"a": 1}, 60, "p")
+    assert unsign("k", v, "p") == {"a": 1}
+    assert unsign("other", v, "p") is None
+    assert unsign("k", v, "other-purpose") is None
+    assert unsign("k", sign("k", {"a": 1}, -1, "p"), "p") is None
+    assert unsign("k", "garbage", "p") is None
+
+
+async def test_tracing_records_spans() -> None:
+    from httpx import ASGITransport, AsyncClient
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    from handball_api.core.config import Settings
+    from handball_api.core.storage import MemoryStorage
+    from handball_api.core.telemetry import setup_tracing
+    from handball_api.main import create_app
+
+    settings = Settings(env="test", email_backend="memory", rate_limit_backend="memory")
+    plain = create_app(settings, storage=MemoryStorage())
+    assert setup_tracing(plain, settings) is False
+    exporter = InMemorySpanExporter()
+    app = create_app(settings, storage=MemoryStorage())
+    assert setup_tracing(app, settings, exporter) is True
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://t") as c:
+        await c.get("/v1/openapi.json")
+    app.state.tracer_provider.force_flush()
+    assert any("openapi" in s.name for s in exporter.get_finished_spans())

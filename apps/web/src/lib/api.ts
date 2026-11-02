@@ -29,3 +29,13 @@ export async function fetchReadiness(timeoutMs = 3000): Promise<Readiness | null
     return null;
   }
 }
+
+/** Enabled external sign-in providers (Google, Apple), empty when none is configured. */
+export async function fetchProviders(): Promise<string[]> {
+  try {
+    const { data } = await createApiClient(apiBaseUrl()).GET("/v1/auth/providers", { cache: "no-store" });
+    return data?.providers ?? [];
+  } catch {
+    return [];
+  }
+}

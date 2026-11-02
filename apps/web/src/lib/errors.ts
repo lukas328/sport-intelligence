@@ -20,6 +20,10 @@ export const KNOWN_ERRORS = [
   "logo-too-large",
   "validation-error",
   "unauthenticated",
+  "oauth-state",
+  "oauth-failed",
+  "oauth-email-unverified",
+  "oauth-cancelled",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

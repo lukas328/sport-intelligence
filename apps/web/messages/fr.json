@@ -72,7 +72,11 @@
     "unsupported-image": "Veuillez utiliser une image PNG, JPEG ou WebP.",
     "logo-too-large": "Le logo ne doit pas dépasser 1 Mo.",
     "validation-error": "Veuillez vérifier les champs signalés.",
-    "unauthenticated": "Veuillez vous connecter."
+    "unauthenticated": "Veuillez vous connecter.",
+    "oauth-state": "La connexion a expiré. Veuillez réessayer.",
+    "oauth-failed": "La connexion auprès du fournisseur a échoué.",
+    "oauth-email-unverified": "Le fournisseur n'a pas confirmé d'adresse e-mail.",
+    "oauth-cancelled": "La connexion a été annulée."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -98,7 +102,22 @@
     "submitRegister": "Créer un compte",
     "haveAccount": "Déjà un compte ?",
     "toLogin": "Se connecter",
-    "magicConsuming": "Connexion en cours …"
+    "magicConsuming": "Connexion en cours …",
+    "continueWith": "Continuer avec {provider}",
+    "or": "ou",
+    "oauthTerms": "En continuant, vous acceptez les conditions d'utilisation et la politique de confidentialité.",
+    "forgot": "Mot de passe oublié ?",
+    "forgotTitle": "Réinitialiser le mot de passe",
+    "forgotIntro": "Saisissez votre adresse e-mail. Nous vous envoyons un lien pour définir un nouveau mot de passe.",
+    "forgotSubmit": "Envoyer le lien",
+    "forgotSent": "Si un compte existe, le lien est en route. Il est valable 60 minutes.",
+    "resetTitle": "Nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "resetSubmit": "Enregistrer le mot de passe",
+    "verifyTitle": "Confirmer l'e-mail",
+    "verifyOk": "Merci, votre adresse e-mail est confirmée.",
+    "verifyBusy": "Confirmation …",
+    "toApp": "Ouvrir l'app"
   },
   "invite": {
     "title": "Invitation",
@@ -242,5 +261,29 @@
     "newTeam": "Nouvelle équipe",
     "myRole": "Votre rôle : {role}",
     "youthBadge": "Juniors"
+  },
+  "account": {
+    "title": "Compte",
+    "emailUnverified": "Votre adresse e-mail n'est pas encore confirmée.",
+    "resend": "Renvoyer l'e-mail de confirmation",
+    "resent": "E-mail de confirmation envoyé.",
+    "passwordTitle": "Mot de passe",
+    "setPasswordIntro": "Vous vous connectez sans mot de passe pour l'instant. Vous pouvez en définir un ici.",
+    "currentPassword": "Mot de passe actuel",
+    "changePassword": "Changer le mot de passe",
+    "setPassword": "Définir un mot de passe",
+    "passwordChanged": "Mot de passe enregistré. Les autres appareils ont été déconnectés.",
+    "linked": "Lié à : {providers}",
+    "sessionsTitle": "Appareils connectés",
+    "thisDevice": "Cet appareil",
+    "signOutDevice": "Déconnecter",
+    "signOutOthers": "Déconnecter tous les autres appareils",
+    "lastSeen": "dernière activité {date}",
+    "unknownDevice": "Appareil inconnu",
+    "method_password": "Mot de passe",
+    "method_magic_link": "Lien de connexion",
+    "method_google": "Google",
+    "method_apple": "Apple",
+    "method_password_reset": "Mot de passe réinitialisé"
   }
 }

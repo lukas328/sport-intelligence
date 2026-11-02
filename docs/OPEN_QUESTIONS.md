@@ -26,8 +26,9 @@ Each question has the **assumption** I work with until it is answered. Status: o
   adapter only, nothing is scraped (BRIEF 7.4).
 
 ## Accounts and roles (M1)
-- **Q-AUTH-1 Google and Apple sign-in** are optional in the brief. *Assumption:* postponed until after M2;
-  the session model supports additional login methods without changes.
+- **Q-AUTH-1 Google and Apple sign-in**: implemented (ADR 010). **Needs credentials**: a Google OAuth
+  client (Google Cloud Console) and, for Apple, a paid Apple Developer account (Services ID + key).
+  Without them the buttons stay hidden.
 - **Q-AUTH-2 2FA for org admins**: enforced for org-level write actions after a 14-day grace period
   (configurable), so the 5-minute onboarding is not blocked. Is that acceptable, or must 2FA be set up
   during onboarding?

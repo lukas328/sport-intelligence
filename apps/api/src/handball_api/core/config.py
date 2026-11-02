@@ -68,6 +68,21 @@ class Settings(BaseSettings):
     smtp_starttls: bool = False
 
     max_logo_bytes: int = 1_000_000
+    password_reset_ttl_minutes: int = 60
+    email_verify_ttl_hours: int = 72
+
+    # OIDC sign-in (ADR 010). A provider is enabled when its client id is set.
+    google_client_id: str | None = None
+    google_client_secret: SecretStr | None = None
+    apple_client_id: str | None = None  # the Services ID
+    apple_team_id: str | None = None
+    apple_key_id: str | None = None
+    apple_private_key: SecretStr | None = None  # PEM of the .p8 key
+    # Overrides for tests / self-hosted IdPs: {"google": {"authorize_url": ..., ...}}
+    oidc_overrides: dict[str, dict[str, str]] = Field(default_factory=dict)
+
+    # OpenTelemetry: traces are exported when an OTLP endpoint is set
+    otel_endpoint: str | None = None
 
 
 @lru_cache

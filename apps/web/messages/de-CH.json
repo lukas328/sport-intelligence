@@ -72,7 +72,11 @@
     "unsupported-image": "Bitte ein PNG-, JPEG- oder WebP-Bild verwenden.",
     "logo-too-large": "Das Logo darf höchstens 1 MB gross sein.",
     "validation-error": "Bitte prüfe die markierten Felder.",
-    "unauthenticated": "Bitte melde dich an."
+    "unauthenticated": "Bitte melde dich an.",
+    "oauth-state": "Die Anmeldung ist abgelaufen. Bitte versuch es nochmals.",
+    "oauth-failed": "Die Anmeldung beim Anbieter hat nicht geklappt.",
+    "oauth-email-unverified": "Der Anbieter hat keine bestätigte E-Mail-Adresse geliefert.",
+    "oauth-cancelled": "Die Anmeldung wurde abgebrochen."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -98,7 +102,22 @@
     "submitRegister": "Konto erstellen",
     "haveAccount": "Schon ein Konto?",
     "toLogin": "Anmelden",
-    "magicConsuming": "Du wirst angemeldet …"
+    "magicConsuming": "Du wirst angemeldet …",
+    "continueWith": "Weiter mit {provider}",
+    "or": "oder",
+    "oauthTerms": "Mit dem Fortfahren akzeptierst du die Nutzungsbedingungen und die Datenschutzerklärung.",
+    "forgot": "Passwort vergessen?",
+    "forgotTitle": "Passwort zurücksetzen",
+    "forgotIntro": "Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link für ein neues Passwort.",
+    "forgotSubmit": "Link senden",
+    "forgotSent": "Falls ein Konto existiert, ist der Link unterwegs. Er ist 60 Minuten gültig.",
+    "resetTitle": "Neues Passwort",
+    "newPassword": "Neues Passwort",
+    "resetSubmit": "Passwort speichern",
+    "verifyTitle": "E-Mail bestätigen",
+    "verifyOk": "Danke, deine E-Mail-Adresse ist bestätigt.",
+    "verifyBusy": "Wird bestätigt …",
+    "toApp": "Zur App"
   },
   "invite": {
     "title": "Einladung",
@@ -242,5 +261,29 @@
     "newTeam": "Neues Team",
     "myRole": "Deine Rolle: {role}",
     "youthBadge": "Nachwuchs"
+  },
+  "account": {
+    "title": "Konto",
+    "emailUnverified": "Deine E-Mail-Adresse ist noch nicht bestätigt.",
+    "resend": "Bestätigungsmail erneut senden",
+    "resent": "Bestätigungsmail gesendet.",
+    "passwordTitle": "Passwort",
+    "setPasswordIntro": "Du meldest dich bisher ohne Passwort an. Hier kannst du eines festlegen.",
+    "currentPassword": "Aktuelles Passwort",
+    "changePassword": "Passwort ändern",
+    "setPassword": "Passwort festlegen",
+    "passwordChanged": "Passwort gespeichert. Andere Geräte wurden abgemeldet.",
+    "linked": "Verknüpft mit: {providers}",
+    "sessionsTitle": "Angemeldete Geräte",
+    "thisDevice": "Dieses Gerät",
+    "signOutDevice": "Abmelden",
+    "signOutOthers": "Alle anderen Geräte abmelden",
+    "lastSeen": "zuletzt aktiv {date}",
+    "unknownDevice": "Unbekanntes Gerät",
+    "method_password": "Passwort",
+    "method_magic_link": "Anmeldelink",
+    "method_google": "Google",
+    "method_apple": "Apple",
+    "method_password_reset": "Passwort zurückgesetzt"
   }
 }

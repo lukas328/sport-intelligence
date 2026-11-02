@@ -61,3 +61,10 @@ class ConsentGivenBy(StrEnum):
 
 class TokenPurpose(StrEnum):
     MAGIC_LINK = "magic_link"
+    PASSWORD_RESET = "password_reset"  # noqa: S105 (enum value, not a secret)
+    EMAIL_VERIFY = "email_verify"
+
+
+class OAuthProvider(StrEnum):
+    GOOGLE = "google"
+    APPLE = "apple"

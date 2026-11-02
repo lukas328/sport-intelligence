@@ -72,7 +72,11 @@
     "unsupported-image": "Please use a PNG, JPEG or WebP image.",
     "logo-too-large": "The logo must be at most 1 MB.",
     "validation-error": "Please check the highlighted fields.",
-    "unauthenticated": "Please sign in."
+    "unauthenticated": "Please sign in.",
+    "oauth-state": "Sign-in expired. Please try again.",
+    "oauth-failed": "Sign-in with the provider failed.",
+    "oauth-email-unverified": "The provider did not confirm an e-mail address.",
+    "oauth-cancelled": "Sign-in was cancelled."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -98,7 +102,22 @@
     "submitRegister": "Create account",
     "haveAccount": "Already have an account?",
     "toLogin": "Sign in",
-    "magicConsuming": "Signing you in …"
+    "magicConsuming": "Signing you in …",
+    "continueWith": "Continue with {provider}",
+    "or": "or",
+    "oauthTerms": "By continuing you accept the terms of use and the privacy policy.",
+    "forgot": "Forgot password?",
+    "forgotTitle": "Reset password",
+    "forgotIntro": "Enter your e-mail address. We send you a link to set a new password.",
+    "forgotSubmit": "Send link",
+    "forgotSent": "If an account exists, the link is on its way. It is valid for 60 minutes.",
+    "resetTitle": "New password",
+    "newPassword": "New password",
+    "resetSubmit": "Save password",
+    "verifyTitle": "Confirm e-mail",
+    "verifyOk": "Thanks, your e-mail address is confirmed.",
+    "verifyBusy": "Confirming …",
+    "toApp": "Open app"
   },
   "invite": {
     "title": "Invitation",
@@ -242,5 +261,29 @@
     "newTeam": "New team",
     "myRole": "Your role: {role}",
     "youthBadge": "Youth"
+  },
+  "account": {
+    "title": "Account",
+    "emailUnverified": "Your e-mail address is not confirmed yet.",
+    "resend": "Send confirmation e-mail again",
+    "resent": "Confirmation e-mail sent.",
+    "passwordTitle": "Password",
+    "setPasswordIntro": "You sign in without a password so far. You can set one here.",
+    "currentPassword": "Current password",
+    "changePassword": "Change password",
+    "setPassword": "Set password",
+    "passwordChanged": "Password saved. Other devices were signed out.",
+    "linked": "Linked with: {providers}",
+    "sessionsTitle": "Signed-in devices",
+    "thisDevice": "This device",
+    "signOutDevice": "Sign out",
+    "signOutOthers": "Sign out all other devices",
+    "lastSeen": "last active {date}",
+    "unknownDevice": "Unknown device",
+    "method_password": "Password",
+    "method_magic_link": "Sign-in link",
+    "method_google": "Google",
+    "method_apple": "Apple",
+    "method_password_reset": "Password reset"
   }
 }

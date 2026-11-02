@@ -3,13 +3,13 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import CITEXT, INET, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from handball_api.core.db import Base, EntityMixin
 from handball_api.models._types import str_enum
-from handball_api.models.enums import TokenPurpose
+from handball_api.models.enums import OAuthProvider, TokenPurpose
 
 
 class User(Base, EntityMixin):
@@ -49,6 +49,29 @@ class AuthSession(Base):
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     user_agent: Mapped[str | None] = mapped_column(String(300))
     ip: Mapped[str | None] = mapped_column(INET)
+    method: Mapped[str] = mapped_column(String(20), nullable=False, default="password")
+
+
+class OAuthIdentity(Base):
+    """External identity (Google, Apple) linked to a user.
+
+    subject is the provider's stable user id.
+    """
+
+    __tablename__ = "oauth_identities"
+    __table_args__ = (UniqueConstraint("provider", "subject"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    provider: Mapped[OAuthProvider] = mapped_column(str_enum(OAuthProvider), nullable=False)
+    subject: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str | None] = mapped_column(CITEXT)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class AuthToken(Base):

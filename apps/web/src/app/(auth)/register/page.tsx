@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { serverApi } from "@/lib/api";
+import { OAuthButtons } from "@/components/oauth-buttons";
+import { fetchProviders, serverApi } from "@/lib/api";
 import { RegisterForm } from "./register-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,5 +15,13 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
     const { data } = await (await serverApi()).GET("/v1/invitations/{token}", { params: { path: { token: invite } } });
     email = data?.status === "pending" ? data.email : undefined;
   }
-  return <RegisterForm invitationToken={email ? invite : undefined} email={email} />;
+  const providers = await fetchProviders();
+  const token = email ? invite : undefined;
+  return (
+    <RegisterForm
+      invitationToken={token}
+      email={email}
+      oauth={<OAuthButtons providers={providers} invite={token} next={token ? "/app" : undefined} />}
+    />
+  );
 }

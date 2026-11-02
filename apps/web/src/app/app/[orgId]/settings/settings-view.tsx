@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { useEffect, useState, type FormEvent } from "react";
+import { AccountSection } from "@/components/account-section";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
 import { Alert, Card, EmptyState } from "@/components/ui/card";
@@ -28,6 +29,7 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
       {(isAdmin || inviteTeams.length > 0) && (
         <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
       )}
+      <AccountSection me={me} />
       <SecuritySection me={me} />
     </div>
   );

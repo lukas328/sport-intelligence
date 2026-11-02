@@ -91,10 +91,11 @@ async def test_magic_link(make_api: Callable[[], Api], outbox: MemoryEmailSender
     api = make_api()
     await api.register("m@hc-test.ch", name="Mia")
     await api.post("/v1/auth/logout")
+    sent = len(outbox.outbox)  # verification mail from registration
     assert (
         await api.post("/v1/auth/magic-link", json={"email": "nobody@hc-test.ch"})
     ).status_code == 202
-    assert outbox.outbox == []
+    assert len(outbox.outbox) == sent
     assert (
         await api.post("/v1/auth/magic-link", json={"email": "m@hc-test.ch"})
     ).status_code == 202

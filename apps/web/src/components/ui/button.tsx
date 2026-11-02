@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-accent text-accent-contrast hover:opacity-90",
+  primary: "bg-accent text-accent-contrast hover:brightness-90",
   secondary: "border border-border bg-background hover:bg-surface",
   ghost: "hover:bg-surface",
-  danger: "bg-error text-white hover:opacity-90",
+  danger: "bg-error text-white hover:brightness-90",
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

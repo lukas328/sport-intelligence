@@ -3,14 +3,22 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 
-export function RegisterForm({ invitationToken, email }: { invitationToken?: string; email?: string }) {
+export function RegisterForm({
+  invitationToken,
+  email,
+  oauth,
+}: {
+  invitationToken?: string | undefined;
+  email?: string | undefined;
+  oauth?: ReactNode;
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
@@ -48,6 +56,7 @@ export function RegisterForm({ invitationToken, email }: { invitationToken?: str
     <Card className="space-y-5">
       <h1 className="text-2xl font-semibold">{t("auth.registerTitle")}</h1>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
+      {oauth}
       <form onSubmit={submit} className="space-y-4" noValidate>
         <Input label={t("auth.name")} name="name" autoComplete="name" required autoFocus error={fields.name} />
         <Input

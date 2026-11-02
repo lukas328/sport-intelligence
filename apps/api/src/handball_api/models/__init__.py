@@ -1,7 +1,7 @@
 """SQLAlchemy models (BRIEF 5)."""
 
 from handball_api.models.audit import AuditLog
-from handball_api.models.identity import AuthSession, AuthToken, User
+from handball_api.models.identity import AuthSession, AuthToken, OAuthIdentity, User
 from handball_api.models.roster import Consent, Player, RosterEntry
 from handball_api.models.tenancy import (
     Invitation,
@@ -19,6 +19,7 @@ __all__ = [
     "Consent",
     "Invitation",
     "Membership",
+    "OAuthIdentity",
     "OrgMembership",
     "Organization",
     "Player",

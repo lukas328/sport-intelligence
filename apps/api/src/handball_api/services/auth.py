@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
@@ -57,7 +58,12 @@ def validate_password(ctx: Ctx, password: str, email: str) -> None:
 
 
 async def issue_session(
-    ctx: Ctx, user: User, *, mfa_pending: bool, user_agent: str | None
+    ctx: Ctx,
+    user: User,
+    *,
+    mfa_pending: bool,
+    user_agent: str | None,
+    method: str = "password",
 ) -> IssuedSession:
     token = new_token()
     expires = _now() + timedelta(hours=ctx.settings.session_ttl_hours)
@@ -72,6 +78,7 @@ async def issue_session(
             expires_at=expires,
             user_agent=(user_agent or "")[:300] or None,
             ip=ctx.ip,
+            method=method,
         )
     )
     if not mfa_pending:
@@ -104,6 +111,8 @@ async def register(
     await ctx.db.flush()
     ctx.user_id = user.id
     await audit.record(ctx, "user.registered", target_type="user", target_id=user.id)
+    if not data.invitation_token:  # invitations prove the address already
+        await send_email_verification(ctx, user)
     return user, await issue_session(ctx, user, mfa_pending=False, user_agent=user_agent)
 
 
@@ -197,7 +206,9 @@ async def consume_magic_link(ctx: Ctx, token: str, user_agent: str | None) -> Is
     user.email_verified_at = user.email_verified_at or _now()
     ctx.user_id = user.id
     await audit.record(ctx, "user.login_magic_link", target_type="user", target_id=user.id)
-    return await issue_session(ctx, user, mfa_pending=user.totp_enabled, user_agent=user_agent)
+    return await issue_session(
+        ctx, user, mfa_pending=user.totp_enabled, user_agent=user_agent, method="magic_link"
+    )
 
 
 async def update_me(ctx: Ctx, user: User, data: MeUpdate) -> User:
@@ -236,3 +247,145 @@ async def totp_disable(ctx: Ctx, user: User, code: str) -> None:
     user.totp_enabled_at = None
     user.totp_secret_enc = None
     await audit.record(ctx, "user.totp_disabled", target_type="user", target_id=user.id)
+
+
+# ---- single-use tokens (password reset, e-mail verification) ------------------------------
+
+
+async def _issue_token(ctx: Ctx, user: User, purpose: TokenPurpose, ttl: timedelta) -> str:
+    token = new_token()
+    ctx.db.add(
+        AuthToken(
+            purpose=purpose,
+            token_hash=hash_token(token),
+            user_id=user.id,
+            email=user.email,
+            expires_at=_now() + ttl,
+        )
+    )
+    return token
+
+
+async def _consume_token(ctx: Ctx, token: str, purpose: TokenPurpose) -> User:
+    row = await ctx.db.scalar(
+        select(AuthToken)
+        .where(AuthToken.token_hash == hash_token(token), AuthToken.purpose == purpose)
+        .with_for_update()
+    )
+    if row is None or row.used_at is not None or row.expires_at <= _now() or row.user_id is None:
+        raise ProblemError(400, "invalid-token", "The link is invalid or expired")
+    row.used_at = _now()
+    user = await ctx.db.get(User, row.user_id)
+    if user is None or user.email.lower() != row.email.lower():
+        raise ProblemError(400, "invalid-token", "The link is invalid or expired")
+    return user
+
+
+async def request_password_reset(ctx: Ctx, email: str) -> None:
+    """Always succeeds (no account enumeration)."""
+    user = await ctx.db.scalar(select(User).where(User.email == email))
+    if user is None:
+        return
+    minutes = ctx.settings.password_reset_ttl_minutes
+    token = await _issue_token(ctx, user, TokenPurpose.PASSWORD_RESET, timedelta(minutes=minutes))
+    await ctx.email.send(
+        render(
+            "password_reset",
+            user.locale,
+            to=user.email,
+            name=user.name,
+            minutes=minutes,
+            link=f"{ctx.settings.web_base_url}/auth/reset?token={token}",
+        )
+    )
+    await audit.record(
+        ctx,
+        "user.password_reset_requested",
+        target_type="user",
+        target_id=user.id,
+        actor_id=user.id,
+    )
+
+
+async def reset_password(
+    ctx: Ctx, token: str, password: str, user_agent: str | None
+) -> IssuedSession:
+    user = await _consume_token(ctx, token, TokenPurpose.PASSWORD_RESET)
+    validate_password(ctx, password, user.email)
+    user.password_hash = hash_password(password)
+    user.email_verified_at = user.email_verified_at or _now()  # the mail reached the user
+    await ctx.db.execute(delete(AuthSession).where(AuthSession.user_id == user.id))
+    ctx.user_id = user.id
+    await audit.record(ctx, "user.password_reset", target_type="user", target_id=user.id)
+    return await issue_session(
+        ctx, user, mfa_pending=user.totp_enabled, user_agent=user_agent, method="password_reset"
+    )
+
+
+async def send_email_verification(ctx: Ctx, user: User) -> None:
+    if user.email_verified_at is not None:
+        return
+    hours = ctx.settings.email_verify_ttl_hours
+    token = await _issue_token(ctx, user, TokenPurpose.EMAIL_VERIFY, timedelta(hours=hours))
+    await ctx.email.send(
+        render(
+            "email_verify",
+            user.locale,
+            to=user.email,
+            name=user.name,
+            hours=hours,
+            link=f"{ctx.settings.web_base_url}/auth/verify?token={token}",
+        )
+    )
+
+
+async def verify_email(ctx: Ctx, token: str) -> User:
+    user = await _consume_token(ctx, token, TokenPurpose.EMAIL_VERIFY)
+    user.email_verified_at = user.email_verified_at or _now()
+    await audit.record(
+        ctx, "user.email_verified", target_type="user", target_id=user.id, actor_id=user.id
+    )
+    return user
+
+
+async def change_password(
+    ctx: Ctx, user: User, session: AuthSession, current: str | None, new: str
+) -> None:
+    # Accounts created via Google/Apple or magic link may have no password yet.
+    if user.password_hash and not verify_password(user.password_hash, current or ""):
+        raise ProblemError(403, "invalid-credentials", "The current password is wrong")
+    validate_password(ctx, new, user.email)
+    user.password_hash = hash_password(new)
+    await ctx.db.execute(
+        delete(AuthSession).where(AuthSession.user_id == user.id, AuthSession.id != session.id)
+    )
+    await audit.record(ctx, "user.password_changed", target_type="user", target_id=user.id)
+
+
+async def list_sessions(ctx: Ctx, user: User) -> list[AuthSession]:
+    rows = await ctx.db.scalars(
+        select(AuthSession)
+        .where(
+            AuthSession.user_id == user.id,
+            AuthSession.expires_at > _now(),
+            AuthSession.mfa_pending.is_(False),
+        )
+        .order_by(AuthSession.created_at.desc())
+    )
+    return list(rows.all())
+
+
+async def revoke_session(ctx: Ctx, user: User, session_id: uuid.UUID) -> None:
+    res = await ctx.db.execute(
+        delete(AuthSession).where(AuthSession.id == session_id, AuthSession.user_id == user.id)
+    )
+    if res.rowcount == 0:  # type: ignore[attr-defined]
+        raise ProblemError(404, "not-found", "Session not found")
+    await audit.record(ctx, "user.session_revoked", target_type="session", target_id=session_id)
+
+
+async def revoke_other_sessions(ctx: Ctx, user: User, current: AuthSession) -> None:
+    await ctx.db.execute(
+        delete(AuthSession).where(AuthSession.user_id == user.id, AuthSession.id != current.id)
+    )
+    await audit.record(ctx, "user.sessions_revoked", target_type="user", target_id=user.id)

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
@@ -13,12 +13,13 @@ import { safeNext } from "@/lib/nav";
 
 type Mode = "password" | "magic" | "totp" | "magic-sent";
 
-export function LoginForm() {
+export function LoginForm({ oauth }: { oauth?: ReactNode }) {
   const t = useTranslations();
   const router = useRouter();
-  const next = safeNext(useSearchParams().get("next"));
-  const [mode, setMode] = useState<Mode>("password");
-  const [error, setError] = useState<ErrorKey | null>(null);
+  const params = useSearchParams();
+  const next = safeNext(params.get("next"));
+  const [mode, setMode] = useState<Mode>(params.get("totp") ? "totp" : "password");
+  const [error, setError] = useState<ErrorKey | null>(params.get("error") ? errorKey({ type: `x:${params.get("error")}` }) : null);
   const [busy, setBusy] = useState(false);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -55,6 +56,7 @@ export function LoginForm() {
     <Card className="space-y-5">
       <h1 className="text-2xl font-semibold">{title}</h1>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
+      {mode === "password" && oauth}
       {mode === "magic-sent" ? (
         <Alert kind="success">{t("auth.magicSent")}</Alert>
       ) : (
@@ -78,7 +80,12 @@ export function LoginForm() {
               {mode === "magic" && <p className="text-sm text-muted">{t("auth.magicIntro")}</p>}
               <Input label={t("auth.email")} name="email" type="email" autoComplete="email" required autoFocus />
               {mode === "password" && (
-                <Input label={t("auth.password")} name="password" type="password" autoComplete="current-password" required />
+                <>
+                  <Input label={t("auth.password")} name="password" type="password" autoComplete="current-password" required />
+                  <Link href="/auth/forgot" className="block text-sm text-accent underline underline-offset-4">
+                    {t("auth.forgot")}
+                  </Link>
+                </>
               )}
             </>
           )}

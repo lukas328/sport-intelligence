@@ -19,8 +19,10 @@ from handball_api.core.email import (
 )
 from handball_api.core.errors import install_error_handlers
 from handball_api.core.logging import configure_logging, get_logger
+from handball_api.core.oidc import OidcClient
 from handball_api.core.ratelimit import MemoryRateLimiter, RateLimiter, RedisRateLimiter
 from handball_api.core.storage import ObjectStorage, S3Storage
+from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.routers import auth, health, orgs, teams
 from handball_api.routers.deps import csrf_protect
 
@@ -85,6 +87,7 @@ def create_app(
     email: EmailSender | None = None,
     storage: ObjectStorage | None = None,
     rate_limiter: RateLimiter | None = None,
+    oidc: OidcClient | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     check_production_secrets(settings)
@@ -93,8 +96,9 @@ def create_app(
     log = get_logger("handball_api")
 
     @asynccontextmanager
-    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        init_engine(settings.database_url)
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        engine = init_engine(settings.database_url)
+        instrument_engine(app, engine)
         log.info("startup", env=settings.env, version=__version__)
         yield
         await dispose_engine()
@@ -113,6 +117,7 @@ def create_app(
     app.state.email = email or _email_sender(settings)
     app.state.storage = storage or S3Storage(settings)
     app.state.rate_limiter = rate_limiter or _rate_limiter(settings)
+    app.state.oidc = oidc or OidcClient()
     app.dependency_overrides[get_settings] = lambda: settings
     app.add_middleware(
         CORSMiddleware,
@@ -138,6 +143,7 @@ def create_app(
         return response
 
     install_error_handlers(app)
+    setup_tracing(app, settings)
     for r in health.routers():
         app.include_router(r)
     app.include_router(auth.router)

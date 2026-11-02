@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Literal
 
 from pydantic import EmailStr, Field
@@ -57,6 +58,9 @@ class MeOut(ApiModel):
     name: str
     locale: str
     totp_enabled: bool
+    has_password: bool
+    email_verified: bool
+    linked_providers: list[str]
     is_platform_admin: bool
     organizations: list[OrgSummary]
 
@@ -64,3 +68,31 @@ class MeOut(ApiModel):
 class MeUpdate(ApiModel):
     name: Name | None = None
     locale: Locale | None = None
+
+
+class ProvidersOut(ApiModel):
+    providers: list[str]
+
+
+class PasswordForgotIn(ApiModel):
+    email: EmailStr
+
+
+class PasswordResetIn(ApiModel):
+    token: str = Field(min_length=10, max_length=200)
+    password: str = Field(min_length=1, max_length=200)
+
+
+class PasswordChangeIn(ApiModel):
+    current_password: str | None = Field(default=None, max_length=200)
+    new_password: str = Field(min_length=1, max_length=200)
+
+
+class SessionOut(ApiModel):
+    id: uuid.UUID
+    created_at: datetime
+    last_seen_at: datetime | None
+    user_agent: str | None
+    ip: str | None
+    method: str
+    current: bool

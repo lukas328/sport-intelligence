@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -22,6 +23,7 @@ from handball_api.services.context import Ctx
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 DbDep = Annotated[AsyncSession, Depends(get_session)]
 UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
+OAUTH_CALLBACK = re.compile(r"^/v1/auth/oauth/[a-z]+/callback$")
 
 
 def client_ip(request: Request) -> str | None:
@@ -33,6 +35,8 @@ async def csrf_protect(request: Request, settings: SettingsDep) -> None:
     token whenever a session cookie is present (ADR 008)."""
     if request.method not in UNSAFE:
         return
+    if OAUTH_CALLBACK.match(request.url.path):
+        return  # Apple posts the callback cross-site; the signed state cookie protects it
     origin = request.headers.get("origin")
     if origin:
         allowed = {_origin(o) for o in [*settings.cors_origins, settings.web_base_url]}
