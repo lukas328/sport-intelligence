@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Handball AI",
+    "tagline": "Video hochladen, alles andere passiert automatisch.",
+    "description": "Spielbericht, Clips, Statistiken, Spielzüge und Erkenntnisse aus jedem Spielvideo. Ohne manuelles Tagging."
+  },
+  "nav": { "home": "Start", "status": "Systemstatus" },
+  "home": {
+    "cta": "Systemstatus ansehen",
+    "foundation": "Fundament (M0). Die Funktionen folgen Meilenstein für Meilenstein.",
+    "courtLabel": "Handballfeld 40 × 20 m, aus der gemeinsamen Geometrie gezeichnet"
+  },
+  "status": {
+    "title": "Systemstatus",
+    "intro": "Zustand der Dienste hinter der Plattform.",
+    "overall_ok": "Alle Dienste laufen",
+    "overall_degraded": "Eingeschränkt: mindestens ein Dienst antwortet nicht",
+    "overall_unreachable": "Die API ist nicht erreichbar",
+    "component": "Dienst",
+    "state": "Zustand",
+    "latency": "Antwortzeit",
+    "ok": "OK",
+    "error": "Fehler",
+    "version": "API-Version {version} · Umgebung {env}",
+    "names": { "database": "Datenbank", "redis": "Warteschlange (Redis)", "storage": "Objektspeicher" },
+    "retry": "Neu laden"
+  }
+}

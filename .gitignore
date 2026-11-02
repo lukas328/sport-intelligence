@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node
+node_modules/
+.next/
+*.tsbuildinfo
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+compose.override.yaml
+*.pem
+*.key
+
+# Data (videos and datasets never go into git)
+data/*
+!data/README.md
+!data/paper_reports/
+data/paper_reports/*
+!data/paper_reports/.gitkeep
+*.mp4
+*.mov
+*.mkv
+*.avi
+ml/**/weights/
+*.onnx
+*.engine
+*.pt
+
+# Tooling
+playwright-report/
+test-results/
+.DS_Store

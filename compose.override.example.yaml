@@ -1,0 +1,20 @@
+# Copy to compose.override.yaml (gitignored) when builds must go through a TLS-intercepting
+# corporate proxy. docker compose picks the override up automatically.
+x-proxy-build: &proxy-build
+  network: host
+  args:
+    HTTPS_PROXY: ${HTTPS_PROXY:-}
+    https_proxy: ${HTTPS_PROXY:-}
+    NO_PROXY: ${NO_PROXY:-}
+  secrets: [extra_ca]
+
+services:
+  migrate: { build: *proxy-build }
+  api: { build: *proxy-build }
+  worker: { build: *proxy-build }
+  gpu-worker: { build: *proxy-build }
+  web: { build: *proxy-build }
+
+secrets:
+  extra_ca:
+    file: ${HB_EXTRA_CA_CERT:-/etc/ssl/certs/ca-certificates.crt}

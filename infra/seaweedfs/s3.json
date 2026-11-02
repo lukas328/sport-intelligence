@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "handball-local",
+      "credentials": [{ "accessKey": "handball", "secretKey": "handball-secret" }],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

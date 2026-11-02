@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Handball AI",
+    "tagline": "Téléchargez la vidéo, tout le reste se fait automatiquement.",
+    "description": "Rapport de match, clips, statistiques, combinaisons et analyses à partir de chaque vidéo. Sans saisie manuelle."
+  },
+  "nav": { "home": "Accueil", "status": "État du système" },
+  "home": {
+    "cta": "Voir l'état du système",
+    "foundation": "Fondations (M0). Les fonctionnalités suivent jalon par jalon.",
+    "courtLabel": "Terrain de handball 40 × 20 m, dessiné à partir de la géométrie commune"
+  },
+  "status": {
+    "title": "État du système",
+    "intro": "État des services de la plateforme.",
+    "overall_ok": "Tous les services fonctionnent",
+    "overall_degraded": "Dégradé : au moins un service ne répond pas",
+    "overall_unreachable": "L'API est injoignable",
+    "component": "Service",
+    "state": "État",
+    "latency": "Latence",
+    "ok": "OK",
+    "error": "Erreur",
+    "version": "Version de l'API {version} · environnement {env}",
+    "names": { "database": "Base de données", "redis": "File d'attente (Redis)", "storage": "Stockage objet" },
+    "retry": "Recharger"
+  }
+}

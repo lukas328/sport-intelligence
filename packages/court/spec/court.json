@@ -1,0 +1,15 @@
+{
+  "$comment": "Single source of truth for the handball court. Units: metres. Run `make court` after editing. Coordinate system: x=0 left goal line .. 40, y=0 bottom sideline .. 20.",
+  "sport": "handball",
+  "version": 1,
+  "length": 40.0,
+  "width": 20.0,
+  "goal": { "width": 3.0, "height": 2.0 },
+  "goal_area_radius": 6.0,
+  "free_throw_radius": 9.0,
+  "penalty_mark": { "distance": 7.0, "length": 1.0 },
+  "goalkeeper_restraining_line": { "distance": 4.0, "length": 0.15 },
+  "substitution_line": { "distance_from_center": 4.5, "length": 0.15 },
+  "free_throw_line_dash": { "dash": 0.15, "gap": 0.15 },
+  "arc_samples": 24
+}

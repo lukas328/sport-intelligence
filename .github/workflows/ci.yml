@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  UV_PYTHON: "3.12"
+  NODE_VERSION: "22"
+
+jobs:
+  python:
+    name: Python (lint, types, tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - name: Import contracts (no circular or cross-app imports)
+        run: uv run lint-imports
+      - run: make typecheck-py
+      - run: make test-py
+      - name: OpenAPI client is up to date
+        run: |
+          uv run python -m handball_api.openapi /tmp/openapi.json
+          diff -u packages/api-client/openapi.json /tmp/openapi.json
+
+  migrations:
+    name: Migrations check
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: handball
+          POSTGRES_PASSWORD: handball
+          POSTGRES_DB: handball
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U handball" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      HB_DATABASE_URL: postgresql+asyncpg://handball:handball@localhost:5432/handball
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --all-packages --frozen
+      - run: uv run alembic upgrade head
+      - name: Models and migrations are in sync
+        run: uv run alembic check
+      - name: Downgrade and upgrade again
+        run: uv run alembic downgrade base && uv run alembic upgrade head
+
+  web:
+    name: Web (lint, types, tests, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm circular
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm --filter @handball/web build
+
+  images:
+    name: Container build and scan (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, worker, gpu-worker, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          tags: handball-ai-${{ matrix.app }}:ci
+          load: true
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: handball-ai-${{ matrix.app }}:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+  e2e:
+    name: Stack (compose, integration, Playwright)
+    runs-on: ubuntu-latest
+    needs: [python, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: uv sync --all-packages --frozen
+      - run: pnpm install --frozen-lockfile
+      - run: docker compose up -d --build
+      - name: Wait for API and web
+        run: |
+          for i in $(seq 1 90); do
+            curl -fs localhost:8000/readyz && curl -fs localhost:3000/api/healthz && exit 0
+            sleep 2
+          done
+          docker compose ps; docker compose logs --tail=100; exit 1
+      - run: make test-integration
+      - run: pnpm --filter @handball/web exec playwright install --with-deps chromium
+      - run: make test-e2e
+      - if: failure()
+        run: docker compose logs --tail=200
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+
+  preview:
+    name: Preview deploy
+    runs-on: ubuntu-latest
+    needs: [e2e, images]
+    # Enabled once hosting is decided (docs/adr/002-hosting-region.md, OPEN_QUESTIONS Q-INFRA-1).
+    if: github.event_name == 'pull_request' && vars.PREVIEW_DEPLOY_ENABLED == 'true'
+    steps:
+      - run: echo "Preview deploy target not configured yet" && exit 1

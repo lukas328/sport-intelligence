@@ -1,0 +1,93 @@
+[project]
+name = "handball-ai-workspace"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "pytest-asyncio>=0.25",
+  "httpx>=0.28",
+  "mypy>=1.15",
+  "ruff>=0.9",
+  "import-linter>=2.1",
+  "fakeredis>=2.26",
+  "pre-commit>=4.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["apps/api", "apps/worker", "apps/gpu-worker", "packages/court"]
+
+[tool.uv.sources]
+handball-court = { workspace = true }
+handball-api = { workspace = true }
+handball-worker = { workspace = true }
+handball-gpu-worker = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["**/migrations/versions/*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "SIM", "PTH", "N"]
+ignore = ["S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S", "PTH"]
+"packages/court/scripts/*.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "packages/court:apps/api/src:apps/worker/src:apps/gpu-worker/src"
+explicit_package_bases = true
+namespace_packages = true
+
+[[tool.mypy.overrides]]
+module = ["rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["integration: needs running postgres/redis/minio (docker compose)"]
+addopts = "-m 'not integration' --import-mode=importlib"
+
+[tool.coverage.run]
+branch = true
+source = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court"]
+omit = ["**/migrations/**", "**/__main__.py"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true
+
+[tool.importlinter]
+root_packages = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court"]
+
+[[tool.importlinter.contracts]]
+name = "Court package is a leaf (no app imports)"
+type = "forbidden"
+source_modules = ["handball_court"]
+forbidden_modules = ["handball_api", "handball_worker", "handball_gpu_worker"]
+
+[[tool.importlinter.contracts]]
+name = "Apps are independent of each other"
+type = "independence"
+modules = ["handball_api", "handball_worker", "handball_gpu_worker"]
+
+[[tool.importlinter.contracts]]
+name = "API layers (routers above services above core)"
+type = "layers"
+layers = ["handball_api.main", "handball_api.routers", "handball_api.services", "handball_api.core"]

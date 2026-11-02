@@ -1,0 +1,5 @@
+{
+  "$comment": "Golden set manifest (BRIEF 10.3). Videos and annotations live in object storage, never in git.",
+  "version": 0,
+  "matches": []
+}

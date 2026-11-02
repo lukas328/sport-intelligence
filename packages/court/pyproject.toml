@@ -1,0 +1,16 @@
+[project]
+name = "handball-court"
+version = "0.1.0"
+description = "Handball court geometry (generated from spec/court.json)"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["handball_court"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"generated/court_geometry.json" = "handball_court/court_geometry.json"

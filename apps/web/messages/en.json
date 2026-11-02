@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Handball AI",
+    "tagline": "Upload the video, everything else happens automatically.",
+    "description": "Match report, clips, statistics, plays and insights from every match video. No manual tagging."
+  },
+  "nav": { "home": "Home", "status": "System status" },
+  "home": {
+    "cta": "View system status",
+    "foundation": "Foundation (M0). Features follow milestone by milestone.",
+    "courtLabel": "Handball court 40 × 20 m, drawn from the shared geometry"
+  },
+  "status": {
+    "title": "System status",
+    "intro": "Health of the services behind the platform.",
+    "overall_ok": "All services operational",
+    "overall_degraded": "Degraded: at least one service is not responding",
+    "overall_unreachable": "The API is unreachable",
+    "component": "Service",
+    "state": "State",
+    "latency": "Latency",
+    "ok": "OK",
+    "error": "Error",
+    "version": "API version {version} · environment {env}",
+    "names": { "database": "Database", "redis": "Queue (Redis)", "storage": "Object storage" },
+    "retry": "Reload"
+  }
+}

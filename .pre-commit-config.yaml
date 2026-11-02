@@ -1,0 +1,45 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^docs/BRIEF\.md$
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+        exclude: tsconfig.*\.json$
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: detect-private-key
+      - id: check-merge-conflict
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.0
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: court-geometry
+        name: court geometry is generated
+        entry: python packages/court/scripts/generate.py --check
+        language: system
+        files: ^packages/court/
+        pass_filenames: false
+      - id: mypy
+        name: mypy strict
+        entry: uv run mypy apps/api/src apps/worker/src apps/gpu-worker/src packages/court/handball_court
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: eslint
+        name: eslint (web)
+        entry: pnpm --filter @handball/web lint
+        language: system
+        files: ^apps/web/.*\.(ts|tsx)$
+        pass_filenames: false

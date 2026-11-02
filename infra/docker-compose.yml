@@ -1,0 +1,101 @@
+name: handball-ai
+
+x-python-env: &python-env
+  HB_ENV: local
+  HB_DATABASE_URL: postgresql+asyncpg://handball:handball@postgres:5432/handball
+  HB_REDIS_URL: redis://redis:6379/0
+  HB_S3_ENDPOINT_URL: http://s3:9000
+  HB_S3_ACCESS_KEY: handball
+  HB_S3_SECRET_KEY: handball-secret
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: handball
+      POSTGRES_PASSWORD: handball
+      POSTGRES_DB: handball
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U handball -d handball"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Local S3-compatible object storage. MinIO no longer ships community images (ADR 006).
+  s3:
+    image: chrislusf/seaweedfs:4.50
+    command: ["server", "-dir=/data", "-s3", "-s3.port=9000", "-s3.config=/etc/seaweedfs/s3.json", "-master.volumeSizeLimitMB=1024"]
+    ports: ["9000:9000"]
+    volumes:
+      - s3data:/data
+      - ./seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9000/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.24
+    ports: ["8025:8025", "1025:1025"]
+
+  migrate:
+    build: { context: .., dockerfile: apps/api/Dockerfile }
+    environment: *python-env
+    working_dir: /app/apps/api
+    command: ["sh", "-c", "alembic upgrade head && python -m handball_api.bootstrap"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      s3: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: { context: .., dockerfile: apps/api/Dockerfile }
+    environment:
+      <<: *python-env
+      HB_LOG_JSON: "true"
+      HB_CORS_ORIGINS: '["http://localhost:3000"]'
+    ports: ["8000:8000"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+
+  worker:
+    build: { context: .., dockerfile: apps/worker/Dockerfile }
+    environment: *python-env
+    depends_on:
+      redis: { condition: service_healthy }
+
+  gpu-worker:
+    build: { context: .., dockerfile: apps/gpu-worker/Dockerfile }
+    environment:
+      <<: *python-env
+      HB_GPU_BACKEND: local
+    depends_on:
+      redis: { condition: service_healthy }
+
+  web:
+    build: { context: .., dockerfile: apps/web/Dockerfile }
+    environment:
+      HB_API_INTERNAL_URL: http://api:8000
+    ports: ["3000:3000"]
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  pgdata:
+  redisdata:
+  s3data:

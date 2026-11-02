@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/.venv
+.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.git
+data
+**/test-results
+**/playwright-report
+*.mp4
+*.mov
