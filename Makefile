@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-PY_SRC := apps/api/src apps/worker/src apps/gpu-worker/src packages/court/handball_court
-PY_TESTS := apps/api/tests apps/worker/tests apps/gpu-worker/tests packages/court/tests
+PY_SRC := apps/api/src apps/worker/src apps/gpu-worker/src packages/court/handball_court packages/vision/handball_vision packages/jobkit/handball_jobkit
+PY_TESTS := apps/api/tests apps/worker/tests apps/gpu-worker/tests packages/court/tests packages/vision/tests
 
 help: ## Show targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -72,9 +72,15 @@ migrate: ## Apply DB migrations inside the stack
 migration: ## Create a migration: make migration m="add teams"
 	cd apps/api && uv run alembic revision --autogenerate -m "$(m)"
 
-seed: ## Demo data (from M1 on)
-	@echo "make seed: demo data generator arrives with M1/M2 (see docs/PLAN.md)"; exit 1
+seed: ## Demo club, teams, matches and synthetic videos (stack must be running)
+	uv run python scripts/seed.py
+
+eval: ## Evaluation harness on the synthetic golden set (writes docs/perf/eval.md)
+	uv run python ml/eval/run.py --seconds 60 --out docs/perf/eval.md
+
+bench: ## Per-stage timing of the analysis pipeline
+	uv run python ml/eval/bench.py
 
 check: lint typecheck test ## Everything CI runs without services
 
-.PHONY: help install up down logs court api-client lint fmt typecheck typecheck-py db policy-doc test test-py test-js test-integration test-e2e migrate migration seed check
+.PHONY: eval bench help install up down logs court api-client lint fmt typecheck typecheck-py db policy-doc test test-py test-js test-integration test-e2e migrate migration seed check

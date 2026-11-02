@@ -11,11 +11,11 @@ import httpx
 import numpy as np
 import pytest
 
+from handball_jobkit import Reporter
 from handball_worker import ingest
 from handball_worker.config import WorkerSettings
 from handball_worker.media import quality, transcode
 from handball_worker.media.probe import ProbeError, VideoInfo, parse_probe, probe
-from handball_worker.reporter import Reporter
 
 FFMPEG = shutil.which("ffmpeg")
 needs_ffmpeg = pytest.mark.skipif(FFMPEG is None, reason="ffmpeg not installed")

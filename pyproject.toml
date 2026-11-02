@@ -16,16 +16,19 @@ dev = [
   "fakeredis>=2.26",
   "pre-commit>=4.0",
   "asyncpg>=0.32.0",
+  "onnx>=1.23.2",
 ]
 
 [tool.uv]
 package = false
 
 [tool.uv.workspace]
-members = ["apps/api", "apps/worker", "apps/gpu-worker", "packages/court"]
+members = ["apps/api", "apps/worker", "apps/gpu-worker", "packages/court", "packages/vision", "packages/jobkit"]
 
 [tool.uv.sources]
 handball-court = { workspace = true }
+handball-vision = { workspace = true }
+handball-jobkit = { workspace = true }
 handball-api = { workspace = true }
 handball-worker = { workspace = true }
 handball-gpu-worker = { workspace = true }
@@ -40,7 +43,7 @@ select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "SIM", "PTH", "N"]
 ignore = ["S101"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court"]
+known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S", "PTH"]
@@ -48,6 +51,10 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 "**/mail_templates.py" = ["E501"]
 # ffmpeg/ffprobe are called with fixed argument lists, never through a shell
 "apps/worker/src/handball_worker/media/*.py" = ["S603", "S404"]
+"packages/vision/handball_vision/*.py" = ["E501"]
+# developer tools (seed data, evaluation): long literals, fixed subprocess argv, non-crypto RNG
+"scripts/*.py" = ["E501", "S311", "S603"]
+"ml/**/*.py" = ["E501", "S311", "S603"]
 # local development defaults, overridden by environment in deployments
 "apps/worker/src/handball_worker/config.py" = ["S105", "S108"]
 
@@ -55,12 +62,17 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-mypy_path = "packages/court:apps/api/src:apps/worker/src:apps/gpu-worker/src"
+mypy_path = "packages/court:packages/vision:packages/jobkit:apps/api/src:apps/worker/src:apps/gpu-worker/src"
 explicit_package_bases = true
 namespace_packages = true
 
 [[tool.mypy.overrides]]
-module = ["rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*"]
+# OpenCV/numpy return loosely typed arrays; keep strict otherwise
+module = ["handball_vision.*", "handball_gpu_worker.analysis"]
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
@@ -72,7 +84,7 @@ addopts = "-m 'not integration' --import-mode=importlib"
 [tool.coverage.run]
 branch = true
 concurrency = ["greenlet", "thread"]
-source = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court"]
+source = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit"]
 omit = ["**/migrations/**", "**/__main__.py"]
 
 [tool.coverage.report]
@@ -81,12 +93,12 @@ show_missing = true
 skip_covered = true
 
 [tool.importlinter]
-root_packages = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court"]
+root_packages = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit"]
 
 [[tool.importlinter.contracts]]
-name = "Court package is a leaf (no app imports)"
+name = "Shared packages import no app"
 type = "forbidden"
-source_modules = ["handball_court"]
+source_modules = ["handball_court", "handball_vision", "handball_jobkit"]
 forbidden_modules = ["handball_api", "handball_worker", "handball_gpu_worker"]
 
 [[tool.importlinter.contracts]]

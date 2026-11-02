@@ -471,5 +471,24 @@
     "note": "Note",
     "nowPlaying": "Clip {n} of {total}",
     "noItems": "This playlist has no clips yet. Add them in a match with the clip tool."
+  },
+  "analysis": {
+    "title": "Positions",
+    "running": "Analysis is running. Positions appear here afterwards.",
+    "failed": "The analysis failed: {error}",
+    "none": "No analysis yet.",
+    "heuristic": "estimated",
+    "heuristicHint": "Heuristic detection without a trained model. Positions may be inaccurate.",
+    "calibration": "Calibration",
+    "calibration_heuristic": "automatic",
+    "calibration_user_correction": "manual",
+    "tracks": "{count} people tracked",
+    "home": "Own team",
+    "away": "Opponent",
+    "referee": "Referee",
+    "legend": "Legend",
+    "quality": "Data quality",
+    "confidence": "Confidence {value} %",
+    "duration": "Analysis time {seconds} s"
   }
 }

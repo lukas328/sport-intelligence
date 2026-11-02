@@ -9,6 +9,8 @@ dependencies = [
   "pydantic-settings>=2.7",
   "structlog>=24.4",
   "handball-court",
+  "handball-jobkit",
+  "handball-vision",
 ]
 
 [project.optional-dependencies]

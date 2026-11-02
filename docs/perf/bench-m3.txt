@@ -1,0 +1,15 @@
+machine: x86_64, 4 cpus, no GPU
+video: 120 s at 25 fps, 1280x720 analysis proxy; detector: heuristic
+
+| stage | seconds | share |
+|---|---|---|
+| detection | 29.40 | 52% |
+| sample | 8.08 | 14% |
+| tracking | 6.78 | 12% |
+| appearance | 4.82 | 9% |
+| calibration | 1.64 | 3% |
+| stitching | 0.41 | 1% |
+| total | 56.03 | 100% |
+
+throughput: 53.5 frames/s, realtime factor 0.47
+projected for 60 min: 28 min (budget 45 min)

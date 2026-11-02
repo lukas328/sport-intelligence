@@ -8,12 +8,14 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
 
+from sqlalchemy import delete, select
+
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.net import UnsafeUrlError, check_public_https_url
 from handball_api.core.storage import ObjectNotFoundError
-from handball_api.models import Match, ProcessingJob, VideoAsset
-from handball_api.models.enums import JobStatus, MatchStatus, VideoStatus
+from handball_api.models import CameraCalibration, Match, ProcessingJob, Track, VideoAsset
+from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
 from handball_api.services import audit
 from handball_api.services.context import Ctx
@@ -22,6 +24,7 @@ from handball_api.services.policies import Action
 
 PIPELINE_VERSION = "0.2.0"
 INGEST_FUNC = "handball_worker.ingest.run_ingest"
+ANALYSIS_FUNC = "handball_gpu_worker.analysis.run_analysis"
 IMPORT_FUNC = "handball_worker.ingest.run_import"
 MEDIA_PATH = re.compile(r"^[A-Za-z0-9_\-]+(/[A-Za-z0-9_\-]+)*\.(m3u8|m4s|mp4|ts|jpg|vtt)$")
 MEDIA_TYPES = {
@@ -317,7 +320,9 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         job.finished_at = now
         job.error = data.error
     if asset is not None and match is not None:
-        if data.status == JobStatus.FAILED:
+        if data.status == JobStatus.FAILED and job.kind == "analysis":
+            pass  # the video stays playable; the analysis error is shown on its own
+        elif data.status == JobStatus.FAILED:
             asset.status = VideoStatus.FAILED
             asset.error = data.error
             match.status = MatchStatus.FAILED
@@ -328,6 +333,10 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         elif data.status == JobStatus.SUCCEEDED and job.kind == "ingest" and data.result:
             _apply_ingest_result(asset, data.result)
             match.status = MatchStatus.READY
+            if asset.role == VideoRole.MAIN and asset.proxy_key:
+                await start_analysis(ctx, asset, match)
+        elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
+            await _apply_analysis_result(ctx, asset, job, data.result)
     await ctx.db.flush()
     await ctx.require_events().publish(f"match:{job.match_id}", job_event(job))
     return job
@@ -352,3 +361,172 @@ def _apply_ingest_result(asset: VideoAsset, r: dict[str, object]) -> None:
     asset.poster_key = str(r.get("poster_key") or "") or None
     report = r.get("quality_report")
     asset.quality_report = report if isinstance(report, dict) else None
+
+
+# ---- analysis (stages 2 to 5) ---------------------------------------------------------------
+
+
+async def start_analysis(
+    ctx: Ctx, asset: VideoAsset, match: Match, points: list[dict[str, list[float]]] | None = None
+) -> ProcessingJob:
+    job = await _new_job(ctx, asset, "analysis")
+    payload: dict[str, object] = {
+        "job_id": str(job.id),
+        "organization_id": str(asset.organization_id),
+        "match_id": str(asset.match_id),
+        "asset_id": str(asset.id),
+        "bucket": ctx.settings.s3_bucket_videos,
+        "proxy_key": asset.proxy_key,
+        "prefix": media_prefix(asset),
+        "kits": {
+            "home": match.kit_own,
+            "home_gk": match.kit_own_gk,
+            "away": match.kit_opponent,
+            "away_gk": match.kit_opponent_gk,
+            "referee": "#1a1a1a",
+        },
+        "calibration_points": points,
+    }
+    ctx.require_jobs().enqueue("gpu", ANALYSIS_FUNC, str(job.id), payload)
+    return job
+
+
+async def _apply_analysis_result(
+    ctx: Ctx, asset: VideoAsset, job: ProcessingJob, r: dict[str, object]
+) -> None:
+    cal = r.get("calibration")
+    if isinstance(cal, dict):
+        prev_points = (
+            await ctx.db.scalar(
+                select(CameraCalibration.points)
+                .where(
+                    CameraCalibration.video_asset_id == asset.id,
+                    CameraCalibration.source == "user_correction",
+                )
+                .order_by(CameraCalibration.created_at.desc())
+                .limit(1)
+            )
+            if cal.get("source") == "user_correction"
+            else None
+        )
+        ctx.db.add(
+            CameraCalibration(
+                organization_id=asset.organization_id,
+                video_asset_id=asset.id,
+                homography=cal["homography"],
+                image_size=cal["image_size"],
+                confidence=float(cal["confidence"]),
+                reprojection_px=float(cal["reprojection_px"]),
+                source=str(cal["source"]),
+                points=prev_points,
+                pipeline_version=job.pipeline_version,
+            )
+        )
+    await ctx.db.execute(delete(Track).where(Track.video_asset_id == asset.id))
+    tracks = r.get("tracks")
+    detector = str(r.get("detector") or "heuristic")
+    if isinstance(tracks, list):
+        for t in tracks:
+            ctx.db.add(
+                Track(
+                    organization_id=asset.organization_id,
+                    match_id=asset.match_id,
+                    video_asset_id=asset.id,
+                    track_no=int(t["track_id"]),
+                    team=t.get("team"),
+                    team_confidence=t.get("team_confidence"),
+                    first_ms=int(t["first_ms"]),
+                    last_ms=int(t["last_ms"]),
+                    observed_share=float(t["observed_share"]),
+                    source=detector,
+                    pipeline_version=job.pipeline_version,
+                )
+            )
+    asset.analysis = {
+        k: r.get(k)
+        for k in (
+            "chunks",
+            "chunk_ms",
+            "fps",
+            "frames",
+            "detector",
+            "versions",
+            "timings_s",
+            "elapsed_s",
+            "stats",
+        )
+    }
+
+
+async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
+    asset = await get_asset(ctx, asset_id)
+    cal = await ctx.db.scalar(
+        select(CameraCalibration)
+        .where(CameraCalibration.video_asset_id == asset.id)
+        .order_by(CameraCalibration.created_at.desc())
+        .limit(1)
+    )
+    tracks = (
+        await ctx.db.scalars(
+            select(Track).where(Track.video_asset_id == asset.id).order_by(Track.track_no)
+        )
+    ).all()
+    job = await ctx.db.scalar(
+        select(ProcessingJob)
+        .where(ProcessingJob.video_asset_id == asset.id, ProcessingJob.kind == "analysis")
+        .order_by(ProcessingJob.created_at.desc())
+        .limit(1)
+    )
+    meta = asset.analysis or {}
+    status = "none"
+    if job is not None:
+        status = {
+            "queued": "running",
+            "running": "running",
+            "succeeded": "ready",
+            "failed": "failed",
+        }.get(job.status, "none")
+    return {
+        "status": status,
+        "calibration": cal,
+        "tracks": list(tracks),
+        "chunk_ms": meta.get("chunk_ms"),
+        "chunks": meta.get("chunks"),
+        "fps": meta.get("fps"),
+        "detector": meta.get("detector"),
+        "elapsed_s": meta.get("elapsed_s"),
+        "error": job.error if job is not None and job.status == "failed" else None,
+    }
+
+
+async def read_track_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
+    asset = await get_asset(ctx, asset_id)
+    meta = asset.analysis or {}
+    if not isinstance(meta.get("chunks"), int) or not 0 <= n < int(meta["chunks"]):
+        raise ProblemError(404, "not-found", "No such chunk")
+    try:
+        data, _ = await ctx.storage.get(
+            ctx.settings.s3_bucket_artifacts, f"{media_prefix(asset)}analysis/chunk_{n:05d}.bin"
+        )
+    except ObjectNotFoundError as exc:
+        raise ProblemError(404, "not-found", "No such chunk") from exc
+    return data
+
+
+async def calibrate_manually(
+    ctx: Ctx, asset_id: uuid.UUID, points: list[dict[str, list[float]]]
+) -> ProcessingJob:
+    """Store clicked correspondences and re-run the analysis with them (source user_correction)."""
+    asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    if asset.status != VideoStatus.READY or not asset.proxy_key:
+        raise ProblemError(409, "video-not-ready", "The video is still being processed")
+    match = await ctx.db.get(Match, asset.match_id)
+    assert match is not None
+    await audit.record(
+        ctx,
+        "video.calibrated_manually",
+        target_type="video",
+        target_id=asset.id,
+        data={"points": len(points)},
+    )
+    return await start_analysis(ctx, asset, match, points)

@@ -15,8 +15,10 @@ from handball_api.core.errors import ProblemError
 from handball_api.models import Annotation, Clip, Opponent, Playlist, ProcessingJob
 from handball_api.routers.deps import OrgDep
 from handball_api.schemas.matches import (
+    AnalysisOut,
     AnnotationCreate,
     AnnotationOut,
+    CalibrationIn,
     ClipCreate,
     ClipOut,
     CommentCreate,
@@ -166,6 +168,34 @@ async def media_file(video_id: uuid.UUID, path: str, scope: OrgDep) -> Response:
     data, ctype = await videos.read_media(scope.ctx, video_id, path)
     cache = "private, max-age=60" if path.endswith(".m3u8") else "private, max-age=86400, immutable"
     return Response(data, media_type=ctype, headers={"cache-control": cache})
+
+
+@router.get("/videos/{video_id}/analysis", response_model=AnalysisOut, tags=["analysis"])
+async def get_analysis(video_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
+    return await videos.analysis(scope.ctx, video_id)
+
+
+@router.get(
+    "/videos/{video_id}/tracks/{n}",
+    tags=["analysis"],
+    response_class=Response,
+    responses={200: {"content": {"application/octet-stream": {}}}},
+)
+async def track_chunk(video_id: uuid.UUID, n: int, scope: OrgDep) -> Response:
+    """30 s of positions as little-endian float32 rows [t_ms, track, x, y]."""
+    data = await videos.read_track_chunk(scope.ctx, video_id, n)
+    return Response(
+        data,
+        media_type="application/octet-stream",
+        headers={"cache-control": "private, max-age=3600"},
+    )
+
+
+@router.post("/videos/{video_id}/calibration", status_code=202, tags=["analysis"])
+async def calibrate(video_id: uuid.UUID, data: CalibrationIn, scope: OrgDep) -> dict[str, str]:
+    points = [{"image": list(p.image), "court": list(p.court)} for p in data.points]
+    job = await videos.calibrate_manually(scope.ctx, video_id, points)
+    return {"job_id": str(job.id)}
 
 
 # ---- live job progress (SSE) ---------------------------------------------------------------

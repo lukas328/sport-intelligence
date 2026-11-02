@@ -1,0 +1,392 @@
+"""Synthetic handball footage with exact ground truth (source: "synthetic").
+
+Renders a fixed, elevated sideline camera (perspective, like a club camera on the balcony): wooden
+floor, court lines from the shared court geometry, 2 x 7 players in kit colours with numbers,
+2 referees and a ball. Players move in alternating attack and defence phases with switches of side,
+crossings and occlusions, so calibration, detection, tracking and team assignment can be measured
+without real footage. It is a test instrument, never shown to customers as real analysis.
+"""
+
+from __future__ import annotations
+
+import math
+import subprocess
+from collections.abc import Iterator
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import cv2
+import numpy as np
+from numpy.typing import NDArray
+
+from handball_court import COURT
+from handball_vision import geometry
+
+ROLES_ATTACK = {  # attacking positions relative to the attacked goal at x = 40 (metres)
+    "LA": (38.5, 1.5),
+    "RL": (30.5, 5.5),
+    "RM": (29.0, 10.0),
+    "RR": (30.5, 14.5),
+    "RA": (38.5, 18.5),
+    "KM": (34.2, 9.0),
+}
+ROLES_DEFENCE = {  # 6-0 on the 6 m line of the defended goal at x = 40
+    "D1": (39.0, 3.5),
+    "D2": (36.0, 6.5),
+    "D3": (34.6, 8.8),
+    "D4": (34.6, 11.2),
+    "D5": (36.0, 13.5),
+    "D6": (39.0, 16.5),
+}
+
+
+@dataclass(frozen=True)
+class Kits:
+    home: tuple[int, int, int] = (200, 40, 40)  # BGR
+    home_gk: tuple[int, int, int] = (40, 200, 230)
+    away: tuple[int, int, int] = (230, 230, 235)
+    away_gk: tuple[int, int, int] = (60, 170, 60)
+    referee: tuple[int, int, int] = (25, 25, 25)
+
+
+@dataclass(frozen=True)
+class SyntheticConfig:
+    seconds: float = 30.0
+    fps: int = 25
+    size: tuple[int, int] = (1280, 720)
+    camera: tuple[float, float, float] = (20.0, -12.0, 10.0)
+    target: tuple[float, float, float] = (20.0, 8.0, 0.0)
+    focal_px: float = 470.0
+    phase_s: float = 12.0
+    seed: int = 7
+    kits: Kits = field(default_factory=Kits)
+    noise: float = 3.0  # pixel noise sigma
+
+
+@dataclass(frozen=True)
+class GtObject:
+    object_id: int
+    label: str  # home, home_gk, away, away_gk, referee, ball
+    number: int
+    x: float
+    y: float
+    bbox: tuple[float, float, float, float]  # x1, y1, x2, y2 in pixels
+
+
+@dataclass(frozen=True)
+class GtFrame:
+    index: int
+    t_ms: int
+    objects: list[GtObject]
+
+
+@dataclass
+class _Agent:
+    object_id: int
+    label: str
+    number: int
+    pos: NDArray[np.float64]
+    phase: float
+    speed: float
+
+
+class SyntheticMatch:
+    def __init__(self, cfg: SyntheticConfig | None = None) -> None:
+        self.cfg = cfg or SyntheticConfig()
+        self.p = geometry.look_at_camera(
+            self.cfg.camera, self.cfg.target, self.cfg.focal_px, self.cfg.size
+        )
+        self.h = geometry.ground_homography(self.p)  # court -> image
+        rng = np.random.default_rng(self.cfg.seed)
+        self.rng = rng
+        self.agents: list[_Agent] = []
+        oid = 1
+        for team in ("home", "away"):
+            numbers = rng.choice(np.arange(2, 40), size=6, replace=False)
+            for n in numbers:
+                self.agents.append(
+                    _Agent(
+                        oid,
+                        team,
+                        int(n),
+                        rng.uniform([10, 3], [30, 17]),
+                        rng.uniform(0, 2 * math.pi),
+                        rng.uniform(0.6, 1.2),
+                    )
+                )
+                oid += 1
+            self.agents.append(
+                _Agent(
+                    oid, f"{team}_gk", 1 if team == "home" else 12, np.array([1.5, 10.0]), 0.0, 0.5
+                )
+            )
+            oid += 1
+        for _ in range(2):
+            self.agents.append(
+                _Agent(oid, "referee", 0, rng.uniform([12, 1], [28, 19]), rng.uniform(0, 6), 0.5)
+            )
+            oid += 1
+        self._background = self._render_background()
+        w, h = self.cfg.size
+        # a few precomputed noise fields, cycled per frame (sensor noise without per-frame cost)
+        self._noise = (
+            [rng.normal(0, self.cfg.noise, (h, w, 3)).astype(np.int16) for _ in range(6)]
+            if self.cfg.noise
+            else []
+        )
+
+    # ---- motion --------------------------------------------------------------------------
+
+    def _targets(self, t: float) -> dict[int, NDArray[np.float64]]:
+        phase = int(t // self.cfg.phase_s)
+        home_attacks = phase % 2 == 0
+        # attacking direction alternates: in even phases the home team attacks the right goal
+        attack_right = home_attacks
+        attack, defend = ("home", "away") if home_attacks else ("away", "home")
+        out: dict[int, NDArray[np.float64]] = {}
+        sway = math.sin(t * 0.9) * 2.0  # ball side moves left and right
+        for team, roles in ((attack, ROLES_ATTACK), (defend, ROLES_DEFENCE)):
+            players = [a for a in self.agents if a.label == team]
+            for a, (_, (x, y)) in zip(players, roles.items(), strict=True):
+                dx = 1.4 * math.sin(t * 1.3 * a.speed + a.phase)
+                dy = 1.2 * math.cos(t * 1.1 * a.speed + a.phase) + (
+                    sway * 0.6 if team == defend else sway * 0.3
+                )
+                px, py = x + dx, float(np.clip(y + dy, 0.6, 19.4))
+                if not attack_right:  # mirror to the left goal
+                    px, py = 40 - px, 20 - py
+                out[a.object_id] = np.array([px, py])
+        for a in self.agents:
+            if a.label.endswith("_gk"):
+                team = a.label[:-3]
+                defending_right = (team == defend) == attack_right
+                gx = 38.6 if defending_right else 1.4
+                if team == attack:  # the attacking team's goalkeeper waits deep in his own half
+                    gx = 1.6 if attack_right else 38.4
+                out[a.object_id] = np.array([gx, 10 + 1.5 * math.sin(t * 0.7 + a.object_id)])
+            elif a.label == "referee":
+                side = 1 if a.object_id % 2 else -1
+                out[a.object_id] = np.array(
+                    [20 + side * 9 + 3 * math.sin(t * 0.4), 0.8 if side > 0 else 19.2]
+                )
+        return out
+
+    def _step(self, t: float, dt: float) -> None:
+        targets = self._targets(t)
+        for a in self.agents:
+            d = targets[a.object_id] - a.pos
+            dist = float(np.linalg.norm(d))
+            vmax = 6.5 * dt  # m per frame (sprint ~6.5 m/s)
+            a.pos = a.pos + (d if dist <= vmax else d / dist * vmax)
+
+    # ---- rendering -----------------------------------------------------------------------
+
+    def _render_background(self) -> NDArray[np.uint8]:
+        w, h = self.cfg.size
+        img = np.zeros((h, w, 3), np.uint8)
+        img[:] = (40, 45, 55)  # hall walls
+        floor = geometry.apply(self.h, np.array([[-6, -8], [46, -8], [46, 24], [-6, 24]]))
+        cv2.fillPoly(img, [floor.astype(np.int32)], (70, 135, 185))  # wooden floor (BGR)
+        # stripes of the parquet
+        for x in np.arange(-4, 44, 0.5):
+            seg = geometry.apply(self.h, np.array([[x, -3], [x, 23]])).astype(np.int32)
+            shade = 6 if int(x * 2) % 2 else -6
+            cv2.line(
+                img,
+                tuple(seg[0]),
+                tuple(seg[1]),
+                (70 + shade, 135 + shade, 185 + shade),
+                1,
+                cv2.LINE_AA,
+            )
+        for name in ("goal_area_left", "goal_area_right"):
+            area = geometry.apply(self.h, np.array(COURT.lines[name]))
+            cv2.fillPoly(img, [area.astype(np.int32)], (150, 110, 60))
+        for name, pts in COURT.lines.items():
+            if name.startswith("substitution"):
+                continue
+            img_pts = geometry.apply(self.h, np.array(pts)).astype(np.int32)
+            thick = 4 if name.startswith("goal_left") or name.startswith("goal_right") else 2
+            color = (
+                (40, 40, 220)
+                if name.startswith("goal_") and not name.startswith("goal_area")
+                else (245, 245, 245)
+            )
+            if name in COURT.dashed_lines:
+                for i in range(0, len(img_pts) - 1, 2):
+                    cv2.line(
+                        img, tuple(img_pts[i]), tuple(img_pts[i + 1]), color, thick, cv2.LINE_AA
+                    )
+            else:
+                cv2.polylines(img, [img_pts], False, color, thick, cv2.LINE_AA)
+        return img
+
+    def _bbox(self, x: float, y: float, height_m: float) -> tuple[float, float, float, float]:
+        foot, head = geometry.project(self.p, np.array([[x, y, 0.0], [x, y, height_m]]))
+        hpx = foot[1] - head[1]
+        wpx = hpx * 0.32
+        return (foot[0] - wpx / 2, head[1], foot[0] + wpx / 2, foot[1])
+
+    def frames(self) -> Iterator[tuple[NDArray[np.uint8], GtFrame]]:
+        cfg = self.cfg
+        n = round(cfg.seconds * cfg.fps)
+        dt = 1 / cfg.fps
+        kits = cfg.kits
+        colors = {
+            "home": kits.home,
+            "home_gk": kits.home_gk,
+            "away": kits.away,
+            "away_gk": kits.away_gk,
+            "referee": kits.referee,
+        }
+        for i in range(n):
+            t = i * dt
+            self._step(t, dt)
+            img = self._background.copy()
+            objects: list[GtObject] = []
+            # painter's algorithm: far players first
+            for a in sorted(self.agents, key=lambda a: -a.pos[1]):
+                x, y = float(a.pos[0]), float(a.pos[1])
+                x1, y1, x2, y2 = self._bbox(x, y, 1.85 if a.label != "referee" else 1.8)
+                objects.append(GtObject(a.object_id, a.label, a.number, x, y, (x1, y1, x2, y2)))
+                body_top = y1 + (y2 - y1) * 0.16
+                skin, shorts = (
+                    (150, 180, 220),
+                    (30, 30, 30) if a.label != "away" else (220, 220, 220),
+                )
+                cx, w = (x1 + x2) / 2, x2 - x1
+                head_r = max(2, int(w * 0.32))
+                cv2.circle(img, (int(cx), int(y1 + head_r)), head_r, skin, -1, cv2.LINE_AA)
+                cv2.rectangle(
+                    img,
+                    (int(x1), int(body_top)),
+                    (int(x2), int(y1 + (y2 - y1) * 0.55)),
+                    colors[a.label],
+                    -1,
+                )
+                cv2.rectangle(
+                    img,
+                    (int(x1 + w * 0.08), int(y1 + (y2 - y1) * 0.55)),
+                    (int(x2 - w * 0.08), int(y1 + (y2 - y1) * 0.7)),
+                    shorts,
+                    -1,
+                )
+                stride = math.sin(t * 9 + a.object_id) * w * 0.18
+                for leg in (-1, 1):
+                    lx = cx + leg * w * 0.18 + leg * stride
+                    cv2.line(
+                        img,
+                        (int(cx + leg * w * 0.15), int(y1 + (y2 - y1) * 0.7)),
+                        (int(lx), int(y2)),
+                        skin,
+                        max(1, int(w * 0.18)),
+                        cv2.LINE_AA,
+                    )
+                if a.number and w > 10:
+                    text_color = (255, 255, 255) if sum(colors[a.label]) < 400 else (20, 20, 20)
+                    cv2.putText(
+                        img,
+                        str(a.number),
+                        (int(cx - w * 0.3), int(y1 + (y2 - y1) * 0.45)),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        max(0.25, w / 40),
+                        text_color,
+                        1,
+                        cv2.LINE_AA,
+                    )
+            # ball near the court centre of the attack
+            bx, by = 31.0 + 3 * math.sin(t * 1.7), 10 + 6 * math.sin(t * 0.9)
+            if int(t // cfg.phase_s) % 2:
+                bx = 40 - bx
+            ball = geometry.project(self.p, np.array([[bx, by, 1.2 + 0.4 * math.sin(t * 5)]]))[0]
+            cv2.circle(img, (int(ball[0]), int(ball[1])), 3, (40, 200, 240), -1, cv2.LINE_AA)
+            if self._noise:
+                img = np.clip(
+                    img.astype(np.int16) + self._noise[i % len(self._noise)], 0, 255
+                ).astype(np.uint8)
+            yield img, GtFrame(i, round(t * 1000), objects)
+
+    def write(self, path: Path, ffmpeg: str = "ffmpeg") -> list[GtFrame]:
+        w, h = self.cfg.size
+        proc = subprocess.Popen(  # noqa: S603
+            [
+                ffmpeg,
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "bgr24",
+                "-s",
+                f"{w}x{h}",
+                "-r",
+                str(self.cfg.fps),
+                "-i",
+                "pipe:0",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "20",
+                "-pix_fmt",
+                "yuv420p",
+                str(path),
+            ],
+            stdin=subprocess.PIPE,
+        )
+        assert proc.stdin is not None
+        truth = []
+        for img, gt in self.frames():
+            proc.stdin.write(img.tobytes())
+            truth.append(gt)
+        proc.stdin.close()
+        if proc.wait() != 0:
+            raise RuntimeError("ffmpeg failed to encode synthetic video")
+        return truth
+
+
+def main() -> None:
+    import argparse
+    import json
+
+    ap = argparse.ArgumentParser(description="Render a synthetic handball clip with ground truth")
+    ap.add_argument("out", type=Path)
+    ap.add_argument("--seconds", type=float, default=30)
+    ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--truth", type=Path, help="write ground truth JSON here")
+    args = ap.parse_args()
+    match = SyntheticMatch(SyntheticConfig(seconds=args.seconds, seed=args.seed))
+    truth = match.write(args.out)
+    if args.truth:
+        args.truth.write_text(
+            json.dumps(
+                {
+                    "source": "synthetic",
+                    "homography": match.h.tolist(),
+                    "fps": match.cfg.fps,
+                    "frames": [
+                        {
+                            "t_ms": f.t_ms,
+                            "objects": [
+                                {
+                                    "id": o.object_id,
+                                    "label": o.label,
+                                    "number": o.number,
+                                    "x": round(o.x, 3),
+                                    "y": round(o.y, 3),
+                                }
+                                for o in f.objects
+                            ],
+                        }
+                        for f in truth
+                    ],
+                }
+            )
+        )
+
+
+if __name__ == "__main__":
+    main()

@@ -10,6 +10,8 @@ WORKDIR /app
 FROM base AS build
 COPY pyproject.toml uv.lock ./
 COPY packages/court packages/court
+COPY packages/vision packages/vision
+COPY packages/jobkit packages/jobkit
 COPY apps/api/pyproject.toml apps/api/pyproject.toml
 COPY apps/worker/pyproject.toml apps/worker/pyproject.toml
 COPY apps/gpu-worker/pyproject.toml apps/gpu-worker/pyproject.toml

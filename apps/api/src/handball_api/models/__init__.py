@@ -4,6 +4,7 @@ from handball_api.models.audit import AuditLog
 from handball_api.models.identity import AuthSession, AuthToken, OAuthIdentity, User
 from handball_api.models.matches import (
     Annotation,
+    CameraCalibration,
     Clip,
     Comment,
     Match,
@@ -11,6 +12,7 @@ from handball_api.models.matches import (
     Playlist,
     PlaylistItem,
     ProcessingJob,
+    Track,
     VideoAsset,
 )
 from handball_api.models.roster import Consent, Player, RosterEntry
@@ -28,6 +30,7 @@ __all__ = [
     "AuditLog",
     "AuthSession",
     "AuthToken",
+    "CameraCalibration",
     "Clip",
     "Comment",
     "Consent",
@@ -45,6 +48,7 @@ __all__ = [
     "RosterEntry",
     "Season",
     "Team",
+    "Track",
     "User",
     "VideoAsset",
 ]

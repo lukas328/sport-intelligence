@@ -26,6 +26,7 @@ class Court:
     free_throw_radius: float
     lines: dict[str, list[Point]]
     keypoints: dict[str, Point]
+    dashed_lines: tuple[str, ...] = ()
 
     @property
     def center(self) -> Point:
@@ -52,6 +53,7 @@ def load_court() -> Court:
         free_throw_radius=float(d["free_throw_radius"]),
         lines={k: [(float(x), float(y)) for x, y in v] for k, v in d["lines"].items()},
         keypoints={k: (float(v[0]), float(v[1])) for k, v in d["keypoints"].items()},
+        dashed_lines=tuple(d.get("dashed_lines", ())),
     )
 
 

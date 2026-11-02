@@ -70,6 +70,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               {hs}:{as}
             </p>
           )}
+          {match.is_demo && (
+            <span className="rounded-full border border-accent px-3 py-1 text-sm font-medium" data-testid="demo-badge">
+              {t("matches.demo")}
+            </span>
+          )}
           <span className="rounded-full bg-surface px-3 py-1 text-sm">{t(`matches.status_${match.status}`)}</span>
         </div>
       </header>

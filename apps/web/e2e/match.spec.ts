@@ -50,6 +50,10 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   // processing runs in the worker; progress arrives via SSE
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByText("Videoqualität:")).toBeVisible();
+  // stages 2 to 5 run in the GPU worker (CPU locally): calibration, detection, tracking, teams
+  await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByTestId("analysis-panel")).toContainText("Personen verfolgt");
+  await expect(page.getByTestId("analysis-panel")).toContainText("Kalibrierung: automatisch");
 
   // play: the HLS stream loads and time advances
   const video = page.getByTestId("video");

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { DrawLayer } from "@/components/video/draw-layer";
+import { MiniCourt } from "@/components/video/mini-court";
 import { VideoPlayer, type Marker, type PlayerHandle } from "@/components/video/player";
 import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
@@ -46,6 +47,27 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
     queryKey: ["clips", match.id],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/clips", { params: { path: m } })).data ?? [],
   });
+  const analysis = useQuery({
+    queryKey: ["analysis", video.id],
+    refetchInterval: (q) => (q.state.data?.status === "running" ? 10_000 : false),
+    queryFn: async () =>
+      (await api.GET("/v1/orgs/{org_id}/videos/{video_id}/analysis", { params: { path: { org_id: orgId, video_id: video.id } } }))
+        .data ?? null,
+  });
+  const kitColours = useMemo(
+    () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: "#111827" }),
+    [match],
+  );
+  const getTime = useCallback(() => player.current?.time() ?? 0, []);
+  // the clock in the comment box needs only a few updates per second, not every video frame
+  const lastTick = useRef(0);
+  const onTime = useCallback((ms: number) => {
+    const now = performance.now();
+    if (now - lastTick.current > 250) {
+      lastTick.current = now;
+      setNow(ms);
+    }
+  }, []);
   const annotations = useQuery({
     queryKey: ["annotations", match.id],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/annotations", { params: { path: m } })).data ?? [],
@@ -144,11 +166,12 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
           fps={video.fps}
           markers={markers}
           annotations={drawing ? [] : (annotations.data ?? []).map((a) => ({ ...a, shapes: a.shapes as Shape[] }))}
-          onTime={setNow}
+          onTime={onTime}
           onKey={onKey}
           overlay={drawing ? <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} /> : undefined}
         />
         <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
+        <AnalysisPanel analysis={analysis.data ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} />
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
         {notice && (
           <Alert kind="success" className="py-2">
@@ -321,5 +344,65 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
         )}
       </Card>
     </div>
+  );
+}
+
+
+type Analysis = Schemas["AnalysisOut"];
+
+function AnalysisPanel({
+  analysis,
+  orgId,
+  videoId,
+  colours,
+  getTime,
+}: {
+  analysis: Analysis | null;
+  orgId: string;
+  videoId: string;
+  colours: Record<string, string>;
+  getTime: () => number;
+}) {
+  const t = useTranslations("analysis");
+  if (!analysis || analysis.status === "none") return null;
+  return (
+    <Card className="space-y-3 p-3" data-testid="analysis-panel">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-semibold">{t("title")}</h2>
+        {analysis.detector === "heuristic" && (
+          <span className="rounded-full bg-surface px-2 py-0.5 text-xs" title={t("heuristicHint")}>
+            {t("heuristic")}
+          </span>
+        )}
+      </div>
+      {analysis.status === "running" && <p className="text-sm text-muted">{t("running")}</p>}
+      {analysis.status === "failed" && <Alert>{t("failed", { error: analysis.error ?? "" })}</Alert>}
+      {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
+        <MiniCourt
+          baseUrl={`/v1/orgs/${orgId}/videos/${videoId}/tracks`}
+          chunkMs={analysis.chunk_ms}
+          chunks={analysis.chunks}
+          tracks={analysis.tracks}
+          colours={colours}
+          getTime={getTime}
+          label={t("title")}
+        />
+      )}
+      <div className="flex flex-wrap gap-3 text-xs text-muted">
+        {(["home", "away", "referee"] as const).map((k) => (
+          <span key={k} className="flex items-center gap-1">
+            <span aria-hidden className="inline-block size-3 rounded-full border border-neutral-700" style={{ background: colours[k] }} />
+            {t(k)}
+          </span>
+        ))}
+        {analysis.calibration && (
+          <span>
+            {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
+            {t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
+          </span>
+        )}
+        {analysis.tracks.length > 0 && <span>{t("tracks", { count: analysis.tracks.length })}</span>}
+      </div>
+    </Card>
   );
 }

@@ -394,3 +394,108 @@ async def test_clips_playlists_comments_annotations(
     assert (await coach.delete(f"{base}/items/{detail['items'][0]['id']}")).status_code == 204
     assert (await coach.delete(f"/v1/orgs/{org}/clips/{clip['id']}")).status_code == 204
     assert (await coach.delete(base)).status_code == 204
+
+
+async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids, kit_own="#2828c8")
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    ingest_id = jobs.jobs[-1][2]
+    assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()["status"] == "none"
+    # manual calibration needs a processed video
+    pts = [{"image": [10 * i, 20 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
+    assert (
+        await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts})
+    ).status_code == 409
+    prefix = jobs.jobs[-1][3]["prefix"]
+    await api.http.post(
+        f"/internal/jobs/{ingest_id}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {"proxy_key": prefix + "proxy.mp4", "hls_prefix": prefix + "hls/"},
+        },
+    )
+    queue, func, analysis_id, payload = jobs.jobs[-1]
+    assert (queue, func) == ("gpu", "handball_gpu_worker.analysis.run_analysis")
+    assert payload["kits"]["home"] == "#2828c8"
+    assert payload["calibration_points"] is None
+    assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()["status"] == "running"
+    storage: MemoryStorage = api.app.state.storage
+    chunk = b"\x00" * 16
+    await storage.put(
+        "artifacts", prefix + "analysis/chunk_00000.bin", chunk, "application/octet-stream"
+    )
+    result = {
+        "calibration": {
+            "homography": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            "image_size": [1280, 720],
+            "confidence": 0.9,
+            "reprojection_px": 0.4,
+            "source": "heuristic",
+        },
+        "tracks": [
+            {
+                "track_id": 3,
+                "first_ms": 0,
+                "last_ms": 9000,
+                "points": 200,
+                "observed_share": 0.8,
+                "team": "home",
+                "team_confidence": 0.7,
+            },
+            {
+                "track_id": 9,
+                "first_ms": 400,
+                "last_ms": 9000,
+                "points": 180,
+                "observed_share": 0.6,
+                "team": "referee",
+                "team_confidence": 0.5,
+            },
+        ],
+        "chunks": 1,
+        "chunk_ms": 30000,
+        "fps": 25.0,
+        "frames": 250,
+        "detector": "heuristic",
+        "timings_s": {"detection": 1.0},
+        "elapsed_s": 5.5,
+    }
+    await api.http.post(
+        f"/internal/jobs/{analysis_id}",
+        headers=token,
+        json={"status": "succeeded", "progress": 1, "result": result},
+    )
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert a["status"] == "ready"
+    assert a["calibration"]["source"] == "heuristic"
+    assert [t["team"] for t in a["tracks"]] == ["home", "referee"]
+    assert a["tracks"][0]["source"] == "heuristic"
+    assert (a["chunks"], a["chunk_ms"], a["detector"]) == (1, 30000, "heuristic")
+    r = await api.get(f"/v1/orgs/{org}/videos/{vid}/tracks/0")
+    assert r.content == chunk and r.headers["content-type"] == "application/octet-stream"
+    assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/tracks/1")).status_code == 404
+    # manual calibration re-runs the analysis with the points
+    bad = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts[:3]})
+    assert bad.status_code == 422
+    assert (
+        await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts})
+    ).status_code == 202
+    assert jobs.jobs[-1][3]["calibration_points"][0]["court"] == [0.0, 0.0]
+    # a failed analysis keeps the video playable
+    await api.http.post(
+        f"/internal/jobs/{jobs.jobs[-1][2]}",
+        headers=token,
+        json={"status": "failed", "progress": 0.2, "error": "calibration: degenerate"},
+    )
+    match = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).json()
+    assert match["videos"][0]["status"] == "ready"
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert (a["status"], a["error"]) == ("failed", "calibration: degenerate")
+    assert len(a["tracks"]) == 2  # previous results stay until a new run succeeds

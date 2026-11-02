@@ -49,7 +49,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 - Ingest stage (ffprobe, checksum, HLS 720p/1080p, proxy, thumbnails), heuristic quality check with tips
 - HLS player (hls.js + native Safari), timeline, playlists, comments, drawing tool, keyboard shortcuts; SSE job progress
 - Acceptance: 2 GB upload with abort/resume; playback Chrome, Safari, iPhone (needs real device or cloud device lab, Q-QA-1)
-### M3 Pipeline skeleton, calibration, detection, tracking
+### M3 Pipeline skeleton, calibration, detection, tracking ✅ (see docs/progress/M3.md)
 - ProcessingJob state, orchestrator over PipelineGraph, checkpoints/caching, chunked processing
 - Streaming decode (PyAV/decord, NVDEC in CUDA image), batching, ONNX Runtime/TensorRT FP16 from day one
 - Stages 0 to 5; Dockerfile.cuda; `ml/eval/run.py` + `bench.py`; golden-set manifest; mini court in player (Arrow chunks)

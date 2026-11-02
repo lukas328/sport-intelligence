@@ -471,5 +471,24 @@
     "note": "Note",
     "nowPlaying": "Clip {n} sur {total}",
     "noItems": "Cette playlist n'a pas encore de clips. Ajoutez-les dans un match avec l'outil clip."
+  },
+  "analysis": {
+    "title": "Positions",
+    "running": "L'analyse est en cours. Les positions s'afficheront ici ensuite.",
+    "failed": "L'analyse a échoué : {error}",
+    "none": "Pas encore d'analyse.",
+    "heuristic": "estimé",
+    "heuristicHint": "Détection heuristique sans modèle entraîné. Les positions peuvent être imprécises.",
+    "calibration": "Calibration",
+    "calibration_heuristic": "automatique",
+    "calibration_user_correction": "manuelle",
+    "tracks": "{count} personnes suivies",
+    "home": "Notre équipe",
+    "away": "Adversaire",
+    "referee": "Arbitre",
+    "legend": "Légende",
+    "quality": "Qualité des données",
+    "confidence": "Confiance {value} %",
+    "duration": "Durée d'analyse {seconds} s"
   }
 }

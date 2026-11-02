@@ -1070,6 +1070,40 @@ export interface paths {
         patch: operations["update_video_v1_orgs__org_id__videos__video_id__patch"];
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/analysis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Analysis */
+        get: operations["get_analysis_v1_orgs__org_id__videos__video_id__analysis_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Calibrate */
+        post: operations["calibrate_v1_orgs__org_id__videos__video_id__calibration_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/videos/{video_id}/complete": {
         parameters: {
             query?: never;
@@ -1139,6 +1173,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/tracks/{n}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Track Chunk
+         * @description 30 s of positions as little-endian float32 rows [t_ms, track, x, y].
+         */
+        get: operations["track_chunk_v1_orgs__org_id__videos__video_id__tracks__n__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1150,6 +1204,29 @@ export interface components {
              * Format: uuid
              */
             organization_id: string;
+        };
+        /** AnalysisOut */
+        AnalysisOut: {
+            calibration: components["schemas"]["CalibrationOut"] | null;
+            /** Chunk Ms */
+            chunk_ms: number | null;
+            /** Chunks */
+            chunks: number | null;
+            /** Detector */
+            detector: string | null;
+            /** Elapsed S */
+            elapsed_s: number | null;
+            /** Error */
+            error: string | null;
+            /** Fps */
+            fps: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "none" | "running" | "ready" | "failed";
+            /** Tracks */
+            tracks: components["schemas"]["TrackOut"][];
         };
         /** AnnotationCreate */
         AnnotationCreate: {
@@ -1193,6 +1270,42 @@ export interface components {
         Body_upload_logo_v1_orgs__org_id__logo_put: {
             /** File */
             file: string;
+        };
+        /** CalibrationIn */
+        CalibrationIn: {
+            /** Points */
+            points: components["schemas"]["CalibrationPoint"][];
+        };
+        /** CalibrationOut */
+        CalibrationOut: {
+            /** Confidence */
+            confidence: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Homography */
+            homography: number[][];
+            /** Image Size */
+            image_size: number[];
+            /** Reprojection Px */
+            reprojection_px: number;
+            /** Source */
+            source: string;
+        };
+        /** CalibrationPoint */
+        CalibrationPoint: {
+            /** Court */
+            court: [
+                number,
+                number
+            ];
+            /** Image */
+            image: [
+                number,
+                number
+            ];
         };
         /** ClipCreate */
         ClipCreate: {
@@ -1506,6 +1619,12 @@ export interface components {
         MatchCreate: {
             /** Competition */
             competition?: string | null;
+            /**
+             * Is Demo
+             * @description marks demo or synthetic data, shown as Demo in the UI
+             * @default false
+             */
+            is_demo?: boolean;
             /**
              * Is Home
              * @default true
@@ -2277,6 +2396,25 @@ export interface components {
             otpauth_uri: string;
             /** Secret */
             secret: string;
+        };
+        /** TrackOut */
+        TrackOut: {
+            /** First Ms */
+            first_ms: number;
+            /** Last Ms */
+            last_ms: number;
+            /** Observed Share */
+            observed_share: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Source */
+            source: string;
+            /** Team */
+            team: string | null;
+            /** Team Confidence */
+            team_confidence: number | null;
+            /** Track No */
+            track_no: number;
         };
         /** UploadComplete */
         UploadComplete: {
@@ -5032,6 +5170,76 @@ export interface operations {
             };
         };
     };
+    get_analysis_v1_orgs__org_id__videos__video_id__analysis_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    calibrate_v1_orgs__org_id__videos__video_id__calibration_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalibrationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     complete_upload_v1_orgs__org_id__videos__video_id__complete_post: {
         parameters: {
             query?: never;
@@ -5191,6 +5399,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    track_chunk_v1_orgs__org_id__videos__video_id__tracks__n__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                n: number;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": unknown;
                 };
             };
             /** @description Validation Error */

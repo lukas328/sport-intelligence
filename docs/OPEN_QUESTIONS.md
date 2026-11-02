@@ -54,6 +54,10 @@ Each question has the **assumption** I work with until it is answered. Status: o
 - **Q-ML-2 Licences** of TeamTrack, UNIRI-HBD and the Roboflow set need a legal check for commercial
   training (recorded in `ml/datasets/LICENSES.md`).
 
+- **Q-ML-3 Model and dataset access**: from this build environment Hugging Face, PyTorch downloads, Kaggle,
+  Zenodo and Roboflow are blocked. *Assumption:* heuristic baselines now (ADR 012); trained models are added
+  in an environment with access, through the ONNX detector and the model registry.
+
 ## Legal and privacy
 - **Q-LEGAL-1** Privacy policy, DPA (AVV) and terms need legal review (placeholders from M8/M9).
 - **Q-LEGAL-2 Youth consent workflow**: do parents get their own account, or does the club upload signed

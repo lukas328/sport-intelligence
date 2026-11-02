@@ -12,6 +12,7 @@ dependencies = [
   "httpx>=0.28",
   "numpy>=2.1",
   "handball-court",
+  "handball-jobkit",
 ]
 
 [project.scripts]

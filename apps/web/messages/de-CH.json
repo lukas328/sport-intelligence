@@ -471,5 +471,24 @@
     "note": "Notiz",
     "nowPlaying": "Clip {n} von {total}",
     "noItems": "Diese Playlist hat noch keine Clips. Füge sie im Spiel über die Clip-Funktion hinzu."
+  },
+  "analysis": {
+    "title": "Positionen",
+    "running": "Die Analyse läuft. Positionen erscheinen danach hier.",
+    "failed": "Die Analyse ist fehlgeschlagen: {error}",
+    "none": "Noch keine Analyse.",
+    "heuristic": "geschätzt",
+    "heuristicHint": "Heuristische Erkennung ohne trainiertes Modell. Positionen können ungenau sein.",
+    "calibration": "Kalibrierung",
+    "calibration_heuristic": "automatisch",
+    "calibration_user_correction": "manuell",
+    "tracks": "{count} Personen verfolgt",
+    "home": "Eigenes Team",
+    "away": "Gegner",
+    "referee": "Schiedsrichter",
+    "legend": "Legende",
+    "quality": "Datenqualität",
+    "confidence": "Konfidenz {value} %",
+    "duration": "Analysedauer {seconds} s"
   }
 }

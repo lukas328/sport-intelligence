@@ -100,6 +100,8 @@ class VideoAsset(Base, EntityMixin, TenantMixin):
     poster_key: Mapped[str | None] = mapped_column(String(400))
     time_offset_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     quality_report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    # result metadata of the latest analysis run (chunks, fps, detector, timings, versions)
+    analysis: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     error: Mapped[str | None] = mapped_column(Text)
 
 
@@ -200,3 +202,45 @@ class Annotation(Base, EntityMixin, TenantMixin):
     t_ms: Mapped[int] = mapped_column(Integer, nullable=False)
     duration_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=3000)
     shapes: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
+
+
+class CameraCalibration(Base, EntityMixin, TenantMixin):
+    """Image <-> court homography of a video (BRIEF 5 "Calibration"). Latest row wins."""
+
+    __tablename__ = "calibrations"
+
+    video_asset_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("video_assets.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    homography: Mapped[list[list[float]]] = mapped_column(JSONB, nullable=False)
+    image_size: Mapped[list[int]] = mapped_column(JSONB, nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, nullable=False)
+    reprojection_px: Mapped[float] = mapped_column(Float, nullable=False)
+    source: Mapped[str] = mapped_column(String(20), nullable=False)
+    points: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB)  # manual correspondences
+    pipeline_version: Mapped[str] = mapped_column(String(20), nullable=False)
+
+
+class Track(Base, EntityMixin, TenantMixin):
+    """One tracked person in a video (summary; frames live in Parquet on object storage)."""
+
+    __tablename__ = "tracks"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    video_asset_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("video_assets.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    track_no: Mapped[int] = mapped_column(Integer, nullable=False)
+    team: Mapped[str | None] = mapped_column(String(20))  # home, home_gk, away, away_gk, referee
+    team_confidence: Mapped[float | None] = mapped_column(Float)
+    first_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    last_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    observed_share: Mapped[float] = mapped_column(Float, nullable=False)
+    player_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("players.id", ondelete="SET NULL")
+    )
+    player_confidence: Mapped[float | None] = mapped_column(Float)
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="heuristic")
+    pipeline_version: Mapped[str] = mapped_column(String(20), nullable=False)

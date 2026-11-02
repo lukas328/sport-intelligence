@@ -19,12 +19,11 @@ from urllib.parse import urljoin, urlsplit
 import boto3
 import httpx
 import structlog
-from boto3.s3.transfer import TransferConfig
 
+from handball_jobkit import TRANSFER, Reporter, upload_dir
 from handball_worker.config import WorkerSettings
 from handball_worker.media import quality, transcode
 from handball_worker.media.probe import ProbeError, probe
-from handball_worker.reporter import Reporter
 
 log = structlog.get_logger("worker.ingest")
 
@@ -38,16 +37,6 @@ INGEST_STAGES = {
     "upload": 0.05,
 }
 IMPORT_STAGES = {"download": 0.9, "upload": 0.1}
-TRANSFER = TransferConfig(
-    multipart_threshold=64 * 1024**2, multipart_chunksize=64 * 1024**2, max_concurrency=4
-)
-CONTENT_TYPES = {
-    ".m3u8": "application/vnd.apple.mpegurl",
-    ".m4s": "video/iso.segment",
-    ".mp4": "video/mp4",
-    ".jpg": "image/jpeg",
-    ".vtt": "text/vtt",
-}
 
 
 def _s3(settings: WorkerSettings) -> Any:
@@ -66,21 +55,6 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: f.read(8 * 1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
-
-
-def upload_dir(s3: Any, bucket: str, local: Path, prefix: str) -> list[str]:
-    keys = []
-    for path in sorted(p for p in local.rglob("*") if p.is_file()):
-        key = prefix + path.relative_to(local).as_posix()
-        s3.upload_file(
-            str(path),
-            bucket,
-            key,
-            Config=TRANSFER,
-            ExtraArgs={"ContentType": CONTENT_TYPES.get(path.suffix, "application/octet-stream")},
-        )
-        keys.append(key)
-    return keys
 
 
 def run_ingest(

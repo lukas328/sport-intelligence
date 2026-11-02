@@ -44,6 +44,9 @@ class MatchCreate(ApiModel):
     kit_own_gk: HexColor = "#f59e0b"
     kit_opponent: HexColor = "#dc2626"
     kit_opponent_gk: HexColor = "#16a34a"
+    is_demo: bool = Field(
+        default=False, description="marks demo or synthetic data, shown as Demo in the UI"
+    )
 
     @model_validator(mode="after")
     def _opponent(self) -> MatchCreate:
@@ -322,3 +325,56 @@ class JobUpdate(ApiModel):
     result: dict[str, Any] | None = None
     gpu_seconds: float | None = None
     cost_chf: float | None = None
+
+
+# ---- analysis (pipeline stages 2 to 5) ------------------------------------------------------
+
+
+class CalibrationOut(ApiModel):
+    homography: list[list[float]]
+    image_size: list[int]
+    confidence: float
+    reprojection_px: float
+    source: str
+    created_at: datetime
+
+
+class TrackOut(ApiModel):
+    track_no: int
+    team: str | None
+    team_confidence: float | None
+    first_ms: int
+    last_ms: int
+    observed_share: float
+    player_id: uuid.UUID | None
+    source: str
+
+
+class AnalysisOut(ApiModel):
+    status: Literal["none", "running", "ready", "failed"]
+    calibration: CalibrationOut | None
+    tracks: list[TrackOut]
+    chunk_ms: int | None
+    chunks: int | None
+    fps: float | None
+    detector: str | None
+    elapsed_s: float | None
+    error: str | None
+
+
+class CalibrationPoint(ApiModel):
+    image: tuple[float, float]
+    court: tuple[float, float]
+
+    @model_validator(mode="after")
+    def _ranges(self) -> CalibrationPoint:
+        x, y = self.court
+        if not (-5 <= x <= 45 and -5 <= y <= 25):
+            raise ValueError("court point outside the court area")
+        if self.image[0] < 0 or self.image[1] < 0:
+            raise ValueError("image point must be inside the frame")
+        return self
+
+
+class CalibrationIn(ApiModel):
+    points: list[CalibrationPoint] = Field(min_length=4, max_length=40)

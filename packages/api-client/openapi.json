@@ -15,6 +15,116 @@
         "title": "AcceptedOut",
         "type": "object"
       },
+      "AnalysisOut": {
+        "properties": {
+          "calibration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CalibrationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "chunk_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunk Ms"
+          },
+          "chunks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunks"
+          },
+          "detector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detector"
+          },
+          "elapsed_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed S"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps"
+          },
+          "status": {
+            "enum": [
+              "none",
+              "running",
+              "ready",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/TrackOut"
+            },
+            "title": "Tracks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "calibration",
+          "tracks",
+          "chunk_ms",
+          "chunks",
+          "fps",
+          "detector",
+          "elapsed_s",
+          "error"
+        ],
+        "title": "AnalysisOut",
+        "type": "object"
+      },
       "AnnotationCreate": {
         "properties": {
           "duration_ms": {
@@ -123,6 +233,110 @@
           "file"
         ],
         "title": "Body_upload_logo_v1_orgs__org_id__logo_put",
+        "type": "object"
+      },
+      "CalibrationIn": {
+        "properties": {
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/CalibrationPoint"
+            },
+            "maxItems": 40,
+            "minItems": 4,
+            "title": "Points",
+            "type": "array"
+          }
+        },
+        "required": [
+          "points"
+        ],
+        "title": "CalibrationIn",
+        "type": "object"
+      },
+      "CalibrationOut": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "homography": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Homography",
+            "type": "array"
+          },
+          "image_size": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Image Size",
+            "type": "array"
+          },
+          "reprojection_px": {
+            "title": "Reprojection Px",
+            "type": "number"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "homography",
+          "image_size",
+          "confidence",
+          "reprojection_px",
+          "source",
+          "created_at"
+        ],
+        "title": "CalibrationOut",
+        "type": "object"
+      },
+      "CalibrationPoint": {
+        "properties": {
+          "court": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Court",
+            "type": "array"
+          },
+          "image": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Image",
+            "type": "array"
+          }
+        },
+        "required": [
+          "image",
+          "court"
+        ],
+        "title": "CalibrationPoint",
         "type": "object"
       },
       "ClipCreate": {
@@ -972,6 +1186,12 @@
               }
             ],
             "title": "Competition"
+          },
+          "is_demo": {
+            "default": false,
+            "description": "marks demo or synthetic data, shown as Demo in the UI",
+            "title": "Is Demo",
+            "type": "boolean"
           },
           "is_home": {
             "default": true,
@@ -3252,6 +3472,76 @@
           "otpauth_uri"
         ],
         "title": "TotpSetupOut",
+        "type": "object"
+      },
+      "TrackOut": {
+        "properties": {
+          "first_ms": {
+            "title": "First Ms",
+            "type": "integer"
+          },
+          "last_ms": {
+            "title": "Last Ms",
+            "type": "integer"
+          },
+          "observed_share": {
+            "title": "Observed Share",
+            "type": "number"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "team": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team"
+          },
+          "team_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Confidence"
+          },
+          "track_no": {
+            "title": "Track No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "track_no",
+          "team",
+          "team_confidence",
+          "first_ms",
+          "last_ms",
+          "observed_share",
+          "player_id",
+          "source"
+        ],
+        "title": "TrackOut",
         "type": "object"
       },
       "UploadComplete": {
@@ -7732,6 +8022,128 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/videos/{video_id}/analysis": {
+      "get": {
+        "operationId": "get_analysis_v1_orgs__org_id__videos__video_id__analysis_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Analysis",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration": {
+      "post": {
+        "operationId": "calibrate_v1_orgs__org_id__videos__video_id__calibration_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalibrationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Calibrate V1 Orgs  Org Id  Videos  Video Id  Calibration Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Calibrate",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/videos/{video_id}/complete": {
       "post": {
         "operationId": "complete_upload_v1_orgs__org_id__videos__video_id__complete_post",
@@ -8035,6 +8447,66 @@
         "tags": [
           "matches",
           "videos"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/tracks/{n}": {
+      "get": {
+        "description": "30 s of positions as little-endian float32 rows [t_ms, track, x, y].",
+        "operationId": "track_chunk_v1_orgs__org_id__videos__video_id__tracks__n__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "n",
+            "required": true,
+            "schema": {
+              "title": "N",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Track Chunk",
+        "tags": [
+          "matches",
+          "analysis"
         ]
       }
     }
