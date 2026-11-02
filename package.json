@@ -24,6 +24,9 @@
       "sharp",
       "unrs-resolver",
       "@tailwindcss/oxide"
-    ]
+    ],
+    "overrides": {
+      "postcss@<8.5.18": "^8.5.18"
+    }
   }
 }
