@@ -68,3 +68,68 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 - Stripe (checkout, portal, idempotent webhooks, trials), plan limits + usage, share links, PDF reports, operator backoffice + annotation tool
 ### M9 Hardening and go-live ✅ in the repository; environment items in GO_LIVE.md (see docs/progress/M9.md)
 - Load tests, security review (ASVS L2), privacy functions (export, deletion, consent), monitoring/alerting, backups + restore test, runbooks, GO_LIVE.md
+
+## 5. Addendum 01 (docs/BRIEF_ADDENDUM_01.md)
+
+M0 to M9 were finished before the addendum arrived. Following addendum section 1.3, every addendum item
+assigned to an already finished milestone (M1 to M9) becomes a task in a new milestone before launch.
+Product principles P1 to P10 (addendum section 2) apply to every task; each report gets a "Vision-Check".
+Report with the mapping and risks: `docs/progress/addendum-01-plan.md`. Architecture and data model:
+ADR 017.
+
+### A1 Foundations: model, roles, protection (before everything else, it changes the schema)
+- Data model of addendum section 3: Federation, Presentation/Slide, Tag/TagSet/ClipTag/SavedFilter,
+  HighlightReel, ScoutingReport, PlayerFeedItem/SelfAssessment, LiveTagSession/LiveTag,
+  TrainingSession/Attendance, ConversationThread/AssistantMessage, PublicProfile, PaperReportUpload,
+  MatchSegment, MatchFormat, Invoice; RLS and policy matrix for each (from M1, M2)
+- Roles `goalkeeper_coach`, `athletic_coach`, `team_manager`, `parent` (own children only), `federation_admin`;
+  admin handover; players in several teams and Spielgemeinschaften (from M1)
+- Consent per purpose (`analysis`, `highlights_internal`, `highlights_public`, `public_profile`,
+  `training_data`) with history and revocation, parent consent for minors (from M1, 4.9, 8)
+- Youth and opponent protection 4.9: opponents number-only by default, names only entered by coaches from
+  public sources and never public; youth: no public profiles or sharing, no player rankings,
+  developmental wording; policy tests for every rule (from M1, M5)
+- Match formats with templates (2 × 30, 2 × 25, 2 × 20, mini, tournament) and the match clock using
+  them; similar-kit warning when creating a match (from M2, M3, M4)
+- Partner adapters as stubs with tests (section 7) and P2 preparations (section 6) (from M9)
+
+### A2 Video session and players
+- Own tags, tag sets, smart playlists 4.4 (from M2)
+- Presentation mode 4.1: slides, presenter view, phone remote over WebSocket, offline package, MP4 and PDF
+  export, sharing as assignment (from M7)
+- Spotlight 4.2 in the player (canvas) and burned into exports (from M3)
+- Multi-angle player 4.5: picture-in-picture, side by side, best camera per event (from M5)
+- Player feed "Deine Szenen" with self-assessment first 4.7 (from M7)
+- Scouting report 72 h before a match 4.6 incl. A6 goalkeeper card (from M7)
+
+### A3 Automation (principle P1; depends on real videos and trained models)
+- Automatic event baseline (shots, goals, saves, turnovers, throw-offs) with confidence; this is the
+  prerequisite for highlights, player feed and scouting reports to work without manual tagging (from M4)
+- Automatic highlights 16:9 and 9:16 with crop following the play 4.3 (from M4)
+- Side change detection, match boundaries in one video, several files per match with gaps, training
+  videos as match type, team assignment with more signals than colour 4.8 (from M2, M3)
+- Upload over poor Wi-Fi: background upload, optional on-device compression, mobile data warning 4.8
+
+### A4 Club operations and launch readiness
+- Annual subscription by Swiss QR bill (`qrbill`), reminders, dunning, camt.054 matching, VAT, invoice
+  archive, vouchers and federation discounts 4.10 (from M8)
+- Help centre (MDX, de/fr/en, ≥ 15 articles), in-app help, support chat adapter, feedback button,
+  onboarding checklist and e-mail series, failed-analysis credits 4.11 (from M8)
+- PostHog with consent, status page adapter, alerts on cost and analysis time, AI quality monitoring,
+  storage policy (raw video after 90 days), pentest scope 4.12 (from M8, M9)
+- Marketing site `apps/site` with demo analysis without login, Lighthouse > 90 4.13 (from M8)
+- Usability test with 3 coaches; end-to-end test with 3 real amateur matches (section 10)
+
+### Launch (go-live criteria: GO_LIVE.md plus addendum section 10)
+
+### M10 Data and training (new)
+- Ask your data 5.1 (Claude tool use, typed tools, number validator, eval set ≥ 60 questions in CI)
+- Statistics matrix, Sportscode XML and CSV/Excel export, imports 5.4
+- From problem to training 5.6, training planning, attendance, ICS 5.7
+
+### M11 Mobile and growth (new)
+- Native apps with Expo 5.5, phone as camera 5.2
+- Live tagging with device time and automatic video sync 5.3 (extends the existing match-clock live mode)
+- Public player profile 5.8, paper report photo extraction 5.9, federation licences 5.10
+
+### M12+ (new): P2 items of addendum section 6 after prioritisation by the product owner

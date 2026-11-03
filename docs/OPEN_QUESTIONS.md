@@ -79,3 +79,37 @@ shown with the "geschätzt" badge and no comparisons across matches with differe
 To run a real purchase in Stripe test mode we need a Stripe account (test keys), a webhook endpoint secret
 and price ids for Team, Club and the goalkeeper add-on (CHF, monthly). **Default until then**: billing is
 not enforced; the settings page shows the plans and explains that online payment is not set up.
+
+## Addendum 01
+
+### Q-ADD-1 Automatic events before launch (P1 vs. reality)
+P1 ("Automatisch zuerst") and the P0 items highlights, player feed and scouting report need automatic
+events. They need trained models and the club's real videos. **Default**: build A3 with heuristics on
+tracking (throw-off, shot and goal candidates with confidence), measure on real matches, and keep the
+manual and import paths as optional supplements. If the measured quality is too low, launch needs the
+product owner's decision (launch with "assisted" events or postpone).
+
+### Q-ADD-2 Live tagging already built with match clock
+A courtside live mode (match clock, offline queue) exists since M9. Addendum 5.3 (M11) wants device time
+and automatic sync to the video. **Default**: keep the current mode and extend it in M11; it stays
+optional (P1).
+
+### Q-ADD-3 VAT and invoicing
+Clubs are often not VAT registered; our own VAT status and the rates for CH and EU customers need a
+fiduciary/tax review. **Default**: VAT rate configurable, Stripe Tax for EU, QR bill with the legally
+required fields, marked "rechtlich prüfen lassen".
+
+### Q-ADD-4 Tools and providers needing a decision
+Support chat (Crisp or Intercom), status page provider, PostHog (EU cloud or self-hosted), email series
+sender. **Default**: Crisp, a hosted status page with API, PostHog EU cloud, the existing e-mail provider;
+all behind adapters.
+
+### Q-ADD-5 Legal templates
+Terms section on video use, hall notice, consent texts per purpose, model-training opt-in, data portability
+for players. Templates will be marked "rechtlich prüfen lassen" and listed here for review.
+
+### Q-ADD-6 Test material for the addendum
+Spotlight (95 % on the golden set), multi-angle sync (< 2 frames), portrait crop (90 %), special cases
+(several files, tournaments, side change, similar kits, training) and the 10 paper sheets for 5.9 each
+need real or synthetic test material. **Default**: extend the synthetic generator where possible; real
+material from the club's uploads.
