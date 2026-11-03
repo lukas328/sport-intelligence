@@ -14,8 +14,9 @@ Each question has the **assumption** I work with until it is answered. Status: o
 ## Data and test material
 - **Q-DATA-1 Test videos** (you mentioned you have some). Needed per video: camera type (fixed / auto-follow,
   Veo, Spiideo, ...), resolution and fps, venue, whether goal cams exist, final score and scorers (ground
-  truth), and **consent of the filmed players** (minors?). *Assumption:* videos are never committed to
-  git; they go to a bucket (or Git LFS) and the repo holds only `ml/eval/golden_set/manifest.json`.
+  truth), and **consent of the filmed players** (minors?). *Decided:* videos are never committed to
+  git; they go to the R2 test-data bucket (ADR 002) via `scripts/testdata.py`, and the repo holds only
+  `ml/eval/golden_set/manifest.json` (metadata, no player names). See `data/README.md`.
 - **Q-DATA-2 Paper match report JSON schema and files** (BRIEF 15). *Assumption:* importer is built in M4
   once the schema is provided; files live in `data/paper_reports/` (gitignored by default, they contain names).
 - **Q-DATA-3 Golden set annotation**: who annotates the 5 full matches, with which tool (CVAT, Label Studio,
@@ -40,8 +41,10 @@ Each question has the **assumption** I work with until it is answered. Status: o
   (e.g. youth tournaments)?
 
 ## Infrastructure
-- **Q-INFRA-1 Hosting provider** (ADR 002 proposed: Exoscale or Infomaniak in CH, AWS Zurich fallback) and
-  **GPU provider** with CH/EU processing and DPA. Needs price/availability check.
+- **Q-INFRA-1 Hosting provider.** *Partly answered 2026-11-03:* EU is enough, cost first (ADR 002).
+  Object storage: Cloudflare R2 with EU jurisdiction (test-data bucket first). Still open: app and
+  managed Postgres provider in the EU (Hetzner, Scaleway, Exoscale EU) and **GPU provider** with EU
+  processing and DPA. Needs price/availability check.
 - **Q-INFRA-2 GitHub repository and org**, CI secrets, preview deploy target. *Assumption:* GitHub Actions,
   preview job disabled until hosting exists (`vars.PREVIEW_DEPLOY_ENABLED`).
 - **Q-INFRA-3 E-mail provider** Postmark vs Resend (ADR in M1). *Assumption:* Postmark (EU data residency to verify).
