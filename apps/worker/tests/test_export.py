@@ -6,6 +6,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import pytest
 from PIL import Image
@@ -70,7 +71,7 @@ def test_render_concatenates_pieces(tmp_path: Path) -> None:
         capture_output=True,
     )
     settings = WorkerSettings(ffmpeg="ffmpeg")
-    slides = [
+    slides: list[dict[str, Any]] = [
         {"type": "text", "lines": ["Video-Sitzung", "Rückzug"]},
         {
             "type": "clip",
