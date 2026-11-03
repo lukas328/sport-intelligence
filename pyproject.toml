@@ -23,12 +23,13 @@ dev = [
 package = false
 
 [tool.uv.workspace]
-members = ["apps/api", "apps/worker", "apps/gpu-worker", "packages/court", "packages/vision", "packages/jobkit"]
+members = ["apps/api", "apps/worker", "apps/gpu-worker", "packages/court", "packages/vision", "packages/jobkit", "packages/metrics"]
 
 [tool.uv.sources]
 handball-court = { workspace = true }
 handball-vision = { workspace = true }
 handball-jobkit = { workspace = true }
+handball-metrics = { workspace = true }
 handball-api = { workspace = true }
 handball-worker = { workspace = true }
 handball-gpu-worker = { workspace = true }
@@ -43,7 +44,7 @@ select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "SIM", "PTH", "N"]
 ignore = ["S101"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit"]
+known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit", "handball_metrics"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S", "PTH"]
@@ -62,7 +63,7 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-mypy_path = "packages/court:packages/vision:packages/jobkit:apps/api/src:apps/worker/src:apps/gpu-worker/src"
+mypy_path = "packages/court:packages/vision:packages/jobkit:packages/metrics:apps/api/src:apps/worker/src:apps/gpu-worker/src"
 explicit_package_bases = true
 namespace_packages = true
 
@@ -84,7 +85,7 @@ addopts = "-m 'not integration' --import-mode=importlib"
 [tool.coverage.run]
 branch = true
 concurrency = ["greenlet", "thread"]
-source = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit"]
+source = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit", "handball_metrics"]
 omit = ["**/migrations/**", "**/__main__.py"]
 
 [tool.coverage.report]
@@ -93,12 +94,12 @@ show_missing = true
 skip_covered = true
 
 [tool.importlinter]
-root_packages = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit"]
+root_packages = ["handball_api", "handball_worker", "handball_gpu_worker", "handball_court", "handball_vision", "handball_jobkit", "handball_metrics"]
 
 [[tool.importlinter.contracts]]
 name = "Shared packages import no app"
 type = "forbidden"
-source_modules = ["handball_court", "handball_vision", "handball_jobkit"]
+source_modules = ["handball_court", "handball_vision", "handball_jobkit", "handball_metrics"]
 forbidden_modules = ["handball_api", "handball_worker", "handball_gpu_worker"]
 
 [[tool.importlinter.contracts]]

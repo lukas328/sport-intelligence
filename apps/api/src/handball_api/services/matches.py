@@ -201,6 +201,8 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         status=match.status,
         source=match.source,
         is_demo=match.is_demo,
+        kickoff_ms=match.kickoff_ms,
+        report_extra=match.report_extra,
         videos=[video_out(v) for v in videos],
         jobs=[JobOut.model_validate(j) for j in jobs],
     )

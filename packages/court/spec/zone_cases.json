@@ -1,0 +1,19 @@
+{
+  "$comment": "Shared test vectors: Python and TS zone functions must agree on every case.",
+  "cases": [
+    { "x": 34.5, "y": 10.0, "zone": "circle_centre" },
+    { "x": 34.5, "y": 13.5, "zone": "circle_left" },
+    { "x": 34.5, "y": 6.5, "zone": "circle_right" },
+    { "x": 32.0, "y": 10.5, "zone": "half_centre" },
+    { "x": 32.0, "y": 15.0, "zone": "half_left" },
+    { "x": 31.5, "y": 5.0, "zone": "half_right" },
+    { "x": 29.0, "y": 10.0, "zone": "back_centre" },
+    { "x": 28.0, "y": 15.0, "zone": "back_left" },
+    { "x": 28.5, "y": 4.0, "zone": "back_right" },
+    { "x": 38.0, "y": 18.5, "zone": "wing_left" },
+    { "x": 37.0, "y": 1.0, "zone": "wing_right" },
+    { "x": 20.0, "y": 10.0, "zone": "long_range" },
+    { "x": 33.0, "y": 10.0, "zone": "penalty", "penalty": true },
+    { "x": 30.0, "y": 12.0, "zone": "fast_break", "fast_break": true }
+  ]
+}

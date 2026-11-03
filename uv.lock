@@ -9,6 +9,7 @@ members = [
     "handball-court",
     "handball-gpu-worker",
     "handball-jobkit",
+    "handball-metrics",
     "handball-vision",
     "handball-worker",
 ]
@@ -598,6 +599,7 @@ dependencies = [
     { name = "email-validator" },
     { name = "fastapi" },
     { name = "handball-court" },
+    { name = "handball-metrics" },
     { name = "httpx" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp-proto-http" },
@@ -628,6 +630,7 @@ requires-dist = [
     { name = "email-validator", specifier = ">=2.2" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "handball-court", editable = "packages/court" },
+    { name = "handball-metrics", editable = "packages/metrics" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "opentelemetry-api", specifier = ">=1.29" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.29" },
@@ -706,6 +709,17 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.7" },
     { name = "structlog", specifier = ">=24.4" },
 ]
+
+[[package]]
+name = "handball-metrics"
+version = "0.1.0"
+source = { editable = "packages/metrics" }
+dependencies = [
+    { name = "handball-court" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "handball-court", editable = "packages/court" }]
 
 [[package]]
 name = "handball-vision"

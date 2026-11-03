@@ -3,7 +3,8 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
+import { Tagger } from "@/components/analysis/tagger";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
@@ -18,14 +19,39 @@ import { cn } from "@/lib/utils";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
-type Tab = "comments" | "clips" | "drawings";
+type Tab = "comments" | "clips" | "drawings" | "events";
 const TOOLS: Tool[] = ["arrow", "line", "circle", "freehand", "spotlight"];
 const COLORS = ["#facc15", "#ef4444", "#22c55e", "#3b82f6", "#ffffff"];
 
-export function Workspace({ orgId, match, video, staff }: { orgId: string; match: Match; video: Video; staff: boolean }) {
+export function Workspace({
+  orgId,
+  match,
+  video,
+  staff,
+  teamName,
+  handle,
+}: {
+  orgId: string;
+  match: Match;
+  video: Video;
+  staff: boolean;
+  teamName: string;
+  handle?: Ref<PlayerHandle | null>;
+}) {
   const t = useTranslations();
   const qc = useQueryClient();
   const player = useRef<PlayerHandle>(null);
+  useImperativeHandle(
+    handle,
+    () => ({
+      seek: (ms: number) => player.current?.seek(ms),
+      play: () => player.current?.play(),
+      pause: () => player.current?.pause(),
+      time: () => player.current?.time() ?? 0,
+      video: () => player.current?.video() ?? null,
+    }),
+    [],
+  );
   const [now, setNow] = useState(0);
   const [tab, setTab] = useState<Tab>("comments");
   const [drawing, setDrawing] = useState(false);
@@ -182,7 +208,7 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
 
       <Card className="flex max-h-[42rem] flex-col gap-3 p-3">
         <div role="tablist" className="flex gap-1">
-          {(["comments", "clips", "drawings"] as const).map((k) => (
+          {(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => (
             <button
               key={k}
               role="tab"
@@ -190,10 +216,16 @@ export function Workspace({ orgId, match, video, staff }: { orgId: string; match
               onClick={() => setTab(k)}
               className={cn("flex-1 rounded px-2 py-1.5 text-sm", tab === k ? "bg-accent text-accent-contrast" : "hover:bg-surface")}
             >
-              {t(k === "drawings" ? "draw.list" : `${k}.title`)}
+              {t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`)}
             </button>
           ))}
         </div>
+
+        {tab === "events" && staff && (
+          <div role="tabpanel" className="flex min-h-0 flex-1 flex-col">
+            <Tagger orgId={orgId} match={match} teamName={teamName} getTime={getTime} />
+          </div>
+        )}
 
         {tab === "comments" && (
           <div role="tabpanel" className="flex min-h-0 flex-1 flex-col gap-2">

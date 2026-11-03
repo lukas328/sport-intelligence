@@ -1,0 +1,17 @@
+{
+  "schema": "handball-paper-report/1",
+  "date": "2026-10-18",
+  "kickoff": "17:00",
+  "opponent": "TV Papierdorf",
+  "home": true,
+  "competition": "Meisterschaft",
+  "score": { "own": 5, "opponent": 4 },
+  "halftime": { "own": 3, "opponent": 2 },
+  "players": [
+    { "number": 7, "name": "Anna Muster", "goals": 2, "misses": 2, "posts": 1, "seven_m_goals": 1, "technical_faults": { "bad_pass": 1 } },
+    { "number": 11, "name": "Lea Beispiel", "goals": 2, "misses": 1, "suspensions": 1 }
+  ],
+  "goalkeepers": [
+    { "number": 1, "name": "Mia Tor", "saves": 6, "goals_against_by_zone": { "TL": [9, 5], "BR": [5], "MC": [null] } }
+  ]
+}

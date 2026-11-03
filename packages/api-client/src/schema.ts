@@ -536,6 +536,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/events/{event_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Event */
+        delete: operations["delete_event_v1_orgs__org_id__events__event_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Event */
+        patch: operations["update_event_v1_orgs__org_id__events__event_id__patch"];
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/invitations": {
         parameters: {
             query?: never;
@@ -655,6 +673,81 @@ export interface paths {
         put?: never;
         /** Add Comment */
         post: operations["add_comment_v1_orgs__org_id__matches__match_id__comments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Events
+         * @description Filtered event list: every number in the statistics links to these events and clips.
+         */
+        get: operations["list_events_v1_orgs__org_id__matches__match_id__events_get"];
+        put?: never;
+        /** Create Event */
+        post: operations["create_event_v1_orgs__org_id__matches__match_id__events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/events/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Feed
+         * @description Official play-by-play as CSV or JSON (BRIEF 7.4). Nothing is scraped.
+         */
+        post: operations["import_feed_v1_orgs__org_id__matches__match_id__events_import_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/kickoff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Kickoff */
+        put: operations["set_kickoff_v1_orgs__org_id__matches__match_id__kickoff_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Match Stats */
+        get: operations["match_stats_v1_orgs__org_id__matches__match_id__stats_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -926,6 +1019,26 @@ export interface paths {
         head?: never;
         /** Update Team Member */
         patch: operations["update_team_member_v1_orgs__org_id__teams__team_id__members__user_id__patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/paper-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Paper Report
+         * @description Paper match report (docs/schemas/paper-report.schema.json) as a match without video.
+         */
+        post: operations["import_paper_report_v1_orgs__org_id__teams__team_id__paper_reports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/consents": {
@@ -1261,6 +1374,16 @@ export interface components {
             /** T Ms */
             t_ms: number;
         };
+        /** Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post */
+        Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_import_paper_report_v1_orgs__org_id__teams__team_id__paper_reports_post */
+        Body_import_paper_report_v1_orgs__org_id__teams__team_id__paper_reports_post: {
+            /** File */
+            file: string;
+        };
         /** Body_import_roster_v1_orgs__org_id__teams__team_id__seasons__season_id__roster_import_post */
         Body_import_roster_v1_orgs__org_id__teams__team_id__seasons__season_id__roster_import_post: {
             /** File */
@@ -1448,6 +1571,139 @@ export interface components {
          * @enum {string}
          */
         DataRegion: "ch" | "eu";
+        /** EventIn */
+        EventIn: {
+            /** Assist Player Id */
+            assist_player_id?: string | null;
+            /** Attributes */
+            attributes?: {
+                [key: string]: unknown;
+            };
+            /** Clock S */
+            clock_s?: number | null;
+            /** Goal Zone */
+            goal_zone?: ("TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR") | null;
+            /** Number */
+            number?: number | null;
+            /** Outcome */
+            outcome?: ("goal" | "save" | "miss" | "post" | "blocked") | null;
+            /**
+             * Period
+             * @default 1
+             */
+            period?: number;
+            /** Player Id */
+            player_id?: string | null;
+            /** Shot Type */
+            shot_type?: ("jump_shot" | "standing" | "pivot" | "wing" | "fast_break" | "penalty" | "empty_net") | null;
+            /**
+             * Side
+             * @enum {string}
+             */
+            side: "own" | "opponent";
+            /** T Ms */
+            t_ms?: number | null;
+            /** Turnover Type */
+            turnover_type?: ("bad_pass" | "catch_error" | "steps" | "double_dribble" | "offensive_foul" | "line_violation" | "passive_play" | "other") | null;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "shot" | "turnover" | "steal" | "foul" | "free_throw" | "seven_meter_awarded" | "suspension_2min" | "yellow_card" | "red_card" | "timeout" | "throw_off" | "substitution";
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
+        };
+        /** EventOut */
+        EventOut: {
+            /** Assist Player Id */
+            assist_player_id: string | null;
+            /** Attributes */
+            attributes: {
+                [key: string]: unknown;
+            };
+            /** Clock S */
+            clock_s: number | null;
+            /** Confidence */
+            confidence: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Goal Zone */
+            goal_zone: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Number */
+            number: number | null;
+            /** Outcome */
+            outcome: string | null;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Shot Type */
+            shot_type: string | null;
+            /** Shot Zone */
+            shot_zone: string | null;
+            /** Side */
+            side: string;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
+            /** Turnover Type */
+            turnover_type: string | null;
+            /** Type */
+            type: string;
+            /** X */
+            x: number | null;
+            /** Y */
+            y: number | null;
+        };
+        /** EventPatch */
+        EventPatch: {
+            /** Assist Player Id */
+            assist_player_id?: string | null;
+            /** Clock S */
+            clock_s?: number | null;
+            /** Goal Zone */
+            goal_zone?: ("TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR") | null;
+            /** Number */
+            number?: number | null;
+            /** Outcome */
+            outcome?: ("goal" | "save" | "miss" | "post" | "blocked") | null;
+            /** Period */
+            period?: number | null;
+            /** Player Id */
+            player_id?: string | null;
+            /** Shot Type */
+            shot_type?: ("jump_shot" | "standing" | "pivot" | "wing" | "fast_break" | "penalty" | "empty_net") | null;
+            /** Side */
+            side?: ("own" | "opponent") | null;
+            /** T Ms */
+            t_ms?: number | null;
+            /** Turnover Type */
+            turnover_type?: ("bad_pass" | "catch_error" | "steps" | "double_dribble" | "offensive_foul" | "line_violation" | "passive_play" | "other") | null;
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
+        };
+        /** FeedImportResult */
+        FeedImportResult: {
+            /** Created */
+            created: number;
+            /** Errors */
+            errors: string[];
+            /** Skipped */
+            skipped: number;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1566,6 +1822,13 @@ export interface components {
          * @enum {string}
          */
         JobStatus: "queued" | "running" | "succeeded" | "failed" | "cancelled";
+        /** KickoffIn */
+        KickoffIn: {
+            /** Period */
+            period: number;
+            /** T Ms */
+            t_ms: number;
+        };
         /** LinkImport */
         LinkImport: {
             /** @default main */
@@ -1688,6 +1951,10 @@ export interface components {
              * Format: date-time
              */
             kickoff_at: string;
+            /** Kickoff Ms */
+            kickoff_ms: {
+                [key: string]: number;
+            } | null;
             /** Kit Opponent */
             kit_opponent: string;
             /** Kit Opponent Gk */
@@ -1697,6 +1964,10 @@ export interface components {
             /** Kit Own Gk */
             kit_own_gk: string;
             opponent: components["schemas"]["OpponentOut"];
+            /** Report Extra */
+            report_extra: {
+                [key: string]: unknown;
+            } | null;
             /** Score Opponent */
             score_opponent: number | null;
             /** Score Own */
@@ -3481,6 +3752,72 @@ export interface operations {
             };
         };
     };
+    delete_event_v1_orgs__org_id__events__event_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_event_v1_orgs__org_id__events__event_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_invitations_v1_orgs__org_id__invitations_get: {
         parameters: {
             query?: {
@@ -3902,6 +4239,187 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CommentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_events_v1_orgs__org_id__matches__match_id__events_get: {
+        parameters: {
+            query?: {
+                side?: string | null;
+                type?: string | null;
+                outcome?: string | null;
+                player_id?: string | null;
+                number?: number | null;
+                zone?: string | null;
+                goal_zone?: string | null;
+                turnover_type?: string | null;
+            };
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_event_v1_orgs__org_id__matches__match_id__events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_feed_v1_orgs__org_id__matches__match_id__events_import_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedImportResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_kickoff_v1_orgs__org_id__matches__match_id__kickoff_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KickoffIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    match_stats_v1_orgs__org_id__matches__match_id__stats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -4674,6 +5192,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TeamMemberOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_paper_report_v1_orgs__org_id__teams__team_id__paper_reports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_paper_report_v1_orgs__org_id__teams__team_id__paper_reports_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */

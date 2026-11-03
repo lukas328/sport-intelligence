@@ -3,6 +3,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/card";
 import { serverApi } from "@/lib/api";
 import { NewMatchForm } from "./new-match-form";
+import { PaperImport } from "./paper-import";
 
 const STATUS_STYLE: Record<string, string> = {
   ready: "bg-ok/10 text-ok",
@@ -57,6 +58,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ orgId:
         </ul>
       )}
       {canWrite && <NewMatchForm orgId={orgId} teamId={teamId} />}
+      {canWrite && <PaperImport orgId={orgId} teamId={teamId} />}
     </div>
   );
 }

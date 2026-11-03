@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "handball-paper-report/1",
+  "title": "Paper match report (BRIEF 15)",
+  "description": "Assumed format until the club's existing schema is provided (OPEN_QUESTIONS Q-DATA-2). One file per match.",
+  "type": "object",
+  "required": ["schema", "date", "opponent", "score", "players"],
+  "properties": {
+    "schema": { "const": "handball-paper-report/1" },
+    "date": { "type": "string", "format": "date" },
+    "kickoff": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+    "opponent": { "type": "string", "minLength": 1 },
+    "home": { "type": "boolean", "default": true },
+    "competition": { "type": "string" },
+    "venue": { "type": "string" },
+    "score": { "$ref": "#/$defs/score" },
+    "halftime": { "$ref": "#/$defs/score" },
+    "players": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["number"],
+        "properties": {
+          "number": { "type": "integer", "minimum": 1, "maximum": 99 },
+          "name": { "type": "string" },
+          "goals": { "type": "integer", "minimum": 0 },
+          "misses": { "type": "integer", "minimum": 0 },
+          "posts": { "type": "integer", "minimum": 0 },
+          "blocked": { "type": "integer", "minimum": 0 },
+          "seven_m_goals": { "type": "integer", "minimum": 0 },
+          "seven_m_misses": { "type": "integer", "minimum": 0 },
+          "technical_faults": {
+            "type": "object",
+            "propertyNames": { "enum": ["bad_pass", "catch_error", "steps", "double_dribble", "offensive_foul", "line_violation", "passive_play", "other"] },
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          },
+          "suspensions": { "type": "integer", "minimum": 0 },
+          "assists": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "goalkeepers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["number"],
+        "properties": {
+          "number": { "type": "integer" },
+          "name": { "type": "string" },
+          "saves": { "type": "integer", "minimum": 0 },
+          "goals_against_by_zone": {
+            "description": "Goals conceded per 3x3 goal zone (shooter's view), value = list of the shooters' jersey numbers",
+            "type": "object",
+            "propertyNames": { "enum": ["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"] },
+            "additionalProperties": { "type": "array", "items": { "type": ["integer", "null"] } }
+          }
+        }
+      }
+    },
+    "score_progression": {
+      "description": "Score every 5 minutes",
+      "type": "array",
+      "items": { "type": "object", "required": ["minute", "own", "opponent"],
+                 "properties": { "minute": { "type": "integer" }, "own": { "type": "integer" }, "opponent": { "type": "integer" } } }
+    },
+    "tactics_notes": { "type": "object", "additionalProperties": { "type": "string" } }
+  },
+  "$defs": {
+    "score": { "type": "object", "required": ["own", "opponent"],
+               "properties": { "own": { "type": "integer", "minimum": 0 }, "opponent": { "type": "integer", "minimum": 0 } } }
+  }
+}

@@ -53,7 +53,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 - ProcessingJob state, orchestrator over PipelineGraph, checkpoints/caching, chunked processing
 - Streaming decode (PyAV/decord, NVDEC in CUDA image), batching, ONNX Runtime/TensorRT FP16 from day one
 - Stages 0 to 5; Dockerfile.cuda; `ml/eval/run.py` + `bench.py`; golden-set manifest; mini court in player (Arrow chunks)
-### M4 Events and match report
+### M4 Events and match report ✅ manual + import path, automatic events open (see docs/progress/M4.md)
 - Pose (RTMPose), shot heuristic + EventSpotter interface, throw-off detection, final-score constraint, official feed CSV adapter, scoreboard OCR, possessions/phases baseline
 - `packages/metrics` with DEFINITIONS.md, zones (`zones.py`, `zones.ts`), stats caches; analysis screen (overview, match report, shots), everything clickable; paper report importer
 ### M5 Identity, goal zones, goal cams

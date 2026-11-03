@@ -101,6 +101,31 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.getByRole("button", { name: "Zeichnung speichern" }).click();
   await expect(page.getByText("Zeichnung gespeichert.")).toBeVisible();
   await expectAccessible(page);
+
+  // event tagging: kickoff at 0:00, a goal by hotkey at the current video time
+  await seekTo(0);
+  await page.getByRole("tab", { name: "Ereignisse" }).click();
+  await page.getByRole("button", { name: "Anpfiff 1. HZ hier" }).click();
+  await expect(page.getByText(/Anpfiff 1. HZ bei 0:00/).first()).toBeVisible();
+  await seekTo(8);
+  await page.getByRole("tab", { name: "Ereignisse" }).focus();
+  await page.keyboard.press("g");
+  await expect(page.getByText(/Erfasst: Tor bei 0:08/)).toBeVisible();
+  await page.getByRole("button", { name: "Fehlwurf" }).click();
+  await expect(page.getByText(/Erfasst: Fehlwurf/)).toBeVisible();
+  await expectAccessible(page);
+
+  // the overview counts it, the number opens the event, the event jumps into the video
+  await page.getByRole("tab", { name: "Übersicht" }).click();
+  const table = page.getByTestId("comparison");
+  await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("1");
+  await expect(table.getByRole("row", { name: /^Würfe/ })).toContainText("2");
+  await table.getByRole("button", { name: "Tore Herren 1" }).click();
+  const list = page.getByTestId("event-list");
+  await expect(list).toContainText("1. HZ 0:08");
+  await list.getByRole("button", { name: /Abspielen/ }).click();
+  await expect(page.getByTestId("player")).toBeVisible();
+  await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(3.5);
 });
 
 test("playlist: create and share with players", async ({ page }, info) => {

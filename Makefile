@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-PY_SRC := apps/api/src apps/worker/src apps/gpu-worker/src packages/court/handball_court packages/vision/handball_vision packages/jobkit/handball_jobkit
-PY_TESTS := apps/api/tests apps/worker/tests apps/gpu-worker/tests packages/court/tests packages/vision/tests
+PY_SRC := apps/api/src apps/worker/src apps/gpu-worker/src packages/court/handball_court packages/vision/handball_vision packages/jobkit/handball_jobkit packages/metrics/handball_metrics
+PY_TESTS := apps/api/tests apps/worker/tests apps/gpu-worker/tests packages/court/tests packages/vision/tests packages/metrics/tests
 
 help: ## Show targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'

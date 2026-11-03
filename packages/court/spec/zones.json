@@ -1,0 +1,27 @@
+{
+  "$comment": "Shot zones (BRIEF 4.3), one source for Python and TS. Positions are normalised so the attacked goal is at x = 40. 'left'/'right' are from the attacker's view: facing the goal (+x), left is +y. Distances are to the nearest point of the goal mouth.",
+  "version": 1,
+  "long_range_m": 15.0,
+  "back_min_m": 9.5,
+  "circle_max_m": 6.5,
+  "wing": { "min_x": 35.0, "min_abs_dy": 5.5, "max_distance_m": 9.5 },
+  "centre_half_width_m": { "circle": 2.5, "half": 3.0, "back": 3.0 },
+  "fast_break_window_s": 6.0,
+  "zones": [
+    "wing_left", "wing_right",
+    "back_left", "back_centre", "back_right",
+    "half_left", "half_centre", "half_right",
+    "circle_left", "circle_centre", "circle_right",
+    "penalty", "fast_break", "long_range"
+  ],
+  "labels": {
+    "de-CH": {
+      "wing_left": "Aussen links", "wing_right": "Aussen rechts",
+      "back_left": "Rückraum links", "back_centre": "Rückraum Mitte", "back_right": "Rückraum rechts",
+      "half_left": "Halbposition links", "half_centre": "Halbposition Mitte", "half_right": "Halbposition rechts",
+      "circle_left": "Kreis links", "circle_centre": "Kreis Mitte", "circle_right": "Kreis rechts",
+      "penalty": "7 m", "fast_break": "Gegenstoss", "long_range": "Fernwurf / leeres Tor"
+    }
+  },
+  "goal_zones": ["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"]
+}

@@ -124,6 +124,8 @@ class MatchOut(ApiModel):
     status: MatchStatus
     source: str
     is_demo: bool
+    kickoff_ms: dict[str, int] | None
+    report_extra: dict[str, Any] | None
     videos: list[VideoOut]
     jobs: list[JobOut]
 

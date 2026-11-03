@@ -15,6 +15,7 @@ from sqlalchemy import (
     SmallInteger,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -70,6 +71,10 @@ class Match(Base, EntityMixin, TenantMixin):
     # paper_report, video, demo: where the match data comes from (BRIEF 15)
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="video")
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # video time (ms) of the throw-off of each half: maps match clock <-> video time
+    kickoff_ms: Mapped[dict[str, int] | None] = mapped_column(JSONB)
+    # extra content of an imported paper report (score every 5 min, tactics notes by zone)
+    report_extra: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
 
 class VideoAsset(Base, EntityMixin, TenantMixin):
@@ -244,3 +249,83 @@ class Track(Base, EntityMixin, TenantMixin):
     player_confidence: Mapped[float | None] = mapped_column(Float)
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="heuristic")
     pipeline_version: Mapped[str] = mapped_column(String(20), nullable=False)
+
+
+class Event(Base, EntityMixin, TenantMixin):
+    """Match event (BRIEF 4.5). Every event carries confidence and source."""
+
+    __tablename__ = "events"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    type: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
+    side: Mapped[str] = mapped_column(String(10), nullable=False)  # own, opponent
+    period: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=1)
+    clock_s: Mapped[float | None] = mapped_column(Float)
+    t_ms: Mapped[int | None] = mapped_column(Integer)
+    t_end_ms: Mapped[int | None] = mapped_column(Integer)
+    player_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("players.id", ondelete="SET NULL"), index=True
+    )
+    number: Mapped[int | None] = mapped_column(SmallInteger)
+    x: Mapped[float | None] = mapped_column(Float)
+    y: Mapped[float | None] = mapped_column(Float)
+    outcome: Mapped[str | None] = mapped_column(String(20))
+    shot_zone: Mapped[str | None] = mapped_column(String(20))
+    goal_zone: Mapped[str | None] = mapped_column(String(2))
+    shot_type: Mapped[str | None] = mapped_column(String(20))
+    turnover_type: Mapped[str | None] = mapped_column(String(20))
+    assist_player_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("players.id", ondelete="SET NULL")
+    )
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    source: Mapped[str] = mapped_column(String(20), nullable=False)
+    pipeline_version: Mapped[str | None] = mapped_column(String(20))
+    attributes: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+
+
+class Possession(Base, EntityMixin, TenantMixin):
+    __tablename__ = "possessions"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    side: Mapped[str] = mapped_column(String(10), nullable=False)
+    start_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    start_type: Mapped[str | None] = mapped_column(String(30))
+    outcome: Mapped[str | None] = mapped_column(String(30))
+    phase: Mapped[str | None] = mapped_column(String(30))
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    source: Mapped[str] = mapped_column(String(20), nullable=False)
+
+
+class Correction(Base, EntityMixin, TenantMixin):
+    """User correction of an event (BRIEF 10.2): kept as training data."""
+
+    __tablename__ = "corrections"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    event_id: Mapped[uuid.UUID | None] = mapped_column()
+    action: Mapped[str] = mapped_column(String(10), nullable=False)  # create, update, delete
+    before: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    after: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+
+
+class StatsCache(Base, EntityMixin, TenantMixin):
+    """Derived statistics cache, keyed by scope and a version over its inputs (BRIEF 6.4)."""
+
+    __tablename__ = "stats_cache"
+    __table_args__ = (UniqueConstraint("scope", "scope_id"),)
+
+    scope: Mapped[str] = mapped_column(String(20), nullable=False)
+    scope_id: Mapped[uuid.UUID] = mapped_column(nullable=False)
+    version: Mapped[str] = mapped_column(String(120), nullable=False)
+    data: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)

@@ -4,7 +4,11 @@ import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useRosterNames } from "@/components/analysis/tagger";
+import { EmptyState } from "@/components/ui/card";
+import type { PlayerHandle } from "@/components/video/player";
+import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
@@ -16,6 +20,9 @@ import { Workspace } from "./workspace";
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
 type Job = Schemas["JobOut"];
+
+type View = "video" | "overview" | "report" | "shots";
+const VIEWS: View[] = ["video", "overview", "report", "shots"];
 
 const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnails", "upload"] as const;
 
@@ -44,12 +51,30 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     return () => es.close();
   }, [orgId, initial.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [view, setView] = useState<View>("video");
+  const player = useRef<PlayerHandle | null>(null);
+  const stats = useStats(orgId, initial.id);
+  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  const names = useMemo(
+    () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.jersey_number != null ? `#${r.jersey_number} ` : ""}${r.first_name} ${r.last_name}`])),
+    [roster.data],
+  );
+
   const jobs = match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job);
   const main = match.videos.find((v) => v.role === "main" && v.status === "ready");
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
   const ourName = teamName;
   const [home, away] = match.is_home ? [ourName, match.opponent.name] : [match.opponent.name, ourName];
   const [hs, as] = match.is_home ? [match.score_own, match.score_opponent] : [match.score_opponent, match.score_own];
+
+  function onPlay(ms: number) {
+    setView("video");
+    // the player is kept mounted, so the seek works right after the tab switch
+    requestAnimationFrame(() => {
+      player.current?.seek(ms);
+      player.current?.play();
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -79,11 +104,36 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         </div>
       </header>
 
-      {main ? (
-        <Workspace orgId={orgId} match={match} video={main} staff={staff} />
-      ) : (
-        <Alert kind="info">{t("player.notReady")}</Alert>
-      )}
+      <nav role="tablist" aria-label={t("tabs.video")} className="flex gap-1 overflow-x-auto border-b border-border">
+        {VIEWS.map((v) => (
+          <button
+            key={v}
+            role="tab"
+            aria-selected={view === v}
+            onClick={() => setView(v)}
+            className={cn("-mb-px border-b-2 px-4 py-2 text-sm font-medium", view === v ? "border-accent" : "border-transparent text-muted hover:text-foreground")}
+          >
+            {t(`tabs.${v}`)}
+          </button>
+        ))}
+      </nav>
+
+      <div hidden={view !== "video"}>
+        {main ? (
+          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} handle={player} />
+        ) : (
+          <Alert kind="info">{match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")}</Alert>
+        )}
+      </div>
+      {view !== "video" &&
+        (stats.data && stats.data.quality.events > 0 ? (
+          (() => {
+            const props = { orgId, match, teamName, stats: stats.data, names, onPlay: main ? onPlay : undefined };
+            return view === "overview" ? <OverviewView {...props} /> : view === "report" ? <ReportView {...props} /> : <ShotsView {...props} />;
+          })()
+        ) : (
+          <EmptyState title={stats.isLoading ? "…" : t("stats.noData")} />
+        ))}
 
       {jobs.filter((j) => j.status !== "succeeded").length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 

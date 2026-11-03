@@ -21,3 +21,10 @@ Court, goal and tactics board drawings use the same primitives (SVG, Canvas for 
 ## Alternatives considered
 - Recharts: faster for standard charts, but custom court/goal visuals would need a second approach.
 - ECharts: powerful but large bundle and canvas-first, weaker for accessible SVG.
+
+## Amendment (2026-11-03, M4)
+The M4 visuals (score progression, shot map on the court half, 3x3 goal grid, comparison tables) are plain
+SVG components in `apps/web/src/components/analysis` built on `@handball/court` geometry. They needed no
+scales or axes beyond a few lines of code, so visx is **not installed yet** (0 kB added). visx stays the
+choice once charts with real axes, brushing or many series arrive (season trends in M7); the components keep
+the same props so the switch is local.

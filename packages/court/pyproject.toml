@@ -14,3 +14,4 @@ packages = ["handball_court"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "generated/court_geometry.json" = "handball_court/court_geometry.json"
+"spec/zones.json" = "handball_court/zones.json"
