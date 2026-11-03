@@ -448,8 +448,31 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Totp Enable */
+        /**
+         * Totp Enable
+         * @description Turn two-factor sign-in on; returns ten one-time recovery codes (shown only now).
+         */
         post: operations["totp_enable_v1_me_totp_enable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/totp/recovery-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Recovery Codes
+         * @description New recovery codes (the old ones stop working).
+         */
+        post: operations["recovery_codes_v1_me_totp_recovery_codes_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2800,6 +2823,11 @@ export interface components {
             name: string;
             /** Organizations */
             organizations: components["schemas"]["OrgSummary"][];
+            /**
+             * Recovery Codes Left
+             * @default 0
+             */
+            recovery_codes_left?: number;
             /** Totp Enabled */
             totp_enabled: boolean;
         };
@@ -3260,6 +3288,11 @@ export interface components {
             status: "ok" | "degraded";
             /** Version */
             version: string;
+        };
+        /** RecoveryCodesOut */
+        RecoveryCodesOut: {
+            /** Recovery Codes */
+            recovery_codes: string[];
         };
         /** RegisterIn */
         RegisterIn: {
@@ -4558,11 +4591,46 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RecoveryCodesOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recovery_codes_v1_me_totp_recovery_codes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotpCodeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryCodesOut"];
+                };
             };
             /** @description Validation Error */
             422: {

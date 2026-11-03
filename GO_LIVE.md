@@ -30,7 +30,8 @@ Status of the platform at the end of M9 and what has to happen before real clubs
 - ✅ ASVS L2 review (`docs/security/ASVS-L2.md`), tenant isolation and policy matrix tests, image scans
 - ✅ Personal data export, account and club deletion, youth defaults, shared links without names
 - ☐ External penetration test on staging
-- ☐ TOTP recovery codes; key rotation for `HB_ENCRYPTION_KEY` (key list with re-encryption)
+- ✅ TOTP recovery codes
+- ☐ Key rotation for `HB_ENCRYPTION_KEY` (key list with re-encryption)
 - ☐ Privacy policy, terms, DPA template for clubs (controller) and sub-processor list; records of processing
 - ☐ Data protection impact assessment for video of minors
 

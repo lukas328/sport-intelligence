@@ -123,7 +123,8 @@
     "verifyTitle": "Confirmer l'e-mail",
     "verifyOk": "Merci, votre adresse e-mail est confirmée.",
     "verifyBusy": "Confirmation …",
-    "toApp": "Ouvrir l'app"
+    "toApp": "Ouvrir l'app",
+    "totpHint": "Code de l'application ou code de récupération"
   },
   "invite": {
     "title": "Invitation",
@@ -256,7 +257,11 @@
     "twoFactorSecret": "Clé",
     "twoFactorConfirm": "Activer",
     "twoFactorDisable": "Désactiver",
-    "twoFactorEnabled": "La connexion à deux facteurs est active."
+    "twoFactorEnabled": "La connexion à deux facteurs est active.",
+    "recoveryTitle": "Codes de récupération",
+    "recoveryHint": "Conserve ces codes en lieu sûr (par exemple imprimés). Chaque code fonctionne une fois si tu n'as pas accès à ton application d'authentification. Ils ne sont affichés que maintenant.",
+    "recoveryLeft": "{count, plural, one {# code de récupération restant} other {# codes de récupération restants}}.",
+    "recoveryNew": "Nouveaux codes de récupération"
   },
   "dashboard": {
     "teamsTitle": "Équipes",

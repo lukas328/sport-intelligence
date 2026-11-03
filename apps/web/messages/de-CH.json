@@ -123,7 +123,8 @@
     "verifyTitle": "E-Mail bestätigen",
     "verifyOk": "Danke, deine E-Mail-Adresse ist bestätigt.",
     "verifyBusy": "Wird bestätigt …",
-    "toApp": "Zur App"
+    "toApp": "Zur App",
+    "totpHint": "Code aus der App oder ein Wiederherstellungscode"
   },
   "invite": {
     "title": "Einladung",
@@ -256,7 +257,11 @@
     "twoFactorSecret": "Schlüssel",
     "twoFactorConfirm": "Aktivieren",
     "twoFactorDisable": "Deaktivieren",
-    "twoFactorEnabled": "Zwei-Faktor-Anmeldung ist aktiv."
+    "twoFactorEnabled": "Zwei-Faktor-Anmeldung ist aktiv.",
+    "recoveryTitle": "Wiederherstellungscodes",
+    "recoveryHint": "Bewahre diese Codes sicher auf (zum Beispiel ausgedruckt). Jeder Code funktioniert einmal, wenn du keinen Zugriff auf deine Authenticator-App hast. Sie werden nur jetzt angezeigt.",
+    "recoveryLeft": "{count, plural, one {# Wiederherstellungscode} other {# Wiederherstellungscodes}} übrig.",
+    "recoveryNew": "Neue Wiederherstellungscodes"
   },
   "dashboard": {
     "teamsTitle": "Teams",

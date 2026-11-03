@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, UniqueConstraint, func
-from sqlalchemy.dialects.postgresql import CITEXT, INET, UUID
+from sqlalchemy.dialects.postgresql import CITEXT, INET, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from handball_api.core.db import Base, EntityMixin
@@ -21,6 +21,8 @@ class User(Base, EntityMixin):
     password_hash: Mapped[str | None] = mapped_column(String(255))
     totp_secret_enc: Mapped[str | None] = mapped_column(String(255))
     totp_enabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # HMAC hashes of the unused one-time recovery codes (shown once, M9)
+    recovery_codes: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     is_platform_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

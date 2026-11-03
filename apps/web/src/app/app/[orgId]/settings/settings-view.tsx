@@ -222,6 +222,7 @@ function SecuritySection({ me }: { me: Me }) {
   const [error, setError] = useState<ErrorKey | null>(null);
   const [enabled, setEnabled] = useState(me.totp_enabled);
   const [busy, setBusy] = useState(false);
+  const [codes, setCodes] = useState<string[] | null>(null);
 
   useEffect(() => {
     if (setup) void QRCode.toString(setup.otpauth_uri, { type: "svg", margin: 1, width: 180 }).then(setQr);
@@ -231,12 +232,23 @@ function SecuritySection({ me }: { me: Me }) {
     e.preventDefault();
     const code = String(new FormData(e.currentTarget).get("code"));
     setBusy(true);
-    const { error } = await api.POST(path, { body: { code } });
+    const res = await api.POST(path, { body: { code } });
     setBusy(false);
-    if (error) return setError(errorKey(error));
+    if (res.error) return setError(errorKey(res.error));
     setError(null);
     setSetup(null);
     setEnabled(path.endsWith("enable"));
+    if (path === "/v1/me/totp/enable") setCodes((res.data as { recovery_codes: string[] }).recovery_codes);
+    router.refresh();
+  }
+
+  async function regenerate(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const code = String(new FormData(e.currentTarget).get("code"));
+    const { data, error } = await api.POST("/v1/me/totp/recovery-codes", { body: { code } });
+    if (error) return setError(errorKey(error));
+    setError(null);
+    setCodes(data.recovery_codes);
     router.refresh();
   }
 
@@ -274,6 +286,31 @@ function SecuritySection({ me }: { me: Me }) {
             <Input label={t("auth.totpCode")} name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required />
             <Button type="submit" loading={busy}>
               {t("settings.twoFactorConfirm")}
+            </Button>
+          </form>
+        )}
+        {codes && (
+          <div className="space-y-2 rounded-md border border-accent p-3" data-testid="recovery-codes">
+            <p className="text-sm font-medium">{t("settings.recoveryTitle")}</p>
+            <p className="text-sm text-muted">{t("settings.recoveryHint")}</p>
+            <ul className="grid grid-cols-2 gap-1 font-mono text-sm sm:grid-cols-5">
+              {codes.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+            <Button variant="secondary" onClick={() => void navigator.clipboard?.writeText(codes.join("\n"))}>
+              {t("share.copy")}
+            </Button>
+          </div>
+        )}
+        {enabled && !codes && (
+          <p className="text-sm text-muted">{t("settings.recoveryLeft", { count: me.recovery_codes_left ?? 0 })}</p>
+        )}
+        {enabled && (
+          <form onSubmit={regenerate} className="flex flex-wrap items-end gap-3" aria-label={t("settings.recoveryNew")}>
+            <Input label={t("auth.totpCode")} name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required />
+            <Button type="submit" variant="secondary">
+              {t("settings.recoveryNew")}
             </Button>
           </form>
         )}

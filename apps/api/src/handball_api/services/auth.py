@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
+import secrets
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -198,11 +200,52 @@ async def login(ctx: Ctx, data: LoginIn, user_agent: str | None) -> IssuedSessio
     return await issue_session(ctx, user, mfa_pending=user.totp_enabled, user_agent=user_agent)
 
 
+RECOVERY_CODES = 10
+
+
+def _recovery_hash(ctx: Ctx, code: str) -> str:
+    normalised = code.strip().lower().replace("-", "").replace(" ", "")
+    key = ctx.settings.secret_key.get_secret_value().encode()
+    return hmac.new(key, b"recovery:" + normalised.encode(), hashlib.sha256).hexdigest()
+
+
+def new_recovery_codes(ctx: Ctx, user: User) -> list[str]:
+    """Ten one-time codes like `k7m2-x9qp`; only their HMAC is stored."""
+    alphabet = "abcdefghjkmnpqrstuvwxyz23456789"
+    codes = [
+        "-".join("".join(secrets.choice(alphabet) for _ in range(4)) for _ in range(2))
+        for _ in range(RECOVERY_CODES)
+    ]
+    user.recovery_codes = [_recovery_hash(ctx, c) for c in codes]
+    return codes
+
+
+def _use_recovery_code(ctx: Ctx, user: User, code: str) -> bool:
+    digest = _recovery_hash(ctx, code)
+    remaining = list(user.recovery_codes or [])
+    for stored in remaining:
+        if hmac.compare_digest(stored, digest):
+            remaining.remove(stored)
+            user.recovery_codes = remaining
+            return True
+    return False
+
+
 async def complete_totp(ctx: Ctx, session: AuthSession, user: User, code: str) -> None:
     if not session.mfa_pending:
         raise ProblemError(409, "no-totp-pending", "No second factor pending")
     secret = _box(ctx).decrypt(user.totp_secret_enc or "")
-    if not secret or not verify_totp(secret, code):
+    ok = secret is not None and secret != "" and verify_totp(secret, code)
+    if not ok and len(code.strip()) > 8 and _use_recovery_code(ctx, user, code):
+        ok = True
+        await audit.record(
+            ctx,
+            "user.recovery_code_used",
+            target_type="user",
+            target_id=user.id,
+            data={"remaining": len(user.recovery_codes)},
+        )
+    if not ok:
         raise ProblemError(401, "invalid-totp", "The code is wrong or expired")
     session.mfa_pending = False
     session.mfa_verified = True
@@ -298,7 +341,7 @@ async def totp_setup(ctx: Ctx, user: User) -> tuple[str, str]:
     return secret, totp_uri(secret, user.email)
 
 
-async def totp_enable(ctx: Ctx, user: User, session: AuthSession, code: str) -> None:
+async def totp_enable(ctx: Ctx, user: User, session: AuthSession, code: str) -> list[str]:
     secret = _box(ctx).decrypt(user.totp_secret_enc or "")
     if not secret:
         raise ProblemError(409, "totp-not-set-up", "Start the setup first")
@@ -307,6 +350,19 @@ async def totp_enable(ctx: Ctx, user: User, session: AuthSession, code: str) -> 
     user.totp_enabled_at = _now()
     session.mfa_verified = True
     await audit.record(ctx, "user.totp_enabled", target_type="user", target_id=user.id)
+    return new_recovery_codes(ctx, user)
+
+
+async def regenerate_recovery_codes(ctx: Ctx, user: User, code: str) -> list[str]:
+    secret = _box(ctx).decrypt(user.totp_secret_enc or "")
+    if not user.totp_enabled or not secret:
+        raise ProblemError(409, "totp-not-enabled", "Two-factor authentication is off")
+    if not verify_totp(secret, code):
+        raise ProblemError(422, "invalid-totp", "The code is wrong or expired")
+    await audit.record(
+        ctx, "user.recovery_codes_regenerated", target_type="user", target_id=user.id
+    )
+    return new_recovery_codes(ctx, user)
 
 
 async def totp_disable(ctx: Ctx, user: User, code: str) -> None:
@@ -317,6 +373,7 @@ async def totp_disable(ctx: Ctx, user: User, code: str) -> None:
         raise ProblemError(422, "invalid-totp", "The code is wrong or expired")
     user.totp_enabled_at = None
     user.totp_secret_enc = None
+    user.recovery_codes = []
     await audit.record(ctx, "user.totp_disabled", target_type="user", target_id=user.id)
 
 

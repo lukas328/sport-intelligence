@@ -26,7 +26,12 @@ class LoginIn(ApiModel):
 
 
 class TotpCodeIn(ApiModel):
-    code: str = Field(min_length=6, max_length=8)
+    # six-digit TOTP code or a recovery code (xxxx-xxxx)
+    code: str = Field(min_length=6, max_length=12)
+
+
+class RecoveryCodesOut(ApiModel):
+    recovery_codes: list[str]
 
 
 class MagicLinkIn(ApiModel):
@@ -58,6 +63,7 @@ class MeOut(ApiModel):
     name: str
     locale: str
     totp_enabled: bool
+    recovery_codes_left: int = 0
     has_password: bool
     email_verified: bool
     linked_providers: list[str]

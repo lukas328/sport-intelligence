@@ -12,7 +12,7 @@ n/a not applicable. Findings fixed during the review are marked **fixed in M9**.
 | V2.2 Authenticator lifecycle / anti-automation | ✅ | Redis rate limits on login, register, reset, magic link, TOTP, verify, share links; generic errors on login and reset |
 | V2.4 Credential storage | ✅ | Argon2id with rehash on login |
 | V2.5 Recovery | ✅ | single-use hashed tokens, 60 min, all sessions revoked after reset |
-| V2.7/2.8 OTP / TOTP | ◐ | TOTP (RFC 6238) with encrypted secrets (Fernet), required for org admins after the grace period and for operators in production; **no recovery codes yet** (lost device: identity check by support, documented in the runbook) |
+| V2.7/2.8 OTP / TOTP | ✅ | TOTP (RFC 6238) with encrypted secrets (Fernet), required for org admins after the grace period and for operators in production; ten one-time recovery codes stored as HMAC (**added after M9**) |
 | V3 Session management | ✅ | opaque random tokens, only SHA-256 stored, httpOnly + Secure + SameSite=Lax cookies, 14 day expiry, logout and "sign out other devices", device list |
 | V4 Access control | ✅ | central policy table, generated matrix (docs/policy-matrix.md), policy matrix test over every endpoint × 7 roles, deny by default, RLS as second line, operator backoffice invisible (404) |
 | V5 Validation, sanitisation, encoding | ✅ | Pydantic schemas with limits on every input, React escaping, CSP without `unsafe-eval` in production, SSRF guard for link imports (public HTTPS only, redirects re-checked), path traversal checks on media paths |
@@ -27,7 +27,6 @@ n/a not applicable. Findings fixed during the review are marked **fixed in M9**.
 | V14 Configuration | ✅ | refuses to start in staging/production with development secrets or insecure cookies, **no server banner (fixed in M9)**, security headers (CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy) |
 
 ## Open items before go-live
-- TOTP recovery codes (one-time, hashed) so admins do not depend on support after losing a device.
 - External penetration test of the deployed staging environment (GO_LIVE.md).
 - TLS configuration of the chosen hosting (Q-INFRA-1).
 - Turn on `HB_PWNED_CHECK=true` and `HB_BILLING_ENFORCE=true` in production.

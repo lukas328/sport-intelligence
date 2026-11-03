@@ -123,7 +123,8 @@
     "verifyTitle": "Confirm e-mail",
     "verifyOk": "Thanks, your e-mail address is confirmed.",
     "verifyBusy": "Confirming …",
-    "toApp": "Open app"
+    "toApp": "Open app",
+    "totpHint": "Code from the app or a recovery code"
   },
   "invite": {
     "title": "Invitation",
@@ -256,7 +257,11 @@
     "twoFactorSecret": "Key",
     "twoFactorConfirm": "Enable",
     "twoFactorDisable": "Disable",
-    "twoFactorEnabled": "Two-factor sign-in is active."
+    "twoFactorEnabled": "Two-factor sign-in is active.",
+    "recoveryTitle": "Recovery codes",
+    "recoveryHint": "Keep these codes safe (for example printed). Each code works once when you cannot use your authenticator app. They are shown only now.",
+    "recoveryLeft": "{count, plural, one {# recovery code} other {# recovery codes}} left.",
+    "recoveryNew": "New recovery codes"
   },
   "dashboard": {
     "teamsTitle": "Teams",

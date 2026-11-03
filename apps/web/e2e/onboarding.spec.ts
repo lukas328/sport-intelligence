@@ -106,6 +106,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await page.getByLabel("Code").fill(totp.generate());
   await page.getByRole("button", { name: "Aktivieren", exact: true }).click();
   await expect(page.getByTestId("totp-state")).toContainText("Aktiv.");
+  const recovery = (await page.getByTestId("recovery-codes").getByRole("listitem").first().textContent())!.trim();
+  expect(recovery).toMatch(/^[a-z2-9]{4}-[a-z2-9]{4}$/);
   await page.getByRole("button", { name: "Abmelden" }).click();
   await expect(page).toHaveURL(/\/login/);
   await page.getByLabel("E-Mail").fill(coachEmail);
@@ -113,6 +115,15 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Zwei-Faktor-Code" })).toBeVisible();
   await page.getByLabel("Code").fill(totp.generate());
+  await page.getByRole("button", { name: "Bestätigen" }).click();
+  await expect(page.getByRole("heading", { name: "Teams" })).toBeVisible();
+
+  // lost phone: a recovery code works once
+  await page.getByRole("button", { name: "Abmelden" }).click();
+  await page.getByLabel("E-Mail").fill(coachEmail);
+  await page.getByLabel("Passwort").fill("correct-horse-1");
+  await page.getByRole("button", { name: "Anmelden", exact: true }).click();
+  await page.getByLabel("Code").fill(recovery);
   await page.getByRole("button", { name: "Bestätigen" }).click();
   await expect(page.getByRole("heading", { name: "Teams" })).toBeVisible();
 });

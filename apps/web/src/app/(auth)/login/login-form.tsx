@@ -67,10 +67,9 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
               <Input
                 label={t("auth.totpCode")}
                 name="code"
-                inputMode="numeric"
                 autoComplete="one-time-code"
-                pattern="[0-9]*"
-                maxLength={6}
+                hint={t("auth.totpHint")}
+                maxLength={12}
                 required
                 autoFocus
               />

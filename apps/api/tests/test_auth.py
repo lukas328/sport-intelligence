@@ -118,8 +118,12 @@ async def test_totp_flow(make_api: Callable[[], Api]) -> None:
     assert setup["otpauth_uri"].startswith("otpauth://totp/")
     totp = pyotp.TOTP(setup["secret"])
     assert (await api.post("/v1/me/totp/enable", json={"code": "000000"})).status_code == 422
-    assert (await api.post("/v1/me/totp/enable", json={"code": totp.now()})).status_code == 204
-    assert (await api.get("/v1/me")).json()["totp_enabled"] is True
+    enabled = await api.post("/v1/me/totp/enable", json={"code": totp.now()})
+    assert enabled.status_code == 200
+    codes = enabled.json()["recovery_codes"]
+    assert len(codes) == 10 and len(set(codes)) == 10 and all(len(c) == 9 for c in codes)
+    me = (await api.get("/v1/me")).json()
+    assert me["totp_enabled"] is True and me["recovery_codes_left"] == 10
     assert (await api.post("/v1/me/totp/setup")).status_code == 409
 
     await api.post("/v1/auth/logout")
@@ -220,3 +224,41 @@ async def test_common_and_pwned_passwords(
         assert r.status_code == 201  # fails open
     finally:
         api.app.state.settings.pwned_check = False
+
+
+async def test_recovery_codes(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    await api.register("r@hc-test.ch")
+    totp = pyotp.TOTP((await api.post("/v1/me/totp/setup")).json()["secret"])
+    codes = (await api.post("/v1/me/totp/enable", json={"code": totp.now()})).json()[
+        "recovery_codes"
+    ]
+
+    async def login() -> None:
+        await api.post("/v1/auth/logout")
+        r = await api.post(
+            "/v1/auth/login", json={"email": "r@hc-test.ch", "password": "correct-horse-1"}
+        )
+        assert r.json() == {"status": "totp_required"}
+
+    await login()
+    # a recovery code works once, with or without dash and in any case
+    code = codes[0].upper().replace("-", " ")
+    assert (await api.post("/v1/auth/login/totp", json={"code": code})).json() == {"status": "ok"}
+    assert (await api.get("/v1/me")).json()["recovery_codes_left"] == 9
+    await login()
+    assert (await api.post("/v1/auth/login/totp", json={"code": codes[0]})).status_code == 401
+    assert (await api.post("/v1/auth/login/totp", json={"code": "zzzz-zzzz"})).status_code == 401
+    assert (await api.post("/v1/auth/login/totp", json={"code": codes[1]})).status_code == 200
+
+    # regeneration needs a TOTP code and replaces all codes
+    assert (
+        await api.post("/v1/me/totp/recovery-codes", json={"code": "000000"})
+    ).status_code == 422
+    fresh = (await api.post("/v1/me/totp/recovery-codes", json={"code": totp.now()})).json()[
+        "recovery_codes"
+    ]
+    assert len(fresh) == 10 and not set(fresh) & set(codes)
+    await login()
+    assert (await api.post("/v1/auth/login/totp", json={"code": codes[2]})).status_code == 401
+    assert (await api.post("/v1/auth/login/totp", json={"code": fresh[0]})).status_code == 200

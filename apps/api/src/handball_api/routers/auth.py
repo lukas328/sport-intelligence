@@ -34,6 +34,7 @@ from handball_api.schemas.auth import (
     PasswordForgotIn,
     PasswordResetIn,
     ProvidersOut,
+    RecoveryCodesOut,
     RegisterIn,
     SessionOut,
     TokenIn,
@@ -130,6 +131,7 @@ async def _me(auth: Authed) -> MeOut:
         locale=u.locale,
         totp_enabled=u.totp_enabled,
         has_password=u.password_hash is not None,
+        recovery_codes_left=len(u.recovery_codes or []),
         email_verified=u.email_verified_at is not None,
         linked_providers=sorted(str(p) for p in providers.all()),
         is_platform_admin=u.is_platform_admin,
@@ -154,9 +156,19 @@ async def totp_setup(auth: AuthedDep) -> TotpSetupOut:
     return TotpSetupOut(secret=secret, otpauth_uri=uri)
 
 
-@router.post("/me/totp/enable", status_code=status.HTTP_204_NO_CONTENT, tags=["me"])
-async def totp_enable(data: TotpCodeIn, auth: AuthedDep) -> None:
-    await service.totp_enable(auth.ctx, auth.user, auth.session, data.code)
+@router.post("/me/totp/enable", response_model=RecoveryCodesOut, tags=["me"])
+async def totp_enable(data: TotpCodeIn, auth: AuthedDep) -> RecoveryCodesOut:
+    """Turn two-factor sign-in on; returns ten one-time recovery codes (shown only now)."""
+    codes = await service.totp_enable(auth.ctx, auth.user, auth.session, data.code)
+    return RecoveryCodesOut(recovery_codes=codes)
+
+
+@router.post("/me/totp/recovery-codes", response_model=RecoveryCodesOut, tags=["me"])
+async def recovery_codes(data: TotpCodeIn, auth: AuthedDep) -> RecoveryCodesOut:
+    """New recovery codes (the old ones stop working)."""
+    return RecoveryCodesOut(
+        recovery_codes=await service.regenerate_recovery_codes(auth.ctx, auth.user, data.code)
+    )
 
 
 @router.post("/me/totp/disable", status_code=status.HTTP_204_NO_CONTENT, tags=["me"])

@@ -2865,6 +2865,11 @@
             "title": "Organizations",
             "type": "array"
           },
+          "recovery_codes_left": {
+            "default": 0,
+            "title": "Recovery Codes Left",
+            "type": "integer"
+          },
           "totp_enabled": {
             "title": "Totp Enabled",
             "type": "boolean"
@@ -4193,6 +4198,22 @@
         "title": "Readiness",
         "type": "object"
       },
+      "RecoveryCodesOut": {
+        "properties": {
+          "recovery_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Recovery Codes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "recovery_codes"
+        ],
+        "title": "RecoveryCodesOut",
+        "type": "object"
+      },
       "RegisterIn": {
         "properties": {
           "accept_terms": {
@@ -5204,7 +5225,7 @@
       "TotpCodeIn": {
         "properties": {
           "code": {
-            "maxLength": 8,
+            "maxLength": 12,
             "minLength": 6,
             "title": "Code",
             "type": "string"
@@ -6684,6 +6705,7 @@
     },
     "/v1/me/totp/enable": {
       "post": {
+        "description": "Turn two-factor sign-in on; returns ten one-time recovery codes (shown only now).",
         "operationId": "totp_enable_v1_me_totp_enable_post",
         "requestBody": {
           "content": {
@@ -6696,7 +6718,14 @@
           "required": true
         },
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryCodesOut"
+                }
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -6711,6 +6740,49 @@
           }
         },
         "summary": "Totp Enable",
+        "tags": [
+          "auth",
+          "me"
+        ]
+      }
+    },
+    "/v1/me/totp/recovery-codes": {
+      "post": {
+        "description": "New recovery codes (the old ones stop working).",
+        "operationId": "recovery_codes_v1_me_totp_recovery_codes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TotpCodeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryCodesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Recovery Codes",
         "tags": [
           "auth",
           "me"
