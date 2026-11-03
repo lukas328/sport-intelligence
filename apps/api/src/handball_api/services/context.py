@@ -9,6 +9,7 @@ from handball_api.core.config import Settings
 from handball_api.core.email import EmailSender
 from handball_api.core.jobs import EventBus, JobQueue
 from handball_api.core.storage import ObjectStorage
+from handball_api.core.text import TextGenerator
 from handball_api.services.policies import Actor, TwoFactorPolicy
 
 
@@ -22,6 +23,7 @@ class Ctx:
     storage: ObjectStorage
     jobs: JobQueue | None = None
     events: EventBus | None = None
+    text: TextGenerator | None = None
     ip: str | None = None
     user_id: uuid.UUID | None = None
     actor: Actor | None = None

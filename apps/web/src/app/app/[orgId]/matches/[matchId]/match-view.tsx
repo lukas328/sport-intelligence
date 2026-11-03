@@ -145,7 +145,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         view !== "physical" &&
         (stats.data && stats.data.quality.events > 0 ? (
           (() => {
-            const props = { orgId, match, teamName, stats: stats.data, names, onPlay: main ? onPlay : undefined };
+            const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
             if (view === "overview") return <OverviewView {...props} />;
             if (view === "report") return <ReportView {...props} />;
             if (view === "keepers") return <KeepersView {...props} />;

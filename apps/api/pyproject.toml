@@ -31,6 +31,7 @@ dependencies = [
   "opentelemetry-instrumentation-sqlalchemy>=0.50b0",
   "handball-court",
   "handball-metrics",
+  "anthropic>=1.0",
 ]
 
 [project.scripts]

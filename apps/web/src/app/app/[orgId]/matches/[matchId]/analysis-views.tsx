@@ -4,10 +4,11 @@ import type { Schemas } from "@handball/api-client";
 import { ZONE_LABELS } from "@handball/court";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CourtHalf, ShotDot } from "@/components/analysis/court-half";
 import { EventList, type EventFilter } from "@/components/analysis/event-list";
 import { GoalGrid } from "@/components/analysis/goal-grid";
+import { InsightsCard } from "@/components/analysis/insights";
 import { Card, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -109,6 +110,7 @@ export interface ViewProps {
   stats: Stats;
   onPlay?: (t_ms: number) => void;
   names: Record<string, string>;
+  staff?: boolean;
 }
 
 function useDrill() {
@@ -118,9 +120,13 @@ function useDrill() {
 
 function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnType<typeof useDrill>["drill"]; orgId: string; matchId: string; onPlay?: (t: number) => void; names: Record<string, string>; close: () => void }) {
   const t = useTranslations("common");
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (drill) ref.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [drill]);
   if (!drill) return null;
   return (
-    <Card className="space-y-2">
+    <Card className="space-y-2" ref={ref}>
       <EventList orgId={orgId} matchId={matchId} filter={drill.filter} title={drill.title} onPlay={onPlay} names={names} />
       <button className="text-sm text-muted underline" onClick={close}>
         {t("close")}
@@ -129,7 +135,7 @@ function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnT
   );
 }
 
-export function OverviewView({ orgId, match, teamName, stats, onPlay, names }: ViewProps) {
+export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false }: ViewProps) {
   const t = useTranslations("stats");
   const { drill, open, close } = useDrill();
   const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter }[] = [
@@ -148,6 +154,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names }: V
   const run = stats.timeline.best_run.own;
   return (
     <div className="space-y-4">
+      <InsightsCard orgId={orgId} matchId={match.id} names={names} staff={staff} onEvidence={open} />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>

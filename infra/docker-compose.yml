@@ -85,6 +85,8 @@ services:
       HB_RATE_LIMIT_AUTH: "60/60"
       # small parts locally so multi-part and resume are exercised with small test files
       HB_UPLOAD_PART_SIZE: "5242880"
+      # optional prose summaries; empty keeps the template texts only
+      HB_ANTHROPIC_API_KEY: ${HB_ANTHROPIC_API_KEY:-}
     ports: ["8000:8000"]
     depends_on:
       migrate: { condition: service_completed_successfully }

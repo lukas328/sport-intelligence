@@ -43,6 +43,8 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     sentry_dsn: SecretStr | None = None
+    # optional: natural-language match summaries via the Claude API (templates are used without it)
+    anthropic_api_key: SecretStr | None = None
     readiness_timeout_s: float = 2.0
 
     # Public URL of the web app (links in e-mails)

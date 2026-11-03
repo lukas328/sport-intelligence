@@ -29,6 +29,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
   await expectAccessible(page);
   // every number opens the events behind it
+  await expect(page.getByTestId("insights")).toContainText("Erkenntnisse");
   await table.getByRole("button", { name: "Tore Damen 1" }).click();
   await expect(page.getByTestId("event-list").getByRole("listitem")).toHaveCount(5);
 
@@ -45,5 +46,13 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   const keeper = page.getByTestId("keeper-card").filter({ hasText: "Mia Tor" });
   await expect(keeper).toContainText("Paraden");
   await expect(keeper.getByText("6", { exact: true })).toBeVisible();
+  await expectAccessible(page);
+
+  // season view across matches (back to the team's match list)
+  await page.goBack();
+  await page.getByRole("link", { name: "Saison" }).click();
+  await expect(page.getByTestId("season-tiles")).toContainText("Spiele");
+  await expect(page.getByTestId("season-matches")).toContainText("TV Papierdorf");
+  await expect(page.getByTestId("season-trend")).toBeVisible();
   await expectAccessible(page);
 });

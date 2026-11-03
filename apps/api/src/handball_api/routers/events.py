@@ -9,6 +9,7 @@ from handball_api.models import Event
 from handball_api.routers.deps import OrgDep
 from handball_api.schemas.events import EventIn, EventOut, EventPatch, FeedImportResult, KickoffIn
 from handball_api.services import events as service
+from handball_api.services import insights as insights_service
 from handball_api.services import paper_reports
 
 router = APIRouter(prefix="/v1/orgs/{org_id}", tags=["events"])
@@ -91,3 +92,23 @@ async def import_paper_report(
     """Paper match report (docs/schemas/paper-report.schema.json) as a match without video."""
     data = await file.read(MAX_IMPORT + 1)
     return await paper_reports.import_report(scope.ctx, team_id, data[:MAX_IMPORT])
+
+
+@router.get("/matches/{match_id}/insights", response_model=dict[str, Any], tags=["insights"])
+async def match_insights(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Ranked insights with evidence filters; compared with the other matches of the season."""
+    return await insights_service.insights(scope.ctx, match_id)
+
+
+@router.post("/matches/{match_id}/summary", response_model=dict[str, Any], tags=["insights"])
+async def match_summary(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Prose summary of the insights (Claude API, optional); numbers are verified before saving."""
+    return await insights_service.summarise(scope.ctx, match_id)
+
+
+@router.get(
+    "/teams/{team_id}/seasons/{season_id}/stats", response_model=dict[str, Any], tags=["insights"]
+)
+async def season_stats(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Per-match key numbers, totals and player totals for a season."""
+    return await insights_service.season_stats(scope.ctx, team_id, season_id)

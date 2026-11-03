@@ -254,6 +254,12 @@ ENDPOINTS += [
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
     (
+        "GET insights",
+        READERS,
+        lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/insights"),
+    ),
+    ("GET season stats", READERS, lambda a, w: a.get(w.t(f"/seasons/{w.season}/stats"))),
+    (
         "POST play",
         STAFF,
         lambda a, w: a.post(

@@ -66,6 +66,7 @@ def get_ctx(request: Request, db: DbDep, settings: SettingsDep) -> Ctx:
         storage=request.app.state.storage,
         jobs=request.app.state.jobs,
         events=request.app.state.events,
+        text=request.app.state.text,
         ip=client_ip(request),
     )
 

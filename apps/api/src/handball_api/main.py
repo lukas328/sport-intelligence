@@ -24,6 +24,7 @@ from handball_api.core.oidc import OidcClient
 from handball_api.core.ratelimit import MemoryRateLimiter, RateLimiter, RedisRateLimiter
 from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
+from handball_api.core.text import ClaudeTextGenerator, TextGenerator
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import events as events_router
 from handball_api.routers import tactics as tactics_router
@@ -94,6 +95,7 @@ def create_app(
     oidc: OidcClient | None = None,
     jobs: JobQueue | None = None,
     events: EventBus | None = None,
+    text: TextGenerator | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     check_production_secrets(settings)
@@ -126,6 +128,11 @@ def create_app(
     app.state.oidc = oidc or OidcClient()
     app.state.jobs = jobs or RqJobQueue(settings.redis_url)
     app.state.events = events or RedisEventBus(settings.redis_url)
+    app.state.text = text or (
+        ClaudeTextGenerator(settings.anthropic_api_key.get_secret_value())
+        if settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value()
+        else None
+    )
     app.dependency_overrides[get_settings] = lambda: settings
     app.add_middleware(
         CORSMiddleware,
