@@ -6,8 +6,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { problemCode } from "@handball/api-client";
 import { toDrillItem } from "@/lib/drill-snapshot";
@@ -84,9 +83,9 @@ export function InsightsCard({
   if (!data) return null;
 
   return (
-    <Card className="space-y-3" data-testid="insights">
+    <Sheet className="space-y-3" data-testid="insights">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold">{t("title")}</h2>
+        <h2 className="text-xl">{t("title")}</h2>
         <p className="text-xs text-muted">{t("baseline", { count: data.baseline_matches })}</p>
       </div>
       {data.insights.length === 0 ? (
@@ -94,11 +93,12 @@ export function InsightsCard({
       ) : (
         <ul className="divide-y divide-border/70">
           {data.insights.map((i) => (
-            <li key={i.id} className="flex flex-wrap items-start gap-x-3 gap-y-1 py-2.5 text-sm">
-              <Badge tone={i.kind === "strength" ? "ok" : i.kind === "weakness" ? "error" : "neutral"} className="mt-0.5 shrink-0">
+            <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
+              <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
+                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? "size-2.5 rounded-[2px] bg-error" : "size-2.5 rounded-[2px] bg-muted"} />
                 {t(i.kind)}
-              </Badge>
-              <span className="min-w-0 flex-1">{text(i)}</span>
+              </span>
+              <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">{text(i)}</span>
               <button className="text-xs font-semibold text-accent hover:underline" onClick={() => onEvidence(text(i), i.evidence)}>
                 {t("evidence")}
               </button>
@@ -131,7 +131,7 @@ export function InsightsCard({
         </p>
       )}
       <p className="text-xs text-muted">{t("hint")}</p>
-    </Card>
+    </Sheet>
   );
 }
 

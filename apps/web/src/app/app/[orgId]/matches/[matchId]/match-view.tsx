@@ -110,6 +110,14 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
   const jobs = match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job);
   const main = match.videos.find((v) => v.role === "main" && v.status === "ready");
+  // a match with events but no video (paper report, demo, marks) opens on its analysis
+  const opened = useRef(false);
+  const hasEvents = (stats.data?.own.shots ?? 0) + (stats.data?.opponent.shots ?? 0) > 0;
+  useEffect(() => {
+    if (opened.current || !stats.data) return;
+    opened.current = true;
+    if (!main && hasEvents && !new URLSearchParams(window.location.search).get("t")) setView("analysis");
+  }, [stats.data, main, hasEvents]);
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
   const ourName = teamName;
   const [home, away] = match.is_home ? [ourName, oppName(match)] : [oppName(match), ourName];
@@ -163,7 +171,39 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const base = `/app/${orgId}/matches/${match.id}`;
   return (
     <div className="space-y-8">
-      <Stage compact>
+      <Stage
+        compact
+        aside={
+          stats.data && hasEvents ? (
+            <table className="text-[0.9375rem]">
+              <caption className="sr-only">{t("stats.comparison")}</caption>
+              <thead>
+                <tr className="text-sm">
+                  <th scope="col" className="sr-only">
+                    {t("stats.comparison")}
+                  </th>
+                  <th scope="col" className="px-3 pb-1 text-right font-semibold">{t("stats.own")}</th>
+                  <th scope="col" className="pb-1 pl-3 text-right font-semibold opacity-80">{t("stats.opponent")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
+                  [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
+                  [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
+                  ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
+                ].map(([label, a, b]) => (
+                  <tr key={String(label)} className="border-t border-current/20">
+                    <th scope="row" className="py-1.5 pr-4 text-left font-medium">{label}</th>
+                    <td className="px-3 py-1.5 text-right font-score text-2xl leading-none">{a}</td>
+                    <td className="py-1.5 pl-3 text-right font-score text-2xl leading-none opacity-80">{b}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : undefined
+        }
+      >
         <p className="text-[0.9375rem] font-semibold">
           {[format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "long", year: "numeric" }), format.dateTime(kickoff, { timeStyle: "short" }), match.competition, match.venue]
             .filter(Boolean)
@@ -486,6 +526,8 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
 }
 
 /** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
+const pctLabel = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
+
 function ScoreRows({ home, away, hs, as, ownHome, halftime, halftimeLabel }: { home: string; away: string; hs: number | null; as: number | null; ownHome: boolean; halftime: string | null; halftimeLabel: string }) {
   const [h, a] = useCountUp(hs ?? 0, as ?? 0);
   const scored = hs != null && as != null;

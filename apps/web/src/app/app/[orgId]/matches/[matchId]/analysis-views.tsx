@@ -9,7 +9,7 @@ import { CourtHalf, ShotDot } from "@/components/analysis/court-half";
 import { EventList, type EventFilter } from "@/components/analysis/event-list";
 import { GoalGrid } from "@/components/analysis/goal-grid";
 import { InsightsCard } from "@/components/analysis/insights";
-import { Card, EmptyState } from "@/components/ui/card";
+import { Sheet, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
@@ -127,12 +127,12 @@ function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnT
   }, [drill]);
   if (!drill) return null;
   return (
-    <Card className="space-y-2" ref={ref}>
+    <Sheet className="space-y-2" ref={ref}>
       <EventList orgId={orgId} matchId={matchId} filter={drill.filter} title={drill.title} onPlay={onPlay} names={names} />
       <button className="text-sm text-muted underline" onClick={close}>
         {t("close")}
       </button>
-    </Card>
+    </Sheet>
   );
 }
 
@@ -155,10 +155,10 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   ];
   const run = stats.timeline.best_run.own;
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <InsightsCard orgId={orgId} matchId={match.id} names={names} staff={staff} onEvidence={open} />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="space-y-3">
+      <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
+        <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>
           <ScoreChart
             points={stats.timeline.score}
@@ -173,8 +173,8 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               <li>{t("drought", { minutes: Math.round(stats.timeline.longest_own_drought_s.seconds / 60) })}</li>
             )}
           </ul>
-        </Card>
-        <Card className="space-y-3">
+        </Sheet>
+        <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("comparison")}</h2>
           <table className="w-full text-sm" data-testid="comparison">
             <thead className="text-muted">
@@ -199,7 +199,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             </tbody>
           </table>
           <p className="text-xs text-muted">{t("possessionsHint")}</p>
-        </Card>
+        </Sheet>
       </div>
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
@@ -392,7 +392,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
   const placed = list.filter((e) => e.x != null && e.y != null);
   const team = side === "own" ? stats.own : stats.opponent;
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <div className="flex flex-wrap gap-3">
         <div className="flex gap-1" role="group" aria-label={t("filterTeam")}>
           {(["own", "opponent"] as const).map((s) => (
@@ -413,8 +413,8 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
           </select>
         </label>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
-        <Card className="space-y-2">
+      <div className="grid gap-10 lg:grid-cols-[3fr_2fr] lg:gap-x-12">
+        <Sheet className="space-y-2">
           <h2 className="font-semibold">{t("map")}</h2>
           <CourtHalf label={t("map")}>
             {placed.map((e) => (
@@ -422,13 +422,13 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
             ))}
           </CourtHalf>
           {list.length - placed.length > 0 && <p className="text-xs text-muted">{t("noPosition", { count: list.length - placed.length })}</p>}
-        </Card>
-        <Card className="space-y-2">
+        </Sheet>
+        <Sheet className="space-y-2">
           <h2 className="font-semibold">{t("goal")}</h2>
           <GoalGrid data={team.goal_zones} onCell={(z) => open(`${t("goal")} ${z}`, { side, type: "shot", goal_zone: z })} />
-        </Card>
+        </Sheet>
       </div>
-      <Card className="space-y-2">
+      <Sheet className="space-y-2">
         <h2 className="font-semibold">{t("zones")}</h2>
         {Object.keys(team.zones).length === 0 ? (
           <EmptyState title={t("noPosition", { count: list.length })} />
@@ -442,7 +442,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
             ))}
           </ul>
         )}
-      </Card>
+      </Sheet>
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
   );

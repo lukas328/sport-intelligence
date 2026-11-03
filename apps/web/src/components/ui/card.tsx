@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -6,6 +7,11 @@ import { cn } from "@/lib/utils";
 export function Card({ className, ...props }: ComponentProps<"div">) {
   return <div className={cn("rounded-lg border border-border bg-raised p-5 sm:p-6", className)} {...props} />;
 }
+
+/** An open section of a match sheet: a strong rule on top instead of a panel around it. */
+export const Sheet = forwardRef<HTMLElement, ComponentProps<"section">>(function Sheet({ className, ...props }, ref) {
+  return <section ref={ref} className={cn("border-t-2 border-foreground pt-4", className)} {...props} />;
+});
 
 export function CardTitle({ children, as: Tag = "h2", className }: { children: ReactNode; as?: "h1" | "h2" | "h3"; className?: string }) {
   return <Tag className={cn("text-lg font-bold font-display", className)}>{children}</Tag>;

@@ -62,3 +62,15 @@ the last ten matches, newest on the right; the trend became goal difference per 
 and below the line with dates (the last six on phones); scorers show the shirt number in the club
 colour, as on the squad page, in two columns on desktop. The onboarding card on the overview became
 a slim strip (3/7, next step, button). The fixture list no longer says home or away twice.
+
+## Match, drills and training without panels
+
+- Match stage: the four figures that decide a handball match (shooting, saves, turnovers, xG) as a
+  head-to-head table in the stage ink next to the score; below the score on phones. A match with
+  events but no video (paper report, demo, marks) opens on its analysis instead of an upload box.
+- Analysis, insights, training lists and the calendar tools: open sections under a strong top rule
+  (`Sheet` in `components/ui/card.tsx`) instead of panels; strength and weakness as a small
+  coloured square with the word instead of a pill.
+- Drills: each drill shows a small half court with its area marked (wings, back court, pivot, 7 m,
+  goal, or the whole half), drawn from the real court geometry; the list sits on hairlines.
+- The calendar import uses the German file picker.
