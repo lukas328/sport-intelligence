@@ -12,6 +12,7 @@ import { CourtLines } from "./court-lines";
  */
 export function Stage({
   children,
+  eyebrow,
   aside,
   compact,
   full,
@@ -19,6 +20,8 @@ export function Stage({
   className,
 }: {
   children: ReactNode;
+  /** first line (greeting, date); on phones the aside follows it, before the headline */
+  eyebrow?: ReactNode;
   aside?: ReactNode;
   compact?: boolean;
   full?: boolean;
@@ -43,8 +46,11 @@ export function Stage({
       )}
       {compact && aside && <div className="absolute inset-y-0 right-0 hidden items-center pr-[max(2.5rem,calc((100%-1240px)/2+2.5rem))] xl:flex">{aside}</div>}
       <div className={cn("relative mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-10", compact ? "py-6 lg:py-7" : "pt-7 pb-8 lg:pt-12 lg:pb-14")}>
-        <div className={cn("min-w-0", aside ? "max-w-2xl xl:max-w-[min(42rem,calc(100%-min(100dvh,36rem)))]" : "max-w-2xl")}>{children}</div>
-        {aside && <div className="mt-6 xl:hidden">{aside}</div>}
+        <div className={cn("min-w-0", aside ? "max-w-2xl xl:max-w-[min(42rem,calc(100%-min(100dvh,36rem)))]" : "max-w-2xl")}>
+          {eyebrow && <p className="text-[0.9375rem] font-semibold">{eyebrow}</p>}
+          {aside && <div className="mt-5 mb-2 xl:hidden">{aside}</div>}
+          {children}
+        </div>
       </div>
     </section>
   );

@@ -19,7 +19,7 @@ export function ClubMark({ org, className }: { org: { id: string; name: string; 
   return (
     <span
       aria-hidden
-      className={cn("grid size-9 shrink-0 place-items-center rounded-md text-[0.8125rem] font-bold font-wide", className)}
+      className={cn("grid size-9 shrink-0 place-items-center rounded-md text-[0.8125rem] font-bold font-wide ring-1 ring-inset ring-white/25", className)}
       style={{ background: org.primary_color, color: contrastText(org.primary_color) }}
     >
       {initials || "•"}

@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { FileUp, Trash2, UserPlus, Users } from "lucide-react";
-import { Jersey } from "@/components/domain/scoreboard";
 import { Alert, Card, EmptyState, Skeleton } from "@/components/ui/card";
 import { useConfirm } from "@/components/ui/confirm";
 import { Dialog } from "@/components/ui/dialog";
@@ -180,58 +179,48 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
             <EmptyState icon={<Users />} title={t("roster.empty")}>{canEdit && t("roster.emptyHint")}</EmptyState>
           )
         ) : (
-          <div className="overflow-x-auto rounded-lg bg-raised border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs text-muted">
-                <tr className="border-b border-border/70">
-                  <th scope="col" className="w-14 py-3 pl-4 font-medium sm:pl-5">{t("roster.number")}</th>
-                  <th scope="col" className="px-3 py-3 font-medium">{t("roster.lastName")}</th>
-                  <th scope="col" className="px-3 py-3 font-medium">{t("roster.firstName")}</th>
-                  <th scope="col" className="px-3 py-3 font-medium">{t("roster.position")}</th>
-                  <th scope="col" className="hidden px-3 py-3 font-medium sm:table-cell">{t("roster.hand")}</th>
-                  <th scope="col" className="hidden px-3 py-3 font-medium md:table-cell">{t("roster.account")}</th>
-                  {canEdit && <th scope="col" className="py-3 pr-4"><span className="sr-only">{t("common.edit")}</span></th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/70">
-                {entries.map((p) => (
-                  <tr key={p.id} className="transition-colors hover:bg-surface/50" data-testid="roster-row">
-                    <td className="py-2.5 pl-4 sm:pl-5">
-                      <Jersey n={p.jersey_number} />
-                    </td>
-                    <td className="px-3 py-2.5 font-semibold">{p.last_name}</td>
-                    <td className="px-3 py-2.5">{p.first_name}</td>
-                    <td className="px-3 py-2.5" title={p.main_position ? t(`positions.${p.main_position}`) : undefined}>
-                      {p.main_position && <span className="rounded-md bg-surface px-1.5 py-0.5 text-xs font-semibold">{p.main_position}</span>}
-                    </td>
-                    <td className="hidden px-3 py-2.5 text-muted sm:table-cell">{p.shooting_hand ? t(`hands.${p.shooting_hand}`) : ""}</td>
-                    <td className="hidden px-3 py-2.5 md:table-cell">
-                      <span className="inline-flex items-center gap-1.5 text-muted">
-                        <span aria-hidden className={cn("size-1.5 rounded-full", p.has_account ? "bg-ok" : "bg-border")} />
-                        {p.has_account ? t("roster.hasAccount") : t("roster.noAccount")}
+          // the squad as it lines up: shirt number first, in the club colour
+          <ul className="grid grid-cols-1 overflow-hidden rounded-lg border border-foreground/15 bg-raised sm:grid-cols-2 xl:grid-cols-3">
+            {entries.map((p) => (
+              <li key={p.id} className="group relative flex items-center gap-4 px-4 py-3.5 outline outline-1 outline-foreground/10" data-testid="roster-row">
+                <span className="w-14 shrink-0 text-center font-score text-[2.75rem] leading-none text-accent" aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
+                  {p.jersey_number ?? "–"}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[1.0625rem] font-semibold">
+                    {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                  </span>
+                  <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
+                    {p.main_position && (
+                      <span className="rounded-sm bg-surface px-1.5 py-px text-xs font-bold text-foreground" title={t(`positions.${p.main_position}`)}>
+                        {p.main_position}
                       </span>
-                    </td>
-                    {canEdit && (
-                      <td className="py-2 pr-3 text-right">
-                        <Button
-                          variant="quiet"
-                          size="icon-sm"
-                          aria-label={`${t("roster.remove")}: ${p.first_name} ${p.last_name}`}
-                          title={t("roster.remove")}
-                          onClick={async () => {
-                            if (await confirm({ title: t("roster.removeConfirm", { name: `${p.first_name} ${p.last_name}` }), confirm: t("roster.remove"), danger: true }))
-                              remove.mutate(p.id);
-                          }}
-                        >
-                          <Trash2 aria-hidden />
-                        </Button>
-                      </td>
                     )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    {p.shooting_hand && <span>{t(`hands.${p.shooting_hand}`)}</span>}
+                    <span className="inline-flex items-center gap-1.5">
+                      <span aria-hidden className={cn("size-1.5 rounded-full", p.has_account ? "bg-ok" : "bg-foreground/25")} />
+                      {p.has_account ? t("roster.hasAccount") : t("roster.noAccount")}
+                    </span>
+                  </span>
+                </span>
+                {canEdit && (
+                  <Button
+                    variant="quiet"
+                    size="icon-sm"
+                    className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+                    aria-label={`${t("roster.remove")}: ${p.first_name} ${p.last_name}`}
+                    title={t("roster.remove")}
+                    onClick={async () => {
+                      if (await confirm({ title: t("roster.removeConfirm", { name: `${p.first_name} ${p.last_name}` }), confirm: t("roster.remove"), danger: true }))
+                        remove.mutate(p.id);
+                    }}
+                  >
+                    <Trash2 aria-hidden />
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 

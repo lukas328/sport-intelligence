@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 const path = (pts: readonly Point[]) => pts.map(([x, y], i) => `${i ? "L" : "M"}${x} ${COURT.width - y}`).join(" ");
 
 /**
- * The right goal area of a real court (packages/court): 6 m line, dashed 9 m line, 7 m mark and
- * goal. Decorative only, drawn in the current text colour. It frames the stage; it never runs
+ * The right goal area of a real court (packages/court): 6 m line, dashed 9 m line and 7 m mark
+ * (the goal itself sits on the edge and would read as a stray bar). Decorative only, drawn in the current text colour. It frames the stage; it never runs
  * through text (callers hide it where space is short).
  */
 export function CourtLines({ className }: { className?: string }) {
@@ -23,8 +23,7 @@ export function CourtLines({ className }: { className?: string }) {
     >
       <path d={path(L.free_throw_right ?? [])} strokeWidth={2} strokeDasharray="9 8" vectorEffect="non-scaling-stroke" opacity={0.4} />
       <path d={path(L.goal_area_right ?? [])} strokeWidth={2.5} vectorEffect="non-scaling-stroke" opacity={0.55} />
-      <path d={path(L.penalty_mark_right ?? [])} strokeWidth={2.5} vectorEffect="non-scaling-stroke" opacity={0.6} />
-      <path d={path(L.goal_right ?? [])} strokeWidth={6} vectorEffect="non-scaling-stroke" opacity={0.7} />
+      <path d={path(L.penalty_mark_right ?? [])} strokeWidth={2} vectorEffect="non-scaling-stroke" opacity={0.45} />
     </svg>
   );
 }

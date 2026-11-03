@@ -117,6 +117,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       <TeamSubNav />
       <Stage
         pullMobile={false}
+        eyebrow={tv("afterMatches", { label, n })}
         aside={
           <Link href={`/app/${orgId}/matches/${last.match_id}`} className="group block text-left xl:text-center">
             <span className="block text-[0.9375rem] font-semibold">{tv("lastResult")}: {tm(lastWon)}</span>
@@ -125,7 +126,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           </Link>
         }
       >
-        <p className="text-[0.9375rem] font-semibold">{tv("afterMatches", { label, n })}</p>
         <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
           {statement ? tv(statement.headline.key.replace("voice.", "") as "overXg", statement.headline.params as never) : lastResult ? tv(lastResult.headline.key.replace("voice.", "") as "won", lastResult.headline.params as never) : tv("neutralSeason")}
         </h1>
@@ -141,28 +141,29 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
       <section className="space-y-3">
         <h2 className="sr-only">{t("title")}</h2>
-        <dl className="grid grid-cols-2 overflow-hidden rounded-lg border border-foreground/25 bg-raised lg:grid-cols-4" data-testid="season-tiles">
+        <ul className="grid grid-cols-2 overflow-hidden rounded-lg border border-foreground/25 bg-raised lg:grid-cols-4" data-testid="season-tiles">
           {cells.map((c, i) => (
+            <li key={c.key} className="contents">
             <Link
-              key={c.key}
               href={c.href}
               className={cn(
                 "group block px-5 py-4 transition-colors focus-visible:relative focus-visible:z-10",
                 i % 2 === 1 && "border-l border-foreground/15",
                 i >= 2 && "border-t border-foreground/15 lg:border-t-0",
                 i === 2 && "lg:border-l",
-                c.focus ? "bg-signal/25 shadow-[inset_0_4px_0_var(--signal)] hover:bg-signal/35 dark:bg-signal/15" : "hover:bg-surface",
+                c.focus ? "bg-resin/25 shadow-[inset_0_4px_0_var(--resin)] hover:bg-resin/35 dark:bg-resin/[0.08]" : "hover:bg-surface",
               )}
             >
-              <dt className="text-sm font-semibold">
+              <span className="block text-sm font-semibold">
                 {c.label}
                 {c.focus && <span>, {tv("focus")}</span>}
-              </dt>
-              <dd className="mt-1 font-score text-[2.5rem] leading-none group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">{c.value}</dd>
-              {c.focus && c.reference && <dd className="mt-1 text-sm font-semibold">{tv("reference", { value: c.reference })}</dd>}
+              </span>
+              <span className="mt-1 block font-score text-[2.5rem] leading-none group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">{c.value}</span>
+              {c.focus && c.reference && <span className="mt-1 block text-sm font-semibold">{tv("reference", { value: c.reference })}</span>}
             </Link>
+            </li>
           ))}
-        </dl>
+        </ul>
         {focus && <p className="text-sm text-muted">{tv("focusNote")}</p>}
       </section>
 
@@ -215,17 +216,19 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       {n > 1 && (
         <section className="space-y-3">
           <h2 className="text-2xl">{t("best")}</h2>
-          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-foreground/15 bg-foreground/15 lg:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-foreground/15 bg-foreground/15 lg:grid-cols-4">
             {bests.map((b) =>
               b.row ? (
-                <Link key={b.label} href={`/app/${orgId}/matches/${b.row.match_id}`} className="group bg-raised px-5 py-4 transition-colors hover:bg-surface">
-                  <dt className="text-sm font-semibold">{b.label}</dt>
-                  <dd className="mt-1 font-score text-3xl leading-none">{b.value}</dd>
-                  <dd className="mt-1.5 truncate text-sm text-muted group-hover:underline">{t("against", { opponent: b.row.opponent })}</dd>
-                </Link>
+                <li key={b.label} className="contents">
+                  <Link href={`/app/${orgId}/matches/${b.row.match_id}`} className="group bg-raised px-5 py-4 transition-colors hover:bg-surface">
+                    <span className="block text-sm font-semibold">{b.label}</span>
+                    <span className="mt-1 block font-score text-3xl leading-none">{b.value}</span>
+                    <span className="mt-1.5 block truncate text-sm text-muted group-hover:underline">{t("against", { opponent: b.row.opponent })}</span>
+                  </Link>
+                </li>
               ) : null,
             )}
-          </dl>
+          </ul>
         </section>
       )}
 

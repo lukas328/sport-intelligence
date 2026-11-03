@@ -175,6 +175,7 @@ function NextStage({ orgId, m }: { orgId: string; m: Match }) {
   const href = `/app/${orgId}/matches/${m.id}`;
   return (
     <Stage
+      eyebrow={greeting}
       aside={
         <div className="text-left xl:text-center" aria-hidden>
           <span className="block font-score text-[5rem] leading-[0.85] xl:text-[clamp(3.25rem,4.2vw,4.75rem)]">{format.dateTime(when, { hour: "2-digit", minute: "2-digit" })}</span>
@@ -182,7 +183,6 @@ function NextStage({ orgId, m }: { orgId: string; m: Match }) {
         </div>
       }
     >
-      <p className="text-[0.9375rem] font-semibold">{greeting}</p>
       <p className="mt-6 text-lg font-semibold">
         {t("today.inDays", { n: days })} · {m.kind === "training" ? t("matches.training") : m.is_home ? t("matches.homeShort") : t("matches.awayShort")}
       </p>
@@ -212,6 +212,7 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
   const needsVideo = !m.has_video && m.status !== "processing" && m.status !== "uploading";
   return (
     <Stage
+      eyebrow={greeting}
       aside={
         m.score_own != null && m.score_opponent != null ? (
           <Link href={href} className="block text-left xl:text-center" aria-label={`${m.score_own}:${m.score_opponent}`}>
@@ -220,7 +221,6 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
         ) : undefined
       }
     >
-      <p className="text-[0.9375rem] font-semibold">{greeting}</p>
       <p className="mt-6 text-lg font-semibold">{t("today.lastMatchOn", { date: format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "long" }) })}</p>
       <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
         {statement ? t(statement.headline.key as "voice.won", statement.headline.params as never) : m.kind === "training" ? t("matches.training") : m.opponent_name}
@@ -256,8 +256,7 @@ function FirstStage({ base }: { base: string }) {
   const t = useTranslations();
   const greeting = useGreeting();
   return (
-    <Stage>
-      <p className="text-[0.9375rem] font-semibold">{greeting}</p>
+    <Stage eyebrow={greeting}>
       <h1 className="mt-6 text-[2.75rem] leading-[0.95] sm:text-6xl">{t("today.firstMatch")}</h1>
       <p className="mt-3 text-lg">{t("today.firstMatchHint")}</p>
       <div className="mt-7">
@@ -399,6 +398,7 @@ function PlayerToday({ orgId }: { orgId: string }) {
   return (
     <div className="space-y-12">
       <Stage
+        eyebrow={greeting}
         aside={
           when ? (
             <div className="text-left xl:text-center" aria-hidden>
@@ -408,7 +408,6 @@ function PlayerToday({ orgId }: { orgId: string }) {
           ) : undefined
         }
       >
-        <p className="text-[0.9375rem] font-semibold">{greeting}</p>
         <p className="mt-6 text-lg font-semibold">{t("today.yourNext")}</p>
         <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">
           {schedule.items.isLoading ? "" : next ? (next.kind === "match" ? t("schedule.match", { opponent: next.title ?? "" }) : next.title || t("schedule.training")) : t("today.noDates")}

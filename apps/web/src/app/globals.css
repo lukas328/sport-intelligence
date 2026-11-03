@@ -16,6 +16,8 @@
   --signal: #ffd23f;
   --signal-ink: #10151c;
   --mark: #ffffff;
+  /* resin yellow, fixed: the warning tint must not depend on the club colour */
+  --resin: #ffd23f;
   --accent-l: #0a66c1;
   --accent-l-contrast: #ffffff;
   --paper-l: #eef5fb;
@@ -25,7 +27,7 @@
   --paper-d: #07131f;
   --surface-d: #0d2239;
   --raised-d: #0d1d2e;
-  --ok: #1a7a3a;
+  --ok: #166534;
   --error: #b42318;
   --warn: #8a5300;
   --court: #e7efe4;
@@ -122,6 +124,7 @@
   --color-signal: var(--signal);
   --color-signal-ink: var(--signal-ink);
   --color-mark: var(--mark);
+  --color-resin: var(--resin);
   --color-ok: var(--ok);
   --color-error: var(--error);
   --color-warn: var(--warn);
