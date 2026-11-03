@@ -11,6 +11,7 @@ import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesC
 import { useRosterNames } from "@/components/analysis/tagger";
 import { useCountUp } from "@/components/domain/match-score";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
+import { DEFAULT_CLUB } from "@/lib/color";
 import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
 import { EmptyState, Skeleton } from "@/components/ui/card";
@@ -138,7 +139,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       opponent: oppName(match),
       line: t(`voice.${result === "won" ? "won" : result === "lost" ? "lost" : "draw"}`, { opponent: oppName(match) }).replace(/\.$/, ""),
       figures: [shots && t("matches.cardShots", { value: shots }), saves && t("matches.cardSaves", { value: saves })].filter((x): x is string => Boolean(x)),
-      colour: shell?.org.primary_color ?? "#0b6bcb",
+      colour: shell?.org.primary_color ?? DEFAULT_CLUB,
       tag: match.is_demo ? t("matches.cardDemo") : null,
     });
     const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));

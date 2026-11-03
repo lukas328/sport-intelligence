@@ -62,6 +62,22 @@ describe("design rules", () => {
     expect(bad.map((f) => f.path)).toEqual([]);
   });
 
+  it("keeps the angular form: no soft panels or pills, no coloured side borders", () => {
+    // 2xl/3xl radii were the soft-panel look; padded rounded-full elements were pills; a thick
+    // coloured left border on a rounded box is the best-known sign of generated UI
+    const soft = /\brounded-(2xl|3xl)\b/;
+    const pill = /className="[^"]*\brounded-full\b[^"]*\bpx-\d/;
+    const sideBorder = /\bborder-l-(4|8|\[)/;
+    const bad = sources.filter((f) => soft.test(f.text) || pill.test(f.text) || sideBorder.test(f.text));
+    expect(bad.map((f) => f.path)).toEqual([]);
+  });
+
+  it("draws navigation and domain icons itself", () => {
+    const shell = sources.filter((f) => ["components/shell/app-shell.tsx", "components/shell/icons.tsx"].includes(f.path.replaceAll("\\", "/")));
+    for (const f of shell) expect(f.text.includes("Sparkles"), f.path).toBe(false);
+    expect(sources.some((f) => /\bSparkles\b/.test(f.text)), "the sparkle symbol for AI").toBe(false);
+  });
+
   it("has no long dashes in UI text", () => {
     for (const locale of ["de-CH", "fr", "en"]) {
       const text = readFileSync(join(MESSAGES, `${locale}.json`), "utf8");

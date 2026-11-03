@@ -225,11 +225,11 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <p className="text-4xl font-bold tabular-nums" data-testid="live-score">
+          <p className="font-score text-6xl leading-none" data-testid="live-score">
             {score.own}:{score.opp}
           </p>
           <div className="text-right">
-            <p className="font-mono text-3xl tabular-nums" data-testid="live-clock">
+            <p className="font-score text-5xl leading-none" data-testid="live-clock">
               {fmt(seconds)}
             </p>
             <p className="text-xs text-muted">{t("period", { period: clock.period })}</p>

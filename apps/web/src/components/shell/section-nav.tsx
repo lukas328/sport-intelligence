@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, Grid3x3, Sparkles } from "lucide-react";
+import { ChevronLeft, Grid3x3 } from "lucide-react";
+import { IconAsk } from "./icons";
 import { buttonClass } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -68,7 +69,7 @@ export function TeamHeader({ actions }: { actions?: ReactNode }) {
           {tr("palette.matrix")}
         </Link>
         <Link href={`${base}/assistant`} className={buttonClass("secondary", "sm")} aria-current={page === "assistant" ? "page" : undefined}>
-          <Sparkles aria-hidden />
+          <IconAsk />
           {tr("palette.ask")}
         </Link>
       </>
