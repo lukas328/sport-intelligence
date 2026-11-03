@@ -289,6 +289,13 @@ ENDPOINTS += [
         VIDEO_WORK,
         lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/exports/shots"),
     ),
+    ("GET highlights", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/highlights")),
+    ("GET match parts", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/parts")),
+    (
+        "GET match boundaries",
+        READERS,
+        lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/boundaries"),
+    ),
     ("GET stats", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/stats")),
     (
         "PUT kickoff",

@@ -24,6 +24,8 @@ from numpy.typing import NDArray
 from handball_vision import __version__
 from handball_vision.calibration import Calibration, calibrate_frames
 from handball_vision.detection import BackgroundDetector, Detection, Detector, foot_positions
+from handball_vision.events import EventResult, refine_teams
+from handball_vision.events import detect as detect_events
 from handball_vision.physical import physical
 from handball_vision.teams import TeamAssigner
 from handball_vision.tracking import CourtTracker, TrackPoint, stitch
@@ -44,6 +46,12 @@ class AnalysisResult:
     version: str = __version__
     detections_per_frame: float = 0.0
     extra: dict[str, Any] = field(default_factory=dict)
+
+    def detect_events(self) -> EventResult:
+        """Automatic event baseline from the tracks (throw-offs, goals, possession, sides)."""
+        labels = {tid: str(v["label"]) for tid, v in self.teams.items()}
+        pts = [(round(p.frame * 1000 / self.fps), p.track_id, p.x, p.y) for p in self.points]
+        return detect_events(pts, labels)
 
     def tracks_table(self) -> pa.Table:
         p = self.points
@@ -210,11 +218,22 @@ def analyse_video(
         stitched[mapping.get(old, old)].extend(samples)
     teams.samples = stitched
     timings["stitching"] += time.perf_counter() - t0
-    team_out = {}
+    team_out: dict[int, dict[str, Any]] = {}
     for tid in {p.track_id for p in points}:
         r = teams.result(tid)
         if r:
             team_out[tid] = {"label": r.label, "confidence": r.confidence, "samples": r.samples}
+    # second signal besides the kit colour: throw-off formations (addendum 01, 4.8)
+    pts = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points]
+    refined = refine_teams(
+        pts,
+        {t: str(v["label"]) for t, v in team_out.items()},
+        {t: float(v["confidence"]) for t, v in team_out.items()},
+    )
+    for tid, label in refined.items():
+        if label != team_out[tid]["label"]:
+            team_out[tid]["label"] = label
+            team_out[tid]["label_source"] = "formation"
     return AnalysisResult(
         calib,
         fps,

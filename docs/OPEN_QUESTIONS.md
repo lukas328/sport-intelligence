@@ -120,3 +120,12 @@ A guardianship keeps existing when the child becomes an adult; from then on the 
 consents valid until the player changes them and show the player a reminder on the consent page (A4).
 Needs a legal check whether consents given by parents must be renewed at 18 ("rechtlich prüfen lassen").
 
+### Q-ADD-8 Real footage for the golden set: network access
+Suitable open material exists: TeamTrack (handball full-pitch videos with tracking annotations,
+Kaggle or Google Drive; dataset licence to be confirmed), UWB amateur women positions and
+possession (Zenodo 12065335, CC BY 4.0), EIGD-H and the Roboflow handball set (non-commercial,
+evaluation only). This environment's network policy blocks kaggle.com, drive.google.com,
+zenodo.org, figshare.com, huggingface.co and archive.org. **Needed**: allow these hosts in the cloud
+environment settings (Network access, Allowed domains) or provide the files; then the golden set and
+`ml/eval/events.py` run on real matches. YouTube videos are not downloaded (terms of use, ADR 018).
+

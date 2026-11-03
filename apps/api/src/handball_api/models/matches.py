@@ -119,6 +119,8 @@ class VideoAsset(Base, EntityMixin, TenantMixin):
     quality_report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     # P2 preparation (half-time report): a partial upload analysed before the match ends
     is_partial: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # camera clock from the file metadata: orders several files of one match (4.8)
+    recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # result metadata of the latest analysis run (chunks, fps, detector, timings, versions)
     analysis: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     error: Mapped[str | None] = mapped_column(Text)

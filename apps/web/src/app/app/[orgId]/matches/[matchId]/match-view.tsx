@@ -20,13 +20,14 @@ import { UploadPanel } from "./upload-panel";
 import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { TeamFeedView } from "./feed-views";
+import { HighlightsView, PartsPanel } from "./highlight-views";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
 type Job = Schemas["JobOut"];
 
-type View = "video" | "overview" | "report" | "shots" | "keepers" | "physical" | "scenes";
-const VIEWS: View[] = ["video", "overview", "report", "shots", "keepers", "physical"];
+type View = "video" | "overview" | "report" | "shots" | "keepers" | "physical" | "highlights" | "scenes";
+const VIEWS: View[] = ["video", "overview", "report", "shots", "keepers", "physical", "highlights"];
 
 const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnails", "upload"] as const;
 
@@ -175,10 +176,12 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         )}
       </div>
       {view === "physical" && <PhysicalView orgId={orgId} matchId={match.id} names={names} />}
+      {view === "highlights" && <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />}
       {view === "scenes" && <TeamFeedView orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
       {view !== "video" &&
         view !== "physical" &&
         view !== "scenes" &&
+        view !== "highlights" &&
         (stats.data && stats.data.quality.events > 0 ? (
           (() => {
             const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
@@ -191,6 +194,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           <EmptyState title={stats.isLoading ? "…" : t("stats.noData")} />
         ))}
 
+      <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
       {jobs.filter((j) => j.status !== "succeeded").length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 
       {staff && (pendingVideos.length > 0 || !main) && (

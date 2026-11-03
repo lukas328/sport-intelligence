@@ -96,7 +96,9 @@
     "invalid-slide": "This slide is invalid.",
     "nothing-to-export": "Add clip or text slides first.",
     "too-many-slides": "At most 200 slides.",
-    "image-too-large": "The image may be at most 3 MB."
+    "image-too-large": "The image may be at most 3 MB.",
+    "not-enough-scenes": "A reel needs at least 3 confident scenes with consent.",
+    "consent-missing": "No consent for public highlights from every player shown."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -383,7 +385,12 @@
     "import": "Import",
     "importStarted": "Import started.",
     "tipsTitle": "Filming tips",
-    "tips": "One fixed camera, raised (3 m or more), at the centre line, whole court in view. At least 1080p; in halls with 50 Hz lighting use 50 or 100 fps."
+    "tips": "One fixed camera, raised (3 m or more), at the centre line, whole court in view. At least 1080p; in halls with 50 Hz lighting use 50 or 100 fps.",
+    "mobileData": "You are on mobile data. The video is {size}. Upload now or later on Wi-Fi?",
+    "slowLink": "The connection is slow. The video is {size}; the upload may take long and continues next time.",
+    "uploadAnyway": "Upload now",
+    "later": "Later on Wi-Fi",
+    "offline": "No connection. The upload continues by itself once the network is back."
   },
   "processing": {
     "title": "Processing",
@@ -524,7 +531,10 @@
     "legend": "Legend",
     "quality": "Data quality",
     "confidence": "Confidence {value} %",
-    "duration": "Analysis time {seconds} s"
+    "duration": "Analysis time {seconds} s",
+    "autoSummary": "Detected automatically: {events} events (throw-offs, goals from the throw-off) and {possessions} attacks, marked as estimates.",
+    "autoNoGoalkeepers": "Without detected goalkeepers, sides, attacks and goals cannot be determined automatically.",
+    "autoLimits": "Shots, saves and turnovers need ball detection and come from tagging or import."
   },
   "tabs": {
     "video": "Video",
@@ -533,7 +543,8 @@
     "shots": "Shots",
     "keepers": "Goalkeepers",
     "physical": "Physical",
-    "scenes": "Scenes"
+    "scenes": "Scenes",
+    "highlights": "Highlights"
   },
   "stats": {
     "goals": "Goals",
@@ -1342,5 +1353,34 @@
     "add": "Add player",
     "remove": "Remove",
     "save": "Save"
+  },
+  "highlights": {
+    "title": "Highlights",
+    "intro": "After every analysis a team reel (16:9 and 9:16) and personal reels are created automatically. Only confident scenes; players without consent do not appear. No music.",
+    "format": "Format",
+    "landscape": "Landscape 16:9",
+    "portrait": "Portrait 9:16",
+    "player": "For",
+    "team": "Whole team",
+    "create": "Create reel",
+    "none": "No highlights yet.",
+    "noneHint": "They are created after the analysis once there are enough confident scenes.",
+    "playerReel": "Player reel",
+    "teamReel": "Team reel",
+    "scenes": "{n, plural, one {# scene} other {# scenes}}",
+    "excluded": "{n, plural, one {# player without consent left out} other {# players without consent left out}}",
+    "download": "Download",
+    "status_queued": "Being prepared...",
+    "status_rendering": "Rendering...",
+    "status_failed": "Creation failed.",
+    "status_blocked_consent": "Not possible because consents are missing."
+  },
+  "parts": {
+    "title": "Video files of the match",
+    "gap": "Gap of {time} before",
+    "up": "Move earlier",
+    "confirmed": "Order confirmed.",
+    "auto": "Order taken from the recording time. Change it if needed.",
+    "boundary": "A new match probably starts at {time} (pause of {pause} min, then a throw-off). Split the video there?"
   }
 }

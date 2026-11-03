@@ -30,10 +30,12 @@ from handball_api.routers import billing as billing_router
 from handball_api.routers import events as events_router
 from handball_api.routers import family as family_router
 from handball_api.routers import feed as feed_router
+from handball_api.routers import highlights as highlights_router
 from handball_api.routers import ops as ops_router
 from handball_api.routers import presentations as presentations_router
 from handball_api.routers import privacy as privacy_router
 from handball_api.routers import scouting as scouting_router
+from handball_api.routers import segments as segments_router
 from handball_api.routers import sharing as sharing_router
 from handball_api.routers import tactics as tactics_router
 from handball_api.routers import tags as tags_router
@@ -197,7 +199,9 @@ def create_app(
     app.include_router(family_router.router)
     app.include_router(tags_router.router)
     app.include_router(feed_router.router)
+    app.include_router(highlights_router.router)
     app.include_router(scouting_router.router)
+    app.include_router(segments_router.router)
     app.include_router(presentations_router.router)
     app.include_router(internal.router)
     return app

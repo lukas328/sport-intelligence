@@ -15,7 +15,15 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import Correction, Event, Match, RosterEntry, StatsCache, VideoAsset
+from handball_api.models import (
+    Correction,
+    Event,
+    Match,
+    Possession,
+    RosterEntry,
+    StatsCache,
+    VideoAsset,
+)
 from handball_api.models.enums import VideoRole
 from handball_api.schemas.events import EventIn, EventPatch
 from handball_api.services import audit
@@ -286,7 +294,18 @@ async def stats_for(ctx: Ctx, match: Match) -> dict[str, Any]:
             )
         )
     ).one()
-    version = hashlib.sha256(f"{count}|{latest}|{METRICS_VERSION}".encode()).hexdigest()[:32]
+    tracked = dict(
+        (
+            await ctx.db.execute(
+                select(Possession.side, func.count(Possession.id))
+                .where(Possession.match_id == match.id)
+                .group_by(Possession.side)
+            )
+        ).all()
+    )
+    version = hashlib.sha256(
+        f"{count}|{latest}|{sorted(tracked.items())}|{METRICS_VERSION}".encode()
+    ).hexdigest()[:32]
     cached = await cache_get(ctx, "match", match.id, version)
     if cached is not None:
         return cached
@@ -294,9 +313,15 @@ async def stats_for(ctx: Ctx, match: Match) -> dict[str, Any]:
         _to_metric(e)
         for e in (await ctx.db.scalars(select(Event).where(Event.match_id == match.id))).all()
     ]
-    possessions = estimate_possessions(events)
+    if tracked:
+        # possession phases from the tracking (A3) instead of the estimate from events
+        possessions = {"own": tracked.get("own", 0), "opponent": tracked.get("opponent", 0)}
+        source = "tracking"
+    else:
+        possessions = estimate_possessions(events)
+        source = "heuristic_estimate"
     data = compute_match_stats(events, possessions)
-    data["possessions_source"] = "heuristic_estimate"
+    data["possessions_source"] = source
     await cache_put(ctx, match.organization_id, "match", match.id, version, data)
     return data
 

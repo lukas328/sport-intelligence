@@ -96,7 +96,9 @@
     "invalid-slide": "Cette diapositive n'est pas valable.",
     "nothing-to-export": "Ajoute d'abord des diapositives clip ou texte.",
     "too-many-slides": "200 diapositives au maximum.",
-    "image-too-large": "L'image ne doit pas dépasser 3 Mo."
+    "image-too-large": "L'image ne doit pas dépasser 3 Mo.",
+    "not-enough-scenes": "Un reel demande au moins 3 scènes sûres avec consentement.",
+    "consent-missing": "Pas de consentement pour des highlights publics de tous les joueur·euse·s montré·e·s."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -383,7 +385,12 @@
     "import": "Importer",
     "importStarted": "Import démarré.",
     "tipsTitle": "Conseils de tournage",
-    "tips": "Une caméra fixe, en hauteur (3 m ou plus), au niveau de la ligne médiane, tout le terrain visible. Au moins 1080p ; dans les salles éclairées en 50 Hz, filmer en 50 ou 100 fps."
+    "tips": "Une caméra fixe, en hauteur (3 m ou plus), au niveau de la ligne médiane, tout le terrain visible. Au moins 1080p ; dans les salles éclairées en 50 Hz, filmer en 50 ou 100 fps.",
+    "mobileData": "Tu es connecté·e avec des données mobiles. La vidéo fait {size}. Envoyer maintenant ou plus tard en Wi-Fi ?",
+    "slowLink": "La connexion est lente. La vidéo fait {size} ; l'envoi peut durer et reprendra la prochaine fois.",
+    "uploadAnyway": "Envoyer maintenant",
+    "later": "Plus tard en Wi-Fi",
+    "offline": "Pas de connexion. L'envoi reprend tout seul dès que le réseau revient."
   },
   "processing": {
     "title": "Traitement",
@@ -524,7 +531,10 @@
     "legend": "Légende",
     "quality": "Qualité des données",
     "confidence": "Confiance {value} %",
-    "duration": "Durée d'analyse {seconds} s"
+    "duration": "Durée d'analyse {seconds} s",
+    "autoSummary": "Détecté automatiquement : {events} événements (engagements, buts déduits de l'engagement) et {possessions} attaques, marqués comme estimations.",
+    "autoNoGoalkeepers": "Sans gardien·ne·s détecté·e·s, les côtés, attaques et buts ne peuvent pas être déterminés automatiquement.",
+    "autoLimits": "Les tirs, arrêts et pertes de balle nécessitent la détection du ballon et viennent de la saisie ou de l'import."
   },
   "tabs": {
     "video": "Vidéo",
@@ -533,7 +543,8 @@
     "shots": "Tirs",
     "keepers": "Gardiens",
     "physical": "Physique",
-    "scenes": "Scènes"
+    "scenes": "Scènes",
+    "highlights": "Highlights"
   },
   "stats": {
     "goals": "Buts",
@@ -1342,5 +1353,34 @@
     "add": "Ajouter",
     "remove": "Supprimer",
     "save": "Enregistrer"
+  },
+  "highlights": {
+    "title": "Highlights",
+    "intro": "Après chaque analyse, un reel d'équipe (16:9 et 9:16) et des reels personnels sont créés automatiquement. Seulement des scènes sûres ; les joueur·euse·s sans consentement n'apparaissent pas. Pas de musique.",
+    "format": "Format",
+    "landscape": "Paysage 16:9",
+    "portrait": "Portrait 9:16",
+    "player": "Pour",
+    "team": "Toute l'équipe",
+    "create": "Créer un reel",
+    "none": "Pas encore de highlights.",
+    "noneHint": "Ils sont créés après l'analyse dès qu'il y a assez de scènes sûres.",
+    "playerReel": "Reel joueur·euse",
+    "teamReel": "Reel d'équipe",
+    "scenes": "{n, plural, one {# scène} other {# scènes}}",
+    "excluded": "{n, plural, one {# joueur·euse sans consentement exclu·e} other {# joueur·euse·s sans consentement exclu·e·s}}",
+    "download": "Télécharger",
+    "status_queued": "En préparation...",
+    "status_rendering": "Rendu en cours...",
+    "status_failed": "La création a échoué.",
+    "status_blocked_consent": "Impossible faute de consentements."
+  },
+  "parts": {
+    "title": "Fichiers vidéo du match",
+    "gap": "Interruption de {time} avant",
+    "up": "Avancer",
+    "confirmed": "Ordre confirmé.",
+    "auto": "Ordre selon l'heure d'enregistrement. À modifier si besoin.",
+    "boundary": "Un nouveau match commence probablement à {time} (pause de {pause} min, puis engagement). Diviser la vidéo à cet endroit ?"
   }
 }

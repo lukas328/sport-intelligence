@@ -9,7 +9,7 @@ import { VideoPlayer } from "@/components/video/player";
 import { cn } from "@/lib/utils";
 
 export interface Shared {
-  kind: "play" | "match" | "playlist";
+  kind: "play" | "match" | "playlist" | "highlight";
   title: string;
   team: string;
   expires_at: string;
@@ -25,6 +25,7 @@ export interface Shared {
     players: { number: number | null; goals: number; shots: number; saves: number; turnovers: number }[];
     video_id: string | null;
   };
+  highlight?: { format: string; scenes: number };
   playlist?: { title: string; description: string | null; clips: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null }[] };
 }
 
@@ -51,6 +52,15 @@ export function SharedView({ token, data }: { token: string; data: Shared }) {
       )}
       {data.match && <MatchShare m={data.match} media={media} t={t} ts={ts} format={format} />}
       {data.playlist && <PlaylistShare p={data.playlist} media={media} />}
+      {data.highlight && (
+        <video
+          controls
+          preload="metadata"
+          src={`/v1/share/${token}/reel.mp4`}
+          aria-label={data.title}
+          className={data.highlight.format === "9x16" ? "mx-auto max-h-[80vh] rounded" : "w-full rounded"}
+        />
+      )}
     </div>
   );
 }

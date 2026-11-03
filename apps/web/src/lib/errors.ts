@@ -40,6 +40,8 @@ export const KNOWN_ERRORS = [
   "nothing-to-export",
   "too-many-slides",
   "image-too-large",
+  "not-enough-scenes",
+  "consent-missing",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

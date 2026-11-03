@@ -17,7 +17,7 @@ from handball_api.models import ProcessingJob
 from handball_api.models.enums import JobStatus
 from handball_api.routers.deps import CtxDep
 from handball_api.schemas.matches import JobOut, JobUpdate
-from handball_api.services import presentations, scouting, videos
+from handball_api.services import highlights, presentations, scouting, videos
 
 router = APIRouter(prefix="/internal", include_in_schema=False)
 
@@ -88,3 +88,19 @@ async def presentation_export_done(
         raise ProblemError(403, "forbidden", "Invalid internal token")
     await enable_system_access(ctx.db, reason="presentation export callback")
     await presentations.export_done(ctx, pres_id, data.status, data.key, data.error)
+
+
+class ReelDone(BaseModel):
+    status: str = Field(pattern="^(ready|failed|rendering)$")
+    key: str | None = None
+    error: str | None = None
+
+
+@router.post("/highlights/{reel_id}", status_code=204)
+async def highlight_done(
+    reel_id: uuid.UUID, data: ReelDone, ctx: CtxDep, x_internal_token: Annotated[str, Header()] = ""
+) -> None:
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    await enable_system_access(ctx.db, reason="highlight render callback")
+    await highlights.done(ctx, reel_id, data.status, data.key, data.error)

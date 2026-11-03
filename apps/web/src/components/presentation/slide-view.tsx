@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Board } from "@/components/tactics/board";
+import { SpotlightOverlay } from "@/components/video/spotlight";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import type { Shape } from "@/components/video/shapes";
 import { api } from "@/lib/client";
@@ -51,6 +52,14 @@ function ClipSlide({ orgId, c, paused, extraShapes, onEnd }: { orgId: string; c:
   const slow = (c.slow as Slow[] | undefined) ?? [];
   const done = useRef(new Set<number>());
   const [holding, setHolding] = useState<Hold | null>(null);
+  const spotTrack = ((c.spotlight as number[] | undefined) ?? [])[0];
+  const analysis = useQuery({
+    queryKey: ["analysis", String(c.video_id)],
+    enabled: spotTrack != null,
+    queryFn: async () =>
+      (await api.GET("/v1/orgs/{org_id}/videos/{video_id}/analysis", { params: { path: { org_id: orgId, video_id: String(c.video_id) } } })).data ?? null,
+  });
+  const a = analysis.data;
   useEffect(() => {
     const v = ref.current?.video();
     if (!v) return;
@@ -82,7 +91,23 @@ function ClipSlide({ orgId, c, paused, extraShapes, onEnd }: { orgId: string; c:
       onTime={onTime}
       onWindowEnd={onEnd}
       autoPlay={!paused}
-      overlay={<ShapesOverlay shapes={[...(holding?.shapes ?? []), ...extraShapes]} />}
+      overlay={
+        <>
+          {spotTrack != null && a?.calibration && a.chunk_ms ? (
+            <SpotlightOverlay
+              baseUrl={`/v1/orgs/${orgId}/videos/${String(c.video_id)}/tracks`}
+              chunkMs={a.chunk_ms}
+              homography={a.calibration.homography}
+              imageSize={a.calibration.image_size as [number, number]}
+              track={spotTrack}
+              label=""
+              getTime={() => ref.current?.time() ?? 0}
+              showTrail
+            />
+          ) : null}
+          <ShapesOverlay shapes={[...(holding?.shapes ?? []), ...extraShapes]} />
+        </>
+      }
     />
   );
 }

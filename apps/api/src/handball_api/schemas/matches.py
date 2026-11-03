@@ -428,6 +428,9 @@ class FormationSegment(ApiModel):
 class AnalysisOut(ApiModel):
     status: Literal["none", "running", "ready", "failed"]
     formations: list[FormationSegment] = Field(default_factory=list)
+    auto_events: dict[str, Any] | None = Field(
+        default=None, description="automatic events: counts, sides, boundaries, what is missing"
+    )
     calibration: CalibrationOut | None
     tracks: list[TrackOut]
     chunk_ms: int | None

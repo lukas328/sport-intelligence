@@ -22,6 +22,7 @@ from sqlalchemy import func, select
 
 from handball_api.core.errors import ProblemError
 from handball_api.models import (
+    CameraCalibration,
     Clip,
     Match,
     Play,
@@ -374,6 +375,24 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
             payload_slides.append({"type": str(s.type), "lines": slide_lines(s)})
     if not payload_slides:
         raise ProblemError(422, "nothing-to-export", "Add clip or text slides first")
+    analysis: dict[str, dict[str, Any]] = {}
+    for vid in {
+        str(sl["video_id"]) for sl in payload_slides if sl["type"] == "clip" and sl.get("spotlight")
+    }:
+        v = await ctx.db.get(VideoAsset, uuid.UUID(vid))
+        cal = await ctx.db.scalar(
+            select(CameraCalibration)
+            .where(CameraCalibration.video_asset_id == uuid.UUID(vid))
+            .order_by(CameraCalibration.created_at.desc())
+            .limit(1)
+        )
+        if v is not None and cal is not None and (v.analysis or {}).get("chunk_ms"):
+            analysis[vid] = {
+                "chunks_prefix": media_prefix(v) + "analysis/",
+                "chunk_ms": v.analysis["chunk_ms"],  # type: ignore[index]
+                "homography": cal.homography,
+                "image_size": cal.image_size,
+            }
     job_id = f"pres-{p.id}-{int(datetime.now(UTC).timestamp())}"
     ctx.require_jobs().enqueue(
         "default",
@@ -387,6 +406,7 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
                 "out_key": f"{p.organization_id}/presentations/{p.id}/export.mp4",
                 "sources": sources,
                 "slides": payload_slides,
+                "analysis": analysis,
             }
         },
     )

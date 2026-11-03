@@ -15,7 +15,7 @@ router = APIRouter(tags=["sharing"])
 
 
 class ShareCreate(ApiModel):
-    kind: Literal["play", "match", "playlist"]
+    kind: Literal["play", "match", "playlist", "highlight"]
     target_id: uuid.UUID
     days: int = Field(default=14, ge=1, le=90)
 
@@ -74,3 +74,13 @@ async def public(token: str, ctx: CtxDep) -> dict[str, Any]:
 async def public_media(token: str, video_id: uuid.UUID, path: str, ctx: CtxDep) -> Response:
     data, ctype = await service.public_media(ctx, token, video_id, path)
     return Response(data, media_type=ctype, headers={"cache-control": "private, max-age=60"})
+
+
+@router.get(
+    "/v1/share/{token}/reel.mp4",
+    response_class=Response,
+    responses={200: {"content": {"video/mp4": {}}}},
+)
+async def public_reel(token: str, ctx: CtxDep) -> Response:
+    data = await service.public_reel(ctx, token)
+    return Response(data, media_type="video/mp4", headers={"cache-control": "private, max-age=60"})

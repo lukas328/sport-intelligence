@@ -115,3 +115,70 @@ def test_render_concatenates_pieces(tmp_path: Path) -> None:
     assert info["streams"][0]["width"] == 1280
     # 4 s card + 0.5 + 1.0 (slow) + 0.5 + 1.0 hold + 0.5
     assert 7.0 < float(info["format"]["duration"]) < 8.3
+
+
+@pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="needs ffmpeg")
+def test_spotlight_pieces_use_the_reel_renderer(tmp_path: Path) -> None:
+    import numpy as np
+
+    from handball_vision.synthetic import SyntheticConfig, SyntheticMatch
+    from handball_worker import reels
+
+    match = SyntheticMatch(SyntheticConfig(seconds=4, noise=0))
+    src = tmp_path / "proxy.mp4"
+    truth = match.write(src)
+    rows = np.array(
+        [[f.t_ms, o.object_id, o.x, o.y] for f in truth for o in f.objects if o.label != "ball"],
+        dtype=np.float32,
+    )
+    settings = WorkerSettings(ffmpeg="ffmpeg")
+    calls: list[tuple[float, float]] = []
+
+    def piece(slide: dict[str, Any], s: Path, x: float, y: float, out: Path) -> bool:
+        calls.append((x, y))
+        ctx = {
+            "format": "16x9",
+            "homography": match.h.tolist(),
+            "image_size": [1280, 720],
+            "player_tracks": [],
+        }
+        reels.render_clip(
+            settings,
+            s,
+            {"in_ms": round(x * 1000), "out_ms": round(y * 1000), "spotlight_track": 1},
+            rows,
+            ctx,
+            out,
+        )
+        return True
+
+    slides: list[dict[str, Any]] = [
+        {
+            "type": "clip",
+            "video_id": "v1",
+            "in_ms": 500,
+            "out_ms": 2500,
+            "spotlight": [1],
+            "slow": [{"from_ms": 1500, "to_ms": 2500, "rate": 0.5}],
+        }
+    ]
+    out = render(settings, slides, {"v1": src}, tmp_path, piece)
+    assert calls == [(0.5, 1.5), (1.5, 2.5)]
+    duration = float(
+        subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "csv=p=0",
+                str(out),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    )
+    assert 2.7 < duration < 3.4  # 1 s normal + 1 s at half speed

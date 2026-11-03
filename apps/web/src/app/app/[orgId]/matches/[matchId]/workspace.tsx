@@ -562,6 +562,14 @@ function AnalysisPanel({
       </div>
       {analysis.status === "running" && <p className="text-sm text-muted">{t("running")}</p>}
       {analysis.status === "failed" && <Alert>{t("failed", { error: analysis.error ?? "" })}</Alert>}
+      {analysis.auto_events && (
+        <p className="text-sm text-muted" data-testid="auto-events">
+          {(analysis.auto_events.missing as string[] | undefined)?.includes("goalkeepers")
+            ? t("autoNoGoalkeepers")
+            : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
+          {t("autoLimits")}
+        </p>
+      )}
       {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
         <MiniCourt
           baseUrl={`/v1/orgs/${orgId}/videos/${videoId}/tracks`}

@@ -43,6 +43,19 @@
       },
       "AnalysisOut": {
         "properties": {
+          "auto_events": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "automatic events: counts, sides, boundaries, what is missing",
+            "title": "Auto Events"
+          },
           "calibration": {
             "anyOf": [
               {
@@ -580,6 +593,49 @@
           "file"
         ],
         "title": "Body_upload_logo_v1_orgs__org_id__logo_put",
+        "type": "object"
+      },
+      "BoundaryOut": {
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "pause_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pause Ms"
+          },
+          "t_ms": {
+            "title": "T Ms",
+            "type": "integer"
+          },
+          "video_id": {
+            "format": "uuid",
+            "title": "Video Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "video_id",
+          "t_ms",
+          "pause_ms",
+          "confidence"
+        ],
+        "title": "BoundaryOut",
         "type": "object"
       },
       "CalibrationIn": {
@@ -2219,6 +2275,98 @@
         ],
         "title": "Hand",
         "type": "string"
+      },
+      "HighlightIn": {
+        "properties": {
+          "format": {
+            "$ref": "#/components/schemas/ReelFormat",
+            "default": "16x9"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          }
+        },
+        "title": "HighlightIn",
+        "type": "object"
+      },
+      "HighlightOut": {
+        "properties": {
+          "clip_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Clip Ids",
+            "type": "array"
+          },
+          "consent": {
+            "additionalProperties": true,
+            "title": "Consent",
+            "type": "object"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "match_id",
+          "player_id",
+          "format",
+          "status",
+          "clip_ids",
+          "consent",
+          "created_at"
+        ],
+        "title": "HighlightOut",
+        "type": "object"
       },
       "ImportResult": {
         "properties": {
@@ -4131,6 +4279,94 @@
         "title": "OrgUpdate",
         "type": "object"
       },
+      "PartOrder": {
+        "properties": {
+          "video_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Video Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "video_ids"
+        ],
+        "title": "PartOrder",
+        "type": "object"
+      },
+      "PartOut": {
+        "properties": {
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "gap_before_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Before Ms"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "recorded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded At"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "video_id": {
+            "format": "uuid",
+            "title": "Video Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "video_id",
+          "filename",
+          "position",
+          "duration_s",
+          "recorded_at",
+          "gap_before_ms",
+          "source",
+          "confirmed"
+        ],
+        "title": "PartOut",
+        "type": "object"
+      },
       "PartUrl": {
         "properties": {
           "number": {
@@ -5199,6 +5435,14 @@
         ],
         "title": "RecoveryCodesOut",
         "type": "object"
+      },
+      "ReelFormat": {
+        "enum": [
+          "16x9",
+          "9x16"
+        ],
+        "title": "ReelFormat",
+        "type": "string"
       },
       "RegisterIn": {
         "properties": {
@@ -6368,7 +6612,8 @@
             "enum": [
               "play",
               "match",
-              "playlist"
+              "playlist",
+              "highlight"
             ],
             "title": "Kind",
             "type": "string"
@@ -9916,6 +10161,55 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/highlights/{reel_id}/video.mp4": {
+      "get": {
+        "operationId": "video_v1_orgs__org_id__highlights__reel_id__video_mp4_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reel Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "video/mp4": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Video",
+        "tags": [
+          "highlights"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/invitations": {
       "get": {
         "operationId": "list_invitations_v1_orgs__org_id__invitations_get",
@@ -10454,6 +10748,64 @@
         "tags": [
           "matches",
           "annotations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/boundaries": {
+      "get": {
+        "description": "Suggested match boundaries (long pause, then a throw-off): split the video there.",
+        "operationId": "boundaries_v1_orgs__org_id__matches__match_id__boundaries_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BoundaryOut"
+                  },
+                  "title": "Response Boundaries V1 Orgs  Org Id  Matches  Match Id  Boundaries Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Boundaries",
+        "tags": [
+          "matches"
         ]
       }
     },
@@ -11195,6 +11547,125 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
+      "get": {
+        "description": "Team reels and player reels the caller may see (created after every analysis).",
+        "operationId": "list_reels_v1_orgs__org_id__matches__match_id__highlights_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HighlightOut"
+                  },
+                  "title": "Response List Reels V1 Orgs  Org Id  Matches  Match Id  Highlights Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Reels",
+        "tags": [
+          "highlights"
+        ]
+      },
+      "post": {
+        "operationId": "create_v1_orgs__org_id__matches__match_id__highlights_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HighlightIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HighlightOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "highlights"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/insights": {
       "get": {
         "description": "Ranked insights with evidence filters; compared with the other matches of the season.",
@@ -11305,6 +11776,129 @@
         "summary": "Set Kickoff",
         "tags": [
           "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/parts": {
+      "get": {
+        "description": "Main-camera files in order (camera clock), with the gap before each file.",
+        "operationId": "parts_v1_orgs__org_id__matches__match_id__parts_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartOut"
+                  },
+                  "title": "Response Parts V1 Orgs  Org Id  Matches  Match Id  Parts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Parts",
+        "tags": [
+          "matches"
+        ]
+      },
+      "put": {
+        "operationId": "reorder_v1_orgs__org_id__matches__match_id__parts_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartOrder"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartOut"
+                  },
+                  "title": "Response Reorder V1 Orgs  Org Id  Matches  Match Id  Parts Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reorder",
+        "tags": [
+          "matches"
         ]
       }
     },
@@ -17782,6 +18376,44 @@
           }
         },
         "summary": "Public",
+        "tags": [
+          "sharing"
+        ]
+      }
+    },
+    "/v1/share/{token}/reel.mp4": {
+      "get": {
+        "operationId": "public_reel_v1_share__token__reel_mp4_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "video/mp4": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Reel",
         "tags": [
           "sharing"
         ]

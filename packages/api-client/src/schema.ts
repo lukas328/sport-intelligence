@@ -867,6 +867,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/highlights/{reel_id}/video.mp4": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Video */
+        get: operations["video_v1_orgs__org_id__highlights__reel_id__video_mp4_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/invitations": {
         parameters: {
             query?: never;
@@ -951,6 +968,26 @@ export interface paths {
         put?: never;
         /** Add Annotation */
         post: operations["add_annotation_v1_orgs__org_id__matches__match_id__annotations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/boundaries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Boundaries
+         * @description Suggested match boundaries (long pause, then a throw-off): split the video there.
+         */
+        get: operations["boundaries_v1_orgs__org_id__matches__match_id__boundaries_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1113,6 +1150,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Reels
+         * @description Team reels and player reels the caller may see (created after every analysis).
+         */
+        get: operations["list_reels_v1_orgs__org_id__matches__match_id__highlights_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_v1_orgs__org_id__matches__match_id__highlights_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/insights": {
         parameters: {
             query?: never;
@@ -1143,6 +1201,27 @@ export interface paths {
         get?: never;
         /** Set Kickoff */
         put: operations["set_kickoff_v1_orgs__org_id__matches__match_id__kickoff_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Parts
+         * @description Main-camera files in order (camera clock), with the gap before each file.
+         */
+        get: operations["parts_v1_orgs__org_id__matches__match_id__parts_get"];
+        /** Reorder */
+        put: operations["reorder_v1_orgs__org_id__matches__match_id__parts_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2621,6 +2700,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/share/{token}/reel.mp4": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Reel */
+        get: operations["public_reel_v1_share__token__reel_mp4_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/share/{token}/videos/{video_id}/media/{path}": {
         parameters: {
             query?: never;
@@ -2659,6 +2755,13 @@ export interface components {
         };
         /** AnalysisOut */
         AnalysisOut: {
+            /**
+             * Auto Events
+             * @description automatic events: counts, sides, boundaries, what is missing
+             */
+            auto_events?: {
+                [key: string]: unknown;
+            } | null;
             calibration: components["schemas"]["CalibrationOut"] | null;
             /** Chunk Ms */
             chunk_ms: number | null;
@@ -2829,6 +2932,20 @@ export interface components {
         Body_upload_logo_v1_orgs__org_id__logo_put: {
             /** File */
             file: string;
+        };
+        /** BoundaryOut */
+        BoundaryOut: {
+            /** Confidence */
+            confidence: number | null;
+            /** Pause Ms */
+            pause_ms: number | null;
+            /** T Ms */
+            t_ms: number;
+            /**
+             * Video Id
+             * Format: uuid
+             */
+            video_id: string;
         };
         /** CalibrationIn */
         CalibrationIn: {
@@ -3338,6 +3455,40 @@ export interface components {
          * @enum {string}
          */
         Hand: "left" | "right";
+        /** HighlightIn */
+        HighlightIn: {
+            /** @default 16x9 */
+            format?: components["schemas"]["ReelFormat"];
+            /** Player Id */
+            player_id?: string | null;
+        };
+        /** HighlightOut */
+        HighlightOut: {
+            /** Clip Ids */
+            clip_ids: string[];
+            /** Consent */
+            consent: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Format */
+            format: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Match Id */
+            match_id: string | null;
+            /** Player Id */
+            player_id: string | null;
+            /** Status */
+            status: string;
+        };
         /** ImportResult */
         ImportResult: {
             /** Created */
@@ -3980,6 +4131,33 @@ export interface components {
             /** Secondary Color */
             secondary_color?: string | null;
         };
+        /** PartOrder */
+        PartOrder: {
+            /** Video Ids */
+            video_ids: string[];
+        };
+        /** PartOut */
+        PartOut: {
+            /** Confirmed */
+            confirmed: boolean;
+            /** Duration S */
+            duration_s: number | null;
+            /** Filename */
+            filename: string;
+            /** Gap Before Ms */
+            gap_before_ms: number | null;
+            /** Position */
+            position: number;
+            /** Recorded At */
+            recorded_at: string | null;
+            /** Source */
+            source: string;
+            /**
+             * Video Id
+             * Format: uuid
+             */
+            video_id: string;
+        };
         /** PartUrl */
         PartUrl: {
             /** Number */
@@ -4362,6 +4540,11 @@ export interface components {
             /** Recovery Codes */
             recovery_codes: string[];
         };
+        /**
+         * ReelFormat
+         * @enum {string}
+         */
+        ReelFormat: "16x9" | "9x16";
         /** RegisterIn */
         RegisterIn: {
             /** Accept Terms */
@@ -4762,7 +4945,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "play" | "match" | "playlist";
+            kind: "play" | "match" | "playlist" | "highlight";
             /**
              * Target Id
              * Format: uuid
@@ -6811,6 +6994,38 @@ export interface operations {
             };
         };
     };
+    video_v1_orgs__org_id__highlights__reel_id__video_mp4_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reel_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "video/mp4": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_invitations_v1_orgs__org_id__invitations_get: {
         parameters: {
             query?: {
@@ -7132,6 +7347,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnnotationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    boundaries_v1_orgs__org_id__matches__match_id__boundaries_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BoundaryOut"][];
                 };
             };
             /** @description Validation Error */
@@ -7490,6 +7737,74 @@ export interface operations {
             };
         };
     };
+    list_reels_v1_orgs__org_id__matches__match_id__highlights_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HighlightOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_v1_orgs__org_id__matches__match_id__highlights_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HighlightIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HighlightOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     match_insights_v1_orgs__org_id__matches__match_id__insights_get: {
         parameters: {
             query?: never;
@@ -7546,6 +7861,74 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    parts_v1_orgs__org_id__matches__match_id__parts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reorder_v1_orgs__org_id__matches__match_id__parts_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartOrder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartOut"][];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -11287,6 +11670,37 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_reel_v1_share__token__reel_mp4_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "video/mp4": unknown;
                 };
             };
             /** @description Validation Error */

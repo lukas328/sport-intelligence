@@ -96,7 +96,9 @@
     "invalid-slide": "Diese Folie ist ungültig.",
     "nothing-to-export": "Füge zuerst Clip- oder Textfolien hinzu.",
     "too-many-slides": "Höchstens 200 Folien.",
-    "image-too-large": "Das Bild darf höchstens 3 MB gross sein."
+    "image-too-large": "Das Bild darf höchstens 3 MB gross sein.",
+    "not-enough-scenes": "Für ein Reel braucht es mindestens 3 sichere Szenen mit Einwilligung.",
+    "consent-missing": "Keine Einwilligung für öffentliche Highlights aller gezeigten Spieler."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -383,7 +385,12 @@
     "import": "Importieren",
     "importStarted": "Import gestartet.",
     "tipsTitle": "Aufnahmetipps",
-    "tips": "Eine feste Kamera, erhöht (ab 3 m), auf Höhe der Mittellinie, das ganze Feld im Bild. Mindestens 1080p, in Hallen mit 50-Hz-Licht 50 oder 100 fps."
+    "tips": "Eine feste Kamera, erhöht (ab 3 m), auf Höhe der Mittellinie, das ganze Feld im Bild. Mindestens 1080p, in Hallen mit 50-Hz-Licht 50 oder 100 fps.",
+    "mobileData": "Du bist mit mobilen Daten verbunden. Das Video hat {size}. Jetzt hochladen oder später im WLAN?",
+    "slowLink": "Die Verbindung ist langsam. Das Video hat {size}; der Upload kann lange dauern und läuft beim nächsten Mal weiter.",
+    "uploadAnyway": "Jetzt hochladen",
+    "later": "Später im WLAN",
+    "offline": "Keine Verbindung. Der Upload läuft automatisch weiter, sobald das Netz wieder da ist."
   },
   "processing": {
     "title": "Verarbeitung",
@@ -524,7 +531,10 @@
     "legend": "Legende",
     "quality": "Datenqualität",
     "confidence": "Konfidenz {value} %",
-    "duration": "Analysedauer {seconds} s"
+    "duration": "Analysedauer {seconds} s",
+    "autoSummary": "Automatisch erkannt: {events} Ereignisse (Anwürfe, Tore aus dem Anwurf) und {possessions} Angriffe, als geschätzt markiert.",
+    "autoNoGoalkeepers": "Ohne erkannte Torhüter können Seiten, Angriffe und Tore nicht automatisch bestimmt werden.",
+    "autoLimits": "Würfe, Paraden und Ballverluste brauchen die Ballerkennung und kommen aus Erfassung oder Import."
   },
   "tabs": {
     "video": "Video",
@@ -533,7 +543,8 @@
     "shots": "Würfe",
     "keepers": "Torhüter",
     "physical": "Laufleistung",
-    "scenes": "Szenen"
+    "scenes": "Szenen",
+    "highlights": "Highlights"
   },
   "stats": {
     "goals": "Tore",
@@ -1342,5 +1353,34 @@
     "add": "Spieler hinzufügen",
     "remove": "Entfernen",
     "save": "Speichern"
+  },
+  "highlights": {
+    "title": "Highlights",
+    "intro": "Nach jeder Analyse entstehen automatisch ein Team-Reel (16:9 und 9:16) und persönliche Reels. Nur Szenen mit genügend Sicherheit; Spieler ohne Einwilligung erscheinen nicht. Keine Musik.",
+    "format": "Format",
+    "landscape": "Querformat 16:9",
+    "portrait": "Hochformat 9:16",
+    "player": "Für",
+    "team": "Ganzes Team",
+    "create": "Reel erstellen",
+    "none": "Noch keine Highlights.",
+    "noneHint": "Sie entstehen nach der Analyse, sobald genug sichere Szenen da sind.",
+    "playerReel": "Spieler-Reel",
+    "teamReel": "Team-Reel",
+    "scenes": "{n, plural, one {# Szene} other {# Szenen}}",
+    "excluded": "{n, plural, one {# Spieler ohne Einwilligung ausgelassen} other {# Spieler ohne Einwilligung ausgelassen}}",
+    "download": "Herunterladen",
+    "status_queued": "Wird vorbereitet...",
+    "status_rendering": "Wird gerendert...",
+    "status_failed": "Erstellen fehlgeschlagen.",
+    "status_blocked_consent": "Wegen fehlender Einwilligungen nicht möglich."
+  },
+  "parts": {
+    "title": "Videodateien des Spiels",
+    "gap": "Lücke {time} davor",
+    "up": "Nach vorne",
+    "confirmed": "Reihenfolge bestätigt.",
+    "auto": "Reihenfolge automatisch aus der Aufnahmezeit. Bei Bedarf umstellen.",
+    "boundary": "Bei {time} beginnt vermutlich ein neues Spiel (Pause von {pause} Min., dann Anwurf). Video dort aufteilen?"
   }
 }

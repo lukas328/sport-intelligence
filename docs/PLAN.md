@@ -105,7 +105,7 @@ ADR 017.
   club formats in the match form, format picker on the match page, opponent player list UI,
   ClipTag beyond clips if the tag UI needs it
 
-### A3 Automation (principle P1; depends on real videos and trained models)
+### A3 Automation (principle P1; depends on real videos and trained models) ✅ done as far as possible without real footage (report: progress/A3.md)
 - Carried over from A2: spotlight burned into exports (with the highlight renderer), automatic
   opponent play detection for the preparation report
 - Automatic event baseline (shots, goals, saves, turnovers, throw-offs) with confidence; this is the
@@ -124,6 +124,10 @@ ADR 017.
   storage policy (raw video after 90 days), pentest scope 4.12 (from M8, M9)
 - Marketing site `apps/site` with demo analysis without login, Lighthouse > 90 4.13 (from M8)
 - Usability test with 3 coaches; end-to-end test with 3 real amateur matches (section 10)
+- Carried over from A3: ball detection and shot/save/turnover events (trained model on real
+  footage, needs Q-ADD-8), golden-set run of events, spotlight (95 %) and portrait crop (90 %) on
+  real matches, splitting a tournament video at a suggested boundary, one continuous timeline over
+  several files of a match, optional on-device compression (native apps, M11)
 
 ### Launch (go-live criteria: GO_LIVE.md plus addendum section 10)
 
