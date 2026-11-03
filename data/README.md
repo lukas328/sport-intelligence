@@ -38,4 +38,6 @@ uv run python scripts/testdata.py push match.mp4 --id 2026-10-12-u17-home \
 
 Ids describe the match, never people (`2026-10-12-u17-home`, not names). Only upload videos the club has agreed to share for testing; mark `--minors` when children are visible.
 
+`make eval-real` runs the analysis health checks on every manifest video found in `data/videos/` (report in `docs/perf/eval-real.md`, debug images in `data/eval-real/`). Until the bucket exists, copy the files there by hand with the manifest id as file name (e.g. `data/videos/ch-nlb-2017-horgen-staefa.mp4`) (`eval-real` looks files up by that name).
+
 To test the app itself with a real video, start the stack (`docker compose up -d`) and upload the file from `data/videos/` in the web UI; it is then stored in the local SeaweedFS bucket.

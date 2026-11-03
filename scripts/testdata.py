@@ -41,9 +41,10 @@ ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "ml" / "eval" / "golden_set" / "manifest.json"
 VIDEO_DIR = ROOT / "data" / "videos"
 PREFIX = "videos/"
-CAMERAS = ("fixed", "auto-follow", "handheld", "unknown")
+CAMERAS = ("fixed", "panning", "auto-follow", "handheld", "unknown")
 CONSENT = ("club", "public", "unknown")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,79}$")
+HEX_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
 CHUNK = 8 * 1024 * 1024
 
 
@@ -229,10 +230,19 @@ def cmd_push(s3: Any, cfg: Config, manifest: dict[str, Any], args: argparse.Name
         raise SystemExit(f"no such file: {path}")
     if not ID_RE.match(args.id):
         raise SystemExit("id: lowercase letters, digits and dashes, e.g. 2026-10-12-u17-home")
-    if any(e["id"] == args.id for e in manifest["matches"]):
-        raise SystemExit(f"id {args.id!r} already in manifest")
-    key = f"{PREFIX}{args.id}{path.suffix.lower()}"
     digest = sha256(path)
+    existing = next((e for e in manifest["matches"] if e["id"] == args.id), None)
+    if existing is not None:
+        # entry registered before the bucket existed: upload the file, keep the manifest as is
+        if existing["sha256"] != digest:
+            raise SystemExit(f"id {args.id!r} already in manifest with a different file")
+        print(f"upload      {path} -> s3://{cfg.bucket}/{existing['key']} (manifest unchanged)")
+        s3.upload_file(str(path), cfg.bucket, existing["key"])
+        return 0
+    kits = {k: v for k, v in (("home", args.home_kit), ("away", args.away_kit)) if v}
+    if any(not HEX_RE.match(v) for v in kits.values()):
+        raise SystemExit("kit colours as hex, e.g. --home-kit '#c8102e'")
+    key = f"{PREFIX}{args.id}{path.suffix.lower()}"
     print(f"upload      {path} -> s3://{cfg.bucket}/{key}")
     s3.upload_file(str(path), cfg.bucket, key)
     entry: dict[str, Any] = {
@@ -245,6 +255,7 @@ def cmd_push(s3: Any, cfg: Config, manifest: dict[str, Any], args: argparse.Name
         "venue": args.venue,
         "level": args.level,
         **probe(path),
+        "kits": kits or None,
         "minors": args.minors,
         "consent": args.consent,
         "score": args.score,
@@ -265,12 +276,16 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("list", help="bucket objects vs. manifest")
     pull = sub.add_parser("pull", help="download videos to data/videos/")
     pull.add_argument("ids", nargs="*", help="manifest ids (default: all)")
-    push = sub.add_parser("push", help="upload a video and add it to the manifest")
+    push = sub.add_parser(
+        "push", help="upload a video and add it to the manifest (or upload a registered entry)"
+    )
     push.add_argument("file")
     push.add_argument("--id", required=True, help="e.g. 2026-10-12-u17-home (no player names)")
     push.add_argument("--camera", choices=CAMERAS, default="unknown")
     push.add_argument("--camera-system", default=None, help="e.g. Veo, Spiideo, phone")
     push.add_argument("--venue", default=None)
+    push.add_argument("--home-kit", default=None, help="shirt colour as hex, e.g. '#c8102e'")
+    push.add_argument("--away-kit", default=None, help="shirt colour as hex, e.g. '#f2c200'")
     push.add_argument("--level", default=None, help="league or age group, e.g. U17, 2. Liga")
     push.add_argument("--minors", action="store_true", help="minors are visible in the video")
     push.add_argument("--consent", choices=CONSENT, default="unknown")

@@ -1,5 +1,75 @@
 {
   "$comment": "Golden set manifest (BRIEF 10.3). Videos and annotations live in the test-data bucket (ADR 002), never in git. Add entries with `make testdata-push` / scripts/testdata.py. Committed: no player names. Fields per match: id, key, sha256, bytes, camera (fixed|auto-follow|handheld|unknown), camera_system, venue, level, resolution, fps, duration_s, minors, consent (club|public|unknown), score, annotations (object key or null), notes, added.",
   "version": 1,
-  "matches": []
+  "matches": [
+    {
+      "id": "ch-nlb-2017-horgen-moehlin",
+      "key": "videos/ch-nlb-2017-horgen-moehlin.mp4",
+      "sha256": "2aa7f039b1b909afe52ec92c80e8474f2c9ad35893744013a415d184b379f093",
+      "bytes": 26808132,
+      "camera": "panning",
+      "camera_system": "club camera (unknown)",
+      "venue": null,
+      "level": "NLB men",
+      "resolution": "1280x720",
+      "fps": 30.0,
+      "duration_s": 300,
+      "kits": {
+        "home": "#c8102e",
+        "away": "#f0f0f0"
+      },
+      "minors": false,
+      "consent": "unknown",
+      "score": null,
+      "annotations": null,
+      "notes": "Operator pans with play; the full court is never in view at once. Home red, away white; bench and staff in red in the foreground. 5-minute clip, not yet in the bucket (push once R2 exists).",
+      "added": "2026-11-03"
+    },
+    {
+      "id": "ch-nlb-2017-horgen-staefa",
+      "key": "videos/ch-nlb-2017-horgen-staefa.mp4",
+      "sha256": "acd1e25eeebc0d94130e45a8a4ea09a972eafb50dfe155979d0dbb7d05b48022",
+      "bytes": 29151447,
+      "camera": "panning",
+      "camera_system": "club camera (unknown)",
+      "venue": null,
+      "level": "NLB men",
+      "resolution": "1280x720",
+      "fps": 29.97,
+      "duration_s": 300,
+      "kits": {
+        "home": "#c8102e",
+        "away": "#f2c200"
+      },
+      "minors": false,
+      "consent": "unknown",
+      "score": null,
+      "annotations": null,
+      "notes": "Operator pans with play; the full court is never in view at once. Home red/white, away yellow/black. 5-minute clip, not yet in the bucket (push once R2 exists).",
+      "added": "2026-11-03"
+    },
+    {
+      "id": "ch-spl2-2024-leimental-arbon",
+      "key": "videos/ch-spl2-2024-leimental-arbon.mp4",
+      "sha256": "4c16ea46ab0624920db8271d93580e43449e398e1feef3aa627df18031f5282d",
+      "bytes": 29122097,
+      "camera": "panning",
+      "camera_system": "TV broadcast",
+      "venue": null,
+      "level": "SPL2 women",
+      "resolution": "1280x720",
+      "fps": 30.0,
+      "duration_s": 300,
+      "kits": {
+        "home": "#f0f0f0",
+        "away": "#202020"
+      },
+      "minors": false,
+      "consent": "unknown",
+      "score": null,
+      "annotations": null,
+      "notes": "Operator pans with play; the full court is never in view at once. Zoom changes, score and sponsor overlays. White/black assignment to home/away not verified. 5-minute clip, not yet in the bucket (push once R2 exists).",
+      "added": "2026-11-03"
+    }
+  ]
 }
