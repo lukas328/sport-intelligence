@@ -24,6 +24,10 @@ export const KNOWN_ERRORS = [
   "oauth-failed",
   "oauth-email-unverified",
   "oauth-cancelled",
+  "plan-required",
+  "plan-limit-matches",
+  "plan-limit-teams",
+  "plan-limit-storage",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

@@ -27,6 +27,7 @@ from handball_api.models.tenancy import (
     Organization,
     OrgMembership,
     Season,
+    StripeEvent,
     Team,
 )
 from handball_api.models.training import Assignment, AssignmentStatus, Notification
@@ -61,6 +62,7 @@ __all__ = [
     "RosterEntry",
     "Season",
     "StatsCache",
+    "StripeEvent",
     "Team",
     "Track",
     "User",

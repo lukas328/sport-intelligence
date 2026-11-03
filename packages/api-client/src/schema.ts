@@ -519,6 +519,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Overview
+         * @description Plan, limits, usage and the plan catalogue.
+         */
+        get: operations["overview_v1_orgs__org_id__billing_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/billing/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Checkout
+         * @description Stripe Checkout for a paid plan (30-day trial on the first subscription).
+         */
+        post: operations["checkout_v1_orgs__org_id__billing_checkout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/billing/portal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Portal
+         * @description Stripe customer portal: payment method, invoices, plan changes, cancellation.
+         */
+        post: operations["portal_v1_orgs__org_id__billing_portal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/clips": {
         parameters: {
             query?: never;
@@ -1787,6 +1847,15 @@ export interface components {
                 number,
                 number
             ];
+        };
+        /** CheckoutIn */
+        CheckoutIn: {
+            /**
+             * Goalkeeper Seats
+             * @default 0
+             */
+            goalkeeper_seats?: number;
+            plan: components["schemas"]["Plan"];
         };
         /** ClipCreate */
         ClipCreate: {
@@ -3286,6 +3355,11 @@ export interface components {
             /** Size */
             size: number;
         };
+        /** UrlOut */
+        UrlOut: {
+            /** Url */
+            url: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -4295,6 +4369,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssignmentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    overview_v1_orgs__org_id__billing_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    checkout_v1_orgs__org_id__billing_checkout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UrlOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    portal_v1_orgs__org_id__billing_portal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UrlOut"];
                 };
             };
             /** @description Validation Error */

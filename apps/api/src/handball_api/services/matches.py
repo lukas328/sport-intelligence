@@ -20,7 +20,7 @@ from handball_api.schemas.matches import (
     SyncOut,
     VideoOut,
 )
-from handball_api.services import audit
+from handball_api.services import audit, billing
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import current_seasons, get_team
 from handball_api.services.policies import Action, authorize, is_staff_somewhere, visible_team_ids
@@ -103,6 +103,7 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
         season = (await current_seasons(ctx, [team.id])).get(team.id)
         if season is None:
             raise ProblemError(409, "no-season", "The team has no season")
+    await billing.check_new_match(ctx, team.organization_id, team.id, season.id)
     if data.opponent_id:
         opp = await ctx.db.get(Opponent, data.opponent_id)
         if opp is None:

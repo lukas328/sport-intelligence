@@ -36,4 +36,12 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.getByRole("button", { name: "Aufgabe geben" }).click();
   await expect(page.getByText(/Lade zuerst Spieler/)).toBeVisible();
   await expectAccessible(page);
+
+  // plan and usage in the settings (limits are not enforced in this installation)
+  await page.goto(teamUrl.replace(/\/teams\/.*/, "/settings"));
+  const billing = page.getByTestId("billing");
+  await expect(billing).toContainText("Free");
+  await expect(billing).toContainText("Limiten sind in dieser Installation nicht aktiv.");
+  await expect(page.getByTestId("plans").getByRole("listitem").filter({ hasText: "CHF 39 pro Monat" })).toBeVisible();
+  await expectAccessible(page);
 });

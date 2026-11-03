@@ -21,7 +21,7 @@ from handball_api.schemas.orgs import (
     TeamMemberUpdate,
     TeamUpdate,
 )
-from handball_api.services import audit
+from handball_api.services import audit, billing
 from handball_api.services.context import Ctx
 from handball_api.services.policies import Action, Actor, authorize, visible_team_ids
 
@@ -156,6 +156,7 @@ async def get_logo(ctx: Ctx, org: Organization) -> tuple[bytes, str]:
 async def create_team(ctx: Ctx, data: TeamCreate) -> Team:
     actor = ctx.require_actor()
     authorize(actor, Action.TEAM_CREATE, two_factor=ctx.two_factor)
+    await billing.check_new_team(ctx, actor.organization_id)
     team = Team(
         organization_id=actor.organization_id,
         name=data.name,

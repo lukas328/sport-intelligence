@@ -4,7 +4,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import CITEXT, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -29,6 +29,24 @@ class Organization(Base, EntityMixin):
     )
     stripe_customer_id: Mapped[str | None] = mapped_column(String(100))
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(100))
+    # Stripe subscription state (BRIEF 13): trialing, active, past_due, canceled, ...
+    subscription_status: Mapped[str | None] = mapped_column(String(30))
+    trial_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    goalkeeper_seats: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    trial_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class StripeEvent(Base):
+    """Processed webhook events (idempotency). Global, not tenant data."""
+
+    __tablename__ = "stripe_events"
+
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    type: Mapped[str] = mapped_column(String(100), nullable=False)
+    processed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
 
 class OrgMembership(Base, EntityMixin, TenantMixin):

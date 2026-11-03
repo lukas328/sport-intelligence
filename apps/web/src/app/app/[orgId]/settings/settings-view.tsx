@@ -1,5 +1,6 @@
 "use client";
 
+import { BillingSection } from "@/components/billing/billing-section";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
       {isAdmin && <ClubSection org={org} />}
+      {isAdmin && <BillingSection orgId={org.id} />}
       {(isAdmin || inviteTeams.length > 0) && (
         <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
       )}

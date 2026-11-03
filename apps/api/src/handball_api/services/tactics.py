@@ -9,7 +9,7 @@ from sqlalchemy import select
 from handball_api.core.errors import ProblemError
 from handball_api.models import Match, Play
 from handball_api.schemas.tactics import PlayCreate, PlayUpdate
-from handball_api.services import audit
+from handball_api.services import audit, billing
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, can
@@ -57,6 +57,7 @@ async def get_play(ctx: Ctx, play_id: uuid.UUID) -> Play:
 
 async def create_play(ctx: Ctx, team_id: uuid.UUID, data: PlayCreate) -> Play:
     team = await get_team(ctx, team_id, Action.PLAY_WRITE)
+    await billing.require_feature(ctx, "tactics", team.organization_id)
     source = None
     if data.source is not None:
         match = await ctx.db.get(Match, data.source.match_id)

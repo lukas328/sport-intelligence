@@ -16,7 +16,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
-def _base(table: str) -> list[sa.Column]:
+def _base(table: str) -> list[sa.schema.SchemaItem]:
     return [
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column(

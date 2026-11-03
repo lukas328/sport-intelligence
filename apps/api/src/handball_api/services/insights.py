@@ -14,6 +14,7 @@ from handball_api.core.errors import ProblemError
 from handball_api.core.text import numbers_ok
 from handball_api.models import Event, Match, Opponent, RosterEntry, VideoAsset
 from handball_api.models.enums import VideoRole
+from handball_api.services import billing
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
@@ -41,6 +42,7 @@ async def _matches_with_events(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUI
 
 async def insights(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     match = await get_match(ctx, match_id)
+    await billing.require_feature(ctx, "insights", match.organization_id)
     stats = await events_service.match_stats(ctx, match.id)
     others = [
         m
@@ -118,6 +120,7 @@ def _fact(item: dict[str, Any], numbers: dict[str, int]) -> dict[str, Any]:
 
 async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> dict[str, Any]:
     team = await get_team(ctx, team_id, Action.MATCH_READ)
+    await billing.require_feature(ctx, "season", team.organization_id)
     matches = await _matches_with_events(ctx, team.id, season_id)
     names = {
         o.id: o.name
@@ -201,6 +204,7 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
     opponent = await ctx.db.get(Opponent, opponent_id)
     if opponent is None or opponent.organization_id != ctx.require_actor().organization_id:
         raise ProblemError(404, "not-found", "Opponent not found")
+    await billing.require_feature(ctx, "season", opponent.organization_id)
     visible = visible_team_ids(ctx.require_actor())
     q = select(Match).where(Match.opponent_id == opponent.id).order_by(Match.kickoff_at)
     if visible is not None:

@@ -32,6 +32,7 @@ dependencies = [
   "handball-court",
   "handball-metrics",
   "anthropic>=1.0",
+  "stripe>=12",
 ]
 
 [project.scripts]

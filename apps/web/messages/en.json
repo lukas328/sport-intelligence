@@ -78,7 +78,11 @@
     "oauth-state": "Sign-in expired. Please try again.",
     "oauth-failed": "Sign-in with the provider failed.",
     "oauth-email-unverified": "The provider did not confirm an e-mail address.",
-    "oauth-cancelled": "Sign-in was cancelled."
+    "oauth-cancelled": "Sign-in was cancelled.",
+    "plan-required": "This feature is not part of the current plan. Change the plan in the settings.",
+    "plan-limit-matches": "The plan allows no more matches this season.",
+    "plan-limit-teams": "The plan allows no more teams.",
+    "plan-limit-storage": "The plan's video storage is full."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -836,7 +840,9 @@
     "markAll": "Mark all as read",
     "assignment": "New assignment: {title} ({team})",
     "assignment_done": "{name} completed “{title}”",
-    "analysis_ready": "The video analysis is ready."
+    "analysis_ready": "The video analysis is ready.",
+    "payment_failed": "A payment failed. Please check the payment method.",
+    "subscription_canceled": "The subscription ended. Free applies again."
   },
   "assignments": {
     "title": "Assignments",
@@ -910,5 +916,38 @@
     "formations": "Defence systems (estimated)",
     "matches": "Matches",
     "open": "Opponent profile"
+  },
+  "billing": {
+    "title": "Plan and billing",
+    "plan_free": "Free",
+    "plan_team": "Team",
+    "plan_club": "Club",
+    "status_active": "active",
+    "status_trialing": "trial",
+    "status_past_due": "payment due",
+    "status_canceled": "cancelled",
+    "status_incomplete": "incomplete",
+    "status_unpaid": "unpaid",
+    "trialUntil": "Trial until {date}",
+    "portal": "Manage subscription",
+    "notEnforced": "Limits are not active in this installation.",
+    "teams": "Teams",
+    "matches": "Matches per season (largest team)",
+    "storage": "Video storage",
+    "gpu": "Analysis minutes this month",
+    "price": "CHF {price} per month",
+    "free": "free",
+    "teamsN": "{count, plural, one {# team} other {up to # teams}}",
+    "matchesUnlimited": "unlimited matches (fair use)",
+    "matchesN": "{count} matches per season",
+    "storageN": "{gb} GB video storage",
+    "withAnalysis": "Video analysis, insights, tactics",
+    "withoutAnalysis": "Match report and clips",
+    "trial": "{days} days free trial",
+    "choose": "Choose {plan}",
+    "goalkeepers": "Goalkeeper module (CHF {price} per goalkeeper and month), number:",
+    "unavailable": "Online payment is not set up yet.",
+    "needs2fa": "Payments need two-factor sign-in.",
+    "failed": "That did not work. Please try again."
   }
 }

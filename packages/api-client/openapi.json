@@ -646,6 +646,25 @@
         "title": "CalibrationPoint",
         "type": "object"
       },
+      "CheckoutIn": {
+        "properties": {
+          "goalkeeper_seats": {
+            "default": 0,
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Goalkeeper Seats",
+            "type": "integer"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          }
+        },
+        "required": [
+          "plan"
+        ],
+        "title": "CheckoutIn",
+        "type": "object"
+      },
       "ClipCreate": {
         "properties": {
           "end_ms": {
@@ -5265,6 +5284,19 @@
         "title": "UploadedPartOut",
         "type": "object"
       },
+      "UrlOut": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "UrlOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -6727,6 +6759,150 @@
         "summary": "Set Status",
         "tags": [
           "training"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/billing": {
+      "get": {
+        "description": "Plan, limits, usage and the plan catalogue.",
+        "operationId": "overview_v1_orgs__org_id__billing_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Overview V1 Orgs  Org Id  Billing Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Overview",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/billing/checkout": {
+      "post": {
+        "description": "Stripe Checkout for a paid plan (30-day trial on the first subscription).",
+        "operationId": "checkout_v1_orgs__org_id__billing_checkout_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Checkout",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/billing/portal": {
+      "post": {
+        "description": "Stripe customer portal: payment method, invoices, plan changes, cancellation.",
+        "operationId": "portal_v1_orgs__org_id__billing_portal_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Portal",
+        "tags": [
+          "billing"
         ]
       }
     },

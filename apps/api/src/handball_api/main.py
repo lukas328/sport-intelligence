@@ -26,10 +26,12 @@ from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.core.text import ClaudeTextGenerator, TextGenerator
 from handball_api.routers import auth, health, internal, matches, orgs, teams
+from handball_api.routers import billing as billing_router
 from handball_api.routers import events as events_router
 from handball_api.routers import tactics as tactics_router
 from handball_api.routers import training as training_router
 from handball_api.routers.deps import csrf_protect
+from handball_api.services.billing import BillingGateway, StripeGateway
 
 
 def _init_sentry(settings: Settings) -> None:
@@ -97,6 +99,7 @@ def create_app(
     jobs: JobQueue | None = None,
     events: EventBus | None = None,
     text: TextGenerator | None = None,
+    billing: BillingGateway | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     check_production_secrets(settings)
@@ -129,6 +132,11 @@ def create_app(
     app.state.oidc = oidc or OidcClient()
     app.state.jobs = jobs or RqJobQueue(settings.redis_url)
     app.state.events = events or RedisEventBus(settings.redis_url)
+    app.state.billing = billing or (
+        StripeGateway(settings.stripe_secret_key.get_secret_value())
+        if settings.stripe_secret_key and settings.stripe_secret_key.get_secret_value()
+        else None
+    )
     app.state.text = text or (
         ClaudeTextGenerator(settings.anthropic_api_key.get_secret_value())
         if settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value()
@@ -169,5 +177,6 @@ def create_app(
     app.include_router(events_router.router)
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)
+    app.include_router(billing_router.router)
     app.include_router(internal.router)
     return app

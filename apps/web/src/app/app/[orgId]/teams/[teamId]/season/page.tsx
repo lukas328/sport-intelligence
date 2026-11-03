@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, EmptyState } from "@/components/ui/card";
+import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
 
 interface Row {
@@ -40,6 +41,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats", path),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", path),
   ]);
+  if (stats.response.status === 402) return <PlanHint orgId={orgId} />;
   const data = stats.data as unknown as Season | undefined;
   if (!data || data.matches.length === 0) return <EmptyState title={t("none")} />;
   const names = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.jersey_number != null ? `#${r.jersey_number} ` : ""}${r.first_name} ${r.last_name}`]));

@@ -24,7 +24,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, training
+from handball_api.services import audit, billing, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
@@ -65,6 +65,7 @@ async def create_upload(
         raise ProblemError(413, "video-too-large", "The video is too large")
     if not VIDEO_EXT.search(data.filename):
         raise ProblemError(415, "unsupported-video", "Use MP4, MOV, MKV, AVI, MTS or WebM")
+    await billing.check_upload(ctx, match.organization_id, data.size_bytes)
     asset_id = uuid.uuid4()
     # S3 allows at most 10'000 parts; grow the part size for huge files.
     part_size = max(ctx.settings.upload_part_size, math.ceil(data.size_bytes / 10_000))
@@ -400,7 +401,11 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         elif data.status == JobStatus.SUCCEEDED and job.kind == "ingest" and data.result:
             _apply_ingest_result(asset, data.result)
             match.status = MatchStatus.READY
-            if asset.role == VideoRole.MAIN and asset.proxy_key:
+            if (
+                asset.role == VideoRole.MAIN
+                and asset.proxy_key
+                and await billing.analysis_allowed(ctx, match.organization_id)
+            ):
                 await start_analysis(ctx, asset, match)
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:

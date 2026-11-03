@@ -78,7 +78,11 @@
     "oauth-state": "Die Anmeldung ist abgelaufen. Bitte versuch es nochmals.",
     "oauth-failed": "Die Anmeldung beim Anbieter hat nicht geklappt.",
     "oauth-email-unverified": "Der Anbieter hat keine bestätigte E-Mail-Adresse geliefert.",
-    "oauth-cancelled": "Die Anmeldung wurde abgebrochen."
+    "oauth-cancelled": "Die Anmeldung wurde abgebrochen.",
+    "plan-required": "Diese Funktion ist im aktuellen Abo nicht enthalten. Unter Einstellungen kannst du das Abo ändern.",
+    "plan-limit-matches": "Das Abo erlaubt keine weiteren Spiele in dieser Saison.",
+    "plan-limit-teams": "Das Abo erlaubt keine weiteren Teams.",
+    "plan-limit-storage": "Der Videospeicher des Abos ist voll."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -836,7 +840,9 @@
     "markAll": "Alle als gelesen markieren",
     "assignment": "Neue Aufgabe: {title} ({team})",
     "assignment_done": "{name} hat «{title}» erledigt",
-    "analysis_ready": "Die Videoanalyse ist fertig."
+    "analysis_ready": "Die Videoanalyse ist fertig.",
+    "payment_failed": "Eine Zahlung ist fehlgeschlagen. Bitte Zahlungsmittel prüfen.",
+    "subscription_canceled": "Das Abo wurde beendet. Es gilt wieder Free."
   },
   "assignments": {
     "title": "Aufgaben",
@@ -910,5 +916,38 @@
     "formations": "Abwehrsysteme (geschätzt)",
     "matches": "Spiele",
     "open": "Gegner-Profil"
+  },
+  "billing": {
+    "title": "Abo und Rechnungen",
+    "plan_free": "Free",
+    "plan_team": "Team",
+    "plan_club": "Verein",
+    "status_active": "aktiv",
+    "status_trialing": "Testphase",
+    "status_past_due": "Zahlung offen",
+    "status_canceled": "gekündigt",
+    "status_incomplete": "unvollständig",
+    "status_unpaid": "unbezahlt",
+    "trialUntil": "Testphase bis {date}",
+    "portal": "Abo verwalten",
+    "notEnforced": "Limiten sind in dieser Installation nicht aktiv.",
+    "teams": "Teams",
+    "matches": "Spiele pro Saison (grösstes Team)",
+    "storage": "Videospeicher",
+    "gpu": "Analyseminuten diesen Monat",
+    "price": "CHF {price} pro Monat",
+    "free": "gratis",
+    "teamsN": "{count, plural, one {# Team} other {bis # Teams}}",
+    "matchesUnlimited": "unbegrenzt Spiele (Fair Use)",
+    "matchesN": "{count} Spiele pro Saison",
+    "storageN": "{gb} GB Videospeicher",
+    "withAnalysis": "Videoanalyse, Erkenntnisse, Taktik",
+    "withoutAnalysis": "Spielbericht und Clips",
+    "trial": "{days} Tage gratis testen",
+    "choose": "{plan} wählen",
+    "goalkeepers": "Torhüter-Modul (CHF {price} pro Torhüter und Monat), Anzahl:",
+    "unavailable": "Online-Zahlung ist noch nicht eingerichtet.",
+    "needs2fa": "Für Zahlungen braucht es die Zwei-Faktor-Anmeldung.",
+    "failed": "Das hat nicht geklappt. Bitte erneut versuchen."
   }
 }

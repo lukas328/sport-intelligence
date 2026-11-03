@@ -37,7 +37,7 @@ async def csrf_protect(request: Request, settings: SettingsDep) -> None:
         return
     if OAUTH_CALLBACK.match(request.url.path):
         return  # Apple posts the callback cross-site; the signed state cookie protects it
-    if request.url.path.startswith("/internal/"):
+    if request.url.path.startswith("/internal/") or request.url.path == "/v1/stripe/webhook":
         return  # worker callbacks: shared-secret header, never reachable via the web origin
     origin = request.headers.get("origin")
     if origin:

@@ -78,7 +78,11 @@
     "oauth-state": "La connexion a expiré. Veuillez réessayer.",
     "oauth-failed": "La connexion auprès du fournisseur a échoué.",
     "oauth-email-unverified": "Le fournisseur n'a pas confirmé d'adresse e-mail.",
-    "oauth-cancelled": "La connexion a été annulée."
+    "oauth-cancelled": "La connexion a été annulée.",
+    "plan-required": "Cette fonction n'est pas incluse dans l'abonnement actuel. Change l'abonnement dans les paramètres.",
+    "plan-limit-matches": "L'abonnement ne permet plus de matchs cette saison.",
+    "plan-limit-teams": "L'abonnement ne permet plus d'équipes.",
+    "plan-limit-storage": "Le stockage vidéo de l'abonnement est plein."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -836,7 +840,9 @@
     "markAll": "Tout marquer comme lu",
     "assignment": "Nouvelle tâche : {title} ({team})",
     "assignment_done": "{name} a terminé « {title} »",
-    "analysis_ready": "L'analyse vidéo est prête."
+    "analysis_ready": "L'analyse vidéo est prête.",
+    "payment_failed": "Un paiement a échoué. Vérifie le moyen de paiement.",
+    "subscription_canceled": "L'abonnement est terminé. Le plan Free s'applique à nouveau."
   },
   "assignments": {
     "title": "Tâches",
@@ -910,5 +916,38 @@
     "formations": "Systèmes défensifs (estimés)",
     "matches": "Matchs",
     "open": "Profil adversaire"
+  },
+  "billing": {
+    "title": "Abonnement et factures",
+    "plan_free": "Free",
+    "plan_team": "Équipe",
+    "plan_club": "Club",
+    "status_active": "actif",
+    "status_trialing": "période d'essai",
+    "status_past_due": "paiement en attente",
+    "status_canceled": "résilié",
+    "status_incomplete": "incomplet",
+    "status_unpaid": "impayé",
+    "trialUntil": "Essai jusqu'au {date}",
+    "portal": "Gérer l'abonnement",
+    "notEnforced": "Les limites ne sont pas actives dans cette installation.",
+    "teams": "Équipes",
+    "matches": "Matchs par saison (plus grande équipe)",
+    "storage": "Stockage vidéo",
+    "gpu": "Minutes d'analyse ce mois",
+    "price": "CHF {price} par mois",
+    "free": "gratuit",
+    "teamsN": "{count, plural, one {# équipe} other {jusqu'à # équipes}}",
+    "matchesUnlimited": "matchs illimités (usage raisonnable)",
+    "matchesN": "{count} matchs par saison",
+    "storageN": "{gb} Go de stockage vidéo",
+    "withAnalysis": "Analyse vidéo, constats, tactique",
+    "withoutAnalysis": "Rapport de match et clips",
+    "trial": "{days} jours d'essai gratuit",
+    "choose": "Choisir {plan}",
+    "goalkeepers": "Module gardien (CHF {price} par gardien et mois), nombre :",
+    "unavailable": "Le paiement en ligne n'est pas encore configuré.",
+    "needs2fa": "Les paiements nécessitent la connexion à deux facteurs.",
+    "failed": "Cela n'a pas fonctionné. Réessaie."
   }
 }

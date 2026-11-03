@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, EmptyState } from "@/components/ui/card";
+import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
 
 interface Profile {
@@ -28,6 +29,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
   const res = await (await serverApi()).GET("/v1/orgs/{org_id}/opponents/{opponent_id}/profile", {
     params: { path: { org_id: orgId, opponent_id: opponentId } },
   });
+  if (res.response.status === 402) return <PlanHint orgId={orgId} />;
   const p = res.data as unknown as Profile | undefined;
   if (!p) notFound();
   const n = Math.max(1, p.tagged_matches);
