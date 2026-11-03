@@ -15,6 +15,8 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "retain-on-failure",
+    // page transitions fade in; axe must judge the final colours, not a frame of the fade
+    reducedMotion: "reduce",
     ...(executablePath ? { launchOptions: { executablePath } } : {}),
   },
   projects: [

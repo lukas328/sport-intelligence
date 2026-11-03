@@ -35,8 +35,8 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   // calendar link for subscription
   await page.getByRole("button", { name: "Link erzeugen" }).click();
   const url = await page.getByLabel("Kalender abonnieren").inputValue();
-  const feed = await page.request.get(url.slice(url.indexOf("/v1/")));
-  expect(await feed.text()).toContain("Abschluss Flügel");
+  // the link is stored with the request's commit; poll instead of a single read
+  await expect.poll(async () => (await page.request.get(url.slice(url.indexOf("/v1/")))).text()).toContain("Abschluss Flügel");
 
   // matrix: empty team, but the page and its controls work
   await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
