@@ -11,6 +11,7 @@ import itertools
 import math
 import subprocess
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -130,8 +131,15 @@ def plan_clip(slide: dict[str, Any]) -> list[tuple[str, float, float, float]]:
     return pieces
 
 
+SpotPiece = Callable[[dict[str, Any], Path, float, float, Path], bool]
+
+
 def render(
-    settings: WorkerSettings, slides: list[dict[str, Any]], sources: dict[str, Path], work: Path
+    settings: WorkerSettings,
+    slides: list[dict[str, Any]],
+    sources: dict[str, Path],
+    work: Path,
+    spot_piece: SpotPiece | None = None,
 ) -> Path:
     parts: list[Path] = []
     for i, slide in enumerate(slides):
@@ -139,6 +147,13 @@ def render(
             src = sources[slide["video_id"]]
             for j, (kind, x, y, rate) in enumerate(plan_clip(slide)):
                 out = work / f"p{i:03d}_{j:02d}.mp4"
+                if kind == "play" and spot_piece and slide.get("spotlight"):
+                    # burned-in spotlight (A3): frames drawn by the reel renderer, then slowed
+                    tmp = work / f"r{i:03d}_{j:02d}.mp4"
+                    if spot_piece(slide, src, x, y, tmp):
+                        _ff(settings, ["-i", str(tmp), "-vf", f"setpts=PTS/{rate}", *ENC, str(out)])
+                        parts.append(out)
+                        continue
                 if kind == "play":
                     _ff(
                         settings,
@@ -251,7 +266,13 @@ def run_presentation_export(payload: dict[str, Any]) -> dict[str, Any]:
                 dst = work / f"src_{vid}.mp4"
                 s3.download_file(payload["bucket_videos"], key, str(dst))
                 sources[vid] = dst
-            final = render(settings, payload["slides"], sources, work)
+            final = render(
+                settings,
+                payload["slides"],
+                sources,
+                work,
+                _spotlight_pieces(settings, payload, s3, work),
+            )
             s3.upload_file(
                 str(final),
                 payload["bucket_artifacts"],
@@ -264,3 +285,52 @@ def run_presentation_export(payload: dict[str, Any]) -> dict[str, Any]:
         body = {"status": "failed", "error": str(exc)[:500]}
     httpx.post(url, json=body, headers=headers, timeout=30).raise_for_status()
     return body
+
+
+def _spotlight_pieces(
+    settings: WorkerSettings, payload: dict[str, Any], s3: Any, work: Path
+) -> SpotPiece | None:
+    """Renders clip pieces with a burned-in spotlight from the analysis tracks of their video."""
+    from handball_worker import reels  # reels imports this module (encoder settings)
+
+    analysis: dict[str, dict[str, Any]] = payload.get("analysis") or {}
+    if not analysis:
+        return None
+    rows_cache: dict[str, Any] = {}
+
+    def piece(slide: dict[str, Any], src: Path, x: float, y: float, out: Path) -> bool:
+        info = analysis.get(str(slide.get("video_id")))
+        track = (slide.get("spotlight") or [None])[0]
+        if not info or track is None or not info.get("homography"):
+            return False
+        clip = {
+            "in_ms": round(x * 1000),
+            "out_ms": round(y * 1000),
+            "label": "",
+            "spotlight_track": track,
+        }
+        key = str(slide["video_id"])
+        if key not in rows_cache:
+            clips = [
+                {"in_ms": s["in_ms"], "out_ms": s["out_ms"]}
+                for s in payload["slides"]
+                if s.get("video_id") == key
+            ]
+            rows_cache[key] = reels._rows(
+                s3,
+                payload["bucket_artifacts"],
+                info["chunks_prefix"],
+                info.get("chunk_ms"),
+                clips,
+                work,
+            )
+        ctx = {
+            "format": "16x9",
+            "homography": info["homography"],
+            "image_size": info.get("image_size"),
+            "player_tracks": [],
+        }
+        reels.render_clip(settings, src, clip, rows_cache[key], ctx, out)
+        return True
+
+    return piece

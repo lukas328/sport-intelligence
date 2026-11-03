@@ -19,6 +19,8 @@ from handball_api.core.errors import ProblemError
 from handball_api.core.security import hash_token, new_token
 from handball_api.models import (
     Clip,
+    Event,
+    HighlightReel,
     Match,
     Play,
     Playlist,
@@ -28,13 +30,15 @@ from handball_api.models import (
     Team,
     VideoAsset,
 )
-from handball_api.models.enums import VideoRole, VideoStatus
+from handball_api.models.enums import ConsentKind, ReelStatus, VideoRole, VideoStatus
 from handball_api.services import audit, billing
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
+from handball_api.services.highlights import rank
 from handball_api.services.matches import opponent_of
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
+from handball_api.services.roster import consented
 from handball_api.services.videos import MEDIA_PATH, MEDIA_TYPES, media_prefix
 
 
@@ -43,6 +47,32 @@ def _now() -> datetime:
 
 
 async def _target(ctx: Ctx, team: Team, kind: str, target_id: uuid.UUID) -> str:
+    if kind == "highlight":
+        reel = await ctx.db.get(HighlightReel, target_id)
+        if reel is None or reel.team_id != team.id or reel.status != ReelStatus.READY:
+            raise ProblemError(404, "not-found", "Reel not found or not ready")
+        # public only with highlights_public of every featured player (addendum 01, 4.3)
+        featured = {
+            s.player_id
+            for s in rank(
+                list(
+                    (
+                        await ctx.db.scalars(
+                            select(Event).where(Event.id.in_([uuid.UUID(c) for c in reel.clip_ids]))
+                        )
+                    ).all()
+                ),
+                await ctx.db.get(Match, reel.match_id) if reel.match_id else None,  # type: ignore[arg-type]
+                reel.player_id,
+            )
+            if s.player_id
+        }
+        ok = await consented(ctx, list(featured), ConsentKind.HIGHLIGHTS_PUBLIC)
+        if featured - ok:
+            raise ProblemError(
+                403, "consent-missing", "Public sharing needs the public highlights consent"
+            )
+        return "Highlights"
     if kind == "play":
         play = await ctx.db.get(Play, target_id)
         if play is None or play.team_id != team.id:
@@ -209,6 +239,11 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
                 "video_id": str(video.id) if video else None,
             },
         }
+    if link.kind == "highlight":
+        reel = await ctx.db.get(HighlightReel, link.target_id)
+        if reel is None or reel.status != ReelStatus.READY:
+            raise ProblemError(404, "not-found", "Not found")
+        return {**base, "highlight": {"format": reel.format, "scenes": len(reel.clip_ids)}}
     pl = await ctx.db.get(Playlist, link.target_id)
     if pl is None:
         raise ProblemError(404, "not-found", "Not found")
@@ -263,3 +298,14 @@ async def public_media(ctx: Ctx, token: str, video_id: uuid.UUID, path: str) -> 
     except Exception as exc:
         raise ProblemError(404, "not-found", "Not found") from exc
     return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
+
+
+async def public_reel(ctx: Ctx, token: str) -> bytes:
+    link = await _resolve(ctx, token)
+    if link.kind != "highlight":
+        raise ProblemError(404, "not-found", "Not found")
+    reel = await ctx.db.get(HighlightReel, link.target_id)
+    if reel is None or reel.status != ReelStatus.READY or not reel.output_key:
+        raise ProblemError(404, "not-found", "Not found")
+    data, _ = await ctx.storage.get(ctx.settings.s3_bucket_artifacts, reel.output_key)
+    return data

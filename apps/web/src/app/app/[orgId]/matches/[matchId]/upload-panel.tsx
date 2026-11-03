@@ -1,11 +1,13 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { connectionHint } from "@/lib/network";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatBytes } from "@/lib/format";
 import { localStore, uploadFile, UploadAbortedError, xhrPutPart, type UploadApi } from "@/lib/upload";
@@ -52,9 +54,11 @@ function apiFor(orgId: string, matchId: string): UploadApi {
 type State =
   | { kind: "idle" }
   | { kind: "uploading"; file: File; done: number; resumed: boolean }
-  | { kind: "paused" }
+  | { kind: "paused"; file: File }
+  | { kind: "confirm"; file: File; hint: "mobile" | "slow" }
+  | { kind: "offline"; file: File }
   | { kind: "done" }
-  | { kind: "error"; error: ErrorKey | "upload" };
+  | { kind: "error"; error: ErrorKey | "upload"; file?: File };
 
 export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; matchId: string; onUploaded: () => void }) {
   const t = useTranslations();
@@ -76,7 +80,23 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
     return () => window.removeEventListener("beforeunload", warn);
   }, [uploading, t]);
 
-  async function start(file: File) {
+  // the hall Wi-Fi drops: continue by itself when the connection is back (parts already sent stay)
+  useEffect(() => {
+    if (state.kind !== "offline") return;
+    const file = state.file;
+    const resume = () => void start(file, true);
+    window.addEventListener("online", resume, { once: true });
+    return () => window.removeEventListener("online", resume);
+  }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function ask(file: File) {
+    const hint = connectionHint();
+    if (hint) setState({ kind: "confirm", file, hint });
+    else void start(file, true);
+  }
+
+  async function start(file: File, confirmed = false) {
+    if (!confirmed) return ask(file);
     ctrl.current = new AbortController();
     setState({ kind: "uploading", file, done: 0, resumed: false });
     try {
@@ -89,10 +109,12 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
         onProgress: (done) => setState((s) => (s.kind === "uploading" ? { ...s, done } : s)),
       });
       setState({ kind: "done" });
+      track("first_upload", { role });
       onUploaded();
     } catch (e) {
-      if (e instanceof UploadAbortedError) setState({ kind: "paused" });
-      else setState({ kind: "error", error: e && typeof e === "object" && "status" in e ? errorKey(e) : "upload" });
+      if (e instanceof UploadAbortedError) setState({ kind: "paused", file });
+      else if (!navigator.onLine) setState({ kind: "offline", file });
+      else setState({ kind: "error", error: e && typeof e === "object" && "status" in e ? errorKey(e) : "upload", file });
     }
   }
 
@@ -168,10 +190,40 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
           </Button>
         </div>
       )}
-      {state.kind === "paused" && <Alert kind="info">{t("upload.paused")}</Alert>}
+      {state.kind === "confirm" && (
+        <Alert kind="info">
+          <span className="block">{t(state.hint === "mobile" ? "upload.mobileData" : "upload.slowLink", { size: formatBytes(state.file.size) })}</span>
+          <span className="mt-2 flex gap-2">
+            <Button onClick={() => void start(state.file, true)}>{t("upload.uploadAnyway")}</Button>
+            <Button variant="ghost" onClick={() => setState({ kind: "idle" })}>
+              {t("upload.later")}
+            </Button>
+          </span>
+        </Alert>
+      )}
+      {state.kind === "offline" && (
+        <Alert kind="info" data-testid="upload-offline">
+          {t("upload.offline")}
+        </Alert>
+      )}
+      {state.kind === "paused" && (
+        <Alert kind="info">
+          <span className="block">{t("upload.paused")}</span>
+          <Button variant="secondary" className="mt-2" onClick={() => void start(state.file, true)}>
+            {t("upload.resume")}
+          </Button>
+        </Alert>
+      )}
       {state.kind === "done" && <Alert kind="success">{t("upload.done")}</Alert>}
       {state.kind === "error" && (
-        <Alert>{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</Alert>
+        <Alert>
+          <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
+          {state.file && (
+            <Button variant="secondary" className="mt-2" onClick={() => void start(state.file!, true)}>
+              {t("upload.resume")}
+            </Button>
+          )}
+        </Alert>
       )}
       <details className="text-sm">
         <summary className="cursor-pointer text-muted">{t("upload.link")}</summary>

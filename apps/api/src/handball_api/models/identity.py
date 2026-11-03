@@ -27,6 +27,9 @@ class User(Base, EntityMixin):
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # onboarding e-mail series (addendum 01, 4.11): days already sent, opt-out
+    onboarding_sent: Mapped[list[int]] = mapped_column(JSONB, nullable=False, default=list)
+    onboarding_opt_out: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     @property
     def totp_enabled(self) -> bool:
@@ -91,3 +94,16 @@ class AuthToken(Base):
     )
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class DeviceToken(Base, EntityMixin):
+    """Expo push token of a phone with the app (5.5); one row per device, moves with the user."""
+
+    __tablename__ = "device_tokens"
+
+    token: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    platform: Mapped[str] = mapped_column(String(10), nullable=False)  # ios, android
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

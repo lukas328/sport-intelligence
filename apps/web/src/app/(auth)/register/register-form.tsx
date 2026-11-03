@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -43,6 +44,7 @@ export function RegisterForm({
       },
     });
     setBusy(false);
+    if (!error) track("signed_up", { invited: Boolean(invitationToken) });
     if (error) {
       setError(errorKey(error));
       setFields(fieldErrors(error));

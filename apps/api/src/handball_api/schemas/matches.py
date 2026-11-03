@@ -428,6 +428,9 @@ class FormationSegment(ApiModel):
 class AnalysisOut(ApiModel):
     status: Literal["none", "running", "ready", "failed"]
     formations: list[FormationSegment] = Field(default_factory=list)
+    auto_events: dict[str, Any] | None = Field(
+        default=None, description="automatic events: counts, sides, boundaries, what is missing"
+    )
     calibration: CalibrationOut | None
     tracks: list[TrackOut]
     chunk_ms: int | None
@@ -440,6 +443,9 @@ class AnalysisOut(ApiModel):
     panorama: PanoramaOut | None = None  # hall image to mark the court on
     needs_calibration: bool = False  # the court was not found automatically
     calibration_error: str | None = None
+    error_code: str | None = Field(
+        default=None, description="calibration, unreadable, too_short, timeout or generic"
+    )
 
 
 class CalibrationPoint(ApiModel):

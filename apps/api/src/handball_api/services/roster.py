@@ -248,9 +248,8 @@ async def add_consent(
     team = await get_team(ctx, team_id, Action.CONSENT_WRITE)
     player = await _player_in_team(ctx, team_id, player_id)
     check_consent_giver(player, data.given_by, data.given_at, team.is_youth)
-    check_youth_purpose(
-        data.kind, team.is_youth or bool(is_minor(player.birth_year, data.given_at))
-    )
+    # youth teams never go public (4.9); minors in adult teams may, with a parent's consent (5.8)
+    check_youth_purpose(data.kind, team.is_youth)
     consent = Consent(
         organization_id=team.organization_id,
         player_id=player.id,
@@ -287,7 +286,7 @@ PUBLIC_PURPOSES = frozenset({ConsentKind.HIGHLIGHTS_PUBLIC, ConsentKind.PUBLIC_P
 
 
 def check_youth_purpose(kind: ConsentKind, youth: bool) -> None:
-    """Youth protection (4.9): no public profiles or public highlights of youth players."""
+    """Youth protection (4.9): no public profiles or public highlights in youth teams."""
     if youth and kind in PUBLIC_PURPOSES:
         raise ProblemError(
             403, "youth-protection", "Public profiles and highlights are off for youth players"

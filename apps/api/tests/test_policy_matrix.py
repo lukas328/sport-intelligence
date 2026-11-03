@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import itertools
 import re
+import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
@@ -46,6 +47,7 @@ SEASON = STAFF | MANAGER
 TEAM_MEMBERS = STAFF | ASSISTANTS | MANAGER
 MATCH_WRITE = STAFF | MANAGER
 VIDEO_WORK = STAFF | ASSISTANTS
+TRAINING = VIDEO_WORK | MANAGER
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
 
@@ -289,6 +291,17 @@ ENDPOINTS += [
         VIDEO_WORK,
         lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/exports/shots"),
     ),
+    (
+        "GET highlights",
+        READERS,
+        lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/highlights"),
+    ),
+    ("GET match parts", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/parts")),
+    (
+        "GET match boundaries",
+        READERS,
+        lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/boundaries"),
+    ),
     ("GET stats", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/stats")),
     (
         "PUT kickoff",
@@ -300,6 +313,33 @@ ENDPOINTS += [
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
     ("GET team assignments", VIDEO_WORK, lambda a, w: a.get(w.t("/assignments"))),
+    ("GET assistant conversations", VIDEO_WORK, lambda a, w: a.get(w.t("/assistant"))),
+    ("GET matrix templates", READERS, lambda a, w: a.get(w.t("/matrix/templates"))),
+    ("GET sessions", READERS, lambda a, w: a.get(w.t("/sessions"))),
+    ("GET mark keys", READERS, lambda a, w: a.get(w.t("/mark-keys"))),
+    (
+        "POST mark session",
+        VIDEO_WORK,
+        lambda a, w: a.post(f"/v1/orgs/{w.org}/matches/{w.match}/mark-sessions", json={}),
+    ),
+    (
+        "POST session",
+        TRAINING,
+        lambda a, w: a.post(w.t("/sessions"), json={"on_date": "2026-12-01"}),
+    ),
+    ("GET focus plans", READERS, lambda a, w: a.get(w.t("/focus"))),
+    ("POST calendar link", TRAINING, lambda a, w: a.post(w.t("/calendar"))),
+    (
+        "POST matrix template",
+        VIDEO_WORK,
+        lambda a, w: a.post(
+            w.t("/matrix/templates"),
+            json={
+                "name": f"T{uuid.uuid4().hex[:6]}",
+                "config": {"rows": "match", "metrics": ["goals"]},
+            },
+        ),
+    ),
     ("GET presentations", READERS, lambda a, w: a.get(w.t("/presentations"))),
     (
         "POST presentation",

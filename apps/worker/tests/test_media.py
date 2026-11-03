@@ -47,9 +47,14 @@ def test_parse_probe() -> None:
             },
             {"codec_type": "audio"},
         ],
-        "format": {"duration": "3600.5", "bit_rate": "20000000"},
+        "format": {
+            "duration": "3600.5",
+            "bit_rate": "20000000",
+            "tags": {"creation_time": "2026-11-07T17:58:03.000000Z"},
+        },
     }
     v = parse_probe(data)
+    assert v.recorded_at == "2026-11-07T17:58:03.000000Z"
     assert (v.width, v.fps, v.codec, v.has_audio, v.rotation, v.short_side) == (
         3840,
         50.0,

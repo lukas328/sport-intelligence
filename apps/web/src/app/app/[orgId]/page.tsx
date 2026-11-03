@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { OnboardingChecklist } from "@/components/support/checklist";
 import { Card, EmptyState } from "@/components/ui/card";
 import { serverApi } from "@/lib/api";
 
@@ -11,6 +12,7 @@ export default async function OrgHome({ params }: { params: Promise<{ orgId: str
   });
   return (
     <div className="space-y-6">
+      <OnboardingChecklist orgId={orgId} teamId={teams[0]?.id ?? null} />
       <h1 className="text-2xl font-semibold">{t("dashboard.teamsTitle")}</h1>
       {teams.length === 0 ? (
         <EmptyState title={t("dashboard.noTeams")} />

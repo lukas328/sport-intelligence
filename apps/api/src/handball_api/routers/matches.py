@@ -21,7 +21,7 @@ from handball_api.models import (
     ProcessingJob,
     Track,
 )
-from handball_api.routers.deps import OrgDep
+from handball_api.routers.deps import CtxDep, OrgDep
 from handball_api.schemas.matches import (
     AnalysisOut,
     AnnotationCreate,
@@ -201,6 +201,12 @@ async def media_file(video_id: uuid.UUID, path: str, scope: OrgDep) -> Response:
     data, ctype = await videos.read_media(scope.ctx, video_id, path)
     cache = "private, max-age=60" if path.endswith(".m3u8") else "private, max-age=86400, immutable"
     return Response(data, media_type=ctype, headers={"cache-control": cache})
+
+
+@router.post("/videos/{video_id}/media-token", tags=["videos"])
+async def media_token(video_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
+    """Signed media path for the native apps' players (HLS segments without auth headers)."""
+    return await videos.media_token(scope.ctx, video_id)
 
 
 @router.get("/videos/{video_id}/analysis", response_model=AnalysisOut, tags=["analysis"])
@@ -448,3 +454,16 @@ async def add_annotation(match_id: uuid.UUID, data: AnnotationCreate, scope: Org
 @router.delete("/annotations/{annotation_id}", status_code=204, tags=["annotations"])
 async def delete_annotation(annotation_id: uuid.UUID, scope: OrgDep) -> None:
     await media.delete_annotation(scope.ctx, annotation_id)
+
+
+public_media = APIRouter(prefix="/v1/media", tags=["videos"])
+
+
+@public_media.get(
+    "/{video_id}/{token}/{path:path}",
+    response_class=Response,
+    responses={200: {"content": {"application/vnd.apple.mpegurl": {}, "video/mp4": {}}}},
+)
+async def signed_media(video_id: uuid.UUID, token: str, path: str, ctx: CtxDep) -> Response:
+    data, ctype = await videos.read_signed_media(ctx, video_id, token, path)
+    return Response(data, media_type=ctype, headers={"cache-control": "private, max-age=600"})

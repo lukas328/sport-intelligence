@@ -106,7 +106,8 @@ async def give(ctx: Ctx, player_id: uuid.UUID, kind: ConsentKind, name: str) -> 
     ) is not None
     now = _now()
     check_consent_giver(player, given_by, now, youth)
-    check_youth_purpose(kind, youth or bool(is_minor(player.birth_year, now)))
+    # youth teams never go public (4.9); minors in adult teams may, with a parent's consent (5.8)
+    check_youth_purpose(kind, youth)
     active = await ctx.db.scalar(
         select(Consent).where(
             Consent.player_id == player.id, Consent.kind == kind, Consent.revoked_at.is_(None)

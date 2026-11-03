@@ -77,6 +77,8 @@ class Match(Base, EntityMixin, TenantMixin):
     # paper_report, video, demo: where the match data comes from (BRIEF 15)
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="video")
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # analysis failed: the match does not count against the plan (addendum 01, 4.11)
+    quota_credit: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # video time (ms) of the throw-off of each half: maps match clock <-> video time
     kickoff_ms: Mapped[dict[str, int] | None] = mapped_column(JSONB)
     # extra content of an imported paper report (score every 5 min, tactics notes by zone)
@@ -119,6 +121,11 @@ class VideoAsset(Base, EntityMixin, TenantMixin):
     quality_report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     # P2 preparation (half-time report): a partial upload analysed before the match ends
     is_partial: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # storage policy (addendum 01, 4.12): original reduced to the compressed versions
+    purge_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    original_purged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # camera clock from the file metadata: orders several files of one match (4.8)
+    recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # result metadata of the latest analysis run (chunks, fps, detector, timings, versions)
     analysis: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     error: Mapped[str | None] = mapped_column(Text)

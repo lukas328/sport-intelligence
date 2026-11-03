@@ -1,0 +1,62 @@
+{
+  "currency": "CHF",
+  "annual_months": 10,
+  "goalkeeper_addon_chf_month": 7,
+  "plans": [
+    {
+      "plan": "free",
+      "price_chf_month": 0,
+      "price_chf_year": 0,
+      "teams": 1,
+      "matches_per_season": 2,
+      "storage_gb": 10,
+      "analysis": false,
+      "features": [
+        "events"
+      ],
+      "trial_days": 0
+    },
+    {
+      "plan": "team",
+      "price_chf_month": 39,
+      "price_chf_year": 390,
+      "teams": 1,
+      "matches_per_season": null,
+      "storage_gb": 250,
+      "analysis": true,
+      "features": [
+        "assistant",
+        "events",
+        "insights",
+        "pdf_reports",
+        "season",
+        "share_links",
+        "tactics",
+        "tracking"
+      ],
+      "trial_days": 30
+    },
+    {
+      "plan": "club",
+      "price_chf_month": 199,
+      "price_chf_year": 1990,
+      "teams": 10,
+      "matches_per_season": null,
+      "storage_gb": 2500,
+      "analysis": true,
+      "features": [
+        "assistant",
+        "club_stats",
+        "events",
+        "insights",
+        "pdf_reports",
+        "priority",
+        "season",
+        "share_links",
+        "tactics",
+        "tracking"
+      ],
+      "trial_days": 30
+    }
+  ]
+}

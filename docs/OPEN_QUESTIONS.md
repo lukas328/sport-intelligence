@@ -110,6 +110,12 @@ all behind adapters.
 ### Q-ADD-5 Legal templates
 Terms section on video use, hall notice, consent texts per purpose, model-training opt-in, data portability
 for players. Templates will be marked "rechtlich prüfen lassen" and listed here for review.
+**Status A4**: drafts for review, each page shows a "draft, not yet legally reviewed" note:
+`apps/site/content/legal/{de,fr,en}/agb.mdx` (incl. the video-use section and training opt-in),
+`datenschutz.mdx` (sub-processors only as categories until Q-INFRA-1 and Q-ADD-4 are decided),
+`impressum.mdx`; the hall notice is on `/{locale}/aufnahme/`. Missing: the operating company's name,
+address and UID (build variables `NEXT_PUBLIC_COMPANY_*`; until set the imprint says the details follow),
+the DPA template for clubs and the processing records (GO_LIVE.md).
 
 ### Q-ADD-6 Test material for the addendum
 Spotlight (95 % on the golden set), multi-angle sync (< 2 frames), portrait crop (90 %), special cases
@@ -123,3 +129,41 @@ A guardianship keeps existing when the child becomes an adult; from then on the 
 consents valid until the player changes them and show the player a reminder on the consent page (A4).
 Needs a legal check whether consents given by parents must be renewed at 18 ("rechtlich prüfen lassen").
 
+### Q-ADD-8 Real footage for the golden set: network access
+Suitable open material exists: TeamTrack (handball full-pitch videos with tracking annotations,
+Kaggle or Google Drive; dataset licence to be confirmed), UWB amateur women positions and
+possession (Zenodo 12065335, CC BY 4.0), EIGD-H and the Roboflow handball set (non-commercial,
+evaluation only). This environment's network policy blocks kaggle.com, drive.google.com,
+zenodo.org, figshare.com, huggingface.co and archive.org. **Needed**: allow these hosts in the cloud
+environment settings (Network access, Allowed domains) or provide the files; then the golden set and
+`ml/eval/events.py` run on real matches. YouTube videos are not downloaded (terms of use, ADR 018).
+
+
+### Q-M10-1 Data assistant: live evaluation needs a model key
+The 62-question evaluation set runs in CI with a scripted model (tools, validator, logging; ADR 021).
+The acceptance criteria of 5.1 for the model itself (90 % correct, p95 under 8 s) can only be measured
+with a key: `HB_ANTHROPIC_API_KEY=... uv run pytest -m live apps/api/tests/test_assistant.py`
+(writes `docs/perf/assistant-eval.md`, about 62 questions times a few cents). **Default**: the
+assistant is off without a key (503 "not set up"); run the live evaluation before enabling it.
+
+### Q-M10-2 Sportscode compatibility check
+The export follows the public Sportscode XML layout (instances with ID, start, end, code, labels;
+rows with RGB) and round-trips losslessly through our import (tested). Opening the file in Sportscode
+itself needs a licence. **Default**: ask a club with Sportscode to open one export before launch.
+
+### Q-M11-1 Paper sheets test set
+The acceptance of 5.9 (95 % of number fields correct on 10 real sheets) needs 10 photos of real
+match sheets with their true values (`ml/eval/paper_sheets/<name>.jpg` + `<name>.json` in the
+extraction schema) and a model key; then `pytest -m live apps/api/tests/test_paper_vision.py`.
+**Default**: the feature stays off without a key; review before import is always required.
+
+### Q-M11-2 Device measurements
+Cold start under 2 s (5.5) and a 70-minute recording without interruption (5.2) need device builds on
+a mid-range iPhone and Android phone. **Default**: measure with the first internal build, record in
+the M11 report.
+
+### Q-M11-3 Store accounts and push credentials
+Apple Developer and Google Play accounts of the operating company, an Expo (EAS) project id
+(`app.json` extra.eas.projectId), APNs key and FCM credentials, the domain for app links
+(`app.handball-ai.ch`, apple-app-site-association and assetlinks.json on the web server).
+**Default**: prepared in `apps/mobile` (bundle id `ch.handballai.app`); submission once accounts exist.

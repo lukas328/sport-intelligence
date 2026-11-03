@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -32,6 +33,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
   const [started] = useState(() => Date.now());
   const [now, setNow] = useState(Date.now());
   const stage = useRef<HTMLDivElement>(null);
+  useEffect(() => track("presentation_held"), []);
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
@@ -111,7 +113,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
         </Button>
       </div>
       <div className={presenterView ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
-        <div ref={stage} className="relative rounded-lg bg-bg" data-testid="stage" aria-live="polite">
+        <div ref={stage} className="relative rounded-lg bg-background" data-testid="stage" aria-live="polite">
           {slide ? (
             <SlideView orgId={orgId} slide={slide} paused={paused} extraShapes={remoteShapes} observationText={obsText} />
           ) : (

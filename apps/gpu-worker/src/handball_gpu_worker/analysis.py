@@ -54,6 +54,35 @@ def write_chunks(result: AnalysisResult, out: Path) -> int:
     return count
 
 
+def events_payload(result: AnalysisResult) -> dict[str, Any]:
+    """Automatic events and possession phases (addendum 01, A3) for the API."""
+    found = result.detect_events()
+    return {
+        "events": [
+            {
+                "t_ms": e.t_ms,
+                "type": e.type,
+                "team": e.team,
+                "confidence": e.confidence,
+                **e.attributes,
+            }
+            for e in found.events
+        ],
+        "possessions": [
+            {
+                "team": p.team,
+                "start_ms": p.start_ms,
+                "end_ms": p.end_ms,
+                "confidence": p.confidence,
+                "outcome": p.outcome,
+            }
+            for p in found.possessions
+        ],
+        "sides": [{"from_ms": t, "home_defends": side} for t, side in found.sides],
+        "missing": found.missing,
+    }
+
+
 def detect_formations(result: AnalysisResult) -> list[dict[str, Any]]:
     labels = {tid: str(v.get("label")) for tid, v in result.teams.items() if v.get("label")}
     samples = [
@@ -201,6 +230,7 @@ def run_analysis(
             "elapsed_s": round(elapsed, 1),
             "stats": result.extra,
             "formations": detect_formations(result),
+            "events": events_payload(result),
         }
         rep.succeed(payload)
         log.info(

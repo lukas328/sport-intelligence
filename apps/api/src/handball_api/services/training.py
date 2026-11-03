@@ -49,6 +49,10 @@ async def notify(
         ctx.db.add(
             Notification(organization_id=org_id, user_id=uid, kind=kind, params=params, link=link)
         )
+    # the same notification as push to the native apps (5.5), sent by the worker
+    from handball_api.services import push
+
+    await push.enqueue(ctx, list(dict.fromkeys(user_ids)), kind, link)
 
 
 async def staff_of(ctx: Ctx, team_id: uuid.UUID) -> list[uuid.UUID]:

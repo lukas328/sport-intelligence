@@ -46,6 +46,8 @@ jobs:
       - name: Tests (coverage gate 80 %)
         run: |
           uv run python packages/court/scripts/generate.py --check
+          uv run python packages/plans/generate.py --check
+          uv run python apps/site/scripts/make_demo.py --check
           uv run pytest apps packages --cov --cov-report=term
       - name: OpenAPI client is up to date
         run: |
@@ -104,6 +106,8 @@ jobs:
       - run: pnpm --filter @handball/web build
       - name: Bundle budget (first-load JS per route)
         run: pnpm --filter @handball/web budget
+      - name: Marketing site (static export)
+        run: pnpm --filter @handball/site build
 
   images:
     name: Container build and scan (${{ matrix.app }})

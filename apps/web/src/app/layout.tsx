@@ -1,3 +1,4 @@
+import { ConsentBanner } from "@/components/consent-banner";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { NextIntlClientProvider } from "next-intl";
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               </nav>
             </header>
             <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>
+            <ConsentBanner />
           </Providers>
         </NextIntlClientProvider>
       </body>

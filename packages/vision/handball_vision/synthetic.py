@@ -65,6 +65,11 @@ class SyntheticConfig:
     pan: float = 0.0  # 0 = fixed camera; 1 = the camera centre follows the centre of play
     zoom: float = 0.0  # relative focal change over a phase (0 = constant focal length)
     walls: bool | None = None  # textured walls (banners, windows); default: on when panning
+    # scripted match flow (addendum 01, A3): goals end attacks, throw-offs restart play, sides switch
+    restarts: bool = False
+    goal_share: float = 0.5
+    throw_off_s: float = 8.0  # players walk back and line up (real matches: about 6 to 15 s)
+    side_change_s: float | None = None
 
 
 @dataclass(frozen=True)
@@ -130,6 +135,11 @@ class SyntheticMatch:
                 _Agent(oid, "referee", 0, rng.uniform([12, 1], [28, 19]), rng.uniform(0, 6), 0.5)
             )
             oid += 1
+        flow = np.random.default_rng(self.cfg.seed + 101)  # separate stream: positions unchanged
+        phases = int(self.cfg.seconds // self.cfg.phase_s) + 2
+        self.outcomes = [
+            "goal" if flow.random() < self.cfg.goal_share else "lost" for _ in range(phases)
+        ]
         self._background = self._render_background()
         w, h = self.cfg.size
         # a few precomputed noise fields, cycled per frame (sensor noise without per-frame cost)
@@ -234,16 +244,73 @@ class SyntheticMatch:
 
     # ---- motion --------------------------------------------------------------------------
 
+    def _side_change_phase(self) -> int | None:
+        sc = self.cfg.side_change_s
+        return None if sc is None else round(sc / self.cfg.phase_s)
+
+    def restart(self, phase: int) -> bool:
+        """True when the phase starts with a throw-off (match start, after a goal, new half)."""
+        if not self.cfg.restarts:
+            return False
+        return (
+            phase == 0 or self.outcomes[phase - 1] == "goal" or phase == self._side_change_phase()
+        )
+
+    def attack_right(self, phase: int) -> bool:
+        """Home attacks the right goal until the side change, then the left one."""
+        home_attacks = phase % 2 == 0
+        sc = self._side_change_phase()
+        flipped = sc is not None and phase >= sc
+        return home_attacks != flipped
+
+    def events(self) -> list[dict[str, object]]:
+        """Ground-truth match events of the scripted flow (t_ms, type, team)."""
+        cfg = self.cfg
+        out: list[dict[str, object]] = []
+        n = int(cfg.seconds // cfg.phase_s) + 1
+        for p in range(n):
+            start = p * cfg.phase_s
+            attack = "home" if p % 2 == 0 else "away"
+            if p and start < cfg.seconds:
+                prev = "away" if attack == "home" else "home"
+                if cfg.restarts and self.outcomes[p - 1] == "goal":
+                    out.append({"t_ms": round((start - 1.0) * 1000), "type": "goal", "team": prev})
+                out.append(
+                    {"t_ms": round(start * 1000), "type": "possession_change", "team": attack}
+                )
+                if p == self._side_change_phase():
+                    out.append({"t_ms": round(start * 1000), "type": "side_change", "team": None})
+            if self.restart(p) and start + cfg.throw_off_s < cfg.seconds:
+                t_ms = round((start + cfg.throw_off_s) * 1000)
+                out.append({"t_ms": t_ms, "type": "throw_off", "team": attack})
+        return sorted(out, key=lambda e: int(str(e["t_ms"])))
+
     def _targets(self, t: float) -> dict[int, NDArray[np.float64]]:
         phase = int(t // self.cfg.phase_s)
         home_attacks = phase % 2 == 0
-        # attacking direction alternates: in even phases the home team attacks the right goal
-        attack_right = home_attacks
+        attack_right = self.attack_right(phase)
         attack, defend = ("home", "away") if home_attacks else ("away", "home")
         out: dict[int, NDArray[np.float64]] = {}
+        local = t - phase * self.cfg.phase_s
+        if self.restart(phase) and local < self.cfg.throw_off_s:
+            # throw-off: both teams in their own half, the throwing team at the centre
+            for team in (attack, defend):
+                players = [a for a in self.agents if a.label == team]
+                own_left = (team == attack) == attack_right
+                for k, a in enumerate(players):
+                    # positions in left-half coordinates, mirrored for the right half
+                    if team == attack and k == 0:
+                        x, y = 19.6, 10.0
+                    else:
+                        x, y = 16.0 - (k % 2) * 3, 3.0 + k * 2.8
+                    if not own_left:
+                        x = 40 - x
+                    out[a.object_id] = np.array([x, y])
         sway = math.sin(t * 0.9) * 2.0  # ball side moves left and right
         for team, roles in ((attack, ROLES_ATTACK), (defend, ROLES_DEFENCE)):
             players = [a for a in self.agents if a.label == team]
+            if players and players[0].object_id in out:
+                continue
             for a, (_, (x, y)) in zip(players, roles.items(), strict=True):
                 dx = 1.4 * math.sin(t * 1.3 * a.speed + a.phase)
                 dy = 1.2 * math.cos(t * 1.1 * a.speed + a.phase) + (
@@ -406,7 +473,7 @@ class SyntheticMatch:
                     )
             # ball near the court centre of the attack
             bx, by = 31.0 + 3 * math.sin(t * 1.7), 10 + 6 * math.sin(t * 0.9)
-            if int(t // cfg.phase_s) % 2:
+            if not self.attack_right(int(t // cfg.phase_s)):
                 bx = 40 - bx
             ball = geometry.project(self.p, np.array([[bx, by, 1.2 + 0.4 * math.sin(t * 5)]]))[0]
             cv2.circle(img, (int(ball[0]), int(ball[1])), 3, (40, 200, 240), -1, cv2.LINE_AA)

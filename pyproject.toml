@@ -50,9 +50,11 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 "**/tests/**" = ["S", "PTH"]
 "packages/court/scripts/*.py" = ["E501"]
 "**/mail_templates.py" = ["E501"]
+"**/services/invoices.py" = ["E501"]  # mail texts in three languages
 # ffmpeg/ffprobe are called with fixed argument lists, never through a shell
 "apps/worker/src/handball_worker/media/*.py" = ["S603", "S404"]
 "apps/worker/src/handball_worker/export.py" = ["S603", "S404"]
+"apps/worker/src/handball_worker/reels.py" = ["S603", "S404"]
 "packages/vision/handball_vision/*.py" = ["E501"]
 # developer tools (seed data, evaluation): long literals, fixed subprocess argv, non-crypto RNG
 "scripts/*.py" = ["E501", "S311", "S603"]
@@ -74,14 +76,17 @@ module = ["handball_vision.*", "handball_gpu_worker.analysis"]
 warn_return_any = false
 
 [[tool.mypy.overrides]]
-module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*", "reportlab.*"]
+module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*", "reportlab.*", "qrbill.*", "svglib.*", "stdnum.*", "openpyxl.*", "defusedxml.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-markers = ["integration: needs running postgres/redis/minio (docker compose)"]
-addopts = "-m 'not integration' --import-mode=importlib"
+markers = [
+    "integration: needs running postgres/redis/minio (docker compose)",
+    "live: calls the real model API (HB_ANTHROPIC_API_KEY), costs money",
+]
+addopts = "-m 'not integration and not live' --import-mode=importlib"
 
 [tool.coverage.run]
 branch = true

@@ -23,6 +23,7 @@ class VideoInfo:
     bitrate: int | None
     has_audio: bool
     rotation: int = 0
+    recorded_at: str | None = None  # creation_time from the file metadata (camera clock)
 
     @property
     def short_side(self) -> int:
@@ -65,7 +66,18 @@ def parse_probe(data: dict[str, object]) -> VideoInfo:
         bitrate=int(str(bitrate)) if bitrate else None,
         has_audio=any(isinstance(s, dict) and s.get("codec_type") == "audio" for s in streams),
         rotation=rotation,
+        recorded_at=_creation_time(fmt, video),
     )
+
+
+def _creation_time(fmt: dict[str, object], video: dict[str, object]) -> str | None:
+    for src in (fmt, video):
+        tags = src.get("tags")
+        if isinstance(tags, dict):
+            value = tags.get("creation_time") or tags.get("com.apple.quicktime.creationdate")
+            if isinstance(value, str) and len(value) >= 19:
+                return value
+    return None
 
 
 def probe(path: Path, ffprobe: str = "ffprobe") -> VideoInfo:

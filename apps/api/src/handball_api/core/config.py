@@ -47,6 +47,28 @@ class Settings(BaseSettings):
     operator_emails: list[str] = Field(default_factory=list)
     # billing (BRIEF 13): off in development and CI, on in production
     billing_enforce: bool = False
+    # annual subscription by Swiss QR bill (addendum 01, 4.10); creditor = the operating company
+    # support (addendum 01, 4.11/4.12): adapters stay off without configuration
+    support_email: str = "support@handball-ai.ch"
+    crisp_website_id: str | None = None
+    status_page_url: str | None = None
+    status_page_push_url: str | None = None  # provider webhook for component status
+    status_page_token: SecretStr | None = None
+    help_base_url: str = "https://handball-ai.ch/hilfe"
+    raw_video_days: int = 90  # originals reduced to the compressed version after this
+    alert_cost_chf_per_match: float = 2.0
+    alert_analysis_minutes: float = 45.0
+    invoice_creditor_name: str = "Handball AI GmbH"
+    invoice_creditor_street: str = "Musterstrasse 1"
+    invoice_creditor_pcode: str = "3000"
+    invoice_creditor_city: str = "Bern"
+    invoice_creditor_country: str = "CH"
+    invoice_iban: str = "CH9300762011623852957"  # example IBAN (RF reference); set in deployments
+    invoice_uid: str | None = None  # CHE-xxx.xxx.xxx MWST when VAT registered
+    invoice_vat_registered: bool = False  # see OPEN_QUESTIONS Q-ADD-3
+    invoice_vat_rate_percent: float = 8.1
+    invoice_payment_days: int = 30
+    invoice_annual_months: int = 10  # annual price = 10 monthly prices (two months free)
     stripe_secret_key: SecretStr | None = None
     stripe_webhook_secret: SecretStr | None = None
     stripe_price_team: str | None = None
@@ -54,6 +76,8 @@ class Settings(BaseSettings):
     stripe_price_goalkeeper: str | None = None
     # optional: natural-language match summaries via the Claude API (templates are used without it)
     anthropic_api_key: SecretStr | None = None
+    # data assistant (5.1): monthly model cost cap when billing limits are off (development)
+    assistant_usd_month_unenforced: float = 5.0
     readiness_timeout_s: float = 2.0
 
     # Public URL of the web app (links in e-mails)

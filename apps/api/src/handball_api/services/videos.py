@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import math
 import re
 import uuid
@@ -24,10 +26,12 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, billing, feed, training
+from handball_api.services import audit, auto_events, billing, feed, segments, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
+from handball_api.services.segments import parse_recorded
+from handball_api.services.support import failure_code
 
 PIPELINE_VERSION = "0.2.0"
 INGEST_FUNC = "handball_worker.ingest.run_ingest"
@@ -351,6 +355,52 @@ async def read_media(ctx: Ctx, asset_id: uuid.UUID, path: str) -> tuple[bytes, s
     return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
 
 
+# ---- signed media links for the native apps (5.5) -------------------------------------------
+
+MEDIA_TOKEN_S = 4 * 3600
+
+
+def _media_sig(ctx: Ctx, asset_id: uuid.UUID, exp: int) -> str:
+    key = ctx.settings.secret_key.get_secret_value().encode()
+    return hmac.new(key, f"media:{asset_id}:{exp}".encode(), hashlib.sha256).hexdigest()[:32]
+
+
+async def media_token(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
+    """A path token for players that cannot send auth headers to HLS segments (native apps).
+    Issued only to someone who may watch the video; valid for four hours."""
+    asset = await get_asset(ctx, asset_id)
+    exp = int(datetime.now(UTC).timestamp()) + MEDIA_TOKEN_S
+    token = f"{exp}.{_media_sig(ctx, asset.id, exp)}"
+    return {"base": f"/v1/media/{asset.id}/{token}/", "expires_at": exp}
+
+
+async def read_signed_media(
+    ctx: Ctx, asset_id: uuid.UUID, token: str, path: str
+) -> tuple[bytes, str]:
+    exp_s, _, sig = token.partition(".")
+    if not exp_s.isdigit() or int(exp_s) < datetime.now(UTC).timestamp():
+        raise ProblemError(404, "not-found", "Not found")
+    if not hmac.compare_digest(sig, _media_sig(ctx, asset_id, int(exp_s))):
+        raise ProblemError(404, "not-found", "Not found")
+    if (
+        not MEDIA_PATH.match(path)
+        or ".." in path
+        or path == "proxy.mp4"
+        or path.startswith("original")
+    ):
+        raise ProblemError(404, "not-found", "Not found")
+    await enable_system_access(ctx.db, reason="signed media")
+    asset = await ctx.db.get(VideoAsset, asset_id)
+    await disable_system_access(ctx.db)
+    if asset is None:
+        raise ProblemError(404, "not-found", "Not found")
+    try:
+        data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
+    except ObjectNotFoundError as exc:
+        raise ProblemError(404, "not-found", "Not found") from exc
+    return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
+
+
 # ---- worker callbacks (internal) ------------------------------------------------------------
 
 
@@ -395,8 +445,19 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         job.finished_at = now
         job.error = data.error
     if asset is not None and match is not None:
-        if data.status == JobStatus.FAILED and job.kind in ("analysis", "sync"):
-            pass  # the video stays playable; the error is shown on its own
+        if data.status == JobStatus.FAILED and job.kind == "analysis":
+            # the video stays playable (tagging and imports still work); the match is credited
+            match.quota_credit = True
+            await training.notify(
+                ctx,
+                match.organization_id,
+                await training.staff_of(ctx, match.team_id),
+                "analysis_failed",
+                {"match_id": str(match.id), "reason": failure_code(data.error)},
+                f"/app/{match.organization_id}/matches/{match.id}",
+            )
+        elif data.status == JobStatus.FAILED and job.kind == "sync":
+            pass  # the camera stays usable with a manual offset
         elif data.status == JobStatus.FAILED:
             asset.status = VideoStatus.FAILED
             asset.error = data.error
@@ -408,6 +469,8 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         elif data.status == JobStatus.SUCCEEDED and job.kind == "ingest" and data.result:
             _apply_ingest_result(asset, data.result)
             match.status = MatchStatus.READY
+            if asset.role == VideoRole.MAIN:
+                await segments.rebuild(ctx, match)
             if (
                 asset.role == VideoRole.MAIN
                 and asset.proxy_key
@@ -426,6 +489,9 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 f"/app/{match.organization_id}/matches/{match.id}",
             )
             await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
+            from handball_api.services import highlights  # imports this module (media paths)
+
+            await highlights.auto(ctx, match)  # reels right after the analysis (4.3)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "sync" and data.result:
             _apply_sync_result(asset, data.result)
     await ctx.db.flush()
@@ -450,6 +516,7 @@ def _apply_ingest_result(asset: VideoAsset, r: dict[str, object]) -> None:
     asset.hls_prefix = str(r.get("hls_prefix") or "") or None
     asset.proxy_key = str(r.get("proxy_key") or "") or None
     asset.poster_key = str(r.get("poster_key") or "") or None
+    asset.recorded_at = parse_recorded(r.get("recorded_at"))
     report = r.get("quality_report")
     asset.quality_report = report if isinstance(report, dict) else None
     audio = r.get("audio_key")
@@ -581,6 +648,32 @@ async def _apply_analysis_result(
             "calibration_error",
         )
     }
+    auto = r.get("events")
+    if isinstance(auto, dict):
+        match = await ctx.db.get(Match, asset.match_id)
+        if match is not None and asset.role == VideoRole.MAIN:
+            counts = await auto_events.apply(ctx, match, auto)
+            # courtside marks with device time follow the new goals (5.3)
+            from handball_api.services import marks
+
+            await marks.sync_match(ctx, match.id, authorised=True)
+            asset.analysis = {
+                **asset.analysis,
+                "auto_events": {
+                    **counts,
+                    "sides": auto.get("sides") or [],
+                    "missing": auto.get("missing") or [],
+                    "boundaries": [
+                        {
+                            "t_ms": e["t_ms"],
+                            "pause_ms": e.get("pause_ms"),
+                            "confidence": e.get("confidence"),
+                        }
+                        for e in auto.get("events") or []
+                        if e.get("type") == "match_boundary"
+                    ],
+                },
+            }
 
 
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
@@ -621,11 +714,15 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "detector": meta.get("detector"),
         "elapsed_s": meta.get("elapsed_s"),
         "formations": meta.get("formations") or [],
+        "auto_events": meta.get("auto_events"),
         "error": job.error if job is not None and job.status == "failed" else None,
         "camera": meta.get("camera"),
         "panorama": meta.get("panorama"),
         "needs_calibration": bool(meta.get("needs_calibration")),
         "calibration_error": meta.get("calibration_error"),
+        "error_code": failure_code(job.error)
+        if job is not None and job.status == "failed"
+        else None,
     }
 
 

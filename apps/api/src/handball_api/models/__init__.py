@@ -1,11 +1,11 @@
 """SQLAlchemy models (BRIEF 5)."""
 
+from handball_api.models.assistant import AssistantConversation, AssistantMessage
 from handball_api.models.audit import AuditLog
 from handball_api.models.content import (
-    AssistantMessage,
     ClipTag,
-    ConversationThread,
     HighlightReel,
+    MatrixTemplate,
     PlayerFeedItem,
     Presentation,
     PresentationSlide,
@@ -19,11 +19,13 @@ from handball_api.models.content import (
 from handball_api.models.federation import (
     Federation,
     FederationAdmin,
+    FederationInvite,
     FederationMembership,
     Invoice,
     OrgShare,
+    Voucher,
 )
-from handball_api.models.identity import AuthSession, AuthToken, OAuthIdentity, User
+from handball_api.models.identity import AuthSession, AuthToken, DeviceToken, OAuthIdentity, User
 from handball_api.models.matches import (
     Annotation,
     CameraCalibration,
@@ -63,12 +65,13 @@ from handball_api.models.tenancy import (
     StripeEvent,
     Team,
 )
-from handball_api.models.training import Assignment, AssignmentStatus, Notification
+from handball_api.models.training import Assignment, AssignmentStatus, FocusPlan, Notification
 
 __all__ = [
     "Annotation",
     "Assignment",
     "AssignmentStatus",
+    "AssistantConversation",
     "AssistantMessage",
     "Attendance",
     "AuditLog",
@@ -79,12 +82,14 @@ __all__ = [
     "ClipTag",
     "Comment",
     "Consent",
-    "ConversationThread",
     "Correction",
+    "DeviceToken",
     "Event",
     "Federation",
     "FederationAdmin",
+    "FederationInvite",
     "FederationMembership",
+    "FocusPlan",
     "Guardianship",
     "HighlightReel",
     "Invitation",
@@ -94,6 +99,7 @@ __all__ = [
     "Match",
     "MatchFormat",
     "MatchSegment",
+    "MatrixTemplate",
     "Membership",
     "Notification",
     "OAuthIdentity",
@@ -128,4 +134,5 @@ __all__ = [
     "TrainingSession",
     "User",
     "VideoAsset",
+    "Voucher",
 ]

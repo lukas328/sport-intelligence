@@ -105,7 +105,7 @@ ADR 017.
   club formats in the match form, format picker on the match page, opponent player list UI,
   ClipTag beyond clips if the tag UI needs it
 
-### A3 Automation (principle P1; depends on real videos and trained models)
+### A3 Automation (principle P1; depends on real videos and trained models) ✅ done as far as possible without real footage (report: progress/A3.md)
 - Carried over from A2: spotlight burned into exports (with the highlight renderer), automatic
   opponent play detection for the preparation report
 - Automatic event baseline (shots, goals, saves, turnovers, throw-offs) with confidence; this is the
@@ -116,6 +116,8 @@ ADR 017.
 - Upload over poor Wi-Fi: background upload, optional on-device compression, mobile data warning 4.8
 
 ### A4 Club operations and launch readiness
+Status: done as far as possible here (report `docs/progress/A4.md`); open: usability test, real-match
+end-to-end test and the A3 carry-overs, all listed in GO_LIVE.md.
 - Annual subscription by Swiss QR bill (`qrbill`), reminders, dunning, camt.054 matching, VAT, invoice
   archive, vouchers and federation discounts 4.10 (from M8)
 - Help centre (MDX, de/fr/en, ≥ 15 articles), in-app help, support chat adapter, feedback button,
@@ -124,15 +126,23 @@ ADR 017.
   storage policy (raw video after 90 days), pentest scope 4.12 (from M8, M9)
 - Marketing site `apps/site` with demo analysis without login, Lighthouse > 90 4.13 (from M8)
 - Usability test with 3 coaches; end-to-end test with 3 real amateur matches (section 10)
+- Carried over from A3: ball detection and shot/save/turnover events (trained model on real
+  footage, needs Q-ADD-8), golden-set run of events, spotlight (95 %) and portrait crop (90 %) on
+  real matches, splitting a tournament video at a suggested boundary, one continuous timeline over
+  several files of a match, optional on-device compression (native apps, M11)
 
 ### Launch (go-live criteria: GO_LIVE.md plus addendum section 10)
 
 ### M10 Data and training (new)
+Status: done (report `docs/progress/M10.md`); open: live evaluation of the assistant with a model
+key (Q-M10-1), opening an export in Sportscode (Q-M10-2).
 - Ask your data 5.1 (Claude tool use, typed tools, number validator, eval set ≥ 60 questions in CI)
 - Statistics matrix, Sportscode XML and CSV/Excel export, imports 5.4
 - From problem to training 5.6, training planning, attendance, ICS 5.7
 
 ### M11 Mobile and growth (new)
+Status: done as far as possible here (report `docs/progress/M11.md`); open: device builds and
+measurements, store accounts, paper sheets test set (Q-M11-1 to Q-M11-3).
 - Native apps with Expo 5.5, phone as camera 5.2
 - Live tagging with device time and automatic video sync 5.3 (extends the existing match-clock live mode)
 - Public player profile 5.8, paper report photo extraction 5.9, federation licences 5.10

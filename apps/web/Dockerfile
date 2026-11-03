@@ -12,6 +12,7 @@ COPY packages/court/package.json packages/court/package.json
 COPY packages/api-client/package.json packages/api-client/package.json
 COPY packages/tactics/package.json packages/tactics/package.json
 COPY packages/ui/package.json packages/ui/package.json
+COPY packages/client-core/package.json packages/client-core/package.json
 RUN --mount=type=secret,id=extra_ca,required=false --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     if [ -s /run/secrets/extra_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/extra_ca npm_config_cafile=/run/secrets/extra_ca; fi; pnpm install --frozen-lockfile --filter @handball/web...
 

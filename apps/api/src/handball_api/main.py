@@ -9,6 +9,7 @@ from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from handball_api import __version__
+from handball_api.core.assistant_llm import AssistantModel, ClaudeAssistantModel
 from handball_api.core.config import Settings, get_settings
 from handball_api.core.db import dispose_engine, init_engine
 from handball_api.core.email import (
@@ -21,20 +22,33 @@ from handball_api.core.errors import install_error_handlers
 from handball_api.core.jobs import EventBus, JobQueue, RedisEventBus, RqJobQueue
 from handball_api.core.logging import configure_logging, get_logger
 from handball_api.core.oidc import OidcClient
+from handball_api.core.paper_vision import ClaudePaperExtractor, PaperExtractor
 from handball_api.core.ratelimit import MemoryRateLimiter, RateLimiter, RedisRateLimiter
 from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.core.text import ClaudeTextGenerator, TextGenerator
+from handball_api.routers import assistant as assistant_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
+from handball_api.routers import devices as devices_router
 from handball_api.routers import events as events_router
 from handball_api.routers import family as family_router
+from handball_api.routers import federation as federation_router
 from handball_api.routers import feed as feed_router
+from handball_api.routers import focus as focus_router
+from handball_api.routers import highlights as highlights_router
+from handball_api.routers import marks as marks_router
+from handball_api.routers import matrix as matrix_router
 from handball_api.routers import ops as ops_router
+from handball_api.routers import paper_vision as paper_router
 from handball_api.routers import presentations as presentations_router
 from handball_api.routers import privacy as privacy_router
+from handball_api.routers import profiles as profiles_router
 from handball_api.routers import scouting as scouting_router
+from handball_api.routers import segments as segments_router
+from handball_api.routers import sessions as sessions_router
 from handball_api.routers import sharing as sharing_router
+from handball_api.routers import support as support_router
 from handball_api.routers import tactics as tactics_router
 from handball_api.routers import tags as tags_router
 from handball_api.routers import training as training_router
@@ -107,6 +121,8 @@ def create_app(
     jobs: JobQueue | None = None,
     events: EventBus | None = None,
     text: TextGenerator | None = None,
+    assistant: AssistantModel | None = None,
+    paper: PaperExtractor | None = None,
     billing: BillingGateway | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
@@ -150,6 +166,16 @@ def create_app(
         if settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value()
         else None
     )
+    app.state.assistant = assistant or (
+        ClaudeAssistantModel(settings.anthropic_api_key.get_secret_value())
+        if settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value()
+        else None
+    )
+    app.state.paper = paper or (
+        ClaudePaperExtractor(settings.anthropic_api_key.get_secret_value())
+        if settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value()
+        else None
+    )
     app.dependency_overrides[get_settings] = lambda: settings
     app.add_middleware(
         CORSMiddleware,
@@ -187,6 +213,7 @@ def create_app(
     app.include_router(orgs.router)
     app.include_router(teams.router)
     app.include_router(matches.router)
+    app.include_router(matches.public_media)
     app.include_router(events_router.router)
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)
@@ -197,7 +224,23 @@ def create_app(
     app.include_router(family_router.router)
     app.include_router(tags_router.router)
     app.include_router(feed_router.router)
+    app.include_router(highlights_router.router)
     app.include_router(scouting_router.router)
+    app.include_router(segments_router.router)
+    app.include_router(support_router.router)
     app.include_router(presentations_router.router)
+    app.include_router(assistant_router.router)
+    app.include_router(matrix_router.router)
+    app.include_router(sessions_router.router)
+    app.include_router(focus_router.router)
+    app.include_router(marks_router.router)
+    app.include_router(profiles_router.router)
+    app.include_router(paper_router.router)
+    app.include_router(federation_router.ops)
+    app.include_router(federation_router.admin)
+    app.include_router(federation_router.club)
+    app.include_router(devices_router.router)
+    app.include_router(profiles_router.public)
+    app.include_router(sessions_router.public)
     app.include_router(internal.router)
     return app

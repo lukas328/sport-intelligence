@@ -18,3 +18,26 @@ Signals and where they come from:
 
 Dashboards: requests per second and p95 per route, 5xx rate, queue depths, GPU minutes per day,
 uploads per day, sign-ups, active clubs.
+
+## Additions (addendum 01, 4.12)
+
+`GET /internal/stats` now also returns `metrics` and `alerts`; the probe pages on any entry in
+`alerts`.
+
+| Alert key | Rule | Default threshold (setting) |
+|---|---|---|
+| `error_rate` | failed share of jobs finished in the last 24 h (at least 10 jobs) | > 10 % |
+| `analysis_duration` | p95 of successful analyses in the last 7 days | > 45 min (`HB_ALERT_ANALYSIS_MINUTES`, P10) |
+| `cost_per_match` | mean `cost_chf` of successful analyses in the last 7 days | > CHF 2 (`HB_ALERT_COST_CHF_PER_MATCH`, P10) |
+| `ai_corrections` | correction rate of automatic events in the latest week vs. the 4 weeks before (min. 20 events per week) | > max(10 %, 1.5 x baseline) |
+| `ai_confidence` | mean confidence of automatic events in the latest week | drop > 0.1 vs. baseline |
+
+The backoffice shows the weekly AI quality table (`/v1/ops/quality`): automatic events, mean
+confidence, share below 0.6 and correction rate per ISO week.
+
+**Status page:** the hourly worker tick calls `/internal/ops/tick`, which runs the readiness checks
+and posts the component states to the external status page (`HB_STATUS_PAGE_PUSH_URL`, bearer
+`HB_STATUS_PAGE_TOKEN`; ADR 018). Database and storage down = "down", others = "degraded".
+
+**Storage policy:** the same tick deletes original uploads after `HB_RAW_VIDEO_DAYS` (default 90)
+once HLS and the analysis proxy exist; club admins get a notification 7 days before.

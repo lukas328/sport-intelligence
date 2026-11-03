@@ -179,6 +179,14 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
                 </>
               )}
             </div>
+            {p.can_edit && s.type === "clip" && (
+              <SpotlightPick
+                orgId={orgId}
+                videoId={String((s.content as { video_id?: string }).video_id ?? "")}
+                value={((s.content as { spotlight?: number[] }).spotlight ?? [])[0] ?? null}
+                onChange={(track) => patch.mutate({ id: s.id, content: { ...(s.content as object), spotlight: track == null ? [] : [track] } })}
+              />
+            )}
             {p.can_edit && (
               <form
                 className="mt-2 flex items-end gap-2"
@@ -272,6 +280,31 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
           </Card>
         </div>
       )}
+    </div>
+  );
+}
+
+
+/** Spotlight player of a clip slide: burned into the MP4 export, drawn live when presenting. */
+function SpotlightPick({ orgId, videoId, value, onChange }: { orgId: string; videoId: string; value: number | null; onChange: (track: number | null) => void }) {
+  const t = useTranslations("spotlight");
+  const q = useQuery({
+    queryKey: ["analysis", videoId],
+    enabled: Boolean(videoId),
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/videos/{video_id}/analysis", { params: { path: { org_id: orgId, video_id: videoId } } })).data ?? null,
+  });
+  const tracks = (q.data?.tracks ?? []).filter((tr) => tr.team && tr.team !== "referee" && tr.observed_share > 0.05);
+  if (tracks.length === 0) return null;
+  return (
+    <div className="mt-2 max-w-xs">
+      <Select label={t("title")} value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}>
+        <option value="">{t("off")}</option>
+        {tracks.map((tr) => (
+          <option key={tr.track_no} value={tr.track_no}>
+            {tr.number != null ? `#${tr.number}` : t("track", { n: tr.track_no })} · {tr.team?.startsWith("home") ? t("own") : t("opponent")}
+          </option>
+        ))}
+      </Select>
     </div>
   );
 }

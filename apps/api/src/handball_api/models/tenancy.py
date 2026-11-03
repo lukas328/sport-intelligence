@@ -34,6 +34,10 @@ class Organization(Base, EntityMixin):
     trial_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     goalkeeper_seats: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # invoice billing (addendum 01, 4.10): treasurer and club address for invoices
+    billing_contact: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    # end of the period paid by invoice; the plan stays active until then
+    paid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     trial_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
 
@@ -73,6 +77,8 @@ class Team(Base, EntityMixin, TenantMixin):
     is_youth: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     gender: Mapped[TeamGender] = mapped_column(str_enum(TeamGender), nullable=False)
     settings: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    # calendar subscription (5.7): only the hash is stored; the link is shown once
+    calendar_token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
 
     @property
     def players_see_team_stats(self) -> bool:

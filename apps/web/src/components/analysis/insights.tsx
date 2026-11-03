@@ -1,14 +1,15 @@
 "use client";
 
-import { focusForInsight } from "@handball/tactics";
+import { drillsFor, focusForInsight } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { problemCode } from "@handball/api-client";
+import { toDrillItem } from "@/lib/drill-snapshot";
 import { cn } from "@/lib/utils";
 import type { EventFilter } from "./event-list";
 
@@ -105,6 +106,9 @@ export function InsightsCard({
                   {t("drills")}
                 </Link>
               )}
+              {staff && i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
+                <TrainFromInsight orgId={orgId} matchId={matchId} insight={i} label={text(i)} />
+              )}
             </li>
           ))}
         </ul>
@@ -129,3 +133,84 @@ export function InsightsCard({
     </Card>
   );
 }
+
+/** From a problem to training (addendum 01, 5.6): session, evidence playlist, assignment. */
+function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; matchId: string; insight: Insight; label: string }) {
+  const t = useTranslations("insights");
+  const locale = useLocale();
+  const [open, setOpen] = useState(false);
+  const suggestions = drillsFor(focusForInsight(insight.key, insight.params.zone as string | null)).slice(0, 4);
+  const [chosen, setChosen] = useState<string[]>(suggestions.slice(0, 2).map((d) => d.id));
+  const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+  const [day, setDay] = useState(nextWeek);
+  const [playlist, setPlaylist] = useState(true);
+  const [assignment, setAssignment] = useState(false);
+  const create = useMutation({
+    mutationFn: async () => {
+      const r = await api.POST("/v1/orgs/{org_id}/matches/{match_id}/focus", {
+        params: { path: { org_id: orgId, match_id: matchId } },
+        body: {
+          insight_key: insight.key,
+          params: insight.params,
+          title: label.slice(0, 200),
+          session: { on_date: day, drills: suggestions.filter((d) => chosen.includes(d.id)).map((d) => toDrillItem(d, locale)) },
+          playlist,
+          assignment: playlist && assignment,
+        },
+      });
+      if (r.error) throw r.error;
+      return r.data;
+    },
+  });
+  if (!open)
+    return (
+      <button type="button" className="text-xs text-accent underline" onClick={() => setOpen(true)}>
+        {t("train")}
+      </button>
+    );
+  return (
+    <div className="mt-2 w-full space-y-2 rounded border border-border p-3" role="group" aria-label={t("trainTitle")}>
+      <p className="font-medium">{t("trainTitle")}</p>
+      {create.data ? (
+        <p className="text-sm">
+          {t("trainDone")}{" "}
+          <Link className="text-accent underline" href={`/app/${orgId}/teams/${create.data.team_id}/training`}>
+            {t("trainOpen")}
+          </Link>
+        </p>
+      ) : (
+        <>
+          <label className="block text-sm">
+            {t("trainDate")}{" "}
+            <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="rounded border border-border bg-background px-2" />
+          </label>
+          <fieldset className="text-sm">
+            <legend>{t("trainDrills")}</legend>
+            {suggestions.map((d) => (
+              <label key={d.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={chosen.includes(d.id)}
+                  onChange={() => setChosen((c) => (c.includes(d.id) ? c.filter((x) => x !== d.id) : [...c, d.id]))}
+                />
+                {toDrillItem(d, locale).name} ({d.minutes} min)
+              </label>
+            ))}
+          </fieldset>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={playlist} onChange={(e) => setPlaylist(e.target.checked)} />
+            {t("trainPlaylist")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={assignment} disabled={!playlist} onChange={(e) => setAssignment(e.target.checked)} />
+            {t("trainAssignment")}
+          </label>
+          <Button disabled={create.isPending} onClick={() => create.mutate()}>
+            {t("trainCreate")}
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
+

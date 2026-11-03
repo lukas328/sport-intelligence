@@ -119,6 +119,7 @@ def run_ingest(
         result = {
             "checksum_sha256": checksum,
             "duration_s": info.duration_s,
+            "recorded_at": info.recorded_at,
             "fps": info.fps,
             "width": info.width,
             "height": info.height,

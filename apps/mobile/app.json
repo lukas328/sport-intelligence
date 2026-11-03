@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Handball AI",
+    "slug": "handball-ai",
+    "scheme": "handball",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "ios": {
+      "bundleIdentifier": "ch.handballai.app",
+      "supportsTablet": true,
+      "associatedDomains": ["applinks:app.handball-ai.ch"],
+      "infoPlist": {
+        "NSCameraUsageDescription": "Die Kamera filmt das Spiel für die Analyse. / The camera records the match for the analysis.",
+        "NSMicrophoneUsageDescription": "Der Ton gehört zur Aufnahme. / Sound is part of the recording.",
+        "UIBackgroundModes": ["fetch", "processing"]
+      }
+    },
+    "android": {
+      "package": "ch.handballai.app",
+      "permissions": ["CAMERA", "RECORD_AUDIO", "POST_NOTIFICATIONS"],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "app.handball-ai.ch", "pathPrefix": "/app" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-video",
+      ["expo-camera", { "cameraPermission": "Die Kamera filmt das Spiel für die Analyse.", "recordAudioAndroid": true }],
+      ["expo-notifications", { "color": "#0b6bcb" }]
+    ],
+    "experiments": { "typedRoutes": false },
+    "extra": { "apiUrl": "https://app.handball-ai.ch" }
+  }
+}

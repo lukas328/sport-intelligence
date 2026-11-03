@@ -51,3 +51,17 @@ Status of the platform at the end of M9 and what has to happen before real clubs
 ## Launch
 - ☐ Pilot with 2 to 3 clubs for 4 weeks (feedback loop on tagging speed, analysis quality, mobile use)
 - ☐ Go/no-go review: open incidents, error rate, p95, backup and restore evidence
+
+## Addendum 01, section 10 (status after A4)
+- ☐ All P0 items meet their acceptance criteria (open: ball-dependent events and golden-set numbers, Q-ADD-8)
+- ✅ Vision-Check in every milestone report; no principle violated without a reason
+- ☐ End-to-end test with 3 real amateur matches from different halls (needs footage, Q-ADD-8)
+- ☐ Usability test with 3 coaches without prior knowledge (needs people; script in `docs/progress/A4.md`)
+- ☐ Purchase flow for monthly card and annual QR bill run through on staging (both covered by tests; Stripe test mode and a real e-banking scan pending)
+- ✅ Help centre with 16 articles in German, French and English (`apps/site/content/help`)
+- ☐ Status page, alerts and backups with restore test active (adapters and alert rules done, providers pending)
+- ☐ Pentest scope done (`docs/security/pentest-scope.md`), external test commissioned
+- ☐ Legal templates handed over for review (drafts listed in OPEN_QUESTIONS Q-ADD-5)
+- ☐ Analysis time and cost per match within budget (P10), measured on real matches
+- ☐ Marketing site: set `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_COMPANY_*`, deploy `apps/site/out` (see `apps/site/README.md`)
+

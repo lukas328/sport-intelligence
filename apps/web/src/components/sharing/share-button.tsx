@@ -7,7 +7,7 @@ import { api } from "@/lib/client";
 import { errorKey } from "@/lib/errors";
 
 /** Creates a read-only public link (play, match report or playlist) and shows it once. */
-export function ShareButton({ orgId, teamId, kind, targetId }: { orgId: string; teamId: string; kind: "play" | "match" | "playlist"; targetId: string }) {
+export function ShareButton({ orgId, teamId, kind, targetId }: { orgId: string; teamId: string; kind: "play" | "match" | "playlist" | "highlight"; targetId: string }) {
   const t = useTranslations("share");
   const te = useTranslations("errors");
   const [open, setOpen] = useState(false);

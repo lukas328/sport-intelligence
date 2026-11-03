@@ -40,6 +40,18 @@ export const KNOWN_ERRORS = [
   "nothing-to-export",
   "too-many-slides",
   "image-too-large",
+  "not-enough-scenes",
+  "consent-missing",
+  "invalid-voucher",
+  "invoice-open",
+  "assistant-budget",
+  "assistant-unavailable",
+  "file-too-large",
+  "vision-unavailable",
+  "paper-warnings",
+  "paper-incomplete",
+  "quota-reached",
+  "already-member",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

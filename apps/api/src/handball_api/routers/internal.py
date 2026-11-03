@@ -17,7 +17,15 @@ from handball_api.models import ProcessingJob
 from handball_api.models.enums import JobStatus
 from handball_api.routers.deps import CtxDep
 from handball_api.schemas.matches import JobOut, JobUpdate
-from handball_api.services import presentations, scouting, videos
+from handball_api.services import (
+    highlights,
+    invoices,
+    monitoring,
+    presentations,
+    scouting,
+    support,
+    videos,
+)
 
 router = APIRouter(prefix="/internal", include_in_schema=False)
 
@@ -58,6 +66,8 @@ async def stats(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "") ->
         "failed_last_hour": int(failed or 0),
         "running_over_3h": int(stuck or 0),
         "oldest_queued_s": int((now - oldest).total_seconds()) if oldest else 0,
+        "metrics": await monitoring.ops_metrics(ctx, now),
+        "alerts": await monitoring.alerts(ctx),
     }
 
 
@@ -88,3 +98,49 @@ async def presentation_export_done(
         raise ProblemError(403, "forbidden", "Invalid internal token")
     await enable_system_access(ctx.db, reason="presentation export callback")
     await presentations.export_done(ctx, pres_id, data.status, data.key, data.error)
+
+
+class ReelDone(BaseModel):
+    status: str = Field(pattern="^(ready|failed|rendering)$")
+    key: str | None = None
+    error: str | None = None
+
+
+@router.post("/highlights/{reel_id}", status_code=204)
+async def highlight_done(
+    reel_id: uuid.UUID, data: ReelDone, ctx: CtxDep, x_internal_token: Annotated[str, Header()] = ""
+) -> None:
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    await enable_system_access(ctx.db, reason="highlight render callback")
+    await highlights.done(ctx, reel_id, data.status, data.key, data.error)
+
+
+@router.post("/billing/dunning")
+async def dunning(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "") -> dict[str, int]:
+    """Worker tick: invoice reminders and final notices (addendum 01, 4.10)."""
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    await enable_system_access(ctx.db, reason="dunning run")
+    return await invoices.run_dunning(ctx)
+
+
+@router.post("/onboarding/run")
+async def onboarding_run(
+    ctx: CtxDep, x_internal_token: Annotated[str, Header()] = ""
+) -> dict[str, int]:
+    """Worker tick: onboarding e-mail series (addendum 01, 4.11)."""
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    await enable_system_access(ctx.db, reason="onboarding e-mail series")
+    return {"sent": await support.run_series(ctx)}
+
+
+@router.post("/ops/tick")
+async def ops_tick(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "") -> dict[str, Any]:
+    """Worker tick: status page feed and storage policy for original videos (4.12)."""
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    status = await monitoring.push_status(ctx)
+    await enable_system_access(ctx.db, reason="storage policy")
+    return {"status": status, "retention": await monitoring.retention(ctx)}

@@ -214,37 +214,8 @@ class SelfAssessment(Base, EntityMixin, TenantMixin):
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
-class ConversationThread(Base, EntityMixin, TenantMixin):
-    """'Ask your data' (5.1)."""
-
-    __tablename__ = "conversation_threads"
-
-    team_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
-    )
-    user_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL"), index=True
-    )
-    title: Mapped[str | None] = mapped_column(String(160))
-
-
-class AssistantMessage(Base, EntityMixin, TenantMixin):
-    __tablename__ = "assistant_messages"
-
-    thread_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("conversation_threads.id", ondelete="CASCADE"), index=True, nullable=False
-    )
-    question: Mapped[str] = mapped_column(Text, nullable=False)
-    tools: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False, default=list)
-    answer: Mapped[str | None] = mapped_column(Text)
-    facts: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
-    clip_ids: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
-    cost_microchf: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    rating: Mapped[int | None] = mapped_column(SmallInteger)  # -1, 0, 1
-
-
 class PublicProfile(Base, EntityMixin, TenantMixin):
-    """Opt-in public player profile (5.8); never for youth players."""
+    """Opt-in public player profile (5.8); never in youth teams, minors only with a parent."""
 
     __tablename__ = "public_profiles"
 
@@ -257,3 +228,19 @@ class PublicProfile(Base, EntityMixin, TenantMixin):
     content: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
     consent_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     views: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class MatrixTemplate(Base, EntityMixin, TenantMixin):
+    """A saved layout of the statistics matrix (5.4): rows, metric columns and filter."""
+
+    __tablename__ = "matrix_templates"
+    __table_args__ = (UniqueConstraint("team_id", "name"),)
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    config: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
