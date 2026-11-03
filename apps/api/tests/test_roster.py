@@ -111,15 +111,18 @@ async def test_consents(make_api: Callable[[], Api]) -> None:
     base = f"/v1/orgs/{ids['org']}/teams/{ids['team']}/players/{entry['player_id']}/consents"
     body = {"given_by": "parent", "given_by_name": "Eva Z", "given_at": "2026-10-01T10:00:00+02:00"}
     assert (
-        await api.post(
-            base, json={**body, "kind": "video_analysis", "given_at": "2026-10-01T10:00:00"}
-        )
+        await api.post(base, json={**body, "kind": "analysis", "given_at": "2026-10-01T10:00:00"})
     ).status_code == 422
-    c1 = (await api.post(base, json={**body, "kind": "video_analysis"})).json()
-    assert (await api.get(roster_url(ids))).json()[0]["consent_complete"] is False
+    # a minor cannot consent alone (addendum 01: parents decide for children)
+    selfish = {**body, "given_by": "self", "kind": "analysis"}
+    res = await api.post(base, json=selfish)
+    assert res.status_code == 422
+    assert res.json()["type"].endswith("parent-consent-required")
     await api.post(
-        base, json={**body, "kind": "identification", "document_ref": "Formular 2026-14"}
+        base, json={**body, "kind": "highlights_internal", "document_ref": "Formular 2026-14"}
     )
+    assert (await api.get(roster_url(ids))).json()[0]["consent_complete"] is False
+    c1 = (await api.post(base, json={**body, "kind": "analysis"})).json()
     assert (await api.get(roster_url(ids))).json()[0]["consent_complete"] is True
     assert len((await api.get(base)).json()) == 2
     revoked = (await api.delete(f"{base}/{c1['id']}")).json()

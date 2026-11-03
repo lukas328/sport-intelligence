@@ -93,11 +93,18 @@ def insight_text(lang: str, item: dict[str, Any], names: dict[str, str]) -> str:
         return str(template)
 
 
-def _timeline(points: list[dict[str, Any]], own: str, opp: str, accent: colors.Color) -> Drawing:
+def _timeline(
+    points: list[dict[str, Any]],
+    own: str,
+    opp: str,
+    accent: colors.Color,
+    period_s: int = 1800,
+    periods: int = 2,
+) -> Drawing:
     w, h = 170 * mm, 45 * mm
     d = Drawing(w, h)
     pad_l, pad_b = 18, 14
-    max_t = max([3600.0, *[float(p["clock_s"]) for p in points]])
+    max_t = max([float(period_s * periods), *[float(p["clock_s"]) for p in points]])
     max_g = max([5, *[max(p["own"], p["opp"]) for p in points]])
 
     def x(s: float) -> float:
@@ -119,7 +126,8 @@ def _timeline(points: list[dict[str, Any]], own: str, opp: str, accent: colors.C
                 textAnchor="end",
             )
         )
-    for m in (0, 15, 30, 45, 60):
+    step = 15 if max_t > 2400 else 5
+    for m in range(0, int(max_t // 60) + 1, step):
         d.add(
             String(
                 x(m * 60),
@@ -131,7 +139,9 @@ def _timeline(points: list[dict[str, Any]], own: str, opp: str, accent: colors.C
                 textAnchor="middle",
             )
         )
-    d.add(Line(x(1800), pad_b, x(1800), h - 8, strokeColor=LINE, strokeDashArray=[2, 2]))
+    for k in range(1, periods):
+        xs = x(k * period_s)
+        d.add(Line(xs, pad_b, xs, h - 8, strokeColor=LINE, strokeDashArray=[2, 2]))
 
     def steps(key: str) -> list[float]:
         pts: list[float] = [x(0), y(0)]
@@ -303,7 +313,14 @@ def render(
         story += [Paragraph(t["comparison"], s["h2"]), table]
         story += [
             Paragraph(t["timeline"], s["h2"]),
-            _timeline(stats["timeline"]["score"], match["own_name"], match["opp_name"], accent),
+            _timeline(
+                stats["timeline"]["score"],
+                match["own_name"],
+                match["opp_name"],
+                accent,
+                int(match.get("period_s", 1800)),
+                int(match.get("periods", 2)),
+            ),
         ]
         grids = Table(
             [

@@ -110,3 +110,31 @@ async def test_insights_summary_and_season(make_api: Callable[[], Api]) -> None:
     assert len(prof["matches"]) == 4  # incl. the match without events
     missing = "00000000-0000-0000-0000-000000000009"
     assert (await api.get(f"/v1/orgs/{org}/opponents/{missing}/profile")).status_code == 404
+
+
+async def test_youth_season_has_no_ranking(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api, youth=True)
+    roster = f"/v1/orgs/{ids['org']}/teams/{ids['team']}/seasons/{ids['season']}/roster"
+    a = (
+        await api.post(roster, json={"first_name": "A", "last_name": "A", "jersey_number": 3})
+    ).json()
+    b = (
+        await api.post(roster, json={"first_name": "B", "last_name": "B", "jersey_number": 9})
+    ).json()
+    m = await new_match(api, ids)
+    url = f"/v1/orgs/{ids['org']}/matches/{m['id']}/events"
+    for i, pid in enumerate([a["player_id"], b["player_id"], b["player_id"], b["player_id"]]):
+        body = {
+            "type": "shot",
+            "side": "own",
+            "outcome": "goal",
+            "clock_s": 30 * i + 5,
+            "player_id": pid,
+        }
+        assert (await api.post(url, json=body)).status_code == 201
+    season = (
+        await api.get(f"/v1/orgs/{ids['org']}/teams/{ids['team']}/seasons/{ids['season']}/stats")
+    ).json()
+    assert season["ranked"] is False
+    assert [p["player_id"] for p in season["players"]] == [a["player_id"], b["player_id"]]

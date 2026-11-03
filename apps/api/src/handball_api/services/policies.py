@@ -61,34 +61,40 @@ ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
     Action.AUDIT_READ: frozenset({OrgRole.ORG_ADMIN}),
 }
 
-_READERS = frozenset({TeamRole.COACH, TeamRole.ANALYST, TeamRole.PLAYER, TeamRole.GOALKEEPER})
 _STAFF = frozenset({TeamRole.COACH, TeamRole.ANALYST})
+# specialist coaches read everything and work with video, but do not manage team or data
+_ASSISTANTS = frozenset({TeamRole.GOALKEEPER_COACH, TeamRole.ATHLETIC_COACH})
+_MANAGER = frozenset({TeamRole.TEAM_MANAGER})
+# parents are deliberately not readers: they only reach their own children (guardianships)
+_READERS = frozenset({TeamRole.PLAYER, TeamRole.GOALKEEPER}) | _STAFF | _ASSISTANTS | _MANAGER
 _COACH = frozenset({TeamRole.COACH})
+_VIDEO_WORK = _STAFF | _ASSISTANTS
+_ORGANISE = _COACH | _MANAGER
 
 TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.TEAM_READ: _READERS,
     Action.ROSTER_READ: _READERS,
-    Action.TEAM_MEMBERS_READ: _STAFF,
-    Action.SEASON_WRITE: _STAFF,
+    Action.TEAM_MEMBERS_READ: _STAFF | _ASSISTANTS | _MANAGER,
+    Action.SEASON_WRITE: _STAFF | _MANAGER,
     Action.TEAM_UPDATE: _COACH,
-    Action.ROSTER_WRITE: _COACH,
-    Action.CONSENT_READ: _COACH,
-    Action.CONSENT_WRITE: _COACH,
+    Action.ROSTER_WRITE: _ORGANISE,
+    Action.CONSENT_READ: _ORGANISE,
+    Action.CONSENT_WRITE: _ORGANISE,
     Action.TEAM_MEMBERS_MANAGE: _COACH,
-    Action.INVITE_TEAM: _COACH,
+    Action.INVITE_TEAM: _ORGANISE,
     Action.MATCH_READ: _READERS,
-    Action.MATCH_WRITE: _STAFF,
-    Action.VIDEO_UPLOAD: _STAFF,
-    Action.CLIP_WRITE: _STAFF,
-    Action.PLAYLIST_READ_ALL: _STAFF,
-    Action.PLAYLIST_WRITE: _STAFF,
+    Action.MATCH_WRITE: _STAFF | _MANAGER,
+    Action.VIDEO_UPLOAD: _STAFF | _MANAGER,
+    Action.CLIP_WRITE: _VIDEO_WORK,
+    Action.PLAYLIST_READ_ALL: _VIDEO_WORK,
+    Action.PLAYLIST_WRITE: _VIDEO_WORK,
     Action.COMMENT_WRITE: _READERS,
     Action.COMMENT_MODERATE: _STAFF,
-    Action.ANNOTATION_WRITE: _STAFF,
+    Action.ANNOTATION_WRITE: _VIDEO_WORK,
     Action.EVENT_WRITE: _STAFF,
-    Action.PLAY_READ_ALL: _STAFF,
+    Action.PLAY_READ_ALL: _VIDEO_WORK,
     Action.PLAY_WRITE: _STAFF,
-    Action.ASSIGNMENT_WRITE: _STAFF,
+    Action.ASSIGNMENT_WRITE: _VIDEO_WORK,
 }
 
 # Actions that change rights, billing or the organisation.
@@ -156,8 +162,8 @@ def authorize(
 
 
 def is_staff_somewhere(actor: Actor) -> bool:
-    """Org admins, or coach/analyst of at least one team (e.g. may manage opponents)."""
-    return actor.is_org_admin or any(r in _STAFF for r in actor.team_roles.values())
+    """Org admins, or coach/analyst/team manager of a team (e.g. may manage opponents)."""
+    return actor.is_org_admin or any(r in _STAFF | _MANAGER for r in actor.team_roles.values())
 
 
 def visible_team_ids(actor: Actor) -> set[uuid.UUID] | None:
@@ -194,6 +200,14 @@ def matrix_markdown() -> str:
         "- Org admins need two-factor sign-in for org-level write actions after the grace period "
         "(`HB_ORG_ADMIN_2FA_GRACE_DAYS`, default 14).",
         "- Guests get access only through share links (M8).",
+        "- Parents (`parent`) get no team access: they see their own children only "
+        "(guardianships, `/me/consents`) and manage their consents per purpose.",
+        "- Players decide their own consents (`/me/consents`); minors need a parent or guardian.",
+        "- Youth teams (addendum 01, 4.9): share links only for plays, no consent for public "
+        "purposes (public highlights, public profile), season player lists unranked.",
+        "- Opponent players: number only; a name needs a public source and is never public.",
+        "- Club admin handover: `PATCH /orgs/{id}/members/{user}`; "
+        "the last admin cannot step down.",
         "",
     ]
     return "\n".join(lines)

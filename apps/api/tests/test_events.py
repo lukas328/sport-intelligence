@@ -321,3 +321,66 @@ async def test_idempotent_offline_events(make_api: Callable[[], Api]) -> None:
     assert len({r.json()["id"] for r in results}) == 1
     events = (await api.get(url)).json()
     assert len(events) == 2
+
+
+async def test_match_format_drives_the_clock(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api, youth=True)
+    org = ids["org"]
+    match = await new_match(api, ids)
+    assert (match["format"], match["period_s"], match["periods"]) == ("youth_2x25", 1500, 2)
+    m = match["id"]
+    await api.put(f"/v1/orgs/{org}/matches/{m}/kickoff", json={"period": 2, "t_ms": 2_000_000})
+    url = f"/v1/orgs/{org}/matches/{m}/events"
+    e = (
+        await api.post(
+            url, json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": 2_060_000}
+        )
+    ).json()
+    assert (e["period"], e["clock_s"]) == (2, 1560.0)  # 25 min + 60 s
+
+    murl = f"/v1/orgs/{org}/matches/{m}"
+    mini = (await api.patch(murl, json={"format": "mini"})).json()
+    assert (mini["format"], mini["period_s"], mini["periods"]) == ("mini", 600, 2)
+    own = (await api.patch(murl, json={"period_s": 900})).json()
+    assert (own["format"], own["period_s"], own["periods"]) == ("custom", 900, 2)
+    bad = await api.patch(murl, json={"format": "custom"})
+    assert bad.status_code == 200  # keeps current values as custom
+    assert (await api.patch(murl, json={"period_s": 10})).status_code == 422
+
+
+async def test_similar_kits_are_flagged(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    ok = await new_match(api, ids)
+    assert ok["kit_warnings"] == []
+    clash = await new_match(
+        api, ids, kit_own="#c8102e", kit_opponent="#d0142f", opponent_name="Rot Weiss"
+    )
+    assert clash["kit_warnings"] == ["own/opponent"]
+
+
+async def test_shot_export_for_goalkeeper_trainer(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org, m = ids["org"], (await new_match(api, ids))["id"]
+    url = f"/v1/orgs/{org}/matches/{m}/events"
+    await api.post(
+        url,
+        json={
+            "type": "shot",
+            "side": "opponent",
+            "outcome": "save",
+            "t_ms": 90_000,
+            "number": 23,
+            "x": 33.0,
+            "y": 8.0,
+            "goal_zone": "TL",
+        },
+    )
+    await api.post(url, json={"type": "timeout", "side": "own", "t_ms": 100_000})
+    data = (await api.get(f"/v1/orgs/{org}/matches/{m}/exports/shots")).json()
+    assert data["format_version"] == 1 and data["cameras"] == []
+    [shot] = data["shots"]
+    assert (shot["side"], shot["shooter_number"], shot["release_ms"]) == ("opponent", 23, 90_000)
+    assert shot["goal_zone"] == "TL"

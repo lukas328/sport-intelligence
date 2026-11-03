@@ -113,3 +113,10 @@ Spotlight (95 % on the golden set), multi-angle sync (< 2 frames), portrait crop
 (several files, tournaments, side change, similar kits, training) and the 10 paper sheets for 5.9 each
 need real or synthetic test material. **Default**: extend the synthetic generator where possible; real
 material from the club's uploads.
+
+### Q-ADD-7 Child turns 18
+A guardianship keeps existing when the child becomes an adult; from then on the player decides
+(self-consent is accepted, parent consent is no longer required). **Default**: keep the parent's earlier
+consents valid until the player changes them and show the player a reminder on the consent page (A4).
+Needs a legal check whether consents given by parents must be renewed at 18 ("rechtlich prüfen lassen").
+

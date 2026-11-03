@@ -15,6 +15,7 @@ from handball_api.schemas.orgs import (
     MemberOut,
     OrgCreate,
     OrgOut,
+    OrgRoleIn,
     OrgUpdate,
 )
 from handball_api.services import invitations as invitation_service
@@ -97,6 +98,12 @@ async def list_members(scope: OrgDep) -> list[MemberOut]:
         )
         for u, r, t in await service.list_org_members(scope.ctx)
     ]
+
+
+@router.patch("/orgs/{org_id}/members/{user_id}", response_model=OrgRoleIn)
+async def set_member_role(user_id: uuid.UUID, data: OrgRoleIn, scope: OrgDep) -> OrgRoleIn:
+    """Club admin handover: promote a member to club admin, or step down (another admin stays)."""
+    return OrgRoleIn(org_role=await service.set_org_role(scope.ctx, user_id, data.org_role))
 
 
 @router.post(

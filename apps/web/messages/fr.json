@@ -10,7 +10,8 @@
     "app": "Ouvrir l'app",
     "login": "Connexion",
     "assignments": "Tâches",
-    "drills": "Exercices"
+    "drills": "Exercices",
+    "consents": "Consentements"
   },
   "home": {
     "cta": "Commencer",
@@ -82,7 +83,13 @@
     "plan-required": "Cette fonction n'est pas incluse dans l'abonnement actuel. Change l'abonnement dans les paramètres.",
     "plan-limit-matches": "L'abonnement ne permet plus de matchs cette saison.",
     "plan-limit-teams": "L'abonnement ne permet plus d'équipes.",
-    "plan-limit-storage": "Le stockage vidéo de l'abonnement est plein."
+    "plan-limit-storage": "Le stockage vidéo de l'abonnement est plein.",
+    "parent-needs-player": "Choisis l'enfant pour lequel le parent est invité.",
+    "parent-consent-required": "Pour les mineur·e·s, un parent ou une personne responsable décide.",
+    "youth-protection": "Les équipes juniors ne peuvent partager que des systèmes de jeu, pas de matchs ni de vidéos.",
+    "last-admin": "Nomme d'abord un autre membre admin du club.",
+    "invalid-format": "Un format personnalisé exige la durée et le nombre de périodes.",
+    "duplicate-number": "Chaque numéro une seule fois."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -138,7 +145,9 @@
     "status_accepted": "Cette invitation a déjà été acceptée.",
     "status_revoked": "Cette invitation a été retirée.",
     "status_expired": "Cette invitation a expiré.",
-    "notFound": "Cette invitation n'existe pas."
+    "notFound": "Cette invitation n'existe pas.",
+    "child": "Enfant",
+    "childHint": "Les parents ne voient que les contenus de leur enfant et gèrent ses consentements."
   },
   "roles": {
     "org_admin": "Admin du club",
@@ -147,7 +156,11 @@
     "analyst": "Analyste",
     "player": "Joueur·euse",
     "goalkeeper": "Gardien·ne",
-    "guest": "Invité·e"
+    "guest": "Invité·e",
+    "goalkeeper_coach": "Entraîneur·e des gardien·ne·s",
+    "athletic_coach": "Préparateur·rice physique",
+    "team_manager": "Team manager",
+    "parent": "Parent"
   },
   "positions": {
     "LA": "Ailier gauche",
@@ -1034,5 +1047,50 @@
     "log": "Historique",
     "undo": "Annuler",
     "rejected": "{count, plural, one {# entrée a été refusée} other {# entrées ont été refusées}} par le serveur."
+  },
+  "consents": {
+    "title": "Consentements",
+    "intro": "Décide à quoi les vidéos et les données peuvent servir. Tu peux retirer chaque consentement à tout moment.",
+    "none": "Aucun profil de joueur·euse n'est lié à ton compte.",
+    "self": "Toi",
+    "guardian": "Ton enfant",
+    "minor": "Mineur·e : seuls les parents peuvent consentir.",
+    "teams": "Équipes : {teams}",
+    "given": "Donné",
+    "notGiven": "Non donné",
+    "give": "Consentir",
+    "revoke": "Retirer",
+    "history": "Historique",
+    "historyItem": "{purpose} : donné le {date} par {name}",
+    "revokedOn": "retiré le {date}",
+    "youthLocked": "Pas possible chez les juniors",
+    "purpose_analysis": "Analyse vidéo dans l'équipe",
+    "purpose_analysis_help": "L'équipe peut analyser les vidéos de match et t'y reconnaître.",
+    "purpose_highlights_internal": "Highlights du club",
+    "purpose_highlights_internal_help": "Des scènes avec toi peuvent apparaître dans des highlights visibles seulement par le club.",
+    "purpose_highlights_public": "Highlights publics",
+    "purpose_highlights_public_help": "Des scènes avec toi peuvent être montrées publiquement, par exemple sur le site du club.",
+    "purpose_public_profile": "Profil public",
+    "purpose_public_profile_help": "Un profil avec des scènes et des chiffres choisis peut être public.",
+    "purpose_training_data": "Améliorer la reconnaissance",
+    "purpose_training_data_help": "Des extraits anonymisés peuvent aider à améliorer la reconnaissance automatique."
+  },
+  "members": {
+    "makeAdmin": "Nommer admin du club",
+    "stepDown": "Renoncer aux droits d'admin"
+  },
+  "matchForm": {
+    "format": "Format de match",
+    "format_adult_2x30": "Adultes, 2 × 30 min",
+    "format_youth_2x25": "Juniors, 2 × 25 min",
+    "format_youth_2x20": "Juniors, 2 × 20 min",
+    "format_mini": "Minihandball, 2 × 10 min",
+    "format_tournament": "Tournoi, 1 × 10 min",
+    "format_custom": "Format personnalisé",
+    "kitWarning": "Les couleurs des maillots sont très proches ({pairs}). L'attribution automatique des équipes devient moins sûre. Si possible, indique des chasubles ou une autre couleur.",
+    "kit_own": "Propre équipe",
+    "kit_own_gk": "Propre gardien·ne",
+    "kit_opponent": "Adversaire",
+    "kit_opponent_gk": "Gardien·ne adverse"
   }
 }

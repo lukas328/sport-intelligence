@@ -2,7 +2,8 @@
 
 Tokens are random, only their hash is stored; links expire (1 to 90 days), can be revoked and count
 views.
-Shared content never contains player names, only jersey numbers.
+Shared content never contains player names, only jersey numbers. Youth teams may only share plays
+(addendum 01, youth protection).
 """
 
 from __future__ import annotations
@@ -64,6 +65,11 @@ async def create(
 ) -> tuple[ShareLink, str]:
     team = await get_team(ctx, team_id, Action.PLAYLIST_WRITE)
     await billing.require_feature(ctx, "share_links", team.organization_id)
+    if team.is_youth and kind != "play":
+        # youth protection (addendum 01): no public video or player data of children
+        raise ProblemError(
+            403, "youth-protection", "Youth teams can only share plays, no matches or videos"
+        )
     title = await _target(ctx, team, kind, target_id)
     token = new_token(24)
     link = ShareLink(

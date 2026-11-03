@@ -15,7 +15,8 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import Correction, Event, Match, RosterEntry, StatsCache
+from handball_api.models import Correction, Event, Match, RosterEntry, StatsCache, VideoAsset
+from handball_api.models.enums import VideoRole
 from handball_api.schemas.events import EventIn, EventPatch
 from handball_api.services import audit
 from handball_api.services.context import Ctx
@@ -28,7 +29,6 @@ from handball_metrics import Side as MSide
 from handball_metrics import compute_match_stats
 from handball_metrics.stats import METRICS_VERSION
 
-HALF_S = 1800
 EVENT_FIELDS = (
     "type",
     "side",
@@ -64,7 +64,7 @@ def clock_from_video(match: Match, t_ms: int) -> tuple[int, float] | None:
     if not starts:
         return None
     period, start = starts[-1]
-    return period, round((period - 1) * HALF_S + (t_ms - start) / 1000, 1)
+    return period, round((period - 1) * match.period_s + (t_ms - start) / 1000, 1)
 
 
 def video_from_clock(match: Match, period: int, clock_s: float) -> int | None:
@@ -72,7 +72,7 @@ def video_from_clock(match: Match, period: int, clock_s: float) -> int | None:
     start = k.get(str(period))
     if start is None:
         return None
-    return int(start + (clock_s - (period - 1) * HALF_S) * 1000)
+    return int(start + (clock_s - (period - 1) * match.period_s) * 1000)
 
 
 def _zone(data: EventIn | Event) -> str | None:
@@ -464,3 +464,62 @@ async def import_feed(ctx: Ctx, match_id: uuid.UUID, data: bytes, filename: str)
         data={"created": created, "skipped": skipped, "errors": len(errors)},
     )
     return {"created": created, "skipped": skipped, "errors": errors[:50]}
+
+
+async def shot_export(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
+    """P2 preparation (goalkeeper anticipation trainer): shots with metadata and the video times in
+    the goal cameras. Only own staff; opponent shooters by number only (4.9)."""
+    match = await get_match(ctx, match_id, Action.CLIP_WRITE)
+    cams = (
+        await ctx.db.scalars(
+            select(VideoAsset).where(
+                VideoAsset.match_id == match.id,
+                VideoAsset.role.in_([VideoRole.GOAL_CAM_LEFT, VideoRole.GOAL_CAM_RIGHT]),
+            )
+        )
+    ).all()
+    shots = (
+        await ctx.db.scalars(
+            select(Event)
+            .where(Event.match_id == match.id, Event.type == "shot")
+            .order_by(Event.period, Event.clock_s.nulls_last(), Event.t_ms.nulls_last())
+        )
+    ).all()
+    numbers = {
+        pid: n
+        for pid, n in (
+            await ctx.db.execute(
+                select(RosterEntry.player_id, RosterEntry.jersey_number).where(
+                    RosterEntry.season_id == match.season_id
+                )
+            )
+        ).all()
+    }
+    return {
+        "format_version": 1,
+        "match_id": str(match.id),
+        "cameras": [{"video_id": str(c.id), "role": c.role} for c in cams],
+        "shots": [
+            {
+                "event_id": str(e.id),
+                "side": e.side,
+                "shooter_number": e.number
+                if e.number is not None
+                else numbers.get(e.player_id)
+                if e.player_id
+                else None,
+                "x": e.x,
+                "y": e.y,
+                "shot_zone": e.shot_zone,
+                "goal_zone": e.goal_zone,
+                "shot_type": e.shot_type,
+                "outcome": e.outcome,
+                "release_ms": e.t_ms,
+                "camera_ms": {
+                    str(c.id): e.t_ms + c.time_offset_ms if e.t_ms is not None else None
+                    for c in cams
+                },
+            }
+            for e in shots
+        ],
+    }

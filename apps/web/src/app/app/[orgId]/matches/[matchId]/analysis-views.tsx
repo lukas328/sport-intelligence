@@ -158,7 +158,13 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>
-          <ScoreChart points={stats.timeline.score} own={teamName} opp={match.opponent.name} />
+          <ScoreChart
+            points={stats.timeline.score}
+            own={teamName}
+            opp={match.opponent.name}
+            periodS={match.period_s}
+            periods={match.periods}
+          />
           <ul className="text-sm text-muted">
             {run && run.goals > 1 && <li>{t("bestRun", { goals: run.goals })}</li>}
             {stats.timeline.longest_own_drought_s.seconds > 0 && (
@@ -198,10 +204,24 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   );
 }
 
-function ScoreChart({ points, own, opp }: { points: { clock_s: number; own: number; opp: number }[]; own: string; opp: string }) {
+function ScoreChart({
+  points,
+  own,
+  opp,
+  periodS,
+  periods,
+}: {
+  points: { clock_s: number; own: number; opp: number }[];
+  own: string;
+  opp: string;
+  periodS: number;
+  periods: number;
+}) {
   const w = 600;
   const h = 200;
-  const maxT = Math.max(3600, ...points.map((p) => p.clock_s));
+  const maxT = Math.max(periodS * periods, ...points.map((p) => p.clock_s));
+  const tickStep = maxT > 2400 ? 15 : 5;
+  const ticks = Array.from({ length: Math.floor(maxT / 60 / tickStep) + 1 }, (_, i) => i * tickStep);
   const maxG = Math.max(5, ...points.map((p) => Math.max(p.own, p.opp)));
   const X = (s: number) => 30 + (s / maxT) * (w - 40);
   const Y = (g: number) => h - 20 - (g / maxG) * (h - 30);
@@ -210,8 +230,10 @@ function ScoreChart({ points, own, opp }: { points: { clock_s: number; own: numb
   const timed = points.every((p) => p.clock_s > 0 || (p.own === 0 && p.opp === 0));
   return (
     <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${own} ${points.at(-1)?.own ?? 0}, ${opp} ${points.at(-1)?.opp ?? 0}`} className="w-full">
-      <line x1={X(1800)} x2={X(1800)} y1={10} y2={h - 20} stroke="var(--border)" strokeDasharray="4 4" />
-      {[0, 15, 30, 45, 60].map((m) => (
+      {Array.from({ length: periods - 1 }, (_, i) => (
+        <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={10} y2={h - 20} stroke="var(--border)" strokeDasharray="4 4" />
+      ))}
+      {ticks.map((m) => (
         <text key={m} x={X(m * 60)} y={h - 4} fontSize="10" textAnchor="middle" fill="var(--muted)">
           {m}&apos;
         </text>

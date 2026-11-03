@@ -114,6 +114,7 @@ layers = [
   "handball_api.main",
   "handball_api.routers",
   "handball_api.services",
+  "handball_api.integrations",
   "handball_api.schemas",
   "handball_api.models",
   "handball_api.core",

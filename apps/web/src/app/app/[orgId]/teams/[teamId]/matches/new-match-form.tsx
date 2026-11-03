@@ -6,9 +6,18 @@ import { useTranslations } from "next-intl";
 import { useId, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
-import { Checkbox, Input } from "@/components/ui/field";
+import { Checkbox, Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
+import { kitWarnings, type KitKey } from "@/lib/kit";
+
+const FORMATS = ["adult_2x30", "youth_2x25", "youth_2x20", "mini", "tournament"] as const;
+const KIT_DEFAULTS: Record<KitKey, string> = {
+  own: "#0b6bcb",
+  own_gk: "#f59e0b",
+  opponent: "#dc2626",
+  opponent_gk: "#16a34a",
+};
 
 function localNow(): string {
   const d = new Date();
@@ -23,6 +32,15 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [error, setError] = useState<ErrorKey | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [kits, setKits] = useState(KIT_DEFAULTS);
+  const [format, setFormat] = useState<string | null>(null);
+  const team = useQuery({
+    queryKey: ["team", orgId, teamId],
+    queryFn: async () =>
+      (await api.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } })).data,
+  });
+  const chosenFormat = format ?? (team.data?.is_youth ? "youth_2x25" : "adult_2x30");
+  const similar = kitWarnings(kits);
   const opponents = useQuery({
     queryKey: ["opponents", orgId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/opponents", { params: { path: { org_id: orgId } } })).data ?? [],
@@ -43,10 +61,11 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         is_home: f.get("away") !== "on",
         competition: optional("competition"),
         venue: optional("venue"),
-        kit_own: String(f.get("kit_own")),
-        kit_own_gk: String(f.get("kit_own_gk")),
-        kit_opponent: String(f.get("kit_opponent")),
-        kit_opponent_gk: String(f.get("kit_opponent_gk")),
+        kit_own: kits.own,
+        kit_own_gk: kits.own_gk,
+        kit_opponent: kits.opponent,
+        kit_opponent_gk: kits.opponent_gk,
+        format: chosenFormat as (typeof FORMATS)[number],
       },
     });
     setBusy(false);
@@ -82,12 +101,40 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         </div>
         <fieldset className="grid grid-cols-2 gap-3 sm:col-span-2 sm:grid-cols-4">
           <legend className="mb-1 text-sm font-medium">{t("matches.kits")}</legend>
-          <Input label={t("matches.kitOwn")} name="kit_own" type="color" defaultValue="#0b6bcb" className="h-10 p-1" />
-          <Input label={t("matches.kitOwnGk")} name="kit_own_gk" type="color" defaultValue="#f59e0b" className="h-10 p-1" />
-          <Input label={t("matches.kitOpp")} name="kit_opponent" type="color" defaultValue="#dc2626" className="h-10 p-1" />
-          <Input label={t("matches.kitOppGk")} name="kit_opponent_gk" type="color" defaultValue="#16a34a" className="h-10 p-1" />
+          {(
+            [
+              ["own", "matches.kitOwn"],
+              ["own_gk", "matches.kitOwnGk"],
+              ["opponent", "matches.kitOpp"],
+              ["opponent_gk", "matches.kitOppGk"],
+            ] as const
+          ).map(([k, label]) => (
+            <Input
+              key={k}
+              label={t(label)}
+              name={`kit_${k}`}
+              type="color"
+              value={kits[k]}
+              onChange={(e) => setKits((v) => ({ ...v, [k]: e.target.value }))}
+              className="h-10 p-1"
+            />
+          ))}
           <p className="col-span-full text-xs text-muted">{t("matches.kitsHint")}</p>
+          {similar.length > 0 && (
+            <p role="status" className="col-span-full rounded-md border-l-4 border-accent bg-surface px-3 py-2 text-sm" data-testid="kit-warning">
+              {t("matchForm.kitWarning", {
+                pairs: similar.map(([a, b]) => `${t(`matchForm.kit_${a}`)} / ${t(`matchForm.kit_${b}`)}`).join(", "),
+              })}
+            </p>
+          )}
         </fieldset>
+        <Select label={t("matchForm.format")} name="format" value={chosenFormat} onChange={(e) => setFormat(e.target.value)}>
+          {FORMATS.map((k) => (
+            <option key={k} value={k}>
+              {t(`matchForm.format_${k}`)}
+            </option>
+          ))}
+        </Select>
         <div className="sm:col-span-2">
           <Button type="submit" loading={busy}>
             {t("matches.create")}

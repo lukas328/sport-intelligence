@@ -92,3 +92,22 @@ async def test_audit_log_written(
         "SELECT count(*) FROM audit_logs WHERE organization_id = $1", ids["org"]
     )
     assert org_rows >= 2
+
+
+async def test_every_tenant_table_has_forced_rls(owner_conn: asyncpg.Connection) -> None:
+    """Every table with organization_id is protected by a forced RLS policy (addendum 01, P7)."""
+    rows = await owner_conn.fetch(
+        """
+        SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity,
+               (SELECT count(*) FROM pg_policy p WHERE p.polrelid = c.oid) AS policies
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = 'public'
+        WHERE c.relkind = 'r'
+          AND EXISTS (SELECT 1 FROM pg_attribute a WHERE a.attrelid = c.oid
+                      AND a.attname = 'organization_id' AND NOT a.attisdropped)
+        """
+    )
+    assert len(rows) > 40
+    bad = [r["relname"] for r in rows if not (r["relrowsecurity"] and r["relforcerowsecurity"])]
+    bad += [r["relname"] for r in rows if r["policies"] == 0]
+    assert not bad, bad

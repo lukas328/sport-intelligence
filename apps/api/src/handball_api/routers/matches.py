@@ -12,7 +12,15 @@ from sqlalchemy import select
 
 from handball_api.core.db import open_session, set_current_user
 from handball_api.core.errors import ProblemError
-from handball_api.models import Annotation, Clip, Opponent, Playlist, ProcessingJob, Track
+from handball_api.models import (
+    Annotation,
+    Clip,
+    Opponent,
+    OpponentPlayer,
+    Playlist,
+    ProcessingJob,
+    Track,
+)
 from handball_api.routers.deps import OrgDep
 from handball_api.schemas.matches import (
     AnalysisOut,
@@ -30,6 +38,8 @@ from handball_api.schemas.matches import (
     MatchUpdate,
     OpponentCreate,
     OpponentOut,
+    OpponentPlayerIn,
+    OpponentPlayerOut,
     OpponentUpdate,
     PartsRequest,
     PartUrl,
@@ -73,6 +83,27 @@ async def create_opponent(data: OpponentCreate, scope: OrgDep) -> Opponent:
 @router.patch("/opponents/{opponent_id}", response_model=OpponentOut, tags=["opponents"])
 async def update_opponent(opponent_id: uuid.UUID, data: OpponentUpdate, scope: OrgDep) -> Opponent:
     return await service.update_opponent(scope.ctx, opponent_id, data)
+
+
+@router.get(
+    "/opponents/{opponent_id}/players",
+    response_model=list[OpponentPlayerOut],
+    tags=["opponents"],
+)
+async def opponent_players(opponent_id: uuid.UUID, scope: OrgDep) -> list[OpponentPlayer]:
+    """Opponent players: number only by default; names only from public sources (internal)."""
+    return await service.opponent_players(scope.ctx, opponent_id)
+
+
+@router.put(
+    "/opponents/{opponent_id}/players",
+    response_model=list[OpponentPlayerOut],
+    tags=["opponents"],
+)
+async def put_opponent_players(
+    opponent_id: uuid.UUID, data: list[OpponentPlayerIn], scope: OrgDep
+) -> list[OpponentPlayer]:
+    return await service.put_opponent_players(scope.ctx, opponent_id, data)
 
 
 # ---- matches -------------------------------------------------------------------------------

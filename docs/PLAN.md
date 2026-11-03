@@ -77,7 +77,7 @@ Product principles P1 to P10 (addendum section 2) apply to every task; each repo
 Report with the mapping and risks: `docs/progress/addendum-01-plan.md`. Architecture and data model:
 ADR 017.
 
-### A1 Foundations: model, roles, protection (before everything else, it changes the schema)
+### A1 Foundations: model, roles, protection ✅ done (report: progress/A1.md)
 - Data model of addendum section 3: Federation, Presentation/Slide, Tag/TagSet/ClipTag/SavedFilter,
   HighlightReel, ScoutingReport, PlayerFeedItem/SelfAssessment, LiveTagSession/LiveTag,
   TrainingSession/Attendance, ConversationThread/AssistantMessage, PublicProfile, PaperReportUpload,
@@ -101,6 +101,9 @@ ADR 017.
 - Multi-angle player 4.5: picture-in-picture, side by side, best camera per event (from M5)
 - Player feed "Deine Szenen" with self-assessment first 4.7 (from M7)
 - Scouting report 72 h before a match 4.6 incl. A6 goalkeeper card (from M7)
+- Carried over from A1: match type `training` without opponent (4.8), stored team default format and
+  club formats in the match form, format picker on the match page, opponent player list UI,
+  ClipTag beyond clips if the tag UI needs it
 
 ### A3 Automation (principle P1; depends on real videos and trained models)
 - Automatic event baseline (shots, goals, saves, turnovers, throw-offs) with confidence; this is the

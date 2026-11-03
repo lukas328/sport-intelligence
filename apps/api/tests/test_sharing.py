@@ -85,3 +85,24 @@ async def test_share_links(make_api: Callable[[], Api]) -> None:
         await api.delete(f"/v1/orgs/{org}/share-links/{links['play']['id']}")
     ).status_code == 204
     assert (await anon.get(f"/v1/share/{links['play']['token']}")).status_code == 404
+
+
+async def test_youth_teams_share_only_plays(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api, youth=True)
+    org, team = ids["org"], ids["team"]
+    base = f"/v1/orgs/{org}/teams/{team}/share-links"
+    play = (
+        await api.post(
+            f"/v1/orgs/{org}/teams/{team}/plays",
+            json={"name": "Kreuzen", "category": "attack", "doc": doc()},
+        )
+    ).json()
+    m = await new_match(api, ids)
+    pl = (await api.post(f"/v1/orgs/{org}/teams/{team}/playlists", json={"title": "U13"})).json()
+    for kind, target in (("match", m["id"]), ("playlist", pl["id"])):
+        r = await api.post(base, json={"kind": kind, "target_id": target, "days": 7})
+        assert r.status_code == 403
+        assert r.json()["type"].endswith("youth-protection")
+    ok = await api.post(base, json={"kind": "play", "target_id": play["id"], "days": 7})
+    assert ok.status_code == 201

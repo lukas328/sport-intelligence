@@ -48,6 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
 export function Select({
   label,
   error,
+  hint,
   children,
   id,
   className,
@@ -60,9 +61,20 @@ export function Select({
       <label htmlFor={selectId} className="block text-sm font-medium">
         {label}
       </label>
-      <select id={selectId} aria-invalid={error ? true : undefined} className={cn(control, className)} {...props}>
+      <select
+        id={selectId}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={hint && !error ? `${selectId}-hint` : undefined}
+        className={cn(control, className)}
+        {...props}
+      >
         {children}
       </select>
+      {hint && !error && (
+        <p id={`${selectId}-hint`} className="text-xs text-muted">
+          {hint}
+        </p>
+      )}
       {error && <p className="text-xs text-error">{error}</p>}
     </div>
   );

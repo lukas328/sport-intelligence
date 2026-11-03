@@ -10,7 +10,8 @@
     "app": "Zur App",
     "login": "Anmelden",
     "assignments": "Aufgaben",
-    "drills": "Übungen"
+    "drills": "Übungen",
+    "consents": "Einwilligungen"
   },
   "home": {
     "cta": "Jetzt starten",
@@ -82,7 +83,13 @@
     "plan-required": "Diese Funktion ist im aktuellen Abo nicht enthalten. Unter Einstellungen kannst du das Abo ändern.",
     "plan-limit-matches": "Das Abo erlaubt keine weiteren Spiele in dieser Saison.",
     "plan-limit-teams": "Das Abo erlaubt keine weiteren Teams.",
-    "plan-limit-storage": "Der Videospeicher des Abos ist voll."
+    "plan-limit-storage": "Der Videospeicher des Abos ist voll.",
+    "parent-needs-player": "Wähle das Kind aus, für das der Elternteil eingeladen wird.",
+    "parent-consent-required": "Bei Minderjährigen entscheidet ein Elternteil oder eine erziehungsberechtigte Person.",
+    "youth-protection": "Nachwuchsteams können nur Spielzüge teilen, keine Spiele oder Videos.",
+    "last-admin": "Mach zuerst ein anderes Mitglied zum Vereinsadmin.",
+    "invalid-format": "Für ein eigenes Format braucht es Spielzeit und Anzahl Abschnitte.",
+    "duplicate-number": "Jede Nummer nur einmal."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -138,7 +145,9 @@
     "status_accepted": "Diese Einladung wurde schon angenommen.",
     "status_revoked": "Diese Einladung wurde zurückgezogen.",
     "status_expired": "Diese Einladung ist abgelaufen.",
-    "notFound": "Diese Einladung gibt es nicht."
+    "notFound": "Diese Einladung gibt es nicht.",
+    "child": "Kind",
+    "childHint": "Eltern sehen nur Inhalte ihres eigenen Kindes und verwalten dessen Einwilligungen."
   },
   "roles": {
     "org_admin": "Vereinsadmin",
@@ -147,7 +156,11 @@
     "analyst": "Analyst/in",
     "player": "Spieler/in",
     "goalkeeper": "Torhüter/in",
-    "guest": "Gast"
+    "guest": "Gast",
+    "goalkeeper_coach": "Torhütertrainer/in",
+    "athletic_coach": "Athletiktrainer/in",
+    "team_manager": "Teammanager/in",
+    "parent": "Elternteil"
   },
   "positions": {
     "LA": "Linksaussen",
@@ -1034,5 +1047,50 @@
     "log": "Verlauf",
     "undo": "Rückgängig",
     "rejected": "{count, plural, one {# Eintrag wurde} other {# Einträge wurden}} vom Server abgelehnt."
+  },
+  "consents": {
+    "title": "Einwilligungen",
+    "intro": "Hier entscheidest du, wofür Videos und Daten verwendet werden dürfen. Du kannst jede Einwilligung jederzeit zurückziehen.",
+    "none": "Mit deinem Konto ist kein Spielerprofil verknüpft.",
+    "self": "Du selbst",
+    "guardian": "Dein Kind",
+    "minor": "Minderjährig: nur Eltern können einwilligen.",
+    "teams": "Teams: {teams}",
+    "given": "Erteilt",
+    "notGiven": "Nicht erteilt",
+    "give": "Einwilligen",
+    "revoke": "Zurückziehen",
+    "history": "Verlauf",
+    "historyItem": "{purpose}: erteilt am {date} von {name}",
+    "revokedOn": "zurückgezogen am {date}",
+    "youthLocked": "Im Nachwuchs nicht möglich",
+    "purpose_analysis": "Videoanalyse im Team",
+    "purpose_analysis_help": "Das Team darf Spielvideos analysieren und dich darin erkennen.",
+    "purpose_highlights_internal": "Highlights im Verein",
+    "purpose_highlights_internal_help": "Szenen mit dir dürfen in Highlights erscheinen, die nur der Verein sieht.",
+    "purpose_highlights_public": "Öffentliche Highlights",
+    "purpose_highlights_public_help": "Szenen mit dir dürfen öffentlich gezeigt werden, zum Beispiel auf der Vereinsseite.",
+    "purpose_public_profile": "Öffentliches Profil",
+    "purpose_public_profile_help": "Ein Profil mit ausgewählten Szenen und Zahlen darf öffentlich sein.",
+    "purpose_training_data": "Verbesserung der Erkennung",
+    "purpose_training_data_help": "Anonymisierte Ausschnitte dürfen helfen, die automatische Erkennung zu verbessern."
+  },
+  "members": {
+    "makeAdmin": "Zum Vereinsadmin machen",
+    "stepDown": "Adminrechte abgeben"
+  },
+  "matchForm": {
+    "format": "Spielformat",
+    "format_adult_2x30": "Erwachsene, 2 × 30 Min.",
+    "format_youth_2x25": "Nachwuchs, 2 × 25 Min.",
+    "format_youth_2x20": "Nachwuchs, 2 × 20 Min.",
+    "format_mini": "Minihandball, 2 × 10 Min.",
+    "format_tournament": "Turnier, 1 × 10 Min.",
+    "format_custom": "Eigenes Format",
+    "kitWarning": "Die Trikotfarben sind sehr ähnlich ({pairs}). Die automatische Teamzuordnung wird unsicherer. Wenn möglich: Leibchen oder andere Farbe eintragen.",
+    "kit_own": "Eigenes Team",
+    "kit_own_gk": "Eigener Torhüter",
+    "kit_opponent": "Gegner",
+    "kit_opponent_gk": "Gegnerischer Torhüter"
   }
 }

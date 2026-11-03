@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
 from handball_api.models import Consent, Player, RosterEntry, Season
-from handball_api.models.enums import ConsentKind, Position
+from handball_api.models.enums import ConsentGivenBy, ConsentKind, Position
 from handball_api.schemas.roster import (
     ConsentCreate,
     ImportResult,
@@ -45,8 +45,8 @@ async def _consented_players(ctx: Ctx, player_ids: list[uuid.UUID]) -> set[uuid.
     kinds: dict[uuid.UUID, set[ConsentKind]] = {}
     for pid, kind in rows:
         kinds.setdefault(pid, set()).add(kind)
-    needed = set(ConsentKind)
-    return {pid for pid, k in kinds.items() if needed <= k}
+    # a roster entry is complete when video analysis is consented; other purposes are opt-ins
+    return {pid for pid, k in kinds.items() if ConsentKind.ANALYSIS in k}
 
 
 def _out(entry: RosterEntry, player: Player, consented: bool) -> RosterEntryOut:
@@ -247,6 +247,10 @@ async def add_consent(
 ) -> Consent:
     team = await get_team(ctx, team_id, Action.CONSENT_WRITE)
     player = await _player_in_team(ctx, team_id, player_id)
+    check_consent_giver(player, data.given_by, data.given_at, team.is_youth)
+    check_youth_purpose(
+        data.kind, team.is_youth or bool(is_minor(player.birth_year, data.given_at))
+    )
     consent = Consent(
         organization_id=team.organization_id,
         player_id=player.id,
@@ -259,6 +263,49 @@ async def add_consent(
         ctx, "consent.recorded", target_type="player", target_id=player.id, data={"kind": data.kind}
     )
     return consent
+
+
+def is_minor(birth_year: int | None, at: datetime) -> bool | None:
+    """True/False when known; with only the birth year a player of 18 may still be 17 (minor)."""
+    if birth_year is None:
+        return None
+    return at.year - birth_year <= 18
+
+
+def check_consent_giver(
+    player: Player, given_by: ConsentGivenBy, at: datetime, youth_team: bool
+) -> None:
+    """Minors (or players of youth teams with unknown age) need a parent or guardian (P6)."""
+    minor = is_minor(player.birth_year, at)
+    if (minor or (minor is None and youth_team)) and given_by == ConsentGivenBy.SELF:
+        raise ProblemError(
+            422, "parent-consent-required", "For minors a parent or guardian must consent"
+        )
+
+
+PUBLIC_PURPOSES = frozenset({ConsentKind.HIGHLIGHTS_PUBLIC, ConsentKind.PUBLIC_PROFILE})
+
+
+def check_youth_purpose(kind: ConsentKind, youth: bool) -> None:
+    """Youth protection (4.9): no public profiles or public highlights of youth players."""
+    if youth and kind in PUBLIC_PURPOSES:
+        raise ProblemError(
+            403, "youth-protection", "Public profiles and highlights are off for youth players"
+        )
+
+
+async def consented(ctx: Ctx, player_ids: list[uuid.UUID], purpose: ConsentKind) -> set[uuid.UUID]:
+    """Players with an unrevoked consent for the purpose (used by highlights, sharing, training)."""
+    if not player_ids:
+        return set()
+    rows = await ctx.db.scalars(
+        select(Consent.player_id).where(
+            Consent.player_id.in_(player_ids),
+            Consent.kind == purpose,
+            Consent.revoked_at.is_(None),
+        )
+    )
+    return set(rows.all())
 
 
 async def revoke_consent(

@@ -46,3 +46,8 @@ launch (PLAN.md section 5).
   tracking is a heuristic baseline (ADR 012). Milestone A3 is therefore on the critical path and needs
   real footage (OPEN_QUESTIONS Q-DATA-1, Q-ADD-1).
 - Role and consent changes touch every policy; the policy matrix test is extended before features use them.
+
+## Implementation notes (A1, 2026-11-03)
+Implemented in migrations 0015 and 0016; deviations (ClipTag on clips only, match type `training` and a
+stored team default format moved to A2) are listed in `docs/progress/A1.md`. Adapters: ADR 018.
+

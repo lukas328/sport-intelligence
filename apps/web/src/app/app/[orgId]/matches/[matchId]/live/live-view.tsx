@@ -172,7 +172,8 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
     const full: Record<string, unknown> = {
       side,
       period: clock.period,
-      clock_s: clock.period === 2 ? clockS + 1800 : clockS,
+      // match clock over all periods; period length from the match format (addendum 01, 4.8)
+      clock_s: clockS + (clock.period - 1) * (match?.period_s ?? 1800),
       player_id: side === "own" ? player : null,
       number: side === "opponent" && oppNumber ? Number(oppNumber) : null,
       ...body,
@@ -242,8 +243,11 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
             +10 s
           </button>
         </div>
-        {clock.period === 1 && seconds >= 60 && (
-          <button className="w-full rounded-md border border-border py-2 text-sm" onClick={() => setClock({ period: 2, base_s: 0, started_at: null })}>
+        {clock.period < (match?.periods ?? 2) && seconds >= 60 && (
+          <button
+            className="w-full rounded-md border border-border py-2 text-sm"
+            onClick={() => setClock({ period: clock.period + 1, base_s: 0, started_at: null })}
+          >
             {t("secondHalf")}
           </button>
         )}

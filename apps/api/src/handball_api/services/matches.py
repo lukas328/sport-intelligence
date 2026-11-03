@@ -4,10 +4,19 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 
+from handball_api.core.colors import kit_warnings
 from handball_api.core.errors import ProblemError
-from handball_api.models import Match, Opponent, ProcessingJob, Season, VideoAsset
+from handball_api.models import (
+    Match,
+    Opponent,
+    OpponentPlayer,
+    ProcessingJob,
+    Season,
+    VideoAsset,
+)
+from handball_api.models.enums import MatchFormatKey
 from handball_api.schemas.matches import (
     JobOut,
     MatchCreate,
@@ -16,11 +25,12 @@ from handball_api.schemas.matches import (
     MatchUpdate,
     OpponentCreate,
     OpponentOut,
+    OpponentPlayerIn,
     OpponentUpdate,
     SyncOut,
     VideoOut,
 )
-from handball_api.services import audit, billing
+from handball_api.services import audit, billing, match_formats
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import current_seasons, get_team
 from handball_api.services.policies import Action, authorize, is_staff_somewhere, visible_team_ids
@@ -58,13 +68,64 @@ def video_out(v: VideoAsset) -> VideoOut:
 
 def _require_staff(ctx: Ctx) -> None:
     if not is_staff_somewhere(ctx.require_actor()):
-        raise ProblemError(403, "forbidden", "Only coaches, analysts and admins manage opponents")
+        raise ProblemError(
+            403, "forbidden", "Only coaches, analysts, team managers and admins manage opponents"
+        )
 
 
 async def list_opponents(ctx: Ctx) -> list[Opponent]:
     if visible_team_ids(ctx.require_actor()) == set():
         raise ProblemError(403, "forbidden", "No team access")
     return list((await ctx.db.scalars(select(Opponent).order_by(Opponent.name))).all())
+
+
+async def _opponent(ctx: Ctx, opponent_id: uuid.UUID) -> Opponent:
+    opp = await ctx.db.get(Opponent, opponent_id)
+    if opp is None or opp.organization_id != ctx.require_actor().organization_id:
+        raise ProblemError(404, "not-found", "Opponent not found")
+    return opp
+
+
+async def opponent_players(ctx: Ctx, opponent_id: uuid.UUID) -> list[OpponentPlayer]:
+    if visible_team_ids(ctx.require_actor()) == set():
+        raise ProblemError(403, "forbidden", "No team access")
+    opp = await _opponent(ctx, opponent_id)
+    rows = await ctx.db.scalars(
+        select(OpponentPlayer)
+        .where(OpponentPlayer.opponent_id == opp.id)
+        .order_by(OpponentPlayer.number)
+    )
+    return list(rows.all())
+
+
+async def put_opponent_players(
+    ctx: Ctx, opponent_id: uuid.UUID, players: list[OpponentPlayerIn]
+) -> list[OpponentPlayer]:
+    """Replaces the opponent's list (numbers unique)."""
+    _require_staff(ctx)
+    opp = await _opponent(ctx, opponent_id)
+    numbers = [p.number for p in players]
+    if len(numbers) != len(set(numbers)):
+        raise ProblemError(422, "duplicate-number", "Each number only once")
+    await ctx.db.execute(delete(OpponentPlayer).where(OpponentPlayer.opponent_id == opp.id))
+    for p in players:
+        ctx.db.add(
+            OpponentPlayer(
+                organization_id=opp.organization_id,
+                opponent_id=opp.id,
+                entered_by_id=ctx.user_id,
+                **p.model_dump(),
+            )
+        )
+    await ctx.db.flush()
+    await audit.record(
+        ctx,
+        "opponent.players_updated",
+        target_type="opponent",
+        target_id=opp.id,
+        data={"count": len(players), "named": sum(1 for p in players if p.name)},
+    )
+    return await opponent_players(ctx, opp.id)
 
 
 async def create_opponent(ctx: Ctx, data: OpponentCreate) -> Opponent:
@@ -111,7 +172,12 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
     else:
         assert data.opponent_name is not None
         opp = await create_opponent(ctx, OpponentCreate(name=data.opponent_name))
-    values = data.model_dump(exclude={"season_id", "opponent_id", "opponent_name"})
+    values = data.model_dump(
+        exclude={"season_id", "opponent_id", "opponent_name", "format", "period_s", "periods"}
+    )
+    values["format"], values["period_s"], values["periods"] = _format(
+        data.format or match_formats.default_for(team.is_youth), data.period_s, data.periods
+    )
     match = Match(
         organization_id=team.organization_id,
         team_id=team.id,
@@ -201,6 +267,17 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         kit_own_gk=match.kit_own_gk,
         kit_opponent=match.kit_opponent,
         kit_opponent_gk=match.kit_opponent_gk,
+        kit_warnings=kit_warnings(
+            {
+                "own": match.kit_own,
+                "own_gk": match.kit_own_gk,
+                "opponent": match.kit_opponent,
+                "opponent_gk": match.kit_opponent_gk,
+            }
+        ),
+        format=match.format,
+        period_s=match.period_s,
+        periods=match.periods,
         score_own=match.score_own,
         score_opponent=match.score_opponent,
         halftime_own=match.halftime_own,
@@ -215,10 +292,28 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
     )
 
 
+def _format(key: MatchFormatKey, period_s: int | None, periods: int | None) -> tuple[str, int, int]:
+    try:
+        return match_formats.resolve(key, period_s, periods)
+    except ValueError as exc:
+        raise ProblemError(422, "invalid-format", str(exc)) from exc
+
+
 async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Match:
     match = await get_match(ctx, match_id, Action.MATCH_WRITE)
-    for k, v in data.model_dump(exclude_unset=True).items():
-        setattr(match, k, v)
+    changes = data.model_dump(exclude_unset=True)
+    fmt_keys = {"format", "period_s", "periods"}
+    if fmt_keys & changes.keys():
+        key = changes.get("format") or MatchFormatKey.CUSTOM
+        keep = key == MatchFormatKey.CUSTOM  # custom keeps the current values unless given
+        match.format, match.period_s, match.periods = _format(
+            key,
+            changes.get("period_s") or (match.period_s if keep else None),
+            changes.get("periods") or (match.periods if keep else None),
+        )
+    for k, v in changes.items():
+        if k not in fmt_keys:
+            setattr(match, k, v)
     await audit.record(
         ctx,
         "match.updated",

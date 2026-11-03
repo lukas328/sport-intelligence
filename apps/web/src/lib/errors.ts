@@ -28,6 +28,12 @@ export const KNOWN_ERRORS = [
   "plan-limit-matches",
   "plan-limit-teams",
   "plan-limit-storage",
+  "parent-needs-player",
+  "parent-consent-required",
+  "youth-protection",
+  "last-admin",
+  "invalid-format",
+  "duplicate-number",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

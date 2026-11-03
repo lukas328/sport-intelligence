@@ -968,9 +968,13 @@
         "type": "string"
       },
       "ConsentKind": {
+        "description": "Consent purposes (addendum 01 section 3); history = rows, latest unrevoked row counts.",
         "enum": [
-          "video_analysis",
-          "identification"
+          "analysis",
+          "highlights_internal",
+          "highlights_public",
+          "public_profile",
+          "training_data"
         ],
         "title": "ConsentKind",
         "type": "string"
@@ -1037,6 +1041,95 @@
           "revoked_at"
         ],
         "title": "ConsentOut",
+        "type": "object"
+      },
+      "ConsentSubject": {
+        "properties": {
+          "active": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentKind"
+            },
+            "title": "Active",
+            "type": "array"
+          },
+          "birth_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Year"
+          },
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentOut"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          },
+          "minor": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minor"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "relation": {
+            "title": "Relation",
+            "type": "string"
+          },
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/SubjectTeam"
+            },
+            "title": "Teams",
+            "type": "array"
+          }
+        },
+        "required": [
+          "player_id",
+          "first_name",
+          "last_name",
+          "birth_year",
+          "relation",
+          "minor",
+          "teams",
+          "active",
+          "history"
+        ],
+        "title": "ConsentSubject",
+        "type": "object"
+      },
+      "ConsentToggle": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/ConsentKind"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "ConsentToggle",
         "type": "object"
       },
       "DataRegion": {
@@ -2312,6 +2405,17 @@
             ],
             "title": "Competition"
           },
+          "format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchFormatKey"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "template; default adult_2x30, youth teams youth_2x25"
+          },
           "is_demo": {
             "default": false,
             "description": "marks demo or synthetic data, shown as Demo in the UI",
@@ -2373,6 +2477,32 @@
             ],
             "title": "Opponent Name"
           },
+          "period_s": {
+            "anyOf": [
+              {
+                "maximum": 3600.0,
+                "minimum": 60.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period S"
+          },
+          "periods": {
+            "anyOf": [
+              {
+                "maximum": 4.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periods"
+          },
           "season_id": {
             "anyOf": [
               {
@@ -2405,6 +2535,19 @@
         "title": "MatchCreate",
         "type": "object"
       },
+      "MatchFormatKey": {
+        "description": "Templates (4.8). The match stores the resolved values so later template edits do not change\nold matches.",
+        "enum": [
+          "adult_2x30",
+          "youth_2x25",
+          "youth_2x20",
+          "mini",
+          "tournament",
+          "custom"
+        ],
+        "title": "MatchFormatKey",
+        "type": "string"
+      },
       "MatchOut": {
         "properties": {
           "competition": {
@@ -2417,6 +2560,10 @@
               }
             ],
             "title": "Competition"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
           },
           "halftime_opponent": {
             "anyOf": [
@@ -2495,8 +2642,24 @@
             "title": "Kit Own Gk",
             "type": "string"
           },
+          "kit_warnings": {
+            "description": "kit pairs with similar colours, e.g. own/opponent",
+            "items": {
+              "type": "string"
+            },
+            "title": "Kit Warnings",
+            "type": "array"
+          },
           "opponent": {
             "$ref": "#/components/schemas/OpponentOut"
+          },
+          "period_s": {
+            "title": "Period S",
+            "type": "integer"
+          },
+          "periods": {
+            "title": "Periods",
+            "type": "integer"
           },
           "report_extra": {
             "anyOf": [
@@ -2581,6 +2744,10 @@
           "kit_own_gk",
           "kit_opponent",
           "kit_opponent_gk",
+          "kit_warnings",
+          "format",
+          "period_s",
+          "periods",
           "score_own",
           "score_opponent",
           "halftime_own",
@@ -2708,6 +2875,16 @@
             ],
             "title": "Competition"
           },
+          "format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchFormatKey"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "halftime_opponent": {
             "anyOf": [
               {
@@ -2800,6 +2977,32 @@
               }
             ],
             "title": "Kit Own Gk"
+          },
+          "period_s": {
+            "anyOf": [
+              {
+                "maximum": 3600.0,
+                "minimum": 60.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period S"
+          },
+          "periods": {
+            "anyOf": [
+              {
+                "maximum": 4.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periods"
           },
           "score_opponent": {
             "anyOf": [
@@ -3189,6 +3392,114 @@
         "title": "OpponentOut",
         "type": "object"
       },
+      "OpponentPlayerIn": {
+        "description": "Number only by default. A name needs a public source (e.g. the league website), addendum\n01 4.9; names are never shown publicly or in highlights.",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "number": {
+            "maximum": 99.0,
+            "minimum": 1.0,
+            "title": "Number",
+            "type": "integer"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "pattern": "^(GK|LW|LB|CB|RB|RW|PV)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "OpponentPlayerIn",
+        "type": "object"
+      },
+      "OpponentPlayerOut": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "name",
+          "source",
+          "position"
+        ],
+        "title": "OpponentPlayerOut",
+        "type": "object"
+      },
       "OpponentUpdate": {
         "properties": {
           "name": {
@@ -3356,6 +3667,18 @@
         ],
         "title": "OrgRole",
         "type": "string"
+      },
+      "OrgRoleIn": {
+        "properties": {
+          "org_role": {
+            "$ref": "#/components/schemas/OrgRole"
+          }
+        },
+        "required": [
+          "org_role"
+        ],
+        "title": "OrgRoleIn",
+        "type": "object"
       },
       "OrgSummary": {
         "properties": {
@@ -4947,6 +5270,30 @@
         "title": "ShareOut",
         "type": "object"
       },
+      "SubjectTeam": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_youth": {
+            "title": "Is Youth",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "is_youth"
+        ],
+        "title": "SubjectTeam",
+        "type": "object"
+      },
       "SyncOut": {
         "description": "Camera sync against the main video. `applied` is false when the audio match was too weak.",
         "properties": {
@@ -5165,7 +5512,11 @@
           "analyst",
           "player",
           "goalkeeper",
-          "guest"
+          "guest",
+          "goalkeeper_coach",
+          "athletic_coach",
+          "team_manager",
+          "parent"
         ],
         "title": "TeamRole",
         "type": "string"
@@ -8842,6 +9193,63 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/exports/shots": {
+      "get": {
+        "description": "Shots with metadata and goal-camera times (export API for the goalkeeper trainer, P2).",
+        "operationId": "shot_export_v1_orgs__org_id__matches__match_id__exports_shots_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Shot Export V1 Orgs  Org Id  Matches  Match Id  Exports Shots Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shot Export",
+        "tags": [
+          "events",
+          "exports"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/insights": {
       "get": {
         "description": "Ranked insights with evidence filters; compared with the other matches of the season.",
@@ -9413,6 +9821,171 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/me/consents": {
+      "get": {
+        "description": "Players I decide for: my own player profile (adults) and my children (parents).",
+        "operationId": "my_consents_v1_orgs__org_id__me_consents_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConsentSubject"
+                  },
+                  "title": "Response My Consents V1 Orgs  Org Id  Me Consents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Consents",
+        "tags": [
+          "consents"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/me/consents/{player_id}": {
+      "post": {
+        "operationId": "give_consent_v1_orgs__org_id__me_consents__player_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "player_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Player Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentToggle"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Give Consent",
+        "tags": [
+          "consents"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/me/consents/{player_id}/{kind}": {
+      "delete": {
+        "operationId": "revoke_consent_v1_orgs__org_id__me_consents__player_id___kind__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "player_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Player Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ConsentKind"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Consent",
+        "tags": [
+          "consents"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/me/notifications": {
       "get": {
         "operationId": "notifications_v1_orgs__org_id__me_notifications_get",
@@ -9546,6 +10119,70 @@
           }
         },
         "summary": "List Members",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/members/{user_id}": {
+      "patch": {
+        "description": "Club admin handover: promote a member to club admin, or step down (another admin stays).",
+        "operationId": "set_member_role_v1_orgs__org_id__members__user_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgRoleIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgRoleIn"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Member Role",
         "tags": [
           "organizations"
         ]
@@ -9709,6 +10346,135 @@
           }
         },
         "summary": "Update Opponent",
+        "tags": [
+          "matches",
+          "opponents"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/opponents/{opponent_id}/players": {
+      "get": {
+        "description": "Opponent players: number only by default; names only from public sources (internal).",
+        "operationId": "opponent_players_v1_orgs__org_id__opponents__opponent_id__players_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "opponent_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Opponent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OpponentPlayerOut"
+                  },
+                  "title": "Response Opponent Players V1 Orgs  Org Id  Opponents  Opponent Id  Players Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Opponent Players",
+        "tags": [
+          "matches",
+          "opponents"
+        ]
+      },
+      "put": {
+        "operationId": "put_opponent_players_v1_orgs__org_id__opponents__opponent_id__players_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "opponent_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Opponent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/OpponentPlayerIn"
+                },
+                "title": "Data",
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OpponentPlayerOut"
+                  },
+                  "title": "Response Put Opponent Players V1 Orgs  Org Id  Opponents  Opponent Id  Players Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Opponent Players",
         "tags": [
           "matches",
           "opponents"

@@ -6,7 +6,7 @@ import uuid
 from dataclasses import replace
 from datetime import UTC, date, datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
@@ -317,6 +317,30 @@ async def list_org_members(ctx: Ctx) -> list[tuple[User, OrgRole, dict[uuid.UUID
     ):
         teams.setdefault(uid, {})[tid] = role
     return [(u, r, teams.get(u.id, {})) for u, r in rows]
+
+
+async def set_org_role(ctx: Ctx, user_id: uuid.UUID, role: OrgRole) -> OrgRole:
+    """Admin handover (addendum 01): promote a member, or step down when another admin remains."""
+    actor = ctx.require_actor()
+    authorize(actor, Action.INVITE_ORG, two_factor=ctx.two_factor)
+    om = await ctx.db.scalar(select(OrgMembership).where(OrgMembership.user_id == user_id))
+    if om is None:
+        raise ProblemError(404, "not-found", "Member not found")
+    if om.role == OrgRole.ORG_ADMIN and role != OrgRole.ORG_ADMIN:
+        admins = await ctx.db.scalar(
+            select(func.count(OrgMembership.id)).where(OrgMembership.role == OrgRole.ORG_ADMIN)
+        )
+        if (admins or 0) <= 1:
+            raise ProblemError(409, "last-admin", "Make another member club admin first")
+    old, om.role = om.role, role
+    await audit.record(
+        ctx,
+        "org.member_role_changed",
+        target_type="user",
+        target_id=user_id,
+        data={"from": old, "to": role},
+    )
+    return role
 
 
 async def list_team_members(ctx: Ctx, team_id: uuid.UUID) -> list[tuple[User, TeamRole]]:

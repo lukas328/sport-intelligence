@@ -504,3 +504,25 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
     assert (a["status"], a["error"]) == ("failed", "calibration: degenerate")
     assert len(a["tracks"]) == 2  # previous results stay until a new run succeeds
+
+
+async def test_opponent_players_number_first(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    url = f"/v1/orgs/{ids['org']}/opponents/{m['opponent']['id']}/players"
+    assert (await api.get(url)).json() == []
+    nameless = await api.put(url, json=[{"number": 7}, {"number": 11, "position": "CB"}])
+    assert [p["number"] for p in nameless.json()] == [7, 11]
+    no_source = await api.put(url, json=[{"number": 7, "name": "Max Muster"}])
+    assert no_source.status_code == 422
+    dup = await api.put(url, json=[{"number": 7}, {"number": 7}])
+    assert dup.status_code == 422
+    named = await api.put(
+        url,
+        json=[
+            {"number": 7, "name": "Max Muster", "source": "https://www.handball.ch/de/matchcenter"}
+        ],
+    )
+    assert named.json()[0]["name"] == "Max Muster"
+    assert (await api.get(url)).json()[0]["source"].startswith("https://")

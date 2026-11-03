@@ -11,6 +11,7 @@ from handball_api.core.db import disable_system_access, enable_system_access, se
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import hash_token, new_token
 from handball_api.models import (
+    Guardianship,
     Invitation,
     Membership,
     Organization,
@@ -20,7 +21,7 @@ from handball_api.models import (
     Team,
     User,
 )
-from handball_api.models.enums import OrgRole
+from handball_api.models.enums import OrgRole, TeamRole
 from handball_api.schemas.orgs import InvitationCreate, InvitationPreview
 from handball_api.services import audit
 from handball_api.services.context import Ctx
@@ -52,6 +53,8 @@ async def create(
         authorize(actor, Action.INVITE_ORG, two_factor=ctx.two_factor)
     if data.team_id is not None:
         team = await get_team(ctx, data.team_id, Action.INVITE_TEAM)
+    if data.team_role == TeamRole.PARENT and data.player_id is None:
+        raise ProblemError(422, "parent-needs-player", "A parent invitation names the child")
     if data.player_id is not None:
         if team is None:
             raise ProblemError(422, "player-needs-team", "Linking a player needs a team invitation")
@@ -192,7 +195,21 @@ async def accept(ctx: Ctx, token: str, user: User) -> Organization:
                 )
             else:
                 m.role = inv.team_role
-        if inv.player_id:
+        if inv.player_id and inv.team_role == TeamRole.PARENT:
+            known = await ctx.db.scalar(
+                select(Guardianship.id).where(
+                    Guardianship.user_id == user.id, Guardianship.player_id == inv.player_id
+                )
+            )
+            if known is None:
+                ctx.db.add(
+                    Guardianship(
+                        organization_id=inv.organization_id,
+                        user_id=user.id,
+                        player_id=inv.player_id,
+                    )
+                )
+        elif inv.player_id:
             player = await ctx.db.get(Player, inv.player_id)
             if player is not None and player.user_id is None:
                 player.user_id = user.id

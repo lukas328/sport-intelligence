@@ -123,6 +123,25 @@ function PeopleSection({
     enabled: isAdmin,
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/members", { params: { path: { org_id: orgId } } })).data ?? [],
   });
+  const me = useQuery({ queryKey: ["me"], queryFn: async () => (await api.GET("/v1/me")).data });
+  const [roleError, setRoleError] = useState<ErrorKey | null>(null);
+  const setRole = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: "org_admin" | "member" }) => {
+      const r = await api.PATCH("/v1/orgs/{org_id}/members/{user_id}", {
+        params: { path: { org_id: orgId, user_id: userId } },
+        body: { org_role: role },
+      });
+      if (r.error) throw r.error;
+      return role;
+    },
+    onSuccess: (role, v) => {
+      setRoleError(null);
+      // stepping down: reload, the admin areas are gone
+      if (role === "member" && v.userId === me.data?.id) return void (window.location.href = `/app/${orgId}`);
+      void qc.invalidateQueries({ queryKey: ["members", orgId] });
+    },
+    onError: (e) => setRoleError(errorKey(e)),
+  });
   const invitations = useQuery({
     queryKey: ["invitations", orgId],
     queryFn: async () => {
@@ -155,6 +174,7 @@ function PeopleSection({
       {isAdmin && (
         <Card className="space-y-3">
           <h3 className="font-semibold">{t("settings.membersTitle")}</h3>
+          {roleError && <Alert>{t(`errors.${roleError}`)}</Alert>}
           {members.data && members.data.length > 0 ? (
             <ul className="divide-y divide-border text-sm">
               {members.data.map((m) => (
@@ -170,6 +190,15 @@ function PeopleSection({
                       .filter(Boolean)
                       .join(" · ")}
                   </span>
+                  {m.org_role === "org_admin" && m.user_id === me.data?.id ? (
+                    <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => setRole.mutate({ userId: m.user_id, role: "member" })}>
+                      {t("members.stepDown")}
+                    </Button>
+                  ) : m.org_role !== "org_admin" ? (
+                    <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => setRole.mutate({ userId: m.user_id, role: "org_admin" })}>
+                      {t("members.makeAdmin")}
+                    </Button>
+                  ) : null}
                 </li>
               ))}
             </ul>

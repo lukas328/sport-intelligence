@@ -10,7 +10,8 @@
     "app": "Open app",
     "login": "Sign in",
     "assignments": "Assignments",
-    "drills": "Drills"
+    "drills": "Drills",
+    "consents": "Consents"
   },
   "home": {
     "cta": "Get started",
@@ -82,7 +83,13 @@
     "plan-required": "This feature is not part of the current plan. Change the plan in the settings.",
     "plan-limit-matches": "The plan allows no more matches this season.",
     "plan-limit-teams": "The plan allows no more teams.",
-    "plan-limit-storage": "The plan's video storage is full."
+    "plan-limit-storage": "The plan's video storage is full.",
+    "parent-needs-player": "Choose the child the parent is invited for.",
+    "parent-consent-required": "For minors, a parent or guardian decides.",
+    "youth-protection": "Youth teams can only share plays, no matches or videos.",
+    "last-admin": "Make another member club admin first.",
+    "invalid-format": "A custom format needs the period length and the number of periods.",
+    "duplicate-number": "Each number only once."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -138,7 +145,9 @@
     "status_accepted": "This invitation was already accepted.",
     "status_revoked": "This invitation was revoked.",
     "status_expired": "This invitation has expired.",
-    "notFound": "This invitation does not exist."
+    "notFound": "This invitation does not exist.",
+    "child": "Child",
+    "childHint": "Parents only see content of their own child and manage its consents."
   },
   "roles": {
     "org_admin": "Club admin",
@@ -147,7 +156,11 @@
     "analyst": "Analyst",
     "player": "Player",
     "goalkeeper": "Goalkeeper",
-    "guest": "Guest"
+    "guest": "Guest",
+    "goalkeeper_coach": "Goalkeeper coach",
+    "athletic_coach": "Athletic coach",
+    "team_manager": "Team manager",
+    "parent": "Parent"
   },
   "positions": {
     "LA": "Left wing",
@@ -1034,5 +1047,50 @@
     "log": "Log",
     "undo": "Undo",
     "rejected": "{count, plural, one {# entry was} other {# entries were}} rejected by the server."
+  },
+  "consents": {
+    "title": "Consents",
+    "intro": "Decide what videos and data may be used for. You can withdraw any consent at any time.",
+    "none": "No player profile is linked to your account.",
+    "self": "You",
+    "guardian": "Your child",
+    "minor": "Minor: only parents can consent.",
+    "teams": "Teams: {teams}",
+    "given": "Given",
+    "notGiven": "Not given",
+    "give": "Consent",
+    "revoke": "Withdraw",
+    "history": "History",
+    "historyItem": "{purpose}: given on {date} by {name}",
+    "revokedOn": "withdrawn on {date}",
+    "youthLocked": "Not available for youth players",
+    "purpose_analysis": "Video analysis in the team",
+    "purpose_analysis_help": "The team may analyse match videos and recognise you in them.",
+    "purpose_highlights_internal": "Club highlights",
+    "purpose_highlights_internal_help": "Scenes with you may appear in highlights only the club sees.",
+    "purpose_highlights_public": "Public highlights",
+    "purpose_highlights_public_help": "Scenes with you may be shown publicly, for example on the club website.",
+    "purpose_public_profile": "Public profile",
+    "purpose_public_profile_help": "A profile with selected scenes and numbers may be public.",
+    "purpose_training_data": "Improving recognition",
+    "purpose_training_data_help": "Anonymised excerpts may help improve automatic recognition."
+  },
+  "members": {
+    "makeAdmin": "Make club admin",
+    "stepDown": "Give up admin rights"
+  },
+  "matchForm": {
+    "format": "Match format",
+    "format_adult_2x30": "Adults, 2 × 30 min",
+    "format_youth_2x25": "Youth, 2 × 25 min",
+    "format_youth_2x20": "Youth, 2 × 20 min",
+    "format_mini": "Mini handball, 2 × 10 min",
+    "format_tournament": "Tournament, 1 × 10 min",
+    "format_custom": "Custom format",
+    "kitWarning": "The kit colours are very similar ({pairs}). Automatic team assignment becomes less certain. If possible, enter bibs or another colour.",
+    "kit_own": "Own team",
+    "kit_own_gk": "Own goalkeeper",
+    "kit_opponent": "Opponent",
+    "kit_opponent_gk": "Opponent goalkeeper"
   }
 }

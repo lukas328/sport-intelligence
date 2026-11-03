@@ -147,3 +147,7 @@ class InvitationPreview(ApiModel):
     team_role: TeamRole | None
     status: str = Field(description="pending, accepted, revoked or expired")
     account_exists: bool
+
+
+class OrgRoleIn(ApiModel):
+    org_role: OrgRole

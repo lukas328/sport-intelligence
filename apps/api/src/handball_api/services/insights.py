@@ -156,7 +156,7 @@ def _fact(item: dict[str, Any], numbers: dict[str, int]) -> dict[str, Any]:
 async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> dict[str, Any]:
     team = await get_team(ctx, team_id, Action.MATCH_READ)
     await billing.require_feature(ctx, "season", team.organization_id)
-    version = await _season_version(ctx, team.id, season_id)
+    version = await _season_version(ctx, team.id, season_id) + (":y" if team.is_youth else "")
     cached = await events_service.cache_get(ctx, "season", season_id, version)
     if cached is not None:
         return cached
@@ -227,7 +227,16 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
             row["xg"] = round(row["xg"] + p.get("xg", 0.0), 2)
     for p in players.values():
         p["shooting_pct"] = round(p["goals"] / p["shots"], 4) if p["shots"] else None
+    if team.is_youth:
+        # youth protection (addendum 01): no ranking of children, list by jersey number
+        numbers = await _jersey_numbers(ctx, season_id)
+        player_list = sorted(
+            players.values(), key=lambda p: (numbers.get(p["player_id"], 100), p["player_id"])
+        )
+    else:
+        player_list = sorted(players.values(), key=lambda p: -p["goals"])
     return {
+        "ranked": not team.is_youth,
         "season_id": str(season_id),
         "matches": rows,
         "totals": {
@@ -240,7 +249,7 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
             if totals["saves"] + totals["goals_against"]
             else None,
         },
-        "players": sorted(players.values(), key=lambda p: -p["goals"]),
+        "players": player_list,
     }
 
 
@@ -384,6 +393,8 @@ async def match_pdf(ctx: Ctx, match_id: uuid.UUID, lang: str) -> tuple[bytes, st
             "away": away,
             "own_name": own,
             "opp_name": opp,
+            "period_s": match.period_s,
+            "periods": match.periods,
             "score": score,
             "halftime": ht,
             "subtitle": subtitle,

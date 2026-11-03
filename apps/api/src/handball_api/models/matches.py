@@ -75,6 +75,10 @@ class Match(Base, EntityMixin, TenantMixin):
     kickoff_ms: Mapped[dict[str, int] | None] = mapped_column(JSONB)
     # extra content of an imported paper report (score every 5 min, tactics notes by zone)
     report_extra: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    # match format (addendum 01, 4.8): template key plus the resolved values used by the clock
+    format: Mapped[str] = mapped_column(String(20), nullable=False, default="adult_2x30")
+    period_s: Mapped[int] = mapped_column(Integer, nullable=False, default=1800)
+    periods: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=2)
 
 
 class VideoAsset(Base, EntityMixin, TenantMixin):
@@ -107,6 +111,8 @@ class VideoAsset(Base, EntityMixin, TenantMixin):
     # sync against the main video: offset_ms, confidence, source (audio or user_correction)
     sync: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     quality_report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    # P2 preparation (half-time report): a partial upload analysed before the match ends
+    is_partial: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # result metadata of the latest analysis run (chunks, fps, detector, timings, versions)
     analysis: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     error: Mapped[str | None] = mapped_column(Text)

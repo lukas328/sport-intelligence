@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from pydantic import Field, HttpUrl, model_validator
 
-from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
+from handball_api.models.enums import JobStatus, MatchFormatKey, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.common import ApiModel, HexColor, Name
 
 
@@ -32,6 +32,30 @@ class OpponentOut(ApiModel):
     notes: str | None
 
 
+class OpponentPlayerIn(ApiModel):
+    """Number only by default. A name needs a public source (e.g. the league website), addendum
+    01 4.9; names are never shown publicly or in highlights."""
+
+    number: int = Field(ge=1, le=99)
+    name: Name | None = None
+    source: str | None = Field(default=None, max_length=300)
+    position: str | None = Field(default=None, pattern=r"^(GK|LW|LB|CB|RB|RW|PV)$")
+
+    @model_validator(mode="after")
+    def _source(self) -> OpponentPlayerIn:
+        if self.name and not (self.source and self.source.strip()):
+            raise ValueError("a name needs the public source it comes from")
+        return self
+
+
+class OpponentPlayerOut(ApiModel):
+    id: uuid.UUID
+    number: int
+    name: str | None
+    source: str | None
+    position: str | None
+
+
 class MatchCreate(ApiModel):
     season_id: uuid.UUID | None = None
     opponent_id: uuid.UUID | None = None
@@ -44,6 +68,11 @@ class MatchCreate(ApiModel):
     kit_own_gk: HexColor = "#f59e0b"
     kit_opponent: HexColor = "#dc2626"
     kit_opponent_gk: HexColor = "#16a34a"
+    format: MatchFormatKey | None = Field(
+        default=None, description="template; default adult_2x30, youth teams youth_2x25"
+    )
+    period_s: int | None = Field(default=None, ge=60, le=3600)
+    periods: int | None = Field(default=None, ge=1, le=4)
     is_demo: bool = Field(
         default=False, description="marks demo or synthetic data, shown as Demo in the UI"
     )
@@ -66,6 +95,9 @@ class MatchUpdate(ApiModel):
     kit_own_gk: HexColor | None = None
     kit_opponent: HexColor | None = None
     kit_opponent_gk: HexColor | None = None
+    format: MatchFormatKey | None = None
+    period_s: int | None = Field(default=None, ge=60, le=3600)
+    periods: int | None = Field(default=None, ge=1, le=4)
     score_own: int | None = Field(default=None, ge=0, le=99)
     score_opponent: int | None = Field(default=None, ge=0, le=99)
     halftime_own: int | None = Field(default=None, ge=0, le=99)
@@ -127,6 +159,10 @@ class MatchOut(ApiModel):
     kit_own_gk: str
     kit_opponent: str
     kit_opponent_gk: str
+    kit_warnings: list[str] = Field(description="kit pairs with similar colours, e.g. own/opponent")
+    format: str
+    period_s: int
+    periods: int
     score_own: int | None
     score_opponent: int | None
     halftime_own: int | None

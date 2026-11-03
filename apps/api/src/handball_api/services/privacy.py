@@ -26,6 +26,7 @@ from handball_api.models import (
     AuditLog,
     AuthSession,
     Comment,
+    Guardianship,
     Membership,
     Notification,
     Organization,
@@ -77,6 +78,13 @@ async def export(ctx: Ctx, user: User) -> dict[str, Any]:
             )
         ).all()
         players = (await ctx.db.scalars(select(Player).where(Player.user_id == user.id))).all()
+        children = (
+            await ctx.db.scalars(
+                select(Player)
+                .join(Guardianship, Guardianship.player_id == Player.id)
+                .where(Guardianship.user_id == user.id)
+            )
+        ).all()
         audits = (
             await ctx.db.scalars(
                 select(AuditLog)
@@ -110,6 +118,15 @@ async def export(ctx: Ctx, user: User) -> dict[str, Any]:
                 "organization_id": str(p.organization_id),
             }
             for p in players
+        ],
+        "children": [
+            {
+                "id": str(p.id),
+                "first_name": p.first_name,
+                "last_name": p.last_name,
+                "organization_id": str(p.organization_id),
+            }
+            for p in children
         ],
         "sessions": [
             {

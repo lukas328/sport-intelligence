@@ -59,6 +59,12 @@ async def delete_event(event_id: uuid.UUID, scope: OrgDep) -> None:
     await service.delete_event(scope.ctx, event_id)
 
 
+@router.get("/matches/{match_id}/exports/shots", response_model=dict[str, Any], tags=["exports"])
+async def shot_export(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Shots with metadata and goal-camera times (export API for the goalkeeper trainer, P2)."""
+    return await service.shot_export(scope.ctx, match_id)
+
+
 @router.get("/matches/{match_id}/stats", response_model=dict[str, Any], tags=["stats"])
 async def match_stats(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
     return await service.match_stats(scope.ctx, match_id)

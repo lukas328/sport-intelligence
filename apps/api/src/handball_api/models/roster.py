@@ -83,3 +83,17 @@ class Consent(Base, EntityMixin, TenantMixin):
         ForeignKey("users.id", ondelete="SET NULL")
     )
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Guardianship(Base, EntityMixin, TenantMixin):
+    """Parent or guardian account of a (usually minor) player (addendum 01, role `parent`)."""
+
+    __tablename__ = "guardianships"
+    __table_args__ = (UniqueConstraint("user_id", "player_id"),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    player_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("players.id", ondelete="CASCADE"), index=True, nullable=False
+    )

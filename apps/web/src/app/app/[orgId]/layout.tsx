@@ -39,6 +39,9 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           <Link href={`/app/${org.id}/drills`} className="rounded px-3 py-2 hover:bg-surface">
             {t("nav.drills")}
           </Link>
+          <Link href={`/app/${org.id}/consents`} className="rounded px-3 py-2 hover:bg-surface">
+            {t("nav.consents")}
+          </Link>
           <Link href={`/app/${org.id}/settings`} className="rounded px-3 py-2 hover:bg-surface">
             {t("common.settings")}
           </Link>

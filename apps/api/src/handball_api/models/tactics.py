@@ -25,6 +25,8 @@ class Play(Base, EntityMixin, TenantMixin):
     description: Mapped[str | None] = mapped_column(Text)
     tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     doc: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    # P2 preparation: club playbook; True = visible to all teams of the club
+    club_playbook: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     source: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # {match_id, t_ms}
     shared_with_players: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(
