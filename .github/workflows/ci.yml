@@ -102,6 +102,8 @@ jobs:
           pnpm --filter @handball/api-client generate
           git diff --exit-code packages/api-client/src/schema.ts
       - run: pnpm --filter @handball/web build
+      - name: Bundle budget (first-load JS per route)
+        run: pnpm --filter @handball/web budget
 
   images:
     name: Container build and scan (${{ matrix.app }})
