@@ -52,6 +52,8 @@ def _team_out(ctx: Ctx, team: Team, season: Season | None) -> TeamOut:
         is_youth=team.is_youth,
         gender=team.gender,
         settings=TeamSettings(players_see_team_stats=team.players_see_team_stats),
+        level=team.level,
+        default_format=team.default_format,
         my_role=actor.team_role(team.id),
         current_season=SeasonOut.model_validate(season) if season else None,
     )

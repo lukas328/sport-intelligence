@@ -776,6 +776,131 @@
         "title": "ClipOut",
         "type": "object"
       },
+      "CoachFeedPlayer": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CoachScene"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "self_assessment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SelfAssessmentOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "player_id",
+          "name",
+          "number",
+          "self_assessment",
+          "items"
+        ],
+        "title": "CoachFeedPlayer",
+        "type": "object"
+      },
+      "CoachScene": {
+        "properties": {
+          "clip_id": {
+            "format": "uuid",
+            "title": "Clip Id",
+            "type": "string"
+          },
+          "coach_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coach Comment"
+          },
+          "end_ms": {
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "positive": {
+            "title": "Positive",
+            "type": "boolean"
+          },
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "seen": {
+            "title": "Seen",
+            "type": "boolean"
+          },
+          "start_ms": {
+            "title": "Start Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rank",
+          "reason",
+          "positive",
+          "clip_id",
+          "start_ms",
+          "end_ms",
+          "event_id",
+          "coach_comment",
+          "seen"
+        ],
+        "title": "CoachScene",
+        "type": "object"
+      },
       "CommentCreate": {
         "properties": {
           "body": {
@@ -1781,6 +1906,37 @@
         "title": "EventPatch",
         "type": "object"
       },
+      "FeedComment": {
+        "properties": {
+          "coach_comment": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coach Comment"
+          }
+        },
+        "title": "FeedComment",
+        "type": "object"
+      },
+      "FeedGenerated": {
+        "properties": {
+          "players": {
+            "title": "Players",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "players"
+        ],
+        "title": "FeedGenerated",
+        "type": "object"
+      },
       "FeedImportResult": {
         "properties": {
           "created": {
@@ -1805,6 +1961,143 @@
           "errors"
         ],
         "title": "FeedImportResult",
+        "type": "object"
+      },
+      "FeedListItem": {
+        "properties": {
+          "assessed": {
+            "title": "Assessed",
+            "type": "boolean"
+          },
+          "kickoff_at": {
+            "format": "date-time",
+            "title": "Kickoff At",
+            "type": "string"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "opponent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opponent"
+          },
+          "player_first_name": {
+            "title": "Player First Name",
+            "type": "string"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "relation": {
+            "title": "Relation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "player_id",
+          "player_first_name",
+          "relation",
+          "match_id",
+          "kickoff_at",
+          "opponent",
+          "assessed"
+        ],
+        "title": "FeedListItem",
+        "type": "object"
+      },
+      "FeedScene": {
+        "properties": {
+          "clip_id": {
+            "format": "uuid",
+            "title": "Clip Id",
+            "type": "string"
+          },
+          "coach_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coach Comment"
+          },
+          "end_ms": {
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "positive": {
+            "title": "Positive",
+            "type": "boolean"
+          },
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "start_ms": {
+            "title": "Start Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rank",
+          "reason",
+          "positive",
+          "clip_id",
+          "start_ms",
+          "end_ms",
+          "event_id",
+          "coach_comment"
+        ],
+        "title": "FeedScene",
+        "type": "object"
+      },
+      "FeedSwap": {
+        "properties": {
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id"
+        ],
+        "title": "FeedSwap",
         "type": "object"
       },
       "FormationSegment": {
@@ -2432,6 +2725,16 @@
             "title": "Kickoff At",
             "type": "string"
           },
+          "kind": {
+            "default": "match",
+            "description": "training: training video without opponent (4.8)",
+            "enum": [
+              "match",
+              "training"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
           "kit_opponent": {
             "default": "#dc2626",
             "title": "Kit Opponent",
@@ -2626,6 +2929,10 @@
             ],
             "title": "Kickoff Ms"
           },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
           "kit_opponent": {
             "title": "Kit Opponent",
             "type": "string"
@@ -2651,7 +2958,15 @@
             "type": "array"
           },
           "opponent": {
-            "$ref": "#/components/schemas/OpponentOut"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpponentOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null for trainings"
           },
           "period_s": {
             "title": "Period S",
@@ -2735,6 +3050,7 @@
           "id",
           "team_id",
           "season_id",
+          "kind",
           "opponent",
           "kickoff_at",
           "is_home",
@@ -2809,7 +3125,12 @@
             "title": "Kickoff At",
             "type": "string"
           },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
           "opponent_name": {
+            "description": "empty for trainings",
             "title": "Opponent Name",
             "type": "string"
           },
@@ -2847,6 +3168,7 @@
         "required": [
           "id",
           "team_id",
+          "kind",
           "opponent_name",
           "kickoff_at",
           "is_home",
@@ -2858,6 +3180,44 @@
           "has_video"
         ],
         "title": "MatchSummary",
+        "type": "object"
+      },
+      "MatchTagLinks": {
+        "properties": {
+          "clips": {
+            "additionalProperties": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "title": "Clips",
+            "type": "object"
+          },
+          "events": {
+            "additionalProperties": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "title": "Events",
+            "type": "object"
+          }
+        },
+        "required": [
+          "clips",
+          "events"
+        ],
+        "title": "MatchTagLinks",
         "type": "object"
       },
       "MatchUpdate": {
@@ -4194,6 +4554,69 @@
         "title": "PlayUpdate",
         "type": "object"
       },
+      "PlayerFeed": {
+        "properties": {
+          "coach_comments_waiting": {
+            "description": "comments the player sees after the self-assessment",
+            "title": "Coach Comments Waiting",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FeedScene"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "self_assessment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SelfAssessmentOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "video_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Id"
+          },
+          "youth": {
+            "title": "Youth",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "match_id",
+          "player_id",
+          "video_id",
+          "youth",
+          "self_assessment",
+          "items",
+          "coach_comments_waiting"
+        ],
+        "title": "PlayerFeed",
+        "type": "object"
+      },
       "PlaylistCreate": {
         "properties": {
           "description": {
@@ -4918,6 +5341,461 @@
         "title": "RosterEntryUpdate",
         "type": "object"
       },
+      "SavedFilterIn": {
+        "properties": {
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/SearchFilter"
+          }
+        },
+        "required": [
+          "name",
+          "query"
+        ],
+        "title": "SavedFilterIn",
+        "type": "object"
+      },
+      "SavedFilterOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/SearchFilter"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "query",
+          "created_at"
+        ],
+        "title": "SavedFilterOut",
+        "type": "object"
+      },
+      "ScoutingOut": {
+        "properties": {
+          "basis": {
+            "additionalProperties": true,
+            "title": "Basis",
+            "type": "object"
+          },
+          "facts": {
+            "additionalProperties": true,
+            "title": "Facts",
+            "type": "object"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "opponent_id": {
+            "format": "uuid",
+            "title": "Opponent Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "match_id",
+          "opponent_id",
+          "generated_at",
+          "facts",
+          "basis"
+        ],
+        "title": "ScoutingOut",
+        "type": "object"
+      },
+      "SearchFilter": {
+        "description": "Combines automatic attributes and own tags (4.4). Empty lists mean \"any\".",
+        "properties": {
+          "goal_zones": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Goal Zones",
+            "type": "array"
+          },
+          "include_clips": {
+            "default": true,
+            "title": "Include Clips",
+            "type": "boolean"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "match",
+                  "training"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "limit": {
+            "default": 200,
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "match_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Match Ids",
+            "type": "array"
+          },
+          "numbers": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 50,
+            "title": "Numbers",
+            "type": "array"
+          },
+          "opponent_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opponent Id"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Outcomes",
+            "type": "array"
+          },
+          "player_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Player Ids",
+            "type": "array"
+          },
+          "season_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season Id"
+          },
+          "shot_zones": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Shot Zones",
+            "type": "array"
+          },
+          "sides": {
+            "items": {
+              "enum": [
+                "own",
+                "opponent"
+              ],
+              "type": "string"
+            },
+            "title": "Sides",
+            "type": "array"
+          },
+          "tags_all": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags All",
+            "type": "array"
+          },
+          "tags_any": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags Any",
+            "type": "array"
+          },
+          "turnover_types": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Turnover Types",
+            "type": "array"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Types",
+            "type": "array"
+          }
+        },
+        "title": "SearchFilter",
+        "type": "object"
+      },
+      "SearchHit": {
+        "properties": {
+          "end_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Ms"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kickoff_at": {
+            "format": "date-time",
+            "title": "Kickoff At",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "event",
+              "clip"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "match_label": {
+            "title": "Match Label",
+            "type": "string"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "side": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side"
+          },
+          "start_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Ms"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          },
+          "tag_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Tag Ids",
+            "type": "array"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "video_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Id"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "match_id",
+          "match_label",
+          "kickoff_at",
+          "video_id",
+          "start_ms",
+          "end_ms",
+          "t_ms",
+          "tag_ids"
+        ],
+        "title": "SearchHit",
+        "type": "object"
+      },
+      "SearchResult": {
+        "properties": {
+          "facets": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "description": "counts per event type and per tag id over all hits",
+            "title": "Facets",
+            "type": "object"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/SearchHit"
+            },
+            "title": "Hits",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hits",
+          "total",
+          "truncated",
+          "facets"
+        ],
+        "title": "SearchResult",
+        "type": "object"
+      },
       "SeasonCreate": {
         "properties": {
           "ends_on": {
@@ -4980,6 +5858,76 @@
           "ends_on"
         ],
         "title": "SeasonOut",
+        "type": "object"
+      },
+      "SelfAssessmentIn": {
+        "properties": {
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "rating": {
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Rating",
+            "type": "integer"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "rating"
+        ],
+        "title": "SelfAssessmentIn",
+        "type": "object"
+      },
+      "SelfAssessmentOut": {
+        "properties": {
+          "rating": {
+            "title": "Rating",
+            "type": "integer"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "rating",
+          "text",
+          "submitted_at"
+        ],
+        "title": "SelfAssessmentOut",
         "type": "object"
       },
       "SessionOut": {
@@ -5349,6 +6297,214 @@
         "title": "SyncOut",
         "type": "object"
       },
+      "TagIn": {
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "hotkey": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hotkey"
+          },
+          "name": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "TagIn",
+        "type": "object"
+      },
+      "TagLinksIn": {
+        "description": "Replaces the team tags on one target (clip, event or play).",
+        "properties": {
+          "tag_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Tag Ids",
+            "type": "array"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_type": {
+            "enum": [
+              "clip",
+              "event",
+              "play"
+            ],
+            "title": "Target Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_type",
+          "target_id",
+          "tag_ids"
+        ],
+        "title": "TagLinksIn",
+        "type": "object"
+      },
+      "TagOut": {
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "hotkey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hotkey"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "hotkey"
+        ],
+        "title": "TagOut",
+        "type": "object"
+      },
+      "TagPatch": {
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "hotkey": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hotkey"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "title": "TagPatch",
+        "type": "object"
+      },
+      "TagSetIn": {
+        "properties": {
+          "name": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagIn"
+            },
+            "maxItems": 50,
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "TagSetIn",
+        "type": "object"
+      },
+      "TagSetOut": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagOut"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "tags"
+        ],
+        "title": "TagSetOut",
+        "type": "object"
+      },
       "TeamCreate": {
         "properties": {
           "gender": {
@@ -5452,6 +6608,17 @@
               }
             ]
           },
+          "default_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Format"
+          },
           "gender": {
             "$ref": "#/components/schemas/TeamGender"
           },
@@ -5474,6 +6641,17 @@
               }
             ],
             "title": "League"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
           },
           "my_role": {
             "anyOf": [
@@ -5536,6 +6714,16 @@
       },
       "TeamUpdate": {
         "properties": {
+          "default_format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchFormatKey"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "gender": {
             "anyOf": [
               {
@@ -5569,6 +6757,19 @@
               }
             ],
             "title": "League"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
           },
           "name": {
             "anyOf": [
@@ -8154,6 +9355,118 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/feed-items/{item_id}": {
+      "patch": {
+        "operationId": "comment_v1_orgs__org_id__feed_items__item_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedComment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Comment",
+        "tags": [
+          "feed"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/feed-items/{item_id}/scene": {
+      "put": {
+        "operationId": "swap_v1_orgs__org_id__feed_items__item_id__scene_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedSwap"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Swap",
+        "tags": [
+          "feed"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/invitations": {
       "get": {
         "operationId": "list_invitations_v1_orgs__org_id__invitations_get",
@@ -9250,6 +10563,189 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/feed": {
+      "get": {
+        "description": "Coach overview: scenes per player and self-assessments.",
+        "operationId": "team_feed_v1_orgs__org_id__matches__match_id__feed_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CoachFeedPlayer"
+                  },
+                  "title": "Response Team Feed V1 Orgs  Org Id  Matches  Match Id  Feed Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Team Feed",
+        "tags": [
+          "feed"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/feed/generate": {
+      "post": {
+        "description": "Rebuilds the scenes of all players (runs automatically after every analysis).",
+        "operationId": "generate_v1_orgs__org_id__matches__match_id__feed_generate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedGenerated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate",
+        "tags": [
+          "feed"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/feed/me": {
+      "get": {
+        "description": "My scenes (or my child's). Coach comments appear after the self-assessment.",
+        "operationId": "player_feed_v1_orgs__org_id__matches__match_id__feed_me_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "player_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Player Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerFeed"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Player Feed",
+        "tags": [
+          "feed"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/insights": {
       "get": {
         "description": "Ranked insights with evidence filters; compared with the other matches of the season.",
@@ -9482,6 +10978,174 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/scouting": {
+      "get": {
+        "operationId": "latest_v1_orgs__org_id__matches__match_id__scouting_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoutingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Latest",
+        "tags": [
+          "scouting"
+        ]
+      },
+      "post": {
+        "description": "Creates the report now (it is created automatically 72 h before kickoff).",
+        "operationId": "generate_v1_orgs__org_id__matches__match_id__scouting_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoutingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate",
+        "tags": [
+          "scouting"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/self-assessment": {
+      "put": {
+        "operationId": "assess_v1_orgs__org_id__matches__match_id__self_assessment_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelfAssessmentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerFeed"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Assess",
+        "tags": [
+          "feed"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/stats": {
       "get": {
         "operationId": "match_stats_v1_orgs__org_id__matches__match_id__stats_get",
@@ -9643,6 +11307,59 @@
         "tags": [
           "events",
           "insights"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/tag-links": {
+      "get": {
+        "operationId": "match_links_v1_orgs__org_id__matches__match_id__tag_links_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchTagLinks"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Match Links",
+        "tags": [
+          "tags"
         ]
       }
     },
@@ -9983,6 +11700,53 @@
         "summary": "Revoke Consent",
         "tags": [
           "consents"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/me/feeds": {
+      "get": {
+        "operationId": "my_feeds_v1_orgs__org_id__me_feeds_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FeedListItem"
+                  },
+                  "title": "Response My Feeds V1 Orgs  Org Id  Me Feeds Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Feeds",
+        "tags": [
+          "feed"
         ]
       }
     },
@@ -11042,6 +12806,235 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/saved-filters/{filter_id}": {
+      "delete": {
+        "operationId": "delete_filter_v1_orgs__org_id__saved_filters__filter_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "filter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Filter Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Filter",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/saved-filters/{filter_id}/results": {
+      "get": {
+        "description": "Smart playlist: evaluated on every call, new matches appear automatically.",
+        "operationId": "run_filter_v1_orgs__org_id__saved_filters__filter_id__results_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "filter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Filter Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Filter",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/scouting/{report_id}/goalkeeper-card": {
+      "get": {
+        "description": "A6 shooter card for goalkeepers (number, position, preferred goal zones).",
+        "operationId": "goalkeeper_card_v1_orgs__org_id__scouting__report_id__goalkeeper_card_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "enum": [
+                "de-CH",
+                "en",
+                "fr"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Goalkeeper Card",
+        "tags": [
+          "scouting"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/scouting/{report_id}/pdf": {
+      "get": {
+        "operationId": "report_pdf_v1_orgs__org_id__scouting__report_id__pdf_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "enum": [
+                "de-CH",
+                "en",
+                "fr"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Pdf",
+        "tags": [
+          "scouting"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/share-links/{link_id}": {
       "delete": {
         "operationId": "revoke_v1_orgs__org_id__share_links__link_id__delete",
@@ -11085,6 +13078,335 @@
         "summary": "Revoke",
         "tags": [
           "sharing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/tag-links": {
+      "put": {
+        "description": "Sets the team tags of a clip, event or play (replaces the previous tags).",
+        "operationId": "set_links_v1_orgs__org_id__tag_links_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagLinksIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "title": "Response Set Links V1 Orgs  Org Id  Tag Links Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Links",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/tag-sets/{tag_set_id}": {
+      "delete": {
+        "operationId": "delete_tag_set_v1_orgs__org_id__tag_sets__tag_set_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tag_set_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Tag Set Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Tag Set",
+        "tags": [
+          "tags"
+        ]
+      },
+      "patch": {
+        "operationId": "rename_tag_set_v1_orgs__org_id__tag_sets__tag_set_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tag_set_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Tag Set Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rename Tag Set",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/tag-sets/{tag_set_id}/tags": {
+      "post": {
+        "operationId": "add_tag_v1_orgs__org_id__tag_sets__tag_set_id__tags_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tag_set_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Tag Set Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Tag",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/tags/{tag_id}": {
+      "delete": {
+        "operationId": "delete_tag_v1_orgs__org_id__tags__tag_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tag_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Tag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Tag",
+        "tags": [
+          "tags"
+        ]
+      },
+      "patch": {
+        "operationId": "update_tag_v1_orgs__org_id__tags__tag_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tag_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Tag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Tag",
+        "tags": [
+          "tags"
         ]
       }
     },
@@ -12468,6 +14790,188 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/saved-filters": {
+      "get": {
+        "operationId": "list_filters_v1_orgs__org_id__teams__team_id__saved_filters_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SavedFilterOut"
+                  },
+                  "title": "Response List Filters V1 Orgs  Org Id  Teams  Team Id  Saved Filters Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Filters",
+        "tags": [
+          "tags"
+        ]
+      },
+      "post": {
+        "operationId": "save_filter_v1_orgs__org_id__teams__team_id__saved_filters_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedFilterIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedFilterOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Filter",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/search": {
+      "post": {
+        "description": "Events and clips by automatic attributes and own tags, with video windows.",
+        "operationId": "search_v1_orgs__org_id__teams__team_id__search_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchFilter"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/seasons": {
       "get": {
         "operationId": "list_seasons_v1_orgs__org_id__teams__team_id__seasons_get",
@@ -12995,6 +15499,124 @@
         "summary": "Create",
         "tags": [
           "sharing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/tag-sets": {
+      "get": {
+        "operationId": "list_tag_sets_v1_orgs__org_id__teams__team_id__tag_sets_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TagSetOut"
+                  },
+                  "title": "Response List Tag Sets V1 Orgs  Org Id  Teams  Team Id  Tag Sets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Tag Sets",
+        "tags": [
+          "tags"
+        ]
+      },
+      "post": {
+        "operationId": "create_tag_set_v1_orgs__org_id__teams__team_id__tag_sets_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagSetIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagSetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Tag Set",
+        "tags": [
+          "tags"
         ]
       }
     },

@@ -16,7 +16,7 @@ from handball_api.models import ProcessingJob
 from handball_api.models.enums import JobStatus
 from handball_api.routers.deps import CtxDep
 from handball_api.schemas.matches import JobOut, JobUpdate
-from handball_api.services import videos
+from handball_api.services import scouting, videos
 
 router = APIRouter(prefix="/internal", include_in_schema=False)
 
@@ -58,3 +58,13 @@ async def stats(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "") ->
         "running_over_3h": int(stuck or 0),
         "oldest_queued_s": int((now - oldest).total_seconds()) if oldest else 0,
     }
+
+
+@router.post("/scouting/due")
+async def scouting_due(
+    ctx: CtxDep, x_internal_token: Annotated[str, Header()] = ""
+) -> dict[str, int]:
+    """Worker tick (hourly): preparation reports 72 h before matches (addendum 01, 4.6)."""
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    return {"created": await scouting.run_due(ctx)}

@@ -526,3 +526,34 @@ async def test_opponent_players_number_first(make_api: Callable[[], Api]) -> Non
     )
     assert named.json()[0]["name"] == "Max Muster"
     assert (await api.get(url)).json()[0]["source"].startswith("https://")
+
+
+async def test_training_video_and_team_default_format(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org, team = ids["org"], ids["team"]
+    base = f"/v1/orgs/{org}/teams/{team}/matches"
+    when = "2026-11-10T19:30:00+01:00"
+    bad = await api.post(base, json={"kind": "training", "kickoff_at": when, "opponent_name": "X"})
+    assert bad.status_code == 422
+    assert (await api.post(base, json={"kickoff_at": when})).status_code == 422
+    r = await api.post(base, json={"kind": "training", "kickoff_at": when})
+    assert r.status_code == 201, r.text
+    training = r.json()
+    assert (training["kind"], training["opponent"]) == ("training", None)
+    listed = (await api.get(base)).json()
+    assert [(m["kind"], m["opponent_name"]) for m in listed] == [("training", "")]
+    # trainings stay out of season statistics
+    await api.post(
+        f"/v1/orgs/{org}/matches/{training['id']}/events",
+        json={"type": "shot", "side": "own", "outcome": "goal", "clock_s": 10},
+    )
+    season = (await api.get(f"/v1/orgs/{org}/teams/{team}/seasons/{ids['season']}/stats")).json()
+    assert season["totals"]["matches"] == 0
+
+    patched = await api.patch(
+        f"/v1/orgs/{org}/teams/{team}", json={"default_format": "mini", "level": "U11 Promotion"}
+    )
+    assert patched.json()["default_format"] == "mini" and patched.json()["level"] == "U11 Promotion"
+    m = await new_match(api, ids)
+    assert (m["format"], m["period_s"]) == ("mini", 600)

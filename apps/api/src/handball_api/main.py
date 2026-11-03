@@ -29,10 +29,13 @@ from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
 from handball_api.routers import events as events_router
 from handball_api.routers import family as family_router
+from handball_api.routers import feed as feed_router
 from handball_api.routers import ops as ops_router
 from handball_api.routers import privacy as privacy_router
+from handball_api.routers import scouting as scouting_router
 from handball_api.routers import sharing as sharing_router
 from handball_api.routers import tactics as tactics_router
+from handball_api.routers import tags as tags_router
 from handball_api.routers import training as training_router
 from handball_api.routers.deps import csrf_protect
 from handball_api.services.billing import BillingGateway, StripeGateway
@@ -191,5 +194,8 @@ def create_app(
     app.include_router(ops_router.router)
     app.include_router(privacy_router.router)
     app.include_router(family_router.router)
+    app.include_router(tags_router.router)
+    app.include_router(feed_router.router)
+    app.include_router(scouting_router.router)
     app.include_router(internal.router)
     return app

@@ -39,6 +39,10 @@ class Match(Base, EntityMixin, TenantMixin):
     __table_args__ = (
         CheckConstraint("score_own IS NULL OR score_own >= 0", name="score_own_positive"),
         CheckConstraint("score_opponent IS NULL OR score_opponent >= 0", name="score_opp_positive"),
+        CheckConstraint("kind IN ('match', 'training')", name="kind_values"),
+        CheckConstraint(
+            "kind = 'training' OR opponent_id IS NOT NULL", name="opponent_for_matches"
+        ),
     )
 
     team_id: Mapped[uuid.UUID] = mapped_column(
@@ -47,9 +51,11 @@ class Match(Base, EntityMixin, TenantMixin):
     season_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("seasons.id", ondelete="CASCADE"), index=True, nullable=False
     )
-    opponent_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("opponents.id", ondelete="RESTRICT"), index=True, nullable=False
+    # null only for training videos (kind = training, addendum 01 4.8)
+    opponent_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("opponents.id", ondelete="RESTRICT"), index=True
     )
+    kind: Mapped[str] = mapped_column(String(10), nullable=False, default="match")
     kickoff_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )

@@ -18,18 +18,21 @@ import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { UploadPanel } from "./upload-panel";
 import { Workspace } from "./workspace";
+import { useOpponentName } from "@/lib/opponent";
+import { TeamFeedView } from "./feed-views";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
 type Job = Schemas["JobOut"];
 
-type View = "video" | "overview" | "report" | "shots" | "keepers" | "physical";
+type View = "video" | "overview" | "report" | "shots" | "keepers" | "physical" | "scenes";
 const VIEWS: View[] = ["video", "overview", "report", "shots", "keepers", "physical"];
 
 const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnails", "upload"] as const;
 
 export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; initial: Match; teamName: string; staff: boolean }) {
   const t = useTranslations();
+  const oppName = useOpponentName();
   const format = useFormatter();
   const locale = useLocale();
   const qc = useQueryClient();
@@ -81,7 +84,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const main = match.videos.find((v) => v.role === "main" && v.status === "ready");
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
   const ourName = teamName;
-  const [home, away] = match.is_home ? [ourName, match.opponent.name] : [match.opponent.name, ourName];
+  const [home, away] = match.is_home ? [ourName, oppName(match)] : [oppName(match), ourName];
   const [hs, as] = match.is_home ? [match.score_own, match.score_opponent] : [match.score_opponent, match.score_own];
 
   function onPlay(ms: number) {
@@ -103,11 +106,19 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             {match.venue && ` · ${match.venue}`}
           </p>
           <h1 className="text-2xl font-semibold">
-            {home} <span className="text-muted">{t("matches.vs")}</span> {away}
+            {match.opponent ? (
+              <>
+                {home} <span className="text-muted">{t("matches.vs")}</span> {away}
+              </>
+            ) : (
+              `${t("matches.training")}: ${ourName}`
+            )}
           </h1>
-          <a href={`/app/${orgId}/opponents/${match.opponent.id}`} className="text-sm text-accent underline underline-offset-4">
-            {t("opponent.open")}: {match.opponent.name}
-          </a>
+          {match.opponent && (
+            <a href={`/app/${orgId}/opponents/${match.opponent.id}`} className="text-sm text-accent underline underline-offset-4">
+              {t("opponent.open")}: {match.opponent.name}
+            </a>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {hs != null && as != null && (
@@ -133,12 +144,17 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               {t("live.open")}
             </a>
           )}
+          {staff && match.opponent && (
+            <a href={`/app/${orgId}/matches/${match.id}/scouting`} className="whitespace-nowrap rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" data-testid="scouting-link">
+              {t("scouting.open")}
+            </a>
+          )}
           {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="match" targetId={match.id} />}
         </div>
       </header>
 
       <nav role="tablist" aria-label={t("tabs.video")} className="flex gap-1 overflow-x-auto border-b border-border">
-        {VIEWS.map((v) => (
+        {[...VIEWS, ...(staff ? (["scenes"] as View[]) : [])].map((v) => (
           <button
             key={v}
             role="tab"
@@ -159,8 +175,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         )}
       </div>
       {view === "physical" && <PhysicalView orgId={orgId} matchId={match.id} names={names} />}
+      {view === "scenes" && <TeamFeedView orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
       {view !== "video" &&
         view !== "physical" &&
+        view !== "scenes" &&
         (stats.data && stats.data.quality.events > 0 ? (
           (() => {
             const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
@@ -265,6 +283,7 @@ function QualityReport({ video }: { video: Video }) {
 
 function MatchAdmin({ orgId, match, teamName }: { orgId: string; match: Match; teamName: string }) {
   const t = useTranslations();
+  const oppName = useOpponentName();
   const router = useRouter();
   const qc = useQueryClient();
   async function saveScore(e: FormEvent<HTMLFormElement>) {
@@ -283,12 +302,12 @@ function MatchAdmin({ orgId, match, teamName }: { orgId: string; match: Match; t
         <fieldset className="flex items-end gap-2">
           <legend className="mb-1 text-sm font-medium">{t("matches.score")}</legend>
           <Input label={teamName} name="score_own" type="number" min={0} max={99} defaultValue={match.score_own ?? ""} className="w-20" />
-          <Input label={match.opponent.name} name="score_opponent" type="number" min={0} max={99} defaultValue={match.score_opponent ?? ""} className="w-20" />
+          <Input label={oppName(match)} name="score_opponent" type="number" min={0} max={99} defaultValue={match.score_opponent ?? ""} className="w-20" />
         </fieldset>
         <fieldset className="flex items-end gap-2">
           <legend className="mb-1 text-sm font-medium">{t("matches.halftime")}</legend>
           <Input label={teamName} name="ht_own" type="number" min={0} max={99} defaultValue={match.halftime_own ?? ""} className="w-20" />
-          <Input label={match.opponent.name} name="ht_opp" type="number" min={0} max={99} defaultValue={match.halftime_opponent ?? ""} className="w-20" />
+          <Input label={oppName(match)} name="ht_opp" type="number" min={0} max={99} defaultValue={match.halftime_opponent ?? ""} className="w-20" />
         </fieldset>
         <Button type="submit" variant="secondary">
           {t("matches.saveScore")}

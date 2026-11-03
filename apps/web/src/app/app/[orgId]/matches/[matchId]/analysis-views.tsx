@@ -12,6 +12,7 @@ import { InsightsCard } from "@/components/analysis/insights";
 import { Card, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
+import { useOpponentName } from "@/lib/opponent";
 
 type ZoneCount = Record<string, { shots: number; goals: number }>;
 interface TeamStats {
@@ -137,6 +138,7 @@ function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnT
 
 export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false }: ViewProps) {
   const t = useTranslations("stats");
+  const oppName = useOpponentName();
   const { drill, open, close } = useDrill();
   const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter }[] = [
     { label: t("goals"), own: stats.own.goals, opp: stats.opponent.goals, filter: (s) => ({ side: s, type: "shot", outcome: "goal" }) },
@@ -161,7 +163,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           <ScoreChart
             points={stats.timeline.score}
             own={teamName}
-            opp={match.opponent.name}
+            opp={oppName(match)}
             periodS={match.period_s}
             periods={match.periods}
           />
@@ -179,7 +181,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               <tr>
                 <th scope="col" className="text-left font-normal" />
                 <th scope="col" className="text-right font-medium">{teamName}</th>
-                <th scope="col" className="text-right font-medium">{match.opponent.name}</th>
+                <th scope="col" className="text-right font-medium">{oppName(match)}</th>
               </tr>
             </thead>
             <tbody>
@@ -190,7 +192,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
                     <N value={r.own} label={`${r.label} ${teamName}`} onClick={r.filter && (() => open(`${r.label}: ${teamName}`, r.filter!("own")))} />
                   </td>
                   <td className="text-right">
-                    <N value={r.opp} label={`${r.label} ${match.opponent.name}`} onClick={r.filter && (() => open(`${r.label}: ${match.opponent.name}`, r.filter!("opponent")))} />
+                    <N value={r.opp} label={`${r.label} ${oppName(match)}`} onClick={r.filter && (() => open(`${r.label}: ${oppName(match)}`, r.filter!("opponent")))} />
                   </td>
                 </tr>
               ))}
@@ -334,6 +336,7 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
 
 export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: ViewProps) {
   const t = useTranslations("shotsView");
+  const oppName = useOpponentName();
   const { drill, open, close } = useDrill();
   const [side, setSide] = useState<"own" | "opponent">("own");
   const [outcome, setOutcome] = useState<string>("");
@@ -353,7 +356,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
         <div className="flex gap-1" role="group" aria-label={t("filterTeam")}>
           {(["own", "opponent"] as const).map((s) => (
             <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded px-3 py-1 text-sm", side === s ? "bg-accent text-accent-contrast" : "bg-surface")}>
-              {s === "own" ? teamName : match.opponent.name}
+              {s === "own" ? teamName : oppName(match)}
             </button>
           ))}
         </div>

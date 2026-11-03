@@ -68,6 +68,8 @@ class Team(Base, EntityMixin, TenantMixin):
     league: Mapped[str | None] = mapped_column(String(120))
     # level within the league system (P2: anonymous benchmarks per league and level)
     level: Mapped[str | None] = mapped_column(String(40))
+    # match format template for new matches (addendum 01, 4.8); None = derived from is_youth
+    default_format: Mapped[str | None] = mapped_column(String(20))
     is_youth: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     gender: Mapped[TeamGender] = mapped_column(str_enum(TeamGender), nullable=False)
     settings: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { serverApi } from "@/lib/api";
@@ -21,7 +22,9 @@ async function load(orgId: string, matchId: string) {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { orgId, matchId } = await params;
   const data = await load(orgId, matchId);
-  return { title: data ? `${data.team?.name ?? ""} vs ${data.match.opponent.name}` : undefined };
+  if (!data) return {};
+  if (!data.match.opponent) return { title: `${(await getTranslations("matches"))("training")}: ${data.team?.name ?? ""}` };
+  return { title: `${data.team?.name ?? ""} vs ${data.match.opponent.name}` };
 }
 
 export default async function MatchPage({ params }: Params) {

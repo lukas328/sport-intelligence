@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/client";
 import { adjust, clockSeconds, enqueue, flush, load, remove, toggle, type Clock } from "@/lib/live-queue";
 import { cn } from "@/lib/utils";
+import { useOpponentName } from "@/lib/opponent";
 
 type Match = Schemas["MatchOut"];
 type Roster = Schemas["RosterEntryOut"][];
@@ -60,6 +61,7 @@ function useCached<T>(key: string, fetcher: () => Promise<T | undefined>, ready 
  */
 export function LiveView({ orgId, matchId }: { orgId: string; matchId: string }) {
   const t = useTranslations("live");
+  const oppName = useOpponentName();
   const te = useTranslations("events");
   const path = { org_id: orgId, match_id: matchId };
   const match = useCached<Match>(`hb.live.match.${matchId}`, async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}", { params: { path } })).data);
@@ -251,7 +253,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
             {t("secondHalf")}
           </button>
         )}
-        {match && <p className="truncate text-xs text-muted">{t("vs", { opponent: match.opponent.name })}</p>}
+        {match && <p className="truncate text-xs text-muted">{t("vs", { opponent: oppName(match) })}</p>}
       </div>
 
       <section aria-label={t("own")} className="space-y-2">

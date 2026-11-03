@@ -165,24 +165,29 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
         if season is None:
             raise ProblemError(409, "no-season", "The team has no season")
     await billing.check_new_match(ctx, team.organization_id, team.id, season.id)
+    opp: Opponent | None = None
     if data.opponent_id:
         opp = await ctx.db.get(Opponent, data.opponent_id)
         if opp is None:
             raise ProblemError(404, "not-found", "Opponent not found")
-    else:
-        assert data.opponent_name is not None
+    elif data.opponent_name:
         opp = await create_opponent(ctx, OpponentCreate(name=data.opponent_name))
     values = data.model_dump(
         exclude={"season_id", "opponent_id", "opponent_name", "format", "period_s", "periods"}
     )
+    default = (
+        MatchFormatKey(team.default_format)
+        if team.default_format
+        else match_formats.default_for(team.is_youth)
+    )
     values["format"], values["period_s"], values["periods"] = _format(
-        data.format or match_formats.default_for(team.is_youth), data.period_s, data.periods
+        data.format or default, data.period_s, data.periods
     )
     match = Match(
         organization_id=team.organization_id,
         team_id=team.id,
         season_id=season.id,
-        opponent_id=opp.id,
+        opponent_id=opp.id if opp else None,
         **values,
     )
     ctx.db.add(match)
@@ -197,7 +202,7 @@ async def list_matches(
     await get_team(ctx, team_id, Action.MATCH_READ)
     q = (
         select(Match, Opponent.name, func.count(VideoAsset.id))
-        .join(Opponent, Opponent.id == Match.opponent_id)
+        .outerjoin(Opponent, Opponent.id == Match.opponent_id)
         .outerjoin(VideoAsset, VideoAsset.match_id == Match.id)
         .where(Match.team_id == team_id)
         .group_by(Match.id, Opponent.name)
@@ -210,7 +215,8 @@ async def list_matches(
         MatchSummary(
             id=m.id,
             team_id=m.team_id,
-            opponent_name=name,
+            kind=m.kind,
+            opponent_name=name or "",
             kickoff_at=m.kickoff_at,
             is_home=m.is_home,
             competition=m.competition,
@@ -236,9 +242,12 @@ async def get_match(ctx: Ctx, match_id: uuid.UUID, action: Action = Action.MATCH
     return match
 
 
+async def opponent_of(ctx: Ctx, match: Match) -> Opponent | None:
+    return await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
+
+
 async def match_out(ctx: Ctx, match: Match) -> MatchOut:
-    opp = await ctx.db.get(Opponent, match.opponent_id)
-    assert opp is not None
+    opp = await opponent_of(ctx, match)
     videos = (
         await ctx.db.scalars(
             select(VideoAsset)
@@ -258,7 +267,8 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         id=match.id,
         team_id=match.team_id,
         season_id=match.season_id,
-        opponent=OpponentOut.model_validate(opp),
+        kind=match.kind,
+        opponent=OpponentOut.model_validate(opp) if opp else None,
         kickoff_at=match.kickoff_at,
         is_home=match.is_home,
         competition=match.competition,

@@ -33,6 +33,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [kits, setKits] = useState(KIT_DEFAULTS);
+  const [training, setTraining] = useState(false);
   const [format, setFormat] = useState<string | null>(null);
   const team = useQuery({
     queryKey: ["team", orgId, teamId],
@@ -49,14 +50,14 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const name = String(f.get("opponent")).trim();
+    const name = String(f.get("opponent") ?? "").trim();
     const known = opponents.data?.find((o) => o.name.toLowerCase() === name.toLowerCase());
     const optional = (k: string) => String(f.get(k) ?? "").trim() || null;
     setBusy(true);
     const { data, error } = await api.POST("/v1/orgs/{org_id}/teams/{team_id}/matches", {
       params: { path: { org_id: orgId, team_id: teamId } },
       body: {
-        ...(known ? { opponent_id: known.id } : { opponent_name: name }),
+        ...(training ? { kind: "training" as const } : known ? { opponent_id: known.id } : { opponent_name: name }),
         kickoff_at: new Date(String(f.get("kickoff"))).toISOString(),
         is_home: f.get("away") !== "on",
         competition: optional("competition"),
@@ -81,18 +82,25 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
       <h2 className="mb-4 text-lg font-semibold">{t("matches.new")}</h2>
       {error && <Alert className="mb-4">{t(`errors.${error}`)}</Alert>}
       <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2" aria-label={t("matches.new")}>
-        <Input
-          label={t("matches.opponent")}
-          name="opponent"
-          required
-          list={listId}
-          placeholder={t("matches.opponentPlaceholder")}
-          autoComplete="off"
-          error={fields.opponent_name}
-        />
-        <datalist id={listId}>
-          {opponents.data?.map((o) => <option key={o.id} value={o.name} />)}
-        </datalist>
+        <div className="sm:col-span-2">
+          <Checkbox name="training" label={t("matchForm.isTraining")} checked={training} onChange={(e) => setTraining(e.target.checked)} />
+        </div>
+        {!training && (
+          <>
+          <Input
+            label={t("matches.opponent")}
+            name="opponent"
+            required
+            list={listId}
+            placeholder={t("matches.opponentPlaceholder")}
+            autoComplete="off"
+            error={fields.opponent_name}
+          />
+          <datalist id={listId}>
+            {opponents.data?.map((o) => <option key={o.id} value={o.name} />)}
+          </datalist>
+          </>
+        )}
         <Input label={t("matches.kickoff")} name="kickoff" type="datetime-local" required defaultValue={localNow()} />
         <Input label={`${t("matches.competition")} (${t("common.optional")})`} name="competition" />
         <Input label={`${t("matches.venue")} (${t("common.optional")})`} name="venue" />

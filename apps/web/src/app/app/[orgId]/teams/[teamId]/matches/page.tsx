@@ -24,7 +24,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ orgId:
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", path),
     client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
   ]);
-  const canWrite = org.data?.my_role === "org_admin" || ["coach", "analyst"].includes(team.data?.my_role ?? "");
+  const canWrite = org.data?.my_role === "org_admin" || ["coach", "analyst", "team_manager"].includes(team.data?.my_role ?? "");
   const list = matches.data ?? [];
   return (
     <div className="space-y-6">
@@ -39,8 +39,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ orgId:
                   {format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })}
                 </span>
                 <span className="flex-1 font-medium">
-                  {m.is_home ? "" : "@ "}
-                  {m.opponent_name}
+                  {m.kind === "training" ? t("matches.training") : `${m.is_home ? "" : "@ "}${m.opponent_name}`}
                   {m.competition && <span className="ml-2 text-sm font-normal text-muted">{m.competition}</span>}
                 </span>
                 {m.score_own != null && m.score_opponent != null && (

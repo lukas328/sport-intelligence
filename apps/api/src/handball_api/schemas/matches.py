@@ -57,6 +57,9 @@ class OpponentPlayerOut(ApiModel):
 
 
 class MatchCreate(ApiModel):
+    kind: Literal["match", "training"] = Field(
+        default="match", description="training: training video without opponent (4.8)"
+    )
     season_id: uuid.UUID | None = None
     opponent_id: uuid.UUID | None = None
     opponent_name: Name | None = None
@@ -79,7 +82,10 @@ class MatchCreate(ApiModel):
 
     @model_validator(mode="after")
     def _opponent(self) -> MatchCreate:
-        if (self.opponent_id is None) == (self.opponent_name is None):
+        if self.kind == "training":
+            if self.opponent_id or self.opponent_name:
+                raise ValueError("a training has no opponent")
+        elif (self.opponent_id is None) == (self.opponent_name is None):
             raise ValueError("give either opponent_id or opponent_name")
         if self.kickoff_at.tzinfo is None:
             raise ValueError("kickoff_at needs a timezone")
@@ -150,7 +156,8 @@ class MatchOut(ApiModel):
     id: uuid.UUID
     team_id: uuid.UUID
     season_id: uuid.UUID
-    opponent: OpponentOut
+    kind: str
+    opponent: OpponentOut | None = Field(description="null for trainings")
     kickoff_at: datetime
     is_home: bool
     competition: str | None
@@ -179,7 +186,8 @@ class MatchOut(ApiModel):
 class MatchSummary(ApiModel):
     id: uuid.UUID
     team_id: uuid.UUID
-    opponent_name: str
+    kind: str
+    opponent_name: str = Field(description="empty for trainings")
     kickoff_at: datetime
     is_home: bool
     competition: str | None

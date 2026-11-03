@@ -20,7 +20,6 @@ from handball_api.core.security import hash_token, new_token
 from handball_api.models import (
     Clip,
     Match,
-    Opponent,
     Play,
     Playlist,
     PlaylistItem,
@@ -33,6 +32,7 @@ from handball_api.models.enums import VideoRole, VideoStatus
 from handball_api.services import audit, billing
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
+from handball_api.services.matches import opponent_of
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 from handball_api.services.videos import MEDIA_PATH, MEDIA_TYPES, media_prefix
@@ -56,8 +56,8 @@ async def _target(ctx: Ctx, team: Team, kind: str, target_id: uuid.UUID) -> str:
     match = await ctx.db.get(Match, target_id)
     if match is None or match.team_id != team.id:
         raise ProblemError(404, "not-found", "Match not found")
-    opp = await ctx.db.get(Opponent, match.opponent_id)
-    return f"{team.name} - {opp.name if opp else ''}"
+    opp = await opponent_of(ctx, match)
+    return f"{team.name} - {opp.name}" if opp else team.name
 
 
 async def create(
@@ -176,7 +176,7 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
         match = await ctx.db.get(Match, link.target_id)
         if match is None:
             raise ProblemError(404, "not-found", "Not found")
-        opp = await ctx.db.get(Opponent, match.opponent_id)
+        opp = await opponent_of(ctx, match)
         stats = await events_service.stats_for(ctx, match)
         numbers = await _numbers(ctx, match.season_id)
         players = [

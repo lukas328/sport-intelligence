@@ -9,12 +9,14 @@ import { Card, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import type { KeeperRow, ViewProps } from "./analysis-views";
+import { useOpponentName } from "@/lib/opponent";
 
 const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
 
 /** Goalkeeper module (M5): save rate overall, per goal zone and shot zone, 7 m, GSAx. */
 export function KeepersView({ match, teamName, stats, names }: ViewProps) {
   const t = useTranslations("keepers");
+  const oppName = useOpponentName();
   const sheet = ((match.report_extra as { names?: Record<string, string> } | null)?.names ?? {}) as Record<string, string>;
   const rows = Object.values(stats.goalkeepers ?? {}).sort((a, b) => (a.side === b.side ? b.faced - a.faced : a.side === "own" ? -1 : 1));
   if (rows.length === 0) return <EmptyState title={t("none")}>{t("assignHint")}</EmptyState>;
@@ -30,7 +32,7 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
         return (
           <section key={side} className="space-y-3" aria-label={side === "own" ? t("own") : t("opponent")}>
             <h2 className="font-semibold">
-              {side === "own" ? t("own") : t("opponent")} <span className="text-sm font-normal text-muted">({side === "own" ? teamName : match.opponent.name})</span>
+              {side === "own" ? t("own") : t("opponent")} <span className="text-sm font-normal text-muted">({side === "own" ? teamName : oppName(match)})</span>
             </h2>
             <div className="grid gap-4 lg:grid-cols-2">
               {list.map((k) => (

@@ -146,7 +146,7 @@ async def playlist_detail(ctx: Ctx, playlist_id: uuid.UUID) -> PlaylistDetail:
             select(PlaylistItem, Clip, Opponent.name, Match.kickoff_at)
             .join(Clip, Clip.id == PlaylistItem.clip_id)
             .join(Match, Match.id == Clip.match_id)
-            .join(Opponent, Opponent.id == Match.opponent_id)
+            .outerjoin(Opponent, Opponent.id == Match.opponent_id)
             .where(PlaylistItem.playlist_id == pl.id)
             .order_by(PlaylistItem.position)
         )

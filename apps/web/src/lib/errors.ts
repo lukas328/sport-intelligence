@@ -34,6 +34,8 @@ export const KNOWN_ERRORS = [
   "last-admin",
   "invalid-format",
   "duplicate-number",
+  "duplicate-name",
+  "unknown-tag",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

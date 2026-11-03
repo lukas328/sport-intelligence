@@ -12,6 +12,7 @@ import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CourtHalf, ShotDot } from "./court-half";
 import { GoalGrid } from "./goal-grid";
+import { useOpponentName } from "@/lib/opponent";
 
 type EventIn = Schemas["EventIn"];
 type Outcome = "goal" | "save" | "miss" | "post" | "blocked";
@@ -48,6 +49,7 @@ export function Tagger({
   getTime: () => number;
 }) {
   const t = useTranslations("events");
+  const oppName = useOpponentName();
   const te = useTranslations("errors");
   const tk = useTranslations("keepers");
   const qc = useQueryClient();
@@ -206,7 +208,7 @@ export function Tagger({
             onClick={() => setSide(s)}
             className={cn("flex-1 rounded border px-2 py-1.5", side === s ? "border-accent bg-accent text-accent-contrast" : "border-border")}
           >
-            {s === "own" ? teamName : match.opponent.name}
+            {s === "own" ? teamName : oppName(match)}
           </button>
         ))}
       </div>

@@ -26,7 +26,7 @@ from handball_api.models.enums import VideoRole
 from handball_api.services import billing, report_pdf
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match
+from handball_api.services.matches import get_match, opponent_of
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, visible_team_ids
 from handball_metrics.insights import VERSION, match_insights
@@ -42,6 +42,7 @@ async def _matches_with_events(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUI
                 .where(
                     Match.team_id == team_id,
                     Match.season_id == season_id,
+                    Match.kind == "match",  # trainings stay out of match statistics (4.8)
                     Match.id.in_(has_events),
                 )
                 .order_by(Match.kickoff_at)
@@ -109,7 +110,7 @@ async def summarise(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     if not data["insights"]:
         raise ProblemError(409, "no-insights", "Not enough data for a summary")
     numbers = await _jersey_numbers(ctx, match.season_id)
-    opponent = await ctx.db.get(Opponent, match.opponent_id)
+    opponent = await opponent_of(ctx, match)
     facts = {
         "gegner": opponent.name if opponent else None,
         "resultat": {"wir": match.score_own, "gegner": match.score_opponent},
@@ -185,7 +186,7 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
             {
                 "match_id": str(m.id),
                 "kickoff_at": m.kickoff_at.isoformat(),
-                "opponent": names.get(m.opponent_id, ""),
+                "opponent": names.get(m.opponent_id, "") if m.opponent_id else "",
                 "is_home": m.is_home,
                 "score_own": m.score_own if m.score_own is not None else own["goals"],
                 "score_opponent": m.score_opponent
@@ -353,7 +354,7 @@ async def match_pdf(ctx: Ctx, match_id: uuid.UUID, lang: str) -> tuple[bytes, st
     await billing.require_feature(ctx, "pdf_reports", match.organization_id)
     org = await ctx.db.get(Organization, match.organization_id)
     team = await ctx.db.get(Team, match.team_id)
-    opponent = await ctx.db.get(Opponent, match.opponent_id)
+    opponent = await opponent_of(ctx, match)
     assert org is not None and team is not None
     stats = await events_service.stats_for(ctx, match)
     items: list[dict[str, Any]] = []

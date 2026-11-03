@@ -19,7 +19,9 @@ export default async function TeamLayout({
     client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
   ]);
   if (!team) notFound();
-  const staff = org?.my_role === "org_admin" || ["coach", "analyst"].includes(team.my_role ?? "");
+  const admin = org?.my_role === "org_admin";
+  const staff = admin || ["coach", "analyst"].includes(team.my_role ?? "");
+  const videoWork = staff || ["goalkeeper_coach", "athletic_coach"].includes(team.my_role ?? "");
   const base = `/app/${orgId}/teams/${teamId}`;
   return (
     <div className="space-y-6">
@@ -38,7 +40,8 @@ export default async function TeamLayout({
           <TabLink href={`${base}/playlists`}>{t("team.playlists")}</TabLink>
           <TabLink href={`${base}/plays`}>{t("team.plays")}</TabLink>
           <TabLink href={`${base}/season`}>{t("team.season")}</TabLink>
-          {staff && <TabLink href={`${base}/assignments`}>{t("assignments.nav")}</TabLink>}
+          {videoWork && <TabLink href={`${base}/search`}>{t("search.nav")}</TabLink>}
+          {videoWork && <TabLink href={`${base}/assignments`}>{t("assignments.nav")}</TabLink>}
         </nav>
       </header>
       {children}

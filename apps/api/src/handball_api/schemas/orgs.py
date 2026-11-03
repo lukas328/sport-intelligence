@@ -6,7 +6,14 @@ from typing import Annotated
 
 from pydantic import EmailStr, Field, StringConstraints, model_validator
 
-from handball_api.models.enums import DataRegion, OrgRole, Plan, TeamGender, TeamRole
+from handball_api.models.enums import (
+    DataRegion,
+    MatchFormatKey,
+    OrgRole,
+    Plan,
+    TeamGender,
+    TeamRole,
+)
 from handball_api.schemas.common import ApiModel, HexColor, Name
 
 Country = Annotated[str, StringConstraints(pattern=r"^[A-Z]{2}$")]
@@ -78,6 +85,8 @@ class TeamUpdate(ApiModel):
     is_youth: bool | None = None
     gender: TeamGender | None = None
     settings: TeamSettings | None = None
+    level: Name | None = None
+    default_format: MatchFormatKey | None = None
 
 
 class TeamOut(ApiModel):
@@ -87,6 +96,8 @@ class TeamOut(ApiModel):
     is_youth: bool
     gender: TeamGender
     settings: TeamSettings
+    level: str | None = None
+    default_format: str | None = None
     my_role: TeamRole | None
     current_season: SeasonOut | None
 

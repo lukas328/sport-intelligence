@@ -24,7 +24,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, billing, training
+from handball_api.services import audit, billing, feed, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
@@ -332,7 +332,14 @@ def _apply_sync_result(asset: VideoAsset, r: dict[str, object]) -> None:
 
 
 async def read_media(ctx: Ctx, asset_id: uuid.UUID, path: str) -> tuple[bytes, str]:
-    asset = await get_asset(ctx, asset_id)
+    try:
+        asset = await get_asset(ctx, asset_id)
+    except ProblemError:
+        # parents: the match video of a match in which their child has scenes (4.7, 4.9)
+        guest = await ctx.db.get(VideoAsset, asset_id)
+        if guest is None or not await feed.guardian_sees_match(ctx, guest.match_id):
+            raise
+        asset = guest
     if not MEDIA_PATH.match(path) or ".." in path:
         raise ProblemError(404, "not-found", "Not found")
     if path == "proxy.mp4" or path.startswith("original"):
@@ -418,6 +425,7 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 {"match_id": str(match.id)},
                 f"/app/{match.organization_id}/matches/{match.id}",
             )
+            await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "sync" and data.result:
             _apply_sync_result(asset, data.result)
     await ctx.db.flush()

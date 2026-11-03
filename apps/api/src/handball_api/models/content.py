@@ -12,6 +12,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     SmallInteger,
     String,
@@ -41,6 +42,7 @@ class Presentation(Base, EntityMixin, TenantMixin):
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )
+    shared_with_players: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
 
 class PresentationSlide(Base, EntityMixin, TenantMixin):
@@ -82,11 +84,25 @@ class Tag(Base, EntityMixin, TenantMixin):
 
 
 class ClipTag(Base, EntityMixin, TenantMixin):
-    __tablename__ = "clip_tags"
-    __table_args__ = (UniqueConstraint("clip_id", "tag_id"),)
+    """A team tag on exactly one target: clip, event or play (4.4). Own tags never change automatic
+    metrics; they only add a dimension for search, stats and presentations."""
 
-    clip_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("clips.id", ondelete="CASCADE"), index=True, nullable=False
+    __tablename__ = "clip_tags"
+    __table_args__ = (
+        CheckConstraint("num_nonnulls(clip_id, event_id, play_id) = 1", name="one_target"),
+        Index("uq_clip_tags_clip", "clip_id", "tag_id", unique=True),
+        Index("uq_clip_tags_event", "event_id", "tag_id", unique=True),
+        Index("uq_clip_tags_play", "play_id", "tag_id", unique=True),
+    )
+
+    clip_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("clips.id", ondelete="CASCADE"), index=True
+    )
+    event_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("events.id", ondelete="CASCADE"), index=True
+    )
+    play_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("plays.id", ondelete="CASCADE"), index=True
     )
     tag_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("tags.id", ondelete="CASCADE"), index=True, nullable=False
@@ -171,6 +187,8 @@ class PlayerFeedItem(Base, EntityMixin, TenantMixin):
     rank: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     reason: Mapped[str] = mapped_column(String(40), nullable=False)
     seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    positive: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    coach_comment: Mapped[str | None] = mapped_column(Text)
 
 
 class SelfAssessment(Base, EntityMixin, TenantMixin):
