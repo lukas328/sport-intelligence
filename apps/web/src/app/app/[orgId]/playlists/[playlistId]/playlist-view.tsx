@@ -1,5 +1,6 @@
 "use client";
 
+import { BackLink } from "@/components/ui/back-link";
 import { ShareButton } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -49,9 +50,10 @@ export function PlaylistView({ orgId, initial, staff }: { orgId: string; initial
 
   return (
     <div className="space-y-6">
+      <BackLink fallback={`/app/${orgId}`} />
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">{pl.title}</h1>
+          <h1 className="text-2xl font-bold sm:text-[1.75rem]">{pl.title}</h1>
           <p className="text-sm text-muted">
             {t("items", { count: pl.items.length })} · {pl.shared_with_players ? t("shared") : t("notShared")}
           </p>

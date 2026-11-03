@@ -98,7 +98,7 @@ const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v
 function N({ value, onClick, label }: { value: string | number; onClick?: () => void; label: string }) {
   if (!onClick || value === 0 || value === "0") return <span className="tabular-nums">{value}</span>;
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums text-accent underline decoration-dotted underline-offset-4 hover:decoration-solid">
+    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums font-medium text-accent hover:underline decoration-dotted underline-offset-4 hover:decoration-solid">
       {value}
     </button>
   );
@@ -186,7 +186,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.label} className="border-t border-border">
+                <tr key={r.label} className="border-t border-border/70">
                   <th scope="row" className="py-1.5 text-left font-normal">{r.label}</th>
                   <td className="text-right">
                     <N value={r.own} label={`${r.label} ${teamName}`} onClick={r.filter && (() => open(`${r.label}: ${teamName}`, r.filter!("own")))} />
@@ -272,10 +272,10 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
     { key: "saves", label: t("saves") },
   ];
   const table = (rows: PlayerRow[], caption: string) => (
-    <div className="overflow-x-auto rounded-md border border-border">
+    <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
       <table className="w-full text-sm" data-testid="report-table">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-surface text-muted">
+        <thead className="text-xs text-muted">
           <tr>
             <th scope="col" className="px-3 py-2 text-left font-medium">{t("player")}</th>
             {cols.map((c) => (
@@ -286,7 +286,7 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
         </thead>
         <tbody>
           {rows.map((p) => (
-            <tr key={`${p.player_id}-${p.number}`} className="border-t border-border">
+            <tr key={`${p.player_id}-${p.number}`} className="border-t border-border/70">
               <th scope="row" className="px-3 py-1.5 text-left font-medium">
                 {p.number != null && <span className="mr-2 text-muted tabular-nums">{p.number}</span>}
                 {nameOf(p)}
@@ -362,7 +362,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
         </div>
         <label className="flex items-center gap-2 text-sm">
           {t("filterOutcome")}
-          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="rounded border border-border bg-background px-2 py-1">
+          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="rounded-lg bg-raised ring-1 ring-inset ring-border px-2 py-1">
             <option value="">{t("all")}</option>
             {["goal", "save", "miss", "post", "blocked"].map((o) => (
               <option key={o} value={o}>

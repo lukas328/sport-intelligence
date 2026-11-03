@@ -16,8 +16,15 @@
   },
   "home": {
     "cta": "Jetzt starten",
-    "foundation": "In 5 Minuten: Verein, Team und Kader anlegen. Spielanalyse folgt Meilenstein für Meilenstein.",
-    "courtLabel": "Handballfeld 40 × 20 m, aus der gemeinsamen Geometrie gezeichnet"
+    "foundation": "Verein, Team und Kader sind in fünf Minuten angelegt. Das erste Spielvideo kann gleich danach hochgeladen werden.",
+    "courtLabel": "Handballfeld 40 × 20 m, aus der gemeinsamen Geometrie gezeichnet",
+    "f3": "Ein Handy als Kamera reicht. Spieler und Eltern antworten direkt in der App.",
+    "f1Title": "Automatisch zuerst",
+    "f2Title": "Jede Zahl führt zum Video",
+    "f3Title": "Für Amateurteams gemacht",
+    "f2": "Ein Klick auf eine Statistik zeigt die Szenen dahinter.",
+    "login": "Ich habe schon ein Konto",
+    "f1": "Video hochladen, den Rest erledigt die Analyse: Würfe, Tore, Torhüter, Laufwege."
   },
   "status": {
     "title": "Systemstatus",
@@ -54,7 +61,12 @@
     "teams": "Teams",
     "close": "Schliessen",
     "add": "Hinzufügen",
-    "done": "Fertig"
+    "done": "Fertig",
+    "retry": "Erneut versuchen",
+    "more": "Mehr",
+    "confirm": "Bestätigen",
+    "all": "Alle",
+    "open": "Öffnen"
   },
   "errors": {
     "generic": "Etwas ist schiefgelaufen. Bitte versuch es nochmals.",
@@ -108,7 +120,12 @@
     "paper-warnings": "Bitte die markierten Felder prüfen oder trotz Hinweisen übernehmen.",
     "paper-incomplete": "Datum, Gegner und Endstand werden gebraucht.",
     "quota-reached": "Das Kontingent des Verbands ist ausgeschöpft.",
-    "already-member": "Der Verein gehört schon zu einem Verband."
+    "already-member": "Der Verein gehört schon zu einem Verband.",
+    "notFoundTitle": "Diese Seite gibt es nicht",
+    "pageBody": "Die Seite konnte nicht geladen werden. Versuch es noch einmal; wenn es wieder passiert, schreib uns über «Feedback geben».",
+    "notFoundBody": "Vielleicht wurde sie gelöscht, oder du hast keinen Zugriff darauf.",
+    "home": "Zur Startseite",
+    "pageTitle": "Da ist etwas schiefgelaufen"
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -369,7 +386,27 @@
     "deleteMatch": "Spiel löschen",
     "deleteConfirm": "Spiel mit allen Videos und Daten endgültig löschen?",
     "pdf": "Matchreport als PDF",
-    "training": "Training"
+    "training": "Training",
+    "lost": "Niederlage",
+    "emptyTitle": "Leg dein erstes Spiel an",
+    "noVideoYet": "Noch kein Video",
+    "kindTraining": "Training",
+    "paperSource": "Matchbogen",
+    "won": "Sieg",
+    "photoSheet": "Matchbogen fotografieren",
+    "kindMatch": "Spiel",
+    "played": "Gespielt",
+    "upcoming": "Kommende Spiele",
+    "edit": "Spiel bearbeiten",
+    "draw": "Unentschieden",
+    "otherWays": "Ohne Video? Matchbogen fotografieren oder Datei importieren.",
+    "listLabel": "Spiele der Saison",
+    "newShort": "Neues Spiel",
+    "awayShort": "Auswärts",
+    "homeAway": "Heim oder auswärts",
+    "homeShort": "Heim",
+    "importFile": "Datei importieren",
+    "analysed": "Analysiert"
   },
   "upload": {
     "title": "Video hochladen",
@@ -570,7 +607,8 @@
     "keepers": "Torhüter",
     "physical": "Laufleistung",
     "scenes": "Szenen",
-    "highlights": "Highlights"
+    "highlights": "Highlights",
+    "analysis": "Analyse"
   },
   "stats": {
     "goals": "Tore",
@@ -605,7 +643,8 @@
     "situations": "Effizienz nach Situation",
     "byType": "nach Typ",
     "opponentPlayers": "Gegner nach Rückennummer",
-    "noVideo": "ohne Video"
+    "noVideo": "ohne Video",
+    "noDataHint": "Lade das Video hoch, die Analyse startet danach automatisch."
   },
   "shotsView": {
     "title": "Würfe",
@@ -1166,7 +1205,9 @@
     "oppTwo": "2 Min",
     "log": "Verlauf",
     "undo": "Rückgängig",
-    "rejected": "{count, plural, one {# Eintrag wurde} other {# Einträge wurden}} vom Server abgelehnt."
+    "rejected": "{count, plural, one {# Eintrag wurde} other {# Einträge wurden}} vom Server abgelehnt.",
+    "eventSynced": "Gespeichert",
+    "eventPending": "Wird gespeichert"
   },
   "consents": {
     "title": "Einwilligungen",
@@ -1533,7 +1574,10 @@
     "tryDemo": "Demo-Spiel öffnen",
     "go": "Los",
     "done": "erledigt",
-    "open": "offen"
+    "open": "offen",
+    "hide": "Ausblenden",
+    "allSteps": "Alle Schritte",
+    "nextStep": "Nächster Schritt"
   },
   "consentBanner": {
     "title": "Nutzungsstatistik",
@@ -1827,5 +1871,101 @@
       "sevenRight": "7-m-Linie rechts (Mitte)"
     },
     "spread": "Die Punkte liegen zu nah beieinander: markiere auch Punkte auf beiden Seitenlinien (z. B. die Ecken oder die Enden der Mittellinie). Nur die Torpfosten reichen nicht, das Feld wird sonst verzerrt."
+  },
+  "today": {
+    "uploadHint": "Lade das Video hoch. Statistik, Szenen und Erkenntnisse entstehen danach automatisch.",
+    "myTasks": "Zu erledigen",
+    "prepare": "Vorbereiten",
+    "inDays": "{n, plural, =0 {Heute} =1 {Morgen} other {In # Tagen}}",
+    "day": "Hallo, {name}",
+    "next": "Als Nächstes",
+    "noNextHint": "Leg das nächste Spiel an. Dann kannst du den Gegner vorbereiten und das Spiel live erfassen.",
+    "askPlaceholder": "Wer trifft am besten vom Kreis?",
+    "myDates": "Deine nächsten Termine",
+    "noInsights": "Für dieses Spiel gibt es noch keine Erkenntnisse.",
+    "last": "Letztes Spiel",
+    "askHint": "Antworten mit Quelle und Link zu den Szenen.",
+    "insightsTitle": "Was auffällt",
+    "morning": "Guten Morgen, {name}",
+    "noTraining": "Noch kein Training geplant.",
+    "allDates": "Alle Termine",
+    "ask": "Frag deine Daten",
+    "evening": "Guten Abend, {name}",
+    "due": "bis {date}",
+    "planTraining": "Training planen",
+    "noNext": "Kein Spiel geplant",
+    "openMatch": "Zum Spiel",
+    "noTeam": "Du bist noch in keinem Team. Sobald dich ein Trainer einlädt, erscheint es hier.",
+    "nothing": "Nichts offen.",
+    "allTasks": "Alle Aufgaben",
+    "analysing": "Die Analyse läuft. Du bekommst eine Mitteilung, sobald sie fertig ist.",
+    "nextTraining": "Nächstes Training",
+    "allScenes": "Alle Szenen",
+    "seeAll": "Alle",
+    "trainingLength": "{minutes} Min. · {drills, plural, =1 {1 Übung} other {# Übungen}}",
+    "newScenes": "Neue Szenen für dich",
+    "teams": "Deine Teams"
+  },
+  "shell": {
+    "search": "Suchen",
+    "settings": "Einstellungen",
+    "trainingSections": "Bereiche des Trainings",
+    "otherClubs": "Anderer Verein",
+    "feedback": "Feedback geben",
+    "season": "Saison",
+    "today": "Heute",
+    "mainNav": "Hauptnavigation",
+    "plan": "Planung",
+    "allTeams": "Alle Teams",
+    "training": "Training",
+    "noTeam": "Noch kein Team",
+    "switchTeam": "Team wechseln",
+    "library": "Bibliothek",
+    "account": "Konto",
+    "theme_light": "Hell",
+    "help": "Hilfe",
+    "matches": "Spiele",
+    "drills": "Übungen",
+    "team": "Team",
+    "theme_dark": "Dunkel",
+    "assignments": "Aufgaben",
+    "closeTool": "Schliessen und zurück",
+    "scenes": "Szenen",
+    "consents": "Einwilligungen",
+    "teamSections": "Bereiche des Teams",
+    "appearance": "Darstellung",
+    "skip": "Zum Inhalt springen",
+    "profile": "Profil",
+    "roster": "Kader",
+    "dates": "Termine",
+    "theme_system": "Automatisch"
+  },
+  "palette": {
+    "newMatch": "Neues Spiel anlegen",
+    "matrix": "Statistik-Matrix",
+    "searchScenes": "Szenen suchen",
+    "ask": "Frag deine Daten",
+    "go": "Gehe zu",
+    "matches": "Spiele",
+    "paper": "Matchblatt fotografieren",
+    "placeholder": "Suchen oder springen …",
+    "teams": "Teams",
+    "askWith": "Frag deine Daten: «{q}»",
+    "actions": "Aktionen",
+    "empty": "Nichts gefunden.",
+    "title": "Schnellsuche"
+  },
+  "library": {
+    "plays": "Spielzüge",
+    "presentations": "Präsentationen",
+    "playlists": "Playlists",
+    "playlistsHint": "Szenen sammeln und mit dem Team teilen.",
+    "playsHint": "Auf dem Taktikboard zeichnen, aus dem Video übernehmen.",
+    "back": "Zurück zu {name}",
+    "searchHint": "Alle Szenen der Saison nach Spieler, Aktion und Zone filtern.",
+    "presentationsHint": "Für die Mannschaftssitzung, mit Fernbedienung vom Handy.",
+    "search": "Szenensuche",
+    "intro": "Alles, was dein Team aus den Spielen macht: Playlists, Spielzüge, Präsentationen und die Suche über alle Szenen.",
+    "title": "Bibliothek"
   }
 }

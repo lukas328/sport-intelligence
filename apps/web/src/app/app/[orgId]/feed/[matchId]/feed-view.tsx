@@ -1,5 +1,6 @@
 "use client";
 
+import { BackLink } from "@/components/ui/back-link";
 import { track } from "@/lib/analytics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -71,9 +72,10 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
 
   return (
     <div className="mx-auto max-w-xl space-y-4">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
+      <BackLink fallback={`/app/${orgId}/feed`} />
+      <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
       {!feed.self_assessment && (
-        <form onSubmit={submit} className="space-y-3 rounded-lg border border-border p-4" aria-label={t("assessTitle")}>
+        <form onSubmit={submit} className="space-y-3 rounded-2xl bg-raised ring-1 ring-border/70 p-4" aria-label={t("assessTitle")}>
           <h2 className="font-semibold">{t("assessTitle")}</h2>
           <p className="text-sm text-muted">{t("assessIntro")}</p>
           <fieldset className="flex gap-2">
@@ -94,7 +96,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
           <label className="block text-sm font-medium" htmlFor="assess-text">
             {t("sentence")}
           </label>
-          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-md border border-border bg-background p-2" />
+          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-xl bg-raised ring-1 ring-inset ring-border p-2" />
           <Button type="submit" disabled={!rating} loading={assess.isPending}>
             {t("send")}
           </Button>
@@ -141,7 +143,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
             <p className="text-muted">{t("noVideo")}</p>
           )}
           {scene.coach_comment && (
-            <p className="rounded-md border-l-4 border-accent bg-surface px-3 py-2 text-sm" data-testid="coach-comment">
+            <p className="rounded-xl bg-surface px-3 py-2 text-sm" data-testid="coach-comment">
               {t("coach")}: {scene.coach_comment}
             </p>
           )}

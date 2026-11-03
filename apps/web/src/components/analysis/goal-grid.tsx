@@ -58,7 +58,7 @@ export function GoalGrid({
               aria-pressed={mode === "pick" ? selected === zone : undefined}
               aria-label={`${zone}${d ? `: ${d.goals}/${d.shots}` : ""}`}
               className={cn(
-                "flex flex-col items-center justify-center bg-background text-xs",
+                "flex flex-col items-center justify-center bg-raised text-xs",
                 mode === "pick" && selected === zone && "bg-accent text-accent-contrast",
                 d && d.shots > 0 && mode === "stats" && "font-semibold",
               )}

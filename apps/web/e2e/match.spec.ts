@@ -1,7 +1,7 @@
 import { statSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, openAnalysis, openLibrary, register, uniqueEmail } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -19,7 +19,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.getByRole("button", { name: "Zum Team" }).click();
 
   // create a match
-  await page.getByRole("link", { name: "Spiele" }).first().click();
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await expect(page.getByText("Noch keine Spiele.")).toBeVisible();
   await expectAccessible(page);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
@@ -117,7 +117,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expectAccessible(page);
 
   // the overview counts it, the number opens the event, the event jumps into the video
-  await page.getByRole("tab", { name: "Übersicht" }).click();
+  await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("1");
   await expect(table.getByRole("row", { name: /^Würfe/ })).toContainText("2");
@@ -130,14 +130,14 @@ test("match: create, upload with pause and resume, processing, player, comment, 
 
   // tracks can be assigned to players; physical load per track with heatmap
   await expect(page.getByTestId("identity-panel")).toBeVisible();
-  await page.getByRole("tab", { name: "Laufleistung" }).click();
+  await openAnalysis(page, "Laufleistung");
   await expect(page.getByTestId("physical-table")).toContainText("km");
   await page.getByRole("button", { name: /Heatmap zeigen/ }).nth(1).click();
   await expect(page.getByTestId("court-heatmap")).toBeVisible();
   await expectAccessible(page);
 
   // the current moment of the video as a play on the tactics board
-  await page.getByRole("tab", { name: "Video" }).click();
+  await page.getByRole("tab", { name: "Video", exact: true }).click();
   await page.getByRole("button", { name: "Als Spielzug übernehmen" }).click();
   await expect(page.getByTestId("tactics-board")).toBeVisible();
   expect(await page.getByTestId("tactics-board").locator("[data-testid^=token-]").count()).toBeGreaterThan(4);
@@ -157,7 +157,7 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await page.getByRole("link", { name: "Playlists" }).click();
+  await openLibrary(page, "Playlists");
   await page.getByLabel("Name", { exact: true }).fill("Abwehr Training");
   await page.getByRole("button", { name: "Erstellen" }).click();
   await expect(page.getByRole("heading", { name: "Abwehr Training" })).toBeVisible();

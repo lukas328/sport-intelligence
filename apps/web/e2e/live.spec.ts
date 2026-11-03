@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
 
 test("live tagging courtside: clock, buttons, offline queue, sync", async ({ page, context }, info) => {
   test.skip(info.project.name !== "chromium", "runs once (service worker, offline)");
@@ -22,7 +22,7 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
     data: { first_name: "Lina", last_name: "Muster", jersey_number: 11 },
   });
 
-  await page.getByRole("link", { name: "Spiele" }).first().click();
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Halle");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await page.getByTestId("live-link").click();

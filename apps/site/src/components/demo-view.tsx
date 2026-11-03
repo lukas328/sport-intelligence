@@ -17,7 +17,7 @@ export function DemoView({ match, t, locale }: { match: DemoMatch; t: Messages["
   const shots = useMemo(() => filterShots(match, { side, outcome, period }), [match, side, outcome, period]);
   const pct = (v: number | null) => (v === null ? "-" : `${Math.round(v * 100)} %`);
   const nf = new Intl.NumberFormat(locale === "de" ? "de-CH" : locale, { maximumFractionDigits: 1 });
-  const select = "rounded-md border border-border bg-background px-2 py-1.5 text-sm";
+  const select = "rounded-xl ring-1 ring-inset ring-border bg-background px-2 py-1.5 text-sm";
   const teamName = (s: string) => (s === "own" ? match.own : match.opponent);
   const final = match.stats.timeline.final;
 

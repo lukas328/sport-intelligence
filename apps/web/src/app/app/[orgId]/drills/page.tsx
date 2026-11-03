@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DRILLS, type Focus, type Lang } from "@handball/tactics";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import { TrainingOrPageHeader } from "@/components/shell/section-nav";
 import { cn } from "@/lib/utils";
 
 const FOCI: Focus[] = ["finishing", "wings", "back_court", "pivot", "seven_m", "goalkeeping", "passing", "transition_defence", "fast_break", "defence", "powerplay"];
@@ -18,11 +19,12 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
   const wanted = (focus ?? "").split(",").filter((f): f is Focus => FOCI.includes(f as Focus));
   const list = wanted.length ? DRILLS.filter((d) => d.focus.some((f) => wanted.includes(f))) : DRILLS;
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{wanted.length ? t("suggested") : t("title")}</h1>
-      <p className="text-sm text-muted">{t("hint")}</p>
+    <div className="space-y-6">
+      <TrainingOrPageHeader title={t("title")} />
+      {wanted.length > 0 && <h2 className="text-xl font-bold">{t("suggested")}</h2>}
+      <p className="max-w-2xl text-sm text-muted">{t("hint")}</p>
       <nav aria-label={t("title")} className="flex flex-wrap gap-1">
-        <Link href={`/app/${orgId}/drills`} className={cn("rounded-full border px-3 py-1 text-sm", !wanted.length ? "border-accent bg-accent text-accent-contrast" : "border-border")}>
+        <Link href={`/app/${orgId}/drills`} className={cn("rounded-full px-3.5 py-1.5 text-[0.8125rem] font-medium", !wanted.length ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}>
           {t("all")}
         </Link>
         {FOCI.map((f) => (
@@ -30,7 +32,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
             key={f}
             href={`/app/${orgId}/drills?focus=${f}`}
             aria-current={wanted.length === 1 && wanted[0] === f ? "page" : undefined}
-            className={cn("rounded-full border px-3 py-1 text-sm", wanted.length === 1 && wanted[0] === f ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+            className={cn("rounded-full px-3.5 py-1.5 text-[0.8125rem] font-medium", wanted.length === 1 && wanted[0] === f ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}
           >
             {t(`focus_${f}`)}
           </Link>
@@ -38,7 +40,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
       </nav>
       <ul className="grid gap-3 md:grid-cols-2" data-testid="drills">
         {list.map((d) => (
-          <li key={d.id} id={d.id} className="scroll-mt-4 space-y-2 rounded-lg border border-border p-4 target:border-accent">
+          <li key={d.id} id={d.id} className="scroll-mt-4 space-y-2 rounded-2xl bg-raised p-5 ring-1 ring-border/70 target:ring-2 target:ring-accent">
             <h2 className="font-semibold">{d.name[lang] ?? d.name["de-CH"]}</h2>
             <p className="text-xs text-muted">
               {d.focus.map((f) => t(`focus_${f}`)).join(" · ")} · {t("minutes", { minutes: d.minutes })} · {t("players", { players: d.players })} · {t(`level_${d.level}`)}

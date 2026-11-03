@@ -1,5 +1,6 @@
 "use client";
 
+import { Play } from "lucide-react";
 import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -56,7 +57,7 @@ export function EventList({
     <section aria-label={title} className="space-y-2" data-testid="event-list">
       <h3 className="font-semibold">{title}</h3>
       {q.data && q.data.length === 0 && <p className="text-sm text-muted">{t("none")}</p>}
-      <ol className="divide-y divide-border text-sm">
+      <ol className="divide-y divide-border/70 text-sm">
         {(q.data ?? []).map((e) => (
           <li key={e.id} className="flex items-center justify-between gap-2 py-1.5">
             <span>
@@ -68,8 +69,8 @@ export function EventList({
               <span className="ml-2 text-xs text-muted">{t(`source_${e.source as "model"}`)}</span>
             </span>
             {e.t_ms != null && onPlay && (
-              <Button variant="secondary" className="min-h-8 px-2 py-1" onClick={() => onPlay(Math.max(0, e.t_ms! - 4000))}>
-                ▶ {t("play")}
+              <Button variant="secondary" size="sm" onClick={() => onPlay(Math.max(0, e.t_ms! - 4000))}>
+                <Play aria-hidden className="size-3 fill-current" /> {t("play")}
               </Button>
             )}
           </li>

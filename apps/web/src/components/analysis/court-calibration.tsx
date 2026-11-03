@@ -106,7 +106,7 @@ export function CourtCalibration({
         aria-modal="true"
         aria-labelledby="calibrate-title"
         tabIndex={-1}
-        className="flex w-full max-w-7xl flex-col gap-3 overflow-hidden rounded-lg bg-background p-4 shadow-xl outline-none"
+        className="flex w-full max-w-7xl flex-col gap-3 overflow-hidden rounded-lg bg-raised p-4 shadow-xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -126,7 +126,7 @@ export function CourtCalibration({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto rounded-md border border-border bg-black">
+        <div className="min-h-0 flex-1 overflow-auto rounded-xl ring-1 ring-inset ring-border bg-black">
           <div className="relative" style={fit ? { width: "100%" } : { width: pano.width }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image, not a static asset */}
             <img

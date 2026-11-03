@@ -22,6 +22,7 @@ const HOTKEYS: Record<string, Outcome | "turnover"> = { g: "goal", s: "save", m:
 
 export function useRosterNames(orgId: string, teamId: string, seasonId: string) {
   return useQuery({
+    enabled: Boolean(seasonId),
     queryKey: ["roster", seasonId],
     queryFn: async () =>
       (
@@ -216,7 +217,7 @@ export function Tagger({
       {side === "own" ? (
         <label className="flex flex-col gap-1">
           <span className="font-medium">{t("player")}</span>
-          <select value={player} onChange={(e) => setPlayer(e.target.value)} className="min-h-10 rounded-md border border-border bg-background px-2">
+          <select value={player} onChange={(e) => setPlayer(e.target.value)} className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2">
             <option value="">{t("noPlayer")}</option>
             {(roster.data ?? [])
               .filter((r) => r.active)
@@ -238,7 +239,7 @@ export function Tagger({
             max={99}
             value={oppNumber}
             onChange={(e) => setOppNumber(e.target.value)}
-            className="min-h-10 rounded-md border border-border bg-background px-2"
+            className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
           />
         </label>
       )}
@@ -249,7 +250,7 @@ export function Tagger({
           <select
             value={keepers.own}
             onChange={(e) => updateKeepers({ ...keepers, own: e.target.value })}
-            className="min-h-10 rounded-md border border-border bg-background px-2"
+            className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
           >
             <option value="">-</option>
             {(roster.data ?? [])
@@ -271,7 +272,7 @@ export function Tagger({
             max={99}
             value={keepers.opp}
             onChange={(e) => updateKeepers({ ...keepers, opp: e.target.value })}
-            className="min-h-10 rounded-md border border-border bg-background px-2"
+            className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
           />
         </label>
       </div>
@@ -302,7 +303,7 @@ export function Tagger({
         <select
           value={turnoverType}
           onChange={(e) => setTurnoverType(e.target.value as (typeof TURNOVERS)[number])}
-          className="min-h-10 rounded-md border border-border bg-background px-2"
+          className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
         >
           {TURNOVERS.map((k) => (
             <option key={k} value={k}>

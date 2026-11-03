@@ -11,7 +11,8 @@ import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
-import { Input, Select } from "@/components/ui/field";
+import { Segmented } from "@/components/ui/tabs";
+import { control, Input, Select } from "@/components/ui/field";
 import { SpotlightControls, useSpotlight } from "@/components/video/spotlight-controls";
 import { SpotlightOverlay } from "@/components/video/spotlight";
 import { MultiAngleControls, useMultiAngle } from "@/components/video/multi-angle";
@@ -368,20 +369,17 @@ export function Workspace({
         )}
       </div>
 
-      <Card className="flex max-h-[42rem] min-w-0 flex-col gap-3 p-3">
-        <div role="tablist" className="flex flex-wrap gap-1">
-          {(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => (
-            <button
-              key={k}
-              role="tab"
-              aria-selected={tab === k}
-              onClick={() => setTab(k)}
-              className={cn("flex-1 whitespace-nowrap rounded px-2 py-1.5 text-sm", tab === k ? "bg-accent text-accent-contrast" : "hover:bg-surface")}
-            >
-              {t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`)}
-            </button>
-          ))}
-        </div>
+      <div className="flex max-h-[44rem] min-w-0 flex-col gap-4 rounded-2xl bg-raised p-4 ring-1 ring-border/70">
+        <Segmented<Tab>
+          label={t("tabs.video")}
+          size="sm"
+          value={tab}
+          onChange={setTab}
+          items={(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => ({
+            value: k,
+            label: t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`),
+          }))}
+        />
 
         {tab === "events" && staff && (
           <div role="tabpanel" className="flex min-h-0 flex-1 flex-col">
@@ -394,8 +392,8 @@ export function Workspace({
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
               {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.empty")}</li>}
               {(comments.data ?? []).map((c) => (
-                <li key={c.id} className="rounded bg-surface p-2">
-                  <button className="font-mono text-xs text-accent underline" onClick={() => player.current.seek(c.t_ms)}>
+                <li key={c.id} className="rounded-xl bg-surface px-3 py-2">
+                  <button className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
                     {formatClock(c.t_ms)}
                   </button>{" "}
                   <span className="text-xs text-muted">{c.author_name}</span>
@@ -425,7 +423,7 @@ export function Workspace({
                 name="body"
                 maxLength={2000}
                 placeholder={t("comments.placeholder", { time: formatClock(now) })}
-                className="min-h-10 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm"
+                className={cn(control, "min-w-0 flex-1")}
               />
               <Button type="submit" variant="secondary">
                 {t("comments.add")}
@@ -536,7 +534,7 @@ export function Workspace({
             </ul>
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
@@ -687,7 +685,7 @@ function IdentityPanel({
                 id={`track-${tr.track_no}`}
                 value={tr.player_id ?? ""}
                 onChange={(e) => void assign(tr.track_no, e.target.value)}
-                className="min-h-9 flex-1 rounded-md border border-border bg-background px-2"
+                className="min-h-9 flex-1 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
               >
                 <option value="">{t("none")}</option>
                 {(roster.data ?? [])
@@ -774,7 +772,7 @@ function CameraSwitch({
               step={10}
               defaultValue={active.time_offset_ms}
               key={active.id}
-              className="min-h-9 w-28 rounded-md border border-border bg-background px-2 text-sm"
+              className="min-h-9 w-28 rounded-xl bg-raised ring-1 ring-inset ring-border px-2 text-sm"
             />
           </label>
           <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">

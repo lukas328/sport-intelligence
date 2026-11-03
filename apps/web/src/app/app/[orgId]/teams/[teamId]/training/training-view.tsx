@@ -3,6 +3,7 @@
 import type { Schemas } from "@handball/api-client";
 import { DRILLS } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -97,9 +98,9 @@ function SessionForm({
                 />
                 {t("min")}
               </label>
-              <button type="button" aria-label={t("up")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, -1))}>↑</button>
-              <button type="button" aria-label={t("down")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, 1))}>↓</button>
-              <button type="button" aria-label={t("remove")} className="px-1 text-error" onClick={() => setDrills((ds) => ds.filter((_, j) => j !== i))}>×</button>
+              <button type="button" aria-label={t("up")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, -1))}><ArrowUp aria-hidden className="size-4" /></button>
+              <button type="button" aria-label={t("down")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, 1))}><ArrowDown aria-hidden className="size-4" /></button>
+              <button type="button" aria-label={t("remove")} className="px-1 text-error" onClick={() => setDrills((ds) => ds.filter((_, j) => j !== i))}><X aria-hidden className="size-4" /></button>
             </li>
           ))}
         </ol>
@@ -123,7 +124,7 @@ function SessionForm({
       </div>
       <label className="block text-sm">
         <span className="block font-medium">{t("notes")}</span>
-        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full rounded-md border border-border bg-background p-2" />
+        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full rounded-xl bg-raised ring-1 ring-inset ring-border p-2" />
       </label>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       <Button type="submit" disabled={save.isPending}>{t("save")}</Button>
@@ -160,7 +161,7 @@ function AttendancePanel({ orgId, kind, id }: { orgId: string; kind: "session" |
         </thead>
         <tbody>
           {list.map((r) => (
-            <tr key={r.player_id} className="border-t border-border">
+            <tr key={r.player_id} className="border-t border-border/70">
               <td className="py-1">{r.number != null ? `#${r.number} ` : ""}{r.name}</td>
               <td className="py-1">{r.response ? t(`reply_${r.response}`) : "-"}</td>
               <td className="py-1">
@@ -298,11 +299,11 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
         </div>
         {s.drills.length > 0 && <p className="text-sm">{s.drills.map((d) => d.name).join(" · ")}</p>}
         <div className="flex flex-wrap gap-3 text-sm">
-          <a className="text-accent underline" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
+          <a className="font-medium text-accent hover:underline" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
           {canPlan && (
             <>
-              <button type="button" className="text-accent underline" onClick={() => setEditing(s.id)}>{t("edit")}</button>
-              <button type="button" className="text-accent underline" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
+              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setEditing(s.id)}>{t("edit")}</button>
+              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
               <button type="button" className="text-error underline" onClick={() => remove.mutate(s.id)}>{t("delete")}</button>
             </>
           )}
@@ -315,12 +316,15 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="text-xl font-semibold">{t("title")}</h2>
-          <p className="text-sm text-muted">{t("hint")}</p>
-        </div>
-        {canPlan && <Button onClick={() => setEditing(editing === "new" ? null : "new")}>{t("new")}</Button>}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="sr-only">{t("title")}</h2>
+        <p className="max-w-xl text-sm text-muted">{t("hint")}</p>
+        {canPlan && (
+          <Button onClick={() => setEditing(editing === "new" ? null : "new")}>
+            <Plus aria-hidden />
+            {t("new")}
+          </Button>
+        )}
       </div>
       {editing === "new" && (
         <Card>

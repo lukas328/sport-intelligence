@@ -63,9 +63,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       <h2 className="sr-only">{t("title")}</h2>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5" data-testid="season-tiles">
         {tiles.map((x) => (
-          <div key={x.label} className="rounded-lg border border-border p-3">
-            <dt className="text-xs text-muted">{x.label}</dt>
-            <dd className="text-2xl font-semibold tabular-nums">{x.value}</dd>
+          <div key={x.label} className="rounded-2xl bg-raised px-4 py-4 ring-1 ring-border/70 sm:px-5">
+            <dt className="text-[0.8125rem] text-muted">{x.label}</dt>
+            <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{x.value}</dd>
           </div>
         ))}
       </dl>
@@ -73,10 +73,10 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
         <h3 className="font-semibold">{t("trend")}</h3>
         <TrendChart rows={data.matches} label={t("chartLabel")} goals={t("goals")} xg={t("xg")} />
       </Card>
-      <div className="overflow-x-auto rounded-md border border-border">
+      <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
         <table className="w-full text-sm" data-testid="season-matches">
           <caption className="sr-only">{t("matches")}</caption>
-          <thead className="bg-surface text-muted">
+          <thead className="text-xs text-muted">
             <tr>
               <th scope="col" className="px-3 py-2 text-left font-medium">{t("match")}</th>
               <th scope="col" className="px-2 py-2 text-right font-medium">{t("result")}</th>
@@ -90,7 +90,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           </thead>
           <tbody>
             {data.matches.map((m) => (
-              <tr key={m.match_id} className="border-t border-border">
+              <tr key={m.match_id} className="border-t border-border/70">
                 <th scope="row" className="px-3 py-1.5 text-left font-medium">
                   <Link href={`/app/${orgId}/matches/${m.match_id}`} className="underline decoration-dotted underline-offset-4">
                     {format.dateTime(new Date(m.kickoff_at), { dateStyle: "short" })} {m.is_home ? "" : "@ "}
@@ -114,10 +114,10 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
         </table>
       </div>
       {data.players.length > 0 && (
-        <div className="overflow-x-auto rounded-md border border-border">
+        <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
           <table className="w-full text-sm" data-testid="season-players">
             <caption className="px-3 py-2 text-left font-semibold">{t("players")}</caption>
-            <thead className="bg-surface text-muted">
+            <thead className="text-xs text-muted">
               <tr>
                 <th scope="col" className="px-3 py-2 text-left font-medium">{t("player")}</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">{t("matches")}</th>
@@ -129,7 +129,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             </thead>
             <tbody>
               {data.players.map((p) => (
-                <tr key={p.player_id} className="border-t border-border">
+                <tr key={p.player_id} className="border-t border-border/70">
                   <th scope="row" className="px-3 py-1.5 text-left font-medium">{names[p.player_id] ?? "?"}</th>
                   <td className="px-2 py-1.5 text-right tabular-nums">{p.matches}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{p.goals}</td>

@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -38,11 +38,10 @@ export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; ma
     setResult(r.data as { clips: number; tags_created: number });
     void qc.invalidateQueries({ queryKey: ["clips", matchId] });
   };
-  const link = "whitespace-nowrap rounded-md border border-border px-3 py-2 text-sm hover:bg-surface";
+  const link = buttonClass("secondary", "sm");
   return (
-    <details className="rounded-lg border border-border p-4" data-testid="exchange">
-      <summary className="cursor-pointer font-medium">{t("title")}</summary>
-      <div className="mt-3 space-y-4">
+    <div data-testid="exchange">
+      <div className="space-y-5">
         <div className="flex flex-wrap gap-2">
           <a className={link} href={`${base}/export/sportscode`} data-testid="export-xml">
             {t("sportscode")}
@@ -56,7 +55,7 @@ export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; ma
           <form onSubmit={submit} className="space-y-2">
             <label className="block text-sm font-medium">
               {t("importLabel")}
-              <input name="file" type="file" accept=".xml,application/xml,text/xml" required className="mt-1 block text-sm" />
+              <input name="file" type="file" accept=".xml,application/xml,text/xml" required className="mt-1 block text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-foreground" />
             </label>
             <p className="text-xs text-muted">{t("importHint")}</p>
             <Button type="submit" disabled={busy}>
@@ -67,6 +66,6 @@ export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; ma
           </form>
         )}
       </div>
-    </details>
+    </div>
   );
 }

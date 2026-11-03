@@ -1,12 +1,22 @@
 import { ConsentBanner } from "@/components/consent-banner";
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
+import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { Providers } from "./providers";
+
+// Archivo (SIL OFL, src/fonts/OFL.txt): one variable family with weight and width axes. Wide
+// for headings and scores, normal for text. Self-hosted, no request to a font service.
+const archivo = localFont({
+  src: "../fonts/archivo-variable.woff2",
+  variable: "--font-archivo",
+  display: "swap",
+  weight: "100 900",
+  declarations: [{ prop: "font-stretch", value: "62% 125%" }],
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app");
@@ -16,40 +26,22 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b1120" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f7f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d0e0c" },
   ],
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
-  const t = await getTranslations();
-  const signedIn = Boolean((await cookies()).get("hb_session"));
+  const theme = (await cookies()).get("hb_theme")?.value;
   return (
-    <html lang={locale}>
+    <html lang={locale} className={archivo.variable} data-theme={theme === "light" || theme === "dark" ? theme : undefined} suppressHydrationWarning>
       <body className="min-h-dvh antialiased">
         <NextIntlClientProvider>
           <Providers>
-            <header className="border-b border-border">
-              <nav
-                aria-label="Hauptnavigation"
-                className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3"
-              >
-                <Link href="/" className="font-semibold tracking-tight">
-                  {t("app.name")}
-                </Link>
-                <div className="flex items-center gap-4 text-sm">
-                  <Link href="/status" className="text-muted hover:text-foreground">
-                    {t("nav.status")}
-                  </Link>
-                  <Link href={signedIn ? "/app" : "/login"} className="font-medium text-accent">
-                    {signedIn ? t("nav.app") : t("nav.login")}
-                  </Link>
-                </div>
-              </nav>
-            </header>
-            <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>
+            {children}
             <ConsentBanner />
           </Providers>
         </NextIntlClientProvider>

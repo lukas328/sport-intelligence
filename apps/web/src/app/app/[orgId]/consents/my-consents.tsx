@@ -38,7 +38,7 @@ export function MyConsents({ orgId }: { orgId: string }) {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("consents.title")}</h1>
+      <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("consents.title")}</h1>
       <p className="max-w-prose text-muted">{t("consents.intro")}</p>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
       {q.data && q.data.length === 0 && <EmptyState title={t("consents.none")} />}
@@ -46,7 +46,7 @@ export function MyConsents({ orgId }: { orgId: string }) {
         const youth = s.teams.some((team) => team.is_youth) || s.minor === true;
         const childLocked = s.relation === "self" && s.minor === true;
         return (
-          <section key={s.player_id} className="space-y-3 rounded-lg border border-border p-4" aria-labelledby={`subject-${s.player_id}`}>
+          <section key={s.player_id} className="space-y-3 rounded-2xl bg-raised ring-1 ring-border/70 p-4" aria-labelledby={`subject-${s.player_id}`}>
             <div>
               <h2 id={`subject-${s.player_id}`} className="text-lg font-semibold">
                 {s.first_name} {s.last_name}
@@ -55,7 +55,7 @@ export function MyConsents({ orgId }: { orgId: string }) {
               {s.teams.length > 0 && <p className="text-sm text-muted">{t("consents.teams", { teams: s.teams.map((x) => x.name).join(", ") })}</p>}
               {childLocked && <p className="text-sm">{t("consents.minor")}</p>}
             </div>
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-border/70">
               {PURPOSES.map((p) => {
                 const active = s.active.includes(p);
                 const locked = childLocked || (youth && PUBLIC.includes(p) && !active);

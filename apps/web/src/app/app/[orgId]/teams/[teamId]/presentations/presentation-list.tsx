@@ -39,7 +39,7 @@ export function PresentationList({ orgId, teamId }: { orgId: string; teamId: str
         </Button>
       </form>
       {q.data && q.data.length === 0 && <EmptyState title={t("none")}>{t("noneHint")}</EmptyState>}
-      <ul className="divide-y divide-border rounded-lg border border-border" data-testid="presentation-list">
+      <ul className="divide-y divide-border/70 rounded-2xl bg-raised ring-1 ring-border/70" data-testid="presentation-list">
         {(q.data ?? []).map((p) => (
           <li key={p.id}>
             <Link href={`/app/${orgId}/presentations/${p.id}`} className="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-surface">

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { useConfirm } from "@/components/ui/confirm";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { Board, type Tool } from "./board";
@@ -42,6 +43,7 @@ export function PlayEditor({
   editable: boolean;
 }) {
   const t = useTranslations("tactics");
+  const confirm = useConfirm();
   const tc = useTranslations("common");
   const te = useTranslations("errors");
   const router = useRouter();
@@ -172,7 +174,7 @@ export function PlayEditor({
               <select
                 value={doc.court}
                 onChange={(e) => (setDoc({ ...doc, court: e.target.value as "half" | "full" }), setDirty(true))}
-                className="min-h-8 rounded border border-border bg-background px-1"
+                className="min-h-8 rounded-lg bg-raised ring-1 ring-inset ring-border px-1"
               >
                 <option value="half">{t("court_half")}</option>
                 <option value="full">{t("court_full")}</option>
@@ -258,7 +260,7 @@ export function PlayEditor({
                 maxLength={LIMITS.note}
                 rows={2}
                 onChange={(e) => setFrame({ ...frame, note: e.target.value })}
-                className="rounded-md border border-border bg-background px-2 py-1"
+                className="rounded-xl bg-raised ring-1 ring-inset ring-border px-2 py-1"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -266,7 +268,7 @@ export function PlayEditor({
               <select
                 value={frame.duration_ms}
                 onChange={(e) => setFrame({ ...frame, duration_ms: Number(e.target.value) })}
-                className="min-h-10 rounded-md border border-border bg-background px-2"
+                className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
               >
                 {[1000, 1500, 2000, 3000, 4000, 6000].map((ms) => (
                   <option key={ms} value={ms}>
@@ -285,7 +287,7 @@ export function PlayEditor({
                 value={sel.label}
                 maxLength={3}
                 onChange={(e) => setFrame({ ...frame, tokens: frame.tokens.map((k) => (k.id === sel.id ? { ...k, label: e.target.value } : k)) })}
-                className="min-h-9 w-20 rounded-md border border-border bg-background px-2"
+                className="min-h-9 w-20 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
               />
             </label>
             <Button
@@ -306,7 +308,7 @@ export function PlayEditor({
             <Input label={t("name")} name="name" required maxLength={120} defaultValue={play?.name ?? initialMeta?.name ?? ""} />
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">{t("category")}</span>
-              <select name="category" defaultValue={play?.category ?? initialMeta?.category ?? "attack"} className="min-h-10 rounded-md border border-border bg-background px-2">
+              <select name="category" defaultValue={play?.category ?? initialMeta?.category ?? "attack"} className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2">
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {t(`cat_${c}`)}
@@ -318,7 +320,7 @@ export function PlayEditor({
             <Input label={t("tags")} name="tags" maxLength={300} defaultValue={(play?.tags ?? initialMeta?.tags ?? []).join(", ")} />
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">{t("description")}</span>
-              <textarea name="description" rows={3} maxLength={4000} defaultValue={play?.description ?? ""} className="rounded-md border border-border bg-background px-2 py-1" />
+              <textarea name="description" rows={3} maxLength={4000} defaultValue={play?.description ?? ""} className="rounded-xl bg-raised ring-1 ring-inset ring-border px-2 py-1" />
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" name="shared" defaultChecked={play?.shared_with_players ?? false} />
@@ -333,7 +335,7 @@ export function PlayEditor({
                 variant="danger"
                 className="w-full"
                 onClick={async () => {
-                  if (!window.confirm(t("deleteConfirm"))) return;
+                  if (!(await confirm({ title: t("deleteConfirm"), danger: true }))) return;
                   await api.DELETE("/v1/orgs/{org_id}/plays/{play_id}", { params: { path: { org_id: orgId, play_id: play.id } } });
                   router.push(`/app/${orgId}/teams/${teamId}/plays`);
                   router.refresh();
@@ -354,7 +356,7 @@ export function PlayEditor({
           </div>
         )}
         {source && (
-          <a className="block text-sm text-accent underline" href={`/app/${orgId}/matches/${source.match_id}?t=${source.t_ms}`}>
+          <a className="block text-sm font-medium text-accent hover:underline" href={`/app/${orgId}/matches/${source.match_id}?t=${source.t_ms}`}>
             {t("openSource")}
           </a>
         )}

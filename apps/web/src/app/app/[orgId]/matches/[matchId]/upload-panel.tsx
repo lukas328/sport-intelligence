@@ -163,7 +163,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
         className={`flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center ${drag ? "border-accent bg-surface" : "border-border"}`}
       >
         <span className="font-medium">{t("upload.drop")}</span>
-        <span className="text-sm text-accent underline underline-offset-4">{t("upload.choose")}</span>
+        <span className="text-sm font-medium text-accent hover:underline">{t("upload.choose")}</span>
         <input
           type="file"
           accept="video/*,.mts,.m2ts,.mkv"

@@ -147,4 +147,11 @@ measurements, store accounts, paper sheets test set (Q-M11-1 to Q-M11-3).
 - Live tagging with device time and automatic video sync 5.3 (extends the existing match-clock live mode)
 - Public player profile 5.8, paper report photo extraction 5.9, federation licences 5.10
 
+### UX: UI-first redesign (owner request, 2026-11)
+Status: done (report `docs/progress/UX.md`, ADR 023, `docs/DESIGN.md`); open: usability sessions
+with real users (Q-UX-1), typeface in the Expo app (Q-UX-2).
+- Navigation with at most four destinations per role, command palette, account menu
+- Design system (Archivo, paper and ink tokens, club accent per theme, dark mode, own components)
+- Key screens rebuilt: Heute, Spiele, Spiel-Arbeitsplatz, Team, Training; states for every page
+
 ### M12+ (new): P2 items of addendum section 6 after prioritisation by the product owner

@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  devIndicators: false,
   reactStrictMode: true,
   transpilePackages: ["@handball/court", "@handball/api-client", "@handball/tactics", "@handball/client-core"],
   outputFileTracingRoot: new URL("../../", import.meta.url).pathname,

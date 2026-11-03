@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, matchMenu, openAnalysis, openTeam, register, uniqueEmail } from "./helpers";
 
 const REPORT = fileURLToPath(new URL("./fixtures/paper-report.json", import.meta.url));
 
@@ -15,7 +15,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await page.getByRole("link", { name: "Spiele" }).first().click();
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
 
   await page.getByTestId("paper-file").setInputFiles(REPORT);
   // goalkeeper zones carry one unknown shooter: the import reports it and stays on the list
@@ -23,15 +23,16 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("link", { name: /TV Papierdorf/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Papierdorf");
   await expect(page.getByTestId("score")).toHaveText("5:4");
+  await matchMenu(page);
   const pdf = await page.request.get((await page.getByTestId("pdf").getAttribute("href"))!);
   expect(pdf.headers()["content-type"]).toBe("application/pdf");
   expect((await pdf.body()).subarray(0, 4).toString()).toBe("%PDF");
-  await page.getByRole("link", { name: /Gegner-Profil/ }).click();
+  await page.getByRole("menuitem", { name: /Gegner-Profil/ }).click();
   await expect(page.getByTestId("opponent-tiles")).toBeVisible();
   await expectAccessible(page);
   await page.goBack();
 
-  await page.getByRole("tab", { name: "Übersicht" }).click();
+  await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
   await expectAccessible(page);
@@ -57,7 +58,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
 
   // season view across matches (back to the team's match list)
   await page.goBack();
-  await page.getByRole("link", { name: "Saison" }).click();
+  await openTeam(page, "Saison");
   await expect(page.getByTestId("season-tiles")).toContainText("Spiele");
   await expect(page.getByTestId("season-matches")).toContainText("TV Papierdorf");
   await expect(page.getByTestId("season-trend")).toBeVisible();

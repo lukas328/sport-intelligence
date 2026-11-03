@@ -16,8 +16,15 @@
   },
   "home": {
     "cta": "Get started",
-    "foundation": "In 5 minutes: create club, team and roster. Match analysis follows milestone by milestone.",
-    "courtLabel": "Handball court 40 × 20 m, drawn from the shared geometry"
+    "foundation": "Club, team and squad are set up in five minutes. The first match video can be uploaded right after.",
+    "courtLabel": "Handball court 40 × 20 m, drawn from the shared geometry",
+    "f3": "A phone as camera is enough. Players and parents reply right in the app.",
+    "f1Title": "Automatic first",
+    "f2Title": "Every number leads to the video",
+    "f3Title": "Made for amateur teams",
+    "f2": "One click on a statistic shows the scenes behind it.",
+    "login": "I already have an account",
+    "f1": "Upload the video and the analysis does the rest: shots, goals, goalkeepers, running."
   },
   "status": {
     "title": "System status",
@@ -54,7 +61,12 @@
     "teams": "Teams",
     "close": "Close",
     "add": "Add",
-    "done": "Done"
+    "done": "Done",
+    "retry": "Try again",
+    "more": "More",
+    "confirm": "Confirm",
+    "all": "All",
+    "open": "Open"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -108,7 +120,12 @@
     "paper-warnings": "Check the marked fields or import despite the notes.",
     "paper-incomplete": "Date, opponent and final score are needed.",
     "quota-reached": "The federation's quota is used up.",
-    "already-member": "The club already belongs to a federation."
+    "already-member": "The club already belongs to a federation.",
+    "notFoundTitle": "This page does not exist",
+    "pageBody": "The page could not be loaded. Try again; if it happens again, tell us via “Send feedback”.",
+    "notFoundBody": "It may have been deleted, or you do not have access to it.",
+    "home": "Go to the start page",
+    "pageTitle": "Something went wrong"
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -369,7 +386,27 @@
     "deleteMatch": "Delete match",
     "deleteConfirm": "Permanently delete the match with all videos and data?",
     "pdf": "Match report as PDF",
-    "training": "Training"
+    "training": "Training",
+    "lost": "Loss",
+    "emptyTitle": "Add your first match",
+    "noVideoYet": "No video yet",
+    "kindTraining": "Training",
+    "paperSource": "Score sheet",
+    "won": "Win",
+    "photoSheet": "Photograph a score sheet",
+    "kindMatch": "Match",
+    "played": "Played",
+    "upcoming": "Upcoming",
+    "edit": "Edit match",
+    "draw": "Draw",
+    "otherWays": "No video? Photograph the score sheet or import a file.",
+    "listLabel": "Matches of the season",
+    "newShort": "New match",
+    "awayShort": "Away",
+    "homeAway": "Home or away",
+    "homeShort": "Home",
+    "importFile": "Import a file",
+    "analysed": "Analysed"
   },
   "upload": {
     "title": "Upload video",
@@ -570,7 +607,8 @@
     "keepers": "Goalkeepers",
     "physical": "Physical",
     "scenes": "Scenes",
-    "highlights": "Highlights"
+    "highlights": "Highlights",
+    "analysis": "Analysis"
   },
   "stats": {
     "goals": "Goals",
@@ -605,7 +643,8 @@
     "situations": "Efficiency by situation",
     "byType": "by type",
     "opponentPlayers": "Opponent by jersey number",
-    "noVideo": "no video"
+    "noVideo": "no video",
+    "noDataHint": "Upload the video; the analysis starts automatically afterwards."
   },
   "shotsView": {
     "title": "Shots",
@@ -1166,7 +1205,9 @@
     "oppTwo": "2 min",
     "log": "Log",
     "undo": "Undo",
-    "rejected": "{count, plural, one {# entry was} other {# entries were}} rejected by the server."
+    "rejected": "{count, plural, one {# entry was} other {# entries were}} rejected by the server.",
+    "eventSynced": "Saved",
+    "eventPending": "Saving"
   },
   "consents": {
     "title": "Consents",
@@ -1533,7 +1574,10 @@
     "tryDemo": "Open demo match",
     "go": "Go",
     "done": "done",
-    "open": "open"
+    "open": "open",
+    "hide": "Hide",
+    "allSteps": "All steps",
+    "nextStep": "Next step"
   },
   "consentBanner": {
     "title": "Usage statistics",
@@ -1827,5 +1871,101 @@
       "sevenRight": "Right 7 m line (centre)"
     },
     "spread": "The points are too close together: also mark points on both sidelines (e.g. the corners or the ends of the centre line). The goal posts alone are not enough; the court would be distorted."
+  },
+  "today": {
+    "uploadHint": "Upload the video. Stats, scenes and insights follow automatically.",
+    "myTasks": "To do",
+    "prepare": "Prepare",
+    "inDays": "{n, plural, =0 {Today} =1 {Tomorrow} other {In # days}}",
+    "day": "Hello, {name}",
+    "next": "Up next",
+    "noNextHint": "Add the next match. Then you can prepare for the opponent and track the match live.",
+    "askPlaceholder": "Who scores best from the pivot?",
+    "myDates": "Your next dates",
+    "noInsights": "No insights for this match yet.",
+    "last": "Last match",
+    "askHint": "Answers with their source and links to the scenes.",
+    "insightsTitle": "What stands out",
+    "morning": "Good morning, {name}",
+    "noTraining": "No training planned yet.",
+    "allDates": "All dates",
+    "ask": "Ask your data",
+    "evening": "Good evening, {name}",
+    "due": "due {date}",
+    "planTraining": "Plan training",
+    "noNext": "No match planned",
+    "openMatch": "Open match",
+    "noTeam": "You are not in a team yet. It appears here as soon as a coach invites you.",
+    "nothing": "Nothing open.",
+    "allTasks": "All assignments",
+    "analysing": "The analysis is running. You will be notified when it is done.",
+    "nextTraining": "Next training",
+    "allScenes": "All clips",
+    "seeAll": "All",
+    "trainingLength": "{minutes} min · {drills, plural, =1 {1 drill} other {# drills}}",
+    "newScenes": "New clips for you",
+    "teams": "Your teams"
+  },
+  "shell": {
+    "search": "Search",
+    "settings": "Settings",
+    "trainingSections": "Training sections",
+    "otherClubs": "Other club",
+    "feedback": "Send feedback",
+    "season": "Season",
+    "today": "Today",
+    "mainNav": "Main navigation",
+    "plan": "Planning",
+    "allTeams": "All teams",
+    "training": "Training",
+    "noTeam": "No team yet",
+    "switchTeam": "Switch team",
+    "library": "Library",
+    "account": "Account",
+    "theme_light": "Light",
+    "help": "Help",
+    "matches": "Matches",
+    "drills": "Drills",
+    "team": "Team",
+    "theme_dark": "Dark",
+    "assignments": "Assignments",
+    "closeTool": "Close and go back",
+    "scenes": "Clips",
+    "consents": "Consents",
+    "teamSections": "Team sections",
+    "appearance": "Appearance",
+    "skip": "Skip to content",
+    "profile": "Profile",
+    "roster": "Squad",
+    "dates": "Dates",
+    "theme_system": "Automatic"
+  },
+  "palette": {
+    "newMatch": "Add a match",
+    "matrix": "Stats matrix",
+    "searchScenes": "Search scenes",
+    "ask": "Ask your data",
+    "go": "Go to",
+    "matches": "Matches",
+    "paper": "Photograph a score sheet",
+    "placeholder": "Search or jump to …",
+    "teams": "Teams",
+    "askWith": "Ask your data: “{q}”",
+    "actions": "Actions",
+    "empty": "Nothing found.",
+    "title": "Quick search"
+  },
+  "library": {
+    "plays": "Plays",
+    "presentations": "Presentations",
+    "playlists": "Playlists",
+    "playlistsHint": "Collect scenes and share them with the team.",
+    "playsHint": "Draw on the tactics board or take them from the video.",
+    "back": "Back to {name}",
+    "searchHint": "Filter every scene of the season by player, action and zone.",
+    "presentationsHint": "For the team meeting, with the phone as remote.",
+    "search": "Scene search",
+    "intro": "Everything your team makes from its matches: playlists, plays, presentations and search across all scenes.",
+    "title": "Library"
   }
 }

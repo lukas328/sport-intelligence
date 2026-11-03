@@ -49,7 +49,7 @@ export function Remote({ orgId, presId, pairKey }: { orgId: string; presId: stri
       <svg
         ref={pad}
         viewBox="0 0 1000 562"
-        className="aspect-video w-full touch-none rounded-lg border border-border bg-surface"
+        className="aspect-video w-full touch-none rounded-2xl bg-raised ring-1 ring-border/70 bg-surface"
         role="img"
         aria-label={t("drawHere")}
         onPointerDown={(e) => setStroke([point(e)])}
@@ -61,7 +61,7 @@ export function Remote({ orgId, presId, pairKey }: { orgId: string; presId: stri
       >
         <polyline points={stroke.map(([x, y]) => `${x * 1000},${y * 562}`).join(" ")} fill="none" stroke="#facc15" strokeWidth={6} />
       </svg>
-      <button type="button" className="w-full rounded-md border border-border py-2" onClick={() => void send("clear")}>
+      <button type="button" className="w-full rounded-xl ring-1 ring-inset ring-border py-2" onClick={() => void send("clear")}>
         {t("clear")}
       </button>
       {sent && (

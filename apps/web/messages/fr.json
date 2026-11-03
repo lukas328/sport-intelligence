@@ -16,8 +16,15 @@
   },
   "home": {
     "cta": "Commencer",
-    "foundation": "En 5 minutes : créez club, équipe et effectif. L'analyse des matchs suit jalon par jalon.",
-    "courtLabel": "Terrain de handball 40 × 20 m, dessiné à partir de la géométrie commune"
+    "foundation": "Club, équipe et effectif sont créés en cinq minutes. La première vidéo de match peut être téléversée juste après.",
+    "courtLabel": "Terrain de handball 40 × 20 m, dessiné à partir de la géométrie commune",
+    "f3": "Un téléphone suffit comme caméra. Joueurs et parents répondent directement dans l'app.",
+    "f1Title": "Automatique d'abord",
+    "f2Title": "Chaque chiffre mène à la vidéo",
+    "f3Title": "Conçu pour les équipes amateurs",
+    "f2": "Un clic sur une statistique montre les scènes correspondantes.",
+    "login": "J'ai déjà un compte",
+    "f1": "Téléversez la vidéo, l'analyse fait le reste : tirs, buts, gardiens, courses."
   },
   "status": {
     "title": "État du système",
@@ -54,7 +61,12 @@
     "teams": "Équipes",
     "close": "Fermer",
     "add": "Ajouter",
-    "done": "Terminé"
+    "done": "Terminé",
+    "retry": "Réessayer",
+    "more": "Plus",
+    "confirm": "Confirmer",
+    "all": "Tout",
+    "open": "Ouvrir"
   },
   "errors": {
     "generic": "Une erreur est survenue. Veuillez réessayer.",
@@ -108,7 +120,12 @@
     "paper-warnings": "Vérifie les champs marqués ou reprends malgré les remarques.",
     "paper-incomplete": "Date, adversaire et score final sont nécessaires.",
     "quota-reached": "Le contingent de la fédération est épuisé.",
-    "already-member": "Le club appartient déjà à une fédération."
+    "already-member": "Le club appartient déjà à une fédération.",
+    "notFoundTitle": "Cette page n'existe pas",
+    "pageBody": "La page n'a pas pu être chargée. Réessayez ; si cela se reproduit, écrivez-nous via « Donner un avis ».",
+    "notFoundBody": "Elle a peut-être été supprimée, ou vous n'y avez pas accès.",
+    "home": "Aller à l'accueil",
+    "pageTitle": "Un problème est survenu"
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -369,7 +386,27 @@
     "deleteMatch": "Supprimer le match",
     "deleteConfirm": "Supprimer définitivement le match avec toutes les vidéos et données ?",
     "pdf": "Rapport de match en PDF",
-    "training": "Entraînement"
+    "training": "Entraînement",
+    "lost": "Défaite",
+    "emptyTitle": "Ajoutez votre premier match",
+    "noVideoYet": "Pas encore de vidéo",
+    "kindTraining": "Entraînement",
+    "paperSource": "Feuille de match",
+    "won": "Victoire",
+    "photoSheet": "Photographier la feuille de match",
+    "kindMatch": "Match",
+    "played": "Joués",
+    "upcoming": "À venir",
+    "edit": "Modifier le match",
+    "draw": "Match nul",
+    "otherWays": "Pas de vidéo ? Photographiez la feuille de match ou importez un fichier.",
+    "listLabel": "Matchs de la saison",
+    "newShort": "Nouveau match",
+    "awayShort": "Extérieur",
+    "homeAway": "Domicile ou extérieur",
+    "homeShort": "Domicile",
+    "importFile": "Importer un fichier",
+    "analysed": "Analysé"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -570,7 +607,8 @@
     "keepers": "Gardiens",
     "physical": "Physique",
     "scenes": "Scènes",
-    "highlights": "Highlights"
+    "highlights": "Highlights",
+    "analysis": "Analyse"
   },
   "stats": {
     "goals": "Buts",
@@ -605,7 +643,8 @@
     "situations": "Efficacité par situation",
     "byType": "par type",
     "opponentPlayers": "Adversaire par numéro",
-    "noVideo": "sans vidéo"
+    "noVideo": "sans vidéo",
+    "noDataHint": "Téléversez la vidéo ; l'analyse démarre ensuite automatiquement."
   },
   "shotsView": {
     "title": "Tirs",
@@ -1166,7 +1205,9 @@
     "oppTwo": "2 min",
     "log": "Historique",
     "undo": "Annuler",
-    "rejected": "{count, plural, one {# entrée a été refusée} other {# entrées ont été refusées}} par le serveur."
+    "rejected": "{count, plural, one {# entrée a été refusée} other {# entrées ont été refusées}} par le serveur.",
+    "eventSynced": "Enregistré",
+    "eventPending": "Enregistrement"
   },
   "consents": {
     "title": "Consentements",
@@ -1533,7 +1574,10 @@
     "tryDemo": "Ouvrir le match de démonstration",
     "go": "Aller",
     "done": "fait",
-    "open": "ouvert"
+    "open": "ouvert",
+    "hide": "Masquer",
+    "allSteps": "Toutes les étapes",
+    "nextStep": "Prochaine étape"
   },
   "consentBanner": {
     "title": "Statistiques d'utilisation",
@@ -1827,5 +1871,101 @@
       "sevenRight": "Ligne des 7 m droite (milieu)"
     },
     "spread": "Les points sont trop rapprochés : marque aussi des points sur les deux lignes de touche (p. ex. les coins ou les extrémités de la ligne médiane). Les poteaux seuls ne suffisent pas, le terrain serait déformé."
+  },
+  "today": {
+    "uploadHint": "Téléversez la vidéo. Statistiques, scènes et constats suivent automatiquement.",
+    "myTasks": "À faire",
+    "prepare": "Préparer",
+    "inDays": "{n, plural, =0 {Aujourd'hui} =1 {Demain} other {Dans # jours}}",
+    "day": "Bonjour, {name}",
+    "next": "À venir",
+    "noNextHint": "Ajoutez le prochain match. Vous pourrez préparer l'adversaire et saisir le match en direct.",
+    "askPlaceholder": "Qui marque le mieux au pivot ?",
+    "myDates": "Vos prochains rendez-vous",
+    "noInsights": "Pas encore de constats pour ce match.",
+    "last": "Dernier match",
+    "askHint": "Réponses avec source et liens vers les scènes.",
+    "insightsTitle": "Ce qui ressort",
+    "morning": "Bonjour, {name}",
+    "noTraining": "Aucun entraînement prévu.",
+    "allDates": "Tous les rendez-vous",
+    "ask": "Interrogez vos données",
+    "evening": "Bonsoir, {name}",
+    "due": "pour le {date}",
+    "planTraining": "Planifier l'entraînement",
+    "noNext": "Aucun match prévu",
+    "openMatch": "Ouvrir le match",
+    "noTeam": "Vous n'êtes encore dans aucune équipe. Elle apparaîtra ici dès qu'un entraîneur vous invitera.",
+    "nothing": "Rien en attente.",
+    "allTasks": "Toutes les tâches",
+    "analysing": "L'analyse est en cours. Vous serez averti dès qu'elle est terminée.",
+    "nextTraining": "Prochain entraînement",
+    "allScenes": "Toutes les scènes",
+    "seeAll": "Tout",
+    "trainingLength": "{minutes} min · {drills, plural, =1 {1 exercice} other {# exercices}}",
+    "newScenes": "Nouvelles scènes pour vous",
+    "teams": "Vos équipes"
+  },
+  "shell": {
+    "search": "Rechercher",
+    "settings": "Paramètres",
+    "trainingSections": "Sections de l'entraînement",
+    "otherClubs": "Autre club",
+    "feedback": "Donner un avis",
+    "season": "Saison",
+    "today": "Aujourd'hui",
+    "mainNav": "Navigation principale",
+    "plan": "Planification",
+    "allTeams": "Toutes les équipes",
+    "training": "Entraînement",
+    "noTeam": "Pas encore d'équipe",
+    "switchTeam": "Changer d'équipe",
+    "library": "Bibliothèque",
+    "account": "Compte",
+    "theme_light": "Clair",
+    "help": "Aide",
+    "matches": "Matchs",
+    "drills": "Exercices",
+    "team": "Équipe",
+    "theme_dark": "Sombre",
+    "assignments": "Tâches",
+    "closeTool": "Fermer et revenir",
+    "scenes": "Scènes",
+    "consents": "Consentements",
+    "teamSections": "Sections de l'équipe",
+    "appearance": "Apparence",
+    "skip": "Aller au contenu",
+    "profile": "Profil",
+    "roster": "Effectif",
+    "dates": "Rendez-vous",
+    "theme_system": "Automatique"
+  },
+  "palette": {
+    "newMatch": "Ajouter un match",
+    "matrix": "Matrice de statistiques",
+    "searchScenes": "Rechercher des scènes",
+    "ask": "Interroger vos données",
+    "go": "Aller à",
+    "matches": "Matchs",
+    "paper": "Photographier une feuille de match",
+    "placeholder": "Rechercher ou aller à …",
+    "teams": "Équipes",
+    "askWith": "Interroger vos données : « {q} »",
+    "actions": "Actions",
+    "empty": "Aucun résultat.",
+    "title": "Recherche rapide"
+  },
+  "library": {
+    "plays": "Systèmes",
+    "presentations": "Présentations",
+    "playlists": "Playlists",
+    "playlistsHint": "Rassembler des scènes et les partager avec l'équipe.",
+    "playsHint": "Dessiner sur le tableau tactique ou reprendre depuis la vidéo.",
+    "back": "Retour à {name}",
+    "searchHint": "Filtrer toutes les scènes de la saison par joueur, action et zone.",
+    "presentationsHint": "Pour la séance d'équipe, avec le téléphone comme télécommande.",
+    "search": "Recherche de scènes",
+    "intro": "Tout ce que votre équipe tire de ses matchs : playlists, systèmes, présentations et recherche dans toutes les scènes.",
+    "title": "Bibliothèque"
   }
 }

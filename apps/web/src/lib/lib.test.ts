@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import deCH from "../../messages/de-CH.json";
 import en from "../../messages/en.json";
 import fr from "../../messages/fr.json";
-import { accentFor, contrastRatio, contrastText } from "./color";
+import { clubTheme, contrastRatio, contrastText, SURFACE } from "./color";
 import { errorKey, fieldErrors, KNOWN_ERRORS } from "./errors";
 import { safeNext } from "./nav";
 
@@ -45,9 +45,18 @@ describe("color", () => {
     expect(contrastText("#ffd700")).toBe("#000000");
     expect(contrastText("#0b3d91")).toBe("#ffffff");
   });
-  it("falls back for light club colours", () => {
-    expect(accentFor("#ffd700").accent).toBe("#0b6bcb");
-    expect(accentFor("#c8102e")).toEqual({ accent: "#c8102e", contrast: "#ffffff" });
+  it("keeps club colours readable in both themes", () => {
+    for (const hex of ["#ffd100", "#003366", "#c8102e", "#ffffff", "#000000", "#00a651"]) {
+      const t = clubTheme(hex);
+      expect(contrastRatio(t.light.accent, SURFACE.light)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(t.dark.accent, SURFACE.dark)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(t.light.accent, t.light.contrast)).toBeGreaterThanOrEqual(4.5);
+    }
+    // a readable club colour is kept as it is
+    expect(clubTheme("#c8102e").light).toEqual({ accent: "#c8102e", contrast: "#ffffff" });
+    // navy turns lighter on the dark theme instead of disappearing (1.49:1 before)
+    expect(clubTheme("#003366").dark.accent).not.toBe("#003366");
+    expect(clubTheme("not a colour").club).toBe("#c93a0b");
   });
 });
 

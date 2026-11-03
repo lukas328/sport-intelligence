@@ -124,9 +124,9 @@ export function InvoiceOrder({ orgId, goalkeepers }: { orgId: string; goalkeeper
           </thead>
           <tbody>
             {(list.data ?? []).map((i) => (
-              <tr key={i.id} className="border-t border-border">
+              <tr key={i.id} className="border-t border-border/70">
                 <td>
-                  <a className="text-accent underline underline-offset-4" href={`/v1/orgs/${orgId}/billing/invoices/${i.id}/pdf`}>
+                  <a className="font-medium text-accent hover:underline" href={`/v1/orgs/${orgId}/billing/invoices/${i.id}/pdf`}>
                     {i.number}
                   </a>
                 </td>

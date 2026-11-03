@@ -35,7 +35,7 @@ export async function OAuthButtons({ providers, next, invite }: { providers: str
         <a
           key={p}
           href={`/v1/auth/oauth/${p}/start${qs}`}
-          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-surface"
+          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-raised ring-1 ring-inset ring-border px-4 py-2 text-sm font-medium hover:bg-surface"
         >
           {p === "google" ? <GoogleIcon /> : <AppleIcon />}
           {t("continueWith", { provider: LABELS[p] ?? p })}

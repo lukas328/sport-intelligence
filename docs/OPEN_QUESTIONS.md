@@ -167,3 +167,13 @@ Apple Developer and Google Play accounts of the operating company, an Expo (EAS)
 (`app.json` extra.eas.projectId), APNs key and FCM credentials, the domain for app links
 (`app.handball-ai.ch`, apple-app-site-association and assetlinks.json on the web server).
 **Default**: prepared in `apps/mobile` (bundle id `ch.handballai.app`); submission once accounts exist.
+
+### Q-UX-1 Usability test with real coaches, players and parents
+The redesign (ADR 023) follows the jobs and roles in the brief and was checked with screenshots,
+Playwright flows and axe, not with people. **Default**: five short sessions (two coaches, two
+players, one parent) on a phone and a laptop before launch; tasks: find the next match, upload a
+video, open the scenes behind a number, reply to a training, change the club colour.
+
+### Q-UX-2 Typeface in the Expo app
+The app uses the new colours; Archivo is not yet bundled in the Expo build (system font).
+**Default**: add it with `expo-font` together with the first device build (Q-M11-3).

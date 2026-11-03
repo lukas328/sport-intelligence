@@ -11,7 +11,7 @@ export async function LegalPage({ locale, page }: { locale: Locale; page: keyof 
   return (
     <article className="max-w-3xl">
       <h1 className="text-3xl font-bold">{m.footer[TITLE[page]]}</h1>
-      <p role="note" className="mt-4 rounded-md border border-border bg-surface p-3 text-sm">{m.legal.draft}</p>
+      <p role="note" className="mt-4 rounded-xl ring-1 ring-inset ring-border bg-surface p-3 text-sm">{m.legal.draft}</p>
       {page === "impressum" ? (
         <section className="mt-6">
           <h2 className="text-xl font-semibold">{m.legal.company}</h2>

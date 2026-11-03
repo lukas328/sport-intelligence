@@ -29,6 +29,7 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await expect(page.getByText("Alles hochgeladen")).toBeVisible({ timeout: 15_000 });
   await expectAccessible(page);
   await page.goto(`/app/${orgId}/matches/${match.id}`);
+  await page.getByRole("tab", { name: "Szenen", exact: true }).click();
   await page.getByTestId("marks-panel").getByText(/Markiert während des Spiels \(2\)/).click();
   await expect(page.getByTestId("marks-panel")).toContainText("noch nicht mit dem Video abgeglichen");
 

@@ -5,7 +5,17 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { HTML_LANG, isLocale, localeParams, messages } from "@/lib/i18n";
 import { SITE_URL } from "@/lib/site";
+import localFont from "next/font/local";
 import "../globals.css";
+
+// same typeface as the app (SIL OFL, src/fonts/OFL.txt)
+const archivo = localFont({
+  src: "../../fonts/archivo-variable.woff2",
+  variable: "--font-archivo",
+  display: "swap",
+  weight: "100 900",
+  declarations: [{ prop: "font-stretch", value: "62% 125%" }],
+});
 
 export const dynamicParams = false;
 export const generateStaticParams = localeParams;
@@ -26,7 +36,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return (
-    <html lang={HTML_LANG[locale]}>
+    <html lang={HTML_LANG[locale]} className={archivo.variable}>
       <body className="min-h-screen antialiased">
         <Header locale={locale} />
         <main id="main" className="mx-auto max-w-6xl px-4 py-10">

@@ -1,10 +1,11 @@
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-const control =
-  "block w-full min-h-10 rounded-md border border-border bg-background px-3 py-2 text-sm " +
-  "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent " +
-  "aria-[invalid=true]:border-error";
+export const control =
+  "block w-full min-h-10 rounded-xl border-0 bg-raised px-3 py-2 text-sm text-foreground ring-1 ring-inset ring-border " +
+  "placeholder:text-muted/70 transition-shadow hover:ring-muted/40 " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent " +
+  "aria-[invalid=true]:ring-error disabled:opacity-60";
 
 interface FieldProps {
   label: string;
@@ -20,7 +21,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   const inputId = id ?? auto;
   return (
     <div className="space-y-1">
-      <label htmlFor={inputId} className="block text-sm font-medium">
+      <label htmlFor={inputId} className="block text-[0.8125rem] font-medium">
         {label}
       </label>
       <input
@@ -58,7 +59,7 @@ export function Select({
   const selectId = id ?? auto;
   return (
     <div className="space-y-1">
-      <label htmlFor={selectId} className="block text-sm font-medium">
+      <label htmlFor={selectId} className="block text-[0.8125rem] font-medium">
         {label}
       </label>
       <select
@@ -89,7 +90,7 @@ export function Checkbox({
   const boxId = id ?? auto;
   return (
     <div className="flex items-start gap-2">
-      <input id={boxId} type="checkbox" className="mt-1 size-4 accent-[var(--accent)]" {...props} />
+      <input id={boxId} type="checkbox" className="mt-0.5 size-4 rounded accent-[var(--accent)]" {...props} />
       <label htmlFor={boxId} className="text-sm">
         {label}
       </label>

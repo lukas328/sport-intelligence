@@ -72,7 +72,7 @@ function Editor({ orgId, item }: { orgId: string; item: Mine }) {
         </label>
         <label className="block text-sm">
           <span className="font-medium">{t("bio")}</span>
-          <textarea name="bio" maxLength={400} rows={3} defaultValue={p?.bio ?? ""} className="mt-1 w-full rounded-md border border-border bg-background p-2" />
+          <textarea name="bio" maxLength={400} rows={3} defaultValue={p?.bio ?? ""} className="mt-1 w-full rounded-xl bg-raised ring-1 ring-inset ring-border p-2" />
         </label>
         <fieldset className="text-sm">
           <legend className="font-medium">{t("stats")}</legend>
@@ -125,7 +125,7 @@ function Editor({ orgId, item }: { orgId: string; item: Mine }) {
       {p?.active && url && (
         <p className="text-sm">
           {t("link")}{" "}
-          <a className="break-all text-accent underline" href={url}>{url}</a> · {t("views", { n: p.views })}
+          <a className="break-all font-medium text-accent hover:underline" href={url}>{url}</a> · {t("views", { n: p.views })}
         </p>
       )}
     </Card>
@@ -141,7 +141,7 @@ export function ProfileEditor({ orgId }: { orgId: string }) {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
         <p className="text-sm text-muted">{t("hint")}</p>
       </div>
       {(items.data ?? []).length === 0 ? (

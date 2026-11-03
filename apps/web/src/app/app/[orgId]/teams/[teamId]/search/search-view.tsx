@@ -170,7 +170,7 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
           <ul className="space-y-1">
             {(saved.data ?? []).map((sf) => (
               <li key={sf.id}>
-                <button type="button" className="text-sm text-accent underline underline-offset-4" onClick={() => setFilter(sf.query)}>
+                <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setFilter(sf.query)}>
                   {sf.name}
                 </button>
               </li>
@@ -220,7 +220,7 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
           {result.data ? t("count", { n: result.data.total }) : ""}
         </p>
         {result.data && hits.length === 0 && <EmptyState title={t("none")} />}
-        <ul className="divide-y divide-border rounded-lg border border-border" data-testid="search-hits">
+        <ul className="divide-y divide-border/70 rounded-2xl bg-raised ring-1 ring-border/70" data-testid="search-hits">
           {hits.map((h) => (
             <li key={`${h.kind}-${h.id}`} className="space-y-2 px-3 py-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -235,7 +235,7 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
                   </Button>
                 )}
                 {h.video_id && h.start_ms != null && (
-                  <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="ml-auto rounded-md border border-border px-3 py-1 text-sm hover:bg-surface">
+                  <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
                     {t("watch")}
                   </Link>
                 )}

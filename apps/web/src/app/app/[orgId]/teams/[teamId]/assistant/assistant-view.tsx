@@ -4,7 +4,11 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { ArrowUp, Play } from "lucide-react";
+import { control } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { api } from "@/lib/client";
@@ -55,7 +59,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
   const a = m.answer;
   return (
     <div className="space-y-3">
-      <p className="ml-auto max-w-[85%] rounded-lg bg-surface px-3 py-2 text-right">{m.question}</p>
+      <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-foreground px-4 py-2.5 text-background">{m.question}</p>
       <Card className="space-y-3">
         <p>{a.text}</p>
         {a.sample_size != null && <p className="text-sm text-muted">{t("sample", { n: a.sample_size })}</p>}
@@ -68,9 +72,9 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
                 <li key={c.event_id}>
                   <Link
                     href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}
-                    className="inline-flex min-h-8 items-center rounded-full border border-border px-3 text-sm hover:bg-surface"
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20"
                   >
-                    ▶ {c.label}
+                    <Play aria-hidden className="size-3 fill-current" /> {c.label}
                   </Link>
                 </li>
               ))}
@@ -80,7 +84,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
         {!a.answerable && a.suggestion && (
           <p className="text-sm">
             {t("tryInstead")}{" "}
-            <button type="button" className="text-accent underline" onClick={() => onAsk(a.suggestion!)}>
+            <button type="button" className="font-medium text-accent hover:underline" onClick={() => onAsk(a.suggestion!)}>
               {a.suggestion}
             </button>
           </p>
@@ -99,10 +103,10 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
           {!m.validated && <p className="mt-1">{t("notValidated")}</p>}
         </details>
         <div className="flex items-center gap-2 text-sm" aria-label={t("rateLabel")}>
-          <button type="button" aria-pressed={rated === 1} className="rounded border border-border px-2 py-0.5 aria-pressed:bg-surface" onClick={() => rate.mutate(1)}>
+          <button type="button" aria-pressed={rated === 1} className="rounded-full px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(1)}>
             {t("good")}
           </button>
-          <button type="button" aria-pressed={rated === -1} className="rounded border border-border px-2 py-0.5 aria-pressed:bg-surface" onClick={() => rate.mutate(-1)}>
+          <button type="button" aria-pressed={rated === -1} className="rounded-full px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(-1)}>
             {t("bad")}
           </button>
         </div>
@@ -149,6 +153,16 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
       setMessages(r.data.messages);
     }
   };
+  // a question handed over from the start page or the command palette
+  const params = useSearchParams();
+  const asked = useRef(false);
+  useEffect(() => {
+    const q = params.get("q")?.trim();
+    if (q && q.length >= 3 && !asked.current) {
+      asked.current = true;
+      ask.mutate(q);
+    }
+  }, [params]); // eslint-disable-line react-hooks/exhaustive-deps
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (question.trim().length >= 3) ask.mutate(question.trim());
@@ -158,13 +172,13 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
     <div className="grid gap-6 lg:grid-cols-[1fr_16rem]">
       <section className="space-y-4" aria-labelledby="assistant-title">
         <div>
-          <h2 id="assistant-title" className="text-xl font-semibold">{t("title")}</h2>
+          <h2 id="assistant-title" className="text-xl font-bold">{t("title")}</h2>
           <p className="text-sm text-muted">{t("hint")}</p>
         </div>
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2">
             {examples.map((q) => (
-              <button key={q} type="button" className="rounded-full border border-border px-3 py-1 text-sm hover:bg-surface" onClick={() => ask.mutate(q)}>
+              <button key={q} type="button" className="rounded-full bg-raised px-4 py-2 text-left text-sm ring-1 ring-border/70 transition-colors hover:bg-surface" onClick={() => ask.mutate(q)}>
                 {q}
               </button>
             ))}
@@ -177,18 +191,19 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
           {ask.isPending && <p className="text-sm text-muted">{t("thinking")}</p>}
         </div>
         {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-        <form onSubmit={submit} className="flex gap-2">
-          <label className="flex-1">
+        <form onSubmit={submit} className="relative">
+          <label className="block">
             <span className="sr-only">{t("question")}</span>
             <input
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder={t("placeholder")}
               maxLength={500}
-              className="min-h-10 w-full rounded-md border border-border bg-background px-3 py-2"
+              className={cn(control, "min-h-14 rounded-full pr-28 pl-5 text-base shadow-sm")}
             />
           </label>
-          <Button type="submit" disabled={ask.isPending || question.trim().length < 3}>
+          <Button type="submit" className="absolute top-2 right-2" disabled={ask.isPending || question.trim().length < 3}>
+            <ArrowUp aria-hidden />
             {t("ask")}
           </Button>
         </form>
@@ -196,7 +211,7 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
       <aside className="space-y-2" aria-label={t("history")}>
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">{t("history")}</h3>
-          <button type="button" className="text-sm text-accent underline" onClick={() => { setConversation(null); setMessages([]); }}>
+          <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => { setConversation(null); setMessages([]); }}>
             {t("new")}
           </button>
         </div>

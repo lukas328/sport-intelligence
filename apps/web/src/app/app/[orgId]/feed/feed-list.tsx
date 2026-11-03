@@ -16,7 +16,7 @@ export function FeedList({ orgId }: { orgId: string }) {
   });
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
+      <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
       <p className="text-muted">{t("intro")}</p>
       {q.data && q.data.length === 0 && <EmptyState title={t("none")} />}
       <ul className="space-y-2" data-testid="feed-list">
@@ -24,7 +24,7 @@ export function FeedList({ orgId }: { orgId: string }) {
           <li key={`${f.player_id}-${f.match_id}`}>
             <Link
               href={`/app/${orgId}/feed/${f.match_id}?player=${f.player_id}`}
-              className="flex flex-wrap items-center gap-3 rounded-lg border border-border p-3 hover:bg-surface"
+              className="flex flex-wrap items-center gap-3 rounded-2xl bg-raised ring-1 ring-border/70 p-3 hover:bg-surface"
             >
               <span className="text-sm text-muted tabular-nums">{format.dateTime(new Date(f.kickoff_at), { dateStyle: "medium" })}</span>
               <span className="flex-1 font-medium">{f.opponent ?? tm("training")}</span>

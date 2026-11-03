@@ -141,10 +141,10 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
         {t("hint")}
       </p>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="overflow-x-auto rounded-md border border-border">
+        <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
           <table className="w-full text-sm" data-testid="physical-table">
             <caption className="sr-only">{t("title")}</caption>
-            <thead className="bg-surface text-muted">
+            <thead className="text-xs text-muted">
               <tr>
                 <th scope="col" className="px-3 py-2 text-left font-medium" />
                 <th scope="col" className="px-2 py-2 text-right font-medium">{t("distance")}</th>
@@ -156,7 +156,7 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.key} className={cn("border-t border-border", selected?.key === r.key && "bg-accent/10")}>
+                <tr key={r.key} className={cn("border-t border-border/70", selected?.key === r.key && "bg-accent/10")}>
                   <th scope="row" className="px-3 py-1.5 text-left font-medium">
                     <button className="underline decoration-dotted underline-offset-4" onClick={() => setSel(r.key)} aria-label={`${t("showHeatmap")}: ${r.label}`}>
                       {r.label}

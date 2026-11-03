@@ -18,7 +18,8 @@ const rows = [];
 let failed = false;
 for (const [page, files] of Object.entries(manifest.pages)) {
   if (!page.endsWith("/page")) continue;
-  const route = page.replace(/\/page$/, "") || "/";
+  // route groups like (site) do not appear in the URL
+  const route = page.replace(/\/page$/, "").replace(/\/\([^)]+\)/g, "") || "/";
   const all = [...new Set([...layout, ...files])].filter((f) => f.endsWith(".js"));
   const size = all.reduce((sum, f) => sum + gz(f), 0);
   const budget = route === "/" ? BUDGET_START : BUDGET_ROUTE;

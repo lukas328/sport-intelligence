@@ -1,5 +1,6 @@
 "use client";
 
+import { Play, X } from "lucide-react";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -182,7 +183,7 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
                   {tp.name}
                 </button>
                 <button type="button" aria-label={t("deleteTemplate", { name: tp.name })} className="px-2 text-muted" onClick={() => remove.mutate(tp.id)}>
-                  ×
+                  <X aria-hidden className="size-3.5" />
                 </button>
               </li>
             ))}
@@ -238,8 +239,8 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
             <ul className="flex flex-wrap gap-2">
               {open.cell.clips.map((c, i) => (
                 <li key={c.event_id}>
-                  <Link className="inline-flex min-h-8 items-center rounded-full border border-border px-3 text-sm hover:bg-surface" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
-                    ▶ {i + 1}
+                  <Link className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
+                    <Play aria-hidden className="size-3 fill-current" /> {i + 1}
                   </Link>
                 </li>
               ))}

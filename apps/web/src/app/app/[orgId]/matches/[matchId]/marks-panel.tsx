@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { ChevronDown, Hand, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/client";
 
@@ -26,10 +27,14 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
   const d = data.data;
   const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
   return (
-    <details className="rounded-lg border border-border p-4" data-testid="marks-panel">
-      <summary className="cursor-pointer font-medium">{t("panel", { n: d?.marks.length ?? 0 })}</summary>
+    <details className="group rounded-2xl bg-raised px-5 py-4 ring-1 ring-border/70" data-testid="marks-panel">
+      <summary className="flex cursor-pointer list-none items-center gap-2 font-semibold [&::-webkit-details-marker]:hidden">
+        <Hand aria-hidden className="size-4 text-muted" />
+        {t("panel", { n: d?.marks.length ?? 0 })}
+        <ChevronDown aria-hidden className="ml-auto size-4 text-muted transition-transform group-open:rotate-180" />
+      </summary>
       <div className="mt-3 space-y-3 text-sm">
-        <Link href={`/app/${orgId}/matches/${matchId}/marks`} className="text-accent underline">
+        <Link href={`/app/${orgId}/matches/${matchId}/marks`} className="font-medium text-accent hover:underline">
           {t("open")}
         </Link>
         {(d?.sessions ?? []).map((s) => (
@@ -42,7 +47,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
                 <button
                   key={delta}
                   type="button"
-                  className="rounded border border-border px-2"
+                  className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-foreground hover:bg-border"
                   onClick={() => shift.mutate({ id: s.id, offset: (s.offset_ms ?? 0) + delta })}
                 >
                   {delta > 0 ? "+" : "-"}
@@ -52,7 +57,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
           </div>
         ))}
         {(d?.sessions.length ?? 0) > 0 && (
-          <button type="button" className="text-accent underline" onClick={() => resync.mutate()}>
+          <button type="button" className="font-medium text-accent hover:underline" onClick={() => resync.mutate()}>
             {t("resync")}
           </button>
         )}
@@ -66,8 +71,8 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
                 {items.map((m) => (
                   <li key={m.id} className="flex items-center gap-2">
                     {m.t_ms != null && onPlay ? (
-                      <button type="button" className="tabular-nums text-accent underline" onClick={() => onPlay(m.t_ms!)}>
-                        ▶ {mmss(m.t_ms)}
+                      <button type="button" className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => onPlay(m.t_ms!)}>
+                        <Play aria-hidden className="size-3 fill-current" /> {mmss(m.t_ms)}
                       </button>
                     ) : (
                       <span className="tabular-nums text-muted">{new Date(m.device_time).toLocaleTimeString()}</span>

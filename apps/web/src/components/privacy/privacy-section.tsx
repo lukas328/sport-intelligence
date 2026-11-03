@@ -7,16 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { useConfirm } from "@/components/ui/confirm";
 
 /** Personal data download, account deletion and (for club admins) club deletion (M9). */
 export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId: string; orgName: string; isAdmin: boolean; hasPassword: boolean }) {
   const t = useTranslations("privacy");
   const [problem, setProblem] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   async function deleteAccount(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    if (!window.confirm(t("accountConfirm"))) return;
+    if (!(await confirm({ title: t("accountConfirm"), danger: true }))) return;
     const { error } = await api.POST("/v1/me/delete", {
       body: { confirm_email: String(f.get("email") ?? ""), password: String(f.get("password") ?? "") || null },
     });
@@ -26,7 +28,7 @@ export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId
   async function deleteClub(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    if (!window.confirm(t("clubConfirm"))) return;
+    if (!(await confirm({ title: t("clubConfirm"), danger: true }))) return;
     const { error } = await api.POST("/v1/orgs/{org_id}/delete", {
       params: { path: { org_id: orgId } },
       body: { confirm_name: String(f.get("name") ?? "") },
@@ -49,7 +51,7 @@ export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId
         <div className="space-y-2">
           <p className="text-sm">{t("exportHint")}</p>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API download, not a page */}
-          <a href="/v1/me/export" className="inline-block rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" data-testid="export">
+          <a href="/v1/me/export" className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" data-testid="export">
             {t("export")}
           </a>
         </div>

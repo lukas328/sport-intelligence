@@ -87,15 +87,18 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await player.getByLabel("Passwort").fill("correct-horse-1");
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
-  await expect(player.getByText("Deine Rolle: Spieler/in")).toBeVisible();
-  await player.getByRole("link", { name: "Kader öffnen" }).click();
+  await expect(player.getByRole("heading", { level: 1 })).toContainText("Paul");
+  // players see four places: today, clips, dates, team
+  await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(4);
+  await player.getByRole("link", { name: "Team", exact: true }).click();
   await expect(player.getByTestId("roster-row")).toHaveCount(4);
   // players cannot edit the roster
   await expect(player.getByRole("form", { name: "Spieler hinzufügen" })).toHaveCount(0);
   await ctx.close();
 
   // settings: pending invitations are empty now, members list shows the player
-  await page.getByRole("link", { name: "Einstellungen" }).click();
+  await page.getByTestId("account-menu").filter({ visible: true }).click();
+  await page.getByRole("menuitem", { name: "Einstellungen" }).click();
   await expect(page.getByText("Paul Spieler")).toBeVisible();
   await expectAccessible(page);
 
@@ -108,7 +111,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expect(page.getByTestId("totp-state")).toContainText("Aktiv.");
   const recovery = (await page.getByTestId("recovery-codes").getByRole("listitem").first().textContent())!.trim();
   expect(recovery).toMatch(/^[a-z2-9]{4}-[a-z2-9]{4}$/);
-  await page.getByRole("button", { name: "Abmelden" }).click();
+  await page.getByTestId("account-menu").filter({ visible: true }).click();
+  await page.getByRole("menuitem", { name: "Abmelden" }).click();
   await expect(page).toHaveURL(/\/login/);
   await page.getByLabel("E-Mail").fill(coachEmail);
   await page.getByLabel("Passwort").fill("correct-horse-1");
@@ -116,16 +120,17 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expect(page.getByRole("heading", { name: "Zwei-Faktor-Code" })).toBeVisible();
   await page.getByLabel("Code").fill(totp.generate());
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("heading", { name: "Teams" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Sandra");
 
   // lost phone: a recovery code works once
-  await page.getByRole("button", { name: "Abmelden" }).click();
+  await page.getByTestId("account-menu").filter({ visible: true }).click();
+  await page.getByRole("menuitem", { name: "Abmelden" }).click();
   await page.getByLabel("E-Mail").fill(coachEmail);
   await page.getByLabel("Passwort").fill("correct-horse-1");
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await page.getByLabel("Code").fill(recovery);
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("heading", { name: "Teams" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Sandra");
 });
 
 test("magic link sign-in", async ({ page }, info) => {

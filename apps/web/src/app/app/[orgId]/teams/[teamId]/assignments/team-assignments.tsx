@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import { DRILLS, type Lang } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, Card, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { useConfirm } from "@/components/ui/confirm";
 import { problemCode } from "@handball/api-client";
 import { targetLink } from "../../../assignments/my-assignments";
 
@@ -48,6 +50,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
     drill: DRILLS.map((d) => ({ id: d.id, label: d.name[lang] ?? d.name["de-CH"] })),
   }[kind];
 
+  const confirm = useConfirm();
   const remove = useMutation({
     mutationFn: async (id: string) => api.DELETE("/v1/orgs/{org_id}/assignments/{assignment_id}", { params: { path: { org_id: orgId, assignment_id: id } } }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: key }),
@@ -85,7 +88,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
         {list.data && list.data.length === 0 && <EmptyState title={t("none")} />}
         <ul className="space-y-2" data-testid="team-assignments">
           {(list.data ?? []).map((a) => (
-            <li key={a.id} className="space-y-2 rounded-lg border border-border p-3">
+            <li key={a.id} className="space-y-2 rounded-2xl bg-raised ring-1 ring-border/70 p-3">
               <div className="flex flex-wrap items-center gap-2">
                 <Link href={targetLink(orgId, a)} className="font-medium underline decoration-dotted underline-offset-4">
                   {a.title}
@@ -102,12 +105,12 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
               <ul className="flex flex-wrap gap-1 text-xs">
                 {(a.progress ?? []).map((p) => (
                   <li key={String(p.user_id)} className="rounded-full border border-border px-2 py-0.5">
-                    {p.done_at ? "✓ " : ""}
+                    {p.done_at ? <Check aria-hidden className="mr-1 inline size-3.5 text-ok" /> : null}
                     {String(p.name)}
                   </li>
                 ))}
               </ul>
-              <button className="text-xs text-muted underline" onClick={() => window.confirm(t("delete")) && remove.mutate(a.id)}>
+              <button className="text-xs text-muted underline" onClick={async () => (await confirm({ title: t("delete"), danger: true })) && remove.mutate(a.id)}>
                 {t("delete")}
               </button>
             </li>
@@ -119,7 +122,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
         <form onSubmit={create} className="space-y-3" aria-label={t("new")}>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{t("kind")}</span>
-            <select value={kind} onChange={(e) => setKind(e.target.value as Kind)} className="min-h-10 rounded-md border border-border bg-background px-2">
+            <select value={kind} onChange={(e) => setKind(e.target.value as Kind)} className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2">
               {KINDS.map((k) => (
                 <option key={k} value={k}>
                   {t(`kind_${k}`)}
@@ -129,7 +132,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{t("target")}</span>
-            <select name="target" required className="min-h-10 rounded-md border border-border bg-background px-2">
+            <select name="target" required className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2">
               {options.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}
