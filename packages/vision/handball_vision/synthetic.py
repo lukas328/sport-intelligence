@@ -1,6 +1,7 @@
 """Synthetic handball footage with exact ground truth (source: "synthetic").
 
-Renders a fixed, elevated sideline camera (perspective, like a club camera on the balcony): wooden
+Renders an elevated sideline camera (perspective, like a club camera on the balcony), fixed or
+panning to follow play (`pan` > 0, tripod rotation, optional zoom), with a textured hall: wooden
 floor, court lines from the shared court geometry, 2 x 7 players in kit colours with numbers,
 2 referees and a ball. Players move in alternating attack and defence phases with switches of side,
 crossings and occlusions, so calibration, detection, tracking and team assignment can be measured
@@ -61,6 +62,9 @@ class SyntheticConfig:
     seed: int = 7
     kits: Kits = field(default_factory=Kits)
     noise: float = 3.0  # pixel noise sigma
+    pan: float = 0.0  # 0 = fixed camera; 1 = the camera centre follows the centre of play
+    zoom: float = 0.0  # relative focal change over a phase (0 = constant focal length)
+    walls: bool | None = None  # textured walls (banners, windows); default: on when panning
 
 
 @dataclass(frozen=True)
@@ -78,6 +82,7 @@ class GtFrame:
     index: int
     t_ms: int
     objects: list[GtObject]
+    homography: NDArray[np.float64] | None = None  # court -> image of this frame (panning camera)
 
 
 @dataclass
@@ -93,12 +98,11 @@ class _Agent:
 class SyntheticMatch:
     def __init__(self, cfg: SyntheticConfig | None = None) -> None:
         self.cfg = cfg or SyntheticConfig()
-        self.p = geometry.look_at_camera(
-            self.cfg.camera, self.cfg.target, self.cfg.focal_px, self.cfg.size
-        )
-        self.h = geometry.ground_homography(self.p)  # court -> image
+        self._view_x = self.cfg.target[0]
+        self._set_camera(0.0)
         rng = np.random.default_rng(self.cfg.seed)
         self.rng = rng
+        self._banners = self._make_banners(np.random.default_rng(self.cfg.seed + 1000))
         self.agents: list[_Agent] = []
         oid = 1
         for team in ("home", "away"):
@@ -134,6 +138,99 @@ class SyntheticMatch:
             if self.cfg.noise
             else []
         )
+
+    @property
+    def moving(self) -> bool:
+        return self.cfg.pan > 0 or self.cfg.zoom > 0
+
+    def _set_camera(self, t: float) -> None:
+        cfg = self.cfg
+        _, ty, tz = cfg.target
+        focal = cfg.focal_px * (1 + cfg.zoom * 0.5 * (1 - math.cos(2 * math.pi * t / cfg.phase_s)))
+        self.p = geometry.look_at_camera(cfg.camera, (self._view_x, ty, tz), focal, cfg.size)
+        self.h = geometry.ground_homography(self.p)  # court -> image
+
+    def _follow(self, dt: float) -> None:
+        """Camera operator: aim at the centre of the field players, with some lag."""
+        xs = [a.pos[0] for a in self.agents if a.label in ("home", "away")]
+        goal = self.cfg.target[0] + self.cfg.pan * (float(np.mean(xs)) - self.cfg.target[0])
+        self._view_x += (goal - self._view_x) * min(1.0, dt * 1.5)
+
+    def _clip_project(
+        self, poly: NDArray[np.float64], near: float = 0.3
+    ) -> NDArray[np.int32] | None:
+        """Project a planar 3D polygon, clipped against the camera's near plane."""
+        hom = np.hstack([poly, np.ones((len(poly), 1))]) @ self.p.T
+        depth = hom[:, 2]
+        out = []
+        for k in range(len(poly)):
+            a, b = hom[k], hom[(k + 1) % len(poly)]
+            da, db = depth[k], depth[(k + 1) % len(poly)]
+            if da > near:
+                out.append(a)
+            if (da > near) != (db > near):
+                s = (near - da) / (db - da)
+                out.append(a + s * (b - a))
+        if len(out) < 3:
+            return None
+        arr = np.array(out)
+        pts = np.clip(arr[:, :2] / arr[:, 2:3], -1e5, 1e5)
+        return pts.round().astype(np.int32)
+
+    def _make_banners(
+        self, rng: np.random.Generator
+    ) -> list[tuple[NDArray[np.float64], tuple[int, int, int]]]:
+        """Wall texture as 3D quads: ad banners, windows and pillars (needed to track a moving camera)."""
+        quads: list[tuple[NDArray[np.float64], tuple[int, int, int]]] = []
+
+        def colour() -> tuple[int, int, int]:
+            c = rng.integers(30, 250, 3)
+            return (int(c[0]), int(c[1]), int(c[2]))
+
+        x = -6.0
+        while x < 46:  # far wall (y = 24)
+            w = float(rng.uniform(2.0, 4.5))
+            quads.append(
+                (
+                    np.array([[x, 24, 0.2], [x + w, 24, 0.2], [x + w, 24, 1.2], [x, 24, 1.2]]),
+                    colour(),
+                )
+            )
+            if rng.random() < 0.5:
+                quads.append(
+                    (
+                        np.array(
+                            [
+                                [x + 0.3, 24, 4],
+                                [x + w - 0.3, 24, 4],
+                                [x + w - 0.3, 24, 6.5],
+                                [x + 0.3, 24, 6.5],
+                            ]
+                        ),
+                        (225, 220, 205),
+                    )
+                )
+            quads.append(
+                (
+                    np.array(
+                        [[x + w, 24, 0], [x + w + 0.4, 24, 0], [x + w + 0.4, 24, 8], [x + w, 24, 8]]
+                    ),
+                    (90, 95, 110),
+                )
+            )
+            x += w + 0.6
+        for wx in (-6.0, 46.0):  # end walls
+            y = -8.0
+            while y < 24:
+                d = float(rng.uniform(2.0, 4.0))
+                quads.append(
+                    (
+                        np.array([[wx, y, 0.2], [wx, y + d, 0.2], [wx, y + d, 1.4], [wx, y, 1.4]]),
+                        colour(),
+                    )
+                )
+                y += d + 0.8
+        return quads
 
     # ---- motion --------------------------------------------------------------------------
 
@@ -185,8 +282,17 @@ class SyntheticMatch:
         w, h = self.cfg.size
         img = np.zeros((h, w, 3), np.uint8)
         img[:] = (40, 45, 55)  # hall walls
-        floor = geometry.apply(self.h, np.array([[-6, -8], [46, -8], [46, 24], [-6, 24]]))
-        cv2.fillPoly(img, [floor.astype(np.int32)], (70, 135, 185))  # wooden floor (BGR)
+        walls = self.cfg.walls if self.cfg.walls is not None else self.moving
+        if walls:
+            for quad, col in self._banners:
+                poly = self._clip_project(quad)
+                if poly is not None:
+                    cv2.fillPoly(img, [poly], col)
+        floor = self._clip_project(
+            np.array([[-6, -8, 0], [46, -8, 0], [46, 24, 0], [-6, 24, 0]], float)
+        )
+        if floor is not None:
+            cv2.fillPoly(img, [floor], (70, 135, 185))  # wooden floor (BGR)
         # stripes of the parquet
         for x in np.arange(-4, 44, 0.5):
             seg = geometry.apply(self.h, np.array([[x, -3], [x, 23]])).astype(np.int32)
@@ -242,6 +348,10 @@ class SyntheticMatch:
         for i in range(n):
             t = i * dt
             self._step(t, dt)
+            if self.moving:
+                self._follow(dt)
+                self._set_camera(t)
+                self._background = self._render_background()
             img = self._background.copy()
             objects: list[GtObject] = []
             # painter's algorithm: far players first
@@ -304,7 +414,7 @@ class SyntheticMatch:
                 img = np.clip(
                     img.astype(np.int16) + self._noise[i % len(self._noise)], 0, 255
                 ).astype(np.uint8)
-            yield img, GtFrame(i, round(t * 1000), objects)
+            yield img, GtFrame(i, round(t * 1000), objects, self.h.copy() if self.moving else None)
 
     def write(self, path: Path, ffmpeg: str = "ffmpeg") -> list[GtFrame]:
         w, h = self.cfg.size

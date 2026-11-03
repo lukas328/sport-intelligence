@@ -3,6 +3,10 @@
 - `BackgroundDetector` (source "heuristic"): fixed cameras. A running median background, colour
   distance in Lab, morphology and connected components restricted to the court (+2 m). Blobs that
   are wider than a single player at that image position are split. No training data needed.
+- `MovingBackgroundDetector` (source "heuristic"): panning and zooming cameras. The background of
+  every frame is rendered from the hall panorama (`motion.CameraMotion`), the court homography of
+  the frame follows from the panorama calibration and the camera rotation; detection itself is the
+  same as for a fixed camera.
 - `OnnxDetector` (source "model"): runs any exported detector with the common
   [x1, y1, x2, y2, score, class] output, batched, on ONNX Runtime (CUDA EP when available).
   Weights come from the model registry, never from the repository (ADR 003).
@@ -48,21 +52,56 @@ class Detector(Protocol):
     def detect(self, frames: list[U8]) -> list[list[Detection]]: ...
 
 
+def _clip_front(
+    h: NDArray[np.float64], poly: NDArray[np.float64], eps: float = 1e-3
+) -> NDArray[np.float64]:
+    """Clip a court polygon to the part in front of the camera (homogeneous w > eps).
+
+    w is affine in court coordinates, so this is a half-plane clip (Sutherland-Hodgman). Needed for
+    panning cameras, where parts of the court can be behind the current view.
+    """
+    w = poly @ h[2, :2] + h[2, 2]
+    out: list[NDArray[np.float64]] = []
+    for k in range(len(poly)):
+        a, b, wa, wb = poly[k], poly[(k + 1) % len(poly)], w[k], w[(k + 1) % len(poly)]
+        if wa > eps:
+            out.append(a)
+        if (wa > eps) != (wb > eps):
+            out.append(a + (eps - wa) / (wb - wa) * (b - a))
+    return np.array(out).reshape(-1, 2)
+
+
 def court_mask(calib: Calibration, margin_m: float = 2.0) -> U8:
     w, h = calib.image_size
-    poly = calib.to_image(
-        np.array(
-            [
-                [-margin_m, -margin_m],
-                [40 + margin_m, -margin_m],
-                [40 + margin_m, 20 + margin_m],
-                [-margin_m, 20 + margin_m],
-            ]
-        )
+    court = np.array(
+        [
+            [-margin_m, -margin_m],
+            [40 + margin_m, -margin_m],
+            [40 + margin_m, 20 + margin_m],
+            [-margin_m, 20 + margin_m],
+        ]
     )
     mask = np.zeros((h, w), np.uint8)
-    cv2.fillPoly(mask, [poly.astype(np.int32)], 255)
+    front = _clip_front(calib.homography, court)
+    if len(front) >= 3:
+        poly = np.clip(calib.to_image(front), -1e5, 1e5)
+        cv2.fillPoly(mask, [poly.round().astype(np.int32)], 255)
     return mask
+
+
+def expected_height_grid(
+    calib: Calibration, xs: NDArray[np.float64], ys: NDArray[np.float64], player_m: float = 1.85
+) -> NDArray[np.float64]:
+    """Vectorised `expected_height_px` for image points (xs, ys); 0 where it is undefined."""
+    img = np.column_stack([xs.ravel(), ys.ravel()])
+    with np.errstate(all="ignore"):
+        court = calib.to_court(img)
+        half = np.array([0.5, 0.0])
+        a = calib.to_image(court - half)
+        b = calib.to_image(court + half)
+        out = np.linalg.norm(b - a, axis=1) * player_m
+    out = np.where(np.isfinite(out), out, 0.0)
+    return np.asarray(out.reshape(xs.shape), np.float64)
 
 
 def expected_height_px(
@@ -97,16 +136,11 @@ class BackgroundDetector:
 
     def _expected_height_table(self) -> NDArray[np.float64]:
         w, h = self.size
+        xs, ys = np.meshgrid(np.arange(0, w, 16, dtype=np.float64), np.arange(h, dtype=np.float64))
         table = np.zeros((h, w // 16 + 1))
-        for yi in range(h):
-            for xi in range(0, w, 16):
-                try:
-                    table[yi, xi // 16] = (
-                        expected_height_px(self.calib, (xi / self.scale, yi / self.scale))
-                        * self.scale
-                    )
-                except (ValueError, np.linalg.LinAlgError):
-                    table[yi, xi // 16] = 0
+        table[:, : xs.shape[1]] = (
+            expected_height_grid(self.calib, xs / self.scale, ys / self.scale) * self.scale
+        )
         return table
 
     def exp_h(self, x: float, y: float) -> float:
@@ -273,6 +307,64 @@ class OnnxDetector:
                     )
                 out.append(dets)
         return out
+
+
+class MovingBackgroundDetector(BackgroundDetector):
+    """Background subtraction for a moving camera: call `set_frame(i)` before `detect`."""
+
+    def __init__(
+        self,
+        canvas_calib: Calibration,
+        canvas_background: U8,
+        motion: Any,  # handball_vision.motion.CameraMotion (no import cycle)
+        threshold: float = 26.0,
+        scale: float = 0.5,
+    ) -> None:
+        self.canvas_calib = canvas_calib
+        self.canvas_background = canvas_background
+        self.motion = motion
+        self.scale = scale
+        self.threshold = threshold
+        w, h = motion.frame_size
+        self.size = (round(w * scale), round(h * scale))
+        self.calib = canvas_calib
+        self.mask = np.zeros((self.size[1], self.size[0]), np.uint8)
+        self.background = None
+        self._bg_f = np.zeros(0, np.float32)
+        self._exp = np.zeros((self.size[1], self.size[0] // 16 + 1))
+
+    def frame_calibration(self, index: int) -> Calibration | None:
+        h = self.motion.canvas_to_frame(index)
+        if h is None:
+            return None
+        return Calibration(
+            h @ self.canvas_calib.homography,
+            self.canvas_calib.confidence,
+            self.canvas_calib.reprojection_px,
+            self.canvas_calib.source,
+            self.motion.frame_size,
+        )
+
+    def set_frame(self, index: int) -> Calibration | None:
+        """Prepare court mask, expected heights and background for frame `index`."""
+        calib = self.frame_calibration(index)
+        rendered = self.motion.render_from_canvas(self.canvas_background, index, self.scale)
+        if calib is None or rendered is None:
+            return None
+        self.calib = calib
+        bg, valid = rendered
+        mask = cv2.resize(court_mask(calib), self.size, interpolation=cv2.INTER_NEAREST)
+        self.mask = cv2.bitwise_and(mask, cv2.erode(valid, np.ones((5, 5), np.uint8)))
+        self._exp = self._expected_height_table()
+        self.background = cv2.cvtColor(bg, cv2.COLOR_BGR2LAB)
+        self._bg_f = self.background.astype(np.float32)
+        return calib
+
+    def warm_up(self, frames: list[U8]) -> None:  # background comes from the panorama
+        return None
+
+    def _update(self, lab: U8, foreground: U8 | None) -> None:
+        return None
 
 
 def foot_positions(calib: Calibration, dets: list[Detection]) -> NDArray[np.float64]:

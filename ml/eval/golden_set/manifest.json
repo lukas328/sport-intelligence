@@ -1,5 +1,5 @@
 {
-  "$comment": "Golden set manifest (BRIEF 10.3). Videos and annotations live in the test-data bucket (ADR 002), never in git. Add entries with `make testdata-push` / scripts/testdata.py. Committed: no player names. Fields per match: id, key, sha256, bytes, camera (fixed|auto-follow|handheld|unknown), camera_system, venue, level, resolution, fps, duration_s, minors, consent (club|public|unknown), score, annotations (object key or null), notes, added.",
+  "$comment": "Golden set manifest (BRIEF 10.3). Videos and annotations live in the test-data bucket (ADR 002), never in git. Add entries with `make testdata-push` / scripts/testdata.py. Committed: no player names. Fields per match: id, key, sha256, bytes, camera (fixed|auto-follow|handheld|unknown), camera_system, venue, level, resolution, fps, duration_s, minors, consent (club|public|unknown), score, annotations (object key or null), calibration (optional, clicked points: {\"frame\": index, \"points\": [{\"image\": [x, y], \"court\": [x_m, y_m]}, ...]}, used by ml/eval/real.py when automatic calibration fails), notes, added.",
   "version": 1,
   "matches": [
     {
