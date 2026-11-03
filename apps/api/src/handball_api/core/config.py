@@ -48,6 +48,16 @@ class Settings(BaseSettings):
     # billing (BRIEF 13): off in development and CI, on in production
     billing_enforce: bool = False
     # annual subscription by Swiss QR bill (addendum 01, 4.10); creditor = the operating company
+    # support (addendum 01, 4.11/4.12): adapters stay off without configuration
+    support_email: str = "support@handball-ai.ch"
+    crisp_website_id: str | None = None
+    status_page_url: str | None = None
+    status_page_push_url: str | None = None  # provider webhook for component status
+    status_page_token: SecretStr | None = None
+    help_base_url: str = "https://handball-ai.ch/hilfe"
+    raw_video_days: int = 90  # originals reduced to the compressed version after this
+    alert_cost_chf_per_match: float = 2.0
+    alert_analysis_minutes: float = 45.0
     invoice_creditor_name: str = "Handball AI GmbH"
     invoice_creditor_street: str = "Musterstrasse 1"
     invoice_creditor_pcode: str = "3000"

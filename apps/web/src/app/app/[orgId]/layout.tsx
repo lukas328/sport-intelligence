@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { CSSProperties, ReactNode } from "react";
 import { LogoutButton } from "@/components/logout-button";
+import { SupportBar } from "@/components/support/support-bar";
 import { NotificationBell } from "@/components/training/bell";
 import { serverApi } from "@/lib/api";
 import { accentFor } from "@/lib/color";
@@ -48,6 +49,7 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           <Link href={`/app/${org.id}/settings`} className="rounded px-3 py-2 hover:bg-surface">
             {t("common.settings")}
           </Link>
+          <SupportBar orgId={org.id} />
           <NotificationBell orgId={org.id} />
           <LogoutButton />
         </nav>

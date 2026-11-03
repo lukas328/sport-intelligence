@@ -95,6 +95,76 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
             "{link}\n\nLe lien est valable {days} jours.",
         ),
     },
+    "onboarding_0": {
+        "de-CH": (
+            "Willkommen bei Handball AI",
+            "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Kader eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: Übersicht, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+        ),
+        "en": (
+            "Welcome to Handball AI",
+            "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the roster (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: overview, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+        ),
+        "fr": (
+            "Bienvenue sur Handball AI",
+            "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir l'effectif (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : vue d'ensemble, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+        ),
+    },
+    "onboarding_1": {
+        "de-CH": (
+            "So filmst du ein Spiel richtig",
+            "Hallo {name}\n\nfür eine gute Analyse: Kamera erhöht (Tribüne oder Stativ ab 3 m), ganzes Spielfeld im Bild, quer filmen, nicht zoomen. Das Hallen-WLAN braucht es nicht, hochladen geht auch später.\n\nAnleitung mit Bildern:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+        ),
+        "en": (
+            "How to film a match",
+            "Hello {name}\n\nfor a good analysis: camera up high (stands or tripod from 3 m), the whole court in the picture, landscape, no zoom. You do not need the hall Wi-Fi, upload later.\n\nGuide with pictures:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+        ),
+        "fr": (
+            "Comment filmer un match",
+            "Bonjour {name}\n\npour une bonne analyse : caméra en hauteur (tribune ou trépied dès 3 m), tout le terrain dans l'image, en paysage, sans zoom. Le Wi-Fi de la salle n'est pas nécessaire, l'envoi peut se faire plus tard.\n\nGuide illustré :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+        ),
+    },
+    "onboarding_3": {
+        "de-CH": (
+            "Die Videositzung in 5 Minuten",
+            "Hallo {name}\n\nmit Szenen-Suche und Präsentation stellst du die Videositzung schnell zusammen: Szenen filtern, mit eigenen Tags markieren, als Folien übernehmen, mit dem Handy weiterschalten.\n\nSo geht's:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+        ),
+        "en": (
+            "The video session in 5 minutes",
+            "Hello {name}\n\nwith the scene search and presentations you build the video session quickly: filter scenes, mark them with your own tags, add them as slides, click through with your phone.\n\nHow it works:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+        ),
+        "fr": (
+            "La séance vidéo en 5 minutes",
+            "Bonjour {name}\n\navec la recherche de scènes et les présentations, la séance vidéo est vite prête : filtrer les scènes, les marquer avec vos tags, les reprendre en diapositives, avancer avec le téléphone.\n\nMode d'emploi :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+        ),
+    },
+    "onboarding_7": {
+        "de-CH": (
+            "Deine Spieler mitnehmen",
+            "Hallo {name}\n\nlade dein Team ein: Spieler sehen nach jedem Spiel ihre wichtigsten Szenen und schätzen sich zuerst selbst ein. Eltern verwalten die Einwilligungen ihrer Kinder.\n\nTeam einladen:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+        ),
+        "en": (
+            "Bring your players along",
+            "Hello {name}\n\ninvite your team: after every match players see their most important scenes and rate themselves first. Parents manage their children's consents.\n\nInvite the team:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+        ),
+        "fr": (
+            "Embarquez vos joueur·euse·s",
+            "Bonjour {name}\n\ninvitez votre équipe : après chaque match, les joueur·euse·s voient leurs scènes les plus importantes et s'évaluent d'abord. Les parents gèrent les consentements de leurs enfants.\n\nInviter l'équipe :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+        ),
+    },
+    "onboarding_14": {
+        "de-CH": (
+            "Wie läuft es?",
+            "Hallo {name}\n\nzwei Wochen mit Handball AI: Was hilft dir, was fehlt? Antworte einfach auf diese E-Mail oder nutze den Feedback-Knopf in der App. Wir lesen alles.\n\nZur App:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+        ),
+        "en": (
+            "How is it going?",
+            "Hello {name}\n\ntwo weeks with Handball AI: what helps, what is missing? Just reply to this e-mail or use the feedback button in the app. We read everything.\n\nTo the app:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+        ),
+        "fr": (
+            "Comment ça se passe ?",
+            "Bonjour {name}\n\ndeux semaines avec Handball AI : qu'est-ce qui vous aide, qu'est-ce qui manque ? Répondez simplement à cet e-mail ou utilisez le bouton de feedback dans l'app. Nous lisons tout.\n\nVers l'app :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+        ),
+    },
 }
 
 

@@ -536,7 +536,18 @@
     "duration": "Analysedauer {seconds} s",
     "autoSummary": "Automatisch erkannt: {events} Ereignisse (Anwürfe, Tore aus dem Anwurf) und {possessions} Angriffe, als geschätzt markiert.",
     "autoNoGoalkeepers": "Ohne erkannte Torhüter können Seiten, Angriffe und Tore nicht automatisch bestimmt werden.",
-    "autoLimits": "Würfe, Paraden und Ballverluste brauchen die Ballerkennung und kommen aus Erfassung oder Import."
+    "autoLimits": "Würfe, Paraden und Ballverluste brauchen die Ballerkennung und kommen aus Erfassung oder Import.",
+    "failure_calibration": "Das Spielfeld wurde nicht erkannt.",
+    "failureNext_calibration": "Setze im Video 4 Punkte des Spielfelds von Hand (Spielfeld markieren), dann startet die Analyse neu. Für das nächste Spiel: Kamera höher und das ganze Feld im Bild.",
+    "failure_unreadable": "Die Videodatei konnte nicht gelesen werden.",
+    "failureNext_unreadable": "Lade die Originaldatei der Kamera nochmals hoch (MP4 oder MOV).",
+    "failure_too_short": "Das Video ist zu kurz für eine Analyse.",
+    "failureNext_too_short": "Lade das ganze Spiel hoch, mehrere Dateien sind möglich.",
+    "failure_timeout": "Die Analyse hat zu lange gedauert.",
+    "failureNext_timeout": "Wir haben das Problem notiert. Du kannst die Analyse neu starten oder Ereignisse von Hand erfassen.",
+    "failure_generic": "Die Analyse ist fehlgeschlagen.",
+    "failureNext_generic": "Das Video bleibt abspielbar: Erfasse Ereignisse von Hand oder importiere den Spielbericht. Wir schauen uns den Fall an.",
+    "failureCredit": "Dieses Spiel zählt nicht für dein Kontingent."
   },
   "tabs": {
     "video": "Video",
@@ -885,7 +896,9 @@
     "payment_failed": "Eine Zahlung ist fehlgeschlagen. Bitte Zahlungsmittel prüfen.",
     "subscription_canceled": "Das Abo wurde beendet. Es gilt wieder Free.",
     "feed_ready": "Deine Szenen aus dem letzten Spiel sind da.",
-    "scouting_ready": "Der Vorbereitungsbericht zum nächsten Gegner ist da."
+    "scouting_ready": "Der Vorbereitungsbericht zum nächsten Gegner ist da.",
+    "analysis_failed": "Die Analyse eines Spiels ist fehlgeschlagen. Das Spiel wurde dem Kontingent gutgeschrieben.",
+    "originals_purge": "In 7 Tagen werden {count} Originalvideos auf die komprimierte Fassung reduziert. Analyse und Wiedergabe bleiben unverändert."
   },
   "assignments": {
     "title": "Aufgaben",
@@ -1427,5 +1440,39 @@
     "open": "offen",
     "reminded": "erinnert",
     "dunned": "gemahnt"
+  },
+  "support": {
+    "help": "Hilfe",
+    "feedback": "Feedback",
+    "feedbackTitle": "Feedback und Hilfe",
+    "feedbackIntro": "Was klappt nicht oder fehlt? Seite, Spiel und Browser schicken wir automatisch mit.",
+    "message": "Deine Nachricht",
+    "screenshot": "Screenshot (optional, PNG)",
+    "send": "Senden",
+    "chat": "Chat öffnen",
+    "thanks": "Danke! Wir melden uns per E-Mail.",
+    "failed": "Senden hat nicht geklappt. Schreib an support@handball-ai.ch.",
+    "close": "Schliessen"
+  },
+  "checklist": {
+    "title": "Erste Schritte",
+    "progress": "{done} von {total} erledigt",
+    "step_team": "Team anlegen",
+    "step_roster": "Kader eintragen (mindestens 5 Spieler)",
+    "step_invite": "Jemanden einladen",
+    "step_demo": "Demo-Spiel ansehen",
+    "step_upload": "Erstes Spielvideo hochladen",
+    "step_analysis": "Erste Analyse ansehen",
+    "step_presentation": "Erste Präsentation erstellen",
+    "tryDemo": "Demo-Spiel öffnen",
+    "go": "Los",
+    "done": "erledigt",
+    "open": "offen"
+  },
+  "consentBanner": {
+    "title": "Nutzungsstatistik",
+    "text": "Dürfen wir anonyme Nutzungsstatistiken erfassen, um die App zu verbessern? Keine Videos, keine Namen, Daten in der EU.",
+    "yes": "Erlauben",
+    "no": "Ablehnen"
   }
 }

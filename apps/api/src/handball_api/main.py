@@ -37,6 +37,7 @@ from handball_api.routers import privacy as privacy_router
 from handball_api.routers import scouting as scouting_router
 from handball_api.routers import segments as segments_router
 from handball_api.routers import sharing as sharing_router
+from handball_api.routers import support as support_router
 from handball_api.routers import tactics as tactics_router
 from handball_api.routers import tags as tags_router
 from handball_api.routers import training as training_router
@@ -202,6 +203,7 @@ def create_app(
     app.include_router(highlights_router.router)
     app.include_router(scouting_router.router)
     app.include_router(segments_router.router)
+    app.include_router(support_router.router)
     app.include_router(presentations_router.router)
     app.include_router(internal.router)
     return app

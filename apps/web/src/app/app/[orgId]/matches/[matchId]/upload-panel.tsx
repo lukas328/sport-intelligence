@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -108,6 +109,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
         onProgress: (done) => setState((s) => (s.kind === "uploading" ? { ...s, done } : s)),
       });
       setState({ kind: "done" });
+      track("first_upload", { role });
       onUploaded();
     } catch (e) {
       if (e instanceof UploadAbortedError) setState({ kind: "paused", file });

@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
@@ -57,6 +58,10 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
   if (!feed) return <Alert>{t("none")}</Alert>;
   const scene = feed.items[index];
   const reasonKey = (r: string) => (feed.youth ? `youth_${r}` : `reason_${r}`);
+  if (typeof window !== "undefined" && !sessionStorage.getItem(`hb.fa.${matchId}`)) {
+    sessionStorage.setItem(`hb.fa.${matchId}`, "1");
+    track("player_active");
+  }
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -89,7 +94,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
           <label className="block text-sm font-medium" htmlFor="assess-text">
             {t("sentence")}
           </label>
-          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-md border border-border bg-bg p-2" />
+          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-md border border-border bg-background p-2" />
           <Button type="submit" disabled={!rating} loading={assess.isPending}>
             {t("send")}
           </Button>

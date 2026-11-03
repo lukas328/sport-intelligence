@@ -439,6 +439,9 @@ class AnalysisOut(ApiModel):
     detector: str | None
     elapsed_s: float | None
     error: str | None
+    error_code: str | None = Field(
+        default=None, description="calibration, unreadable, too_short, timeout or generic"
+    )
 
 
 class CalibrationPoint(ApiModel):

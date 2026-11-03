@@ -536,7 +536,18 @@
     "duration": "Durée d'analyse {seconds} s",
     "autoSummary": "Détecté automatiquement : {events} événements (engagements, buts déduits de l'engagement) et {possessions} attaques, marqués comme estimations.",
     "autoNoGoalkeepers": "Sans gardien·ne·s détecté·e·s, les côtés, attaques et buts ne peuvent pas être déterminés automatiquement.",
-    "autoLimits": "Les tirs, arrêts et pertes de balle nécessitent la détection du ballon et viennent de la saisie ou de l'import."
+    "autoLimits": "Les tirs, arrêts et pertes de balle nécessitent la détection du ballon et viennent de la saisie ou de l'import.",
+    "failure_calibration": "Le terrain n'a pas été reconnu.",
+    "failureNext_calibration": "Marquez 4 points du terrain à la main dans la vidéo, puis l'analyse redémarre. Prochain match : caméra plus haute et tout le terrain dans l'image.",
+    "failure_unreadable": "Le fichier vidéo n'a pas pu être lu.",
+    "failureNext_unreadable": "Renvoyez le fichier original de la caméra (MP4 ou MOV).",
+    "failure_too_short": "La vidéo est trop courte pour une analyse.",
+    "failureNext_too_short": "Envoyez tout le match, plusieurs fichiers sont possibles.",
+    "failure_timeout": "L'analyse a duré trop longtemps.",
+    "failureNext_timeout": "Nous avons noté le problème. Vous pouvez relancer l'analyse ou saisir les événements à la main.",
+    "failure_generic": "L'analyse a échoué.",
+    "failureNext_generic": "La vidéo reste lisible : saisissez les événements à la main ou importez la feuille de match. Nous examinons le cas.",
+    "failureCredit": "Ce match ne compte pas dans votre quota."
   },
   "tabs": {
     "video": "Vidéo",
@@ -885,7 +896,9 @@
     "payment_failed": "Un paiement a échoué. Vérifie le moyen de paiement.",
     "subscription_canceled": "L'abonnement est terminé. Le plan Free s'applique à nouveau.",
     "feed_ready": "Tes scènes du dernier match sont prêtes.",
-    "scouting_ready": "Le rapport de préparation pour le prochain adversaire est prêt."
+    "scouting_ready": "Le rapport de préparation pour le prochain adversaire est prêt.",
+    "analysis_failed": "L'analyse d'un match a échoué. Le match a été crédité sur votre quota.",
+    "originals_purge": "Dans 7 jours, {count} vidéos originales seront réduites à la version compressée. L'analyse et la lecture restent inchangées."
   },
   "assignments": {
     "title": "Tâches",
@@ -1427,5 +1440,39 @@
     "open": "ouverte",
     "reminded": "rappel envoyé",
     "dunned": "sommation envoyée"
+  },
+  "support": {
+    "help": "Aide",
+    "feedback": "Feedback",
+    "feedbackTitle": "Feedback et aide",
+    "feedbackIntro": "Qu'est-ce qui ne fonctionne pas ou manque ? Nous joignons automatiquement la page, le match et le navigateur.",
+    "message": "Votre message",
+    "screenshot": "Capture d'écran (facultatif, PNG)",
+    "send": "Envoyer",
+    "chat": "Ouvrir le chat",
+    "thanks": "Merci ! Nous répondons par e-mail.",
+    "failed": "L'envoi a échoué. Écrivez à support@handball-ai.ch.",
+    "close": "Fermer"
+  },
+  "checklist": {
+    "title": "Premiers pas",
+    "progress": "{done} sur {total} faits",
+    "step_team": "Créer une équipe",
+    "step_roster": "Saisir l'effectif (au moins 5 joueur·euse·s)",
+    "step_invite": "Inviter quelqu'un",
+    "step_demo": "Voir le match de démonstration",
+    "step_upload": "Envoyer la première vidéo de match",
+    "step_analysis": "Voir la première analyse",
+    "step_presentation": "Créer la première présentation",
+    "tryDemo": "Ouvrir le match de démonstration",
+    "go": "Aller",
+    "done": "fait",
+    "open": "ouvert"
+  },
+  "consentBanner": {
+    "title": "Statistiques d'utilisation",
+    "text": "Pouvons-nous collecter des statistiques d'utilisation anonymes pour améliorer l'app ? Pas de vidéos, pas de noms, données dans l'UE.",
+    "yes": "Autoriser",
+    "no": "Refuser"
   }
 }

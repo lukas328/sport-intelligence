@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -549,6 +550,10 @@ function AnalysisPanel({
   getTime: () => number;
 }) {
   const t = useTranslations("analysis");
+  const ready = analysis?.status === "ready";
+  useEffect(() => {
+    if (ready) track("analysis_viewed");
+  }, [ready]);
   if (!analysis || analysis.status === "none") return null;
   return (
     <Card className="space-y-3 p-3" data-testid="analysis-panel">
@@ -561,7 +566,13 @@ function AnalysisPanel({
         )}
       </div>
       {analysis.status === "running" && <p className="text-sm text-muted">{t("running")}</p>}
-      {analysis.status === "failed" && <Alert>{t("failed", { error: analysis.error ?? "" })}</Alert>}
+      {analysis.status === "failed" && (
+        <Alert>
+          <span className="block font-medium">{t(`failure_${analysis.error_code ?? "generic"}` as "failure_generic")}</span>
+          <span className="block">{t(`failureNext_${analysis.error_code ?? "generic"}` as "failureNext_generic")}</span>
+          <span className="block text-xs">{t("failureCredit")}</span>
+        </Alert>
+      )}
       {analysis.auto_events && (
         <p className="text-sm text-muted" data-testid="auto-events">
           {(analysis.auto_events.missing as string[] | undefined)?.includes("goalkeepers")

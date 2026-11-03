@@ -121,6 +121,18 @@
             ],
             "title": "Error"
           },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "calibration, unreadable, too_short, timeout or generic",
+            "title": "Error Code"
+          },
           "formations": {
             "items": {
               "$ref": "#/components/schemas/FormationSegment"
@@ -865,6 +877,36 @@
           "court"
         ],
         "title": "CalibrationPoint",
+        "type": "object"
+      },
+      "ChecklistItem": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link"
+          }
+        },
+        "required": [
+          "key",
+          "done",
+          "link"
+        ],
+        "title": "ChecklistItem",
         "type": "object"
       },
       "CheckoutIn": {
@@ -2293,6 +2335,70 @@
           "event_id"
         ],
         "title": "FeedSwap",
+        "type": "object"
+      },
+      "FeedbackIn": {
+        "properties": {
+          "browser": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Browser"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "message": {
+            "maxLength": 4000,
+            "minLength": 3,
+            "title": "Message",
+            "type": "string"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "screenshot": {
+            "anyOf": [
+              {
+                "maxLength": 3000000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "PNG data URL",
+            "title": "Screenshot"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "FeedbackIn",
         "type": "object"
       },
       "FormationSegment": {
@@ -7233,6 +7339,49 @@
         "title": "SubjectTeam",
         "type": "object"
       },
+      "SupportConfig": {
+        "properties": {
+          "chat": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chat"
+          },
+          "help_url": {
+            "title": "Help Url",
+            "type": "string"
+          },
+          "status_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Url"
+          },
+          "support_email": {
+            "title": "Support Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chat",
+          "status_url",
+          "help_url",
+          "support_email"
+        ],
+        "title": "SupportConfig",
+        "type": "object"
+      },
       "SyncOut": {
         "description": "Camera sync against the main video. `applied` is false when the audio match was too weak.",
         "properties": {
@@ -9811,6 +9960,30 @@
         ]
       }
     },
+    "/v1/ops/quality": {
+      "get": {
+        "description": "AI quality per week (confidence, correction rate), operations metrics and open alerts.",
+        "operationId": "quality_v1_ops_quality_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quality V1 Ops Quality Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Quality",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
     "/v1/ops/vouchers": {
       "get": {
         "operationId": "vouchers_v1_ops_vouchers_get",
@@ -10934,6 +11107,53 @@
         "summary": "Swap",
         "tags": [
           "feed"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/feedback": {
+      "post": {
+        "description": "Feedback button: the message goes to support with page, match, club and browser.",
+        "operationId": "feedback_v1_orgs__org_id__feedback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Feedback",
+        "tags": [
+          "support"
         ]
       }
     },
@@ -13771,6 +13991,53 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/onboarding/checklist": {
+      "get": {
+        "operationId": "checklist_v1_orgs__org_id__onboarding_checklist_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChecklistItem"
+                  },
+                  "title": "Response Checklist V1 Orgs  Org Id  Onboarding Checklist Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Checklist",
+        "tags": [
+          "support"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/opponents": {
       "get": {
         "operationId": "list_opponents_v1_orgs__org_id__opponents_get",
@@ -16485,6 +16752,60 @@
         "summary": "Create Assignment",
         "tags": [
           "training"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
+      "post": {
+        "description": "A demo match with events to try the analysis views (marked as demo, never counted).",
+        "operationId": "demo_match_v1_orgs__org_id__teams__team_id__demo_match_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Demo Match",
+        "tags": [
+          "support"
         ]
       }
     },
@@ -19250,6 +19571,27 @@
         "summary": "Public Media",
         "tags": [
           "sharing"
+        ]
+      }
+    },
+    "/v1/support/config": {
+      "get": {
+        "operationId": "config_v1_support_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportConfig"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Config",
+        "tags": [
+          "support"
         ]
       }
     }

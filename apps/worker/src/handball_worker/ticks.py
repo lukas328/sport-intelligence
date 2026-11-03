@@ -35,6 +35,12 @@ def scouting_tick(client: httpx.Client | None = None, reschedule: bool = True) -
         d = http.post(f"{base}/internal/billing/dunning", headers=headers)
         d.raise_for_status()
         log.info("dunning_tick", **d.json())
+        o = http.post(f"{base}/internal/onboarding/run", headers=headers)
+        o.raise_for_status()
+        log.info("onboarding_tick", **o.json())
+        ops = http.post(f"{base}/internal/ops/tick", headers=headers)
+        ops.raise_for_status()
+        log.info("ops_tick", retention=ops.json().get("retention"))
     except httpx.HTTPError as exc:
         log.warning("scouting_tick_failed", error=str(exc))
     finally:

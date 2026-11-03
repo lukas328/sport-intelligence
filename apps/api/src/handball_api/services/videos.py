@@ -29,6 +29,7 @@ from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
 from handball_api.services.segments import parse_recorded
+from handball_api.services.support import failure_code
 
 PIPELINE_VERSION = "0.2.0"
 INGEST_FUNC = "handball_worker.ingest.run_ingest"
@@ -396,8 +397,19 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         job.finished_at = now
         job.error = data.error
     if asset is not None and match is not None:
-        if data.status == JobStatus.FAILED and job.kind in ("analysis", "sync"):
-            pass  # the video stays playable; the error is shown on its own
+        if data.status == JobStatus.FAILED and job.kind == "analysis":
+            # the video stays playable (tagging and imports still work); the match is credited
+            match.quota_credit = True
+            await training.notify(
+                ctx,
+                match.organization_id,
+                await training.staff_of(ctx, match.team_id),
+                "analysis_failed",
+                {"match_id": str(match.id), "reason": failure_code(data.error)},
+                f"/app/{match.organization_id}/matches/{match.id}",
+            )
+        elif data.status == JobStatus.FAILED and job.kind == "sync":
+            pass  # the camera stays usable with a manual offset
         elif data.status == JobStatus.FAILED:
             asset.status = VideoStatus.FAILED
             asset.error = data.error
@@ -641,6 +653,9 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "formations": meta.get("formations") or [],
         "auto_events": meta.get("auto_events"),
         "error": job.error if job is not None and job.status == "failed" else None,
+        "error_code": failure_code(job.error)
+        if job is not None and job.status == "failed"
+        else None,
     }
 
 

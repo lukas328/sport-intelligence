@@ -11,7 +11,7 @@ from handball_api.core.errors import ProblemError
 from handball_api.models.enums import Plan
 from handball_api.routers.deps import Authed, AuthedDep
 from handball_api.schemas.common import ApiModel
-from handball_api.services import invoices
+from handball_api.services import invoices, monitoring
 from handball_api.services import ops as service
 
 
@@ -105,3 +105,16 @@ async def vouchers(op: OperatorDep) -> list[dict[str, Any]]:
 async def create_voucher(data: VoucherIn, op: OperatorDep) -> dict[str, Any]:
     await service._system(op.ctx, "voucher create")
     return await invoices.create_voucher(op.ctx, data.model_dump())
+
+
+@router.get("/quality", response_model=dict[str, Any])
+async def quality(op: OperatorDep) -> dict[str, Any]:
+    """AI quality per week (confidence, correction rate), operations metrics and open alerts."""
+    await service._system(op.ctx, "quality monitoring")
+    weeks = await monitoring.quality_weeks(op.ctx)
+    return {
+        "weeks": weeks,
+        "alert": monitoring.quality_alert(weeks),
+        "metrics": await monitoring.ops_metrics(op.ctx),
+        "alerts": await monitoring.alerts(op.ctx),
+    }

@@ -28,7 +28,7 @@ from handball_api.models import (
     User,
     VideoAsset,
 )
-from handball_api.models.enums import OrgRole, Plan
+from handball_api.models.enums import JobStatus, OrgRole, Plan
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.plans import FEATURES, GOALKEEPER_ADDON_CHF, PLANS, PlanSpec
@@ -99,13 +99,19 @@ async def usage(ctx: Ctx, org: Organization) -> dict[str, Any]:
     )
     gpu_seconds = await ctx.db.scalar(
         select(func.coalesce(func.sum(ProcessingJob.gpu_seconds), 0)).where(
-            ProcessingJob.organization_id == org.id, ProcessingJob.created_at >= month
+            ProcessingJob.organization_id == org.id,
+            ProcessingJob.created_at >= month,
+            ProcessingJob.status != JobStatus.FAILED,  # failed runs are not charged
         )
     )
     per_season = (
         await ctx.db.execute(
             select(Match.team_id, Match.season_id, func.count(Match.id))
-            .where(Match.organization_id == org.id, Match.is_demo.is_(False))
+            .where(
+                Match.organization_id == org.id,
+                Match.is_demo.is_(False),
+                Match.quota_credit.is_(False),
+            )
             .group_by(Match.team_id, Match.season_id)
         )
     ).all()
@@ -145,7 +151,10 @@ async def check_new_match(
         return
     count = await ctx.db.scalar(
         select(func.count(Match.id)).where(
-            Match.team_id == team_id, Match.season_id == season_id, Match.is_demo.is_(False)
+            Match.team_id == team_id,
+            Match.season_id == season_id,
+            Match.is_demo.is_(False),
+            Match.quota_credit.is_(False),  # failed analyses are credited (addendum 01, 4.11)
         )
     )
     if (count or 0) >= check[1].matches_per_season:

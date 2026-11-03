@@ -536,7 +536,18 @@
     "duration": "Analysis time {seconds} s",
     "autoSummary": "Detected automatically: {events} events (throw-offs, goals from the throw-off) and {possessions} attacks, marked as estimates.",
     "autoNoGoalkeepers": "Without detected goalkeepers, sides, attacks and goals cannot be determined automatically.",
-    "autoLimits": "Shots, saves and turnovers need ball detection and come from tagging or import."
+    "autoLimits": "Shots, saves and turnovers need ball detection and come from tagging or import.",
+    "failure_calibration": "The court was not recognised.",
+    "failureNext_calibration": "Mark 4 court points in the video by hand (mark the court), then the analysis restarts. Next match: camera higher and the whole court in the picture.",
+    "failure_unreadable": "The video file could not be read.",
+    "failureNext_unreadable": "Upload the camera's original file again (MP4 or MOV).",
+    "failure_too_short": "The video is too short for an analysis.",
+    "failureNext_too_short": "Upload the whole match, several files are possible.",
+    "failure_timeout": "The analysis took too long.",
+    "failureNext_timeout": "We have noted the problem. You can restart the analysis or tag events by hand.",
+    "failure_generic": "The analysis failed.",
+    "failureNext_generic": "The video stays playable: tag events by hand or import the match report. We will look into it.",
+    "failureCredit": "This match does not count against your plan."
   },
   "tabs": {
     "video": "Video",
@@ -885,7 +896,9 @@
     "payment_failed": "A payment failed. Please check the payment method.",
     "subscription_canceled": "The subscription ended. Free applies again.",
     "feed_ready": "Your scenes from the last match are ready.",
-    "scouting_ready": "The preparation report for the next opponent is ready."
+    "scouting_ready": "The preparation report for the next opponent is ready.",
+    "analysis_failed": "The analysis of a match failed. The match was credited to your plan.",
+    "originals_purge": "In 7 days {count} original videos will be reduced to the compressed version. Analysis and playback stay the same."
   },
   "assignments": {
     "title": "Assignments",
@@ -1427,5 +1440,39 @@
     "open": "open",
     "reminded": "reminded",
     "dunned": "final notice"
+  },
+  "support": {
+    "help": "Help",
+    "feedback": "Feedback",
+    "feedbackTitle": "Feedback and help",
+    "feedbackIntro": "What does not work or is missing? We send page, match and browser along automatically.",
+    "message": "Your message",
+    "screenshot": "Screenshot (optional, PNG)",
+    "send": "Send",
+    "chat": "Open chat",
+    "thanks": "Thank you! We will reply by e-mail.",
+    "failed": "Sending failed. Write to support@handball-ai.ch.",
+    "close": "Close"
+  },
+  "checklist": {
+    "title": "First steps",
+    "progress": "{done} of {total} done",
+    "step_team": "Create a team",
+    "step_roster": "Enter the roster (at least 5 players)",
+    "step_invite": "Invite someone",
+    "step_demo": "Look at the demo match",
+    "step_upload": "Upload the first match video",
+    "step_analysis": "Look at the first analysis",
+    "step_presentation": "Create the first presentation",
+    "tryDemo": "Open demo match",
+    "go": "Go",
+    "done": "done",
+    "open": "open"
+  },
+  "consentBanner": {
+    "title": "Usage statistics",
+    "text": "May we collect anonymous usage statistics to improve the app? No videos, no names, data in the EU.",
+    "yes": "Allow",
+    "no": "Decline"
   }
 }

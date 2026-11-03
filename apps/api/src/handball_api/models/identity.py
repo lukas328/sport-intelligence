@@ -27,6 +27,9 @@ class User(Base, EntityMixin):
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # onboarding e-mail series (addendum 01, 4.11): days already sent, opt-out
+    onboarding_sent: Mapped[list[int]] = mapped_column(JSONB, nullable=False, default=list)
+    onboarding_opt_out: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     @property
     def totp_enabled(self) -> bool:
