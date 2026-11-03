@@ -12,9 +12,18 @@ from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
 from handball_api.core.text import numbers_ok
-from handball_api.models import Event, Match, Opponent, RosterEntry, VideoAsset
+from handball_api.models import (
+    Event,
+    Match,
+    Opponent,
+    Organization,
+    Player,
+    RosterEntry,
+    Team,
+    VideoAsset,
+)
 from handball_api.models.enums import VideoRole
-from handball_api.services import billing
+from handball_api.services import billing, report_pdf
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
@@ -291,3 +300,61 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
         "scorers": [{"number": n, **v} for n, v in top],
         "formations_ms": formations,
     }
+
+
+async def match_pdf(ctx: Ctx, match_id: uuid.UUID, lang: str) -> tuple[bytes, str]:
+    """Printable match report (PDF) in the requested language."""
+    match = await get_match(ctx, match_id)
+    await billing.require_feature(ctx, "pdf_reports", match.organization_id)
+    org = await ctx.db.get(Organization, match.organization_id)
+    team = await ctx.db.get(Team, match.team_id)
+    opponent = await ctx.db.get(Opponent, match.opponent_id)
+    assert org is not None and team is not None
+    stats = await events_service.stats_for(ctx, match)
+    items: list[dict[str, Any]] = []
+    if stats["quality"]["events"] and billing.has_feature(ctx.settings, org, "insights"):
+        items = (await insights(ctx, match.id))["insights"]
+    rows = (
+        await ctx.db.execute(
+            select(
+                RosterEntry.player_id,
+                Player.first_name,
+                Player.last_name,
+            )
+            .join(Player, Player.id == RosterEntry.player_id)
+            .where(RosterEntry.season_id == match.season_id)
+        )
+    ).all()
+    names = {str(pid): f"{first} {last}" for pid, first, last in rows}
+    own, opp = team.name, opponent.name if opponent else ""
+    home, away = (own, opp) if match.is_home else (opp, own)
+    score = ht = None
+    if match.score_own is not None and match.score_opponent is not None:
+        a, b = (match.score_own, match.score_opponent)
+        score = f"{a}:{b}" if match.is_home else f"{b}:{a}"
+    if match.halftime_own is not None and match.halftime_opponent is not None:
+        a, b = (match.halftime_own, match.halftime_opponent)
+        ht = f"{a}:{b}" if match.is_home else f"{b}:{a}"
+    subtitle = " · ".join(
+        x
+        for x in (match.kickoff_at.strftime("%d.%m.%Y %H:%M"), match.competition, match.venue)
+        if x
+    )
+    pdf = report_pdf.render(
+        lang,
+        {"name": org.name, "primary_color": org.primary_color},
+        {
+            "home": home,
+            "away": away,
+            "own_name": own,
+            "opp_name": opp,
+            "score": score,
+            "halftime": ht,
+            "subtitle": subtitle,
+        },
+        stats,
+        items,
+        names,
+    )
+    filename = f"matchreport-{match.kickoff_at:%Y-%m-%d}-{opp}".lower().replace(" ", "-")
+    return pdf, "".join(c for c in filename if c.isalnum() or c in "-_") + ".pdf"

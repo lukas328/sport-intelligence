@@ -4,7 +4,7 @@ import { ShareButton } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { EmptyState } from "@/components/ui/card";
@@ -31,6 +31,7 @@ const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnail
 export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; initial: Match; teamName: string; staff: boolean }) {
   const t = useTranslations();
   const format = useFormatter();
+  const locale = useLocale();
   const qc = useQueryClient();
   const key = ["match", initial.id];
   const { data: match = initial } = useQuery({
@@ -120,6 +121,13 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             </span>
           )}
           <span className="rounded-full bg-surface px-3 py-1 text-sm">{t(`matches.status_${match.status}`)}</span>
+          <a
+            href={`/v1/orgs/${orgId}/matches/${match.id}/report.pdf?lang=${locale}`}
+            className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface"
+            data-testid="pdf"
+          >
+            {t("matches.pdf")}
+          </a>
           {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="match" targetId={match.id} />}
         </div>
       </header>

@@ -73,7 +73,7 @@ module = ["handball_vision.*", "handball_gpu_worker.analysis"]
 warn_return_any = false
 
 [[tool.mypy.overrides]]
-module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*"]
+module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*", "reportlab.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

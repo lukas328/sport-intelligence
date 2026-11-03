@@ -330,7 +330,8 @@
     "halftime": "Mi-temps",
     "saveScore": "Enregistrer le résultat",
     "deleteMatch": "Supprimer le match",
-    "deleteConfirm": "Supprimer définitivement le match avec toutes les vidéos et données ?"
+    "deleteConfirm": "Supprimer définitivement le match avec toutes les vidéos et données ?",
+    "pdf": "Rapport de match en PDF"
   },
   "upload": {
     "title": "Téléverser la vidéo",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, File, Query, UploadFile
+from fastapi import APIRouter, File, Query, Response, UploadFile
 
 from handball_api.models import Event
 from handball_api.routers.deps import OrgDep
@@ -118,3 +118,23 @@ async def season_stats(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) 
 async def opponent_profile(opponent_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
     """Scouting profile from all tagged matches against this opponent."""
     return await insights_service.opponent_profile(scope.ctx, opponent_id)
+
+
+@router.get(
+    "/matches/{match_id}/report.pdf",
+    response_class=Response,
+    tags=["insights"],
+    responses={200: {"content": {"application/pdf": {}}}},
+)
+async def match_report_pdf(
+    match_id: uuid.UUID,
+    scope: OrgDep,
+    lang: Annotated[str, Query(pattern="^(de-CH|en|fr)$")] = "de-CH",
+) -> Response:
+    """Match report as a PDF for printing and sending."""
+    pdf, filename = await insights_service.match_pdf(scope.ctx, match_id, lang)
+    return Response(
+        pdf,
+        media_type="application/pdf",
+        headers={"content-disposition": f'attachment; filename="{filename}"'},
+    )

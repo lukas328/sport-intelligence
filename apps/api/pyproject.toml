@@ -33,6 +33,7 @@ dependencies = [
   "handball-metrics",
   "anthropic>=1.0",
   "stripe>=12",
+  "reportlab>=4.2",
 ]
 
 [project.scripts]

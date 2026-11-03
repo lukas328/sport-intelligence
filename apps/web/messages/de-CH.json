@@ -330,7 +330,8 @@
     "halftime": "Halbzeit",
     "saveScore": "Resultat speichern",
     "deleteMatch": "Spiel löschen",
-    "deleteConfirm": "Spiel mit allen Videos und Daten endgültig löschen?"
+    "deleteConfirm": "Spiel mit allen Videos und Daten endgültig löschen?",
+    "pdf": "Matchreport als PDF"
   },
   "upload": {
     "title": "Video hochladen",

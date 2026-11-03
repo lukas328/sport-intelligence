@@ -330,7 +330,8 @@
     "halftime": "Half-time",
     "saveScore": "Save result",
     "deleteMatch": "Delete match",
-    "deleteConfirm": "Permanently delete the match with all videos and data?"
+    "deleteConfirm": "Permanently delete the match with all videos and data?",
+    "pdf": "Match report as PDF"
   },
   "upload": {
     "title": "Upload video",
