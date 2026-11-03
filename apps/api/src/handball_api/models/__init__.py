@@ -22,6 +22,7 @@ from handball_api.models.federation import (
     FederationMembership,
     Invoice,
     OrgShare,
+    Voucher,
 )
 from handball_api.models.identity import AuthSession, AuthToken, OAuthIdentity, User
 from handball_api.models.matches import (
@@ -128,4 +129,5 @@ __all__ = [
     "TrainingSession",
     "User",
     "VideoAsset",
+    "Voucher",
 ]

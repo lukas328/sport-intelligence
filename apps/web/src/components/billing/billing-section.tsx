@@ -4,6 +4,7 @@ import { problemCode } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
+import { InvoiceOrder } from "./invoice-order";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { api } from "@/lib/client";
@@ -136,6 +137,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
         {!b.checkout_available && <p className="text-xs text-muted">{t("unavailable")}</p>}
         {problem && <Alert>{problem === "two-factor-required" ? t("needs2fa") : t("failed")}</Alert>}
       </Card>
+      <InvoiceOrder orgId={orgId} goalkeepers={goalkeepers} />
     </section>
   );
 }

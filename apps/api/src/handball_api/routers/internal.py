@@ -17,7 +17,7 @@ from handball_api.models import ProcessingJob
 from handball_api.models.enums import JobStatus
 from handball_api.routers.deps import CtxDep
 from handball_api.schemas.matches import JobOut, JobUpdate
-from handball_api.services import highlights, presentations, scouting, videos
+from handball_api.services import highlights, invoices, presentations, scouting, videos
 
 router = APIRouter(prefix="/internal", include_in_schema=False)
 
@@ -104,3 +104,12 @@ async def highlight_done(
         raise ProblemError(403, "forbidden", "Invalid internal token")
     await enable_system_access(ctx.db, reason="highlight render callback")
     await highlights.done(ctx, reel_id, data.status, data.key, data.error)
+
+
+@router.post("/billing/dunning")
+async def dunning(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "") -> dict[str, int]:
+    """Worker tick: invoice reminders and final notices (addendum 01, 4.10)."""
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    await enable_system_access(ctx.db, reason="dunning run")
+    return await invoices.run_dunning(ctx)

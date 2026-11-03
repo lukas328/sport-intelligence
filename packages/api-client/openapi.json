@@ -253,6 +253,49 @@
         "title": "AnnotationOut",
         "type": "object"
       },
+      "AnnualPrice": {
+        "properties": {
+          "contact": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Contact",
+            "type": "object"
+          },
+          "months": {
+            "title": "Months",
+            "type": "integer"
+          },
+          "net_cents": {
+            "title": "Net Cents",
+            "type": "integer"
+          },
+          "payment_days": {
+            "title": "Payment Days",
+            "type": "integer"
+          },
+          "vat_rate_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Rate Percent"
+          }
+        },
+        "required": [
+          "net_cents",
+          "months",
+          "vat_rate_percent",
+          "payment_days",
+          "contact"
+        ],
+        "title": "AnnualPrice",
+        "type": "object"
+      },
       "ArrowIn": {
         "properties": {
           "kind": {
@@ -523,6 +566,88 @@
           "y"
         ],
         "title": "BallIn",
+        "type": "object"
+      },
+      "BillingContact": {
+        "properties": {
+          "attention": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "e.g. the treasurer",
+            "title": "Attention"
+          },
+          "city": {
+            "maxLength": 35,
+            "minLength": 1,
+            "title": "City",
+            "type": "string"
+          },
+          "country": {
+            "default": "CH",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Country",
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "locale": {
+            "default": "de-CH",
+            "pattern": "^(de-CH|fr|en)$",
+            "title": "Locale",
+            "type": "string"
+          },
+          "name": {
+            "description": "club name on the invoice",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "pcode": {
+            "maxLength": 16,
+            "minLength": 3,
+            "title": "Pcode",
+            "type": "string"
+          },
+          "street": {
+            "maxLength": 70,
+            "minLength": 1,
+            "title": "Street",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "street",
+          "pcode",
+          "city",
+          "email"
+        ],
+        "title": "BillingContact",
+        "type": "object"
+      },
+      "Body_camt054_v1_ops_invoices_camt054_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_camt054_v1_ops_invoices_camt054_post",
         "type": "object"
       },
       "Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post": {
@@ -2632,6 +2757,160 @@
         "title": "InvitationPreview",
         "type": "object"
       },
+      "InvoiceOrder": {
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/BillingContact"
+          },
+          "goalkeeper_seats": {
+            "default": 0,
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Goalkeeper Seats",
+            "type": "integer"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          },
+          "voucher": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voucher"
+          }
+        },
+        "required": [
+          "plan",
+          "contact"
+        ],
+        "title": "InvoiceOrder",
+        "type": "object"
+      },
+      "InvoiceOut": {
+        "properties": {
+          "amount_cents": {
+            "title": "Amount Cents",
+            "type": "integer"
+          },
+          "discount_cents": {
+            "title": "Discount Cents",
+            "type": "integer"
+          },
+          "due_date": {
+            "format": "date",
+            "title": "Due Date",
+            "type": "string"
+          },
+          "dunning_level": {
+            "title": "Dunning Level",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "issued_on": {
+            "format": "date",
+            "title": "Issued On",
+            "type": "string"
+          },
+          "net_cents": {
+            "title": "Net Cents",
+            "type": "integer"
+          },
+          "number": {
+            "title": "Number",
+            "type": "string"
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "period_end": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period End"
+          },
+          "period_start": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Start"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "vat_cents": {
+            "title": "Vat Cents",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "plan",
+          "amount_cents",
+          "net_cents",
+          "discount_cents",
+          "vat_cents",
+          "issued_on",
+          "due_date",
+          "period_start",
+          "period_end",
+          "paid_at",
+          "dunning_level",
+          "reference"
+        ],
+        "title": "InvoiceOut",
+        "type": "object"
+      },
       "JobOut": {
         "properties": {
           "error": {
@@ -4277,6 +4556,24 @@
           }
         },
         "title": "OrgUpdate",
+        "type": "object"
+      },
+      "PaidIn": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "title": "PaidIn",
         "type": "object"
       },
       "PartOrder": {
@@ -8033,6 +8330,77 @@
         "title": "VideoUpdate",
         "type": "object"
       },
+      "VoucherIn": {
+        "properties": {
+          "code": {
+            "maxLength": 40,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9-]+$",
+            "title": "Code",
+            "type": "string"
+          },
+          "federation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Federation Id"
+          },
+          "max_uses": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Uses"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "percent_off": {
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Percent Off",
+            "type": "integer"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          }
+        },
+        "required": [
+          "code",
+          "percent_off"
+        ],
+        "title": "VoucherIn",
+        "type": "object"
+      },
       "handball_api__schemas__auth__TokenIn": {
         "properties": {
           "token": {
@@ -9081,6 +9449,137 @@
         ]
       }
     },
+    "/v1/ops/invoices": {
+      "get": {
+        "operationId": "open_invoices_v1_ops_invoices_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Open Invoices V1 Ops Invoices Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Open Invoices",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/invoices/camt054": {
+      "post": {
+        "description": "Bank file (ISO 20022 camt.054): payments with QR reference and amount are matched.",
+        "operationId": "camt054_v1_ops_invoices_camt054_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_camt054_v1_ops_invoices_camt054_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "title": "Response Camt054 V1 Ops Invoices Camt054 Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Camt054",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/invoices/{invoice_id}/paid": {
+      "post": {
+        "operationId": "mark_paid_v1_ops_invoices__invoice_id__paid_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invoice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invoice Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaidIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Mark Paid V1 Ops Invoices  Invoice Id  Paid Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mark Paid",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
     "/v1/ops/jobs/failed": {
       "get": {
         "operationId": "failed_jobs_v1_ops_jobs_failed_get",
@@ -9307,6 +9806,73 @@
           }
         },
         "summary": "Overview",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/vouchers": {
+      "get": {
+        "operationId": "vouchers_v1_ops_vouchers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Vouchers V1 Ops Vouchers Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Vouchers",
+        "tags": [
+          "ops"
+        ]
+      },
+      "post": {
+        "operationId": "create_voucher_v1_ops_vouchers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoucherIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Voucher V1 Ops Vouchers Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Voucher",
         "tags": [
           "ops"
         ]
@@ -9649,6 +10215,68 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/billing/annual": {
+      "get": {
+        "description": "Price of the annual subscription by invoice and the stored billing contact.",
+        "operationId": "annual_price_v1_orgs__org_id__billing_annual_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "plan",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Plan"
+            }
+          },
+          {
+            "in": "query",
+            "name": "goalkeeper_seats",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Goalkeeper Seats",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnualPrice"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Annual Price",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/billing/checkout": {
       "post": {
         "description": "Stripe Checkout for a paid plan (30-day trial on the first subscription).",
@@ -9698,6 +10326,154 @@
           }
         },
         "summary": "Checkout",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/billing/invoices": {
+      "get": {
+        "operationId": "list_invoices_v1_orgs__org_id__billing_invoices_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceOut"
+                  },
+                  "title": "Response List Invoices V1 Orgs  Org Id  Billing Invoices Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Invoices",
+        "tags": [
+          "billing"
+        ]
+      },
+      "post": {
+        "description": "Annual subscription by invoice: the plan starts now, the QR bill goes to the treasurer.",
+        "operationId": "order_invoice_v1_orgs__org_id__billing_invoices_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceOrder"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Order Invoice",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/billing/invoices/{invoice_id}/pdf": {
+      "get": {
+        "operationId": "invoice_pdf_v1_orgs__org_id__billing_invoices__invoice_id__pdf_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invoice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invoice Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Invoice Pdf",
         "tags": [
           "billing"
         ]

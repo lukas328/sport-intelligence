@@ -98,7 +98,9 @@
     "too-many-slides": "200 diapositives au maximum.",
     "image-too-large": "L'image ne doit pas dépasser 3 Mo.",
     "not-enough-scenes": "Un reel demande au moins 3 scènes sûres avec consentement.",
-    "consent-missing": "Pas de consentement pour des highlights publics de tous les joueur·euse·s montré·e·s."
+    "consent-missing": "Pas de consentement pour des highlights publics de tous les joueur·euse·s montré·e·s.",
+    "invalid-voucher": "Ce bon n'est pas valable.",
+    "invoice-open": "Il y a déjà une facture ouverte."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -989,7 +991,9 @@
     "goalkeepers": "Module gardien (CHF {price} par gardien et mois), nombre :",
     "unavailable": "Le paiement en ligne n'est pas encore configuré.",
     "needs2fa": "Les paiements nécessitent la connexion à deux facteurs.",
-    "failed": "Cela n'a pas fonctionné. Réessaie."
+    "failed": "Cela n'a pas fonctionné. Réessaie.",
+    "status_invoice_open": "facture ouverte",
+    "status_invoice_paid": "payé sur facture"
   },
   "share": {
     "button": "Partager",
@@ -1022,7 +1026,22 @@
     "plan": "Abonnement",
     "members": "Membres",
     "trial": "Essai Club 14 jours",
-    "trialUntil": "Essai jusqu'au {date}"
+    "trialUntil": "Essai jusqu'au {date}",
+    "invoices": "Factures",
+    "camt": "Rapprocher le fichier bancaire (camt.054) :",
+    "camtResult": "{matched} paiements rapprochés, {unmatched} non rapprochés.",
+    "invoiceNo": "Facture",
+    "club": "Club",
+    "amount": "CHF",
+    "due": "Échéance",
+    "state": "Statut",
+    "paid": "payée",
+    "markPaid": "Marquer comme payée",
+    "newVoucher": "Créer un bon",
+    "voucherCode": "Code",
+    "percentOff": "Rabais en %",
+    "note": "Note",
+    "uses": "utilisé {n} fois"
   },
   "privacy": {
     "title": "Données et compte",
@@ -1382,5 +1401,31 @@
     "confirmed": "Ordre confirmé.",
     "auto": "Ordre selon l'heure d'enregistrement. À modifier si besoin.",
     "boundary": "Un nouveau match commence probablement à {time} (pause de {pause} min, puis engagement). Diviser la vidéo à cet endroit ?"
+  },
+  "invoices": {
+    "title": "Abonnement annuel sur facture",
+    "intro": "Paiement par facture QR, idéal pour le ou la trésorier·ère. Prix annuel = {months} prix mensuels. L'abonnement commence tout de suite, délai de paiement {days} jours.",
+    "plan": "Abonnement",
+    "perYear": "par an",
+    "plusVat": "plus {rate} % TVA",
+    "clubName": "Club (destinataire de la facture)",
+    "attention": "À l'attention de (p. ex. trésorier·ère)",
+    "street": "Rue et numéro",
+    "pcode": "NPA",
+    "city": "Localité",
+    "email": "E-mail pour la facture",
+    "language": "Langue de la facture",
+    "voucher": "Bon (facultatif)",
+    "order": "Demander la facture",
+    "ordered": "La facture {number} a été créée et envoyée par e-mail. L'abonnement est actif.",
+    "list": "Factures",
+    "number": "N°",
+    "due": "Échéance",
+    "amount": "Montant",
+    "state": "Statut",
+    "paid": "payée",
+    "open": "ouverte",
+    "reminded": "rappel envoyé",
+    "dunned": "sommation envoyée"
   }
 }

@@ -98,7 +98,9 @@
     "too-many-slides": "Höchstens 200 Folien.",
     "image-too-large": "Das Bild darf höchstens 3 MB gross sein.",
     "not-enough-scenes": "Für ein Reel braucht es mindestens 3 sichere Szenen mit Einwilligung.",
-    "consent-missing": "Keine Einwilligung für öffentliche Highlights aller gezeigten Spieler."
+    "consent-missing": "Keine Einwilligung für öffentliche Highlights aller gezeigten Spieler.",
+    "invalid-voucher": "Dieser Gutschein ist nicht gültig.",
+    "invoice-open": "Es gibt schon eine offene Rechnung."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -989,7 +991,9 @@
     "goalkeepers": "Torhüter-Modul (CHF {price} pro Torhüter und Monat), Anzahl:",
     "unavailable": "Online-Zahlung ist noch nicht eingerichtet.",
     "needs2fa": "Für Zahlungen braucht es die Zwei-Faktor-Anmeldung.",
-    "failed": "Das hat nicht geklappt. Bitte erneut versuchen."
+    "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+    "status_invoice_open": "Rechnung offen",
+    "status_invoice_paid": "per Rechnung bezahlt"
   },
   "share": {
     "button": "Teilen",
@@ -1022,7 +1026,22 @@
     "plan": "Abo",
     "members": "Mitglieder",
     "trial": "14 Tage Verein testen",
-    "trialUntil": "Test bis {date}"
+    "trialUntil": "Test bis {date}",
+    "invoices": "Rechnungen",
+    "camt": "Bankdatei (camt.054) abgleichen:",
+    "camtResult": "{matched} Zahlungen zugeordnet, {unmatched} nicht zugeordnet.",
+    "invoiceNo": "Rechnung",
+    "club": "Verein",
+    "amount": "CHF",
+    "due": "Fällig",
+    "state": "Status",
+    "paid": "bezahlt",
+    "markPaid": "Als bezahlt markieren",
+    "newVoucher": "Gutschein anlegen",
+    "voucherCode": "Code",
+    "percentOff": "Rabatt in %",
+    "note": "Notiz",
+    "uses": "{n} Mal benutzt"
   },
   "privacy": {
     "title": "Daten und Konto",
@@ -1382,5 +1401,31 @@
     "confirmed": "Reihenfolge bestätigt.",
     "auto": "Reihenfolge automatisch aus der Aufnahmezeit. Bei Bedarf umstellen.",
     "boundary": "Bei {time} beginnt vermutlich ein neues Spiel (Pause von {pause} Min., dann Anwurf). Video dort aufteilen?"
+  },
+  "invoices": {
+    "title": "Jahresabo per Rechnung",
+    "intro": "Bezahlung per QR-Rechnung, ideal für den Kassier. Jahrespreis = {months} Monatspreise. Das Abo gilt sofort, Zahlungsfrist {days} Tage.",
+    "plan": "Abo",
+    "perYear": "pro Jahr",
+    "plusVat": "zuzüglich {rate} % MWST",
+    "clubName": "Verein (Rechnungsempfänger)",
+    "attention": "zu Handen (z.B. Kassier)",
+    "street": "Strasse und Nr.",
+    "pcode": "PLZ",
+    "city": "Ort",
+    "email": "E-Mail für die Rechnung",
+    "language": "Sprache der Rechnung",
+    "voucher": "Gutschein (optional)",
+    "order": "Rechnung anfordern",
+    "ordered": "Rechnung {number} wurde erstellt und per E-Mail verschickt. Das Abo ist aktiv.",
+    "list": "Rechnungen",
+    "number": "Nr.",
+    "due": "Fällig",
+    "amount": "Betrag",
+    "state": "Status",
+    "paid": "bezahlt",
+    "open": "offen",
+    "reminded": "erinnert",
+    "dunned": "gemahnt"
   }
 }

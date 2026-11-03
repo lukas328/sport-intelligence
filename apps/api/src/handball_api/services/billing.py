@@ -52,6 +52,11 @@ def effective_plan(org: Organization) -> Plan:
         return Plan.FREE
     if org.subscription_status in ACTIVE:
         return org.plan
+    # annual subscription by invoice: usable until paid_until (payment term plus dunning period)
+    if org.subscription_status in ("invoice_open", "invoice_paid") and (
+        org.paid_until and org.paid_until > _now()
+    ):
+        return org.plan
     if org.trial_ends_at and org.trial_ends_at > _now():
         return org.plan
     return Plan.FREE
@@ -178,6 +183,7 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
         "status": org.subscription_status,
         "trial_ends_at": org.trial_ends_at,
         "current_period_end": org.current_period_end,
+        "paid_until": org.paid_until,
         "goalkeeper_seats": org.goalkeeper_seats,
         "enforced": ctx.settings.billing_enforce,
         "checkout_available": ctx.settings.stripe_secret_key is not None,

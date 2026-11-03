@@ -17,6 +17,7 @@ class Email:
     subject: str
     text: str
     html: str | None = None
+    attachments: tuple[tuple[str, str, bytes], ...] = ()  # (filename, mime type, content)
 
 
 class EmailSender(Protocol):
@@ -57,6 +58,9 @@ class SmtpEmailSender:
         msg.set_content(email.text)
         if email.html:
             msg.add_alternative(email.html, subtype="html")
+        for name, mime, content in email.attachments:
+            maintype, subtype = mime.split("/", 1)
+            msg.add_attachment(content, maintype=maintype, subtype=subtype, filename=name)
         await aiosmtplib.send(
             msg,
             hostname=self.host,

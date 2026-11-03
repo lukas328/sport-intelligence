@@ -50,6 +50,7 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 "**/tests/**" = ["S", "PTH"]
 "packages/court/scripts/*.py" = ["E501"]
 "**/mail_templates.py" = ["E501"]
+"**/services/invoices.py" = ["E501"]  # mail texts in three languages
 # ffmpeg/ffprobe are called with fixed argument lists, never through a shell
 "apps/worker/src/handball_worker/media/*.py" = ["S603", "S404"]
 "apps/worker/src/handball_worker/export.py" = ["S603", "S404"]
@@ -75,7 +76,7 @@ module = ["handball_vision.*", "handball_gpu_worker.analysis"]
 warn_return_any = false
 
 [[tool.mypy.overrides]]
-module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*", "reportlab.*"]
+module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*", "reportlab.*", "qrbill.*", "svglib.*", "stdnum.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

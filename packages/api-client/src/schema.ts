@@ -496,6 +496,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/ops/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open Invoices */
+        get: operations["open_invoices_v1_ops_invoices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ops/invoices/camt054": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Camt054
+         * @description Bank file (ISO 20022 camt.054): payments with QR reference and amount are matched.
+         */
+        post: operations["camt054_v1_ops_invoices_camt054_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ops/invoices/{invoice_id}/paid": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Paid */
+        post: operations["mark_paid_v1_ops_invoices__invoice_id__paid_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/ops/jobs/failed": {
         parameters: {
             query?: never;
@@ -592,6 +646,24 @@ export interface paths {
         get: operations["overview_v1_ops_overview_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ops/vouchers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Vouchers */
+        get: operations["vouchers_v1_ops_vouchers_get"];
+        put?: never;
+        /** Create Voucher */
+        post: operations["create_voucher_v1_ops_vouchers_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -704,6 +776,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/billing/annual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Annual Price
+         * @description Price of the annual subscription by invoice and the stored billing contact.
+         */
+        get: operations["annual_price_v1_orgs__org_id__billing_annual_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/billing/checkout": {
         parameters: {
             query?: never;
@@ -718,6 +810,44 @@ export interface paths {
          * @description Stripe Checkout for a paid plan (30-day trial on the first subscription).
          */
         post: operations["checkout_v1_orgs__org_id__billing_checkout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/billing/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Invoices */
+        get: operations["list_invoices_v1_orgs__org_id__billing_invoices_get"];
+        put?: never;
+        /**
+         * Order Invoice
+         * @description Annual subscription by invoice: the plan starts now, the QR bill goes to the treasurer.
+         */
+        post: operations["order_invoice_v1_orgs__org_id__billing_invoices_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/billing/invoices/{invoice_id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Invoice Pdf */
+        get: operations["invoice_pdf_v1_orgs__org_id__billing_invoices__invoice_id__pdf_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2818,6 +2948,21 @@ export interface components {
             /** T Ms */
             t_ms: number;
         };
+        /** AnnualPrice */
+        AnnualPrice: {
+            /** Contact */
+            contact: {
+                [key: string]: string;
+            };
+            /** Months */
+            months: number;
+            /** Net Cents */
+            net_cents: number;
+            /** Payment Days */
+            payment_days: number;
+            /** Vat Rate Percent */
+            vat_rate_percent: number | null;
+        };
         /** ArrowIn */
         ArrowIn: {
             /**
@@ -2907,6 +3052,45 @@ export interface components {
             x: number;
             /** Y */
             y: number;
+        };
+        /** BillingContact */
+        BillingContact: {
+            /**
+             * Attention
+             * @description e.g. the treasurer
+             */
+            attention?: string | null;
+            /** City */
+            city: string;
+            /**
+             * Country
+             * @default CH
+             */
+            country?: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /**
+             * Locale
+             * @default de-CH
+             */
+            locale?: string;
+            /**
+             * Name
+             * @description club name on the invoice
+             */
+            name: string;
+            /** Pcode */
+            pcode: string;
+            /** Street */
+            street: string;
+        };
+        /** Body_camt054_v1_ops_invoices_camt054_post */
+        Body_camt054_v1_ops_invoices_camt054_post: {
+            /** File */
+            file: string;
         };
         /** Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post */
         Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post: {
@@ -3567,6 +3751,58 @@ export interface components {
             team_name: string | null;
             team_role: components["schemas"]["TeamRole"] | null;
         };
+        /** InvoiceOrder */
+        InvoiceOrder: {
+            contact: components["schemas"]["BillingContact"];
+            /**
+             * Goalkeeper Seats
+             * @default 0
+             */
+            goalkeeper_seats?: number;
+            plan: components["schemas"]["Plan"];
+            /** Voucher */
+            voucher?: string | null;
+        };
+        /** InvoiceOut */
+        InvoiceOut: {
+            /** Amount Cents */
+            amount_cents: number;
+            /** Discount Cents */
+            discount_cents: number;
+            /**
+             * Due Date
+             * Format: date
+             */
+            due_date: string;
+            /** Dunning Level */
+            dunning_level: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Issued On
+             * Format: date
+             */
+            issued_on: string;
+            /** Net Cents */
+            net_cents: number;
+            /** Number */
+            number: string;
+            /** Paid At */
+            paid_at: string | null;
+            /** Period End */
+            period_end: string | null;
+            /** Period Start */
+            period_start: string | null;
+            /** Plan */
+            plan: string | null;
+            /** Reference */
+            reference: string | null;
+            /** Vat Cents */
+            vat_cents: number;
+        };
         /** JobOut */
         JobOut: {
             /** Error */
@@ -4130,6 +4366,11 @@ export interface components {
             primary_color?: string | null;
             /** Secondary Color */
             secondary_color?: string | null;
+        };
+        /** PaidIn */
+        PaidIn: {
+            /** Note */
+            note?: string | null;
         };
         /** PartOrder */
         PartOrder: {
@@ -5428,6 +5669,21 @@ export interface components {
             /** Time Offset Ms */
             time_offset_ms: number;
         };
+        /** VoucherIn */
+        VoucherIn: {
+            /** Code */
+            code: string;
+            /** Federation Id */
+            federation_id?: string | null;
+            /** Max Uses */
+            max_uses?: number | null;
+            /** Note */
+            note?: string | null;
+            /** Percent Off */
+            percent_off: number;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
         /** TokenIn */
         handball_api__schemas__auth__TokenIn: {
             /** Token */
@@ -6269,6 +6525,102 @@ export interface operations {
             };
         };
     };
+    open_invoices_v1_ops_invoices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    camt054_v1_ops_invoices_camt054_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_camt054_v1_ops_invoices_camt054_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: {
+                            [key: string]: unknown;
+                        }[];
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_paid_v1_ops_invoices__invoice_id__paid_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invoice_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaidIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     failed_jobs_v1_ops_jobs_failed_get: {
         parameters: {
             query?: never;
@@ -6434,6 +6786,63 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    vouchers_v1_ops_vouchers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    create_voucher_v1_ops_vouchers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoucherIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -6666,6 +7075,40 @@ export interface operations {
             };
         };
     };
+    annual_price_v1_orgs__org_id__billing_annual_get: {
+        parameters: {
+            query: {
+                plan: components["schemas"]["Plan"];
+                goalkeeper_seats?: number;
+            };
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnualPrice"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     checkout_v1_orgs__org_id__billing_checkout_post: {
         parameters: {
             query?: never;
@@ -6688,6 +7131,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UrlOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_invoices_v1_orgs__org_id__billing_invoices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    order_invoice_v1_orgs__org_id__billing_invoices_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvoiceOrder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invoice_pdf_v1_orgs__org_id__billing_invoices__invoice_id__pdf_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invoice_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
                 };
             };
             /** @description Validation Error */

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
+from typing import Any
 
 from sqlalchemy import Date, DateTime, ForeignKey, Integer, SmallInteger, String, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from handball_api.core.db import Base, EntityMixin, TenantMixin
@@ -66,6 +68,36 @@ class Invoice(Base, EntityMixin, TenantMixin):
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     stripe_invoice_id: Mapped[str | None] = mapped_column(String(80))
     pdf_key: Mapped[str | None] = mapped_column(String(300))
+    plan: Mapped[str | None] = mapped_column(String(20))
+    period_start: Mapped[date | None] = mapped_column(Date)
+    period_end: Mapped[date | None] = mapped_column(Date)
+    net_cents: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    discount_cents: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    vat_cents: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    vat_rate_bp: Mapped[int] = mapped_column(Integer, nullable=False, default=0)  # 810 = 8.10 %
+    reference: Mapped[str | None] = mapped_column(String(40), unique=True)  # RF creditor ref.
+    voucher_code: Mapped[str | None] = mapped_column(String(40))
+    lines: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False, default=list)
+    recipient: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    paid_note: Mapped[str | None] = mapped_column(String(200))
+
+
+class Voucher(Base, EntityMixin):
+    """Discount code (federation contracts, volume discounts); managed in the backoffice."""
+
+    __tablename__ = "vouchers"
+
+    code: Mapped[str] = mapped_column(String(40), nullable=False, unique=True)
+    percent_off: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)
+    federation_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("federations.id", ondelete="SET NULL")
+    )
+    valid_until: Mapped[date | None] = mapped_column(Date)
+    max_uses: Mapped[int | None] = mapped_column(Integer)
+    uses: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    note: Mapped[str | None] = mapped_column(String(200))
 
 
 class OrgShare(Base, EntityMixin, TenantMixin):

@@ -47,6 +47,18 @@ class Settings(BaseSettings):
     operator_emails: list[str] = Field(default_factory=list)
     # billing (BRIEF 13): off in development and CI, on in production
     billing_enforce: bool = False
+    # annual subscription by Swiss QR bill (addendum 01, 4.10); creditor = the operating company
+    invoice_creditor_name: str = "Handball AI GmbH"
+    invoice_creditor_street: str = "Musterstrasse 1"
+    invoice_creditor_pcode: str = "3000"
+    invoice_creditor_city: str = "Bern"
+    invoice_creditor_country: str = "CH"
+    invoice_iban: str = "CH9300762011623852957"  # example IBAN (RF reference); set in deployments
+    invoice_uid: str | None = None  # CHE-xxx.xxx.xxx MWST when VAT registered
+    invoice_vat_registered: bool = False  # see OPEN_QUESTIONS Q-ADD-3
+    invoice_vat_rate_percent: float = 8.1
+    invoice_payment_days: int = 30
+    invoice_annual_months: int = 10  # annual price = 10 monthly prices (two months free)
     stripe_secret_key: SecretStr | None = None
     stripe_webhook_secret: SecretStr | None = None
     stripe_price_team: str | None = None

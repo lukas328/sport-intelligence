@@ -42,6 +42,8 @@ export const KNOWN_ERRORS = [
   "image-too-large",
   "not-enough-scenes",
   "consent-missing",
+  "invalid-voucher",
+  "invoice-open",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

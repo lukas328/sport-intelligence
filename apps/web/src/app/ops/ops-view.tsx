@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 
 interface Overview {
@@ -138,6 +139,111 @@ export function OpsView() {
           </table>
         </div>
       </section>
+      <OpsBilling />
     </div>
+  );
+}
+
+
+/** Invoices (mark paid, camt.054 matching) and vouchers (addendum 01, 4.10). */
+function OpsBilling() {
+  const t = useTranslations("ops");
+  const qc = useQueryClient();
+  const [camt, setCamt] = useState<string | null>(null);
+  const invoices = useQuery({
+    queryKey: ["ops-invoices"],
+    queryFn: async () => (await api.GET("/v1/ops/invoices")).data ?? [],
+  });
+  const vouchers = useQuery({
+    queryKey: ["ops-vouchers"],
+    queryFn: async () => (await api.GET("/v1/ops/vouchers")).data ?? [],
+  });
+  const paid = useMutation({
+    mutationFn: async (id: string) => api.POST("/v1/ops/invoices/{invoice_id}/paid", { params: { path: { invoice_id: id } }, body: { note: "manuell" } }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["ops-invoices"] }),
+  });
+  const voucher = useMutation({
+    mutationFn: async (body: { code: string; percent_off: number; note: string | null }) => api.POST("/v1/ops/vouchers", { body }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["ops-vouchers"] }),
+  });
+  async function upload(file: File) {
+    const body = new FormData();
+    body.append("file", file);
+    const res = await fetch("/v1/ops/invoices/camt054", {
+      method: "POST",
+      body,
+      credentials: "same-origin",
+      headers: { "x-csrf-token": document.cookie.match(/hb_csrf=([^;]+)/)?.[1] ?? "" },
+    });
+    const data = (await res.json()) as { matched?: unknown[]; unmatched?: unknown[] };
+    setCamt(t("camtResult", { matched: data.matched?.length ?? 0, unmatched: data.unmatched?.length ?? 0 }));
+    void qc.invalidateQueries({ queryKey: ["ops-invoices"] });
+  }
+  return (
+    <section className="space-y-3" aria-labelledby="ops-billing">
+      <h2 id="ops-billing" className="text-lg font-semibold">
+        {t("invoices")}
+      </h2>
+      <label className="block text-sm">
+        {t("camt")}
+        <input type="file" accept=".xml" className="ml-2" onChange={(e) => e.target.files?.[0] && void upload(e.target.files[0])} />
+      </label>
+      {camt && <p role="status" className="text-sm">{camt}</p>}
+      <table className="w-full text-sm" data-testid="ops-invoices">
+        <thead>
+          <tr className="text-left text-muted">
+            <th scope="col">{t("invoiceNo")}</th>
+            <th scope="col">{t("club")}</th>
+            <th scope="col" className="text-right">{t("amount")}</th>
+            <th scope="col">{t("due")}</th>
+            <th scope="col">{t("state")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(invoices.data ?? []).map((i) => (
+            <tr key={String(i.id)} className="border-t border-border">
+              <td>{String(i.number)}</td>
+              <td>{String(i.organization)}</td>
+              <td className="text-right tabular-nums">{(Number(i.amount_cents) / 100).toFixed(2)}</td>
+              <td>{String(i.due_date)}</td>
+              <td>
+                {i.paid_at ? (
+                  t("paid")
+                ) : (
+                  <Button variant="ghost" className="min-h-8 px-2 text-xs" onClick={() => paid.mutate(String(i.id))}>
+                    {t("markPaid")}
+                  </Button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <form
+        className="flex flex-wrap items-end gap-2"
+        aria-label={t("newVoucher")}
+        onSubmit={(e) => {
+          e.preventDefault();
+          const f = new FormData(e.currentTarget);
+          voucher.mutate({ code: String(f.get("code")), percent_off: Number(f.get("percent")), note: String(f.get("note") ?? "") || null });
+          e.currentTarget.reset();
+        }}
+      >
+        <Input label={t("voucherCode")} name="code" required pattern="[A-Za-z0-9-]+" />
+        <Input label={t("percentOff")} name="percent" type="number" min={1} max={100} required />
+        <Input label={t("note")} name="note" />
+        <Button type="submit" variant="secondary">
+          {t("newVoucher")}
+        </Button>
+      </form>
+      <ul className="text-sm">
+        {(vouchers.data ?? []).map((v) => (
+          <li key={String(v.code)}>
+            {String(v.code)} · {String(v.percent_off)} % · {t("uses", { n: Number(v.uses) })}
+            {v.note ? ` · ${String(v.note)}` : ""}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

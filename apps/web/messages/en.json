@@ -98,7 +98,9 @@
     "too-many-slides": "At most 200 slides.",
     "image-too-large": "The image may be at most 3 MB.",
     "not-enough-scenes": "A reel needs at least 3 confident scenes with consent.",
-    "consent-missing": "No consent for public highlights from every player shown."
+    "consent-missing": "No consent for public highlights from every player shown.",
+    "invalid-voucher": "This voucher is not valid.",
+    "invoice-open": "There is an open invoice already."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -989,7 +991,9 @@
     "goalkeepers": "Goalkeeper module (CHF {price} per goalkeeper and month), number:",
     "unavailable": "Online payment is not set up yet.",
     "needs2fa": "Payments need two-factor sign-in.",
-    "failed": "That did not work. Please try again."
+    "failed": "That did not work. Please try again.",
+    "status_invoice_open": "invoice open",
+    "status_invoice_paid": "paid by invoice"
   },
   "share": {
     "button": "Share",
@@ -1022,7 +1026,22 @@
     "plan": "Plan",
     "members": "Members",
     "trial": "14-day Club trial",
-    "trialUntil": "Trial until {date}"
+    "trialUntil": "Trial until {date}",
+    "invoices": "Invoices",
+    "camt": "Match bank file (camt.054):",
+    "camtResult": "{matched} payments matched, {unmatched} not matched.",
+    "invoiceNo": "Invoice",
+    "club": "Club",
+    "amount": "CHF",
+    "due": "Due",
+    "state": "Status",
+    "paid": "paid",
+    "markPaid": "Mark as paid",
+    "newVoucher": "Create voucher",
+    "voucherCode": "Code",
+    "percentOff": "Discount in %",
+    "note": "Note",
+    "uses": "used {n} times"
   },
   "privacy": {
     "title": "Data and account",
@@ -1382,5 +1401,31 @@
     "confirmed": "Order confirmed.",
     "auto": "Order taken from the recording time. Change it if needed.",
     "boundary": "A new match probably starts at {time} (pause of {pause} min, then a throw-off). Split the video there?"
+  },
+  "invoices": {
+    "title": "Annual subscription by invoice",
+    "intro": "Pay by Swiss QR bill, ideal for the treasurer. Annual price = {months} monthly prices. The subscription starts now, payment term {days} days.",
+    "plan": "Plan",
+    "perYear": "per year",
+    "plusVat": "plus {rate} % VAT",
+    "clubName": "Club (invoice recipient)",
+    "attention": "Attention of (e.g. treasurer)",
+    "street": "Street and number",
+    "pcode": "Postcode",
+    "city": "Town",
+    "email": "E-mail for the invoice",
+    "language": "Invoice language",
+    "voucher": "Voucher (optional)",
+    "order": "Request invoice",
+    "ordered": "Invoice {number} was created and sent by e-mail. The subscription is active.",
+    "list": "Invoices",
+    "number": "No.",
+    "due": "Due",
+    "amount": "Amount",
+    "state": "Status",
+    "paid": "paid",
+    "open": "open",
+    "reminded": "reminded",
+    "dunned": "final notice"
   }
 }

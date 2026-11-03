@@ -1,7 +1,7 @@
 """Periodic work driven by the worker: an hourly tick that re-schedules itself (RQ scheduler).
 
-Today: preparation reports 72 h before matches (addendum 01, 4.6). The API decides what is due;
-the worker only knocks.
+Today: preparation reports 72 h before matches (4.6) and invoice dunning (4.10). The API
+decides what is due; the worker only knocks.
 """
 
 from __future__ import annotations
@@ -25,13 +25,16 @@ def scouting_tick(client: httpx.Client | None = None, reschedule: bool = True) -
     created = 0
     try:
         http = client or httpx.Client(timeout=60)
-        r = http.post(
-            f"{settings.api_internal_url.rstrip('/')}/internal/scouting/due",
-            headers={"x-internal-token": settings.internal_token},
-        )
+        base = settings.api_internal_url.rstrip("/")
+        headers = {"x-internal-token": settings.internal_token}
+        r = http.post(f"{base}/internal/scouting/due", headers=headers)
         r.raise_for_status()
         created = int(r.json().get("created", 0))
         log.info("scouting_tick", created=created)
+        # invoice reminders and final notices (addendum 01, 4.10), idempotent
+        d = http.post(f"{base}/internal/billing/dunning", headers=headers)
+        d.raise_for_status()
+        log.info("dunning_tick", **d.json())
     except httpx.HTTPError as exc:
         log.warning("scouting_tick_failed", error=str(exc))
     finally:
