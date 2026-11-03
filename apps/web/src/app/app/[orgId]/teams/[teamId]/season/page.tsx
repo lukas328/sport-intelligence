@@ -4,7 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
 import { MatchScore } from "@/components/domain/match-score";
-import { Stage, stageButton } from "@/components/domain/stage";
+import { Stage, stageButton, stageLink } from "@/components/domain/stage";
 import { TeamSubNav } from "@/components/shell/section-nav";
 import { IconAsk } from "@/components/shell/icons";
 import { focusMetric, matchStatement, seasonStatement } from "@/lib/voice";
@@ -59,7 +59,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       <Link href={`${base}/matrix`} className={stageButton("outline")}>
         {tp("matrix")}
       </Link>
-      <Link href={`${base}/assistant`} className={stageButton("outline")}>
+      <Link href={`${base}/assistant`} className={stageLink}>
         <IconAsk />
         {tp("ask")}
       </Link>
@@ -73,13 +73,13 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   if (!seasonId || !data || data.matches.length === 0) {
     return (
       <div className="space-y-8">
-        <Stage>
+        <TeamSubNav />
+        <Stage pullMobile={false}>
           <p className="text-[0.9375rem] font-semibold">{label}</p>
           <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl">{tv("noMatchYet")}</h1>
           <p className="mt-4 max-w-lg text-lg">{t("none")}</p>
           {tools && <div className="mt-7 flex flex-wrap gap-3">{tools}</div>}
         </Stage>
-        <TeamSubNav />
       </div>
     );
   }
@@ -90,11 +90,11 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
   const lastResult = matchStatement({ own: last.score_own, opp: last.score_opponent, opponent: last.opponent });
   const focus = focusMetric({ save_pct: data.totals.save_pct, shooting_pct: data.totals.shooting_pct, turnovers_per_match: data.totals.turnovers / n });
-  const cells: { key: string; label: string; value: string | number; href: string; focus?: boolean }[] = [
+  const cells: { key: string; label: string; value: string | number; href: string; focus?: boolean; reference?: string }[] = [
     { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: (data.totals.goals / n).toFixed(1), href: `${base}/search?type=shot&outcome=goal&side=own` },
-    { key: "shooting", label: t("shootingPct"), value: pct(data.totals.shooting_pct), href: `${base}/search?type=shot&side=own`, focus: focus === "shooting_pct" },
-    { key: "save", label: t("savePct"), value: pct(data.totals.save_pct), href: `${base}/search?type=shot&outcome=save&side=opponent`, focus: focus === "save_pct" },
-    { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: (data.totals.turnovers / n).toFixed(1), href: `${base}/search?type=turnover&side=own`, focus: focus === "turnovers" },
+    { key: "shooting", label: t("shootingPct"), value: pct(data.totals.shooting_pct), href: `${base}/search?type=shot&side=own`, focus: focus === "shooting_pct", reference: "55 %" },
+    { key: "save", label: t("savePct"), value: pct(data.totals.save_pct), href: `${base}/search?type=shot&outcome=save&side=opponent`, focus: focus === "save_pct", reference: "30 %" },
+    { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: (data.totals.turnovers / n).toFixed(1), href: `${base}/search?type=turnover&side=own`, focus: focus === "turnovers", reference: "12" },
   ];
   const pick = (score: (r: Row) => number | null) =>
     data.matches.reduce<Row | null>((best, r) => (score(r) != null && (best == null || score(r)! > score(best)!) ? r : best), null);
@@ -113,11 +113,14 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const lastWon = last.score_own > last.score_opponent ? "won" : last.score_own < last.score_opponent ? "lost" : "draw";
   return (
     <div className="space-y-12">
+      <div className="space-y-5 lg:space-y-0">
+      <TeamSubNav />
       <Stage
+        pullMobile={false}
         aside={
           <Link href={`/app/${orgId}/matches/${last.match_id}`} className="group block text-left xl:text-center">
             <span className="block text-[0.9375rem] font-semibold">{tv("lastResult")}: {tm(lastWon)}</span>
-            <MatchScore own={last.score_own} opp={last.score_opponent} className="text-[5rem] leading-[0.85] xl:text-[clamp(4.5rem,6.6vw,7.5rem)]" />
+            <MatchScore own={last.score_own} opp={last.score_opponent} className="text-[5rem] leading-[0.85] xl:text-[clamp(3.5rem,4.6vw,5.25rem)]" />
             <span className="block text-[0.9375rem] group-hover:underline">{last.opponent}</span>
           </Link>
         }
@@ -134,7 +137,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           {tools}
         </div>
       </Stage>
-      <TeamSubNav />
+      </div>
 
       <section className="space-y-3">
         <h2 className="sr-only">{t("title")}</h2>
@@ -148,7 +151,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 i % 2 === 1 && "border-l border-foreground/15",
                 i >= 2 && "border-t border-foreground/15 lg:border-t-0",
                 i === 2 && "lg:border-l",
-                c.focus ? "bg-signal text-signal-ink" : "hover:bg-surface",
+                c.focus ? "bg-signal/25 shadow-[inset_0_4px_0_var(--signal)] hover:bg-signal/35 dark:bg-signal/15" : "hover:bg-surface",
               )}
             >
               <dt className="text-sm font-semibold">
@@ -156,6 +159,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 {c.focus && <span>, {tv("focus")}</span>}
               </dt>
               <dd className="mt-1 font-score text-[2.5rem] leading-none group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">{c.value}</dd>
+              {c.focus && c.reference && <dd className="mt-1 text-sm font-semibold">{tv("reference", { value: c.reference })}</dd>}
             </Link>
           ))}
         </dl>

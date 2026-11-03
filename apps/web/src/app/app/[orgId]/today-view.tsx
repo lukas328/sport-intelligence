@@ -10,7 +10,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { useInsightText, type InsightsData } from "@/components/analysis/insights";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { MatchScore } from "@/components/domain/match-score";
-import { Stage, StageTag, stageButton } from "@/components/domain/stage";
+import { Stage, StageTag, stageButton, stageLink } from "@/components/domain/stage";
 import { useShell } from "@/components/shell/context";
 import { IconAsk, IconScenes } from "@/components/shell/icons";
 import { OnboardingChecklist } from "@/components/support/checklist";
@@ -177,7 +177,7 @@ function NextStage({ orgId, m }: { orgId: string; m: Match }) {
     <Stage
       aside={
         <div className="text-left xl:text-center" aria-hidden>
-          <span className="block font-score text-[5rem] leading-[0.85] xl:text-[clamp(4rem,6vw,6.5rem)]">{format.dateTime(when, { hour: "2-digit", minute: "2-digit" })}</span>
+          <span className="block font-score text-[5rem] leading-[0.85] xl:text-[clamp(3.25rem,4.2vw,4.75rem)]">{format.dateTime(when, { hour: "2-digit", minute: "2-digit" })}</span>
           <span className="mt-2 block text-[0.9375rem] font-semibold">{format.dateTime(when, { weekday: "long", day: "numeric", month: "long" })}</span>
         </div>
       }
@@ -215,7 +215,7 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
       aside={
         m.score_own != null && m.score_opponent != null ? (
           <Link href={href} className="block text-left xl:text-center" aria-label={`${m.score_own}:${m.score_opponent}`}>
-            <MatchScore own={m.score_own} opp={m.score_opponent} className="text-[6rem] leading-[0.85] xl:text-[clamp(4.5rem,6.6vw,7.5rem)]" />
+            <MatchScore own={m.score_own} opp={m.score_opponent} className="text-[6rem] leading-[0.85] xl:text-[clamp(3.5rem,4.6vw,5.25rem)]" />
           </Link>
         ) : undefined
       }
@@ -243,7 +243,7 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
             {t("today.openMatch")}
           </Link>
         )}
-        <Link href={`${base}/assistant`} className={stageButton("outline")}>
+        <Link href={`${base}/assistant`} className={stageLink}>
           <IconAsk />
           {t("palette.ask")}
         </Link>
@@ -402,7 +402,7 @@ function PlayerToday({ orgId }: { orgId: string }) {
         aside={
           when ? (
             <div className="text-left xl:text-center" aria-hidden>
-              <span className="block font-score text-[5rem] leading-[0.85] xl:text-[clamp(4rem,6vw,6.5rem)]">{format.dateTime(when, next?.starts_at ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "numeric" })}</span>
+              <span className="block font-score text-[5rem] leading-[0.85] xl:text-[clamp(3.25rem,4.2vw,4.75rem)]">{format.dateTime(when, next?.starts_at ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "numeric" })}</span>
               <span className="mt-2 block text-[0.9375rem] font-semibold">{format.dateTime(when, { weekday: "long", day: "numeric", month: "long" })}</span>
             </div>
           ) : undefined

@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import type { CSSProperties, ReactNode } from "react";
-import { ShieldAlert } from "lucide-react";
 import { AppShell } from "@/components/shell/app-shell";
+import { TwoFactorBanner } from "@/components/shell/two-factor-banner";
 import { serverApi } from "@/lib/api";
 import { clubStyle } from "@/lib/color";
 
@@ -20,17 +19,8 @@ export default async function OrgLayout({ children, params }: { children: ReactN
   if (response.status === 401) redirect(`/login?next=/app/${orgId}`);
   if (!org || !me) notFound();
   const savedTeam = (await cookies()).get("hb_team")?.value ?? null;
-  const banner = org.two_factor_required ? (
-    <div role="status" className="flex items-center gap-3 border-b border-border/70 bg-raised px-4 py-2.5 text-sm sm:px-6 lg:px-10">
-      <ShieldAlert aria-hidden className="size-4 shrink-0 text-accent" />
-      <p className="min-w-0 flex-1">
-        {t("settings.twoFactorRequired")}{" "}
-        <Link href={`/app/${org.id}/settings#security`} className="font-medium font-medium text-accent hover:underline">
-          {t("settings.twoFactorStart")}
-        </Link>
-      </p>
-    </div>
-  ) : null;
+  // only while the admin has not set it up yet
+  const banner = org.two_factor_required && !me.totp_enabled ? <TwoFactorBanner orgId={org.id} /> : null;
   return (
     <div className="club min-h-dvh" style={clubStyle(org.primary_color) as CSSProperties}>
       <AppShell

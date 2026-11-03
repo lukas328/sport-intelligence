@@ -101,7 +101,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   const entries = roster.data ?? [];
   const inline = layout === "inline" || (!roster.isLoading && entries.length === 0);
   const addForm = (
-    <form ref={formRef} onSubmit={onAdd} className="grid grid-cols-2 gap-3" aria-label={t("roster.addTitle")}>
+    <form ref={formRef} onSubmit={onAdd} className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label={t("roster.addTitle")}>
       <Input label={t("roster.number")} name="jersey_number" type="number" min={1} max={99} inputMode="numeric" />
       <Select label={t("roster.position")} name="main_position" defaultValue="">
         <option value="">{t("roster.none")}</option>
@@ -119,7 +119,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
         <option value="left">{t("hands.left")}</option>
       </Select>
       <Input label={t("roster.birthYear")} name="birth_year" type="number" min={1940} max={2030} />
-      <div className="col-span-2 pt-1">
+      <div className="pt-1 sm:col-span-2">
         <Button type="submit" loading={add.isPending}>
           {t("common.add")}
         </Button>
@@ -174,7 +174,11 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
         {roster.isLoading ? (
           <Skeleton className="h-48" />
         ) : entries.length === 0 ? (
-          <EmptyState icon={<Users />} title={t("roster.empty")}>{canEdit && t("roster.emptyHint")}</EmptyState>
+          canEdit && inline ? (
+            <p className="text-[0.9375rem] text-muted">{t("roster.emptyHint")}</p>
+          ) : (
+            <EmptyState icon={<Users />} title={t("roster.empty")}>{canEdit && t("roster.emptyHint")}</EmptyState>
+          )
         ) : (
           <div className="overflow-x-auto rounded-lg bg-raised border border-border">
             <table className="w-full text-left text-sm">
@@ -286,16 +290,24 @@ function CsvImport({
       <a href={templateHref} download="kader-vorlage.csv" className="inline-block text-sm font-medium text-accent hover:underline">
         {t("roster.csvTemplate")}
       </a>
-      <Input
-        label={t("roster.csvFile")}
-        type="file"
-        accept=".csv,text/csv"
-        onChange={(e) => {
-          setFile(e.target.files?.[0] ?? null);
-          setResult(null);
-          setDone(null);
-        }}
-      />
+      <div className="space-y-1">
+        <span className="block text-sm font-semibold">{t("roster.csvFile")}</span>
+        <label className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
+          <span className="ml-1 rounded-sm bg-surface px-3 py-1 text-sm font-semibold">{t("roster.csvChoose")}</span>
+          <span className="min-w-0 truncate text-muted">{file?.name ?? t("roster.csvNone")}</span>
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            aria-label={t("roster.csvFile")}
+            className="sr-only"
+            onChange={(e) => {
+              setFile(e.target.files?.[0] ?? null);
+              setResult(null);
+              setDone(null);
+            }}
+          />
+        </label>
+      </div>
       {done !== null && <Alert kind="success">{t("roster.csvImported", { count: done })}</Alert>}
       {result && result.errors.length > 0 && (
         <Alert>

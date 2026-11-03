@@ -281,7 +281,9 @@
     "csvRowError": "Ligne {row} : {message}",
     "csvImported": "{count, plural, one {# joueur importé} other {# joueurs importés}}.",
     "csvTemplate": "Télécharger le modèle",
-    "none": "aucun"
+    "none": "aucun",
+    "csvChoose": "Choisir un fichier",
+    "csvNone": "Aucun fichier choisi"
   },
   "settings": {
     "title": "Paramètres",
@@ -406,10 +408,7 @@
     "homeAway": "Domicile ou extérieur",
     "homeShort": "Domicile",
     "importFile": "Importer un fichier",
-    "analysed": "Analysé",
-    "wonShort": "V",
-    "drawShort": "N",
-    "lostShort": "D"
+    "analysed": "Analysé"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -2040,6 +2039,7 @@
     "lastResult": "Dernier match",
     "goalsAsClips": "Voir les buts en clips",
     "nextMatch": "Prochain match",
-    "noMatchYet": "Aucun match joué."
+    "noMatchYet": "Aucun match joué.",
+    "reference": "Référence {value}"
   }
 }

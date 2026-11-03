@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
-import { MatchScore } from "@/components/domain/match-score";
+import { useCountUp } from "@/components/domain/match-score";
 import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
 import { EmptyState, Skeleton } from "@/components/ui/card";
@@ -132,31 +132,21 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const base = `/app/${orgId}/matches/${match.id}`;
   return (
     <div className="space-y-8">
-      <Stage
-        compact
-        aside={
-          match.opponent && hs != null && as != null ? (
-            <div className="text-left xl:text-right">
-              <MatchScore own={hs} opp={as} testId="score" className="text-[4.5rem] leading-[0.85] xl:text-[clamp(4rem,5.6vw,6rem)]" />
-              {hh != null && ah != null && <p className="mt-1 text-sm font-semibold tabular-nums">({hh}:{ah})</p>}
-            </div>
-          ) : undefined
-        }
-      >
+      <Stage compact>
         <p className="text-[0.9375rem] font-semibold">
           {[format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "long", year: "numeric" }), format.dateTime(kickoff, { timeStyle: "short" }), match.competition, match.venue]
             .filter(Boolean)
             .join(" · ")}
         </p>
-        <h1 className="mt-2 text-[2.25rem] leading-[0.95] sm:text-5xl">
-          {match.opponent ? (
-            <>
-              {home} <span className="opacity-70">{t("matches.vs")}</span> {away}
-            </>
-          ) : (
-            `${t("matches.training")}: ${ourName}`
-          )}
-        </h1>
+        <h1 className="sr-only">{match.opponent ? `${home} ${t("matches.vs")} ${away}` : `${t("matches.training")}: ${ourName}`}</h1>
+        {hs != null && as != null && <span className="sr-only" data-testid="score">{`${hs}:${as}`}</span>}
+        {match.opponent ? (
+          <ScoreRows home={home} away={away} hs={hs} as={as} ownHome={match.is_home} halftime={hh != null && ah != null ? `${hh}:${ah}` : null} halftimeLabel={t("matches.halftime")} />
+        ) : (
+          <p aria-hidden className="mt-2 text-[2.25rem] leading-[0.95] font-display sm:text-5xl">
+            {t("matches.training")}: {ourName}
+          </p>
+        )}
         {(result || match.is_demo || justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-lg">
             {result && <span className="font-semibold">{t(`matches.${result}`)}</span>}
@@ -194,7 +184,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 {t("live.open")}
               </Link>
             )}
-            {uploadFirst && (
+            {uploadFirst && view !== "video" && (
               <Button onClick={() => (setView("video"), document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" }))}>
                 <Upload aria-hidden />
                 {t("upload.title")}
@@ -456,5 +446,30 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
       </div>
       <Button type="submit">{t("common.save")}</Button>
     </form>
+  );
+}
+
+/** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
+function ScoreRows({ home, away, hs, as, ownHome, halftime, halftimeLabel }: { home: string; away: string; hs: number | null; as: number | null; ownHome: boolean; halftime: string | null; halftimeLabel: string }) {
+  const [h, a] = useCountUp(hs ?? 0, as ?? 0);
+  const scored = hs != null && as != null;
+  const row = (name: string, goals: number, own: boolean) => (
+    <>
+      <span className={cn("min-w-0 truncate text-[2rem] leading-[1.1] font-display sm:text-[2.75rem]", !own && "opacity-75")}>{name}</span>
+      {scored ? <span className={cn("text-right font-score text-[2.5rem] leading-[1.05] sm:text-[3.25rem]", !own && "opacity-75")}>{goals}</span> : <span />}
+    </>
+  );
+  return (
+    <div aria-hidden className="mt-3">
+      <div className="grid max-w-full grid-cols-[minmax(0,auto)_auto] items-baseline gap-x-8 sm:w-fit sm:gap-x-12">
+        {row(home, h, ownHome)}
+        {row(away, a, !ownHome)}
+      </div>
+      {halftime && (
+        <p className="pt-1 text-sm font-semibold">
+          {halftimeLabel} {halftime}
+        </p>
+      )}
+    </div>
   );
 }

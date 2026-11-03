@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -124,50 +123,37 @@ function MatchList({ title, orgId, matches }: { title: string; orgId: string; ma
   );
 }
 
-/** One line of the fixture list: when, where, against whom, how it stands, how it ended. */
+/** One line of the fixture list: when, where, against whom, how it ended. */
 export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
   const t = useTranslations();
   const format = useFormatter();
   const date = new Date(m.kickoff_at);
   const state = matchState(m);
   const result = m.score_own == null || m.score_opponent == null ? null : m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
+  const quiet = [m.is_demo ? t("matches.demo") : null, state.label === "matches.analysed" ? null : t(state.label)].filter(Boolean).join(" · ");
   return (
-    <Link href={`/app/${orgId}/matches/${m.id}`} className="group grid grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-3.5 transition-colors hover:bg-surface sm:grid-cols-[4.5rem_minmax(0,1fr)_auto_auto] sm:px-5">
+    <Link href={`/app/${orgId}/matches/${m.id}`} className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-4 transition-colors hover:bg-surface sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:px-5">
       <span className="leading-none">
-        <span className="block font-display text-sm text-muted">{format.dateTime(date, { weekday: "short" })}</span>
-        <span className="mt-0.5 block font-score text-2xl">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</span>
+        <span className="block font-display text-sm text-muted">
+          {format.dateTime(date, { weekday: "short" })}
+          {m.kind !== "training" && <span className="hidden sm:inline"> · {m.is_home ? t("matches.homeShort") : t("matches.awayShort")}</span>}
+        </span>
+        <span className="mt-1 block font-score text-[1.6rem]">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</span>
       </span>
       <span className="min-w-0">
-        <span className="flex items-center gap-2">
-          {m.kind !== "training" && (
-            <span className="shrink-0 rounded-sm bg-surface px-1.5 py-px text-[0.6875rem] font-bold text-muted" title={m.is_home ? t("matches.homeShort") : t("matches.awayShort")}>
-              {m.is_home ? t("matches.homeShort") : t("matches.awayShort")}
-            </span>
-          )}
-          <span className="truncate text-[1.0625rem] font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
-        </span>
+        <span className="block truncate text-[1.125rem] font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
         <span className="mt-0.5 block truncate text-sm text-muted">
-          {[m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" })].filter(Boolean).join(" · ")}
+          {[m.kind !== "training" ? (m.is_home ? t("matches.homeShort") : t("matches.awayShort")) : null, m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" }), quiet || null]
+            .filter(Boolean)
+            .join(" · ")}
         </span>
-      </span>
-      <span className="hidden items-center gap-1.5 sm:flex">
-        {m.is_demo && <Badge>{t("matches.demo")}</Badge>}
-        <Badge tone={state.tone}>{t(state.label)}</Badge>
       </span>
       {result ? (
-        <span className="flex items-center gap-2.5">
-          <span className="font-score text-2xl">
-            {m.score_own}:{m.score_opponent}
-          </span>
-          <span
-            aria-label={t(`matches.${result}`)}
-            className={cn(
-              "grid size-6 place-items-center rounded-sm text-xs font-bold ring-1 ring-inset",
-              result === "won" ? "bg-ok/10 text-ok ring-ok/40" : result === "lost" ? "bg-error/10 text-error ring-error/40" : "bg-surface text-muted ring-foreground/20",
-            )}
-          >
-            <span aria-hidden>{t(`matches.${result}Short`)}</span>
-          </span>
+        <span className="font-score text-[1.75rem] leading-none whitespace-nowrap sm:text-[2rem]">
+          <span className={result === "lost" ? "" : "text-accent"}>{m.score_own}</span>
+          <span className="px-0.5 text-muted">:</span>
+          <span className={result === "lost" ? "text-error" : "text-muted"}>{m.score_opponent}</span>
+          <span className="sr-only"> {t(`matches.${result}`)}</span>
         </span>
       ) : (
         <ChevronRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />

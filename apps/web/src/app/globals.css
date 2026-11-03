@@ -15,7 +15,7 @@
   --deep: #06213f;
   --signal: #ffd23f;
   --signal-ink: #10151c;
-  --mark: #ffd23f;
+  --mark: #ffffff;
   --accent-l: #0a66c1;
   --accent-l-contrast: #ffffff;
   --paper-l: #eef5fb;
@@ -289,6 +289,9 @@
     .bleed {
       margin-inline: calc(50% - (100vw - 16rem) / 2);
     }
+  }
+  .bleed-full {
+    margin-inline: calc(50% - 50vw);
   }
   /* real coach notes only (never invented text) */
   .font-hand {

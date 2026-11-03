@@ -281,7 +281,9 @@
     "csvRowError": "Zeile {row}: {message}",
     "csvImported": "{count, plural, one {# Spieler importiert} other {# Spieler importiert}}.",
     "csvTemplate": "Vorlage herunterladen",
-    "none": "keine"
+    "none": "keine",
+    "csvChoose": "Datei wählen",
+    "csvNone": "Keine Datei gewählt"
   },
   "settings": {
     "title": "Einstellungen",
@@ -406,10 +408,7 @@
     "homeAway": "Heim oder auswärts",
     "homeShort": "Heim",
     "importFile": "Datei importieren",
-    "analysed": "Analysiert",
-    "wonShort": "S",
-    "drawShort": "U",
-    "lostShort": "N"
+    "analysed": "Analysiert"
   },
   "upload": {
     "title": "Video hochladen",
@@ -2040,6 +2039,7 @@
     "lastResult": "Letztes Spiel",
     "goalsAsClips": "Tore als Clips ansehen",
     "nextMatch": "Nächstes Spiel",
-    "noMatchYet": "Noch kein Spiel gespielt."
+    "noMatchYet": "Noch kein Spiel gespielt.",
+    "reference": "Richtwert {value}"
   }
 }

@@ -119,8 +119,9 @@ export function clubStyle(hex: string | null | undefined): Record<string, string
     "--deep": t.deep,
     "--signal": t.signal,
     "--signal-ink": t.signalInk,
-    // marker on the deep surface: the signal, or the club colour itself when it is light
-    "--mark": isLight(t.club) ? t.club : SIGNAL,
+    // marker of the current place on the deep surface: white, or the club colour when it is light.
+    // Resin yellow stays reserved for the one thing on a screen that needs attention.
+    "--mark": isLight(t.club) ? t.club : "#ffffff",
     "--accent-l": t.light.accent,
     "--accent-l-contrast": t.light.contrast,
     "--paper-l": t.light.paper,
