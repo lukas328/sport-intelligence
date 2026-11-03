@@ -24,6 +24,7 @@ from numpy.typing import NDArray
 from handball_vision import __version__
 from handball_vision.calibration import Calibration, calibrate_frames
 from handball_vision.detection import BackgroundDetector, Detection, Detector, foot_positions
+from handball_vision.physical import physical
 from handball_vision.teams import TeamAssigner
 from handball_vision.tracking import CourtTracker, TrackPoint, stitch
 
@@ -84,6 +85,11 @@ class AnalysisResult:
                     "observed_share": round(sum(p.observed for p in pts) / len(pts), 3),
                     "team": team.get("label"),
                     "team_confidence": team.get("confidence"),
+                    "physical": physical(
+                        np.array([p.frame * 1000 / self.fps for p in pts]),
+                        np.array([p.x for p in pts]),
+                        np.array([p.y for p in pts]),
+                    ).to_dict(),
                 }
             )
         return out

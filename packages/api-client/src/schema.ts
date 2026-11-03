@@ -737,6 +737,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/physical": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Match Physical
+         * @description Distance, speed bands, sprints and heatmap per player (estimated from video tracking).
+         */
+        get: operations["match_physical_v1_orgs__org_id__matches__match_id__physical_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/stats": {
         parameters: {
             query?: never;
@@ -1299,6 +1319,26 @@ export interface paths {
          */
         get: operations["track_chunk_v1_orgs__org_id__videos__video_id__tracks__n__get"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Track Identity
+         * @description Assign a roster player (or just a jersey number) to a track; null clears it.
+         */
+        put: operations["set_track_identity_v1_orgs__org_id__videos__video_id__tracks__track_no__identity_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2572,6 +2612,20 @@ export interface components {
              */
             width?: number;
         };
+        /**
+         * SyncOut
+         * @description Camera sync against the main video. `applied` is false when the audio match was too weak.
+         */
+        SyncOut: {
+            /** Applied */
+            applied?: boolean | null;
+            /** Confidence */
+            confidence?: number | null;
+            /** Offset Ms */
+            offset_ms?: number | null;
+            /** Source */
+            source?: ("audio" | "user_correction") | null;
+        };
         /** TeamCreate */
         TeamCreate: {
             gender: components["schemas"]["TeamGender"];
@@ -2668,14 +2722,34 @@ export interface components {
             /** Secret */
             secret: string;
         };
+        /**
+         * TrackIdentity
+         * @description Manual identity for a track; both null clears it.
+         */
+        TrackIdentity: {
+            /** Number */
+            number?: number | null;
+            /** Player Id */
+            player_id?: string | null;
+        };
         /** TrackOut */
         TrackOut: {
             /** First Ms */
             first_ms: number;
+            /** Identity Source */
+            identity_source: string | null;
             /** Last Ms */
             last_ms: number;
+            /** Number */
+            number: number | null;
             /** Observed Share */
             observed_share: number;
+            /** Physical */
+            physical: {
+                [key: string]: unknown;
+            } | null;
+            /** Player Confidence */
+            player_confidence: number | null;
             /** Player Id */
             player_id: string | null;
             /** Source */
@@ -2774,6 +2848,7 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
             status: components["schemas"]["VideoStatus"];
+            sync: components["schemas"]["SyncOut"] | null;
             /** Time Offset Ms */
             time_offset_ms: number;
             /** Width */
@@ -4399,6 +4474,40 @@ export interface operations {
             };
         };
     };
+    match_physical_v1_orgs__org_id__matches__match_id__physical_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     match_stats_v1_orgs__org_id__matches__match_id__stats_get: {
         parameters: {
             query?: never;
@@ -5988,6 +6097,43 @@ export interface operations {
                 };
                 content: {
                     "application/octet-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_track_identity_v1_orgs__org_id__videos__video_id__tracks__track_no__identity_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                track_no: number;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrackIdentity"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackOut"];
                 };
             };
             /** @description Validation Error */

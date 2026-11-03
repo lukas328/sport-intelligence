@@ -9,6 +9,7 @@ import { useRosterNames } from "@/components/analysis/tagger";
 import { EmptyState } from "@/components/ui/card";
 import type { PlayerHandle } from "@/components/video/player";
 import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
+import { KeepersView, PhysicalView } from "./m5-views";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
@@ -21,8 +22,8 @@ type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
 type Job = Schemas["JobOut"];
 
-type View = "video" | "overview" | "report" | "shots";
-const VIEWS: View[] = ["video", "overview", "report", "shots"];
+type View = "video" | "overview" | "report" | "shots" | "keepers" | "physical";
+const VIEWS: View[] = ["video", "overview", "report", "shots", "keepers", "physical"];
 
 const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnails", "upload"] as const;
 
@@ -125,11 +126,16 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           <Alert kind="info">{match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")}</Alert>
         )}
       </div>
+      {view === "physical" && <PhysicalView orgId={orgId} matchId={match.id} names={names} />}
       {view !== "video" &&
+        view !== "physical" &&
         (stats.data && stats.data.quality.events > 0 ? (
           (() => {
             const props = { orgId, match, teamName, stats: stats.data, names, onPlay: main ? onPlay : undefined };
-            return view === "overview" ? <OverviewView {...props} /> : view === "report" ? <ReportView {...props} /> : <ShotsView {...props} />;
+            if (view === "overview") return <OverviewView {...props} />;
+            if (view === "report") return <ReportView {...props} />;
+            if (view === "keepers") return <KeepersView {...props} />;
+            return <ShotsView {...props} />;
           })()
         ) : (
           <EmptyState title={stats.isLoading ? "…" : t("stats.noData")} />

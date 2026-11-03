@@ -495,7 +495,9 @@
     "video": "Vidéo",
     "overview": "Aperçu",
     "report": "Feuille de match",
-    "shots": "Tirs"
+    "shots": "Tirs",
+    "keepers": "Gardiens",
+    "physical": "Physique"
   },
   "stats": {
     "goals": "Buts",
@@ -602,5 +604,66 @@
     "file": "Fichier",
     "done": "Match importé.",
     "warnings": "Remarques"
+  },
+  "keepers": {
+    "title": "Gardiens",
+    "own": "Nos gardiens",
+    "opponent": "Gardiens adverses",
+    "faced": "Tirs cadrés",
+    "saves": "Arrêts",
+    "savePct": "% d'arrêts",
+    "goalsAgainst": "Buts encaissés",
+    "xgAgainst": "xG contre",
+    "gsax": "GSAx",
+    "gsaxHint": "Buts évités au-delà de l'attendu : xG contre moins buts encaissés. Positif signifie plus d'arrêts qu'attendu. Estimation.",
+    "sevenM": "7 m arrêtés",
+    "unknown": "Non attribué",
+    "number": "N° {number}",
+    "byShotZone": "Par zone de tir",
+    "byGoalZone": "Par zone du but",
+    "none": "Aucun tir cadré saisi.",
+    "assignHint": "Choisis le gardien lors de la saisie pour attribuer les arrêts.",
+    "ownKeeper": "Notre gardien",
+    "oppKeeper": "Gardien adverse n°"
+  },
+  "physical": {
+    "title": "Physique",
+    "hint": "Estimé à partir de l'analyse vidéo à une caméra. Attribue les traces aux joueurs de l'effectif dans la vidéo pour les voir ici.",
+    "distance": "Distance",
+    "highIntensity": "Haute intensité",
+    "sprints": "Sprints",
+    "topSpeed": "Vitesse max",
+    "time": "Suivi",
+    "unassigned": "Traces non attribuées",
+    "heatmap": "Carte de chaleur",
+    "none": "Pas encore de données de position.",
+    "km": "{value} km",
+    "m": "{value} m",
+    "kmh": "{value} km/h",
+    "min": "{value} min",
+    "track": "Trace {n}",
+    "showHeatmap": "Afficher la carte de chaleur"
+  },
+  "identity": {
+    "title": "Attribuer les traces",
+    "hint": "Attribue les traces de ton équipe à un joueur de l'effectif. Les attributions sont conservées lors d'une nouvelle analyse.",
+    "track": "Trace {n}",
+    "none": "non attribuée",
+    "saved": "Attribution enregistrée.",
+    "auto": "détecté automatiquement",
+    "manual": "manuel",
+    "seek": "Montrer la trace dans la vidéo"
+  },
+  "camera": {
+    "label": "Caméra",
+    "main": "Caméra principale",
+    "goal_cam_left": "Caméra de but gauche",
+    "goal_cam_right": "Caméra de but droite",
+    "other": "Autre caméra",
+    "syncLow": "Synchronisation automatique incertaine. Vérifie le décalage.",
+    "offset": "Décalage par rapport à la caméra principale (ms)",
+    "save": "Enregistrer le décalage",
+    "synced": "synchronisé par le son ({confidence} %)",
+    "manual": "décalage défini manuellement"
   }
 }

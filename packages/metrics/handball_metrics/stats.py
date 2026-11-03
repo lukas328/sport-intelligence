@@ -11,6 +11,8 @@ from handball_metrics.model import Event, EventType, Side
 from handball_metrics.xg import VERSION as XG_VERSION
 from handball_metrics.xg import expected_goal
 
+METRICS_VERSION = "0.2.0"  # bump on any change of definitions: invalidates stats caches
+
 SUSPENSION_S = 120
 
 
@@ -215,6 +217,59 @@ def _players(events: list[Event]) -> dict[str, dict[str, Any]]:
     return out
 
 
+def _keeper_key(e: Event) -> str:
+    gk = e.attributes.get("goalkeeper_id")
+    if gk:
+        return f"p:{gk}"
+    num = e.attributes.get("goalkeeper_number")
+    return f"n:{num}" if num is not None else "unknown"
+
+
+def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
+    """Goalkeeper module (M5): every shot on target (goal or save) against a keeper, credited to the
+    keeper in `attributes` (goalkeeper_id or goalkeeper_number), otherwise to "unknown".
+    GSAx = expected goals against minus goals against (positive = saved more than expected)."""
+    out: dict[str, dict[str, Any]] = {}
+    for e in events:
+        if not e.is_shot or e.outcome not in ("goal", "save"):
+            continue
+        key = f"{e.side.other.value}:{_keeper_key(e)}"
+        k = out.get(key)
+        if k is None:
+            gk_id = e.attributes.get("goalkeeper_id")
+            k = out[key] = {
+                "side": e.side.other.value,
+                "player_id": gk_id,
+                "number": e.attributes.get("goalkeeper_number"),
+                "faced": 0,
+                "saves": 0,
+                "goals_against": 0,
+                "xg_against": 0.0,
+                "seven_m": {"faced": 0, "saves": 0},
+                "goal_zones": defaultdict(lambda: {"faced": 0, "saves": 0}),
+                "shot_zones": defaultdict(lambda: {"faced": 0, "saves": 0}),
+            }
+        saved = e.outcome == "save"
+        k["faced"] += 1
+        k["saves"] += saved
+        k["goals_against"] += not saved
+        k["xg_against"] += expected_goal(e.x, e.y, e.shot_type)
+        if e.shot_type == "penalty":
+            k["seven_m"]["faced"] += 1
+            k["seven_m"]["saves"] += saved
+        for bucket, zone in (("goal_zones", e.goal_zone), ("shot_zones", zone_of(e))):
+            if zone:
+                k[bucket][zone]["faced"] += 1
+                k[bucket][zone]["saves"] += saved
+    for k in out.values():
+        k["save_pct"] = _ratio(k["saves"], k["faced"])
+        k["xg_against"] = round(k["xg_against"], 2)
+        k["gsax"] = round(k["xg_against"] - k["goals_against"], 2)
+        k["goal_zones"] = dict(k["goal_zones"])
+        k["shot_zones"] = dict(k["shot_zones"])
+    return out
+
+
 def _timeline(events: list[Event]) -> dict[str, Any]:
     ordered = [
         e
@@ -270,11 +325,12 @@ def compute_match_stats(
         "own": _team_block(events, Side.OWN, sit, poss.get("own")),
         "opponent": _team_block(events, Side.OPPONENT, sit, poss.get("opponent")),
         "players": _players(events),
+        "goalkeepers": _goalkeepers(events),
         "timeline": _timeline(events),
         "quality": {
             "events": len(events),
             "low_confidence": len(low_conf),
             "sources": dict(Counter(e.source for e in events)),
         },
-        "versions": {"metrics": "0.1.0", "xg": XG_VERSION},
+        "versions": {"metrics": METRICS_VERSION, "xg": XG_VERSION},
     }

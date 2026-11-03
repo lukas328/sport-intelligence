@@ -21,8 +21,21 @@ normalised so the attacked goal is at x = 40 (`packages/court`).
 | Longest own drought | Longest match-clock period without an own goal, from throw-off or the previous own goal. |
 | xG | Sum of expected goals over non-blocked shots. v1 is a logistic prior (`xg.py`, version `prior-1`): distance to goal, angle, shot type; 7 m fixed at 0.75. **An estimate**, labelled so in the UI, refitted on own data later. |
 | Player rows | Per player (roster id) or jersey number for opponents: goals, shots, misses, posts, saved, blocked, turnovers by type, suspensions, assists, 7 m, xG; goalkeeper saves via `attributes.goalkeeper_id`. |
-| Plus-minus | Needs on-court intervals (tracking identity, M5); not yet computed. |
-| Running metrics | Distance, sprints over 5 m/s, top speed from tracks (M5, needs identity). |
+| Goalkeepers | Per keeper (`attributes.goalkeeper_id`, else `goalkeeper_number`, else "unknown"): shots on target faced (goal + save), saves, save %, by goal zone, by shot zone, 7 m. **xG against** = sum of xG of those shots; **GSAx** (goals saved above expected) = xG against minus goals against. Misses and posts are not on target and are left out. |
+| Plus-minus | Needs on-court intervals (tracking identity); not yet computed. |
+
+## Physical (from tracking, estimates)
+Computed per track in `handball_vision.physical` and summed per player once a track is identified
+(jersey reading or manual assignment). Positions are resampled to 5 Hz and smoothed over 600 ms; steps
+across gaps over 1 s or faster than 10 m/s are dropped.
+
+| Metric | Definition |
+|---|---|
+| Distance | Sum of smoothed steps (m). |
+| Speed bands | walk < 2 m/s (7.2 km/h), jog 2 to 4 m/s, run 4 to 5.5 m/s, sprint >= 5.5 m/s (19.8 km/h). High intensity distance = run + sprint. |
+| Sprints | Runs of at least 1 s at sprint speed. |
+| Top speed | Highest speed held over two consecutive 200 ms steps. |
+| Heatmap | Share of time per cell of a 10 x 5 grid over the 40 x 20 m court (match direction, not normalised per half). |
 
 Shot zones and goal zones: `packages/court/spec/zones.json` (goal zones always from the **shooter's view**;
 the UI can mirror to the goalkeeper's view).

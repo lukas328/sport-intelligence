@@ -68,3 +68,9 @@ Each question has the **assumption** I work with until it is answered. Status: o
 ## QA
 - **Q-QA-1 iPhone/Safari acceptance** (M2) needs a real device or a device cloud (BrowserStack/Sauce Labs).
   Playwright WebKit covers the engine, not iOS.
+
+## Q-ML-4 Validation of physical load (M5)
+Distances, speeds and sprints come from single-camera tracking and are estimates. To calibrate the
+smoothing and speed bands we need one match with a reference system (local positioning or GPS vests) or at
+least a few measured sprints filmed from the club's usual camera position. **Default until then**: values are
+shown with the "geschätzt" badge and no comparisons across matches with different camera positions.

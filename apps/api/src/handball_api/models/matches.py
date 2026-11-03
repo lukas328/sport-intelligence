@@ -104,6 +104,8 @@ class VideoAsset(Base, EntityMixin, TenantMixin):
     proxy_key: Mapped[str | None] = mapped_column(String(400))
     poster_key: Mapped[str | None] = mapped_column(String(400))
     time_offset_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # sync against the main video: offset_ms, confidence, source (audio or user_correction)
+    sync: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     quality_report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     # result metadata of the latest analysis run (chunks, fps, detector, timings, versions)
     analysis: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
@@ -247,6 +249,9 @@ class Track(Base, EntityMixin, TenantMixin):
         ForeignKey("players.id", ondelete="SET NULL")
     )
     player_confidence: Mapped[float | None] = mapped_column(Float)
+    number: Mapped[int | None] = mapped_column(Integer)  # jersey number, read or set by hand
+    identity_source: Mapped[str | None] = mapped_column(String(20))  # model, user_correction
+    physical: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="heuristic")
     pipeline_version: Mapped[str] = mapped_column(String(20), nullable=False)
 

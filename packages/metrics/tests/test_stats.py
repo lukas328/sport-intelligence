@@ -127,3 +127,29 @@ def test_events_without_clock() -> None:
     s = compute_match_stats(ev)
     assert s["timeline"]["final"] == {"own": 2, "opp": 0}
     assert situations(ev)["n"] == "unknown"
+
+
+def test_goalkeepers() -> None:
+    mine = {"goalkeeper_id": "gk1"}
+    ev = [
+        shot(1, OPP, "save", 10, x=31.0, y=10.0, goal_zone="TL", attributes=mine),
+        shot(2, OPP, "goal", 20, x=31.0, y=10.0, goal_zone="TL", attributes=mine),
+        shot(3, OPP, "save", 30, shot_type="penalty", attributes=mine),
+        shot(4, OPP, "miss", 40, attributes=mine),  # not on target
+        shot(5, OPP, "goal", 50, attributes={"goalkeeper_number": 12}),
+        shot(6, OPP, "goal", 60),
+        shot(7, OWN, "save", 70, attributes={"goalkeeper_number": 1}),
+    ]
+    gk = compute_match_stats(ev)["goalkeepers"]
+    k = gk["own:p:gk1"]
+    assert (k["faced"], k["saves"], k["goals_against"]) == (3, 2, 1)
+    assert k["save_pct"] == pytest.approx(2 / 3, abs=1e-3)
+    assert k["seven_m"] == {"faced": 1, "saves": 1}
+    assert k["goal_zones"]["TL"] == {"faced": 2, "saves": 1}
+    assert k["shot_zones"]["penalty"] == {"faced": 1, "saves": 1}
+    xg = 2 * expected_goal(31.0, 10.0) + 0.75
+    assert k["xg_against"] == pytest.approx(xg, abs=0.01)
+    assert k["gsax"] == pytest.approx(xg - 1, abs=0.01)
+    assert gk["own:n:12"]["number"] == 12
+    assert gk["own:unknown"]["goals_against"] == 1
+    assert gk["opponent:n:1"]["side"] == "opponent"

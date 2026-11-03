@@ -495,7 +495,9 @@
     "video": "Video",
     "overview": "Übersicht",
     "report": "Matchreport",
-    "shots": "Würfe"
+    "shots": "Würfe",
+    "keepers": "Torhüter",
+    "physical": "Laufleistung"
   },
   "stats": {
     "goals": "Tore",
@@ -602,5 +604,66 @@
     "file": "Datei",
     "done": "Spiel importiert.",
     "warnings": "Hinweise"
+  },
+  "keepers": {
+    "title": "Torhüter",
+    "own": "Eigene Torhüter",
+    "opponent": "Gegnerische Torhüter",
+    "faced": "Würfe aufs Tor",
+    "saves": "Paraden",
+    "savePct": "Paradenquote",
+    "goalsAgainst": "Gegentore",
+    "xgAgainst": "xG gegen",
+    "gsax": "GSAx",
+    "gsaxHint": "Tore verhindert über Erwartung: xG gegen minus Gegentore. Positiv heisst, mehr gehalten als erwartet. Geschätzt.",
+    "sevenM": "7 m gehalten",
+    "unknown": "Ohne Zuordnung",
+    "number": "Nr. {number}",
+    "byShotZone": "Nach Wurfzone",
+    "byGoalZone": "Nach Torzone",
+    "none": "Noch keine Würfe aufs Tor erfasst.",
+    "assignHint": "Wähle beim Erfassen die Torhüterin oder den Torhüter, damit Paraden zugeordnet werden.",
+    "ownKeeper": "Eigene Torhüter/in",
+    "oppKeeper": "Gegner-Torhüter Nr."
+  },
+  "physical": {
+    "title": "Laufleistung",
+    "hint": "Geschätzt aus der Videoanalyse mit einer Kamera. Ordne Spuren im Video Spielerinnen und Spielern zu, damit sie hier erscheinen.",
+    "distance": "Distanz",
+    "highIntensity": "Hohe Intensität",
+    "sprints": "Sprints",
+    "topSpeed": "Topspeed",
+    "time": "Erfasst",
+    "unassigned": "Nicht zugeordnete Spuren",
+    "heatmap": "Heatmap",
+    "none": "Noch keine Positionsdaten.",
+    "km": "{value} km",
+    "m": "{value} m",
+    "kmh": "{value} km/h",
+    "min": "{value} min",
+    "track": "Spur {n}",
+    "showHeatmap": "Heatmap zeigen"
+  },
+  "identity": {
+    "title": "Spuren zuordnen",
+    "hint": "Spuren des eigenen Teams einer Person aus dem Kader zuordnen. Zuordnungen bleiben bei einer neuen Analyse erhalten.",
+    "track": "Spur {n}",
+    "none": "nicht zugeordnet",
+    "saved": "Zuordnung gespeichert.",
+    "auto": "automatisch erkannt",
+    "manual": "manuell",
+    "seek": "Spur im Video zeigen"
+  },
+  "camera": {
+    "label": "Kamera",
+    "main": "Hauptkamera",
+    "goal_cam_left": "Torkamera links",
+    "goal_cam_right": "Torkamera rechts",
+    "other": "Weitere Kamera",
+    "syncLow": "Automatische Synchronisierung unsicher. Bitte Versatz prüfen.",
+    "offset": "Versatz zur Hauptkamera (ms)",
+    "save": "Versatz speichern",
+    "synced": "synchronisiert über Ton ({confidence} %)",
+    "manual": "Versatz manuell gesetzt"
   }
 }

@@ -56,7 +56,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 ### M4 Events and match report ✅ manual + import path, automatic events open (see docs/progress/M4.md)
 - Pose (RTMPose), shot heuristic + EventSpotter interface, throw-off detection, final-score constraint, official feed CSV adapter, scoreboard OCR, possessions/phases baseline
 - `packages/metrics` with DEFINITIONS.md, zones (`zones.py`, `zones.ts`), stats caches; analysis screen (overview, match report, shots), everything clickable; paper report importer
-### M5 Identity, goal zones, goal cams
+### M5 Identity, goal zones, goal cams ✅ manual identity, sync, goalkeeper module; OCR model and goal-zone model open (see docs/progress/M5.md)
 - Jersey OCR + roster assignment (Hungarian with constraints), audio sync of goal cams, goal-zone model, goalkeeper module
 ### M6 Plays and tactics board
 - Role assignment, action detection rules, DTW distance, HDBSCAN clustering, naming, defence formation

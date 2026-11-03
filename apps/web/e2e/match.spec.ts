@@ -126,6 +126,14 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await list.getByRole("button", { name: /Abspielen/ }).click();
   await expect(page.getByTestId("player")).toBeVisible();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(3.5);
+
+  // tracks can be assigned to players; physical load per track with heatmap
+  await expect(page.getByTestId("identity-panel")).toBeVisible();
+  await page.getByRole("tab", { name: "Laufleistung" }).click();
+  await expect(page.getByTestId("physical-table")).toContainText("km");
+  await page.getByRole("button", { name: /Heatmap zeigen/ }).nth(1).click();
+  await expect(page.getByTestId("court-heatmap")).toBeVisible();
+  await expectAccessible(page);
 });
 
 test("playlist: create and share with players", async ({ page }, info) => {

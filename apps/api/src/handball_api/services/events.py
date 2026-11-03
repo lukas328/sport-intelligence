@@ -24,9 +24,9 @@ from handball_metrics import Event as MEvent
 from handball_metrics import EventType as MEventType
 from handball_metrics import Side as MSide
 from handball_metrics import compute_match_stats
+from handball_metrics.stats import METRICS_VERSION
 
 HALF_S = 1800
-METRICS_VERSION = "0.1.0"
 EVENT_FIELDS = (
     "type",
     "side",

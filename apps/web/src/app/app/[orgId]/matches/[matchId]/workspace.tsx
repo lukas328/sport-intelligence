@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useCallback, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
-import { Tagger } from "@/components/analysis/tagger";
+import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
@@ -40,18 +40,41 @@ export function Workspace({
 }) {
   const t = useTranslations();
   const qc = useQueryClient();
-  const player = useRef<PlayerHandle>(null);
-  useImperativeHandle(
-    handle,
-    () => ({
-      seek: (ms: number) => player.current?.seek(ms),
-      play: () => player.current?.play(),
-      pause: () => player.current?.pause(),
-      time: () => player.current?.time() ?? 0,
-      video: () => player.current?.video() ?? null,
-    }),
-    [],
-  );
+  const raw = useRef<PlayerHandle>(null);
+  // camera switch (M5): every time in this component is main-video time; other cameras are shifted
+  // by their sync offset (time in that video = main time + offset)
+  const cams = match.videos.filter((v) => v.status === "ready" && v.has_hls);
+  const [camId, setCamId] = useState(video.id);
+  const cam = cams.find((c) => c.id === camId) ?? video;
+  const offset = cam.id === video.id ? 0 : cam.time_offset_ms;
+  const off = useRef(offset);
+  off.current = offset;
+  const player = useRef<PlayerHandle>({
+    seek: (ms: number) => raw.current?.seek(Math.max(0, ms + off.current)),
+    play: () => raw.current?.play(),
+    pause: () => raw.current?.pause(),
+    time: () => (raw.current?.time() ?? 0) - off.current,
+    video: () => raw.current?.video() ?? null,
+  });
+  useImperativeHandle(handle, () => player.current, []);
+  const pendingSeek = useRef<number | null>(null);
+  function switchCamera(id: string) {
+    pendingSeek.current = player.current.time();
+    const wasPlaying = raw.current?.video()?.paused === false;
+    setCamId(id);
+    // seek once the new source has its metadata
+    window.setTimeout(() => {
+      const v = raw.current?.video();
+      if (!v) return;
+      const go = () => {
+        if (pendingSeek.current != null) player.current.seek(pendingSeek.current);
+        pendingSeek.current = null;
+        if (wasPlaying) player.current.play();
+      };
+      if (v.readyState >= 1) go();
+      else v.addEventListener("loadedmetadata", go, { once: true });
+    }, 0);
+  }
   const [now, setNow] = useState(0);
   const [tab, setTab] = useState<Tab>("comments");
   const [drawing, setDrawing] = useState(false);
@@ -63,7 +86,7 @@ export function Workspace({
   const [notice, setNotice] = useState<string | null>(null);
   const [failure, setFailure] = useState<ErrorKey | null>(null);
   const m = { org_id: orgId, match_id: match.id };
-  const media = `/v1/orgs/${orgId}/videos/${video.id}/media`;
+  const media = `/v1/orgs/${orgId}/videos/${cam.id}/media`;
 
   const comments = useQuery({
     queryKey: ["comments", match.id],
@@ -84,10 +107,11 @@ export function Workspace({
     () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: "#111827" }),
     [match],
   );
-  const getTime = useCallback(() => player.current?.time() ?? 0, []);
+  const getTime = useCallback(() => player.current.time() ?? 0, []);
   // the clock in the comment box needs only a few updates per second, not every video frame
   const lastTick = useRef(0);
-  const onTime = useCallback((ms: number) => {
+  const onTime = useCallback((camMs: number) => {
+    const ms = camMs - off.current;
     const now = performance.now();
     if (now - lastTick.current > 250) {
       lastTick.current = now;
@@ -126,7 +150,7 @@ export function Workspace({
   });
 
   const startDrawing = useCallback(() => {
-    player.current?.pause();
+    player.current.pause();
     setDrawing(true);
     setTab("drawings");
   }, []);
@@ -135,7 +159,7 @@ export function Workspace({
     if (shapes.length === 0) return;
     const { error } = await api.POST("/v1/orgs/{org_id}/matches/{match_id}/annotations", {
       params: { path: m },
-      body: { t_ms: Math.round(player.current?.time() ?? now), duration_ms: 4000, shapes: shapes.map((s) => ({ ...s, text: s.text ?? null })) },
+      body: { t_ms: Math.round(player.current.time() ?? now), duration_ms: 4000, shapes: shapes.map((s) => ({ ...s, text: s.text ?? null })) },
     });
     if (error) return setFailure(errorKey(error));
     setFailure(null);
@@ -172,7 +196,7 @@ export function Workspace({
   const onKey = useCallback(
     (key: string) => {
       if (!staff) return false;
-      const ms = player.current?.time() ?? 0;
+      const ms = player.current.time() ?? 0;
       if (key === "i") return setMarkIn(ms), setTab("clips"), true;
       if (key === "o") return setMarkOut(ms), setTab("clips"), true;
       if (key === "d") return startDrawing(), true;
@@ -185,19 +209,36 @@ export function Workspace({
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="space-y-2">
         <VideoPlayer
-          ref={player}
+          ref={raw}
           src={`${media}/hls/master.m3u8`}
-          poster={video.has_poster ? `${media}/poster.jpg` : undefined}
-          thumbsVtt={video.has_thumbnails ? `${media}/thumbs.vtt` : undefined}
-          fps={video.fps}
-          markers={markers}
-          annotations={drawing ? [] : (annotations.data ?? []).map((a) => ({ ...a, shapes: a.shapes as Shape[] }))}
+          poster={cam.has_poster ? `${media}/poster.jpg` : undefined}
+          thumbsVtt={cam.has_thumbnails ? `${media}/thumbs.vtt` : undefined}
+          fps={cam.fps}
+          markers={offset ? markers.map((mk) => ({ ...mk, t_ms: mk.t_ms + offset })) : markers}
+          annotations={
+            drawing || offset
+              ? [] // drawings belong to the main camera picture
+              : (annotations.data ?? []).map((a) => ({ ...a, shapes: a.shapes as Shape[] }))
+          }
           onTime={onTime}
           onKey={onKey}
           overlay={drawing ? <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} /> : undefined}
         />
+        {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
         <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
         <AnalysisPanel analysis={analysis.data ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} />
+        {staff && analysis.data?.status === "ready" && (
+          <IdentityPanel
+            orgId={orgId}
+            match={match}
+            videoId={video.id}
+            tracks={analysis.data.tracks}
+            onSeek={(ms) => {
+              player.current.pause();
+              player.current.seek(ms);
+            }}
+          />
+        )}
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
         {notice && (
           <Alert kind="success" className="py-2">
@@ -233,7 +274,7 @@ export function Workspace({
               {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.empty")}</li>}
               {(comments.data ?? []).map((c) => (
                 <li key={c.id} className="rounded bg-surface p-2">
-                  <button className="font-mono text-xs text-accent underline" onClick={() => player.current?.seek(c.t_ms)}>
+                  <button className="font-mono text-xs text-accent underline" onClick={() => player.current.seek(c.t_ms)}>
                     {formatClock(c.t_ms)}
                   </button>{" "}
                   <span className="text-xs text-muted">{c.author_name}</span>
@@ -277,10 +318,10 @@ export function Workspace({
             {staff && (
               <form onSubmit={saveClip} className="space-y-2" aria-label={t("clips.save")}>
                 <div className="flex gap-2">
-                  <Button variant="secondary" className="flex-1" onClick={() => setMarkIn(player.current?.time() ?? now)}>
+                  <Button variant="secondary" className="flex-1" onClick={() => setMarkIn(player.current.time() ?? now)}>
                     {markIn != null ? formatClock(markIn) : t("clips.markIn")}
                   </Button>
-                  <Button variant="secondary" className="flex-1" onClick={() => setMarkOut(player.current?.time() ?? now)}>
+                  <Button variant="secondary" className="flex-1" onClick={() => setMarkOut(player.current.time() ?? now)}>
                     {markOut != null ? formatClock(markOut) : t("clips.markOut")}
                   </Button>
                 </div>
@@ -303,8 +344,8 @@ export function Workspace({
               {(clips.data ?? []).map((c) => (
                 <li key={c.id}>
                   <button className="w-full rounded px-2 py-1 text-left hover:bg-surface" onClick={() => {
-                    player.current?.seek(c.start_ms);
-                    player.current?.play();
+                    player.current.seek(c.start_ms);
+                    player.current.play();
                   }}>
                     <span className="font-mono text-xs">{t("clips.range", { start: formatClock(c.start_ms), end: formatClock(c.end_ms) })}</span>{" "}
                     {c.title}
@@ -364,8 +405,8 @@ export function Workspace({
               {(annotations.data ?? []).map((a) => (
                 <li key={a.id}>
                   <button className="rounded px-2 py-1 font-mono text-xs hover:bg-surface" onClick={() => {
-                    player.current?.pause();
-                    player.current?.seek(a.t_ms + 100);
+                    player.current.pause();
+                    player.current.seek(a.t_ms + 100);
                   }}>
                     {formatClock(a.t_ms)} · {a.shapes.length}×
                   </button>
@@ -436,5 +477,157 @@ function AnalysisPanel({
         {analysis.tracks.length > 0 && <span>{t("tracks", { count: analysis.tracks.length })}</span>}
       </div>
     </Card>
+  );
+}
+
+
+/** Manual track identities (M5): own-team tracks to roster players; kept across re-analysis. */
+function IdentityPanel({
+  orgId,
+  match,
+  videoId,
+  tracks,
+  onSeek,
+}: {
+  orgId: string;
+  match: Match;
+  videoId: string;
+  tracks: Analysis["tracks"];
+  onSeek: (ms: number) => void;
+}) {
+  const t = useTranslations("identity");
+  const qc = useQueryClient();
+  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  const [notice, setNotice] = useState<string | null>(null);
+  const own = tracks
+    .filter((tr) => tr.team === "home" || tr.team === "home_gk")
+    .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
+    .slice(0, 40);
+  if (own.length === 0) return null;
+  async function assign(trackNo: number, playerId: string) {
+    const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
+      params: { path: { org_id: orgId, video_id: videoId, track_no: trackNo } },
+      body: { player_id: playerId || null, number: null },
+    });
+    if (!error) {
+      setNotice(t("saved"));
+      void qc.invalidateQueries({ queryKey: ["analysis", videoId] });
+      void qc.invalidateQueries({ queryKey: ["physical", match.id] });
+    }
+  }
+  return (
+    <Card className="p-3" data-testid="identity-panel">
+      <details>
+        <summary className="cursor-pointer font-semibold">{t("title")}</summary>
+        <p className="mt-2 text-xs text-muted">{t("hint")}</p>
+        <ul className="mt-2 max-h-72 space-y-1 overflow-auto text-sm">
+          {own.map((tr) => (
+            <li key={tr.track_no} className="flex flex-wrap items-center gap-2">
+              <button className="w-36 text-left font-mono text-xs underline" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}`}>
+                {t("track", { n: tr.track_no })} · {formatClock(tr.first_ms)}
+              </button>
+              <label className="sr-only" htmlFor={`track-${tr.track_no}`}>
+                {t("track", { n: tr.track_no })}
+              </label>
+              <select
+                id={`track-${tr.track_no}`}
+                value={tr.player_id ?? ""}
+                onChange={(e) => void assign(tr.track_no, e.target.value)}
+                className="min-h-9 flex-1 rounded-md border border-border bg-background px-2"
+              >
+                <option value="">{t("none")}</option>
+                {(roster.data ?? [])
+                  .filter((r) => r.active)
+                  .map((r) => (
+                    <option key={r.player_id} value={r.player_id}>
+                      {r.jersey_number != null ? `#${r.jersey_number} ` : ""}
+                      {r.first_name} {r.last_name}
+                    </option>
+                  ))}
+              </select>
+              {tr.identity_source && <span className="text-xs text-muted">{tr.identity_source === "model" ? t("auto") : t("manual")}</span>}
+            </li>
+          ))}
+        </ul>
+        {notice && (
+          <p className="mt-2 text-xs text-ok" aria-live="polite">
+            {notice}
+          </p>
+        )}
+      </details>
+    </Card>
+  );
+}
+
+
+function CameraSwitch({
+  orgId,
+  cams,
+  active,
+  staff,
+  onSwitch,
+}: {
+  orgId: string;
+  cams: Video[];
+  active: Video;
+  staff: boolean;
+  onSwitch: (id: string) => void;
+}) {
+  const t = useTranslations("camera");
+  const qc = useQueryClient();
+  const sync = active.sync;
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm" data-testid="camera-switch">
+      <span className="font-medium">{t("label")}:</span>
+      <div role="group" aria-label={t("label")} className="flex flex-wrap gap-1">
+        {cams.map((c) => (
+          <button
+            key={c.id}
+            aria-pressed={c.id === active.id}
+            onClick={() => onSwitch(c.id)}
+            className={cn("rounded border px-2 py-1", c.id === active.id ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+          >
+            {t(c.role)}
+          </button>
+        ))}
+      </div>
+      {active.role !== "main" && sync?.source === "audio" && sync.applied && (
+        <span className="text-xs text-muted">{t("synced", { confidence: Math.round((sync.confidence ?? 0) * 100) })}</span>
+      )}
+      {active.role !== "main" && sync?.source === "user_correction" && <span className="text-xs text-muted">{t("manual")}</span>}
+      {active.role !== "main" && (!sync || (sync.source === "audio" && !sync.applied)) && (
+        <span className="text-xs text-accent">{t("syncLow")}</span>
+      )}
+      {staff && active.role !== "main" && (
+        <form
+          className="flex items-end gap-1"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const value = Number(new FormData(form).get("offset"));
+            await api.PATCH("/v1/orgs/{org_id}/videos/{video_id}", {
+              params: { path: { org_id: orgId, video_id: active.id } },
+              body: { time_offset_ms: value },
+            });
+            void qc.invalidateQueries({ queryKey: ["match"] });
+          }}
+        >
+          <label className="flex flex-col text-xs">
+            {t("offset")}
+            <input
+              name="offset"
+              type="number"
+              step={10}
+              defaultValue={active.time_offset_ms}
+              key={active.id}
+              className="min-h-9 w-28 rounded-md border border-border bg-background px-2 text-sm"
+            />
+          </label>
+          <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">
+            {t("save")}
+          </Button>
+        </form>
+      )}
+    </div>
   );
 }

@@ -53,10 +53,26 @@ interface PlayerRow {
   saves: number;
   xg: number;
 }
+type ZoneSaves = Record<string, { faced: number; saves: number }>;
+export interface KeeperRow {
+  side: "own" | "opponent";
+  player_id: string | null;
+  number: number | null;
+  faced: number;
+  saves: number;
+  goals_against: number;
+  save_pct: number | null;
+  xg_against: number;
+  gsax: number;
+  seven_m: { faced: number; saves: number };
+  goal_zones: ZoneSaves;
+  shot_zones: ZoneSaves;
+}
 export interface Stats {
   own: TeamStats;
   opponent: TeamStats;
   players: Record<string, PlayerRow>;
+  goalkeepers?: Record<string, KeeperRow>;
   timeline: {
     score: { clock_s: number; own: number; opp: number }[];
     best_run: Record<string, { goals: number; from_s: number | null }>;
@@ -86,7 +102,7 @@ function N({ value, onClick, label }: { value: string | number; onClick?: () => 
   );
 }
 
-interface ViewProps {
+export interface ViewProps {
   orgId: string;
   match: Schemas["MatchOut"];
   teamName: string;

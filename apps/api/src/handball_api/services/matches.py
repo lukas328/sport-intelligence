@@ -17,6 +17,7 @@ from handball_api.schemas.matches import (
     OpponentCreate,
     OpponentOut,
     OpponentUpdate,
+    SyncOut,
     VideoOut,
 )
 from handball_api.services import audit
@@ -41,6 +42,11 @@ def video_out(v: VideoAsset) -> VideoOut:
         has_poster=v.poster_key is not None,
         has_thumbnails=bool(v.quality_report and v.quality_report.get("thumbnails")),
         time_offset_ms=v.time_offset_ms,
+        sync=SyncOut.model_validate(
+            {k: v.sync.get(k) for k in ("offset_ms", "confidence", "source", "applied")}
+        )
+        if v.sync and v.sync.get("source")
+        else None,
         quality_report=v.quality_report,
         error=v.error,
         created_at=v.created_at,

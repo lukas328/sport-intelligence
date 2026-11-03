@@ -49,6 +49,7 @@ export function Tagger({
 }) {
   const t = useTranslations("events");
   const te = useTranslations("errors");
+  const tk = useTranslations("keepers");
   const qc = useQueryClient();
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const [side, setSide] = useState<"own" | "opponent">("own");
@@ -61,6 +62,25 @@ export function Tagger({
   const [turnoverType, setTurnoverType] = useState<(typeof TURNOVERS)[number]>("bad_pass");
   const [notice, setNotice] = useState<string | null>(null);
   const [failure, setFailure] = useState<ErrorKey | null>(null);
+  // goalkeepers on court: remembered per match in this browser
+  const gkKey = `hb.gk.${match.id}`;
+  const [keepers, setKeepers] = useState<{ own: string; opp: string }>({ own: "", opp: "" });
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(gkKey);
+      if (saved) setKeepers(JSON.parse(saved) as { own: string; opp: string });
+    } catch {
+      /* storage unavailable: start empty */
+    }
+  }, [gkKey]);
+  function updateKeepers(next: { own: string; opp: string }) {
+    setKeepers(next);
+    try {
+      window.localStorage.setItem(gkKey, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  }
   const path = { org_id: orgId, match_id: match.id };
 
   const refresh = () => {
@@ -110,8 +130,15 @@ export function Tagger({
 
   function shot(outcome: Outcome) {
     const b = base("shot");
+    const attributes =
+      side === "opponent" && keepers.own
+        ? { goalkeeper_id: keepers.own }
+        : side === "own" && keepers.opp !== ""
+          ? { goalkeeper_number: Number(keepers.opp) }
+          : {};
     create.mutate({
       ...b,
+      attributes,
       outcome,
       x: pos?.x ?? null,
       y: pos?.y ?? null,
@@ -213,6 +240,39 @@ export function Tagger({
           />
         </label>
       )}
+
+      <div className="grid grid-cols-2 gap-2">
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium">{tk("ownKeeper")}</span>
+          <select
+            value={keepers.own}
+            onChange={(e) => updateKeepers({ ...keepers, own: e.target.value })}
+            className="min-h-10 rounded-md border border-border bg-background px-2"
+          >
+            <option value="">-</option>
+            {(roster.data ?? [])
+              .filter((r) => r.active)
+              .sort((a, b) => Number(b.main_position === "TW") - Number(a.main_position === "TW") || (a.jersey_number ?? 999) - (b.jersey_number ?? 999))
+              .map((r) => (
+                <option key={r.player_id} value={r.player_id}>
+                  {r.jersey_number != null ? `#${r.jersey_number} ` : ""}
+                  {r.first_name} {r.last_name}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium">{tk("oppKeeper")}</span>
+          <input
+            type="number"
+            min={0}
+            max={99}
+            value={keepers.opp}
+            onChange={(e) => updateKeepers({ ...keepers, opp: e.target.value })}
+            className="min-h-10 rounded-md border border-border bg-background px-2"
+          />
+        </label>
+      </div>
 
       <div className="flex flex-wrap gap-3">
         <label className="flex items-center gap-1.5">

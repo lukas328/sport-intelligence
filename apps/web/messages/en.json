@@ -495,7 +495,9 @@
     "video": "Video",
     "overview": "Overview",
     "report": "Match report",
-    "shots": "Shots"
+    "shots": "Shots",
+    "keepers": "Goalkeepers",
+    "physical": "Physical"
   },
   "stats": {
     "goals": "Goals",
@@ -602,5 +604,66 @@
     "file": "File",
     "done": "Match imported.",
     "warnings": "Notes"
+  },
+  "keepers": {
+    "title": "Goalkeepers",
+    "own": "Our goalkeepers",
+    "opponent": "Opponent goalkeepers",
+    "faced": "Shots on target",
+    "saves": "Saves",
+    "savePct": "Save %",
+    "goalsAgainst": "Goals against",
+    "xgAgainst": "xG against",
+    "gsax": "GSAx",
+    "gsaxHint": "Goals saved above expected: xG against minus goals against. Positive means more saves than expected. Estimated.",
+    "sevenM": "7 m saved",
+    "unknown": "Not assigned",
+    "number": "No. {number}",
+    "byShotZone": "By shot zone",
+    "byGoalZone": "By goal zone",
+    "none": "No shots on target recorded yet.",
+    "assignHint": "Pick the goalkeeper while tagging so saves are credited.",
+    "ownKeeper": "Our goalkeeper",
+    "oppKeeper": "Opponent goalkeeper no."
+  },
+  "physical": {
+    "title": "Physical",
+    "hint": "Estimated from single-camera video analysis. Assign tracks to roster players in the video so they show up here.",
+    "distance": "Distance",
+    "highIntensity": "High intensity",
+    "sprints": "Sprints",
+    "topSpeed": "Top speed",
+    "time": "Tracked",
+    "unassigned": "Unassigned tracks",
+    "heatmap": "Heatmap",
+    "none": "No position data yet.",
+    "km": "{value} km",
+    "m": "{value} m",
+    "kmh": "{value} km/h",
+    "min": "{value} min",
+    "track": "Track {n}",
+    "showHeatmap": "Show heatmap"
+  },
+  "identity": {
+    "title": "Assign tracks",
+    "hint": "Assign tracks of your team to a roster player. Assignments are kept when the analysis runs again.",
+    "track": "Track {n}",
+    "none": "not assigned",
+    "saved": "Assignment saved.",
+    "auto": "detected automatically",
+    "manual": "manual",
+    "seek": "Show track in video"
+  },
+  "camera": {
+    "label": "Camera",
+    "main": "Main camera",
+    "goal_cam_left": "Goal camera left",
+    "goal_cam_right": "Goal camera right",
+    "other": "Other camera",
+    "syncLow": "Automatic sync is uncertain. Please check the offset.",
+    "offset": "Offset to main camera (ms)",
+    "save": "Save offset",
+    "synced": "synced by audio ({confidence} %)",
+    "manual": "offset set manually"
   }
 }

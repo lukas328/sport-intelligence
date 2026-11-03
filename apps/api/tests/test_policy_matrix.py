@@ -234,6 +234,24 @@ ENDPOINTS += [
             json={"t_ms": 1, "shapes": [{"kind": "circle", "points": [[0.5, 0.5], [0.6, 0.6]]}]},
         ),
     ),
+    ("GET events", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/events")),
+    (
+        "POST event",
+        STAFF,
+        lambda a, w: a.post(
+            f"/v1/orgs/{w.org}/matches/{w.match}/events",
+            json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": 1000},
+        ),
+    ),
+    ("GET stats", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/stats")),
+    (
+        "PUT kickoff",
+        STAFF,
+        lambda a, w: a.put(
+            f"/v1/orgs/{w.org}/matches/{w.match}/kickoff", json={"period": 1, "t_ms": 0}
+        ),
+    ),
+    ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("PATCH roster entry", COACHES, _patch_entry),
     ("DELETE roster entry", COACHES, _delete_entry),
     ("GET consents", COACHES, _get_consents),

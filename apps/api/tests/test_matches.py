@@ -26,13 +26,18 @@ async def new_match(api: Api, ids: dict[str, Any], **kw: Any) -> dict[str, Any]:
 
 
 async def upload(
-    api: Api, ids: dict[str, Any], match_id: str, data: bytes, name: str = "spiel.mp4"
+    api: Api,
+    ids: dict[str, Any],
+    match_id: str,
+    data: bytes,
+    name: str = "spiel.mp4",
+    role: str = "main",
 ) -> dict[str, Any]:
     storage: MemoryStorage = api.app.state.storage
     org = ids["org"]
     r = await api.post(
         f"/v1/orgs/{org}/matches/{match_id}/videos",
-        json={"filename": name, "size_bytes": len(data), "content_type": "video/mp4"},
+        json={"filename": name, "size_bytes": len(data), "content_type": "video/mp4", "role": role},
     )
     assert r.status_code == 201, r.text
     up = r.json()

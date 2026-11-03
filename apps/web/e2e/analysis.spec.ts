@@ -39,4 +39,11 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("tab", { name: "Würfe" }).click();
   await expect(page.getByTestId("goal-grid")).toBeVisible();
   await expectAccessible(page);
+
+  // goalkeeper module: the sheet's keeper with saves and goals against by zone
+  await page.getByRole("tab", { name: "Torhüter" }).click();
+  const keeper = page.getByTestId("keeper-card").filter({ hasText: "Mia Tor" });
+  await expect(keeper).toContainText("Paraden");
+  await expect(keeper.getByText("6", { exact: true })).toBeVisible();
+  await expectAccessible(page);
 });

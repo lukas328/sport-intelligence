@@ -150,6 +150,36 @@ def run_with_progress(
         raise TranscodeError(err.strip().splitlines()[-1] if err.strip() else "ffmpeg failed")
 
 
+AUDIO_SYNC_S = 600
+
+
+def sync_audio(src: Path, dst: Path, ffmpeg: str, seconds: int = AUDIO_SYNC_S) -> None:
+    """First minutes of audio as 8 kHz mono WAV (about 1 MB per minute) for camera sync."""
+    subprocess.run(
+        [
+            ffmpeg,
+            "-hide_banner",
+            "-nostdin",
+            "-y",
+            "-i",
+            str(src),
+            "-t",
+            str(seconds),
+            "-vn",
+            "-ac",
+            "1",
+            "-ar",
+            "8000",
+            "-c:a",
+            "pcm_s16le",
+            str(dst),
+        ],
+        check=True,
+        capture_output=True,
+        timeout=300,
+    )
+
+
 def poster(src: Path, dst: Path, at_s: float, ffmpeg: str) -> None:
     subprocess.run(
         [

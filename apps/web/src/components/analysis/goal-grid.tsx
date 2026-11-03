@@ -18,14 +18,17 @@ export function GoalGrid({
   onCell,
   selected,
   mode = "stats",
+  saves = false,
 }: {
+  /** goals/shots per zone; with `saves` the numbers are saves/faced and shown in green */
+  saves?: boolean;
   data?: Record<string, { shots: number; goals: number }>;
   onCell?: (zone: string) => void;
   selected?: string | null;
   mode?: "stats" | "pick";
 }) {
   const t = useTranslations("shotsView");
-  const [keeper, setKeeper] = useState(false);
+  const [keeper, setKeeper] = useState(saves);
   return (
     <div className="space-y-2">
       {mode === "stats" && (
@@ -59,7 +62,7 @@ export function GoalGrid({
                 mode === "pick" && selected === zone && "bg-accent text-accent-contrast",
                 d && d.shots > 0 && mode === "stats" && "font-semibold",
               )}
-              style={mode === "stats" && pct != null ? { background: `color-mix(in srgb, var(--error) ${Math.min(80, pct)}%, var(--background))` } : undefined}
+              style={mode === "stats" && pct != null ? { background: `color-mix(in srgb, var(${saves ? "--ok" : "--error"}) ${Math.min(80, pct)}%, var(--background))` } : undefined}
             >
               {mode === "stats" ? (
                 d ? (

@@ -72,6 +72,15 @@ class MatchUpdate(ApiModel):
     halftime_opponent: int | None = Field(default=None, ge=0, le=99)
 
 
+class SyncOut(ApiModel):
+    """Camera sync against the main video. `applied` is false when the audio match was too weak."""
+
+    offset_ms: int | None = None
+    confidence: float | None = None
+    source: Literal["audio", "user_correction"] | None = None
+    applied: bool | None = None
+
+
 class VideoOut(ApiModel):
     id: uuid.UUID
     role: VideoRole
@@ -87,6 +96,7 @@ class VideoOut(ApiModel):
     has_poster: bool
     has_thumbnails: bool
     time_offset_ms: int
+    sync: SyncOut | None
     quality_report: dict[str, Any] | None
     error: str | None
     created_at: datetime
@@ -349,7 +359,18 @@ class TrackOut(ApiModel):
     last_ms: int
     observed_share: float
     player_id: uuid.UUID | None
+    player_confidence: float | None
+    number: int | None
+    identity_source: str | None
+    physical: dict[str, Any] | None
     source: str
+
+
+class TrackIdentity(ApiModel):
+    """Manual identity for a track; both null clears it."""
+
+    player_id: uuid.UUID | None = None
+    number: int | None = Field(default=None, ge=0, le=99)
 
 
 class AnalysisOut(ApiModel):

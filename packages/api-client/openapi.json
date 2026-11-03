@@ -3902,6 +3902,61 @@
         "title": "Shape",
         "type": "object"
       },
+      "SyncOut": {
+        "description": "Camera sync against the main video. `applied` is false when the audio match was too weak.",
+        "properties": {
+          "applied": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "offset_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset Ms"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "audio",
+                  "user_correction"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "title": "SyncOut",
+        "type": "object"
+      },
       "TeamCreate": {
         "properties": {
           "gender": {
@@ -4194,19 +4249,96 @@
         "title": "TotpSetupOut",
         "type": "object"
       },
+      "TrackIdentity": {
+        "description": "Manual identity for a track; both null clears it.",
+        "properties": {
+          "number": {
+            "anyOf": [
+              {
+                "maximum": 99.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          }
+        },
+        "title": "TrackIdentity",
+        "type": "object"
+      },
       "TrackOut": {
         "properties": {
           "first_ms": {
             "title": "First Ms",
             "type": "integer"
           },
+          "identity_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identity Source"
+          },
           "last_ms": {
             "title": "Last Ms",
             "type": "integer"
           },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
           "observed_share": {
             "title": "Observed Share",
             "type": "number"
+          },
+          "physical": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical"
+          },
+          "player_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Confidence"
           },
           "player_id": {
             "anyOf": [
@@ -4259,6 +4391,10 @@
           "last_ms",
           "observed_share",
           "player_id",
+          "player_confidence",
+          "number",
+          "identity_source",
+          "physical",
           "source"
         ],
         "title": "TrackOut",
@@ -4504,6 +4640,16 @@
           "status": {
             "$ref": "#/components/schemas/VideoStatus"
           },
+          "sync": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SyncOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "time_offset_ms": {
             "title": "Time Offset Ms",
             "type": "integer"
@@ -4535,6 +4681,7 @@
           "has_poster",
           "has_thumbnails",
           "time_offset_ms",
+          "sync",
           "quality_report",
           "error",
           "created_at"
@@ -6992,6 +7139,63 @@
         "summary": "Set Kickoff",
         "tags": [
           "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/physical": {
+      "get": {
+        "description": "Distance, speed bands, sprints and heatmap per player (estimated from video tracking).",
+        "operationId": "match_physical_v1_orgs__org_id__matches__match_id__physical_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Match Physical V1 Orgs  Org Id  Matches  Match Id  Physical Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Match Physical",
+        "tags": [
+          "matches",
+          "analysis"
         ]
       }
     },
@@ -9830,6 +10034,80 @@
           }
         },
         "summary": "Track Chunk",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity": {
+      "put": {
+        "description": "Assign a roster player (or just a jersey number) to a track; null clears it.",
+        "operationId": "set_track_identity_v1_orgs__org_id__videos__video_id__tracks__track_no__identity_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "track_no",
+            "required": true,
+            "schema": {
+              "title": "Track No",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackIdentity"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Track Identity",
         "tags": [
           "matches",
           "analysis"

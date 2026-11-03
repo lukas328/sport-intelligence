@@ -243,6 +243,8 @@ def test_run_ingest_end_to_end(
     assert (out / "poster.jpg").exists()
     assert "thumbs.jpg#xywh=0,0,160,90" in (out / "thumbs.vtt").read_text()
     assert result["width"] == 1280
+    assert result["audio_key"] == "o/m/a/audio_8k.wav"
+    assert (out / "audio_8k.wav").stat().st_size > 8000 * 2 * 5  # 8 kHz mono 16 bit, 8 s clip
     assert len(result["checksum_sha256"]) == 64
     assert result["quality_report"]["overall"] in ("warn", "fail")  # 8 s clip: duration_short
     assert posts[-1]["status"] == "succeeded"

@@ -14,7 +14,14 @@ from handball_api.core.db import disable_system_access, enable_system_access, se
 from handball_api.core.errors import ProblemError
 from handball_api.core.net import UnsafeUrlError, check_public_https_url
 from handball_api.core.storage import ObjectNotFoundError
-from handball_api.models import CameraCalibration, Match, ProcessingJob, Track, VideoAsset
+from handball_api.models import (
+    CameraCalibration,
+    Match,
+    ProcessingJob,
+    RosterEntry,
+    Track,
+    VideoAsset,
+)
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
 from handball_api.services import audit
@@ -25,6 +32,8 @@ from handball_api.services.policies import Action
 PIPELINE_VERSION = "0.2.0"
 INGEST_FUNC = "handball_worker.ingest.run_ingest"
 ANALYSIS_FUNC = "handball_gpu_worker.analysis.run_analysis"
+SYNC_FUNC = "handball_gpu_worker.sync.run_sync"
+SYNC_MIN_CONFIDENCE = 0.35
 IMPORT_FUNC = "handball_worker.ingest.run_import"
 MEDIA_PATH = re.compile(r"^[A-Za-z0-9_\-]+(/[A-Za-z0-9_\-]+)*\.(m3u8|m4s|mp4|ts|jpg|vtt)$")
 MEDIA_TYPES = {
@@ -258,9 +267,67 @@ async def reprocess(ctx: Ctx, asset_id: uuid.UUID) -> ProcessingJob:
 
 
 async def set_offset(ctx: Ctx, asset_id: uuid.UUID, offset_ms: int) -> VideoAsset:
+    """Manual sync: time in this video = time in the main video + offset_ms."""
     asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
     asset.time_offset_ms = offset_ms
+    asset.sync = {**(asset.sync or {}), "offset_ms": offset_ms, "source": "user_correction"}
     return asset
+
+
+async def start_sync(ctx: Ctx, main: VideoAsset, other: VideoAsset) -> ProcessingJob | None:
+    main_key = (main.sync or {}).get("audio_key")
+    other_key = (other.sync or {}).get("audio_key")
+    if not main_key or not other_key or (other.sync or {}).get("source") == "user_correction":
+        return None
+    job = await _new_job(ctx, other, "sync")
+    ctx.require_jobs().enqueue(
+        "gpu",
+        SYNC_FUNC,
+        str(job.id),
+        {
+            "job_id": str(job.id),
+            "bucket": ctx.settings.s3_bucket_videos,
+            "main_audio_key": main_key,
+            "other_audio_key": other_key,
+        },
+    )
+    return job
+
+
+async def _sync_after_ingest(ctx: Ctx, asset: VideoAsset) -> None:
+    others = (
+        await ctx.db.scalars(
+            select(VideoAsset).where(
+                VideoAsset.match_id == asset.match_id,
+                VideoAsset.status == VideoStatus.READY,
+                VideoAsset.id != asset.id,
+            )
+        )
+    ).all()
+    if asset.role == VideoRole.MAIN:
+        for other in others:
+            await start_sync(ctx, asset, other)
+    else:
+        main = next((v for v in others if v.role == VideoRole.MAIN), None)
+        if main is not None:
+            await start_sync(ctx, main, asset)
+
+
+def _apply_sync_result(asset: VideoAsset, r: dict[str, object]) -> None:
+    offset = r.get("offset_ms")
+    conf = r.get("confidence")
+    if not isinstance(offset, int | float) or not isinstance(conf, int | float):
+        return
+    applied = conf >= SYNC_MIN_CONFIDENCE
+    if applied:
+        asset.time_offset_ms = int(offset)
+    asset.sync = {
+        **(asset.sync or {}),
+        "offset_ms": int(offset),
+        "confidence": float(conf),
+        "source": "audio",
+        "applied": applied,
+    }
 
 
 async def read_media(ctx: Ctx, asset_id: uuid.UUID, path: str) -> tuple[bytes, str]:
@@ -320,8 +387,8 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         job.finished_at = now
         job.error = data.error
     if asset is not None and match is not None:
-        if data.status == JobStatus.FAILED and job.kind == "analysis":
-            pass  # the video stays playable; the analysis error is shown on its own
+        if data.status == JobStatus.FAILED and job.kind in ("analysis", "sync"):
+            pass  # the video stays playable; the error is shown on its own
         elif data.status == JobStatus.FAILED:
             asset.status = VideoStatus.FAILED
             asset.error = data.error
@@ -335,8 +402,11 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
             match.status = MatchStatus.READY
             if asset.role == VideoRole.MAIN and asset.proxy_key:
                 await start_analysis(ctx, asset, match)
+            await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
             await _apply_analysis_result(ctx, asset, job, data.result)
+        elif data.status == JobStatus.SUCCEEDED and job.kind == "sync" and data.result:
+            _apply_sync_result(asset, data.result)
     await ctx.db.flush()
     await ctx.require_events().publish(f"match:{job.match_id}", job_event(job))
     return job
@@ -361,6 +431,8 @@ def _apply_ingest_result(asset: VideoAsset, r: dict[str, object]) -> None:
     asset.poster_key = str(r.get("poster_key") or "") or None
     report = r.get("quality_report")
     asset.quality_report = report if isinstance(report, dict) else None
+    audio = r.get("audio_key")
+    asset.sync = {**(asset.sync or {}), "audio_key": str(audio) if audio else None}
 
 
 # ---- analysis (stages 2 to 5) ---------------------------------------------------------------
@@ -422,26 +494,46 @@ async def _apply_analysis_result(
                 pipeline_version=job.pipeline_version,
             )
         )
+    # manual identities survive a re-run: carried over to the new track that covers the same time
+    previous = [
+        (t.team, t.first_ms, t.last_ms, t.player_id, t.number)
+        for t in (
+            await ctx.db.scalars(
+                select(Track).where(
+                    Track.video_asset_id == asset.id, Track.identity_source == "user_correction"
+                )
+            )
+        ).all()
+    ]
     await ctx.db.execute(delete(Track).where(Track.video_asset_id == asset.id))
     tracks = r.get("tracks")
     detector = str(r.get("detector") or "heuristic")
     if isinstance(tracks, list):
         for t in tracks:
-            ctx.db.add(
-                Track(
-                    organization_id=asset.organization_id,
-                    match_id=asset.match_id,
-                    video_asset_id=asset.id,
-                    track_no=int(t["track_id"]),
-                    team=t.get("team"),
-                    team_confidence=t.get("team_confidence"),
-                    first_ms=int(t["first_ms"]),
-                    last_ms=int(t["last_ms"]),
-                    observed_share=float(t["observed_share"]),
-                    source=detector,
-                    pipeline_version=job.pipeline_version,
-                )
+            first, last = int(t["first_ms"]), int(t["last_ms"])
+            track = Track(
+                organization_id=asset.organization_id,
+                match_id=asset.match_id,
+                video_asset_id=asset.id,
+                track_no=int(t["track_id"]),
+                team=t.get("team"),
+                team_confidence=t.get("team_confidence"),
+                first_ms=first,
+                last_ms=last,
+                observed_share=float(t["observed_share"]),
+                physical=t.get("physical"),
+                number=t.get("number"),
+                identity_source="model" if t.get("number") is not None else None,
+                source=detector,
+                pipeline_version=job.pipeline_version,
             )
+            for team, f0, l0, pid, num in previous:
+                shared = min(last, l0) - max(first, f0)
+                if team == track.team and shared > 0.8 * max(1, last - first):
+                    track.player_id, track.number = pid, num
+                    track.identity_source, track.player_confidence = "user_correction", 1.0
+                    break
+            ctx.db.add(track)
     asset.analysis = {
         k: r.get(k)
         for k in (
@@ -530,3 +622,134 @@ async def calibrate_manually(
         data={"points": len(points)},
     )
     return await start_analysis(ctx, asset, match, points)
+
+
+# ---- identities and physical load (M5) ------------------------------------------------------
+
+
+async def set_track_identity(
+    ctx: Ctx, asset_id: uuid.UUID, track_no: int, player_id: uuid.UUID | None, number: int | None
+) -> Track:
+    asset = await get_asset(ctx, asset_id, Action.EVENT_WRITE)
+    track = await ctx.db.scalar(
+        select(Track).where(Track.video_asset_id == asset.id, Track.track_no == track_no)
+    )
+    if track is None:
+        raise ProblemError(404, "not-found", "Track not found")
+    if player_id is not None:
+        match = await ctx.db.get(Match, asset.match_id)
+        assert match is not None
+        entry = await ctx.db.scalar(
+            select(RosterEntry).where(
+                RosterEntry.season_id == match.season_id, RosterEntry.player_id == player_id
+            )
+        )
+        if entry is None:
+            raise ProblemError(422, "validation", "The player is not in this season's roster")
+        if number is None:
+            number = entry.jersey_number
+    track.player_id, track.number = player_id, number
+    cleared = player_id is None and number is None
+    track.identity_source = None if cleared else "user_correction"
+    track.player_confidence = None if cleared else 1.0
+    await audit.record(
+        ctx,
+        "track.identity_set",
+        target_type="video",
+        target_id=asset.id,
+        data={"track": track_no, "player_id": str(player_id) if player_id else None},
+    )
+    return track
+
+
+BANDS = ("walk", "jog", "run", "sprint")
+
+
+def _merge_physical(items: list[dict[str, object]]) -> dict[str, object]:
+    """Sum of track fragments of one player (same rules as handball_vision.physical.merge)."""
+
+    def f(d: dict[str, object], k: str) -> float:
+        v = d.get(k)
+        return float(v) if isinstance(v, int | float) else 0.0
+
+    total = sum(f(p, "duration_s") for p in items) or 1.0
+    heat: list[list[float]] = []
+    for p in items:
+        grid = p.get("heatmap")
+        if not isinstance(grid, list) or not grid:
+            continue
+        w = f(p, "duration_s") / total
+        if not heat:
+            heat = [[0.0] * len(row) for row in grid]
+        for r, row in enumerate(grid):
+            for c, v in enumerate(row):
+                heat[r][c] += float(v) * w
+    bands: dict[str, float] = dict.fromkeys(BANDS, 0.0)
+    for p in items:
+        b = p.get("band_distance_m")
+        if isinstance(b, dict):
+            for k in BANDS:
+                bands[k] += float(b.get(k, 0.0))
+    return {
+        "distance_m": round(sum(f(p, "distance_m") for p in items), 1),
+        "duration_s": round(sum(f(p, "duration_s") for p in items), 1),
+        "max_speed_ms": round(max((f(p, "max_speed_ms") for p in items), default=0.0), 2),
+        "sprints": int(sum(f(p, "sprints") for p in items)),
+        "band_distance_m": {k: round(v, 1) for k, v in bands.items()},
+        "heatmap": [[round(v, 4) for v in row] for row in heat],
+    }
+
+
+async def match_physical(ctx: Ctx, match_id: uuid.UUID) -> dict[str, object]:
+    """Physical load per identified player and per unidentified track of the main video."""
+    match = await get_match(ctx, match_id)
+    main = await ctx.db.scalar(
+        select(VideoAsset).where(
+            VideoAsset.match_id == match.id,
+            VideoAsset.role == VideoRole.MAIN,
+            VideoAsset.status == VideoStatus.READY,
+        )
+    )
+    if main is None:
+        return {"video_id": None, "players": [], "tracks": [], "estimated": True}
+    tracks = (
+        await ctx.db.scalars(
+            select(Track).where(Track.video_asset_id == main.id).order_by(Track.track_no)
+        )
+    ).all()
+    by_player: dict[uuid.UUID, list[Track]] = {}
+    loose = []
+    for t in tracks:
+        if t.team == "referee" or not t.physical:
+            continue
+        if t.player_id is not None:
+            by_player.setdefault(t.player_id, []).append(t)
+        else:
+            loose.append(t)
+    players = [
+        {
+            "player_id": str(pid),
+            "number": ts[0].number,
+            "team": ts[0].team,
+            "tracks": [t.track_no for t in ts],
+            **_merge_physical([t.physical for t in ts if t.physical]),
+        }
+        for pid, ts in by_player.items()
+    ]
+    players.sort(key=lambda p: -float(p["distance_m"]))  # type: ignore[arg-type]
+    return {
+        "video_id": str(main.id),
+        "players": players,
+        "tracks": [
+            {
+                "track_no": t.track_no,
+                "team": t.team,
+                "number": t.number,
+                "first_ms": t.first_ms,
+                "last_ms": t.last_ms,
+                **_merge_physical([t.physical] if t.physical else []),
+            }
+            for t in loose
+        ],
+        "estimated": True,
+    }

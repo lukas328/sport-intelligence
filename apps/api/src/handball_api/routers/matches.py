@@ -12,7 +12,7 @@ from sqlalchemy import select
 
 from handball_api.core.db import open_session, set_current_user
 from handball_api.core.errors import ProblemError
-from handball_api.models import Annotation, Clip, Opponent, Playlist, ProcessingJob
+from handball_api.models import Annotation, Clip, Opponent, Playlist, ProcessingJob, Track
 from handball_api.routers.deps import OrgDep
 from handball_api.schemas.matches import (
     AnalysisOut,
@@ -39,6 +39,8 @@ from handball_api.schemas.matches import (
     PlaylistOut,
     PlaylistUpdate,
     ReorderIn,
+    TrackIdentity,
+    TrackOut,
     UploadComplete,
     UploadCreate,
     UploadedPartOut,
@@ -189,6 +191,24 @@ async def track_chunk(video_id: uuid.UUID, n: int, scope: OrgDep) -> Response:
         media_type="application/octet-stream",
         headers={"cache-control": "private, max-age=3600"},
     )
+
+
+@router.put(
+    "/videos/{video_id}/tracks/{track_no}/identity", response_model=TrackOut, tags=["analysis"]
+)
+async def set_track_identity(
+    video_id: uuid.UUID, track_no: int, data: TrackIdentity, scope: OrgDep
+) -> Track:
+    """Assign a roster player (or just a jersey number) to a track; null clears it."""
+    return await videos.set_track_identity(
+        scope.ctx, video_id, track_no, data.player_id, data.number
+    )
+
+
+@router.get("/matches/{match_id}/physical", response_model=dict[str, Any], tags=["analysis"])
+async def match_physical(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
+    """Distance, speed bands, sprints and heatmap per player (estimated from video tracking)."""
+    return await videos.match_physical(scope.ctx, match_id)
 
 
 @router.post("/videos/{video_id}/calibration", status_code=202, tags=["analysis"])
