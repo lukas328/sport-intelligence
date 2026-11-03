@@ -1066,6 +1066,18 @@
             "title": "Attributes",
             "type": "object"
           },
+          "client_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
           "clock_s": {
             "anyOf": [
               {
@@ -1282,6 +1294,18 @@
             "additionalProperties": true,
             "title": "Attributes",
             "type": "object"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
           },
           "clock_s": {
             "anyOf": [

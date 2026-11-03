@@ -2293,6 +2293,8 @@ export interface components {
             attributes?: {
                 [key: string]: unknown;
             };
+            /** Client Id */
+            client_id?: string | null;
             /** Clock S */
             clock_s?: number | null;
             /** Goal Zone */
@@ -2337,6 +2339,8 @@ export interface components {
             attributes: {
                 [key: string]: unknown;
             };
+            /** Client Id */
+            client_id?: string | null;
             /** Clock S */
             clock_s: number | null;
             /** Confidence */

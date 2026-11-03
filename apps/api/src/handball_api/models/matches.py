@@ -260,10 +260,13 @@ class Event(Base, EntityMixin, TenantMixin):
     """Match event (BRIEF 4.5). Every event carries confidence and source."""
 
     __tablename__ = "events"
+    # offline clients retry with the same id; the event is created once
+    __table_args__ = (UniqueConstraint("match_id", "client_id"),)
 
     match_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
     )
+    client_id: Mapped[uuid.UUID | None] = mapped_column()
     type: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
     side: Mapped[str] = mapped_column(String(10), nullable=False)  # own, opponent
     period: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=1)

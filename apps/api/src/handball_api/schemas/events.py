@@ -27,6 +27,8 @@ GoalZone = Literal["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"]
 
 
 class EventIn(ApiModel):
+    # set by offline clients (live mode): a retry with the same id returns the stored event
+    client_id: uuid.UUID | None = None
     type: EventType
     side: Side
     period: int = Field(default=1, ge=1, le=4)
@@ -106,6 +108,7 @@ class EventPatch(ApiModel):
 
 class EventOut(ApiModel):
     id: uuid.UUID
+    client_id: uuid.UUID | None = None
     type: str
     side: str
     period: int

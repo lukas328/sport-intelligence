@@ -1007,5 +1007,32 @@
     "mismatch": "The confirmation does not match.",
     "wrongPassword": "The password is wrong.",
     "failed": "That did not work."
+  },
+  "live": {
+    "title": "Live tagging",
+    "open": "Live tagging (courtside)",
+    "back": "Back to match",
+    "synced": "All saved",
+    "syncing": "Saving {count}",
+    "offline": "Offline: {count} pending",
+    "period": "Half {period}",
+    "start": "Start",
+    "pause": "Pause",
+    "minus10": "10 seconds back",
+    "plus10": "10 seconds forward",
+    "secondHalf": "Start second half",
+    "vs": "against {opponent}",
+    "own": "Us",
+    "opponent": "Opponent",
+    "player": "Player",
+    "savedByKeeper": "Saved",
+    "goalAgainst": "Goal against",
+    "ourSave": "Save",
+    "oppMiss": "Miss",
+    "oppTurnover": "Turnover",
+    "oppTwo": "2 min",
+    "log": "Log",
+    "undo": "Undo",
+    "rejected": "{count, plural, one {# entry was} other {# entries were}} rejected by the server."
   }
 }

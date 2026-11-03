@@ -12,6 +12,7 @@ from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.exc import IntegrityError
 
 from handball_api.core.errors import ProblemError
 from handball_api.models import Correction, Event, Match, RosterEntry, StatsCache
@@ -105,6 +106,12 @@ async def create_event(
     ctx: Ctx, match_id: uuid.UUID, data: EventIn, source: str = "user_correction"
 ) -> Event:
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
+    if data.client_id is not None:
+        existing = await ctx.db.scalar(
+            select(Event).where(Event.match_id == match.id, Event.client_id == data.client_id)
+        )
+        if existing is not None:
+            return existing
     await _check_players(ctx, match, data.player_id, data.assist_player_id)
     values = data.model_dump()
     if data.t_ms is not None and data.clock_s is None:
@@ -122,8 +129,18 @@ async def create_event(
         created_by_id=ctx.user_id,
         **values,
     )
-    ctx.db.add(ev)
-    await ctx.db.flush()
+    try:
+        async with ctx.db.begin_nested():
+            ctx.db.add(ev)
+            await ctx.db.flush()
+    except IntegrityError:
+        # the same offline event arrived twice at the same moment: return the stored one
+        existing = await ctx.db.scalar(
+            select(Event).where(Event.match_id == match.id, Event.client_id == data.client_id)
+        )
+        if existing is None:
+            raise
+        return existing
     ctx.db.add(
         Correction(
             organization_id=match.organization_id,

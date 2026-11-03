@@ -1007,5 +1007,32 @@
     "mismatch": "La confirmation ne correspond pas.",
     "wrongPassword": "Le mot de passe est faux.",
     "failed": "Cela n'a pas fonctionné."
+  },
+  "live": {
+    "title": "Saisie en direct",
+    "open": "Saisie en direct (salle)",
+    "back": "Retour au match",
+    "synced": "Tout est enregistré",
+    "syncing": "Enregistrement de {count}",
+    "offline": "Hors ligne : {count} en attente",
+    "period": "{period}e mi-temps",
+    "start": "Démarrer",
+    "pause": "Pause",
+    "minus10": "10 secondes en arrière",
+    "plus10": "10 secondes en avant",
+    "secondHalf": "Commencer la 2e mi-temps",
+    "vs": "contre {opponent}",
+    "own": "Nous",
+    "opponent": "Adversaire",
+    "player": "Joueur",
+    "savedByKeeper": "Arrêté",
+    "goalAgainst": "But encaissé",
+    "ourSave": "Arrêt",
+    "oppMiss": "Tir manqué",
+    "oppTurnover": "Perte de balle",
+    "oppTwo": "2 min",
+    "log": "Historique",
+    "undo": "Annuler",
+    "rejected": "{count, plural, one {# entrée a été refusée} other {# entrées ont été refusées}} par le serveur."
   }
 }

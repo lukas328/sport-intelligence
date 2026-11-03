@@ -128,6 +128,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           >
             {t("matches.pdf")}
           </a>
+          {staff && (
+            <a href={`/app/${orgId}/matches/${match.id}/live`} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" data-testid="live-link">
+              {t("live.open")}
+            </a>
+          )}
           {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="match" targetId={match.id} />}
         </div>
       </header>

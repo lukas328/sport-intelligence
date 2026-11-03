@@ -1007,5 +1007,32 @@
     "mismatch": "Die Bestätigung stimmt nicht.",
     "wrongPassword": "Das Passwort ist falsch.",
     "failed": "Das hat nicht geklappt."
+  },
+  "live": {
+    "title": "Live erfassen",
+    "open": "Live erfassen (Halle)",
+    "back": "Zum Spiel",
+    "synced": "Alles gespeichert",
+    "syncing": "{count} werden gespeichert",
+    "offline": "Offline: {count} ausstehend",
+    "period": "{period}. Halbzeit",
+    "start": "Start",
+    "pause": "Pause",
+    "minus10": "10 Sekunden zurück",
+    "plus10": "10 Sekunden vor",
+    "secondHalf": "2. Halbzeit beginnen",
+    "vs": "gegen {opponent}",
+    "own": "Wir",
+    "opponent": "Gegner",
+    "player": "Spieler/in",
+    "savedByKeeper": "Gehalten",
+    "goalAgainst": "Gegentor",
+    "ourSave": "Parade",
+    "oppMiss": "Fehlwurf",
+    "oppTurnover": "Ballverlust",
+    "oppTwo": "2 Min",
+    "log": "Verlauf",
+    "undo": "Rückgängig",
+    "rejected": "{count, plural, one {# Eintrag wurde} other {# Einträge wurden}} vom Server abgelehnt."
   }
 }

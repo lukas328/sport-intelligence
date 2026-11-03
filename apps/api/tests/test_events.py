@@ -288,3 +288,36 @@ async def test_concurrent_first_stats_views(make_api: Callable[[], Api]) -> None
     )
     assert [r.status_code for r in results] == [200] * len(results)
     assert {r.json()["own"]["goals"] for r in results} == {1}
+
+
+async def test_idempotent_offline_events(make_api: Callable[[], Api]) -> None:
+    """Live mode retries with the same client id; the event exists once (also when concurrent)."""
+    import asyncio
+    import uuid as _uuid
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = (await new_match(api, ids))["id"]
+    url = f"/v1/orgs/{org}/matches/{m}/events"
+    cid = str(_uuid.uuid4())
+    body = {
+        "client_id": cid,
+        "type": "shot",
+        "side": "own",
+        "outcome": "goal",
+        "period": 2,
+        "clock_s": 95,
+    }
+    first = await api.post(url, json=body)
+    again = await api.post(url, json=body)
+    assert first.status_code == again.status_code == 201
+    assert first.json()["id"] == again.json()["id"] and first.json()["client_id"] == cid
+    cid2 = str(_uuid.uuid4())
+    results = await asyncio.gather(
+        *(api.post(url, json={**body, "client_id": cid2}) for _ in range(4))
+    )
+    assert {r.status_code for r in results} == {201}
+    assert len({r.json()["id"] for r in results}) == 1
+    events = (await api.get(url)).json()
+    assert len(events) == 2
