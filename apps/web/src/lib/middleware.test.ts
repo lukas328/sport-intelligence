@@ -35,4 +35,14 @@ describe("middleware", () => {
     expect(app.status).toBe(307);
     expect(app.headers.get("location")).toContain("/login?next=%2Fops");
   });
+  it("takes the language from marketing site links and drops the parameter", async () => {
+    const { middleware } = await import("../middleware");
+    const { NextRequest } = await import("next/server");
+    const res = middleware(new NextRequest("http://web/register?lang=fr"));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://web/register");
+    expect(res.cookies.get("NEXT_LOCALE")?.value).toBe("fr");
+    const unknown = middleware(new NextRequest("http://web/register?lang=xx"));
+    expect(unknown.status).toBe(200);
+  });
 });

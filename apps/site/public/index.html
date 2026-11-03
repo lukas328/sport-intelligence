@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handball AI</title>
+<link rel="icon" href="/icon.png">
+<link rel="canonical" href="/de/">
+<link rel="alternate" hreflang="de-CH" href="/de/">
+<link rel="alternate" hreflang="fr" href="/fr/">
+<link rel="alternate" hreflang="en" href="/en/">
+<meta http-equiv="refresh" content="0; url=/de/">
+<script>
+  // pick the visitor's language once; falls back to German via the meta refresh above
+  (function () {
+    var l = (navigator.language || "de").slice(0, 2).toLowerCase();
+    location.replace("/" + (l === "fr" || l === "en" ? l : "de") + "/");
+  })();
+</script>
+</head>
+<body><p><a href="/de/">Deutsch</a> · <a href="/fr/">Français</a> · <a href="/en/">English</a></p></body>
+</html>

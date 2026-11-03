@@ -116,6 +116,8 @@ ADR 017.
 - Upload over poor Wi-Fi: background upload, optional on-device compression, mobile data warning 4.8
 
 ### A4 Club operations and launch readiness
+Status: done as far as possible here (report `docs/progress/A4.md`); open: usability test, real-match
+end-to-end test and the A3 carry-overs, all listed in GO_LIVE.md.
 - Annual subscription by Swiss QR bill (`qrbill`), reminders, dunning, camt.054 matching, VAT, invoice
   archive, vouchers and federation discounts 4.10 (from M8)
 - Help centre (MDX, de/fr/en, ≥ 15 articles), in-app help, support chat adapter, feedback button,

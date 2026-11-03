@@ -1,3 +1,4 @@
+import { LOCALE_COOKIE, locales } from "@/i18n/config";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED = ["/app", "/onboarding", "/ops"];
@@ -56,6 +57,15 @@ export function middleware(req: NextRequest) {
     url.pathname = "/login";
     url.search = `?next=${encodeURIComponent(pathname + search)}`;
     return NextResponse.redirect(url);
+  }
+  // links from the marketing site carry ?lang=de-CH|fr|en: remember it and drop the parameter
+  const lang = req.nextUrl.searchParams.get("lang");
+  if (lang && (locales as readonly string[]).includes(lang)) {
+    const url = req.nextUrl.clone();
+    url.searchParams.delete("lang");
+    const redirect = NextResponse.redirect(url);
+    redirect.cookies.set(LOCALE_COOKIE, lang, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+    return redirect;
   }
   const res = NextResponse.next();
   res.headers.set(

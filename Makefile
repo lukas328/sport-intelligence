@@ -55,6 +55,8 @@ db: ## Start only Postgres (needed by the API tests)
 
 test-py: db ## Python tests with coverage gate (80 %), needs Postgres
 	uv run python packages/court/scripts/generate.py --check
+	uv run python packages/plans/generate.py --check
+	uv run python apps/site/scripts/make_demo.py --check
 	uv run pytest apps packages --cov --cov-report=term
 
 test-js: ## Vitest
@@ -68,6 +70,10 @@ test-e2e: ## Playwright against http://localhost:3000 (make up first)
 
 migrate: ## Apply DB migrations inside the stack
 	docker compose run --rm migrate
+
+plans: ## Plan catalogue for the marketing site (packages/plans/plans.json)
+	uv run python packages/plans/generate.py
+	uv run python apps/site/scripts/make_demo.py
 
 migration: ## Create a migration: make migration m="add teams"
 	cd apps/api && uv run alembic revision --autogenerate -m "$(m)"
@@ -83,4 +89,4 @@ bench: ## Per-stage timing of the analysis pipeline
 
 check: lint typecheck test ## Everything CI runs without services
 
-.PHONY: eval bench help install up down logs court api-client lint fmt typecheck typecheck-py db policy-doc test test-py test-js test-integration test-e2e migrate migration seed check
+.PHONY: plans eval bench help install up down logs court api-client lint fmt typecheck typecheck-py db policy-doc test test-py test-js test-integration test-e2e migrate migration seed check

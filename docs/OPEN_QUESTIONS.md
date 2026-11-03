@@ -107,6 +107,12 @@ all behind adapters.
 ### Q-ADD-5 Legal templates
 Terms section on video use, hall notice, consent texts per purpose, model-training opt-in, data portability
 for players. Templates will be marked "rechtlich prüfen lassen" and listed here for review.
+**Status A4**: drafts for review, each page shows a "draft, not yet legally reviewed" note:
+`apps/site/content/legal/{de,fr,en}/agb.mdx` (incl. the video-use section and training opt-in),
+`datenschutz.mdx` (sub-processors only as categories until Q-INFRA-1 and Q-ADD-4 are decided),
+`impressum.mdx`; the hall notice is on `/{locale}/aufnahme/`. Missing: the operating company's name,
+address and UID (build variables `NEXT_PUBLIC_COMPANY_*`; until set the imprint says the details follow),
+the DPA template for clubs and the processing records (GO_LIVE.md).
 
 ### Q-ADD-6 Test material for the addendum
 Spotlight (95 % on the golden set), multi-angle sync (< 2 frames), portrait crop (90 %), special cases
