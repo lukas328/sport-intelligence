@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -55,3 +55,37 @@ class Notification(Base, EntityMixin, TenantMixin):
     params: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
     link: Mapped[str | None] = mapped_column(String(400))
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class FocusPlan(Base, EntityMixin, TenantMixin):
+    """From a problem to training (5.6): an insight of a match turned into a training focus, with
+    the session, evidence playlist and assignment it created and the metric that is followed over
+    the next matches (shown as an observation, not as proof)."""
+
+    __tablename__ = "focus_plans"
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    match_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("matches.id", ondelete="SET NULL")
+    )
+    insight_key: Mapped[str] = mapped_column(String(60), nullable=False)
+    params: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    focus: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    metric: Mapped[str | None] = mapped_column(String(30))
+    filter: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    higher_is_better: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    session_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("training_sessions.id", ondelete="SET NULL")
+    )
+    playlist_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("playlists.id", ondelete="SET NULL")
+    )
+    assignment_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("assignments.id", ondelete="SET NULL")
+    )
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )

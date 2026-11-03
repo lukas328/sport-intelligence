@@ -47,6 +47,7 @@ SEASON = STAFF | MANAGER
 TEAM_MEMBERS = STAFF | ASSISTANTS | MANAGER
 MATCH_WRITE = STAFF | MANAGER
 VIDEO_WORK = STAFF | ASSISTANTS
+TRAINING = VIDEO_WORK | MANAGER
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
 
@@ -314,6 +315,14 @@ ENDPOINTS += [
     ("GET team assignments", VIDEO_WORK, lambda a, w: a.get(w.t("/assignments"))),
     ("GET assistant conversations", VIDEO_WORK, lambda a, w: a.get(w.t("/assistant"))),
     ("GET matrix templates", READERS, lambda a, w: a.get(w.t("/matrix/templates"))),
+    ("GET sessions", READERS, lambda a, w: a.get(w.t("/sessions"))),
+    (
+        "POST session",
+        TRAINING,
+        lambda a, w: a.post(w.t("/sessions"), json={"on_date": "2026-12-01"}),
+    ),
+    ("GET focus plans", READERS, lambda a, w: a.get(w.t("/focus"))),
+    ("POST calendar link", TRAINING, lambda a, w: a.post(w.t("/calendar"))),
     (
         "POST matrix template",
         VIDEO_WORK,

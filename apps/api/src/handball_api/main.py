@@ -32,6 +32,7 @@ from handball_api.routers import billing as billing_router
 from handball_api.routers import events as events_router
 from handball_api.routers import family as family_router
 from handball_api.routers import feed as feed_router
+from handball_api.routers import focus as focus_router
 from handball_api.routers import highlights as highlights_router
 from handball_api.routers import matrix as matrix_router
 from handball_api.routers import ops as ops_router
@@ -39,6 +40,7 @@ from handball_api.routers import presentations as presentations_router
 from handball_api.routers import privacy as privacy_router
 from handball_api.routers import scouting as scouting_router
 from handball_api.routers import segments as segments_router
+from handball_api.routers import sessions as sessions_router
 from handball_api.routers import sharing as sharing_router
 from handball_api.routers import support as support_router
 from handball_api.routers import tactics as tactics_router
@@ -216,5 +218,8 @@ def create_app(
     app.include_router(presentations_router.router)
     app.include_router(assistant_router.router)
     app.include_router(matrix_router.router)
+    app.include_router(sessions_router.router)
+    app.include_router(focus_router.router)
+    app.include_router(sessions_router.public)
     app.include_router(internal.router)
     return app

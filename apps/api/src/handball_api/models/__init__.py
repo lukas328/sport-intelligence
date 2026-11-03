@@ -64,7 +64,7 @@ from handball_api.models.tenancy import (
     StripeEvent,
     Team,
 )
-from handball_api.models.training import Assignment, AssignmentStatus, Notification
+from handball_api.models.training import Assignment, AssignmentStatus, FocusPlan, Notification
 
 __all__ = [
     "Annotation",
@@ -86,6 +86,7 @@ __all__ = [
     "Federation",
     "FederationAdmin",
     "FederationMembership",
+    "FocusPlan",
     "Guardianship",
     "HighlightReel",
     "Invitation",

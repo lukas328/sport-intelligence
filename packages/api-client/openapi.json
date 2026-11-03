@@ -661,6 +661,145 @@
         "title": "AssignmentStatusIn",
         "type": "object"
       },
+      "AttendanceIn": {
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/AttendanceRecord"
+            },
+            "maxItems": 100,
+            "title": "Records",
+            "type": "array"
+          }
+        },
+        "required": [
+          "records"
+        ],
+        "title": "AttendanceIn",
+        "type": "object"
+      },
+      "AttendanceRecord": {
+        "properties": {
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "present",
+                  "absent",
+                  "excused",
+                  "injured",
+                  "late"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "player_id"
+        ],
+        "title": "AttendanceRecord",
+        "type": "object"
+      },
+      "AttendanceRow": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "response": {
+            "anyOf": [
+              {
+                "enum": [
+                  "yes",
+                  "no"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "present",
+                  "absent",
+                  "excused",
+                  "injured",
+                  "late"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "player_id",
+          "name",
+          "number",
+          "response",
+          "status",
+          "reason"
+        ],
+        "title": "AttendanceRow",
+        "type": "object"
+      },
       "BallIn": {
         "properties": {
           "x": {
@@ -779,6 +918,20 @@
         "title": "Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post",
         "type": "object"
       },
+      "Body_import_ics_v1_orgs__org_id__teams__team_id__sessions_import_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_import_ics_v1_orgs__org_id__teams__team_id__sessions_import_post",
+        "type": "object"
+      },
       "Body_import_paper_report_v1_orgs__org_id__teams__team_id__paper_reports_post": {
         "properties": {
           "file": {
@@ -890,6 +1043,19 @@
           "confidence"
         ],
         "title": "BoundaryOut",
+        "type": "object"
+      },
+      "CalendarLink": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "CalendarLink",
         "type": "object"
       },
       "CalibrationIn": {
@@ -1780,6 +1946,80 @@
         ],
         "title": "DataRegion",
         "type": "string"
+      },
+      "DrillItem": {
+        "description": "Snapshot of a library drill (or a free item) inside a session.",
+        "properties": {
+          "coaching": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coaching"
+          },
+          "drill_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Drill Id",
+            "type": "string"
+          },
+          "focus": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Focus",
+            "type": "array"
+          },
+          "minutes": {
+            "maximum": 180.0,
+            "minimum": 1.0,
+            "title": "Minutes",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "setup": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Setup"
+          }
+        },
+        "required": [
+          "drill_id",
+          "name",
+          "minutes"
+        ],
+        "title": "DrillItem",
+        "type": "object"
       },
       "EventIn": {
         "properties": {
@@ -2678,6 +2918,344 @@
           "message"
         ],
         "title": "FeedbackIn",
+        "type": "object"
+      },
+      "FocusIn": {
+        "properties": {
+          "assignment": {
+            "default": false,
+            "title": "Assignment",
+            "type": "boolean"
+          },
+          "insight_key": {
+            "maxLength": 60,
+            "minLength": 3,
+            "title": "Insight Key",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "playlist": {
+            "default": true,
+            "title": "Playlist",
+            "type": "boolean"
+          },
+          "session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FocusSessionIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "insight_key"
+        ],
+        "title": "FocusIn",
+        "type": "object"
+      },
+      "FocusOut": {
+        "properties": {
+          "assignment_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignment Id"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "filter": {
+            "additionalProperties": true,
+            "title": "Filter",
+            "type": "object"
+          },
+          "focus": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Focus",
+            "type": "array"
+          },
+          "followup": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Followup"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "higher_is_better": {
+            "title": "Higher Is Better",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "insight_key": {
+            "title": "Insight Key",
+            "type": "string"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "metric": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "playlist_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Playlist Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "match_id",
+          "insight_key",
+          "params",
+          "focus",
+          "metric",
+          "filter",
+          "higher_is_better",
+          "session_id",
+          "playlist_id",
+          "assignment_id",
+          "closed_at",
+          "created_at"
+        ],
+        "title": "FocusOut",
+        "type": "object"
+      },
+      "FocusSessionIn": {
+        "properties": {
+          "drills": {
+            "items": {
+              "$ref": "#/components/schemas/DrillItem"
+            },
+            "maxItems": 30,
+            "title": "Drills",
+            "type": "array"
+          },
+          "on_date": {
+            "format": "date",
+            "title": "On Date",
+            "type": "string"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          }
+        },
+        "required": [
+          "on_date"
+        ],
+        "title": "FocusSessionIn",
+        "type": "object"
+      },
+      "FollowSide": {
+        "properties": {
+          "matches": {
+            "title": "Matches",
+            "type": "integer"
+          },
+          "per_match": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Per Match"
+          },
+          "sample": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "matches",
+          "value",
+          "per_match",
+          "sample"
+        ],
+        "title": "FollowSide",
+        "type": "object"
+      },
+      "Followup": {
+        "properties": {
+          "after": {
+            "$ref": "#/components/schemas/FollowSide"
+          },
+          "before": {
+            "$ref": "#/components/schemas/FollowSide"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "small_sample": {
+            "title": "Small Sample",
+            "type": "boolean"
+          },
+          "trend": {
+            "anyOf": [
+              {
+                "enum": [
+                  "better",
+                  "worse",
+                  "same"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trend"
+          }
+        },
+        "required": [
+          "metric",
+          "before",
+          "after",
+          "trend",
+          "small_sample",
+          "note"
+        ],
+        "title": "Followup",
         "type": "object"
       },
       "FormationSegment": {
@@ -4604,6 +5182,56 @@
           "created_at"
         ],
         "title": "MessageOut",
+        "type": "object"
+      },
+      "MyReply": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "session",
+              "match"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "response": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "title": "Response",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "player_id",
+          "response"
+        ],
+        "title": "MyReply",
         "type": "object"
       },
       "NotificationList": {
@@ -6849,6 +7477,101 @@
         "title": "SavedFilterOut",
         "type": "object"
       },
+      "ScheduleItem": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "session",
+              "match"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "on_date": {
+            "format": "date",
+            "title": "On Date",
+            "type": "string"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "player_name": {
+            "title": "Player Name",
+            "type": "string"
+          },
+          "relation": {
+            "enum": [
+              "self",
+              "guardian"
+            ],
+            "title": "Relation",
+            "type": "string"
+          },
+          "response": {
+            "anyOf": [
+              {
+                "enum": [
+                  "yes",
+                  "no"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "title",
+          "team",
+          "on_date",
+          "starts_at",
+          "player_id",
+          "player_name",
+          "relation",
+          "response"
+        ],
+        "title": "ScheduleItem",
+        "type": "object"
+      },
       "ScoutingOut": {
         "properties": {
           "basis": {
@@ -8749,6 +9472,176 @@
         "title": "TrackOut",
         "type": "object"
       },
+      "TrainingSessionIn": {
+        "properties": {
+          "drills": {
+            "items": {
+              "$ref": "#/components/schemas/DrillItem"
+            },
+            "maxItems": 30,
+            "title": "Drills",
+            "type": "array"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "on_date": {
+            "format": "date",
+            "title": "On Date",
+            "type": "string"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "on_date"
+        ],
+        "title": "TrainingSessionIn",
+        "type": "object"
+      },
+      "TrainingSessionOut": {
+        "properties": {
+          "drills": {
+            "items": {
+              "$ref": "#/components/schemas/DrillItem"
+            },
+            "title": "Drills",
+            "type": "array"
+          },
+          "external_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Ref"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "on_date": {
+            "format": "date",
+            "title": "On Date",
+            "type": "string"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "total_minutes": {
+            "title": "Total Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "on_date",
+          "starts_at",
+          "title",
+          "location",
+          "notes",
+          "drills",
+          "total_minutes",
+          "external_ref"
+        ],
+        "title": "TrainingSessionOut",
+        "type": "object"
+      },
       "TrialIn": {
         "properties": {
           "days": {
@@ -9713,6 +10606,45 @@
         "summary": "Register",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/v1/calendar/{token}.ics": {
+      "get": {
+        "description": "Calendar feed for calendar apps; the token is the only credential.",
+        "operationId": "feed_v1_calendar__token__ics_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/calendar": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Feed",
+        "tags": [
+          "training"
         ]
       }
     },
@@ -11078,6 +12010,155 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/attendance/{kind}/{target_id}": {
+      "get": {
+        "operationId": "attendance_v1_orgs__org_id__attendance__kind___target_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "enum": [
+                "session",
+                "match"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Target Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttendanceRow"
+                  },
+                  "title": "Response Attendance V1 Orgs  Org Id  Attendance  Kind   Target Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Attendance",
+        "tags": [
+          "training"
+        ]
+      },
+      "put": {
+        "description": "Staff record who was there after the session or match.",
+        "operationId": "record_v1_orgs__org_id__attendance__kind___target_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "enum": [
+                "session",
+                "match"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Target Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendanceIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttendanceRow"
+                  },
+                  "title": "Response Record V1 Orgs  Org Id  Attendance  Kind   Target Id  Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record",
+        "tags": [
+          "training"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/billing": {
       "get": {
         "description": "Plan, limits, usage and the plan catalogue.",
@@ -11890,6 +12971,59 @@
         "summary": "Feedback",
         "tags": [
           "support"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/focus/{plan_id}/close": {
+      "post": {
+        "operationId": "close_v1_orgs__org_id__focus__plan_id__close_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FocusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Close",
+        "tags": [
+          "training"
         ]
       }
     },
@@ -13378,6 +14512,70 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/focus": {
+      "post": {
+        "description": "Turns an insight into a session, an evidence playlist and optionally an assignment.",
+        "operationId": "create_v1_orgs__org_id__matches__match_id__focus_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FocusIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FocusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "training"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
       "get": {
         "description": "Team reels and player reels the caller may see (created after every analysis).",
@@ -14526,6 +15724,61 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/me/attendance": {
+      "put": {
+        "operationId": "reply_v1_orgs__org_id__me_attendance_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MyReply"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reply V1 Orgs  Org Id  Me Attendance Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reply",
+        "tags": [
+          "training"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/me/consents": {
       "get": {
         "description": "Players I decide for: my own player profile (adults) and my children (parents).",
@@ -14826,6 +16079,54 @@
         "tags": [
           "training",
           "notifications"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/me/schedule": {
+      "get": {
+        "description": "Upcoming sessions and matches of me and my children, with my replies.",
+        "operationId": "schedule_v1_orgs__org_id__me_schedule_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScheduleItem"
+                  },
+                  "title": "Response Schedule V1 Orgs  Org Id  Me Schedule Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Schedule",
+        "tags": [
+          "training"
         ]
       }
     },
@@ -16743,6 +18044,229 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/sessions/{session_id}": {
+      "delete": {
+        "operationId": "delete_v1_orgs__org_id__sessions__session_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete",
+        "tags": [
+          "training"
+        ]
+      },
+      "get": {
+        "operationId": "get_v1_orgs__org_id__sessions__session_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingSessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get",
+        "tags": [
+          "training"
+        ]
+      },
+      "put": {
+        "operationId": "update_v1_orgs__org_id__sessions__session_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingSessionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingSessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/sessions/{session_id}/pdf": {
+      "get": {
+        "description": "The session plan for the hall.",
+        "operationId": "pdf_v1_orgs__org_id__sessions__session_id__pdf_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "enum": [
+                "de-CH",
+                "en",
+                "fr"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pdf",
+        "tags": [
+          "training"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/share-links/{link_id}": {
       "delete": {
         "operationId": "revoke_v1_orgs__org_id__share_links__link_id__delete",
@@ -17823,6 +19347,104 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/calendar": {
+      "delete": {
+        "operationId": "calendar_revoke_v1_orgs__org_id__teams__team_id__calendar_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Calendar Revoke",
+        "tags": [
+          "training"
+        ]
+      },
+      "post": {
+        "description": "A new subscription link (the old one stops working); shown only now.",
+        "operationId": "calendar_link_v1_orgs__org_id__teams__team_id__calendar_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarLink"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Calendar Link",
+        "tags": [
+          "training"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
       "post": {
         "description": "A demo match with events to try the analysis views (marked as demo, never counted).",
@@ -17874,6 +19496,64 @@
         "summary": "Demo Match",
         "tags": [
           "support"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/focus": {
+      "get": {
+        "description": "Training foci with before/after of their metric (observation, not proof).",
+        "operationId": "plans_v1_orgs__org_id__teams__team_id__focus_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FocusOut"
+                  },
+                  "title": "Response Plans V1 Orgs  Org Id  Teams  Team Id  Focus Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Plans",
+        "tags": [
+          "training"
         ]
       }
     },
@@ -19846,6 +21526,226 @@
         "tags": [
           "events",
           "insights"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/sessions": {
+      "get": {
+        "operationId": "sessions_v1_orgs__org_id__teams__team_id__sessions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingSessionOut"
+                  },
+                  "title": "Response Sessions V1 Orgs  Org Id  Teams  Team Id  Sessions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sessions",
+        "tags": [
+          "training"
+        ]
+      },
+      "post": {
+        "operationId": "create_v1_orgs__org_id__teams__team_id__sessions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingSessionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingSessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/sessions/import": {
+      "post": {
+        "description": "Sessions from an ICS calendar file (Spond, club calendar).",
+        "operationId": "import_ics_v1_orgs__org_id__teams__team_id__sessions_import_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_import_ics_v1_orgs__org_id__teams__team_id__sessions_import_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Import Ics V1 Orgs  Org Id  Teams  Team Id  Sessions Import Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Ics",
+        "tags": [
+          "training"
         ]
       }
     },

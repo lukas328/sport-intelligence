@@ -165,6 +165,39 @@ export const HELP: HelpEntry[] = [
     keywords: { de: "live offline handy tablet", fr: "direct hors ligne téléphone tablette", en: "live offline phone tablet" },
   },
   {
+    slug: "frag-deine-daten",
+    group: "work",
+    title: { de: "Frag deine Daten", fr: "Interroge tes données", en: "Ask your data" },
+    summary: {
+      de: "Fragen in normaler Sprache, Antworten nur aus euren Daten.",
+      fr: "Des questions en langage courant, des réponses tirées uniquement de tes données.",
+      en: "Questions in plain language, answers only from your data.",
+    },
+    keywords: { de: "assistent frage chat ki", fr: "assistant question chat ia", en: "assistant question chat ai" },
+  },
+  {
+    slug: "statistik-matrix",
+    group: "work",
+    title: { de: "Statistik-Matrix und Export", fr: "Matrice statistique et export", en: "Statistics matrix and export" },
+    summary: {
+      de: "Eigene Auswertungen, Excel, CSV und Sportscode-XML.",
+      fr: "Analyses personnalisées, Excel, CSV et XML Sportscode.",
+      en: "Own reports, Excel, CSV and Sportscode XML.",
+    },
+    keywords: { de: "matrix excel csv sportscode export import", fr: "matrice excel csv sportscode export import", en: "matrix excel csv sportscode export import" },
+  },
+  {
+    slug: "training-planen",
+    group: "team",
+    title: { de: "Training planen", fr: "Planifier l'entraînement", en: "Planning training" },
+    summary: {
+      de: "Einheiten, Anwesenheit, Kalender und Schwerpunkte aus Spielen.",
+      fr: "Séances, présences, calendrier et objectifs tirés des matchs.",
+      en: "Sessions, attendance, calendar and focus from matches.",
+    },
+    keywords: { de: "training einheit anwesenheit kalender ics übung", fr: "entraînement séance présence calendrier ics exercice", en: "training session attendance calendar ics drill" },
+  },
+  {
     slug: "abo-und-rechnung",
     group: "account",
     title: { de: "Abo und Rechnung", fr: "Abonnement et facture", en: "Subscription and invoice" },

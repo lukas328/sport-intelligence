@@ -134,6 +134,8 @@ end-to-end test and the A3 carry-overs, all listed in GO_LIVE.md.
 ### Launch (go-live criteria: GO_LIVE.md plus addendum section 10)
 
 ### M10 Data and training (new)
+Status: done (report `docs/progress/M10.md`); open: live evaluation of the assistant with a model
+key (Q-M10-1), opening an export in Sportscode (Q-M10-2).
 - Ask your data 5.1 (Claude tool use, typed tools, number validator, eval set ≥ 60 questions in CI)
 - Statistics matrix, Sportscode XML and CSV/Excel export, imports 5.4
 - From problem to training 5.6, training planning, attendance, ICS 5.7

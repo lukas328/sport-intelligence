@@ -31,7 +31,7 @@ This environment has no API key for the model, so the model itself cannot be mea
   validator status and the user's rating in `assistant_messages` (tenant RLS). Monthly cap per plan
   (`assistant_usd_month`: Team 5, Club 25 USD of model cost; 5 when limits are off).
 - **Evaluation**: `apps/api/tests/assistant_eval.py` holds a deterministic season (8 matches, about
-  560 events) and 62 questions (49 answerable, 7 deliberately not answerable: speed, spectators,
+  560 events) and 62 questions (55 answerable, 7 deliberately not answerable: speed, spectators,
   names, weather, salary, the future, plays against 5-1 without formation data). Expected values are
   computed from the raw events with plain Python, not with the query module. CI replays each
   question's tool plan with a scripted model through the real API (permissions, tools, validator,

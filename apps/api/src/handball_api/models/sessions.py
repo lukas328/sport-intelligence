@@ -125,23 +125,38 @@ class TrainingSession(Base, EntityMixin, TenantMixin):
     )
     on_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    # [{"drill": "<key or play id>", "minutes": 15, "note": "..."}]
+    title: Mapped[str | None] = mapped_column(String(120))
+    location: Mapped[str | None] = mapped_column(String(160))
+    # snapshot of the drills at planning time (5.7), so a later library change keeps the plan:
+    # [{"drill_id", "name", "minutes", "focus": [...], "setup", "coaching", "note"}]
     drills: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False, default=list)
     notes: Mapped[str | None] = mapped_column(Text)
     external_ref: Mapped[str | None] = mapped_column(String(200))  # ICS UID, Spond id
 
 
 class Attendance(Base, EntityMixin, TenantMixin):
-    __tablename__ = "attendances"
-    __table_args__ = (UniqueConstraint("session_id", "player_id"),)
+    """Attendance for a training session or a match (5.7): the player's (or a parent's) reply and
+    what the staff recorded afterwards. Absence reasons are free text; no diagnoses."""
 
-    session_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("training_sessions.id", ondelete="CASCADE"), index=True, nullable=False
+    __tablename__ = "attendances"
+    __table_args__ = (
+        UniqueConstraint("session_id", "player_id"),
+        UniqueConstraint("match_id", "player_id"),
+        CheckConstraint("num_nonnulls(session_id, match_id) = 1", name="one_target"),
+    )
+
+    session_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("training_sessions.id", ondelete="CASCADE"), index=True
+    )
+    match_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True
     )
     player_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("players.id", ondelete="CASCADE"), index=True, nullable=False
     )
-    status: Mapped[AttendanceStatus] = mapped_column(str_enum(AttendanceStatus), nullable=False)
+    response: Mapped[str | None] = mapped_column(String(10))  # yes / no, from the player
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    status: Mapped[AttendanceStatus | None] = mapped_column(str_enum(AttendanceStatus))
     reason: Mapped[str | None] = mapped_column(String(200))
 
 

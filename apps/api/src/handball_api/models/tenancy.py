@@ -77,6 +77,8 @@ class Team(Base, EntityMixin, TenantMixin):
     is_youth: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     gender: Mapped[TeamGender] = mapped_column(str_enum(TeamGender), nullable=False)
     settings: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    # calendar subscription (5.7): only the hash is stored; the link is shown once
+    calendar_token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
 
     @property
     def players_see_team_stats(self) -> bool:

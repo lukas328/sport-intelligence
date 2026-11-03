@@ -122,6 +122,18 @@
       "gkTitle": "Werfer-Karte",
       "gkHint": "Für die Trinkflasche: Nummer, Position, bevorzugte Torzonen",
       "few": "Zu wenig Würfe für eine Werfer-Karte."
+    },
+    "session": {
+      "title": "Training",
+      "total": "Total {minutes} Minuten",
+      "drill": "Übung",
+      "minutes": "Min.",
+      "setup": "Aufbau",
+      "coaching": "Hinweise",
+      "note": "Notiz",
+      "notes": "Notizen",
+      "none": "Noch keine Übungen geplant.",
+      "focus": "Schwerpunkt"
     }
   },
   "en": {
@@ -247,6 +259,18 @@
       "gkTitle": "Shooter card",
       "gkHint": "For the water bottle: number, position, preferred goal zones",
       "few": "Not enough shots for a shooter card."
+    },
+    "session": {
+      "title": "Training",
+      "total": "Total {minutes} minutes",
+      "drill": "Drill",
+      "minutes": "Min.",
+      "setup": "Setup",
+      "coaching": "Coaching points",
+      "note": "Note",
+      "notes": "Notes",
+      "none": "No drills planned yet.",
+      "focus": "Focus"
     }
   },
   "fr": {
@@ -372,6 +396,18 @@
       "gkTitle": "Fiche des tireurs",
       "gkHint": "Pour la gourde : numéro, position, zones de but préférées",
       "few": "Pas assez de tirs pour une fiche des tireurs."
+    },
+    "session": {
+      "title": "Entraînement",
+      "total": "Total {minutes} minutes",
+      "drill": "Exercice",
+      "minutes": "Min.",
+      "setup": "Mise en place",
+      "coaching": "Consignes",
+      "note": "Note",
+      "notes": "Notes",
+      "none": "Aucun exercice planifié.",
+      "focus": "Objectif"
     }
   }
 }
