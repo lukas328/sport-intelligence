@@ -215,7 +215,7 @@ class SelfAssessment(Base, EntityMixin, TenantMixin):
 
 
 class PublicProfile(Base, EntityMixin, TenantMixin):
-    """Opt-in public player profile (5.8); never for youth players."""
+    """Opt-in public player profile (5.8); never in youth teams, minors only with a parent."""
 
     __tablename__ = "public_profiles"
 

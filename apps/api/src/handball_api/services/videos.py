@@ -594,6 +594,10 @@ async def _apply_analysis_result(
         match = await ctx.db.get(Match, asset.match_id)
         if match is not None and asset.role == VideoRole.MAIN:
             counts = await auto_events.apply(ctx, match, auto)
+            # courtside marks with device time follow the new goals (5.3)
+            from handball_api.services import marks
+
+            await marks.sync_match(ctx, match.id, authorised=True)
             asset.analysis = {
                 **asset.analysis,
                 "auto_events": {

@@ -19,12 +19,13 @@ from handball_api.models.content import (
 from handball_api.models.federation import (
     Federation,
     FederationAdmin,
+    FederationInvite,
     FederationMembership,
     Invoice,
     OrgShare,
     Voucher,
 )
-from handball_api.models.identity import AuthSession, AuthToken, OAuthIdentity, User
+from handball_api.models.identity import AuthSession, AuthToken, DeviceToken, OAuthIdentity, User
 from handball_api.models.matches import (
     Annotation,
     CameraCalibration,
@@ -82,9 +83,11 @@ __all__ = [
     "Comment",
     "Consent",
     "Correction",
+    "DeviceToken",
     "Event",
     "Federation",
     "FederationAdmin",
+    "FederationInvite",
     "FederationMembership",
     "FocusPlan",
     "Guardianship",

@@ -316,6 +316,12 @@ ENDPOINTS += [
     ("GET assistant conversations", VIDEO_WORK, lambda a, w: a.get(w.t("/assistant"))),
     ("GET matrix templates", READERS, lambda a, w: a.get(w.t("/matrix/templates"))),
     ("GET sessions", READERS, lambda a, w: a.get(w.t("/sessions"))),
+    ("GET mark keys", READERS, lambda a, w: a.get(w.t("/mark-keys"))),
+    (
+        "POST mark session",
+        VIDEO_WORK,
+        lambda a, w: a.post(f"/v1/orgs/{w.org}/matches/{w.match}/mark-sessions", json={}),
+    ),
     (
         "POST session",
         TRAINING,

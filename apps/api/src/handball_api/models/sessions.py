@@ -7,6 +7,7 @@ from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     CheckConstraint,
     Date,
@@ -99,16 +100,24 @@ class LiveTagSession(Base, EntityMixin, TenantMixin):
     user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     device: Mapped[str | None] = mapped_column(String(120))
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    offset_ms: Mapped[int | None] = mapped_column(Integer)  # device clock -> video time
+    # device clock (epoch ms) -> video time: epoch-sized, hence 64 bit
+    offset_ms: Mapped[int | None] = mapped_column(BigInteger)
     sync_confidence: Mapped[float | None] = mapped_column(Float)
+    sync_source: Mapped[str | None] = mapped_column(String(20))  # events, metadata, manual
+    video_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("video_assets.id", ondelete="SET NULL")
+    )
 
 
 class LiveTag(Base, EntityMixin, TenantMixin):
     __tablename__ = "live_tags"
+    # phones retry uploads with the same client id; the mark is stored once
+    __table_args__ = (UniqueConstraint("session_id", "client_id"),)
 
     session_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("live_tag_sessions.id", ondelete="CASCADE"), index=True, nullable=False
     )
+    client_id: Mapped[uuid.UUID | None] = mapped_column()
     device_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     key: Mapped[str] = mapped_column(String(40), nullable=False)
     note: Mapped[str | None] = mapped_column(String(300))

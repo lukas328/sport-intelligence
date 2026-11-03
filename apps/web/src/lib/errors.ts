@@ -47,6 +47,11 @@ export const KNOWN_ERRORS = [
   "assistant-budget",
   "assistant-unavailable",
   "file-too-large",
+  "vision-unavailable",
+  "paper-warnings",
+  "paper-incomplete",
+  "quota-reached",
+  "already-member",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

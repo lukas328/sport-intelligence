@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, type ChangeEvent } from "react";
@@ -38,6 +39,11 @@ export function PaperImport({ orgId, teamId }: { orgId: string; teamId: string }
     <Card className="space-y-3">
       <h2 className="text-lg font-semibold">{t("paper.title")}</h2>
       <p className="text-sm text-muted">{t("paper.hint")}</p>
+      <p className="text-sm">
+        <Link href={`/app/${orgId}/teams/${teamId}/paper`} className="text-accent underline">
+          {t("paper.photoTitle")}
+        </Link>
+      </p>
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">{t("paper.file")}</span>
         <input type="file" accept=".json,application/json" onChange={onFile} data-testid="paper-file" />

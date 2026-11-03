@@ -24,6 +24,26 @@ class Federation(Base, EntityMixin):
     contract_ref: Mapped[str | None] = mapped_column(String(120))
     contract_until: Mapped[date | None] = mapped_column(Date)
     seat_quota: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    plan: Mapped[str] = mapped_column(String(10), nullable=False, default="team")
+    # recipient of the joint invoice (name, street, pcode, city, country, attention, email)
+    billing_address: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+
+
+class FederationInvite(Base, EntityMixin):
+    """A federation invites a club by e-mail; a club admin accepts with the link (5.10)."""
+
+    __tablename__ = "federation_invites"
+
+    federation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("federations.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    email: Mapped[str] = mapped_column(String(320), nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("organizations.id", ondelete="SET NULL")
+    )
 
 
 class FederationAdmin(Base, EntityMixin):

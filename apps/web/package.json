@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@handball/api-client": "workspace:*",
+    "@handball/client-core": "workspace:*",
     "@handball/court": "workspace:*",
     "@handball/tactics": "workspace:*",
     "@tanstack/react-query": "^5.66.0",

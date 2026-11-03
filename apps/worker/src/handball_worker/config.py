@@ -18,6 +18,7 @@ class WorkerSettings(BaseSettings):
     s3_secret_key: str = "handball-secret"
     work_dir: str = "/tmp/handball-work"
     ffmpeg: str = "ffmpeg"
+    expo_access_token: str | None = None  # optional, for Expo push security (5.5)
     ffprobe: str = "ffprobe"
     x264_preset: str = "veryfast"
     hls_segment_s: int = 4

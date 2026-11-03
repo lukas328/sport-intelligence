@@ -53,7 +53,8 @@ def effective_plan(org: Organization) -> Plan:
     if org.subscription_status in ACTIVE:
         return org.plan
     # annual subscription by invoice: usable until paid_until (payment term plus dunning period)
-    if org.subscription_status in ("invoice_open", "invoice_paid") and (
+    # annual invoice or a federation licence (5.10): valid until paid_until
+    if org.subscription_status in ("invoice_open", "invoice_paid", "federation") and (
         org.paid_until and org.paid_until > _now()
     ):
         return org.plan

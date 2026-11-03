@@ -41,6 +41,20 @@
         "title": "AccountDelete",
         "type": "object"
       },
+      "AdminIn": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "AdminIn",
+        "type": "object"
+      },
       "AnalysisOut": {
         "properties": {
           "auto_events": {
@@ -1002,6 +1016,20 @@
         "title": "Body_upload_logo_v1_orgs__org_id__logo_put",
         "type": "object"
       },
+      "Body_upload_v1_orgs__org_id__teams__team_id__paper_photos_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_v1_orgs__org_id__teams__team_id__paper_photos_post",
+        "type": "object"
+      },
       "BoundaryOut": {
         "properties": {
           "confidence": {
@@ -1386,6 +1414,43 @@
           "match_id"
         ],
         "title": "ClipRef",
+        "type": "object"
+      },
+      "ClubFederation": {
+        "properties": {
+          "contract_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Until"
+          },
+          "federation": {
+            "title": "Federation",
+            "type": "string"
+          },
+          "joined_at": {
+            "format": "date-time",
+            "title": "Joined At",
+            "type": "string"
+          },
+          "plan": {
+            "title": "Plan",
+            "type": "string"
+          }
+        },
+        "required": [
+          "federation",
+          "plan",
+          "joined_at",
+          "contract_until"
+        ],
+        "title": "ClubFederation",
         "type": "object"
       },
       "CoachFeedPlayer": {
@@ -2662,6 +2727,122 @@
         "title": "EventPatch",
         "type": "object"
       },
+      "FederationIn": {
+        "properties": {
+          "billing_address": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Billing Address",
+            "type": "object"
+          },
+          "contract_ref": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Ref"
+          },
+          "contract_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Until"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "plan": {
+            "default": "team",
+            "enum": [
+              "team",
+              "club"
+            ],
+            "title": "Plan",
+            "type": "string"
+          },
+          "seat_quota": {
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Seat Quota",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "seat_quota"
+        ],
+        "title": "FederationIn",
+        "type": "object"
+      },
+      "FederationOut": {
+        "properties": {
+          "contract_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Ref"
+          },
+          "contract_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Until"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "plan": {
+            "title": "Plan",
+            "type": "string"
+          },
+          "seat_quota": {
+            "title": "Seat Quota",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "plan",
+          "seat_quota",
+          "contract_ref",
+          "contract_until"
+        ],
+        "title": "FederationOut",
+        "type": "object"
+      },
       "FeedComment": {
         "properties": {
           "coach_comment": {
@@ -3720,6 +3901,39 @@
         "title": "InvitationPreview",
         "type": "object"
       },
+      "InviteIn": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "InviteIn",
+        "type": "object"
+      },
+      "InviteOut": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "expires_at"
+        ],
+        "title": "InviteOut",
+        "type": "object"
+      },
       "InvoiceOrder": {
         "properties": {
           "contact": {
@@ -3970,6 +4184,21 @@
         "title": "JobStatus",
         "type": "string"
       },
+      "JoinIn": {
+        "properties": {
+          "token": {
+            "maxLength": 200,
+            "minLength": 10,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "JoinIn",
+        "type": "object"
+      },
       "KickoffIn": {
         "properties": {
           "period": {
@@ -4085,6 +4314,339 @@
           "email"
         ],
         "title": "MagicLinkIn",
+        "type": "object"
+      },
+      "MarkIn": {
+        "properties": {
+          "client_id": {
+            "format": "uuid",
+            "title": "Client Id",
+            "type": "string"
+          },
+          "device_time": {
+            "format": "date-time",
+            "title": "Device Time",
+            "type": "string"
+          },
+          "key": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "client_id",
+          "device_time",
+          "key"
+        ],
+        "title": "MarkIn",
+        "type": "object"
+      },
+      "MarkKey": {
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "key": {
+            "maxLength": 40,
+            "minLength": 1,
+            "pattern": "^[a-z0-9_]+$",
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "MarkKey",
+        "type": "object"
+      },
+      "MarkKeysIn": {
+        "properties": {
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/MarkKey"
+            },
+            "maxItems": 8,
+            "minItems": 4,
+            "title": "Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "keys"
+        ],
+        "title": "MarkKeysIn",
+        "type": "object"
+      },
+      "MarkOut": {
+        "properties": {
+          "device_time": {
+            "format": "date-time",
+            "title": "Device Time",
+            "type": "string"
+          },
+          "half": {
+            "title": "Half",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          }
+        },
+        "required": [
+          "id",
+          "session_id",
+          "key",
+          "label",
+          "note",
+          "device_time",
+          "half",
+          "t_ms"
+        ],
+        "title": "MarkOut",
+        "type": "object"
+      },
+      "MarkSessionIn": {
+        "properties": {
+          "device": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          }
+        },
+        "title": "MarkSessionIn",
+        "type": "object"
+      },
+      "MarkSessionInfo": {
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "offset_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset Ms"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "device",
+          "started_at",
+          "offset_ms",
+          "confidence",
+          "source"
+        ],
+        "title": "MarkSessionInfo",
+        "type": "object"
+      },
+      "MarkSessionOut": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "offset_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset Ms"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "sync_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Confidence"
+          },
+          "sync_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Source"
+          }
+        },
+        "required": [
+          "id",
+          "match_id",
+          "started_at",
+          "offset_ms",
+          "sync_confidence",
+          "sync_source"
+        ],
+        "title": "MarkSessionOut",
+        "type": "object"
+      },
+      "MarksIn": {
+        "properties": {
+          "marks": {
+            "items": {
+              "$ref": "#/components/schemas/MarkIn"
+            },
+            "maxItems": 500,
+            "title": "Marks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "marks"
+        ],
+        "title": "MarksIn",
         "type": "object"
       },
       "MatchCreate": {
@@ -4254,6 +4816,30 @@
         ],
         "title": "MatchFormatKey",
         "type": "string"
+      },
+      "MatchMarks": {
+        "properties": {
+          "marks": {
+            "items": {
+              "$ref": "#/components/schemas/MarkOut"
+            },
+            "title": "Marks",
+            "type": "array"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/MarkSessionInfo"
+            },
+            "title": "Sessions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sessions",
+          "marks"
+        ],
+        "title": "MatchMarks",
+        "type": "object"
       },
       "MatchOut": {
         "properties": {
@@ -5114,6 +5700,51 @@
         "title": "MemberOut",
         "type": "object"
       },
+      "MemberUsage": {
+        "properties": {
+          "analyses_30d": {
+            "title": "Analyses 30D",
+            "type": "integer"
+          },
+          "joined_at": {
+            "format": "date-time",
+            "title": "Joined At",
+            "type": "string"
+          },
+          "matches": {
+            "title": "Matches",
+            "type": "integer"
+          },
+          "members": {
+            "title": "Members",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "organization_id": {
+            "format": "uuid",
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "teams": {
+            "title": "Teams",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "organization_id",
+          "name",
+          "joined_at",
+          "teams",
+          "matches",
+          "members",
+          "analyses_30d"
+        ],
+        "title": "MemberUsage",
+        "type": "object"
+      },
       "MessageOut": {
         "properties": {
           "answer": {
@@ -5182,6 +5813,69 @@
           "created_at"
         ],
         "title": "MessageOut",
+        "type": "object"
+      },
+      "MyProfile": {
+        "properties": {
+          "blocked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProfileOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reels": {
+            "items": {
+              "$ref": "#/components/schemas/ReelRef"
+            },
+            "title": "Reels",
+            "type": "array"
+          },
+          "relation": {
+            "title": "Relation",
+            "type": "string"
+          },
+          "stats_available": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Stats Available",
+            "type": "array"
+          }
+        },
+        "required": [
+          "player_id",
+          "name",
+          "relation",
+          "blocked",
+          "profile",
+          "reels",
+          "stats_available"
+        ],
+        "title": "MyProfile",
         "type": "object"
       },
       "MyReply": {
@@ -5324,6 +6018,19 @@
           }
         },
         "title": "NotificationsRead",
+        "type": "object"
+      },
+      "OffsetIn": {
+        "properties": {
+          "offset_ms": {
+            "title": "Offset Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "offset_ms"
+        ],
+        "title": "OffsetIn",
         "type": "object"
       },
       "OpponentCreate": {
@@ -5795,6 +6502,44 @@
         "title": "OrgUpdate",
         "type": "object"
       },
+      "Overview": {
+        "properties": {
+          "aggregate": {
+            "additionalProperties": true,
+            "title": "Aggregate",
+            "type": "object"
+          },
+          "federation": {
+            "additionalProperties": true,
+            "title": "Federation",
+            "type": "object"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/MemberUsage"
+            },
+            "title": "Members",
+            "type": "array"
+          },
+          "open_invites": {
+            "title": "Open Invites",
+            "type": "integer"
+          },
+          "seats_used": {
+            "title": "Seats Used",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "federation",
+          "seats_used",
+          "open_invites",
+          "members",
+          "aggregate"
+        ],
+        "title": "Overview",
+        "type": "object"
+      },
       "PaidIn": {
         "properties": {
           "note": {
@@ -5811,6 +6556,119 @@
           }
         },
         "title": "PaidIn",
+        "type": "object"
+      },
+      "PaperConfirm": {
+        "properties": {
+          "accept_warnings": {
+            "default": false,
+            "title": "Accept Warnings",
+            "type": "boolean"
+          }
+        },
+        "title": "PaperConfirm",
+        "type": "object"
+      },
+      "PaperCorrection": {
+        "properties": {
+          "extraction": {
+            "additionalProperties": true,
+            "title": "Extraction",
+            "type": "object"
+          }
+        },
+        "required": [
+          "extraction"
+        ],
+        "title": "PaperCorrection",
+        "type": "object"
+      },
+      "PaperIssue": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "title": "Detail",
+            "type": "object"
+          },
+          "field": {
+            "title": "Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "code"
+        ],
+        "title": "PaperIssue",
+        "type": "object"
+      },
+      "PaperUploadOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/PaperIssue"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "extraction": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "status",
+          "extraction",
+          "errors",
+          "match_id",
+          "created_at"
+        ],
+        "title": "PaperUploadOut",
         "type": "object"
       },
       "PartOrder": {
@@ -6898,6 +7756,127 @@
         "title": "PresentationPatch",
         "type": "object"
       },
+      "ProfileIn": {
+        "properties": {
+          "active": {
+            "default": false,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "maxLength": 400,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "indexable": {
+            "default": false,
+            "title": "Indexable",
+            "type": "boolean"
+          },
+          "reel_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "title": "Reel Ids",
+            "type": "array"
+          },
+          "show_hand": {
+            "default": true,
+            "title": "Show Hand",
+            "type": "boolean"
+          },
+          "show_position": {
+            "default": true,
+            "title": "Show Position",
+            "type": "boolean"
+          },
+          "stats": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 7,
+            "title": "Stats",
+            "type": "array"
+          }
+        },
+        "title": "ProfileIn",
+        "type": "object"
+      },
+      "ProfileOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "indexable": {
+            "title": "Indexable",
+            "type": "boolean"
+          },
+          "reel_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reel Ids",
+            "type": "array"
+          },
+          "show_hand": {
+            "title": "Show Hand",
+            "type": "boolean"
+          },
+          "show_position": {
+            "title": "Show Position",
+            "type": "boolean"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "stats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Stats",
+            "type": "array"
+          },
+          "views": {
+            "title": "Views",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "slug",
+          "active",
+          "views",
+          "bio",
+          "stats",
+          "reel_ids",
+          "show_position",
+          "show_hand",
+          "indexable"
+        ],
+        "title": "ProfileOut",
+        "type": "object"
+      },
       "ProvidersOut": {
         "properties": {
           "providers": {
@@ -6912,6 +7891,96 @@
           "providers"
         ],
         "title": "ProvidersOut",
+        "type": "object"
+      },
+      "PublicProfileOut": {
+        "properties": {
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "club": {
+            "title": "Club",
+            "type": "string"
+          },
+          "indexable": {
+            "title": "Indexable",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "reels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reels",
+            "type": "array"
+          },
+          "shooting_hand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shooting Hand"
+          },
+          "stats": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Stats",
+            "type": "object"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "club",
+          "team",
+          "position",
+          "shooting_hand",
+          "bio",
+          "stats",
+          "reels",
+          "indexable"
+        ],
+        "title": "PublicProfileOut",
         "type": "object"
       },
       "RateIn": {
@@ -6994,6 +8063,31 @@
         ],
         "title": "ReelFormat",
         "type": "string"
+      },
+      "ReelRef": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "format"
+        ],
+        "title": "ReelRef",
+        "type": "object"
       },
       "RegisterIn": {
         "properties": {
@@ -8625,61 +9719,6 @@
         "title": "SupportConfig",
         "type": "object"
       },
-      "SyncOut": {
-        "description": "Camera sync against the main video. `applied` is false when the audio match was too weak.",
-        "properties": {
-          "applied": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Applied"
-          },
-          "confidence": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confidence"
-          },
-          "offset_ms": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Offset Ms"
-          },
-          "source": {
-            "anyOf": [
-              {
-                "enum": [
-                  "audio",
-                  "user_correction"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source"
-          }
-        },
-        "title": "SyncOut",
-        "type": "object"
-      },
       "TagIn": {
         "properties": {
           "color": {
@@ -9917,7 +10956,7 @@
           "sync": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/SyncOut"
+                "$ref": "#/components/schemas/handball_api__schemas__matches__SyncOut"
               },
               {
                 "type": "null"
@@ -10083,6 +11122,116 @@
           "token"
         ],
         "title": "TokenIn",
+        "type": "object"
+      },
+      "handball_api__schemas__marks__SyncOut": {
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "matched": {
+            "title": "Matched",
+            "type": "integer"
+          },
+          "offset_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset Ms"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "required": [
+          "session_id",
+          "offset_ms",
+          "confidence",
+          "source",
+          "matched"
+        ],
+        "title": "SyncOut",
+        "type": "object"
+      },
+      "handball_api__schemas__matches__SyncOut": {
+        "description": "Camera sync against the main video. `applied` is false when the audio match was too weak.",
+        "properties": {
+          "applied": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "offset_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset Ms"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "audio",
+                  "user_correction"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "title": "SyncOut",
         "type": "object"
       },
       "handball_api__schemas__tactics__TokenIn": {
@@ -10648,6 +11797,174 @@
         ]
       }
     },
+    "/v1/federations": {
+      "get": {
+        "operationId": "mine_v1_federations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FederationOut"
+                  },
+                  "title": "Response Mine V1 Federations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Mine",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/v1/federations/{federation_id}": {
+      "get": {
+        "description": "Usage per club and anonymised aggregates; no videos or people.",
+        "operationId": "overview_v1_federations__federation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "federation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Federation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Overview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Overview",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/v1/federations/{federation_id}/invites": {
+      "post": {
+        "operationId": "invite_v1_federations__federation_id__invites_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "federation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Federation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Invite",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/v1/federations/{federation_id}/members/{org_id}": {
+      "delete": {
+        "operationId": "remove_v1_federations__federation_id__members__org_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "federation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Federation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
     "/v1/health": {
       "get": {
         "description": "Public, versioned system status used by the web status page.",
@@ -11154,6 +12471,171 @@
         "tags": [
           "auth",
           "me"
+        ]
+      }
+    },
+    "/v1/ops/federations": {
+      "get": {
+        "operationId": "listing_v1_ops_federations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FederationOut"
+                  },
+                  "title": "Response Listing V1 Ops Federations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Listing",
+        "tags": [
+          "ops"
+        ]
+      },
+      "post": {
+        "operationId": "create_v1_ops_federations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FederationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FederationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/federations/{federation_id}/admins": {
+      "post": {
+        "operationId": "add_admin_v1_ops_federations__federation_id__admins_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "federation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Federation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Admin",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/federations/{federation_id}/invoice": {
+      "get": {
+        "description": "Joint QR invoice for all member clubs.",
+        "operationId": "invoice_v1_ops_federations__federation_id__invoice_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "federation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Federation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "enum": [
+                "de-CH",
+                "fr",
+                "en"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Invoice",
+        "tags": [
+          "ops"
         ]
       }
     },
@@ -12815,6 +14297,147 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/federation": {
+      "delete": {
+        "operationId": "leave_v1_orgs__org_id__federation_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Leave",
+        "tags": [
+          "federation"
+        ]
+      },
+      "get": {
+        "operationId": "status_v1_orgs__org_id__federation_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ClubFederation"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Status V1 Orgs  Org Id  Federation Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Status",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/federation/join": {
+      "post": {
+        "description": "A club admin accepts the federation's invitation for this club.",
+        "operationId": "join_v1_orgs__org_id__federation_join_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Join V1 Orgs  Org Id  Federation Join Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Join",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/feed-items/{item_id}": {
       "patch": {
         "operationId": "comment_v1_orgs__org_id__feed_items__item_id__patch",
@@ -13336,6 +14959,135 @@
         "summary": "Upload Logo",
         "tags": [
           "organizations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/mark-sessions/{session_id}/marks": {
+      "post": {
+        "description": "Uploads marks saved offline; a mark with a known client id is not stored twice.",
+        "operationId": "add_v1_orgs__org_id__mark_sessions__session_id__marks_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarksIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add V1 Orgs  Org Id  Mark Sessions  Session Id  Marks Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add",
+        "tags": [
+          "marks"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/mark-sessions/{session_id}/offset": {
+      "put": {
+        "operationId": "offset_v1_orgs__org_id__mark_sessions__session_id__offset_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffsetIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkSessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Offset",
+        "tags": [
+          "marks"
         ]
       }
     },
@@ -14876,6 +16628,180 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/mark-sessions": {
+      "post": {
+        "operationId": "start_v1_orgs__org_id__matches__match_id__mark_sessions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkSessionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkSessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start",
+        "tags": [
+          "marks"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/marks": {
+      "get": {
+        "description": "Marks of all phones with their video time once synced, split at the half-time mark.",
+        "operationId": "marks_v1_orgs__org_id__matches__match_id__marks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchMarks"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Marks",
+        "tags": [
+          "marks"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/marks/sync": {
+      "post": {
+        "operationId": "sync_v1_orgs__org_id__matches__match_id__marks_sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/handball_api__schemas__marks__SyncOut"
+                  },
+                  "title": "Response Sync V1 Orgs  Org Id  Matches  Match Id  Marks Sync Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sync",
+        "tags": [
+          "marks"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/parts": {
       "get": {
         "description": "Main-camera files in order (camera clock), with the gap before each file.",
@@ -16082,6 +18008,54 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/me/profiles": {
+      "get": {
+        "description": "Profiles I manage: my own and my children's, with the reels that can go on them.",
+        "operationId": "mine_v1_orgs__org_id__me_profiles_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MyProfile"
+                  },
+                  "title": "Response Mine V1 Orgs  Org Id  Me Profiles Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mine",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/me/schedule": {
       "get": {
         "description": "Upcoming sessions and matches of me and my children, with my replies.",
@@ -16635,6 +18609,340 @@
         "tags": [
           "events",
           "insights"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/paper-photos/{upload_id}": {
+      "get": {
+        "operationId": "get_v1_orgs__org_id__paper_photos__upload_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaperUploadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get",
+        "tags": [
+          "paper"
+        ]
+      },
+      "put": {
+        "operationId": "correct_v1_orgs__org_id__paper_photos__upload_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaperCorrection"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaperUploadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Correct",
+        "tags": [
+          "paper"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/paper-photos/{upload_id}/confirm": {
+      "post": {
+        "description": "Imports the reviewed sheet as a match with source \"paper_report\".",
+        "operationId": "confirm_v1_orgs__org_id__paper_photos__upload_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaperConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaperUploadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm",
+        "tags": [
+          "paper"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/paper-photos/{upload_id}/photo": {
+      "get": {
+        "operationId": "photo_v1_orgs__org_id__paper_photos__upload_id__photo_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Photo",
+        "tags": [
+          "paper"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/players/{player_id}/profile": {
+      "delete": {
+        "operationId": "remove_v1_orgs__org_id__players__player_id__profile_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "player_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Player Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove",
+        "tags": [
+          "profiles"
+        ]
+      },
+      "put": {
+        "operationId": "save_v1_orgs__org_id__players__player_id__profile_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "player_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Player Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save",
+        "tags": [
+          "profiles"
         ]
       }
     },
@@ -19557,6 +21865,129 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/mark-keys": {
+      "get": {
+        "description": "The team's 4 to 8 buttons; goal_own and goal_opp make the automatic sync possible.",
+        "operationId": "keys_v1_orgs__org_id__teams__team_id__mark_keys_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MarkKey"
+                  },
+                  "title": "Response Keys V1 Orgs  Org Id  Teams  Team Id  Mark Keys Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Keys",
+        "tags": [
+          "marks"
+        ]
+      },
+      "put": {
+        "operationId": "set_keys_v1_orgs__org_id__teams__team_id__mark_keys_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkKeysIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MarkKey"
+                  },
+                  "title": "Response Set Keys V1 Orgs  Org Id  Teams  Team Id  Mark Keys Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Keys",
+        "tags": [
+          "marks"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/matches": {
       "get": {
         "operationId": "list_matches_v1_orgs__org_id__teams__team_id__matches_get",
@@ -20132,6 +22563,125 @@
         "tags": [
           "teams",
           "members"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/paper-photos": {
+      "get": {
+        "operationId": "listing_v1_orgs__org_id__teams__team_id__paper_photos_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaperUploadOut"
+                  },
+                  "title": "Response Listing V1 Orgs  Org Id  Teams  Team Id  Paper Photos Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listing",
+        "tags": [
+          "paper"
+        ]
+      },
+      "post": {
+        "description": "Reads a photo of a match report sheet; the result waits for review.",
+        "operationId": "upload_v1_orgs__org_id__teams__team_id__paper_photos_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_v1_orgs__org_id__teams__team_id__paper_photos_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaperUploadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload",
+        "tags": [
+          "paper"
         ]
       }
     },
@@ -22654,6 +25204,96 @@
         "tags": [
           "matches",
           "analysis"
+        ]
+      }
+    },
+    "/v1/public/profiles/{slug}": {
+      "get": {
+        "operationId": "show_v1_public_profiles__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Show",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/v1/public/profiles/{slug}/reels/{reel_id}": {
+      "get": {
+        "operationId": "reel_v1_public_profiles__slug__reels__reel_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reel Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "video/mp4": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reel",
+        "tags": [
+          "profiles"
         ]
       }
     },

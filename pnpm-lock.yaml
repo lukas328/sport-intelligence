@@ -87,6 +87,9 @@ importers:
       '@handball/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@handball/client-core':
+        specifier: workspace:*
+        version: link:../../packages/client-core
       '@handball/court':
         specifier: workspace:*
         version: link:../../packages/court
@@ -179,6 +182,15 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+
+  packages/client-core:
+    devDependencies:
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.12(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(jiti@2.7.0))
 
   packages/court:
     devDependencies:

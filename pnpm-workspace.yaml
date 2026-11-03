@@ -6,3 +6,4 @@ packages:
   - packages/api-client
   - packages/ui
   - packages/plans
+  - packages/client-core

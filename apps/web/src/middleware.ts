@@ -1,7 +1,7 @@
 import { LOCALE_COOKIE, locales } from "@/i18n/config";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/app", "/onboarding", "/ops"];
+const PROTECTED = ["/app", "/onboarding", "/ops", "/federation"];
 
 /**
  * Content Security Policy, built at runtime so the storage origin for direct uploads can be
