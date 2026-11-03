@@ -949,5 +949,18 @@
     "unavailable": "Online payment is not set up yet.",
     "needs2fa": "Payments need two-factor sign-in.",
     "failed": "That did not work. Please try again."
+  },
+  "share": {
+    "button": "Share",
+    "title": "View-only link",
+    "hint": "Anyone with the link sees the content without signing in. Player names are not shown, only jersey numbers.",
+    "valid": "Valid for",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "create": "Create link",
+    "link": "Link (shown only now)",
+    "copy": "Copy",
+    "copied": "Copied",
+    "invalid": "This link has expired or was revoked.",
+    "readOnly": "View only, valid until {date}"
   }
 }

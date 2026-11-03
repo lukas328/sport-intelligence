@@ -254,6 +254,7 @@ ENDPOINTS += [
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
     ("GET team assignments", STAFF, lambda a, w: a.get(w.t("/assignments"))),
+    ("GET share links", STAFF, lambda a, w: a.get(w.t("/share-links"))),
     ("GET my assignments", MEMBERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/me/assignments")),
     ("GET notifications", MEMBERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/me/notifications")),
     (

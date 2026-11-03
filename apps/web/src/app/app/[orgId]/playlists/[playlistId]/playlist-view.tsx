@@ -1,5 +1,6 @@
 "use client";
 
+import { ShareButton } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -55,6 +56,7 @@ export function PlaylistView({ orgId, initial, staff }: { orgId: string; initial
             {t("items", { count: pl.items.length })} · {pl.shared_with_players ? t("shared") : t("notShared")}
           </p>
         </div>
+        {staff && <ShareButton orgId={orgId} teamId={pl.team_id} kind="playlist" targetId={pl.id} />}
         {staff && (
           <div className="flex gap-2">
             <Button

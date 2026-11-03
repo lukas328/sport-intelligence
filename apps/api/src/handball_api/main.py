@@ -28,6 +28,7 @@ from handball_api.core.text import ClaudeTextGenerator, TextGenerator
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
 from handball_api.routers import events as events_router
+from handball_api.routers import sharing as sharing_router
 from handball_api.routers import tactics as tactics_router
 from handball_api.routers import training as training_router
 from handball_api.routers.deps import csrf_protect
@@ -178,5 +179,6 @@ def create_app(
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)
     app.include_router(billing_router.router)
+    app.include_router(sharing_router.router)
     app.include_router(internal.router)
     return app

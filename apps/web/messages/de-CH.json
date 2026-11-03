@@ -949,5 +949,18 @@
     "unavailable": "Online-Zahlung ist noch nicht eingerichtet.",
     "needs2fa": "Für Zahlungen braucht es die Zwei-Faktor-Anmeldung.",
     "failed": "Das hat nicht geklappt. Bitte erneut versuchen."
+  },
+  "share": {
+    "button": "Teilen",
+    "title": "Link zum Ansehen",
+    "hint": "Wer den Link hat, sieht den Inhalt ohne Anmeldung. Spielernamen werden nicht angezeigt, nur Rückennummern.",
+    "valid": "Gültig",
+    "days": "{count, plural, one {# Tag} other {# Tage}}",
+    "create": "Link erstellen",
+    "link": "Link (nur jetzt sichtbar)",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "invalid": "Dieser Link ist abgelaufen oder wurde zurückgezogen.",
+    "readOnly": "Nur ansehen, gültig bis {date}"
   }
 }

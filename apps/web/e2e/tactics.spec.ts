@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { expectAccessible, register, uniqueEmail } from "./helpers";
 
-test("play library: template, edit on the board, animate, save, find", async ({ page }, info) => {
+test("play library: template, edit on the board, animate, save, find", async ({ page, browser }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("tac"), "Coach Taktik");
   await page.getByLabel("Vereinsname").fill("HC Taktik");
@@ -46,6 +46,20 @@ test("play library: template, edit on the board, animate, save, find", async ({ 
   await page.getByRole("button", { name: "Spielzug speichern" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Abwehr 5:1" })).toBeVisible();
   await expect(page.getByRole("button", { name: "2", exact: true })).toBeVisible();
+
+  // read-only public link, opened without a session
+  await page.getByRole("button", { name: "Teilen" }).click();
+  await page.getByRole("button", { name: "Link erstellen" }).click();
+  const shareUrl = await page.getByTestId("share-url").inputValue();
+  expect(shareUrl).toMatch(/\/s\/[\w-]{20,}$/);
+  const guest = await browser.newContext();
+  const gp = await guest.newPage();
+  await gp.goto(shareUrl);
+  await expect(gp.getByRole("heading", { level: 1, name: "Abwehr 5:1" })).toBeVisible();
+  await expect(gp.getByTestId("tactics-board").locator("[data-testid^=token-]")).toHaveCount(13);
+  await expect(gp.getByRole("button", { name: "Spielzug speichern" })).toHaveCount(0);
+  await expectAccessible(gp);
+  await guest.close();
 
   await page.getByRole("link", { name: "Spielzüge" }).first().click();
   await expect(page.getByTestId("play-list")).toContainText("Abwehr 5:1");

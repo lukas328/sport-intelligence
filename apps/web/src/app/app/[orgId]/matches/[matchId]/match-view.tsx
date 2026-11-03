@@ -1,5 +1,6 @@
 "use client";
 
+import { ShareButton } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -119,6 +120,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             </span>
           )}
           <span className="rounded-full bg-surface px-3 py-1 text-sm">{t(`matches.status_${match.status}`)}</span>
+          {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="match" targetId={match.id} />}
         </div>
       </header>
 

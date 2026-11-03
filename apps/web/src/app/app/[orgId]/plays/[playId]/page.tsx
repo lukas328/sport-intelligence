@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { ShareButton } from "@/components/sharing/share-button";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { PlayEditor } from "@/components/tactics/play-editor";
@@ -23,7 +24,10 @@ export default async function PlayPage({ params }: { params: Promise<{ orgId: st
           {t("title")}
         </Link>
       </p>
-      <h1 className="text-2xl font-semibold">{play.data.name}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-semibold">{play.data.name}</h1>
+        {staff && <ShareButton orgId={orgId} teamId={play.data.team_id} kind="play" targetId={play.data.id} />}
+      </div>
       <PlayEditor orgId={orgId} teamId={play.data.team_id} play={play.data} editable={staff} source={source} />
     </div>
   );

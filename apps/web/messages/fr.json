@@ -949,5 +949,18 @@
     "unavailable": "Le paiement en ligne n'est pas encore configuré.",
     "needs2fa": "Les paiements nécessitent la connexion à deux facteurs.",
     "failed": "Cela n'a pas fonctionné. Réessaie."
+  },
+  "share": {
+    "button": "Partager",
+    "title": "Lien en lecture seule",
+    "hint": "Toute personne disposant du lien voit le contenu sans connexion. Les noms ne sont pas affichés, seulement les numéros.",
+    "valid": "Valable",
+    "days": "{count, plural, one {# jour} other {# jours}}",
+    "create": "Créer le lien",
+    "link": "Lien (visible maintenant seulement)",
+    "copy": "Copier",
+    "copied": "Copié",
+    "invalid": "Ce lien a expiré ou a été retiré.",
+    "readOnly": "Lecture seule, valable jusqu'au {date}"
   }
 }

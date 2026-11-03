@@ -256,7 +256,11 @@ def estimate_possessions(events: list[MEvent]) -> dict[str, int]:
 
 
 async def match_stats(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
-    match = await get_match(ctx, match_id)
+    return await stats_for(ctx, await get_match(ctx, match_id))
+
+
+async def stats_for(ctx: Ctx, match: Match) -> dict[str, Any]:
+    """Stats of a match the caller has already been authorised for (cached by event version)."""
     count, latest = (
         await ctx.db.execute(
             select(func.count(Event.id), func.max(Event.updated_at)).where(
