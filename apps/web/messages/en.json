@@ -1975,7 +1975,10 @@
     "profile": "Profile",
     "roster": "Squad",
     "dates": "Dates",
-    "theme_system": "Automatic"
+    "theme_system": "Automatic",
+    "fixtures": "Fixtures",
+    "plays": "Plays",
+    "matchSections": "Match sections"
   },
   "palette": {
     "newMatch": "Add a match",
@@ -2038,12 +2041,15 @@
     "afterMatches": "{label}, after {n, plural, =1 {1 match} other {# matches}}",
     "neutralSeason": "The season so far.",
     "focus": "work on this",
-    "focusNote": "Marked when a figure is clearly below the reference (saves 30 %, shooting 55 %, 12 turnovers per match). Reference values, not a league average.",
+    "focusNote": "The tick shows the reference value, not a league average. Yellow where a value is clearly off.",
     "chartLater": "The trend appears from three matches. Until then the table shows each match.",
     "lastResult": "Last match",
     "goalsAsClips": "Watch the goals as clips",
     "nextMatch": "Next match",
     "noMatchYet": "No match played yet.",
-    "reference": "Reference {value}"
+    "reference": "Reference {value}",
+    "inNumbers": "The season in numbers",
+    "lowerBetter": "lower is better",
+    "againstRef": "Goals against {value}"
   }
 }

@@ -27,6 +27,9 @@ are ugly and only the idea should be taken over (decisions in `docs/design/ident
 - **Own icons** for navigation and handball objects; lucide only for neutral controls.
 - **Voice** (`lib/voice.ts`): deterministic statements from real figures (runs, goals against
   expected goals, defence, record, match margin); neutral when the data is thin; estimates marked.
+- **Navigation regrouped** after a UX fit test with the owner (still four destinations, URLs
+  unchanged): staff order Übersicht · Spiele · Training · Team; Spiele → Spielplan · Saison ·
+  Bibliothek, Training → Planung · Übungen · Spielzüge · Aufgaben, Team → Kader · Termine.
 - **Moments**: score count-up, analysis-done on the stage, a match card as a local 4:5 PNG.
 
 ## Consequences

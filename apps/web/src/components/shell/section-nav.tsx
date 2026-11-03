@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/ui/page-header";
-import { teamSectionOf, trainingSectionOf, videoWork } from "@/lib/nav-model";
+import { destOf, sectionOf, sectionsFor, type Dest, type Section } from "@/lib/nav-model";
 import { cn } from "@/lib/utils";
 import { useShell } from "./context";
 
@@ -39,115 +39,103 @@ export function SubNav({ label, items, active }: { label: string; items: { key: 
   );
 }
 
-export function TeamHeader({ actions }: { actions?: ReactNode }) {
+/** The current destination, its second level with labels and the active item. */
+function useArea() {
+  const t = useTranslations("shell");
+  const path = usePathname();
+  const { org, team, mode } = useShell();
+  const dest = destOf(path, mode);
+  const items = dest ? sectionsFor(dest, mode, org.id, team?.id ?? null).map((x) => ({ ...x, label: t(x.key) })) : [];
+  const page: string = path.replace(/^\/app\/[^/]+(\/teams\/[^/]+)?/, "").split("/")[1] ?? "";
+  return { dest, items, active: sectionOf(path), page, org, team, mode };
+}
+
+const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "trainingSections" | "teamSections">> = {
+  matches: "matchSections",
+  training: "trainingSections",
+  team: "teamSections",
+};
+
+/** Second level of the current destination on phones (the sidebar shows it on desktop). */
+export function AreaSubNav() {
+  const t = useTranslations("shell");
+  const { dest, items, active } = useArea();
+  if (!dest || items.length === 0) return null;
+  return <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />;
+}
+
+/** Leaf pages one level below a section item, with a way back to it. */
+const LEAF: Record<string, { parent: Section; title: string }> = {
+  playlists: { parent: "library", title: "library.playlists" },
+  presentations: { parent: "library", title: "library.presentations" },
+  search: { parent: "library", title: "library.search" },
+};
+
+/** Title, phone sub navigation and leaf back link for the pages of a destination. */
+export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactNode; title?: string }) {
   const t = useTranslations("shell");
   const tr = useTranslations();
-  const path = usePathname();
-  const { org, team } = useShell();
-  if (!team) return null;
-  const base = `/app/${org.id}/teams/${team.id}`;
-  const staff = videoWork(org.my_role, team.my_role);
-  const items = [
-    { key: "roster", href: base, label: t("roster") },
-    { key: "season", href: `${base}/season`, label: t("season") },
-    ...(staff ? [{ key: "library", href: `${base}/library`, label: t("library") }] : []),
-  ];
-  const section = teamSectionOf(path);
-  const page: string = path.replace(/^\/app\/[^/]+(\/teams\/[^/]+)?/, "").split("/")[1] ?? "";
-  const LEAF: Record<string, [string, string, string]> = {
-    playlists: ["library", "library", "playlists"],
-    plays: ["library", "library", "plays"],
-    presentations: ["library", "library", "presentations"],
-    search: ["library", "library", "search"],
-  };
+  const { dest, items, active, page, org, team } = useArea();
+  const teamBase = team ? `/app/${org.id}/teams/${team.id}` : null;
   const leaf = LEAF[page];
   const seasonTools =
-    staff && section === "season" ? (
+    teamBase && active === "season" ? (
       <>
-        <Link href={`${base}/matrix`} className={buttonClass("secondary", "sm")} aria-current={page === "matrix" ? "page" : undefined}>
+        <Link href={`${teamBase}/matrix`} className={buttonClass("secondary", "sm")} aria-current={page === "matrix" ? "page" : undefined}>
           <Grid3x3 aria-hidden />
           {tr("palette.matrix")}
         </Link>
-        <Link href={`${base}/assistant`} className={buttonClass("secondary", "sm")} aria-current={page === "assistant" ? "page" : undefined}>
+        <Link href={`${teamBase}/assistant`} className={buttonClass("secondary", "sm")} aria-current={page === "assistant" ? "page" : undefined}>
           <IconAsk />
           {tr("palette.ask")}
         </Link>
       </>
     ) : null;
+  const heading =
+    dest === "matches"
+      ? { eyebrow: team?.name, title: t("matches") }
+      : dest === "training"
+        ? { eyebrow: team?.name, title: t("training") }
+        : dest === "team" && team
+          ? { eyebrow: team.season ?? org.name, title: team.name }
+          : { eyebrow: undefined, title: fallbackTitle ?? "" };
   return (
     <div className="space-y-5">
-      <PageHeader eyebrow={team.season ?? org.name} title={team.name} actions={actions ?? seasonTools} />
-      <SubNav label={t("teamSections")} items={items} active={section} />
-      {leaf && <LeafTitle base={base} leaf={leaf} page={page} />}
+      <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions ?? seasonTools} />
+      {dest && items.length > 0 && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
+      {leaf && teamBase && <LeafTitle href={`${teamBase}/${leaf.parent}`} parent={leaf.parent} title={tr(leaf.title as "library.plays")} search={page === "search"} />}
     </div>
   );
 }
 
-function LeafTitle({ base, leaf, page }: { base: string; leaf: [string, string, string]; page: string }) {
+function LeafTitle({ href, parent, title, search }: { href: string; parent: Section; title: string; search: boolean }) {
   const t = useTranslations();
-  const parentLabel = leaf[0] === "library" ? t("library.title") : t("shell.season");
-  const title = page === "matrix" ? t("palette.matrix") : page === "assistant" ? t("palette.ask") : t(`library.${leaf[2]}` as "library.plays");
-  const href = `${base}/${leaf[0] === "library" ? "library" : "season"}`;
+  const parentLabel = parent === "library" ? t("library.title") : t(`shell.${parent}` as "shell.season");
   return (
     <div className="flex items-center gap-2 pt-2">
       <Link href={href} aria-label={t("library.back", { name: parentLabel })} className="grid size-8 place-items-center rounded-md text-muted ring-1 ring-border hover:bg-surface hover:text-foreground">
         <ChevronLeft aria-hidden className="size-4" />
       </Link>
-      {page === "search" ? <span className="text-sm font-medium text-muted">{t("library.title")}</span> : <h2 className="text-xl font-bold">{title}</h2>}
+      {search ? <span className="text-sm font-medium text-muted">{parentLabel}</span> : <h2 className="text-xl font-bold">{title}</h2>}
     </div>
   );
 }
 
-export function TrainingHeader({ actions }: { actions?: ReactNode }) {
-  const t = useTranslations("shell");
-  const path = usePathname();
-  const { org, team } = useShell();
-  const base = `/app/${org.id}`;
-  const teamBase = team ? `${base}/teams/${team.id}` : null;
-  const items = [
-    ...(teamBase ? [{ key: "plan", href: `${teamBase}/training`, label: t("plan") }] : []),
-    { key: "dates", href: `${base}/schedule`, label: t("dates") },
-    { key: "drills", href: `${base}/drills`, label: t("drills") },
-    ...(teamBase ? [{ key: "assignments", href: `${teamBase}/assignments`, label: t("assignments") }] : []),
-  ];
-  return (
-    <div className="space-y-5">
-      <PageHeader eyebrow={team?.name} title={t("training")} actions={actions} />
-      <SubNav label={t("trainingSections")} items={items} active={trainingSectionOf(path)} />
-    </div>
-  );
-}
-
-/** Second level of the team area on phones (the sidebar shows it on desktop). */
-export function TeamSubNav() {
-  const t = useTranslations("shell");
-  const path = usePathname();
-  const { org, team } = useShell();
-  if (!team) return null;
-  const base = `/app/${org.id}/teams/${team.id}`;
-  const staff = videoWork(org.my_role, team.my_role);
-  const items = [
-    { key: "roster", href: base, label: t("roster") },
-    { key: "season", href: `${base}/season`, label: t("season") },
-    ...(staff ? [{ key: "library", href: `${base}/library`, label: t("library") }] : []),
-  ];
-  return <SubNav label={t("teamSections")} items={items} active={teamSectionOf(path)} />;
-}
-
-/** Team layout chrome: the team header on team pages, the training header on training pages. */
+/** Team layout chrome: the header of the destination a team page belongs to. */
 export function TeamChrome() {
+  const { active } = useArea();
   const path = usePathname();
-  const { mode } = useShell();
+  if (!active) return null;
   // the season page opens with its own stage (one stage per screen, at the top)
   if (/\/season$/.test(path)) return null;
-  if (teamSectionOf(path)) return <TeamHeader />;
-  if (mode === "staff" && trainingSectionOf(path)) return <TrainingHeader />;
-  return null;
+  // the fixture list has its own title and actions
+  if (active === "fixtures") return <AreaSubNav />;
+  return <AreaHeader />;
 }
 
-/** Header for pages that sit in Training for staff and stand alone for players (dates, drills). */
-export function TrainingOrPageHeader({ title }: { title: string }) {
-  const { mode } = useShell();
-  if (mode === "staff") return <TrainingHeader />;
+/** Header for org-level pages that sit in a destination for staff and stand alone for others. */
+export function AreaOrPageHeader({ title }: { title: string }) {
+  const { mode, dest, team } = useArea();
+  if (mode === "staff" && (dest === "training" || (dest === "team" && team))) return <AreaHeader title={title} />;
   return <PageHeader title={title} />;
 }

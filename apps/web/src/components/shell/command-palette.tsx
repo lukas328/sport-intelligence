@@ -96,7 +96,8 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 })}
                 {teamBase && staff && row("season", t("shell.season"), <Grid3x3 />, `${teamBase}/season`, ["statistik", "stats"])}
                 {teamBase && staff && row("matrix", t("palette.matrix"), <Grid3x3 />, `${teamBase}/matrix`)}
-                {teamBase && staff && row("library", t("shell.library"), <BookOpen />, `${teamBase}/library`, ["playlists", "spielzüge", "plays", "präsentationen"])}
+                {teamBase && staff && row("library", t("shell.library"), <BookOpen />, `${teamBase}/library`, ["playlists", "präsentationen", "presentations"])}
+                {teamBase && staff && row("plays", t("shell.plays"), <BookOpen />, `${teamBase}/plays`, ["spielzüge", "taktik", "tactics"])}
                 {row("profile", t("shell.profile"), <UserRound />, `${base}/profile`)}
                 {row("settings", t("shell.settings"), <Settings />, `${base}/settings`)}
               </Command.Group>

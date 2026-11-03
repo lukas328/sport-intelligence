@@ -1975,7 +1975,10 @@
     "profile": "Profil",
     "roster": "Kader",
     "dates": "Termine",
-    "theme_system": "Automatisch"
+    "theme_system": "Automatisch",
+    "fixtures": "Spielplan",
+    "plays": "Spielzüge",
+    "matchSections": "Bereiche der Spiele"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",
@@ -2038,12 +2041,15 @@
     "afterMatches": "{label}, nach {n, plural, =1 {1 Spiel} other {# Spielen}}",
     "neutralSeason": "Die Saison bis hierher.",
     "focus": "hier ansetzen",
-    "focusNote": "Markiert, wenn ein Wert klar unter dem Richtwert liegt (Paraden 30 %, Würfe 55 %, 12 Ballverluste pro Spiel). Richtwerte, kein Ligaschnitt.",
+    "focusNote": "Der Strich zeigt den Richtwert, keinen Ligaschnitt. Gelb, wo ein Wert klar daneben liegt.",
     "chartLater": "Der Verlauf erscheint ab drei Spielen. Bis dahin zeigt die Tabelle jedes Spiel einzeln.",
     "lastResult": "Letztes Spiel",
     "goalsAsClips": "Tore als Clips ansehen",
     "nextMatch": "Nächstes Spiel",
     "noMatchYet": "Noch kein Spiel gespielt.",
-    "reference": "Richtwert {value}"
+    "reference": "Richtwert {value}",
+    "inNumbers": "Die Saison in Zahlen",
+    "lowerBetter": "weniger ist besser",
+    "againstRef": "Gegentore {value}"
   }
 }

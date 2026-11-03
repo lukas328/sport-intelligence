@@ -5,7 +5,7 @@ import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
 import { MatchScore } from "@/components/domain/match-score";
 import { Stage, stageButton, stageLink } from "@/components/domain/stage";
-import { TeamSubNav } from "@/components/shell/section-nav";
+import { AreaSubNav } from "@/components/shell/section-nav";
 import { IconAsk } from "@/components/shell/icons";
 import { focusMetric, matchStatement, seasonStatement } from "@/lib/voice";
 import { cn } from "@/lib/utils";
@@ -73,7 +73,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   if (!seasonId || !data || data.matches.length === 0) {
     return (
       <div className="space-y-8">
-        <TeamSubNav />
+        <AreaSubNav />
         <Stage pullMobile={false}>
           <p className="text-[0.9375rem] font-semibold">{label}</p>
           <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl">{tv("noMatchYet")}</h1>
@@ -90,11 +90,15 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
   const lastResult = matchStatement({ own: last.score_own, opp: last.score_opponent, opponent: last.opponent });
   const focus = focusMetric({ save_pct: data.totals.save_pct, shooting_pct: data.totals.shooting_pct, turnovers_per_match: data.totals.turnovers / n });
-  const cells: { key: string; label: string; value: string | number; href: string; focus?: boolean; reference?: string }[] = [
-    { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: (data.totals.goals / n).toFixed(1), href: `${base}/search?type=shot&outcome=goal&side=own` },
-    { key: "shooting", label: t("shootingPct"), value: pct(data.totals.shooting_pct), href: `${base}/search?type=shot&side=own`, focus: focus === "shooting_pct", reference: "55 %" },
-    { key: "save", label: t("savePct"), value: pct(data.totals.save_pct), href: `${base}/search?type=shot&outcome=save&side=opponent`, focus: focus === "save_pct", reference: "30 %" },
-    { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: (data.totals.turnovers / n).toFixed(1), href: `${base}/search?type=turnover&side=own`, focus: focus === "turnovers", reference: "12" },
+  const goalsFor = data.totals.goals / n;
+  const goalsAgainst = data.matches.reduce((sum, m) => sum + m.score_opponent, 0) / n;
+  const turnovers = data.totals.turnovers / n;
+  // one row per figure: value, a bar on a fixed scale and a tick for the reference (or goals against)
+  const cells: { key: string; label: string; value: string; href: string; share: number | null; tick: number; refText: string; focus?: boolean }[] = [
+    { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: goalsFor.toFixed(1), href: `${base}/search?type=shot&outcome=goal&side=own`, share: goalsFor / 40, tick: goalsAgainst / 40, refText: tv("againstRef", { value: goalsAgainst.toFixed(1) }) },
+    { key: "shooting", label: t("shootingPct"), value: pct(data.totals.shooting_pct), href: `${base}/search?type=shot&side=own`, share: data.totals.shooting_pct, tick: 0.55, refText: tv("reference", { value: "55 %" }), focus: focus === "shooting_pct" },
+    { key: "save", label: t("savePct"), value: pct(data.totals.save_pct), href: `${base}/search?type=shot&outcome=save&side=opponent`, share: data.totals.save_pct, tick: 0.3, refText: tv("reference", { value: "30 %" }), focus: focus === "save_pct" },
+    { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: turnovers.toFixed(1), href: `${base}/search?type=turnover&side=own`, share: turnovers / 24, tick: 0.5, refText: `${tv("reference", { value: "12" })}, ${tv("lowerBetter")}`, focus: focus === "turnovers" },
   ];
   const pick = (score: (r: Row) => number | null) =>
     data.matches.reduce<Row | null>((best, r) => (score(r) != null && (best == null || score(r)! > score(best)!) ? r : best), null);
@@ -114,7 +118,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   return (
     <div className="space-y-12">
       <div className="space-y-5 lg:space-y-0">
-      <TeamSubNav />
+      <AreaSubNav />
       <Stage
         pullMobile={false}
         eyebrow={tv("afterMatches", { label, n })}
@@ -139,73 +143,90 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       </Stage>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="sr-only">{t("title")}</h2>
-        <ul className="grid grid-cols-2 overflow-hidden rounded-lg border border-foreground/25 bg-raised lg:grid-cols-4" data-testid="season-tiles">
-          {cells.map((c, i) => (
-            <li key={c.key} className="contents">
-            <Link
-              href={c.href}
-              className={cn(
-                "group block px-5 py-4 transition-colors focus-visible:relative focus-visible:z-10",
-                i % 2 === 1 && "border-l border-foreground/15",
-                i >= 2 && "border-t border-foreground/15 lg:border-t-0",
-                i === 2 && "lg:border-l",
-                "hover:bg-surface",
-              )}
-            >
-              <span className="block text-sm font-semibold">
-                {c.label}
-                {c.focus && <span>, {tv("focus")}</span>}
-              </span>
-              <span className="relative mt-1 inline-block font-score text-[2.5rem] leading-none group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">
-                {c.focus && (
-                  <span aria-hidden className="absolute -inset-x-1.5 -bottom-1.5 h-2 -skew-x-12 rounded-[2px] bg-resin" />
-                )}
-                <span className="relative">{c.value}</span>
-              </span>
-              {c.focus && c.reference && <span className="mt-2.5 block text-sm text-muted">{tv("reference", { value: c.reference })}</span>}
-            </Link>
-            </li>
-          ))}
-        </ul>
-        {focus && <p className="text-sm text-muted">{tv("focusNote")}</p>}
-      </section>
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-16">
+        <section className="space-y-4">
+          <h2 className="text-2xl">{tv("inNumbers")}</h2>
+          <ul className="border-y border-foreground/15" data-testid="season-tiles">
+            {cells.map((c) => (
+              <li key={c.key} className="border-t border-foreground/10 first:border-t-0">
+                <Link
+                  href={c.href}
+                  className="group grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-6 gap-y-3 py-4 sm:grid-cols-[14rem_6.5rem_minmax(0,1fr)] sm:items-center"
+                >
+                  <span className="min-w-0">
+                    <span className="block font-semibold group-hover:text-accent">{c.label}</span>
+                    {c.focus && (
+                      <span className="mt-0.5 mb-1.5 block w-fit text-sm font-semibold underline decoration-resin decoration-[5px] underline-offset-[5px]">{tv("focus")}</span>
+                    )}
+                    <span className="block text-sm text-muted">{c.refText}</span>
+                  </span>
+                  <span className="text-right font-score text-[2.5rem] leading-none sm:text-left">{c.value}</span>
+                  <StatBar share={c.share} tick={c.tick} focus={c.focus} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm text-muted">{tv("focusNote")}</p>
+        </section>
 
-      <section className="space-y-3">
-        <h2 className="text-2xl">{t("form")}</h2>
-        <ol className="flex flex-wrap gap-x-2 gap-y-4">
-          {[...data.matches]
-            .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
-            .map((m) => {
-              const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
-              return (
-                <li key={m.match_id}>
-                  <Link
-                    href={`/app/${orgId}/matches/${m.match_id}`}
-                    title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
-                    className="group flex w-16 flex-col items-center gap-1.5 text-center"
-                  >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "grid size-10 place-items-center rounded-[5px] font-score text-xl text-background transition-transform group-hover:-translate-y-0.5",
-                        r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted",
-                      )}
-                    >
-                      {tm(r).charAt(0)}
-                    </span>
-                    <span className="sr-only">{tm(r)}</span>
-                    <span className="font-score text-lg leading-none group-hover:underline">
-                      {m.score_own}:{m.score_opponent}
-                    </span>
-                    <span className="w-full truncate text-xs text-muted">{m.opponent}</span>
-                  </Link>
-                </li>
-              );
-            })}
-        </ol>
-      </section>
+        <div className="space-y-12">
+          <section className="space-y-4">
+            <h2 className="text-2xl">{t("form")}</h2>
+            <ol className="flex flex-wrap gap-x-2 gap-y-4">
+              {[...data.matches]
+                .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
+                .map((m) => {
+                  const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
+                  return (
+                    <li key={m.match_id}>
+                      <Link
+                        href={`/app/${orgId}/matches/${m.match_id}`}
+                        title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
+                        className="group flex w-16 flex-col items-center gap-1.5 text-center"
+                      >
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "grid size-10 place-items-center rounded-[5px] font-score text-xl text-background transition-transform group-hover:-translate-y-0.5",
+                            r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted",
+                          )}
+                        >
+                          {tm(r).charAt(0)}
+                        </span>
+                        <span className="sr-only">{tm(r)}</span>
+                        <span className="font-score text-lg leading-none group-hover:underline">
+                          {m.score_own}:{m.score_opponent}
+                        </span>
+                        <span className="w-full truncate text-xs text-muted">{m.opponent}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+            </ol>
+          </section>
+
+          {n > 1 && (
+            <section className="space-y-4">
+              <h2 className="text-2xl">{t("best")}</h2>
+              <ul className="border-y border-foreground/15">
+                {bests.map((b) =>
+                  b.row ? (
+                    <li key={b.label} className="border-t border-foreground/10 first:border-t-0">
+                      <Link href={`/app/${orgId}/matches/${b.row.match_id}`} className="group flex items-baseline gap-4 py-3">
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold">{b.label}</span>
+                          <span className="block truncate text-sm text-muted group-hover:underline">{t("against", { opponent: b.row.opponent })}</span>
+                        </span>
+                        <span className="font-score text-3xl leading-none">{b.value}</span>
+                      </Link>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </section>
+          )}
+        </div>
+      </div>
 
       {n >= 3 ? (
         <div className={cn("grid gap-8", scorers.length > 0 && "lg:grid-cols-2")}>
@@ -222,25 +243,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           </p>
           {scorers.length > 0 && <Scorers scorers={scorers} names={names} topGoals={topGoals} t={t} />}
         </>
-      )}
-
-      {n > 1 && (
-        <section className="space-y-3">
-          <h2 className="text-2xl">{t("best")}</h2>
-          <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-foreground/15 bg-foreground/15 lg:grid-cols-4">
-            {bests.map((b) =>
-              b.row ? (
-                <li key={b.label} className="contents">
-                  <Link href={`/app/${orgId}/matches/${b.row.match_id}`} className="group bg-raised px-5 py-4 transition-colors hover:bg-surface">
-                    <span className="block text-sm font-semibold">{b.label}</span>
-                    <span className="mt-1 block font-score text-3xl leading-none">{b.value}</span>
-                    <span className="mt-1.5 block truncate text-sm text-muted group-hover:underline">{t("against", { opponent: b.row.opponent })}</span>
-                  </Link>
-                </li>
-              ) : null,
-            )}
-          </ul>
-        </section>
       )}
 
       <section className="space-y-3">
@@ -295,7 +297,7 @@ function Scorers({ scorers, names, topGoals, t }: { scorers: Season["players"]; 
   return (
     <section className="space-y-3">
       <h2 className="text-2xl">{t("scorers")}</h2>
-      <ol className="divide-y divide-foreground/10 rounded-lg border border-foreground/15 bg-raised px-5" data-testid="season-players">
+      <ol className="divide-y divide-foreground/10 border-y border-foreground/15" data-testid="season-players">
         {scorers.map((p, i) => (
           <li key={p.player_id} className="grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-3">
             <span className="font-score text-lg text-muted">{i + 1}</span>
@@ -309,13 +311,24 @@ function Scorers({ scorers, names, topGoals, t }: { scorers: Season["players"]; 
               <span className="block font-score text-2xl leading-none">{p.goals}</span>
               <span className="block text-sm text-muted tabular-nums">{pct(p.shooting_pct)}</span>
             </span>
-            <span aria-hidden className="col-start-2 col-end-4 h-1 overflow-hidden rounded-full bg-surface">
-              <span className="block h-full rounded-full bg-accent" style={{ width: `${(p.goals / topGoals) * 100}%` }} />
+            <span aria-hidden className="col-start-2 col-end-4 h-1.5 overflow-hidden rounded-[2px] bg-foreground/10">
+              <span className="block h-full bg-accent" style={{ width: `${(p.goals / topGoals) * 100}%` }} />
             </span>
           </li>
         ))}
       </ol>
     </section>
+  );
+}
+
+/** A figure on a fixed scale with a tick for its reference; yellow when it needs work. */
+function StatBar({ share, tick, focus }: { share: number | null; tick: number; focus?: boolean }) {
+  const clamp = (v: number) => `${Math.max(0, Math.min(1, v)) * 100}%`;
+  return (
+    <span aria-hidden className="relative col-span-2 block h-2.5 rounded-[2px] bg-foreground/10 sm:col-span-1">
+      {share != null && <span className={cn("absolute inset-y-0 left-0 rounded-[2px]", focus ? "bg-resin ring-1 ring-inset ring-foreground/25" : "bg-accent")} style={{ width: clamp(share) }} />}
+      <span className="absolute -top-1.5 -bottom-1.5 w-0.5 -translate-x-1/2 bg-foreground" style={{ left: clamp(tick) }} />
+    </span>
   );
 }
 

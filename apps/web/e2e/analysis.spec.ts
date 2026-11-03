@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, matchMenu, openAnalysis, openTeam, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, matchMenu, openAnalysis, openMatches, register, uniqueEmail } from "./helpers";
 
 const REPORT = fileURLToPath(new URL("./fixtures/paper-report.json", import.meta.url));
 
@@ -58,7 +58,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
 
   // season view across matches (back to the team's match list)
   await page.goBack();
-  await openTeam(page, "Saison");
+  await openMatches(page, "Saison");
   // the number of matches is part of the stage line now, the strip holds the per-match figures
   await expect(page.getByRole("main")).toContainText("nach 1 Spiel");
   await expect(page.getByTestId("season-tiles")).toContainText("Tore pro Spiel");

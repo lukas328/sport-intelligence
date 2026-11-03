@@ -24,16 +24,19 @@ At most **four destinations per role** (main navigation: sidebar on desktop, tab
 
 | Role | Destinations |
 |---|---|
-| Coach, analyst, team manager, admin | Übersicht · Spiele · Team · Training |
+| Coach, analyst, team manager, admin | Übersicht · Spiele · Training · Team |
 | Player, goalkeeper | Übersicht · Szenen · Termine · Team |
 | Parent | Übersicht · Termine · Team |
 | Guest | Übersicht · Spiele · Team |
 
-- Second level, never more than four: Team → Kader · Saison · Bibliothek; Training → Planung ·
-  Termine · Übungen · Aufgaben. On desktop they unfold in the sidebar under the active
-  destination; on phones they are pill links under the title. There is no third level: pages
-  below (Matrix, Frag deine Daten, Playlists, Spielzüge, Präsentationen, Szenensuche) show a back
-  link to their parent.
+- Order for staff follows the coach's week: the match, its analysis, the training, then the squad.
+- Second level, never more than four, grouped by the job: Spiele → Spielplan · Saison · Bibliothek
+  (playlists, presentations, scene search: material from the matches); Training → Planung ·
+  Übungen · Spielzüge · Aufgaben; Team → Kader · Termine (the people and when they meet). For
+  players, parents and guests Team → Kader · Saison. On desktop the second level unfolds in the
+  sidebar under the active destination; on phones it is a row of links under the title. There is
+  no third level: pages below (Playlists, Präsentationen, Szenensuche) show a back link to their
+  parent; Matrix and Frag deine Daten are tools on the season page.
 - The sidebar also shows the next match of the active team.
 - Account menu (avatar): Profil, Einwilligungen, Einstellungen, Darstellung (hell, dunkel,
   automatisch), Hilfe, Feedback, Abmelden.

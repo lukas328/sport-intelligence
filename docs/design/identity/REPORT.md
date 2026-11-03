@@ -35,6 +35,10 @@ Decisions in `DECISIONS.md`, open points for the owner in `FOR_LUKAS.md`, rules 
 - **Guard rails.** `design-lint.test.ts` now also forbids soft panels, pills, coloured side
   borders and the sparkle symbol; `voice.test.ts`, contrast tests for stage, deep, signal and paper.
 
+- **Navigation (after owner review).** Staff order Übersicht, Spiele, Training, Team; Saison and
+  Bibliothek under Spiele, Spielzüge under Training, Termine under Team; season figures as open
+  rows with reference bars instead of boxes.
+
 ## Reviews (fresh agent, screenshots only)
 
 1. After slice 3: eight findings (cropped court, yellow with two meanings, badge soup in the

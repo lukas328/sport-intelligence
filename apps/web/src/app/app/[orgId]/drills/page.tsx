@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DRILLS, type Focus, type Lang } from "@handball/tactics";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
-import { TrainingOrPageHeader } from "@/components/shell/section-nav";
+import { AreaOrPageHeader } from "@/components/shell/section-nav";
 import { cn } from "@/lib/utils";
 
 const FOCI: Focus[] = ["finishing", "wings", "back_court", "pivot", "seven_m", "goalkeeping", "passing", "transition_defence", "fast_break", "defence", "powerplay"];
@@ -20,7 +20,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
   const list = wanted.length ? DRILLS.filter((d) => d.focus.some((f) => wanted.includes(f))) : DRILLS;
   return (
     <div className="space-y-6">
-      <TrainingOrPageHeader title={t("title")} />
+      <AreaOrPageHeader title={t("title")} />
       {wanted.length > 0 && <h2 className="text-xl font-bold">{t("suggested")}</h2>}
       <p className="max-w-2xl text-sm text-muted">{t("hint")}</p>
       <nav aria-label={t("title")} className="flex flex-wrap gap-1">

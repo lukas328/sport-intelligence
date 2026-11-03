@@ -27,13 +27,14 @@ export function videoWork(orgRole: string | null | undefined, teamRole: string |
 export function navFor(mode: Mode, orgId: string, teamId: string | null): NavItem[] {
   const org = `/app/${orgId}`;
   const team: string | null = teamId ? `${org}/teams/${teamId}` : null;
+  // staff order follows the coach's week: the match, its analysis, the training, then the squad
   const items: (NavItem | null)[] =
     mode === "staff"
       ? [
           { key: "today", href: org },
           team ? { key: "matches", href: `${team}/matches` } : null,
-          team ? { key: "team", href: team } : null,
           team ? { key: "training", href: `${team}/training` } : null,
+          team ? { key: "team", href: team } : null,
         ]
       : mode === "player"
         ? [
@@ -48,36 +49,54 @@ export function navFor(mode: Mode, orgId: string, teamId: string | null): NavIte
   return items.filter((i): i is NavItem => Boolean(i));
 }
 
+export type Section = "fixtures" | "season" | "library" | "plan" | "drills" | "plays" | "assignments" | "roster" | "dates";
+
+const SECTION_OF_PAGE: Record<string, Section> = {
+  matches: "fixtures",
+  paper: "fixtures",
+  season: "season",
+  matrix: "season",
+  assistant: "season",
+  library: "library",
+  playlists: "library",
+  presentations: "library",
+  search: "library",
+  training: "plan",
+  drills: "drills",
+  plays: "plays",
+  assignments: "assignments",
+  schedule: "dates",
+};
+
+function firstSegment(path: string): { first: string; inTeam: boolean } {
+  const rest = path.replace(/^\/app\/[^/]+/, "") || "/";
+  const inTeam = rest.startsWith("/teams/");
+  const first = (inTeam ? rest.replace(/^\/teams\/[^/]+/, "") : rest).split("/")[1] ?? "";
+  return { first, inTeam };
+}
+
 /** Which destination a path belongs to (pages below a destination keep it highlighted). */
 export function destOf(path: string, mode: Mode): Dest | null {
   const rest = path.replace(/^\/app\/[^/]+/, "") || "/";
   if (rest === "/") return "today";
-  const sub = rest.replace(/^\/teams\/[^/]+/, "");
-  const inTeam = rest.startsWith("/teams/");
-  const first = (inTeam ? sub : rest).split("/")[1] ?? "";
+  const { first, inTeam } = firstSegment(path);
   if (inTeam && first === "") return "team";
-  if (["matches", "opponents", "paper"].includes(first)) return mode === "player" || mode === "family" ? "scenes" : "matches";
-  if (["training", "assignments", "drills"].includes(first)) return mode === "staff" ? "training" : "today";
-  if (first === "schedule") return mode === "staff" ? "training" : "dates";
-  if (first === "feed") return mode === "staff" ? "matches" : "scenes";
-  if (["season", "matrix", "library", "playlists", "plays", "presentations", "search", "assistant"].includes(first)) return "team";
+  const staff = mode === "staff";
+  const fan = mode === "player" || mode === "family";
+  if (["matches", "opponents", "paper"].includes(first)) return fan ? "scenes" : "matches";
+  if (first === "feed") return staff ? "matches" : "scenes";
+  if (["training", "assignments", "drills"].includes(first)) return staff ? "training" : "today";
+  if (first === "plays") return staff ? "training" : "team";
+  if (first === "schedule") return staff ? "team" : "dates";
+  if (["season", "matrix", "assistant", "library", "playlists", "presentations", "search"].includes(first)) return staff ? "matches" : "team";
   return null;
 }
 
-export type TeamSection = "roster" | "season" | "library";
-export type TrainingSection = "plan" | "dates" | "drills" | "assignments";
-
-export function teamSectionOf(path: string): TeamSection | null {
-  const first = path.replace(/^\/app\/[^/]+(\/teams\/[^/]+)?/, "").split("/")[1] ?? "";
-  if (first === "") return "roster";
-  if (["season", "matrix", "assistant"].includes(first)) return "season";
-  if (["library", "playlists", "plays", "presentations", "search"].includes(first)) return "library";
-  return null;
-}
-
-export function trainingSectionOf(path: string): TrainingSection | null {
-  const first = path.replace(/^\/app\/[^/]+(\/teams\/[^/]+)?/, "").split("/")[1] ?? "";
-  return ({ training: "plan", schedule: "dates", drills: "drills", assignments: "assignments" } as const)[first as "training"] ?? null;
+/** Active second-level item for a path. */
+export function sectionOf(path: string): Section | null {
+  const { first, inTeam } = firstSegment(path);
+  if (inTeam && first === "") return "roster";
+  return SECTION_OF_PAGE[first] ?? null;
 }
 
 /** Team id in a path, if any. */
@@ -86,34 +105,44 @@ export function teamInPath(path: string): string | null {
 }
 
 export interface SubItem {
-  key: TeamSection | TrainingSection;
+  key: Section;
   href: string;
 }
 
-/** Second level of a destination (sidebar on desktop, pills under the title on phones). */
+/**
+ * Second level of a destination (sidebar on desktop, links under the title on phones), never more
+ * than four. Staff: Spiele = fixtures, season, library; Training = plan, drills, plays,
+ * assignments; Team = squad and dates. Everyone else: Team = squad and season.
+ */
 export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: string | null): SubItem[] {
   const org = `/app/${orgId}`;
   const team = teamId ? `${org}/teams/${teamId}` : null;
-  if (dest === "team" && team) {
-    const items: SubItem[] = [
-      { key: "roster", href: team },
+  const staff = mode === "staff";
+  if (dest === "matches" && staff && team) {
+    return [
+      { key: "fixtures", href: `${team}/matches` },
       { key: "season", href: `${team}/season` },
+      { key: "library", href: `${team}/library` },
     ];
-    if (mode === "staff") items.push({ key: "library", href: `${team}/library` });
-    return items;
   }
-  if (dest === "training" && mode === "staff") {
+  if (dest === "training" && staff) {
     return [
       ...(team ? [{ key: "plan" as const, href: `${team}/training` }] : []),
-      { key: "dates", href: `${org}/schedule` },
       { key: "drills", href: `${org}/drills` },
+      ...(team ? [{ key: "plays" as const, href: `${team}/plays` }] : []),
       ...(team ? [{ key: "assignments" as const, href: `${team}/assignments` }] : []),
     ];
   }
+  if (dest === "team" && team) {
+    return staff
+      ? [
+          { key: "roster", href: team },
+          { key: "dates", href: `${org}/schedule` },
+        ]
+      : [
+          { key: "roster", href: team },
+          { key: "season", href: `${team}/season` },
+        ];
+  }
   return [];
-}
-
-/** Active second-level item for a path. */
-export function sectionOf(path: string): TeamSection | TrainingSection | null {
-  return teamSectionOf(path) ?? trainingSectionOf(path);
 }

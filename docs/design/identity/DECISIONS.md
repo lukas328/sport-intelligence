@@ -39,3 +39,18 @@ a coloured top line) generic. The focus figure now keeps the plain cell and gets
 stroke under the number, like a coach marking the match sheet, with the reference value below in
 muted text. The form became a classic form guide: one solid square per match with the result
 letter, the score and the opponent below. No coloured panel edges remain on the season page.
+
+## Owner request: UX fit test of the navigation, season numbers without boxes
+
+A walk through the coach's main jobs showed that four destinations are enough, but the order and
+the contents of Team did not match how a coach thinks. Team mixed people (squad), match statistics
+(season) and match material (library); plays sat three levels deep. Now: Übersicht · Spiele ·
+Training · Team; Spiele → Spielplan · Saison · Bibliothek, Training → Planung · Übungen ·
+Spielzüge · Aufgaben, Team → Kader · Termine. Players, parents and guests keep their navigation
+(Team → Kader · Saison). URLs are unchanged, so links and bookmarks keep working.
+
+The owner still found the lower half of the season page generated (rows of boxes). The four
+figures became "Die Saison in Zahlen": open rows on the paper, label and reference on the left,
+the figure in scoreboard type, a bar on a fixed scale with a tick for the reference (goals against
+for goals per match), yellow only for the figure that needs work. Form and bests moved into a side
+column; bests and scorers are open lists with hairlines instead of panels.

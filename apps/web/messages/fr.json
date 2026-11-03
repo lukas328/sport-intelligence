@@ -1975,7 +1975,10 @@
     "profile": "Profil",
     "roster": "Effectif",
     "dates": "Rendez-vous",
-    "theme_system": "Automatique"
+    "theme_system": "Automatique",
+    "fixtures": "Calendrier",
+    "plays": "Systèmes",
+    "matchSections": "Sections des matchs"
   },
   "palette": {
     "newMatch": "Ajouter un match",
@@ -2038,12 +2041,15 @@
     "afterMatches": "{label}, après {n, plural, =1 {1 match} other {# matchs}}",
     "neutralSeason": "La saison jusqu'ici.",
     "focus": "à travailler",
-    "focusNote": "Signalé quand une valeur est nettement sous la référence (arrêts 30 %, tirs 55 %, 12 pertes de balle par match). Valeurs de référence, pas une moyenne de ligue.",
+    "focusNote": "Le trait indique la valeur de référence, pas une moyenne de ligue. En jaune, là où une valeur s'en écarte nettement.",
     "chartLater": "L'évolution apparaît dès trois matchs. D'ici là, le tableau montre chaque match.",
     "lastResult": "Dernier match",
     "goalsAsClips": "Voir les buts en clips",
     "nextMatch": "Prochain match",
     "noMatchYet": "Aucun match joué.",
-    "reference": "Référence {value}"
+    "reference": "Référence {value}",
+    "inNumbers": "La saison en chiffres",
+    "lowerBetter": "moins, c'est mieux",
+    "againstRef": "Buts encaissés {value}"
   }
 }
