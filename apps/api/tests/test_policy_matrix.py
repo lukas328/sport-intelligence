@@ -300,6 +300,12 @@ ENDPOINTS += [
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
     ("GET team assignments", VIDEO_WORK, lambda a, w: a.get(w.t("/assignments"))),
+    ("GET presentations", READERS, lambda a, w: a.get(w.t("/presentations"))),
+    (
+        "POST presentation",
+        VIDEO_WORK,
+        lambda a, w: a.post(w.t("/presentations"), json={"title": f"P{_seq(w)}"}),
+    ),
     ("GET tag sets", VIDEO_WORK, lambda a, w: a.get(w.t("/tag-sets"))),
     (
         "POST tag set",

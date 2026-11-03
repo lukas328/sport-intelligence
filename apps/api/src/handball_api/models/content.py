@@ -43,6 +43,11 @@ class Presentation(Base, EntityMixin, TenantMixin):
         ForeignKey("users.id", ondelete="SET NULL")
     )
     shared_with_players: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # MP4 export with burned-in drawings (worker): status queued | running | ready | failed
+    export_status: Mapped[str | None] = mapped_column(String(20))
+    export_key: Mapped[str | None] = mapped_column(String(300))
+    export_error: Mapped[str | None] = mapped_column(Text)
+    exported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class PresentationSlide(Base, EntityMixin, TenantMixin):

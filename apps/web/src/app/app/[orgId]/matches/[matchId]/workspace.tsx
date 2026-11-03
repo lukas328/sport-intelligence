@@ -3,13 +3,18 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useCallback, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
+import { SpotlightControls, useSpotlight } from "@/components/video/spotlight-controls";
+import { SpotlightOverlay } from "@/components/video/spotlight";
+import { MultiAngleControls, useMultiAngle } from "@/components/video/multi-angle";
+import { SyncedCam } from "@/components/video/synced-cam";
+import { cameraAt } from "@/lib/best-camera";
 import { DrawLayer } from "@/components/video/draw-layer";
 import { MiniCourt } from "@/components/video/mini-court";
 import { VideoPlayer, type Marker, type PlayerHandle } from "@/components/video/player";
@@ -196,6 +201,42 @@ export function Workspace({
     void qc.invalidateQueries({ queryKey: ["clips", match.id] });
   }
 
+  const spot = useSpotlight(analysis.data ?? null);
+  const multi = useMultiAngle(cams, video.id);
+  const pickCam = multi.pick;
+  const mainVideo = useCallback(() => raw.current?.video() ?? null, []);
+  const events = useQuery({
+    queryKey: ["events", match.id],
+    enabled: multi.auto && cams.length > 1,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/events", { params: { path: { org_id: orgId, match_id: match.id } } })).data ?? [],
+  });
+  // best camera around events (4.5): the goal camera takes over shortly before a shot on goal
+  const [autoCamId, setAutoCamId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!multi.auto) return setAutoCamId(null);
+    const id = window.setInterval(() => {
+      const best = cameraAt(player.current.time() ?? 0, events.data ?? [], cams);
+      setAutoCamId(best);
+      if (best) pickCam(best);
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [multi.auto, events.data, cams, pickCam]);
+  const autoCam = multi.auto && autoCamId !== null;
+  const roster = useQuery({
+    queryKey: ["roster-names", match.season_id],
+    queryFn: async () =>
+      (
+        await api.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", {
+          params: { path: { org_id: orgId, team_id: match.team_id, season_id: match.season_id } },
+        })
+      ).data ?? [],
+  });
+  const spotNames = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `#${r.jersey_number ?? "?"} ${r.first_name}`]));
+  const spotLabel = (() => {
+    const tr = analysis.data?.tracks.find((x) => x.track_no === spot.track);
+    return tr ? (tr.player_id && spotNames[tr.player_id]) || (tr.number != null ? `#${tr.number}` : "") : "";
+  })();
+
   const onKey = useCallback(
     (key: string) => {
       if (!staff) return false;
@@ -211,6 +252,7 @@ export function Workspace({
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-2">
+        <div className={cn("relative", multi.mode === "side" && multi.secondary && !offset && "grid gap-2 md:grid-cols-2")}>
         <VideoPlayer
           ref={raw}
           src={`${media}/hls/master.m3u8`}
@@ -225,8 +267,46 @@ export function Workspace({
           }
           onTime={onTime}
           onKey={onKey}
-          overlay={drawing ? <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} /> : undefined}
+          overlay={
+            drawing ? (
+              <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} />
+            ) : spot.ready && !offset ? (
+              <SpotlightOverlay
+                baseUrl={`/v1/orgs/${orgId}/videos/${video.id}/tracks`}
+                chunkMs={analysis.data!.chunk_ms!}
+                homography={analysis.data!.calibration!.homography}
+                imageSize={analysis.data!.calibration!.image_size as [number, number]}
+                track={spot.track}
+                label={spotLabel}
+                getTime={getTime}
+                dim={spot.dim}
+                showTrail={spot.trail}
+                picking={spot.picking}
+                onPick={(n) => spot.set({ track: n, picking: false })}
+              />
+            ) : undefined
+          }
         />
+        {multi.secondaryCam && !offset && (multi.mode !== "single" || autoCam) && (
+          <SyncedCam
+            key={multi.secondaryCam.id}
+            src={`/v1/orgs/${orgId}/videos/${multi.secondaryCam.id}/media/hls/master.m3u8`}
+            offsetMs={multi.secondaryCam.time_offset_ms}
+            main={mainVideo}
+            label={t(`camera.${multi.secondaryCam.role}` as "camera.main")}
+            className={cn(
+              "bg-black",
+              multi.mode === "side"
+                ? "aspect-video w-full rounded"
+                : autoCam && multi.mode === "single"
+                  ? "pointer-events-none absolute inset-0 size-full object-contain"
+                  : "pointer-events-none absolute right-2 top-2 w-1/3 rounded border-2 border-white shadow-lg",
+            )}
+          />
+        )}
+        </div>
+        {cams.length > 1 && !offset && <MultiAngleControls cams={cams} state={multi} />}
+        {spot.ready && !offset && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
         <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
         <AnalysisPanel analysis={analysis.data ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} />

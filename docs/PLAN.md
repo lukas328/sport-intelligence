@@ -93,7 +93,7 @@ ADR 017.
   them; similar-kit warning when creating a match (from M2, M3, M4)
 - Partner adapters as stubs with tests (section 7) and P2 preparations (section 6) (from M9)
 
-### A2 Video session and players
+### A2 Video session and players ✅ done (report: progress/A2.md)
 - Own tags, tag sets, smart playlists 4.4 (from M2)
 - Presentation mode 4.1: slides, presenter view, phone remote over WebSocket, offline package, MP4 and PDF
   export, sharing as assignment (from M7)
@@ -106,6 +106,8 @@ ADR 017.
   ClipTag beyond clips if the tag UI needs it
 
 ### A3 Automation (principle P1; depends on real videos and trained models)
+- Carried over from A2: spotlight burned into exports (with the highlight renderer), automatic
+  opponent play detection for the preparation report
 - Automatic event baseline (shots, goals, saves, turnovers, throw-offs) with confidence; this is the
   prerequisite for highlights, player feed and scouting reports to work without manual tagging (from M4)
 - Automatic highlights 16:9 and 9:16 with crop following the play 4.3 (from M4)

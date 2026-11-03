@@ -1661,6 +1661,174 @@ export interface paths {
         patch: operations["update_play_v1_orgs__org_id__plays__play_id__patch"];
         trace?: never;
     };
+    "/v1/orgs/{org_id}/presentations/{pres_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get */
+        get: operations["get_v1_orgs__org_id__presentations__pres_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete */
+        delete: operations["delete_v1_orgs__org_id__presentations__pres_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update */
+        patch: operations["update_v1_orgs__org_id__presentations__pres_id__patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start Export
+         * @description MP4 with burned-in drawings, rendered by the worker.
+         */
+        post: operations["start_export_v1_orgs__org_id__presentations__pres_id__export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/export.mp4": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export File */
+        get: operations["export_file_v1_orgs__org_id__presentations__pres_id__export_mp4_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Reorder */
+        put: operations["reorder_v1_orgs__org_id__presentations__pres_id__order_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pdf
+         * @description Stills plus notes per slide.
+         */
+        get: operations["pdf_v1_orgs__org_id__presentations__pres_id__pdf_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/remote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pair
+         * @description Pairing key for the phone remote (shown as QR code by the presenter).
+         */
+        post: operations["pair_v1_orgs__org_id__presentations__pres_id__remote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/remote/command": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Command */
+        post: operations["command_v1_orgs__org_id__presentations__pres_id__remote_command_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/remote/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remote Stream
+         * @description Commands of the paired phone as Server-Sent Events. Authorises once, then holds no
+         *     database connection while streaming.
+         */
+        get: operations["remote_stream_v1_orgs__org_id__presentations__pres_id__remote_stream_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/presentations/{pres_id}/slides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Slide */
+        post: operations["add_slide_v1_orgs__org_id__presentations__pres_id__slides_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/saved-filters/{filter_id}": {
         parameters: {
             query?: never;
@@ -1735,6 +1903,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/scouting/{report_id}/presentation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * From Scouting
+         * @description The preparation report as a presentation (observations, then their clips).
+         */
+        post: operations["from_scouting_v1_orgs__org_id__scouting__report_id__presentation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/share-links/{link_id}": {
         parameters: {
             query?: never;
@@ -1747,6 +1935,42 @@ export interface paths {
         post?: never;
         /** Revoke */
         delete: operations["revoke_v1_orgs__org_id__share_links__link_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/slides/{slide_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Slide */
+        delete: operations["delete_slide_v1_orgs__org_id__slides__slide_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Slide */
+        patch: operations["update_slide_v1_orgs__org_id__slides__slide_id__patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/slides/{slide_id}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Image */
+        get: operations["get_image_v1_orgs__org_id__slides__slide_id__image_get"];
+        /** Set Image */
+        put: operations["set_image_v1_orgs__org_id__slides__slide_id__image_put"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2024,6 +2248,24 @@ export interface paths {
         put?: never;
         /** Create Play */
         post: operations["create_play_v1_orgs__org_id__teams__team_id__plays_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/presentations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Presentations */
+        get: operations["list_presentations_v1_orgs__org_id__teams__team_id__presentations_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_v1_orgs__org_id__teams__team_id__presentations_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2575,6 +2817,11 @@ export interface components {
         };
         /** Body_import_roster_v1_orgs__org_id__teams__team_id__seasons__season_id__roster_import_post */
         Body_import_roster_v1_orgs__org_id__teams__team_id__seasons__season_id__roster_import_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_set_image_v1_orgs__org_id__slides__slide_id__image_put */
+        Body_set_image_v1_orgs__org_id__slides__slide_id__image_put: {
             /** File */
             file: string;
         };
@@ -4015,6 +4262,80 @@ export interface components {
          * @enum {string}
          */
         Position: "LA" | "RL" | "RM" | "RR" | "RA" | "KM" | "TW";
+        /** PresentationDetail */
+        PresentationDetail: {
+            /** Can Edit */
+            can_edit: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Export Status */
+            export_status: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Match Id */
+            match_id: string | null;
+            /** Shared With Players */
+            shared_with_players: boolean;
+            /** Slide List */
+            slide_list: components["schemas"]["SlideOut"][];
+            /** Slides */
+            slides: number;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Title */
+            title: string;
+        };
+        /** PresentationIn */
+        PresentationIn: {
+            /** Match Id */
+            match_id?: string | null;
+            /** Title */
+            title: string;
+        };
+        /** PresentationOut */
+        PresentationOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Export Status */
+            export_status: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Match Id */
+            match_id: string | null;
+            /** Shared With Players */
+            shared_with_players: boolean;
+            /** Slides */
+            slides: number;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Title */
+            title: string;
+        };
+        /** PresentationPatch */
+        PresentationPatch: {
+            /** Shared With Players */
+            shared_with_players?: boolean | null;
+            /** Title */
+            title?: string | null;
+        };
         /** ProvidersOut */
         ProvidersOut: {
             /** Providers */
@@ -4062,6 +4383,32 @@ export interface components {
             name: string;
             /** Password */
             password: string;
+        };
+        /** RemoteCommand */
+        RemoteCommand: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "next" | "prev" | "goto" | "play" | "pause" | "draw" | "clear";
+            /** Key */
+            key: string;
+            /** Shapes */
+            shapes?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Slide */
+            slide?: number | null;
+        };
+        /** RemotePairing */
+        RemotePairing: {
+            /** Expires In S */
+            expires_in_s: number;
+            /**
+             * Key
+             * @description pairing key, part of the QR code link
+             */
+            key: string;
         };
         /** ReorderIn */
         ReorderIn: {
@@ -4486,6 +4833,67 @@ export interface components {
             /** Views */
             views: number;
         };
+        /**
+         * SlideIn
+         * @description Content per type (addendum 01, 4.1):
+         *
+         *     - clip: video_id, in_ms, out_ms, holds [{t_ms, duration_ms, shapes}], slow [{from_ms, to_ms,
+         *       rate}], spotlight [track ids], notes
+         *     - tactics_board: play_id (field), notes
+         *     - text: title, body, notes
+         *     - stat_card: title, rows [{label, value, n}], notes
+         *     - image: caption, notes (image uploaded separately)
+         */
+        SlideIn: {
+            /** Clip Id */
+            clip_id?: string | null;
+            /** Content */
+            content?: {
+                [key: string]: unknown;
+            };
+            /** Play Id */
+            play_id?: string | null;
+            type: components["schemas"]["SlideType"];
+        };
+        /** SlideOrder */
+        SlideOrder: {
+            /** Slide Ids */
+            slide_ids: string[];
+        };
+        /** SlideOut */
+        SlideOut: {
+            /** Clip Id */
+            clip_id: string | null;
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Play Id */
+            play_id: string | null;
+            /** Position */
+            position: number;
+            /** Type */
+            type: string;
+        };
+        /** SlidePatch */
+        SlidePatch: {
+            /** Content */
+            content?: {
+                [key: string]: unknown;
+            } | null;
+            /** Play Id */
+            play_id?: string | null;
+        };
+        /**
+         * SlideType
+         * @enum {string}
+         */
+        SlideType: "clip" | "tactics_board" | "text" | "stat_card" | "image";
         /** SubjectTeam */
         SubjectTeam: {
             /**
@@ -8316,6 +8724,374 @@ export interface operations {
             };
         };
     };
+    get_v1_orgs__org_id__presentations__pres_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_v1_orgs__org_id__presentations__pres_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_v1_orgs__org_id__presentations__pres_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PresentationPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_export_v1_orgs__org_id__presentations__pres_id__export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_file_v1_orgs__org_id__presentations__pres_id__export_mp4_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "video/mp4": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reorder_v1_orgs__org_id__presentations__pres_id__order_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlideOrder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pdf_v1_orgs__org_id__presentations__pres_id__pdf_get: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pair_v1_orgs__org_id__presentations__pres_id__remote_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemotePairing"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    command_v1_orgs__org_id__presentations__pres_id__remote_command_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoteCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remote_stream_v1_orgs__org_id__presentations__pres_id__remote_stream_get: {
+        parameters: {
+            query: {
+                key: string;
+            };
+            header?: never;
+            path: {
+                org_id: string;
+                pres_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_slide_v1_orgs__org_id__presentations__pres_id__slides_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pres_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlideIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlideOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     delete_filter_v1_orgs__org_id__saved_filters__filter_id__delete: {
         parameters: {
             query?: never;
@@ -8446,6 +9222,38 @@ export interface operations {
             };
         };
     };
+    from_scouting_v1_orgs__org_id__scouting__report_id__presentation_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                report_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     revoke_v1_orgs__org_id__share_links__link_id__delete: {
         parameters: {
             query?: never;
@@ -8457,6 +9265,139 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_slide_v1_orgs__org_id__slides__slide_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_slide_v1_orgs__org_id__slides__slide_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlidePatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlideOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_image_v1_orgs__org_id__slides__slide_id__image_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
+                    "image/png": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_image_v1_orgs__org_id__slides__slide_id__image_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_set_image_v1_orgs__org_id__slides__slide_id__image_put"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             204: {
@@ -9347,6 +10288,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlayOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_presentations_v1_orgs__org_id__teams__team_id__presentations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_v1_orgs__org_id__teams__team_id__presentations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PresentationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentationDetail"];
                 };
             };
             /** @description Validation Error */

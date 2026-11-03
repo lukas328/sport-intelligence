@@ -28,6 +28,7 @@ test("no horizontal scrolling on phones", async ({ page }, info) => {
   await page.goto(`${teamUrl}/matches`);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Mit Einem Sehr Langen Vereinsnamen");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
+  await page.waitForURL(/\/matches\/[0-9a-f-]{36}$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await noHorizontalScroll(page);
   await page.goto(page.url() + "/live");

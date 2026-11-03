@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OpponentPlayers } from "./opponent-players";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, EmptyState } from "@/components/ui/card";
@@ -46,6 +47,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
         <h1 className="text-2xl font-semibold">{p.opponent.name}</h1>
         <p className="text-sm">{t("record", p.record)}</p>
       </header>
+      <OpponentPlayers orgId={orgId} opponentId={opponentId} />
       {p.tagged_matches === 0 ? (
         <EmptyState title={t("none")} />
       ) : (

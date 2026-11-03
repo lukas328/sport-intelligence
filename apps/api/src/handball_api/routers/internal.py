@@ -7,6 +7,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Header
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
 from handball_api.core.db import enable_system_access
@@ -16,7 +17,7 @@ from handball_api.models import ProcessingJob
 from handball_api.models.enums import JobStatus
 from handball_api.routers.deps import CtxDep
 from handball_api.schemas.matches import JobOut, JobUpdate
-from handball_api.services import scouting, videos
+from handball_api.services import presentations, scouting, videos
 
 router = APIRouter(prefix="/internal", include_in_schema=False)
 
@@ -68,3 +69,22 @@ async def scouting_due(
     if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
         raise ProblemError(403, "forbidden", "Invalid internal token")
     return {"created": await scouting.run_due(ctx)}
+
+
+class ExportDone(BaseModel):
+    status: str = Field(pattern="^(ready|failed|running)$")
+    key: str | None = None
+    error: str | None = None
+
+
+@router.post("/presentations/{pres_id}/export", status_code=204)
+async def presentation_export_done(
+    pres_id: uuid.UUID,
+    data: ExportDone,
+    ctx: CtxDep,
+    x_internal_token: Annotated[str, Header()] = "",
+) -> None:
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    await enable_system_access(ctx.db, reason="presentation export callback")
+    await presentations.export_done(ctx, pres_id, data.status, data.key, data.error)

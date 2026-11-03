@@ -3,6 +3,7 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,21 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
   const [filter, setFilter] = useState<Filter>({});
   const [error, setError] = useState<ErrorKey | null>(null);
   const team = { org_id: orgId, team_id: teamId };
+  const tp = useTranslations("presentations");
+  const target = useSearchParams().get("presentation");
+  const [added, setAdded] = useState<string[]>([]);
+  const toPresentation = useMutation({
+    mutationFn: async (h: Hit) => {
+      const r = await api.POST("/v1/orgs/{org_id}/presentations/{pres_id}/slides", {
+        params: { path: { org_id: orgId, pres_id: target! } },
+        body: { type: "clip", content: { video_id: h.video_id, in_ms: h.start_ms, out_ms: h.end_ms } },
+      });
+      if (r.error) throw r.error;
+      return h.id;
+    },
+    onSuccess: (id) => setAdded((a) => [...a, id]),
+    onError: (e) => setError(errorKey(e)),
+  });
 
   const sets = useQuery({
     queryKey: ["tag-sets", teamId],
@@ -213,6 +229,11 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
                 <span className="text-sm">
                   {h.kind === "clip" ? h.title ?? t("clip") : [h.type && t(`type_${h.type as "shot"}`), h.outcome && te(h.outcome as "goal"), h.number != null && `#${h.number}`].filter(Boolean).join(" · ")}
                 </span>
+                {target && h.video_id && h.start_ms != null && (
+                  <Button variant="secondary" className="min-h-8 px-3 py-1" disabled={added.includes(h.id)} onClick={() => toPresentation.mutate(h)}>
+                    {added.includes(h.id) ? tp("addedToPresentation") : tp("addToPresentation")}
+                  </Button>
+                )}
                 {h.video_id && h.start_ms != null && (
                   <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="ml-auto rounded-md border border-border px-3 py-1 text-sm hover:bg-surface">
                     {t("watch")}

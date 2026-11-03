@@ -13,7 +13,7 @@ import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views"
 import { KeepersView, PhysicalView } from "./m5-views";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
+import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { UploadPanel } from "./upload-panel";
@@ -311,6 +311,34 @@ function MatchAdmin({ orgId, match, teamName }: { orgId: string; match: Match; t
         </fieldset>
         <Button type="submit" variant="secondary">
           {t("matches.saveScore")}
+        </Button>
+      </form>
+      <form
+        className="flex flex-wrap items-end gap-3"
+        aria-label={t("matchForm.format")}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const f = new FormData(e.currentTarget);
+          const format = String(f.get("format"));
+          const minutes = Number(f.get("minutes"));
+          await api.PATCH("/v1/orgs/{org_id}/matches/{match_id}", {
+            params: { path: { org_id: orgId, match_id: match.id } },
+            body: format === "custom" ? { format: "custom", period_s: minutes * 60, periods: Number(f.get("periods")) } : { format: format as "mini" },
+          });
+          void qc.invalidateQueries({ queryKey: ["match", match.id] });
+        }}
+      >
+        <Select label={t("matchForm.format")} name="format" defaultValue={match.format}>
+          {["adult_2x30", "youth_2x25", "youth_2x20", "mini", "tournament", "custom"].map((k) => (
+            <option key={k} value={k}>
+              {t(`matchForm.format_${k}` as "matchForm.format_mini")}
+            </option>
+          ))}
+        </Select>
+        <Input label={t("matchForm.minutes")} name="minutes" type="number" min={1} max={60} defaultValue={match.period_s / 60} className="w-24" />
+        <Input label={t("matchForm.periods")} name="periods" type="number" min={1} max={4} defaultValue={match.periods} className="w-20" />
+        <Button type="submit" variant="secondary">
+          {t("matchForm.saveFormat")}
         </Button>
       </form>
       <Button

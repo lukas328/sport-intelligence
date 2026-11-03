@@ -2,10 +2,11 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
-import { VideoPlayer } from "@/components/video/player";
+import { SpotlightOverlay } from "@/components/video/spotlight";
+import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,16 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
     },
   });
   const feed = q.data;
+  const player = useRef<PlayerHandle>(null);
+  const analysis = useQuery({
+    queryKey: ["analysis", feed?.video_id],
+    enabled: Boolean(feed?.video_id),
+    queryFn: async () =>
+      (await api.GET("/v1/orgs/{org_id}/videos/{video_id}/analysis", { params: { path: { org_id: orgId, video_id: feed!.video_id! } } })).data ?? null,
+  });
+  const a = analysis.data;
+  // spotlight on the player automatically (4.7), when the analysis identified their track
+  const myTrack = a?.tracks.find((tr) => tr.player_id === feed?.player_id);
   if (q.isLoading) return <p className="text-muted">{t("loading")}</p>;
   if (!feed) return <Alert>{t("none")}</Alert>;
   const scene = feed.items[index];
@@ -101,10 +112,25 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
           </h2>
           {feed.video_id ? (
             <VideoPlayer
+              ref={player}
               key={scene.id}
               src={`/v1/orgs/${orgId}/videos/${feed.video_id}/media/hls/master.m3u8`}
               window={{ start_ms: scene.start_ms, end_ms: scene.end_ms }}
               autoPlay
+              overlay={
+                myTrack && a?.calibration && a.chunk_ms ? (
+                  <SpotlightOverlay
+                    baseUrl={`/v1/orgs/${orgId}/videos/${feed.video_id}/tracks`}
+                    chunkMs={a.chunk_ms}
+                    homography={a.calibration.homography}
+                    imageSize={a.calibration.image_size as [number, number]}
+                    track={myTrack.track_no}
+                    label=""
+                    getTime={() => player.current?.time() ?? 0}
+                    showTrail
+                  />
+                ) : undefined
+              }
             />
           ) : (
             <p className="text-muted">{t("noVideo")}</p>

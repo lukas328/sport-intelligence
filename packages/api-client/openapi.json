@@ -554,6 +554,20 @@
         "title": "Body_import_roster_v1_orgs__org_id__teams__team_id__seasons__season_id__roster_import_post",
         "type": "object"
       },
+      "Body_set_image_v1_orgs__org_id__slides__slide_id__image_put": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_set_image_v1_orgs__org_id__slides__slide_id__image_put",
+        "type": "object"
+      },
       "Body_upload_logo_v1_orgs__org_id__logo_put": {
         "properties": {
           "file": {
@@ -4912,6 +4926,208 @@
         "title": "Position",
         "type": "string"
       },
+      "PresentationDetail": {
+        "properties": {
+          "can_edit": {
+            "title": "Can Edit",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "export_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Export Status"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "shared_with_players": {
+            "title": "Shared With Players",
+            "type": "boolean"
+          },
+          "slide_list": {
+            "items": {
+              "$ref": "#/components/schemas/SlideOut"
+            },
+            "title": "Slide List",
+            "type": "array"
+          },
+          "slides": {
+            "title": "Slides",
+            "type": "integer"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "match_id",
+          "title",
+          "shared_with_players",
+          "slides",
+          "export_status",
+          "created_at",
+          "slide_list",
+          "can_edit"
+        ],
+        "title": "PresentationDetail",
+        "type": "object"
+      },
+      "PresentationIn": {
+        "properties": {
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "title": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "PresentationIn",
+        "type": "object"
+      },
+      "PresentationOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "export_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Export Status"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "shared_with_players": {
+            "title": "Shared With Players",
+            "type": "boolean"
+          },
+          "slides": {
+            "title": "Slides",
+            "type": "integer"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "match_id",
+          "title",
+          "shared_with_players",
+          "slides",
+          "export_status",
+          "created_at"
+        ],
+        "title": "PresentationOut",
+        "type": "object"
+      },
+      "PresentationPatch": {
+        "properties": {
+          "shared_with_players": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shared With Players"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "PresentationPatch",
+        "type": "object"
+      },
       "ProvidersOut": {
         "properties": {
           "providers": {
@@ -5036,6 +5252,83 @@
           "accept_terms"
         ],
         "title": "RegisterIn",
+        "type": "object"
+      },
+      "RemoteCommand": {
+        "properties": {
+          "action": {
+            "enum": [
+              "next",
+              "prev",
+              "goto",
+              "play",
+              "pause",
+              "draw",
+              "clear"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "key": {
+            "maxLength": 64,
+            "minLength": 16,
+            "title": "Key",
+            "type": "string"
+          },
+          "shapes": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "maxItems": 50,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shapes"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slide"
+          }
+        },
+        "required": [
+          "key",
+          "action"
+        ],
+        "title": "RemoteCommand",
+        "type": "object"
+      },
+      "RemotePairing": {
+        "properties": {
+          "expires_in_s": {
+            "title": "Expires In S",
+            "type": "integer"
+          },
+          "key": {
+            "description": "pairing key, part of the QR code link",
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "expires_in_s"
+        ],
+        "title": "RemotePairing",
         "type": "object"
       },
       "ReorderIn": {
@@ -6217,6 +6510,162 @@
         ],
         "title": "ShareOut",
         "type": "object"
+      },
+      "SlideIn": {
+        "description": "Content per type (addendum 01, 4.1):\n\n- clip: video_id, in_ms, out_ms, holds [{t_ms, duration_ms, shapes}], slow [{from_ms, to_ms,\n  rate}], spotlight [track ids], notes\n- tactics_board: play_id (field), notes\n- text: title, body, notes\n- stat_card: title, rows [{label, value, n}], notes\n- image: caption, notes (image uploaded separately)",
+        "properties": {
+          "clip_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clip Id"
+          },
+          "content": {
+            "additionalProperties": true,
+            "title": "Content",
+            "type": "object"
+          },
+          "play_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Play Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SlideType"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "SlideIn",
+        "type": "object"
+      },
+      "SlideOrder": {
+        "properties": {
+          "slide_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Slide Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "slide_ids"
+        ],
+        "title": "SlideOrder",
+        "type": "object"
+      },
+      "SlideOut": {
+        "properties": {
+          "clip_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clip Id"
+          },
+          "content": {
+            "additionalProperties": true,
+            "title": "Content",
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "play_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Play Id"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "position",
+          "type",
+          "clip_id",
+          "play_id",
+          "content"
+        ],
+        "title": "SlideOut",
+        "type": "object"
+      },
+      "SlidePatch": {
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "play_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Play Id"
+          }
+        },
+        "title": "SlidePatch",
+        "type": "object"
+      },
+      "SlideType": {
+        "enum": [
+          "clip",
+          "tactics_board",
+          "text",
+          "stat_card",
+          "image"
+        ],
+        "title": "SlideType",
+        "type": "string"
       },
       "SubjectTeam": {
         "properties": {
@@ -12806,6 +13255,625 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/presentations/{pres_id}": {
+      "delete": {
+        "operationId": "delete_v1_orgs__org_id__presentations__pres_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete",
+        "tags": [
+          "presentations"
+        ]
+      },
+      "get": {
+        "operationId": "get_v1_orgs__org_id__presentations__pres_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresentationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get",
+        "tags": [
+          "presentations"
+        ]
+      },
+      "patch": {
+        "operationId": "update_v1_orgs__org_id__presentations__pres_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresentationPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresentationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/export": {
+      "post": {
+        "description": "MP4 with burned-in drawings, rendered by the worker.",
+        "operationId": "start_export_v1_orgs__org_id__presentations__pres_id__export_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresentationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Export",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/export.mp4": {
+      "get": {
+        "operationId": "export_file_v1_orgs__org_id__presentations__pres_id__export_mp4_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "video/mp4": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export File",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/order": {
+      "put": {
+        "operationId": "reorder_v1_orgs__org_id__presentations__pres_id__order_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlideOrder"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresentationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reorder",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/pdf": {
+      "get": {
+        "description": "Stills plus notes per slide.",
+        "operationId": "pdf_v1_orgs__org_id__presentations__pres_id__pdf_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "pattern": "^(de-CH|en|fr)$",
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pdf",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/remote": {
+      "post": {
+        "description": "Pairing key for the phone remote (shown as QR code by the presenter).",
+        "operationId": "pair_v1_orgs__org_id__presentations__pres_id__remote_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemotePairing"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pair",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/remote/command": {
+      "post": {
+        "operationId": "command_v1_orgs__org_id__presentations__pres_id__remote_command_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoteCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Command",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/remote/stream": {
+      "get": {
+        "description": "Commands of the paired phone as Server-Sent Events. Authorises once, then holds no\ndatabase connection while streaming.",
+        "operationId": "remote_stream_v1_orgs__org_id__presentations__pres_id__remote_stream_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 16,
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remote Stream",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/presentations/{pres_id}/slides": {
+      "post": {
+        "operationId": "add_slide_v1_orgs__org_id__presentations__pres_id__slides_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pres_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pres Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlideIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Slide",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/saved-filters/{filter_id}": {
       "delete": {
         "operationId": "delete_filter_v1_orgs__org_id__saved_filters__filter_id__delete",
@@ -13035,6 +14103,60 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/scouting/{report_id}/presentation": {
+      "post": {
+        "description": "The preparation report as a presentation (observations, then their clips).",
+        "operationId": "from_scouting_v1_orgs__org_id__scouting__report_id__presentation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresentationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "From Scouting",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/share-links/{link_id}": {
       "delete": {
         "operationId": "revoke_v1_orgs__org_id__share_links__link_id__delete",
@@ -13078,6 +14200,217 @@
         "summary": "Revoke",
         "tags": [
           "sharing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/slides/{slide_id}": {
+      "delete": {
+        "operationId": "delete_slide_v1_orgs__org_id__slides__slide_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slide_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Slide Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Slide",
+        "tags": [
+          "presentations"
+        ]
+      },
+      "patch": {
+        "operationId": "update_slide_v1_orgs__org_id__slides__slide_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slide_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Slide Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlidePatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Slide",
+        "tags": [
+          "presentations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/slides/{slide_id}/image": {
+      "get": {
+        "operationId": "get_image_v1_orgs__org_id__slides__slide_id__image_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slide_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Slide Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {},
+              "image/png": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Image",
+        "tags": [
+          "presentations"
+        ]
+      },
+      "put": {
+        "operationId": "set_image_v1_orgs__org_id__slides__slide_id__image_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slide_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Slide Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_set_image_v1_orgs__org_id__slides__slide_id__image_put"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Image",
+        "tags": [
+          "presentations"
         ]
       }
     },
@@ -14658,6 +15991,124 @@
         "summary": "Create Play",
         "tags": [
           "tactics"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/presentations": {
+      "get": {
+        "operationId": "list_presentations_v1_orgs__org_id__teams__team_id__presentations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PresentationOut"
+                  },
+                  "title": "Response List Presentations V1 Orgs  Org Id  Teams  Team Id  Presentations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Presentations",
+        "tags": [
+          "presentations"
+        ]
+      },
+      "post": {
+        "operationId": "create_v1_orgs__org_id__teams__team_id__presentations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresentationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresentationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "presentations"
         ]
       }
     },

@@ -36,6 +36,10 @@ export const KNOWN_ERRORS = [
   "duplicate-number",
   "duplicate-name",
   "unknown-tag",
+  "invalid-slide",
+  "nothing-to-export",
+  "too-many-slides",
+  "image-too-large",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

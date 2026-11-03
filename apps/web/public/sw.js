@@ -1,14 +1,17 @@
-// Service worker (live tagging offline): static assets cache-first, live pages network-first with a
-// cached fallback so the courtside page reloads without connection. Nothing else is cached; API
-// data never goes through this cache.
+// Service worker (live tagging and presentations offline): static assets cache-first, live pages
+// network-first with a cached fallback so the courtside page reloads without connection.
+// Presentations packed for offline use (addendum 01, 4.1) live in their own caches "hb-pres-<id>",
+// filled explicitly by the app; their media, data and presenter page are served from there when
+// the network is gone. Other API data is never cached.
 const CACHE = "hb-live-v1";
+const PACKED = /^\/v1\/orgs\/[^/]+\/(videos\/[^/]+\/media\/|presentations\/[^/]+$|slides\/[^/]+\/image$|plays\/[^/]+$)/;
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && !k.startsWith("hb-pres-")).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -29,6 +32,11 @@ self.addEventListener("fetch", (event) => {
           }),
       ),
     );
+    return;
+  }
+  if (PACKED.test(url.pathname) || (req.mode === "navigate" && /\/presentations\/[^/]+\/present$/.test(url.pathname))) {
+    // network first; packed presentations answer from their cache when offline
+    event.respondWith(fetch(req).catch(() => caches.match(req, { ignoreSearch: false }).then((hit) => hit || Response.error())));
     return;
   }
   if (req.mode === "navigate" && /\/matches\/[^/]+\/live$/.test(url.pathname)) {

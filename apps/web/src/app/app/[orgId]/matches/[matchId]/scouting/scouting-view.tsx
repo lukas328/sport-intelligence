@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, EmptyState } from "@/components/ui/card";
@@ -38,6 +39,12 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
     mutationFn: async () => (await api.POST("/v1/orgs/{org_id}/matches/{match_id}/scouting", { params: { path } })).data,
     onSuccess: (d) => qc.setQueryData(["scouting", matchId], d),
   });
+  const router = useRouter();
+  const asPresentation = useMutation({
+    mutationFn: async (id: string) =>
+      (await api.POST("/v1/orgs/{org_id}/scouting/{report_id}/presentation", { params: { path: { org_id: orgId, report_id: id } } })).data,
+    onSuccess: (p) => p && router.push(`/app/${orgId}/presentations/${p.id}`),
+  });
   const rep = q.data;
   const f = rep?.facts as Facts | undefined;
   const zone = (z: string | null) => (z ? (tz.has(z) ? tz(z) : z) : "-");
@@ -71,6 +78,9 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
               <a className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/goalkeeper-card?lang=${locale}`}>
                 {t("gkCard")}
               </a>
+              <Button variant="secondary" loading={asPresentation.isPending} onClick={() => asPresentation.mutate(rep.id)}>
+                {t("asPresentation")}
+              </Button>
             </>
           )}
         </div>

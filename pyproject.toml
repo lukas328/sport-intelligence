@@ -52,6 +52,7 @@ known-first-party = ["handball_api", "handball_worker", "handball_gpu_worker", "
 "**/mail_templates.py" = ["E501"]
 # ffmpeg/ffprobe are called with fixed argument lists, never through a shell
 "apps/worker/src/handball_worker/media/*.py" = ["S603", "S404"]
+"apps/worker/src/handball_worker/export.py" = ["S603", "S404"]
 "packages/vision/handball_vision/*.py" = ["E501"]
 # developer tools (seed data, evaluation): long literals, fixed subprocess argv, non-crypto RNG
 "scripts/*.py" = ["E501", "S311", "S603"]
