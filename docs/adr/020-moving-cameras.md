@@ -41,12 +41,14 @@ or moving, instead of asking clubs to film differently.
   many other lines, near sideline hidden by spectators): it fails or, in one of three clips, returns a
   court several metres off that passes every automatic check. Until a top-view search, goal detection or
   a learned court model is in place, calibrations of moving cameras need user confirmation or clicked
-  points (UI for clicking on the panorama: follow-up).
+  points: every analysis stores a hall image (`analysis/panorama.jpg`, plus `motion.npz` so a re-run keeps
+  the same panorama coordinates); a failed automatic calibration ends as `needs_calibration` and the web
+  dialog lets the user mark landmarks on the hall image (`POST .../calibration` with `space: "panorama"`).
 - Cost: the motion pass adds about 0.35 x video length on CPU; the per-frame view rendering adds a few
   ms per frame.
 - The stored calibration of a moving camera refers to the panorama (image size = canvas). Overlays in
   the web player that project court positions into the video need per-frame homographies (follow-up);
-  until then they are only correct for fixed cameras.
+  until then the spotlight is hidden for moving cameras.
 - Broadcast cuts to other cameras and replays are dropped unless they show a view seen before.
 
 ## Alternatives considered

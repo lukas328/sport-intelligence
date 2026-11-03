@@ -524,7 +524,12 @@
     "legend": "Legende",
     "quality": "Datenqualität",
     "confidence": "Konfidenz {value} %",
-    "duration": "Analysedauer {seconds} s"
+    "duration": "Analysedauer {seconds} s",
+    "needsCalibration": "Das Spielfeld wurde nicht automatisch erkannt. Markiere es einmal im Hallenbild, danach läuft die Analyse.",
+    "needsCalibrationStaff": "Das Spielfeld wurde nicht automatisch erkannt. Ein Trainer muss es im Hallenbild markieren.",
+    "checkCourt": "Bewegte Kamera: das automatisch erkannte Spielfeld bitte im Hallenbild prüfen.",
+    "markCourt": "Spielfeld markieren",
+    "checkCourtButton": "Spielfeld prüfen"
   },
   "tabs": {
     "video": "Video",
@@ -1342,5 +1347,44 @@
     "add": "Spieler hinzufügen",
     "remove": "Entfernen",
     "save": "Speichern"
+  },
+  "calibrate": {
+    "title": "Spielfeld markieren",
+    "introMoving": "Das Hallenbild ist aus dem ganzen Video zusammengesetzt (die Kamera schwenkt). Markiere mindestens 4 Punkte, besser 6 bis 8 verteilt über das ganze Feld.",
+    "introFixed": "Markiere mindestens 4 Punkte des Spielfelds, besser 6 bis 8 verteilt über das ganze Feld.",
+    "zoomIn": "Vergrössern",
+    "zoomFit": "Ganzes Bild",
+    "close": "Schliessen",
+    "imageAlt": "Hallenbild ohne Spieler",
+    "pick": "Jetzt im Hallenbild anklicken: {name}",
+    "courtTitle": "Spielfeldpunkt wählen",
+    "nearSide": "Unten in der Skizze ist die Seite, auf der die Kamera steht.",
+    "count": "{count} von mindestens {min} Punkten gesetzt",
+    "fit": "Abweichung der Punkte: {px} Pixel",
+    "existing": "Orange: das automatisch erkannte Spielfeld. Stimmt es nicht, setze die Punkte neu.",
+    "remove": "{name} entfernen",
+    "error": "Die Punkte konnten nicht gespeichert werden. Bitte nochmals versuchen.",
+    "save": "Speichern und Analyse starten",
+    "reset": "Alle Punkte entfernen",
+    "hint": "Tipp: Spielfeldecken und Torpfosten am Boden sind am genauesten. Ein Punkt lässt sich neu setzen, indem du ihn in der Skizze wählst und nochmals klickst.",
+    "landmarks": {
+      "cornerNearLeft": "Ecke links, Kameraseite",
+      "cornerFarLeft": "Ecke links, gegenüber",
+      "cornerNearRight": "Ecke rechts, Kameraseite",
+      "cornerFarRight": "Ecke rechts, gegenüber",
+      "centreNear": "Mittellinie, Kameraseite",
+      "centreFar": "Mittellinie, gegenüber",
+      "postLeftNear": "Linkes Tor, Pfosten Kameraseite",
+      "postLeftFar": "Linkes Tor, Pfosten gegenüber",
+      "postRightNear": "Rechtes Tor, Pfosten Kameraseite",
+      "postRightFar": "Rechtes Tor, Pfosten gegenüber",
+      "sixLeftNear": "6-m-Linie links, Ende Kameraseite",
+      "sixLeftFar": "6-m-Linie links, Ende gegenüber",
+      "sixRightNear": "6-m-Linie rechts, Ende Kameraseite",
+      "sixRightFar": "6-m-Linie rechts, Ende gegenüber",
+      "sevenLeft": "7-m-Linie links (Mitte)",
+      "sevenRight": "7-m-Linie rechts (Mitte)"
+    },
+    "spread": "Die Punkte liegen zu nah beieinander: markiere auch Punkte auf beiden Seitenlinien (z. B. die Ecken oder die Enden der Mittellinie). Nur die Torpfosten reichen nicht, das Feld wird sonst verzerrt."
   }
 }

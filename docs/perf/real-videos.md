@@ -33,11 +33,21 @@ never started. Reasons:
   by the balcony railing and spectators (club clips) or out of the picture (broadcast). The line masks find
   many lines, and a court hypothesis built from the wrong lines can still explain a fair share of them.
 
+## 2026-11-03, marking the court on the panorama (built)
+Every analysis now stores a hall image (panorama or median frame) and, if the court is not found, ends with
+"mark the court" instead of an error. The web dialog lets the user pick court landmarks and click them on the
+hall image; the worker re-runs with the points on the panorama and reuses the stored camera motion.
+
+Checked by hand on the Stäfa clip: the four goal-post feet clicked once on the panorama land exactly on the
+goal posts in frames 4 minutes and 80 degrees of pan apart, so camera motion and panorama coordinates are
+accurate on real footage. The goal posts alone, however, do not fix the court's width (two 3 m segments
+40 m apart): a few pixels of clicking error stretch the court. The dialog therefore warns until the points
+span at least 20 m of length and 10 m of width (corners, centre line ends). A fully checked analysis of a real
+clip still needs those points from someone who knows which lines in the hall are the handball court.
+
 ## Next steps
-1. **Click calibration on the panorama** (product): the user marks 4 or more court points once per video on
-   the hall panorama; motion carries them to every frame. The pipeline already supports it
-   (`analyse_video(calibration=..., calibration_frame=...)`, manifest field `calibration` for
-   `make eval-real`); missing is the UI and storing the frame index with the points.
+1. **Use the dialog on the real clips** with points on both sidelines and check the result against the video
+   (club staff know which lines belong to the handball court).
 2. **Top-down search with the known focal length**: all line sets of a hall run parallel to its walls, so the
    two floor vanishing points give the floor orientation; with the focal length from the camera motion the
    panorama floor can be rectified to a top view, where the handball court is a 40 x 20 m template that only

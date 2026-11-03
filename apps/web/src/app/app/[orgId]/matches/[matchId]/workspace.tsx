@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
+import { CourtCalibration } from "@/components/analysis/court-calibration";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
@@ -309,7 +310,14 @@ export function Workspace({
         {spot.ready && !offset && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
         <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
-        <AnalysisPanel analysis={analysis.data ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} />
+        <AnalysisPanel
+          analysis={analysis.data ?? null}
+          orgId={orgId}
+          videoId={video.id}
+          colours={kitColours}
+          getTime={getTime}
+          canCalibrate={staff}
+        />
         {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
           <Button
             variant="secondary"
@@ -541,15 +549,20 @@ function AnalysisPanel({
   videoId,
   colours,
   getTime,
+  canCalibrate,
 }: {
   analysis: Analysis | null;
   orgId: string;
   videoId: string;
   colours: Record<string, string>;
   getTime: () => number;
+  canCalibrate: boolean;
 }) {
   const t = useTranslations("analysis");
+  const [marking, setMarking] = useState(false);
   if (!analysis || analysis.status === "none") return null;
+  const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
+  const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
   return (
     <Card className="space-y-3 p-3" data-testid="analysis-panel">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -562,6 +575,16 @@ function AnalysisPanel({
       </div>
       {analysis.status === "running" && <p className="text-sm text-muted">{t("running")}</p>}
       {analysis.status === "failed" && <Alert>{t("failed", { error: analysis.error ?? "" })}</Alert>}
+      {analysis.status === "ready" && analysis.needs_calibration && (
+        <Alert kind="info">{t(canMark ? "needsCalibration" : "needsCalibrationStaff")}</Alert>
+      )}
+      {analysis.status === "ready" && !analysis.needs_calibration && unconfirmed && <p className="text-sm text-muted">{t("checkCourt")}</p>}
+      {canMark && (
+        <Button variant={analysis.needs_calibration ? "primary" : "secondary"} onClick={() => setMarking(true)} data-testid="mark-court">
+          {t(analysis.needs_calibration ? "markCourt" : "checkCourtButton")}
+        </Button>
+      )}
+      {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} onClose={() => setMarking(false)} />}
       {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
         <MiniCourt
           baseUrl={`/v1/orgs/${orgId}/videos/${videoId}/tracks`}

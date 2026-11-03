@@ -202,3 +202,15 @@ def test_camera_pose_separates_real_and_impossible_courts() -> None:
     # a court squeezed to half its length (lines of another sport): no camera can see that
     squeezed = h @ np.diag([0.5, 1.0, 1.0])
     assert not camera_plausible(squeezed, k)
+
+
+def test_motion_save_and_load_roundtrip(pan_motion: CameraMotion, tmp_path: Path) -> None:
+    pan_motion.background()
+    path = tmp_path / "motion.npz"
+    pan_motion.save(path)
+    loaded = CameraMotion.load(path)
+    assert loaded.moving and loaded.canvas_size == pan_motion.canvas_size
+    assert loaded.panorama is not None and loaded.panorama.shape == pan_motion.background().shape
+    h0, h1 = pan_motion.frame_to_canvas(40), loaded.frame_to_canvas(40)
+    assert h0 is not None and h1 is not None and np.allclose(h0, h1)
+    assert np.array_equal(loaded.seen(), pan_motion.seen())

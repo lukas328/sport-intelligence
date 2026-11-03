@@ -118,7 +118,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
               window={{ start_ms: scene.start_ms, end_ms: scene.end_ms }}
               autoPlay
               overlay={
-                myTrack && a?.calibration && a.chunk_ms ? (
+                myTrack && a?.calibration && a.camera !== "moving" && a.chunk_ms ? (
                   <SpotlightOverlay
                     baseUrl={`/v1/orgs/${orgId}/videos/${feed.video_id}/tracks`}
                     chunkMs={a.chunk_ms}

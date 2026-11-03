@@ -53,6 +53,32 @@
               }
             ]
           },
+          "calibration_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calibration Error"
+          },
+          "camera": {
+            "anyOf": [
+              {
+                "enum": [
+                  "fixed",
+                  "moving"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera"
+          },
           "chunk_ms": {
             "anyOf": [
               {
@@ -125,6 +151,21 @@
               }
             ],
             "title": "Fps"
+          },
+          "needs_calibration": {
+            "default": false,
+            "title": "Needs Calibration",
+            "type": "boolean"
+          },
+          "panorama": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PanoramaOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "status": {
             "enum": [
@@ -584,6 +625,12 @@
       },
       "CalibrationIn": {
         "properties": {
+          "frame_ms": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Frame Ms",
+            "type": "integer"
+          },
           "points": {
             "items": {
               "$ref": "#/components/schemas/CalibrationPoint"
@@ -592,6 +639,15 @@
             "minItems": 4,
             "title": "Points",
             "type": "array"
+          },
+          "space": {
+            "default": "frame",
+            "enum": [
+              "frame",
+              "panorama"
+            ],
+            "title": "Space",
+            "type": "string"
           }
         },
         "required": [
@@ -4129,6 +4185,24 @@
           }
         },
         "title": "OrgUpdate",
+        "type": "object"
+      },
+      "PanoramaOut": {
+        "properties": {
+          "height": {
+            "title": "Height",
+            "type": "integer"
+          },
+          "width": {
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "width",
+          "height"
+        ],
+        "title": "PanoramaOut",
         "type": "object"
       },
       "PartUrl": {
@@ -17423,6 +17497,57 @@
         "tags": [
           "matches",
           "videos"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/panorama": {
+      "get": {
+        "description": "Hall image of the last analysis (panorama or median frame) to mark the court on.",
+        "operationId": "panorama_v1_orgs__org_id__videos__video_id__panorama_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Panorama",
+        "tags": [
+          "matches",
+          "analysis"
         ]
       }
     },

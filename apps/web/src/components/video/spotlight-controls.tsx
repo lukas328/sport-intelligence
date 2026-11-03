@@ -19,7 +19,14 @@ export interface SpotlightState {
 
 export function useSpotlight(analysis: Analysis | null): SpotlightState {
   const [s, setS] = useState({ track: null as number | null, dim: false, trail: true, picking: false });
-  const ready = Boolean(analysis?.status === "ready" && analysis.calibration && analysis.chunk_ms && (analysis.chunks ?? 0) > 0);
+  // moving cameras: the stored calibration refers to the panorama, not to each frame (ADR 020)
+  const ready = Boolean(
+    analysis?.status === "ready" &&
+      analysis.calibration &&
+      analysis.camera !== "moving" &&
+      analysis.chunk_ms &&
+      (analysis.chunks ?? 0) > 0,
+  );
   return { ready, ...s, set: (patch) => setS((cur) => ({ ...cur, ...patch })) };
 }
 

@@ -460,7 +460,12 @@ def _apply_ingest_result(asset: VideoAsset, r: dict[str, object]) -> None:
 
 
 async def start_analysis(
-    ctx: Ctx, asset: VideoAsset, match: Match, points: list[dict[str, list[float]]] | None = None
+    ctx: Ctx,
+    asset: VideoAsset,
+    match: Match,
+    points: list[dict[str, list[float]]] | None = None,
+    space: str = "frame",
+    frame_ms: int = 0,
 ) -> ProcessingJob:
     job = await _new_job(ctx, asset, "analysis")
     payload: dict[str, object] = {
@@ -479,6 +484,8 @@ async def start_analysis(
             "referee": "#1a1a1a",
         },
         "calibration_points": points,
+        "calibration_space": space,
+        "calibration_frame_ms": frame_ms,
     }
     ctx.require_jobs().enqueue("gpu", ANALYSIS_FUNC, str(job.id), payload)
     return job
@@ -568,6 +575,10 @@ async def _apply_analysis_result(
             "elapsed_s",
             "stats",
             "formations",
+            "camera",
+            "panorama",
+            "needs_calibration",
+            "calibration_error",
         )
     }
 
@@ -611,7 +622,26 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "elapsed_s": meta.get("elapsed_s"),
         "formations": meta.get("formations") or [],
         "error": job.error if job is not None and job.status == "failed" else None,
+        "camera": meta.get("camera"),
+        "panorama": meta.get("panorama"),
+        "needs_calibration": bool(meta.get("needs_calibration")),
+        "calibration_error": meta.get("calibration_error"),
     }
+
+
+async def read_panorama(ctx: Ctx, asset_id: uuid.UUID) -> bytes:
+    """The hall image of the last analysis (panorama of a moving camera, median frame of a fixed
+    one): what users mark court points on."""
+    asset = await get_asset(ctx, asset_id)
+    if not (asset.analysis or {}).get("panorama"):
+        raise ProblemError(404, "not-found", "No hall image for this video")
+    try:
+        data, _ = await ctx.storage.get(
+            ctx.settings.s3_bucket_artifacts, f"{media_prefix(asset)}analysis/panorama.jpg"
+        )
+    except ObjectNotFoundError as exc:
+        raise ProblemError(404, "not-found", "No hall image for this video") from exc
+    return data
 
 
 async def read_track_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
@@ -629,12 +659,22 @@ async def read_track_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
 
 
 async def calibrate_manually(
-    ctx: Ctx, asset_id: uuid.UUID, points: list[dict[str, list[float]]]
+    ctx: Ctx,
+    asset_id: uuid.UUID,
+    points: list[dict[str, list[float]]],
+    space: str = "frame",
+    frame_ms: int = 0,
 ) -> ProcessingJob:
-    """Store clicked correspondences and re-run the analysis with them (source user_correction)."""
+    """Store clicked correspondences and re-run the analysis with them (source user_correction).
+
+    `space`: "frame" = points in the video frame at `frame_ms`, "panorama" = points on the hall
+    image of the last analysis (needed for moving cameras, where one frame shows only part of it).
+    """
     asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
     if asset.status != VideoStatus.READY or not asset.proxy_key:
         raise ProblemError(409, "video-not-ready", "The video is still being processed")
+    if space == "panorama" and not (asset.analysis or {}).get("panorama"):
+        raise ProblemError(409, "no-hall-image", "Run the analysis first to get the hall image")
     match = await ctx.db.get(Match, asset.match_id)
     assert match is not None
     await audit.record(
@@ -642,9 +682,9 @@ async def calibrate_manually(
         "video.calibrated_manually",
         target_type="video",
         target_id=asset.id,
-        data={"points": len(points)},
+        data={"points": len(points), "space": space},
     )
-    return await start_analysis(ctx, asset, match, points)
+    return await start_analysis(ctx, asset, match, points, space, frame_ms)
 
 
 # ---- identities and physical load (M5) ------------------------------------------------------

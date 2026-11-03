@@ -18,7 +18,7 @@ from collections import defaultdict
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import av
 import cv2
@@ -188,6 +188,27 @@ def camera_moves(path: Path, probes: int = 16, threshold_px: float = 1.5) -> boo
         container.close()
 
 
+def prepare_view(path: Path, max_frames: int | None = None) -> CameraMotion:
+    """Camera motion and the hall image (panorama, or the median frame of a fixed camera).
+
+    The hall image is what the user clicks court points on; `motion.background()` returns it.
+    """
+    if camera_moves(path):
+        _, _, _, total = _open(path)
+        if max_frames is not None:
+            total = min(total, max_frames) if total else max_frames
+        motion = estimate_motion(_frames(path, max_frames), expected_frames=total)
+        if motion.moving:
+            motion.background()
+            return motion
+    container, stream, _, total = _open(path)
+    size = (stream.codec_context.width, stream.codec_context.height)
+    container.close()
+    fixed = CameraMotion.fixed(size, total or 1)
+    fixed.panorama = np.median(np.stack(sample_frames(path, 48)[::2]), axis=0).astype(np.uint8)
+    return fixed
+
+
 def _confident_label(
     teams: TeamAssigner, colour: NDArray[np.float64], min_conf: float = 0.25
 ) -> str | None:
@@ -205,13 +226,19 @@ def analyse_video(
     max_frames: int | None = None,
     calibration_frame: int = 0,
     motion: CameraMotion | bool | None = None,
+    calibration_space: Literal["frame", "panorama"] = "frame",
 ) -> AnalysisResult:
     """Analyse a match video.
 
-    `calibration` (e.g. from clicked points) refers to frame `calibration_frame`; for a fixed camera
-    that is every frame. `motion`: None = detect, False = treat as fixed camera, True = estimate,
-    or a precomputed `CameraMotion`.
+    `calibration` (e.g. from clicked points) refers to frame `calibration_frame`, or with
+    `calibration_space="panorama"` to the hall image (`prepare_view`); for a fixed camera both are
+    the same. `motion`: None = detect, False = treat as fixed camera, True = estimate, or a
+    precomputed `CameraMotion` (fixed or moving).
     """
+    hall: U8 | None = None
+    if isinstance(motion, CameraMotion) and not motion.moving:
+        hall = motion.panorama
+        motion = False
     if motion is None:
         motion = camera_moves(path)
     if motion is not False:
@@ -225,6 +252,7 @@ def analyse_video(
             progress,
             max_frames,
             motion if isinstance(motion, CameraMotion) else None,
+            calibration_space,
         )
     timings: dict[str, float] = defaultdict(float)
     t0 = time.perf_counter()
@@ -233,7 +261,7 @@ def analyse_video(
     if progress:
         progress("calibration", 0.0)
     t0 = time.perf_counter()
-    calib = calibration or calibrate_frames(samples[::2])
+    calib = calibration or calibrate_frames([hall] if hall is not None else samples[::2])
     timings["calibration"] += time.perf_counter() - t0
 
     det = detector or BackgroundDetector(calib)
@@ -334,6 +362,7 @@ def _analyse_moving(
     progress: Progress | None,
     max_frames: int | None,
     motion: CameraMotion | None,
+    calibration_space: Literal["frame", "panorama"] = "frame",
 ) -> AnalysisResult:
     timings: dict[str, float] = defaultdict(float)
     _, _, fps, total = _open(path)
@@ -349,7 +378,15 @@ def _analyse_moving(
     canvas_bg = motion.background()
     timings["panorama"] += time.perf_counter() - t0
     t0 = time.perf_counter()
-    if calibration is not None:
+    if calibration is not None and calibration_space == "panorama":
+        calib = Calibration(
+            calibration.homography,
+            calibration.confidence,
+            calibration.reprojection_px,
+            calibration.source,
+            motion.canvas_size,
+        )
+    elif calibration is not None:
         to_canvas = motion.frame_to_canvas(calibration_frame)
         if to_canvas is None:
             raise CalibrationError("the calibrated frame could not be placed on the panorama")

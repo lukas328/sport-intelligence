@@ -20,8 +20,10 @@ canvas as on a fixed camera; a fixed camera is the special case canvas = frame.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import cv2
@@ -54,6 +56,57 @@ class CameraMotion:
     canvas_size: tuple[int, int] = (0, 0)
     samples: list[tuple[int, U8]] = field(default_factory=list, repr=False)
     stats: dict[str, float] = field(default_factory=dict)
+    panorama: U8 | None = field(default=None, repr=False)  # cached background of the canvas
+
+    def save(self, path: Path) -> None:
+        """Rotations, focal lengths, canvas and panorama (re-runs skip the motion pass)."""
+        n = len(self.rotations)
+        rots = np.full((n, 3, 3), np.nan)
+        for i, r in enumerate(self.rotations):
+            if r is not None:
+                rots[i] = r
+        meta = {
+            "frame_size": list(self.frame_size),
+            "moving": self.moving,
+            "canvas_f": self.canvas_f,
+            "canvas_c": list(self.canvas_c),
+            "canvas_size": list(self.canvas_size),
+            "stats": self.stats,
+        }
+        arrays: dict[str, Any] = {
+            "rotations": rots,
+            "focals": np.array(self.focals, np.float64),
+            "ref_r": self.ref_r,
+            "meta": np.array(json.dumps(meta)),
+        }
+        if self.panorama is not None:
+            arrays["panorama"] = self.panorama
+            arrays["seen"] = self.seen()
+        with path.open("wb") as fh:
+            np.savez_compressed(fh, **arrays)
+
+    @classmethod
+    def load(cls, path: Path) -> CameraMotion:
+        with np.load(path, allow_pickle=False) as data:
+            meta = json.loads(str(data["meta"]))
+            motion = cls(
+                (int(meta["frame_size"][0]), int(meta["frame_size"][1])),
+                bool(meta["moving"]),
+                [
+                    None if np.isnan(r).any() else np.asarray(r, np.float64)
+                    for r in data["rotations"]
+                ],
+                [float(x) for x in data["focals"]],
+                ref_r=np.asarray(data["ref_r"], np.float64),
+                canvas_f=float(meta["canvas_f"]),
+                canvas_c=(float(meta["canvas_c"][0]), float(meta["canvas_c"][1])),
+                canvas_size=(int(meta["canvas_size"][0]), int(meta["canvas_size"][1])),
+                stats={k: float(v) for k, v in meta["stats"].items()},
+                panorama=np.asarray(data["panorama"]) if "panorama" in data else None,
+            )
+            if "seen" in data:
+                motion.__dict__["_seen"] = np.asarray(data["seen"])
+        return motion
 
     @classmethod
     def fixed(cls, size: tuple[int, int], frames: int) -> CameraMotion:
@@ -183,10 +236,15 @@ class CameraMotion:
         Samples are warped once (uint8 + coverage mask), the median is taken band by band so memory
         stays at a few hundred MB even for wide canvases.
         """
+        if self.panorama is not None:
+            return self.panorama
         if not self.samples:
             raise ValueError("no samples kept")
         if not self.moving:
-            return np.median(np.stack([f for _, f in self.samples]), axis=0).astype(np.uint8)
+            self.panorama = np.median(np.stack([f for _, f in self.samples]), axis=0).astype(
+                np.uint8
+            )
+            return self.panorama
         w, h = self.canvas_size
         imgs = np.zeros((len(self.samples), h, w, 3), np.uint8)
         masks = np.zeros((len(self.samples), h, w), bool)
@@ -205,6 +263,7 @@ class CameraMotion:
             med = np.take_along_axis(blk, mid[None, :, :, None].repeat(3, axis=3), axis=0)[0]
             med[count == 0] = 0
             out[y : y + band] = med.astype(np.uint8)
+        self.panorama = out
         return out
 
     def seen(self) -> U8:
@@ -213,6 +272,8 @@ class CameraMotion:
         if cached is not None:
             return np.asarray(cached)
         w, h = self.canvas_size
+        if not self.moving:
+            return np.full((h, w), 255, np.uint8)
         mask = np.zeros((h, w), np.uint8)
         for i, frame in self.samples:
             warped = self.warp_to_canvas(frame, i)

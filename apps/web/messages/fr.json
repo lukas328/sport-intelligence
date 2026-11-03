@@ -524,7 +524,12 @@
     "legend": "Légende",
     "quality": "Qualité des données",
     "confidence": "Confiance {value} %",
-    "duration": "Durée d'analyse {seconds} s"
+    "duration": "Durée d'analyse {seconds} s",
+    "needsCalibration": "Le terrain n'a pas été reconnu automatiquement. Marque-le une fois sur l'image de la salle, puis l'analyse démarre.",
+    "needsCalibrationStaff": "Le terrain n'a pas été reconnu automatiquement. Un entraîneur doit le marquer sur l'image de la salle.",
+    "checkCourt": "Caméra mobile : vérifie le terrain reconnu automatiquement sur l'image de la salle.",
+    "markCourt": "Marquer le terrain",
+    "checkCourtButton": "Vérifier le terrain"
   },
   "tabs": {
     "video": "Vidéo",
@@ -1342,5 +1347,44 @@
     "add": "Ajouter",
     "remove": "Supprimer",
     "save": "Enregistrer"
+  },
+  "calibrate": {
+    "title": "Marquer le terrain",
+    "introMoving": "L'image de la salle est assemblée à partir de toute la vidéo (la caméra pivote). Marque au moins 4 points, idéalement 6 à 8 répartis sur tout le terrain.",
+    "introFixed": "Marque au moins 4 points du terrain, idéalement 6 à 8 répartis sur tout le terrain.",
+    "zoomIn": "Agrandir",
+    "zoomFit": "Image entière",
+    "close": "Fermer",
+    "imageAlt": "Image de la salle sans joueurs",
+    "pick": "Clique maintenant dans l'image de la salle : {name}",
+    "courtTitle": "Choisir un point du terrain",
+    "nearSide": "Le bas du croquis est le côté où se trouve la caméra.",
+    "count": "{count} sur au moins {min} points placés",
+    "fit": "Écart des points : {px} pixels",
+    "existing": "Orange : le terrain reconnu automatiquement. S'il est faux, place les points à nouveau.",
+    "remove": "Retirer {name}",
+    "error": "Les points n'ont pas pu être enregistrés. Réessaie.",
+    "save": "Enregistrer et lancer l'analyse",
+    "reset": "Retirer tous les points",
+    "hint": "Astuce : les coins du terrain et les poteaux des buts au sol sont les plus précis. Pour déplacer un point, choisis-le dans le croquis et clique à nouveau.",
+    "landmarks": {
+      "cornerNearLeft": "Coin gauche, côté caméra",
+      "cornerFarLeft": "Coin gauche, côté opposé",
+      "cornerNearRight": "Coin droit, côté caméra",
+      "cornerFarRight": "Coin droit, côté opposé",
+      "centreNear": "Ligne médiane, côté caméra",
+      "centreFar": "Ligne médiane, côté opposé",
+      "postLeftNear": "But gauche, poteau côté caméra",
+      "postLeftFar": "But gauche, poteau côté opposé",
+      "postRightNear": "But droit, poteau côté caméra",
+      "postRightFar": "But droit, poteau côté opposé",
+      "sixLeftNear": "Ligne des 6 m gauche, extrémité côté caméra",
+      "sixLeftFar": "Ligne des 6 m gauche, extrémité côté opposé",
+      "sixRightNear": "Ligne des 6 m droite, extrémité côté caméra",
+      "sixRightFar": "Ligne des 6 m droite, extrémité côté opposé",
+      "sevenLeft": "Ligne des 7 m gauche (milieu)",
+      "sevenRight": "Ligne des 7 m droite (milieu)"
+    },
+    "spread": "Les points sont trop rapprochés : marque aussi des points sur les deux lignes de touche (p. ex. les coins ou les extrémités de la ligne médiane). Les poteaux seuls ne suffisent pas, le terrain serait déformé."
   }
 }
