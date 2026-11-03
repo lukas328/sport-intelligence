@@ -41,3 +41,4 @@ ml/**/weights/
 playwright-report/
 test-results/
 .DS_Store
+.ux-artifacts/

@@ -81,7 +81,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
 
   const segment = (on: boolean) =>
     cn(
-      "flex-1 cursor-pointer rounded-full px-4 py-1.5 text-center text-sm font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent",
+      "flex-1 cursor-pointer rounded-md px-4 py-1.5 text-center text-sm font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent",
       on ? "bg-raised text-foreground shadow-sm ring-1 ring-border/60" : "text-muted hover:text-foreground",
     );
   return (
@@ -90,7 +90,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
       <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2" aria-label={t("matches.new")}>
         <fieldset className="sm:col-span-2">
           <legend className="sr-only">{t("matchForm.isTraining")}</legend>
-          <div className="flex max-w-xs gap-0.5 rounded-full bg-surface p-1">
+          <div className="flex max-w-xs gap-0.5 rounded-md bg-surface p-1">
             <label className={segment(!training)}>
               <input type="radio" name="kind" className="sr-only" checked={!training} onChange={() => setTraining(false)} />
               {t("matches.kindMatch")}
@@ -122,7 +122,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         {!training ? (
           <fieldset className="space-y-1">
             <legend className="mb-1 block text-[0.8125rem] font-medium">{t("matches.homeAway")}</legend>
-            <div className="flex gap-0.5 rounded-full bg-surface p-1">
+            <div className="flex gap-0.5 rounded-md bg-surface p-1">
               <label className={segment(!away)}>
                 <input type="radio" name="side" className="sr-only" checked={!away} onChange={() => setAway(false)} />
                 {t("matches.homeShort")}

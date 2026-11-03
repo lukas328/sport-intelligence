@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Vereinsposter</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#ffffff}a:hover{color:#111111}
+</style>
+</helmet>
+<div style="min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: {{club}}; color: {{ink}}; font-family: 'Instrument Sans', sans-serif; overflow: hidden">
+  <header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 40px">
+    <div style="font-family: 'Anton', sans-serif; font-size: 24px; letter-spacing: 0.02em">HC GRAUHOLZ</div>
+    <nav aria-label="Hauptnavigation" style="display: flex; flex-wrap: wrap; gap: 4px; font-weight: 600">
+      <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; color: {{ink}}; text-decoration: none">Übersicht</a>
+      <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; color: {{ink}}; text-decoration: none">Spiele</a>
+      <a href="#" aria-current="page" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; color: {{ink}}; text-decoration: underline; text-underline-offset: 6px">Saison</a>
+      <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; color: {{ink}}; text-decoration: none">Kader</a>
+      <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; color: {{ink}}; text-decoration: none">Training</a>
+    </nav>
+  </header>
+  <div style="display: flex; flex-wrap: wrap">
+    <section style="flex: 1 1 560px; min-width: 0; box-sizing: border-box; padding: 16px 40px 36px">
+      <p style="margin: 0; font-size: 18px; font-weight: 600">Herren 1, Saison 2026/27</p>
+      <h1 style="margin: 12px 0 0; font-family: 'Anton', sans-serif; font-weight: 400; font-size: clamp(92px, 12.4vw, 178px); line-height: 0.96; letter-spacing: 0">SIEG<br>22:20</h1>
+      <p style="margin: 22px 0 0; max-width: 520px; font-size: 21px; line-height: 1.35">Gegen Demo HC Beispiel. 22 Tore aus 14.3 erwarteten, die Effizienz hat das Spiel entschieden.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px">
+        <a href="#" style="min-height: 48px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 22px; background: {{ink}}; color: {{club}}; font-weight: 600; text-decoration: none">Spiel anschauen</a>
+        <a href="Matchkarte.dc.html" style="min-height: 48px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 22px; border: 2px solid {{ink}}; color: {{ink}}; font-weight: 600; text-decoration: none">Matchkarte teilen</a>
+      </div>
+    </section>
+    <section style="flex: 1 1 480px; min-width: 0; position: relative; min-height: 520px; background: #101317; color: #ffffff; display: flex; align-items: center; justify-content: center">
+      <div style="text-align: center; padding: 32px">
+        <button aria-label="Clip abspielen" style="width: 76px; height: 76px; border-radius: 50%; border: 2px solid #ffffff; background: transparent; color: #ffffff; display: inline-flex; align-items: center; justify-content: center">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"></path></svg>
+        </button>
+        <p style="margin: 18px 0 0; font-size: 17px; font-weight: 500">[Echtes Standbild aus eurem Spiel, nur mit Einwilligung]</p>
+      </div>
+      <div style="position: absolute; left: 24px; bottom: 20px; font-family: 'Anton', sans-serif; font-size: 34px">DIE ENTSCHEIDUNG</div>
+    </section>
+  </div>
+  <section aria-label="Kennzahlen" style="flex: 1 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); background: #101317; color: #ffffff">
+    <a href="#" style="padding: 22px 40px; color: #ffffff; text-decoration: none"><div style="font-family: 'Anton', sans-serif; font-size: 46px">71 %</div><div style="margin-top: 2px; font-size: 16px">Wurfquote</div></a>
+    <a href="#" style="padding: 22px 40px; color: #ffffff; text-decoration: none"><div style="font-family: 'Anton', sans-serif; font-size: 46px">23 %</div><div style="margin-top: 2px; font-size: 16px">Paradenquote</div></a>
+    <a href="#" style="padding: 22px 40px; color: #ffffff; text-decoration: none"><div style="font-family: 'Anton', sans-serif; font-size: 46px">4</div><div style="margin-top: 2px; font-size: 16px">Ballverluste</div></a>
+    <a href="#" style="padding: 22px 40px; color: #ffffff; text-decoration: none"><div style="font-family: 'Anton', sans-serif; font-size: 46px">15.1</div><div style="margin-top: 2px; font-size: 16px">xG gegen uns</div></a>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"club":{"editor":"color","default":"#0b6bcb","options":["#0b6bcb","#c8102e","#0f6b46","#ffd100"]},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const club = this.props.club ?? '#0b6bcb';
+    const h = club.replace('#', '');
+    const n = parseInt(h, 16);
+    const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (c) {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    });
+    const l = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    const ink = 1.05 / (l + 0.05) >= (l + 0.05) / 0.05 ? '#ffffff' : '#101317';
+    return { club: club, ink: ink };
+  }
+}
+</script>
+</body>
+</html>

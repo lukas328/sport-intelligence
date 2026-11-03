@@ -367,7 +367,7 @@ function QualityReport({ video }: { video: Video }) {
   };
   const tone = { ok: "text-ok", warn: "text-warn", fail: "text-error" }[report.overall];
   return (
-    <details className="group rounded-2xl bg-raised px-5 py-4 ring-1 ring-border/70">
+    <details className="group rounded-lg bg-raised px-5 py-4 border border-border">
       <summary className="flex cursor-pointer list-none items-center gap-2 text-sm [&::-webkit-details-marker]:hidden">
         <span className="font-medium">{t("title")}:</span>
         <span className={cn("font-medium", tone)}>{t(`overall_${report.overall}`)}</span>

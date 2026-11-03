@@ -24,7 +24,7 @@ export function SubNav({ label, items, active }: { label: string; items: { key: 
                 href={it.href}
                 aria-current={on ? "page" : undefined}
                 className={cn(
-                  "block whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                  "block whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
                   on ? "bg-foreground text-background" : "text-muted hover:bg-surface hover:text-foreground",
                 )}
               >
@@ -89,7 +89,7 @@ function LeafTitle({ base, leaf, page }: { base: string; leaf: [string, string, 
   const href = `${base}/${leaf[0] === "library" ? "library" : "season"}`;
   return (
     <div className="flex items-center gap-2 pt-2">
-      <Link href={href} aria-label={t("library.back", { name: parentLabel })} className="grid size-8 place-items-center rounded-full text-muted ring-1 ring-border hover:bg-surface hover:text-foreground">
+      <Link href={href} aria-label={t("library.back", { name: parentLabel })} className="grid size-8 place-items-center rounded-md text-muted ring-1 ring-border hover:bg-surface hover:text-foreground">
         <ChevronLeft aria-hidden className="size-4" />
       </Link>
       {page === "search" ? <span className="text-sm font-medium text-muted">{t("library.title")}</span> : <h2 className="text-xl font-bold">{title}</h2>}

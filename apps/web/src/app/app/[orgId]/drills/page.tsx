@@ -24,7 +24,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
       {wanted.length > 0 && <h2 className="text-xl font-bold">{t("suggested")}</h2>}
       <p className="max-w-2xl text-sm text-muted">{t("hint")}</p>
       <nav aria-label={t("title")} className="flex flex-wrap gap-1">
-        <Link href={`/app/${orgId}/drills`} className={cn("rounded-full px-3.5 py-1.5 text-[0.8125rem] font-medium", !wanted.length ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}>
+        <Link href={`/app/${orgId}/drills`} className={cn("rounded-md px-3.5 py-1.5 text-[0.8125rem] font-medium", !wanted.length ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}>
           {t("all")}
         </Link>
         {FOCI.map((f) => (
@@ -32,7 +32,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
             key={f}
             href={`/app/${orgId}/drills?focus=${f}`}
             aria-current={wanted.length === 1 && wanted[0] === f ? "page" : undefined}
-            className={cn("rounded-full px-3.5 py-1.5 text-[0.8125rem] font-medium", wanted.length === 1 && wanted[0] === f ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}
+            className={cn("rounded-md px-3.5 py-1.5 text-[0.8125rem] font-medium", wanted.length === 1 && wanted[0] === f ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}
           >
             {t(`focus_${f}`)}
           </Link>
@@ -40,7 +40,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
       </nav>
       <ul className="grid gap-3 md:grid-cols-2" data-testid="drills">
         {list.map((d) => (
-          <li key={d.id} id={d.id} className="scroll-mt-4 space-y-2 rounded-2xl bg-raised p-5 ring-1 ring-border/70 target:ring-2 target:ring-accent">
+          <li key={d.id} id={d.id} className="scroll-mt-4 space-y-2 rounded-lg bg-raised p-5 border border-border target:ring-2 target:ring-accent">
             <h2 className="font-semibold">{d.name[lang] ?? d.name["de-CH"]}</h2>
             <p className="text-xs text-muted">
               {d.focus.map((f) => t(`focus_${f}`)).join(" · ")} · {t("minutes", { minutes: d.minutes })} · {t("players", { players: d.players })} · {t(`level_${d.level}`)}

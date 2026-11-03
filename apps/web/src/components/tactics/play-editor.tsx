@@ -146,7 +146,7 @@ export function PlayEditor({
                 key={k}
                 aria-pressed={tool === k}
                 onClick={() => setTool(k)}
-                className={cn("rounded-full border px-2 py-1 text-sm", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+                className={cn("rounded-md border px-2 py-1 text-sm", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
               >
                 {t(`tool_${k}`)}
               </button>
@@ -211,7 +211,7 @@ export function PlayEditor({
           )}
           <div role="group" aria-label={t("speed")} className="flex gap-1">
             {SPEEDS.map((s) => (
-              <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)} className={cn("rounded-full px-2 py-1 text-xs", speed === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
+              <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)} className={cn("rounded-md px-2 py-1 text-xs", speed === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
                 {s}×
               </button>
             ))}
@@ -260,7 +260,7 @@ export function PlayEditor({
                 maxLength={LIMITS.note}
                 rows={2}
                 onChange={(e) => setFrame({ ...frame, note: e.target.value })}
-                className="rounded-xl bg-raised ring-1 ring-inset ring-border px-2 py-1"
+                className="rounded-md bg-raised ring-1 ring-inset ring-border px-2 py-1"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -268,7 +268,7 @@ export function PlayEditor({
               <select
                 value={frame.duration_ms}
                 onChange={(e) => setFrame({ ...frame, duration_ms: Number(e.target.value) })}
-                className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
+                className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
               >
                 {[1000, 1500, 2000, 3000, 4000, 6000].map((ms) => (
                   <option key={ms} value={ms}>
@@ -287,7 +287,7 @@ export function PlayEditor({
                 value={sel.label}
                 maxLength={3}
                 onChange={(e) => setFrame({ ...frame, tokens: frame.tokens.map((k) => (k.id === sel.id ? { ...k, label: e.target.value } : k)) })}
-                className="min-h-9 w-20 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
+                className="min-h-9 w-20 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
               />
             </label>
             <Button
@@ -308,7 +308,7 @@ export function PlayEditor({
             <Input label={t("name")} name="name" required maxLength={120} defaultValue={play?.name ?? initialMeta?.name ?? ""} />
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">{t("category")}</span>
-              <select name="category" defaultValue={play?.category ?? initialMeta?.category ?? "attack"} className="min-h-10 rounded-xl bg-raised ring-1 ring-inset ring-border px-2">
+              <select name="category" defaultValue={play?.category ?? initialMeta?.category ?? "attack"} className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2">
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {t(`cat_${c}`)}
@@ -320,7 +320,7 @@ export function PlayEditor({
             <Input label={t("tags")} name="tags" maxLength={300} defaultValue={(play?.tags ?? initialMeta?.tags ?? []).join(", ")} />
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">{t("description")}</span>
-              <textarea name="description" rows={3} maxLength={4000} defaultValue={play?.description ?? ""} className="rounded-xl bg-raised ring-1 ring-inset ring-border px-2 py-1" />
+              <textarea name="description" rows={3} maxLength={4000} defaultValue={play?.description ?? ""} className="rounded-md bg-raised ring-1 ring-inset ring-border px-2 py-1" />
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" name="shared" defaultChecked={play?.shared_with_players ?? false} />

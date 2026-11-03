@@ -58,7 +58,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
           aria-label={`${t("account")}: ${me.name}`}
           data-testid="account-menu"
           className={cn(
-            "flex min-w-0 items-center gap-3 rounded-xl text-left hover:bg-surface",
+            "flex min-w-0 items-center gap-3 rounded-md text-left hover:bg-surface",
             compact ? "p-1" : "flex-1 px-2 py-1.5",
           )}
         >

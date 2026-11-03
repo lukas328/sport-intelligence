@@ -113,7 +113,7 @@ function MatchList({ title, orgId, matches }: { title: string; orgId: string; ma
   return (
     <section className="space-y-3">
       <h2 className="eyebrow">{title}</h2>
-      <ul className="overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70" data-testid="match-list">
+      <ul className="overflow-hidden rounded-lg bg-raised border border-border" data-testid="match-list">
         {matches.map((m, i) => (
           <li key={m.id} className={cn(i > 0 && "border-t border-border/70")}>
             <MatchRow orgId={orgId} m={m} />

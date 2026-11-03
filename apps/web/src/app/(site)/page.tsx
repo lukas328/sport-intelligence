@@ -26,7 +26,7 @@ export default async function HomePage() {
           </div>
           <p className="text-sm text-muted">{t("home.foundation")}</p>
         </div>
-        <div className="rounded-3xl bg-raised p-3 shadow-sm ring-1 ring-border/70 sm:p-4">
+        <div className="rounded-lg bg-raised p-3 shadow-sm border border-border sm:p-4">
           <CourtSvg label={t("home.courtLabel")} />
         </div>
       </section>

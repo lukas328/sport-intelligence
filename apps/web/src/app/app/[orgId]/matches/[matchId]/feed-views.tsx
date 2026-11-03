@@ -71,7 +71,7 @@ export function TeamFeedView({ orgId, matchId, onPlay }: { orgId: string; matchI
             </p>
             <ol className="space-y-2">
               {p.items.map((s) => (
-                <li key={s.id} className="space-y-1 rounded-xl ring-1 ring-inset ring-border p-2 text-sm">
+                <li key={s.id} className="space-y-1 rounded-md ring-1 ring-inset ring-border p-2 text-sm">
                   <div className="flex items-center gap-2">
                     <span className={cn("size-2 rounded-full", s.positive ? "bg-ok" : "bg-muted")} aria-hidden />
                     <span className="flex-1">{t(`reason_${s.reason}` as "reason_goal")}</span>

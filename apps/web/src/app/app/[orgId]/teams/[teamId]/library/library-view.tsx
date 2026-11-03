@@ -23,7 +23,7 @@ export function LibraryView({ base, orgBase, plays, playlists, presentations }: 
   const when = (iso: string) => format.relativeTime(new Date(iso));
   return (
     <div className="space-y-12">
-      <Link href={`${base}/search`} className="group flex items-center gap-4 rounded-2xl bg-foreground px-5 py-4 text-background transition-transform hover:-translate-y-px sm:px-6">
+      <Link href={`${base}/search`} className="group flex items-center gap-4 rounded-lg bg-foreground px-5 py-4 text-background transition-transform hover:-translate-y-px sm:px-6">
         <ScanSearch aria-hidden className="size-5 shrink-0 opacity-80" />
         <span className="min-w-0 flex-1">
           <span className="block font-semibold font-wide">{t("search")}</span>
@@ -44,7 +44,7 @@ export function LibraryView({ base, orgBase, plays, playlists, presentations }: 
                 const frame = doc.frames?.[0];
                 return (
                   <li key={p.id}>
-                    <Link href={`${orgBase}/plays/${p.id}`} className="group block overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70 transition-shadow hover:shadow-md">
+                    <Link href={`${orgBase}/plays/${p.id}`} className="group block overflow-hidden rounded-lg bg-raised border border-border transition-shadow hover:shadow-md">
                       <div aria-hidden className="pointer-events-none border-b border-border/70">
                         {frame && <Board frame={frame} court={doc.court} label={p.name} />}
                       </div>

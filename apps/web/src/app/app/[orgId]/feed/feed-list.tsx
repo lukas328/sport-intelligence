@@ -25,7 +25,7 @@ export function FeedList({ orgId }: { orgId: string }) {
       ) : (q.data ?? []).length === 0 ? (
         <EmptyState icon={<Film />} title={t("none")} />
       ) : (
-        <ul className="divide-y divide-border/70 overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70" data-testid="feed-list">
+        <ul className="divide-y divide-border/70 overflow-hidden rounded-lg bg-raised border border-border" data-testid="feed-list">
           {(q.data ?? []).map((f) => {
             const d = new Date(f.kickoff_at);
             return (

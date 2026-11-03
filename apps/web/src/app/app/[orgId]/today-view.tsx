@@ -193,9 +193,9 @@ function LastMatch({ orgId, m }: { orgId: string; m: Match }) {
       {m.has_video && m.status === "ready" ? (
         <TopInsights orgId={orgId} m={m} />
       ) : m.status === "processing" || m.status === "uploading" ? (
-        <p className="rounded-xl bg-surface px-4 py-3 text-sm text-muted">{t("today.analysing")}</p>
+        <p className="rounded-md bg-surface px-4 py-3 text-sm text-muted">{t("today.analysing")}</p>
       ) : !m.has_video ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-surface px-4 py-3">
           <p className="text-sm text-muted">{t("today.uploadHint")}</p>
           <Link href={`${href}#upload`} className={buttonClass("primary", "sm")}>
             <Upload aria-hidden />
@@ -288,7 +288,7 @@ function NextTraining({ orgId, teamId }: { orgId: string; teamId: string }) {
       {q.isLoading ? (
         <Skeleton className="h-24" />
       ) : next ? (
-        <Link href={href} className="block rounded-2xl bg-raised p-5 ring-1 ring-border/70 transition-colors hover:bg-surface/60">
+        <Link href={href} className="block rounded-lg bg-raised p-5 border border-border transition-colors hover:bg-surface/60">
           <p className="text-sm font-semibold text-accent">
             {format.dateTime(new Date(next.starts_at ?? `${next.on_date}T12:00:00`), next.starts_at ? { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" } : { weekday: "long", day: "numeric", month: "long" })}
           </p>
@@ -296,7 +296,7 @@ function NextTraining({ orgId, teamId }: { orgId: string; teamId: string }) {
           <p className="mt-1 text-sm text-muted">{t("trainingLength", { minutes: next.total_minutes, drills: next.drills.length })}</p>
         </Link>
       ) : (
-        <div className="flex items-center gap-3 rounded-2xl bg-surface/60 p-5 text-sm text-muted">
+        <div className="flex items-center gap-3 rounded-lg bg-surface/60 p-5 text-sm text-muted">
           <Dumbbell aria-hidden className="size-5 shrink-0" />
           {t("noTraining")}
         </div>
@@ -329,9 +329,9 @@ function MemberToday({ orgId, family }: { orgId: string; family: boolean }) {
         {items.isLoading ? (
           <Skeleton className="h-32" />
         ) : dates.length === 0 ? (
-          <p className="rounded-2xl bg-surface/60 p-5 text-sm text-muted">{t("schedule.none")}</p>
+          <p className="rounded-lg bg-surface/60 p-5 text-sm text-muted">{t("schedule.none")}</p>
         ) : (
-          <ul className="divide-y divide-border/70 overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70">
+          <ul className="divide-y divide-border/70 overflow-hidden rounded-lg bg-raised border border-border">
             {dates.map((i) => (
               <li key={`${i.kind}-${i.id}-${i.player_id}`}>
                 <ScheduleRow item={i} onReply={reply} />
@@ -343,7 +343,7 @@ function MemberToday({ orgId, family }: { orgId: string; family: boolean }) {
       {!family && (
         <Block title={t("today.myTasks")} href={`${base}/assignments`} linkLabel={t("today.allTasks")}>
           {open.length === 0 ? (
-            <p className="flex items-center gap-3 rounded-2xl bg-surface/60 p-5 text-sm text-muted">
+            <p className="flex items-center gap-3 rounded-lg bg-surface/60 p-5 text-sm text-muted">
               <ListTodo aria-hidden className="size-5" />
               {t("today.nothing")}
             </p>
@@ -351,7 +351,7 @@ function MemberToday({ orgId, family }: { orgId: string; family: boolean }) {
             <ul className="space-y-2">
               {open.map((a) => (
                 <li key={a.id}>
-                  <Link href={targetLink(orgId, a)} className="flex items-center gap-3 rounded-2xl bg-raised px-4 py-3 ring-1 ring-border/70 hover:bg-surface/60">
+                  <Link href={targetLink(orgId, a)} className="flex items-center gap-3 rounded-lg bg-raised px-4 py-3 border border-border hover:bg-surface/60">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{a.title}</span>
                       <span className="block text-[0.8125rem] text-muted">
@@ -369,7 +369,7 @@ function MemberToday({ orgId, family }: { orgId: string; family: boolean }) {
       )}
       <Block title={t("today.newScenes")} href={`${base}/feed`} linkLabel={t("today.allScenes")}>
         {scenes.length === 0 ? (
-          <p className="flex items-center gap-3 rounded-2xl bg-surface/60 p-5 text-sm text-muted">
+          <p className="flex items-center gap-3 rounded-lg bg-surface/60 p-5 text-sm text-muted">
             <Film aria-hidden className="size-5" />
             {t("feed.none")}
           </p>
@@ -377,7 +377,7 @@ function MemberToday({ orgId, family }: { orgId: string; family: boolean }) {
           <ul className="space-y-2">
             {scenes.map((f) => (
               <li key={`${f.player_id}-${f.match_id}`}>
-                <Link href={`${base}/feed/${f.match_id}?player=${f.player_id}`} className="flex items-center gap-3 rounded-2xl bg-raised px-4 py-3 ring-1 ring-border/70 hover:bg-surface/60">
+                <Link href={`${base}/feed/${f.match_id}?player=${f.player_id}`} className="flex items-center gap-3 rounded-lg bg-raised px-4 py-3 border border-border hover:bg-surface/60">
                   <Film aria-hidden className="size-4 text-muted" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{f.opponent ?? t("matches.training")}</span>

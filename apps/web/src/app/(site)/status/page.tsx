@@ -43,7 +43,7 @@ export default async function StatusPage() {
       </p>
 
       {view.components.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
+        <div className="overflow-x-auto rounded-lg bg-raised border border-border">
           <table className="w-full text-left text-sm">
             <thead className="text-xs text-muted">
               <tr>

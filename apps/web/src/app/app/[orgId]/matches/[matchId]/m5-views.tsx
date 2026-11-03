@@ -137,11 +137,11 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted">
-        <span className="mr-2 rounded-full bg-surface px-2 py-0.5 text-xs">{ta("heuristic")}</span>
+        <span className="mr-2 rounded-md bg-surface px-2 py-0.5 text-xs">{ta("heuristic")}</span>
         {t("hint")}
       </p>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
+        <div className="overflow-x-auto rounded-lg bg-raised border border-border">
           <table className="w-full text-sm" data-testid="physical-table">
             <caption className="sr-only">{t("title")}</caption>
             <thead className="text-xs text-muted">

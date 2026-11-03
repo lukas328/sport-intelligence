@@ -68,7 +68,7 @@ export function OnboardingChecklist({ orgId, teamId }: { orgId: string; teamId: 
         <button
           type="button"
           aria-label={t("hide")}
-          className="-mt-1 -mr-2 grid size-8 shrink-0 place-items-center rounded-full text-muted hover:bg-surface hover:text-foreground"
+          className="-mt-1 -mr-2 grid size-8 shrink-0 place-items-center rounded-md text-muted hover:bg-surface hover:text-foreground"
           onClick={() => {
             setHidden(true);
             try {
@@ -82,7 +82,7 @@ export function OnboardingChecklist({ orgId, teamId }: { orgId: string; teamId: 
         </button>
       </div>
       {next && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-surface px-4 py-3">
           <p className="text-sm">
             <span className="text-muted">{t("nextStep")}: </span>
             <span className="font-semibold">{t(`step_${next.key}` as "step_team")}</span>

@@ -124,7 +124,7 @@ function SessionForm({
       </div>
       <label className="block text-sm">
         <span className="block font-medium">{t("notes")}</span>
-        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full rounded-xl bg-raised ring-1 ring-inset ring-border p-2" />
+        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full rounded-md bg-raised ring-1 ring-inset ring-border p-2" />
       </label>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       <Button type="submit" disabled={save.isPending}>{t("save")}</Button>

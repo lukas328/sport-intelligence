@@ -38,9 +38,31 @@ export function contrastText(hex: string): "#000000" | "#ffffff" {
   return contrastRatio(hex, "#ffffff") >= contrastRatio(hex, "#000000") ? "#ffffff" : "#000000";
 }
 
-/** Darkest page surfaces of the light and dark theme (see globals.css). */
-export const SURFACE = { light: "#f2f2ee", dark: "#1f221e" } as const;
-export const DEFAULT_ACCENT = "#c93a0b";
+export const INK = "#10151c";
+export const INK_DARK = "#eef1f5";
+export const NEUTRAL_DEEP = "#14171c";
+export const SIGNAL = "#ffd23f";
+export const DEFAULT_CLUB = "#0b6bcb";
+/** kept for older callers */
+export const DEFAULT_ACCENT = DEFAULT_CLUB;
+
+export function isLight(hex: string): boolean {
+  return contrastText(hex) === "#000000";
+}
+
+/** Page colours of a club: paper tinted towards the club colour (light), near black tinted (dark). */
+export function paperOf(club: string): { light: string; dark: string; surfaceLight: string; surfaceDark: string; raisedDark: string } {
+  return {
+    light: mix(club, "#ffffff", 0.93),
+    surfaceLight: mix(club, "#ffffff", 0.86),
+    dark: mix(club, "#07090c", 0.9),
+    surfaceDark: mix(club, "#0d1015", 0.8),
+    raisedDark: mix(club, "#0d1015", 0.86),
+  };
+}
+
+/** Darkest page surfaces of the light and dark theme for the default club (see globals.css). */
+export const SURFACE = { light: paperOf(DEFAULT_CLUB).surfaceLight, dark: paperOf(DEFAULT_CLUB).surfaceDark } as const;
 
 /**
  * Shifts a club colour until it reaches `min` contrast on `surface` (WCAG 2.2 AA: 4.5 for text),
@@ -48,7 +70,7 @@ export const DEFAULT_ACCENT = "#c93a0b";
  * e.g. a navy club stays navy on white and turns light blue on the dark theme.
  */
 export function readableOn(hex: string, surface: string, min = 4.5): string {
-  if (!parse(hex)) return DEFAULT_ACCENT;
+  if (!parse(hex)) return DEFAULT_CLUB;
   const toward = luminance(surface) > 0.5 ? "#000000" : "#ffffff";
   for (let step = 0; step <= 20; step++) {
     const c = mix(hex, toward, step * 0.05);
@@ -58,20 +80,33 @@ export function readableOn(hex: string, surface: string, min = 4.5): string {
 }
 
 export interface ClubTheme {
-  /** the club colour as entered, for decorative use only (logo tile, stripe) */
+  /** the club colour as entered: the stage surface */
   club: string;
-  light: { accent: string; contrast: string };
-  dark: { accent: string; contrast: string };
+  /** text on the club colour */
+  clubInk: string;
+  /** the club's own dark surface (sidebar); neutral for light club colours, which turn olive */
+  deep: string;
+  /** the one thing per screen that needs attention */
+  signal: string;
+  signalInk: string;
+  light: { accent: string; contrast: string; paper: string; surface: string };
+  dark: { accent: string; contrast: string; paper: string; surface: string; raised: string };
 }
 
 export function clubTheme(hex: string | null | undefined): ClubTheme {
-  const club = hex && parse(hex) ? hex.toLowerCase() : DEFAULT_ACCENT;
-  const light = readableOn(club, SURFACE.light);
-  const dark = readableOn(club, SURFACE.dark);
+  const club = hex && parse(hex) ? hex.toLowerCase() : DEFAULT_CLUB;
+  const light = isLight(club);
+  const p = paperOf(club);
+  const accentLight = readableOn(club, p.surfaceLight);
+  const accentDark = readableOn(club, p.surfaceDark);
   return {
     club,
-    light: { accent: light, contrast: contrastText(light) },
-    dark: { accent: dark, contrast: contrastText(dark) },
+    clubInk: light ? INK : "#ffffff",
+    deep: light ? NEUTRAL_DEEP : mix(club, "#050c18", 0.78),
+    signal: light ? INK : SIGNAL,
+    signalInk: light ? "#ffffff" : INK,
+    light: { accent: accentLight, contrast: contrastText(accentLight), paper: p.light, surface: p.surfaceLight },
+    dark: { accent: accentDark, contrast: contrastText(accentDark), paper: p.dark, surface: p.surfaceDark, raised: p.raisedDark },
   };
 }
 
@@ -80,9 +115,20 @@ export function clubStyle(hex: string | null | undefined): Record<string, string
   const t = clubTheme(hex);
   return {
     "--club": t.club,
+    "--club-ink": t.clubInk,
+    "--deep": t.deep,
+    "--signal": t.signal,
+    "--signal-ink": t.signalInk,
+    // marker on the deep surface: the signal, or the club colour itself when it is light
+    "--mark": isLight(t.club) ? t.club : SIGNAL,
     "--accent-l": t.light.accent,
     "--accent-l-contrast": t.light.contrast,
+    "--paper-l": t.light.paper,
+    "--surface-l": t.light.surface,
     "--accent-d": t.dark.accent,
     "--accent-d-contrast": t.dark.contrast,
+    "--paper-d": t.dark.paper,
+    "--surface-d": t.dark.surface,
+    "--raised-d": t.dark.raised,
   };
 }

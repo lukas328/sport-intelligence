@@ -41,7 +41,7 @@ export function Segmented<T extends string>({
   }
   return (
     <div className={cn("scrollbar-none -mx-1 overflow-x-auto px-1", className)}>
-      <div role="tablist" aria-label={label} className="inline-flex gap-0.5 rounded-full bg-surface p-1">
+      <div role="tablist" aria-label={label} className="inline-flex gap-0.5 rounded-md bg-surface p-1">
         {items.map((it, i) => {
           const active = it.value === value;
           return (
@@ -59,9 +59,9 @@ export function Segmented<T extends string>({
               onKeyDown={(e) => onKey(e, i)}
               onClick={() => onChange(it.value)}
               className={cn(
-                "whitespace-nowrap rounded-full font-medium transition-[background,color,box-shadow] duration-150",
+                "whitespace-nowrap rounded-[5px] font-semibold transition-[background,color] duration-150",
                 size === "sm" ? "px-3 py-1 text-[0.8125rem]" : "px-4 py-1.5 text-sm",
-                active ? "bg-raised text-foreground shadow-sm ring-1 ring-border/60" : "text-muted hover:text-foreground",
+                active ? "bg-foreground text-background" : "text-muted hover:bg-surface hover:text-foreground",
               )}
             >
               {it.label}

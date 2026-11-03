@@ -97,7 +97,7 @@ export function HighlightsView({
                   className={r.format === "9x16" ? "mx-auto max-h-[70vh] rounded" : "w-full rounded"}
                 />
                 <div className="flex flex-wrap gap-2">
-                  <a className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/highlights/${r.id}/video.mp4`} download>
+                  <a className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/highlights/${r.id}/video.mp4`} download>
                     {t("download")}
                   </a>
                   {staff && <ShareButton orgId={orgId} teamId={teamId} kind="highlight" targetId={r.id} />}

@@ -313,7 +313,7 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
     { key: "saves", label: t("saves") },
   ];
   const table = (rows: PlayerRow[], caption: string) => (
-    <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
+    <div className="overflow-x-auto rounded-lg bg-raised border border-border">
       <table className="w-full text-sm" data-testid="report-table">
         <caption className="sr-only">{caption}</caption>
         <thead className="text-xs text-muted">
@@ -396,7 +396,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
       <div className="flex flex-wrap gap-3">
         <div className="flex gap-1" role="group" aria-label={t("filterTeam")}>
           {(["own", "opponent"] as const).map((s) => (
-            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded-full px-3 py-1 text-sm", side === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
+            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded-md px-3 py-1 text-sm", side === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
               {s === "own" ? teamName : oppName(match)}
             </button>
           ))}

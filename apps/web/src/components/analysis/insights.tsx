@@ -115,7 +115,7 @@ export function InsightsCard({
         </ul>
       )}
       {data.summary && (
-        <div className="space-y-1 rounded-xl bg-surface p-4 text-sm" data-testid="summary">
+        <div className="space-y-1 rounded-md bg-surface p-4 text-sm" data-testid="summary">
           <p className="whitespace-pre-line">{data.summary.text}</p>
           <p className="text-xs text-muted">{t("summaryGenerated")}</p>
         </div>
@@ -170,7 +170,7 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
       </button>
     );
   return (
-    <div className="mt-2 w-full space-y-3 rounded-xl bg-surface p-4" role="group" aria-label={t("trainTitle")}>
+    <div className="mt-2 w-full space-y-3 rounded-md bg-surface p-4" role="group" aria-label={t("trainTitle")}>
       <p className="font-medium">{t("trainTitle")}</p>
       {create.data ? (
         <p className="text-sm">

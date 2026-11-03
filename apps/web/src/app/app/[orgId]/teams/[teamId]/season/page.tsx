@@ -79,7 +79,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       <h2 className="sr-only">{t("title")}</h2>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5" data-testid="season-tiles">
         {tiles.map((x) => (
-          <div key={x.label} className="rounded-2xl bg-raised px-4 py-4 ring-1 ring-border/70 sm:px-5">
+          <div key={x.label} className="rounded-lg bg-raised px-4 py-4 border border-border sm:px-5">
             <dt className="text-[0.8125rem] text-muted">{x.label}</dt>
             <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{x.value}</dd>
           </div>
@@ -96,7 +96,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   href={`/app/${orgId}/matches/${m.match_id}`}
                   title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
                   className={cn(
-                    "flex min-w-14 flex-col items-center rounded-xl px-2.5 py-2 text-center ring-1 ring-inset transition-transform hover:-translate-y-0.5",
+                    "flex min-w-14 flex-col items-center rounded-md px-2.5 py-2 text-center ring-1 ring-inset transition-transform hover:-translate-y-0.5",
                     r === "won" ? "bg-ok/8 ring-ok/30" : r === "lost" ? "bg-error/8 ring-error/30" : "bg-surface ring-border",
                   )}
                 >
@@ -121,7 +121,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {bests.map((b) =>
               b.row ? (
-                <Link key={b.label} href={`/app/${orgId}/matches/${b.row.match_id}`} className="rounded-2xl bg-raised px-4 py-4 ring-1 ring-border/70 transition-shadow hover:shadow-md sm:px-5">
+                <Link key={b.label} href={`/app/${orgId}/matches/${b.row.match_id}`} className="rounded-lg bg-raised px-4 py-4 border border-border transition-shadow hover:shadow-md sm:px-5">
                   <dt className="text-[0.8125rem] text-muted">{b.label}</dt>
                   <dd className="mt-1 font-score text-2xl leading-none">{b.value}</dd>
                   <dd className="mt-1.5 truncate text-xs text-muted">{t("against", { opponent: b.row.opponent })}</dd>
@@ -166,7 +166,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
       <section className="space-y-3">
         <h3 className="font-semibold">{t("allMatches")}</h3>
-      <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
+      <div className="overflow-x-auto rounded-lg bg-raised border border-border">
         <table className="w-full text-sm" data-testid="season-matches">
           <caption className="sr-only">{t("matches")}</caption>
           <thead className="text-xs text-muted">

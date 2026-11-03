@@ -36,7 +36,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="min-h-10 w-64 rounded-xl bg-raised ring-1 ring-inset ring-border px-3"
+            className="min-h-10 w-64 rounded-md bg-raised ring-1 ring-inset ring-border px-3"
           />
         </label>
         <div role="group" aria-label={t("category")} className="flex flex-wrap gap-1">
@@ -45,7 +45,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
               key={c || "all"}
               aria-pressed={cat === c}
               onClick={() => setCat(c)}
-              className={cn("rounded-full border px-3 py-1 text-sm", cat === c ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+              className={cn("rounded-md border px-3 py-1 text-sm", cat === c ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
             >
               {c ? t(`cat_${c}`) : t("all")}
             </button>
@@ -64,7 +64,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="play-list">
           {list.map((p) => (
             <li key={p.id}>
-              <Link href={`/app/${orgId}/plays/${p.id}`} className="block space-y-2 rounded-2xl bg-raised ring-1 ring-border/70 p-3 hover:bg-surface">
+              <Link href={`/app/${orgId}/plays/${p.id}`} className="block space-y-2 rounded-lg bg-raised border border-border p-3 hover:bg-surface">
                 <Preview doc={p.doc as unknown as PlayDoc} label={p.name} />
                 <p className="font-medium">{p.name}</p>
                 <p className="text-sm text-muted">

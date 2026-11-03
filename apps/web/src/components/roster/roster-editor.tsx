@@ -176,7 +176,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
         ) : entries.length === 0 ? (
           <EmptyState icon={<Users />} title={t("roster.empty")}>{canEdit && t("roster.emptyHint")}</EmptyState>
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
+          <div className="overflow-x-auto rounded-lg bg-raised border border-border">
             <table className="w-full text-left text-sm">
               <thead className="text-xs text-muted">
                 <tr className="border-b border-border/70">
@@ -307,7 +307,7 @@ function CsvImport({
         </Alert>
       )}
       {result && result.errors.length === 0 && (
-        <ul className="max-h-40 space-y-1 overflow-auto rounded-xl bg-surface p-3 text-sm" data-testid="csv-preview">
+        <ul className="max-h-40 space-y-1 overflow-auto rounded-md bg-surface p-3 text-sm" data-testid="csv-preview">
           {result.rows.map((r, i) => (
             <li key={i}>
               {r.jersey_number ?? ""} {r.first_name} {r.last_name} {r.main_position ?? ""}

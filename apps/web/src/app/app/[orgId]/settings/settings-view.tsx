@@ -41,7 +41,7 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
           <ul className="flex gap-1 lg:flex-col">
             {sections.map(([id, label]) => (
               <li key={id}>
-                <a href={`#${id}`} className="block whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium text-muted hover:bg-surface hover:text-foreground lg:rounded-xl">
+                <a href={`#${id}`} className="block whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium text-muted hover:bg-surface hover:text-foreground lg:rounded-md">
                   {label}
                 </a>
               </li>
@@ -347,7 +347,7 @@ function SecuritySection({ me }: { me: Me }) {
           </form>
         )}
         {codes && (
-          <div className="space-y-2 rounded-xl bg-surface p-4" data-testid="recovery-codes">
+          <div className="space-y-2 rounded-md bg-surface p-4" data-testid="recovery-codes">
             <p className="text-sm font-medium">{t("settings.recoveryTitle")}</p>
             <p className="text-sm text-muted">{t("settings.recoveryHint")}</p>
             <ul className="grid grid-cols-2 gap-1 font-mono text-sm sm:grid-cols-5">

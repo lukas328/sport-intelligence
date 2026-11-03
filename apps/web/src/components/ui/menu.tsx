@@ -17,7 +17,7 @@ export function MenuContent({ children, align = "end", className, side }: { chil
         sideOffset={6}
         collisionPadding={12}
         className={cn(
-          "club z-50 min-w-56 overflow-hidden rounded-2xl bg-raised p-1.5 text-sm shadow-xl ring-1 ring-border animate-fade",
+          "club z-50 min-w-56 overflow-hidden rounded-lg bg-raised p-1.5 text-sm shadow-xl ring-1 ring-border animate-fade",
           className,
         )}
       >
@@ -28,7 +28,7 @@ export function MenuContent({ children, align = "end", className, side }: { chil
 }
 
 const item =
-  "flex w-full cursor-pointer select-none items-center gap-3 rounded-xl px-3 py-2 text-left outline-none " +
+  "flex w-full cursor-pointer select-none items-center gap-3 rounded-md px-3 py-2 text-left outline-none " +
   "data-[highlighted]:bg-surface data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted";
 
 export function MenuItem({

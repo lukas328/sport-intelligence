@@ -72,7 +72,7 @@ function Editor({ orgId, item }: { orgId: string; item: Mine }) {
         </label>
         <label className="block text-sm">
           <span className="font-medium">{t("bio")}</span>
-          <textarea name="bio" maxLength={400} rows={3} defaultValue={p?.bio ?? ""} className="mt-1 w-full rounded-xl bg-raised ring-1 ring-inset ring-border p-2" />
+          <textarea name="bio" maxLength={400} rows={3} defaultValue={p?.bio ?? ""} className="mt-1 w-full rounded-md bg-raised ring-1 ring-inset ring-border p-2" />
         </label>
         <fieldset className="text-sm">
           <legend className="font-medium">{t("stats")}</legend>

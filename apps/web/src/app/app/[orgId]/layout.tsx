@@ -32,8 +32,9 @@ export default async function OrgLayout({ children, params }: { children: ReactN
     </div>
   ) : null;
   return (
-    <div className="club" style={clubStyle(org.primary_color) as CSSProperties}>
+    <div className="club min-h-dvh" style={clubStyle(org.primary_color) as CSSProperties}>
       <AppShell
+        clubVars={clubStyle(org.primary_color)}
         org={{ id: org.id, name: org.name, has_logo: org.has_logo, primary_color: org.primary_color, my_role: org.my_role }}
         orgs={me.organizations.map((o) => ({ id: o.id, name: o.name }))}
         teams={teams.map((x) => ({

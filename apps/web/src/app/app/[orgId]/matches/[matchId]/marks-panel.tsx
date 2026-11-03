@@ -27,7 +27,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
   const d = data.data;
   const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
   return (
-    <details className="group rounded-2xl bg-raised px-5 py-4 ring-1 ring-border/70" data-testid="marks-panel">
+    <details className="group rounded-lg bg-raised px-5 py-4 border border-border" data-testid="marks-panel">
       <summary className="flex cursor-pointer list-none items-center gap-2 font-semibold [&::-webkit-details-marker]:hidden">
         <Hand aria-hidden className="size-4 text-muted" />
         {t("panel", { n: d?.marks.length ?? 0 })}
@@ -47,7 +47,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
                 <button
                   key={delta}
                   type="button"
-                  className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-foreground hover:bg-border"
+                  className="rounded-md bg-surface px-2.5 py-0.5 text-xs font-medium text-foreground hover:bg-border"
                   onClick={() => shift.mutate({ id: s.id, offset: (s.offset_ms ?? 0) + delta })}
                 >
                   {delta > 0 ? "+" : "-"}
@@ -71,7 +71,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
                 {items.map((m) => (
                   <li key={m.id} className="flex items-center gap-2">
                     {m.t_ms != null && onPlay ? (
-                      <button type="button" className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => onPlay(m.t_ms!)}>
+                      <button type="button" className="inline-flex items-center gap-1 rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => onPlay(m.t_ms!)}>
                         <Play aria-hidden className="size-3 fill-current" /> {mmss(m.t_ms)}
                       </button>
                     ) : (

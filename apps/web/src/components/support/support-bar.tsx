@@ -86,7 +86,7 @@ export function FeedbackDialog({ orgId, open, onOpenChange, chat }: { orgId: str
           </div>
           <label className="block text-[0.8125rem] font-medium">
             {t("screenshot")}
-            <input name="shot" type="file" accept="image/png" className="mt-1 block text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-foreground" />
+            <input name="shot" type="file" accept="image/png" className="mt-1 block text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-foreground" />
           </label>
           <div className="flex flex-wrap gap-2">
             <Button type="submit" loading={busy}>

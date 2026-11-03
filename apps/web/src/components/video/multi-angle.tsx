@@ -40,7 +40,7 @@ export function MultiAngleControls({ cams, state }: { cams: Video[]; state: Mult
   const tc = useTranslations("camera");
   const others = cams.filter((c) => c.role !== "main");
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-xl ring-1 ring-inset ring-border p-2" data-testid="multi-angle">
+    <div className="flex flex-wrap items-end gap-3 rounded-md ring-1 ring-inset ring-border p-2" data-testid="multi-angle">
       <Select label={t("layout")} value={state.mode} onChange={(e) => state.setMode(e.target.value as MultiMode)}>
         <option value="single">{t("single")}</option>
         <option value="pip">{t("pip")}</option>
