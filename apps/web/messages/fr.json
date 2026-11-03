@@ -1921,7 +1921,20 @@
     "seeAll": "Tout",
     "trainingLength": "{minutes} min · {drills, plural, =1 {1 exercice} other {# exercices}}",
     "newScenes": "Nouvelles scènes pour vous",
-    "teams": "Vos équipes"
+    "teams": "Vos équipes",
+    "firstMatch": "Ajoutez votre premier match.",
+    "firstMatchHint": "Ensuite, téléversez la vidéo, l'analyse fait le reste.",
+    "standsOut": "Ce qui ressort",
+    "upNext": "À venir",
+    "match": "Match",
+    "trainingRow": "Entraînement",
+    "noMatchPlanned": "Aucun prévu",
+    "notAnalysed": "Dès qu'un match est analysé, ce qui ressort apparaît ici, avec des liens vers les scènes.",
+    "forYou": "Pour vous",
+    "noDates": "Aucun rendez-vous dans les 30 prochains jours.",
+    "yourNext": "Votre prochain rendez-vous",
+    "openTasks": "Tâches ouvertes",
+    "lastMatchOn": "Dernier match, {date}"
   },
   "shell": {
     "search": "Rechercher",

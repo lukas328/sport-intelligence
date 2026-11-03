@@ -1921,7 +1921,20 @@
     "seeAll": "All",
     "trainingLength": "{minutes} min · {drills, plural, =1 {1 drill} other {# drills}}",
     "newScenes": "New clips for you",
-    "teams": "Your teams"
+    "teams": "Your teams",
+    "firstMatch": "Add your first match.",
+    "firstMatchHint": "Then upload the video, the analysis does the rest.",
+    "standsOut": "What stands out",
+    "upNext": "Up next",
+    "match": "Match",
+    "trainingRow": "Training",
+    "noMatchPlanned": "None scheduled yet",
+    "notAnalysed": "Once a match is analysed, what stands out appears here, with links to the scenes.",
+    "forYou": "For you",
+    "noDates": "No dates in the next 30 days.",
+    "yourNext": "Your next date",
+    "openTasks": "Open assignments",
+    "lastMatchOn": "Last match, {date}"
   },
   "shell": {
     "search": "Search",

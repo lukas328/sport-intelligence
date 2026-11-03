@@ -115,9 +115,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
     <div className="space-y-12">
       <Stage
         aside={
-          <Link href={`/app/${orgId}/matches/${last.match_id}`} className="group block text-left lg:text-right">
+          <Link href={`/app/${orgId}/matches/${last.match_id}`} className="group block text-left xl:text-center">
             <span className="block text-[0.9375rem] font-semibold">{tv("lastResult")}: {tm(lastWon)}</span>
-            <MatchScore own={last.score_own} opp={last.score_opponent} className="text-[5.5rem] leading-[0.9] sm:text-[7.5rem]" />
+            <MatchScore own={last.score_own} opp={last.score_opponent} className="text-[5rem] leading-[0.85] xl:text-[clamp(4.5rem,6.6vw,7.5rem)]" />
             <span className="block text-[0.9375rem] group-hover:underline">{last.opponent}</span>
           </Link>
         }

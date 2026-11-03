@@ -87,7 +87,7 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await player.getByLabel("Passwort").fill("correct-horse-1");
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
-  await expect(player.getByRole("heading", { level: 1 })).toContainText("Paul");
+  await expect(player.getByRole("main")).toContainText("Paul");
   // players see four places: today, clips, dates, team
   await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(4);
   await player.getByRole("link", { name: "Team", exact: true }).click();
@@ -120,7 +120,7 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expect(page.getByRole("heading", { name: "Zwei-Faktor-Code" })).toBeVisible();
   await page.getByLabel("Code").fill(totp.generate());
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Sandra");
+  await expect(page.getByRole("main")).toContainText("Sandra");
 
   // lost phone: a recovery code works once
   await page.getByTestId("account-menu").filter({ visible: true }).click();
@@ -130,7 +130,7 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await page.getByLabel("Code").fill(recovery);
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Sandra");
+  await expect(page.getByRole("main")).toContainText("Sandra");
 });
 
 test("magic link sign-in", async ({ page }, info) => {
