@@ -26,6 +26,8 @@ export async function linkFromMail(page: Page, to: string, path: string): Promis
 }
 
 export async function expectAccessible(page: Page) {
+  // metadata (the <title>) is streamed after client-side navigations
+  await expect.poll(() => page.title()).not.toBe("");
   const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(
     result.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(" ")} ${n.failureSummary ?? ""}`)),

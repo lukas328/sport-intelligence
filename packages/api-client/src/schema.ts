@@ -297,6 +297,26 @@ export interface paths {
         patch: operations["update_me_v1_me_patch"];
         trace?: never;
     };
+    "/v1/me/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete Account
+         * @description Delete the own account (password and e-mail confirmation).
+         */
+        post: operations["delete_account_v1_me_delete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me/email/verify": {
         parameters: {
             query?: never;
@@ -308,6 +328,26 @@ export interface paths {
         put?: never;
         /** Email Verify Resend */
         post: operations["email_verify_resend_v1_me_email_verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export
+         * @description Download of all personal data (JSON).
+         */
+        get: operations["export_v1_me_export_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -727,6 +767,26 @@ export interface paths {
         post?: never;
         /** Delete Comment */
         delete: operations["delete_comment_v1_orgs__org_id__comments__comment_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete Org
+         * @description Delete the club with all teams, matches and videos (club admin, name confirmation).
+         */
+        post: operations["delete_org_v1_orgs__org_id__delete_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1841,6 +1901,13 @@ export interface components {
              */
             organization_id: string;
         };
+        /** AccountDelete */
+        AccountDelete: {
+            /** Confirm Email */
+            confirm_email: string;
+            /** Password */
+            password?: string | null;
+        };
         /** AnalysisOut */
         AnalysisOut: {
             calibration: components["schemas"]["CalibrationOut"] | null;
@@ -2854,6 +2921,11 @@ export interface components {
              * @default #ffffff
              */
             secondary_color?: string;
+        };
+        /** OrgDelete */
+        OrgDelete: {
+            /** Confirm Name */
+            confirm_name: string;
         };
         /** OrgOut */
         OrgOut: {
@@ -4272,6 +4344,37 @@ export interface operations {
             };
         };
     };
+    delete_account_v1_me_delete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountDelete"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     email_verify_resend_v1_me_email_verify_post: {
         parameters: {
             query?: never;
@@ -4283,6 +4386,26 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    export_v1_me_export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5011,6 +5134,39 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_org_v1_orgs__org_id__delete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgDelete"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             204: {

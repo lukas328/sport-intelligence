@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { serverApi } from "@/lib/api";
 import { PlayLibrary } from "./play-library";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("tactics"))("title") };
+}
 
 export default async function PlaysPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
   const { orgId, teamId } = await params;

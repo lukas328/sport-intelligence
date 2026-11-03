@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { DRILLS, type Focus, type Lang } from "@handball/tactics";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 
 const FOCI: Focus[] = ["finishing", "wings", "back_court", "pivot", "seven_m", "goalkeeping", "passing", "transition_defence", "fast_break", "defence", "powerplay"];
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("drills"))("title") };
+}
 
 export default async function DrillsPage({ params, searchParams }: { params: Promise<{ orgId: string }>; searchParams: Promise<{ focus?: string }> }) {
   const { orgId } = await params;

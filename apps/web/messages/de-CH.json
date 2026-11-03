@@ -983,5 +983,24 @@
     "members": "Mitglieder",
     "trial": "14 Tage Verein testen",
     "trialUntil": "Test bis {date}"
+  },
+  "privacy": {
+    "title": "Daten und Konto",
+    "exportHint": "Lade alle Daten herunter, die wir über dich gespeichert haben (JSON).",
+    "export": "Meine Daten herunterladen",
+    "deleteAccount": "Konto löschen",
+    "accountHint": "Dein Konto, deine Sitzungen und Mitgliedschaften werden gelöscht. Kommentare bleiben ohne Namen erhalten. Gib zur Bestätigung deine E-Mail-Adresse ein.",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "accountConfirm": "Konto endgültig löschen?",
+    "deleteClub": "Verein löschen",
+    "clubHint": "Alle Teams, Spiele, Videos und Daten von «{name}» werden endgültig gelöscht. Gib zur Bestätigung den Vereinsnamen ein.",
+    "clubName": "Vereinsname",
+    "clubConfirm": "Verein mit allen Daten endgültig löschen?",
+    "lastAdmin": "Du bist die einzige Vereinsadministration. Ernenne zuerst eine andere Person.",
+    "subscriptionActive": "Bitte zuerst das Abo kündigen.",
+    "mismatch": "Die Bestätigung stimmt nicht.",
+    "wrongPassword": "Das Passwort ist falsch.",
+    "failed": "Das hat nicht geklappt."
   }
 }

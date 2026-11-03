@@ -983,5 +983,24 @@
     "members": "Members",
     "trial": "14-day Club trial",
     "trialUntil": "Trial until {date}"
+  },
+  "privacy": {
+    "title": "Data and account",
+    "exportHint": "Download all data we store about you (JSON).",
+    "export": "Download my data",
+    "deleteAccount": "Delete account",
+    "accountHint": "Your account, sessions and memberships are deleted. Comments stay without your name. Type your e-mail address to confirm.",
+    "email": "E-mail address",
+    "password": "Password",
+    "accountConfirm": "Delete the account for good?",
+    "deleteClub": "Delete club",
+    "clubHint": "All teams, matches, videos and data of “{name}” are deleted for good. Type the club name to confirm.",
+    "clubName": "Club name",
+    "clubConfirm": "Delete the club with all data for good?",
+    "lastAdmin": "You are the only club admin. Make someone else admin first.",
+    "subscriptionActive": "Please cancel the subscription first.",
+    "mismatch": "The confirmation does not match.",
+    "wrongPassword": "The password is wrong.",
+    "failed": "That did not work."
   }
 }

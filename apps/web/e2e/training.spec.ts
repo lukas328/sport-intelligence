@@ -44,4 +44,14 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await expect(billing).toContainText("Limiten sind in dieser Installation nicht aktiv.");
   await expect(page.getByTestId("plans").getByRole("listitem").filter({ hasText: "CHF 39 pro Monat" })).toBeVisible();
   await expectAccessible(page);
+
+  // privacy: personal data download and club deletion with name confirmation
+  const exported = await page.request.get((await page.getByTestId("export").getAttribute("href"))!);
+  expect((await exported.json()).account.name).toBe("Coach Training");
+  await page.getByText("Verein löschen", { exact: true }).first().click();
+  page.on("dialog", (d) => void d.accept());
+  const del = page.getByRole("form", { name: "Verein löschen" });
+  await del.getByLabel("Vereinsname").fill("HC Training");
+  await del.getByRole("button", { name: "Verein löschen" }).click();
+  await expect(page).toHaveURL(/\/onboarding/);
 });

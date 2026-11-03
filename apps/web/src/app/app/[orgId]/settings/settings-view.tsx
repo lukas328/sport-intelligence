@@ -1,6 +1,7 @@
 "use client";
 
 import { BillingSection } from "@/components/billing/billing-section";
+import { PrivacySection } from "@/components/privacy/privacy-section";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -33,6 +34,7 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
       )}
       <AccountSection me={me} />
       <SecuritySection me={me} />
+      <PrivacySection orgId={org.id} orgName={org.name} isAdmin={isAdmin} hasPassword={me.has_password ?? true} />
     </div>
   );
 }

@@ -983,5 +983,24 @@
     "members": "Membres",
     "trial": "Essai Club 14 jours",
     "trialUntil": "Essai jusqu'au {date}"
+  },
+  "privacy": {
+    "title": "Données et compte",
+    "exportHint": "Télécharge toutes les données que nous enregistrons sur toi (JSON).",
+    "export": "Télécharger mes données",
+    "deleteAccount": "Supprimer le compte",
+    "accountHint": "Ton compte, tes sessions et tes adhésions sont supprimés. Les commentaires restent sans ton nom. Saisis ton adresse e-mail pour confirmer.",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "accountConfirm": "Supprimer définitivement le compte ?",
+    "deleteClub": "Supprimer le club",
+    "clubHint": "Toutes les équipes, matchs, vidéos et données de « {name} » sont supprimés définitivement. Saisis le nom du club pour confirmer.",
+    "clubName": "Nom du club",
+    "clubConfirm": "Supprimer définitivement le club et toutes ses données ?",
+    "lastAdmin": "Tu es le seul administrateur du club. Nomme d'abord une autre personne.",
+    "subscriptionActive": "Résilie d'abord l'abonnement.",
+    "mismatch": "La confirmation ne correspond pas.",
+    "wrongPassword": "Le mot de passe est faux.",
+    "failed": "Cela n'a pas fonctionné."
   }
 }

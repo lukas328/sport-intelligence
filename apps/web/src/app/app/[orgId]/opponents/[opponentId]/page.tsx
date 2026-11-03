@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
@@ -18,6 +19,10 @@ interface Profile {
 }
 
 const pct = (v: number | null) => (v == null ? "-" : `${Math.round(v * 100)} %`);
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("opponent"))("title") };
+}
 
 export default async function OpponentPage({ params }: { params: Promise<{ orgId: string; opponentId: string }> }) {
   const { orgId, opponentId } = await params;

@@ -15,6 +15,32 @@
         "title": "AcceptedOut",
         "type": "object"
       },
+      "AccountDelete": {
+        "properties": {
+          "confirm_email": {
+            "maxLength": 320,
+            "title": "Confirm Email",
+            "type": "string"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          }
+        },
+        "required": [
+          "confirm_email"
+        ],
+        "title": "AccountDelete",
+        "type": "object"
+      },
       "AnalysisOut": {
         "properties": {
           "calibration": {
@@ -3216,6 +3242,20 @@
           "name"
         ],
         "title": "OrgCreate",
+        "type": "object"
+      },
+      "OrgDelete": {
+        "properties": {
+          "confirm_name": {
+            "maxLength": 200,
+            "title": "Confirm Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirm_name"
+        ],
+        "title": "OrgDelete",
         "type": "object"
       },
       "OrgOut": {
@@ -6421,6 +6461,41 @@
         ]
       }
     },
+    "/v1/me/delete": {
+      "post": {
+        "description": "Delete the own account (password and e-mail confirmation).",
+        "operationId": "delete_account_v1_me_delete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDelete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Account",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
     "/v1/me/email/verify": {
       "post": {
         "operationId": "email_verify_resend_v1_me_email_verify_post",
@@ -6438,6 +6513,24 @@
         "tags": [
           "auth",
           "me"
+        ]
+      }
+    },
+    "/v1/me/export": {
+      "get": {
+        "description": "Download of all personal data (JSON).",
+        "operationId": "export_v1_me_export_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Export",
+        "tags": [
+          "privacy"
         ]
       }
     },
@@ -7457,6 +7550,53 @@
         "tags": [
           "matches",
           "comments"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/delete": {
+      "post": {
+        "description": "Delete the club with all teams, matches and videos (club admin, name confirmation).",
+        "operationId": "delete_org_v1_orgs__org_id__delete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgDelete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Org",
+        "tags": [
+          "privacy"
         ]
       }
     },

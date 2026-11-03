@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, EmptyState } from "@/components/ui/card";
@@ -27,6 +28,10 @@ interface Season {
 }
 
 const pct = (v: number | null) => (v == null ? "-" : `${Math.round(v * 100)} %`);
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("season"))("title") };
+}
 
 export default async function SeasonPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
   const { orgId, teamId } = await params;
