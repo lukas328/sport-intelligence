@@ -18,3 +18,16 @@ Decisions taken without the owner (blueprint section 0). Newest last.
    (never added to package.json), so nothing has to be removed again.
 4. **Form: 6 to 8 px radius, no pills, no floating cards.** Between the soft panels of before and
    the square references.
+5. **Polished, not raw.** The owner added: it must still look like a highly produced app; more love,
+   never worse. So the identity comes from care in details (court lines from the real geometry,
+   count-up of the score, result edges on the form, real coach notes in handwriting, a voice from
+   the data) on top of the existing quality, not from a rougher look.
+6. **References used** (free, no account): the football Bundesliga's 2021/22 on-air identity draws
+   its score graphics from hand-hung stadium scoreboards and lets club colours lead
+   (bundesliga.com, "brand refresh: the football takes centre stage"); practitioner lists of AI
+   design tells (coloured side border on rounded cards, characterless gradients, dashboard look,
+   filler). Several design-tool sites were not reachable from this session.
+7. **Signal metric against reference values** (save rate 30 %, shooting 55 %, 12 turnovers per
+   match) because there is no league baseline in the data; the page names them as reference values.
+8. **Season chart from three matches**; before that a sentence says when it appears. The e2e check
+   for the chart changed accordingly (intended change of design).

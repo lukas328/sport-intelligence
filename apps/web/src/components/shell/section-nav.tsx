@@ -117,10 +117,28 @@ export function TrainingHeader({ actions }: { actions?: ReactNode }) {
   );
 }
 
+/** Second level of the team area on phones (the sidebar shows it on desktop). */
+export function TeamSubNav() {
+  const t = useTranslations("shell");
+  const path = usePathname();
+  const { org, team } = useShell();
+  if (!team) return null;
+  const base = `/app/${org.id}/teams/${team.id}`;
+  const staff = videoWork(org.my_role, team.my_role);
+  const items = [
+    { key: "roster", href: base, label: t("roster") },
+    { key: "season", href: `${base}/season`, label: t("season") },
+    ...(staff ? [{ key: "library", href: `${base}/library`, label: t("library") }] : []),
+  ];
+  return <SubNav label={t("teamSections")} items={items} active={teamSectionOf(path)} />;
+}
+
 /** Team layout chrome: the team header on team pages, the training header on training pages. */
 export function TeamChrome() {
   const path = usePathname();
   const { mode } = useShell();
+  // the season page opens with its own stage (one stage per screen, at the top)
+  if (/\/season$/.test(path)) return null;
   if (teamSectionOf(path)) return <TeamHeader />;
   if (mode === "staff" && trainingSectionOf(path)) return <TrainingHeader />;
   return null;

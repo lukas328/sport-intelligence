@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Card, EmptyState } from "@/components/ui/card";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
+import { MatchScore } from "@/components/domain/match-score";
+import { Stage, stageButton } from "@/components/domain/stage";
+import { TeamSubNav } from "@/components/shell/section-nav";
+import { IconAsk } from "@/components/shell/icons";
+import { focusMetric, matchStatement, seasonStatement } from "@/lib/voice";
 import { cn } from "@/lib/utils";
 
 interface Row {
@@ -37,29 +41,61 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SeasonPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
   const { orgId, teamId } = await params;
   const t = await getTranslations("season");
+  const tv = await getTranslations("voice");
+  const tm = await getTranslations("matches");
+  const tp = await getTranslations("palette");
   const format = await getFormatter();
   const client = await serverApi();
-  const team = await client.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } });
-  const seasonId = team.data?.current_season?.id;
-  if (!seasonId) return <EmptyState title={t("none")} />;
-  const path = { params: { path: { org_id: orgId, team_id: teamId, season_id: seasonId } } };
-  const [stats, roster] = await Promise.all([
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats", path),
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", path),
+  const [team, org] = await Promise.all([
+    client.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } }),
+    client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
   ]);
-  if (stats.response.status === 402) return <PlanHint orgId={orgId} />;
-  const data = stats.data as unknown as Season | undefined;
-  if (!data || data.matches.length === 0) return <EmptyState title={t("none")} />;
+  const staff = org.data?.my_role === "org_admin" || ["coach", "analyst", "team_manager", "goalkeeper_coach", "athletic_coach"].includes(team.data?.my_role ?? "");
+  const base = `/app/${orgId}/teams/${teamId}`;
+  const seasonId = team.data?.current_season?.id;
+  const label = team.data?.current_season ? t("title") + " " + team.data.current_season.label : t("title");
+  const tools = staff ? (
+    <>
+      <Link href={`${base}/matrix`} className={stageButton("outline")}>
+        {tp("matrix")}
+      </Link>
+      <Link href={`${base}/assistant`} className={stageButton("outline")}>
+        <IconAsk />
+        {tp("ask")}
+      </Link>
+    </>
+  ) : null;
+  const stats = seasonId
+    ? await client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats", { params: { path: { org_id: orgId, team_id: teamId, season_id: seasonId } } })
+    : null;
+  if (stats?.response.status === 402) return <PlanHint orgId={orgId} />;
+  const data = stats?.data as unknown as Season | undefined;
+  if (!seasonId || !data || data.matches.length === 0) {
+    return (
+      <div className="space-y-8">
+        <Stage>
+          <p className="text-[0.9375rem] font-semibold">{label}</p>
+          <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl">{tv("noMatchYet")}</h1>
+          <p className="mt-4 max-w-lg text-lg">{t("none")}</p>
+          {tools && <div className="mt-7 flex flex-wrap gap-3">{tools}</div>}
+        </Stage>
+        <TeamSubNav />
+      </div>
+    );
+  }
+  const roster = await client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", { params: { path: { org_id: orgId, team_id: teamId, season_id: seasonId } } });
   const names = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.jersey_number != null ? `#${r.jersey_number} ` : ""}${r.first_name} ${r.last_name}`]));
   const n = data.totals.matches;
-  const tiles = [
-    { label: t("matches"), value: n },
-    { label: `${t("goals")} ${t("perMatch")}`, value: (data.totals.goals / n).toFixed(1) },
-    { label: t("shootingPct"), value: pct(data.totals.shooting_pct) },
-    { label: t("savePct"), value: pct(data.totals.save_pct) },
-    { label: `${t("turnovers")} ${t("perMatch")}`, value: (data.totals.turnovers / n).toFixed(1) },
+  const statement = seasonStatement(data.matches);
+  const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
+  const lastResult = matchStatement({ own: last.score_own, opp: last.score_opponent, opponent: last.opponent });
+  const focus = focusMetric({ save_pct: data.totals.save_pct, shooting_pct: data.totals.shooting_pct, turnovers_per_match: data.totals.turnovers / n });
+  const cells: { key: string; label: string; value: string | number; href: string; focus?: boolean }[] = [
+    { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: (data.totals.goals / n).toFixed(1), href: `${base}/search?type=shot&outcome=goal&side=own` },
+    { key: "shooting", label: t("shootingPct"), value: pct(data.totals.shooting_pct), href: `${base}/search?type=shot&side=own`, focus: focus === "shooting_pct" },
+    { key: "save", label: t("savePct"), value: pct(data.totals.save_pct), href: `${base}/search?type=shot&outcome=save&side=opponent`, focus: focus === "save_pct" },
+    { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: (data.totals.turnovers / n).toFixed(1), href: `${base}/search?type=turnover&side=own`, focus: focus === "turnovers" },
   ];
-  const tm = await getTranslations("matches");
   const pick = (score: (r: Row) => number | null) =>
     data.matches.reduce<Row | null>((best, r) => (score(r) != null && (best == null || score(r)! > score(best)!) ? r : best), null);
   const bestGoals = pick((r) => r.score_own);
@@ -74,57 +110,114 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   ];
   const scorers = [...data.players].filter((p) => p.shots > 0).sort((a, b) => b.goals - a.goals || (b.shooting_pct ?? 0) - (a.shooting_pct ?? 0)).slice(0, 8);
   const topGoals = Math.max(1, ...scorers.map((p) => p.goals));
+  const lastWon = last.score_own > last.score_opponent ? "won" : last.score_own < last.score_opponent ? "lost" : "draw";
   return (
-    <div className="space-y-10">
-      <h2 className="sr-only">{t("title")}</h2>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5" data-testid="season-tiles">
-        {tiles.map((x) => (
-          <div key={x.label} className="rounded-lg bg-raised px-4 py-4 border border-border sm:px-5">
-            <dt className="text-[0.8125rem] text-muted">{x.label}</dt>
-            <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{x.value}</dd>
-          </div>
-        ))}
-      </dl>
+    <div className="space-y-12">
+      <Stage
+        aside={
+          <Link href={`/app/${orgId}/matches/${last.match_id}`} className="group block text-left lg:text-right">
+            <span className="block text-[0.9375rem] font-semibold">{tv("lastResult")}: {tm(lastWon)}</span>
+            <MatchScore own={last.score_own} opp={last.score_opponent} className="text-[5.5rem] leading-[0.9] sm:text-[7.5rem]" />
+            <span className="block text-[0.9375rem] group-hover:underline">{last.opponent}</span>
+          </Link>
+        }
+      >
+        <p className="text-[0.9375rem] font-semibold">{tv("afterMatches", { label, n })}</p>
+        <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
+          {statement ? tv(statement.headline.key.replace("voice.", "") as "overXg", statement.headline.params as never) : lastResult ? tv(lastResult.headline.key.replace("voice.", "") as "won", lastResult.headline.params as never) : tv("neutralSeason")}
+        </h1>
+        {statement?.evidence && <p className="mt-4 max-w-xl text-lg">{tv(statement.evidence.key.replace("voice.", "") as "record", statement.evidence.params as never)}</p>}
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Link href={`${base}/search?type=shot&outcome=goal&side=own`} className={stageButton("solid")}>
+            {tv("goalsAsClips")}
+          </Link>
+          {tools}
+        </div>
+      </Stage>
+      <TeamSubNav />
+
       <section className="space-y-3">
-        <h3 className="font-semibold">{t("form")}</h3>
+        <h2 className="sr-only">{t("title")}</h2>
+        <dl className="grid grid-cols-2 overflow-hidden rounded-lg border border-foreground/25 bg-raised lg:grid-cols-4" data-testid="season-tiles">
+          {cells.map((c, i) => (
+            <Link
+              key={c.key}
+              href={c.href}
+              className={cn(
+                "group block px-5 py-4 transition-colors focus-visible:relative focus-visible:z-10",
+                i % 2 === 1 && "border-l border-foreground/15",
+                i >= 2 && "border-t border-foreground/15 lg:border-t-0",
+                i === 2 && "lg:border-l",
+                c.focus ? "bg-signal text-signal-ink" : "hover:bg-surface",
+              )}
+            >
+              <dt className="text-sm font-semibold">
+                {c.label}
+                {c.focus && <span>, {tv("focus")}</span>}
+              </dt>
+              <dd className="mt-1 font-score text-[2.5rem] leading-none group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">{c.value}</dd>
+            </Link>
+          ))}
+        </dl>
+        {focus && <p className="text-sm text-muted">{tv("focusNote")}</p>}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-2xl">{t("form")}</h2>
         <ol className="flex flex-wrap gap-1.5">
-          {data.matches.map((m) => {
-            const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
-            return (
-              <li key={m.match_id}>
-                <Link
-                  href={`/app/${orgId}/matches/${m.match_id}`}
-                  title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
-                  className={cn(
-                    "flex min-w-14 flex-col items-center rounded-md px-2.5 py-2 text-center ring-1 ring-inset transition-transform hover:-translate-y-0.5",
-                    r === "won" ? "bg-ok/8 ring-ok/30" : r === "lost" ? "bg-error/8 ring-error/30" : "bg-surface ring-border",
-                  )}
-                >
-                  <span className="inline-flex items-center gap-1 text-[0.6875rem] font-bold">
-                    <span aria-hidden className={cn("size-1.5 rounded-full", r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted")} />
-                    {tm(r)}
-                  </span>
-                  <span className="font-score text-base">
-                    {m.score_own}:{m.score_opponent}
-                  </span>
-                  <span className="max-w-20 truncate text-[0.6875rem] text-muted">{m.opponent}</span>
-                </Link>
-              </li>
-            );
-          })}
+          {[...data.matches]
+            .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
+            .map((m) => {
+              const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
+              return (
+                <li key={m.match_id}>
+                  <Link
+                    href={`/app/${orgId}/matches/${m.match_id}`}
+                    title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
+                    className={cn(
+                      "flex min-w-16 flex-col items-center rounded-md border-t-4 bg-raised px-3 pt-2 pb-2.5 text-center ring-1 ring-inset ring-foreground/15 transition-transform hover:-translate-y-0.5",
+                      r === "won" ? "border-t-ok" : r === "lost" ? "border-t-error" : "border-t-muted",
+                    )}
+                  >
+                    <span className="text-xs font-semibold">{tm(r)}</span>
+                    <span className="font-score text-xl leading-tight">
+                      {m.score_own}:{m.score_opponent}
+                    </span>
+                    <span className="max-w-24 truncate text-xs text-muted">{m.opponent}</span>
+                  </Link>
+                </li>
+              );
+            })}
         </ol>
       </section>
 
-      {data.matches.length > 1 && (
+      {n >= 3 ? (
+        <div className={cn("grid gap-8", scorers.length > 0 && "lg:grid-cols-2")}>
+          <section className="space-y-3">
+            <h2 className="text-2xl">{t("trend")}</h2>
+            <TrendChart rows={data.matches} label={t("chartLabel")} goals={t("goals")} xg={t("xg")} />
+          </section>
+          {scorers.length > 0 && <Scorers scorers={scorers} names={names} topGoals={topGoals} t={t} />}
+        </div>
+      ) : (
+        <>
+          <p className="text-[0.9375rem] text-muted" data-testid="season-trend">
+            {tv("chartLater")}
+          </p>
+          {scorers.length > 0 && <Scorers scorers={scorers} names={names} topGoals={topGoals} t={t} />}
+        </>
+      )}
+
+      {n > 1 && (
         <section className="space-y-3">
-          <h3 className="font-semibold">{t("best")}</h3>
-          <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <h2 className="text-2xl">{t("best")}</h2>
+          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-foreground/15 bg-foreground/15 lg:grid-cols-4">
             {bests.map((b) =>
               b.row ? (
-                <Link key={b.label} href={`/app/${orgId}/matches/${b.row.match_id}`} className="rounded-lg bg-raised px-4 py-4 border border-border transition-shadow hover:shadow-md sm:px-5">
-                  <dt className="text-[0.8125rem] text-muted">{b.label}</dt>
-                  <dd className="mt-1 font-score text-2xl leading-none">{b.value}</dd>
-                  <dd className="mt-1.5 truncate text-xs text-muted">{t("against", { opponent: b.row.opponent })}</dd>
+                <Link key={b.label} href={`/app/${orgId}/matches/${b.row.match_id}`} className="group bg-raised px-5 py-4 transition-colors hover:bg-surface">
+                  <dt className="text-sm font-semibold">{b.label}</dt>
+                  <dd className="mt-1 font-score text-3xl leading-none">{b.value}</dd>
+                  <dd className="mt-1.5 truncate text-sm text-muted group-hover:underline">{t("against", { opponent: b.row.opponent })}</dd>
                 </Link>
               ) : null,
             )}
@@ -132,82 +225,79 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
         </section>
       )}
 
-      <div className={cn("grid gap-6", scorers.length > 0 && "lg:grid-cols-2")}>
-        <Card className="space-y-2">
-          <h3 className="font-semibold">{t("trend")}</h3>
-          <TrendChart rows={data.matches} label={t("chartLabel")} goals={t("goals")} xg={t("xg")} />
-        </Card>
-        {scorers.length > 0 && (
-          <Card className="space-y-4">
-            <h3 className="font-semibold">{t("scorers")}</h3>
-            <ol className="space-y-3" data-testid="season-players">
-              {scorers.map((p, i) => (
-                <li key={p.player_id} className="grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1">
-                  <span className="text-sm font-semibold text-muted tabular-nums">{i + 1}</span>
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium">{names[p.player_id] ?? t("unknownPlayer")}</span>
-                    <span className="block text-xs text-muted">
-                      {t("goalsOfShots", { goals: p.goals, shots: p.shots })} · {t("inMatches", { n: p.matches })}
-                    </span>
-                  </span>
-                  <span className="text-right">
-                    <span className="block font-score text-xl leading-none">{p.goals}</span>
-                    <span className="block text-xs text-muted tabular-nums">{pct(p.shooting_pct)}</span>
-                  </span>
-                  <span aria-hidden className="col-start-2 col-end-4 h-1 overflow-hidden rounded-full bg-surface">
-                    <span className="block h-full rounded-full bg-accent" style={{ width: `${(p.goals / topGoals) * 100}%` }} />
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </Card>
-        )}
-      </div>
-
       <section className="space-y-3">
-        <h3 className="font-semibold">{t("allMatches")}</h3>
-      <div className="overflow-x-auto rounded-lg bg-raised border border-border">
-        <table className="w-full text-sm" data-testid="season-matches">
-          <caption className="sr-only">{t("matches")}</caption>
-          <thead className="text-xs text-muted">
-            <tr>
-              <th scope="col" className="px-3 py-2 text-left font-medium">{t("match")}</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">{t("result")}</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">{t("shootingPct")}</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">{t("savePct")}</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">{t("turnovers")}</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">{t("xg")}</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">{t("xgAgainst")}</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">{t("sevenM")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.matches.map((m) => (
-              <tr key={m.match_id} className="border-t border-border/70">
-                <th scope="row" className="px-3 py-1.5 text-left font-medium">
-                  <Link href={`/app/${orgId}/matches/${m.match_id}`} className="hover:text-accent hover:underline">
-                    {format.dateTime(new Date(m.kickoff_at), { dateStyle: "short" })} {m.is_home ? "" : "@ "}
-                    {m.opponent}
-                  </Link>
-                </th>
-                <td className="px-2 py-1.5 text-right tabular-nums">
-                  {m.score_own}:{m.score_opponent}
-                </td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{pct(m.shooting_pct)}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{pct(m.save_pct)}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{m.turnovers}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{m.xg.toFixed(1)}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{m.xg_against.toFixed(1)}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">
-                  {m.seven_m[0]}/{m.seven_m[1]}
-                </td>
+        <h2 className="text-2xl">{t("allMatches")}</h2>
+        <div className="sheet overflow-x-auto">
+          <table className="w-full text-[0.9375rem]" data-testid="season-matches">
+            <caption className="sr-only">{t("matches")}</caption>
+            <thead>
+              <tr>
+                <th scope="col" className="text-left">{t("match")}</th>
+                <th scope="col">{t("result")}</th>
+                <th scope="col">{t("shootingPct")}</th>
+                <th scope="col">{t("savePct")}</th>
+                <th scope="col">{t("turnovers")}</th>
+                <th scope="col">{t("xg")}</th>
+                <th scope="col">{t("xgAgainst")}</th>
+                <th scope="col">{t("sevenM")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data.matches.map((m) => (
+                <tr key={m.match_id}>
+                  <th scope="row" className="text-left font-medium">
+                    <Link href={`/app/${orgId}/matches/${m.match_id}`} className="hover:text-accent hover:underline">
+                      <span className="text-muted tabular-nums">{format.dateTime(new Date(m.kickoff_at), { dateStyle: "short" })}</span> {m.is_home ? "" : "@ "}
+                      {m.opponent}
+                    </Link>
+                  </th>
+                  <td className="font-semibold">
+                    {m.score_own}:{m.score_opponent}
+                  </td>
+                  <td>{pct(m.shooting_pct)}</td>
+                  <td>{pct(m.save_pct)}</td>
+                  <td>{m.turnovers}</td>
+                  <td>{m.xg.toFixed(1)}</td>
+                  <td>{m.xg_against.toFixed(1)}</td>
+                  <td>
+                    {m.seven_m[0]}/{m.seven_m[1]}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-xs text-muted">{t("xgNote")}</p>
       </section>
     </div>
+  );
+}
+
+function Scorers({ scorers, names, topGoals, t }: { scorers: Season["players"]; names: Record<string, string>; topGoals: number; t: (k: string, p?: Record<string, string | number>) => string }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-2xl">{t("scorers")}</h2>
+      <ol className="divide-y divide-foreground/10 rounded-lg border border-foreground/15 bg-raised px-5" data-testid="season-players">
+        {scorers.map((p, i) => (
+          <li key={p.player_id} className="grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-3">
+            <span className="font-score text-lg text-muted">{i + 1}</span>
+            <span className="min-w-0">
+              <span className="block truncate font-semibold">{names[p.player_id] ?? t("unknownPlayer")}</span>
+              <span className="block text-sm text-muted">
+                {t("goalsOfShots", { goals: p.goals, shots: p.shots })} · {t("inMatches", { n: p.matches })}
+              </span>
+            </span>
+            <span className="text-right">
+              <span className="block font-score text-2xl leading-none">{p.goals}</span>
+              <span className="block text-sm text-muted tabular-nums">{pct(p.shooting_pct)}</span>
+            </span>
+            <span aria-hidden className="col-start-2 col-end-4 h-1 overflow-hidden rounded-full bg-surface">
+              <span className="block h-full rounded-full bg-accent" style={{ width: `${(p.goals / topGoals) * 100}%` }} />
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

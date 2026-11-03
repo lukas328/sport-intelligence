@@ -248,6 +248,39 @@
     font-family: var(--font-display);
     font-weight: 700;
   }
+  /* match-sheet table: hairline grid, figures right-aligned, a firm rule under the head */
+  .sheet {
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 22%, transparent);
+    background: var(--raised);
+  }
+  .sheet table {
+    border-collapse: collapse;
+  }
+  .sheet th,
+  .sheet td {
+    padding: 0.7rem 0.9rem;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+  .sheet thead th {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid color-mix(in srgb, var(--foreground) 75%, transparent);
+  }
+  .sheet th:first-child,
+  .sheet td:first-child,
+  .sheet .text-left {
+    text-align: left;
+  }
+  .sheet tbody tr:hover {
+    background: var(--surface);
+  }
+  .sheet tbody tr:last-child > * {
+    border-bottom: 0;
+  }
   /* full-bleed band inside the content column (the stage): reaches the column edges */
   .bleed {
     margin-inline: calc(50% - 50vw);

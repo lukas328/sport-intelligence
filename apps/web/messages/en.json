@@ -1004,7 +1004,8 @@
     "goalsOfShots": "{goals} goals from {shots} shots",
     "inMatches": "{n, plural, =1 {1 match} other {# matches}}",
     "allMatches": "All matches in detail",
-    "unknownPlayer": "Unassigned"
+    "unknownPlayer": "Unassigned",
+    "xgNote": "xG: expected goals, estimated from shot position and situation."
   },
   "notifications": {
     "title": "Notifications",
@@ -1991,5 +1992,37 @@
     "emptyPlays": "No plays yet. Start from a template or take a scene straight from the video.",
     "emptyPlaylists": "No playlists yet. You cut clips in the video with “Set start” and “Set end”.",
     "emptyPresentations": "No presentations for the next video session yet."
+  },
+  "voice": {
+    "runWins": "{n} wins in a row.",
+    "runLosses": "{n} losses in a row.",
+    "record": "{w, plural, =1 {1 win} other {# wins}}, {d, plural, =1 {1 draw} other {# draws}}, {l, plural, =1 {1 loss} other {# losses}}.",
+    "overXg": "Scored more than the chances suggested.",
+    "underXg": "The chances were there. The goals not yet.",
+    "xgEvidence": "{goals} goals from {xg} expected (estimated).",
+    "defenceHeld": "The defence held more than expected.",
+    "defenceLeaked": "Conceded more than the opponents' chances suggested.",
+    "xgaEvidence": "{against} goals conceded from {xga} expected (estimated).",
+    "moreWins": "More wins than losses.",
+    "moreLosses": "More losses than wins. There is still time.",
+    "level": "Even so far.",
+    "wonClear": "A clear win against {opponent}.",
+    "wonTight": "Tight, but won against {opponent}.",
+    "won": "Win against {opponent}.",
+    "draw": "Draw against {opponent}.",
+    "lostTight": "Narrow loss against {opponent}.",
+    "lost": "Loss against {opponent}.",
+    "lostClear": "A clear loss against {opponent}.",
+    "matchOverXg": "{goals} goals from {xg} expected (estimated): the finishing was there.",
+    "matchUnderXg": "{goals} goals from {xg} expected (estimated): there was more in it.",
+    "afterMatches": "{label}, after {n, plural, =1 {1 match} other {# matches}}",
+    "neutralSeason": "The season so far.",
+    "focus": "work on this",
+    "focusNote": "Marked when a figure is clearly below the reference (saves 30 %, shooting 55 %, 12 turnovers per match). Reference values, not a league average.",
+    "chartLater": "The trend appears from three matches. Until then the table shows each match.",
+    "lastResult": "Last match",
+    "goalsAsClips": "Watch the goals as clips",
+    "nextMatch": "Next match",
+    "noMatchYet": "No match played yet."
   }
 }

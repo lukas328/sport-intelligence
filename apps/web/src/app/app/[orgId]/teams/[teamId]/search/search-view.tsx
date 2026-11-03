@@ -48,11 +48,18 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
   const tr = useTranslations();
   const format = useFormatter();
   const qc = useQueryClient();
-  const [filter, setFilter] = useState<Filter>({});
+  const params = useSearchParams();
+  // links from the season stage ("goals as clips") open the search pre-filtered
+  const [filter, setFilter] = useState<Filter>(() => {
+    const outcomes = (params.get("outcome") ?? "").split(",").filter((o): o is (typeof OUTCOMES)[number] => (OUTCOMES as readonly string[]).includes(o));
+    const types = (params.get("type") ?? "").split(",").filter((o): o is (typeof TYPES)[number] => (TYPES as readonly string[]).includes(o));
+    const side = params.get("side");
+    return { ...(outcomes.length ? { outcomes } : {}), ...(types.length ? { types } : {}), ...(side === "own" || side === "opponent" ? { sides: [side] } : {}) } as Filter;
+  });
   const [error, setError] = useState<ErrorKey | null>(null);
   const team = { org_id: orgId, team_id: teamId };
   const tp = useTranslations("presentations");
-  const target = useSearchParams().get("presentation");
+  const target = params.get("presentation");
   const [added, setAdded] = useState<string[]>([]);
   const toPresentation = useMutation({
     mutationFn: async (h: Hit) => {

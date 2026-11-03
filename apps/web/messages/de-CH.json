@@ -1004,7 +1004,8 @@
     "goalsOfShots": "{goals} Tore aus {shots} Würfen",
     "inMatches": "{n, plural, =1 {1 Spiel} other {# Spiele}}",
     "allMatches": "Alle Spiele im Detail",
-    "unknownPlayer": "Nicht zugeordnet"
+    "unknownPlayer": "Nicht zugeordnet",
+    "xgNote": "xG: erwartete Tore, geschätzt aus Wurfposition und Situation."
   },
   "notifications": {
     "title": "Mitteilungen",
@@ -1991,5 +1992,37 @@
     "emptyPlays": "Noch keine Spielzüge. Starte mit einer Vorlage oder übernimm eine Szene direkt aus dem Video.",
     "emptyPlaylists": "Noch keine Playlists. Clips schneidest du im Video mit «Start setzen» und «Ende setzen».",
     "emptyPresentations": "Noch keine Präsentationen für die nächste Videositzung."
+  },
+  "voice": {
+    "runWins": "{n} Siege in Folge.",
+    "runLosses": "{n} Niederlagen in Folge.",
+    "record": "{w, plural, =1 {1 Sieg} other {# Siege}}, {d, plural, =1 {1 Unentschieden} other {# Unentschieden}}, {l, plural, =1 {1 Niederlage} other {# Niederlagen}}.",
+    "overXg": "Mehr getroffen, als die Chancen hergaben.",
+    "underXg": "Die Chancen waren da. Die Tore noch nicht.",
+    "xgEvidence": "{goals} Tore aus {xg} erwarteten (geschätzt).",
+    "defenceHeld": "Hinten mehr gehalten als erwartet.",
+    "defenceLeaked": "Hinten mehr kassiert, als die Chancen hergaben.",
+    "xgaEvidence": "{against} Gegentore bei {xga} erwarteten (geschätzt).",
+    "moreWins": "Mehr Siege als Niederlagen.",
+    "moreLosses": "Mehr Niederlagen als Siege. Noch ist Zeit.",
+    "level": "Ausgeglichen bis hierher.",
+    "wonClear": "Deutlich gewonnen gegen {opponent}.",
+    "wonTight": "Knapp, aber gewonnen gegen {opponent}.",
+    "won": "Sieg gegen {opponent}.",
+    "draw": "Unentschieden gegen {opponent}.",
+    "lostTight": "Knapp verloren gegen {opponent}.",
+    "lost": "Niederlage gegen {opponent}.",
+    "lostClear": "Deutlich verloren gegen {opponent}.",
+    "matchOverXg": "{goals} Tore aus {xg} erwarteten (geschätzt): Die Abschlüsse sassen.",
+    "matchUnderXg": "{goals} Tore aus {xg} erwarteten (geschätzt): Da lag mehr drin.",
+    "afterMatches": "{label}, nach {n, plural, =1 {1 Spiel} other {# Spielen}}",
+    "neutralSeason": "Die Saison bis hierher.",
+    "focus": "hier ansetzen",
+    "focusNote": "Markiert, wenn ein Wert klar unter dem Richtwert liegt (Paraden 30 %, Würfe 55 %, 12 Ballverluste pro Spiel). Richtwerte, kein Ligaschnitt.",
+    "chartLater": "Der Verlauf erscheint ab drei Spielen. Bis dahin zeigt die Tabelle jedes Spiel einzeln.",
+    "lastResult": "Letztes Spiel",
+    "goalsAsClips": "Tore als Clips ansehen",
+    "nextMatch": "Nächstes Spiel",
+    "noMatchYet": "Noch kein Spiel gespielt."
   }
 }

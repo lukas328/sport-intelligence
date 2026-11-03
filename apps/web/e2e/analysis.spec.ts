@@ -61,6 +61,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await openTeam(page, "Saison");
   await expect(page.getByTestId("season-tiles")).toContainText("Spiele");
   await expect(page.getByTestId("season-matches")).toContainText("TV Papierdorf");
-  await expect(page.getByTestId("season-trend")).toBeVisible();
+  // one match: the trend chart waits for three matches and says so
+  await expect(page.getByTestId("season-trend")).toContainText("ab drei Spielen");
   await expectAccessible(page);
 });

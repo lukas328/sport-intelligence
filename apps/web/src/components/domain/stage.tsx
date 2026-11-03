@@ -9,7 +9,7 @@ import { CourtLines } from "./court-lines";
 export function Stage({ children, aside, compact, className }: { children: ReactNode; aside?: ReactNode; compact?: boolean; className?: string }) {
   return (
     <section className={cn("bleed relative -mt-5 overflow-hidden bg-club text-club-ink lg:-mt-10", className)}>
-      <CourtLines className="absolute inset-y-0 right-0 hidden h-full w-[34rem] md:block" />
+      <CourtLines className="absolute inset-y-0 right-0 hidden h-full w-[46rem] md:block" />
       <div
         className={cn(
           "relative mx-auto flex max-w-[1240px] flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-10",
@@ -17,7 +17,7 @@ export function Stage({ children, aside, compact, className }: { children: React
         )}
       >
         <div className="min-w-0 max-w-2xl">{children}</div>
-        {aside && <div className="shrink-0 lg:pr-[4%]">{aside}</div>}
+        {aside && <div className="shrink-0 lg:pr-[3.5rem]">{aside}</div>}
       </div>
     </section>
   );
