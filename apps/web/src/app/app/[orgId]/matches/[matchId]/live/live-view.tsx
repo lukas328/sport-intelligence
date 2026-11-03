@@ -265,7 +265,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
               key={p.player_id}
               aria-pressed={player === p.player_id}
               onClick={() => setPlayer((cur) => (cur === p.player_id ? null : p.player_id))}
-              className={cn("rounded-md border py-2 text-sm", player === p.player_id ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+              className={cn("rounded-full border py-2 text-sm", player === p.player_id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
             >
               <span className="block text-lg font-bold tabular-nums">{p.jersey_number ?? "?"}</span>
               <span className="block truncate text-xs">{p.first_name}</span>

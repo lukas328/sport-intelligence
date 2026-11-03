@@ -14,7 +14,7 @@ import { useShell } from "./context";
 /** Second (and last) level of navigation: a few pill links below the page title. */
 export function SubNav({ label, items, active }: { label: string; items: { key: string; href: string; label: ReactNode }[]; active: string | null }) {
   return (
-    <nav aria-label={label} className="scrollbar-none -mx-1 overflow-x-auto px-1">
+    <nav aria-label={label} className="scrollbar-none -mx-1 overflow-x-auto px-1 lg:hidden">
       <ul className="inline-flex gap-1">
         {items.map((it) => {
           const on = it.key === active;

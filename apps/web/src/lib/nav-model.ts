@@ -84,3 +84,36 @@ export function trainingSectionOf(path: string): TrainingSection | null {
 export function teamInPath(path: string): string | null {
   return /\/teams\/([0-9a-f-]{36})/.exec(path)?.[1] ?? null;
 }
+
+export interface SubItem {
+  key: TeamSection | TrainingSection;
+  href: string;
+}
+
+/** Second level of a destination (sidebar on desktop, pills under the title on phones). */
+export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: string | null): SubItem[] {
+  const org = `/app/${orgId}`;
+  const team = teamId ? `${org}/teams/${teamId}` : null;
+  if (dest === "team" && team) {
+    const items: SubItem[] = [
+      { key: "roster", href: team },
+      { key: "season", href: `${team}/season` },
+    ];
+    if (mode === "staff") items.push({ key: "library", href: `${team}/library` });
+    return items;
+  }
+  if (dest === "training" && mode === "staff") {
+    return [
+      ...(team ? [{ key: "plan" as const, href: `${team}/training` }] : []),
+      { key: "dates", href: `${org}/schedule` },
+      { key: "drills", href: `${org}/drills` },
+      ...(team ? [{ key: "assignments" as const, href: `${team}/assignments` }] : []),
+    ];
+  }
+  return [];
+}
+
+/** Active second-level item for a path. */
+export function sectionOf(path: string): TeamSection | TrainingSection | null {
+  return teamSectionOf(path) ?? trainingSectionOf(path);
+}

@@ -207,7 +207,7 @@ export function Tagger({
             key={s}
             aria-pressed={side === s}
             onClick={() => setSide(s)}
-            className={cn("flex-1 rounded border px-2 py-1.5", side === s ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+            className={cn("flex-1 rounded border px-2 py-1.5", side === s ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
           >
             {s === "own" ? teamName : oppName(match)}
           </button>

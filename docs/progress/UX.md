@@ -13,8 +13,8 @@ theme (#003366 at 1.49:1). On a phone the navigation took four rows before any c
 ## Delivered
 | Area | Result |
 |---|---|
-| Navigation | At most four destinations per role (coach Heute · Spiele · Team · Training; player Heute · Szenen · Termine · Team; parent Heute · Termine · Team), sidebar on desktop, tab bar on phones, two levels at most, team switcher, account menu (profile, consents, settings, appearance, help, feedback, sign out), command palette ⌘K with destinations, actions, matches and a direct question to the data assistant. Old URLs unchanged |
-| Heute | Coach: next match with "Vorbereiten" and "Live erfassen", last match with scoreboard, analysis state and the three strongest insights (P2: from the insight engine, with roster names), "Frag deine Daten", next training. Player and parent: next dates with yes / no, open assignments, new scenes. First steps: one next step, the rest folded, can be hidden |
+| Navigation | At most four destinations per role (coach Übersicht · Spiele · Team · Training; player Übersicht · Szenen · Termine · Team; parent Übersicht · Termine · Team), sidebar on desktop, tab bar on phones, two levels at most, team switcher, account menu (profile, consents, settings, appearance, help, feedback, sign out), command palette ⌘K with destinations, actions, matches and a direct question to the data assistant. Old URLs unchanged |
+| Übersicht | Coach: next match with "Vorbereiten" and "Live erfassen", last match with scoreboard, analysis state and the three strongest insights (P2: from the insight engine, with roster names), "Frag deine Daten", next training. Player and parent: next dates with yes / no, open assignments, new scenes. First steps: one next step, the rest folded, can be hidden |
 | Spiel | Scoreboard header; three views (Video · Analyse · Szenen) instead of eight tabs; one primary action depending on state (Live erfassen before the match, Video hochladen without video); everything else in "…" (PDF, live, marks, scouting, opponent, data exchange, edit, delete with a confirm dialog); processing as one progress card; edit and data exchange in dialogs |
 | Spiele | Upcoming and played, date block, state and result per row; new match in a dialog with home / away and kit swatches; the first match is created inline; score sheet photo and file import next to it |
 | Team | Kader (jersey badges, add and CSV import in dialogs), Saison with Matrix and "Frag deine Daten" as actions, Bibliothek (playlists, plays, presentations, scene search) |
@@ -72,3 +72,15 @@ theme (#003366 at 1.49:1). On a phone the navigation took four rows before any c
   texts in de-CH, fr, en.
 - P9 Partner statt alles selbst: eingehalten. Radix, cmdk and lucide instead of own widgets.
 - P10 Schnell und günstig: eingehalten. Within the route budgets, no new servers.
+
+## Second pass (same day, owner feedback)
+- "Heute" is now "Übersicht" in all three languages.
+- The desktop sidebar unfolds the second level under the active destination (Kader, Saison,
+  Bibliothek; Planung, Termine, Übungen, Aufgaben) and shows the next match; the pill row is
+  phone only.
+- Library rebuilt around the team's content (plays as board previews, playlists and
+  presentations as lists, scene search as the first entry) instead of four icon tiles.
+- Generic patterns removed: uppercase micro labels, tinted icon squares on the start page.
+- Analysis: goal with red and white posts and a neutral ink scale, toggles as quiet chips, score
+  flow with a legend and labelled line ends, insights name "your goalkeeper" instead of "?" when no
+  player is assigned, status badge only while uploading, processing or failed.

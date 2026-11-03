@@ -38,14 +38,19 @@ export function GoalGrid({
               key={String(k)}
               aria-pressed={keeper === k}
               onClick={() => setKeeper(k)}
-              className={cn("rounded px-2 py-1", keeper === k ? "bg-accent text-accent-contrast" : "bg-surface")}
+              className={cn("rounded-full px-2 py-1", keeper === k ? "bg-foreground text-background" : "bg-surface hover:bg-border")}
             >
               {k ? t("keeperView") : t("shooterView")}
             </button>
           ))}
         </div>
       )}
-      <div className="grid aspect-[3/2] grid-cols-3 gap-0.5 rounded-t-md border-4 border-b-0 border-red-600 bg-red-600 p-0.5" data-testid="goal-grid">
+      {/* the goal as it stands in the hall: red and white posts and crossbar, net cells inside */}
+      <div className="relative px-2 pt-2" data-testid="goal-grid">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-2 rounded-t-sm" style={{ background: "repeating-linear-gradient(90deg, #c8102e 0 22px, #ffffff 22px 44px)", boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.15)" }} />
+        <span aria-hidden className="absolute top-0 bottom-0 left-0 w-2" style={{ background: "repeating-linear-gradient(180deg, #c8102e 0 22px, #ffffff 22px 44px)", boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.15)" }} />
+        <span aria-hidden className="absolute top-0 right-0 bottom-0 w-2" style={{ background: "repeating-linear-gradient(180deg, #c8102e 0 22px, #ffffff 22px 44px)", boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.15)" }} />
+      <div className="grid aspect-[3/2] grid-cols-3 gap-px bg-border">
         {ROWS.flat().map((cell) => {
           const zone = keeper ? mirror(cell) : cell;
           const d = data?.[zone];
@@ -58,16 +63,16 @@ export function GoalGrid({
               aria-pressed={mode === "pick" ? selected === zone : undefined}
               aria-label={`${zone}${d ? `: ${d.goals}/${d.shots}` : ""}`}
               className={cn(
-                "flex flex-col items-center justify-center bg-raised text-xs",
+                "flex flex-col items-center justify-center bg-raised text-xs transition-colors hover:brightness-95",
                 mode === "pick" && selected === zone && "bg-accent text-accent-contrast",
                 d && d.shots > 0 && mode === "stats" && "font-semibold",
               )}
-              style={mode === "stats" && pct != null ? { background: `color-mix(in srgb, var(${saves ? "--ok" : "--error"}) ${Math.min(80, pct)}%, var(--background))` } : undefined}
+              style={mode === "stats" && pct != null ? { background: `color-mix(in srgb, var(--foreground) ${Math.round(Math.min(70, pct * 0.7))}%, var(--raised))`, color: pct > 55 ? "var(--background)" : undefined } : undefined}
             >
               {mode === "stats" ? (
                 d ? (
                   <>
-                    <span className="tabular-nums">
+                    <span className="text-sm font-bold tabular-nums font-wide">
                       {d.goals}/{d.shots}
                     </span>
                     {pct != null && <span className="opacity-70">{pct} %</span>}
@@ -81,6 +86,7 @@ export function GoalGrid({
             </button>
           );
         })}
+      </div>
       </div>
     </div>
   );

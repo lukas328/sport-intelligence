@@ -6,13 +6,14 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Search, X } from "lucide-react";
 import { NotificationBell } from "@/components/training/bell";
-import { destOf, modeFor, navFor, teamInPath } from "@/lib/nav-model";
+import { destOf, modeFor, navFor, sectionOf, sectionsFor, teamInPath } from "@/lib/nav-model";
 import { cn } from "@/lib/utils";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
 import { ShellContext, setCookie, TEAM_COOKIE, type ShellOrg, type ShellTeam, type ShellValue } from "./context";
 import { DEST_ICON } from "./icons";
+import { NextUp } from "./next-up";
 import { TeamSwitcher } from "./team-switcher";
 
 export function AppShell({
@@ -105,23 +106,46 @@ export function AppShell({
               {items.map((it) => {
                 const Icon = DEST_ICON[it.key];
                 const on = active === it.key;
+                const subs = on ? sectionsFor(it.key, mode, org.id, team?.id ?? null) : [];
+                const subOn = sectionOf(path);
                 return (
-                  <Link
-                    key={it.key}
-                    href={it.href}
-                    aria-current={on ? "page" : undefined}
-                    className={cn(
-                      "group flex items-center gap-3 rounded-xl px-3 py-2 text-[0.9375rem] font-medium transition-colors",
-                      on ? "bg-raised text-foreground shadow-sm ring-1 ring-border/70" : "text-muted hover:bg-surface hover:text-foreground",
+                  <div key={it.key}>
+                    <Link
+                      href={it.href}
+                      aria-current={on && !subs.some((x) => x.key === subOn) ? "page" : undefined}
+                      className={cn(
+                        "group flex items-center gap-3 rounded-xl px-3 py-2 text-[0.9375rem] font-medium transition-colors",
+                        on ? "text-foreground" : "text-muted hover:bg-surface hover:text-foreground",
+                        on && subs.length === 0 && "bg-raised shadow-sm ring-1 ring-border/70",
+                      )}
+                    >
+                      <Icon aria-hidden className={cn("size-[1.15rem]", on ? "text-accent" : "")} strokeWidth={on ? 2.2 : 1.8} />
+                      {t(it.key)}
+                    </Link>
+                    {subs.length > 0 && (
+                      <ul className="mt-0.5 mb-1 ml-[1.35rem] space-y-0.5 border-l border-border pl-3">
+                        {subs.map((x) => (
+                          <li key={x.key}>
+                            <Link
+                              href={x.href}
+                              aria-current={x.key === subOn ? "page" : undefined}
+                              className={cn(
+                                "-ml-[0.8rem] block rounded-r-lg border-l-2 py-1.5 pr-2 pl-[0.7rem] text-sm transition-colors",
+                                x.key === subOn ? "border-accent font-semibold text-foreground" : "border-transparent text-muted hover:text-foreground",
+                              )}
+                            >
+                              {t(x.key)}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                  >
-                    <Icon aria-hidden className={cn("size-[1.15rem]", on ? "text-accent" : "")} strokeWidth={on ? 2.2 : 1.8} />
-                    {t(it.key)}
-                  </Link>
+                  </div>
                 );
               })}
             </nav>
-            <div className="mt-auto space-y-1">
+            <div className="mt-auto space-y-3">
+              <NextUp />
               <button
                 type="button"
                 onClick={() => setPalette(true)}

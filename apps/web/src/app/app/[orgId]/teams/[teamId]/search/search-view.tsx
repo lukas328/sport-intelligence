@@ -28,7 +28,7 @@ function Chip({ on, children, onClick, color }: { on: boolean; children: React.R
       onClick={onClick}
       className={cn(
         "inline-flex min-h-8 items-center gap-1 rounded-full border px-3 py-1 text-sm",
-        on ? "border-accent bg-accent text-accent-contrast" : "border-border hover:bg-surface",
+        on ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface",
       )}
     >
       {color && <span aria-hidden className="size-2.5 rounded-full" style={{ background: color }} />}

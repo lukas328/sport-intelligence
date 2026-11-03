@@ -942,7 +942,9 @@
     "trainAssignment": "As an assignment for the team",
     "trainCreate": "Create focus",
     "trainDone": "Created. Session and follow-up are under Training.",
-    "trainOpen": "Go to training"
+    "trainOpen": "Go to training",
+    "whoKeeper": "Your goalkeeper",
+    "whoPlayer": "An unassigned player"
   },
   "zones": {
     "wing_left": "Left wing",
@@ -1913,7 +1915,7 @@
     "otherClubs": "Other club",
     "feedback": "Send feedback",
     "season": "Season",
-    "today": "Today",
+    "today": "Overview",
     "mainNav": "Main navigation",
     "plan": "Planning",
     "allTeams": "All teams",
@@ -1962,10 +1964,18 @@
     "playlistsHint": "Collect scenes and share them with the team.",
     "playsHint": "Draw on the tactics board or take them from the video.",
     "back": "Back to {name}",
-    "searchHint": "Filter every scene of the season by player, action and zone.",
+    "searchHint": "Filter every scene of the season by player, action and zone, add your own tags, save as smart playlist.",
     "presentationsHint": "For the team meeting, with the phone as remote.",
     "search": "Scene search",
-    "intro": "Everything your team makes from its matches: playlists, plays, presentations and search across all scenes.",
-    "title": "Library"
+    "title": "Library",
+    "all": "Show all",
+    "new": "New",
+    "count": "{n, plural, =0 {none} =1 {1} other {#}}",
+    "clips": "{n, plural, =0 {empty} =1 {1 clip} other {# clips}}",
+    "slides": "{n, plural, =0 {empty} =1 {1 slide} other {# slides}}",
+    "shared": "visible to players",
+    "emptyPlays": "No plays yet. Start from a template or take a scene straight from the video.",
+    "emptyPlaylists": "No playlists yet. You cut clips in the video with “Set start” and “Set end”.",
+    "emptyPresentations": "No presentations for the next video session yet."
   }
 }

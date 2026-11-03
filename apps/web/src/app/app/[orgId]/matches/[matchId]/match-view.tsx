@@ -141,7 +141,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 {t("matches.demo")}
               </Badge>
             )}
-            {match.status !== "ready" && <Badge>{t(`matches.status_${match.status}`)}</Badge>}
+            {["uploading", "processing", "failed"].includes(match.status) && <Badge tone={match.status === "failed" ? "error" : "accent"}>{t(`matches.status_${match.status}`)}</Badge>}
           </div>
         </div>
         <h1 className="sr-only">

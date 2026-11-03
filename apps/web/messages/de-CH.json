@@ -942,7 +942,9 @@
     "trainAssignment": "Als Aufgabe an das Team",
     "trainCreate": "Schwerpunkt anlegen",
     "trainDone": "Angelegt. Du findest Einheit und Verlauf unter Training.",
-    "trainOpen": "Zum Training"
+    "trainOpen": "Zum Training",
+    "whoKeeper": "Euer Torhüter",
+    "whoPlayer": "Ein nicht zugeordneter Spieler"
   },
   "zones": {
     "wing_left": "Aussen links",
@@ -1913,7 +1915,7 @@
     "otherClubs": "Anderer Verein",
     "feedback": "Feedback geben",
     "season": "Saison",
-    "today": "Heute",
+    "today": "Übersicht",
     "mainNav": "Hauptnavigation",
     "plan": "Planung",
     "allTeams": "Alle Teams",
@@ -1962,10 +1964,18 @@
     "playlistsHint": "Szenen sammeln und mit dem Team teilen.",
     "playsHint": "Auf dem Taktikboard zeichnen, aus dem Video übernehmen.",
     "back": "Zurück zu {name}",
-    "searchHint": "Alle Szenen der Saison nach Spieler, Aktion und Zone filtern.",
+    "searchHint": "Alle Szenen der Saison nach Spieler, Aktion und Zone filtern, eigene Tags setzen, als Smart Playlist speichern.",
     "presentationsHint": "Für die Mannschaftssitzung, mit Fernbedienung vom Handy.",
     "search": "Szenensuche",
-    "intro": "Alles, was dein Team aus den Spielen macht: Playlists, Spielzüge, Präsentationen und die Suche über alle Szenen.",
-    "title": "Bibliothek"
+    "title": "Bibliothek",
+    "all": "Alle anzeigen",
+    "new": "Neu",
+    "count": "{n, plural, =0 {keine} =1 {1} other {#}}",
+    "clips": "{n, plural, =0 {leer} =1 {1 Clip} other {# Clips}}",
+    "slides": "{n, plural, =0 {leer} =1 {1 Folie} other {# Folien}}",
+    "shared": "für Spieler sichtbar",
+    "emptyPlays": "Noch keine Spielzüge. Starte mit einer Vorlage oder übernimm eine Szene direkt aus dem Video.",
+    "emptyPlaylists": "Noch keine Playlists. Clips schneidest du im Video mit «Start setzen» und «Ende setzen».",
+    "emptyPresentations": "Noch keine Präsentationen für die nächste Videositzung."
   }
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Clapperboard, Smartphone, Zap } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { CourtSvg } from "@/components/court-svg";
 import { buttonClass } from "@/components/ui/button";
@@ -7,9 +6,9 @@ import { buttonClass } from "@/components/ui/button";
 export default async function HomePage() {
   const t = await getTranslations();
   const features = [
-    { Icon: Zap, title: t("home.f1Title"), body: t("home.f1") },
-    { Icon: Clapperboard, title: t("home.f2Title"), body: t("home.f2") },
-    { Icon: Smartphone, title: t("home.f3Title"), body: t("home.f3") },
+    { title: t("home.f1Title"), body: t("home.f1") },
+    { title: t("home.f2Title"), body: t("home.f2") },
+    { title: t("home.f3Title"), body: t("home.f3") },
   ];
   return (
     <div className="space-y-16 sm:space-y-24">
@@ -31,14 +30,11 @@ export default async function HomePage() {
           <CourtSvg label={t("home.courtLabel")} />
         </div>
       </section>
-      <ul className="grid gap-4 sm:grid-cols-3">
-        {features.map(({ Icon, title, body }) => (
-          <li key={title} className="space-y-3 rounded-2xl bg-raised p-6 ring-1 ring-border/70">
-            <span className="grid size-10 place-items-center rounded-xl bg-accent/10 text-accent">
-              <Icon aria-hidden className="size-5" />
-            </span>
+      <ul className="grid gap-x-10 gap-y-8 border-t border-border pt-10 sm:grid-cols-3">
+        {features.map(({ title, body }) => (
+          <li key={title} className="space-y-2">
             <h2 className="text-lg font-bold">{title}</h2>
-            <p className="text-sm text-muted">{body}</p>
+            <p className="text-[0.9375rem] text-muted">{body}</p>
           </li>
         ))}
       </ul>

@@ -45,7 +45,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
               key={c || "all"}
               aria-pressed={cat === c}
               onClick={() => setCat(c)}
-              className={cn("rounded-full border px-3 py-1 text-sm", cat === c ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+              className={cn("rounded-full border px-3 py-1 text-sm", cat === c ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
             >
               {c ? t(`cat_${c}`) : t("all")}
             </button>

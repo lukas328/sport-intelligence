@@ -204,13 +204,12 @@
   .font-narrow {
     font-stretch: 82%;
   }
+  /* small label above a title or a block: sentence case, quiet */
   .eyebrow {
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    line-height: 1.3;
     color: var(--muted);
-    font-stretch: 112%;
   }
   .scrollbar-none {
     scrollbar-width: none;

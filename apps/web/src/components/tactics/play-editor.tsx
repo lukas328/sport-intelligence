@@ -146,7 +146,7 @@ export function PlayEditor({
                 key={k}
                 aria-pressed={tool === k}
                 onClick={() => setTool(k)}
-                className={cn("rounded border px-2 py-1 text-sm", tool === k ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+                className={cn("rounded-full border px-2 py-1 text-sm", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
               >
                 {t(`tool_${k}`)}
               </button>
@@ -211,7 +211,7 @@ export function PlayEditor({
           )}
           <div role="group" aria-label={t("speed")} className="flex gap-1">
             {SPEEDS.map((s) => (
-              <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)} className={cn("rounded px-2 py-1 text-xs", speed === s ? "bg-accent text-accent-contrast" : "bg-surface")}>
+              <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)} className={cn("rounded-full px-2 py-1 text-xs", speed === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
                 {s}×
               </button>
             ))}
@@ -222,7 +222,7 @@ export function PlayEditor({
                 <button
                   aria-current={i === idx ? "step" : undefined}
                   onClick={() => (setPlaying(false), setClock(0), setIdx(i))}
-                  className={cn("size-8 rounded border text-sm tabular-nums", i === idx ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+                  className={cn("size-8 rounded border text-sm tabular-nums", i === idx ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
                 >
                   {i + 1}
                 </button>

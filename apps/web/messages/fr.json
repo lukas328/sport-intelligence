@@ -942,7 +942,9 @@
     "trainAssignment": "Comme tâche pour l'équipe",
     "trainCreate": "Créer l'objectif",
     "trainDone": "Créé. Séance et suivi se trouvent sous Entraînement.",
-    "trainOpen": "Vers l'entraînement"
+    "trainOpen": "Vers l'entraînement",
+    "whoKeeper": "Votre gardien",
+    "whoPlayer": "Un joueur non attribué"
   },
   "zones": {
     "wing_left": "Ailier gauche",
@@ -1913,7 +1915,7 @@
     "otherClubs": "Autre club",
     "feedback": "Donner un avis",
     "season": "Saison",
-    "today": "Aujourd'hui",
+    "today": "Aperçu",
     "mainNav": "Navigation principale",
     "plan": "Planification",
     "allTeams": "Toutes les équipes",
@@ -1962,10 +1964,18 @@
     "playlistsHint": "Rassembler des scènes et les partager avec l'équipe.",
     "playsHint": "Dessiner sur le tableau tactique ou reprendre depuis la vidéo.",
     "back": "Retour à {name}",
-    "searchHint": "Filtrer toutes les scènes de la saison par joueur, action et zone.",
+    "searchHint": "Filtrer toutes les scènes de la saison par joueur, action et zone, ajouter des tags, enregistrer comme smart playlist.",
     "presentationsHint": "Pour la séance d'équipe, avec le téléphone comme télécommande.",
     "search": "Recherche de scènes",
-    "intro": "Tout ce que votre équipe tire de ses matchs : playlists, systèmes, présentations et recherche dans toutes les scènes.",
-    "title": "Bibliothèque"
+    "title": "Bibliothèque",
+    "all": "Tout afficher",
+    "new": "Nouveau",
+    "count": "{n, plural, =0 {aucun} =1 {1} other {#}}",
+    "clips": "{n, plural, =0 {vide} =1 {1 clip} other {# clips}}",
+    "slides": "{n, plural, =0 {vide} =1 {1 diapositive} other {# diapositives}}",
+    "shared": "visible pour les joueurs",
+    "emptyPlays": "Pas encore de systèmes. Partez d'un modèle ou reprenez une scène directement depuis la vidéo.",
+    "emptyPlaylists": "Pas encore de playlists. Vous découpez des clips dans la vidéo avec « Début » et « Fin ».",
+    "emptyPresentations": "Pas encore de présentations pour la prochaine séance vidéo."
   }
 }

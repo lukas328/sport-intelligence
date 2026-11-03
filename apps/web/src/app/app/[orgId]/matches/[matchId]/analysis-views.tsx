@@ -220,31 +220,72 @@ function ScoreChart({
   periods: number;
 }) {
   const w = 600;
-  const h = 200;
+  const h = 210;
+  const right = 34;
   const maxT = Math.max(periodS * periods, ...points.map((p) => p.clock_s));
   const tickStep = maxT > 2400 ? 15 : 5;
   const ticks = Array.from({ length: Math.floor(maxT / 60 / tickStep) + 1 }, (_, i) => i * tickStep);
   const maxG = Math.max(5, ...points.map((p) => Math.max(p.own, p.opp)));
-  const X = (s: number) => 30 + (s / maxT) * (w - 40);
-  const Y = (g: number) => h - 20 - (g / maxG) * (h - 30);
+  const gridStep = maxG > 20 ? 10 : 5;
+  const grid = Array.from({ length: Math.floor(maxG / gridStep) + 1 }, (_, i) => i * gridStep);
+  const X = (s: number) => 28 + (s / maxT) * (w - 28 - right);
+  const Y = (g: number) => h - 22 - (g / maxG) * (h - 34);
   const step = (key: "own" | "opp") =>
     points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(0)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p[key])}`).join(" ") + ` H${X(maxT)}`;
   const timed = points.every((p) => p.clock_s > 0 || (p.own === 0 && p.opp === 0));
+  const last = points.at(-1) ?? { own: 0, opp: 0 };
+  // end labels: keep them apart when the score is close
+  let yo = Y(last.own);
+  let yp = Y(last.opp);
+  if (Math.abs(yo - yp) < 13) {
+    const mid = (yo + yp) / 2;
+    const up = last.own >= last.opp;
+    yo = mid + (up ? -7 : 7);
+    yp = mid + (up ? 7 : -7);
+  }
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${own} ${points.at(-1)?.own ?? 0}, ${opp} ${points.at(-1)?.opp ?? 0}`} className="w-full">
-      {Array.from({ length: periods - 1 }, (_, i) => (
-        <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={10} y2={h - 20} stroke="var(--border)" strokeDasharray="4 4" />
-      ))}
-      {ticks.map((m) => (
-        <text key={m} x={X(m * 60)} y={h - 4} fontSize="10" textAnchor="middle" fill="var(--muted)">
-          {m}&apos;
-        </text>
-      ))}
-      {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} />}
-      {timed && <path d={step("opp")} fill="none" stroke="var(--muted)" strokeWidth={2} strokeDasharray="5 3" />}
-      <text x={w - 6} y={14} fontSize="11" textAnchor="end" fill="var(--accent)">{own}</text>
-      <text x={w - 6} y={28} fontSize="11" textAnchor="end" fill="var(--muted)">{opp}</text>
-    </svg>
+    <figure className="space-y-3">
+      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.8125rem]">
+        <span className="inline-flex items-center gap-2 font-medium">
+          <span aria-hidden className="h-0.5 w-5 rounded-full bg-accent" />
+          {own}
+        </span>
+        <span className="inline-flex items-center gap-2 text-muted">
+          <span aria-hidden className="h-0 w-5 border-t-2 border-dashed border-muted" />
+          {opp}
+        </span>
+      </figcaption>
+      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${own} ${last.own}, ${opp} ${last.opp}`} className="w-full">
+        {grid.map((g) => (
+          <g key={g}>
+            <line x1={X(0)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke="var(--border)" strokeWidth={g === 0 ? 1.2 : 0.6} />
+            <text x={X(0) - 8} y={Y(g) + 3.5} fontSize="10" textAnchor="end" fill="var(--muted)">
+              {g}
+            </text>
+          </g>
+        ))}
+        {Array.from({ length: periods - 1 }, (_, i) => (
+          <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={8} y2={h - 22} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
+        ))}
+        {ticks.map((m) => (
+          <text key={m} x={X(m * 60)} y={h - 6} fontSize="10" textAnchor="middle" fill="var(--muted)">
+            {m}&apos;
+          </text>
+        ))}
+        {timed && <path d={step("opp")} fill="none" stroke="var(--muted)" strokeWidth={1.8} strokeDasharray="5 3" />}
+        {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />}
+        {timed && (
+          <>
+            <text x={X(maxT) + 6} y={yo + 4} fontSize="12" fontWeight="700" fill="var(--accent)">
+              {last.own}
+            </text>
+            <text x={X(maxT) + 6} y={yp + 4} fontSize="12" fontWeight="600" fill="var(--muted)">
+              {last.opp}
+            </text>
+          </>
+        )}
+      </svg>
+    </figure>
   );
 }
 
@@ -355,7 +396,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
       <div className="flex flex-wrap gap-3">
         <div className="flex gap-1" role="group" aria-label={t("filterTeam")}>
           {(["own", "opponent"] as const).map((s) => (
-            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded px-3 py-1 text-sm", side === s ? "bg-accent text-accent-contrast" : "bg-surface")}>
+            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded-full px-3 py-1 text-sm", side === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
               {s === "own" ? teamName : oppName(match)}
             </button>
           ))}

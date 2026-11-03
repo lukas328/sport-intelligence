@@ -38,7 +38,8 @@ export function useInsightText(names: Record<string, string>): (i: Insight) => s
   return (i: Insight) => {
     const p = { ...i.params } as Record<string, string | number>;
     const pid = i.params.player_id as string | null | undefined;
-    p.who = (pid && names[pid]) || (i.params.number != null ? t("player", { number: i.params.number }) : "?");
+    const fallback = i.key.includes("keeper") ? t("whoKeeper") : t("whoPlayer");
+    p.who = (pid && names[pid]) || (i.params.number != null ? t("player", { number: i.params.number }) : fallback);
     if (typeof p.zone === "string") p.zone = p.zone.length === 2 ? tg(p.zone as "TL") : tz(p.zone as "wing_left");
     if (typeof p.type === "string") p.type = te(`tt_${p.type}` as "tt_other");
     if (typeof p.gsax === "number") p.gsax = Math.abs(p.gsax).toFixed(1);

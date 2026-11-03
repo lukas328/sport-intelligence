@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { destOf, modeFor, navFor, teamInPath, teamSectionOf, trainingSectionOf } from "./nav-model";
+import { destOf, modeFor, navFor, sectionsFor, teamInPath, teamSectionOf, trainingSectionOf } from "./nav-model";
 
 const T = "11111111-2222-3333-4444-555555555555";
 
@@ -41,5 +41,13 @@ describe("navigation model", () => {
     expect(trainingSectionOf(`/app/o/teams/${T}/assignments`)).toBe("assignments");
     expect(teamInPath(`/app/o/teams/${T}/season`)).toBe(T);
     expect(teamInPath("/app/o")).toBeNull();
+  });
+
+  it("offers at most four sub items, library and training only for staff", () => {
+    expect(sectionsFor("team", "staff", "o", T).map((i) => i.key)).toEqual(["roster", "season", "library"]);
+    expect(sectionsFor("team", "player", "o", T).map((i) => i.key)).toEqual(["roster", "season"]);
+    expect(sectionsFor("training", "staff", "o", T)).toHaveLength(4);
+    expect(sectionsFor("training", "player", "o", T)).toEqual([]);
+    expect(sectionsFor("today", "staff", "o", T)).toEqual([]);
   });
 });

@@ -11,8 +11,8 @@ phone the navigation took four rows before any content. The owner asked for a UI
 lean, simple to navigate, distinctive, not generic, production ready (UX blueprint, 2026-11).
 
 ## Decision
-- **Navigation by role, at most four destinations** (`lib/nav-model.ts`, tested): coach Heute ·
-  Spiele · Team · Training; player Heute · Szenen · Termine · Team; parent Heute · Termine ·
+- **Navigation by role, at most four destinations** (`lib/nav-model.ts`, tested): coach Übersicht ·
+  Spiele · Team · Training; player Übersicht · Szenen · Termine · Team; parent Übersicht · Termine ·
   Team. Two levels at most; account items in an avatar menu; a command palette (cmdk) for
   everything else. Sidebar on desktop, tab bar on phones, full screen for courtside and
   presentation tools.

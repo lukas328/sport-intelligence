@@ -24,15 +24,17 @@ At most **four destinations per role** (main navigation: sidebar on desktop, tab
 
 | Role | Destinations |
 |---|---|
-| Coach, analyst, team manager, admin | Heute · Spiele · Team · Training |
-| Player, goalkeeper | Heute · Szenen · Termine · Team |
-| Parent | Heute · Termine · Team |
-| Guest | Heute · Spiele · Team |
+| Coach, analyst, team manager, admin | Übersicht · Spiele · Team · Training |
+| Player, goalkeeper | Übersicht · Szenen · Termine · Team |
+| Parent | Übersicht · Termine · Team |
+| Guest | Übersicht · Spiele · Team |
 
-- Second level (pill links under the title, never more than four): Team → Kader · Saison ·
-  Bibliothek; Training → Planung · Termine · Übungen · Aufgaben. There is no third level: pages
+- Second level, never more than four: Team → Kader · Saison · Bibliothek; Training → Planung ·
+  Termine · Übungen · Aufgaben. On desktop they unfold in the sidebar under the active
+  destination; on phones they are pill links under the title. There is no third level: pages
   below (Matrix, Frag deine Daten, Playlists, Spielzüge, Präsentationen, Szenensuche) show a back
   link to their parent.
+- The sidebar also shows the next match of the active team.
 - Account menu (avatar): Profil, Einwilligungen, Einstellungen, Darstellung (hell, dunkel,
   automatisch), Hilfe, Feedback, Abmelden.
 - Team switcher in the sidebar or top bar; every team page follows the active team (cookie
@@ -45,10 +47,10 @@ At most **four destinations per role** (main navigation: sidebar on desktop, tab
 
 ## Key screens
 
-- **Heute** (coach): next match with "Vorbereiten" and "Live erfassen"; last match with score,
+- **Übersicht** (coach): next match with "Vorbereiten" and "Live erfassen"; last match with score,
   analysis state and the three strongest insights; "Frag deine Daten"; next training. The first
   steps checklist shows one next step and folds the rest; it can be hidden.
-- **Heute** (player, parent): next dates with yes / no reply, open assignments, new scenes.
+- **Übersicht** (player, parent): next dates with yes / no reply, open assignments, new scenes.
 - **Spiel**: scoreboard header, three views (Video · Analyse · Szenen). Analyse holds Übersicht,
   Würfe, Torhüter, Laufleistung and Matchreport. Upload sits in the video view while there is no
   video; processing shows as one progress card. PDF, live, marks, scouting, opponent, data
@@ -83,6 +85,13 @@ At most **four destinations per role** (main navigation: sidebar on desktop, tab
 (instead of `window.confirm`), `PageHeader`, form fields.
 `components/shell`: `AppShell`, `TeamSwitcher`, `AccountMenu`, `CommandPalette`, `SubNav`,
 `TeamHeader`, `TrainingHeader`.
+
+## Avoiding the generic look
+
+No grids of icon tiles in tinted squares, no uppercase micro labels, no gradients, no emoji, no
+filler sentences. Show the team's own content instead (the library shows plays as board
+previews, playlists and presentations as lists); let domain objects carry the identity (the
+goal with red and white posts, the scoreboard, the court).
 
 ## Writing
 

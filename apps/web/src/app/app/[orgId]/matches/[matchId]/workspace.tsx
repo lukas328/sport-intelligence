@@ -491,7 +491,7 @@ export function Workspace({
                       key={k}
                       aria-pressed={tool === k}
                       onClick={() => setTool(k)}
-                      className={cn("rounded border px-2 py-1 text-xs", tool === k ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+                      className={cn("rounded-full border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
                     >
                       {t(`draw.tool_${k}`)}
                     </button>
@@ -737,7 +737,7 @@ function CameraSwitch({
             key={c.id}
             aria-pressed={c.id === active.id}
             onClick={() => onSwitch(c.id)}
-            className={cn("rounded border px-2 py-1", c.id === active.id ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+            className={cn("rounded-full border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
           >
             {t(c.role)}
           </button>

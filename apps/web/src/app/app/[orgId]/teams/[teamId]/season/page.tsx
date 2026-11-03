@@ -168,7 +168,7 @@ function TrendChart({ rows, label, goals, xg }: { rows: Row[]; label: string; go
           {xg}
         </li>
       </ul>
-      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className="w-full" data-testid="season-trend">
+      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className="max-h-64 w-full" data-testid="season-trend">
         {ticks.map((v) => (
           <g key={v}>
             <line x1={pad.l} x2={w - pad.r} y1={Y(v)} y2={Y(v)} stroke="var(--border)" strokeWidth={1} />

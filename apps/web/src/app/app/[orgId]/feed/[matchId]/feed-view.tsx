@@ -87,7 +87,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
                 aria-pressed={rating === n}
                 aria-label={t("ratingN", { n })}
                 onClick={() => setRating(n)}
-                className={cn("size-12 rounded-full border text-lg font-semibold", rating === n ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+                className={cn("size-12 rounded-full border text-lg font-semibold", rating === n ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
               >
                 {n}
               </button>
