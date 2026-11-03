@@ -506,6 +506,75 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     assert len(a["tracks"]) == 2  # previous results stay until a new run succeeds
 
 
+async def test_court_marked_on_the_hall_image(make_api: Callable[[], Api]) -> None:
+    """Moving camera, court not found automatically: the user marks it on the panorama."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    prefix = jobs.jobs[-1][3]["prefix"]
+    await api.http.post(
+        f"/internal/jobs/{jobs.jobs[-1][2]}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {"proxy_key": prefix + "proxy.mp4", "hls_prefix": prefix + "hls/"},
+        },
+    )
+    analysis_id = jobs.jobs[-1][2]
+    assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/panorama")).status_code == 404
+    pts = [{"image": [100 * i, 50 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
+    no_image = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts, "space": "panorama"}
+    )
+    assert no_image.status_code == 409
+    storage: MemoryStorage = api.app.state.storage
+    await storage.put("artifacts", prefix + "analysis/panorama.jpg", b"jpeg", "image/jpeg")
+    await api.http.post(
+        f"/internal/jobs/{analysis_id}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {
+                "camera": "moving",
+                "panorama": {"width": 3600, "height": 1100},
+                "needs_calibration": True,
+                "calibration_error": "no plausible court boundary",
+                "calibration": None,
+                "tracks": [],
+                "chunks": 0,
+                "chunk_ms": 30000,
+                "fps": 30.0,
+                "frames": 0,
+                "detector": "heuristic",
+            },
+        },
+    )
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert a["status"] == "ready" and a["needs_calibration"] is True
+    assert a["camera"] == "moving" and a["panorama"] == {"width": 3600, "height": 1100}
+    assert a["calibration"] is None and a["calibration_error"] == "no plausible court boundary"
+    img = await api.get(f"/v1/orgs/{org}/videos/{vid}/panorama")
+    assert img.status_code == 200 and img.content == b"jpeg"
+    assert img.headers["content-type"] == "image/jpeg"
+    r = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration",
+        json={"points": pts, "space": "panorama", "frame_ms": 0},
+    )
+    assert r.status_code == 202
+    payload = jobs.jobs[-1][3]
+    assert (payload["calibration_space"], payload["calibration_frame_ms"]) == ("panorama", 0)
+    bad = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts, "space": "sky"}
+    )
+    assert bad.status_code == 422
+
+
 async def test_opponent_players_number_first(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)

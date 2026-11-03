@@ -439,6 +439,10 @@ class AnalysisOut(ApiModel):
     detector: str | None
     elapsed_s: float | None
     error: str | None
+    camera: Literal["fixed", "moving"] | None = None
+    panorama: PanoramaOut | None = None  # hall image to mark the court on
+    needs_calibration: bool = False  # the court was not found automatically
+    calibration_error: str | None = None
     error_code: str | None = Field(
         default=None, description="calibration, unreadable, too_short, timeout or generic"
     )
@@ -460,3 +464,11 @@ class CalibrationPoint(ApiModel):
 
 class CalibrationIn(ApiModel):
     points: list[CalibrationPoint] = Field(min_length=4, max_length=40)
+    # "frame": image points in the video frame at frame_ms; "panorama": on the hall image
+    space: Literal["frame", "panorama"] = "frame"
+    frame_ms: int = Field(default=0, ge=0)
+
+
+class PanoramaOut(ApiModel):
+    width: int
+    height: int

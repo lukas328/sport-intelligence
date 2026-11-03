@@ -251,8 +251,22 @@ async def match_physical(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object
 @router.post("/videos/{video_id}/calibration", status_code=202, tags=["analysis"])
 async def calibrate(video_id: uuid.UUID, data: CalibrationIn, scope: OrgDep) -> dict[str, str]:
     points = [{"image": list(p.image), "court": list(p.court)} for p in data.points]
-    job = await videos.calibrate_manually(scope.ctx, video_id, points)
+    job = await videos.calibrate_manually(scope.ctx, video_id, points, data.space, data.frame_ms)
     return {"job_id": str(job.id)}
+
+
+@router.get(
+    "/videos/{video_id}/panorama",
+    tags=["analysis"],
+    response_class=Response,
+    responses={200: {"content": {"image/jpeg": {}}}},
+)
+async def panorama(video_id: uuid.UUID, scope: OrgDep) -> Response:
+    """Hall image of the last analysis (panorama or median frame) to mark the court on."""
+    data = await videos.read_panorama(scope.ctx, video_id)
+    return Response(
+        data, media_type="image/jpeg", headers={"cache-control": "private, max-age=300"}
+    )
 
 
 # ---- live job progress (SSE) ---------------------------------------------------------------

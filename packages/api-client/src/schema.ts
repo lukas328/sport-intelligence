@@ -3693,6 +3693,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/panorama": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Panorama
+         * @description Hall image of the last analysis (panorama or median frame) to mark the court on.
+         */
+        get: operations["panorama_v1_orgs__org_id__videos__video_id__panorama_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/videos/{video_id}/parts": {
         parameters: {
             query?: never;
@@ -3910,6 +3930,10 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             calibration: components["schemas"]["CalibrationOut"] | null;
+            /** Calibration Error */
+            calibration_error?: string | null;
+            /** Camera */
+            camera?: ("fixed" | "moving") | null;
             /** Chunk Ms */
             chunk_ms: number | null;
             /** Chunks */
@@ -3929,6 +3953,12 @@ export interface components {
             formations?: components["schemas"]["FormationSegment"][];
             /** Fps */
             fps: number | null;
+            /**
+             * Needs Calibration
+             * @default false
+             */
+            needs_calibration?: boolean;
+            panorama?: components["schemas"]["PanoramaOut"] | null;
             /**
              * Status
              * @enum {string}
@@ -4245,8 +4275,19 @@ export interface components {
         };
         /** CalibrationIn */
         CalibrationIn: {
+            /**
+             * Frame Ms
+             * @default 0
+             */
+            frame_ms?: number;
             /** Points */
             points: components["schemas"]["CalibrationPoint"][];
+            /**
+             * Space
+             * @default frame
+             * @enum {string}
+             */
+            space?: "frame" | "panorama";
         };
         /** CalibrationOut */
         CalibrationOut: {
@@ -6090,6 +6131,13 @@ export interface components {
         PaidIn: {
             /** Note */
             note?: string | null;
+        };
+        /** PanoramaOut */
+        PanoramaOut: {
+            /** Height */
+            height: number;
+            /** Width */
+            width: number;
         };
         /** PaperConfirm */
         PaperConfirm: {
@@ -16138,6 +16186,38 @@ export interface operations {
                 content: {
                     "application/vnd.apple.mpegurl": unknown;
                     "video/mp4": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    panorama_v1_orgs__org_id__videos__video_id__panorama_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
                 };
             };
             /** @description Validation Error */

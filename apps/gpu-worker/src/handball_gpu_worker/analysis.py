@@ -4,7 +4,12 @@ Runs on the `gpu` queue (local backend on CPU until a GPU provider is configured
 - `analysis/tracks.parquet`: all track points (pipeline and detector version in the metadata)
 - `analysis/chunk_NNNNN.bin`: 30 s chunks for the browser, packed little-endian float32 rows
   [t_ms, track_id, x, y] (BRIEF 6.4: compact binary instead of JSON)
-and reports calibration, per-track summary, timings and cost to the API.
+- `analysis/panorama.jpg`: the hall image users click court points on (panorama of a moving
+  camera, median frame of a fixed one) and `analysis/motion.npz`: camera motion + panorama, reused
+  when the analysis re-runs with clicked points (same panorama coordinates, no second motion pass)
+and reports calibration, per-track summary, timings and cost to the API. If the court cannot be
+found automatically, the job still succeeds with `needs_calibration` and the hall image, so the user
+can mark the court instead of seeing an error.
 """
 
 from __future__ import annotations
@@ -15,6 +20,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+import cv2
 import numpy as np
 import structlog
 
@@ -22,7 +28,8 @@ from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_d
 from handball_vision import __version__ as vision_version
 from handball_vision import formation
 from handball_vision.calibration import CalibrationError, calibrate_points
-from handball_vision.pipeline import AnalysisResult, analyse_video
+from handball_vision.motion import CameraMotion
+from handball_vision.pipeline import AnalysisResult, _open, analyse_video, prepare_view
 from handball_vision.teams import hex_to_bgr
 
 log = structlog.get_logger("gpu.analysis")
@@ -88,6 +95,30 @@ def detect_formations(result: AnalysisResult) -> list[dict[str, Any]]:
     return [s.to_dict() for s in formation.detect(samples)]
 
 
+def _load_motion(
+    s3: Any, bucket: str, prefix: str, work: Path, points: list[Any] | None
+) -> CameraMotion | None:
+    """Camera motion of an earlier run (only when re-running with clicked points)."""
+    if not points:
+        return None
+    path = work / "motion.npz"
+    try:
+        s3.download_file(bucket, prefix + "analysis/motion.npz", str(path), Config=TRANSFER)
+        return CameraMotion.load(path)
+    except Exception as exc:  # missing or unreadable: estimate again
+        log.info("motion_cache_miss", error=str(exc))
+        return None
+
+
+def _store_view(s3: Any, bucket: str, prefix: str, work: Path, motion: CameraMotion) -> None:
+    out = work / "view"
+    out.mkdir(exist_ok=True)
+    hall = motion.background()
+    cv2.imwrite(str(out / "panorama.jpg"), hall, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    motion.save(out / "motion.npz")
+    upload_dir(s3, bucket, out, prefix + "analysis/")
+
+
 def run_analysis(
     job_id: str,
     organization_id: str,
@@ -98,6 +129,8 @@ def run_analysis(
     prefix: str,
     kits: dict[str, str],
     calibration_points: list[dict[str, list[float]]] | None = None,
+    calibration_space: str = "frame",
+    calibration_frame_ms: int = 0,
     settings: JobSettings | None = None,
     reporter: Reporter | None = None,
 ) -> dict[str, Any]:
@@ -118,13 +151,20 @@ def run_analysis(
         s3.download_file(bucket, proxy_key, str(video), Config=TRANSFER)
 
         rep.stage("calibration")
+        motion = _load_motion(s3, settings.s3_bucket_artifacts, prefix, work, calibration_points)
+        if motion is None:
+            motion = prepare_view(video)
+            _store_view(s3, settings.s3_bucket_artifacts, prefix, work, motion)
+        hall = motion.background()
+        view = {
+            "camera": "moving" if motion.moving else "fixed",
+            "panorama": {"width": int(hall.shape[1]), "height": int(hall.shape[0])},
+        }
+        _, _, fps, _ = _open(video)
         calib = None
+        space = "panorama" if calibration_space == "panorama" else "frame"
         if calibration_points:
-            import av
-
-            with av.open(str(video)) as c:
-                st = c.streams.video[0]
-                size = (st.codec_context.width, st.codec_context.height)
+            size = (hall.shape[1], hall.shape[0]) if space == "panorama" else motion.frame_size
             calib = calibrate_points(
                 [(p["image"][0], p["image"][1]) for p in calibration_points],
                 [(p["court"][0], p["court"][1]) for p in calibration_points],
@@ -132,12 +172,40 @@ def run_analysis(
             )
         bgr = {k: hex_to_bgr(v) for k, v in kits.items()}
         rep.stage("tracking")
-        result = analyse_video(
-            video,
-            bgr,
-            calibration=calib,
-            progress=lambda stage, f: rep.fraction(f) if stage == "tracking" else None,
-        )
+        try:
+            result = analyse_video(
+                video,
+                bgr,
+                calibration=calib,
+                calibration_frame=round(calibration_frame_ms * fps / 1000),
+                calibration_space=space,  # type: ignore[arg-type]
+                motion=motion,
+                progress=lambda stage, f: rep.fraction(f) if stage == "tracking" else None,
+            )
+        except CalibrationError as exc:
+            if calib is not None:
+                raise
+            # automatic calibration failed: not an error for the user, they mark the court
+            pending: dict[str, Any] = {
+                **view,
+                "needs_calibration": True,
+                "calibration_error": str(exc),
+                "calibration": None,
+                "tracks": [],
+                "fps": fps,
+                "frames": 0,
+                "chunks": 0,
+                "chunk_ms": CHUNK_MS,
+                "detector": "heuristic",
+                "versions": {"vision": vision_version},
+                "timings_s": {},
+                "elapsed_s": round(time.perf_counter() - started, 1),
+                "stats": {"camera": view["camera"], "motion": motion.stats},
+                "formations": [],
+            }
+            rep.succeed(pending)
+            log.info("analysis_needs_calibration", job_id=job_id, reason=str(exc))
+            return pending
 
         rep.stage("upload")
         out = work / "analysis"
@@ -148,6 +216,8 @@ def run_analysis(
         elapsed = time.perf_counter() - started
         tracks = result.summary()
         payload: dict[str, Any] = {
+            **view,
+            "needs_calibration": False,
             "calibration": result.calibration.to_dict(),
             "tracks": tracks,
             "fps": result.fps,

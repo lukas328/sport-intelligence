@@ -9,10 +9,18 @@ Status of the platform at the end of M9 and what has to happen before real clubs
 - ✅ Tagging, match report, shots, goalkeepers, insights, season, opponents, plays, assignments, notifications
 - ✅ Video analysis baseline (calibration, detection, tracking, teams, physical load, formations): **estimates**,
   labelled in the UI; trained models are the next quality step (ADR 012, Q-ML-2)
+- ✅ Moving cameras (operator pans and zooms, broadcast): camera motion, hall panorama, per-frame court
+  homography (ADR 020); verified on synthetic panning footage and on 3 real clips (motion and panorama)
+- ✅ Mark the court by hand on the hall image (panorama or median frame) when automatic calibration fails or
+  looks wrong; the analysis re-runs with the points (ADR 020)
+- ☐ Automatic calibration on real multi-sport halls is not reliable yet (docs/perf/real-videos.md): top-view
+  search, goal detection or a learned court model
+- ☐ Web player overlays (spotlight) for moving cameras need per-frame homographies; hidden until then (ADR 020)
 - ☐ Validate the analysis on the club's real videos (Q-DATA-1) and adjust filming guidance
 
 ## Infrastructure (ADR 002, Q-INFRA-1)
-- ☐ Choose hosting in CH/EU, managed Postgres with PITR, S3-compatible storage with versioning, GPU provider with DPA
+- ✅ Object storage decided: Cloudflare R2 with EU jurisdiction (ADR 002); test-data bucket via `scripts/testdata.py`
+- ☐ Choose app hosting in the EU, managed Postgres with PITR, S3-compatible storage with versioning, GPU provider with DPA
 - ☐ Terraform module for the chosen provider (`infra/terraform`)
 - ☐ TLS on the load balancer, HSTS preload decision, CDN for HLS segments
 - ☐ Off-site backup bucket with object lock; schedule `backup.sh`; first production restore test recorded

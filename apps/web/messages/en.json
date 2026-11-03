@@ -555,7 +555,12 @@
     "failureNext_timeout": "We have noted the problem. You can restart the analysis or tag events by hand.",
     "failure_generic": "The analysis failed.",
     "failureNext_generic": "The video stays playable: tag events by hand or import the match report. We will look into it.",
-    "failureCredit": "This match does not count against your plan."
+    "failureCredit": "This match does not count against your plan.",
+    "needsCalibration": "The court was not found automatically. Mark it once on the hall image, then the analysis runs.",
+    "needsCalibrationStaff": "The court was not found automatically. A coach has to mark it on the hall image.",
+    "checkCourt": "Moving camera: please check the automatically detected court on the hall image.",
+    "markCourt": "Mark the court",
+    "checkCourtButton": "Check the court"
   },
   "tabs": {
     "video": "Video",
@@ -1783,5 +1788,44 @@
     "toClub": "Go to club",
     "noAdmin": "Only club admins can accept the invitation.",
     "accept": "Accept"
+  },
+  "calibrate": {
+    "title": "Mark the court",
+    "introMoving": "The hall image is stitched from the whole video (the camera pans). Mark at least 4 points, ideally 6 to 8 spread over the whole court.",
+    "introFixed": "Mark at least 4 court points, ideally 6 to 8 spread over the whole court.",
+    "zoomIn": "Zoom in",
+    "zoomFit": "Whole image",
+    "close": "Close",
+    "imageAlt": "Hall image without players",
+    "pick": "Now click in the hall image: {name}",
+    "courtTitle": "Choose a court point",
+    "nearSide": "The bottom of the sketch is the side where the camera stands.",
+    "count": "{count} of at least {min} points set",
+    "fit": "Point deviation: {px} pixels",
+    "existing": "Orange: the automatically detected court. If it is wrong, set the points again.",
+    "remove": "Remove {name}",
+    "error": "The points could not be saved. Please try again.",
+    "save": "Save and start the analysis",
+    "reset": "Remove all points",
+    "hint": "Tip: court corners and goal posts on the floor are the most precise. To move a point, choose it in the sketch and click again.",
+    "landmarks": {
+      "cornerNearLeft": "Left corner, camera side",
+      "cornerFarLeft": "Left corner, far side",
+      "cornerNearRight": "Right corner, camera side",
+      "cornerFarRight": "Right corner, far side",
+      "centreNear": "Centre line, camera side",
+      "centreFar": "Centre line, far side",
+      "postLeftNear": "Left goal, post camera side",
+      "postLeftFar": "Left goal, post far side",
+      "postRightNear": "Right goal, post camera side",
+      "postRightFar": "Right goal, post far side",
+      "sixLeftNear": "Left 6 m line, end camera side",
+      "sixLeftFar": "Left 6 m line, end far side",
+      "sixRightNear": "Right 6 m line, end camera side",
+      "sixRightFar": "Right 6 m line, end far side",
+      "sevenLeft": "Left 7 m line (centre)",
+      "sevenRight": "Right 7 m line (centre)"
+    },
+    "spread": "The points are too close together: also mark points on both sidelines (e.g. the corners or the ends of the centre line). The goal posts alone are not enough; the court would be distorted."
   }
 }
