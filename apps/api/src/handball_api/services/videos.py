@@ -24,7 +24,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit
+from handball_api.services import audit, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
@@ -405,6 +405,14 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
             await _apply_analysis_result(ctx, asset, job, data.result)
+            await training.notify(
+                ctx,
+                match.organization_id,
+                await training.staff_of(ctx, match.team_id),
+                "analysis_ready",
+                {"match_id": str(match.id)},
+                f"/app/{match.organization_id}/matches/{match.id}",
+            )
         elif data.status == JobStatus.SUCCEEDED and job.kind == "sync" and data.result:
             _apply_sync_result(asset, data.result)
     await ctx.db.flush()

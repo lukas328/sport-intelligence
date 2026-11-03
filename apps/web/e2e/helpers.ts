@@ -9,7 +9,8 @@ export function uniqueEmail(prefix: string): string {
 
 /** Waits for the latest e-mail to `to` and returns the first link in it that contains `path`. */
 export async function linkFromMail(page: Page, to: string, path: string): Promise<string> {
-  for (let i = 0; i < 40; i++) {
+  // generous: during the full run the video analysis keeps the CPU busy
+  for (let i = 0; i < 120; i++) {
     const res = await page.request.get(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`);
     const { messages } = (await res.json()) as { messages: { ID: string }[] };
     if (messages.length > 0) {
@@ -38,4 +39,6 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.getByLabel("Passwort").fill("correct-horse-1");
   await page.getByLabel(/Nutzungsbedingungen/).check();
   await page.getByRole("button", { name: "Konto erstellen" }).click();
+  // password hashing is deliberately slow; wait until the app has moved on
+  await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
 }

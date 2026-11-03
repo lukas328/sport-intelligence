@@ -103,6 +103,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           <h1 className="text-2xl font-semibold">
             {home} <span className="text-muted">{t("matches.vs")}</span> {away}
           </h1>
+          <a href={`/app/${orgId}/opponents/${match.opponent.id}`} className="text-sm text-accent underline underline-offset-4">
+            {t("opponent.open")}: {match.opponent.name}
+          </a>
         </div>
         <div className="flex items-center gap-3">
           {hs != null && as != null && (

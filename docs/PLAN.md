@@ -61,7 +61,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 ### M6 Plays and tactics board ✅ board, library, templates, video to board, defence systems; play clustering open (see docs/progress/M6.md)
 - Role assignment, action detection rules, DTW distance, HDBSCAN clustering, naming, defence formation
 - Tactics editor (SVG, frames, animation, touch), video + board side by side, template search, play library, matchup matrix
-### M7 Insights, season, opponents, training
+### M7 Insights, season, opponents, training ✅ web push open (see docs/progress/M7.md)
 - Insight engine (catalogue, Wilson/Beta tests, min samples, ranking), TextGenerator (Claude API) + number validator + template fallback
 - Season stats, problem radar, opponent profile, drill library, assignments, notifications (in-app, e-mail, web push)
 ### M8 Billing, sharing, export, backoffice

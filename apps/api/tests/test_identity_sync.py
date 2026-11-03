@@ -123,6 +123,8 @@ async def test_identity_and_physical(make_api: Callable[[], Api]) -> None:
 
     a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
     assert a["formations"] == [seg]
+    notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
+    assert notes["items"][0]["kind"] == "analysis_ready"
     away = next(t for t in a["tracks"] if t["track_no"] == 3)
     assert (away["number"], away["identity_source"]) == (14, "model")
     assert away["physical"]["distance_m"] == 150

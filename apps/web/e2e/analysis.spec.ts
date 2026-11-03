@@ -23,6 +23,10 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("link", { name: /TV Papierdorf/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Papierdorf");
   await expect(page.getByTestId("score")).toHaveText("5:4");
+  await page.getByRole("link", { name: /Gegner-Profil/ }).click();
+  await expect(page.getByTestId("opponent-tiles")).toBeVisible();
+  await expectAccessible(page);
+  await page.goBack();
 
   await page.getByRole("tab", { name: "Übersicht" }).click();
   const table = page.getByTestId("comparison");

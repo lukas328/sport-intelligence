@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { CSSProperties, ReactNode } from "react";
 import { LogoutButton } from "@/components/logout-button";
+import { NotificationBell } from "@/components/training/bell";
 import { serverApi } from "@/lib/api";
 import { accentFor } from "@/lib/color";
 
@@ -28,13 +29,20 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           )}
           <span className="text-lg font-semibold">{org.name}</span>
         </Link>
-        <nav aria-label={org.name} className="flex items-center gap-1 text-sm">
+        <nav aria-label={org.name} className="flex flex-wrap items-center gap-1 text-sm">
           <Link href={`/app/${org.id}`} className="rounded px-3 py-2 hover:bg-surface">
             {t("common.teams")}
+          </Link>
+          <Link href={`/app/${org.id}/assignments`} className="rounded px-3 py-2 hover:bg-surface">
+            {t("nav.assignments")}
+          </Link>
+          <Link href={`/app/${org.id}/drills`} className="rounded px-3 py-2 hover:bg-surface">
+            {t("nav.drills")}
           </Link>
           <Link href={`/app/${org.id}/settings`} className="rounded px-3 py-2 hover:bg-surface">
             {t("common.settings")}
           </Link>
+          <NotificationBell orgId={org.id} />
           <LogoutButton />
         </nav>
       </div>

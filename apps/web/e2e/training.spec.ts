@@ -1,0 +1,39 @@
+import { expect, test } from "@playwright/test";
+import { expectAccessible, register, uniqueEmail } from "./helpers";
+
+test("drills, notifications and team assignments", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  await register(page, uniqueEmail("train"), "Coach Training");
+  await page.getByLabel("Vereinsname").fill("HC Training");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("U17");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "U17" })).toBeVisible();
+  const teamUrl = page.url();
+
+  // the bell shows no unread notifications for a new coach
+  await expect(page.getByTestId("bell")).toBeVisible();
+  await page.getByTestId("bell").click();
+  await expect(page.getByText("Keine Mitteilungen.")).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  // drill library with focus filter
+  await page.getByRole("link", { name: "Übungen" }).first().click();
+  await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(11);
+  await page.getByRole("link", { name: "Torhüter", exact: true }).click();
+  await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(2);
+  await expectAccessible(page);
+
+  // my assignments: empty
+  await page.getByRole("link", { name: "Aufgaben" }).first().click();
+  await expect(page.getByText("Keine Aufgaben.")).toBeVisible();
+
+  // team assignments: a drill for everybody; without players the API explains why it cannot
+  await page.goto(`${teamUrl}/assignments`);
+  await page.getByLabel("Art").selectOption("drill");
+  await page.getByRole("button", { name: "Aufgabe geben" }).click();
+  await expect(page.getByText(/Lade zuerst Spieler/)).toBeVisible();
+  await expectAccessible(page);
+});

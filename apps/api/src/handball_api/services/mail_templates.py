@@ -42,6 +42,23 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
             "Le lien est valable {hours} heures.",
         ),
     },
+    "assignment": {
+        "de-CH": (
+            "Neue Aufgabe: {title}",
+            "Hallo {name}\n\n{coach} hat dir eine Aufgabe im Team {team} gegeben: {title}.{due}\n\n"
+            "Zur Aufgabe: {link}",
+        ),
+        "en": (
+            "New assignment: {title}",
+            "Hello {name}\n\n{coach} gave you an assignment in team {team}: {title}.{due}\n\n"
+            "Open it: {link}",
+        ),
+        "fr": (
+            "Nouvelle tâche : {title}",
+            "Bonjour {name}\n\n{coach} t'a confié une tâche dans l'équipe {team} : {title}.{due}\n\n"
+            "Ouvrir la tâche : {link}",
+        ),
+    },
     "magic_link": {
         "de-CH": (
             "Dein Anmeldelink",

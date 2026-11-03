@@ -29,9 +29,12 @@ from handball_api.models.tenancy import (
     Season,
     Team,
 )
+from handball_api.models.training import Assignment, AssignmentStatus, Notification
 
 __all__ = [
     "Annotation",
+    "Assignment",
+    "AssignmentStatus",
     "AuditLog",
     "AuthSession",
     "AuthToken",
@@ -44,6 +47,7 @@ __all__ = [
     "Invitation",
     "Match",
     "Membership",
+    "Notification",
     "OAuthIdentity",
     "Opponent",
     "OrgMembership",

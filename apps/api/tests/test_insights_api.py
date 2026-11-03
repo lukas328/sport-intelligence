@@ -101,3 +101,12 @@ async def test_insights_summary_and_season(make_api: Callable[[], Api]) -> None:
     assert season["totals"]["goals"] == 39
     assert season["totals"]["shooting_pct"] == pytest.approx(39 / 78, abs=1e-4)
     assert season["matches"][0]["opponent"] == "TV Gegner"
+
+    opp_id = (await api.get(f"/v1/orgs/{org}/matches/{bad}")).json()["opponent"]["id"]
+    prof = (await api.get(f"/v1/orgs/{org}/opponents/{opp_id}/profile")).json()
+    assert prof["opponent"]["name"] == "TV Gegner"
+    assert prof["tagged_matches"] == 3
+    assert prof["totals"]["goals"] == 18
+    assert len(prof["matches"]) == 4  # incl. the match without events
+    missing = "00000000-0000-0000-0000-000000000009"
+    assert (await api.get(f"/v1/orgs/{org}/opponents/{missing}/profile")).status_code == 404

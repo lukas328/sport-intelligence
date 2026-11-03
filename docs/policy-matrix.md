@@ -34,6 +34,7 @@ Enforced server-side; verified by `apps/api/tests/test_policy_matrix.py`.
 | `event.write` | ✓ | ✓ | ✓ |  |  |  |
 | `play.read_all` | ✓ | ✓ | ✓ |  |  |  |
 | `play.write` | ✓ | ✓ | ✓ |  |  |  |
+| `assignment.write` | ✓ | ✓ | ✓ |  |  |  |
 
 - Team actions apply to the teams where the user has that role; org admins act in every team.
 - Org admins need two-factor sign-in for org-level write actions after the grace period (`HB_ORG_ADMIN_2FA_GRACE_DAYS`, default 14).

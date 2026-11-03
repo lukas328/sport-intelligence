@@ -112,3 +112,9 @@ async def match_summary(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
 async def season_stats(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
     """Per-match key numbers, totals and player totals for a season."""
     return await insights_service.season_stats(scope.ctx, team_id, season_id)
+
+
+@router.get("/opponents/{opponent_id}/profile", response_model=dict[str, Any], tags=["insights"])
+async def opponent_profile(opponent_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Scouting profile from all tagged matches against this opponent."""
+    return await insights_service.opponent_profile(scope.ctx, opponent_id)

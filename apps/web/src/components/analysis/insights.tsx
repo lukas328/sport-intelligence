@@ -1,6 +1,8 @@
 "use client";
 
+import { focusForInsight } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -98,6 +100,11 @@ export function InsightsCard({
               <button className="text-xs text-accent underline" onClick={() => onEvidence(text(i), i.evidence)}>
                 {t("evidence")}
               </button>
+              {i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
+                <Link className="text-xs text-accent underline" href={`/app/${orgId}/drills?focus=${focusForInsight(i.key, i.params.zone as string | null).join(",")}`}>
+                  {t("drills")}
+                </Link>
+              )}
             </li>
           ))}
         </ul>

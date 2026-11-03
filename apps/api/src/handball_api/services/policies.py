@@ -48,6 +48,7 @@ class Action(StrEnum):
     EVENT_WRITE = "event.write"
     PLAY_READ_ALL = "play.read_all"
     PLAY_WRITE = "play.write"
+    ASSIGNMENT_WRITE = "assignment.write"
 
 
 ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
@@ -87,6 +88,7 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.EVENT_WRITE: _STAFF,
     Action.PLAY_READ_ALL: _STAFF,
     Action.PLAY_WRITE: _STAFF,
+    Action.ASSIGNMENT_WRITE: _STAFF,
 }
 
 # Actions that change rights, billing or the organisation.

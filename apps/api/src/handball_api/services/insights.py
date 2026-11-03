@@ -12,12 +12,13 @@ from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
 from handball_api.core.text import numbers_ok
-from handball_api.models import Event, Match, Opponent, RosterEntry
+from handball_api.models import Event, Match, Opponent, RosterEntry, VideoAsset
+from handball_api.models.enums import VideoRole
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.orgs import get_team
-from handball_api.services.policies import Action
+from handball_api.services.policies import Action, visible_team_ids
 from handball_metrics.insights import VERSION, match_insights
 
 
@@ -192,4 +193,97 @@ async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> di
             else None,
         },
         "players": sorted(players.values(), key=lambda p: -p["goals"]),
+    }
+
+
+async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
+    """Scouting: what the opponent did in all our tagged matches against them (visible teams)."""
+    opponent = await ctx.db.get(Opponent, opponent_id)
+    if opponent is None or opponent.organization_id != ctx.require_actor().organization_id:
+        raise ProblemError(404, "not-found", "Opponent not found")
+    visible = visible_team_ids(ctx.require_actor())
+    q = select(Match).where(Match.opponent_id == opponent.id).order_by(Match.kickoff_at)
+    if visible is not None:
+        q = q.where(Match.team_id.in_(visible))
+    matches = list((await ctx.db.scalars(q)).all())
+    record = {"won": 0, "drawn": 0, "lost": 0}
+    agg: dict[str, Any] = {
+        "goals": 0,
+        "shots": 0,
+        "seven_m_goals": 0,
+        "seven_m_shots": 0,
+        "fast_break_goals": 0,
+        "turnovers": 0,
+        "xg": 0.0,
+    }
+    zones: dict[str, dict[str, int]] = {}
+    goal_zones: dict[str, dict[str, int]] = {}
+    scorers: dict[int, dict[str, int]] = {}
+    formations: dict[str, int] = {}
+    rows = []
+    tagged = 0
+    for m in matches:
+        if m.score_own is not None and m.score_opponent is not None:
+            key = (
+                "won"
+                if m.score_own > m.score_opponent
+                else "drawn"
+                if m.score_own == m.score_opponent
+                else "lost"
+            )
+            record[key] += 1
+        s = await events_service.match_stats(ctx, m.id)
+        rows.append(
+            {
+                "match_id": str(m.id),
+                "kickoff_at": m.kickoff_at.isoformat(),
+                "score_own": m.score_own,
+                "score_opponent": m.score_opponent,
+                "events": s["quality"]["events"],
+            }
+        )
+        if not s["quality"]["events"]:
+            continue
+        tagged += 1
+        opp = s["opponent"]
+        for k in (
+            "goals",
+            "shots",
+            "seven_m_goals",
+            "seven_m_shots",
+            "fast_break_goals",
+            "turnovers",
+        ):
+            agg[k] += opp[k]
+        agg["xg"] = round(agg["xg"] + opp["xg"], 2)
+        for src, dst in ((opp["zones"], zones), (opp["goal_zones"], goal_zones)):
+            for z, v in src.items():
+                d = dst.setdefault(z, {"shots": 0, "goals": 0})
+                d["shots"] += v["shots"]
+                d["goals"] += v["goals"]
+        for p in s["players"].values():
+            if p["side"] == "opponent" and p.get("number") is not None:
+                d = scorers.setdefault(int(p["number"]), {"goals": 0, "shots": 0, "matches": 0})
+                d["goals"] += p["goals"]
+                d["shots"] += p["shots"]
+                d["matches"] += 1
+        main = await ctx.db.scalar(
+            select(VideoAsset).where(VideoAsset.match_id == m.id, VideoAsset.role == VideoRole.MAIN)
+        )
+        for seg in ((main.analysis or {}).get("formations") or []) if main else []:
+            if seg.get("team") == "away":
+                f = str(seg["formation"])
+                formations[f] = formations.get(f, 0) + int(seg["end_ms"]) - int(seg["start_ms"])
+    agg["shooting_pct"] = round(agg["goals"] / agg["shots"], 4) if agg["shots"] else None
+    top = sorted(scorers.items(), key=lambda kv: (-kv[1]["goals"], kv[0]))[:8]
+    return {
+        "opponent": {"id": str(opponent.id), "name": opponent.name},
+        "record": record,
+        "matches": rows,
+        "tagged_matches": tagged,
+        "totals": agg,
+        "zones": zones,
+        "goal_zones": goal_zones,
+        "scorers": [{"number": n, **v} for n, v in top],
+        "formations_ms": formations,
     }

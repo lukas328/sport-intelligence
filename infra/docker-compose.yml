@@ -82,7 +82,7 @@ services:
       HB_EMAIL_FROM: "Handball AI <noreply@handball.local>"
       # only the web container talks to the API inside the compose network
       FORWARDED_ALLOW_IPS: "*"
-      HB_RATE_LIMIT_AUTH: "60/60"
+      HB_RATE_LIMIT_AUTH: "300/60"  # local and E2E only; production keeps the default
       # small parts locally so multi-part and resume are exercised with small test files
       HB_UPLOAD_PART_SIZE: "5242880"
       # optional prose summaries; empty keeps the template texts only
