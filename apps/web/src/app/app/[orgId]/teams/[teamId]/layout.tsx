@@ -30,7 +30,7 @@ export default async function TeamLayout({
             <p className="text-sm text-muted">{t("roster.season", { label: team.current_season.label })}</p>
           )}
         </div>
-        <nav aria-label={team.name} className="flex gap-1 border-b border-border">
+        <nav aria-label={team.name} className="flex gap-1 overflow-x-auto border-b border-border">
           <TabLink href={`${base}/matches`}>{t("team.matches")}</TabLink>
           <TabLink href={base} exact>
             {t("team.roster")}

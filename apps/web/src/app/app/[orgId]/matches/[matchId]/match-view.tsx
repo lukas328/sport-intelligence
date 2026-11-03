@@ -109,7 +109,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             {t("opponent.open")}: {match.opponent.name}
           </a>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {hs != null && as != null && (
             <p className="text-3xl font-bold tabular-nums" data-testid="score">
               {hs}:{as}
@@ -123,13 +123,13 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           <span className="rounded-full bg-surface px-3 py-1 text-sm">{t(`matches.status_${match.status}`)}</span>
           <a
             href={`/v1/orgs/${orgId}/matches/${match.id}/report.pdf?lang=${locale}`}
-            className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface"
+            className="whitespace-nowrap rounded-md border border-border px-3 py-2 text-sm hover:bg-surface"
             data-testid="pdf"
           >
             {t("matches.pdf")}
           </a>
           {staff && (
-            <a href={`/app/${orgId}/matches/${match.id}/live`} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" data-testid="live-link">
+            <a href={`/app/${orgId}/matches/${match.id}/live`} className="whitespace-nowrap rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" data-testid="live-link">
               {t("live.open")}
             </a>
           )}

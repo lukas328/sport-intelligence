@@ -209,8 +209,8 @@ export function Workspace({
   );
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="space-y-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="min-w-0 space-y-2">
         <VideoPlayer
           ref={raw}
           src={`${media}/hls/master.m3u8`}
@@ -279,15 +279,15 @@ export function Workspace({
         )}
       </div>
 
-      <Card className="flex max-h-[42rem] flex-col gap-3 p-3">
-        <div role="tablist" className="flex gap-1">
+      <Card className="flex max-h-[42rem] min-w-0 flex-col gap-3 p-3">
+        <div role="tablist" className="flex flex-wrap gap-1">
           {(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => (
             <button
               key={k}
               role="tab"
               aria-selected={tab === k}
               onClick={() => setTab(k)}
-              className={cn("flex-1 rounded px-2 py-1.5 text-sm", tab === k ? "bg-accent text-accent-contrast" : "hover:bg-surface")}
+              className={cn("flex-1 whitespace-nowrap rounded px-2 py-1.5 text-sm", tab === k ? "bg-accent text-accent-contrast" : "hover:bg-surface")}
             >
               {t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`)}
             </button>
@@ -336,7 +336,7 @@ export function Workspace({
                 name="body"
                 maxLength={2000}
                 placeholder={t("comments.placeholder", { time: formatClock(now) })}
-                className="min-h-10 flex-1 rounded-md border border-border bg-background px-3 text-sm"
+                className="min-h-10 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm"
               />
               <Button type="submit" variant="secondary">
                 {t("comments.add")}
