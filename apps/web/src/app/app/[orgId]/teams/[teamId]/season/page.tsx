@@ -84,7 +84,8 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
     );
   }
   const roster = await client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", { params: { path: { org_id: orgId, team_id: teamId, season_id: seasonId } } });
-  const names = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.jersey_number != null ? `#${r.jersey_number} ` : ""}${r.first_name} ${r.last_name}`]));
+  const names = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.first_name} ${r.last_name}`]));
+  const shirts = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, r.jersey_number]));
   const n = data.totals.matches;
   const statement = seasonStatement(data.matches);
   const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
@@ -172,37 +173,44 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
         <div className="space-y-12">
           <section className="space-y-4">
             <h2 className="text-2xl">{t("form")}</h2>
-            <ol className="flex flex-wrap gap-x-2 gap-y-4">
-              {[...data.matches]
-                .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
-                .map((m) => {
-                  const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
-                  return (
-                    <li key={m.match_id}>
-                      <Link
-                        href={`/app/${orgId}/matches/${m.match_id}`}
-                        title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
-                        className="group flex w-16 flex-col items-center gap-1.5 text-center"
-                      >
-                        <span
-                          aria-hidden
-                          className={cn(
-                            "grid size-10 place-items-center rounded-[5px] font-score text-xl text-background transition-transform group-hover:-translate-y-0.5",
-                            r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted",
-                          )}
-                        >
-                          {tm(r).charAt(0)}
-                        </span>
-                        <span className="sr-only">{tm(r)}</span>
-                        <span className="font-score text-lg leading-none group-hover:underline">
-                          {m.score_own}:{m.score_opponent}
-                        </span>
-                        <span className="w-full truncate text-xs text-muted">{m.opponent}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-            </ol>
+            {(() => {
+              const recent = [...data.matches].sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at)).slice(-10);
+              return (
+                <>
+                  <ol className="flex gap-1">
+                    {recent.map((m) => {
+                      const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
+                      return (
+                        <li key={m.match_id} className="min-w-0 flex-1 sm:max-w-12">
+                          <Link
+                            href={`/app/${orgId}/matches/${m.match_id}`}
+                            title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
+                            className="group flex flex-col items-center gap-1"
+                          >
+                            <span
+                              aria-hidden
+                              className={cn(
+                                "grid aspect-square w-full place-items-center rounded-[4px] font-score text-lg text-background transition-transform group-hover:-translate-y-0.5",
+                                r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted",
+                              )}
+                            >
+                              {tm(r).charAt(0)}
+                            </span>
+                            <span className="sr-only">
+                              {tm(r)} {m.score_own}:{m.score_opponent} {m.opponent}
+                            </span>
+                            <span aria-hidden className="font-score text-[0.8125rem] leading-none text-muted tabular-nums group-hover:text-foreground">
+                              {m.score_own}:{m.score_opponent}
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <p className="text-sm text-muted">{t("formLast", { n: recent.length })}</p>
+                </>
+              );
+            })()}
           </section>
 
           {n > 1 && (
@@ -229,21 +237,32 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       </div>
 
       {n >= 3 ? (
-        <div className={cn("grid gap-8", scorers.length > 0 && "lg:grid-cols-2")}>
-          <section className="space-y-3">
-            <h2 className="text-2xl">{t("trend")}</h2>
-            <TrendChart rows={data.matches} label={t("chartLabel")} goals={t("goals")} xg={t("xg")} />
-          </section>
-          {scorers.length > 0 && <Scorers scorers={scorers} names={names} topGoals={topGoals} t={t} />}
-        </div>
+        <section className="space-y-3">
+          <h2 className="text-2xl">
+            {t("trend")} <span className="font-sans text-base font-medium text-muted">{t("chartLabel")}</span>
+          </h2>
+          {(() => {
+            const rows = [...data.matches].sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at));
+            const day = (iso: string) => format.dateTime(new Date(iso), { day: "numeric", month: "numeric" });
+            return (
+              <>
+                {/* phones: the last six matches at a readable size */}
+                <div className="sm:hidden">
+                  <TrendChart rows={rows.slice(-6)} label={t("chartLabel")} day={day} width={420} />
+                </div>
+                <div className="hidden sm:block">
+                  <TrendChart rows={rows} label={t("chartLabel")} day={day} />
+                </div>
+              </>
+            );
+          })()}
+        </section>
       ) : (
-        <>
-          <p className="text-[0.9375rem] text-muted" data-testid="season-trend">
-            {tv("chartLater")}
-          </p>
-          {scorers.length > 0 && <Scorers scorers={scorers} names={names} topGoals={topGoals} t={t} />}
-        </>
+        <p className="text-[0.9375rem] text-muted" data-testid="season-trend">
+          {tv("chartLater")}
+        </p>
       )}
+      {scorers.length > 0 && <Scorers scorers={scorers} names={names} shirts={shirts} topGoals={topGoals} t={t} />}
 
       <section className="space-y-3">
         <h2 className="text-2xl">{t("allMatches")}</h2>
@@ -293,14 +312,17 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   );
 }
 
-function Scorers({ scorers, names, topGoals, t }: { scorers: Season["players"]; names: Record<string, string>; topGoals: number; t: (k: string, p?: Record<string, string | number>) => string }) {
+function Scorers({ scorers, names, shirts, topGoals, t }: { scorers: Season["players"]; names: Record<string, string>; shirts: Record<string, number | null | undefined>; topGoals: number; t: (k: string, p?: Record<string, string | number>) => string }) {
   return (
     <section className="space-y-3">
       <h2 className="text-2xl">{t("scorers")}</h2>
-      <ol className="divide-y divide-foreground/10 border-y border-foreground/15" data-testid="season-players">
+      <ol className="gap-x-12 border-y border-foreground/15 lg:columns-2 [&>li]:break-inside-avoid [&>li+li]:border-t [&>li+li]:border-foreground/10" data-testid="season-players">
         {scorers.map((p, i) => (
-          <li key={p.player_id} className="grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-3">
-            <span className="font-score text-lg text-muted">{i + 1}</span>
+          <li key={p.player_id} className="grid grid-cols-[2.75rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-3">
+            <span className="text-center font-score text-[2rem] leading-none text-accent">
+              <span className="sr-only">{shirts[p.player_id] != null ? "#" : `${i + 1}.`}</span>
+              {shirts[p.player_id] ?? <span aria-hidden>{i + 1}</span>}
+            </span>
             <span className="min-w-0">
               <span className="block truncate font-semibold">{names[p.player_id] ?? t("unknownPlayer")}</span>
               <span className="block text-sm text-muted">
@@ -332,56 +354,38 @@ function StatBar({ share, tick, focus }: { share: number | null; tick: number; f
   );
 }
 
-/** Goals and xG per match on one axis; identity by colour, dash and legend; values on hover. */
-function TrendChart({ rows, label, goals, xg }: { rows: Row[]; label: string; goals: string; xg: string }) {
-  const w = 640;
-  const h = 200;
-  const pad = { l: 32, r: 16, t: 12, b: 24 };
-  const max = Math.max(5, ...rows.flatMap((r) => [r.goals, r.xg]));
-  const X = (i: number) => pad.l + (rows.length === 1 ? (w - pad.l - pad.r) / 2 : (i / (rows.length - 1)) * (w - pad.l - pad.r));
-  const Y = (v: number) => h - pad.b - (v / max) * (h - pad.t - pad.b);
-  const line = (k: "goals" | "xg") => rows.map((r, i) => `${i ? "L" : "M"}${X(i)} ${Y(r[k])}`).join(" ");
-  const ticks = [0, Math.round(max / 2), Math.round(max)];
+/** Goal difference per match as bars above (won) and below (lost) the line; values on hover. */
+function TrendChart({ rows, label, day, width = 1100 }: { rows: Row[]; label: string; day: (iso: string) => string; width?: number }) {
+  const w = width;
+  const h = 240;
+  const pad = { l: 8, r: 8, t: 22, b: 40 };
+  const max = Math.max(5, ...rows.map((r) => Math.abs(r.score_own - r.score_opponent)));
+  const mid = pad.t + (h - pad.t - pad.b) / 2;
+  const half = (h - pad.t - pad.b) / 2;
+  const slot = (w - pad.l - pad.r) / rows.length;
+  const bw = Math.min(44, slot * 0.6);
   return (
-    <div className="space-y-2">
-      <ul className="flex gap-4 text-xs text-muted" aria-hidden>
-        <li className="flex items-center gap-1.5">
-          <svg width="18" height="6"><line x1="0" x2="18" y1="3" y2="3" stroke="var(--accent)" strokeWidth={2} /></svg>
-          {goals}
-        </li>
-        <li className="flex items-center gap-1.5">
-          <svg width="18" height="6"><line x1="0" x2="18" y1="3" y2="3" stroke="var(--muted)" strokeWidth={2} strokeDasharray="4 3" /></svg>
-          {xg}
-        </li>
-      </ul>
-      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className="max-h-64 w-full" data-testid="season-trend">
-        {ticks.map((v) => (
-          <g key={v}>
-            <line x1={pad.l} x2={w - pad.r} y1={Y(v)} y2={Y(v)} stroke="var(--border)" strokeWidth={1} />
-            <text x={pad.l - 6} y={Y(v) + 3} fontSize="10" textAnchor="end" fill="var(--muted)">
-              {v}
-            </text>
-          </g>
-        ))}
-        <path d={line("xg")} fill="none" stroke="var(--muted)" strokeWidth={2} strokeDasharray="5 4" />
-        <path d={line("goals")} fill="none" stroke="var(--accent)" strokeWidth={2} />
-        {rows.map((r, i) => (
+    <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className="h-auto w-full" data-testid="season-trend">
+      {rows.map((r, i) => {
+        const d = r.score_own - r.score_opponent;
+        const bh = Math.max(3, (Math.abs(d) / max) * half);
+        const x = pad.l + slot * i + (slot - bw) / 2;
+        const y = d >= 0 ? mid - bh : mid;
+        const fill = d > 0 ? "var(--ok)" : d < 0 ? "var(--error)" : "var(--muted)";
+        return (
           <g key={r.match_id}>
-            <circle cx={X(i)} cy={Y(r.goals)} r={4} fill="var(--accent)" stroke="var(--background)" strokeWidth={2} />
-            <circle cx={X(i)} cy={Y(r.goals)} r={12} fill="transparent">
-              <title>{`${r.opponent}: ${goals} ${r.goals}, ${xg} ${r.xg.toFixed(1)}`}</title>
-            </circle>
-            <text x={X(i)} y={h - 6} fontSize="10" textAnchor="middle" fill="var(--muted)">
-              {i + 1}
+            <title>{`${r.opponent} ${r.score_own}:${r.score_opponent}`}</title>
+            <rect x={x} y={y} width={bw} height={bh} rx={2} fill={fill} />
+            <text x={x + bw / 2} y={d >= 0 ? y - 6 : y + bh + 14} fontSize="12" fontWeight={700} textAnchor="middle" fill="var(--foreground)">
+              {d > 0 ? `+${d}` : d}
+            </text>
+            <text x={x + bw / 2} y={h - 8} fontSize="12" textAnchor="middle" fill="var(--muted)">
+              {day(r.kickoff_at)}
             </text>
           </g>
-        ))}
-        {rows.length > 0 && (
-          <text x={X(rows.length - 1)} y={Y(rows[rows.length - 1]!.goals) - 8} fontSize="11" textAnchor="end" fill="var(--foreground)">
-            {rows[rows.length - 1]!.goals}
-          </text>
-        )}
-      </svg>
-    </div>
+        );
+      })}
+      <line x1={pad.l} x2={w - pad.r} y1={mid} y2={mid} stroke="var(--foreground)" strokeWidth={1.5} />
+    </svg>
   );
 }

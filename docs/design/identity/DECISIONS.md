@@ -54,3 +54,11 @@ figures became "Die Saison in Zahlen": open rows on the paper, label and referen
 the figure in scoreboard type, a bar on a fixed scale with a tick for the reference (goals against
 for goals per match), yellow only for the figure that needs work. Form and bests moved into a side
 column; bests and scorers are open lists with hairlines instead of panels.
+
+## Season page with a full season of test data
+
+Reviewed with twelve matches of local test data (not part of the product). Form became a strip of
+the last ten matches, newest on the right; the trend became goal difference per match as bars above
+and below the line with dates (the last six on phones); scorers show the shirt number in the club
+colour, as on the squad page, in two columns on desktop. The onboarding card on the overview became
+a slim strip (3/7, next step, button). The fixture list no longer says home or away twice.

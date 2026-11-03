@@ -999,7 +999,7 @@
     "match": "Match",
     "result": "Result",
     "sevenM": "7 m",
-    "chartLabel": "Goals and xG per match",
+    "chartLabel": "Goal difference per match",
     "form": "Form",
     "best": "Season bests",
     "bestGoals": "Most goals",
@@ -1012,7 +1012,8 @@
     "inMatches": "{n, plural, =1 {1 match} other {# matches}}",
     "allMatches": "All matches in detail",
     "unknownPlayer": "Unassigned",
-    "xgNote": "xG: expected goals, estimated from shot position and situation."
+    "xgNote": "xG: expected goals, estimated from shot position and situation.",
+    "formLast": "The last {n} matches, newest on the right."
   },
   "notifications": {
     "title": "Notifications",

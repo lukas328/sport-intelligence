@@ -999,7 +999,7 @@
     "match": "Match",
     "result": "Résultat",
     "sevenM": "7 m",
-    "chartLabel": "Buts et xG par match",
+    "chartLabel": "Différence de buts par match",
     "form": "Forme",
     "best": "Meilleures valeurs de la saison",
     "bestGoals": "Le plus de buts",
@@ -1012,7 +1012,8 @@
     "inMatches": "{n, plural, =1 {1 match} other {# matchs}}",
     "allMatches": "Tous les matchs en détail",
     "unknownPlayer": "Non attribué",
-    "xgNote": "xG : buts attendus, estimés d'après la position et la situation du tir."
+    "xgNote": "xG : buts attendus, estimés d'après la position et la situation du tir.",
+    "formLast": "Les {n} derniers matchs, le plus récent à droite."
   },
   "notifications": {
     "title": "Notifications",

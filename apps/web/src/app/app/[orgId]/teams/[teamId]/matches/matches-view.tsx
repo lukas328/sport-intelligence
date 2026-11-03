@@ -136,7 +136,6 @@ export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
       <span className="leading-none">
         <span className="block font-display text-sm text-muted">
           {format.dateTime(date, { weekday: "short" })}
-          {m.kind !== "training" && <span className="hidden sm:inline"> · {m.is_home ? t("matches.homeShort") : t("matches.awayShort")}</span>}
         </span>
         <span className="mt-1 block font-score text-[1.6rem]">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</span>
       </span>

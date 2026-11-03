@@ -999,7 +999,7 @@
     "match": "Spiel",
     "result": "Resultat",
     "sevenM": "7 m",
-    "chartLabel": "Tore und xG pro Spiel",
+    "chartLabel": "Tordifferenz pro Spiel",
     "form": "Form",
     "best": "Bestwerte der Saison",
     "bestGoals": "Meiste Tore",
@@ -1012,7 +1012,8 @@
     "inMatches": "{n, plural, =1 {1 Spiel} other {# Spiele}}",
     "allMatches": "Alle Spiele im Detail",
     "unknownPlayer": "Nicht zugeordnet",
-    "xgNote": "xG: erwartete Tore, geschätzt aus Wurfposition und Situation."
+    "xgNote": "xG: erwartete Tore, geschätzt aus Wurfposition und Situation.",
+    "formLast": "Die letzten {n} Spiele, das neueste rechts."
   },
   "notifications": {
     "title": "Mitteilungen",
