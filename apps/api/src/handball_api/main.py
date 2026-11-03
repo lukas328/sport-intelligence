@@ -167,6 +167,11 @@ def create_app(
         response.headers["x-request-id"] = request_id
         response.headers["x-content-type-options"] = "nosniff"
         response.headers["referrer-policy"] = "strict-origin-when-cross-origin"
+        response.headers["x-frame-options"] = "DENY"
+        # API data is personal: never cache unless a route says otherwise (media sets its own)
+        response.headers.setdefault("cache-control", "no-store")
+        if settings.cookie_secure:
+            response.headers["strict-transport-security"] = "max-age=63072000; includeSubDomains"
         return response
 
     install_error_handlers(app)

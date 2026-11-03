@@ -75,3 +75,23 @@ async def test_default_checks_fail_without_services(client: AsyncClient) -> None
     # no overrides: real checks against unreachable services must not crash the endpoint
     r = await client.get("/readyz")
     assert r.status_code == 503
+
+
+async def test_security_headers(client: AsyncClient) -> None:
+    r = await client.get("/healthz")
+    assert r.headers["cache-control"] == "no-store"
+    assert r.headers["x-frame-options"] == "DENY"
+    assert r.headers["x-content-type-options"] == "nosniff"
+    assert "strict-transport-security" not in r.headers  # only with secure cookies (HTTPS)
+
+
+async def test_hsts_with_secure_cookies() -> None:
+    from httpx import ASGITransport
+
+    from handball_api.core.config import Settings
+    from handball_api.main import create_app
+
+    app = create_app(Settings(cookie_secure=True))
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://t") as c:
+        r = await c.get("/healthz")
+    assert r.headers["strict-transport-security"].startswith("max-age=63072000")

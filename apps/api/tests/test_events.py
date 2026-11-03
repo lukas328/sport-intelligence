@@ -260,3 +260,31 @@ async def test_paper_report_import(make_api: Callable[[], Api]) -> None:
         url, files={"file": ("r.json", json.dumps(mismatch).encode(), "application/json")}
     )
     assert any("differ from the final score" in w for w in r.json()["warnings"])
+
+
+async def test_concurrent_first_stats_views(make_api: Callable[[], Api]) -> None:
+    """Several first views at once must not collide on the stats cache (load test finding, M9)."""
+    import asyncio
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = (
+        await api.post(
+            f"/v1/orgs/{org}/teams/{ids['team']}/matches",
+            json={"opponent_name": "Parallel", "kickoff_at": "2026-11-07T18:00:00+01:00"},
+        )
+    ).json()["id"]
+    await api.post(
+        f"/v1/orgs/{org}/matches/{m}/events",
+        json={"type": "shot", "side": "own", "outcome": "goal", "clock_s": 1},
+    )
+    clients = [api, *[make_api() for _ in range(5)]]
+    for c in clients[1:]:
+        c.http.cookies = api.http.cookies
+        c.http.headers.update(api.http.headers)
+    results = await asyncio.gather(
+        *(c.get(f"/v1/orgs/{org}/matches/{m}/stats") for c in clients for _ in range(2))
+    )
+    assert [r.status_code for r in results] == [200] * len(results)
+    assert {r.json()["own"]["goals"] for r in results} == {1}

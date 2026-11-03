@@ -8,7 +8,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from handball_api.core.errors import ProblemError
 from handball_api.core.text import numbers_ok
@@ -30,6 +30,7 @@ from handball_api.services.matches import get_match
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, visible_team_ids
 from handball_metrics.insights import VERSION, match_insights
+from handball_metrics.stats import METRICS_VERSION
 
 
 async def _matches_with_events(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> list[Match]:
@@ -49,22 +50,47 @@ async def _matches_with_events(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUI
     )
 
 
+async def _season_version(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> str:
+    """One aggregated query that changes whenever a match or an event of the season changes."""
+    rows = (
+        await ctx.db.execute(
+            select(Match.id, Match.updated_at, func.count(Event.id), func.max(Event.updated_at))
+            .outerjoin(Event, Event.match_id == Match.id)
+            .where(Match.team_id == team_id, Match.season_id == season_id)
+            .group_by(Match.id, Match.updated_at)
+            .order_by(Match.id)
+        )
+    ).all()
+    raw = "|".join(f"{a}:{b}:{c}:{d}" for a, b, c, d in rows)
+    return hashlib.sha256(f"{raw}|{METRICS_VERSION}|{VERSION}".encode()).hexdigest()[:32]
+
+
 async def insights(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     match = await get_match(ctx, match_id)
     await billing.require_feature(ctx, "insights", match.organization_id)
-    stats = await events_service.match_stats(ctx, match.id)
-    others = [
-        m
-        for m in await _matches_with_events(ctx, match.team_id, match.season_id)
-        if m.id != match.id
-    ]
-    baseline = [await events_service.match_stats(ctx, m.id) for m in others]
-    items = match_insights(stats, baseline) if stats["quality"]["events"] else []
+    version = await _season_version(ctx, match.team_id, match.season_id)
+    cached = await events_service.cache_get(ctx, "insights", match.id, version)
+    if cached is None:
+        stats = await events_service.stats_for(ctx, match)
+        others = [
+            m
+            for m in await _matches_with_events(ctx, match.team_id, match.season_id)
+            if m.id != match.id
+        ]
+        baseline = [await events_service.stats_for(ctx, m) for m in others]
+        cached = {
+            "items": match_insights(stats, baseline) if stats["quality"]["events"] else [],
+            "baseline": len(baseline),
+        }
+        await events_service.cache_put(
+            ctx, match.organization_id, "insights", match.id, version, cached
+        )
+    items, baseline_n = cached["items"], cached["baseline"]
     summary = (match.report_extra or {}).get("summary")
     fingerprint = _fingerprint(items)
     return {
         "version": VERSION,
-        "baseline_matches": len(baseline),
+        "baseline_matches": baseline_n,
         "insights": items,
         "summary": summary if summary and summary.get("fingerprint") == fingerprint else None,
     }
@@ -130,6 +156,16 @@ def _fact(item: dict[str, Any], numbers: dict[str, int]) -> dict[str, Any]:
 async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> dict[str, Any]:
     team = await get_team(ctx, team_id, Action.MATCH_READ)
     await billing.require_feature(ctx, "season", team.organization_id)
+    version = await _season_version(ctx, team.id, season_id)
+    cached = await events_service.cache_get(ctx, "season", season_id, version)
+    if cached is not None:
+        return cached
+    data = await _season_stats(ctx, team, season_id)
+    await events_service.cache_put(ctx, team.organization_id, "season", season_id, version, data)
+    return data
+
+
+async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str, Any]:
     matches = await _matches_with_events(ctx, team.id, season_id)
     names = {
         o.id: o.name
@@ -143,7 +179,7 @@ async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> di
     players: dict[str, dict[str, Any]] = {}
     totals = {"goals": 0, "shots": 0, "saves": 0, "goals_against": 0, "turnovers": 0, "xg": 0.0}
     for m in matches:
-        s = await events_service.match_stats(ctx, m.id)
+        s = await events_service.stats_for(ctx, m)
         own, opp = s["own"], s["opponent"]
         rows.append(
             {

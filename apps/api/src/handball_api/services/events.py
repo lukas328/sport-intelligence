@@ -11,6 +11,7 @@ import uuid
 from typing import Any
 
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from handball_api.core.errors import ProblemError
 from handball_api.models import Correction, Event, Match, RosterEntry, StatsCache
@@ -269,11 +270,9 @@ async def stats_for(ctx: Ctx, match: Match) -> dict[str, Any]:
         )
     ).one()
     version = hashlib.sha256(f"{count}|{latest}|{METRICS_VERSION}".encode()).hexdigest()[:32]
-    cached = await ctx.db.scalar(
-        select(StatsCache).where(StatsCache.scope == "match", StatsCache.scope_id == match.id)
-    )
-    if cached is not None and cached.version == version:
-        return cached.data
+    cached = await cache_get(ctx, "match", match.id, version)
+    if cached is not None:
+        return cached
     events = [
         _to_metric(e)
         for e in (await ctx.db.scalars(select(Event).where(Event.match_id == match.id))).all()
@@ -281,19 +280,46 @@ async def stats_for(ctx: Ctx, match: Match) -> dict[str, Any]:
     possessions = estimate_possessions(events)
     data = compute_match_stats(events, possessions)
     data["possessions_source"] = "heuristic_estimate"
-    if cached is None:
-        ctx.db.add(
-            StatsCache(
-                organization_id=match.organization_id,
-                scope="match",
-                scope_id=match.id,
-                version=version,
-                data=data,
+    await cache_put(ctx, match.organization_id, "match", match.id, version, data)
+    return data
+
+
+async def cache_get(
+    ctx: Ctx, scope: str, scope_id: uuid.UUID, version: str
+) -> dict[str, Any] | None:
+    row = (
+        await ctx.db.execute(
+            select(StatsCache.version, StatsCache.data).where(
+                StatsCache.scope == scope, StatsCache.scope_id == scope_id
             )
         )
-    else:
-        cached.version, cached.data = version, data
-    return data
+    ).first()
+    return dict(row.data) if row is not None and row.version == version else None
+
+
+async def cache_put(
+    ctx: Ctx,
+    org_id: uuid.UUID,
+    scope: str,
+    scope_id: uuid.UUID,
+    version: str,
+    data: dict[str, Any],
+) -> None:
+    """Atomic upsert: concurrent first views must not collide on the unique key."""
+    stmt = pg_insert(StatsCache).values(
+        id=uuid.uuid4(),
+        organization_id=org_id,
+        scope=scope,
+        scope_id=scope_id,
+        version=version,
+        data=data,
+    )
+    await ctx.db.execute(
+        stmt.on_conflict_do_update(
+            constraint="uq_stats_cache_scope",
+            set_={"version": stmt.excluded.version, "data": stmt.excluded.data},
+        )
+    )
 
 
 async def set_kickoff(ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int) -> Match:

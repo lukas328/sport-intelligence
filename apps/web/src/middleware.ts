@@ -42,6 +42,10 @@ export function middleware(req: NextRequest) {
   }
   const res = NextResponse.next();
   res.headers.set("Content-Security-Policy", csp(originOf(process.env.HB_S3_PUBLIC_URL), process.env.NODE_ENV !== "production"));
+  // HSTS only when the request really came in over HTTPS (never on local http)
+  const proto = req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "");
+  if (proto === "https") res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
+  res.headers.set("X-Frame-Options", "DENY");
   return res;
 }
 
