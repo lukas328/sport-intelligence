@@ -237,8 +237,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         )}
       </Stage>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-foreground/15">
           <Segmented<View>
+            variant="underline"
             label={t("tabs.video")}
             value={view}
             onChange={setView}
@@ -248,7 +249,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               { value: "scenes", label: t("tabs.scenes") },
             ]}
           />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pb-2.5">
             {liveFirst && (
               <Link href={`${base}/live`} className={buttonClass("primary")} data-testid="live-link">
                 <Radio aria-hidden />

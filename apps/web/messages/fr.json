@@ -283,7 +283,12 @@
     "csvTemplate": "Télécharger le modèle",
     "none": "aucun",
     "csvChoose": "Choisir un fichier",
-    "csvNone": "Aucun fichier choisi"
+    "csvNone": "Aucun fichier choisi",
+    "group_goal": "But",
+    "group_back": "Arrière",
+    "group_wing": "Ailes",
+    "group_pivot": "Pivot",
+    "group_other": "Sans poste"
   },
   "settings": {
     "title": "Paramètres",
@@ -2042,7 +2047,7 @@
     "afterMatches": "{label}, après {n, plural, =1 {1 match} other {# matchs}}",
     "neutralSeason": "La saison jusqu'ici.",
     "focus": "à travailler",
-    "focusNote": "Le trait indique la valeur de référence, pas une moyenne de ligue. En jaune, là où une valeur s'en écarte nettement.",
+    "focusNote": "Le trait indique la valeur de référence, pas une moyenne de ligue.",
     "chartLater": "L'évolution apparaît dès trois matchs. D'ici là, le tableau montre chaque match.",
     "lastResult": "Dernier match",
     "goalsAsClips": "Voir les buts en clips",
@@ -2051,6 +2056,8 @@
     "reference": "Référence {value}",
     "inNumbers": "La saison en chiffres",
     "lowerBetter": "moins, c'est mieux",
-    "againstRef": "Buts encaissés {value}"
+    "againstRef": "Buts encaissés {value}",
+    "focusNoteMarked": "En jaune, la valeur qui s'en écarte nettement.",
+    "recordLabel": "Bilan"
   }
 }

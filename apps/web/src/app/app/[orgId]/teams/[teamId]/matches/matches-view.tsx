@@ -130,7 +130,9 @@ export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
   const date = new Date(m.kickoff_at);
   const state = matchState(m);
   const result = m.score_own == null || m.score_opponent == null ? null : m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
-  const quiet = [m.is_demo ? t("matches.demo") : null, state.label === "matches.analysed" ? null : t(state.label)].filter(Boolean).join(" · ");
+  // the status only when it asks for something: running, failed, or a played match without video
+  const exception = ["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) || (state.label === "matches.noVideoYet" && m.score_own != null);
+  const quiet = [m.is_demo ? t("matches.demo") : null, exception ? t(state.label) : null].filter(Boolean).join(" · ");
   return (
     <Link href={`/app/${orgId}/matches/${m.id}`} className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-4 transition-colors hover:bg-surface sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:px-5">
       <span className="leading-none">

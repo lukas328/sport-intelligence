@@ -74,3 +74,20 @@ a slim strip (3/7, next step, button). The fixture list no longer says home or a
 - Drills: each drill shows a small half court with its area marked (wings, back court, pivot, 7 m,
   goal, or the whole half), drawn from the real court geometry; the list sits on hairlines.
 - The calendar import uses the German file picker.
+
+## Second fresh-eyes review (screenshots with a full season)
+
+Ratings 1.5 to 3.5 of 5 before this round. Addressed:
+- Training and every empty state: no dashed box; a calm surface with a faint goal area at the edge.
+- Overview: the score names both teams; the next match as a fixture announcement (date in scoreboard
+  type, opponent, "in 4 Tagen"); the ask box is smaller.
+- Season: the stage shows the record (S U N) instead of a last score that argued with the headline;
+  columns that are zero in every match are left out; the first column stays put when the table
+  scrolls on phones; the "yellow" note only appears when something is marked.
+- Match: the main switch (Video, Analyse, Szenen) as underline tabs in display type; zero-only rows
+  (7 m, 2 minutes) hidden; one primary action per insight, the others quiet.
+- Squad: grouped by position like a match sheet (Tor, Rückraum, Flügel, Kreis); delete only on
+  hover on desktop; "Kein Konto" no longer repeated on every row.
+- Fixtures: the status only when it asks for something (running, failed, played without video).
+Not done: drill-specific players and arrows in the mini courts (would need drawn content per drill),
+annotated runs in the match timeline.

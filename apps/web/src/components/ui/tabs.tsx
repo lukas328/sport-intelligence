@@ -19,6 +19,7 @@ export function Segmented<T extends string>({
   onChange,
   label,
   size = "md",
+  variant = "segmented",
   className,
   idPrefix,
 }: {
@@ -27,6 +28,8 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void;
   label: string;
   size?: "sm" | "md";
+  /** segmented: a pill group; underline: the main switch of a page, in display type */
+  variant?: "segmented" | "underline";
   className?: string;
   idPrefix?: string;
 }) {
@@ -41,7 +44,7 @@ export function Segmented<T extends string>({
   }
   return (
     <div className={cn("scrollbar-none -mx-1 overflow-x-auto px-1", className)}>
-      <div role="tablist" aria-label={label} className="inline-flex gap-0.5 rounded-md bg-surface p-1">
+      <div role="tablist" aria-label={label} className={variant === "underline" ? "inline-flex gap-7" : "inline-flex gap-0.5 rounded-md bg-surface p-1"}>
         {items.map((it, i) => {
           const active = it.value === value;
           return (
@@ -58,11 +61,18 @@ export function Segmented<T extends string>({
               data-testid={it.testId}
               onKeyDown={(e) => onKey(e, i)}
               onClick={() => onChange(it.value)}
-              className={cn(
-                "whitespace-nowrap rounded-[5px] font-semibold transition-[background,color] duration-150",
-                size === "sm" ? "px-3 py-1 text-[0.8125rem]" : "px-4 py-1.5 text-sm",
-                active ? "bg-foreground text-background" : "text-muted hover:bg-surface hover:text-foreground",
-              )}
+              className={
+                variant === "underline"
+                  ? cn(
+                      "whitespace-nowrap pt-1 pb-2 font-display text-xl uppercase tracking-wide transition-[color,box-shadow] duration-150",
+                      active ? "text-foreground shadow-[inset_0_-4px_0_var(--accent)]" : "text-muted hover:text-foreground hover:shadow-[inset_0_-4px_0_var(--border)]",
+                    )
+                  : cn(
+                      "whitespace-nowrap rounded-[5px] font-semibold transition-[background,color] duration-150",
+                      size === "sm" ? "px-3 py-1 text-[0.8125rem]" : "px-4 py-1.5 text-sm",
+                      active ? "bg-foreground text-background" : "text-muted hover:bg-surface hover:text-foreground",
+                    )
+              }
             >
               {it.label}
             </button>

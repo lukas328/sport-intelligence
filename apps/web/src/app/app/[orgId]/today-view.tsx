@@ -135,10 +135,13 @@ function StaffToday({ orgId, teamId }: { orgId: string; teamId: string }) {
         </Block>
         <div className="space-y-12">
           <Block title={t("today.upNext")}>
+            {upcoming && !soon && <MatchAhead orgId={orgId} m={upcoming} />}
             <ul>
-              <Row label={t("today.match")} href={upcoming ? `/app/${orgId}/matches/${upcoming.id}` : `${base}/matches?new=1`}>
-                {upcoming ? <UpcomingLine m={upcoming} /> : <span className="text-muted">{t("today.noMatchPlanned")}</span>}
-              </Row>
+              {(!upcoming || soon) && (
+                <Row label={t("today.match")} href={upcoming ? `/app/${orgId}/matches/${upcoming.id}` : `${base}/matches?new=1`}>
+                  {upcoming ? <UpcomingLine m={upcoming} /> : <span className="text-muted">{t("today.noMatchPlanned")}</span>}
+                </Row>
+              )}
               <NextTrainingRow orgId={orgId} teamId={teamId} />
             </ul>
           </Block>
@@ -146,6 +149,28 @@ function StaffToday({ orgId, teamId }: { orgId: string; teamId: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** The next match as a fixture announcement: date in scoreboard type, opponent, how many days to go. */
+function MatchAhead({ orgId, m }: { orgId: string; m: Match }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
+  const when = new Date(m.kickoff_at);
+  return (
+    <Link href={`/app/${orgId}/matches/${m.id}`} className="group mb-1 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-5 border-b border-foreground/10 py-4">
+      <span className="text-center leading-none">
+        <span className="block font-display text-sm uppercase text-muted">{format.dateTime(when, { weekday: "short" })}</span>
+        <span className="mt-1 block font-score text-[2.75rem] leading-[0.9]">{format.dateTime(when, { day: "2-digit", month: "2-digit" })}</span>
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate font-display text-[1.75rem] leading-tight group-hover:text-accent">{m.opponent_name}</span>
+        <span className="block text-sm text-muted">
+          {[format.dateTime(when, { hour: "2-digit", minute: "2-digit" }), m.is_home ? t("matches.homeShort") : t("matches.awayShort"), format.relativeTime(when, now)].join(" · ")}
+        </span>
+      </span>
+    </Link>
   );
 }
 
@@ -210,13 +235,17 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
   const statement = matchStatement({ own: m.score_own, opp: m.score_opponent, opponent: m.opponent_name });
   const state = matchState(m);
   const needsVideo = !m.has_video && m.status !== "processing" && m.status !== "uploading";
+  const teamName = useShell().team?.name;
   return (
     <Stage
       eyebrow={greeting}
       aside={
         m.score_own != null && m.score_opponent != null ? (
-          <Link href={href} className="block text-left xl:text-center" aria-label={`${m.score_own}:${m.score_opponent}`}>
+          <Link href={href} className="group block text-left xl:text-center">
             <MatchScore own={m.score_own} opp={m.score_opponent} className="text-[6rem] leading-[0.85] xl:text-[clamp(3.5rem,4.6vw,5.25rem)]" />
+            <span className="mt-1 block max-w-[16rem] truncate text-[0.9375rem] font-semibold group-hover:underline xl:mx-auto">
+              {teamName ? `${teamName} – ${m.opponent_name}` : m.opponent_name}
+            </span>
           </Link>
         ) : undefined
       }
@@ -309,8 +338,8 @@ function AskBox({ base }: { base: string }) {
   const [q, setQ] = useState("");
   return (
     <section className="space-y-2">
-      <h2 className="flex items-center gap-2 text-2xl">
-        <IconAsk className="size-6" />
+      <h2 className="flex items-center gap-2 text-lg">
+        <IconAsk className="size-5" />
         {t("ask")}
       </h2>
       <form

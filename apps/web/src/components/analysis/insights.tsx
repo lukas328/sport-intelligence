@@ -103,7 +103,7 @@ export function InsightsCard({
                 {t("evidence")}
               </button>
               {i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
-                <Link className="text-xs font-medium text-accent hover:underline" href={`/app/${orgId}/drills?focus=${focusForInsight(i.key, i.params.zone as string | null).join(",")}`}>
+                <Link className="text-xs font-medium text-muted hover:text-foreground hover:underline" href={`/app/${orgId}/drills?focus=${focusForInsight(i.key, i.params.zone as string | null).join(",")}`}>
                   {t("drills")}
                 </Link>
               )}
@@ -165,7 +165,7 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
   });
   if (!open)
     return (
-      <button type="button" className="text-xs font-medium text-accent hover:underline" onClick={() => setOpen(true)}>
+      <button type="button" className="text-xs font-medium text-muted hover:text-foreground hover:underline" onClick={() => setOpen(true)}>
         {t("train")}
       </button>
     );

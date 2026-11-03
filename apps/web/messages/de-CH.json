@@ -283,7 +283,12 @@
     "csvTemplate": "Vorlage herunterladen",
     "none": "keine",
     "csvChoose": "Datei wählen",
-    "csvNone": "Keine Datei gewählt"
+    "csvNone": "Keine Datei gewählt",
+    "group_goal": "Tor",
+    "group_back": "Rückraum",
+    "group_wing": "Flügel",
+    "group_pivot": "Kreis",
+    "group_other": "Ohne Position"
   },
   "settings": {
     "title": "Einstellungen",
@@ -2042,7 +2047,7 @@
     "afterMatches": "{label}, nach {n, plural, =1 {1 Spiel} other {# Spielen}}",
     "neutralSeason": "Die Saison bis hierher.",
     "focus": "hier ansetzen",
-    "focusNote": "Der Strich zeigt den Richtwert, keinen Ligaschnitt. Gelb, wo ein Wert klar daneben liegt.",
+    "focusNote": "Der Strich zeigt den Richtwert, keinen Ligaschnitt.",
     "chartLater": "Der Verlauf erscheint ab drei Spielen. Bis dahin zeigt die Tabelle jedes Spiel einzeln.",
     "lastResult": "Letztes Spiel",
     "goalsAsClips": "Tore als Clips ansehen",
@@ -2051,6 +2056,8 @@
     "reference": "Richtwert {value}",
     "inNumbers": "Die Saison in Zahlen",
     "lowerBetter": "weniger ist besser",
-    "againstRef": "Gegentore {value}"
+    "againstRef": "Gegentore {value}",
+    "focusNoteMarked": "Gelb ist der Wert, der klar daneben liegt.",
+    "recordLabel": "Bilanz"
   }
 }

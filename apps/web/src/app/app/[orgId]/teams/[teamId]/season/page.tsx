@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
-import { MatchScore } from "@/components/domain/match-score";
 import { Stage, stageButton, stageLink } from "@/components/domain/stage";
 import { AreaSubNav } from "@/components/shell/section-nav";
 import { IconAsk } from "@/components/shell/icons";
@@ -91,6 +90,8 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
   const lastResult = matchStatement({ own: last.score_own, opp: last.score_opponent, opponent: last.opponent });
   const focus = focusMetric({ save_pct: data.totals.save_pct, shooting_pct: data.totals.shooting_pct, turnovers_per_match: data.totals.turnovers / n });
+  // columns that are zero in every match are left out (no 7 m recorded yet)
+  const sevenM = data.matches.some((m) => m.seven_m[1] > 0);
   const goalsFor = data.totals.goals / n;
   const goalsAgainst = data.matches.reduce((sum, m) => sum + m.score_opponent, 0) / n;
   const turnovers = data.totals.turnovers / n;
@@ -115,7 +116,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   ];
   const scorers = [...data.players].filter((p) => p.shots > 0).sort((a, b) => b.goals - a.goals || (b.shooting_pct ?? 0) - (a.shooting_pct ?? 0)).slice(0, 8);
   const topGoals = Math.max(1, ...scorers.map((p) => p.goals));
-  const lastWon = last.score_own > last.score_opponent ? "won" : last.score_own < last.score_opponent ? "lost" : "draw";
+  const wins = data.matches.filter((m) => m.score_own > m.score_opponent).length;
+  const draws = data.matches.filter((m) => m.score_own === m.score_opponent).length;
+  const losses = n - wins - draws;
   return (
     <div className="space-y-12">
       <div className="space-y-5 lg:space-y-0">
@@ -124,11 +127,23 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
         pullMobile={false}
         eyebrow={tv("afterMatches", { label, n })}
         aside={
-          <Link href={`/app/${orgId}/matches/${last.match_id}`} className="group block text-left xl:text-center">
-            <span className="block text-[0.9375rem] font-semibold">{tv("lastResult")}: {tm(lastWon)}</span>
-            <MatchScore own={last.score_own} opp={last.score_opponent} className="text-[5rem] leading-[0.85] xl:text-[clamp(3.5rem,4.6vw,5.25rem)]" />
-            <span className="block text-[0.9375rem] group-hover:underline">{last.opponent}</span>
-          </Link>
+          <div className="text-left xl:text-center">
+            <span className="block text-[0.9375rem] font-semibold">{tv("recordLabel")}</span>
+            <dl className="mt-1 flex gap-5 xl:justify-center" data-testid="season-record">
+              {([["won", wins], ["draw", draws], ["lost", losses]] as const).map(([k, v]) => (
+                <div key={k} className="flex flex-col-reverse items-center">
+                  <dt className="text-sm font-semibold">
+                    <span aria-hidden>{tm(k).charAt(0)}</span>
+                    <span className="sr-only">{tm(k)}</span>
+                  </dt>
+                  <dd className="font-score text-[4rem] leading-[0.9] xl:text-[clamp(3rem,3.8vw,4.25rem)]">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <Link href={`/app/${orgId}/matches/${last.match_id}`} className="mt-2 block text-[0.9375rem] hover:underline">
+              {tv("lastResult")}: {last.score_own}:{last.score_opponent} {last.opponent}
+            </Link>
+          </div>
         }
       >
         <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
@@ -167,7 +182,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
               </li>
             ))}
           </ul>
-          <p className="text-sm text-muted">{tv("focusNote")}</p>
+          <p className="text-sm text-muted">{tv("focusNote")}{focus && ` ${tv("focusNoteMarked")}`}</p>
         </section>
 
         <div className="space-y-12">
@@ -271,20 +286,20 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             <caption className="sr-only">{t("matches")}</caption>
             <thead>
               <tr>
-                <th scope="col" className="text-left">{t("match")}</th>
+                <th scope="col" className="sticky left-0 bg-raised text-left">{t("match")}</th>
                 <th scope="col">{t("result")}</th>
                 <th scope="col">{t("shootingPct")}</th>
                 <th scope="col">{t("savePct")}</th>
                 <th scope="col">{t("turnovers")}</th>
                 <th scope="col">{t("xg")}</th>
                 <th scope="col">{t("xgAgainst")}</th>
-                <th scope="col">{t("sevenM")}</th>
+                {sevenM && <th scope="col">{t("sevenM")}</th>}
               </tr>
             </thead>
             <tbody>
               {data.matches.map((m) => (
                 <tr key={m.match_id}>
-                  <th scope="row" className="text-left font-medium">
+                  <th scope="row" className="sticky left-0 bg-raised text-left font-medium">
                     <Link href={`/app/${orgId}/matches/${m.match_id}`} className="hover:text-accent hover:underline">
                       <span className="text-muted tabular-nums">{format.dateTime(new Date(m.kickoff_at), { dateStyle: "short" })}</span> {m.is_home ? "" : "@ "}
                       {m.opponent}
@@ -298,9 +313,11 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   <td>{m.turnovers}</td>
                   <td>{m.xg.toFixed(1)}</td>
                   <td>{m.xg_against.toFixed(1)}</td>
-                  <td>
-                    {m.seven_m[0]}/{m.seven_m[1]}
-                  </td>
+                  {sevenM && (
+                    <td>
+                      {m.seven_m[0]}/{m.seven_m[1]}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

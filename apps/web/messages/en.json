@@ -283,7 +283,12 @@
     "csvTemplate": "Download template",
     "none": "none",
     "csvChoose": "Choose file",
-    "csvNone": "No file chosen"
+    "csvNone": "No file chosen",
+    "group_goal": "Goal",
+    "group_back": "Back court",
+    "group_wing": "Wings",
+    "group_pivot": "Pivot",
+    "group_other": "No position"
   },
   "settings": {
     "title": "Settings",
@@ -2042,7 +2047,7 @@
     "afterMatches": "{label}, after {n, plural, =1 {1 match} other {# matches}}",
     "neutralSeason": "The season so far.",
     "focus": "work on this",
-    "focusNote": "The tick shows the reference value, not a league average. Yellow where a value is clearly off.",
+    "focusNote": "The tick shows the reference value, not a league average.",
     "chartLater": "The trend appears from three matches. Until then the table shows each match.",
     "lastResult": "Last match",
     "goalsAsClips": "Watch the goals as clips",
@@ -2051,6 +2056,8 @@
     "reference": "Reference {value}",
     "inNumbers": "The season in numbers",
     "lowerBetter": "lower is better",
-    "againstRef": "Goals against {value}"
+    "againstRef": "Goals against {value}",
+    "focusNoteMarked": "Yellow marks the value that is clearly off.",
+    "recordLabel": "Record"
   }
 }

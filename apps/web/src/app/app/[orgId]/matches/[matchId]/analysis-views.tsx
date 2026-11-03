@@ -147,9 +147,11 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
     { label: t("saves"), own: stats.own.saves, opp: stats.opponent.saves, filter: (s) => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) },
     { label: t("savePct"), own: pct(stats.own.save_pct), opp: pct(stats.opponent.save_pct) },
     { label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s) => ({ side: s, type: "turnover" }) },
-    { label: t("sevenM"), own: `${stats.own.seven_m_goals}/${stats.own.seven_m_shots}`, opp: `${stats.opponent.seven_m_goals}/${stats.opponent.seven_m_shots}` },
+    ...(stats.own.seven_m_shots + stats.opponent.seven_m_shots > 0 ? [{ label: t("sevenM"), own: `${stats.own.seven_m_goals}/${stats.own.seven_m_shots}`, opp: `${stats.opponent.seven_m_goals}/${stats.opponent.seven_m_shots}` }] : []),
     { label: t("fastBreakGoals"), own: stats.own.fast_break_goals, opp: stats.opponent.fast_break_goals, filter: (s) => ({ side: s, zone: "fast_break", outcome: "goal" }) },
-    { label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s) => ({ side: s, type: "suspension_2min" }) },
+    ...(stats.own.suspensions + stats.opponent.suspensions > 0
+      ? [{ label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s: "own" | "opponent") => ({ side: s, type: "suspension_2min" }) as EventFilter }]
+      : []),
     { label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) },
     { label: t("xg"), own: stats.own.xg.toFixed(1), opp: stats.opponent.xg.toFixed(1) },
   ];
