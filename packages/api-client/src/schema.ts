@@ -776,6 +776,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/assistant/messages/{message_id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rate */
+        post: operations["rate_v1_orgs__org_id__assistant_messages__message_id__rating_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/assistant/{conversation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Conversation */
+        get: operations["conversation_v1_orgs__org_id__assistant__conversation_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/billing": {
         parameters: {
             query?: never;
@@ -1240,6 +1274,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/export/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Events */
+        get: operations["export_events_v1_orgs__org_id__matches__match_id__export_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/export/sportscode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Sportscode
+         * @description Sportscode XML timeline: events with video time and clips with their tags.
+         */
+        get: operations["export_sportscode_v1_orgs__org_id__matches__match_id__export_sportscode_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/exports/shots": {
         parameters: {
             query?: never;
@@ -1335,6 +1406,26 @@ export interface paths {
         put?: never;
         /** Create */
         post: operations["create_v1_orgs__org_id__matches__match_id__highlights_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/import/sportscode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Sportscode
+         * @description Instances become clips with own tags (code and labels); events stay untouched.
+         */
+        post: operations["import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1581,6 +1672,23 @@ export interface paths {
         /** Import Video */
         post: operations["import_video_v1_orgs__org_id__matches__match_id__videos_import_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matrix/templates/{template_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Template */
+        delete: operations["delete_template_v1_orgs__org_id__matrix_templates__template_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2373,6 +2481,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/assistant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Conversations */
+        get: operations["conversations_v1_orgs__org_id__teams__team_id__assistant_get"];
+        put?: never;
+        /**
+         * Ask
+         * @description Answers a question about the team's data with typed queries; numbers are validated.
+         */
+        post: operations["ask_v1_orgs__org_id__teams__team_id__assistant_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
         parameters: {
             query?: never;
@@ -2405,6 +2534,61 @@ export interface paths {
         put?: never;
         /** Create Match */
         post: operations["create_match_v1_orgs__org_id__teams__team_id__matches_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/matrix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Matrix
+         * @description Rows x metrics over the team's matches; every cell lists its events and clips.
+         */
+        post: operations["matrix_v1_orgs__org_id__teams__team_id__matrix_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/matrix/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Matrix Export */
+        post: operations["matrix_export_v1_orgs__org_id__teams__team_id__matrix_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/matrix/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Templates */
+        get: operations["templates_v1_orgs__org_id__teams__team_id__matrix_templates_get"];
+        put?: never;
+        /** Save Template */
+        post: operations["save_template_v1_orgs__org_id__teams__team_id__matrix_templates_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3062,6 +3246,28 @@ export interface components {
             /** Vat Rate Percent */
             vat_rate_percent: number | null;
         };
+        /** Answer */
+        Answer: {
+            /** Answerable */
+            answerable: boolean;
+            chart?: components["schemas"]["Chart"] | null;
+            /**
+             * Clips
+             * @default []
+             */
+            clips?: components["schemas"]["Clip"][];
+            /** Sample Size */
+            sample_size?: number | null;
+            /** Suggestion */
+            suggestion?: string | null;
+            /** Text */
+            text: string;
+            /**
+             * Values
+             * @default []
+             */
+            values?: number[];
+        };
         /** ArrowIn */
         ArrowIn: {
             /**
@@ -3074,6 +3280,19 @@ export interface components {
                 number,
                 number
             ][];
+        };
+        /** AskIn */
+        AskIn: {
+            /** Conversation Id */
+            conversation_id?: string | null;
+            /**
+             * Lang
+             * @default de-CH
+             * @enum {string}
+             */
+            lang?: "de-CH" | "fr" | "en";
+            /** Question */
+            question: string;
         };
         /** AssignmentCreate */
         AssignmentCreate: {
@@ -3206,6 +3425,11 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post */
+        Body_import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post: {
+            /** File */
+            file: string;
+        };
         /** Body_set_image_v1_orgs__org_id__slides__slide_id__image_put */
         Body_set_image_v1_orgs__org_id__slides__slide_id__image_put: {
             /** File */
@@ -3266,6 +3490,15 @@ export interface components {
                 number
             ];
         };
+        /** Chart */
+        Chart: {
+            /** Labels */
+            labels: string[];
+            /** Title */
+            title: string;
+            /** Values */
+            values: number[];
+        };
         /** ChecklistItem */
         ChecklistItem: {
             /** Done */
@@ -3283,6 +3516,20 @@ export interface components {
              */
             goalkeeper_seats?: number;
             plan: components["schemas"]["Plan"];
+        };
+        /** Clip */
+        Clip: {
+            /** Event Id */
+            event_id: string;
+            /**
+             * Label
+             * @default
+             */
+            label?: string;
+            /** Match Id */
+            match_id: string;
+            /** T Ms */
+            t_ms?: number | null;
         };
         /** ClipCreate */
         ClipCreate: {
@@ -3318,6 +3565,15 @@ export interface components {
             start_ms: number;
             /** Title */
             title: string | null;
+        };
+        /** ClipRef */
+        ClipRef: {
+            /** Event Id */
+            event_id: string;
+            /** Match Id */
+            match_id: string;
+            /** T Ms */
+            t_ms?: number | null;
         };
         /** CoachFeedPlayer */
         CoachFeedPlayer: {
@@ -3492,6 +3748,48 @@ export interface components {
         /** ConsentToggle */
         ConsentToggle: {
             kind: components["schemas"]["ConsentKind"];
+        };
+        /** ConversationDetail */
+        ConversationDetail: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Messages */
+            messages: components["schemas"]["MessageOut"][];
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Title */
+            title: string;
+        };
+        /** ConversationOut */
+        ConversationOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Title */
+            title: string;
         };
         /**
          * DataRegion
@@ -4245,6 +4543,60 @@ export interface components {
             /** Venue */
             venue?: string | null;
         };
+        /** MatrixCell */
+        MatrixCell: {
+            /** Clips */
+            clips: components["schemas"]["ClipRef"][];
+            /** Denominator */
+            denominator: number | null;
+            /** Event Ids */
+            event_ids: string[];
+            /** Events */
+            events: number;
+            /** Numerator */
+            numerator: number;
+            /** Value */
+            value: number | null;
+        };
+        /** MatrixIn */
+        MatrixIn: {
+            /** Filter */
+            filter?: {
+                [key: string]: unknown;
+            };
+            /** Metrics */
+            metrics: string[];
+            /**
+             * Rows
+             * @description Row dimension: number, position, play, match, period, ...
+             */
+            rows: string;
+        };
+        /** MatrixOut */
+        MatrixOut: {
+            /** By */
+            by: string;
+            /** Definitions */
+            definitions: {
+                [key: string]: string;
+            };
+            /** Metrics */
+            metrics: string[];
+            /** Rows */
+            rows: components["schemas"]["MatrixRow"][];
+            totals: components["schemas"]["MatrixRow"];
+        };
+        /** MatrixRow */
+        MatrixRow: {
+            /** Cells */
+            cells: {
+                [key: string]: components["schemas"]["MatrixCell"];
+            };
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+        };
         /** MeOut */
         MeOut: {
             /** Email */
@@ -4301,6 +4653,37 @@ export interface components {
              * Format: uuid
              */
             user_id: string;
+        };
+        /** MessageOut */
+        MessageOut: {
+            answer: components["schemas"]["Answer"];
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Latency Ms */
+            latency_ms: number;
+            /** Question */
+            question: string;
+            /** Rating */
+            rating: number | null;
+            /** Status */
+            status: string;
+            /** Tool Calls */
+            tool_calls: components["schemas"]["ToolCall"][];
+            /** Validated */
+            validated: boolean;
         };
         /** NotificationList */
         NotificationList: {
@@ -4883,6 +5266,14 @@ export interface components {
         ProvidersOut: {
             /** Providers */
             providers: string[];
+        };
+        /** RateIn */
+        RateIn: {
+            /**
+             * Rating
+             * @enum {integer}
+             */
+            rating: -1 | 1;
         };
         /** Readiness */
         Readiness: {
@@ -5635,6 +6026,50 @@ export interface components {
             /** Name */
             name?: string | null;
             settings?: components["schemas"]["TeamSettings"] | null;
+        };
+        /** TemplateIn */
+        TemplateIn: {
+            config: components["schemas"]["MatrixIn"];
+            /** Name */
+            name: string;
+        };
+        /** TemplateOut */
+        TemplateOut: {
+            config: components["schemas"]["MatrixIn"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+        };
+        /** ToolCall */
+        ToolCall: {
+            /** Error */
+            error?: string | null;
+            /** Input */
+            input: {
+                [key: string]: unknown;
+            };
+            /** Ms */
+            ms?: number | null;
+            /** Name */
+            name: string;
+            /** Summary */
+            summary?: {
+                [key: string]: unknown;
+            } | null;
         };
         /** TotpCodeIn */
         TotpCodeIn: {
@@ -7201,6 +7636,72 @@ export interface operations {
             };
         };
     };
+    rate_v1_orgs__org_id__assistant_messages__message_id__rating_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    conversation_v1_orgs__org_id__assistant__conversation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     overview_v1_orgs__org_id__billing_get: {
         parameters: {
             query?: never;
@@ -8338,6 +8839,70 @@ export interface operations {
             };
         };
     };
+    export_events_v1_orgs__org_id__matches__match_id__export_events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_sportscode_v1_orgs__org_id__matches__match_id__export_sportscode_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/xml": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     shot_export_v1_orgs__org_id__matches__match_id__exports_shots_get: {
         parameters: {
             query?: never;
@@ -8525,6 +9090,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HighlightOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -9034,6 +9637,36 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["VideoOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_template_v1_orgs__org_id__matrix_templates__template_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                template_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -10997,6 +11630,74 @@ export interface operations {
             };
         };
     };
+    conversations_v1_orgs__org_id__teams__team_id__assistant_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ask_v1_orgs__org_id__teams__team_id__assistant_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     demo_match_v1_orgs__org_id__teams__team_id__demo_match_post: {
         parameters: {
             query?: never;
@@ -11086,6 +11787,149 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MatchOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    matrix_v1_orgs__org_id__teams__team_id__matrix_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MatrixIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatrixOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    matrix_export_v1_orgs__org_id__teams__team_id__matrix_export_post: {
+        parameters: {
+            query?: {
+                format?: "csv" | "xlsx";
+            };
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MatrixIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": unknown;
+                    "text/csv": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    templates_v1_orgs__org_id__teams__team_id__matrix_templates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_template_v1_orgs__org_id__teams__team_id__matrix_templates_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TemplateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateOut"];
                 };
             };
             /** @description Validation Error */

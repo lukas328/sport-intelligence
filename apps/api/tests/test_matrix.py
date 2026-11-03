@@ -1,0 +1,191 @@
+"""Statistics matrix, CSV/Excel export, Sportscode XML export and import (addendum 01, 5.4)."""
+
+from __future__ import annotations
+
+import csv
+import io
+from collections import Counter
+from collections.abc import Callable
+
+import asyncpg
+import pytest
+from defusedxml import ElementTree as SafeET
+from openpyxl import load_workbook
+
+from .assistant_eval import MATCHES
+from .conftest import Api
+from .test_assistant import seed
+from .test_matches import new_match
+
+pytestmark = pytest.mark.usefixtures("clean_db")
+
+
+def instances(xml: bytes) -> Counter[tuple[str, str, str, tuple[tuple[str, str], ...]]]:
+    root = SafeET.fromstring(xml)
+    out: Counter[tuple[str, str, str, tuple[tuple[str, str], ...]]] = Counter()
+    for el in root.iter("instance"):
+        labels = tuple(
+            sorted(
+                (lab.findtext("group") or "", lab.findtext("text") or "")
+                for lab in el.findall("label")
+            )
+        )
+        out[
+            (
+                el.findtext("start") or "",
+                el.findtext("end") or "",
+                el.findtext("code") or "",
+                labels,
+            )
+        ] += 1
+    return out
+
+
+async def test_matrix_templates_and_exports(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    api = make_api()
+    ids = await seed(api, owner_conn)
+    org, team = ids["org"], ids["team"]
+    url = f"/v1/orgs/{org}/teams/{team}/matrix"
+    spec = {"rows": "number", "metrics": ["goals", "shooting_pct"], "filter": {"side": "own"}}
+    out = (await api.post(url, json=spec)).json()
+    expected: Counter[int] = Counter(
+        e["number"]
+        for m in MATCHES
+        for e in m.events
+        if e["side"] == "own" and e["type"] == "shot" and e["outcome"] == "goal"
+    )
+    got = {r["label"]: r["cells"]["goals"]["value"] for r in out["rows"]}
+    assert got == {f"#{n}": float(c) for n, c in expected.items()}
+    assert out["totals"]["cells"]["goals"]["value"] == sum(expected.values())
+    # sorted by the first column; every clip has a video time; ratios list their shots
+    values = [r["cells"]["goals"]["value"] for r in out["rows"]]
+    assert values == sorted(values, reverse=True)
+    cell = out["rows"][0]["cells"]["shooting_pct"]
+    assert cell["denominator"] == len(cell["event_ids"]) and cell["clips"]
+    assert all(c["t_ms"] is not None for c in cell["clips"])
+
+    plays = (await api.post(url, json={"rows": "play", "metrics": ["shots"], "filter": {}})).json()
+    assert {r["label"] for r in plays["rows"]} == {"Kreuzung links", "Stoss Mitte"}
+    halves = (
+        await api.post(
+            url, json={"rows": "period", "metrics": ["goals"], "filter": {"side": "opponent"}}
+        )
+    ).json()
+    assert (
+        sum(r["cells"]["goals"]["value"] for r in halves["rows"])
+        == halves["totals"]["cells"]["goals"]["value"]
+    )
+    assert (await api.post(url, json={"rows": "shoe", "metrics": ["goals"]})).status_code == 422
+    assert (await api.post(url, json={"rows": "match", "metrics": ["luck"]})).status_code == 422
+    assert (
+        await api.post(url, json={"rows": "match", "metrics": ["goals"], "filter": {"x": 1}})
+    ).status_code == 422
+
+    # templates
+    turl = f"{url}/templates"
+    t = await api.post(turl, json={"name": "Werfer", "config": spec})
+    assert t.status_code == 201
+    assert (await api.post(turl, json={"name": "Werfer", "config": spec})).status_code == 409
+    assert [x["name"] for x in (await api.get(turl)).json()] == ["Werfer"]
+    assert (
+        await api.delete(f"/v1/orgs/{org}/matrix/templates/{t.json()['id']}")
+    ).status_code == 204
+    assert (await api.get(turl)).json() == []
+
+    # CSV and Excel; a formula-like label is neutralised
+    await owner_conn.execute("UPDATE opponents SET name = '=HYPERLINK(1)' WHERE name = 'TSV Test'")
+    by_match = {"rows": "match", "metrics": ["goals", "shooting_pct"], "filter": {"side": "own"}}
+    r = await api.post(f"{url}/export?format=csv", json=by_match)
+    assert r.status_code == 200 and "attachment" in r.headers["content-disposition"]
+    table = list(csv.reader(io.StringIO(r.content.decode("utf-8-sig")), delimiter=";"))
+    assert table[0] == ["match", "goals", "shooting_pct (%)"] and table[-1][0] == "total"
+    assert len(table) == len(MATCHES) + 2
+    assert all(not row[0].startswith("=") for row in table)
+    r = await api.post(f"{url}/export?format=xlsx", json=by_match)
+    ws = load_workbook(io.BytesIO(r.content)).active
+    assert ws is not None
+    rows = list(ws.iter_rows(values_only=True))
+    assert rows[0] == ("match", "goals", "shooting_pct (%)") and rows[-1][0] == "total"
+
+
+async def test_sportscode_round_trip_and_csv(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    api = make_api()
+    ids = await seed(api, owner_conn)
+    org = ids["org"]
+    # the newest seeded match has video times; add a tagged clip with labels
+    match_id = await owner_conn.fetchval(
+        "SELECT id::text FROM matches ORDER BY kickoff_at DESC LIMIT 1"
+    )
+    sets = await api.post(
+        f"/v1/orgs/{org}/teams/{ids['team']}/tag-sets",
+        json={"name": "Angriff", "tags": [{"name": "7 gegen 6"}, {"name": "Kreuzung"}]},
+    )
+    tags = [t["id"] for t in sets.json()["tags"]]
+    clip = await api.post(
+        f"/v1/orgs/{org}/clips",
+        json={"match_id": match_id, "start_ms": 61_000, "end_ms": 70_500, "title": "Überzahl"},
+    )
+    assert clip.status_code == 201, clip.text
+    r = await api.put(
+        f"/v1/orgs/{org}/tag-links",
+        json={"target_type": "clip", "target_id": clip.json()["id"], "tag_ids": tags},
+    )
+    assert r.status_code in (200, 204), r.text
+
+    xml1 = (await api.get(f"/v1/orgs/{org}/matches/{match_id}/export/sportscode")).content
+    first = instances(xml1)
+    with_video = sum(1 for e in MATCHES[-1].events if e["t_ms"] is not None)
+    assert sum(first.values()) == with_video + 1
+    assert (
+        "61.000",
+        "70.500",
+        "Überzahl",
+        (("Angriff", "7 gegen 6"), ("Angriff", "Kreuzung")),
+    ) in first
+    root = SafeET.fromstring(xml1)
+    assert root.tag == "file" and root.find("ROWS") is not None
+
+    # import into an empty match, export again: the same instances
+    other = await new_match(
+        api, ids, opponent_name="Rundlauf", kickoff_at="2026-12-01T18:00:00+01:00"
+    )
+    imp = await api.post(
+        f"/v1/orgs/{org}/matches/{other['id']}/import/sportscode",
+        files={"file": ("timeline.xml", xml1, "application/xml")},
+    )
+    assert imp.status_code == 200, imp.text
+    assert imp.json()["clips"] == sum(first.values())
+    xml2 = (await api.get(f"/v1/orgs/{org}/matches/{other['id']}/export/sportscode")).content
+    assert instances(xml2) == first
+    # importing twice reuses the tags
+    again = await api.post(
+        f"/v1/orgs/{org}/matches/{other['id']}/import/sportscode",
+        files={"file": ("timeline.xml", xml1, "application/xml")},
+    )
+    assert again.json()["tags_created"] == 0
+
+    # broken, empty and unsafe XML
+    bad = {
+        "broken": b"<file><instance>",
+        "empty": b"<file><ALL_INSTANCES/></file>",
+        "entity": b'<?xml version="1.0"?><!DOCTYPE x [<!ENTITY e SYSTEM "file:///etc/passwd">]>'
+        b"<file><instance><start>1</start><end>2</end><code>&e;</code></instance></file>",
+    }
+    for name, payload in bad.items():
+        r = await api.post(
+            f"/v1/orgs/{org}/matches/{other['id']}/import/sportscode",
+            files={"file": (f"{name}.xml", payload, "application/xml")},
+        )
+        assert r.status_code == 422, name
+
+    r = await api.get(f"/v1/orgs/{org}/matches/{match_id}/export/events")
+    rows = list(csv.reader(io.StringIO(r.content.decode("utf-8-sig")), delimiter=";"))
+    assert rows[0][:3] == ["period", "clock_s", "video_ms"]
+    assert len(rows) == len(MATCHES[-1].events) + 1
+    own_shot = next(row for row in rows[1:] if row[3] == "shot" and row[4] == "own")
+    assert own_shot[9]  # jersey number from the roster, no names
+    assert "P7" not in r.text

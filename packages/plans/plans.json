@@ -25,6 +25,7 @@
       "storage_gb": 250,
       "analysis": true,
       "features": [
+        "assistant",
         "events",
         "insights",
         "pdf_reports",
@@ -44,6 +45,7 @@
       "storage_gb": 2500,
       "analysis": true,
       "features": [
+        "assistant",
         "club_stats",
         "events",
         "insights",

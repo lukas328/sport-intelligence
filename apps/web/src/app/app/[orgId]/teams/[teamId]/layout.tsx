@@ -41,8 +41,10 @@ export default async function TeamLayout({
           <TabLink href={`${base}/plays`}>{t("team.plays")}</TabLink>
           <TabLink href={`${base}/presentations`}>{t("presentations.nav")}</TabLink>
           <TabLink href={`${base}/season`}>{t("team.season")}</TabLink>
+          <TabLink href={`${base}/matrix`}>{t("matrix.nav")}</TabLink>
           {videoWork && <TabLink href={`${base}/search`}>{t("search.nav")}</TabLink>}
           {videoWork && <TabLink href={`${base}/assignments`}>{t("assignments.nav")}</TabLink>}
+          {videoWork && <TabLink href={`${base}/assistant`}>{t("assistant.nav")}</TabLink>}
         </nav>
       </header>
       {children}

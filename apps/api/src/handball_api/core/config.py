@@ -76,6 +76,8 @@ class Settings(BaseSettings):
     stripe_price_goalkeeper: str | None = None
     # optional: natural-language match summaries via the Claude API (templates are used without it)
     anthropic_api_key: SecretStr | None = None
+    # data assistant (5.1): monthly model cost cap when billing limits are off (development)
+    assistant_usd_month_unenforced: float = 5.0
     readiness_timeout_s: float = 2.0
 
     # Public URL of the web app (links in e-mails)

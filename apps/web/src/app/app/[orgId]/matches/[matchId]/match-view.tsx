@@ -20,6 +20,7 @@ import { UploadPanel } from "./upload-panel";
 import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { TeamFeedView } from "./feed-views";
+import { ExchangePanel } from "./exchange-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
 
 type Match = Schemas["MatchOut"];
@@ -195,6 +196,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         ))}
 
       <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
+      <ExchangePanel orgId={orgId} matchId={match.id} canImport={staff} />
       {jobs.filter((j) => j.status !== "succeeded").length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 
       {staff && (pendingVideos.length > 0 || !main) && (

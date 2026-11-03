@@ -97,6 +97,7 @@ const fr: Messages = {
     trial: "Essayer {days} jours gratuitement",
     choose: "Démarrer {plan}",
     featureNames: {
+      assistant: "Assistant : poser des questions à tes données",
       events: "Saisie des événements et rapport de match",
       insights: "Enseignements sur la saison",
       pdf_reports: "Rapports PDF",

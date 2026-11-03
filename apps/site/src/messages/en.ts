@@ -97,6 +97,7 @@ const en: Messages = {
     trial: "Try free for {days} days",
     choose: "Start {plan}",
     featureNames: {
+      assistant: "Assistant: ask your own data",
       events: "Event tagging and match report",
       insights: "Insights across the season",
       pdf_reports: "PDF reports",

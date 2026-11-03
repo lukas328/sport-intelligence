@@ -135,3 +135,15 @@ zenodo.org, figshare.com, huggingface.co and archive.org. **Needed**: allow thes
 environment settings (Network access, Allowed domains) or provide the files; then the golden set and
 `ml/eval/events.py` run on real matches. YouTube videos are not downloaded (terms of use, ADR 018).
 
+
+### Q-M10-1 Data assistant: live evaluation needs a model key
+The 62-question evaluation set runs in CI with a scripted model (tools, validator, logging; ADR 021).
+The acceptance criteria of 5.1 for the model itself (90 % correct, p95 under 8 s) can only be measured
+with a key: `HB_ANTHROPIC_API_KEY=... uv run pytest -m live apps/api/tests/test_assistant.py`
+(writes `docs/perf/assistant-eval.md`, about 62 questions times a few cents). **Default**: the
+assistant is off without a key (503 "not set up"); run the live evaluation before enabling it.
+
+### Q-M10-2 Sportscode compatibility check
+The export follows the public Sportscode XML layout (instances with ID, start, end, code, labels;
+rows with RGB) and round-trips losslessly through our import (tested). Opening the file in Sportscode
+itself needs a licence. **Default**: ask a club with Sportscode to open one export before launch.

@@ -9,6 +9,7 @@ from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from handball_api import __version__
+from handball_api.core.assistant_llm import AssistantModel, ClaudeAssistantModel
 from handball_api.core.config import Settings, get_settings
 from handball_api.core.db import dispose_engine, init_engine
 from handball_api.core.email import (
@@ -25,12 +26,14 @@ from handball_api.core.ratelimit import MemoryRateLimiter, RateLimiter, RedisRat
 from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.core.text import ClaudeTextGenerator, TextGenerator
+from handball_api.routers import assistant as assistant_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
 from handball_api.routers import events as events_router
 from handball_api.routers import family as family_router
 from handball_api.routers import feed as feed_router
 from handball_api.routers import highlights as highlights_router
+from handball_api.routers import matrix as matrix_router
 from handball_api.routers import ops as ops_router
 from handball_api.routers import presentations as presentations_router
 from handball_api.routers import privacy as privacy_router
@@ -110,6 +113,7 @@ def create_app(
     jobs: JobQueue | None = None,
     events: EventBus | None = None,
     text: TextGenerator | None = None,
+    assistant: AssistantModel | None = None,
     billing: BillingGateway | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
@@ -150,6 +154,11 @@ def create_app(
     )
     app.state.text = text or (
         ClaudeTextGenerator(settings.anthropic_api_key.get_secret_value())
+        if settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value()
+        else None
+    )
+    app.state.assistant = assistant or (
+        ClaudeAssistantModel(settings.anthropic_api_key.get_secret_value())
         if settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value()
         else None
     )
@@ -205,5 +214,7 @@ def create_app(
     app.include_router(segments_router.router)
     app.include_router(support_router.router)
     app.include_router(presentations_router.router)
+    app.include_router(assistant_router.router)
+    app.include_router(matrix_router.router)
     app.include_router(internal.router)
     return app

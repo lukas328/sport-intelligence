@@ -96,6 +96,7 @@ const de = {
     trial: "{days} Tage gratis testen",
     choose: "{plan} starten",
     featureNames: {
+      assistant: "Assistent: Fragen an die eigenen Daten",
       events: "Ereignisse erfassen und Spielbericht",
       insights: "Erkenntnisse über die Saison",
       pdf_reports: "PDF-Berichte",

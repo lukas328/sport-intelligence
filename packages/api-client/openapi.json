@@ -308,6 +308,72 @@
         "title": "AnnualPrice",
         "type": "object"
       },
+      "Answer": {
+        "properties": {
+          "answerable": {
+            "title": "Answerable",
+            "type": "boolean"
+          },
+          "chart": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Chart"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clips": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Clip"
+            },
+            "title": "Clips",
+            "type": "array"
+          },
+          "sample_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample Size"
+          },
+          "suggestion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "values": {
+            "default": [],
+            "items": {
+              "type": "number"
+            },
+            "title": "Values",
+            "type": "array"
+          }
+        },
+        "required": [
+          "answerable",
+          "text"
+        ],
+        "title": "Answer",
+        "type": "object"
+      },
       "ArrowIn": {
         "properties": {
           "kind": {
@@ -345,6 +411,43 @@
           "points"
         ],
         "title": "ArrowIn",
+        "type": "object"
+      },
+      "AskIn": {
+        "properties": {
+          "conversation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "lang": {
+            "default": "de-CH",
+            "enum": [
+              "de-CH",
+              "fr",
+              "en"
+            ],
+            "title": "Lang",
+            "type": "string"
+          },
+          "question": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "title": "AskIn",
         "type": "object"
       },
       "AssignmentCreate": {
@@ -704,6 +807,20 @@
         "title": "Body_import_roster_v1_orgs__org_id__teams__team_id__seasons__season_id__roster_import_post",
         "type": "object"
       },
+      "Body_import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post",
+        "type": "object"
+      },
       "Body_set_image_v1_orgs__org_id__slides__slide_id__image_put": {
         "properties": {
           "file": {
@@ -879,6 +996,35 @@
         "title": "CalibrationPoint",
         "type": "object"
       },
+      "Chart": {
+        "properties": {
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Values",
+            "type": "array"
+          }
+        },
+        "required": [
+          "title",
+          "labels",
+          "values"
+        ],
+        "title": "Chart",
+        "type": "object"
+      },
       "ChecklistItem": {
         "properties": {
           "done": {
@@ -926,6 +1072,40 @@
           "plan"
         ],
         "title": "CheckoutIn",
+        "type": "object"
+      },
+      "Clip": {
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "match_id": {
+            "title": "Match Id",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          }
+        },
+        "required": [
+          "event_id",
+          "match_id"
+        ],
+        "title": "Clip",
         "type": "object"
       },
       "ClipCreate": {
@@ -1011,6 +1191,35 @@
           "source"
         ],
         "title": "ClipOut",
+        "type": "object"
+      },
+      "ClipRef": {
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "match_id": {
+            "title": "Match Id",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          }
+        },
+        "required": [
+          "event_id",
+          "match_id"
+        ],
+        "title": "ClipRef",
         "type": "object"
       },
       "CoachFeedPlayer": {
@@ -1492,6 +1701,76 @@
           "kind"
         ],
         "title": "ConsentToggle",
+        "type": "object"
+      },
+      "ConversationDetail": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/MessageOut"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "title",
+          "created_at",
+          "messages"
+        ],
+        "title": "ConversationDetail",
+        "type": "object"
+      },
+      "ConversationOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "title",
+          "created_at"
+        ],
+        "title": "ConversationOut",
         "type": "object"
       },
       "DataRegion": {
@@ -3954,6 +4233,160 @@
         "title": "MatchUpdate",
         "type": "object"
       },
+      "MatrixCell": {
+        "properties": {
+          "clips": {
+            "items": {
+              "$ref": "#/components/schemas/ClipRef"
+            },
+            "title": "Clips",
+            "type": "array"
+          },
+          "denominator": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Denominator"
+          },
+          "event_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Event Ids",
+            "type": "array"
+          },
+          "events": {
+            "title": "Events",
+            "type": "integer"
+          },
+          "numerator": {
+            "title": "Numerator",
+            "type": "number"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "value",
+          "numerator",
+          "denominator",
+          "events",
+          "event_ids",
+          "clips"
+        ],
+        "title": "MatrixCell",
+        "type": "object"
+      },
+      "MatrixIn": {
+        "properties": {
+          "filter": {
+            "additionalProperties": true,
+            "title": "Filter",
+            "type": "object"
+          },
+          "metrics": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Metrics",
+            "type": "array"
+          },
+          "rows": {
+            "description": "Row dimension: number, position, play, match, period, ...",
+            "title": "Rows",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rows",
+          "metrics"
+        ],
+        "title": "MatrixIn",
+        "type": "object"
+      },
+      "MatrixOut": {
+        "properties": {
+          "by": {
+            "title": "By",
+            "type": "string"
+          },
+          "definitions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Definitions",
+            "type": "object"
+          },
+          "metrics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/MatrixRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/MatrixRow"
+          }
+        },
+        "required": [
+          "by",
+          "metrics",
+          "definitions",
+          "rows",
+          "totals"
+        ],
+        "title": "MatrixOut",
+        "type": "object"
+      },
+      "MatrixRow": {
+        "properties": {
+          "cells": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MatrixCell"
+            },
+            "title": "Cells",
+            "type": "object"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "cells"
+        ],
+        "title": "MatrixRow",
+        "type": "object"
+      },
       "MeOut": {
         "properties": {
           "email": {
@@ -4101,6 +4534,76 @@
           "totp_enabled"
         ],
         "title": "MemberOut",
+        "type": "object"
+      },
+      "MessageOut": {
+        "properties": {
+          "answer": {
+            "$ref": "#/components/schemas/Answer"
+          },
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "latency_ms": {
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tool_calls": {
+            "items": {
+              "$ref": "#/components/schemas/ToolCall"
+            },
+            "title": "Tool Calls",
+            "type": "array"
+          },
+          "validated": {
+            "title": "Validated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "conversation_id",
+          "question",
+          "answer",
+          "tool_calls",
+          "validated",
+          "status",
+          "latency_ms",
+          "rating",
+          "created_at"
+        ],
+        "title": "MessageOut",
         "type": "object"
       },
       "NotificationList": {
@@ -5781,6 +6284,23 @@
           "providers"
         ],
         "title": "ProvidersOut",
+        "type": "object"
+      },
+      "RateIn": {
+        "properties": {
+          "rating": {
+            "enum": [
+              -1,
+              1
+            ],
+            "title": "Rating",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rating"
+        ],
+        "title": "RateIn",
         "type": "object"
       },
       "Readiness": {
@@ -7936,6 +8456,113 @@
           }
         },
         "title": "TeamUpdate",
+        "type": "object"
+      },
+      "TemplateIn": {
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/MatrixIn"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "config"
+        ],
+        "title": "TemplateIn",
+        "type": "object"
+      },
+      "TemplateOut": {
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/MatrixIn"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "name",
+          "config",
+          "created_at"
+        ],
+        "title": "TemplateOut",
+        "type": "object"
+      },
+      "ToolCall": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "input": {
+            "additionalProperties": true,
+            "title": "Input",
+            "type": "object"
+          },
+          "ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ms"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          }
+        },
+        "required": [
+          "name",
+          "input"
+        ],
+        "title": "ToolCall",
         "type": "object"
       },
       "TotpCodeIn": {
@@ -10342,6 +10969,115 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/assistant/messages/{message_id}/rating": {
+      "post": {
+        "operationId": "rate_v1_orgs__org_id__assistant_messages__message_id__rating_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "message_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Message Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rate",
+        "tags": [
+          "assistant"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/assistant/{conversation_id}": {
+      "get": {
+        "operationId": "conversation_v1_orgs__org_id__assistant__conversation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Conversation",
+        "tags": [
+          "assistant"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/billing": {
       "get": {
         "description": "Plan, limits, usage and the plan catalogue.",
@@ -12303,6 +13039,105 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/export/events": {
+      "get": {
+        "operationId": "export_events_v1_orgs__org_id__matches__match_id__export_events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Events",
+        "tags": [
+          "matrix"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/export/sportscode": {
+      "get": {
+        "description": "Sportscode XML timeline: events with video time and clips with their tags.",
+        "operationId": "export_sportscode_v1_orgs__org_id__matches__match_id__export_sportscode_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Sportscode",
+        "tags": [
+          "matrix"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/exports/shots": {
       "get": {
         "description": "Shots with metadata and goal-camera times (export API for the goalkeeper trainer, P2).",
@@ -12659,6 +13494,74 @@
         "summary": "Create",
         "tags": [
           "highlights"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/import/sportscode": {
+      "post": {
+        "description": "Instances become clips with own tags (code and labels); events stay untouched.",
+        "operationId": "import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_import_sportscode_v1_orgs__org_id__matches__match_id__import_sportscode_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Import Sportscode V1 Orgs  Org Id  Matches  Match Id  Import Sportscode Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Sportscode",
+        "tags": [
+          "matrix"
         ]
       }
     },
@@ -13527,6 +14430,52 @@
         "tags": [
           "matches",
           "videos"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matrix/templates/{template_id}": {
+      "delete": {
+        "operationId": "delete_template_v1_orgs__org_id__matrix_templates__template_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Template Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Template",
+        "tags": [
+          "matrix"
         ]
       }
     },
@@ -16755,6 +17704,125 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/assistant": {
+      "get": {
+        "operationId": "conversations_v1_orgs__org_id__teams__team_id__assistant_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationOut"
+                  },
+                  "title": "Response Conversations V1 Orgs  Org Id  Teams  Team Id  Assistant Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Conversations",
+        "tags": [
+          "assistant"
+        ]
+      },
+      "post": {
+        "description": "Answers a question about the team's data with typed queries; numbers are validated.",
+        "operationId": "ask_v1_orgs__org_id__teams__team_id__assistant_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ask",
+        "tags": [
+          "assistant"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
       "post": {
         "description": "A demo match with events to try the analysis views (marked as demo, never counted).",
@@ -16941,6 +18009,262 @@
         "summary": "Create Match",
         "tags": [
           "matches"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/matrix": {
+      "post": {
+        "description": "Rows x metrics over the team's matches; every cell lists its events and clips.",
+        "operationId": "matrix_v1_orgs__org_id__teams__team_id__matrix_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatrixOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Matrix",
+        "tags": [
+          "matrix"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/matrix/export": {
+      "post": {
+        "operationId": "matrix_export_v1_orgs__org_id__teams__team_id__matrix_export_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "csv",
+              "enum": [
+                "csv",
+                "xlsx"
+              ],
+              "title": "Format",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {},
+              "text/csv": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Matrix Export",
+        "tags": [
+          "matrix"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/matrix/templates": {
+      "get": {
+        "operationId": "templates_v1_orgs__org_id__teams__team_id__matrix_templates_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TemplateOut"
+                  },
+                  "title": "Response Templates V1 Orgs  Org Id  Teams  Team Id  Matrix Templates Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Templates",
+        "tags": [
+          "matrix"
+        ]
+      },
+      "post": {
+        "operationId": "save_template_v1_orgs__org_id__teams__team_id__matrix_templates_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Template",
+        "tags": [
+          "matrix"
         ]
       }
     },

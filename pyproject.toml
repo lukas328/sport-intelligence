@@ -76,14 +76,17 @@ module = ["handball_vision.*", "handball_gpu_worker.analysis"]
 warn_return_any = false
 
 [[tool.mypy.overrides]]
-module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*", "reportlab.*", "qrbill.*", "svglib.*", "stdnum.*"]
+module = ["cv2.*", "av.*", "pyarrow.*", "onnxruntime.*", "onnx.*", "scipy.*", "rq.*", "fakeredis.*", "boto3.*", "botocore.*", "structlog.*", "asyncpg.*", "qrcode.*", "reportlab.*", "qrbill.*", "svglib.*", "stdnum.*", "openpyxl.*", "defusedxml.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-markers = ["integration: needs running postgres/redis/minio (docker compose)"]
-addopts = "-m 'not integration' --import-mode=importlib"
+markers = [
+    "integration: needs running postgres/redis/minio (docker compose)",
+    "live: calls the real model API (HB_ANTHROPIC_API_KEY), costs money",
+]
+addopts = "-m 'not integration and not live' --import-mode=importlib"
 
 [tool.coverage.run]
 branch = true

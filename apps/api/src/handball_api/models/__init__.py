@@ -1,11 +1,11 @@
 """SQLAlchemy models (BRIEF 5)."""
 
+from handball_api.models.assistant import AssistantConversation, AssistantMessage
 from handball_api.models.audit import AuditLog
 from handball_api.models.content import (
-    AssistantMessage,
     ClipTag,
-    ConversationThread,
     HighlightReel,
+    MatrixTemplate,
     PlayerFeedItem,
     Presentation,
     PresentationSlide,
@@ -70,6 +70,7 @@ __all__ = [
     "Annotation",
     "Assignment",
     "AssignmentStatus",
+    "AssistantConversation",
     "AssistantMessage",
     "Attendance",
     "AuditLog",
@@ -80,7 +81,6 @@ __all__ = [
     "ClipTag",
     "Comment",
     "Consent",
-    "ConversationThread",
     "Correction",
     "Event",
     "Federation",
@@ -95,6 +95,7 @@ __all__ = [
     "Match",
     "MatchFormat",
     "MatchSegment",
+    "MatrixTemplate",
     "Membership",
     "Notification",
     "OAuthIdentity",

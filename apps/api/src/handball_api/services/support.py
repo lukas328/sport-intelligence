@@ -177,7 +177,8 @@ async def demo_match(ctx: Ctx, team_id: uuid.UUID) -> Match:
         period = 1 if k < 32 else 2
         clock = (k % 32) * 55.0 + rng.uniform(0, 40) + (period - 1) * m.period_s
         side = "own" if k % 2 == 0 else "opponent"
-        x = rng.uniform(26, 38) if side == "own" else rng.uniform(2, 14)
+        # positions are normalised to the attacked goal at x = 40 for both teams
+        x = rng.uniform(26, 38)
         y = rng.uniform(1, 19)
         outcome = rng.choices(["goal", "save", "miss", "blocked"], weights=[55, 25, 15, 5])[0]
         if outcome == "goal":

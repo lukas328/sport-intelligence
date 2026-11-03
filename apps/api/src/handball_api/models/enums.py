@@ -116,6 +116,7 @@ class ClipSource(StrEnum):
     EVENT = "event"
     POSSESSION = "possession"
     PLAY = "play"
+    IMPORT = "import"  # Sportscode XML and similar (5.4)
 
 
 # ---- addendum 01 section 3 ----------------------------------------------------------------------

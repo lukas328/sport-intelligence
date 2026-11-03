@@ -16,6 +16,7 @@ FEATURES = (
     "pdf_reports",
     "club_stats",
     "priority",  # priority processing queue
+    "assistant",  # ask your data (5.1), capped per month by assistant_usd_month
 )
 
 
@@ -29,6 +30,7 @@ class PlanSpec:
     features: frozenset[str] = field(default_factory=frozenset)
     price_chf_month: int = 0
     trial_days: int = 0
+    assistant_usd_month: float = 0.0  # model cost cap of the data assistant per organisation
 
 
 _ALL = frozenset(FEATURES) - {"club_stats", "priority"}
@@ -51,6 +53,7 @@ PLANS: dict[Plan, PlanSpec] = {
         features=_ALL,
         price_chf_month=39,
         trial_days=30,
+        assistant_usd_month=5.0,
     ),
     Plan.CLUB: PlanSpec(
         Plan.CLUB,
@@ -61,6 +64,7 @@ PLANS: dict[Plan, PlanSpec] = {
         features=frozenset(FEATURES),
         price_chf_month=199,
         trial_days=30,
+        assistant_usd_month=25.0,
     ),
 }
 GOALKEEPER_ADDON_CHF = 7

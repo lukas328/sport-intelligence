@@ -49,6 +49,7 @@ class Action(StrEnum):
     PLAY_READ_ALL = "play.read_all"
     PLAY_WRITE = "play.write"
     ASSIGNMENT_WRITE = "assignment.write"
+    ASSISTANT_USE = "assistant.use"
 
 
 ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
@@ -95,6 +96,8 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.PLAY_READ_ALL: _VIDEO_WORK,
     Action.PLAY_WRITE: _STAFF,
     Action.ASSIGNMENT_WRITE: _VIDEO_WORK,
+    # the assistant reads the whole team's data, so only the analysing staff use it (5.1)
+    Action.ASSISTANT_USE: _VIDEO_WORK,
 }
 
 # Actions that change rights, billing or the organisation.

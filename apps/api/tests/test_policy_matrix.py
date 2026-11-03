@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import itertools
 import re
+import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
@@ -311,6 +312,19 @@ ENDPOINTS += [
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
     ("GET team assignments", VIDEO_WORK, lambda a, w: a.get(w.t("/assignments"))),
+    ("GET assistant conversations", VIDEO_WORK, lambda a, w: a.get(w.t("/assistant"))),
+    ("GET matrix templates", READERS, lambda a, w: a.get(w.t("/matrix/templates"))),
+    (
+        "POST matrix template",
+        VIDEO_WORK,
+        lambda a, w: a.post(
+            w.t("/matrix/templates"),
+            json={
+                "name": f"T{uuid.uuid4().hex[:6]}",
+                "config": {"rows": "match", "metrics": ["goals"]},
+            },
+        ),
+    ),
     ("GET presentations", READERS, lambda a, w: a.get(w.t("/presentations"))),
     (
         "POST presentation",
