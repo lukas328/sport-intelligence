@@ -84,3 +84,19 @@ theme (#003366 at 1.49:1). On a phone the navigation took four rows before any c
 - Analysis: goal with red and white posts and a neutral ink scale, toggles as quiet chips, score
   flow with a legend and labelled line ends, insights name "your goalkeeper" instead of "?" when no
   player is assigned, status badge only while uploading, processing or failed.
+
+## Third pass (owner: "ja gerne umsetzen")
+- Season: form strip (win, draw, loss per match with score, links to the match), season bests
+  (most goals, best shooting and save rate, fewest turnovers, each linking to its match), scorer
+  list with goals, shots and shooting percentage; the full match table stays below as detail.
+  Per-player trends need per-match player figures from the API and are not shown (no estimates).
+- Video workspace: the tools below the video sit in one panel with three tabs (Erkennung,
+  Abwehrsysteme, Spuren zuordnen); "Als Spielzug übernehmen" and the keyboard shortcuts are a small
+  row above it.
+- Player: controls float over the picture with a scrim and hide while playing (shown on hover,
+  focus or pause); a centre play indicator when paused; frame steps hidden on phones.
+- Player scenes on the phone: story-like progress across all scenes (tap to jump), swipe and
+  arrow keys to move, large previous and next buttons; the scenes list uses the date-block rows of
+  the match list.
+- Motion: pages rise in on every navigation, analysis views and sections fade (all off with
+  reduced motion).

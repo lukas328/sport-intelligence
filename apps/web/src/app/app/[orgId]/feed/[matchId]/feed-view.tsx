@@ -3,6 +3,7 @@
 import { BackLink } from "@/components/ui/back-link";
 import { track } from "@/lib/analytics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
   const key = ["feed", orgId, matchId, playerId];
   const [index, setIndex] = useState(0);
   const [rating, setRating] = useState(0);
+  const touch = useRef<number | null>(null);
   const q = useQuery({
     queryKey: key,
     queryFn: async () =>
@@ -96,7 +98,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
           <label className="block text-sm font-medium" htmlFor="assess-text">
             {t("sentence")}
           </label>
-          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-xl bg-raised ring-1 ring-inset ring-border p-2" />
+          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-xl bg-raised p-3 ring-1 ring-inset ring-border" />
           <Button type="submit" disabled={!rating} loading={assess.isPending}>
             {t("send")}
           </Button>
@@ -104,15 +106,48 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
         </form>
       )}
       {feed.self_assessment && (
-        <p className="rounded-md bg-surface px-3 py-2 text-sm" data-testid="my-rating">
+        <p className="rounded-xl bg-surface px-4 py-2.5 text-sm" data-testid="my-rating">
           {t("yourRating", { n: feed.self_assessment.rating })}
           {feed.self_assessment.text && `: ${feed.self_assessment.text}`}
         </p>
       )}
       {scene && (
-        <section aria-labelledby="scene-title" className="space-y-2" data-testid="scene">
-          <h2 id="scene-title" className="flex items-center gap-2 font-semibold">
-            <span className={cn("rounded-full px-2 py-0.5 text-xs", scene.positive ? "bg-ok/15 text-ok" : "bg-surface text-muted")}>
+        <section
+          aria-labelledby="scene-title"
+          className="space-y-3"
+          data-testid="scene"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight" && index < feed.items.length - 1) setIndex(index + 1);
+            if (e.key === "ArrowLeft" && index > 0) setIndex(index - 1);
+          }}
+          onTouchStart={(e) => (touch.current = e.touches[0]?.clientX ?? null)}
+          onTouchEnd={(e) => {
+            const start = touch.current;
+            const end = e.changedTouches[0]?.clientX;
+            touch.current = null;
+            if (start == null || end == null || Math.abs(end - start) < 60) return;
+            if (end < start && index < feed.items.length - 1) setIndex(index + 1);
+            if (end > start && index > 0) setIndex(index - 1);
+          }}
+        >
+          {/* one segment per scene, like a story: where am I, jump anywhere */}
+          <ol className="flex gap-1" aria-label={t("sceneN", { n: index + 1, total: feed.items.length })}>
+            {feed.items.map((it, i) => (
+              <li key={it.id} className="flex-1">
+                <button
+                  type="button"
+                  aria-label={t("sceneN", { n: i + 1, total: feed.items.length })}
+                  aria-current={i === index ? "step" : undefined}
+                  onClick={() => setIndex(i)}
+                  className="block w-full py-2"
+                >
+                  <span className={cn("block h-1 rounded-full transition-colors", i < index ? "bg-foreground/60" : i === index ? "bg-accent" : "bg-border")} />
+                </button>
+              </li>
+            ))}
+          </ol>
+          <h2 id="scene-title" className="flex flex-wrap items-center gap-2 text-lg font-bold">
+            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", scene.positive ? "bg-ok/15 text-ok" : "bg-surface text-muted")}>
               {t("sceneN", { n: index + 1, total: feed.items.length })}
             </span>
             {t(reasonKey(scene.reason) as "reason_goal")}
@@ -147,12 +182,14 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
               {t("coach")}: {scene.coach_comment}
             </p>
           )}
-          <div className="flex justify-between">
-            <Button variant="secondary" disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="secondary" size="lg" disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>
+              <ChevronLeft aria-hidden />
               {t("prev")}
             </Button>
-            <Button variant="secondary" disabled={index >= feed.items.length - 1} onClick={() => setIndex((i) => i + 1)}>
+            <Button size="lg" disabled={index >= feed.items.length - 1} onClick={() => setIndex((i) => i + 1)}>
               {t("next")}
+              <ChevronRight aria-hidden />
             </Button>
           </div>
         </section>

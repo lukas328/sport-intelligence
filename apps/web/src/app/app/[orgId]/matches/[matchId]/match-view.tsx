@@ -262,7 +262,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       </div>
 
       {view === "analysis" && (
-        <div className="space-y-6">
+        <div className="animate-fade space-y-6">
           <Segmented<Sub>
             label={t("tabs.analysis")}
             size="sm"
@@ -270,6 +270,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             onChange={setSub}
             items={SUBS.map((v) => ({ value: v, label: t(`tabs.${v}`) }))}
           />
+          <div key={sub} className="animate-fade">
           {sub === "physical" ? (
             <PhysicalView orgId={orgId} matchId={match.id} names={names} />
           ) : stats.data && stats.data.quality.events > 0 ? (
@@ -287,11 +288,12 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               {staff && !main && match.source !== "paper_report" ? t("stats.noDataHint") : null}
             </EmptyState>
           )}
+          </div>
         </div>
       )}
 
       {view === "scenes" && (
-        <div className="space-y-8">
+        <div className="animate-fade space-y-8">
           <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />
           {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
           {staff && <TeamFeedView orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}

@@ -4,6 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, EmptyState } from "@/components/ui/card";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 interface Row {
   match_id: string;
@@ -58,8 +59,23 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
     { label: t("savePct"), value: pct(data.totals.save_pct) },
     { label: `${t("turnovers")} ${t("perMatch")}`, value: (data.totals.turnovers / n).toFixed(1) },
   ];
+  const tm = await getTranslations("matches");
+  const pick = (score: (r: Row) => number | null) =>
+    data.matches.reduce<Row | null>((best, r) => (score(r) != null && (best == null || score(r)! > score(best)!) ? r : best), null);
+  const bestGoals = pick((r) => r.score_own);
+  const bestShooting = pick((r) => r.shooting_pct);
+  const bestSave = pick((r) => r.save_pct);
+  const fewestTo = pick((r) => -r.turnovers);
+  const bests = [
+    { label: t("bestGoals"), row: bestGoals, value: bestGoals?.score_own },
+    { label: t("bestShooting"), row: bestShooting, value: pct(bestShooting?.shooting_pct ?? null) },
+    { label: t("bestSave"), row: bestSave, value: pct(bestSave?.save_pct ?? null) },
+    { label: t("fewestTurnovers"), row: fewestTo, value: fewestTo?.turnovers },
+  ];
+  const scorers = [...data.players].filter((p) => p.shots > 0).sort((a, b) => b.goals - a.goals || (b.shooting_pct ?? 0) - (a.shooting_pct ?? 0)).slice(0, 8);
+  const topGoals = Math.max(1, ...scorers.map((p) => p.goals));
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <h2 className="sr-only">{t("title")}</h2>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5" data-testid="season-tiles">
         {tiles.map((x) => (
@@ -69,10 +85,87 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           </div>
         ))}
       </dl>
-      <Card className="space-y-2">
-        <h3 className="font-semibold">{t("trend")}</h3>
-        <TrendChart rows={data.matches} label={t("chartLabel")} goals={t("goals")} xg={t("xg")} />
-      </Card>
+      <section className="space-y-3">
+        <h3 className="font-semibold">{t("form")}</h3>
+        <ol className="flex flex-wrap gap-1.5">
+          {data.matches.map((m) => {
+            const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
+            return (
+              <li key={m.match_id}>
+                <Link
+                  href={`/app/${orgId}/matches/${m.match_id}`}
+                  title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
+                  className={cn(
+                    "flex min-w-14 flex-col items-center rounded-xl px-2.5 py-2 text-center ring-1 ring-inset transition-transform hover:-translate-y-0.5",
+                    r === "won" ? "bg-ok/8 ring-ok/30" : r === "lost" ? "bg-error/8 ring-error/30" : "bg-surface ring-border",
+                  )}
+                >
+                  <span className="inline-flex items-center gap-1 text-[0.6875rem] font-bold">
+                    <span aria-hidden className={cn("size-1.5 rounded-full", r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted")} />
+                    {tm(r)}
+                  </span>
+                  <span className="font-score text-base">
+                    {m.score_own}:{m.score_opponent}
+                  </span>
+                  <span className="max-w-20 truncate text-[0.6875rem] text-muted">{m.opponent}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      {data.matches.length > 1 && (
+        <section className="space-y-3">
+          <h3 className="font-semibold">{t("best")}</h3>
+          <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {bests.map((b) =>
+              b.row ? (
+                <Link key={b.label} href={`/app/${orgId}/matches/${b.row.match_id}`} className="rounded-2xl bg-raised px-4 py-4 ring-1 ring-border/70 transition-shadow hover:shadow-md sm:px-5">
+                  <dt className="text-[0.8125rem] text-muted">{b.label}</dt>
+                  <dd className="mt-1 font-score text-2xl leading-none">{b.value}</dd>
+                  <dd className="mt-1.5 truncate text-xs text-muted">{t("against", { opponent: b.row.opponent })}</dd>
+                </Link>
+              ) : null,
+            )}
+          </dl>
+        </section>
+      )}
+
+      <div className={cn("grid gap-6", scorers.length > 0 && "lg:grid-cols-2")}>
+        <Card className="space-y-2">
+          <h3 className="font-semibold">{t("trend")}</h3>
+          <TrendChart rows={data.matches} label={t("chartLabel")} goals={t("goals")} xg={t("xg")} />
+        </Card>
+        {scorers.length > 0 && (
+          <Card className="space-y-4">
+            <h3 className="font-semibold">{t("scorers")}</h3>
+            <ol className="space-y-3" data-testid="season-players">
+              {scorers.map((p, i) => (
+                <li key={p.player_id} className="grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1">
+                  <span className="text-sm font-semibold text-muted tabular-nums">{i + 1}</span>
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{names[p.player_id] ?? t("unknownPlayer")}</span>
+                    <span className="block text-xs text-muted">
+                      {t("goalsOfShots", { goals: p.goals, shots: p.shots })} · {t("inMatches", { n: p.matches })}
+                    </span>
+                  </span>
+                  <span className="text-right">
+                    <span className="block font-score text-xl leading-none">{p.goals}</span>
+                    <span className="block text-xs text-muted tabular-nums">{pct(p.shooting_pct)}</span>
+                  </span>
+                  <span aria-hidden className="col-start-2 col-end-4 h-1 overflow-hidden rounded-full bg-surface">
+                    <span className="block h-full rounded-full bg-accent" style={{ width: `${(p.goals / topGoals) * 100}%` }} />
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </Card>
+        )}
+      </div>
+
+      <section className="space-y-3">
+        <h3 className="font-semibold">{t("allMatches")}</h3>
       <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
         <table className="w-full text-sm" data-testid="season-matches">
           <caption className="sr-only">{t("matches")}</caption>
@@ -92,7 +185,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             {data.matches.map((m) => (
               <tr key={m.match_id} className="border-t border-border/70">
                 <th scope="row" className="px-3 py-1.5 text-left font-medium">
-                  <Link href={`/app/${orgId}/matches/${m.match_id}`} className="underline decoration-dotted underline-offset-4">
+                  <Link href={`/app/${orgId}/matches/${m.match_id}`} className="hover:text-accent hover:underline">
                     {format.dateTime(new Date(m.kickoff_at), { dateStyle: "short" })} {m.is_home ? "" : "@ "}
                     {m.opponent}
                   </Link>
@@ -113,35 +206,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           </tbody>
         </table>
       </div>
-      {data.players.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
-          <table className="w-full text-sm" data-testid="season-players">
-            <caption className="px-3 py-2 text-left font-semibold">{t("players")}</caption>
-            <thead className="text-xs text-muted">
-              <tr>
-                <th scope="col" className="px-3 py-2 text-left font-medium">{t("player")}</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">{t("matches")}</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">{t("goals")}</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">{t("shootingPct")}</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">{t("xg")}</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">{t("turnovers")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.players.map((p) => (
-                <tr key={p.player_id} className="border-t border-border/70">
-                  <th scope="row" className="px-3 py-1.5 text-left font-medium">{names[p.player_id] ?? "?"}</th>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{p.matches}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{p.goals}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{pct(p.shooting_pct)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{p.xg.toFixed(1)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{p.turnovers}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      </section>
     </div>
   );
 }

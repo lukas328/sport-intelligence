@@ -498,10 +498,12 @@
     "frameBack": "Ein Bild zurück",
     "frameFwd": "Ein Bild vor",
     "seek": "Zeitleiste",
-    "shortcuts": "Tastaturkürzel",
+    "shortcuts": "Tastenkürzel",
     "shortcutsList": "Leertaste Abspielen · ← → 5 s · , . Einzelbild · [ ] Tempo · I O Clip-Start und -Ende · D Zeichnen · F Vollbild",
     "notReady": "Das Video wird noch verarbeitet.",
-    "error": "Das Video kann nicht abgespielt werden."
+    "error": "Das Video kann nicht abgespielt werden.",
+    "deck": "Werkzeuge zum Video",
+    "deckDetection": "Erkennung"
   },
   "clips": {
     "title": "Clips",
@@ -990,7 +992,19 @@
     "match": "Spiel",
     "result": "Resultat",
     "sevenM": "7 m",
-    "chartLabel": "Tore und xG pro Spiel"
+    "chartLabel": "Tore und xG pro Spiel",
+    "form": "Form",
+    "best": "Bestwerte der Saison",
+    "bestGoals": "Meiste Tore",
+    "bestShooting": "Beste Wurfquote",
+    "bestSave": "Beste Paradenquote",
+    "fewestTurnovers": "Wenigste Ballverluste",
+    "against": "gegen {opponent}",
+    "scorers": "Torschützen",
+    "goalsOfShots": "{goals} Tore aus {shots} Würfen",
+    "inMatches": "{n, plural, =1 {1 Spiel} other {# Spiele}}",
+    "allMatches": "Alle Spiele im Detail",
+    "unknownPlayer": "Nicht zugeordnet"
   },
   "notifications": {
     "title": "Mitteilungen",

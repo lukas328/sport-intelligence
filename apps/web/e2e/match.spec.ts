@@ -54,6 +54,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByTestId("analysis-panel")).toContainText("Personen verfolgt");
   await expect(page.getByTestId("analysis-panel")).toContainText("Kalibrierung: automatisch");
+  await page.getByRole("tab", { name: "Abwehrsysteme", exact: true }).click();
   await expect(page.getByTestId("formations")).toContainText("Abwehrsysteme");
 
   // play: the HLS stream loads and time advances
@@ -129,6 +130,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(3.5);
 
   // tracks can be assigned to players; physical load per track with heatmap
+  await page.getByRole("tab", { name: "Spuren zuordnen", exact: true }).click();
   await expect(page.getByTestId("identity-panel")).toBeVisible();
   await openAnalysis(page, "Laufleistung");
   await expect(page.getByTestId("physical-table")).toContainText("km");

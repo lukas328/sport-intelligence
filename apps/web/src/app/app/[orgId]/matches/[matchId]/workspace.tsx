@@ -3,6 +3,7 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Keyboard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,7 @@ import { cn } from "@/lib/utils";
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
 type Tab = "comments" | "clips" | "drawings" | "events";
+type Deck = "detection" | "formations" | "identity";
 const TOOLS: Tool[] = ["arrow", "line", "circle", "freehand", "spotlight"];
 const COLORS = ["#facc15", "#ef4444", "#22c55e", "#3b82f6", "#ffffff"];
 
@@ -88,6 +90,7 @@ export function Workspace({
   }
   const [now, setNow] = useState(0);
   const [tab, setTab] = useState<Tab>("comments");
+  const [deck, setDeck] = useState<Deck>("detection");
   const [drawing, setDrawing] = useState(false);
   const [tool, setTool] = useState<Tool>("arrow");
   const [color, setColor] = useState(COLORS[0]!);
@@ -311,56 +314,86 @@ export function Workspace({
         {cams.length > 1 && !offset && <MultiAngleControls cams={cams} state={multi} />}
         {spot.ready && !offset && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
-        <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
-        <AnalysisPanel
-          analysis={analysis.data ?? null}
-          orgId={orgId}
-          videoId={video.id}
-          colours={kitColours}
-          getTime={getTime}
-          canCalibrate={staff}
-        />
-        {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
-          <Button
-            variant="secondary"
-            title={t("tactics.fromVideoHint")}
-            onClick={async () => {
-              player.current.pause();
-              const ms = Math.round(player.current.time());
-              const doc = await playFromVideo(`/v1/orgs/${orgId}/videos/${video.id}/tracks`, analysis.data!.chunk_ms!, ms, analysis.data!.tracks);
-              if (!doc) return setFailure("generic");
-              try {
-                window.sessionStorage.setItem(FROM_VIDEO_KEY, JSON.stringify({ doc, match_id: match.id, t_ms: ms }));
-              } catch {
-                return setFailure("generic");
-              }
-              router.push(`/app/${orgId}/teams/${match.team_id}/plays/new?from=video`);
-            }}
-          >
-            {t("tactics.fromVideo")}
-          </Button>
-        )}
-        {analysis.data?.status === "ready" && (
-          <FormationsCard
-            formations={analysis.data.formations ?? []}
-            onSeek={(ms) => {
-              player.current.seek(ms);
-              player.current.play();
-            }}
-          />
-        )}
-        {staff && analysis.data?.status === "ready" && (
-          <IdentityPanel
-            orgId={orgId}
-            match={match}
-            videoId={video.id}
-            tracks={analysis.data.tracks}
-            onSeek={(ms) => {
-              player.current.pause();
-              player.current.seek(ms);
-            }}
-          />
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              title={t("tactics.fromVideoHint")}
+              onClick={async () => {
+                player.current.pause();
+                const ms = Math.round(player.current.time());
+                const doc = await playFromVideo(`/v1/orgs/${orgId}/videos/${video.id}/tracks`, analysis.data!.chunk_ms!, ms, analysis.data!.tracks);
+                if (!doc) return setFailure("generic");
+                try {
+                  window.sessionStorage.setItem(FROM_VIDEO_KEY, JSON.stringify({ doc, match_id: match.id, t_ms: ms }));
+                } catch {
+                  return setFailure("generic");
+                }
+                router.push(`/app/${orgId}/teams/${match.team_id}/plays/new?from=video`);
+              }}
+            >
+              {t("tactics.fromVideo")}
+            </Button>
+          )}
+          <details className="group relative">
+            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-full px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
+              <Keyboard aria-hidden className="size-4" />
+              {t("player.shortcuts")}
+            </summary>
+            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-xl bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
+          </details>
+        </div>
+        <div className="space-y-4 rounded-2xl bg-raised p-4 ring-1 ring-border/70 sm:p-5">
+          {analysis.data?.status === "ready" && (
+            <Segmented<Deck>
+              label={t("player.deck")}
+              size="sm"
+              value={deck}
+              onChange={setDeck}
+              items={[
+                { value: "detection", label: t("player.deckDetection") },
+                { value: "formations", label: t("formations.title") },
+                ...(staff ? [{ value: "identity" as const, label: t("identity.title") }] : []),
+              ]}
+            />
+          )}
+          {(deck === "detection" || !(analysis.data?.status === "ready")) && (
+            <AnalysisPanel
+              analysis={analysis.data ?? null}
+              orgId={orgId}
+              videoId={video.id}
+              colours={kitColours}
+              getTime={getTime}
+              canCalibrate={staff}
+            />
+          )}
+          {deck === "formations" && analysis.data?.status === "ready" && (
+            (
+              <FormationsCard
+                formations={analysis.data.formations ?? []}
+                onSeek={(ms) => {
+                  player.current.seek(ms);
+                  player.current.play();
+                }}
+              />
+            )
+          )}
+          {deck === "identity" && staff && analysis.data?.status === "ready" && (
+            (
+              <IdentityPanel
+                orgId={orgId}
+                match={match}
+                videoId={video.id}
+                tracks={analysis.data.tracks}
+                onSeek={(ms) => {
+                  player.current.pause();
+                  player.current.seek(ms);
+                }}
+              />
+            )
+          )}
+        </div>
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
         {notice && (
           <Alert kind="success" className="py-2">

@@ -501,7 +501,9 @@
     "shortcuts": "Keyboard shortcuts",
     "shortcutsList": "Space play · ← → 5 s · , . single frame · [ ] speed · I O clip start and end · D draw · F full screen",
     "notReady": "The video is still being processed.",
-    "error": "The video cannot be played."
+    "error": "The video cannot be played.",
+    "deck": "Video tools",
+    "deckDetection": "Detection"
   },
   "clips": {
     "title": "Clips",
@@ -990,7 +992,19 @@
     "match": "Match",
     "result": "Result",
     "sevenM": "7 m",
-    "chartLabel": "Goals and xG per match"
+    "chartLabel": "Goals and xG per match",
+    "form": "Form",
+    "best": "Season bests",
+    "bestGoals": "Most goals",
+    "bestShooting": "Best shooting",
+    "bestSave": "Best save rate",
+    "fewestTurnovers": "Fewest turnovers",
+    "against": "against {opponent}",
+    "scorers": "Scorers",
+    "goalsOfShots": "{goals} goals from {shots} shots",
+    "inMatches": "{n, plural, =1 {1 match} other {# matches}}",
+    "allMatches": "All matches in detail",
+    "unknownPlayer": "Unassigned"
   },
   "notifications": {
     "title": "Notifications",

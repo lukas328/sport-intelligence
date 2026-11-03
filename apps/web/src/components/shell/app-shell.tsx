@@ -186,7 +186,10 @@ export function AppShell({
 
             {banner}
             <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1240px] flex-1 px-4 pt-5 pb-28 outline-none sm:px-6 lg:px-10 lg:pt-10 lg:pb-16">
-              {children}
+              {/* a short rise on every page change: the new content is clearly new */}
+              <div key={path} className="animate-rise">
+                {children}
+              </div>
             </main>
           </div>
         </div>

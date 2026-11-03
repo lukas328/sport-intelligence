@@ -501,7 +501,9 @@
     "shortcuts": "Raccourcis clavier",
     "shortcutsList": "Espace lecture · ← → 5 s · , . image par image · [ ] vitesse · I O début et fin du clip · D dessiner · F plein écran",
     "notReady": "La vidéo est encore en traitement.",
-    "error": "La vidéo ne peut pas être lue."
+    "error": "La vidéo ne peut pas être lue.",
+    "deck": "Outils vidéo",
+    "deckDetection": "Détection"
   },
   "clips": {
     "title": "Clips",
@@ -990,7 +992,19 @@
     "match": "Match",
     "result": "Résultat",
     "sevenM": "7 m",
-    "chartLabel": "Buts et xG par match"
+    "chartLabel": "Buts et xG par match",
+    "form": "Forme",
+    "best": "Meilleures valeurs de la saison",
+    "bestGoals": "Le plus de buts",
+    "bestShooting": "Meilleure réussite au tir",
+    "bestSave": "Meilleur taux d'arrêts",
+    "fewestTurnovers": "Le moins de pertes de balle",
+    "against": "contre {opponent}",
+    "scorers": "Buteurs",
+    "goalsOfShots": "{goals} buts sur {shots} tirs",
+    "inMatches": "{n, plural, =1 {1 match} other {# matchs}}",
+    "allMatches": "Tous les matchs en détail",
+    "unknownPlayer": "Non attribué"
   },
   "notifications": {
     "title": "Notifications",

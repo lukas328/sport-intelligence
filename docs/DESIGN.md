@@ -88,7 +88,8 @@ At most **four destinations per role** (main navigation: sidebar on desktop, tab
 
 ## Avoiding the generic look
 
-No grids of icon tiles in tinted squares, no uppercase micro labels, no gradients, no emoji, no
+No grids of icon tiles in tinted squares, no uppercase micro labels, no decorative gradients (a
+scrim behind video controls is functional), no emoji, no
 filler sentences. Show the team's own content instead (the library shows plays as board
 previews, playlists and presentations as lists); let domain objects carry the identity (the
 goal with red and white posts, the scoreboard, the court).

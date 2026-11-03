@@ -215,7 +215,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       ref={boxRef}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="group relative overflow-hidden rounded-lg bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="group relative overflow-hidden rounded-2xl bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
       aria-label={t("shortcutsList")}
       data-testid="player"
     >
@@ -236,6 +236,13 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         />
         <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />
         {overlay}
+        {!playing && !overlay && duration > 0 && (
+          <span aria-hidden className="pointer-events-none absolute inset-0 grid place-items-center">
+            <span className="grid size-16 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur-sm">
+              <Play className="ml-1 size-7 fill-current" />
+            </span>
+          </span>
+        )}
         {error && (
           <p role="alert" className="absolute inset-x-0 top-1/2 text-center text-white">
             {t("error")}
@@ -243,7 +250,13 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         )}
       </div>
 
-      <div className="space-y-1 bg-neutral-900 px-3 py-2 text-white">
+      {/* controls float over the picture; while playing they show on hover, focus or pause */}
+      <div
+        className={cn(
+          "absolute inset-x-0 bottom-0 space-y-1 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-3 pt-10 pb-2 text-white transition-opacity duration-200",
+          playing && !hover && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+        )}
+      >
         <div
           className="relative h-6 cursor-pointer"
           onMouseMove={(e) => {
@@ -312,10 +325,10 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             <span className="text-[0.6875rem] font-semibold">5</span>
             <RotateCw className="size-4" />
           </CtlButton>
-          <CtlButton label={t("frameBack")} onClick={() => step(-1)}>
+          <CtlButton label={t("frameBack")} onClick={() => step(-1)} className="hidden sm:inline-grid">
             <StepBack className="size-4" />
           </CtlButton>
-          <CtlButton label={t("frameFwd")} onClick={() => step(1)}>
+          <CtlButton label={t("frameFwd")} onClick={() => step(1)} className="hidden sm:inline-grid">
             <StepForward className="size-4" />
           </CtlButton>
           <span className="px-2 tabular-nums" data-testid="clock">
@@ -352,14 +365,14 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
   );
 });
 
-function CtlButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+function CtlButton({ label, onClick, children, className }: { label: string; onClick: () => void; children: ReactNode; className?: string }) {
   return (
     <button
       type="button"
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="inline-grid min-h-9 min-w-9 place-items-center rounded-full px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white"
+      className={cn("inline-grid min-h-9 min-w-9 place-items-center rounded-full px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white", className)}
     >
       <span aria-hidden className="inline-flex items-center gap-0.5">{children}</span>
     </button>
