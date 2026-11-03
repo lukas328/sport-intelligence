@@ -151,15 +151,20 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 i % 2 === 1 && "border-l border-foreground/15",
                 i >= 2 && "border-t border-foreground/15 lg:border-t-0",
                 i === 2 && "lg:border-l",
-                c.focus ? "bg-resin/25 shadow-[inset_0_4px_0_var(--resin)] hover:bg-resin/35 dark:bg-resin/[0.08]" : "hover:bg-surface",
+                "hover:bg-surface",
               )}
             >
               <span className="block text-sm font-semibold">
                 {c.label}
                 {c.focus && <span>, {tv("focus")}</span>}
               </span>
-              <span className="mt-1 block font-score text-[2.5rem] leading-none group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">{c.value}</span>
-              {c.focus && c.reference && <span className="mt-1 block text-sm font-semibold">{tv("reference", { value: c.reference })}</span>}
+              <span className="relative mt-1 inline-block font-score text-[2.5rem] leading-none group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">
+                {c.focus && (
+                  <span aria-hidden className="absolute -inset-x-1.5 -bottom-1.5 h-2 -skew-x-12 rounded-[2px] bg-resin" />
+                )}
+                <span className="relative">{c.value}</span>
+              </span>
+              {c.focus && c.reference && <span className="mt-2.5 block text-sm text-muted">{tv("reference", { value: c.reference })}</span>}
             </Link>
             </li>
           ))}
@@ -169,7 +174,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
       <section className="space-y-3">
         <h2 className="text-2xl">{t("form")}</h2>
-        <ol className="flex flex-wrap gap-1.5">
+        <ol className="flex flex-wrap gap-x-2 gap-y-4">
           {[...data.matches]
             .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
             .map((m) => {
@@ -179,16 +184,22 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   <Link
                     href={`/app/${orgId}/matches/${m.match_id}`}
                     title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
-                    className={cn(
-                      "flex min-w-16 flex-col items-center rounded-md border-t-4 bg-raised px-3 pt-2 pb-2.5 text-center ring-1 ring-inset ring-foreground/15 transition-transform hover:-translate-y-0.5",
-                      r === "won" ? "border-t-ok" : r === "lost" ? "border-t-error" : "border-t-muted",
-                    )}
+                    className="group flex w-16 flex-col items-center gap-1.5 text-center"
                   >
-                    <span className="text-xs font-semibold">{tm(r)}</span>
-                    <span className="font-score text-xl leading-tight">
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "grid size-10 place-items-center rounded-[5px] font-score text-xl text-background transition-transform group-hover:-translate-y-0.5",
+                        r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted",
+                      )}
+                    >
+                      {tm(r).charAt(0)}
+                    </span>
+                    <span className="sr-only">{tm(r)}</span>
+                    <span className="font-score text-lg leading-none group-hover:underline">
                       {m.score_own}:{m.score_opponent}
                     </span>
-                    <span className="max-w-24 truncate text-xs text-muted">{m.opponent}</span>
+                    <span className="w-full truncate text-xs text-muted">{m.opponent}</span>
                   </Link>
                 </li>
               );

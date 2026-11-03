@@ -20,7 +20,7 @@ Decisions taken without the owner (blueprint section 0). Newest last.
    the square references.
 5. **Polished, not raw.** The owner added: it must still look like a highly produced app; more love,
    never worse. So the identity comes from care in details (court lines from the real geometry,
-   count-up of the score, result edges on the form, real coach notes in handwriting, a voice from
+   count-up of the score, a form guide of result squares, real coach notes in handwriting, a voice from
    the data) on top of the existing quality, not from a rougher look.
 6. **References used** (free, no account): the football Bundesliga's 2021/22 on-air identity draws
    its score graphics from hand-hung stadium scoreboards and lets club colours lead
@@ -31,3 +31,11 @@ Decisions taken without the owner (blueprint section 0). Newest last.
    match) because there is no league baseline in the data; the page names them as reference values.
 8. **Season chart from three matches**; before that a sentence says when it appears. The e2e check
    for the chart changed accordingly (intended change of design).
+
+## Owner feedback after the PR: marker stroke and form guide
+
+The owner found the yellow focus cell (tinted panel with a top bar) and the form chips (panels with
+a coloured top line) generic. The focus figure now keeps the plain cell and gets a resin marker
+stroke under the number, like a coach marking the match sheet, with the reference value below in
+muted text. The form became a classic form guide: one solid square per match with the result
+letter, the score and the opponent below. No coloured panel edges remain on the season page.

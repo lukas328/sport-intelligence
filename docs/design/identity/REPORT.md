@@ -18,7 +18,7 @@ Decisions in `DECISIONS.md`, open points for the owner in `FOR_LUKAS.md`, rules 
   defence, record, match margin), neutral when the data is thin, estimates marked. Texts in de-CH,
   en, fr.
 - **Saison.** Statement, last result with count-up, goals as clips (pre-filtered scene search), a
-  stat strip with one marked figure against reference values, form with result edges, bests,
+  stat strip with one marked figure against reference values, form as a guide of result squares, bests,
   scorers, chart from three matches, sheet table.
 - **Übersicht.** Coach: the next match when close (time, opponent, prepare, live) or the last
   result and its statement; below: what stands out (one signal on the first weakness), up next,
