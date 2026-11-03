@@ -4,6 +4,8 @@ const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH;
 
 export default defineConfig({
+  // the full run shares the CPU with the video analysis; 5 s is too tight for some steps
+  expect: { timeout: 15_000 },
   testDir: "./e2e",
   globalSetup: "./e2e/global-setup.ts",
   timeout: 120_000,

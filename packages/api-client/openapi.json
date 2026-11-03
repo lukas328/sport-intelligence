@@ -5345,6 +5345,25 @@
         "title": "TrackOut",
         "type": "object"
       },
+      "TrialIn": {
+        "properties": {
+          "days": {
+            "maximum": 90.0,
+            "minimum": 1.0,
+            "title": "Days",
+            "type": "integer"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          }
+        },
+        "required": [
+          "plan",
+          "days"
+        ],
+        "title": "TrialIn",
+        "type": "object"
+      },
       "UploadComplete": {
         "properties": {
           "parts": {
@@ -6624,6 +6643,237 @@
         "tags": [
           "auth",
           "me"
+        ]
+      }
+    },
+    "/v1/ops/jobs/failed": {
+      "get": {
+        "operationId": "failed_jobs_v1_ops_jobs_failed_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Failed Jobs V1 Ops Jobs Failed Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Failed Jobs",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/jobs/{job_id}/retry": {
+      "post": {
+        "operationId": "retry_v1_ops_jobs__job_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Retry V1 Ops Jobs  Job Id  Retry Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retry",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/me": {
+      "get": {
+        "operationId": "me_v1_ops_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Me V1 Ops Me Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Me",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/organizations": {
+      "get": {
+        "operationId": "organizations_v1_ops_organizations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Organizations V1 Ops Organizations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Organizations",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/organizations/{org_id}/trial": {
+      "post": {
+        "operationId": "trial_v1_ops_organizations__org_id__trial_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrialIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Trial V1 Ops Organizations  Org Id  Trial Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Trial",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/v1/ops/overview": {
+      "get": {
+        "operationId": "overview_v1_ops_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Overview V1 Ops Overview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Overview",
+        "tags": [
+          "ops"
         ]
       }
     },
@@ -8523,6 +8773,68 @@
         "tags": [
           "matches",
           "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/report.pdf": {
+      "get": {
+        "description": "Match report as a PDF for printing and sending.",
+        "operationId": "match_report_pdf_v1_orgs__org_id__matches__match_id__report_pdf_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "pattern": "^(de-CH|en|fr)$",
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Match Report Pdf",
+        "tags": [
+          "events",
+          "insights"
         ]
       }
     },

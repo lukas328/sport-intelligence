@@ -87,6 +87,8 @@ services:
       HB_UPLOAD_PART_SIZE: "5242880"
       # optional prose summaries; empty keeps the template texts only
       HB_ANTHROPIC_API_KEY: ${HB_ANTHROPIC_API_KEY:-}
+      # local only: everybody @ops-e2e.ch is a platform operator (Playwright)
+      HB_OPERATOR_EMAILS: '["@ops-e2e.ch"]'
     ports: ["8000:8000"]
     depends_on:
       migrate: { condition: service_completed_successfully }

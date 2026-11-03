@@ -74,3 +74,8 @@ Distances, speeds and sprints come from single-camera tracking and are estimates
 smoothing and speed bands we need one match with a reference system (local positioning or GPS vests) or at
 least a few measured sprints filmed from the club's usual camera position. **Default until then**: values are
 shown with the "geschätzt" badge and no comparisons across matches with different camera positions.
+
+## Q-BILL-1 Stripe account and prices
+To run a real purchase in Stripe test mode we need a Stripe account (test keys), a webhook endpoint secret
+and price ids for Team, Club and the goalkeeper add-on (CHF, monthly). **Default until then**: billing is
+not enforced; the settings page shows the plans and explains that online payment is not set up.

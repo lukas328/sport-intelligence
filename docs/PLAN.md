@@ -64,7 +64,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 ### M7 Insights, season, opponents, training ✅ web push open (see docs/progress/M7.md)
 - Insight engine (catalogue, Wilson/Beta tests, min samples, ranking), TextGenerator (Claude API) + number validator + template fallback
 - Season stats, problem radar, opponent profile, drill library, assignments, notifications (in-app, e-mail, web push)
-### M8 Billing, sharing, export, backoffice
+### M8 Billing, sharing, export, backoffice ✅ annotation tool open (see docs/progress/M8.md)
 - Stripe (checkout, portal, idempotent webhooks, trials), plan limits + usage, share links, PDF reports, operator backoffice + annotation tool
 ### M9 Hardening and go-live
 - Load tests, security review (ASVS L2), privacy functions (export, deletion, consent), monitoring/alerting, backups + restore test, runbooks, GO_LIVE.md

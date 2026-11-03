@@ -963,5 +963,25 @@
     "copied": "Copié",
     "invalid": "Ce lien a expiré ou a été retiré.",
     "readOnly": "Lecture seule, valable jusqu'au {date}"
+  },
+  "ops": {
+    "title": "Backoffice",
+    "organizations": "Clubs",
+    "users": "Personnes",
+    "teams": "Équipes",
+    "matches": "Matchs",
+    "videos": "Vidéos",
+    "storage": "Stockage",
+    "gpu": "Minutes GPU (24 h)",
+    "jobs": "Traitements des dernières 24 heures",
+    "failed": "Jobs en échec",
+    "noFailed": "Aucun job en échec.",
+    "retry": "Relancer",
+    "search": "Chercher un club",
+    "name": "Nom",
+    "plan": "Abonnement",
+    "members": "Membres",
+    "trial": "Essai Club 14 jours",
+    "trialUntil": "Essai jusqu'au {date}"
   }
 }

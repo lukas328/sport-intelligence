@@ -963,5 +963,25 @@
     "copied": "Copied",
     "invalid": "This link has expired or was revoked.",
     "readOnly": "View only, valid until {date}"
+  },
+  "ops": {
+    "title": "Backoffice",
+    "organizations": "Clubs",
+    "users": "People",
+    "teams": "Teams",
+    "matches": "Matches",
+    "videos": "Videos",
+    "storage": "Storage",
+    "gpu": "GPU minutes (24 h)",
+    "jobs": "Processing in the last 24 hours",
+    "failed": "Failed jobs",
+    "noFailed": "No failed jobs.",
+    "retry": "Retry",
+    "search": "Search club",
+    "name": "Name",
+    "plan": "Plan",
+    "members": "Members",
+    "trial": "14-day Club trial",
+    "trialUntil": "Trial until {date}"
   }
 }

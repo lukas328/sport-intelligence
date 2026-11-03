@@ -43,6 +43,8 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     sentry_dsn: SecretStr | None = None
+    # operator backoffice: e-mail addresses of platform operators (BRIEF M8)
+    operator_emails: list[str] = Field(default_factory=list)
     # billing (BRIEF 13): off in development and CI, on in production
     billing_enforce: bool = False
     stripe_secret_key: SecretStr | None = None

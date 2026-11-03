@@ -963,5 +963,25 @@
     "copied": "Kopiert",
     "invalid": "Dieser Link ist abgelaufen oder wurde zurückgezogen.",
     "readOnly": "Nur ansehen, gültig bis {date}"
+  },
+  "ops": {
+    "title": "Backoffice",
+    "organizations": "Vereine",
+    "users": "Personen",
+    "teams": "Teams",
+    "matches": "Spiele",
+    "videos": "Videos",
+    "storage": "Speicher",
+    "gpu": "GPU-Minuten (24 h)",
+    "jobs": "Verarbeitung der letzten 24 Stunden",
+    "failed": "Fehlgeschlagene Jobs",
+    "noFailed": "Keine fehlgeschlagenen Jobs.",
+    "retry": "Erneut starten",
+    "search": "Verein suchen",
+    "name": "Name",
+    "plan": "Abo",
+    "members": "Mitglieder",
+    "trial": "14 Tage Verein testen",
+    "trialUntil": "Test bis {date}"
   }
 }

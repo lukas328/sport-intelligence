@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/app", "/onboarding"];
+const PROTECTED = ["/app", "/onboarding", "/ops"];
 
 /**
  * Content Security Policy, built at runtime so the storage origin for direct uploads can be
