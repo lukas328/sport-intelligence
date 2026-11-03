@@ -373,8 +373,17 @@ class TrackIdentity(ApiModel):
     number: int | None = Field(default=None, ge=0, le=99)
 
 
+class FormationSegment(ApiModel):
+    team: Literal["home", "away"]
+    formation: str
+    start_ms: int
+    end_ms: int
+    confidence: float
+
+
 class AnalysisOut(ApiModel):
     status: Literal["none", "running", "ready", "failed"]
+    formations: list[FormationSegment] = Field(default_factory=list)
     calibration: CalibrationOut | None
     tracks: list[TrackOut]
     chunk_ms: int | None

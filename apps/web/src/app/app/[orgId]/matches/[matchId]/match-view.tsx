@@ -54,6 +54,20 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
   const [view, setView] = useState<View>("video");
   const player = useRef<PlayerHandle | null>(null);
+  // deep links (?t=ms), e.g. from a play drawn on a video moment
+  useEffect(() => {
+    const t0 = Number(new URLSearchParams(window.location.search).get("t"));
+    if (!Number.isFinite(t0) || t0 <= 0) return;
+    const id = window.setInterval(() => {
+      const v = player.current?.video();
+      if (v && v.readyState >= 1) {
+        player.current?.seek(t0);
+        window.clearInterval(id);
+      }
+    }, 300);
+    const stop = window.setTimeout(() => window.clearInterval(id), 30_000);
+    return () => (window.clearInterval(id), window.clearTimeout(stop));
+  }, []);
   const stats = useStats(orgId, initial.id);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(

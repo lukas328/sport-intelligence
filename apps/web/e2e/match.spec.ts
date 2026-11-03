@@ -54,6 +54,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByTestId("analysis-panel")).toContainText("Personen verfolgt");
   await expect(page.getByTestId("analysis-panel")).toContainText("Kalibrierung: automatisch");
+  await expect(page.getByTestId("formations")).toContainText("Abwehrsysteme");
 
   // play: the HLS stream loads and time advances
   const video = page.getByTestId("video");
@@ -134,6 +135,16 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.getByRole("button", { name: /Heatmap zeigen/ }).nth(1).click();
   await expect(page.getByTestId("court-heatmap")).toBeVisible();
   await expectAccessible(page);
+
+  // the current moment of the video as a play on the tactics board
+  await page.getByRole("tab", { name: "Video" }).click();
+  await page.getByRole("button", { name: "Als Spielzug übernehmen" }).click();
+  await expect(page.getByTestId("tactics-board")).toBeVisible();
+  expect(await page.getByTestId("tactics-board").locator("[data-testid^=token-]").count()).toBeGreaterThan(4);
+  await page.getByLabel("Name").fill("Szene aus Video");
+  await page.getByRole("button", { name: "Spielzug speichern" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Szene aus Video" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Szene im Video öffnen" })).toBeVisible();
 });
 
 test("playlist: create and share with players", async ({ page }, info) => {

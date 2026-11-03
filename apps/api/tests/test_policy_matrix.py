@@ -252,6 +252,23 @@ ENDPOINTS += [
         ),
     ),
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
+    ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
+    (
+        "POST play",
+        STAFF,
+        lambda a, w: a.post(
+            w.t("/plays"),
+            json={
+                "name": "Matrix",
+                "category": "attack",
+                "doc": {
+                    "formatVersion": 1,
+                    "court": "half",
+                    "frames": [{"tokens": [], "duration_ms": 1000}],
+                },
+            },
+        ),
+    ),
     ("PATCH roster entry", COACHES, _patch_entry),
     ("DELETE roster entry", COACHES, _delete_entry),
     ("GET consents", COACHES, _get_consents),

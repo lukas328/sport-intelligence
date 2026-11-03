@@ -104,6 +104,7 @@ def test_run_analysis(
     longest = max(res["tracks"], key=lambda t: t["last_ms"] - t["first_ms"])
     assert 0 < longest["physical"]["distance_m"] < 80
     assert longest["physical"]["max_speed_ms"] < 10
+    assert isinstance(res["formations"], list)
 
 
 def test_manual_calibration_points(

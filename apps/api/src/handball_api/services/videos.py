@@ -546,6 +546,7 @@ async def _apply_analysis_result(
             "timings_s",
             "elapsed_s",
             "stats",
+            "formations",
         )
     }
 
@@ -587,6 +588,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "fps": meta.get("fps"),
         "detector": meta.get("detector"),
         "elapsed_s": meta.get("elapsed_s"),
+        "formations": meta.get("formations") or [],
         "error": job.error if job is not None and job.status == "failed" else None,
     }
 

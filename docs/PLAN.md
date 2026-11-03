@@ -58,7 +58,7 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 - `packages/metrics` with DEFINITIONS.md, zones (`zones.py`, `zones.ts`), stats caches; analysis screen (overview, match report, shots), everything clickable; paper report importer
 ### M5 Identity, goal zones, goal cams ✅ manual identity, sync, goalkeeper module; OCR model and goal-zone model open (see docs/progress/M5.md)
 - Jersey OCR + roster assignment (Hungarian with constraints), audio sync of goal cams, goal-zone model, goalkeeper module
-### M6 Plays and tactics board
+### M6 Plays and tactics board ✅ board, library, templates, video to board, defence systems; play clustering open (see docs/progress/M6.md)
 - Role assignment, action detection rules, DTW distance, HDBSCAN clustering, naming, defence formation
 - Tactics editor (SVG, frames, animation, touch), video + board side by side, template search, play library, matchup matrix
 ### M7 Insights, season, opponents, training

@@ -116,9 +116,13 @@ async def test_identity_and_physical(make_api: Callable[[], Api]) -> None:
     jobs: MemoryJobQueue = api.app.state.jobs
     await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
     analysis_id = jobs.jobs[-1][2]
-    await _finish(api, analysis_id, {"tracks": _tracks(), "detector": "heuristic"})
+    seg = {"team": "away", "formation": "5-1", "start_ms": 0, "end_ms": 8000, "confidence": 0.9}
+    await _finish(
+        api, analysis_id, {"tracks": _tracks(), "detector": "heuristic", "formations": [seg]}
+    )
 
     a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert a["formations"] == [seg]
     away = next(t for t in a["tracks"] if t["track_no"] == 3)
     assert (away["number"], away["identity_source"]) == (14, "model")
     assert away["physical"]["distance_m"] == 150

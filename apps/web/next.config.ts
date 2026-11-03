@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
-  transpilePackages: ["@handball/court", "@handball/api-client"],
+  transpilePackages: ["@handball/court", "@handball/api-client", "@handball/tactics"],
   outputFileTracingRoot: new URL("../../", import.meta.url).pathname,
   async headers() {
     return [

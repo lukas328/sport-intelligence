@@ -4,7 +4,9 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useCallback, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
+import { useRouter } from "next/navigation";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
+import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
@@ -40,6 +42,7 @@ export function Workspace({
 }) {
   const t = useTranslations();
   const qc = useQueryClient();
+  const router = useRouter();
   const raw = useRef<PlayerHandle>(null);
   // camera switch (M5): every time in this component is main-video time; other cameras are shifted
   // by their sync offset (time in that video = main time + offset)
@@ -227,6 +230,35 @@ export function Workspace({
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
         <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
         <AnalysisPanel analysis={analysis.data ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} />
+        {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
+          <Button
+            variant="secondary"
+            title={t("tactics.fromVideoHint")}
+            onClick={async () => {
+              player.current.pause();
+              const ms = Math.round(player.current.time());
+              const doc = await playFromVideo(`/v1/orgs/${orgId}/videos/${video.id}/tracks`, analysis.data!.chunk_ms!, ms, analysis.data!.tracks);
+              if (!doc) return setFailure("generic");
+              try {
+                window.sessionStorage.setItem(FROM_VIDEO_KEY, JSON.stringify({ doc, match_id: match.id, t_ms: ms }));
+              } catch {
+                return setFailure("generic");
+              }
+              router.push(`/app/${orgId}/teams/${match.team_id}/plays/new?from=video`);
+            }}
+          >
+            {t("tactics.fromVideo")}
+          </Button>
+        )}
+        {analysis.data?.status === "ready" && (
+          <FormationsCard
+            formations={analysis.data.formations ?? []}
+            onSeek={(ms) => {
+              player.current.seek(ms);
+              player.current.play();
+            }}
+          />
+        )}
         {staff && analysis.data?.status === "ready" && (
           <IdentityPanel
             orgId={orgId}
@@ -629,5 +661,50 @@ function CameraSwitch({
         </form>
       )}
     </div>
+  );
+}
+
+
+/** Defence systems per team over time (heuristic from positions, M6). */
+function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analysis["formations"]>; onSeek: (ms: number) => void }) {
+  const t = useTranslations("formations");
+  const label = (f: string) => (f === "open" ? t("open") : f.replaceAll("-", ":"));
+  return (
+    <Card className="space-y-2 p-3" data-testid="formations">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-semibold">{t("title")}</h2>
+        <p className="text-xs text-muted">{t("hint")}</p>
+      </div>
+      {formations.length === 0 && <p className="text-sm text-muted">{t("none")}</p>}
+      {(["home", "away"] as const).map((team) => {
+        const segs = formations.filter((f) => f.team === team);
+        if (segs.length === 0) return null;
+        const total = segs.reduce((s, f) => s + f.end_ms - f.start_ms, 0);
+        const share = Object.entries(
+          segs.reduce<Record<string, number>>((acc, f) => ({ ...acc, [f.formation]: (acc[f.formation] ?? 0) + f.end_ms - f.start_ms }), {}),
+        ).sort((a, b) => b[1] - a[1]);
+        return (
+          <div key={team} className="space-y-1 text-sm">
+            <p>
+              <span className="font-medium">{team === "home" ? t("own") : t("opponent")}: </span>
+              {share.map(([f, ms]) => `${label(f)} ${Math.round((ms / total) * 100)} %`).join(" · ")}
+            </p>
+            <ul className="flex flex-wrap gap-1">
+              {segs.map((f) => (
+                <li key={`${f.start_ms}-${f.team}`}>
+                  <button
+                    className="rounded bg-surface px-2 py-0.5 font-mono text-xs hover:brightness-90"
+                    onClick={() => onSeek(f.start_ms)}
+                    aria-label={t("jump", { formation: label(f.formation), time: formatClock(f.start_ms) })}
+                  >
+                    {formatClock(f.start_ms)} {label(f.formation)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </Card>
   );
 }

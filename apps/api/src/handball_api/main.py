@@ -26,6 +26,7 @@ from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import events as events_router
+from handball_api.routers import tactics as tactics_router
 from handball_api.routers.deps import csrf_protect
 
 
@@ -158,5 +159,6 @@ def create_app(
     app.include_router(teams.router)
     app.include_router(matches.router)
     app.include_router(events_router.router)
+    app.include_router(tactics_router.router)
     app.include_router(internal.router)
     return app

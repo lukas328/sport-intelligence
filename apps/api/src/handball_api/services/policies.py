@@ -46,6 +46,8 @@ class Action(StrEnum):
     COMMENT_MODERATE = "comment.moderate"
     ANNOTATION_WRITE = "annotation.write"
     EVENT_WRITE = "event.write"
+    PLAY_READ_ALL = "play.read_all"
+    PLAY_WRITE = "play.write"
 
 
 ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
@@ -83,6 +85,8 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.COMMENT_MODERATE: _STAFF,
     Action.ANNOTATION_WRITE: _STAFF,
     Action.EVENT_WRITE: _STAFF,
+    Action.PLAY_READ_ALL: _STAFF,
+    Action.PLAY_WRITE: _STAFF,
 }
 
 # Actions that change rights, billing or the organisation.

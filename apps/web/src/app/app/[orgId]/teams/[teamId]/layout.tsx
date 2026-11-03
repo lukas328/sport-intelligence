@@ -33,6 +33,7 @@ export default async function TeamLayout({
             {t("team.roster")}
           </TabLink>
           <TabLink href={`${base}/playlists`}>{t("team.playlists")}</TabLink>
+          <TabLink href={`${base}/plays`}>{t("team.plays")}</TabLink>
         </nav>
       </header>
       {children}

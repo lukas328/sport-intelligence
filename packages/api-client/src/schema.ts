@@ -951,6 +951,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/plays/{play_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Play */
+        get: operations["get_play_v1_orgs__org_id__plays__play_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Play */
+        delete: operations["delete_play_v1_orgs__org_id__plays__play_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Play */
+        patch: operations["update_play_v1_orgs__org_id__plays__play_id__patch"];
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams": {
         parameters: {
             query?: never;
@@ -1108,6 +1127,27 @@ export interface paths {
         put?: never;
         /** Create Playlist */
         post: operations["create_playlist_v1_orgs__org_id__teams__team_id__playlists_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/plays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Plays
+         * @description Play library; players see plays shared with them.
+         */
+        get: operations["list_plays_v1_orgs__org_id__teams__team_id__plays_get"];
+        put?: never;
+        /** Create Play */
+        post: operations["create_play_v1_orgs__org_id__teams__team_id__plays_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1371,6 +1411,8 @@ export interface components {
             elapsed_s: number | null;
             /** Error */
             error: string | null;
+            /** Formations */
+            formations?: components["schemas"]["FormationSegment"][];
             /** Fps */
             fps: number | null;
             /**
@@ -1413,6 +1455,26 @@ export interface components {
             shapes: components["schemas"]["Shape"][];
             /** T Ms */
             t_ms: number;
+        };
+        /** ArrowIn */
+        ArrowIn: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "run" | "pass" | "screen" | "dribble";
+            /** Points */
+            points: [
+                number,
+                number
+            ][];
+        };
+        /** BallIn */
+        BallIn: {
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
         };
         /** Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post */
         Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post: {
@@ -1743,6 +1805,37 @@ export interface components {
             errors: string[];
             /** Skipped */
             skipped: number;
+        };
+        /** FormationSegment */
+        FormationSegment: {
+            /** Confidence */
+            confidence: number;
+            /** End Ms */
+            end_ms: number;
+            /** Formation */
+            formation: string;
+            /** Start Ms */
+            start_ms: number;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "home" | "away";
+        };
+        /** FrameIn */
+        FrameIn: {
+            /** Arrows */
+            arrows?: components["schemas"]["ArrowIn"][];
+            ball?: components["schemas"]["BallIn"] | null;
+            /** Duration Ms */
+            duration_ms: number;
+            /**
+             * Note
+             * @default
+             */
+            note?: string;
+            /** Tokens */
+            tokens: components["schemas"]["handball_api__schemas__tactics__TokenIn"][];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2300,6 +2393,116 @@ export interface components {
          * @enum {string}
          */
         Plan: "free" | "team" | "club";
+        /** PlayCreate */
+        PlayCreate: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "attack" | "defence" | "fast_break" | "set_piece" | "seven_m" | "other";
+            /** Description */
+            description?: string | null;
+            doc: components["schemas"]["PlayDocIn"];
+            /** Formation */
+            formation?: string | null;
+            /** Name */
+            name: string;
+            /**
+             * Shared With Players
+             * @default false
+             */
+            shared_with_players?: boolean;
+            source?: components["schemas"]["PlaySource"] | null;
+            /** Tags */
+            tags?: string[];
+        };
+        /**
+         * PlayDocIn
+         * @description Tactics board document, format version 1 (packages/tactics/src/format.ts).
+         */
+        PlayDocIn: {
+            /**
+             * Court
+             * @enum {string}
+             */
+            court: "half" | "full";
+            /**
+             * Formatversion
+             * @constant
+             */
+            formatVersion: 1;
+            /** Frames */
+            frames: components["schemas"]["FrameIn"][];
+        };
+        /** PlayOut */
+        PlayOut: {
+            /** Category */
+            category: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /** Doc */
+            doc: {
+                [key: string]: unknown;
+            };
+            /** Formation */
+            formation: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Shared With Players */
+            shared_with_players: boolean;
+            /** Source */
+            source: {
+                [key: string]: unknown;
+            } | null;
+            /** Tags */
+            tags: string[];
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** PlaySource */
+        PlaySource: {
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** T Ms */
+            t_ms: number;
+        };
+        /** PlayUpdate */
+        PlayUpdate: {
+            /** Category */
+            category?: ("attack" | "defence" | "fast_break" | "set_piece" | "seven_m" | "other") | null;
+            /** Description */
+            description?: string | null;
+            doc?: components["schemas"]["PlayDocIn"] | null;
+            /** Formation */
+            formation?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Shared With Players */
+            shared_with_players?: boolean | null;
+            /** Tags */
+            tags?: string[] | null;
+        };
         /** PlaylistCreate */
         PlaylistCreate: {
             /** Description */
@@ -2705,11 +2908,6 @@ export interface components {
             name?: string | null;
             settings?: components["schemas"]["TeamSettings"] | null;
         };
-        /** TokenIn */
-        TokenIn: {
-            /** Token */
-            token: string;
-        };
         /** TotpCodeIn */
         TotpCodeIn: {
             /** Code */
@@ -2869,6 +3067,27 @@ export interface components {
             /** Time Offset Ms */
             time_offset_ms: number;
         };
+        /** TokenIn */
+        handball_api__schemas__auth__TokenIn: {
+            /** Token */
+            token: string;
+        };
+        /** TokenIn */
+        handball_api__schemas__tactics__TokenIn: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /**
+             * Side
+             * @enum {string}
+             */
+            side: "own" | "opp";
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -2936,7 +3155,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TokenIn"];
+                "application/json": components["schemas"]["handball_api__schemas__auth__TokenIn"];
             };
         };
         responses: {
@@ -3084,7 +3303,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TokenIn"];
+                "application/json": components["schemas"]["handball_api__schemas__auth__TokenIn"];
             };
         };
         responses: {
@@ -4980,6 +5199,104 @@ export interface operations {
             };
         };
     };
+    get_play_v1_orgs__org_id__plays__play_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                play_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_play_v1_orgs__org_id__plays__play_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                play_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_play_v1_orgs__org_id__plays__play_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                play_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlayUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_teams_v1_orgs__org_id__teams_get: {
         parameters: {
             query?: never;
@@ -5511,6 +5828,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlaylistDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_plays_v1_orgs__org_id__teams__team_id__plays_get: {
+        parameters: {
+            query?: {
+                category?: string | null;
+                q?: string | null;
+            };
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_play_v1_orgs__org_id__teams__team_id__plays_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlayCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayOut"];
                 };
             };
             /** @description Validation Error */

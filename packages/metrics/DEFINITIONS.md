@@ -39,3 +39,11 @@ across gaps over 1 s or faster than 10 m/s are dropped.
 
 Shot zones and goal zones: `packages/court/spec/zones.json` (goal zones always from the **shooter's view**;
 the UI can mirror to the goalkeeper's view).
+
+## Defence systems (from tracking, estimates)
+`handball_vision.formation`, every 2 s window per team: the defended goal is the one nearest the team's
+goalkeeper track (else where most field players are). The defence counts as **set** when at least 5 field
+players are within 12 m of that goal and at least 4 opponents are in that half. Depth of the six defenders
+closest to the goal: more than 8 m = advanced, more than 10.5 m = deep. 0 advanced 6:0, 1 advanced 5:1,
+2 advanced 4:2, 3 advanced with a deep one 3:2:1, otherwise 3:3, 4 or more deep "offensiv / Manndeckung".
+Windows merge into segments (single outliers tolerated), segments under 4 s are dropped.

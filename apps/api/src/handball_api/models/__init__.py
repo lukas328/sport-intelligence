@@ -20,6 +20,7 @@ from handball_api.models.matches import (
     VideoAsset,
 )
 from handball_api.models.roster import Consent, Player, RosterEntry
+from handball_api.models.tactics import Play
 from handball_api.models.tenancy import (
     Invitation,
     Membership,
@@ -47,6 +48,7 @@ __all__ = [
     "Opponent",
     "OrgMembership",
     "Organization",
+    "Play",
     "Player",
     "Playlist",
     "PlaylistItem",

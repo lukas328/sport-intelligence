@@ -82,6 +82,13 @@
             ],
             "title": "Error"
           },
+          "formations": {
+            "items": {
+              "$ref": "#/components/schemas/FormationSegment"
+            },
+            "title": "Formations",
+            "type": "array"
+          },
           "fps": {
             "anyOf": [
               {
@@ -205,6 +212,67 @@
           "created_at"
         ],
         "title": "AnnotationOut",
+        "type": "object"
+      },
+      "ArrowIn": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "run",
+              "pass",
+              "screen",
+              "dribble"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "maxItems": 12,
+            "minItems": 2,
+            "title": "Points",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "points"
+        ],
+        "title": "ArrowIn",
+        "type": "object"
+      },
+      "BallIn": {
+        "properties": {
+          "x": {
+            "maximum": 42.0,
+            "minimum": -2.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 22.0,
+            "minimum": -2.0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "title": "BallIn",
         "type": "object"
       },
       "Body_import_feed_v1_orgs__org_id__matches__match_id__events_import_post": {
@@ -1364,6 +1432,91 @@
           "errors"
         ],
         "title": "FeedImportResult",
+        "type": "object"
+      },
+      "FormationSegment": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "end_ms": {
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "formation": {
+            "title": "Formation",
+            "type": "string"
+          },
+          "start_ms": {
+            "title": "Start Ms",
+            "type": "integer"
+          },
+          "team": {
+            "enum": [
+              "home",
+              "away"
+            ],
+            "title": "Team",
+            "type": "string"
+          }
+        },
+        "required": [
+          "team",
+          "formation",
+          "start_ms",
+          "end_ms",
+          "confidence"
+        ],
+        "title": "FormationSegment",
+        "type": "object"
+      },
+      "FrameIn": {
+        "properties": {
+          "arrows": {
+            "items": {
+              "$ref": "#/components/schemas/ArrowIn"
+            },
+            "maxItems": 20,
+            "title": "Arrows",
+            "type": "array"
+          },
+          "ball": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BallIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration_ms": {
+            "maximum": 10000.0,
+            "minimum": 300.0,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "note": {
+            "default": "",
+            "maxLength": 300,
+            "title": "Note",
+            "type": "string"
+          },
+          "tokens": {
+            "items": {
+              "$ref": "#/components/schemas/handball_api__schemas__tactics__TokenIn"
+            },
+            "maxItems": 16,
+            "title": "Tokens",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tokens",
+          "duration_ms"
+        ],
+        "title": "FrameIn",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -2998,6 +3151,335 @@
         "title": "Plan",
         "type": "string"
       },
+      "PlayCreate": {
+        "properties": {
+          "category": {
+            "enum": [
+              "attack",
+              "defence",
+              "fast_break",
+              "set_piece",
+              "seven_m",
+              "other"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "doc": {
+            "$ref": "#/components/schemas/PlayDocIn"
+          },
+          "formation": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "shared_with_players": {
+            "default": false,
+            "title": "Shared With Players",
+            "type": "boolean"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlaySource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "category",
+          "doc"
+        ],
+        "title": "PlayCreate",
+        "type": "object"
+      },
+      "PlayDocIn": {
+        "description": "Tactics board document, format version 1 (packages/tactics/src/format.ts).",
+        "properties": {
+          "court": {
+            "enum": [
+              "half",
+              "full"
+            ],
+            "title": "Court",
+            "type": "string"
+          },
+          "formatVersion": {
+            "const": 1,
+            "title": "Formatversion",
+            "type": "integer"
+          },
+          "frames": {
+            "items": {
+              "$ref": "#/components/schemas/FrameIn"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Frames",
+            "type": "array"
+          }
+        },
+        "required": [
+          "formatVersion",
+          "court",
+          "frames"
+        ],
+        "title": "PlayDocIn",
+        "type": "object"
+      },
+      "PlayOut": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "doc": {
+            "additionalProperties": true,
+            "title": "Doc",
+            "type": "object"
+          },
+          "formation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "shared_with_players": {
+            "title": "Shared With Players",
+            "type": "boolean"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "name",
+          "category",
+          "formation",
+          "description",
+          "tags",
+          "doc",
+          "source",
+          "shared_with_players",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "PlayOut",
+        "type": "object"
+      },
+      "PlaySource": {
+        "properties": {
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "t_ms": {
+            "minimum": 0.0,
+            "title": "T Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "match_id",
+          "t_ms"
+        ],
+        "title": "PlaySource",
+        "type": "object"
+      },
+      "PlayUpdate": {
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "enum": [
+                  "attack",
+                  "defence",
+                  "fast_break",
+                  "set_piece",
+                  "seven_m",
+                  "other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "doc": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlayDocIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "formation": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "shared_with_players": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shared With Players"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 12,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          }
+        },
+        "title": "PlayUpdate",
+        "type": "object"
+      },
       "PlaylistCreate": {
         "properties": {
           "description": {
@@ -4201,21 +4683,6 @@
         "title": "TeamUpdate",
         "type": "object"
       },
-      "TokenIn": {
-        "properties": {
-          "token": {
-            "maxLength": 200,
-            "minLength": 10,
-            "title": "Token",
-            "type": "string"
-          }
-        },
-        "required": [
-          "token"
-        ],
-        "title": "TokenIn",
-        "type": "object"
-      },
       "TotpCodeIn": {
         "properties": {
           "code": {
@@ -4724,6 +5191,65 @@
         ],
         "title": "VideoUpdate",
         "type": "object"
+      },
+      "handball_api__schemas__auth__TokenIn": {
+        "properties": {
+          "token": {
+            "maxLength": 200,
+            "minLength": 10,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "TokenIn",
+        "type": "object"
+      },
+      "handball_api__schemas__tactics__TokenIn": {
+        "properties": {
+          "id": {
+            "maxLength": 8,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 3,
+            "title": "Label",
+            "type": "string"
+          },
+          "side": {
+            "enum": [
+              "own",
+              "opp"
+            ],
+            "title": "Side",
+            "type": "string"
+          },
+          "x": {
+            "maximum": 42.0,
+            "minimum": -2.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 22.0,
+            "minimum": -2.0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "side",
+          "label",
+          "x",
+          "y"
+        ],
+        "title": "TokenIn",
+        "type": "object"
       }
     }
   },
@@ -4792,7 +5318,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TokenIn"
+                "$ref": "#/components/schemas/handball_api__schemas__auth__TokenIn"
               }
             }
           },
@@ -4961,7 +5487,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TokenIn"
+                "$ref": "#/components/schemas/handball_api__schemas__auth__TokenIn"
               }
             }
           },
@@ -7991,6 +8517,164 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/plays/{play_id}": {
+      "delete": {
+        "operationId": "delete_play_v1_orgs__org_id__plays__play_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "play_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Play Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Play",
+        "tags": [
+          "tactics"
+        ]
+      },
+      "get": {
+        "operationId": "get_play_v1_orgs__org_id__plays__play_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "play_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Play Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Play",
+        "tags": [
+          "tactics"
+        ]
+      },
+      "patch": {
+        "operationId": "update_play_v1_orgs__org_id__plays__play_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "play_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Play Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlayUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Play",
+        "tags": [
+          "tactics"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams": {
       "get": {
         "operationId": "list_teams_v1_orgs__org_id__teams_get",
@@ -8967,6 +9651,159 @@
         "tags": [
           "matches",
           "playlists"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/plays": {
+      "get": {
+        "description": "Play library; players see plays shared with them.",
+        "operationId": "list_plays_v1_orgs__org_id__teams__team_id__plays_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 20,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlayOut"
+                  },
+                  "title": "Response List Plays V1 Orgs  Org Id  Teams  Team Id  Plays Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Plays",
+        "tags": [
+          "tactics"
+        ]
+      },
+      "post": {
+        "operationId": "create_play_v1_orgs__org_id__teams__team_id__plays_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlayCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Play",
+        "tags": [
+          "tactics"
         ]
       }
     },

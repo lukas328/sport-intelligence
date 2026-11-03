@@ -20,6 +20,7 @@ import structlog
 
 from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_dir
 from handball_vision import __version__ as vision_version
+from handball_vision import formation
 from handball_vision.calibration import CalibrationError, calibrate_points
 from handball_vision.pipeline import AnalysisResult, analyse_video
 from handball_vision.teams import hex_to_bgr
@@ -44,6 +45,18 @@ def write_chunks(result: AnalysisResult, out: Path) -> int:
         (out / f"chunk_{n:05d}.bin").write_bytes(sel.astype("<f4").tobytes())
         count += 1
     return count
+
+
+def detect_formations(result: AnalysisResult) -> list[dict[str, Any]]:
+    labels = {tid: str(v.get("label")) for tid, v in result.teams.items() if v.get("label")}
+    samples = [
+        formation.Sample(
+            round(p.frame * 1000 / result.fps), p.track_id, labels[p.track_id], p.x, p.y
+        )
+        for p in result.points
+        if p.track_id in labels
+    ]
+    return [s.to_dict() for s in formation.detect(samples)]
 
 
 def run_analysis(
@@ -117,6 +130,7 @@ def run_analysis(
             "timings_s": {k: round(v, 2) for k, v in result.timings_s.items()},
             "elapsed_s": round(elapsed, 1),
             "stats": result.extra,
+            "formations": detect_formations(result),
         }
         rep.succeed(payload)
         log.info(
