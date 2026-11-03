@@ -16,7 +16,7 @@ n/a not applicable. Findings fixed during the review are marked **fixed in M9**.
 | V3 Session management | ✅ | opaque random tokens, only SHA-256 stored, httpOnly + Secure + SameSite=Lax cookies, 14 day expiry, logout and "sign out other devices", device list |
 | V4 Access control | ✅ | central policy table, generated matrix (docs/policy-matrix.md), policy matrix test over every endpoint × 7 roles, deny by default, RLS as second line, operator backoffice invisible (404) |
 | V5 Validation, sanitisation, encoding | ✅ | Pydantic schemas with limits on every input, React escaping, CSP without `unsafe-eval` in production, SSRF guard for link imports (public HTTPS only, redirects re-checked), path traversal checks on media paths |
-| V6 Cryptography | ✅ | `secrets` tokens, HMAC-signed CSRF and OAuth state, Fernet for TOTP secrets, no custom crypto |
+| V6 Cryptography | ✅ | `secrets` tokens, HMAC-signed CSRF and OAuth state, Fernet for TOTP secrets with key rotation (MultiFernet key list, re-encryption command), no custom crypto |
 | V7 Errors and logging | ✅ | RFC 9457 problems without stack traces, structured JSON logs with request ids, audit log for security events and every RLS bypass, no secrets in logs |
 | V8 Data protection | ✅ | **`Cache-Control: no-store` on all API data (fixed in M9)**, data minimisation in shared links (numbers, no names), personal data export and deletion (M9), youth defaults |
 | V9 Communications | ◐ | HSTS when served over HTTPS (**fixed in M9**); TLS termination and cipher policy belong to the hosting load balancer (GO_LIVE) |

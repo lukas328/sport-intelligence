@@ -9,7 +9,7 @@ import secrets
 import pyotp
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
-from cryptography.fernet import Fernet, InvalidToken
+from cryptography.fernet import Fernet, InvalidToken, MultiFernet
 
 _hasher = PasswordHasher()  # Argon2id with library defaults (RFC 9106 low-memory profile)
 
@@ -52,8 +52,17 @@ def constant_time_equals(a: str, b: str) -> bool:
 
 
 class SecretBox:
-    def __init__(self, key: str) -> None:
-        self._fernet = Fernet(key.encode())
+    """Symmetric encryption for secrets at rest (TOTP seeds).
+
+    `keys` is one Fernet key or a comma-separated list: the first encrypts, all decrypt. Rotation:
+    put the new key first and keep the old one, run `python -m handball_api.rotate_keys`, then drop
+    the old key (docs/runbooks/secrets.md).
+    """
+
+    def __init__(self, keys: str) -> None:
+        self._fernet = MultiFernet(
+            [Fernet(k.strip().encode()) for k in keys.split(",") if k.strip()]
+        )
 
     def encrypt(self, value: str) -> str:
         return self._fernet.encrypt(value.encode()).decode()
@@ -63,6 +72,10 @@ class SecretBox:
             return self._fernet.decrypt(value.encode()).decode()
         except InvalidToken:
             return None
+
+    def rotate(self, token: str) -> str:
+        """Re-encrypt with the primary key (raises InvalidToken for unknown keys)."""
+        return self._fernet.rotate(token.encode()).decode()
 
 
 def new_totp_secret() -> str:

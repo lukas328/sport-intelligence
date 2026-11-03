@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from typing import Any
 
 import pyotp
 import pytest
@@ -262,3 +263,34 @@ async def test_recovery_codes(make_api: Callable[[], Api]) -> None:
     await login()
     assert (await api.post("/v1/auth/login/totp", json={"code": codes[2]})).status_code == 401
     assert (await api.post("/v1/auth/login/totp", json={"code": fresh[0]})).status_code == 200
+
+
+async def test_encryption_key_rotation(
+    make_api: Callable[[], Api], db_settings: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from cryptography.fernet import Fernet
+    from pydantic import SecretStr
+
+    from handball_api import rotate_keys
+    from handball_api.core.security import SecretBox
+
+    api = make_api()
+    await api.register("k@hc-test.ch")
+    totp = pyotp.TOTP((await api.post("/v1/me/totp/setup")).json()["secret"])
+    await api.post("/v1/me/totp/enable", json={"code": totp.now()})
+    old = api.app.state.settings.encryption_key.get_secret_value()
+    new = Fernet.generate_key().decode()
+    keys = SecretStr(f"{new},{old}")
+    monkeypatch.setattr(api.app.state.settings, "encryption_key", keys)
+    monkeypatch.setattr(
+        rotate_keys, "get_settings", lambda: db_settings.model_copy(update={"encryption_key": keys})
+    )
+    assert await rotate_keys.rotate() == (1, 0)
+    assert await rotate_keys.rotate() == (1, 0)  # idempotent
+
+    # only the new key is needed now
+    monkeypatch.setattr(api.app.state.settings, "encryption_key", SecretStr(new))
+    await api.post("/v1/auth/logout")
+    await api.post("/v1/auth/login", json={"email": "k@hc-test.ch", "password": "correct-horse-1"})
+    assert (await api.post("/v1/auth/login/totp", json={"code": totp.now()})).status_code == 200
+    assert SecretBox(old).decrypt(SecretBox(new).encrypt("x")) is None
