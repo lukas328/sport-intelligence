@@ -408,7 +408,11 @@
     "homeAway": "Home or away",
     "homeShort": "Home",
     "importFile": "Import a file",
-    "analysed": "Analysed"
+    "analysed": "Analysed",
+    "card": "Download match card",
+    "cardShots": "{value} shooting",
+    "cardSaves": "{value} saves",
+    "cardDemo": "Demo data"
   },
   "upload": {
     "title": "Upload video",

@@ -7,9 +7,10 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Check, ChevronDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { useCountUp } from "@/components/domain/match-score";
+import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
 import { EmptyState, Skeleton } from "@/components/ui/card";
@@ -120,6 +121,35 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
   const running = jobs.filter((j) => j.status !== "succeeded");
 
+  /** Match card (4:5 PNG), drawn locally: club, team, date, score, opponent, two figures. */
+  async function downloadCard() {
+    if (match.score_own == null || match.score_opponent == null) return;
+    await document.fonts?.ready;
+    const pctOf = (v: number | null | undefined) => (v == null ? null : `${Math.round(v * 100)} %`);
+    const shots = pctOf(stats.data?.own.shooting_pct);
+    const saves = pctOf(stats.data?.own.save_pct);
+    const date = format.dateTime(kickoff, { day: "2-digit", month: "2-digit", year: "2-digit" });
+    const canvas = drawMatchCard(document.createElement("canvas"), {
+      club: shell?.org.name ?? "",
+      team: teamName,
+      date,
+      own: match.score_own,
+      opp: match.score_opponent,
+      opponent: oppName(match),
+      line: t(`voice.${result === "won" ? "won" : result === "lost" ? "lost" : "draw"}`, { opponent: oppName(match) }).replace(/\.$/, ""),
+      figures: [shots && t("matches.cardShots", { value: shots }), saves && t("matches.cardSaves", { value: saves })].filter((x): x is string => Boolean(x)),
+      colour: shell?.org.primary_color ?? "#0b6bcb",
+      tag: match.is_demo ? t("matches.cardDemo") : null,
+    });
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
+    if (!blob) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = cardFileName(teamName, oppName(match), date);
+    a.click();
+    window.setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
   function onPlay(ms: number) {
     setView("video");
     // the player is kept mounted, so the seek works right after the switch
@@ -199,6 +229,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 <MenuItem href={`/v1/orgs/${orgId}/matches/${match.id}/report.pdf?lang=${locale}`} external icon={<FileDown />} testId="pdf">
                   {t("matches.pdf")}
                 </MenuItem>
+                {staff && match.opponent && match.score_own != null && match.score_opponent != null && (
+                  <MenuItem icon={<ImageDown />} onSelect={() => void downloadCard()} testId="match-card">
+                    {t("matches.card")}
+                  </MenuItem>
+                )}
                 {staff && !liveFirst && (
                   <MenuItem href={`${base}/live`} icon={<Radio />} testId="live-link">
                     {t("live.open")}

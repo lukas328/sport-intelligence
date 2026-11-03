@@ -408,7 +408,11 @@
     "homeAway": "Heim oder auswärts",
     "homeShort": "Heim",
     "importFile": "Datei importieren",
-    "analysed": "Analysiert"
+    "analysed": "Analysiert",
+    "card": "Matchkarte herunterladen",
+    "cardShots": "{value} Würfe",
+    "cardSaves": "{value} Paraden",
+    "cardDemo": "Demo-Daten"
   },
   "upload": {
     "title": "Video hochladen",

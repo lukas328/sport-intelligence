@@ -408,7 +408,11 @@
     "homeAway": "Domicile ou extérieur",
     "homeShort": "Domicile",
     "importFile": "Importer un fichier",
-    "analysed": "Analysé"
+    "analysed": "Analysé",
+    "card": "Télécharger la carte de match",
+    "cardShots": "{value} tirs",
+    "cardSaves": "{value} arrêts",
+    "cardDemo": "Données de démo"
   },
   "upload": {
     "title": "Téléverser la vidéo",
