@@ -17,9 +17,13 @@ from redis import Redis
 from redis.asyncio import Redis as AsyncRedis
 from rq import Queue
 
+QUEUES = ("default", "pipeline", "gpu")
+
 
 class JobQueue(Protocol):
     def enqueue(self, queue: str, func: str, job_id: str, kwargs: dict[str, Any]) -> None: ...
+
+    def depths(self) -> dict[str, int]: ...
 
 
 @dataclass
@@ -28,6 +32,9 @@ class MemoryJobQueue:
 
     def enqueue(self, queue: str, func: str, job_id: str, kwargs: dict[str, Any]) -> None:
         self.jobs.append((queue, func, job_id, kwargs))
+
+    def depths(self) -> dict[str, int]:
+        return {q: 0 for q in QUEUES}
 
 
 class RqJobQueue:
@@ -43,6 +50,10 @@ class RqJobQueue:
             result_ttl=86400,
             failure_ttl=7 * 86400,
         )
+
+    def depths(self) -> dict[str, int]:
+        """Waiting jobs per queue (alerting: a growing GPU queue means missing capacity)."""
+        return {q: len(Queue(q, connection=self._conn)) for q in QUEUES}
 
 
 class EventBus(Protocol):

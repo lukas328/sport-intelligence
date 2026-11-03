@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import hashlib
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
+import httpx
 from sqlalchemy import delete, select
 
 from handball_api.core.errors import ProblemError
+from handball_api.core.logging import get_logger
 from handball_api.core.security import (
     SecretBox,
     csrf_for_session,
@@ -39,6 +42,9 @@ class IssuedSession:
     expires_at: datetime
 
 
+log = get_logger("handball_api.auth")
+
+
 def _now() -> datetime:
     return datetime.now(UTC)
 
@@ -47,14 +53,78 @@ def _box(ctx: Ctx) -> SecretBox:
     return SecretBox(ctx.settings.encryption_key.get_secret_value())
 
 
+COMMON_PASSWORDS = frozenset(
+    {
+        "1234567890",
+        "12345678910",
+        "123456789a",
+        "password123",
+        "password1!",
+        "passwort123",
+        "passwort1!",
+        "qwertzuiop",
+        "qwertyuiop",
+        "1q2w3e4r5t",
+        "asdfghjkl1",
+        "iloveyou12",
+        "handball12",
+        "handball123",
+        "handball2026",
+        "hallo12345",
+        "sommer2026",
+        "winter2026",
+        "fussball123",
+        "schweiz123",
+        "zuerich123",
+        "abcdefghij",
+        "0000000000",
+        "1111111111",
+        "letmein123",
+        "welcome123",
+        "willkommen1",
+        "admin12345",
+        "trustno1234",
+        "dragon12345",
+    }
+)
+
+
 def validate_password(ctx: Ctx, password: str, email: str) -> None:
+    """Length, no e-mail inside, not a common password (ASVS V2.1). Breach check: see is_pwned."""
     problems = []
     if len(password) < ctx.settings.password_min_length:
         problems.append(f"at least {ctx.settings.password_min_length} characters")
     if password.lower() == email.lower() or password.lower() in email.lower():
         problems.append("must not contain the e-mail address")
+    if password.lower() in COMMON_PASSWORDS or len(set(password)) <= 2:
+        problems.append("too common")
     if problems:
         raise ProblemError(422, "weak-password", "Password: " + ", ".join(problems))
+
+
+async def check_not_pwned(ctx: Ctx, password: str) -> None:
+    """Optional Have I Been Pwned range check (k-anonymity: only 5 hash characters leave us).
+
+    Fails open on network errors so sign-up never depends on a third party.
+    """
+    if not ctx.settings.pwned_check:
+        return
+    digest = hashlib.sha1(password.encode(), usedforsecurity=False).hexdigest().upper()
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            r = await client.get(
+                f"https://api.pwnedpasswords.com/range/{digest[:5]}",
+                headers={"add-padding": "true", "user-agent": "handball-ai"},
+            )
+        r.raise_for_status()
+    except httpx.HTTPError:
+        log.warning("pwned_check_unavailable")
+        return
+    suffix = digest[5:]
+    for line in r.text.splitlines():
+        found, _, count = line.partition(":")
+        if found == suffix and count.strip() != "0":
+            raise ProblemError(422, "weak-password", "Password: found in known data breaches")
 
 
 async def issue_session(
@@ -97,6 +167,7 @@ async def register(
     if not data.accept_terms:
         raise ProblemError(422, "terms-not-accepted", "Terms must be accepted")
     validate_password(ctx, data.password, data.email)
+    await check_not_pwned(ctx, data.password)
     exists = await ctx.db.scalar(select(User.id).where(User.email == data.email))
     if exists:
         raise ProblemError(409, "email-taken", "An account with this e-mail already exists")
@@ -312,6 +383,7 @@ async def reset_password(
 ) -> IssuedSession:
     user = await _consume_token(ctx, token, TokenPurpose.PASSWORD_RESET)
     validate_password(ctx, password, user.email)
+    await check_not_pwned(ctx, password)
     user.password_hash = hash_password(password)
     user.email_verified_at = user.email_verified_at or _now()  # the mail reached the user
     await ctx.db.execute(delete(AuthSession).where(AuthSession.user_id == user.id))
@@ -355,6 +427,7 @@ async def change_password(
     if user.password_hash and not verify_password(user.password_hash, current or ""):
         raise ProblemError(403, "invalid-credentials", "The current password is wrong")
     validate_password(ctx, new, user.email)
+    await check_not_pwned(ctx, new)
     user.password_hash = hash_password(new)
     await ctx.db.execute(
         delete(AuthSession).where(AuthSession.user_id == user.id, AuthSession.id != session.id)

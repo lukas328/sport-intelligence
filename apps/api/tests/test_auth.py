@@ -162,3 +162,61 @@ async def test_rate_limit(make_api: Callable[[], Api]) -> None:
     ]
     assert codes[:10] == [401] * 10
     assert codes[10] == 429
+
+
+async def test_common_and_pwned_passwords(
+    make_api: Callable[[], Api], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import hashlib
+
+    import httpx
+
+    api = make_api()
+    body = {"email": "c@hc-test.ch", "name": "C", "accept_terms": True}
+    r = await api.post("/v1/auth/register", json={**body, "password": "Handball123"})
+    assert r.status_code == 422 and "too common" in r.json()["detail"]
+    r = await api.post("/v1/auth/register", json={**body, "password": "aaaaaaaaaaaa"})
+    assert r.status_code == 422
+
+    pwned = "Tr0ub4dor&3xyz"
+    digest = hashlib.sha1(pwned.encode()).hexdigest().upper()
+    seen: list[str] = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        seen.append(str(req.url))
+        return httpx.Response(
+            200, text=f"{digest[5:]}:42\r\nABCDEF0123456789ABCDEF0123456789ABC:0\r\n"
+        )
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(
+        httpx,
+        "AsyncClient",
+        lambda **kw: real(transport=httpx.MockTransport(handler), **kw),
+    )
+    api.app.state.settings.pwned_check = True
+    try:
+        r = await api.post("/v1/auth/register", json={**body, "password": pwned})
+        assert r.status_code == 422 and "breaches" in r.json()["detail"]
+        assert seen[0].endswith(f"/range/{digest[:5]}")  # only the prefix leaves the server
+        r = await api.post(
+            "/v1/auth/register", json={**body, "password": "a-fine-long-unique-pass"}
+        )
+        assert r.status_code == 201
+
+        def down(req: httpx.Request) -> httpx.Response:
+            raise httpx.ConnectError("offline")
+
+        monkeypatch.setattr(
+            httpx,
+            "AsyncClient",
+            lambda **kw: real(transport=httpx.MockTransport(down), **kw),
+        )
+        other = make_api()
+        r = await other.post(
+            "/v1/auth/register",
+            json={**body, "email": "d@hc-test.ch", "password": "another-fine-pass-9"},
+        )
+        assert r.status_code == 201  # fails open
+    finally:
+        api.app.state.settings.pwned_check = False

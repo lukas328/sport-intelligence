@@ -72,6 +72,8 @@ class Settings(BaseSettings):
     org_admin_2fa_required: bool = True
     org_admin_2fa_grace_days: int = 14
     password_min_length: int = 10
+    # Have I Been Pwned range check on new passwords (k-anonymity); on in production
+    pwned_check: bool = False
 
     # Rate limits: "<count>/<seconds>"
     rate_limit_backend: Literal["redis", "memory"] = "redis"

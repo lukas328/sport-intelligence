@@ -66,5 +66,5 @@ See `docs/ARCHITECTURE.md` and ADRs in `docs/adr/`.
 - Season stats, problem radar, opponent profile, drill library, assignments, notifications (in-app, e-mail, web push)
 ### M8 Billing, sharing, export, backoffice ✅ annotation tool open (see docs/progress/M8.md)
 - Stripe (checkout, portal, idempotent webhooks, trials), plan limits + usage, share links, PDF reports, operator backoffice + annotation tool
-### M9 Hardening and go-live
+### M9 Hardening and go-live ✅ in the repository; environment items in GO_LIVE.md (see docs/progress/M9.md)
 - Load tests, security review (ASVS L2), privacy functions (export, deletion, consent), monitoring/alerting, backups + restore test, runbooks, GO_LIVE.md

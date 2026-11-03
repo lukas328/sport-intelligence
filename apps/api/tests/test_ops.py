@@ -73,3 +73,18 @@ async def test_backoffice(make_api: Callable[[], Api], operators: None) -> None:
     assert (await op.post(f"/v1/ops/jobs/{failed[0]['id']}/retry")).status_code == 409
     ok_job = r.json()["job_id"]
     assert (await op.post(f"/v1/ops/jobs/{ok_job}/retry")).status_code == 409
+
+
+async def test_internal_stats(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    await upload(api, ids, m["id"], b"v" * 100)
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    assert (await api.http.get("/internal/stats")).status_code == 403
+    r = await api.http.get("/internal/stats", headers=token)
+    assert r.status_code == 200
+    body = r.json()
+    assert set(body["queues"]) == {"default", "pipeline", "gpu"}
+    assert body["failed_last_hour"] == 0 and body["running_over_3h"] == 0
+    assert body["oldest_queued_s"] >= 0
