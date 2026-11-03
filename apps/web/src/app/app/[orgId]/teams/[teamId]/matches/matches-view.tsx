@@ -112,10 +112,10 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
 function MatchList({ title, orgId, matches }: { title: string; orgId: string; matches: Match[] }) {
   return (
     <section className="space-y-3">
-      <h2 className="eyebrow">{title}</h2>
-      <ul className="overflow-hidden rounded-lg bg-raised border border-border" data-testid="match-list">
+      <h2 className="text-2xl">{title}</h2>
+      <ul className="overflow-hidden rounded-lg border border-foreground/20 bg-raised" data-testid="match-list">
         {matches.map((m, i) => (
-          <li key={m.id} className={cn(i > 0 && "border-t border-border/70")}>
+          <li key={m.id} className={cn(i > 0 && "border-t border-foreground/10")}>
             <MatchRow orgId={orgId} m={m} />
           </li>
         ))}
@@ -124,6 +124,7 @@ function MatchList({ title, orgId, matches }: { title: string; orgId: string; ma
   );
 }
 
+/** One line of the fixture list: when, where, against whom, how it stands, how it ended. */
 export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
   const t = useTranslations();
   const format = useFormatter();
@@ -131,35 +132,46 @@ export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
   const state = matchState(m);
   const result = m.score_own == null || m.score_opponent == null ? null : m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
   return (
-    <Link href={`/app/${orgId}/matches/${m.id}`} className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-surface/70 sm:px-5">
-      <span className="w-11 shrink-0 text-center leading-none">
-        <span className="block text-lg font-bold font-wide tabular-nums">{format.dateTime(date, { day: "numeric" })}</span>
-        <span className="mt-1 block text-[0.6875rem] font-medium uppercase tracking-wide text-muted">{format.dateTime(date, { month: "short" })}</span>
+    <Link href={`/app/${orgId}/matches/${m.id}`} className="group grid grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-3.5 transition-colors hover:bg-surface sm:grid-cols-[4.5rem_minmax(0,1fr)_auto_auto] sm:px-5">
+      <span className="leading-none">
+        <span className="block font-display text-sm text-muted">{format.dateTime(date, { weekday: "short" })}</span>
+        <span className="mt-0.5 block font-score text-2xl">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</span>
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold">
-          {m.kind === "training" ? t("matches.training") : m.opponent_name}
+      <span className="min-w-0">
+        <span className="flex items-center gap-2">
+          {m.kind !== "training" && (
+            <span className="shrink-0 rounded-sm bg-surface px-1.5 py-px text-[0.6875rem] font-bold text-muted" title={m.is_home ? t("matches.homeShort") : t("matches.awayShort")}>
+              {m.is_home ? t("matches.homeShort") : t("matches.awayShort")}
+            </span>
+          )}
+          <span className="truncate text-[1.0625rem] font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
         </span>
-        <span className="block truncate text-[0.8125rem] text-muted">
-          {[m.kind === "training" ? null : m.is_home ? t("matches.homeShort") : t("matches.awayShort"), m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" })]
-            .filter(Boolean)
-            .join(" · ")}
+        <span className="mt-0.5 block truncate text-sm text-muted">
+          {[m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" })].filter(Boolean).join(" · ")}
         </span>
       </span>
-      <span className="hidden shrink-0 sm:block">
-        {m.is_demo && <Badge className="mr-1.5">{t("matches.demo")}</Badge>}
+      <span className="hidden items-center gap-1.5 sm:flex">
+        {m.is_demo && <Badge>{t("matches.demo")}</Badge>}
         <Badge tone={state.tone}>{t(state.label)}</Badge>
       </span>
-      {result && (
-        <span className="flex shrink-0 items-center gap-2">
-          <span aria-label={t(`matches.${result}`)} className={cn("size-2 rounded-full", result === "won" ? "bg-ok" : result === "lost" ? "bg-error" : "bg-muted")} />
-          <span className="font-score text-lg">
+      {result ? (
+        <span className="flex items-center gap-2.5">
+          <span className="font-score text-2xl">
             {m.score_own}:{m.score_opponent}
           </span>
+          <span
+            aria-label={t(`matches.${result}`)}
+            className={cn(
+              "grid size-6 place-items-center rounded-sm text-xs font-bold ring-1 ring-inset",
+              result === "won" ? "bg-ok/10 text-ok ring-ok/40" : result === "lost" ? "bg-error/10 text-error ring-error/40" : "bg-surface text-muted ring-foreground/20",
+            )}
+          >
+            <span aria-hidden>{t(`matches.${result}Short`)}</span>
+          </span>
         </span>
+      ) : (
+        <ChevronRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />
       )}
-      <ChevronRight aria-hidden className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
 }
-

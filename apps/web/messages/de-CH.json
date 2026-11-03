@@ -406,7 +406,10 @@
     "homeAway": "Heim oder auswärts",
     "homeShort": "Heim",
     "importFile": "Datei importieren",
-    "analysed": "Analysiert"
+    "analysed": "Analysiert",
+    "wonShort": "S",
+    "drawShort": "U",
+    "lostShort": "N"
   },
   "upload": {
     "title": "Video hochladen",
@@ -458,7 +461,8 @@
     "videoStatus_uploaded": "Hochgeladen",
     "videoStatus_processing": "Wird verarbeitet",
     "videoStatus_ready": "Bereit",
-    "videoStatus_failed": "Fehler"
+    "videoStatus_failed": "Fehler",
+    "done": "Analyse fertig. Statistik und Szenen stehen bereit."
   },
   "quality": {
     "title": "Videoqualität",

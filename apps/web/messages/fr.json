@@ -406,7 +406,10 @@
     "homeAway": "Domicile ou extérieur",
     "homeShort": "Domicile",
     "importFile": "Importer un fichier",
-    "analysed": "Analysé"
+    "analysed": "Analysé",
+    "wonShort": "V",
+    "drawShort": "N",
+    "lostShort": "D"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -458,7 +461,8 @@
     "videoStatus_uploaded": "Téléversée",
     "videoStatus_processing": "Traitement",
     "videoStatus_ready": "Prête",
-    "videoStatus_failed": "Erreur"
+    "videoStatus_failed": "Erreur",
+    "done": "Analyse terminée. Statistiques et scènes sont prêtes."
   },
   "quality": {
     "title": "Qualité vidéo",

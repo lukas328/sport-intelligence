@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 
 /**
  * The score as the loudest element. On first view it counts up briefly (about half a second),
- * then stands still; with reduced motion it is shown at once. Screen readers get the final score.
+ * then stands still; with reduced motion it is shown at once. Screen readers get the final score (label).
  */
-export function MatchScore({ own, opp, className, animate = true }: { own: number; opp: number; className?: string; animate?: boolean }) {
+export function MatchScore({ own, opp, className, animate = true, testId }: { own: number; opp: number; className?: string; animate?: boolean; testId?: string }) {
   const [shown, setShown] = useState<[number, number]>(animate ? [0, 0] : [own, opp]);
   const done = useRef(!animate);
   useEffect(() => {
@@ -30,13 +30,8 @@ export function MatchScore({ own, opp, className, animate = true }: { own: numbe
     return () => cancelAnimationFrame(raf);
   }, [own, opp]);
   return (
-    <span className={cn("block font-score", className)}>
-      <span aria-hidden>
-        {shown[0]}:{shown[1]}
-      </span>
-      <span className="sr-only">
-        {own}:{opp}
-      </span>
+    <span role="img" aria-label={`${own}:${opp}`} className={cn("block font-score", className)} data-testid={testId}>
+      {shown[0]}:{shown[1]}
     </span>
   );
 }

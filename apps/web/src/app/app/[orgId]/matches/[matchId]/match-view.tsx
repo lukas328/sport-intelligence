@@ -7,11 +7,11 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, ChevronDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
-import { Scoreboard } from "@/components/domain/scoreboard";
+import { MatchScore } from "@/components/domain/match-score";
+import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState, Skeleton } from "@/components/ui/card";
 import { useConfirm } from "@/components/ui/confirm";
 import { Dialog } from "@/components/ui/dialog";
@@ -62,6 +62,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   });
   const [live, setLive] = useState<Record<string, Partial<Job>>>({});
   const [dialog, setDialog] = useState<"edit" | "exchange" | null>(null);
+  const [justDone, setJustDone] = useState(false);
 
   // the shell follows the team of the match (navigation, palette)
   useEffect(() => {
@@ -75,6 +76,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       const ev = JSON.parse((e as MessageEvent).data) as Job & { job_id: string };
       setLive((l) => ({ ...l, [ev.job_id]: ev }));
       if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
+      // the moment the analysis is done: said on the stage, not in a toast
+      if (ev.status === "succeeded" && ev.kind !== "ingest") setJustDone(true);
     });
     return () => es.close();
   }, [orgId, initial.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -111,6 +114,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const [hs, as] = match.is_home ? [match.score_own, match.score_opponent] : [match.score_opponent, match.score_own];
   const [hh, ah] = match.is_home ? [match.halftime_own, match.halftime_opponent] : [match.halftime_opponent, match.halftime_own];
   const kickoff = new Date(match.kickoff_at);
+  const result = match.opponent && match.score_own != null && match.score_opponent != null ? (match.score_own > match.score_opponent ? "won" : match.score_own < match.score_opponent ? "lost" : "draw") : null;
   const soon = kickoff.getTime() > Date.now() - 3 * 3600_000;
   const liveFirst = staff && match.score_own == null && !main && soon && match.source !== "paper_report";
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
@@ -128,40 +132,50 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const base = `/app/${orgId}/matches/${match.id}`;
   return (
     <div className="space-y-8">
-      <header className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="eyebrow">
-            {[format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "long", year: "numeric" }), format.dateTime(kickoff, { timeStyle: "short" }), match.competition, match.venue]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          <div className="flex items-center gap-2">
-            {match.is_demo && (
-              <Badge tone="accent" data-testid="demo-badge">
-                {t("matches.demo")}
-              </Badge>
-            )}
-            {["uploading", "processing", "failed"].includes(match.status) && <Badge tone={match.status === "failed" ? "error" : "accent"}>{t(`matches.status_${match.status}`)}</Badge>}
-          </div>
-        </div>
-        <h1 className="sr-only">
-          {match.opponent ? `${home} ${t("matches.vs")} ${away}` : `${t("matches.training")}: ${ourName}`}
+      <Stage
+        compact
+        aside={
+          match.opponent && hs != null && as != null ? (
+            <div className="text-left xl:text-right">
+              <MatchScore own={hs} opp={as} testId="score" className="text-[4.5rem] leading-[0.85] xl:text-[clamp(4rem,5.6vw,6rem)]" />
+              {hh != null && ah != null && <p className="mt-1 text-sm font-semibold tabular-nums">({hh}:{ah})</p>}
+            </div>
+          ) : undefined
+        }
+      >
+        <p className="text-[0.9375rem] font-semibold">
+          {[format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "long", year: "numeric" }), format.dateTime(kickoff, { timeStyle: "short" }), match.competition, match.venue]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+        <h1 className="mt-2 text-[2.25rem] leading-[0.95] sm:text-5xl">
+          {match.opponent ? (
+            <>
+              {home} <span className="opacity-70">{t("matches.vs")}</span> {away}
+            </>
+          ) : (
+            `${t("matches.training")}: ${ourName}`
+          )}
         </h1>
-        {match.opponent ? (
-          <Scoreboard
-            home={home}
-            away={away}
-            homeScore={hs}
-            awayScore={as}
-            halftime={hh != null && ah != null ? `${hh}:${ah}` : null}
-            ownSide={match.is_home ? "home" : "away"}
-            vsLabel={t("matches.vs")}
-          />
-        ) : (
-          <p className="text-2xl font-bold font-wide" aria-hidden>
-            {t("matches.training")}: {ourName}
-          </p>
+        {(result || match.is_demo || justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-lg">
+            {result && <span className="font-semibold">{t(`matches.${result}`)}</span>}
+            {match.is_demo && (
+              <span data-testid="demo-badge">
+                <StageTag>{t("matches.demo")}</StageTag>
+              </span>
+            )}
+            {justDone && (
+              <span role="status" className="inline-flex items-center gap-1.5 font-semibold">
+                <Check aria-hidden className="size-4" />
+                {t("processing.done")}
+              </span>
+            )}
+            {["uploading", "processing", "failed"].includes(match.status) && <StageTag>{t(`matches.status_${match.status}`)}</StageTag>}
+          </div>
         )}
+      </Stage>
+      <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Segmented<View>
             label={t("tabs.video")}
@@ -242,7 +256,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             </MenuRoot>
           </div>
         </div>
-      </header>
+      </div>
 
       {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 
