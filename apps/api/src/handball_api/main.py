@@ -213,6 +213,7 @@ def create_app(
     app.include_router(orgs.router)
     app.include_router(teams.router)
     app.include_router(matches.router)
+    app.include_router(matches.public_media)
     app.include_router(events_router.router)
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)

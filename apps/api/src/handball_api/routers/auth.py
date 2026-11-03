@@ -60,6 +60,7 @@ def _apply(response: Response, ctx: Ctx, issued: IssuedSession) -> LoginResult:
 @router.post(
     "/auth/register",
     response_model=LoginResult,
+    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(rate_limit("register"))],
 )
@@ -72,13 +73,28 @@ async def register(
     return _apply(response, ctx, issued)
 
 
-@router.post("/auth/login", response_model=LoginResult, dependencies=[Depends(rate_limit("login"))])
+@router.post(
+    "/auth/login",
+    response_model=LoginResult,
+    response_model_exclude_none=True,
+    dependencies=[Depends(rate_limit("login"))],
+)
 async def login(data: LoginIn, request: Request, response: Response, ctx: CtxDep) -> LoginResult:
-    return _apply(response, ctx, await service.login(ctx, data, request.headers.get("user-agent")))
+    issued = await service.login(ctx, data, request.headers.get("user-agent"))
+    if request.headers.get("x-client") == "native":
+        # the apps keep the session token in the device keychain and send it as a bearer token;
+        # no cookies, so no CSRF surface (a web page cannot set this header cross-site)
+        return LoginResult(
+            status="totp_required" if issued.mfa_pending else "ok", token=issued.token
+        )
+    return _apply(response, ctx, issued)
 
 
 @router.post(
-    "/auth/login/totp", response_model=LoginResult, dependencies=[Depends(rate_limit("totp"))]
+    "/auth/login/totp",
+    response_model=LoginResult,
+    response_model_exclude_none=True,
+    dependencies=[Depends(rate_limit("totp"))],
 )
 async def login_totp(
     data: TotpCodeIn, auth: Annotated[Authed, Depends(require_pending_totp)]
@@ -106,6 +122,7 @@ async def magic_link(data: MagicLinkIn, ctx: CtxDep) -> None:
 @router.post(
     "/auth/magic-link/consume",
     response_model=LoginResult,
+    response_model_exclude_none=True,
     dependencies=[Depends(rate_limit("magic-consume"))],
 )
 async def magic_link_consume(
@@ -189,7 +206,10 @@ async def password_forgot(data: PasswordForgotIn, ctx: CtxDep) -> None:
 
 
 @router.post(
-    "/auth/password/reset", response_model=LoginResult, dependencies=[Depends(rate_limit("reset"))]
+    "/auth/password/reset",
+    response_model=LoginResult,
+    response_model_exclude_none=True,
+    dependencies=[Depends(rate_limit("reset"))],
 )
 async def password_reset(
     data: PasswordResetIn, request: Request, response: Response, ctx: CtxDep

@@ -2012,6 +2012,30 @@
         "title": "DataRegion",
         "type": "string"
       },
+      "DeviceIn": {
+        "properties": {
+          "platform": {
+            "enum": [
+              "ios",
+              "android"
+            ],
+            "title": "Platform",
+            "type": "string"
+          },
+          "token": {
+            "maxLength": 200,
+            "minLength": 10,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "platform"
+        ],
+        "title": "DeviceIn",
+        "type": "object"
+      },
       "DrillItem": {
         "description": "Snapshot of a library drill (or a free item) inside a session.",
         "properties": {
@@ -4294,6 +4318,17 @@
             ],
             "title": "Status",
             "type": "string"
+          },
+          "token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token"
           }
         },
         "required": [
@@ -12180,6 +12215,76 @@
         ]
       }
     },
+    "/v1/me/devices": {
+      "post": {
+        "operationId": "register_v1_me_devices_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register",
+        "tags": [
+          "devices"
+        ]
+      }
+    },
+    "/v1/me/devices/{token}": {
+      "delete": {
+        "description": "On sign-out the app removes its token, so pushes stop at once.",
+        "operationId": "unregister_v1_me_devices__token__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unregister",
+        "tags": [
+          "devices"
+        ]
+      }
+    },
     "/v1/me/email/verify": {
       "post": {
         "operationId": "email_verify_resend_v1_me_email_verify_post",
@@ -12471,6 +12576,64 @@
         "tags": [
           "auth",
           "me"
+        ]
+      }
+    },
+    "/v1/media/{video_id}/{token}/{path}": {
+      "get": {
+        "operationId": "signed_media_v1_media__video_id___token___path__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "title": "Path",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.apple.mpegurl": {},
+              "video/mp4": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Signed Media",
+        "tags": [
+          "videos"
         ]
       }
     },
@@ -24825,6 +24988,63 @@
           }
         },
         "summary": "Complete Upload",
+        "tags": [
+          "matches",
+          "videos"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/media-token": {
+      "post": {
+        "description": "Signed media path for the native apps' players (HLS segments without auth headers).",
+        "operationId": "media_token_v1_orgs__org_id__videos__video_id__media_token_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Media Token V1 Orgs  Org Id  Videos  Video Id  Media Token Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Media Token",
         "tags": [
           "matches",
           "videos"

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import math
 import re
 import uuid
@@ -345,6 +347,52 @@ async def read_media(ctx: Ctx, asset_id: uuid.UUID, path: str) -> tuple[bytes, s
     if not MEDIA_PATH.match(path) or ".." in path:
         raise ProblemError(404, "not-found", "Not found")
     if path == "proxy.mp4" or path.startswith("original"):
+        raise ProblemError(404, "not-found", "Not found")
+    try:
+        data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
+    except ObjectNotFoundError as exc:
+        raise ProblemError(404, "not-found", "Not found") from exc
+    return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
+
+
+# ---- signed media links for the native apps (5.5) -------------------------------------------
+
+MEDIA_TOKEN_S = 4 * 3600
+
+
+def _media_sig(ctx: Ctx, asset_id: uuid.UUID, exp: int) -> str:
+    key = ctx.settings.secret_key.get_secret_value().encode()
+    return hmac.new(key, f"media:{asset_id}:{exp}".encode(), hashlib.sha256).hexdigest()[:32]
+
+
+async def media_token(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
+    """A path token for players that cannot send auth headers to HLS segments (native apps).
+    Issued only to someone who may watch the video; valid for four hours."""
+    asset = await get_asset(ctx, asset_id)
+    exp = int(datetime.now(UTC).timestamp()) + MEDIA_TOKEN_S
+    token = f"{exp}.{_media_sig(ctx, asset.id, exp)}"
+    return {"base": f"/v1/media/{asset.id}/{token}/", "expires_at": exp}
+
+
+async def read_signed_media(
+    ctx: Ctx, asset_id: uuid.UUID, token: str, path: str
+) -> tuple[bytes, str]:
+    exp_s, _, sig = token.partition(".")
+    if not exp_s.isdigit() or int(exp_s) < datetime.now(UTC).timestamp():
+        raise ProblemError(404, "not-found", "Not found")
+    if not hmac.compare_digest(sig, _media_sig(ctx, asset_id, int(exp_s))):
+        raise ProblemError(404, "not-found", "Not found")
+    if (
+        not MEDIA_PATH.match(path)
+        or ".." in path
+        or path == "proxy.mp4"
+        or path.startswith("original")
+    ):
+        raise ProblemError(404, "not-found", "Not found")
+    await enable_system_access(ctx.db, reason="signed media")
+    asset = await ctx.db.get(VideoAsset, asset_id)
+    await disable_system_access(ctx.db)
+    if asset is None:
         raise ProblemError(404, "not-found", "Not found")
     try:
         data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)

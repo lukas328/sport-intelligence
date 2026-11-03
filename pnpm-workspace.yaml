@@ -1,6 +1,7 @@
 packages:
   - apps/web
   - apps/site
+  - apps/mobile
   - packages/court
   - packages/tactics
   - packages/api-client

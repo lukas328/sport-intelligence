@@ -147,3 +147,20 @@ assistant is off without a key (503 "not set up"); run the live evaluation befor
 The export follows the public Sportscode XML layout (instances with ID, start, end, code, labels;
 rows with RGB) and round-trips losslessly through our import (tested). Opening the file in Sportscode
 itself needs a licence. **Default**: ask a club with Sportscode to open one export before launch.
+
+### Q-M11-1 Paper sheets test set
+The acceptance of 5.9 (95 % of number fields correct on 10 real sheets) needs 10 photos of real
+match sheets with their true values (`ml/eval/paper_sheets/<name>.jpg` + `<name>.json` in the
+extraction schema) and a model key; then `pytest -m live apps/api/tests/test_paper_vision.py`.
+**Default**: the feature stays off without a key; review before import is always required.
+
+### Q-M11-2 Device measurements
+Cold start under 2 s (5.5) and a 70-minute recording without interruption (5.2) need device builds on
+a mid-range iPhone and Android phone. **Default**: measure with the first internal build, record in
+the M11 report.
+
+### Q-M11-3 Store accounts and push credentials
+Apple Developer and Google Play accounts of the operating company, an Expo (EAS) project id
+(`app.json` extra.eas.projectId), APNs key and FCM credentials, the domain for app links
+(`app.handball-ai.ch`, apple-app-site-association and assetlinks.json on the web server).
+**Default**: prepared in `apps/mobile` (bundle id `ch.handballai.app`); submission once accounts exist.

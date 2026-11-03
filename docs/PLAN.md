@@ -141,6 +141,8 @@ key (Q-M10-1), opening an export in Sportscode (Q-M10-2).
 - From problem to training 5.6, training planning, attendance, ICS 5.7
 
 ### M11 Mobile and growth (new)
+Status: done as far as possible here (report `docs/progress/M11.md`); open: device builds and
+measurements, store accounts, paper sheets test set (Q-M11-1 to Q-M11-3).
 - Native apps with Expo 5.5, phone as camera 5.2
 - Live tagging with device time and automatic video sync 5.3 (extends the existing match-clock live mode)
 - Public player profile 5.8, paper report photo extraction 5.9, federation licences 5.10
