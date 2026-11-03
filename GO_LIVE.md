@@ -11,7 +11,7 @@ Status of the platform at the end of M9 and what has to happen before real clubs
   labelled in the UI; trained models are the next quality step (ADR 012, Q-ML-2)
 - ✅ Moving cameras (operator pans and zooms, broadcast): camera motion, hall panorama, per-frame court
   homography (ADR 020); verified on synthetic panning footage and on 3 real clips (motion and panorama)
-- ☐ Calibration on real multi-sport halls: automatic calibration fails on the first real clips; needs
+- ☐ Calibration on real multi-sport halls: automatic calibration is not reliable on the first real clips; needs
   clicking points on the panorama in the UI and/or a learned court or goal model (docs/perf/real-videos.md)
 - ☐ Web player overlays (spotlight) for moving cameras need per-frame homographies (ADR 020)
 - ☐ Validate the analysis on the club's real videos (Q-DATA-1) and adjust filming guidance

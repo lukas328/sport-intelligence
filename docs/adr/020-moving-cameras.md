@@ -37,9 +37,11 @@ or moving, instead of asking clubs to film differently.
 - Synthetic pan: rotation error about 0.2 degrees, focal length within 1 %; tracking quality on par with
   fixed cameras (`docs/perf/eval.md`). Real clips: camera motion and panorama work on all three (pan 80
   to 86 degrees, 100 % of frames placed).
-- Automatic calibration still fails on the real halls (faint or coloured handball lines among many
-  other lines, near sideline hidden by spectators). Until a learned court model or goal detection
-  exists, these videos need clicked points (UI for clicking on the panorama: follow-up).
+- Automatic calibration is not reliable on the real halls yet (faint or coloured handball lines among
+  many other lines, near sideline hidden by spectators): it fails or, in one of three clips, returns a
+  court several metres off that passes every automatic check. Until a top-view search, goal detection or
+  a learned court model is in place, calibrations of moving cameras need user confirmation or clicked
+  points (UI for clicking on the panorama: follow-up).
 - Cost: the motion pass adds about 0.35 x video length on CPU; the per-frame view rendering adds a few
   ms per frame.
 - The stored calibration of a moving camera refers to the panorama (image size = canvas). Overlays in
