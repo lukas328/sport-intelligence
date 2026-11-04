@@ -41,7 +41,9 @@ Labels: per segment its own readings, the half from the readings of the whole ga
 clock between or inside segments starts the second half; readings at 30:00 and above are a
 continuing second half). Each entry: the official entry (match_s, kind, team, number, name, score,
 ...) plus segment file, segment_ms, video_ms (in the full video: start_s + segment_ms) and
-anchor_gap_s (match seconds to the reading it was counted from).
+anchor_gap_s (match seconds to the reading it was counted from). Entries at the clock value the
+segment starts with while that clock stands still are left out (they happened when it stopped,
+possibly before the segment); segments[k]["skipped_at_stopped_start"] counts them.
 """
 
 from __future__ import annotations
@@ -576,11 +578,18 @@ def game_labels(name: str, game: dict[str, Any], official: dict[str, Any]) -> di
             shown = anchors(samples, half)
             if shown:
                 info["match_s"] = [shown[0].match_s, shown[-1].match_s]
-        n0 = len(rows)
+        n0, skipped = len(rows), 0
+        # the clock already stands at its first reading: an entry at that value happened when it
+        # stopped, which may be before the segment (or before the clock came into view)
+        stopped_at = samples[0][1] if len(samples) >= 2 and samples[1][1] == samples[0][1] else None
         if clock.get("source") and samples:
             for e in entries:
                 found = locate(samples, e["match_s"], half)
                 if found is None or not 0 <= found[0] <= dur:
+                    continue
+                shown = e["match_s"] - (HALF_S if half == 2 and samples[0][1] < HALF_S else 0)
+                if stopped_at is not None and shown == stopped_at:
+                    skipped += 1
                     continue
                 rows.append({
                     **e, "segment": s["file"], "segment_index": k, "segment_ms": found[0],
@@ -588,6 +597,7 @@ def game_labels(name: str, game: dict[str, Any], official: dict[str, Any]) -> di
                     "half_certain": certain,
                 })
         info["entries"] = len(rows) - n0
+        info["skipped_at_stopped_start"] = skipped
         seg_out.append(info)
     kinds: dict[str, int] = {}
     for e in rows:

@@ -146,3 +146,12 @@ def test_clean_drops_a_misread_twice_in_a_row_but_keeps_a_half_restart() -> None
     assert clean([*a, *bad, *b]) == [*a, *b]
     restart = [(0, 1795.0), (2000, 1797.0), (60_000, 0.0), (62_000, 2.0)]  # 2nd half from 0
     assert clean(restart) == restart
+
+
+def test_entry_at_a_clock_stopped_since_the_segment_start_is_left_out() -> None:
+    stopped = [[k * 5000, 2267.0] for k in range(13)]  # 37:47 for a minute
+    run = [[65_000 + k * 5000, 2267.0 + k * 5] for k in range(20)]
+    game = {"duration_s": 7000.0, "segments": [seg(0, 4900, stopped + run)]}
+    out = game_labels("g", game, {"log": [log_entry(2267), log_entry(2300, result="2:0")]})
+    assert [(e["match_s"], e["segment_ms"]) for e in out["entries"]] == [(2300, 98_000)]
+    assert out["segments"][0]["skipped_at_stopped_start"] == 1

@@ -78,7 +78,8 @@ calibrated). Chance for "top" is about 1/14; "biggest box is the holder" is the 
 "all" = 127 holder frames and 36 free-ball frames (96 + 27 from the held-out scenes, 31 + 9 from
 the benchmark half).
 
-128x256 run: see "128x256" below.
+128x256: crops are stored at 128x256 and `--size 128` trains on them, but the run was stopped
+before step 100 (the shared CPU was at load 24, about 15 s per step); not measured.
 
 Per hall, best variant (mix), frames with a holder / free:
 
@@ -118,6 +119,8 @@ is one or two holders seen many times; the per-hall numbers swing with that.
 ## Plugging it in (sketch, once it is good enough)
 Export: `export_onnx.py model.pt holder.onnx` gives input `x` N x 9 x H x W (RGB 0..255, frames
 t-G, t, t+G of each player crop, crop as in `build_crops.py`), output `p` N (holder probability).
+(Tested on the best model: ONNX matches torch to 5e-8. It exports the classifier head only; the
+"mix" score would also need the heatmap head as a second output.)
 In `handball_vision.ballpossession` the per-frame holder would come from the ball path where a
 ball peak is near a box (today's `holders()`), and from the classifier otherwise:
 
@@ -125,11 +128,11 @@ ball peak is near a box (today's `holders()`), and from the classifier otherwise
 def holders_with_classifier(ball, boxes, frames, clf, thr=0.6, margin=1.5):
     out = {}
     for f, bs in boxes.items():
-        if f in ball:                            # tracked ball: geometry decides
+        if f in ball:  # tracked ball: geometry decides
             out[f] = holder(ball[f], bs)
             continue
-        crops = [player_crop(frames, f, b) for b in bs]   # 3 frames, +25 % sides/top
-        p = clf(crops)                                    # N probabilities
+        crops = [player_crop(frames, f, b) for b in bs]  # 3 frames, +25 % sides/top
+        p = clf(crops)  # N probabilities
         i = int(p.argmax())
         second = sorted(p)[-2] if len(p) > 1 else 0.0
         out[f] = bs[i][0] if p[i] > thr and p[i] > margin * second else None
