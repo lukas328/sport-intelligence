@@ -41,13 +41,16 @@ Each question has the **assumption** I work with until it is answered. Status: o
   (e.g. youth tournaments)?
 
 ## Infrastructure
-- **Q-INFRA-1 Hosting provider.** *Partly answered 2026-11-03:* EU is enough, cost first (ADR 002).
-  Object storage: Cloudflare R2 with EU jurisdiction (test-data bucket first). Still open: app and
-  managed Postgres provider in the EU (Hetzner, Scaleway, Exoscale EU) and **GPU provider** with EU
-  processing and DPA. Needs price/availability check.
+- **Q-INFRA-1 Hosting provider.** *Answered 2026-11-03/04 (ADR 002):* EU is enough, cost first.
+  Object storage: Cloudflare R2 with EU jurisdiction. App, Postgres, Redis, secrets and monitoring:
+  Azure West Europe. Still open: **GPU** (CPU workers first, about 2 x video length; later Azure
+  serverless GPU if available in an EU region, or an EU GPU provider with DPA). Owner checklist:
+  `docs/LIVEGANG.md`.
 - **Q-INFRA-2 GitHub repository and org**, CI secrets, preview deploy target. *Assumption:* GitHub Actions,
   preview job disabled until hosting exists (`vars.PREVIEW_DEPLOY_ENABLED`).
 - **Q-INFRA-3 E-mail provider** Postmark vs Resend (ADR in M1). *Assumption:* Postmark (EU data residency to verify).
+  *Proposal 2026-11-04:* Azure Communication Services Email (data location Europe, SMTP), so mail stays on the
+  chosen platform; needs the owner's confirmation (`docs/LIVEGANG.md`).
 - **Q-INFRA-4 MinIO** no longer ships community images; local S3 is SeaweedFS (ADR 006). Answered, for information.
 - **Q-INFRA-5 Next.js version**: the brief pins Next.js 15; Next.js 16 is current. *Assumption:* stay on 15.5.x
   as specified, upgrade in a dedicated step if wanted.
