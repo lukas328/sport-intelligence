@@ -47,3 +47,14 @@ On TeamTrack's own validation the 3-frame net finds 64 % at 2 % false alarms: th
   (spot vs its own surroundings over three frames) separates balls (median 0.5) from fixed things
   (median 0.08).
 - Amateur halls (Uznach) give far more usable ball candidates than league broadcasts.
+
+## GPU (Kaggle)
+- `kaggle/train_gpu.py`: first GPU trainer (CPU augmentation; data-bound at about 0.7 s per step).
+- `kaggle/train_gpu_fast.py`: workers only decode (single-threaded); zoom, crop, flip, time reversal,
+  hue rotation, saturation, gain and the target heatmap run on the GPU (`affine_grid`/`grid_sample`),
+  mixed precision; starts from the best model in the `handball-ball-models` dataset. `CHECK_AUG=1`
+  writes crops around the targets to check the augmentation by eye.
+- `kaggle/mine_gpu.py`: self-training over the game segments (`handball-game-segments`): every frame
+  through the net, peaks linked with balltrack, fixed and background-glued spots dropped, tracklet
+  tiles saved for review.
+Kaggle allows two GPU jobs at a time; a small queue script pushes the next kernel when a slot frees.
