@@ -128,7 +128,9 @@ async def test_goals_and_clock_from_score_overlay(make_api: Callable[[], Api]) -
     await upload(api, ids, m["id"], b"v" * 100)
     jobs: MemoryJobQueue = api.app.state.jobs
     await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
-    payload = {"tracks": _tracks(), "detector": "model", "events": AUTO, "scoreboard": OVERLAY}
+    attack = {"team": "away", "start_ms": 70_000, "end_ms": 88_500, "confidence": 0.9}
+    events_in = {**AUTO, "possessions": [*AUTO["possessions"], attack]}
+    payload = {"tracks": _tracks(), "detector": "model", "events": events_in, "scoreboard": OVERLAY}
     await _finish(api, jobs.jobs[-1][2], payload)
 
     match = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).json()
@@ -141,13 +143,16 @@ async def test_goals_and_clock_from_score_overlay(make_api: Callable[[], Api]) -
         for e in events
         if e["source"] == "scoreboard_ocr"
     )
-    # the own goal at 63 s is the one tagged by hand at 70 s
+    # the own goal at 63 s is the one tagged by hand at 70 s; the opponent's goal shown at 91 s
+    # moves to the end of their attack at 88.5 s
     assert read == [
-        ("opponent", 91_000, 1, 211.0),
+        ("opponent", 88_500, 1, 208.5),
         ("opponent", 900_000, 2, 2400.0),
         ("own", 400_000, 2, 1900.0),
     ]
     # the overlay is the goal source: no goals from the throw-off heuristic
     assert not [e for e in events if e["source"] == "heuristic" and e["type"] == "shot"]
     a = (await api.get(f"/v1/orgs/{org}/videos/{jobs.jobs[-1][3]['asset_id']}/analysis")).json()
-    assert a["auto_events"]["overlay_goals"] == 3
+    assert a["auto_events"]["overlay_goals"] == 3 and a["auto_events"]["overlay_aligned"] == 1
+    poss = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/possessions")).json()["phases"]
+    assert [p["outcome"] for p in poss if p["start_ms"] == 70_000] == ["goal"]

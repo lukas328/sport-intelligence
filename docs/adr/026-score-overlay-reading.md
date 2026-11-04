@@ -31,9 +31,11 @@ a running match clock. That is the most reliable goal source available without a
    `Match.is_home` decides own and opponent. Goals become `shot`/`goal` events with source
    `scoreboard_ocr` and confidence 0.95, with period and match clock from the overlay clock. A goal
    tagged by hand within 20 s on the same side wins. When the overlay gave goals, the throw-off
-   heuristic adds none. The overlay clock sets throw-off times nobody set (negative when the video
-   starts after the throw-off), and the final score when the video reaches the end of the match and
-   no result is stored.
+   heuristic adds none. Each goal moves to the end of the scoring side's attack that ended up to
+   15 s before the overlay changed (the operator's delay), and that attack is marked as a goal: the
+   goal clip shows the finish. The overlay clock sets throw-off times nobody set (negative when the
+   video starts after the throw-off), and the final score when the video reaches the end of the
+   match and no result is stored.
 
 ## Results (5-minute clips)
 | Clip | Overlay | Goals read | Actual | Clock |
@@ -43,6 +45,9 @@ a running match clock. That is the most reliable goal source available without a
 | NLB Horgen vs Möhlin 2017 | none | 0 | not checked | - |
 
 Single misreadings (`41:0`, `2:7`) occur and are filtered by rule 5.
+
+Cross-check with the tracking: before each of the 5 goals, the possession segmentation (ADR 025)
+had the scoring team attacking (5 of 5); the attack ended 1 to 3 s before the overlay changed.
 
 ## Consequences
 - Recordings without an overlay (club cameras, the 2017 clips) still have no automatic goals. The

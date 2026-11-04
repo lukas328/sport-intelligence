@@ -50,8 +50,36 @@ async def _manual_goals(ctx: Ctx, match: Match) -> list[tuple[str, int]]:
     return [(e.side, int(e.t_ms)) for e in rows.all() if e.t_ms is not None]
 
 
+ALIGN_BEFORE_MS = 15000  # an attack that ended up to 15 s before the overlay changed scored
+
+
+def align_goals(goals: list[Event], possessions: list[Possession]) -> int:
+    """Move each overlay goal to the end of the scoring side's attack just before the overlay
+    changed, and mark that attack as a goal: the goal clip then shows the finish, not the restart.
+    """
+    moved = 0
+    for g in goals:
+        if g.t_ms is None:
+            continue
+        cands = [
+            p
+            for p in possessions
+            if p.side == g.side and g.t_ms - ALIGN_BEFORE_MS <= p.end_ms <= g.t_ms + 2000
+        ]
+        if not cands:
+            continue
+        p = max(cands, key=lambda c: c.end_ms)
+        g.attributes = {**(g.attributes or {}), "overlay_ms": g.t_ms}
+        if g.clock_s is not None:
+            g.clock_s = round(g.clock_s - (g.t_ms - p.end_ms) / 1000, 1)
+        g.t_ms = p.end_ms
+        p.outcome = "goal"
+        moved += 1
+    return moved
+
+
 async def apply_scoreboard(
-    ctx: Ctx, match: Match, overlay: dict[str, Any] | None
+    ctx: Ctx, match: Match, overlay: dict[str, Any] | None, created_out: list[Event] | None = None
 ) -> dict[str, int]:
     """Goals and match clock read from a broadcast overlay (BRIEF 7.2 stage 10). The left team of
     an overlay is the home team. The overlay clock sets the throw-off times nobody set yet, and the
@@ -88,21 +116,22 @@ async def apply_scoreboard(
             period, clock_s = derived if derived else (1, None)  # type: ignore[assignment]
         score = list(g.get("score") or [])
         own_score = score if left == "own" else score[::-1]
-        ctx.db.add(
-            Event(
-                organization_id=match.organization_id,
-                match_id=match.id,
-                type="shot",
-                side=side,
-                outcome="goal",
-                t_ms=t_ms,
-                period=period,
-                clock_s=clock_s,
-                source=OVERLAY,
-                confidence=0.95,
-                attributes={"score": own_score},
-            )
+        event = Event(
+            organization_id=match.organization_id,
+            match_id=match.id,
+            type="shot",
+            side=side,
+            outcome="goal",
+            t_ms=t_ms,
+            period=period,
+            clock_s=clock_s,
+            source=OVERLAY,
+            confidence=0.95,
+            attributes={"score": own_score},
         )
+        ctx.db.add(event)
+        if created_out is not None:
+            created_out.append(event)
         created += 1
 
     final = overlay.get("last_score")
@@ -125,7 +154,8 @@ async def apply(
 ) -> dict[str, int]:
     """Overlay first (exact goals and clock), then the position heuristics; a heuristic goal is
     dropped when the overlay gave goals."""
-    sb = await apply_scoreboard(ctx, match, overlay)
+    overlay_goals: list[Event] = []
+    sb = await apply_scoreboard(ctx, match, overlay, overlay_goals)
     if not payload:
         return {"events": 0, "possessions": 0, **sb}
     await ctx.db.execute(delete(Event).where(Event.match_id == match.id, Event.source == SOURCE))
@@ -191,12 +221,12 @@ async def apply(
             )
         )
         created += 1
-    possessions = 0
+    rows: list[Possession] = []
     for p in payload.get("possessions") or []:
         side = _side(p.get("team"))
         if side is None:
             continue
-        ctx.db.add(
+        rows.append(
             Possession(
                 organization_id=match.organization_id,
                 match_id=match.id,
@@ -209,6 +239,7 @@ async def apply(
                 source=SOURCE,
             )
         )
-        possessions += 1
+    ctx.db.add_all(rows)
+    aligned = align_goals(overlay_goals, rows)
     await ctx.db.flush()
-    return {"events": created, "possessions": possessions, **sb}
+    return {"events": created, "possessions": len(rows), "overlay_aligned": aligned, **sb}
