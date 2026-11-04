@@ -6,3 +6,7 @@ not a bot"), so `download_segments.ps1` runs on a home computer: five 3-minute p
 720p plus the info JSON (title, description, which often lists goals with timestamps), about
 100 to 150 MB per game. Put the result into the shared Google Drive folder; the training pipeline
 picks it up from there (segments for self-training, info JSON for goal lists).
+
+Behind a VPN or company network YouTube answers with the bot check as well: use a phone hotspot
+(`videos_priority.csv`, 71 games from many countries and halls, `-Pieces 2`, about 5 GB) or
+`-Browser chrome|edge|firefox` to use the signed-in YouTube session (slow, with pauses).
