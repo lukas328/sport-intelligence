@@ -1,0 +1,53 @@
+# syntax=docker/dockerfile:1.7
+# GPU image (ADR 025): same worker, ONNX Runtime with the CUDA execution provider. The detector
+# picks CUDA automatically when a GPU is visible (`--gpus all`), else it falls back to the CPU.
+FROM python:3.12-slim AS python
+
+# Ubuntu 24.04 (glibc 2.39) runs the Debian bookworm Python build of the official image
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04 AS base
+ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1 UV_PYTHON_DOWNLOADS=never
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
+    libffi8 libssl3t64 libsqlite3-0 libbz2-1.0 liblzma5 zlib1g \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=python /usr/local /usr/local
+RUN ldconfig
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then export SSL_CERT_FILE=/run/secrets/extra_ca PIP_CERT=/run/secrets/extra_ca; fi; \
+    python3.12 -m pip install --no-cache-dir uv==0.11.32
+WORKDIR /app
+
+FROM base AS build
+COPY pyproject.toml uv.lock ./
+COPY packages/court packages/court
+COPY packages/vision packages/vision
+COPY packages/jobkit packages/jobkit
+COPY packages/metrics packages/metrics
+COPY apps/api/pyproject.toml apps/api/pyproject.toml
+COPY apps/worker/pyproject.toml apps/worker/pyproject.toml
+COPY apps/gpu-worker/pyproject.toml apps/gpu-worker/pyproject.toml
+RUN mkdir -p apps/worker/src/handball_worker apps/gpu-worker/src/handball_gpu_worker apps/api/src/handball_api
+COPY apps/gpu-worker apps/gpu-worker
+RUN --mount=type=secret,id=extra_ca,required=false --mount=type=cache,target=/root/.cache/uv \
+    if [ -s /run/secrets/extra_ca ]; then export SSL_CERT_FILE=/run/secrets/extra_ca; fi; \
+    uv sync --frozen --no-dev --package handball-gpu-worker --no-editable --python /usr/local/bin/python3.12 \
+    && uv pip uninstall --python /app/.venv/bin/python onnxruntime \
+    && uv pip install --python /app/.venv/bin/python "onnxruntime-gpu>=1.20,<2"
+
+# model weights: pinned release and checksum (ADR 003/025)
+FROM base AS models
+ARG YOLOX_URL=https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx
+ARG YOLOX_SHA256=c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then export CURL_CA_BUNDLE=/run/secrets/extra_ca; fi; \
+    mkdir -p /models && curl -LsSf -o /models/yolox_s.onnx "${YOLOX_URL}" \
+    && echo "${YOLOX_SHA256}  /models/yolox_s.onnx" | sha256sum -c -
+
+FROM base AS runtime
+RUN useradd --system --uid 10001 app
+COPY --from=build /app/.venv /app/.venv
+COPY --from=models /models /models
+ENV PATH="/app/.venv/bin:$PATH" HB_DETECT_EVERY=1
+USER app
+HEALTHCHECK --interval=15s --timeout=5s --retries=5 CMD ["handball-gpu-worker", "healthcheck"]
+CMD ["handball-gpu-worker"]

@@ -169,7 +169,7 @@ def run_analysis(
         STAGES_LEARNED if detector is not None else STAGES,
     )
     if detector is not None:
-        return _run_learned(
+        learned_result = _run_learned(
             detector,
             job_id,
             bucket,
@@ -182,6 +182,9 @@ def run_analysis(
             settings,
             rep,
         )
+        if learned_result is not None:
+            return learned_result
+        # the detector saw (almost) nobody, e.g. unusual footage: the classical path decides
     Path(settings.work_dir).mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix=f"analysis-{asset_id}-", dir=settings.work_dir))
     started = time.perf_counter()
@@ -365,9 +368,10 @@ def _run_learned(
     calibration_frame_ms: int,
     settings: JobSettings,
     rep: Reporter,
-) -> dict[str, Any]:
+) -> dict[str, Any] | None:
     """Learned detector path (ADR 025): one observation pass, automatic calibration, tracking.
-    A re-run with clicked points reuses the stored observations and takes seconds."""
+    A re-run with clicked points reuses the stored observations and takes seconds. Returns None
+    when the detector finds (almost) no people, so the classical path can take over."""
     Path(settings.work_dir).mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="analysis-", dir=settings.work_dir))
     started = time.perf_counter()
@@ -394,6 +398,12 @@ def _run_learned(
                 detect_every=max(1, settings.detect_every),
                 progress=lambda _stage, f: rep.fraction(f),
             )
+            counts = sorted(len(fo.people) for fo in obs.frames)
+            if not counts or counts[len(counts) // 2] < 3:
+                log.info(
+                    "detector_sees_few_people", median=counts[len(counts) // 2] if counts else 0
+                )
+                return None
             learned.save_observations(obs, work / "observations.npz")
             upload_dir_files(
                 s3, settings.s3_bucket_artifacts, work, ["observations.npz"], prefix + "analysis/"
