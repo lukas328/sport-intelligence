@@ -448,7 +448,8 @@
     "slowLink": "La connexion est lente. La vidéo fait {size} ; l'envoi peut durer et reprendra la prochaine fois.",
     "uploadAnyway": "Envoyer maintenant",
     "later": "Plus tard en Wi-Fi",
-    "offline": "Pas de connexion. L'envoi reprend tout seul dès que le réseau revient."
+    "offline": "Pas de connexion. L'envoi reprend tout seul dès que le réseau revient.",
+    "addCamera": "Ajouter une caméra (caméra de but, autre angle)"
   },
   "processing": {
     "title": "Traitement",
@@ -470,7 +471,14 @@
     "videoStatus_processing": "Traitement",
     "videoStatus_ready": "Prête",
     "videoStatus_failed": "Erreur",
-    "done": "Analyse terminée. Statistiques et scènes sont prêtes."
+    "done": "Analyse terminée. Statistiques et scènes sont prêtes.",
+    "titleAnalysis": "Analyse du match",
+    "stage_analysis_download": "Chargement de la vidéo",
+    "stage_analysis_observe": "Caméra et joueurs",
+    "stage_analysis_calibration": "Recherche du terrain",
+    "stage_analysis_tracking": "Calcul des déplacements",
+    "stage_analysis_upload": "Enregistrement",
+    "analysisHint": "Tourne en arrière-plan. Tu peux fermer la page, nous te prévenons quand c'est prêt."
   },
   "quality": {
     "title": "Qualité vidéo",
@@ -812,7 +820,13 @@
     "kmh": "{value} km/h",
     "min": "{value} min",
     "track": "Trace {n}",
-    "showHeatmap": "Afficher la carte de chaleur"
+    "showHeatmap": "Afficher la carte de chaleur",
+    "teamOwn": "Propre équipe",
+    "teamOpp": "Adversaire",
+    "tracksOwn": "Traces de l'équipe, dès 1 minute",
+    "playersAndTracks": "Joueuses, joueurs et traces",
+    "showShort": "Afficher {n} traces courtes (moins d'1 minute)",
+    "hideShort": "Masquer les traces courtes"
   },
   "identity": {
     "title": "Attribuer les traces",
@@ -1900,7 +1914,9 @@
       "sevenLeft": "Ligne des 7 m gauche (milieu)",
       "sevenRight": "Ligne des 7 m droite (milieu)"
     },
-    "spread": "Les points sont trop rapprochés : marque aussi des points sur les deux lignes de touche (p. ex. les coins ou les extrémités de la ligne médiane). Les poteaux seuls ne suffisent pas, le terrain serait déformé."
+    "spread": "Les points sont trop rapprochés : marque aussi des points sur les deux lignes de touche (p. ex. les coins ou les extrémités de la ligne médiane). Les poteaux seuls ne suffisent pas, le terrain serait déformé.",
+    "confirm": "C'est juste",
+    "existingAuto": "Trouvé automatiquement. Le terrain orange est-il sur les lignes et les buts au bon endroit ? Alors confirme, sinon place des points."
   },
   "today": {
     "uploadHint": "Téléversez la vidéo. Statistiques, scènes et constats suivent automatiquement.",
@@ -2059,5 +2075,19 @@
     "againstRef": "Buts encaissés {value}",
     "focusNoteMarked": "En jaune, la valeur qui s'en écarte nettement.",
     "recordLabel": "Bilan"
+  },
+  "videoOverview": {
+    "title": "Ce que la vidéo montre déjà",
+    "estimated": "estimé à partir des positions",
+    "noPossessions": "Aucune phase d'attaque détectée.",
+    "attacks": "{n, plural, =1 {1 attaque} other {# attaques}} · {avg} s en moyenne",
+    "timeline": "Possession au fil du match",
+    "timelineHint": "Un clic sur une attaque y mène dans la vidéo.",
+    "physical": "Voir l'effort physique et les heatmaps",
+    "moreTitle": "Pour les tirs, buts et arrêts",
+    "moreText": "L'analyse vidéo ne voit pas encore le ballon. Marque les buts au bord du terrain pendant le match ou importe la feuille de match : statistiques, cartes de tirs et valeurs du gardien apparaissent alors ici.",
+    "marks": "Marquer au bord du terrain",
+    "paper": "Importer la feuille de match",
+    "phase": "{team}, de {from} à {to}"
   }
 }

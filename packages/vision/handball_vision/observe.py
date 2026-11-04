@@ -328,7 +328,8 @@ def auto_calibrate(obs: Observations, hall: U8) -> tuple[Calibration, dict[str, 
         "camera_y_m": round(float(centre[1]), 2),
     }
     # a real camera stands above the floor beside or behind the court, and play is on the court
-    plausible = 1.5 <= centre[2] <= 25 and (centre[1] < -1 or centre[0] < -1 or centre[0] > 41)
+    # (a camera right above the near sideline is common, so the near side starts at y < 1)
+    plausible = 1.5 <= centre[2] <= 25 and (centre[1] < 1 or centre[0] < -1 or centre[0] > 41)
     if not plausible or inside < 0.5 or goal < 0.2:
         raise CalibrationError(f"automatic court not trustworthy ({info})")
     return calib, info

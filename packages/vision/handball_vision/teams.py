@@ -97,3 +97,107 @@ class TeamAssigner:
             return None
         label, conf = self.classify(np.median(np.stack(s), axis=0))
         return TeamResult(label, conf, len(s))
+
+
+def _kmeans(
+    x: NDArray[np.float64], w: NDArray[np.float64], k: int, iters: int = 30, starts: int = 8
+) -> tuple[NDArray[np.float64], NDArray[np.int_]]:
+    """Weighted k-means, k-means++ starts with fixed seeds, the lowest inertia wins."""
+    best: tuple[float, NDArray[np.float64], NDArray[np.int_]] | None = None
+    for seed in range(starts):
+        rng = np.random.default_rng(seed)
+        centres = [x[int(rng.choice(len(x), p=w / w.sum()))]]
+        for _ in range(1, k):
+            d = np.min([np.sum((x - c) ** 2, axis=1) for c in centres], axis=0) * w
+            centres.append(x[int(rng.choice(len(x), p=d / d.sum()))] if d.sum() > 0 else x[0])
+        c = np.array(centres)
+        labels = np.zeros(len(x), int)
+        for _ in range(iters):
+            labels = np.argmin(((x[:, None, :] - c[None]) ** 2).sum(axis=2), axis=1)
+            new = np.array(
+                [
+                    np.average(x[labels == j], axis=0, weights=w[labels == j])
+                    if (labels == j).any()
+                    else c[j]
+                    for j in range(k)
+                ]
+            )
+            if np.allclose(new, c):
+                break
+            c = new
+        inertia = float((w * ((x - c[labels]) ** 2).sum(axis=1)).sum())
+        if best is None or inertia < best[0]:
+            best = (inertia, c, labels)
+    assert best is not None
+    return best[1], best[2]
+
+
+def relabel_by_clusters(
+    colours: dict[int, tuple[NDArray[np.float64], int]],
+    kits: dict[str, NDArray[np.float64]],
+    min_samples: int = 20,
+) -> dict[int, str]:
+    """Team labels relative to this match's colours, not absolute kit colours.
+
+    Hall lighting shifts colours a lot (white shirts look grey, black ones dark grey; colours wash
+    out), so absolute matching fails while the order survives. The tracks' median torso colours are
+    clustered (two big clusters: the teams; a small third: referees and others); the two team
+    clusters are matched to the home and away kits by hue when the kits are coloured, else by
+    lightness order. `colours`: track -> (median Lab, samples); `kits`: label -> Lab. Returns labels
+    for the tracks with enough samples.
+    """
+    tids = [t for t, (_, n) in colours.items() if n >= min_samples]
+    if len(tids) < 6 or "home" not in kits or "away" not in kits:
+        return {}
+    x = np.array([colours[t][0] for t in tids], dtype=np.float64)
+    w = np.array([colours[t][1] for t in tids], dtype=np.float64)
+    feat = np.column_stack([x[:, 0] * 0.6, x[:, 1], x[:, 2]])  # lightness counts less than colour
+    total = float(w.sum())
+    # the two teams: the pair of clusters with most players that is clearly apart (3 to 5 clusters,
+    # because referees, goalkeepers and the bench form groups of their own)
+    best: tuple[float, NDArray[np.float64], NDArray[np.int_], int, int] | None = None
+    for k in (3, 4, 5):
+        if len(tids) < 2 * k:
+            break
+        centres, labels = _kmeans(feat, w, k)
+        weight = np.array([w[labels == j].sum() for j in range(k)])
+        for i in range(k):
+            for j in range(i + 1, k):
+                if min(weight[i], weight[j]) < 0.12 * total:
+                    continue
+                sep = float(np.linalg.norm(centres[i] - centres[j]))
+                # both teams field about as many players: a lopsided pair is a team plus referees
+                balance = float(np.sqrt(min(weight[i], weight[j]) / max(weight[i], weight[j])))
+                score = (weight[i] + weight[j]) / total * min(1.0, sep / 10.0) * balance
+                if best is None or score > best[0] + 1e-9:
+                    best = (score, centres, labels, i, j)
+    if best is None:
+        return {}
+    _, centres, labels, ci, cj = best
+    real = {
+        j: np.average(x[labels == j], axis=0, weights=w[labels == j])
+        for j in range(len(centres))
+        if (labels == j).any()
+    }
+    home, away = kits["home"], kits["away"]
+    a, b = real[ci], real[cj]
+
+    def chroma(c: NDArray[np.float64]) -> float:
+        return float(np.hypot(c[1] - 128, c[2] - 128))
+
+    if max(chroma(home), chroma(away)) >= 15:
+        straight = colour_distance(a, home) + colour_distance(b, away)
+        swapped = colour_distance(a, away) + colour_distance(b, home)
+        first_home = straight <= swapped
+    else:  # white, black, grey kits: the lighter cluster wears the lighter kit
+        first_home = (a[0] >= b[0]) == (home[0] >= away[0])
+    names = {ci: "home" if first_home else "away", cj: "away" if first_home else "home"}
+    # other clusters: referees (or keepers, fixed later by position) if they differ clearly from
+    # both teams, else part of the nearest team
+    for j in real:
+        if j in names:
+            continue
+        dists = {t: float(np.linalg.norm(centres[j] - centres[t])) for t in (ci, cj)}
+        nearest = min(dists, key=dists.__getitem__)
+        names[j] = "referee" if dists[nearest] > 25 else names[nearest]
+    return {t: names[int(lb)] for t, lb in zip(tids, labels, strict=True)}

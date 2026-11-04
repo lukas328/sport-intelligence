@@ -448,7 +448,8 @@
     "slowLink": "The connection is slow. The video is {size}; the upload may take long and continues next time.",
     "uploadAnyway": "Upload now",
     "later": "Later on Wi-Fi",
-    "offline": "No connection. The upload continues by itself once the network is back."
+    "offline": "No connection. The upload continues by itself once the network is back.",
+    "addCamera": "Add another camera (goal camera, second angle)"
   },
   "processing": {
     "title": "Processing",
@@ -470,7 +471,14 @@
     "videoStatus_processing": "Processing",
     "videoStatus_ready": "Ready",
     "videoStatus_failed": "Error",
-    "done": "Analysis done. Stats and scenes are ready."
+    "done": "Analysis done. Stats and scenes are ready.",
+    "titleAnalysis": "Match analysis",
+    "stage_analysis_download": "Loading the video",
+    "stage_analysis_observe": "Finding camera and players",
+    "stage_analysis_calibration": "Finding the court",
+    "stage_analysis_tracking": "Computing paths",
+    "stage_analysis_upload": "Saving",
+    "analysisHint": "Runs in the background. You can close this page; we will let you know when it is done."
   },
   "quality": {
     "title": "Video quality",
@@ -812,7 +820,13 @@
     "kmh": "{value} km/h",
     "min": "{value} min",
     "track": "Track {n}",
-    "showHeatmap": "Show heatmap"
+    "showHeatmap": "Show heatmap",
+    "teamOwn": "Own team",
+    "teamOpp": "Opponent",
+    "tracksOwn": "Own team's tracks, 1 minute and longer",
+    "playersAndTracks": "Players and tracks",
+    "showShort": "Show {n} short tracks (under 1 minute)",
+    "hideShort": "Hide short tracks"
   },
   "identity": {
     "title": "Assign tracks",
@@ -1900,7 +1914,9 @@
       "sevenLeft": "Left 7 m line (centre)",
       "sevenRight": "Right 7 m line (centre)"
     },
-    "spread": "The points are too close together: also mark points on both sidelines (e.g. the corners or the ends of the centre line). The goal posts alone are not enough; the court would be distorted."
+    "spread": "The points are too close together: also mark points on both sidelines (e.g. the corners or the ends of the centre line). The goal posts alone are not enough; the court would be distorted.",
+    "confirm": "Looks right",
+    "existingAuto": "Found automatically. Does the orange court lie on the hall's lines with the goals in place? Then confirm, otherwise set points."
   },
   "today": {
     "uploadHint": "Upload the video. Stats, scenes and insights follow automatically.",
@@ -2059,5 +2075,19 @@
     "againstRef": "Goals against {value}",
     "focusNoteMarked": "Yellow marks the value that is clearly off.",
     "recordLabel": "Record"
+  },
+  "videoOverview": {
+    "title": "What the video already shows",
+    "estimated": "estimated from positions",
+    "noPossessions": "No attack phases found yet.",
+    "attacks": "{n, plural, =1 {1 attack} other {# attacks}} · {avg} s on average",
+    "timeline": "Possession over the match",
+    "timelineHint": "Click an attack to jump there in the video.",
+    "physical": "See physical load and heatmaps",
+    "moreTitle": "For shots, goals and saves",
+    "moreText": "The video analysis does not see the ball yet. Mark goals at the courtside during the match or import the match sheet: statistics, shot maps and goalkeeper figures then appear here.",
+    "marks": "Mark at the courtside",
+    "paper": "Import the match sheet",
+    "phase": "{team}, {from} to {to}"
   }
 }

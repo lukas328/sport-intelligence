@@ -1897,6 +1897,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/possessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Match Possessions
+         * @description Possession phases (estimated from video tracking or imported) with a summary per side.
+         */
+        get: operations["match_possessions_v1_orgs__org_id__matches__match_id__possessions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/report.pdf": {
         parameters: {
             query?: never;
@@ -3633,6 +3653,26 @@ export interface paths {
         put?: never;
         /** Calibrate */
         post: operations["calibrate_v1_orgs__org_id__videos__video_id__calibration_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm Calibration
+         * @description The automatic court fits: keep it as confirmed (no re-run).
+         */
+        post: operations["confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -11599,6 +11639,40 @@ export interface operations {
             };
         };
     };
+    match_possessions_v1_orgs__org_id__matches__match_id__possessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     match_report_pdf_v1_orgs__org_id__matches__match_id__report_pdf_get: {
         parameters: {
             query?: {
@@ -16088,6 +16162,40 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

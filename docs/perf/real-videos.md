@@ -45,10 +45,51 @@ accurate on real footage. The goal posts alone, however, do not fix the court's 
 span at least 20 m of length and 10 m of width (corners, centre line ends). A fully checked analysis of a real
 clip still needs those points from someone who knows which lines in the hall are the handball court.
 
+## 2026-11-04, learned detector and top-view calibration (ADR 025)
+Pretrained Apache-2.0 weights are reachable now (GitHub releases). With YOLOX-S (COCO) and the new
+automatic calibration all three clips run end to end without any click:
+
+| Clip | Camera | Calibration (automatic) | People on court / frame | Teams (tracks > 30 s) | Possession phases |
+|---|---|---|---|---|---|
+| Horgen - Stäfa (NLB 2017) | balcony, 6.0 m high, 5.6 m behind the near sideline | goal fit 0.76, both goal frames on the real goals | 14 | 35 / 28, referees 12, keepers by position | 11 in 5 min |
+| Horgen - Möhlin (NLB 2017) | 4.2 m high, 5.9 m behind the sideline, low and flat | goal fit 0.56, one goal about 1 m off | 14 | 27 / 30, referees 12 | 8 |
+| Leimental - Arbon (SPL2 2024, broadcast) | 5.5 m high above the near sideline | goal fit 0.63 | 13 | 30 / 24 | 10 |
+
+How it works (details in ADR 025): floor orientation from the hall's markings over many frames, scale
+from person heights, a top view drawn from the aligned markings only, court template search with
+the players (on the court, nobody behind the goal lines, goalkeepers in the goal mouths), refined on
+the striped goal frames. Check images: the court and both 3D goal frames drawn on the panorama
+(`data/views/*-court.jpg`, local only).
+
+What was fixed on the way:
+- **Floor from a single panorama is wrong** (walls, banners and the railing give many segments):
+  segments from 100 frames with the top 30 % and the people masked give a clean fit (tilt 17.8
+  instead of 8 degrees on Stäfa).
+- **Pixel masks in the top view** are dominated by white walls and reflections smeared along rays;
+  drawing only segments along the two hall directions gives a clean map.
+- **Goal search on red paint** locked onto red wall frames and window mullions; the score now asks
+  for alternation along posts and crossbar (stripes), and a small move penalty keeps the court near
+  the top-view result.
+- **Team colours**: video washes colours out (yellow looks beige, white grey); kits are compared by
+  hue, and the final labels come from clustering this match's colours and matching the two team
+  clusters by order (lighter to lighter, hue to hue).
+- **Goalkeepers by position** (most of the time within 6.5 m of a goal) and by which team defends
+  that goal in set attacks; kit colours for goalkeepers are often missing or wrong.
+- **Panning camera**: tracks of players outside the view wait instead of ageing.
+
+Still open:
+- **Goals** are not found automatically on these clips: after a goal the panning camera rarely shows
+  the whole throw-off formation. Goals come from courtside marks, the paper report or tagging.
+- **Ball and shots** need a handball-trained detector (COCO finds no handball).
+- **Track identities** fragment (110 to 200 tracks per 5 minutes for about 16 people on court);
+  team-level analysis (formations, possession, heatmaps) works, per-player numbers need shirt numbers
+  or the manual assignment.
+- **Speed on CPU** (4 cores): about 2x real time (detection on every 3rd frame dominates); a GPU
+  worker brings this well under real time.
+
 ## Next steps
-1. **Use the dialog on the real clips** with points on both sidelines and check the result against the video
-   (club staff know which lines belong to the handball court).
-2. **Top-down search with the known focal length**: all line sets of a hall run parallel to its walls, so the
+1. ~~Use the dialog on the real clips~~ (automatic now; the dialog stays as fallback).
+2. ~~Top-down search with the known focal length~~ (done, ADR 025):: all line sets of a hall run parallel to its walls, so the
    two floor vanishing points give the floor orientation; with the focal length from the camera motion the
    panorama floor can be rectified to a top view, where the handball court is a 40 x 20 m template that only
    needs position and scale (no need to see all four boundary lines).

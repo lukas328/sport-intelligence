@@ -5,6 +5,7 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import pytest
 
 from handball_api.core.email import MemoryEmailSender
@@ -626,3 +627,31 @@ async def test_training_video_and_team_default_format(make_api: Callable[[], Api
     assert patched.json()["default_format"] == "mini" and patched.json()["level"] == "U11 Promotion"
     m = await new_match(api, ids)
     assert (m["format"], m["period_s"]) == ("mini", 600)
+
+
+async def test_possessions_summary(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    org = ids["org"]
+    for side, start, end in (
+        ("own", 0, 20_000),
+        ("opponent", 21_000, 51_000),
+        ("own", 52_000, 62_000),
+    ):
+        await owner_conn.execute(
+            "INSERT INTO possessions (id, organization_id, match_id, side, start_ms, end_ms, "
+            "confidence, source) "
+            "VALUES (gen_random_uuid(), $1::uuid, $2::uuid, $3, $4, $5, 0.8, 'heuristic')",
+            org,
+            m["id"],
+            side,
+            start,
+            end,
+        )
+    data = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/possessions")).json()
+    assert len(data["phases"]) == 3 and data["estimated"]
+    assert data["summary"]["own"] == {"count": 2, "avg_s": 15.0, "share": 0.5}
+    assert data["summary"]["opponent"]["count"] == 1

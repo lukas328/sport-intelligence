@@ -17240,6 +17240,63 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/possessions": {
+      "get": {
+        "description": "Possession phases (estimated from video tracking or imported) with a summary per side.",
+        "operationId": "match_possessions_v1_orgs__org_id__matches__match_id__possessions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Match Possessions V1 Orgs  Org Id  Matches  Match Id  Possessions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Match Possessions",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/report.pdf": {
       "get": {
         "description": "Match report as a PDF for printing and sending.",
@@ -25019,6 +25076,65 @@
           }
         },
         "summary": "Calibrate",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm": {
+      "post": {
+        "description": "The automatic court fits: keep it as confirmed (no re-run).",
+        "operationId": "confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Confirm Calibration V1 Orgs  Org Id  Videos  Video Id  Calibration Confirm Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Calibration",
         "tags": [
           "matches",
           "analysis"

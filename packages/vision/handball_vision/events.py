@@ -23,6 +23,7 @@ BIN_MS = 200
 PAUSE_MS = 45_000  # almost nobody on court
 BOUNDARY_MS = 90_000  # a long pause followed by a throw-off: probably the next match
 CENTRE = (20.0, 10.0)
+MIN_SIDE_MS = 45_000  # shortest stretch a side holds (noise lasts seconds, a half 20 to 30 minutes)
 
 
 @dataclass(frozen=True)
@@ -85,15 +86,31 @@ def _sides(
             votes.append((b, 1 if v > 0 else -1))
     if not votes:
         return []
-    out: list[tuple[int, str]] = []
+    raw: list[tuple[int, str]] = []
     cur: str | None = None
     for i, (b, _) in enumerate(votes):
         lo, hi = max(0, i - window_bins // 2), min(len(votes), i + window_bins // 2)
         s = sum(v for _, v in votes[lo:hi])
         side = "left" if s >= 0 else "right"
         if side != cur:
-            out.append((b * BIN_MS, side))
+            raw.append((b * BIN_MS, side))
             cur = side
+    # teams change ends only at half-time: a side that holds for less than MIN_SIDE_MS is noise
+    # (few goalkeeper sightings at the start, a keeper running out); it merges into its neighbours
+    ends = [t for t, _ in raw[1:]] + [votes[-1][0] * BIN_MS]
+    # the last stretch is cut by the end of the video, so it only needs 15 s
+    kept = [
+        (t, side)
+        for k, ((t, side), end) in enumerate(zip(raw, ends, strict=True))
+        if end - t >= (15_000 if k == len(raw) - 1 else MIN_SIDE_MS)
+    ]
+    if not kept:  # a short clip: the majority side
+        total = sum(v for _, v in votes)
+        return [(votes[0][0] * BIN_MS, "left" if total >= 0 else "right")]
+    out: list[tuple[int, str]] = [(votes[0][0] * BIN_MS, kept[0][1])]
+    for t, side in kept[1:]:
+        if side != out[-1][1]:
+            out.append((t, side))
     return out
 
 
@@ -380,4 +397,64 @@ def refine_teams(
         top = max(set(vs), key=vs.count)
         if vs.count(top) / len(vs) >= 0.8:
             out[tid] = top
+    return out
+
+
+def assign_goalkeepers(
+    points: list[tuple[int, int, float, float]],
+    teams: dict[int, str],
+    min_track_ms: int = 10_000,
+    area_share: float = 0.6,
+    bin_ms: int = 2_000,
+) -> dict[int, str]:
+    """Goalkeepers by position, not by shirt colour (kit colours entered for a match are often
+    wrong or missing for goalkeepers).
+
+    A track that spends most of its time within 6.5 m of a goal is a goalkeeper. Its team: during
+    set attacks the defending team stands closer to its own goal than the attacking team; the vote
+    over the goalkeeper's time span says which team defended that goal (side changes included).
+    `points` are (t_ms, track_id, x, y) of observed positions; returns new labels
+    (`home_gk` / `away_gk`) for the goalkeeper tracks.
+    """
+    by_track: dict[int, list[tuple[int, float, float]]] = defaultdict(list)
+    for t, tid, x, y in points:
+        by_track[tid].append((t, x, y))
+    keepers: dict[int, str] = {}  # track -> goal side "left" | "right"
+    for tid, ps in by_track.items():
+        if teams.get(tid) == "referee" or ps[-1][0] - ps[0][0] < min_track_ms:
+            continue
+        left = sum(math.hypot(x, y - 10) < 6.5 for _, x, y in ps) / len(ps)
+        right = sum(math.hypot(40 - x, y - 10) < 6.5 for _, x, y in ps) / len(ps)
+        if max(left, right) >= area_share:
+            keepers[tid] = "left" if left > right else "right"
+    if not keepers:
+        return {}
+    # defending team per time bin and goal
+    groups: dict[int, dict[str, list[tuple[float, float]]]] = defaultdict(lambda: defaultdict(list))
+    for t, tid, x, y in points:
+        lbl = teams.get(tid)
+        if lbl in ("home", "away") and tid not in keepers:
+            groups[t // bin_ms][lbl].append((x, y))
+    votes: list[tuple[int, str, str]] = []  # (bin, side, defending team)
+    for b, g in groups.items():
+        for side, gx in (("left", 0.0), ("right", 40.0)):
+            near = {
+                team: sorted(
+                    math.hypot(x - gx, y - 10) for x, y in ps if (x < 20) == (side == "left")
+                )
+                for team, ps in g.items()
+            }
+            if len(near.get("home", [])) >= 2 and len(near.get("away", [])) >= 2:
+                med = {team: d[len(d) // 2] for team, d in near.items()}
+                if abs(med["home"] - med["away"]) > 1.0:
+                    votes.append((b, side, min(med, key=med.__getitem__)))
+    out: dict[int, str] = {}
+    for tid, side in keepers.items():
+        t0, t1 = by_track[tid][0][0] // bin_ms, by_track[tid][-1][0] // bin_ms
+        tally: dict[str, int] = defaultdict(int)
+        for b, s, team in votes:
+            if t0 <= b <= t1 and s == side:
+                tally[team] += 1
+        if tally and max(tally.values()) >= 3:
+            out[tid] = f"{max(tally, key=tally.__getitem__)}_gk"
     return out

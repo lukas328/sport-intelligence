@@ -787,6 +787,37 @@ async def calibrate_manually(
     return await start_analysis(ctx, asset, match, points, space, frame_ms)
 
 
+async def confirm_calibration(ctx: Ctx, asset_id: uuid.UUID) -> CameraCalibration:
+    """A person checked the automatic court on the hall image and it fits: the same homography is
+    stored again as a user correction (no re-run needed; analysis results stay valid)."""
+    asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    latest = await ctx.db.scalar(
+        select(CameraCalibration)
+        .where(CameraCalibration.video_asset_id == asset.id)
+        .order_by(CameraCalibration.created_at.desc())
+        .limit(1)
+    )
+    if latest is None:
+        raise ProblemError(409, "no-calibration", "There is no court to confirm yet")
+    if latest.source == "user_correction":
+        return latest
+    confirmed = CameraCalibration(
+        organization_id=asset.organization_id,
+        video_asset_id=asset.id,
+        homography=latest.homography,
+        image_size=latest.image_size,
+        confidence=1.0,
+        reprojection_px=latest.reprojection_px,
+        source="user_correction",
+        points=None,
+        pipeline_version=latest.pipeline_version,
+    )
+    ctx.db.add(confirmed)
+    await audit.record(ctx, "video.calibration_confirmed", target_type="video", target_id=asset.id)
+    await ctx.db.flush()
+    return confirmed
+
+
 # ---- identities and physical load (M5) ------------------------------------------------------
 
 

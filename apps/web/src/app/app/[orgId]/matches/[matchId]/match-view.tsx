@@ -4,10 +4,10 @@ import { ShareButton } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { useCountUp } from "@/components/domain/match-score";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
@@ -32,6 +32,7 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
+import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
 
@@ -333,9 +334,22 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
-        {staff && (pendingVideos.length > 0 || !main) && match.source !== "paper_report" && (
+        {staff && match.source !== "paper_report" && (
           <div id="upload" className="scroll-mt-24">
-            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            {main ? (
+              // the main video is there: more cameras (goal cameras, a second angle) on demand
+              <details className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
+                <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                  <Plus aria-hidden className="size-4" />
+                  {t("upload.addCamera")}
+                </summary>
+                <div className="pt-3">
+                  <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+                </div>
+              </details>
+            ) : (
+              <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            )}
           </div>
         )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
@@ -364,9 +378,21 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             })()
           ) : stats.isLoading ? (
             <Skeleton className="h-64" />
+          ) : main ? (
+            <VideoOverview
+              orgId={orgId}
+              matchId={match.id}
+              teamId={match.team_id}
+              ownName={teamName}
+              oppName={oppName(match)}
+              durationMs={main.duration_s ? main.duration_s * 1000 : null}
+              onPlay={onPlay}
+              onPhysical={() => setSub("physical")}
+              staff={staff}
+            />
           ) : (
             <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
-              {staff && !main && match.source !== "paper_report" ? t("stats.noDataHint") : null}
+              {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
             </EmptyState>
           )}
           </div>
@@ -393,33 +419,48 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
 function Processing({ jobs, orgId, staff }: { jobs: Job[]; orgId: string; staff: boolean }) {
   const t = useTranslations("processing");
+  const now = useNow({ updateInterval: 5000 });
   return (
     <Card className="space-y-5" aria-live="polite">
-      <h2 className="text-base font-semibold">{t("title")}</h2>
       {jobs
         .filter((j) => j.status !== "succeeded")
-        .map((j) => (
-          <div key={j.id} className="space-y-3" data-testid="job">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">{t(j.status as "running")}</span>
-              <span className="font-semibold tabular-nums">{Math.round(j.progress * 100)} %</span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-surface">
-              <div className={cn("h-full rounded-full transition-all duration-500", j.status === "failed" ? "bg-error" : "bg-accent")} style={{ width: `${j.progress * 100}%` }} />
-            </div>
-            {j.kind === "ingest" && (
-              <ol className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                {STAGES.map((s) => {
-                  const st = (j.stages as Record<string, { status?: string }>)[s]?.status ?? "pending";
-                  return (
-                    <li key={s} className={cn("flex items-center gap-1.5", st === "done" ? "text-ok" : st === "running" ? "font-semibold text-foreground" : st === "failed" ? "text-error" : "text-muted")}>
-                      <span aria-hidden className={cn("size-1.5 rounded-full", st === "done" ? "bg-ok" : st === "running" ? "animate-pulse bg-accent" : st === "failed" ? "bg-error" : "bg-border")} />
-                      {t(`stage_${s}`)}
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
+        .map((j) => {
+          // the stages the worker reported, in its order (ingest and analysis have different ones)
+          const reported = Object.keys((j.stages ?? {}) as Record<string, unknown>);
+          const stages = reported.length > 0 ? reported : j.kind === "ingest" ? [...STAGES] : [];
+          const started = j.started_at ? new Date(j.started_at).getTime() : null;
+          const elapsed = started ? (now.getTime() - started) / 1000 : 0;
+          const etaMin =
+            j.status === "running" && j.progress > 0.05 && elapsed > 20
+              ? Math.max(1, Math.round(((elapsed / j.progress) * (1 - j.progress)) / 60))
+              : null;
+          return (
+            <div key={j.id} className="space-y-3" data-testid="job">
+              <h2 className="text-base font-semibold">{t(j.kind === "analysis" ? "titleAnalysis" : "title")}</h2>
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="font-medium">
+                  {t(j.status as "running")}
+                  {etaMin != null && <span className="font-normal text-muted"> · {t("eta", { minutes: etaMin })}</span>}
+                </span>
+                <span className="font-semibold tabular-nums">{Math.round(j.progress * 100)} %</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-surface">
+                <div className={cn("h-full rounded-full transition-all duration-500", j.status === "failed" ? "bg-error" : "bg-accent")} style={{ width: `${j.progress * 100}%` }} />
+              </div>
+              {stages.length > 0 && (
+                <ol className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                  {stages.map((s) => {
+                    const st = (j.stages as Record<string, { status?: string }>)[s]?.status ?? "pending";
+                    return (
+                      <li key={s} className={cn("flex items-center gap-1.5", st === "done" ? "text-ok" : st === "running" ? "font-semibold text-foreground" : st === "failed" ? "text-error" : "text-muted")}>
+                        <span aria-hidden className={cn("size-1.5 rounded-full", st === "done" ? "bg-ok" : st === "running" ? "animate-pulse bg-accent" : st === "failed" ? "bg-error" : "bg-border")} />
+                        {t.has(`stage_${j.kind}_${s}`) ? t(`stage_${j.kind}_${s}` as "stage_download") : t.has(`stage_${s}`) ? t(`stage_${s}` as "stage_download") : s}
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+              {j.kind === "analysis" && j.status === "running" && <p className="text-sm text-muted">{t("analysisHint")}</p>}
             {j.error && <Alert>{j.error}</Alert>}
             {j.status === "failed" && staff && j.video_asset_id && (
               <Button
@@ -435,7 +476,8 @@ function Processing({ jobs, orgId, staff }: { jobs: Job[]; orgId: string; staff:
               </Button>
             )}
           </div>
-        ))}
+          );
+        })}
     </Card>
   );
 }

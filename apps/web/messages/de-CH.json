@@ -448,7 +448,8 @@
     "slowLink": "Die Verbindung ist langsam. Das Video hat {size}; der Upload kann lange dauern und läuft beim nächsten Mal weiter.",
     "uploadAnyway": "Jetzt hochladen",
     "later": "Später im WLAN",
-    "offline": "Keine Verbindung. Der Upload läuft automatisch weiter, sobald das Netz wieder da ist."
+    "offline": "Keine Verbindung. Der Upload läuft automatisch weiter, sobald das Netz wieder da ist.",
+    "addCamera": "Weitere Kamera hinzufügen (Torkamera, zweiter Blickwinkel)"
   },
   "processing": {
     "title": "Verarbeitung",
@@ -470,7 +471,14 @@
     "videoStatus_processing": "Wird verarbeitet",
     "videoStatus_ready": "Bereit",
     "videoStatus_failed": "Fehler",
-    "done": "Analyse fertig. Statistik und Szenen stehen bereit."
+    "done": "Analyse fertig. Statistik und Szenen stehen bereit.",
+    "titleAnalysis": "Spielanalyse",
+    "stage_analysis_download": "Video laden",
+    "stage_analysis_observe": "Kamera und Spieler erkennen",
+    "stage_analysis_calibration": "Spielfeld finden",
+    "stage_analysis_tracking": "Laufwege berechnen",
+    "stage_analysis_upload": "Speichern",
+    "analysisHint": "Läuft im Hintergrund. Du kannst die Seite schliessen, wir melden uns, wenn es fertig ist."
   },
   "quality": {
     "title": "Videoqualität",
@@ -812,7 +820,13 @@
     "kmh": "{value} km/h",
     "min": "{value} min",
     "track": "Spur {n}",
-    "showHeatmap": "Heatmap zeigen"
+    "showHeatmap": "Heatmap zeigen",
+    "teamOwn": "Eigenes Team",
+    "teamOpp": "Gegner",
+    "tracksOwn": "Spuren des eigenen Teams, ab 1 Minute",
+    "playersAndTracks": "Spielerinnen, Spieler und Spuren",
+    "showShort": "{n} kurze Spuren zeigen (unter 1 Minute)",
+    "hideShort": "Kurze Spuren ausblenden"
   },
   "identity": {
     "title": "Spuren zuordnen",
@@ -1900,7 +1914,9 @@
       "sevenLeft": "7-m-Linie links (Mitte)",
       "sevenRight": "7-m-Linie rechts (Mitte)"
     },
-    "spread": "Die Punkte liegen zu nah beieinander: markiere auch Punkte auf beiden Seitenlinien (z. B. die Ecken oder die Enden der Mittellinie). Nur die Torpfosten reichen nicht, das Feld wird sonst verzerrt."
+    "spread": "Die Punkte liegen zu nah beieinander: markiere auch Punkte auf beiden Seitenlinien (z. B. die Ecken oder die Enden der Mittellinie). Nur die Torpfosten reichen nicht, das Feld wird sonst verzerrt.",
+    "confirm": "Passt so",
+    "existingAuto": "Automatisch gefunden. Liegt das orange Feld auf den Hallenlinien und stehen die Tore richtig? Dann bestätigen, sonst Punkte setzen."
   },
   "today": {
     "uploadHint": "Lade das Video hoch. Statistik, Szenen und Erkenntnisse entstehen danach automatisch.",
@@ -2059,5 +2075,19 @@
     "againstRef": "Gegentore {value}",
     "focusNoteMarked": "Gelb ist der Wert, der klar daneben liegt.",
     "recordLabel": "Bilanz"
+  },
+  "videoOverview": {
+    "title": "Was das Video schon zeigt",
+    "estimated": "geschätzt aus den Positionen",
+    "noPossessions": "Noch keine Angriffsphasen erkannt.",
+    "attacks": "{n, plural, =1 {1 Angriff} other {# Angriffe}} · im Schnitt {avg} s",
+    "timeline": "Ballbesitz im Spielverlauf",
+    "timelineHint": "Ein Klick auf einen Angriff springt im Video dorthin.",
+    "physical": "Laufleistung und Heatmaps ansehen",
+    "moreTitle": "Für Würfe, Tore und Paraden",
+    "moreText": "Den Ball erkennt die Videoanalyse noch nicht. Markiere Tore während des Spiels am Spielfeldrand oder importiere das Matchblatt: Statistik, Wurfbilder und Torhüterwerte erscheinen dann hier.",
+    "marks": "Am Spielfeldrand markieren",
+    "paper": "Matchblatt importieren",
+    "phase": "{team}, {from} bis {to}"
   }
 }

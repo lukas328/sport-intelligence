@@ -143,4 +143,8 @@ async def ops_tick(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "")
         raise ProblemError(403, "forbidden", "Invalid internal token")
     status = await monitoring.push_status(ctx)
     await enable_system_access(ctx.db, reason="storage policy")
-    return {"status": status, "retention": await monitoring.retention(ctx)}
+    return {
+        "status": status,
+        "retention": await monitoring.retention(ctx),
+        "abandoned_uploads": await monitoring.abandoned_uploads(ctx),
+    }

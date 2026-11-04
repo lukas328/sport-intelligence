@@ -72,7 +72,7 @@ def test_stripe_score_prefers_striped_posts_over_solid_paint() -> None:
 
 
 def test_orientation_is_normalised_to_the_near_side() -> None:
-    k, r = _camera(20.0)
+    k, _ = _camera(20.0)
     centre = np.array([20.0, 28.0, 6.0])  # camera on the y = 20 side
     look = np.array([20.0, 10.0, 0.0]) - centre
     z = look / np.linalg.norm(look)
@@ -149,3 +149,37 @@ def test_observe_store_and_track(tmp_path: Path) -> None:
     assert len(dist) > 200
     assert float(np.median(dist)) < 0.6
     assert {"home", "away"} <= {v["label"] for v in res.teams.values()}
+
+
+def test_teams_are_labelled_relative_to_the_match_colours() -> None:
+    from handball_vision.teams import bgr_to_lab, relabel_by_clusters
+
+    rng = np.random.default_rng(5)
+    colours: dict[int, tuple[np.ndarray, int]] = {}
+    # white shirts look grey and black ones dark grey in a dim hall; two referees in green
+    for tid in range(8):
+        colours[tid] = (np.array([125.0, 129.0, 130.0]) + rng.normal(0, 4, 3), 200)
+    for tid in range(8, 16):
+        colours[tid] = (np.array([55.0, 130.0, 127.0]) + rng.normal(0, 4, 3), 200)
+    for tid in (16, 17):
+        colours[tid] = (np.array([120.0, 100.0, 150.0]), 150)
+    kits = {"home": bgr_to_lab((240, 240, 240)), "away": bgr_to_lab((32, 32, 32))}
+    labels = relabel_by_clusters(colours, kits)
+    assert all(labels[t] == "home" for t in range(8))
+    assert all(labels[t] == "away" for t in range(8, 16))
+    assert labels[16] == labels[17] == "referee"
+
+
+def test_goalkeepers_by_position_and_defending_team() -> None:
+    from handball_vision.events import assign_goalkeepers
+
+    pts: list[tuple[int, int, float, float]] = []
+    teams = {1: "home", 2: "away"}
+    for t in range(0, 60_000, 500):
+        pts.append((t, 99, 1.5, 10.0))  # someone who never leaves the left goal area
+        for k in range(4):  # home defends left: home players near their goal, away further out
+            pts.append((t, 10 + k, 6.5 + k * 0.3, 6 + 2.5 * k))
+            pts.append((t, 20 + k, 10.0 + k * 0.3, 6 + 2.5 * k))
+            teams[10 + k], teams[20 + k] = "home", "away"
+    labels = assign_goalkeepers(pts, {**teams, 99: "away"})
+    assert labels == {99: "home_gk"}

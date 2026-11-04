@@ -38,11 +38,11 @@ from handball_vision.detection import (
     filter_on_court,
     foot_positions,
 )
-from handball_vision.events import EventResult, refine_teams
+from handball_vision.events import EventResult, assign_goalkeepers, refine_teams
 from handball_vision.events import detect as detect_events
 from handball_vision.motion import CameraMotion, estimate_motion
 from handball_vision.physical import physical
-from handball_vision.teams import TeamAssigner
+from handball_vision.teams import TeamAssigner, relabel_by_clusters
 from handball_vision.tracking import CourtTracker, TrackPoint, stitch
 
 U8 = NDArray[Any]  # images (OpenCV returns loosely typed arrays)
@@ -360,8 +360,28 @@ def _finish(
                 "colour": f"#{int(bgr[2]):02x}{int(bgr[1]):02x}{int(bgr[0]):02x}",
                 "lab": [round(float(v), 1) for v in lab],
             }
-    # second signal besides the kit colour: throw-off formations (addendum 01, 4.8)
+    # team labels relative to this match's colours (lighting shifts absolute colours)
+    clustered = relabel_by_clusters(
+        {
+            t: (np.asarray(v["lab"], dtype=np.float64), int(v["samples"]))
+            for t, v in team_out.items()
+        },
+        teams.kits,
+    )
+    for tid, label in clustered.items():
+        if team_out[tid]["label"] != label:
+            team_out[tid]["label"] = label
+            team_out[tid]["label_source"] = "cluster"
+    # goalkeepers by position and by which team defends their goal (kit colours often missing)
     pts = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points]
+    observed = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points if p.observed]
+    for tid, label in assign_goalkeepers(
+        observed, {t: str(v["label"]) for t, v in team_out.items()}
+    ).items():
+        if tid in team_out and team_out[tid]["label"] != label:
+            team_out[tid]["label"] = label
+            team_out[tid]["label_source"] = "position"
+    # second signal besides the kit colour: throw-off formations (addendum 01, 4.8)
     refined = refine_teams(
         pts,
         {t: str(v["label"]) for t, v in team_out.items()},
