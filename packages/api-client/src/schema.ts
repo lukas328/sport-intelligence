@@ -1856,6 +1856,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Official Report
+         * @description Official match report (handball.ch match centre or DHB press report) as events: goals with
+         *     scorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous
+         *     one; automatic goals from the video within 20 s are merged with the official goal.
+         */
+        post: operations["import_official_report_v1_orgs__org_id__matches__match_id__official_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/parts": {
         parameters: {
             query?: never;
@@ -6003,6 +6025,42 @@ export interface components {
         NotificationsRead: {
             /** Ids */
             ids?: string[];
+        };
+        /** OfficialReportIn */
+        OfficialReportIn: {
+            /** Provider */
+            provider?: ("handball_ch" | "dhb") | null;
+            /** Url */
+            url: string;
+        };
+        /** OfficialReportResult */
+        OfficialReportResult: {
+            /** Away */
+            away: string | null;
+            /** Created */
+            created: number;
+            /** Final */
+            final: number[] | null;
+            /** Game Id */
+            game_id: number;
+            /** Home */
+            home: string | null;
+            /** Kept Manual Goals */
+            kept_manual_goals: number;
+            /** Matched Video Goals */
+            matched_video_goals: number;
+            /** Provider */
+            provider: string;
+            /** Replaced */
+            replaced: number;
+            /** Skipped */
+            skipped: number;
+            /** Source Url */
+            source_url: string;
+            /** Unmatched Video Goals */
+            unmatched_video_goals: number;
+            /** Warnings */
+            warnings: string[];
         };
         /** OffsetIn */
         OffsetIn: {
@@ -11524,6 +11582,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["handball_api__schemas__marks__SyncOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_official_report_v1_orgs__org_id__matches__match_id__official_report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfficialReportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialReportResult"];
                 };
             };
             /** @description Validation Error */

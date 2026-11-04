@@ -121,6 +121,11 @@
     "paper-incomplete": "Datum, Gegner und Endstand werden gebraucht.",
     "quota-reached": "Das Kontingent des Verbands ist ausgeschöpft.",
     "already-member": "Der Verein gehört schon zu einem Verband.",
+    "report-url-unsupported": "Dieser Link wird nicht unterstützt. Verwende einen Link aus dem handball.ch Matchcenter oder einen DHB-Pressebericht.",
+    "report-not-found": "Zu diesem Link gibt es kein Spiel.",
+    "report-unreadable": "Der Bericht konnte nicht gelesen werden.",
+    "report-empty": "Der Bericht enthält noch keinen Spielverlauf.",
+    "report-unavailable": "Die Quelle antwortet gerade nicht. Versuche es später nochmals.",
     "notFoundTitle": "Diese Seite gibt es nicht",
     "pageBody": "Die Seite konnte nicht geladen werden. Versuch es noch einmal; wenn es wieder passiert, schreib uns über «Feedback geben».",
     "notFoundBody": "Vielleicht wurde sie gelöscht, oder du hast keinen Zugriff darauf.",
@@ -702,6 +707,7 @@
     "source_heuristic": "automatisch (geschätzt)",
     "source_model": "automatisch",
     "source_scoreboard_ocr": "Anzeigetafel",
+    "source_official_report": "Offizieller Matchbericht",
     "tagTitle": "Ereignis erfassen",
     "side": "Team",
     "player": "Spieler/in",
@@ -1665,6 +1671,14 @@
     "importHint": "Jede Instanz wird ein Clip; Code und Labels werden eigene Tags. Ereignisse und Kennzahlen bleiben unverändert.",
     "import": "Importieren",
     "imported": "{clips} Clips importiert, {tags} neue Tags."
+  },
+  "officialReport": {
+    "label": "Offiziellen Matchbericht importieren",
+    "hint": "Link zum Spiel im handball.ch Matchcenter oder zum DHB-Pressebericht (PDF). Tore mit Torschütze, 7-Meter, Zeitstrafen und Time-outs werden zu Ereignissen; ein neuer Import ersetzt den alten.",
+    "import": "Bericht importieren",
+    "importing": "Wird importiert…",
+    "imported": "{created} Ereignisse importiert, {matched} Tore mit dem Video abgeglichen.",
+    "warnings": "Bitte prüfen"
   },
   "matrix": {
     "nav": "Matrix",

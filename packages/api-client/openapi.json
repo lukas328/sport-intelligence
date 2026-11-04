@@ -6132,6 +6132,136 @@
         "title": "NotificationsRead",
         "type": "object"
       },
+      "OfficialReportIn": {
+        "properties": {
+          "provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "handball_ch",
+                  "dhb"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "OfficialReportIn",
+        "type": "object"
+      },
+      "OfficialReportResult": {
+        "properties": {
+          "away": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away"
+          },
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "final": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final"
+          },
+          "game_id": {
+            "title": "Game Id",
+            "type": "integer"
+          },
+          "home": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home"
+          },
+          "kept_manual_goals": {
+            "title": "Kept Manual Goals",
+            "type": "integer"
+          },
+          "matched_video_goals": {
+            "title": "Matched Video Goals",
+            "type": "integer"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "replaced": {
+            "title": "Replaced",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "unmatched_video_goals": {
+            "title": "Unmatched Video Goals",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "provider",
+          "game_id",
+          "source_url",
+          "home",
+          "away",
+          "final",
+          "created",
+          "replaced",
+          "matched_video_goals",
+          "unmatched_video_goals",
+          "kept_manual_goals",
+          "skipped",
+          "warnings"
+        ],
+        "title": "OfficialReportResult",
+        "type": "object"
+      },
       "OffsetIn": {
         "properties": {
           "offset_ms": {
@@ -17057,6 +17187,70 @@
         "summary": "Sync",
         "tags": [
           "marks"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
+      "post": {
+        "description": "Official match report (handball.ch match centre or DHB press report) as events: goals with\nscorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous\none; automatic goals from the video within 20 s are merged with the official goal.",
+        "operationId": "import_official_report_v1_orgs__org_id__matches__match_id__official_report_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficialReportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialReportResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Official Report",
+        "tags": [
+          "events"
         ]
       }
     },

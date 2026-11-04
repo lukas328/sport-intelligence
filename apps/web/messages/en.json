@@ -121,6 +121,11 @@
     "paper-incomplete": "Date, opponent and final score are needed.",
     "quota-reached": "The federation's quota is used up.",
     "already-member": "The club already belongs to a federation.",
+    "report-url-unsupported": "This link is not supported. Use a link from the handball.ch match centre or a DHB press report.",
+    "report-not-found": "There is no game for this link.",
+    "report-unreadable": "The report could not be read.",
+    "report-empty": "The report has no game log yet.",
+    "report-unavailable": "The source is not answering right now. Try again later.",
     "notFoundTitle": "This page does not exist",
     "pageBody": "The page could not be loaded. Try again; if it happens again, tell us via “Send feedback”.",
     "notFoundBody": "It may have been deleted, or you do not have access to it.",
@@ -702,6 +707,7 @@
     "source_heuristic": "automatic (estimated)",
     "source_model": "automatic",
     "source_scoreboard_ocr": "scoreboard",
+    "source_official_report": "official report",
     "tagTitle": "Tag event",
     "side": "Team",
     "player": "Player",
@@ -1665,6 +1671,14 @@
     "importHint": "Each instance becomes a clip; code and labels become own tags. Events and figures stay unchanged.",
     "import": "Import",
     "imported": "{clips} clips imported, {tags} new tags."
+  },
+  "officialReport": {
+    "label": "Import official match report",
+    "hint": "Link to the game in the handball.ch match centre or to the DHB press report (PDF). Goals with scorer, 7 m, suspensions and time-outs become events; a new import replaces the previous one.",
+    "import": "Import report",
+    "importing": "Importing…",
+    "imported": "{created} events imported, {matched} goals matched with the video.",
+    "warnings": "Please check"
   },
   "matrix": {
     "nav": "Matrix",

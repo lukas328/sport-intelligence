@@ -35,8 +35,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - name: ffmpeg and tesseract (worker and overlay tests)
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg tesseract-ocr
+      - name: ffmpeg, tesseract and pdftotext (worker, overlay and report tests)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg tesseract-ocr poppler-utils
       - run: uv sync --all-packages --frozen
       - run: uv run ruff check .
       - run: uv run ruff format --check .
