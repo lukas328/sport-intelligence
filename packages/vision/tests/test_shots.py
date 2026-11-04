@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from handball_vision.shots import locate_goal_shots
 from handball_vision.tracking import TrackPoint
 
@@ -17,7 +19,7 @@ def test_the_scorer_by_number_else_the_nearest_attacker() -> None:
     pts = _run(1, [14 - 0.1 * k for k in range(80)], 12.0, 0) + _run(
         2, [12 - 0.1 * k for k in range(80)], 6.0, 0
     )
-    teams = {1: {"label": "away", "number": 7}, 2: {"label": "away"}}
+    teams: dict[int, dict[str, Any]] = {1: {"label": "away", "number": 7}, 2: {"label": "away"}}
     goal = {"t_ms": 9000, "side": "right", "scorer": {"number": 7, "name": "Amy H"}}
     (g,) = locate_goal_shots(pts, teams, FPS, [goal], own_is_home=True)
     shot = g["shot"]
