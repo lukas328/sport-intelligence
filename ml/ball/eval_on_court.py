@@ -2,12 +2,13 @@
 off-court peaks as automatic hard negatives."""
 import sys,json,pickle,cv2,numpy as np,onnxruntime as ort
 from pathlib import Path
+ROOT=Path(__file__).resolve().parents[2]
 from handball_vision.motion import CameraMotion
 from handball_vision.calibration import Calibration
 model,vid,video,out=sys.argv[1:5]; thr=float(sys.argv[5]) if len(sys.argv)>5 else 0.3
 negdir=Path(sys.argv[6]) if len(sys.argv)>6 else None
-V=Path("/home/user/handball-ai/data/views"); mo=CameraMotion.load(V/f"{vid}-motion2.npz")
-cal=Calibration.from_dict(pickle.load(open(f"/tmp/claude-0/-home-user/3dc450e2-2499-5e21-b252-1c4e366c6b5a/scratchpad/exp/{vid}-cal.pkl","rb")))
+V=Path(str(ROOT/"data/views")); mo=CameraMotion.load(V/f"{vid}-motion2.npz")
+cal=Calibration.from_dict(pickle.load(open(V/f"{vid}-cal.pkl","rb")))
 so=ort.SessionOptions(); so.intra_op_num_threads=2; s=ort.InferenceSession(model,so,providers=["CPUExecutionProvider"])
 def court_mask(n,shape):
     hc=mo.frame_to_canvas(n)

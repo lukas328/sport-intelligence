@@ -1,8 +1,9 @@
 import cv2,json,random,sys
 from pathlib import Path
+ROOT=Path(__file__).resolve().parents[2]
 out=Path(sys.argv[1]); T=192; random.seed(1); meta=json.load(open(out/"meta_tt.json"))
-vids={"staefa":"/home/user/handball-ai/data/videos/ch-nlb-2017-horgen-staefa.mp4","moehlin":"/home/user/handball-ai/data/videos/ch-nlb-2017-horgen-moehlin.mp4",
-      "leimental":"/home/user/handball-ai/data/videos/ch-spl2-2024-leimental-arbon.mp4","cottbus":"/home/user/handball-ai/data/videos/full/cb_seg_1080.mp4"}
+vids={"staefa":str(ROOT/"data/videos/ch-nlb-2017-horgen-staefa.mp4"),"moehlin":str(ROOT/"data/videos/ch-nlb-2017-horgen-moehlin.mp4"),
+      "leimental":str(ROOT/"data/videos/ch-spl2-2024-leimental-arbon.mp4"),"cottbus":str(ROOT/"data/videos/full/cb_seg_1080.mp4")}
 for name,p in vids.items():
     cap=cv2.VideoCapture(p); fps=cap.get(cv2.CAP_PROP_FPS); n=0; k=0
     while True:
