@@ -345,6 +345,7 @@ def _finish(
     number_reads: dict[int, list[Reading]] | None = None,
     vectors: dict[int, list[tuple[int, NDArray[np.float64]]]] | None = None,
     role_samples: dict[int, list[NDArray[np.float64]]] | None = None,
+    rosters: dict[str, set[int]] | None = None,
 ) -> AnalysisResult:
     t0 = time.perf_counter()
     colours = {tid: np.median(np.stack(v), axis=0) for tid, v in teams.samples.items() if v}
@@ -416,7 +417,7 @@ def _finish(
     if reads:
         t0 = time.perf_counter()
         before = len({p.track_id for p in points})
-        points, merged = merge_by_number(points, team_out, reads, fps, looks=looks)
+        points, merged = merge_by_number(points, team_out, reads, fps, looks=looks, rosters=rosters)
         extra = {
             **extra,
             "merged_by_number": merged,
@@ -587,11 +588,15 @@ def merge_by_number(
     fps: float,
     max_overlap_s: float = 1.0,
     looks: dict[int, list[tuple[int, Any]]] | None = None,
+    rosters: dict[str, set[int]] | None = None,
 ) -> tuple[list[TrackPoint], int]:
     """Number per track by vote, then one track per player: fragments of the same team with the
     same number that do not overlap in time are joined (the number is the identity the tracker
     loses on occlusions and camera pans). When two fragments with the same number overlap, the one
-    with the weaker vote loses its number. Returns the points and the number of joined fragments."""
+    with the weaker vote loses its number. Returns the points and the number of joined fragments.
+
+    `rosters` ("home"/"away" -> shirt numbers) restricts each team's votes to its roster (see
+    `vote`); a team without roster is voted freely."""
     points, reads, moved = _split_at_switches(points, team_out, reads, looks or {})
     if looks is not None:
         looks.clear()
@@ -600,16 +605,21 @@ def merge_by_number(
     for p in points:
         a, b = span.get(p.track_id, (p.frame, p.frame))
         span[p.track_id] = (min(a, p.frame), max(b, p.frame))
-    votes = {t: v for t, rs in reads.items() if t in team_out and (v := vote(rs)) is not None}
-    for t, v in votes.items():
-        team_out[t].update(
-            number=v.number, number_confidence=v.confidence, number_readings=v.readings
-        )
 
     def side(t: int) -> str:
         # a number belongs to one person of a team: a "goalkeeper" fragment with a field player's
         # number is the position heuristic being wrong (they still may not overlap in time)
         return str(team_out[t]["label"]).removesuffix("_gk")
+
+    votes = {
+        t: v
+        for t, rs in reads.items()
+        if t in team_out and (v := vote(rs, (rosters or {}).get(side(t)))) is not None
+    }
+    for t, v in votes.items():
+        team_out[t].update(
+            number=v.number, number_confidence=v.confidence, number_readings=v.readings
+        )
 
     groups: dict[tuple[str, int], list[int]] = defaultdict(list)
     for t, v in votes.items():

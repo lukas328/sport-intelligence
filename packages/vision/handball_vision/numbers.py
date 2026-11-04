@@ -199,31 +199,88 @@ class Vote:
     number: int
     confidence: float  # share of the confident readings that agree, damped for few readings
     readings: int
+    corrected: int = 0  # readings outside the roster counted for this number as known misreads
+
+
+# digit pairs PP-OCR confuses on shirts (thin strokes, folds, motion blur)
+CONFUSIONS: frozenset[frozenset[str]] = frozenset(
+    frozenset(p) for p in ("17", "14", "38", "68", "56", "08")
+)
+
+
+def _misread_of(read: str, number: str) -> bool:
+    """Whether `read` is a known OCR confusion of `number`: one digit swapped for a look-alike
+    (the same swap in every place counts once: 11 read as 44), one digit dropped (14 read as 4)
+    or one digit doubled (4 read as 44)."""
+    if len(read) == len(number):
+        swaps = {(a, b) for a, b in zip(read, number, strict=True) if a != b}
+        return len(swaps) == 1 and frozenset(next(iter(swaps))) in CONFUSIONS
+    if len(read) + 1 == len(number):
+        return any(number[:i] + number[i + 1 :] == read for i in range(len(number)))
+    if len(read) == len(number) + 1:
+        return any(
+            read[i] == read[i + 1] and read[:i] + read[i + 1 :] == number
+            for i in range(len(read) - 1)
+        )
+    return False
+
+
+def _on_roster(readings: list[Reading], allowed: set[int]) -> list[tuple[int, Reading]]:
+    """Readings as (number on the roster, reading): numbers on the roster count as read, others
+    for the roster number they are a known misreading of. A reading that fits several roster
+    numbers goes to the one this track was read as most often (directly); without such a
+    favourite, and for readings that fit none, it is ignored."""
+    direct: dict[int, float] = defaultdict(float)
+    for r in readings:
+        if r.number in allowed:
+            direct[r.number] += r.confidence
+    out: list[tuple[int, Reading]] = []
+    for r in readings:
+        if r.number in allowed:
+            out.append((r.number, r))
+            continue
+        fits = [m for m in allowed if _misread_of(str(r.number), str(m))]
+        if len(fits) > 1:
+            best = max(direct.get(m, 0.0) for m in fits)
+            fits = [m for m in fits if best > 0 and direct.get(m, 0.0) == best]
+        if len(fits) == 1:
+            out.append((fits[0], r))
+    return out
 
 
 def vote(
-    readings: list[Reading], min_confidence: float = MIN_CONFIDENCE, min_readings: int = 3
+    readings: list[Reading],
+    allowed: set[int] | None = None,
+    min_confidence: float = MIN_CONFIDENCE,
+    min_readings: int = 3,
 ) -> Vote | None:
     """One number per track from confident readings: the most frequent number needs at least 70 %
     of them and `min_readings` readings; two readings suffice when both are very sure (0.95) and
     nothing else was read. On the checked clips, numbers with two ordinary readings were often
-    wrong, numbers with three or more were right."""
+    wrong, numbers with three or more were right.
+
+    `allowed` is the team's roster when it is known: readings of other numbers then count for the
+    roster number they are a known misreading of (`_misread_of`: 44 for 11 or 4, 3 for 8, ...) or
+    are ignored, and the result is a roster number or None."""
     good = [r for r in readings if r.confidence >= min_confidence]
-    if not good:
+    counted = [(r.number, r) for r in good] if allowed is None else _on_roster(good, allowed)
+    if not counted:
         return None
     weight: dict[int, float] = defaultdict(float)
     count: dict[int, int] = defaultdict(int)
-    for r in good:
-        weight[r.number] += r.confidence
-        count[r.number] += 1
+    for number, r in counted:
+        weight[number] += r.confidence
+        count[number] += 1
     number = max(weight, key=lambda k: weight[k])
     share = weight[number] / sum(weight.values())
     n = count[number]
-    sure_pair = n == 2 and len(count) == 1 and all(r.confidence >= 0.95 for r in good)
+    # "nothing else": also no ignored reading (a roster vote may not turn 56 56 56 33 33 into 33)
+    sure_pair = n == 2 and len(good) == 2 and all(r.confidence >= 0.95 for r in good)
     if share < 0.7 or (n < min_readings and not sure_pair):
         return None
     damp = 1 - 0.5 ** (n + 1)  # 2 readings: 0.88, 3: 0.94, 5: 0.98
-    return Vote(number, round(share * damp, 3), n)
+    corrected = sum(1 for k, r in counted if k == number and r.number != number)
+    return Vote(number, round(share * damp, 3), n, corrected)
 
 
 def split_points(readings: list[Reading], min_side: int = 2, gain: int = 2) -> list[int]:

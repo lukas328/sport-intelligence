@@ -421,8 +421,10 @@ def track(
     kits: dict[str, tuple[int, int, int]],
     hall: U8 | None = None,
     progress: Progress | None = None,
+    rosters: dict[str, set[int]] | None = None,
 ) -> Any:
-    """Tracks, teams and the AnalysisResult from stored observations and a hall calibration."""
+    """Tracks, teams and the AnalysisResult from stored observations and a hall calibration.
+    `rosters` (team label -> shirt numbers) keeps voted numbers on the roster (numbers.vote)."""
     from handball_vision.numbers import Reading
     from handball_vision.pipeline import _confident_label, _finish
     from handball_vision.teams import TeamAssigner
@@ -534,6 +536,7 @@ def track(
         number_reads,
         vectors,
         role_samples,
+        rosters,
     )
     from handball_vision.ballpossession import from_observations
 
