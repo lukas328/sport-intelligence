@@ -36,6 +36,8 @@ basketball tracking (CC BY-NC-ND), sports-ball image classification (close-ups).
 |---|---|---|
 | Single-frame net (TeamTrack + 37 own) | 6 % (all 80) | 14 % (all 80) |
 | 3-frame net, round 1 (TeamTrack) | 12 % | 23 % |
+| round 2 (+ user frames, train half; Kaggle GPU) | 20 % | 28 % |
+| round 3 (+ user ball paths, DeepSport basketball) | 33 % | 47 % |
 
 On TeamTrack's own validation the 3-frame net finds 64 % at 2 % false alarms: the gap is the domain
 (one hall vs many), not the method.
