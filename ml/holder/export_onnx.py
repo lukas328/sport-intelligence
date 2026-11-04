@@ -18,7 +18,7 @@ r = torchvision.models.resnet18()
 if ch == 9:
     r.conv1 = nn.Conv2d(9, 64, 7, 2, 3, bias=False)
 r.fc = nn.Linear(512, 1)
-r.load_state_dict(ck["state"])
+r.load_state_dict({k.removeprefix("r."): v for k, v in ck["state"].items() if not k.startswith("hm.")})  # heatmap head: training only
 r.eval()
 
 

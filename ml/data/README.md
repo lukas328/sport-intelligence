@@ -10,3 +10,13 @@ picks it up from there (segments for self-training, info JSON for goal lists).
 Behind a VPN or company network YouTube answers with the bot check as well: use a phone hotspot
 (`videos_priority.csv`, 71 games from many countries and halls, `-Pieces 2`, about 5 GB) or
 `-Browser chrome|edge|firefox` to use the signed-in YouTube session (slow, with pauses).
+
+## Official data per game
+`match_official.py` finds the handball.ch game for each name (description link first, else date
+window and fuzzy team names over the public match centre API, cached) and writes the game log and
+player stats to `official/<name>.json`; `catalog.json` lists every game with its match state,
+video properties from the ingest and the Kaggle batch holding its segments. Run it with the
+ingest's Python (needs gdown for the info JSONs on Drive); re-running is cheap and picks up new
+uploads. First run: 138 of 178 Swiss games matched, 63 with a full game log (3,445 goals; logs
+exist from season 2023/24), the rest ambiguous (approximate dates), not on handball.ch (European
+cup, friendlies abroad, regional selections) or without team names.

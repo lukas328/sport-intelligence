@@ -100,6 +100,7 @@ def main() -> None:
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--tracklets", action="store_true", help="use unnumbered tracks too")
+    ap.add_argument("--freeze", type=int, default=5, help="body modules kept at ImageNet (5: stem + layer1)")
     ap.add_argument("--tracklet-share", type=float, default=0.5, help="of a batch's identities")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
@@ -135,6 +136,9 @@ def main() -> None:
     )
 
     model = build_model(size=size)
+    frozen = model.body[: a.freeze]
+    for prm in frozen.parameters():
+        prm.requires_grad_(False)
     head = torch.nn.Linear(256, len(idents), bias=False)
     params = list(model.parameters()) + list(head.parameters())
     opt = torch.optim.AdamW([p for p in params if p.requires_grad], lr=a.lr, weight_decay=5e-4)
@@ -147,6 +151,7 @@ def main() -> None:
 
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_at)
     model.train()
+    frozen.eval()  # keep ImageNet batch-norm statistics in the frozen part
     t0 = time.time()
     log_l, log_c, log_acc = [], [], []
     for it in range(a.iters):
