@@ -70,6 +70,9 @@ def _team_block(
 ) -> dict[str, Any]:
     mine = [e for e in events if e.side is side]
     theirs = [e for e in events if e.side is side.other]
+    # goals alone (score overlay, throw-off heuristic) say nothing about shooting or saving: the
+    # ratios need at least one recorded miss, save, post or block in the match
+    attempts_known = any(e.is_shot and e.outcome != "goal" for e in events)
     shots = [e for e in mine if e.is_shot]
     on_target_shots = [e for e in shots if e.outcome != "blocked"]
     goals = [e for e in shots if e.outcome == "goal"]
@@ -99,9 +102,9 @@ def _team_block(
         "shots_blocked": len(shots) - len(on_target_shots),
         "misses": sum(e.outcome == "miss" for e in shots),
         "posts": sum(e.outcome == "post" for e in shots),
-        "shooting_pct": _ratio(len(goals), len(on_target_shots)),
+        "shooting_pct": _ratio(len(goals), len(on_target_shots)) if attempts_known else None,
         "saves": len(saves),
-        "save_pct": _ratio(len(saves), len(saves) + len(goals_against)),
+        "save_pct": _ratio(len(saves), len(saves) + len(goals_against)) if attempts_known else None,
         "goals_against": len(goals_against),
         "turnovers": len(turnovers),
         "turnovers_by_type": dict(Counter(e.turnover_type or "other" for e in turnovers)),

@@ -153,3 +153,13 @@ def test_goalkeepers() -> None:
     assert gk["own:n:12"]["number"] == 12
     assert gk["own:unknown"]["goals_against"] == 1
     assert gk["opponent:n:1"]["side"] == "opponent"
+
+
+def test_goals_only_have_no_shooting_ratios() -> None:
+    """Goals read from a score overlay: no misses or saves recorded, so no shooting or save
+    percentage (it would read 100 % and 0 %), but goals per attack work."""
+    ev = [shot(i, OWN if i % 2 else OPP, "goal", 60 * i, source="scoreboard_ocr") for i in range(5)]
+    st = compute_match_stats(ev, {"own": 4, "opponent": 5})
+    assert st["own"]["goals"] == 2 and st["opponent"]["goals"] == 3
+    assert st["own"]["shooting_pct"] is None and st["opponent"]["save_pct"] is None
+    assert st["own"]["attack_efficiency"] == 0.5
