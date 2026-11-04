@@ -65,7 +65,35 @@ or shift the log by about -5 s first.
    goal clips outside the segments.
 
 ## Results
-RESULTS_TABLE
+AUC: all 52 goal clips / 35 overlay-confirmed clips, against 47 non-goal clips. R@10%FP is the
+recall on the overlay-confirmed clips at the threshold where 10 % of non-goal clips fire. Timing
+columns use the score peak in each goal clip. "peak - overlay" is the median offset from the score
+change, |dev| is the median distance from that offset, and the last column is the share of clips
+within 1 s of it.
+
+| Cue | Needs | AUC all / confirmed | R@10%FP | peak - logged | peak - overlay | abs dev | within 1 s |
+|---|---|---|---|---|---|---|---|
+| `pan_rev` | camera pan | 0.844 / 0.897 | 0.74 | -3.5 s | +1.5 s | 0.5 s | 0.80 |
+| `still_swing` | camera pan | 0.824 / 0.900 | 0.71 | -2.9 s | +1.7 s | 0.6 s | 0.60 |
+| `pan_after` | camera pan | 0.830 / 0.903 | 0.60 | -1.7 s | +3.0 s | 1.1 s | 0.49 |
+| `cut` | camera pan | 0.812 / 0.861 | 0.17 | -4.1 s | +1.7 s | 0.7 s | 0.60 |
+| `energy_drop` | frames | 0.650 / 0.647 | 0.14 | +0.1 s | +4.5 s | 1.1 s | 0.46 |
+| `zone_leave` | goal-area paint (hall) | **0.876 / 0.945** | **0.94** | -1.9 s | +2.8 s | 0.6 s | 0.66 |
+| `people_flow` | YOLOX every 0.5 s | 0.828 / 0.873 | 0.57 | -2.1 s | +2.9 s | 0.8 s | 0.54 |
+| `ball_fast` | ball net + path | 0.676 / 0.736 | 0.40 | -3.1 s | +1.3 s | 2.0 s | 0.26 |
+| `ball_fast_lost` | ball net + path | 0.677 / 0.735 | 0.37 | -4.6 s | +0.7 s | 1.6 s | 0.31 |
+| `ball_zone` | ball + paint | 0.528 / 0.578 | 0.29 | -5.5 s | -0.4 s | 0.9 s | 0.57 |
+| sum z(pan_rev, still_swing, cut) | camera pan only | 0.850 / 0.921 | 0.80 | -3.3 s | +1.7 s | 0.6 s | 0.77 |
+| sum z(pan_rev, still_swing, zone_leave) | pan + paint | 0.861 / 0.920 | 0.60 | -3.0 s | +2.0 s | 0.6 s | 0.80 |
+| logistic regression, LOO, same three | pan + paint | 0.849 / 0.905 | 0.51 | -1.9 s | +2.6 s | 0.7 s | 0.63 |
+| sum z(pan_rev, still_swing, zone_leave, ball_fast, people_flow) | all | 0.860 / 0.919 | 0.71 | -2.9 s | +2.0 s | 0.7 s | 0.69 |
+| **template** (pan, paint, energy; LOO) | pan + paint | **0.869 / 0.928** | **0.91** | -3.5 s | **+1.3 s** | **0.5 s** | 0.74 |
+| template (pan, energy) | camera pan only | 0.817 / 0.894 | 0.66 | -4.0 s | +0.8 s | 0.6 s | 0.71 |
+| template (pan only) | camera pan only | 0.573 / 0.563 | 0.17 | -3.5 s | +1.4 s | 0.9 s | 0.54 |
+
+The ball path covers 24 % of the sampled frames (1.7 net peaks per frame above 0.2). Adding the
+ball and people cues to the combination does not raise the AUC. Template window variants (-3..+4,
+-2..+2, -2..+5, -1..+4 s) give AUC 0.855 to 0.873: the result does not hinge on that choice.
 
 Timing prior: always answering the same clip time (the median overlay change, 1.3 s) gives a median
 error of 1.0 s, with 51 % of goals within 1 s. A useful cue has to beat that.
@@ -113,7 +141,7 @@ error of 1.0 s, with 51 % of goals within 1 s. A useful cue has to beat that.
    players' centroid: YOLOX people, projected to court coordinates when calibration is available.
    The play's centre of mass leaving one goal and running back to the centre replaces the camera
    swing, and the players' "leave the goal area" replaces the painted zone. `people_flow`, which
-   already uses canvas coordinates, reaches AUC PEOPLE_AUC here. Auto-panning cameras (Veo,
+   already uses canvas coordinates, reaches AUC 0.83 / 0.87 here. Auto-panning cameras (Veo,
    Pixellot) behave like the broadcast camera, so the pan cues carry over directly.
 
 ## Reproduce
@@ -124,6 +152,7 @@ python ml/goals/cut_negatives.py $S/match/magdeburg_aligned.json $S/goals/neg_cl
   --starts 855,1709,3988,4843
 uv run --project packages/vision python ml/goals/extract.py $S/goals/cache $S/match/magdeburg_goals/*.mp4 $S/goals/neg_clips/*.mp4
 python ml/goals/overlay_ref.py $S/goals/cache
+uv run --project packages/vision python ml/goals/compact.py $S/goals/cache   # optional: 15 MB -> 2.7 MB per clip
 uv run --project packages/vision python ml/goals/evaluate.py $S/goals/cache $S/match/magdeburg_goals/index.json \
   --cues pan_rev,still_swing,zone_leave --template
 uv run --project packages/vision python ml/goals/extract.py $S/goals/cache_seg $V/magdeburg_rostock_s{0,1,3,4}.mp4 --no-ball --no-det

@@ -78,6 +78,9 @@ def ball_speed(path: np.ndarray) -> np.ndarray:
 def zone_masks(z: Any) -> np.ndarray:
     """Goal-area paint per thumbnail (320x180). Hall-specific: in this hall the 6 m zone is green
     (OpenCV hue `ZONE_HUE`); many halls only draw a line, then this cue is unavailable."""
+    if "zmask" in z:  # compacted cache (`compact.py`): bit-packed masks instead of thumbnails
+        n = len(z["thumb_idx"])
+        return np.unpackbits(z["zmask"])[: n * 180 * 320].reshape(n, 180, 320).astype(bool)
     out = []
     for t in z["thumbs"]:
         hsv = cv2.cvtColor(t, cv2.COLOR_BGR2HSV)
@@ -171,6 +174,7 @@ def profile_channels(z: Any) -> np.ndarray:
     pan = z["pan"][:, 0].astype(float) * fps / 100
     energy = z["energy"].astype(float)
     # compacted caches (`compact.py`) keep only the goal-area share instead of the thumbnails
+    # older compacted caches carry only the share per thumbnail ("zshare")
     zm = (z["zshare"] if "zshare" in z else zone_masks(z).mean(axis=(1, 2))) * 100
     zt = z["thumb_idx"] / fps
     ts = np.arange(0, n / fps, PROFILE_DT)

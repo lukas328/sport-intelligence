@@ -47,6 +47,8 @@ def main() -> None:
     out = {}
     for f in sorted(cache.glob("*.npz")):
         z = np.load(f)
+        if "bugs" not in z:
+            continue  # cue cache, not a clip
         t, jump = change_time(z["bugs"], z["thumb_idx"], float(z["fps"]))
         out[f.stem] = {"change_s": t, "jump": round(jump, 1)}
         print(f.stem, out[f.stem])
