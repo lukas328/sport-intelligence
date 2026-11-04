@@ -36,7 +36,7 @@ export function OfficialReportImport({ orgId, matchId }: { orgId: string; matchI
     setBusy(false);
     if (r.error || !r.data) return setError(errorKey(r.error));
     setResult(r.data);
-    for (const key of ["events", "stats", "match"]) void qc.invalidateQueries({ queryKey: [key, matchId] });
+    for (const key of ["events", "stats", "match", "official-goals"]) void qc.invalidateQueries({ queryKey: [key, matchId] });
   };
 
   return (

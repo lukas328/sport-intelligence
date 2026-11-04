@@ -32,6 +32,7 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
+import { OfficialGoalsPanel, officialGoalsKey } from "./official-goals";
 import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
@@ -79,6 +80,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       const ev = JSON.parse((e as MessageEvent).data) as Job & { job_id: string };
       setLive((l) => ({ ...l, [ev.job_id]: ev }));
       if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
+      // a new analysis reads the goals again: the comparison with the official report changes
+      if (ev.status === "succeeded") void qc.invalidateQueries({ queryKey: officialGoalsKey(initial.id) });
       // the moment the analysis is done: said on the stage, not in a toast
       if (ev.status === "succeeded" && ev.kind !== "ingest") setJustDone(true);
     });
@@ -359,6 +362,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
             )}
           </div>
+        )}
+        {staff && main && match.report_extra?.official_report != null && (
+          <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} isHome={match.is_home} names={names} onPlay={onPlay} />
         )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
         {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}

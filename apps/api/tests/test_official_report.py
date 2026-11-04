@@ -357,3 +357,134 @@ async def test_analysis_after_import_does_not_count_goals_twice(
     read = [(e["side"], e["t_ms"]) for e in events if e["source"] == "scoreboard_ocr"]
     assert read == [("opponent", 500_000)]
     assert not [e for e in events if e["source"] == "heuristic" and e["type"] == "shot"]
+    # the official goals keep what the overlay read, so the comparison shows them as found
+    assert first["attributes"]["video"] == {
+        "source": "scoreboard_ocr",
+        "clock_s": 95.0,
+        "t_ms": 35_000,
+        "confidence": 0.95,
+    }
+    cmp = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/official-report/comparison")).json()
+    assert cmp["counts"] == {"official": 8, "found": 2, "missing": 6, "extra": 1, "open": 7}
+    row = next(r for r in cmp["goals"] if r["clock_s"] == 93)
+    assert (row["status"], row["t_ms"], row["estimated"], row["official_time"]) == (
+        "found",
+        35_000,
+        False,
+        "01:33",
+    )
+    assert [(x["side"], x["t_ms"]) for x in cmp["extra"]] == [("opponent", 500_000)]
+
+
+# ---- official goals compared with the video ----------------------------------------------------
+
+
+@pytest.mark.usefixtures("clean_db")
+async def test_goal_comparison_and_review(
+    make_api: Callable[[], Api], recorded: list[tuple[str, int]], owner_conn: Any
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids, opponent_name="SC Magdeburg II", is_home=False)
+    org = ids["org"]
+    base = f"/v1/orgs/{org}/matches/{m['id']}"
+    cmp_url, review_url = f"{base}/official-report/comparison", f"{base}/official-report/review"
+
+    # nothing imported yet: an empty comparison
+    empty = (await api.get(cmp_url)).json()
+    assert empty["imported"] is False and empty["goals"] == [] and empty["extra"] == []
+    assert empty["counts"] == {"official": 0, "found": 0, "missing": 0, "extra": 0, "open": 0}
+
+    shot = {"type": "shot", "outcome": "goal", "period": 1}
+    overlay = (
+        await api.post(f"{base}/events", json={**shot, "side": "own", "clock_s": 280})
+    ).json()
+    lone = (
+        await api.post(f"{base}/events", json={**shot, "side": "opponent", "clock_s": 3000})
+    ).json()
+    await owner_conn.execute(
+        "UPDATE events SET source = 'scoreboard_ocr', t_ms = 300000, confidence = 0.95"
+        " WHERE id = ANY($1::uuid[])",
+        [overlay["id"], lone["id"]],
+    )
+    await owner_conn.execute("UPDATE events SET period = 2 WHERE id = $1", lone["id"])
+    r = await api.post(f"{base}/official-report", json={"url": DHB_URL})
+    assert r.status_code == 200, r.text
+
+    cmp = (await api.get(cmp_url)).json()
+    assert (cmp["imported"], cmp["provider"], cmp["home"], cmp["window_s"]) == (
+        True,
+        "dhb",
+        "SC Magdeburg II",
+        20.0,
+    )
+    # 52 goals in the report; merged on import: Pedersen's goal at 04:31
+    assert cmp["counts"] == {"official": 52, "found": 1, "missing": 51, "extra": 1, "open": 52}
+    goals = cmp["goals"]
+    assert [g["clock_s"] for g in goals] == sorted(g["clock_s"] for g in goals)
+    merged = next(g for g in goals if g["status"] == "found")
+    assert (merged["official_time"], merged["side"], merged["number"], merged["t_ms"]) == (
+        "04:31",
+        "own",
+        13,
+        300_000,
+    )
+    assert merged["video"]["source"] == "scoreboard_ocr" and merged["video"]["event_id"] is None
+    # no throw-off time yet: the missing goals have no video time to jump to
+    missing = next(g for g in goals if g["status"] == "missing")
+    assert (missing["t_ms"], missing["estimated"], missing["video"]) == (None, True, None)
+    assert cmp["extra"][0]["event_id"] == lone["id"]
+
+    # a goal read from the video after the import, 6 s of clock after an official one: paired
+    target = next(g for g in goals if g["status"] == "missing" and g["side"] == "opponent")
+    late = (
+        await api.post(
+            f"{base}/events",
+            json={**shot, "side": "opponent", "clock_s": target["clock_s"] + 6, "t_ms": 900_000},
+        )
+    ).json()
+    await owner_conn.execute(
+        "UPDATE events SET source = 'scoreboard_ocr', confidence = 0.8 WHERE id = $1", late["id"]
+    )
+    cmp = (await api.get(cmp_url)).json()
+    assert (cmp["counts"]["found"], cmp["counts"]["extra"]) == (2, 1)
+    paired = next(g for g in cmp["goals"] if g["event_id"] == target["event_id"])
+    assert (paired["status"], paired["t_ms"], paired["estimated"]) == ("found", 900_000, False)
+    assert paired["video"] == {
+        "source": "scoreboard_ocr",
+        "t_ms": 900_000,
+        "clock_s": target["clock_s"] + 6,
+        "confidence": 0.8,
+        "event_id": late["id"],
+    }
+
+    # the coach checks rows: a missing goal confirmed, the lone video goal dismissed
+    check = next(g for g in cmp["goals"] if g["status"] == "missing")
+    for event_id, status in ((check["event_id"], "confirmed"), (lone["id"], "dismissed")):
+        r = await api.put(review_url, json={"event_id": event_id, "status": status})
+        assert r.status_code == 204, r.text
+    cmp = (await api.get(cmp_url)).json()
+    assert cmp["counts"]["open"] == 50 - 1
+    assert next(g for g in cmp["goals"] if g["event_id"] == check["event_id"])["review"] == (
+        "confirmed"
+    )
+    assert cmp["extra"][0]["review"] == "dismissed"
+    # a re-import keeps the checks of the official goals
+    await api.post(f"{base}/official-report", json={"url": DHB_URL})
+    cmp = (await api.get(cmp_url)).json()
+    again = next(g for g in cmp["goals"] if g["clock_s"] == check["clock_s"] and g["review"])
+    assert (again["review"], cmp["counts"]["open"]) == ("confirmed", 49)
+    # undo
+    r = await api.put(review_url, json={"event_id": lone["id"], "status": None})
+    assert r.status_code == 204
+    assert (await api.get(cmp_url)).json()["extra"][0]["review"] is None
+
+    # only goals of the comparison can be checked
+    events = (await api.get(f"{base}/events")).json()
+    timeout = next(e for e in events if e["type"] == "timeout")
+    tagged = (await api.post(f"{base}/events", json={**shot, "side": "own", "clock_s": 10})).json()
+    for event_id in (timeout["id"], tagged["id"], "00000000-0000-0000-0000-000000000000"):
+        r = await api.put(review_url, json={"event_id": event_id, "status": "confirmed"})
+        assert r.status_code == 404, r.text
+    r = await api.put(review_url, json={"event_id": lone["id"], "status": "maybe"})
+    assert r.status_code == 422

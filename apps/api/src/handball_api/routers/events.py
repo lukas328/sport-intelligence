@@ -12,6 +12,8 @@ from handball_api.schemas.events import (
     EventOut,
     EventPatch,
     FeedImportResult,
+    GoalComparison,
+    GoalReviewIn,
     KickoffIn,
     OfficialReportIn,
     OfficialReportResult,
@@ -102,6 +104,19 @@ async def import_official_report(
     scorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous
     one; automatic goals from the video within 20 s are merged with the official goal."""
     return await official_report.import_report(scope.ctx, match_id, data.url, data.provider)
+
+
+@router.get("/matches/{match_id}/official-report/comparison", response_model=GoalComparison)
+async def official_goal_comparison(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Official goals next to the goals the video analysis found (same side, at most 20 s of
+    match clock apart), and video goals without an official one, with the coach's checks."""
+    return await official_report.comparison(scope.ctx, match_id)
+
+
+@router.put("/matches/{match_id}/official-report/review", status_code=204)
+async def review_official_goal(match_id: uuid.UUID, data: GoalReviewIn, scope: OrgDep) -> None:
+    """Confirm or dismiss a row of the comparison (null undoes it)."""
+    await official_report.review(scope.ctx, match_id, data.event_id, data.status)
 
 
 @router.post(

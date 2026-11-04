@@ -22,6 +22,10 @@ Only these fixed hosts are contacted; the given URL only names the game.
     an official counterpart are kept when read from the overlay (they show where the video and
     the report disagree) and dropped when only estimated (heuristic);
   * suspensions, time-outs and the other entries are added as they are.
+
+`comparison` lists the official goals next to what the video found (the import's video data, or an
+automatic goal within the same 20 s) and the video goals without an official one; the coach
+confirms or dismisses each row (`review`, kept in attributes.review, kept by a re-import).
 """
 
 from __future__ import annotations
@@ -50,6 +54,7 @@ from handball_api.services.policies import Action
 
 SOURCE = OFFICIAL
 AUTO_GOALS = ("heuristic", "model", OVERLAY)
+REVIEW = ("confirmed", "dismissed")
 MATCH_WINDOW_S = 20.0  # the overlay changes a few seconds after the goal; minutes are rounded
 TIMEOUT = httpx.Timeout(15.0, connect=5.0)
 HEADERS = {"User-Agent": "handball-ai/1.0 (official match report import)", "Accept-Language": "de"}
@@ -469,6 +474,11 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
         )
     ).all()
     seen: list[_Seen] = []
+    reviewed = {  # the coach's check of a goal survives a re-import of the same report
+        (p.side, p.clock_s): r
+        for p in previous
+        if p.outcome == "goal" and (r := (p.attributes or {}).get("review")) in REVIEW
+    }
     for p in previous:  # video data an earlier import took over: matched again below
         v = (p.attributes or {}).get("video")
         if isinstance(v, dict) and v.get("clock_s") is not None:
@@ -554,6 +564,8 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
                     "t_ms": vid.t_ms,
                     "confidence": round(vid.confidence, 3),
                 }
+            if (side, clock) in reviewed:
+                attrs["review"] = reviewed[(side, clock)]
         if spec.get("outcome") == "save" and e.goalkeeper_number is not None:
             gk = roster.get(e.goalkeeper_number) if side == "opponent" else None
             attrs.update(
@@ -667,3 +679,152 @@ async def import_report(
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
     report = await fetch(source, provider)
     return await apply(ctx, match, report)
+
+
+# ---- official goals compared with the video ------------------------------------------------
+
+
+def _official_time(clock_s: float | None) -> str | None:
+    if clock_s is None:
+        return None
+    c = int(clock_s)
+    return f"{c // 60:02d}:{c % 60:02d}"
+
+
+def _review(e: Event) -> str | None:
+    r = (e.attributes or {}).get("review")
+    return r if r in REVIEW else None
+
+
+def _video_goal(e: Event) -> dict[str, Any]:
+    attrs = e.attributes or {}
+    return {
+        "event_id": e.id,
+        "side": e.side,
+        "period": e.period,
+        "clock_s": e.clock_s,
+        "official_time": _official_time(e.clock_s),
+        "t_ms": e.t_ms,
+        "source": e.source,
+        "confidence": round(e.confidence, 3),
+        "number": e.number,
+        "player_id": e.player_id,
+        "name": attrs.get("scorer_name"),
+        "score": attrs.get("score"),
+        "review": _review(e),
+    }
+
+
+async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
+    """Each official goal with what the video found: the video data the import took over (or the
+    analysis noted), else an automatic goal of the same side within MATCH_WINDOW_S of match
+    clock, as the import pairs them; then the automatic goals without an official counterpart."""
+    match = await get_match(ctx, match_id)
+    goals = (
+        await ctx.db.scalars(
+            select(Event)
+            .where(Event.match_id == match.id, Event.type == "shot", Event.outcome == "goal")
+            .order_by(Event.period, Event.clock_s.nulls_last(), Event.t_ms.nulls_last())
+        )
+    ).all()
+    official = [g for g in goals if g.source == SOURCE]
+    auto = [g for g in goals if g.source in AUTO_GOALS]
+    cands = [
+        _Seen(g.side, float(g.clock_s), g.t_ms, g.x, g.y, g.source, g.confidence, g)
+        for g in auto
+        if g.clock_s is not None
+    ]
+    used: set[int] = set()
+    rows: list[dict[str, Any]] = []
+    for o in official:
+        stored = (o.attributes or {}).get("video")
+        video: dict[str, Any] | None = None
+        if isinstance(stored, dict):
+            video = {
+                "source": str(stored.get("source", OVERLAY)),
+                "t_ms": stored.get("t_ms"),
+                "clock_s": stored.get("clock_s"),
+                "confidence": stored.get("confidence"),
+                "event_id": None,
+            }
+        elif o.clock_s is not None:
+            hit = _nearest([c for c in cands if id(c) not in used], o.side, float(o.clock_s))
+            if hit is not None and hit.event is not None:
+                used.add(id(hit))
+                video = {
+                    "source": hit.source,
+                    "t_ms": hit.t_ms,
+                    "clock_s": hit.clock_s,
+                    "confidence": round(hit.confidence, 3),
+                    "event_id": hit.event.id,
+                }
+        video_t = video.get("t_ms") if video else None
+        attrs = o.attributes or {}
+        rows.append(
+            {
+                "event_id": o.id,
+                "side": o.side,
+                "period": o.period,
+                "clock_s": o.clock_s,
+                "official_time": attrs.get("official_time") or _official_time(o.clock_s),
+                # where the video shows it: the video reading, else the time from the clock
+                "t_ms": int(video_t) if video_t is not None else o.t_ms,
+                "estimated": video_t is None,
+                "number": o.number,
+                "player_id": o.player_id,
+                "name": attrs.get("name"),
+                "score": attrs.get("score"),
+                "penalty": o.shot_type == "penalty",
+                "status": "found" if video else "missing",
+                "video": video,
+                "review": _review(o),
+            }
+        )
+    paired = {id(c.event) for c in cands if id(c) in used}
+    extra = [_video_goal(g) for g in auto if id(g) not in paired]
+    found = sum(1 for r in rows if r["status"] == "found")
+    report = (match.report_extra or {}).get("official_report") or {}
+    return {
+        "imported": bool(report) or bool(official),
+        "provider": report.get("provider"),
+        "source_url": report.get("url"),
+        "home": report.get("home"),
+        "away": report.get("away"),
+        "window_s": MATCH_WINDOW_S,
+        "counts": {
+            "official": len(rows),
+            "found": found,
+            "missing": len(rows) - found,
+            "extra": len(extra),
+            "open": sum(1 for r in rows if r["status"] == "missing" and r["review"] is None)
+            + sum(1 for r in extra if r["review"] is None),
+        },
+        "goals": rows,
+        "extra": extra,
+    }
+
+
+async def review(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID, status: str | None) -> None:
+    """The coach checked a row of the comparison: an official goal (its video time is right, or
+    not) or a video goal without an official one (a real goal, or a misreading)."""
+    match = await get_match(ctx, match_id, Action.EVENT_WRITE)
+    ev = await ctx.db.get(Event, event_id)
+    if (
+        ev is None
+        or ev.match_id != match.id
+        or ev.type != "shot"
+        or ev.outcome != "goal"
+        or ev.source not in (SOURCE, *AUTO_GOALS)
+    ):
+        raise ProblemError(404, "not-found", "Goal not found in the comparison")
+    attrs = {k: v for k, v in (ev.attributes or {}).items() if k != "review"}
+    if status is not None:
+        attrs["review"] = status
+    ev.attributes = attrs
+    await audit.record(
+        ctx,
+        "match.official_goal_reviewed",
+        target_type="match",
+        target_id=match.id,
+        data={"event_id": str(ev.id), "source": ev.source, "review": status},
+    )

@@ -157,6 +157,80 @@ class OfficialReportResult(ApiModel):
     warnings: list[str]
 
 
+ReviewStatus = Literal["confirmed", "dismissed"]
+
+
+class VideoReading(ApiModel):
+    """What the video analysis read for an official goal."""
+
+    source: str  # scoreboard_ocr (broadcast overlay or hall scoreboard), heuristic, model
+    t_ms: int | None
+    clock_s: float | None
+    confidence: float | None
+    event_id: uuid.UUID | None  # the automatic goal paired at read time (none: merged on import)
+
+
+class OfficialGoalRow(ApiModel):
+    event_id: uuid.UUID
+    side: str
+    period: int
+    clock_s: float | None
+    official_time: str | None  # match time as in the report, "MM:SS"
+    t_ms: int | None  # video time: the video reading, else derived from the match clock
+    estimated: bool  # t_ms comes from the match clock only
+    number: int | None
+    player_id: uuid.UUID | None
+    name: str | None
+    score: list[int] | None  # own, opponent after the goal
+    penalty: bool
+    status: Literal["found", "missing"]
+    video: VideoReading | None
+    review: ReviewStatus | None
+
+
+class VideoGoalRow(ApiModel):
+    """An automatic goal from the video with no official counterpart."""
+
+    event_id: uuid.UUID
+    side: str
+    period: int
+    clock_s: float | None
+    official_time: str | None
+    t_ms: int | None
+    source: str
+    confidence: float
+    number: int | None
+    player_id: uuid.UUID | None
+    name: str | None
+    score: list[int] | None
+    review: ReviewStatus | None
+
+
+class GoalComparisonCounts(ApiModel):
+    official: int
+    found: int  # official goals the video saw
+    missing: int  # official goals the video did not see
+    extra: int  # video goals without an official one
+    open: int  # missing and extra rows nobody confirmed or dismissed yet
+
+
+class GoalComparison(ApiModel):
+    imported: bool
+    provider: str | None
+    source_url: str | None
+    home: str | None
+    away: str | None
+    window_s: float  # an official and a video goal of the same side this close are the same goal
+    counts: GoalComparisonCounts
+    goals: list[OfficialGoalRow]
+    extra: list[VideoGoalRow]
+
+
+class GoalReviewIn(ApiModel):
+    event_id: uuid.UUID
+    status: ReviewStatus | None  # null: undo the check
+
+
 class FeedImportResult(ApiModel):
     created: int
     skipped: int

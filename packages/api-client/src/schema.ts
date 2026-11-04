@@ -1878,6 +1878,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/comparison": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Official Goal Comparison
+         * @description Official goals next to the goals the video analysis found (same side, at most 20 s of
+         *     match clock apart), and video goals without an official one, with the coach's checks.
+         */
+        get: operations["official_goal_comparison_v1_orgs__org_id__matches__match_id__official_report_comparison_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Review Official Goal
+         * @description Confirm or dismiss a row of the comparison (null undoes it).
+         */
+        put: operations["review_official_goal_v1_orgs__org_id__matches__match_id__official_report_review_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/parts": {
         parameters: {
             query?: never;
@@ -5144,6 +5185,49 @@ export interface components {
             /** Tokens */
             tokens: components["schemas"]["handball_api__schemas__tactics__TokenIn"][];
         };
+        /** GoalComparison */
+        GoalComparison: {
+            /** Away */
+            away: string | null;
+            counts: components["schemas"]["GoalComparisonCounts"];
+            /** Extra */
+            extra: components["schemas"]["VideoGoalRow"][];
+            /** Goals */
+            goals: components["schemas"]["OfficialGoalRow"][];
+            /** Home */
+            home: string | null;
+            /** Imported */
+            imported: boolean;
+            /** Provider */
+            provider: string | null;
+            /** Source Url */
+            source_url: string | null;
+            /** Window S */
+            window_s: number;
+        };
+        /** GoalComparisonCounts */
+        GoalComparisonCounts: {
+            /** Extra */
+            extra: number;
+            /** Found */
+            found: number;
+            /** Missing */
+            missing: number;
+            /** Official */
+            official: number;
+            /** Open */
+            open: number;
+        };
+        /** GoalReviewIn */
+        GoalReviewIn: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Status */
+            status: ("confirmed" | "dismissed") | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -6025,6 +6109,44 @@ export interface components {
         NotificationsRead: {
             /** Ids */
             ids?: string[];
+        };
+        /** OfficialGoalRow */
+        OfficialGoalRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Estimated */
+            estimated: boolean;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Penalty */
+            penalty: boolean;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Review */
+            review: ("confirmed" | "dismissed") | null;
+            /** Score */
+            score: number[] | null;
+            /** Side */
+            side: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "found" | "missing";
+            /** T Ms */
+            t_ms: number | null;
+            video: components["schemas"]["VideoReading"] | null;
         };
         /** OfficialReportIn */
         OfficialReportIn: {
@@ -7769,6 +7891,41 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /**
+         * VideoGoalRow
+         * @description An automatic goal from the video with no official counterpart.
+         */
+        VideoGoalRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Confidence */
+            confidence: number;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Review */
+            review: ("confirmed" | "dismissed") | null;
+            /** Score */
+            score: number[] | null;
+            /** Side */
+            side: string;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
+        };
         /** VideoOut */
         VideoOut: {
             /** Codec */
@@ -7812,6 +7969,22 @@ export interface components {
             time_offset_ms: number;
             /** Width */
             width: number | null;
+        };
+        /**
+         * VideoReading
+         * @description What the video analysis read for an official goal.
+         */
+        VideoReading: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Confidence */
+            confidence: number | null;
+            /** Event Id */
+            event_id: string | null;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
         };
         /**
          * VideoRole
@@ -11619,6 +11792,72 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OfficialReportResult"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    official_goal_comparison_v1_orgs__org_id__matches__match_id__official_report_comparison_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalComparison"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_official_goal_v1_orgs__org_id__matches__match_id__official_report_review_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -5,7 +5,8 @@ changes) is stored with source "heuristic" and its confidence. A re-analysis rep
 automatic rows. Events a person entered (tagging, import, correction) always win: an automatic
 goal close to a manual one is dropped. The opening throw-offs set the match clock if nobody did.
 An imported official report (services/official_report.py) has every goal: overlay goals close to
-one of its goals are dropped and no goals are estimated from throw-offs.
+one of its goals are dropped (the official goal keeps what the overlay read in attributes.video,
+as an import after the analysis does) and no goals are estimated from throw-offs.
 """
 
 from __future__ import annotations
@@ -55,7 +56,7 @@ async def _align_official(ctx: Ctx, match: Match) -> None:
         e.t_ms = video_from_clock(match, e.period, e.clock_s or 0.0)
 
 
-async def _manual_goals(ctx: Ctx, match: Match) -> list[tuple[str, int]]:
+async def _manual_goals(ctx: Ctx, match: Match) -> list[Event]:
     rows = await ctx.db.scalars(
         select(Event).where(
             Event.match_id == match.id,
@@ -65,7 +66,12 @@ async def _manual_goals(ctx: Ctx, match: Match) -> list[tuple[str, int]]:
             Event.source.not_in((SOURCE, OVERLAY)),
         )
     )
-    return [(e.side, int(e.t_ms)) for e in rows.all() if e.t_ms is not None]
+    return [e for e in rows.all() if e.t_ms is not None]
+
+
+def _closest(goals: list[Event], side: str, t_ms: int, window_ms: int) -> Event | None:
+    near = [g for g in goals if g.side == side and abs(int(g.t_ms or 0) - t_ms) <= window_ms]
+    return min(near, key=lambda g: abs(int(g.t_ms or 0) - t_ms)) if near else None
 
 
 ALIGN_BEFORE_MS = 15000  # an attack that ended up to 15 s before the overlay changed scored
@@ -149,9 +155,25 @@ async def apply_scoreboard(
         if n is not None
     }
     created = 0
+    confidence = 0.8 if overlay.get("source") == "hall_scoreboard" else 0.95
+    noted: set[int] = set()  # official goals given the overlay reading in this run
     for g in overlay.get("goals") or []:
         side, t_ms = (left if g.get("side") == "left" else right), int(g["t_ms"])
-        if any(s == side and abs(t - t_ms) <= OVERLAY_DEDUPE_MS for s, t in manual):
+        hit = _closest(manual, side, t_ms, OVERLAY_DEDUPE_MS)
+        if hit is not None:
+            if hit.source == OFFICIAL and id(hit) not in noted:
+                # the same goal seen on video: kept like an import after the analysis keeps it
+                noted.add(id(hit))
+                shown = _overlay_clock(segments, t_ms)
+                hit.attributes = {
+                    **(hit.attributes or {}),
+                    "video": {
+                        "source": OVERLAY,
+                        "clock_s": float(shown) if shown is not None else hit.clock_s,
+                        "t_ms": t_ms,
+                        "confidence": confidence,
+                    },
+                }
             continue
         shot = g.get("shot") if isinstance(g.get("shot"), dict) else None
         if shot and shot.get("t_ms") is not None:
@@ -183,7 +205,7 @@ async def apply_scoreboard(
             period=period,
             clock_s=clock_s,
             source=OVERLAY,
-            confidence=0.8 if overlay.get("source") == "hall_scoreboard" else 0.95,
+            confidence=confidence,
             number=number,
             player_id=roster.get(number) if side == "own" and number is not None else None,
             x=float(shot["x"]) if shot else None,
