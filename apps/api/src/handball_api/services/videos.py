@@ -9,6 +9,7 @@ import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
+from typing import Any
 
 from sqlalchemy import delete, select
 
@@ -530,7 +531,7 @@ async def start_analysis(
     ctx: Ctx,
     asset: VideoAsset,
     match: Match,
-    points: list[dict[str, list[float]]] | None = None,
+    points: list[dict[str, Any]] | None = None,
     space: str = "frame",
     frame_ms: int = 0,
 ) -> ProcessingJob:
@@ -646,6 +647,7 @@ async def _apply_analysis_result(
             "panorama",
             "needs_calibration",
             "calibration_error",
+            "calibration_info",
         )
     }
     auto = r.get("events")
@@ -720,6 +722,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "panorama": meta.get("panorama"),
         "needs_calibration": bool(meta.get("needs_calibration")),
         "calibration_error": meta.get("calibration_error"),
+        "calibration_info": meta.get("calibration_info"),
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,
@@ -758,7 +761,7 @@ async def read_track_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
 async def calibrate_manually(
     ctx: Ctx,
     asset_id: uuid.UUID,
-    points: list[dict[str, list[float]]],
+    points: list[dict[str, Any]],
     space: str = "frame",
     frame_ms: int = 0,
 ) -> ProcessingJob:

@@ -15,3 +15,8 @@ class JobSettings(BaseSettings):
     s3_secret_key: str = "handball-secret"  # noqa: S105
     s3_bucket_artifacts: str = "artifacts"
     work_dir: str = "/tmp/handball-work"  # noqa: S108
+    # learned person detector (ADR 025): ONNX weights baked into the GPU worker image; without
+    # the file the classical background detector runs (ADR 012)
+    detector_model: str = "/models/yolox_s.onnx"
+    detect_every: int = 3
+    detector_threads: int = 0

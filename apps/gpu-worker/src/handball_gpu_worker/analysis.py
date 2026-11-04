@@ -27,7 +27,14 @@ import structlog
 from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_dir
 from handball_vision import __version__ as vision_version
 from handball_vision import formation
-from handball_vision.calibration import CalibrationError, calibrate_points
+from handball_vision import observe as learned
+from handball_vision.calibration import (
+    Calibration,
+    CalibrationError,
+    calibrate_points,
+    calibrate_pose,
+)
+from handball_vision.detection import YoloxDetector
 from handball_vision.motion import CameraMotion
 from handball_vision.pipeline import AnalysisResult, _open, analyse_video, prepare_view
 from handball_vision.teams import hex_to_bgr
@@ -35,6 +42,24 @@ from handball_vision.teams import hex_to_bgr
 log = structlog.get_logger("gpu.analysis")
 
 STAGES = {"download": 0.05, "calibration": 0.1, "tracking": 0.75, "upload": 0.1}
+# with the learned detector the single observation pass dominates (ADR 025)
+STAGES_LEARNED = {
+    "download": 0.03,
+    "observe": 0.72,
+    "calibration": 0.12,
+    "tracking": 0.05,
+    "upload": 0.08,
+}
+
+
+def load_detector(settings: JobSettings) -> YoloxDetector | None:
+    """The learned person detector if its weights are installed, else None (classical path)."""
+    path = Path(settings.detector_model)
+    if not path.is_file():
+        return None
+    return YoloxDetector(path, threads=settings.detector_threads or None)
+
+
 CHUNK_MS = 30_000
 
 
@@ -128,14 +153,34 @@ def run_analysis(
     proxy_key: str,
     prefix: str,
     kits: dict[str, str],
-    calibration_points: list[dict[str, list[float]]] | None = None,
+    calibration_points: list[dict[str, Any]] | None = None,
     calibration_space: str = "frame",
     calibration_frame_ms: int = 0,
     settings: JobSettings | None = None,
     reporter: Reporter | None = None,
 ) -> dict[str, Any]:
     settings = settings or JobSettings()
-    rep = reporter or Reporter(settings.api_internal_url, settings.internal_token, job_id, STAGES)
+    detector = load_detector(settings)
+    rep = reporter or Reporter(
+        settings.api_internal_url,
+        settings.internal_token,
+        job_id,
+        STAGES_LEARNED if detector is not None else STAGES,
+    )
+    if detector is not None:
+        return _run_learned(
+            detector,
+            job_id,
+            bucket,
+            proxy_key,
+            prefix,
+            kits,
+            calibration_points,
+            calibration_space,
+            calibration_frame_ms,
+            settings,
+            rep,
+        )
     Path(settings.work_dir).mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix=f"analysis-{asset_id}-", dir=settings.work_dir))
     started = time.perf_counter()
@@ -248,3 +293,195 @@ def run_analysis(
         raise
     finally:
         shutil.rmtree(work, ignore_errors=True)
+
+
+def _points_calibration(
+    obs: learned.Observations,
+    hall: Any,
+    points: list[dict[str, Any]],
+    space: str,
+    frame_ms: int,
+) -> Calibration:
+    """Calibration from clicked points, in hall-image (panorama) coordinates.
+
+    With a known camera (focal length from the motion) only the pose is fitted, which needs fewer
+    and less spread points (the four goal-post feet are enough; crossbar points carry z = 2 m);
+    without it, or if the pose fit fails, a plain homography."""
+    motion = obs.motion
+    image = [(float(p["image"][0]), float(p["image"][1])) for p in points]
+    court3 = [
+        (float(p["court"][0]), float(p["court"][1]), float(p.get("height_m", 0.0) or 0.0))
+        for p in points
+    ]
+    if space != "panorama" and motion.moving:
+        index = round(frame_ms * obs.fps / 1000)
+        to_canvas = motion.frame_to_canvas(index)
+        if to_canvas is None:
+            raise CalibrationError("the calibrated frame could not be placed on the panorama")
+        pts = cv2.perspectiveTransform(np.array(image, np.float64).reshape(-1, 1, 2), to_canvas)
+        image = [(float(x), float(y)) for x, y in pts.reshape(-1, 2)]
+    size = (int(hall.shape[1]), int(hall.shape[0]))
+    if motion.moving and len(points) >= 4:
+        try:
+            return calibrate_pose(image, court3, motion.canvas_intrinsics(), size)
+        except CalibrationError as exc:
+            log.info("pose_calibration_failed", error=str(exc))
+    flat = [(x, y) for x, y, z in court3 if z == 0.0]
+    flat_img = [im for im, c in zip(image, court3, strict=True) if c[2] == 0.0]
+    return calibrate_points(flat_img, flat, size)
+
+
+def _cached_observations(
+    s3: Any, bucket: str, prefix: str, work: Path
+) -> learned.Observations | None:
+    try:
+        s3.download_file(
+            bucket, prefix + "analysis/motion.npz", str(work / "motion.npz"), Config=TRANSFER
+        )
+        s3.download_file(
+            bucket,
+            prefix + "analysis/observations.npz",
+            str(work / "observations.npz"),
+            Config=TRANSFER,
+        )
+        return learned.load_observations(
+            work / "observations.npz", CameraMotion.load(work / "motion.npz")
+        )
+    except Exception as exc:  # missing or unreadable: observe again
+        log.info("observation_cache_miss", error=str(exc))
+        return None
+
+
+def _run_learned(
+    detector: YoloxDetector,
+    job_id: str,
+    bucket: str,
+    proxy_key: str,
+    prefix: str,
+    kits: dict[str, str],
+    calibration_points: list[dict[str, Any]] | None,
+    calibration_space: str,
+    calibration_frame_ms: int,
+    settings: JobSettings,
+    rep: Reporter,
+) -> dict[str, Any]:
+    """Learned detector path (ADR 025): one observation pass, automatic calibration, tracking.
+    A re-run with clicked points reuses the stored observations and takes seconds."""
+    Path(settings.work_dir).mkdir(parents=True, exist_ok=True)
+    work = Path(tempfile.mkdtemp(prefix="analysis-", dir=settings.work_dir))
+    started = time.perf_counter()
+    try:
+        s3 = s3_client(
+            settings.s3_endpoint_url,
+            settings.s3_region,
+            settings.s3_access_key,
+            settings.s3_secret_key,
+        )
+        rep.stage("download")
+        obs = (
+            _cached_observations(s3, settings.s3_bucket_artifacts, prefix, work)
+            if calibration_points
+            else None
+        )
+        rep.stage("observe")
+        if obs is None:
+            video = work / "proxy.mp4"
+            s3.download_file(bucket, proxy_key, str(video), Config=TRANSFER)
+            obs = learned.observe(
+                video,
+                detector,
+                detect_every=max(1, settings.detect_every),
+                progress=lambda _stage, f: rep.fraction(f),
+            )
+            learned.save_observations(obs, work / "observations.npz")
+            upload_dir_files(
+                s3, settings.s3_bucket_artifacts, work, ["observations.npz"], prefix + "analysis/"
+            )
+        hall = obs.motion.background()
+        view = {
+            "camera": "moving" if obs.motion.moving else "fixed",
+            "panorama": {"width": int(hall.shape[1]), "height": int(hall.shape[0])},
+        }
+        rep.stage("calibration")
+        info: dict[str, Any] = {}
+        try:
+            if calibration_points:
+                calib = _points_calibration(
+                    obs, hall, calibration_points, calibration_space, calibration_frame_ms
+                )
+            else:
+                calib, info = learned.auto_calibrate(obs, hall)
+        except CalibrationError as exc:
+            if calibration_points:
+                raise
+            _store_view(s3, settings.s3_bucket_artifacts, prefix, work, obs.motion)
+            pending: dict[str, Any] = {
+                **view,
+                "needs_calibration": True,
+                "calibration_error": str(exc),
+                "calibration": None,
+                "tracks": [],
+                "fps": obs.fps,
+                "frames": 0,
+                "chunks": 0,
+                "chunk_ms": CHUNK_MS,
+                "detector": "model",
+                "versions": {"vision": vision_version, "detector": detector.model},
+                "timings_s": {k: round(v, 2) for k, v in obs.timings_s.items()},
+                "elapsed_s": round(time.perf_counter() - started, 1),
+                "stats": {"camera": view["camera"], "motion": obs.motion.stats},
+                "formations": [],
+            }
+            rep.succeed(pending)
+            log.info("analysis_needs_calibration", job_id=job_id, reason=str(exc))
+            return pending
+        # the motion is saved after calibration (a fixed camera's focal length is set there)
+        _store_view(s3, settings.s3_bucket_artifacts, prefix, work, obs.motion)
+        rep.stage("tracking")
+        bgr = {k: hex_to_bgr(v) for k, v in kits.items() if v}
+        result = learned.track(obs, calib, bgr, hall, progress=lambda _stage, f: rep.fraction(f))
+        rep.stage("upload")
+        out = work / "analysis"
+        out.mkdir()
+        result.write_parquet(out / "tracks.parquet")
+        chunks = write_chunks(result, out)
+        upload_dir(s3, settings.s3_bucket_artifacts, out, prefix + "analysis/")
+        payload: dict[str, Any] = {
+            **view,
+            "needs_calibration": False,
+            "calibration": result.calibration.to_dict(),
+            "calibration_info": info,
+            "tracks": result.summary(),
+            "fps": result.fps,
+            "frames": result.frames,
+            "chunks": chunks,
+            "chunk_ms": CHUNK_MS,
+            "detector": result.detector_source,
+            "versions": {"vision": vision_version, "detector": detector.model},
+            "timings_s": {k: round(v, 2) for k, v in result.timings_s.items()},
+            "elapsed_s": round(time.perf_counter() - started, 1),
+            "stats": result.extra,
+            "formations": detect_formations(result),
+            "events": events_payload(result),
+        }
+        rep.succeed(payload)
+        log.info(
+            "analysis_done",
+            job_id=job_id,
+            tracks=len(payload["tracks"]),
+            elapsed_s=payload["elapsed_s"],
+        )
+        return payload
+    except CalibrationError as exc:
+        rep.fail(f"calibration: {exc}")
+        raise
+    except Exception as exc:
+        rep.fail(f"{type(exc).__name__}: {exc}")
+        raise
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def upload_dir_files(s3: Any, bucket: str, root: Path, names: list[str], prefix: str) -> None:
+    for name in names:
+        s3.upload_file(str(root / name), bucket, prefix + name, Config=TRANSFER)

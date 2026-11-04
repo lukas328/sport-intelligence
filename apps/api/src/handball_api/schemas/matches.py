@@ -443,6 +443,10 @@ class AnalysisOut(ApiModel):
     panorama: PanoramaOut | None = None  # hall image to mark the court on
     needs_calibration: bool = False  # the court was not found automatically
     calibration_error: str | None = None
+    calibration_info: dict[str, Any] | None = Field(
+        default=None,
+        description="automatic calibration: goal fit, players on the court, camera position",
+    )
     error_code: str | None = Field(
         default=None, description="calibration, unreadable, too_short, timeout or generic"
     )
@@ -451,6 +455,9 @@ class AnalysisOut(ApiModel):
 class CalibrationPoint(ApiModel):
     image: tuple[float, float]
     court: tuple[float, float]
+    height_m: float = Field(
+        default=0.0, ge=0.0, le=2.5, description="above the floor, e.g. 2 for the crossbar"
+    )
 
     @model_validator(mode="after")
     def _ranges(self) -> CalibrationPoint:

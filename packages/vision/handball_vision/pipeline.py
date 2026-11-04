@@ -35,6 +35,7 @@ from handball_vision.detection import (
     Detector,
     MovingBackgroundDetector,
     court_mask,
+    filter_on_court,
     foot_positions,
 )
 from handball_vision.events import EventResult, refine_teams
@@ -217,6 +218,15 @@ def prepare_view(path: Path, max_frames: int | None = None) -> CameraMotion:
     return fixed
 
 
+def _people(det: Detector, frame: U8, calib: Calibration) -> list[Detection]:
+    """People on the court in one frame. A learned detector finds everyone in the hall (bench,
+    spectators, people behind the railing); only those standing on the court are kept."""
+    found = det.detect([frame])[0]
+    if det.source == "model":
+        return filter_on_court(calib, found)
+    return [d for d in found if d.cls != "ball"]
+
+
 def _confident_label(
     teams: TeamAssigner, colour: NDArray[np.float64], min_conf: float = 0.25
 ) -> str | None:
@@ -292,7 +302,7 @@ def analyse_video(
         dets: list[Detection] = []
         if n % detect_every == 0:
             t0 = time.perf_counter()
-            dets = [d for d in det.detect([frame])[0] if d.cls != "ball"]
+            dets = _people(det, frame, calib)
             timings["detection"] += time.perf_counter() - t0
         n_dets += len(dets)
         t0 = time.perf_counter()
@@ -339,7 +349,17 @@ def _finish(
     for tid in {p.track_id for p in points}:
         r = teams.result(tid)
         if r:
-            team_out[tid] = {"label": r.label, "confidence": r.confidence, "samples": r.samples}
+            lab = np.median(np.stack(teams.samples[tid]), axis=0)
+            bgr = cv2.cvtColor(
+                np.clip(lab, 0, 255).astype(np.uint8).reshape(1, 1, 3), cv2.COLOR_LAB2BGR
+            )[0, 0]
+            team_out[tid] = {
+                "label": r.label,
+                "confidence": r.confidence,
+                "samples": r.samples,
+                "colour": f"#{int(bgr[2]):02x}{int(bgr[1]):02x}{int(bgr[0]):02x}",
+                "lab": [round(float(v), 1) for v in lab],
+            }
     # second signal besides the kit colour: throw-off formations (addendum 01, 4.8)
     pts = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points]
     refined = refine_teams(
@@ -441,14 +461,17 @@ def _analyse_moving(
     n = n_dets = n_lost = 0
     for frame in _frames(path, max_frames):
         t0 = time.perf_counter()
-        frame_calib = moving_det.set_frame(n)
+        # a learned detector needs only the court homography, not the rendered background
+        frame_calib = (
+            moving_det.set_frame(n) if detector is None else moving_det.frame_calibration(n)
+        )
         timings["view"] += time.perf_counter() - t0
         dets: list[Detection] = []
         if frame_calib is None:
             n_lost += 1
         elif n % detect_every == 0:
             t0 = time.perf_counter()
-            dets = [d for d in det.detect([frame])[0] if d.cls != "ball"]
+            dets = _people(det, frame, frame_calib)
             timings["detection"] += time.perf_counter() - t0
         n_dets += len(dets)
         t0 = time.perf_counter()

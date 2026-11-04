@@ -31,6 +31,24 @@ def bgr_to_lab(bgr: tuple[int, int, int]) -> NDArray[np.float64]:
     return cv2.cvtColor(np.array([[bgr]], np.uint8), cv2.COLOR_BGR2LAB)[0, 0].astype(np.float64)
 
 
+def colour_distance(colour: NDArray[np.float64], kit: NDArray[np.float64]) -> float:
+    """Distance between a torso colour seen in the video and a kit colour (both Lab, OpenCV
+    scale). Hall video washes colours out (a yellow shirt looks beige, red looks pink), so a
+    coloured kit is compared by hue (direction of a, b around neutral), not by plain distance;
+    white, black and grey kits are compared by lightness and lack of colour."""
+    ca = np.array([colour[1] - 128.0, colour[2] - 128.0])
+    ka = np.array([kit[1] - 128.0, kit[2] - 128.0])
+    mc, mk = float(np.hypot(*ca)), float(np.hypot(*ka))
+    dl = abs(float(colour[0]) - float(kit[0]))
+    if mk >= 15:
+        if mc < 6:
+            return 45.0 + 0.1 * dl
+        cos = float(ca @ ka) / (mc * mk)
+        hue = float(np.degrees(np.arccos(np.clip(cos, -1.0, 1.0))))
+        return 0.8 * hue + 0.12 * dl + max(0.0, 8.0 - mc) * 2.0
+    return 0.45 * dl + 1.6 * mc
+
+
 @dataclass(frozen=True)
 class TeamResult:
     label: str
@@ -67,7 +85,7 @@ class TeamAssigner:
             self.samples[track_id].append(c)
 
     def classify(self, colour: NDArray[np.float64]) -> tuple[str, float]:
-        dists = {k: float(np.linalg.norm(colour - v)) for k, v in self.kits.items()}
+        dists = {k: colour_distance(colour, v) for k, v in self.kits.items()}
         ranked = sorted(dists.items(), key=lambda kv: kv[1])
         best, second = ranked[0], ranked[1]
         confidence = 1.0 - best[1] / max(second[1], 1e-6)

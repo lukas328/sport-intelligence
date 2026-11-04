@@ -21,11 +21,21 @@ COPY apps/gpu-worker apps/gpu-worker
 RUN --mount=type=secret,id=extra_ca,required=false --mount=type=cache,target=/root/.cache/uv \
     if [ -s /run/secrets/extra_ca ]; then export SSL_CERT_FILE=/run/secrets/extra_ca PIP_CERT=/run/secrets/extra_ca; fi; uv sync --frozen --no-dev --package handball-gpu-worker --no-editable
 
+# Model weights (ADR 003/025): pinned release and checksum, never in the repository
+FROM base AS models
+ARG YOLOX_URL=https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx
+ARG YOLOX_SHA256=c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then export SSL_CERT_FILE=/run/secrets/extra_ca; fi; \
+    mkdir -p /models && python -c "import os,urllib.request,ssl; ctx=ssl.create_default_context(cafile=os.environ.get('SSL_CERT_FILE')); open('/models/yolox_s.onnx','wb').write(urllib.request.urlopen('${YOLOX_URL}', context=ctx).read())" \
+    && echo "${YOLOX_SHA256}  /models/yolox_s.onnx" | sha256sum -c -
+
 # CPU fallback image. The CUDA image (Dockerfile.cuda) follows in M3 with onnxruntime-gpu + NVDEC.
 FROM python:3.12-slim AS runtime
 RUN useradd --system --uid 10001 app
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
+COPY --from=models /models /models
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1
 USER app
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 CMD ["handball-gpu-worker", "healthcheck"]

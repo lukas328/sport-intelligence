@@ -9,6 +9,7 @@ coordinates makes gates physical (max sprint speed) instead of pixel based.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -58,6 +59,7 @@ class Track:
 
     hits: int = 1
     misses: int = 0
+    hidden: int = 0  # steps spent outside the camera's view (panning cameras)
     confirmed: bool = False
     history: list[tuple[int, float, float, bool]] = field(
         default_factory=list
@@ -93,12 +95,14 @@ class CourtTracker:
         colour_gate: float = 40.0,
         predict_output_s: float = 0.4,
         label_penalty_m: float = 0.6,
+        max_hidden_s: float = 90.0,
     ) -> None:
         self.dt = 1 / fps
         self.gate = gate_m
         self.high = high
         self.min_hits = min_hits
         self.max_age = round(max_age_s * fps)
+        self.max_hidden = round(max_hidden_s * fps)
         self.r = meas_noise_m
         self.cw = colour_weight
         self.label_penalty = label_penalty_m
@@ -125,9 +129,8 @@ class CourtTracker:
                 tl = t.label
                 if tl is None:
                     continue
-                penalty = np.array(
-                    [self.label_penalty if (lb is not None and lb != tl) else 0.0 for lb in labels]
-                )
+                # a confident team label never jumps to the other team's player
+                penalty = np.array([1e6 if (lb is not None and lb != tl) else 0.0 for lb in labels])
                 cost[i] = cost[i] + penalty
         if feats is not None and len(feats):
             for i, t in enumerate(tracks):
@@ -137,7 +140,12 @@ class CourtTracker:
                 cd = np.where(np.isnan(cd), 0.0, cd)
                 cost[i] = np.where(cd > self.cgate, 1e6, cost[i] + self.cw * cd)
         # inflate the gate for tracks that have been predicted for a while
-        gates = np.array([gate + 0.5 * min(t.misses, 6) * self.dt * 7 for t in tracks])
+        gates = np.array(
+            [
+                gate + 0.5 * min(t.misses, 6) * self.dt * 7 + min(4.0, t.hidden * self.dt * 1.0)
+                for t in tracks
+            ]
+        )
         cost = np.where(cost > gates[:, None], 1e6, cost)
         r, c = linear_sum_assignment(cost)
         pairs = [(i, j) for i, j in zip(r, c, strict=True) if cost[i, j] < 1e6]
@@ -155,11 +163,23 @@ class CourtTracker:
         scores: NDArray[np.floating],
         features: F64 | None = None,
         labels: list[str | None] | None = None,
+        visible: Callable[[F64], NDArray[np.bool_]] | None = None,
     ) -> list[TrackPoint]:
-        """positions: (n, 2) court metres; scores: (n,); features: optional (n, 3) colours (NaN = unknown)."""
+        """positions: (n, 2) court metres; scores: (n,); features: optional (n, 3) colours (NaN =
+        unknown); `visible` (panning cameras) tells which court points the frame shows: a player
+        outside the view is not missing, so his track waits (up to `max_hidden_s`) instead of
+        ageing, and is matched again with a wider gate when he comes back into view."""
         self.frame += 1
-        for t in self.tracks:
-            t.kf.predict(self.dt)
+        hidden_now: set[int] = set()
+        if visible is not None and self.tracks:
+            seen = visible(np.array([t.pos for t in self.tracks]))
+            hidden_now = {i for i, v in enumerate(seen) if not v}
+        for i, t in enumerate(self.tracks):
+            if i in hidden_now:
+                t.kf.x[2:] *= 0.8  # an unseen player is assumed to slow down, not run away
+                t.kf.predict(self.dt, q=1.0)
+            else:
+                t.kf.predict(self.dt)
         positions = np.asarray(positions, dtype=np.float64).reshape(-1, 2)
         scores = np.asarray(scores, dtype=np.float64).reshape(-1)
         high = np.nonzero(scores >= self.high)[0]
@@ -201,8 +221,13 @@ class CourtTracker:
                 t.misses = 0
                 if t.hits >= self.min_hits:
                     t.confirmed = True
+            elif ti in hidden_now:
+                t.hidden += 1
             else:
                 t.misses += 1
+        for ti in assigned:
+            if ti < len(self.tracks):
+                self.tracks[ti].hidden = 0
         # new tracks only from confident unmatched detections
         for dj in un_d:
             j = int(high[dj])
@@ -210,12 +235,17 @@ class CourtTracker:
             self.tracks.append(Track(self._next, _Kalman.start(positions[j]), feature=f))
             assigned[len(self.tracks) - 1] = j
             self._next += 1
-        self.tracks = [t for t in self.tracks if t.misses <= (self.max_age if t.confirmed else 1)]
+        self.tracks = [
+            t
+            for t in self.tracks
+            if t.misses <= (self.max_age if t.confirmed else 1)
+            and t.hidden <= (self.max_hidden if t.confirmed else 0)
+        ]
 
         out = []
         index_of = {id(self.tracks[i]): d for i, d in assigned.items() if i < len(self.tracks)}
         for t in self.tracks:
-            if not t.confirmed or t.misses > self.predict_out:
+            if not t.confirmed or t.misses > self.predict_out or t.hidden > 0:
                 continue
             x, y, vx, vy = (float(v) for v in t.kf.x)
             obs = t.misses == 0
@@ -226,6 +256,21 @@ class CourtTracker:
                 )
             )
         return out
+
+
+def same_shirt(a: F64, b: F64, lab_gate: float = 35.0, hue_gate_deg: float = 28.0) -> bool:
+    """Could two median torso colours (Lab) be the same shirt? Coloured shirts must agree in hue
+    (video washes saturation out, hue survives); grey ones in lightness."""
+    ca = np.array([a[1] - 128.0, a[2] - 128.0])
+    cb = np.array([b[1] - 128.0, b[2] - 128.0])
+    ma, mb = float(np.hypot(*ca)), float(np.hypot(*cb))
+    if ma >= 7 and mb >= 7:
+        cos = float(ca @ cb) / (ma * mb)
+        if np.degrees(np.arccos(np.clip(cos, -1, 1))) > hue_gate_deg:
+            return False
+    elif (ma >= 12) != (mb >= 12):  # one clearly coloured, the other grey
+        return False
+    return float(np.linalg.norm(a - b)) <= lab_gate * 1.5
 
 
 def stitch(
@@ -270,11 +315,7 @@ def stitch(
                 if d > 1.0 + speed_mps * gap / fps:
                     continue
                 ca, cb = cols[a], cols[b]
-                if (
-                    ca is not None
-                    and cb is not None
-                    and float(np.linalg.norm(ca - cb)) > colour_gate
-                ):
+                if ca is not None and cb is not None and not same_shirt(ca, cb, colour_gate):
                     continue
                 cost[a, b] = d + 0.5 * gap / fps
         r, c = linear_sum_assignment(cost)

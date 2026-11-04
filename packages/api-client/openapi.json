@@ -91,6 +91,19 @@
             ],
             "title": "Calibration Error"
           },
+          "calibration_info": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "automatic calibration: goal fit, players on the court, camera position",
+            "title": "Calibration Info"
+          },
           "camera": {
             "anyOf": [
               {
@@ -1223,6 +1236,14 @@
             ],
             "title": "Court",
             "type": "array"
+          },
+          "height_m": {
+            "default": 0.0,
+            "description": "above the floor, e.g. 2 for the crossbar",
+            "maximum": 2.5,
+            "minimum": 0.0,
+            "title": "Height M",
+            "type": "number"
           },
           "image": {
             "maxItems": 2,

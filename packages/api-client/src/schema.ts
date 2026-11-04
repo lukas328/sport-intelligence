@@ -3932,6 +3932,13 @@ export interface components {
             calibration: components["schemas"]["CalibrationOut"] | null;
             /** Calibration Error */
             calibration_error?: string | null;
+            /**
+             * Calibration Info
+             * @description automatic calibration: goal fit, players on the court, camera position
+             */
+            calibration_info?: {
+                [key: string]: unknown;
+            } | null;
             /** Camera */
             camera?: ("fixed" | "moving") | null;
             /** Chunk Ms */
@@ -4314,6 +4321,12 @@ export interface components {
                 number,
                 number
             ];
+            /**
+             * Height M
+             * @description above the floor, e.g. 2 for the crossbar
+             * @default 0
+             */
+            height_m?: number;
             /** Image */
             image: [
                 number,
