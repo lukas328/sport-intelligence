@@ -61,6 +61,14 @@ Each question has the **assumption** I work with until it is answered. Status: o
   Zenodo and Roboflow are blocked. *Assumption:* heuristic baselines now (ADR 012); trained models are added
   in an environment with access, through the ONNX detector and the model registry.
 
+- **Q-ML-5 Re-identification model licence**: the FastReID weights are Apache-2.0 but trained on MSMT17
+  (non-commercial research terms). *Assumption:* not shipped; re-identification runs only where an
+  approved `reid.onnx` is installed (ml/models/reid-fastreid.md). Options: legal clearance, a model
+  trained on licensed data, or our own handball crops labelled through the shirt numbers.
+- **Q-ML-6 Ball labels**: no handball ball dataset is reachable from here (Kaggle, Google Drive,
+  Zenodo blocked). *Assumption:* self-labelled candidates from our clips (about 100 balls so far);
+  allowing those hosts would let us train on TeamTrack-style data instead.
+
 ## Legal and privacy
 - **Q-LEGAL-1** Privacy policy, DPA (AVV) and terms need legal review (placeholders from M8/M9).
 - **Q-LEGAL-2 Youth consent workflow**: do parents get their own account, or does the club upload signed

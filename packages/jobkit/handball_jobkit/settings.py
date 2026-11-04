@@ -20,3 +20,10 @@ class JobSettings(BaseSettings):
     detector_model: str = "/models/yolox_s.onnx"
     detect_every: int = 3
     detector_threads: int = 0
+    # shirt numbers (PP-OCRv4 text models) and re-identification (person appearance network);
+    # each step runs only when its model files are installed
+    number_det_model: str = "/models/ch_PP-OCRv4_det_infer.onnx"
+    number_rec_model: str = "/models/ch_PP-OCRv4_rec_infer.onnx"
+    number_every: int = 6  # frames; 3 on the GPU image (every detection frame)
+    reid_model: str = "/models/reid.onnx"
+    reid_every: int = 30  # frames: about once per second per player

@@ -604,6 +604,24 @@ async def _apply_analysis_result(
     await ctx.db.execute(delete(Track).where(Track.video_asset_id == asset.id))
     tracks = r.get("tracks")
     detector = str(r.get("detector") or "heuristic")
+    # own players by shirt number (read or recognised by the analysis): "home" is the own kit
+    roster: dict[int, uuid.UUID] = {}
+    if isinstance(tracks, list) and any(t.get("number") is not None for t in tracks):
+        owner = await ctx.db.get(Match, asset.match_id)
+        if owner is not None and owner.season_id is not None:
+            roster = {
+                n: pid
+                for n, pid in (
+                    await ctx.db.execute(
+                        select(RosterEntry.jersey_number, RosterEntry.player_id).where(
+                            RosterEntry.season_id == owner.season_id,
+                            RosterEntry.team_id == owner.team_id,
+                            RosterEntry.active.is_(True),
+                        )
+                    )
+                ).all()
+                if n is not None
+            }
     if isinstance(tracks, list):
         for t in tracks:
             first, last = int(t["first_ms"]), int(t["last_ms"])
@@ -623,6 +641,10 @@ async def _apply_analysis_result(
                 source=detector,
                 pipeline_version=job.pipeline_version,
             )
+            if track.number is not None and str(track.team or "").startswith("home"):
+                track.player_id = roster.get(track.number)
+                if track.player_id is not None:
+                    track.player_confidence = float(t.get("number_confidence") or 0.6)
             for team, f0, l0, pid, num in previous:
                 shared = min(last, l0) - max(first, f0)
                 if team == track.team and shared > 0.8 * max(1, last - first):

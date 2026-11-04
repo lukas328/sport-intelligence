@@ -43,6 +43,8 @@ class FrameObservation:
         NDArray[np.float64] | None
     ]  # Lab pixels of the torso (n x 3), not yet floor-filtered
     balls: list[Detection]
+    numbers: dict[int, tuple[int, float]] = field(default_factory=dict)  # person -> (number, conf)
+    embeds: dict[int, NDArray[np.float64]] = field(default_factory=dict)  # person -> appearance
 
 
 @dataclass
@@ -77,6 +79,10 @@ def observe(
     max_frames: int | None = None,
     progress: Progress | None = None,
     on_frame: Callable[[int, U8], None] | None = None,
+    numbers: Any = None,  # handball_vision.numbers.NumberReader
+    number_every: int = 15,
+    embedder: Any = None,  # handball_vision.reid.Embedder
+    embed_every: int = 30,
 ) -> Observations:
     """`on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
     video is decoded only once."""
@@ -106,10 +112,18 @@ def observe(
             balls = [d for d in found if d.cls == "ball"]
             timings["detection"] += time.perf_counter() - t0
             t0 = time.perf_counter()
-            frames.append(
-                FrameObservation(n, people, [_torso_sample(frame, d) for d in people], balls)
-            )
+            fo = FrameObservation(n, people, [_torso_sample(frame, d) for d in people], balls)
+            frames.append(fo)
             timings["appearance"] += time.perf_counter() - t0
+            if numbers is not None and n % number_every == 0:
+                t0 = time.perf_counter()
+                fo.numbers = read_numbers(numbers, frame, people)
+                timings["numbers"] += time.perf_counter() - t0
+            if embedder is not None and n % embed_every == 0:
+                t0 = time.perf_counter()
+                vecs = embedder.embed(frame, [(d.x1, d.y1, d.x2, d.y2) for d in people])
+                fo.embeds = {k: v for k, v in enumerate(vecs) if v is not None}
+                timings["appearance_net"] += time.perf_counter() - t0
             if n % segment_every == 0:
                 t0 = time.perf_counter()
                 segments[n] = topview.frame_segments(
@@ -125,6 +139,24 @@ def observe(
         step = len(motion.samples) / 30
         motion.samples = [motion.samples[int(k * step)] for k in range(30)]
     return Observations(motion, frames, segments, fps, n, dict(timings), detector.source)
+
+
+def read_numbers(reader: Any, frame: U8, people: list[Detection]) -> dict[int, tuple[int, float]]:
+    """Shirt numbers of the players large, sharp and fully inside the frame."""
+    from handball_vision.numbers import MIN_BOX_HEIGHT, sharp_enough
+
+    h, w = frame.shape[:2]
+    out: dict[int, tuple[int, float]] = {}
+    for k, d in enumerate(people):
+        box = (d.x1, d.y1, d.x2, d.y2)
+        if d.y2 - d.y1 < MIN_BOX_HEIGHT or d.x1 < 2 or d.y1 < 2 or d.x2 > w - 2 or d.y2 > h - 2:
+            continue
+        if not sharp_enough(frame, box):
+            continue
+        r = reader.read_player(frame, box)
+        if r is not None:
+            out[k] = (r.number, round(r.confidence, 3))
+    return out
 
 
 def save_observations(obs: Observations, path: Path) -> None:
@@ -146,6 +178,9 @@ def save_observations(obs: Observations, path: Path) -> None:
             kinds.append(1)
             has_torso.append(False)
             torsos.append(np.zeros((48, 3), np.uint8))
+    nums = [(fo.index, k, n, c) for fo in obs.frames for k, (n, c) in fo.numbers.items()]
+    emb_idx = [(fo.index, k) for fo in obs.frames for k in fo.embeds]
+    embs = [v for fo in obs.frames for v in fo.embeds.values()]
     seg_idx = [i for i, sg in obs.segments.items() for _ in range(len(sg))]
     segs = (
         np.vstack([sg for sg in obs.segments.values() if len(sg)])
@@ -164,6 +199,9 @@ def save_observations(obs: Observations, path: Path) -> None:
         seg_idx=np.array(seg_idx, np.int32),
         segs=np.asarray(segs, np.float32).reshape(-1, 4),
         meta=np.array([obs.fps, obs.total], np.float64),
+        numbers=np.array(nums, np.float64).reshape(-1, 4),  # frame, person, number, confidence
+        emb_idx=np.array(emb_idx, np.int32).reshape(-1, 2),
+        embs=np.array(embs, np.float16).reshape(len(embs), -1) if embs else np.zeros((0, 0)),
     )
 
 
@@ -189,6 +227,13 @@ def load_observations(path: Path, motion: CameraMotion, source: str = "model") -
             fo.torsos.append(t if ht else None)
         else:
             fo.balls.append(d)
+    if "embs" in z.files and len(z["emb_idx"]):
+        for (f, k), v in zip(z["emb_idx"], z["embs"], strict=True):
+            if int(f) in by:
+                by[int(f)].embeds[int(k)] = np.asarray(v, np.float64)
+    for f, k, n, c in z["numbers"] if "numbers" in z.files else []:
+        if int(f) in by:
+            by[int(f)].numbers[int(k)] = (int(n), float(c))
     segments: dict[int, F64] = defaultdict(lambda: np.zeros((0, 4)))
     for i in np.unique(z["seg_idx"]):
         segments[int(i)] = np.asarray(z["segs"][z["seg_idx"] == i], dtype=np.float64)
@@ -362,6 +407,7 @@ def track(
     progress: Progress | None = None,
 ) -> Any:
     """Tracks, teams and the AnalysisResult from stored observations and a hall calibration."""
+    from handball_vision.numbers import Reading
     from handball_vision.pipeline import _confident_label, _finish
     from handball_vision.teams import TeamAssigner
     from handball_vision.tracking import CourtTracker
@@ -384,6 +430,8 @@ def track(
     step_frames = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
     tracker = CourtTracker(fps=obs.fps / step_frames)
     points = []
+    number_reads: dict[int, list[Reading]] = defaultdict(list)
+    vectors: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
     n_dets = n_lost = 0
     for k, fo in enumerate(obs.frames):
         t0 = time.perf_counter()
@@ -437,7 +485,16 @@ def track(
         for tp in stepped:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
                 teams.samples[tp.track_id].append(feats[tp.det_index])
-        points += stepped
+            if tp.det_index is not None and keep[tp.det_index] in fo.embeds:
+                vectors[tp.track_id].append((fo.index, fo.embeds[keep[tp.det_index]]))
+            if tp.det_index is not None and keep[tp.det_index] in fo.numbers:
+                num, conf = fo.numbers[keep[tp.det_index]]
+                number_reads[tp.track_id].append(Reading(num, conf, fo.index))
+        # det_index from here on: the person's index in the frame's observation (all people)
+        points += [
+            replace(tp, det_index=None if tp.det_index is None else keep[tp.det_index])
+            for tp in stepped
+        ]
         if progress and k % 50 == 0:
             progress("tracking", k / max(1, len(obs.frames)))
     return _finish(
@@ -455,4 +512,6 @@ def track(
             "frames_without_view": n_lost,
             "detect_every": step_frames,
         },
+        number_reads,
+        vectors,
     )

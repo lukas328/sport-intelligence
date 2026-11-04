@@ -37,6 +37,7 @@ from handball_vision.calibration import (
 )
 from handball_vision.detection import YoloxDetector
 from handball_vision.motion import CameraMotion
+from handball_vision.numbers import NumberReader
 from handball_vision.pipeline import (
     AnalysisResult,
     _open,
@@ -44,6 +45,7 @@ from handball_vision.pipeline import (
     prepare_view,
     sample_frames,
 )
+from handball_vision.reid import Embedder
 from handball_vision.teams import hex_to_bgr
 
 log = structlog.get_logger("gpu.analysis")
@@ -65,6 +67,18 @@ def load_detector(settings: JobSettings) -> YoloxDetector | None:
     if not path.is_file():
         return None
     return YoloxDetector(path, threads=settings.detector_threads or None)
+
+
+def load_number_reader(settings: JobSettings) -> NumberReader | None:
+    det, rec = Path(settings.number_det_model), Path(settings.number_rec_model)
+    if not (det.is_file() and rec.is_file()):
+        return None
+    return NumberReader(det, rec, threads=settings.detector_threads or None)
+
+
+def load_embedder(settings: JobSettings) -> Embedder | None:
+    path = Path(settings.reid_model)
+    return Embedder(path, threads=settings.detector_threads or None) if path.is_file() else None
 
 
 CHUNK_MS = 30_000
@@ -453,6 +467,10 @@ def _run_learned(
                 detect_every=max(1, settings.detect_every),
                 progress=lambda _stage, f: rep.fraction(f),
                 on_frame=reader.add if reader else None,
+                numbers=load_number_reader(settings),
+                number_every=max(1, settings.number_every),
+                embedder=load_embedder(settings),
+                embed_every=max(1, settings.reid_every),
             )
             overlay = _overlay_summary(reader)
             counts = sorted(len(fo.people) for fo in obs.frames)

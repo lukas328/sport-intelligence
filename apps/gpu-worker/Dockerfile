@@ -29,6 +29,16 @@ RUN --mount=type=secret,id=extra_ca,required=false \
     if [ -s /run/secrets/extra_ca ]; then export SSL_CERT_FILE=/run/secrets/extra_ca; fi; \
     mkdir -p /models && python -c "import os,urllib.request,ssl; ctx=ssl.create_default_context(cafile=os.environ.get('SSL_CERT_FILE')); open('/models/yolox_s.onnx','wb').write(urllib.request.urlopen('${YOLOX_URL}', context=ctx).read())" \
     && echo "${YOLOX_SHA256}  /models/yolox_s.onnx" | sha256sum -c -
+# Shirt numbers (ADR 027): PP-OCRv4 text models (PaddleOCR, Apache-2.0) from the pinned
+# rapidocr_onnxruntime wheel on PyPI (Apache-2.0); only the two model files are kept
+ARG RAPIDOCR_VERSION=1.4.4
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then export PIP_CERT=/run/secrets/extra_ca; fi; \
+    python -m pip download --no-deps --no-cache-dir -d /tmp/wheel "rapidocr_onnxruntime==${RAPIDOCR_VERSION}" \
+    && python -c "import zipfile,glob; z=zipfile.ZipFile(glob.glob('/tmp/wheel/*.whl')[0]); [open('/models/'+n.split('/')[-1],'wb').write(z.read(n)) for n in z.namelist() if n.endswith(('_PP-OCRv4_det_infer.onnx','_PP-OCRv4_rec_infer.onnx'))]" \
+    && rm -rf /tmp/wheel \
+    && echo "d2a7720d45a54257208b1e13e36a8479894cb74155a5efe29462512d42f49da9  /models/ch_PP-OCRv4_det_infer.onnx" | sha256sum -c - \
+    && echo "48fc40f24f6d2a207a2b1091d3437eb3cc3eb6b676dc3ef9c37384005483683b  /models/ch_PP-OCRv4_rec_infer.onnx" | sha256sum -c -
 
 # CPU fallback image. The CUDA image (Dockerfile.cuda) follows in M3 with onnxruntime-gpu + NVDEC.
 FROM python:3.12-slim AS runtime
