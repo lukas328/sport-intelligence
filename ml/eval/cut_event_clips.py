@@ -1,11 +1,11 @@
 """Short clips around officially logged events (goals, shots, saves) from an aligned log
 (`align_official.py`): the raw material for goal and shot scenes without hand labelling.
 
-The logged time is when the table entered the event, a few seconds off the actual shot either way,
+The logged time is when the table entered the event, typically 4 to 6 s after the goal (ml/goals),
 so each clip spans `before` seconds before to `after` seconds after it.
 
 usage: python ml/eval/cut_event_clips.py VIDEO ALIGNED.json OUT_DIR [--kinds goal,penalty_goal]
-       [--before 6] [--after 3] [--width 1280]
+       [--before 12] [--after 3] [--width 1280]
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ def main() -> None:
     ap.add_argument("aligned", type=Path)
     ap.add_argument("out", type=Path)
     ap.add_argument("--kinds", default="goal,penalty_goal")
-    ap.add_argument("--before", type=float, default=6.0)
+    ap.add_argument("--before", type=float, default=12.0)
     ap.add_argument("--after", type=float, default=3.0)
     ap.add_argument("--width", type=int, default=1280)
     a = ap.parse_args()
