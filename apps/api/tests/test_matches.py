@@ -653,5 +653,5 @@ async def test_possessions_summary(
         )
     data = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/possessions")).json()
     assert len(data["phases"]) == 3 and data["estimated"]
-    assert data["summary"]["own"] == {"count": 2, "avg_s": 15.0, "share": 0.5}
+    assert data["summary"]["own"] == {"count": 2, "fast_breaks": 0, "avg_s": 15.0, "share": 0.5}
     assert data["summary"]["opponent"]["count"] == 1
