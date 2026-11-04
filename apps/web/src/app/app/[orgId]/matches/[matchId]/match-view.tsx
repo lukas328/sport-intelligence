@@ -188,12 +188,20 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 </tr>
               </thead>
               <tbody>
-                {[
-                  [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
-                  [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
-                  [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
-                  ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
-                ].map(([label, a, b]) => (
+                {(stats.data.quality.attempts_known === false
+                  ? // only goals are known (score overlay): goals, attacks and goals per attack
+                    [
+                      [t("stats.goals"), stats.data.own.goals, stats.data.opponent.goals],
+                      [t("stats.possessions"), stats.data.own.possessions ?? "-", stats.data.opponent.possessions ?? "-"],
+                      [t("stats.efficiency"), pctLabel(stats.data.own.attack_efficiency), pctLabel(stats.data.opponent.attack_efficiency)],
+                    ]
+                  : [
+                      [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
+                      [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
+                      [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
+                      ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
+                    ]
+                ).map(([label, a, b]) => (
                   <tr key={String(label)} className="border-t border-current/20">
                     <th scope="row" className="py-1.5 pr-4 text-left font-medium">{label}</th>
                     <td className="px-3 py-1.5 text-right font-score text-2xl leading-none">{a}</td>

@@ -32,6 +32,7 @@ interface TeamStats {
   fast_break_goals: number;
   suspensions: number;
   attack_efficiency: number | null;
+  possessions?: number | null;
   zones: ZoneCount;
   goal_zones: ZoneCount;
   by_situation: Record<string, { shots: number; goals: number; pct: number | null }>;
@@ -80,7 +81,8 @@ export interface Stats {
     best_run: Record<string, { goals: number; from_s: number | null }>;
     longest_own_drought_s: { seconds: number };
   };
-  quality: { events: number; sources: Record<string, number> };
+  quality: { events: number; sources: Record<string, number>; attempts_known?: boolean };
+  possessions_source?: string;
 }
 
 export function useStats(orgId: string, matchId: string) {
@@ -140,9 +142,11 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const t = useTranslations("stats");
   const oppName = useOpponentName();
   const { drill, open, close } = useDrill();
+  const attempts = stats.quality.attempts_known !== false;
   const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter }[] = [
     { label: t("goals"), own: stats.own.goals, opp: stats.opponent.goals, filter: (s) => ({ side: s, type: "shot", outcome: "goal" }) },
-    { label: t("shots"), own: stats.own.shots, opp: stats.opponent.shots, filter: (s) => ({ side: s, type: "shot" }) },
+    // goals alone (score overlay): shot counts and xG would only repeat the goals
+    ...(attempts ? [{ label: t("shots"), own: stats.own.shots, opp: stats.opponent.shots, filter: (s: "own" | "opponent") => ({ side: s, type: "shot" }) as EventFilter }] : []),
     { label: t("shootingPct"), own: pct(stats.own.shooting_pct), opp: pct(stats.opponent.shooting_pct) },
     { label: t("saves"), own: stats.own.saves, opp: stats.opponent.saves, filter: (s) => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) },
     { label: t("savePct"), own: pct(stats.own.save_pct), opp: pct(stats.opponent.save_pct) },
@@ -153,7 +157,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
       ? [{ label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s: "own" | "opponent") => ({ side: s, type: "suspension_2min" }) as EventFilter }]
       : []),
     { label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) },
-    { label: t("xg"), own: stats.own.xg.toFixed(1), opp: stats.opponent.xg.toFixed(1) },
+    { label: t("xg"), own: attempts ? stats.own.xg.toFixed(1) : "-", opp: attempts ? stats.opponent.xg.toFixed(1) : "-" },
   ];
   const run = stats.timeline.best_run.own;
   return (
@@ -200,7 +204,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               ))}
             </tbody>
           </table>
-          <p className="text-xs text-muted">{t("possessionsHint")}</p>
+          <p className="text-xs text-muted">{t(stats.possessions_source === "tracking" ? "possessionsTracked" : "possessionsHint")}</p>
         </Sheet>
       </div>
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />

@@ -11,7 +11,7 @@ from handball_metrics.model import Event, EventType, Side
 from handball_metrics.xg import VERSION as XG_VERSION
 from handball_metrics.xg import expected_goal
 
-METRICS_VERSION = "0.2.0"  # bump on any change of definitions: invalidates stats caches
+METRICS_VERSION = "0.2.1"  # bump on any change of definitions: invalidates stats caches
 
 SUSPENSION_S = 120
 
@@ -332,6 +332,8 @@ def compute_match_stats(
         "timeline": _timeline(events),
         "quality": {
             "events": len(events),
+            # false when only goals are known (score overlay): shots, ratios and xG mean nothing
+            "attempts_known": any(e.is_shot and e.outcome != "goal" for e in events),
             "low_confidence": len(low_conf),
             "sources": dict(Counter(e.source for e in events)),
         },

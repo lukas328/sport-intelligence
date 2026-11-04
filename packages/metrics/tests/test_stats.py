@@ -108,7 +108,12 @@ def test_zone_and_quality() -> None:
     assert zone_of(Event(id="x", type=EventType.SHOT, side=OWN, shot_type="penalty")) == "penalty"
     assert zone_of(Event(id="x", type=EventType.SHOT, side=OWN)) is None
     s = compute_match_stats([shot(1, OWN, "goal", 1, confidence=0.4, source="heuristic")])
-    assert s["quality"] == {"events": 1, "low_confidence": 1, "sources": {"heuristic": 1}}
+    assert s["quality"] == {
+        "events": 1,
+        "attempts_known": False,
+        "low_confidence": 1,
+        "sources": {"heuristic": 1},
+    }
 
 
 def test_xg_prior() -> None:

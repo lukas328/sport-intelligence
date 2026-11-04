@@ -78,14 +78,40 @@ What was fixed on the way:
 - **Panning camera**: tracks of players outside the view wait instead of ageing.
 
 Still open:
-- **Goals** are not found automatically on these clips: after a goal the panning camera rarely shows
-  the whole throw-off formation. Goals come from courtside marks, the paper report or tagging.
+- **Goals** from the throw-off heuristic: none on these clips (after a goal the panning camera rarely
+  shows the whole throw-off formation). Where a league stream shows a score overlay, goals and match
+  clock come from the overlay instead (ADR 026, see below); otherwise from courtside marks, the paper
+  report or tagging.
 - **Ball and shots** need a handball-trained detector (COCO finds no handball).
 - **Track identities** fragment (110 to 200 tracks per 5 minutes for about 16 people on court);
   team-level analysis (formations, possession, heatmaps) works, per-player numbers need shirt numbers
   or the manual assignment.
 - **Speed on CPU** (4 cores): about 2x real time (detection on every 3rd frame dominates); a GPU
   worker brings this well under real time.
+
+## 2026-11-04, later: full-length games and the score overlay
+
+**30 minutes in one file** (the Stäfa clip six times in a row, so five hard cuts), learned path on
+4 shared CPU cores:
+
+| Step | Result |
+|---|---|
+| Observation pass (motion, detection every 3rd frame) | 3984 s for 1800 s video (2.2 x real time, CPU shared with tests) |
+| Camera motion | 5 cuts found and re-attached, coverage 1.0, focal 1223 px (5-minute clip: 1208 px) |
+| Automatic calibration | goal fit 0.72, players on court 0.86 (5-minute clip: 0.76, 0.85) |
+| Memory | observation pass grows to 0.8 GB, peak 1.8 GB during calibration and tracking |
+
+Before this change the camera motion kept every frame-to-frame match (up to 8 KB per frame, more than a
+gigabyte for a 90-minute game); it now keeps 64 point pairs in float32 (about 1 KB per frame,
+rotations within 0.09 degrees median of the full version). A worker with 4 GB is enough for a full game.
+
+**Score overlay** (ADR 026): on the SPL2 clip all 5 goals are read in order (1:1, 2:1, 2:2, 2:3, 3:3)
+with the match clock, about 100 Tesseract calls per 5 minutes. The possession segmentation had the
+scoring team attacking before each of the 5 goals; the attack ended 1 to 3 s before the overlay
+changed, so goals are placed at the end of that attack. The 2017 clips have no overlay; none is found.
+
+**Shirt numbers** with Tesseract on 720p player crops: not readable ("23" read as "2", "43" as "4",
+most crops nothing). Per-player identity needs a dedicated number recogniser (BRIEF stage 6).
 
 ## Next steps
 1. ~~Use the dialog on the real clips~~ (automatic now; the dialog stays as fallback).
