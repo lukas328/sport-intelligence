@@ -368,41 +368,78 @@ def auto_calibrate(
     a, b = topview.segments_on_floor(ra, rb, up, height, yaw)
     if len(a) < 50:
         raise CalibrationError("too few markings on the floor")
-    views = {"all": topview.line_top_view(a, b)}
-    # multi-sport halls: the colour whose lines form the handball court gets its own search
-    colours = topview.segment_colours(
-        line_masks(hall), topview.rays_to_pixels(kc, ra), topview.rays_to_pixels(kc, rb)
-    )
-    by_colour = topview.colour_views(ra, rb, colours, up, height, yaw)
-    ranked = topview.handball_colour(by_colour)
-    line_colour = ranked[0][0] if ranked else "all"
-    if ranked:
-        views[line_colour] = by_colour[line_colour]
     d1, d2 = topview.floor_basis(up, yaw)
     floor_to_cam = np.column_stack([d1, d2, -height * up])
     dn = fr @ up
     ok = dn < -1e-3
     pts = fr[ok] * (-height / dn[ok])[:, None]
     feet_m = np.column_stack([pts @ d1, pts @ d2])
-    courts: list[tuple[F64, float, str]] = []  # court -> floor metres, line score, view
-    for name, tv in views.items():
-        feet_px = (feet_m - np.array(tv.origin)) * tv.ppm
-        for t, line_score in topview.search_court(tv, feet_px=feet_px):
-            to_floor = tv.pixel_to_floor() @ t
-            if any(topview.same_court(to_floor, c[0], 0.25) for c in courts):
-                continue  # the same court from another weighting or view: refined once
-            courts.append((to_floor, line_score, name))
-    best: tuple[float, F64, float, str] | None = None
-    for to_floor, line_score, name in courts:
-        h = kc @ floor_to_cam @ to_floor
+    base = {"floor_fit": round(fit, 3), "view_deg": round(view_deg, 1)}
+
+    def court(tv: topview.TopView, view: str) -> tuple[Calibration, dict[str, Any]]:
+        info = {**base, "court_view": view}
+        return _court_in_view(tv, feet_m, kc, floor_to_cam, hall, feet, info)
+
+    try:
+        return court(topview.line_top_view(a, b), "all")
+    except CalibrationError as exc:
+        first = exc
+    # multi-sport halls: the lines of all sports together can hide the court; the colour whose
+    # own lines form the handball court best gets a search of its own
+    colours = topview.segment_colours(
+        line_masks(hall), topview.rays_to_pixels(kc, ra), topview.rays_to_pixels(kc, rb)
+    )
+    by_colour = topview.colour_views(ra, rb, colours, up, height, yaw)
+    ranked = topview.handball_colour(by_colour)
+    scores = {k: round(v, 3) for k, v in ranked}
+    tried = []
+    for name, score in ranked[:2]:
+        if score < 0.6 * ranked[0][1]:
+            break  # only colours that form the court about as well as the best one
+        try:
+            calib, info = court(by_colour[name], name)
+        except CalibrationError as exc:
+            tried.append(f"{name} lines: {exc}")
+            continue
+        info["colour_scores"] = scores
+        return calib, info
+    if not tried:
+        raise first
+    raise CalibrationError(f"{first}; " + "; ".join(tried))
+
+
+def _court_in_view(
+    tv: topview.TopView,
+    feet_m: F64,
+    k: F64,
+    floor_to_cam: F64,
+    hall: U8,
+    feet: F64,
+    base: dict[str, Any],
+) -> tuple[Calibration, dict[str, Any]]:
+    """The court in one top view: template search (lines and people), the candidates refined on
+    the goal frames, the best goal fit checked for plausibility. `k` and `floor_to_cam` map floor
+    metres (along the top view's axes) to hall pixels; `feet` are the players' feet in the hall
+    image, `feet_m` the same on the floor."""
+    courts: list[tuple[F64, float]] = []  # court -> floor metres, line score
+    feet_px = (feet_m - np.array(tv.origin)) * tv.ppm
+    for t, line_score in topview.search_court(tv, feet_px=feet_px):
+        to_floor = tv.pixel_to_floor() @ t
+        if any(topview.same_court(to_floor, c[0], 1e-3) for c in courts):
+            continue  # the same court from another weighting: refined once (the goal search
+            # is local, so courts that merely lie close are each refined)
+        courts.append((to_floor, line_score))
+    best: tuple[float, F64, float] | None = None
+    for to_floor, line_score in courts:
+        h = k @ floor_to_cam @ to_floor
         h = h / h[2, 2]
-        h2, _, goal = topview.refine_on_goals(h, kc, hall)
+        h2, _, goal = topview.refine_on_goals(h, k, hall)
         if best is None or goal > best[0]:
-            best = (goal, h2, line_score, name)
+            best = (goal, h2, line_score)
     assert best is not None
-    goal, h, line_score, view_name = best
-    h = topview.normalise_orientation(h, kc)
-    r, t = topview.pose_from_homography(h, kc)
+    goal, h, line_score = best
+    h = topview.normalise_orientation(h, k)
+    r, t = topview.pose_from_homography(h, k)
     centre = -r.T @ t
     calib = Calibration(
         h,
@@ -427,15 +464,12 @@ def auto_calibrate(
     info = {
         "goal_score": round(goal, 3),
         "line_score": round(line_score, 3),
-        "floor_fit": round(fit, 3),
+        "floor_fit": base["floor_fit"],
         "people_on_court": round(inside, 3),
-        "view_deg": round(view_deg, 1),
-        "line_colour": line_colour,
-        "court_view": view_name,
-        "colour_scores": {k: round(v, 3) for k, v in ranked},
         "camera_height_m": round(float(centre[2]), 2),
         "camera_x_m": round(float(centre[0]), 2),
         "camera_y_m": round(float(centre[1]), 2),
+        **{k2: v for k2, v in base.items() if k2 != "floor_fit"},
     }
     # a real camera stands above the floor beside or behind the court, and play is on the court
     # (a camera right above the near sideline is common, so the near side starts at y < 1)

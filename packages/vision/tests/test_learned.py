@@ -137,14 +137,14 @@ def test_handball_colour_is_the_one_that_forms_the_court() -> None:
             cv2.line(mask, (300, 105), (300, 195), 255, 1)
         views[name] = topview.TopView(mask, np.full_like(mask, 255), (0.0, 0.0), ppm, np.eye(3))
     ranked = topview.handball_colour(views)
-    assert [n for n, _ in ranked][0] == "white"
+    assert ranked[0][0] == "white"
     assert ranked[0][1] > ranked[1][1] + 0.15
 
 
 def test_colour_views_keep_colours_with_enough_floor_lines() -> None:
     from handball_vision.calibration import LINE_COLOURS
 
-    k, r = _camera(25.0)
+    _, r = _camera(25.0)
     centre = np.array([20.0, -8.0, 7.0])
     rng = np.random.default_rng(1)
     ends_a, ends_b, colours = [], [], []
