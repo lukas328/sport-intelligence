@@ -218,3 +218,22 @@ async def test_marked_goal_gets_its_shot_position_from_the_tracks(
     goal = next(e for e in (await api.get(ev_url)).json() if e["source"] != "heuristic")
     assert (goal["x"], goal["y"]) == (36.0, 10.0)  # the scorer, not the nearer teammate
     assert goal["attributes"]["position_source"] == "tracking_number"
+
+
+def test_hall_scoreboard_goal_moves_back_within_its_window() -> None:
+    """A goal read from the hall scoreboard can lie far back (board out of view): it moves to the
+    scoring side's last attack inside its window, not further."""
+    from handball_api.models import Event, Possession
+    from handball_api.services.auto_events import align_goals
+
+    def poss(side: str, start: int, end: int) -> Possession:
+        return Possession(side=side, start_ms=start, end_ms=end, source="tracking", confidence=1.0)
+
+    rows = [poss("own", 0, 20_000), poss("opponent", 20_000, 40_000), poss("own", 40_000, 52_000)]
+    g = Event(
+        type="shot", side="own", outcome="goal", t_ms=90_000, attributes={"window_ms": 60_000}
+    )
+    near = Event(type="shot", side="own", outcome="goal", t_ms=90_000, attributes={})
+    assert align_goals([g, near], rows) == 1
+    assert g.t_ms == 52_000 and rows[2].outcome == "goal"
+    assert near.t_ms == 90_000  # 15 s window: no attack ended there

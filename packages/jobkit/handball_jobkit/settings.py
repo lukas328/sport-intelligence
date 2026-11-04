@@ -29,3 +29,4 @@ class JobSettings(BaseSettings):
     reid_every: int = 30  # frames: about once per second per player
     role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)
     role_every: int = 30
+    hallboard_every_s: float = 1.0  # hall scoreboard reading when the video has no overlay

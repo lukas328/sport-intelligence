@@ -36,6 +36,7 @@ from handball_vision.calibration import (
     calibrate_pose,
 )
 from handball_vision.detection import YoloxDetector
+from handball_vision.hallboard import HallBoardReader
 from handball_vision.motion import CameraMotion
 from handball_vision.numbers import NumberReader
 from handball_vision.pipeline import (
@@ -474,13 +475,20 @@ def _run_learned(
             _, _, fps, total = _open(video)
             reader = _overlay_reader(spread, fps, total / fps if fps else 0.0)
             del spread
+            numbers = load_number_reader(settings)
+            # no overlay: the hall's own scoreboard, when the camera shows it (raw recordings)
+            board = (
+                HallBoardReader(numbers, fps, every_s=settings.hallboard_every_s)
+                if reader is None and numbers is not None and fps
+                else None
+            )
             obs = learned.observe(
                 video,
                 detector,
                 detect_every=max(1, settings.detect_every),
                 progress=lambda _stage, f: rep.fraction(f),
-                on_frame=reader.add if reader else None,
-                numbers=load_number_reader(settings),
+                on_frame=reader.add if reader else (board.add if board else None),
+                numbers=numbers,
                 number_every=max(1, settings.number_every),
                 embedder=load_embedder(settings),
                 embed_every=max(1, settings.reid_every),
@@ -488,6 +496,14 @@ def _run_learned(
                 role_every=max(1, settings.role_every),
             )
             overlay = _overlay_summary(reader)
+            if overlay is None and board is not None:
+                board_summary = board.summary()
+                overlay = board_summary if board_summary["goals"] else None
+                log.info(
+                    "hall_scoreboard",
+                    readings=board_summary["readings"],
+                    goals=len(board_summary["goals"]),
+                )
             counts = sorted(len(fo.people) for fo in obs.frames)
             if not counts or counts[len(counts) // 2] < 3:
                 log.info(

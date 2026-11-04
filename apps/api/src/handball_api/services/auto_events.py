@@ -51,6 +51,7 @@ async def _manual_goals(ctx: Ctx, match: Match) -> list[tuple[str, int]]:
 
 
 ALIGN_BEFORE_MS = 15000  # an attack that ended up to 15 s before the overlay changed scored
+ALIGN_MAX_WINDOW_MS = 120_000  # hall scoreboard out of view for at most two minutes
 
 
 def align_goals(goals: list[Event], possessions: list[Possession]) -> int:
@@ -61,10 +62,17 @@ def align_goals(goals: list[Event], possessions: list[Possession]) -> int:
     for g in goals:
         if g.t_ms is None:
             continue
+        # hall scoreboard: the goal lies anywhere since the board last showed the old score
+        window = (g.attributes or {}).get("window_ms")
+        before = (
+            max(ALIGN_BEFORE_MS, min(ALIGN_MAX_WINDOW_MS, int(window)))
+            if window
+            else ALIGN_BEFORE_MS
+        )
         cands = [
             p
             for p in possessions
-            if p.side == g.side and g.t_ms - ALIGN_BEFORE_MS <= p.end_ms <= g.t_ms + 2000
+            if p.side == g.side and g.t_ms - before <= p.end_ms <= g.t_ms + 2000
         ]
         if not cands:
             continue
@@ -140,6 +148,8 @@ async def apply_scoreboard(
         scorer = g.get("scorer") if isinstance(g.get("scorer"), dict) else None
         number = int(scorer["number"]) if scorer and scorer.get("number") is not None else None
         attrs: dict[str, Any] = {"score": own_score}
+        if g.get("window_ms") is not None:
+            attrs["window_ms"] = int(g["window_ms"])
         if scorer and scorer.get("name"):
             attrs["scorer_name"] = str(scorer["name"])[:80]
         if shot:
@@ -154,7 +164,7 @@ async def apply_scoreboard(
             period=period,
             clock_s=clock_s,
             source=OVERLAY,
-            confidence=0.95,
+            confidence=0.8 if overlay.get("source") == "hall_scoreboard" else 0.95,
             number=number,
             player_id=roster.get(number) if side == "own" and number is not None else None,
             x=float(shot["x"]) if shot else None,
