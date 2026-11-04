@@ -1,31 +1,48 @@
-# Ball detector (work in progress)
+# Ball detector (research, not shipped)
 
-Transfer learning for a handball ball detector that has to work across halls, cameras and ball
-colours. Nothing here ships yet; the scripts are the reproducible trail of the experiments.
+Finding the ball across halls, cameras and ball colours. Nothing here ships yet; the scripts are the
+reproducible trail of the experiments. **Models trained with non-commercial data (DeepSport, see
+below) are research models and must not go into the product.**
+
+## Approach
+1. **Three frames as input** (t-G, t, t+G; TrackNet principle): a ball moves against the hall, a
+   spot on the wall or a lamp does not. `train_ballnet3.py` (CPU) and `kaggle/train_gpu.py` (Kaggle
+   GPU): ResNet18 layers 1 to 2 plus a decoder, stride-4 heatmap, CenterNet focal loss, first conv
+   extended to 9 channels (centre = single-frame weights, neighbours start at zero).
+2. **Path over time** (`packages/vision/handball_vision/balltrack.py`): peaks linked at physically
+   possible speeds, fixed spots dropped, best chain of reachable tracklets.
+3. **Who has the ball** (`ballpossession.py`): the path against the player boxes. 78 % of the
+   labelled balls lie in a player's box (held, at the body), so a per-player holder classifier
+   (`holder_crops.py`, `train_holder.py`) is the second track.
+4. **Self-training**: the net's long, moving tracklets on the full games (`mine_tracklets.py`,
+   local static test against the surroundings) are checked as whole tracklets
+   (`review_tracklets.py`); one look labels 10 to 30 frames.
 
 ## Data
-- **TeamTrack handball_side** (Kaggle `atomscott/teamtrack`, MIT licence): 63 clips of 30 s, a fixed
-  fisheye panorama 3300 x 450, the ball annotated in every frame (also when held or hidden).
-  `extract_teamtrack.py` cuts 192 x 192 tiles every 6th frame: about 9 300 with the ball, 18 600
-  without.
-- **Our clips**: random tiles as negatives (`extract_negatives.py`), automatic hard negatives (the
-  net's peaks outside the court, `eval_on_court.py`), and labelled on-court peaks
-  (`label_grid.py`, `save_labels.py`; 37 balls, about 230 non-balls so far).
+| Source | What | Licence | Use |
+|---|---|---|---|
+| TeamTrack handball_side (Kaggle `atomscott/teamtrack`) | one hall, fisheye panorama, ball in every frame | MIT | `extract_teamtrack_triplets.py` |
+| Our full games (Drive) | 3-minute segments per game, random tiles as negatives | own | `collect_game.py` |
+| Labelled frames (labelling page "Ball-Labeling Halle", `labelling/frames.html`) | 130 frames from 7 halls, 80 with ball; per hall split in train and test half | own | `tiles_from_frames.py`, benchmark `bench_labelled.py` |
+| Labelled paths (labelling page "Ball-Pfade Halle", `labelling/paths.html`) | 3-second scenes, a click every ~0.1 s, frames between interpolated | own | `tiles_from_paths.py` |
+| DeepSport basketball instants (Kaggle `deepsportradar/basketball-instants-dataset`) | 16 arenas, frame pairs 40 ms apart, 3D ball centre with calibration | **CC BY-NC-SA 4.0** | research only: `deepsport_tiles.py` projects the ball, scales to 8 to 24 px |
 
-## Model
-`train_ballnet.py`: ResNet18 (ImageNet, torchvision, BSD) layers 1 to 2 plus a small decoder,
-stride-4 heatmap, CenterNet focal loss. Augmentation rotates the hue freely (ball colours differ
-per hall), scales 0.7 to 1.5, flips, motion blur. Exported to ONNX.
+Checked and not used: Roboflow handball sets (site not reachable from the session; API needs a key),
+basketball tracking (CC BY-NC-ND), sports-ball image classification (close-ups).
 
-## Results so far (2026-11-04)
-| Run | TeamTrack validation (found / false alarm at 0.3) | Our clips |
+## Benchmark: labelled test half (40 balls, never trained on)
+| Model | Top peak on the ball | Ball among top 5 peaks |
 |---|---|---|
-| TeamTrack only, 3000 steps | 44 % / 1.9 % | many false alarms: ceiling lights, spectators, overlays, camera operators |
-| + hard negatives + 37 own balls, 1500 steps | 53 % / 2.4 % | static bright spots win (a screw on the Möhlin wall), Stäfa almost silent |
+| Single-frame net (TeamTrack + 37 own) | 6 % (all 80) | 14 % (all 80) |
+| 3-frame net, round 1 (TeamTrack) | 12 % | 23 % |
 
-TeamTrack's 100 % is not reachable: the ball is annotated even when hidden in a hand.
+On TeamTrack's own validation the 3-frame net finds 64 % at 2 % false alarms: the gap is the domain
+(one hall vs many), not the method.
 
-## Next
-1. Three consecutive frames as input (TrackNet principle): a static spot never moves, a ball does.
-2. Temporal path search over the per-frame peaks (one ball, bounded speed, gaps bridged).
-3. More own positives from many halls (the 15 full games), labelled in grids.
+## Findings
+- Most earlier "ball" labels from Möhlin were a fixed, ball-like spot on the wall; the three-frame
+  view shows it never moves. They taught the single-frame net the static-spot error.
+- Zooming broadcast cameras break a translation-only camera compensation; the local static test
+  (spot vs its own surroundings over three frames) separates balls (median 0.5) from fixed things
+  (median 0.08).
+- Amateur halls (Uznach) give far more usable ball candidates than league broadcasts.
