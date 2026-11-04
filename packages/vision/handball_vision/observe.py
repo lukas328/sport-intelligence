@@ -7,6 +7,8 @@
 2. **Calibrate** (`auto_calibrate`): the hall's floor orientation from the markings, the camera
    height from the people, a metric top view, the court template (lines, players on the court,
    goalkeepers in the goal mouths) and finally the goal frames (striped posts and crossbar).
+   Multi-sport halls: if the court from all lines is not trustworthy, the line colour that forms
+   the handball court gets a search of its own; flat views (low cameras) stop early.
 3. **Track** (`track`): the stored detections are mapped to the court frame by frame (court
    homography of the frame = panorama calibration x camera rotation), filtered to the court,
    tracked and assigned to teams; the result is the same `AnalysisResult` as before.

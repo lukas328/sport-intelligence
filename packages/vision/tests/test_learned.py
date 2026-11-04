@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from handball_vision import geometry, observe, topview
-from handball_vision.calibration import MODEL_POINTS, Calibration
+from handball_vision.calibration import MODEL_POINTS, Calibration, CalibrationError
 from handball_vision.detection import Detection
 from handball_vision.synthetic import SyntheticConfig, SyntheticMatch
 
@@ -170,6 +170,51 @@ def test_view_depression_of_the_players() -> None:
     angles = np.radians([5.0, 6.0, 7.0, 30.0, 4.0])
     rays = np.column_stack([np.zeros(5), np.sin(angles), np.cos(angles)])
     assert abs(topview.view_depression_deg(up, 3.0, rays) - 6.0) < 1e-6
+
+
+def _low_camera_observations(height_m: float) -> observe.Observations:
+    """A fixed camera at the near sideline `height_m` above the floor, looking at the court
+    centre: court lines as segments and twelve standing players per frame."""
+    from handball_vision.motion import CameraMotion
+
+    k, _ = _camera(0.0)
+    centre = np.array([20.0, -6.0, height_m])
+    look = np.array([20.0, 10.0, 0.0]) - centre
+    z = look / np.linalg.norm(look)
+    x = np.cross(z, [0, 0, 1.0])
+    x /= np.linalg.norm(x)
+    rot = np.vstack([x, np.cross(z, x), z])
+
+    def px(p: np.ndarray) -> np.ndarray:
+        q = k @ (rot @ (p - centre))
+        return q[:2] / q[2]
+
+    rng = np.random.default_rng(2)
+    segs = []
+    for y in (0.0, 20.0):
+        for x0 in np.arange(0, 40, 2.0):
+            segs.append([*px(np.array([x0, y, 0])), *px(np.array([x0 + 1.8, y, 0]))])
+    for xg in (0.0, 20.0, 40.0):
+        for y0 in np.arange(0, 20, 2.0):
+            segs.append([*px(np.array([xg, y0, 0])), *px(np.array([xg, y0 + 1.8, 0]))])
+    frames = []
+    for i in range(30):
+        people = []
+        for _ in range(12):
+            foot = np.array([rng.uniform(4, 36), rng.uniform(2, 18), 0.0])
+            (fx, fy), (_, hy) = px(foot), px(foot + np.array([0.0, 0.0, 1.75]))
+            w = (fy - hy) * 0.3
+            people.append(Detection(fx - w, hy, fx + w, fy, 0.9))
+        frames.append(observe.FrameObservation(i * 3, people, [None] * len(people), []))
+    motion = CameraMotion.fixed((1280, 720), 90)
+    return observe.Observations(motion, frames, {0: np.array(segs)}, 25.0, 90)
+
+
+def test_auto_calibration_refuses_a_flat_view_quickly() -> None:
+    obs = _low_camera_observations(2.0)
+    hall = np.zeros((720, 1280, 3), np.uint8)
+    with pytest.raises(CalibrationError, match="too flatly"):
+        observe.auto_calibrate(obs, hall)
 
 
 def test_same_court_compares_corners() -> None:

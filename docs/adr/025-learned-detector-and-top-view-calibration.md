@@ -61,3 +61,16 @@ weights were unreachable when ADR 012 was written; GitHub release assets are rea
   identity needs shirt numbers (OCR) or manual assignment (existing UI).
 - Goal detection assumes striped goal frames (red and white in all three halls); other colours lower
   the goal fit and send the match to the confirmation dialog.
+
+## Addendum 2026-11-04: flat views and multi-sport floors
+- Automatic calibration now stops within seconds when the camera sees the players less than 10
+  degrees below the horizon (`MIN_VIEW_DEG`): low cameras (Veo at about 1.9 m) and corner positions
+  in the stands make the top view unreliable, and a wrong court was accepted before (Cottbus). The
+  working halls see the players 14 to 18 degrees below the horizon. Such videos go to the manual
+  calibration (clicked points).
+- When the search over all floor lines gives no trustworthy court, the court is searched again on
+  the lines of the colours that best match the handball template (multi-sport floors). The working
+  halls keep their calibrations exactly; on the real failing halls (Mülheim, Cottbus) it did not
+  help yet.
+- Open: a pose fit against the panorama in pixels for flat views; goal detection only knows red
+  stripes (black-and-white goals are missed, red banners can fool it).

@@ -16,6 +16,13 @@ shapes are unmistakable. The pieces, all with the focal length known from the ca
 5. **Goal frames** (`refine_on_goals`): the court is nudged so that the projected 3D goal frames
    (posts and crossbar, 2 m high) fall on striped red and white paint; several court candidates
    are refined and the best goal fit wins.
+6. **Line colours** (`segment_colours`, `colour_views`, `handball_colour`): when the court found
+   among the lines of all sports is not trustworthy, each segment gets the colour of the hall
+   image's line mask under it, and the colours whose own top view forms the handball court best
+   (outline, centre line, 6 m and 9 m lines) are searched on their own.
+7. **Flat views** (`view_depression_deg`): players seen at a median of less than about 10 degrees
+   below the horizon (low or distant cameras) make the top view too sensitive to small errors in
+   the floor orientation; calibration then stops early and asks for clicked points.
 """
 
 from __future__ import annotations
