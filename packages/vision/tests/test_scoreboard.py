@@ -16,7 +16,9 @@ WHITE = (255, 255, 255)
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 
-def _frame(score: tuple[int, int], clock_s: int, rng: np.random.Generator) -> np.ndarray:
+def _frame(
+    score: tuple[int, int], clock_s: int, rng: np.random.Generator, banner: str | None = None
+) -> np.ndarray:
     """A panning 'hall' (texture shifted every frame) with a score bug at the top."""
     base = rng.integers(40, 200, size=(H // 8, W // 8, 3), dtype=np.uint8)
     img = cv2.resize(base, (W, H), interpolation=cv2.INTER_LINEAR)
@@ -28,6 +30,9 @@ def _frame(score: tuple[int, int], clock_s: int, rng: np.random.Generator) -> np
     cv2.rectangle(img, (455, 74), (565, 110), (225, 225, 225), -1)
     text = f"{clock_s // 60:02d}:{clock_s % 60:02d}"
     cv2.putText(img, text, (462, 102), FONT, 0.9, (40, 40, 40), 2)
+    if banner:  # name banner in the overlay red, right side = away team
+        cv2.rectangle(img, (720, 30), (950, 62), (40, 30, 200), -1)
+        cv2.putText(img, banner, (728, 55), FONT, 0.7, WHITE, 2)
     return img
 
 
@@ -37,7 +42,8 @@ def _video(seconds: int = 40) -> list[np.ndarray]:
     for k in range(int(seconds * FPS)):
         t = k / FPS
         score = (1, 0) if t < 12 else (2, 0) if t < 25 else (2, 1)
-        out.append(_frame(score, 120 + int(t), rng))
+        banner = "11 Sophie WINDLER" if 26 <= t < 30 else None
+        out.append(_frame(score, 120 + int(t), rng, banner))
     return out
 
 
@@ -76,6 +82,29 @@ def test_clock_runs_and_stops() -> None:
     segs = sb.clock_segments(reads)
     assert [(s["start_ms"], s["start_clock_s"]) for s in segs] == [(0, 120), (120_000, 175)]
     assert segs[0]["end_ms"] == 55_000
+
+
+def test_banner_texts_and_votes() -> None:
+    assert sb.parse_banner("| 7 Amy HOCHREUTENER |") == (7, "Amy HOCHREUTENER")
+    assert sb.parse_banner("33DeniseSCHWAIGER") == (33, "Denise SCHWAIGER")
+    assert sb.parse_banner("11. Sophie WINDLER |") == (11, "Sophie WINDLER")
+    assert sb.parse_banner("ARB") is None
+    reads = [
+        (174_000, "right", "11 Sophie WINDLER"),
+        (175_000, "right", "e . 11 Sophie WINDLER |"),
+        (291_000, "right", "} 44. Sophie WINDLER |"),  # misread number, same name
+        (292_000, "right", "} 44 Sophie WINDLER |"),
+        (92_000, "left", "| 7 Lisa ZIMMERLI ton"),
+    ]
+    shown = sb.banners(sorted(reads))
+    assert [(b["t_ms"], b["side"], b["number"]) for b in shown] == [
+        (92_000, "left", 7),
+        (174_000, "right", 11),
+        (291_000, "right", 11),  # the name keeps its number
+    ]
+    goals = [sb.Goal(91_000, "left", (2, 1)), sb.Goal(173_000, "right", (2, 3))]
+    attached = sb.attach_scorers(goals, shown)
+    assert [g["scorer"]["name"] for g in attached] == ["Lisa ZIMMERLI", "Sophie WINDLER"]
 
 
 def test_parsers() -> None:
@@ -117,6 +146,8 @@ def test_reads_score_and_clock_from_a_video() -> None:
     ]
     assert abs(summary["goals"][0]["t_ms"] - 12_000) <= 1000
     assert abs(summary["goals"][1]["t_ms"] - 25_000) <= 1000
+    assert summary["goals"][1]["scorer"] == {"number": 11, "name": "Sophie WINDLER"}
+    assert "scorer" not in summary["goals"][0]
     (clock,) = summary["clock"]
     assert clock["start_ms"] == 0 and clock["start_clock_s"] == 120
-    assert reader.calls < 30  # read on change, not on every frame
+    assert reader.calls < 40  # read on change, not on every frame

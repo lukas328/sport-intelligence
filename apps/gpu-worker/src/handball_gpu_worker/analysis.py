@@ -46,6 +46,7 @@ from handball_vision.pipeline import (
     sample_frames,
 )
 from handball_vision.reid import Embedder
+from handball_vision.shots import locate_goal_shots
 from handball_vision.teams import hex_to_bgr
 
 log = structlog.get_logger("gpu.analysis")
@@ -180,6 +181,7 @@ def run_analysis(
     calibration_frame_ms: int = 0,
     settings: JobSettings | None = None,
     reporter: Reporter | None = None,
+    own_is_home: bool = True,
 ) -> dict[str, Any]:
     settings = settings or JobSettings()
     detector = load_detector(settings)
@@ -202,6 +204,7 @@ def run_analysis(
             calibration_frame_ms,
             settings,
             rep,
+            own_is_home,
         )
         if learned_result is not None:
             return learned_result
@@ -427,6 +430,7 @@ def _run_learned(
     calibration_frame_ms: int,
     settings: JobSettings,
     rep: Reporter,
+    own_is_home: bool = True,
 ) -> dict[str, Any] | None:
     """Learned detector path (ADR 025): one observation pass, automatic calibration, tracking.
     A re-run with clicked points reuses the stored observations and takes seconds. Returns None
@@ -534,6 +538,14 @@ def _run_learned(
         rep.stage("tracking")
         bgr = {k: hex_to_bgr(v) for k, v in kits.items() if v}
         result = learned.track(obs, calib, bgr, hall, progress=lambda _stage, f: rep.fraction(f))
+        if overlay and overlay.get("goals"):
+            # where the goals were scored from: the scorer's track, else the nearest attacker
+            overlay = {
+                **overlay,
+                "goals": locate_goal_shots(
+                    result.points, result.teams, result.fps, overlay["goals"], own_is_home
+                ),
+            }
         rep.stage("upload")
         out = work / "analysis"
         out.mkdir()

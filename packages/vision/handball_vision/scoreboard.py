@@ -252,7 +252,11 @@ class Reader:
     scores: list[tuple[int, tuple[int, int]]] = field(default_factory=list)  # (t_ms, score)
     clocks: list[tuple[int, int]] = field(default_factory=list)  # (t_ms, clock_s)
     calls: int = 0
+    banner_reads: list[tuple[int, str, str]] = field(default_factory=list)  # (t_ms, side, text)
     _thumb: U8 | None = None
+    _hue: float | None = None  # colour of the overlay boxes (name banners share it)
+    _banner_since: int = -(10**9)
+    _banner_reads_now: int = 0
     _misses: int = 0  # unreadable score readings in a row (retried up to 3 times)
     _score_ms: int = -(10**9)
     _clock_ms: int = -(10**9)
@@ -288,6 +292,156 @@ class Reader:
                 clock = parse_clock(read_text(crop))
                 if clock is not None:
                     self.clocks.append((t_ms, clock))
+        self._banner(t_ms, frame)
+
+    def _banner(self, t_ms: int, frame: U8) -> None:
+        """Name banners ("7 Amy HOCHREUTENER") pop up after goals in the overlay's colour, left
+        for the home team, right for the away team: read a few times while one is shown."""
+        score = next((f for f in self.fields if f.kind == "score"), None)
+        if score is None:
+            return
+        if self._hue is None:
+            self._hue = _box_hue(frame, score.box)
+            if self._hue is None:
+                self._hue = -1.0  # white or grey overlay: no coloured banners to look for
+        if self._hue < 0:
+            return
+        found = _find_banner(frame, self._hue, self.fields)
+        if found is None:
+            self._banner_reads_now = 0
+            return
+        x0, y0, x1, y1 = found
+        if t_ms - self._banner_since > 3000:
+            self._banner_reads_now = 0
+        self._banner_since = t_ms
+        if self._banner_reads_now >= 4:
+            return
+        self._banner_reads_now += 1
+        self.calls += 1
+        crop = frame[y0:y1, x0:x1]
+        big = cv2.resize(crop, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+        grey = 255 - cv2.cvtColor(big, cv2.COLOR_BGR2GRAY)  # light text on the banner colour
+        text = " ".join(_tesseract(np.asarray(grey), 7).split())
+        centre = score.box[0] + score.box[2] / 2
+        self.banner_reads.append((t_ms, "left" if (x0 + x1) / 2 < centre else "right", text))
+
+
+def _box_hue(frame: U8, box: Box) -> float | None:
+    """Dominant saturated hue (OpenCV 0..180) inside an overlay box, or None."""
+    x, y, w, h = box
+    hsv = cv2.cvtColor(frame[max(0, y) : y + h, max(0, x) : x + w], cv2.COLOR_BGR2HSV)
+    sat = hsv[..., 1] > 120
+    if sat.mean() < 0.3:
+        return None
+    hue = hsv[..., 0][sat].astype(np.float64)
+    ang = hue / 180 * 2 * np.pi  # circular mean (red wraps around 0)
+    return float(
+        (np.arctan2(np.sin(ang).mean(), np.cos(ang).mean()) % (2 * np.pi)) / (2 * np.pi) * 180
+    )
+
+
+def _find_banner(frame: U8, hue: float, fields: list[Field]) -> tuple[int, int, int, int] | None:
+    """A wide bar in the overlay colour outside the score bug: (x0, y0, x1, y1) or None."""
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    d = np.abs(hsv[..., 0].astype(np.int16) - round(hue)) % 180
+    mask = (np.minimum(d, 180 - d) < 10) & (hsv[..., 1] > 140) & (hsv[..., 2] > 100)
+    for f in fields:  # the score bug itself, generously
+        x, y, w, h = f.box
+        mask[max(0, y - 60) : y + h + 60, max(0, x - 60) : x + w + 60] = False
+    cols = mask.sum(axis=0) > 15
+    if cols.sum() < 150:
+        return None
+    xs = np.nonzero(cols)[0]
+    # the widest run of banner columns
+    runs = np.split(xs, np.nonzero(np.diff(xs) > 8)[0] + 1)
+    run = max(runs, key=len)
+    if len(run) < 150:
+        return None
+    x0, x1 = int(run[0]), int(run[-1]) + 1
+    rows = np.nonzero(mask[:, x0:x1].sum(axis=1) > 0.5 * (x1 - x0))[0]
+    if len(rows) < 10 or rows[-1] - rows[0] > 80:
+        return None
+    return x0, int(rows[0]), x1, int(rows[-1]) + 1
+
+
+BANNER_RE = re.compile(
+    r"(\d{1,2})[\s.,:]*([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'\-]+(?:\s*[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'\-]+)+)"
+)
+
+
+def parse_banner(text: str) -> tuple[int, str] | None:
+    """'| 7 Amy HOCHREUTENER |' -> (7, 'Amy HOCHREUTENER'); '33DeniseSCHWAIGER' works too."""
+    t = re.sub(r"(?<=[a-zà-ÿ])(?=[A-ZÀ-Þ]{2})", " ", text)  # DeniseSCHWAIGER -> Denise SCHWAIGER
+    m = BANNER_RE.search(t)
+    if not m:
+        return None
+    words = [w for w in m.group(2).split() if len(w) >= 2]
+    caps = [k for k, w in enumerate(words) if w.isupper()]
+    if caps:  # surnames in capitals: what follows the last one is OCR noise ("ZIMMERLI ton")
+        words = words[: caps[-1] + 1]
+    if len(words) < 2:
+        return None
+    return int(m.group(1)), " ".join(words[:3])
+
+
+def _name_key(name: str) -> str:
+    return re.sub(r"[^a-z]", "", name.lower())
+
+
+def banners(reads: list[tuple[int, str, str]], gap_ms: int = 2500) -> list[dict[str, Any]]:
+    """Banner appearances with one number and name each. A name keeps one number all match, so the
+    number is voted over all appearances of that name (OCR reads 11 as 44 now and then)."""
+    groups: list[list[tuple[int, str, tuple[int, str]]]] = []
+    for t, side, text in reads:
+        parsed = parse_banner(text)
+        if parsed is None:
+            continue
+        if groups and groups[-1][-1][1] == side and t - groups[-1][-1][0] <= gap_ms:
+            groups[-1].append((t, side, parsed))
+        else:
+            groups.append([(t, side, parsed)])
+    by_name: dict[str, list[int]] = {}
+    names: dict[str, str] = {}
+    for g in groups:
+        for _, _, (n, name) in g:
+            by_name.setdefault(_name_key(name), []).append(n)
+            names.setdefault(_name_key(name), name)
+    out = []
+    for g in groups:
+        keys = [_name_key(name) for _, _, (_, name) in g]
+        key = max(set(keys), key=keys.count)
+        numbers = by_name[key]
+        out.append(
+            {
+                "t_ms": g[0][0],
+                "side": g[0][1],
+                "number": max(set(numbers), key=numbers.count),
+                "name": names[key],
+            }
+        )
+    return out
+
+
+def attach_scorers(
+    goals: list[Goal], shown: list[dict[str, Any]], window_ms: int = 20000
+) -> list[dict[str, Any]]:
+    """Each goal with the first banner on its side within `window_ms` after it (or just before:
+    the overlay score can lag behind the banner)."""
+    out = []
+    used: set[int] = set()
+    for g in goals:
+        cand = [
+            (k, b)
+            for k, b in enumerate(shown)
+            if k not in used and b["side"] == g.side and -3000 <= b["t_ms"] - g.t_ms <= window_ms
+        ]
+        entry: dict[str, Any] = {"t_ms": g.t_ms, "side": g.side, "score": list(g.score)}
+        if cand:
+            k, b = min(cand, key=lambda kb: kb[1]["t_ms"])
+            used.add(k)
+            entry["scorer"] = {"number": b["number"], "name": b["name"]}
+        out.append(entry)
+    return out
 
 
 # --- 4. clean the readings ---------------------------------------------------------------------
@@ -361,11 +515,13 @@ def clock_segments(reads: list[tuple[int, int]], tol_s: float = 2.5) -> list[dic
 
 def read_overlay_summary(reader: Reader) -> dict[str, Any]:
     goals = goals_from_scores(reader.scores)
+    shown = banners(reader.banner_reads)
     return {
         "fields": [{"kind": f.kind, "box": list(f.box)} for f in reader.fields],
         "first_score": first_score(reader.scores),
         "last_score": goals[-1].score if goals else first_score(reader.scores),
-        "goals": [{"t_ms": g.t_ms, "side": g.side, "score": list(g.score)} for g in goals],
+        "goals": attach_scorers(goals, shown),
+        "banners": shown,
         "clock": clock_segments(reader.clocks),
         "ocr_calls": reader.calls,
     }

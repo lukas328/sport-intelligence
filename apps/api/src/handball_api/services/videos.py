@@ -554,6 +554,7 @@ async def start_analysis(
         "calibration_points": points,
         "calibration_space": space,
         "calibration_frame_ms": frame_ms,
+        "own_is_home": match.is_home,  # the overlay shows the home team on the left
     }
     ctx.require_jobs().enqueue("gpu", ANALYSIS_FUNC, str(job.id), payload)
     return job

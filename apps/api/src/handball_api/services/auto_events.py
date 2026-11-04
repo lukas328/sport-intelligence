@@ -12,7 +12,7 @@ from typing import Any
 
 from sqlalchemy import delete, select
 
-from handball_api.models import Event, Match, Possession
+from handball_api.models import Event, Match, Possession, RosterEntry
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video
 
@@ -69,6 +69,10 @@ def align_goals(goals: list[Event], possessions: list[Possession]) -> int:
         if not cands:
             continue
         p = max(cands, key=lambda c: c.end_ms)
+        if (g.attributes or {}).get("position_source"):  # the throw time is known: keep it
+            p.outcome = "goal"
+            moved += 1
+            continue
         g.attributes = {**(g.attributes or {}), "overlay_ms": g.t_ms}
         if g.clock_s is not None:
             g.clock_s = round(g.clock_s - (g.t_ms - p.end_ms) / 1000, 1)
@@ -103,11 +107,28 @@ async def apply_scoreboard(
         match.kickoff_ms = k
 
     manual = await _manual_goals(ctx, match)
+    # the overlay names the scorer after a goal ("7 Lisa ZIMMERLI"): own players by shirt number
+    roster: dict[int, Any] = {
+        n: pid
+        for n, pid in (
+            await ctx.db.execute(
+                select(RosterEntry.jersey_number, RosterEntry.player_id).where(
+                    RosterEntry.season_id == match.season_id,
+                    RosterEntry.team_id == match.team_id,
+                    RosterEntry.active.is_(True),
+                )
+            )
+        ).all()
+        if n is not None
+    }
     created = 0
     for g in overlay.get("goals") or []:
         side, t_ms = (left if g.get("side") == "left" else right), int(g["t_ms"])
         if any(s == side and abs(t - t_ms) <= OVERLAY_DEDUPE_MS for s, t in manual):
             continue
+        shot = g.get("shot") if isinstance(g.get("shot"), dict) else None
+        if shot and shot.get("t_ms") is not None:
+            t_ms = int(shot["t_ms"])  # the scorer closest to goal: about the throw
         shown = _overlay_clock(segments, t_ms)
         if shown is not None:
             period, clock_s = (1 if shown < period_s else 2), float(shown)
@@ -116,6 +137,13 @@ async def apply_scoreboard(
             period, clock_s = derived if derived else (1, None)  # type: ignore[assignment]
         score = list(g.get("score") or [])
         own_score = score if left == "own" else score[::-1]
+        scorer = g.get("scorer") if isinstance(g.get("scorer"), dict) else None
+        number = int(scorer["number"]) if scorer and scorer.get("number") is not None else None
+        attrs: dict[str, Any] = {"score": own_score}
+        if scorer and scorer.get("name"):
+            attrs["scorer_name"] = str(scorer["name"])[:80]
+        if shot:
+            attrs["position_source"] = str(shot.get("method", "nearest"))
         event = Event(
             organization_id=match.organization_id,
             match_id=match.id,
@@ -127,7 +155,11 @@ async def apply_scoreboard(
             clock_s=clock_s,
             source=OVERLAY,
             confidence=0.95,
-            attributes={"score": own_score},
+            number=number,
+            player_id=roster.get(number) if side == "own" and number is not None else None,
+            x=float(shot["x"]) if shot else None,
+            y=float(shot["y"]) if shot else None,
+            attributes=attrs,
         )
         ctx.db.add(event)
         if created_out is not None:

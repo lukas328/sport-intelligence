@@ -108,7 +108,13 @@ OVERLAY = {
     "goals": [
         {"t_ms": 63_000, "side": "right", "score": [1, 1]},
         {"t_ms": 91_000, "side": "left", "score": [2, 1]},
-        {"t_ms": 400_000, "side": "right", "score": [2, 2]},
+        {
+            "t_ms": 400_000,
+            "side": "right",
+            "score": [2, 2],
+            "scorer": {"number": 7, "name": "Mia KELLER"},
+            "shot": {"t_ms": 397_000, "x": 34.0, "y": 8.0, "track_id": 3, "method": "number"},
+        },
         {"t_ms": 900_000, "side": "left", "score": [3, 2]},
     ],
     "clock": [
@@ -122,6 +128,12 @@ async def test_goals_and_clock_from_score_overlay(make_api: Callable[[], Api]) -
     api = make_api()
     ids = await setup_club(api)
     org = ids["org"]
+    roster = f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/roster"
+    mia = (
+        await api.post(
+            roster, json={"first_name": "Mia", "last_name": "Keller", "jersey_number": 7}
+        )
+    ).json()
     m = await new_match(api, ids, is_home=False)  # away game: the overlay's left team is them
     ev_url = f"/v1/orgs/{org}/matches/{m['id']}/events"
     await api.post(ev_url, json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": 70_000})
@@ -148,8 +160,12 @@ async def test_goals_and_clock_from_score_overlay(make_api: Callable[[], Api]) -
     assert read == [
         ("opponent", 88_500, 1, 208.5),
         ("opponent", 900_000, 2, 2400.0),
-        ("own", 400_000, 2, 1900.0),
+        ("own", 397_000, 2, 1897.0),
     ]
+    # the scorer named by the overlay is linked to the roster
+    own = next(e for e in events if e["source"] == "scoreboard_ocr" and e["side"] == "own")
+    assert own["number"] == 7 and own["player_id"] == mia["player_id"]
+    assert (own["x"], own["y"]) == (34.0, 8.0)  # where she scored from (normalised)
     # the overlay is the goal source: no goals from the throw-off heuristic
     assert not [e for e in events if e["source"] == "heuristic" and e["type"] == "shot"]
     a = (await api.get(f"/v1/orgs/{org}/videos/{jobs.jobs[-1][3]['asset_id']}/analysis")).json()

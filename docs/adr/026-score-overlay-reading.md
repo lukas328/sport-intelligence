@@ -37,6 +37,16 @@ a running match clock. That is the most reliable goal source available without a
    video starts after the throw-off), and the final score when the video reaches the end of the
    match and no result is stored.
 
+7. **Scorer** (added 2026-11-04): after a goal the stream shows a name banner in the overlay colour
+   ("7 Lisa ZIMMERLI"), left for the home team, right for the away team. The reader finds wide bars
+   of that colour outside the score bug, reads them a few times, and votes the number per name over
+   the match (OCR reads 11 as 44 now and then). Each goal gets the first banner on its side within
+   20 s. Own scorers are linked to the roster by shirt number.
+8. **Where from** (`shots.py`): the scorer's track (shirt number from `numbers.py`/`reid.py`), or
+   else the attacker nearest to the attacked goal in the 10 s before the overlay changed, gives the
+   shot position (normalised, attacked goal at x = 40) and the throw time; the goal event carries
+   both and `position_source` (`number` or `nearest`).
+
 ## Results (5-minute clips)
 | Clip | Overlay | Goals read | Actual | Clock |
 |---|---|---|---|---|
@@ -45,6 +55,12 @@ a running match clock. That is the most reliable goal source available without a
 | NLB Horgen vs Möhlin 2017 | none | 0 | not checked | - |
 
 Single misreadings (`41:0`, `2:7`) occur and are filtered by rule 5.
+
+Scorers on the SPL2 clip: all 5 banners read and attached to the right goals (7 Amy HOCHREUTENER,
+7 Lisa ZIMMERLI, 5 Zerin OZCELIK, 11 Sophie WINDLER, 33 Denise SCHWAIGER); a sixth banner after the
+last overlay change was corrected from 44 to 11 by the name vote. Shot positions: 1 of 5 from the
+scorer's own track (numbers read only every 15th frame on that run), 4 from the nearest attacker,
+all 3 to 6 m from the goal.
 
 Cross-check with the tracking: before each of the 5 goals, the possession segmentation (ADR 025)
 had the scoring team attacking (5 of 5); the attack ended 1 to 3 s before the overlay changed.
