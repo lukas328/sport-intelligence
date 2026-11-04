@@ -686,6 +686,10 @@ async def _apply_analysis_result(
             from handball_api.services import marks
 
             await marks.sync_match(ctx, match.id, authorised=True)
+            # goals marked by hand get their shot position from the tracking
+            from handball_api.services import shot_positions
+
+            await shot_positions.fill(ctx, match)
             asset.analysis = {
                 **asset.analysis,
                 "auto_events": {

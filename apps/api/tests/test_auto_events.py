@@ -172,3 +172,49 @@ async def test_goals_and_clock_from_score_overlay(make_api: Callable[[], Api]) -
     assert a["auto_events"]["overlay_goals"] == 3 and a["auto_events"]["overlay_aligned"] == 1
     poss = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/possessions")).json()["phases"]
     assert [p["outcome"] for p in poss if p["start_ms"] == 70_000] == ["goal"]
+
+
+async def test_marked_goal_gets_its_shot_position_from_the_tracks(
+    make_api: Callable[[], Api],
+) -> None:
+    import numpy as np
+
+    from handball_api.core.storage import MemoryStorage
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    ev_url = f"/v1/orgs/{org}/matches/{m['id']}/events"
+    # a courtside mark with the scorer's number, no position
+    await api.post(
+        ev_url,
+        json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": 20_000, "number": 7},
+    )
+    await upload(api, ids, m["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    prefix = jobs.jobs[-1][3]["prefix"]
+    await _ingest(api, jobs.jobs[-1][2], prefix)
+    # tracks: #7 runs in to 4 m from the goal at x = 40; a teammate gets even closer
+    rows = [(t, 1, 30 + 0.75 * k, 10.0) for k, t in enumerate(range(12_000, 20_001, 1000))]
+    rows += [(t, 2, 33 + 0.5 * k, 4.0) for k, t in enumerate(range(12_000, 20_001, 1000))]
+    storage: MemoryStorage = api.app.state.storage
+    await storage.put(
+        "artifacts",
+        jobs.jobs[-1][3]["prefix"] + "analysis/chunk_00000.bin",
+        np.array(rows, "<f4").tobytes(),
+        "application/octet-stream",
+    )
+    track = {"first_ms": 0, "last_ms": 30_000, "points": 9, "observed_share": 1.0}
+    tracks = [
+        {**track, "track_id": 1, "team": "home", "team_confidence": 0.9, "number": 7},
+        {**track, "track_id": 2, "team": "home", "team_confidence": 0.9},
+    ]
+    await _finish(
+        api,
+        jobs.jobs[-1][2],
+        {"tracks": tracks, "detector": "model", "chunks": 1, "chunk_ms": 30_000, "events": AUTO},
+    )
+    goal = next(e for e in (await api.get(ev_url)).json() if e["source"] != "heuristic")
+    assert (goal["x"], goal["y"]) == (36.0, 10.0)  # the scorer, not the nearer teammate
+    assert goal["attributes"]["position_source"] == "tracking_number"
