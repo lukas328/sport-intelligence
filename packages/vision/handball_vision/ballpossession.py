@@ -18,8 +18,12 @@ disappears for longer is a "lost" end, not a pass.
 from __future__ import annotations
 
 import itertools
+from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any
+
+import numpy as np
 
 Box = tuple[int, float, float, float, float]  # track id, x1, y1, x2, y2 (frame pixels)
 
@@ -143,4 +147,84 @@ def summary(pos: Sequence[Possession], moves: Sequence[Transfer], fps: float) ->
         "passes": passes,
         "turnovers": turnovers,
         "possessions": len(pos),
+    }
+
+
+def _apply(h: Any, x: float, y: float) -> tuple[float, float]:
+    v = h @ np.array([x, y, 1.0])
+    return float(v[0] / v[2]), float(v[1] / v[2])
+
+
+def from_observations(obs: Any, result: Any, min_score: float = 0.35) -> dict[str, Any] | None:
+    """Ball path, holders, possessions and transfers for an analysed video.
+
+    `obs` is a `handball_vision.observe.Observations` (ball boxes per observed frame, camera
+    motion), `result` its `AnalysisResult` (tracks keep the index of their box in the frame's
+    observation). Ball peaks go to the camera-compensated canvas for the temporal path, and back
+    to frame pixels for the holder test. None without ball observations."""
+    from handball_vision import balltrack
+
+    motion = obs.motion
+    fw = motion.frame_size[0]
+    peaks: list[balltrack.Peak] = []
+    for fo in obs.frames:
+        if not fo.balls:
+            continue
+        h = motion.frame_to_canvas(fo.index)
+        if h is None:
+            continue
+        for d in fo.balls:
+            x, y = _apply(h, (d.x1 + d.x2) / 2, (d.y1 + d.y2) / 2)
+            peaks.append(balltrack.Peak(fo.index, x, y, float(d.score)))
+    if not peaks:
+        return None
+    step = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
+    path, stats = balltrack.track(
+        peaks,
+        obs.fps,
+        max_speed=0.9 * fw,  # about 30 m/s on a broadcast view of the court
+        radius=fw / 160,
+        min_score=min_score,
+        max_gap=3 * step,
+    )
+    people = {fo.index: fo.people for fo in obs.frames}
+    boxes: dict[int, list[Box]] = defaultdict(list)
+    for p in result.points:
+        if p.det_index is None or p.frame not in people:
+            continue
+        d = people[p.frame][p.det_index]
+        boxes[p.frame].append((p.track_id, d.x1, d.y1, d.x2, d.y2))
+    ball: dict[int, tuple[float, float]] = {}
+    for bpnt in path:
+        if bpnt.frame not in boxes:
+            continue
+        h = motion.canvas_to_frame(bpnt.frame)
+        if h is not None:
+            ball[bpnt.frame] = _apply(h, bpnt.x, bpnt.y)
+    teams = {tid: str(v["label"]) for tid, v in result.teams.items()}
+    pos = possessions(holders(ball, boxes), teams, obs.fps)
+    moves = transfers(pos, obs.fps)
+    ms = 1000 / obs.fps
+    return {
+        "path_stats": stats,
+        "summary": summary(pos, moves, obs.fps),
+        "possessions": [
+            {
+                "track_id": p.track_id,
+                "team": p.team,
+                "start_ms": round(p.first * ms),
+                "end_ms": round(p.last * ms),
+            }
+            for p in pos
+        ],
+        "transfers": [
+            {
+                "kind": m.kind,
+                "from": m.from_track,
+                "to": m.to_track,
+                "released_ms": round(m.released * ms),
+                "received_ms": round(m.received * ms),
+            }
+            for m in moves
+        ],
     }

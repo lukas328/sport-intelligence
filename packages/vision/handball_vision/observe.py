@@ -497,7 +497,7 @@ def track(
         ]
         if progress and k % 50 == 0:
             progress("tracking", k / max(1, len(obs.frames)))
-    return _finish(
+    result = _finish(
         points,
         teams,
         obs.fps,
@@ -515,3 +515,11 @@ def track(
         number_reads,
         vectors,
     )
+    from handball_vision.ballpossession import from_observations
+
+    t0 = time.perf_counter()
+    ball = from_observations(obs, result)
+    if ball is not None:
+        result.extra["ball"] = ball
+    result.timings_s["ball"] = time.perf_counter() - t0
+    return result
