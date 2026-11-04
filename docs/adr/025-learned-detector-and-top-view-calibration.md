@@ -38,6 +38,19 @@ weights were unreachable when ADR 012 was written; GitHub release assets are rea
    never jumps to the other team; stitching compares shirts by hue (video washes colours out) and the
    kit match uses hue for coloured kits and lightness for white, black and grey ones.
 
+6. **Teams by this match's colours**: the tracks' median torso colours are clustered (3 to 5
+   clusters, the pair with most players that is clearly apart and balanced are the teams) and matched
+   to the entered kits by order (lighter to lighter, hue to hue); hall lighting shifts absolute
+   colours too much. **Goalkeepers by position** (most of the time within 6.5 m of a goal) and by the
+   team that defends that goal in set attacks.
+7. **What video gives without the ball**: possession phases with a summary per side
+   (`GET /matches/{id}/possessions`), fast breaks (the team runs 18 m towards the other goal within
+   4 s of winning the ball), physical load per team and per track; the analysis tab shows them when no
+   events were recorded, with the way to goals and shots (courtside marks, match sheet).
+8. **Fallback**: when the detector finds fewer than three people in the median frame, the classical
+   path runs (unusual footage; the synthetic test video).
+9. **GPU image** (`Dockerfile.cuda`, CUDA 12.6, ONNX Runtime GPU, detection on every frame).
+
 ## Consequences
 - All three real clips calibrate automatically (court about 0.5 to 1.5 m accurate judged by the
   goal frames and lines; docs/perf/real-videos.md). People per frame on the court: 13 to 15.

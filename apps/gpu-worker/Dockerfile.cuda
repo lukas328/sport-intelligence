@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1.7
-# GPU image (ADR 025): same worker, ONNX Runtime with the CUDA execution provider. The detector
+# GPU image (ADR 025): same worker, ONNX Runtime with the CUDA execution provider (onnxruntime-gpu
+# below 1.24 is built for CUDA 12; newer releases need CUDA 13). The detector
 # picks CUDA automatically when a GPU is visible (`--gpus all`), else it falls back to the CPU.
-FROM python:3.12-slim AS python
+FROM python:3.12-slim-bookworm AS python
 
-# Ubuntu 24.04 (glibc 2.39) runs the Debian bookworm Python build of the official image
+# Ubuntu 24.04 (glibc 2.39, OpenSSL 3.0) runs the Debian bookworm Python build of the official image
 FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04 AS base
 ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1 UV_PYTHON_DOWNLOADS=never
@@ -32,7 +33,7 @@ RUN --mount=type=secret,id=extra_ca,required=false --mount=type=cache,target=/ro
     if [ -s /run/secrets/extra_ca ]; then export SSL_CERT_FILE=/run/secrets/extra_ca; fi; \
     uv sync --frozen --no-dev --package handball-gpu-worker --no-editable --python /usr/local/bin/python3.12 \
     && uv pip uninstall --python /app/.venv/bin/python onnxruntime \
-    && uv pip install --python /app/.venv/bin/python "onnxruntime-gpu>=1.20,<2"
+    && uv pip install --python /app/.venv/bin/python "onnxruntime-gpu>=1.20,<1.24"
 
 # model weights: pinned release and checksum (ADR 003/025)
 FROM base AS models
