@@ -14,6 +14,7 @@ can mark the court instead of seeing an error.
 
 from __future__ import annotations
 
+import json
 import shutil
 import tempfile
 import time
@@ -26,7 +27,7 @@ import structlog
 
 from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_dir
 from handball_vision import __version__ as vision_version
-from handball_vision import formation
+from handball_vision import formation, scoreboard
 from handball_vision import observe as learned
 from handball_vision.calibration import (
     Calibration,
@@ -286,6 +287,7 @@ def run_analysis(
             "stats": result.extra,
             "formations": detect_formations(result),
             "events": events_payload(result),
+            "scoreboard": None,
         }
         rep.succeed(payload)
         log.info(
@@ -366,6 +368,39 @@ def _people(found: list[Any]) -> list[Any]:
     return [d for d in found if d.cls != "ball"]
 
 
+def _overlay_reader(frames: list[Any], fps: float, duration_s: float) -> scoreboard.Reader | None:
+    """A reader for a broadcast score overlay, or None (no overlay, no Tesseract). Never fails
+    the analysis: the overlay is an extra source."""
+    if not scoreboard.available() or not frames:
+        return None
+    try:
+        boxes = scoreboard.find_overlay(frames)
+        if not boxes:
+            return None
+        h, w = frames[0].shape[:2]
+        x, y, bw, bh = scoreboard._union(boxes, 6, (w, h))
+        n = len(frames)
+        crops = [
+            (duration_s * (k + 0.5) / n, frames[k][y : y + bh, x : x + bw])
+            for k in range(0, n, max(1, n // 8))
+        ]
+        fields = scoreboard.find_fields(crops, (x, y))
+        if not any(f.kind == "score" for f in fields):
+            return None
+        log.info("score_overlay_found", fields=[(f.kind, f.box) for f in fields])
+        return scoreboard.Reader(fields, fps)
+    except Exception as exc:  # pragma: no cover - defensive
+        log.warning("score_overlay_failed", error=str(exc))
+        return None
+
+
+def _overlay_summary(reader: scoreboard.Reader | None) -> dict[str, Any] | None:
+    if reader is None:
+        return None
+    summary = scoreboard.read_overlay_summary(reader)
+    return summary if summary["first_score"] is not None else None
+
+
 def _run_learned(
     detector: YoloxDetector,
     job_id: str,
@@ -404,16 +439,22 @@ def _run_learned(
             s3.download_file(bucket, proxy_key, str(video), Config=TRANSFER)
             # a quick look first: a detector that sees nobody on a dozen frames spread over the
             # video would not see more in a full pass (unusual footage, drawn test videos)
-            seen = sorted(len(_people(d)) for d in detector.detect(sample_frames(video, 12)))
+            spread = sample_frames(video, 36)
+            seen = sorted(len(_people(d)) for d in detector.detect(spread[::3]))
             if not seen or seen[len(seen) // 2] < 3:
                 log.info("detector_sees_few_people", median=seen[len(seen) // 2] if seen else 0)
                 return None
+            _, _, fps, total = _open(video)
+            reader = _overlay_reader(spread, fps, total / fps if fps else 0.0)
+            del spread
             obs = learned.observe(
                 video,
                 detector,
                 detect_every=max(1, settings.detect_every),
                 progress=lambda _stage, f: rep.fraction(f),
+                on_frame=reader.add if reader else None,
             )
+            overlay = _overlay_summary(reader)
             counts = sorted(len(fo.people) for fo in obs.frames)
             if not counts or counts[len(counts) // 2] < 3:
                 log.info(
@@ -421,9 +462,16 @@ def _run_learned(
                 )
                 return None
             learned.save_observations(obs, work / "observations.npz")
+            (work / "scoreboard.json").write_text(json.dumps(overlay))
             upload_dir_files(
-                s3, settings.s3_bucket_artifacts, work, ["observations.npz"], prefix + "analysis/"
+                s3,
+                settings.s3_bucket_artifacts,
+                work,
+                ["observations.npz", "scoreboard.json"],
+                prefix + "analysis/",
             )
+        else:
+            overlay = _cached_overlay(s3, settings.s3_bucket_artifacts, prefix, work)
         hall = obs.motion.background()
         view = {
             "camera": "moving" if obs.motion.moving else "fixed",
@@ -458,6 +506,7 @@ def _run_learned(
                 "elapsed_s": round(time.perf_counter() - started, 1),
                 "stats": {"camera": view["camera"], "motion": obs.motion.stats},
                 "formations": [],
+                "scoreboard": overlay,
             }
             rep.succeed(pending)
             log.info("analysis_needs_calibration", job_id=job_id, reason=str(exc))
@@ -490,6 +539,7 @@ def _run_learned(
             "stats": result.extra,
             "formations": detect_formations(result),
             "events": events_payload(result),
+            "scoreboard": overlay,
         }
         rep.succeed(payload)
         log.info(
@@ -507,6 +557,16 @@ def _run_learned(
         raise
     finally:
         shutil.rmtree(work, ignore_errors=True)
+
+
+def _cached_overlay(s3: Any, bucket: str, prefix: str, work: Path) -> dict[str, Any] | None:
+    path = work / "scoreboard.json"
+    try:
+        s3.download_file(bucket, prefix + "analysis/scoreboard.json", str(path), Config=TRANSFER)
+        data = json.loads(path.read_text())
+        return data if isinstance(data, dict) else None
+    except Exception:  # an earlier run without overlay reading
+        return None
 
 
 def upload_dir_files(s3: Any, bucket: str, root: Path, names: list[str], prefix: str) -> None:

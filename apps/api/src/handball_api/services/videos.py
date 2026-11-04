@@ -648,13 +648,17 @@ async def _apply_analysis_result(
             "needs_calibration",
             "calibration_error",
             "calibration_info",
+            "scoreboard",
         )
     }
     auto = r.get("events")
-    if isinstance(auto, dict):
+    sb_raw = r.get("scoreboard")
+    overlay: dict[str, Any] | None = sb_raw if isinstance(sb_raw, dict) else None
+    if isinstance(auto, dict) or overlay:
+        auto = auto if isinstance(auto, dict) else {}
         match = await ctx.db.get(Match, asset.match_id)
         if match is not None and asset.role == VideoRole.MAIN:
-            counts = await auto_events.apply(ctx, match, auto)
+            counts = await auto_events.apply(ctx, match, auto or None, overlay)
             # courtside marks with device time follow the new goals (5.3)
             from handball_api.services import marks
 

@@ -76,7 +76,10 @@ def observe(
     segment_every: int = 90,
     max_frames: int | None = None,
     progress: Progress | None = None,
+    on_frame: Callable[[int, U8], None] | None = None,
 ) -> Observations:
+    """`on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
+    video is decoded only once."""
     from handball_vision.pipeline import _open, iter_frames
 
     _, _, fps, total = _open(path)
@@ -92,6 +95,10 @@ def observe(
         t0 = time.perf_counter()
         est.add(frame)
         timings["camera_motion"] += time.perf_counter() - t0
+        if on_frame is not None:
+            t0 = time.perf_counter()
+            on_frame(n, frame)
+            timings["overlay"] += time.perf_counter() - t0
         if n % detect_every == 0:
             t0 = time.perf_counter()
             found = detector.detect([frame])[0]
