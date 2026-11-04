@@ -1,12 +1,12 @@
 {
- "generated": "2026-11-04T21:10:47",
+ "generated": "2026-11-04T23:11:30",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 246,
   "swiss": 178,
   "swiss_matched": 138,
   "with_log": 63,
-  "in_ingest": 3
+  "in_ingest": 12
  },
  "games": [
   {
@@ -147,7 +147,15 @@
    "log_goals": 0,
    "players": 30,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_YellowPfadiEspoirs_2022-09-11.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7468.174,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b01"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_GSKadettenEspoirs_2022-10-23",
@@ -176,7 +184,15 @@
    "log_goals": 0,
    "players": 29,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_GSKadettenEspoirs_2022-10-23.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7030.574,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b01"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_BSVStans_2022-11-05",
@@ -218,7 +234,7 @@
    ],
    "date": "2022-11-17",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 447179,
    "match": "search",
    "match_score": 1.0,
@@ -234,7 +250,15 @@
    "log_goals": 0,
    "players": 30,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_Emmen_2022-11-17.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7159.054,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b01"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_Endingen_2022-11-27",
@@ -263,7 +287,15 @@
    "log_goals": 0,
    "players": 30,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_Endingen_2022-11-27.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6713.134,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b01"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-02-18",
@@ -276,7 +308,7 @@
    ],
    "date": "2023-02-18",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 447282,
    "match": "search",
    "match_score": 1.0,
@@ -292,7 +324,15 @@
    "log_goals": 0,
    "players": 30,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-02-18.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6732.374,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b02"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_GCAmicitia_2023-03-15",
@@ -305,7 +345,7 @@
    ],
    "date": "2023-03-15",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 447296,
    "match": "search",
    "match_score": 1.0,
@@ -321,7 +361,15 @@
    "log_goals": 0,
    "players": 31,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_GCAmicitia_2023-03-15.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6574.574,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b02"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-03-25",
@@ -334,7 +382,7 @@
    ],
    "date": "2023-03-25",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 447310,
    "match": "search",
    "match_score": 1.0,
@@ -350,7 +398,15 @@
    "log_goals": 0,
    "players": 30,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-03-25.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6744.054,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b02"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_STVBaden_2023-04-05",
@@ -363,7 +419,7 @@
    ],
    "date": "2023-04-05",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 447324,
    "match": "search",
    "match_score": 1.0,
@@ -379,7 +435,15 @@
    "log_goals": 0,
    "players": 28,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_STVBaden_2023-04-05.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6862.974,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b02"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-04-22",
@@ -392,7 +456,7 @@
    ],
    "date": "2023-04-22",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 447338,
    "match": "search",
    "match_score": 1.0,
@@ -421,7 +485,7 @@
    ],
    "date": "2023-05-13",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 447352,
    "match": "search",
    "match_score": 1.0,
@@ -450,7 +514,7 @@
    ],
    "date": "2023-09-03",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 453419,
    "match": "search",
    "match_score": 1.0,
@@ -466,7 +530,15 @@
    "log_goals": 65,
    "players": 35,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7004.654,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b01"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
@@ -479,7 +551,7 @@
    ],
    "date": "2023-09-09",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 453422,
    "match": "search",
    "match_score": 1.0,
@@ -508,7 +580,7 @@
    ],
    "date": "2023-09-23",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 453441,
    "match": "search",
    "match_score": 1.0,
@@ -537,7 +609,7 @@
    ],
    "date": "2023-10-14",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 453453,
    "match": "search",
    "match_score": 1.0,

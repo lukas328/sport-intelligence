@@ -64,6 +64,22 @@ def embed_torch(path: Path, x: np.ndarray, threads: int, bs: int = 64) -> np.nda
     return np.concatenate(out)
 
 
+def embed_imagenet(x: np.ndarray, threads: int, bs: int = 64) -> np.ndarray:
+    """Floor: the untrained ImageNet ResNet18, average-pooled 512-d, at 128 x 64."""
+    import torch
+
+    torch.set_num_threads(threads)
+    m = build_model(size=(128, 64)).eval()
+    out = []
+    with torch.no_grad():
+        for i in range(0, len(x), bs):
+            xb = torch.nn.functional.interpolate(
+                torch.from_numpy(x[i : i + bs]), size=(128, 64), mode="bilinear"
+            )
+            out.append(m.pool(m.body((xb - m.mean) / m.std)).flatten(1).numpy())
+    return np.concatenate(out)
+
+
 def retrieval(vecs: np.ndarray, ids: list[str], teams: list[str], wins: list[int]) -> dict:
     v = vecs / np.linalg.norm(vecs, axis=1, keepdims=True)
     sim = v @ v.T
@@ -110,6 +126,7 @@ def main() -> None:
     ap.add_argument("--every", type=int, default=4, help="every n-th detected frame")
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--json", type=Path)
+    ap.add_argument("--imagenet", action="store_true", help="also the untrained ImageNet floor")
     a = ap.parse_args()
     rows = eval_rows(a.data, a.clip, a.every)
     n_id = len({r["identity"] for r in rows})
@@ -117,7 +134,8 @@ def main() -> None:
     x = None
     results = {}
     a.cache.mkdir(parents=True, exist_ok=True)
-    for path in [*a.onnx, *a.model]:
+    paths = [*a.onnx, *a.model] + ([Path("imagenet-r18.floor")] if a.imagenet else [])
+    for path in paths:
         cp = a.cache / f"{path.stem}-{a.clip}-e{a.every}.npy"
         if cp.exists() and path.suffix == ".onnx":
             vecs = np.load(cp)
@@ -125,7 +143,9 @@ def main() -> None:
             if x is None:
                 x = load_crops(a.data, rows)
             t = time.time()
-            if path.suffix == ".onnx":
+            if path.suffix == ".floor":
+                vecs = embed_imagenet(x, a.threads)
+            elif path.suffix == ".onnx":
                 vecs = embed_onnx(path, x, a.threads)
             else:
                 vecs = embed_torch(path, x, a.threads)
