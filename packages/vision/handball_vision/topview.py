@@ -29,6 +29,7 @@ from numpy.typing import NDArray
 
 from handball_vision import geometry
 from handball_vision.calibration import (
+    LINE_COLOURS,
     MODEL_POINTS,
     CalibrationError,
     line_masks,
@@ -102,6 +103,101 @@ def segments_on_floor(
     near = (np.abs(a).max(axis=1) < max_m) & (np.abs(b).max(axis=1) < max_m)
     keep = aligned & near
     return a[keep], b[keep]
+
+
+def rays_to_pixels(k: F64, rays: F64) -> F64:
+    """Image pixels of unit rays (NaN behind the camera)."""
+    p = rays @ k.T
+    with np.errstate(divide="ignore", invalid="ignore"):
+        px = p[:, :2] / p[:, 2:3]
+    px[p[:, 2] <= 1e-6] = np.nan
+    return np.asarray(px, dtype=np.float64)
+
+
+def segment_colours(
+    masks: dict[str, U8], a: F64, b: F64, min_share: float = 0.6, samples: int = 9
+) -> NDArray[np.int_]:
+    """Line colour of each segment (end points `a`, `b` in the pixels of the image the colour
+    `masks` come from): the index into LINE_COLOURS of the mask that covers most of it, or -1
+    when no mask covers `min_share` of it (walls, people, reflections). The masks are widened by
+    2 px: the segments come from sharp single frames, the masks from the median hall image."""
+    n = len(a)
+    if n == 0:
+        return np.zeros(0, dtype=np.int_)
+    hh, ww = next(iter(masks.values())).shape[:2]
+    t = np.linspace(0.1, 0.9, samples)
+    p = a[:, None, :] + (b - a)[:, None, :] * t[None, :, None]
+    p = np.where(np.isfinite(p), p, -1.0)
+    inside = (p[..., 0] >= 0) & (p[..., 0] < ww) & (p[..., 1] >= 0) & (p[..., 1] < hh)
+    xi = np.clip(p[..., 0], 0, ww - 1).astype(np.intp)
+    yi = np.clip(p[..., 1], 0, hh - 1).astype(np.intp)
+    shares = np.zeros((n, len(LINE_COLOURS)))
+    kernel = np.ones((5, 5), np.uint8)
+    for c, name in enumerate(LINE_COLOURS):
+        if name not in masks:
+            continue
+        wide = cv2.dilate(masks[name], kernel) > 0
+        shares[:, c] = (wide[yi, xi] & inside).mean(axis=1)
+    best = shares.argmax(axis=1)
+    return np.where(shares.max(axis=1) >= min_share, best, -1).astype(np.int_)
+
+
+def colour_views(
+    ra: F64,
+    rb: F64,
+    colours: NDArray[np.int_],
+    up: F64,
+    height: float,
+    yaw: float,
+    min_segments: int = 60,
+    min_share: float = 0.1,
+) -> dict[str, TopView]:
+    """One top view per line colour that has enough floor segments of its own (at least
+    `min_segments` and `min_share` of the coloured floor segments): multi-sport halls draw each
+    sport in its own colour, and a view of one colour shows one sport's shapes."""
+    floor: dict[str, tuple[F64, F64]] = {}
+    for c, name in enumerate(LINE_COLOURS):
+        sel = colours == c
+        if sel.sum() < min_segments:
+            continue
+        floor[name] = segments_on_floor(ra[sel], rb[sel], up, height, yaw)
+    total = sum(len(a) for a, _ in floor.values())
+    return {
+        name: line_top_view(a, b)
+        for name, (a, b) in floor.items()
+        if len(a) >= max(min_segments, min_share * total)
+    }
+
+
+def handball_colour(views: dict[str, TopView]) -> list[tuple[str, float]]:
+    """Line colours ranked by how well their top view forms the handball court (40 x 20 m
+    outline, centre line, 6 m and 9 m lines; goal areas weighted): the best court match of the
+    lines alone. Basketball (28 x 15 m), volleyball (18 x 9 m) and badminton markings explain
+    only parts of the template."""
+    ranked = []
+    for name, tv in views.items():
+        found = search_court(tv, weights=((0.0, 0.0),))
+        ranked.append((name, max(s for _, s in found)))
+    return sorted(ranked, key=lambda r: -r[1])
+
+
+def view_depression_deg(up: F64, height: float, feet_rays: F64) -> float:
+    """Median angle below the horizon at which the camera sees the players' feet: below about
+    10 degrees the floor is seen so flatly that small errors in the floor orientation move the
+    far half of the court by metres (low cameras, cameras far away)."""
+    down = -(feet_rays @ up)
+    down = down[down > 1e-3]
+    if len(down) == 0:
+        return 0.0
+    return float(np.degrees(np.arcsin(np.clip(np.median(down), 0.0, 1.0))))
+
+
+def same_court(t1: F64, t2: F64, tol_px: float) -> bool:
+    """Two court placements (court metres -> top-view pixels) that put the court corners within
+    `tol_px` of each other."""
+    corners = np.array([[0.0, 0.0], [40.0, 0.0], [40.0, 20.0], [0.0, 20.0]])
+    d = np.linalg.norm(geometry.apply(t1, corners) - geometry.apply(t2, corners), axis=1)
+    return bool(d.max() < tol_px)
 
 
 def line_top_view(a: F64, b: F64, ppm: float = 10.0, margin_m: float = 3.0) -> TopView:

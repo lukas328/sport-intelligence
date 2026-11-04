@@ -135,6 +135,28 @@ class KickoffIn(ApiModel):
     t_ms: int = Field(ge=0)
 
 
+class OfficialReportIn(ApiModel):
+    # handball.ch match centre or DHB press report link; a plain game id needs the provider
+    url: str = Field(min_length=1, max_length=500)
+    provider: Literal["handball_ch", "dhb"] | None = None
+
+
+class OfficialReportResult(ApiModel):
+    provider: str
+    game_id: int
+    source_url: str
+    home: str | None
+    away: str | None
+    final: list[int] | None
+    created: int
+    replaced: int  # official report events of an earlier import
+    matched_video_goals: int  # automatic goals that are the same goal (video time kept)
+    unmatched_video_goals: int  # overlay goals without an official counterpart (kept)
+    kept_manual_goals: int  # goals entered by a person (no official duplicate added)
+    skipped: int
+    warnings: list[str]
+
+
 class FeedImportResult(ApiModel):
     created: int
     skipped: int

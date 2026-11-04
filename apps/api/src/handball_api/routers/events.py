@@ -7,10 +7,18 @@ from fastapi import APIRouter, File, Query, Response, UploadFile
 
 from handball_api.models import Event
 from handball_api.routers.deps import OrgDep
-from handball_api.schemas.events import EventIn, EventOut, EventPatch, FeedImportResult, KickoffIn
+from handball_api.schemas.events import (
+    EventIn,
+    EventOut,
+    EventPatch,
+    FeedImportResult,
+    KickoffIn,
+    OfficialReportIn,
+    OfficialReportResult,
+)
 from handball_api.services import events as service
 from handball_api.services import insights as insights_service
-from handball_api.services import paper_reports
+from handball_api.services import official_report, paper_reports
 
 router = APIRouter(prefix="/v1/orgs/{org_id}", tags=["events"])
 MAX_IMPORT = 2_000_000
@@ -84,6 +92,16 @@ async def import_feed(
     return await service.import_feed(
         scope.ctx, match_id, data[:MAX_IMPORT], file.filename or "feed.csv"
     )
+
+
+@router.post("/matches/{match_id}/official-report", response_model=OfficialReportResult)
+async def import_official_report(
+    match_id: uuid.UUID, data: OfficialReportIn, scope: OrgDep
+) -> dict[str, Any]:
+    """Official match report (handball.ch match centre or DHB press report) as events: goals with
+    scorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous
+    one; automatic goals from the video within 20 s are merged with the official goal."""
+    return await official_report.import_report(scope.ctx, match_id, data.url, data.provider)
 
 
 @router.post(

@@ -4,6 +4,8 @@ The pipeline's event baseline (throw-offs, goals inferred from throw-offs, posse
 changes) is stored with source "heuristic" and its confidence. A re-analysis replaces the previous
 automatic rows. Events a person entered (tagging, import, correction) always win: an automatic
 goal close to a manual one is dropped. The opening throw-offs set the match clock if nobody did.
+An imported official report (services/official_report.py) has every goal: overlay goals close to
+one of its goals are dropped and no goals are estimated from throw-offs.
 """
 
 from __future__ import annotations
@@ -14,10 +16,11 @@ from sqlalchemy import delete, select
 
 from handball_api.models import Event, Match, Possession, RosterEntry
 from handball_api.services.context import Ctx
-from handball_api.services.events import clock_from_video
+from handball_api.services.events import clock_from_video, video_from_clock
 
 SOURCE = "heuristic"
 OVERLAY = "scoreboard_ocr"
+OFFICIAL = "official_report"
 MIN_CONFIDENCE = 0.5
 DEDUPE_MS = 5000
 OVERLAY_DEDUPE_MS = 20000  # the overlay is updated a few seconds after the goal
@@ -35,6 +38,21 @@ def _overlay_clock(segments: list[dict[str, int]], t_ms: int) -> int | None:
         return None
     s = before[-1]
     return int(s["start_clock_s"] + (min(t_ms, s["end_ms"]) - s["start_ms"]) / 1000)
+
+
+async def _align_official(ctx: Ctx, match: Match) -> None:
+    """Official report events imported before the throw-off times were known get their video
+    time now, so the overlay goals are matched against them."""
+    rows = await ctx.db.scalars(
+        select(Event).where(
+            Event.match_id == match.id,
+            Event.source == OFFICIAL,
+            Event.t_ms.is_(None),
+            Event.clock_s.is_not(None),
+        )
+    )
+    for e in rows.all():
+        e.t_ms = video_from_clock(match, e.period, e.clock_s or 0.0)
 
 
 async def _manual_goals(ctx: Ctx, match: Match) -> list[tuple[str, int]]:
@@ -113,6 +131,7 @@ async def apply_scoreboard(
             k[half] = start - (clock - (period_s if half == "2" else 0)) * 1000
     if k != (match.kickoff_ms or {}):
         match.kickoff_ms = k
+    await _align_official(ctx, match)
 
     manual = await _manual_goals(ctx, match)
     # the overlay names the scorer after a goal ("7 Lisa ZIMMERLI"): own players by shirt number
@@ -205,6 +224,16 @@ async def apply(
         delete(Possession).where(Possession.match_id == match.id, Possession.source == SOURCE)
     )
     found = list(payload.get("events") or [])
+    official_goals = await ctx.db.scalar(
+        select(Event.id)
+        .where(
+            Event.match_id == match.id,
+            Event.source == OFFICIAL,
+            Event.type == "shot",
+            Event.outcome == "goal",
+        )
+        .limit(1)
+    )
 
     # match clock from the opening throw-offs (first one, first one after a side change)
     k = dict(match.kickoff_ms or {})
@@ -238,7 +267,7 @@ async def apply(
         conf = float(e.get("confidence", 0))
         if kind not in ("goal", "throw_off") or side is None or conf < MIN_CONFIDENCE:
             continue
-        if kind == "goal" and sb["overlay_goals"]:
+        if kind == "goal" and (sb["overlay_goals"] or official_goals is not None):
             continue
         if kind == "goal" and any(
             s == side and t is not None and abs(t - t_ms) <= DEDUPE_MS for s, t in manual_goals

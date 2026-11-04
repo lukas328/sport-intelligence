@@ -376,7 +376,11 @@ async def set_kickoff(ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int) -> 
         )
     ).all()
     for e in events:
-        if e.source in ("official_feed", "paper_report") or e.t_ms is None:
+        # official report goals matched with the video keep the video time
+        from_video = e.source == "official_report" and "video" in (e.attributes or {})
+        if e.t_ms is None or (
+            e.source in ("official_feed", "paper_report", "official_report") and not from_video
+        ):
             e.t_ms = video_from_clock(match, period, e.clock_s or 0.0)
     return match
 

@@ -26,7 +26,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from handball_vision import geometry, topview
-from handball_vision.calibration import Calibration, CalibrationError
+from handball_vision.calibration import Calibration, CalibrationError, line_masks
 from handball_vision.detection import Detection, Detector, filter_on_court, foot_positions
 from handball_vision.motion import CameraMotion, MotionEstimator
 
@@ -314,8 +314,17 @@ def _fixed_focal(obs: Observations) -> float:
     return best[1]
 
 
-def auto_calibrate(obs: Observations, hall: U8) -> tuple[Calibration, dict[str, float]]:
-    """Automatic court calibration of the hall image (panorama or median frame)."""
+MIN_FLOOR_FIT = 0.35  # share of the marking length along two floor directions
+MIN_VIEW_DEG = 10.0  # players' median angle below the horizon (flatter views are not trusted)
+
+
+def auto_calibrate(
+    obs: Observations, hall: U8, min_view_deg: float = MIN_VIEW_DEG
+) -> tuple[Calibration, dict[str, Any]]:
+    """Automatic court calibration of the hall image (panorama or median frame).
+
+    Fails (CalibrationError with the reason) when the markings show no clear floor, when the
+    camera sees the floor too flatly (`min_view_deg`) or when the court found is implausible."""
     motion = obs.motion
     if not motion.moving:
         f = _fixed_focal(obs)
@@ -338,31 +347,60 @@ def auto_calibrate(obs: Observations, hall: U8) -> tuple[Calibration, dict[str, 
         raise CalibrationError("no floor markings found")
     ra, rb, m, length = np.vstack(ras), np.vstack(rbs), np.vstack(ms), np.concatenate(ls)
     alpha, beta, yaw, fit = topview.orientation_from_normals(m, length)
-    if fit < 0.35:
-        raise CalibrationError("the hall's markings do not show a clear floor")
+    if fit < MIN_FLOOR_FIT:
+        raise CalibrationError(
+            "the hall's markings do not show a clear floor (only "
+            f"{fit:.0%} of the line length runs along two floor directions, "
+            f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, or a very low "
+            "camera): click the court points"
+        )
     up = topview._up(alpha, beta)
     feet, heads = people_on_canvas(obs)
     height = topview.camera_height_from_people(up, feet, heads, kc)
+    fr = topview._rays(kc, feet)
+    view_deg = topview.view_depression_deg(up, height, fr)
+    if view_deg < min_view_deg:
+        raise CalibrationError(
+            "the camera sees the floor too flatly for an automatic court (players at a median "
+            f"{view_deg:.0f} degrees below the horizon, at least {min_view_deg:.0f} needed; "
+            f"camera about {height:.1f} m above the floor): click the court points"
+        )
     a, b = topview.segments_on_floor(ra, rb, up, height, yaw)
     if len(a) < 50:
         raise CalibrationError("too few markings on the floor")
-    tv = topview.line_top_view(a, b)
+    views = {"all": topview.line_top_view(a, b)}
+    # multi-sport halls: the colour whose lines form the handball court gets its own search
+    colours = topview.segment_colours(
+        line_masks(hall), topview.rays_to_pixels(kc, ra), topview.rays_to_pixels(kc, rb)
+    )
+    by_colour = topview.colour_views(ra, rb, colours, up, height, yaw)
+    ranked = topview.handball_colour(by_colour)
+    line_colour = ranked[0][0] if ranked else "all"
+    if ranked:
+        views[line_colour] = by_colour[line_colour]
     d1, d2 = topview.floor_basis(up, yaw)
     floor_to_cam = np.column_stack([d1, d2, -height * up])
-    fr = topview._rays(kc, feet)
     dn = fr @ up
     ok = dn < -1e-3
     pts = fr[ok] * (-height / dn[ok])[:, None]
-    feet_px = (np.column_stack([pts @ d1, pts @ d2]) - np.array(tv.origin)) * tv.ppm
-    best: tuple[float, F64, float, float] | None = None
-    for t, line_score in topview.search_court(tv, feet_px=feet_px):
-        h = kc @ floor_to_cam @ tv.pixel_to_floor() @ t
+    feet_m = np.column_stack([pts @ d1, pts @ d2])
+    courts: list[tuple[F64, float, str]] = []  # court -> floor metres, line score, view
+    for name, tv in views.items():
+        feet_px = (feet_m - np.array(tv.origin)) * tv.ppm
+        for t, line_score in topview.search_court(tv, feet_px=feet_px):
+            to_floor = tv.pixel_to_floor() @ t
+            if any(topview.same_court(to_floor, c[0], 0.25) for c in courts):
+                continue  # the same court from another weighting or view: refined once
+            courts.append((to_floor, line_score, name))
+    best: tuple[float, F64, float, str] | None = None
+    for to_floor, line_score, name in courts:
+        h = kc @ floor_to_cam @ to_floor
         h = h / h[2, 2]
         h2, _, goal = topview.refine_on_goals(h, kc, hall)
         if best is None or goal > best[0]:
-            best = (goal, h2, line_score, 0.0)
+            best = (goal, h2, line_score, name)
     assert best is not None
-    goal, h, line_score, _ = best
+    goal, h, line_score, view_name = best
     h = topview.normalise_orientation(h, kc)
     r, t = topview.pose_from_homography(h, kc)
     centre = -r.T @ t
@@ -391,6 +429,10 @@ def auto_calibrate(obs: Observations, hall: U8) -> tuple[Calibration, dict[str, 
         "line_score": round(line_score, 3),
         "floor_fit": round(fit, 3),
         "people_on_court": round(inside, 3),
+        "view_deg": round(view_deg, 1),
+        "line_colour": line_colour,
+        "court_view": view_name,
+        "colour_scores": {k: round(v, 3) for k, v in ranked},
         "camera_height_m": round(float(centre[2]), 2),
         "camera_x_m": round(float(centre[0]), 2),
         "camera_y_m": round(float(centre[1]), 2),
