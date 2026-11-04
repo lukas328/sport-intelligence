@@ -2,9 +2,10 @@ import glob,os,sys,json
 _D=os.path.dirname(glob.glob("/kaggle/input/**/meta_tt.json",recursive=True)[0])
 _D2=os.path.dirname(glob.glob("/kaggle/input/**/meta_seq.json",recursive=True)[0])
 _DS=glob.glob("/kaggle/input/**/basketball-instants-dataset.json",recursive=True)
+_RF=glob.glob("/kaggle/input/**/meta_roboflow.json",recursive=True)
 _METAS="meta_tt.json,meta_ourlab.json,meta_lab3.json,meta_user.json,meta_konstanz_wuerzburg.json,meta_uznach_dietikon.json,meta_eisenach_wetzlar.json,meta_leimental_frauenfeld.json,meta_muelheim_suedpfalz.json,meta_u20_sui_ger.json"
 ITERS_ENV=int(os.environ.get("ITERS","10000"))
-sys.argv=[sys.argv[0],_D,"/kaggle/working/ball3d.onnx",str(ITERS_ENV),_METAS,_D+"/ball3a.pt","4"]
+sys.argv=[sys.argv[0],_D,"/kaggle/working/ball3e.onnx",str(ITERS_ENV),_METAS,_D+"/ball3a.pt","4"]
 print("data",_D,_D2,_DS,flush=True)
 """3-frame ball heatmap net: frames t-G, t, t+G stacked (9 channels). ResNet18 layers 1-2 + decoder, stride 4.
 Initialised from the single-frame net: centre channels get its first conv, neighbour channels start at zero,
@@ -59,6 +60,10 @@ def load(m,aug):
             hsv=cv2.cvtColor(np.ascontiguousarray(img[...,k:k+3]),cv2.COLOR_RGB2HSV).astype(np.int16); hsv[...,0]=(hsv[...,0]+dh)%180
             hsv[...,1]=np.clip(hsv[...,1]*sat,0,255); out.append(cv2.cvtColor(hsv.astype(np.uint8),cv2.COLOR_HSV2RGB))
         img=np.clip(np.concatenate(out,2).astype(np.float32)*gain+off,0,255).astype(np.uint8)
+    if not aug and (img.shape[0]>T or img.shape[1]>T):  # larger tiles: a fixed 192 window around the ball (or the centre)
+        H,W=img.shape[:2]; cx,cy=(ball[0],ball[1]) if ball else (W/2,H/2)
+        x0=int(np.clip(cx-T/2,0,W-T)); y0=int(np.clip(cy-T/2,0,H-T)); img=img[y0:y0+T,x0:x0+T]
+        if ball: ball=[ball[0]-x0,ball[1]-y0,ball[2]]
     hm=np.zeros((48,48),np.float32)
     if ball and 0<=ball[0]<T and 0<=ball[1]<T:
         cx,cy=ball[0]/4,ball[1]/4; yy,xx=np.mgrid[0:48,0:48]; hm=np.exp(-((xx-cx)**2+(yy-cy)**2)/(2*1.2**2)).astype(np.float32)
@@ -76,7 +81,7 @@ def evaluate(net):
         for k in range(0,len(va),64):
             ms=va[k:k+64]; x,_=batch(ms,False); hm=torch.sigmoid(net(x))[:,0].numpy()
             for m,h in zip(ms,hm):
-                g=res.setdefault(m["src"] if m["src"]=="teamtrack" else "ours",{"pos":[],"neg":[]})
+                g=res.setdefault(m["src"].split("_")[0],{"pos":[],"neg":[]})
                 yx=np.unravel_index(h.argmax(),h.shape); s=float(h.max())
                 if m["ball"]: g["pos"].append(s if np.hypot(yx[1]*4+2-m["ball"][0],yx[0]*4+2-m["ball"][1])<8 else 0.0)
                 else: g["neg"].append(s)
@@ -127,7 +132,11 @@ def build(root,out,T=320,seed=0):
 
 _dsp=build(os.path.dirname(_DS[0]),"/tmp/dsp") if _DS else []
 print("seq",len(_seq),"deepsport",len(_dsp),flush=True)
-tr=tr+[m for m in _seq+_dsp]
+_rf=json.load(open(_RF[0])) if _RF else []
+for m in _rf: m["root"]=os.path.dirname(_RF[0])
+print("roboflow",len(_rf),flush=True)
+tr=tr+[m for m in _seq+_dsp]+[m for m in _rf if m["split"]=="train"]
+va=va+[m for m in _rf if m["split"]!="train"][:600]
 import math
 from torch.utils.data import IterableDataset, DataLoader
 dev="cuda" if torch.cuda.is_available() else "cpu"; print("device",dev,flush=True)
@@ -140,7 +149,9 @@ groups={"tt_pos":[m for m in tr if m["ball"] and m["src"]=="teamtrack"],"our_pos
         "tt_neg":[m for m in tr if not m["ball"] and m["src"]=="teamtrack"],"our_neg":[m for m in tr if not m["ball"] and m["src"] not in ("teamtrack","deepsport") and not m.get("hard")],
         "ds_neg":[m for m in tr if not m["ball"] and m["src"]=="deepsport"],
         "hard_neg":[m for m in tr if not m["ball"] and m.get("hard")]}
-mix={"tt_pos":16,"our_pos":30,"ds_pos":14,"tt_neg":8,"our_neg":16,"ds_neg":6,"hard_neg":18}
+groups["rf_pos"]=[m for m in tr if m["ball"] and m["src"].startswith("roboflow")]; groups["rf_neg"]=[m for m in tr if not m["ball"] and m["src"].startswith("roboflow")]
+groups["our_pos"]=[m for m in groups["our_pos"] if not m["src"].startswith("roboflow")]; groups["our_neg"]=[m for m in groups["our_neg"] if not m["src"].startswith("roboflow")]
+mix={"tt_pos":12,"our_pos":28,"ds_pos":10,"rf_pos":18,"tt_neg":6,"our_neg":14,"ds_neg":4,"rf_neg":6,"hard_neg":18}
 mix={k:v for k,v in mix.items() if groups[k]}
 print({k:len(v) for k,v in groups.items()},flush=True)
 class Stream(IterableDataset):
@@ -155,7 +166,7 @@ def evaluate_dev(net):
         for k in range(0,len(va),128):
             ms=va[k:k+128]; x,_=batch(ms,False); hm=torch.sigmoid(net(x.to(dev)))[:,0].cpu().numpy()
             for m,h in zip(ms,hm):
-                g=res.setdefault(m["src"] if m["src"]=="teamtrack" else "ours",{"pos":[],"neg":[]})
+                g=res.setdefault(m["src"].split("_")[0],{"pos":[],"neg":[]})
                 yx=np.unravel_index(h.argmax(),h.shape); s=float(h.max())
                 if m["ball"]: g["pos"].append(s if np.hypot(yx[1]*4+2-m["ball"][0],yx[0]*4+2-m["ball"][1])<8 else 0.0)
                 else: g["neg"].append(s)
@@ -168,10 +179,10 @@ for it,(x,h) in enumerate(loader,1):
     loss=focal(net(x),h); opt.zero_grad(); loss.backward(); opt.step(); sched.step()
     if it%200==0: print(f"it {it} loss {loss.item():.3f} {time.time()-t0:.0f}s",flush=True)
     if it%2000==0 or it==ITERS:
-        print("val (found, false alarm):",evaluate_dev(net),flush=True); torch.save(net.state_dict(),"/kaggle/working/ball3d.pt")
+        print("val (found, false alarm):",evaluate_dev(net),flush=True); torch.save(net.state_dict(),"/kaggle/working/ball3e.pt")
     if it>=ITERS: break
 net.eval().cpu()
 try:
-    torch.onnx.export(net,torch.zeros(1,9,192,192),"/kaggle/working/ball3d.onnx",input_names=["x"],output_names=["heat"],dynamic_axes={"x":{0:"n",2:"h",3:"w"},"heat":{0:"n",2:"h4",3:"w4"}},opset_version=17); print("exported onnx",flush=True)
+    torch.onnx.export(net,torch.zeros(1,9,192,192),"/kaggle/working/ball3e.onnx",input_names=["x"],output_names=["heat"],dynamic_axes={"x":{0:"n",2:"h",3:"w"},"heat":{0:"n",2:"h4",3:"w4"}},opset_version=17); print("exported onnx",flush=True)
 except Exception as e: print("onnx export failed",e,flush=True)
 print("done",flush=True)

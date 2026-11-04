@@ -27,7 +27,8 @@ below) are research models and must not go into the product.**
 | Labelled paths (labelling page "Ball-Pfade Halle", `labelling/paths.html`) | 3-second scenes, a click every ~0.1 s, frames between interpolated | own | `tiles_from_paths.py` |
 | DeepSport basketball instants (Kaggle `deepsportradar/basketball-instants-dataset`) | 16 arenas, frame pairs 40 ms apart, 3D ball centre with calibration | **CC BY-NC-SA 4.0** | research only: `deepsport_tiles.py` projects the ball, scales to 8 to 24 px |
 
-Checked and not used: Roboflow handball sets (site not reachable from the session; API needs a key),
+Roboflow handball sets with ball boxes (CC BY 4.0, via API): handball-ballon v13, handball-xutbx v16, handball-detection-fj8rc v2, custom_handball_dataset v5, handball5 v1, about 2,900 balls (`roboflow_tiles.py`, still frames); handball-detection-2 checked and left out (mostly football photos).
+Checked and not used:
 basketball tracking (CC BY-NC-ND), sports-ball image classification (close-ups).
 
 ## Benchmark: labelled test half (40 balls, never trained on)
