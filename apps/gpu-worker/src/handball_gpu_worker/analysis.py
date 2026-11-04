@@ -100,6 +100,7 @@ def events_payload(result: AnalysisResult) -> dict[str, Any]:
                 "end_ms": p.end_ms,
                 "confidence": p.confidence,
                 "outcome": p.outcome,
+                "phase": p.phase,
             }
             for p in found.possessions
         ],

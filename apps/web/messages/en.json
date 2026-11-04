@@ -2088,6 +2088,14 @@
     "moreText": "The video analysis does not see the ball yet. Mark goals at the courtside during the match or import the match sheet: statistics, shot maps and goalkeeper figures then appear here.",
     "marks": "Mark at the courtside",
     "paper": "Import the match sheet",
-    "phase": "{team}, {from} to {to}"
+    "phase": "{team}, {from} to {to}",
+    "fastBreaks": "{n, plural, =1 {1 of them a fast break} other {# of them fast breaks}}",
+    "list": "All attacks",
+    "filter_all": "All",
+    "filter_fast": "Fast breaks",
+    "fastBreak": "Fast break",
+    "noneFiltered": "No attacks in this selection.",
+    "showAll": "Show all {n}",
+    "showLess": "Show less"
   }
 }

@@ -42,6 +42,7 @@ class Phase:
     end_ms: int
     confidence: float
     outcome: str | None = None  # goal | lost | None
+    phase: str | None = None  # fast_break | None (set attack)
 
 
 @dataclass
@@ -319,7 +320,56 @@ def detect(points: list[tuple[int, int, float, float]], teams: dict[int, str]) -
         if p.outcome is None:
             final_phases[i] = Phase(p.team, p.start_ms, p.end_ms, p.confidence, "lost")
         events.append(Detected(p.end_ms, "possession_change", nxt.team, p.confidence))
+    final_phases = _mark_fast_breaks(final_phases, bins, sides)
+    events += [
+        Detected(p.start_ms, "fast_break", p.team, round(p.confidence * 0.8, 2))
+        for p in final_phases
+        if p.phase == "fast_break"
+    ]
     return EventResult(sorted(events, key=lambda e: e.t_ms), final_phases, sides, missing)
+
+
+def _mark_fast_breaks(
+    phases: list[Phase],
+    bins: dict[int, dict[str, list[tuple[float, float]]]],
+    sides: list[tuple[int, str]],
+    min_run_m: float = 18.0,
+    window_ms: int = 4_000,
+) -> list[Phase]:
+    """An attack that starts with the team running from its own half to the other one within a
+    few seconds is a fast break (Gegenstoss): the team's mean position moves at least
+    `min_run_m` towards the attacked goal between 2 s before and `window_ms` after its start."""
+
+    def centre(team: str, b: int) -> float | None:
+        ps = bins.get(b, {}).get(team, [])
+        return sum(x for x, _ in ps) / len(ps) if len(ps) >= 3 else None
+
+    out: list[Phase] = []
+    for p in phases:
+        hd = _side_at(sides, p.start_ms)
+        if hd is None:
+            out.append(p)
+            continue
+        sign = 1.0 if _attack_right(p.team, hd) else -1.0
+        b0 = (p.start_ms - 2_000) // BIN_MS
+        b1 = (p.start_ms + window_ms) // BIN_MS
+        xs = [(b, c) for b in range(b0, b1 + 1) if (c := centre(p.team, b)) is not None]
+        fast = False
+        if len(xs) >= 4:
+            start_x = min(xs[: max(1, len(xs) // 3)], key=lambda bc: sign * bc[1])[1]
+            best = max(sign * (c - start_x) for _, c in xs)
+            fast = best >= min_run_m and sign * (start_x - 20.0) < 0  # started in its own half
+        out.append(
+            Phase(
+                p.team,
+                p.start_ms,
+                p.end_ms,
+                p.confidence,
+                p.outcome,
+                "fast_break" if fast else None,
+            )
+        )
+    return out
 
 
 def score(

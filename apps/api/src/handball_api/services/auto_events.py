@@ -102,6 +102,7 @@ async def apply(ctx: Ctx, match: Match, payload: dict[str, Any] | None) -> dict[
                 start_ms=int(p["start_ms"]),
                 end_ms=int(p["end_ms"]),
                 outcome=p.get("outcome"),
+                phase=p.get("phase"),
                 confidence=float(p.get("confidence", 0.5)),
                 source=SOURCE,
             )

@@ -565,6 +565,7 @@ async def match_possessions(ctx: Ctx, match_id: uuid.UUID) -> dict[str, object]:
             "start_ms": p.start_ms,
             "end_ms": p.end_ms,
             "outcome": p.outcome,
+            "phase": p.phase,
             "confidence": round(p.confidence, 3),
             "source": p.source,
         }
@@ -577,6 +578,7 @@ async def match_possessions(ctx: Ctx, match_id: uuid.UUID) -> dict[str, object]:
         dur = sum(max(0, p.end_ms - p.start_ms) for p in mine)
         summary[side] = {
             "count": len(mine),
+            "fast_breaks": sum(p.phase == "fast_break" for p in mine),
             "avg_s": round(dur / len(mine) / 1000, 1) if mine else 0.0,
             "share": round(dur / total, 3),
         }

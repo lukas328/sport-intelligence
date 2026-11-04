@@ -2088,6 +2088,14 @@
     "moreText": "L'analyse vidéo ne voit pas encore le ballon. Marque les buts au bord du terrain pendant le match ou importe la feuille de match : statistiques, cartes de tirs et valeurs du gardien apparaissent alors ici.",
     "marks": "Marquer au bord du terrain",
     "paper": "Importer la feuille de match",
-    "phase": "{team}, de {from} à {to}"
+    "phase": "{team}, de {from} à {to}",
+    "fastBreaks": "{n, plural, =1 {dont 1 contre-attaque} other {dont # contre-attaques}}",
+    "list": "Toutes les attaques",
+    "filter_all": "Toutes",
+    "filter_fast": "Contre-attaques",
+    "fastBreak": "Contre-attaque",
+    "noneFiltered": "Aucune attaque dans cette sélection.",
+    "showAll": "Tout afficher ({n})",
+    "showLess": "Afficher moins"
   }
 }

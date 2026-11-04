@@ -3,14 +3,15 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-type Phase = { side: "own" | "opponent"; start_ms: number; end_ms: number; outcome: string | null };
-type Possessions = { phases: Phase[]; summary: Record<"own" | "opponent", { count: number; avg_s: number; share: number }>; estimated: boolean };
+type Phase = { side: "own" | "opponent"; start_ms: number; end_ms: number; outcome: string | null; phase: string | null };
+type Possessions = { phases: Phase[]; summary: Record<"own" | "opponent", { count: number; fast_breaks: number; avg_s: number; share: number }>; estimated: boolean };
 
 /**
  * What a match video gives without any tagging (ADR 025): possession phases from the players'
@@ -38,6 +39,8 @@ export function VideoOverview({
   staff: boolean;
 }) {
   const t = useTranslations("videoOverview");
+  const [filter, setFilter] = useState<"all" | "own" | "opponent" | "fast">("all");
+  const [showAll, setShowAll] = useState(false);
   const q = useQuery({
     queryKey: ["possessions", matchId],
     queryFn: async () =>
@@ -65,6 +68,7 @@ export function VideoOverview({
                   <p className="text-sm font-semibold">{name}</p>
                   <p className="font-score text-[2.5rem] leading-none">{Math.round((s?.share ?? 0) * 100)} %</p>
                   <p className="text-sm text-muted">{t("attacks", { n: s?.count ?? 0, avg: Math.round(s?.avg_s ?? 0) })}</p>
+                  {(s?.fast_breaks ?? 0) > 0 && <p className="text-sm text-muted">{t("fastBreaks", { n: s?.fast_breaks ?? 0 })}</p>}
                 </div>
               ))}
             </div>
@@ -94,6 +98,52 @@ export function VideoOverview({
                 <span>{formatClock(end)}</span>
               </div>
               {onPlay && <p className="text-xs text-muted">{t("timelineHint")}</p>}
+            </div>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold">{t("list")}</p>
+                <div className="flex gap-1" role="group" aria-label={t("list")}>
+                  {(["all", "own", "opponent", "fast"] as const).map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      aria-pressed={filter === f}
+                      onClick={() => setFilter(f)}
+                      className={cn("rounded-[5px] px-2.5 py-1 text-xs font-semibold", filter === f ? "bg-foreground text-background" : "text-muted hover:bg-surface hover:text-foreground")}
+                    >
+                      {f === "own" ? ownName : f === "opponent" ? oppName : t(`filter_${f}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {(() => {
+                const rows = phases.filter((p) => filter === "all" || (filter === "fast" ? p.phase === "fast_break" : p.side === filter));
+                const shown = showAll ? rows : rows.slice(0, 8);
+                return (
+                  <>
+                    <ul className="border-t-2 border-foreground">
+                      {shown.map((p) => (
+                        <li key={p.start_ms} className="border-b border-foreground/10">
+                          <button type="button" disabled={!onPlay} onClick={() => onPlay?.(p.start_ms)} className="flex w-full items-center gap-3 py-2 text-left text-sm hover:bg-surface disabled:hover:bg-transparent">
+                            <span aria-hidden className={cn("size-2.5 shrink-0 rounded-[2px]", p.side === "own" ? "bg-accent" : "bg-foreground/60")} />
+                            <span className="w-28 shrink-0 font-semibold">{p.side === "own" ? ownName : oppName}</span>
+                            <span className="tabular-nums text-muted">
+                              {formatClock(p.start_ms)} · {Math.round((p.end_ms - p.start_ms) / 1000)} s
+                            </span>
+                            {p.phase === "fast_break" && <span className="text-xs font-semibold underline decoration-resin decoration-[3px] underline-offset-4">{t("fastBreak")}</span>}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    {rows.length === 0 && <p className="text-sm text-muted">{t("noneFiltered")}</p>}
+                    {rows.length > 8 && (
+                      <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setShowAll((v) => !v)}>
+                        {showAll ? t("showLess") : t("showAll", { n: rows.length })}
+                      </button>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </>
         )}

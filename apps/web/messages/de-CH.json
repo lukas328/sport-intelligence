@@ -2088,6 +2088,14 @@
     "moreText": "Den Ball erkennt die Videoanalyse noch nicht. Markiere Tore während des Spiels am Spielfeldrand oder importiere das Matchblatt: Statistik, Wurfbilder und Torhüterwerte erscheinen dann hier.",
     "marks": "Am Spielfeldrand markieren",
     "paper": "Matchblatt importieren",
-    "phase": "{team}, {from} bis {to}"
+    "phase": "{team}, {from} bis {to}",
+    "fastBreaks": "{n, plural, =1 {davon 1 Gegenstoss} other {davon # Gegenstösse}}",
+    "list": "Alle Angriffe",
+    "filter_all": "Alle",
+    "filter_fast": "Gegenstösse",
+    "fastBreak": "Gegenstoss",
+    "noneFiltered": "Keine Angriffe in dieser Auswahl.",
+    "showAll": "Alle {n} zeigen",
+    "showLess": "Weniger zeigen"
   }
 }
