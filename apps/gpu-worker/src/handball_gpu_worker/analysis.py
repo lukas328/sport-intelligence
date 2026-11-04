@@ -36,7 +36,13 @@ from handball_vision.calibration import (
 )
 from handball_vision.detection import YoloxDetector
 from handball_vision.motion import CameraMotion
-from handball_vision.pipeline import AnalysisResult, _open, analyse_video, prepare_view
+from handball_vision.pipeline import (
+    AnalysisResult,
+    _open,
+    analyse_video,
+    prepare_view,
+    sample_frames,
+)
 from handball_vision.teams import hex_to_bgr
 
 log = structlog.get_logger("gpu.analysis")
@@ -356,6 +362,10 @@ def _cached_observations(
         return None
 
 
+def _people(found: list[Any]) -> list[Any]:
+    return [d for d in found if d.cls != "ball"]
+
+
 def _run_learned(
     detector: YoloxDetector,
     job_id: str,
@@ -392,6 +402,12 @@ def _run_learned(
         if obs is None:
             video = work / "proxy.mp4"
             s3.download_file(bucket, proxy_key, str(video), Config=TRANSFER)
+            # a quick look first: a detector that sees nobody on a dozen frames spread over the
+            # video would not see more in a full pass (unusual footage, drawn test videos)
+            seen = sorted(len(_people(d)) for d in detector.detect(sample_frames(video, 12)))
+            if not seen or seen[len(seen) // 2] < 3:
+                log.info("detector_sees_few_people", median=seen[len(seen) // 2] if seen else 0)
+                return None
             obs = learned.observe(
                 video,
                 detector,

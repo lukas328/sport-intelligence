@@ -59,9 +59,9 @@ test("match: create, upload with pause and resume, processing, player, comment, 
 
   // play: the HLS stream loads and time advances
   const video = page.getByTestId("video");
-  await page.getByRole("button", { name: "Abspielen" }).click();
+  await page.getByTestId("player").getByRole("button", { name: "Abspielen" }).click();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime), { timeout: 20_000 }).toBeGreaterThan(1);
-  await page.getByRole("button", { name: "Pause" }).click();
+  await page.getByTestId("player").getByRole("button", { name: "Pause" }).click();
 
   // keyboard: frame step and 5 s jumps
   await page.getByTestId("player").focus();
