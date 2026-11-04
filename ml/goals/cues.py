@@ -170,7 +170,8 @@ def profile_channels(z: Any) -> np.ndarray:
     n = int(z["n"])
     pan = z["pan"][:, 0].astype(float) * fps / 100
     energy = z["energy"].astype(float)
-    zm = zone_masks(z).mean(axis=(1, 2)) * 100
+    # compacted caches (`compact.py`) keep only the goal-area share instead of the thumbnails
+    zm = (z["zshare"] if "zshare" in z else zone_masks(z).mean(axis=(1, 2))) * 100
     zt = z["thumb_idx"] / fps
     ts = np.arange(0, n / fps, PROFILE_DT)
     step = int(fps * PROFILE_DT)
