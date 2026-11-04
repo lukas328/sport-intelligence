@@ -8,6 +8,8 @@ recognisable on many more. So:
 2. Fragments (track pieces) whose number was read (`numbers.vote`) are the labelled examples of
    this match. Per team, a projection is learned from them (PCA, then LDA: directions that separate
    today's players; all shirts of a team are equal, hair, build and shoes are not).
+   Only consistent fragments teach (`consistency`): a track jumping between people would teach a
+   mixture.
 3. Every fragment without a number goes to the nearest player when that is clearly nearer than the
    second nearest (ratio test), the player is not on court elsewhere at the same time, and the
    distances to the player's fragments before and after can be run. Unsure stays unknown.
@@ -119,6 +121,18 @@ def fit_projection(
     return project
 
 
+def consistency(vectors: F64) -> float:
+    """Median similarity of a fragment's vectors to their mean: low for a track that jumps between
+    people (crowds, referee and spectators), about 0.75 for one player on the checked clip."""
+    c = _unit(np.asarray(vectors, np.float64).mean(axis=0))
+    return float(np.median(np.asarray(vectors, np.float64) @ c))
+
+
+MIN_ANCHOR_CONSISTENCY = 0.68
+MIN_ANCHOR_VECTORS = 5
+MIN_CANDIDATE_CONSISTENCY = 0.62
+
+
 def _unit(v: F64) -> F64:
     return np.asarray(v / (np.linalg.norm(v) + 1e-9), np.float64)
 
@@ -152,18 +166,29 @@ def assign(
     accepted fragment joins its player's timeline, so later ones must fit around it."""
     out: dict[int, int] = {}
     for team in {f.team.removesuffix("_gk") for f in fragments}:
-        mine = [f for f in fragments if f.team.removesuffix("_gk") == team and len(f.vectors)]
+        mine = [
+            f
+            for f in fragments
+            if f.team.removesuffix("_gk") == team
+            and len(f.vectors)
+            and consistency(f.vectors) >= MIN_CANDIDATE_CONSISTENCY
+        ]
         timeline: dict[int, list[Fragment]] = defaultdict(list)
         for f in mine:
-            if f.number is not None:
+            if (
+                f.number is not None
+                and len(f.vectors) >= MIN_ANCHOR_VECTORS
+                and consistency(f.vectors) >= MIN_ANCHOR_CONSISTENCY
+            ):
                 timeline[f.number].append(f)
+        teachers = {id(f) for fs in timeline.values() for f in fs}
         project = fit_projection(
             {n: np.concatenate([g.vectors for g in fs]) for n, fs in timeline.items()}
         )
         if project is None:
             continue
         desc = {id(f): _unit(project(f.vectors).mean(axis=0)) for f in mine}
-        open_ = [f for f in mine if f.number is None]
+        open_ = [f for f in mine if id(f) not in teachers]
         while open_:
             centres = {
                 n: _unit(np.mean([desc[id(g)] for g in fs], axis=0)) for n, fs in timeline.items()
