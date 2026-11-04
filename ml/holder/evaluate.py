@@ -5,6 +5,8 @@ Per evaluation set (held-out path scenes / benchmark single frames) and per hall
   top        frames with a holder: the holder is the top-scoring player
   top@thr    ... and its score is above the threshold (what a pipeline would accept)
   free_fp    frames whose ball is free (in no box): top score above the threshold (false holder)
+  fp@med     scale-free: free frames whose top score exceeds the median top score of the holder
+             frames (a threshold that accepts half of the holder frames)
   biggest    baseline: the holder is the largest box in the frame
 usage: evaluate.py <data dir> <pred.json> [<pred.json> ...] [--thr 0.5] [--md]
 """
@@ -45,6 +47,8 @@ def metrics(rows, thr):
     topt = [max(v)[1] == 1 and max(v)[0] > thr for v in hold]
     big = [max(v, key=lambda r: r[2])[1] == 1 for v in hold]
     fp = [max(v)[0] > thr for v in free]
+    med = float(np.median([max(v)[0] for v in hold])) if hold else float("nan")
+    fpm = [max(v)[0] > med for v in free]
     return {
         "hold": len(hold),
         "free": len(free),
@@ -52,19 +56,20 @@ def metrics(rows, thr):
         "top": np.mean(top) if top else float("nan"),
         "top@thr": np.mean(topt) if topt else float("nan"),
         "free_fp": np.mean(fp) if fp else float("nan"),
+        "fp@med": np.mean(fpm) if fpm else float("nan"),
         "biggest": np.mean(big) if big else float("nan"),
     }
 
 
 def fmt(name, r):
     f = lambda v: "  -  " if v != v else f"{v:.2f}"  # noqa: E731
-    cells = [name, str(r["hold"]), str(r["free"]), f(r["auc"]), f(r["top"]), f(r["top@thr"]), f(r["free_fp"]), f(r["biggest"])]
+    cells = [name, str(r["hold"]), str(r["free"]), f(r["auc"]), f(r["top"]), f(r["top@thr"]), f(r["free_fp"]), f(r["fp@med"]), f(r["biggest"])]
     if args.md:
         return "| " + " | ".join(cells) + " |"
     return f"{cells[0]:34s}" + "".join(f"{c:>9s}" for c in cells[1:])
 
 
-head = ["set / hall", "hold fr", "free fr", "AUC", "top", f"top@{args.thr}", "free FP", "biggest"]
+head = ["set / hall", "hold fr", "free fr", "AUC", "top", f"top@{args.thr}", "free FP", "fp@med", "biggest"]
 for pf in args.preds:
     pred = json.load(open(pf))
     rows = [(meta[r["file"]], r["p"]) for r in pred]
