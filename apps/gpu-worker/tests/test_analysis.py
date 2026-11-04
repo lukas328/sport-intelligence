@@ -384,3 +384,64 @@ def test_learned_path_needs_calibration_then_reuses_observations(
         and second["calibration"]["source"] == "user_correction"
     )
     assert len(second["tracks"]) >= 8
+
+
+@pytest.mark.parametrize(
+    ("rosters", "expected"),
+    [
+        ({"home": [7, 14, 7], "away": [3], "away_gk": []}, {"home": {7, 14}, "away": {3}}),
+        (None, None),  # older payloads without rosters
+    ],
+)
+def test_rosters_reach_the_number_vote(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    rosters: dict[str, list[int]] | None,
+    expected: dict[str, set[int]] | None,
+) -> None:
+    class StopError(Exception):
+        pass
+
+    class Detector:
+        source = "model"
+        model = "stub"
+
+    class Motion:
+        moving = False
+
+        def background(self) -> Any:
+            return np.zeros((20, 40, 3), np.uint8)
+
+    class Obs:
+        motion = Motion()
+
+    seen: dict[str, Any] = {}
+
+    def track(*args: Any, rosters: dict[str, set[int]] | None = None, **kw: Any) -> Any:
+        seen["rosters"] = rosters
+        raise StopError
+
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: FakeS3(tmp_path))
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Detector())
+    monkeypatch.setattr(analysis, "_cached_observations", lambda *a: Obs())
+    monkeypatch.setattr(analysis, "_cached_overlay", lambda *a: None)
+    monkeypatch.setattr(analysis, "_points_calibration", lambda *a: object())
+    monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
+    monkeypatch.setattr(analysis.learned, "track", track)
+    rep, _ = reporter()
+    with pytest.raises(StopError):
+        analysis.run_analysis(
+            "j",
+            "o",
+            "m",
+            "a",
+            "videos",
+            "o/m/a/proxy.mp4",
+            "o/m/a/",
+            KITS,
+            calibration_points=[{"image": [0, 0], "court": [0, 0]}],
+            settings=JobSettings(work_dir=str(tmp_path / "w")),
+            reporter=rep,
+            rosters=rosters,
+        )
+    assert seen["rosters"] == expected

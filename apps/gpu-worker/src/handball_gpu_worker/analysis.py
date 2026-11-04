@@ -192,7 +192,10 @@ def run_analysis(
     settings: JobSettings | None = None,
     reporter: Reporter | None = None,
     own_is_home: bool = True,
+    rosters: dict[str, list[int]] | None = None,
 ) -> dict[str, Any]:
+    """`rosters` (kit label "home"/"away" -> shirt numbers, optional in the job payload) keeps
+    the voted shirt numbers on the teams' rosters (learned path only)."""
     settings = settings or JobSettings()
     detector = load_detector(settings)
     rep = reporter or Reporter(
@@ -215,6 +218,7 @@ def run_analysis(
             settings,
             rep,
             own_is_home,
+            rosters,
         )
         if learned_result is not None:
             return learned_result
@@ -441,6 +445,7 @@ def _run_learned(
     settings: JobSettings,
     rep: Reporter,
     own_is_home: bool = True,
+    rosters: dict[str, list[int]] | None = None,
 ) -> dict[str, Any] | None:
     """Learned detector path (ADR 025): one observation pass, automatic calibration, tracking.
     A re-run with clicked points reuses the stored observations and takes seconds. Returns None
@@ -564,7 +569,15 @@ def _run_learned(
         _store_view(s3, settings.s3_bucket_artifacts, prefix, work, obs.motion)
         rep.stage("tracking")
         bgr = {k: hex_to_bgr(v) for k, v in kits.items() if v}
-        result = learned.track(obs, calib, bgr, hall, progress=lambda _stage, f: rep.fraction(f))
+        numbers_on = {k: set(v) for k, v in (rosters or {}).items() if v}
+        result = learned.track(
+            obs,
+            calib,
+            bgr,
+            hall,
+            progress=lambda _stage, f: rep.fraction(f),
+            rosters=numbers_on or None,
+        )
         if overlay and overlay.get("goals"):
             # where the goals were scored from: the scorer's track, else the nearest attacker
             overlay = {

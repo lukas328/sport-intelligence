@@ -20,6 +20,7 @@ from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     CameraCalibration,
     Match,
+    OpponentPlayer,
     ProcessingJob,
     RosterEntry,
     Track,
@@ -556,8 +557,46 @@ async def start_analysis(
         "calibration_frame_ms": frame_ms,
         "own_is_home": match.is_home,  # the overlay shows the home team on the left
     }
+    rosters = await _rosters(ctx, match)
+    if rosters:
+        payload["rosters"] = rosters
     ctx.require_jobs().enqueue("gpu", ANALYSIS_FUNC, str(job.id), payload)
     return job
+
+
+async def _own_roster(ctx: Ctx, match: Match) -> dict[int, uuid.UUID]:
+    """Shirt number -> player of the own team's active roster in the match's season."""
+    rows = await ctx.db.execute(
+        select(RosterEntry.jersey_number, RosterEntry.player_id).where(
+            RosterEntry.season_id == match.season_id,
+            RosterEntry.team_id == match.team_id,
+            RosterEntry.active.is_(True),
+        )
+    )
+    return {n: pid for n, pid in rows.all() if n is not None}
+
+
+async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
+    """Shirt numbers per kit label for the number vote of the analysis. The labels follow the
+    kits in the job payload, so "home" is always the own kit (match.is_home only moves the
+    overlay); the opponent side only when its players were entered. Empty sides are left out."""
+    out: dict[str, list[int]] = {}
+    own = sorted(await _own_roster(ctx, match))
+    if own:
+        out["home"] = own
+    if match.opponent_id is not None:
+        opp = sorted(
+            (
+                await ctx.db.scalars(
+                    select(OpponentPlayer.number).where(
+                        OpponentPlayer.opponent_id == match.opponent_id
+                    )
+                )
+            ).all()
+        )
+        if opp:
+            out["away"] = opp
+    return out
 
 
 async def _apply_analysis_result(
@@ -610,19 +649,7 @@ async def _apply_analysis_result(
     if isinstance(tracks, list) and any(t.get("number") is not None for t in tracks):
         owner = await ctx.db.get(Match, asset.match_id)
         if owner is not None and owner.season_id is not None:
-            roster = {
-                n: pid
-                for n, pid in (
-                    await ctx.db.execute(
-                        select(RosterEntry.jersey_number, RosterEntry.player_id).where(
-                            RosterEntry.season_id == owner.season_id,
-                            RosterEntry.team_id == owner.team_id,
-                            RosterEntry.active.is_(True),
-                        )
-                    )
-                ).all()
-                if n is not None
-            }
+            roster = await _own_roster(ctx, owner)
     if isinstance(tracks, list):
         for t in tracks:
             first, last = int(t["first_ms"]), int(t["last_ms"])
