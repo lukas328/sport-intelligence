@@ -46,6 +46,7 @@ from handball_vision.pipeline import (
     sample_frames,
 )
 from handball_vision.reid import Embedder
+from handball_vision.roles import RoleClassifier
 from handball_vision.shots import locate_goal_shots
 from handball_vision.teams import hex_to_bgr
 
@@ -75,6 +76,14 @@ def load_number_reader(settings: JobSettings) -> NumberReader | None:
     if not (det.is_file() and rec.is_file()):
         return None
     return NumberReader(det, rec, threads=settings.detector_threads or None)
+
+
+def load_role_classifier(settings: JobSettings) -> RoleClassifier | None:
+    """Player / goalkeeper / referee from appearance, when the model is installed (ml/roles)."""
+    path = Path(settings.role_model)
+    return (
+        RoleClassifier(path, threads=settings.detector_threads or None) if path.is_file() else None
+    )
 
 
 def load_embedder(settings: JobSettings) -> Embedder | None:
@@ -475,6 +484,8 @@ def _run_learned(
                 number_every=max(1, settings.number_every),
                 embedder=load_embedder(settings),
                 embed_every=max(1, settings.reid_every),
+                roles=load_role_classifier(settings),
+                role_every=max(1, settings.role_every),
             )
             overlay = _overlay_summary(reader)
             counts = sorted(len(fo.people) for fo in obs.frames)

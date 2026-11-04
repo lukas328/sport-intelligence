@@ -37,8 +37,8 @@ handball-gpu-worker = { workspace = true }
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-# ml/ball: research scripts (the reproducible trail of the ball experiments), not product code
-extend-exclude = ["**/migrations/versions/*.py", "ml/ball/**/*.py"]
+# ml/ball, ml/roles: research scripts (the reproducible trail of the ball experiments), not product code
+extend-exclude = ["**/migrations/versions/*.py", "ml/ball/**/*.py", "ml/roles/**/*.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "SIM", "PTH", "N"]

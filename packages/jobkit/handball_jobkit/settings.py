@@ -27,3 +27,5 @@ class JobSettings(BaseSettings):
     number_every: int = 6  # frames; 3 on the GPU image (every detection frame)
     reid_model: str = "/models/reid.onnx"
     reid_every: int = 30  # frames: about once per second per player
+    role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)
+    role_every: int = 30

@@ -45,6 +45,7 @@ class FrameObservation:
     balls: list[Detection]
     numbers: dict[int, tuple[int, float]] = field(default_factory=dict)  # person -> (number, conf)
     embeds: dict[int, NDArray[np.float64]] = field(default_factory=dict)  # person -> appearance
+    roles: dict[int, NDArray[np.float64]] = field(default_factory=dict)  # person -> role probs
 
 
 @dataclass
@@ -83,6 +84,8 @@ def observe(
     number_every: int = 15,
     embedder: Any = None,  # handball_vision.reid.Embedder
     embed_every: int = 30,
+    roles: Any = None,  # handball_vision.roles.RoleClassifier
+    role_every: int = 30,
 ) -> Observations:
     """`on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
     video is decoded only once."""
@@ -124,6 +127,11 @@ def observe(
                 vecs = embedder.embed(frame, [(d.x1, d.y1, d.x2, d.y2) for d in people])
                 fo.embeds = {k: v for k, v in enumerate(vecs) if v is not None}
                 timings["appearance_net"] += time.perf_counter() - t0
+            if roles is not None and n % role_every == 0:
+                t0 = time.perf_counter()
+                probs = roles.classify(frame, [(d.x1, d.y1, d.x2, d.y2) for d in people])
+                fo.roles = {k: v for k, v in enumerate(probs) if v is not None}
+                timings["roles"] += time.perf_counter() - t0
             if n % segment_every == 0:
                 t0 = time.perf_counter()
                 segments[n] = topview.frame_segments(
@@ -181,6 +189,8 @@ def save_observations(obs: Observations, path: Path) -> None:
     nums = [(fo.index, k, n, c) for fo in obs.frames for k, (n, c) in fo.numbers.items()]
     emb_idx = [(fo.index, k) for fo in obs.frames for k in fo.embeds]
     embs = [v for fo in obs.frames for v in fo.embeds.values()]
+    role_idx = [(fo.index, k) for fo in obs.frames for k in fo.roles]
+    role_p = [v for fo in obs.frames for v in fo.roles.values()]
     seg_idx = [i for i, sg in obs.segments.items() for _ in range(len(sg))]
     segs = (
         np.vstack([sg for sg in obs.segments.values() if len(sg)])
@@ -202,6 +212,8 @@ def save_observations(obs: Observations, path: Path) -> None:
         numbers=np.array(nums, np.float64).reshape(-1, 4),  # frame, person, number, confidence
         emb_idx=np.array(emb_idx, np.int32).reshape(-1, 2),
         embs=np.array(embs, np.float16).reshape(len(embs), -1) if embs else np.zeros((0, 0)),
+        role_idx=np.array(role_idx, np.int32).reshape(-1, 2),
+        role_p=np.array(role_p, np.float16).reshape(-1, 3),
     )
 
 
@@ -231,6 +243,10 @@ def load_observations(path: Path, motion: CameraMotion, source: str = "model") -
         for (f, k), v in zip(z["emb_idx"], z["embs"], strict=True):
             if int(f) in by:
                 by[int(f)].embeds[int(k)] = np.asarray(v, np.float64)
+    if "role_p" in z.files:
+        for (f, k), v in zip(z["role_idx"], z["role_p"], strict=True):
+            if int(f) in by:
+                by[int(f)].roles[int(k)] = np.asarray(v, np.float64)
     for f, k, n, c in z["numbers"] if "numbers" in z.files else []:
         if int(f) in by:
             by[int(f)].numbers[int(k)] = (int(n), float(c))
@@ -432,6 +448,7 @@ def track(
     points = []
     number_reads: dict[int, list[Reading]] = defaultdict(list)
     vectors: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
+    role_samples: dict[int, list[NDArray[np.float64]]] = defaultdict(list)
     n_dets = n_lost = 0
     for k, fo in enumerate(obs.frames):
         t0 = time.perf_counter()
@@ -487,6 +504,8 @@ def track(
                 teams.samples[tp.track_id].append(feats[tp.det_index])
             if tp.det_index is not None and keep[tp.det_index] in fo.embeds:
                 vectors[tp.track_id].append((fo.index, fo.embeds[keep[tp.det_index]]))
+            if tp.det_index is not None and keep[tp.det_index] in fo.roles:
+                role_samples[tp.track_id].append(fo.roles[keep[tp.det_index]])
             if tp.det_index is not None and keep[tp.det_index] in fo.numbers:
                 num, conf = fo.numbers[keep[tp.det_index]]
                 number_reads[tp.track_id].append(Reading(num, conf, fo.index))
@@ -514,6 +533,7 @@ def track(
         },
         number_reads,
         vectors,
+        role_samples,
     )
     from handball_vision.ballpossession import from_observations
 

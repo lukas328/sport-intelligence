@@ -344,6 +344,7 @@ def _finish(
     extra: dict[str, Any],
     number_reads: dict[int, list[Reading]] | None = None,
     vectors: dict[int, list[tuple[int, NDArray[np.float64]]]] | None = None,
+    role_samples: dict[int, list[NDArray[np.float64]]] | None = None,
 ) -> AnalysisResult:
     t0 = time.perf_counter()
     colours = {tid: np.median(np.stack(v), axis=0) for tid, v in teams.samples.items() if v}
@@ -359,6 +360,9 @@ def _finish(
     looks: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
     for old, vs in (vectors or {}).items():
         looks[mapping.get(old, old)].extend(vs)
+    role_looks: dict[int, list[NDArray[np.float64]]] = defaultdict(list)
+    for old, role_list in (role_samples or {}).items():
+        role_looks[mapping.get(old, old)].extend(role_list)
     timings["stitching"] += time.perf_counter() - t0
     team_out: dict[int, dict[str, Any]] = {}
     for tid in {p.track_id for p in points}:
@@ -406,6 +410,9 @@ def _finish(
         if label != team_out[tid]["label"]:
             team_out[tid]["label"] = label
             team_out[tid]["label_source"] = "formation"
+    if role_looks:
+        changed = _apply_role_votes(points, team_out, role_looks, observed)
+        extra = {**extra, "roles_changed": changed}
     if reads:
         t0 = time.perf_counter()
         before = len({p.track_id for p in points})
@@ -431,6 +438,52 @@ def _finish(
         detections_per_frame=n_dets / max(1, n),
         extra={"raw_tracks": raw_tracks, "tracks": len(team_out), **extra},
     )
+
+
+def _apply_role_votes(
+    points: list[TrackPoint],
+    team_out: dict[int, dict[str, Any]],
+    role_looks: dict[int, list[NDArray[np.float64]]],
+    observed: list[tuple[int, int, float, float]],
+) -> dict[str, int]:
+    """Referees and short goalkeeper tracks from the role classifier (handball_vision.roles)."""
+    from handball_vision.roles import apply_roles, goal_presence, track_roles
+
+    roles = track_roles(role_looks)
+    for tid, probs in roles.items():
+        if tid in team_out:
+            team_out[tid]["role_p"] = [round(float(v), 3) for v in probs]
+    spans: dict[int, tuple[int, int]] = {}
+    for p in points:
+        a, b = spans.get(p.track_id, (p.frame, p.frame))
+        spans[p.track_id] = (min(a, p.frame), max(b, p.frame))
+    near, side = goal_presence(observed)
+    # the team defending a goal: from the goalkeepers the position rule found (nearest in time)
+    keepers = [
+        (t, str(v["label"]).removesuffix("_gk"), side.get(t))
+        for t, v in team_out.items()
+        if str(v.get("label", "")).endswith("_gk") and side.get(t)
+    ]
+    goal_team: dict[int, str] = {}
+    for t in roles:
+        if t not in side or t not in spans:
+            continue
+        same = [
+            (abs(spans[k][0] - spans[t][0]), team)
+            for k, team, s in keepers
+            if s == side[t] and k in spans
+        ]
+        if same:
+            goal_team[t] = min(same)[1]
+    changes = apply_roles(team_out, roles, spans, near, goal_team)
+    for tid, label in changes.items():
+        team_out[tid]["label"] = label
+        team_out[tid]["label_source"] = "role"
+    return {
+        "referee": sum(1 for v in changes.values() if v == "referee"),
+        "goalkeeper": sum(1 for v in changes.values() if v.endswith("_gk")),
+        "team": sum(1 for v in changes.values() if v in ("home", "away")),
+    }
 
 
 def _split_at_switches(
