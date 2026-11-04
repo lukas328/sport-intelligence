@@ -62,12 +62,16 @@ Each question has the **assumption** I work with until it is answered. Status: o
   in an environment with access, through the ONNX detector and the model registry.
 
 - **Q-ML-5 Re-identification model licence**: the FastReID weights are Apache-2.0 but trained on MSMT17
-  (non-commercial research terms). *Assumption:* not shipped; re-identification runs only where an
-  approved `reid.onnx` is installed (ml/models/reid-fastreid.md). Options: legal clearance, a model
-  trained on licensed data, or our own handball crops labelled through the shirt numbers.
-- **Q-ML-6 Ball labels**: no handball ball dataset is reachable from here (Kaggle, Google Drive,
-  Zenodo blocked). *Assumption:* self-labelled candidates from our clips (about 100 balls so far);
-  allowing those hosts would let us train on TeamTrack-style data instead.
+  (non-commercial research terms). *Decision (2026-11-04, product owner):* the risk is accepted for
+  the current phase; the model may be used while we find out what works. Before a commercial launch:
+  legal clearance or our own handball model trained on crops labelled through the shirt numbers.
+- **Q-ML-6 Ball data**: TeamTrack (MIT), five Roboflow handball sets (CC BY 4.0), our own labels and
+  DeepSport basketball (CC BY-NC-SA) are in use (ml/ball/README.md). *Decision (2026-11-04, product
+  owner):* non-commercial data are fine for the feasibility phase; a shipped ball model needs a
+  retraining without them (or a licence).
+- **Q-ML-7 Target footage**: uploads are raw amateur recordings from any camera position (phones,
+  club cameras, Veo and similar), rarely with a score overlay, not TV broadcasts. *Consequence:* the
+  overlay reader stays a bonus; goals, possession and players must work from the picture alone.
 
 ## Legal and privacy
 - **Q-LEGAL-1** Privacy policy, DPA (AVV) and terms need legal review (placeholders from M8/M9).
