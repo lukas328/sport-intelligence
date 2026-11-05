@@ -139,3 +139,25 @@ Both kinds live in the goal-candidate table and share the review endpoint.
   lists do not ask twice. Suggested UI: one "Shots" review list next to "Goals"; with a report,
   show the suggestion (player, outcome, official time) and confirm with Enter, reject with X; a
   filter "only with a report entry" turns 4 candidates per minute into roughly the logged shots.
+
+Real footage audit (2026-11-05): fixes for full games, clips from mid-half, several files.
+- Match clock without overlay for a video that starts after the throw-off: `PUT
+  .../kickoff` takes an optional `clock_s`, the match clock shown at `t_ms` (any moment of that
+  half). The throw-off is then stored before the video (a negative `kickoff_ms`). Suggested UI:
+  besides "Anpfiff jetzt", "Spieluhr zeigt hier [mm:ss]" for the paused moment; 422
+  `invalid-clock` when the time is not in that half.
+- Timeline video: event and clip times refer to the match's first main video (upload order,
+  failed uploads left out), the one the workspace already plays (`videos.find(main && ready)`).
+  A second main file (second half, a split recording) gets its own tracks and court, but its
+  analysis no longer changes the match's events, possessions, throw-off times, scenes or reels;
+  its `analysis.auto_events` stays null. The UI could say "Ereignisse aus der ersten Datei".
+- Events before or after the video (official report on a clip): search hits keep `t_ms` but have
+  `start_ms`/`end_ms` null (no moment to show: do not offer "add to playlist / presentation");
+  Sportscode export, focus playlists, scouting and assistant clips leave them out. Clip windows
+  end at the video's end.
+- A clip slide (`clip_id`) of a match without video gives 422 `no-video`; a clip of another team
+  404.
+- Re-analysis (court points clicked, reprocess): the coach's comparison check (confirmed or
+  dismissed) of an overlay or estimated goal moves to the new row at the same moment, and
+  automatic rows the coach deleted or changed are not created again. Clicked court points are
+  kept with the video: reprocess and retries use them, so a flat view does not ask again.
