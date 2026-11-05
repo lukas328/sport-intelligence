@@ -99,7 +99,7 @@ export function useStats(orgId: string, matchId: string) {
 const pct = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Math.round(v * 100)} %`);
 
 /** A number that opens the events behind it. */
-function N({ value, onClick, label }: { value: string | number; onClick?: () => void; label: string }) {
+export function N({ value, onClick, label }: { value: string | number; onClick?: () => void; label: string }) {
   // zeros stay quiet; figures in ink (red means goal against or error), a dotted line says "opens the scenes"
   if (value === 0 || value === "0") return <span className="tabular-nums text-muted">{value}</span>;
   if (!onClick) return <span className="tabular-nums">{value}</span>;
@@ -120,12 +120,12 @@ export interface ViewProps {
   staff?: boolean;
 }
 
-function useDrill() {
+export function useDrill() {
   const [drill, setDrill] = useState<{ title: string; filter: EventFilter } | null>(null);
   return { drill, open: (title: string, filter: EventFilter) => setDrill({ title, filter }), close: () => setDrill(null) };
 }
 
-function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnType<typeof useDrill>["drill"]; orgId: string; matchId: string; onPlay?: (t: number) => void; names: Record<string, string>; close: () => void }) {
+export function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnType<typeof useDrill>["drill"]; orgId: string; matchId: string; onPlay?: (t: number) => void; names: Record<string, string>; close: () => void }) {
   const t = useTranslations("common");
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

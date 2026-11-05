@@ -255,7 +255,8 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       {/* controls float over the picture; while playing they show on hover, focus or pause */}
       <div
         className={cn(
-          "absolute inset-x-0 bottom-0 space-y-1 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-3 pt-10 pb-2 text-white transition-opacity duration-200",
+          // phones: one short bar at the bottom edge, so the goal areas stay visible
+          "absolute inset-x-0 bottom-0 space-y-0.5 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2 pt-6 pb-1 text-white transition-opacity duration-200 sm:space-y-1 sm:px-3 sm:pt-10 sm:pb-2",
           playing && !hover && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
         )}
       >
@@ -316,7 +317,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             </div>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-1 text-sm">
+        <div className="flex items-center gap-0.5 text-sm sm:flex-wrap sm:gap-1">
           <CtlButton label={playing ? t("pause") : t("play")} onClick={toggle}>
             {playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}
           </CtlButton>
@@ -334,11 +335,12 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           <CtlButton label={t("frameFwd")} onClick={() => step(1)} className="hidden sm:inline-grid">
             <StepForward className="size-4" />
           </CtlButton>
-          <span className="px-2 tabular-nums" data-testid="clock">
+          <span className="truncate px-1 tabular-nums sm:px-2" data-testid="clock">
             {clock ? clock(time) : `${formatClock(time)} / ${formatClock(duration * 1000)}`}
           </span>
           <span className="flex-1" />
-          <label className="flex items-center gap-1">
+          {/* speed and sound are rare on a phone; the picture needs the room */}
+          <label className="flex items-center gap-1 max-sm:hidden">
             <span className="sr-only">{t("speed")}</span>
             <select
               value={speed}
@@ -353,7 +355,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               ))}
             </select>
           </label>
-          <CtlButton label={muted ? t("unmute") : t("mute")} onClick={() => setMuted((m) => !m)}>
+          <CtlButton label={muted ? t("unmute") : t("mute")} onClick={() => setMuted((m) => !m)} className="max-sm:hidden">
             {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
           </CtlButton>
           <CtlButton

@@ -8,13 +8,16 @@ import { GoalGrid } from "@/components/analysis/goal-grid";
 import { EmptyState, Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
-import type { KeeperRow, ViewProps } from "./analysis-views";
+import { Drill, N, useDrill, type KeeperRow, type ViewProps } from "./analysis-views";
 import { useOpponentName } from "@/lib/opponent";
 
 const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
 
 /** Goalkeeper module (M5): save rate overall, per goal zone and shot zone, 7 m, GSAx. */
-export function KeepersView({ match, teamName, stats, names }: ViewProps) {
+export function KeepersView({ orgId, match, teamName, stats, names, onPlay }: ViewProps) {
+  // every count opens the scenes behind it, like the other sub-tabs
+  const { drill, open, close } = useDrill();
+  const against = (k: KeeperRow) => (k.side === "own" ? "opponent" : "own") as "own" | "opponent";
   const t = useTranslations("keepers");
   const tz = useTranslations("zones");
   const oppName = useOpponentName();
@@ -53,7 +56,9 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
                     {nameOf(k)} <span className="font-normal text-muted">{teamOf(k)}</span>
                   </th>
                   <td className="px-2 py-2 text-right font-score text-base tabular-nums">{k.faced}</td>
-                  <td className="px-2 py-2 text-right font-score text-base tabular-nums">{k.saves}</td>
+                  <td className="px-2 py-2 text-right font-score text-base tabular-nums">
+                    <N value={k.saves} label={`${t("saves")} ${nameOf(k)}`} onClick={() => open(`${t("saves")}: ${nameOf(k)}`, { side: against(k), type: "shot", outcome: "save" })} />
+                  </td>
                   <td className="px-2 py-2 text-right font-score text-lg tabular-nums">{pct(k.save_pct)}</td>
                   <td className="py-2 pl-2 text-right font-score text-base tabular-nums">
                     {k.seven_m.faced ? `${k.seven_m.saves}/${k.seven_m.faced}` : "-"}
@@ -72,7 +77,11 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
             </h3>
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted">{t("byGoalZone")}</p>
-              <GoalGrid saves data={Object.fromEntries(Object.entries(k.goal_zones).map(([z, v]) => [z, { shots: v.faced, goals: v.saves }]))} />
+              <GoalGrid
+                saves
+                data={Object.fromEntries(Object.entries(k.goal_zones).map(([z, v]) => [z, { shots: v.faced, goals: v.saves }]))}
+                onCell={(z) => open(`${t("byGoalZone")}: ${nameOf(k)}`, { side: against(k), type: "shot", goal_zone: z })}
+              />
             </div>
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted">{t("byShotZone")}</p>
@@ -88,7 +97,7 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
                         <span className="block h-full bg-foreground" style={{ width: `${v.faced ? (v.saves / v.faced) * 100 : 0}%` }} />
                       </span>
                       <span className="w-12 text-right font-score tabular-nums">
-                        {v.saves}/{v.faced}
+                        <N value={`${v.saves}/${v.faced}`} label={`${tz.has(z as "penalty") ? tz(z as "penalty") : z}: ${nameOf(k)}`} onClick={() => open(`${tz.has(z as "penalty") ? tz(z as "penalty") : z}: ${nameOf(k)}`, { side: against(k), type: "shot", zone: z })} />
                       </span>
                     </li>
                   ))}
@@ -97,6 +106,7 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
           </Sheet>
         ))}
       </div>
+      <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
   );
 }
