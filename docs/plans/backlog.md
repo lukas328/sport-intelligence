@@ -57,6 +57,19 @@ Ereignis- und Statistik-Ansichten verbergen (mit 5).
   Spiele, Paraden bei Torhütern); der Trainer blendet sie in der UI ein oder aus. Umgesetzt.
   Details in `docs/plans/federation-onboarding.md` (Entscheide).
 
+## Aus der Code-Prüfung (2026-11-05, offen)
+1. Indizes auf neue Fremdschlüssel (vor allem `goal_candidates.event_id`; dazu join/access requests,
+   suggestions, `organizations.claimed_by_id`) in einer neuen Migration.
+2. Stündlicher Abgleich (`run_due`): Savepoint pro Team und Spiel, damit ein Fehler nicht den ganzen
+   Lauf zurückrollt; Spiele ohne Protokoll nicht 7 Tage lang stündlich und alt-zuerst abfragen.
+3. Doppelklick auf Beitritts-/Zugangsanfragen: 409 statt 500 (Zeilensperre oder IntegrityError).
+4. `official_cache`: Aufbewahrungsregel (Spielernamen und Statistik nicht unbegrenzt).
+5. Grosse Abfragen: `team_data.load` auf Saison begrenzen, `halls.references` per DISTINCT ON.
+6. Klein: `_download` erlaubt Weiterleitung auf anderen Port; Sperre im handball.ch-Client über den
+   ganzen HTTP-Aufruf; `focus.create` liest die Videolänge pro Eintrag.
+7. Echte Spielernamen im Repo: `ml/data/official/*.json` (öffentliche Spielprotokolle), einige
+   Web-Tests und Doku. Entscheid Lukas (siehe unten); PR 3 deshalb als Squash mergen.
+
 ## Nach dem Merge der UI-Branch
 - `apps/api/tests/test_report_pdf.py::test_insight_texts_match_the_web_app` wieder für
   `zones.long_range` und `zones.empty_goal` einschalten: die Web-Texte sind im UI-Branch
