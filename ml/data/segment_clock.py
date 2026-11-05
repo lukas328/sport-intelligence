@@ -39,14 +39,15 @@ readings that stand still throughout with no score ever read beside them (a half
     # segments are local (WORKDIR/batch_NN, or --search DIR/batch_NN, DIR)
     python ml/data/segment_clock.py --fill [--workdir W] [--search DIR ...] [--batch batch_NN ...]
         [--write-state]
-    # official log entries inside the segments -> ml/data/segment_labels/<name>.json
-    python ml/data/segment_clock.py --labels [--workdir W]
+    # official log entries inside the segments -> ml/data/segment_labels/<name>.json, for the
+    # games of the ingest state and of the segment library (library.py, e.g. handball-segs-lNN)
+    python ml/data/segment_clock.py --labels [--workdir W] [--library DIR]
 
 `--fill` writes WORKDIR/clocks.json (a running ingest owns state.json and would overwrite it; the
 ingest merges clocks.json into its state when it starts and before every poll). `--write-state`
 also merges into state.json: only while the ingest is stopped. Clock data carries the version of
 its reader ("reader"); data of a newer reader replaces older data wherever the two are merged
-(`--labels` reads state.json with clocks.json merged in this way).
+(`--labels` reads state.json with clocks.json merged in this way, and the library's games).
 
 Labels: per segment its own readings, the half from the readings of the whole game (a drop of the
 clock between or inside segments starts the second half; readings at 30:00 and above are a
@@ -72,6 +73,7 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "ml" / "eval"))
+sys.path.insert(0, str(REPO / "ml" / "data"))  # library.py (also under python -I)
 
 from align_official import (  # noqa: E402
     HALF_S,
@@ -623,17 +625,23 @@ def game_labels(name: str, game: dict[str, Any], official: dict[str, Any]) -> di
     }
 
 
-def all_games(workdir: Path) -> dict[str, Any]:
-    """Games of the ingest state, clock data of clocks.json merged in."""
-    state = load_json(workdir / "state.json", {"games": {}})
-    merge_clocks(state, load_json(workdir / SIDECAR, {}))
-    return dict(state.get("games", {}))
+def all_games(workdir: Path, library: Path | None = None) -> dict[str, Any]:
+    """Games of the ingest state (clock data of clocks.json merged in) and of the segment library
+    (`library.py`: LIBRARY/library.json, the batches made elsewhere such as handball-segs-lNN;
+    default: the folder "library" beside the ingest workdir). A game in both keeps the ingest
+    entry with the newer clock data per segment (`library.merge_games`)."""
+    from library import ingest_games, library_games, merge_games
+
+    lib = library if library is not None else workdir.parent / "library"
+    return merge_games(ingest_games(workdir), library_games(lib))
 
 
-def labels(workdir: Path, out_dir: Path, official_dir: Path = OFFICIAL) -> list[Path]:
+def labels(
+    workdir: Path, out_dir: Path, official_dir: Path = OFFICIAL, library: Path | None = None
+) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
-    for name, game in sorted(all_games(workdir).items()):
+    for name, game in sorted(all_games(workdir, library).items()):
         if not any((s.get("clock") or {}).get("source") for s in game.get("segments") or []):
             continue
         # Drive names can carry a format suffix ("..._2023-09-23.f298"); the logs use the plain name
@@ -658,6 +666,8 @@ def main() -> None:
     mode.add_argument("--fill", action="store_true", help="clock data for local ingest segments")
     mode.add_argument("--labels", action="store_true", help="write ml/data/segment_labels/")
     ap.add_argument("--workdir", type=Path, default=SCRATCH / "ingest", help="ingest workdir")
+    ap.add_argument("--library", type=Path, default=None,
+                    help="--labels: segment library folder (library.py; default WORKDIR/../library)")
     ap.add_argument("--search", type=Path, nargs="*", default=[],
                     help="--fill: more folders holding batch_NN/ or the segments themselves")
     ap.add_argument("--batch", nargs="*", default=[], help="--fill: only these batches (batch_01)")
@@ -669,7 +679,7 @@ def main() -> None:
     if a.fill:
         fill(a.workdir, a.search, a.write_state, a.models, a.batch)
     elif a.labels:
-        labels(a.workdir, a.out)
+        labels(a.workdir, a.out, library=a.library)
     elif a.segments:
         for seg in a.segments:
             print(json.dumps({"file": str(seg), **read_segment_clock(seg, a.models)}), flush=True)

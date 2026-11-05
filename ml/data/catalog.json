@@ -1,12 +1,15 @@
 {
- "generated": "2026-11-05T09:15:25",
+ "generated": "2026-11-05T09:43:39",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
   "swiss": 179,
   "swiss_matched": 138,
   "with_log": 63,
-  "in_ingest": 17
+  "in_ingest": 17,
+  "local": 0,
+  "local_matched": 0,
+  "local_with_log": 0
  },
  "games": [
   {
@@ -43,7 +46,8 @@
     "duration_s": 5853.294,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -80,7 +84,8 @@
     "duration_s": 7190.3,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -117,7 +122,8 @@
     "duration_s": 7443.914,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -154,7 +160,8 @@
     "duration_s": 7468.174,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -191,7 +198,8 @@
     "duration_s": 7030.574,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -228,7 +236,8 @@
     "duration_s": 7028.374,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b03"
+    "kaggle_dataset": "handball-segs-b03",
+    "source": "ingest"
    }
   },
   {
@@ -265,7 +274,8 @@
     "duration_s": 7159.054,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -302,7 +312,8 @@
     "duration_s": 6713.134,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -339,7 +350,8 @@
     "duration_s": 6732.374,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b02"
+    "kaggle_dataset": "handball-segs-b02",
+    "source": "ingest"
    }
   },
   {
@@ -376,7 +388,8 @@
     "duration_s": 6574.574,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b02"
+    "kaggle_dataset": "handball-segs-b02",
+    "source": "ingest"
    }
   },
   {
@@ -413,7 +426,8 @@
     "duration_s": 6744.054,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b02"
+    "kaggle_dataset": "handball-segs-b02",
+    "source": "ingest"
    }
   },
   {
@@ -450,7 +464,8 @@
     "duration_s": 6862.974,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b02"
+    "kaggle_dataset": "handball-segs-b02",
+    "source": "ingest"
    }
   },
   {
@@ -516,7 +531,8 @@
     "duration_s": 8503.794,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b03"
+    "kaggle_dataset": "handball-segs-b03",
+    "source": "ingest"
    }
   },
   {
@@ -553,7 +569,8 @@
     "duration_s": 7004.654,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b01"
+    "kaggle_dataset": "handball-segs-b01",
+    "source": "ingest"
    }
   },
   {
@@ -677,7 +694,8 @@
     "duration_s": 7087.794,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b03"
+    "kaggle_dataset": "handball-segs-b03",
+    "source": "ingest"
    }
   },
   {
@@ -743,7 +761,8 @@
     "duration_s": 6543.374,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b03"
+    "kaggle_dataset": "handball-segs-b03",
+    "source": "ingest"
    }
   },
   {
@@ -6981,7 +7000,8 @@
     "duration_s": 6000.016667,
     "codec": "h264",
     "segments": 5,
-    "kaggle_dataset": "handball-segs-b03"
+    "kaggle_dataset": "handball-segs-b03",
+    "source": "ingest"
    }
   }
  ]
