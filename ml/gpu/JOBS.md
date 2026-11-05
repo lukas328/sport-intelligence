@@ -11,6 +11,9 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 - Eingabe: die drei ersten Batches von Lukas' Computer (300 Segmente).
 - Ergebnis: neues Kaggle-Dataset `handball-gpu-owl-<datum>`.
 - Dauer: etwa 10 h auf einer T4; Kosten etwa 6 USD (im Gratis-Guthaben).
+- **Läuft seit 2026-11-05 ~15:55 (lokale Sitzung, Modal, detached).** Gemessen ~210 s pro Segment
+  statt ~120 s, darum stoppt die 11-h-Grenze nach etwa 185 von 300 Segmenten (~6.5 USD). Rest als
+  Folgeauftrag. Ergebnis zusätzlich auf dem Modal-Volume `handball-gpu-out`.
 - Erst nach Auftrag 1 starten. Wenn Modal "budget" oder "spend limit" meldet: abbrechen und melden.
 
 ## Erledigt
