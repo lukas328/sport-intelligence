@@ -33,17 +33,17 @@ export function PresentationList({ orgId, teamId }: { orgId: string; teamId: str
           if (title) create.mutate(title);
         }}
       >
-        <Input label={t("newTitle")} name="title" maxLength={160} placeholder={t("newPlaceholder")} />
+        <Input label={t("newTitle")} name="title" required maxLength={160} placeholder={t("newPlaceholder")} />
         <Button type="submit" loading={create.isPending}>
           {t("new")}
         </Button>
       </form>
       {q.data && q.data.length === 0 && <EmptyState title={t("none")}>{t("noneHint")}</EmptyState>}
-      <ul className="divide-y divide-border/70 rounded-lg bg-raised border border-border" data-testid="presentation-list">
+      <ul className={q.data?.length ? "divide-y divide-foreground/10 border-t-2 border-foreground" : undefined} data-testid="presentation-list">
         {(q.data ?? []).map((p) => (
           <li key={p.id}>
-            <Link href={`/app/${orgId}/presentations/${p.id}`} className="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-surface">
-              <span className="flex-1 font-medium">{p.title}</span>
+            <Link href={`/app/${orgId}/presentations/${p.id}`} className="group flex flex-wrap items-baseline gap-x-3 py-3">
+              <span className="flex-1 font-medium group-hover:underline group-hover:underline-offset-4">{p.title}</span>
               <span className="text-sm text-muted">{t("slides", { n: p.slides })}</span>
               {p.shared_with_players && <span className="text-sm text-muted">{t("shared")}</span>}
               <span className="text-sm text-muted">{format.dateTime(new Date(p.created_at), { dateStyle: "medium" })}</span>

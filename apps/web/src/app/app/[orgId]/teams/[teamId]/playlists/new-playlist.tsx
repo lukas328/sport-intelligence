@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 
@@ -21,13 +20,9 @@ export function NewPlaylist({ orgId, teamId }: { orgId: string; teamId: string }
     if (data) router.push(`/app/${orgId}/playlists/${data.id}`);
   }
   return (
-    <Card>
-      <form onSubmit={submit} className="flex flex-wrap items-end gap-3" aria-label={t("new")}>
-        <div className="min-w-64 flex-1">
-          <Input label={t("name")} name="title" required maxLength={120} />
-        </div>
-        <Button type="submit">{t("create")}</Button>
-      </form>
-    </Card>
+    <form onSubmit={submit} className="flex flex-wrap items-end gap-2" aria-label={t("new")}>
+      <Input label={t("name")} name="title" required maxLength={120} />
+      <Button type="submit">{t("new")}</Button>
+    </form>
   );
 }

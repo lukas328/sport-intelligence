@@ -2234,7 +2234,9 @@
     "shared": "visible to players",
     "emptyPlays": "No plays yet. Start from a template or take a scene straight from the video.",
     "emptyPlaylists": "No playlists yet. You cut clips in the video with “Set start” and “Set end”.",
-    "emptyPresentations": "No presentations for the next video session yet."
+    "emptyPresentations": "No presentations for the next video session yet.",
+    "newPlaylist": "New playlist",
+    "newPresentation": "New presentation"
   },
   "voice": {
     "runWins": "{n} wins in a row.",

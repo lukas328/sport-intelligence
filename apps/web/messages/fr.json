@@ -2234,7 +2234,9 @@
     "shared": "visible pour les joueurs",
     "emptyPlays": "Pas encore de systèmes. Partez d'un modèle ou reprenez une scène directement depuis la vidéo.",
     "emptyPlaylists": "Pas encore de playlists. Vous découpez des clips dans la vidéo avec « Début » et « Fin ».",
-    "emptyPresentations": "Pas encore de présentations pour la prochaine séance vidéo."
+    "emptyPresentations": "Pas encore de présentations pour la prochaine séance vidéo.",
+    "newPlaylist": "Nouvelle playlist",
+    "newPresentation": "Nouvelle présentation"
   },
   "voice": {
     "runWins": "{n} victoires d'affilée.",

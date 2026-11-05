@@ -52,11 +52,11 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 - [x] P1 Matrix: "Jede Zelle führt zu den Szenen" but cells are plain text; rows "#6" without
   names; "Wir"; two red primaries for CSV and Excel; filters in a card fill the phone screen.
 - [x] P1 Assistent: on phones the input is below the fold; pill input; suggestion cards.
-- [ ] P2 Bibliothek: the "Szenensuche" black banner; "0" counts with "Alle anzeigen" into empty
+- [x] P2 Bibliothek: the "Szenensuche" black banner; "0" counts with "Alle anzeigen" into empty
   lists; "Smart Playlist".
-- [ ] P2 Playlists, Präsentationen: two different create patterns, card around one field, boxed
+- [x] P2 Playlists, Präsentationen: two different create patterns, card around one field, boxed
   back icon.
-- [ ] P1 Papier: "Auslesen" active before a photo; no title or back link; card around one field.
+- [x] P1 Papier: "Auslesen" active before a photo; no title or back link; card around one field.
 
 ## Batch 5: account, opponent, scouting
 

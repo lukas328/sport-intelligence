@@ -3,10 +3,10 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -147,12 +147,15 @@ function Review({ orgId, upload, onDone }: { orgId: string; upload: Upload; onDo
 
 export function PaperView({ orgId, teamId }: { orgId: string; teamId: string }) {
   const t = useTranslations("paper");
+  const format = useFormatter();
   const tr = useTranslations();
   const tf = useTranslations("file");
   const qc = useQueryClient();
   const [open, setOpen] = useState<string | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
   const [busy, setBusy] = useState(false);
+  // "Auslesen" waits for a photo
+  const [picked, setPicked] = useState(false);
   const team = { org_id: orgId, team_id: teamId };
   const list = useQuery({
     queryKey: ["paper-photos", teamId],
@@ -183,20 +186,16 @@ export function PaperView({ orgId, teamId }: { orgId: string; teamId: string }) 
   const current = items.find((u) => u.id === open);
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold">{t("photoTitle")}</h2>
-        <p className="text-sm text-muted">{t("photoHint")}</p>
-      </div>
-      <Card>
-        <form onSubmit={upload} className="flex flex-wrap items-end gap-3">
-          <label className="text-sm">
-            <span className="block font-medium">{t("photo")}</span>
-            <FileField name="photo" accept="image/jpeg,image/png,image/webp" capture="environment" required button={tf("choosePhoto")} empty={tf("none")} />
-          </label>
-          <Button type="submit" disabled={busy}>{busy ? t("reading") : t("read")}</Button>
-        </form>
-        {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-      </Card>
+      {/* the page title comes from the area header */}
+      <p className="max-w-prose text-sm text-muted">{t("photoHint")}</p>
+      <form onSubmit={upload} onChange={(e) => setPicked(!!(e.currentTarget.elements.namedItem("photo") as HTMLInputElement | null)?.files?.length)} className="flex flex-wrap items-end gap-3 border-b border-foreground/15 pb-5">
+        <label className="text-sm">
+          <span className="block font-medium">{t("photo")}</span>
+          <FileField name="photo" accept="image/jpeg,image/png,image/webp" capture="environment" required button={tf("choosePhoto")} empty={tf("none")} />
+        </label>
+        <Button type="submit" disabled={busy || !picked}>{busy ? t("reading") : t("read")}</Button>
+      </form>
+      {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       {current && current.status === "extracted" && (
         <Review
           key={current.id}
@@ -208,16 +207,16 @@ export function PaperView({ orgId, teamId }: { orgId: string; teamId: string }) 
           }}
         />
       )}
-      <ul className="space-y-1 text-sm">
+      <ul className="divide-y divide-foreground/10 text-sm">
         {items.map((u) => (
-          <li key={u.id} className="flex flex-wrap items-center gap-2">
-            <span>{new Date(u.created_at).toLocaleString()}</span>
+          <li key={u.id} className="flex min-h-11 flex-wrap items-center gap-x-3 py-1">
+            <span className="tabular-nums">{format.dateTime(new Date(u.created_at), { dateStyle: "medium", timeStyle: "short" })}</span>
             <span className="text-muted">{t(`status_${u.status}`)}</span>
             {u.status === "extracted" && (
-              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setOpen(u.id)}>{t("review")}</button>
+              <button type="button" className="font-medium underline underline-offset-4" onClick={() => setOpen(u.id)}>{t("review")}</button>
             )}
             {u.match_id && (
-              <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/matches/${u.match_id}`}>{t("toMatch")}</Link>
+              <Link className="font-medium underline underline-offset-4" href={`/app/${orgId}/matches/${u.match_id}`}>{t("toMatch")}</Link>
             )}
           </li>
         ))}

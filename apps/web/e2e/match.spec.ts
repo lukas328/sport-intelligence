@@ -168,7 +168,7 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByRole("button", { name: "Zum Team" }).click();
   await openLibrary(page, "Playlists");
   await page.getByLabel("Name", { exact: true }).fill("Abwehr Training");
-  await page.getByRole("button", { name: "Erstellen" }).click();
+  await page.getByRole("button", { name: "Neue Playlist" }).click();
   await expect(page.getByRole("heading", { name: "Abwehr Training" })).toBeVisible();
   await expect(page.getByText(/Diese Playlist hat noch keine Clips/)).toBeVisible();
   await page.getByRole("button", { name: "Mit Spielern teilen" }).click();

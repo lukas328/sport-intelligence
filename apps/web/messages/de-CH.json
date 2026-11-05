@@ -2234,7 +2234,9 @@
     "shared": "für Spieler sichtbar",
     "emptyPlays": "Noch keine Spielzüge. Starte mit einer Vorlage oder übernimm eine Szene direkt aus dem Video.",
     "emptyPlaylists": "Noch keine Playlists. Clips schneidest du im Video mit «Start setzen» und «Ende setzen».",
-    "emptyPresentations": "Noch keine Präsentationen für die nächste Videositzung."
+    "emptyPresentations": "Noch keine Präsentationen für die nächste Videositzung.",
+    "newPlaylist": "Neue Playlist",
+    "newPresentation": "Neue Präsentation"
   },
   "voice": {
     "runWins": "{n} Siege in Folge.",

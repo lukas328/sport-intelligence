@@ -65,10 +65,11 @@ export function AreaSubNav() {
 }
 
 /** Leaf pages one level below a section item, with a way back to it. */
-const LEAF: Record<string, { parent: Section; title: string }> = {
+const LEAF: Record<string, { parent: Section; title: string; href?: string }> = {
   playlists: { parent: "library", title: "library.playlists" },
   presentations: { parent: "library", title: "library.presentations" },
   search: { parent: "library", title: "library.search" },
+  paper: { parent: "fixtures", title: "paper.photoTitle", href: "matches" },
 };
 
 /** Title, phone sub navigation and leaf back link for the pages of a destination. */
@@ -105,7 +106,7 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
     : { eyebrow: undefined, title: fallbackTitle ?? "" };
   return (
     <div className="space-y-5">
-      {(leaf || tool) && teamBase && <BackLink href={`${teamBase}/${leaf ? leaf.parent : "season"}`} parent={leaf ? leaf.parent : "season"} />}
+      {(leaf || tool) && teamBase && <BackLink href={`${teamBase}/${leaf ? leaf.href ?? leaf.parent : "season"}`} parent={leaf ? leaf.parent : "season"} />}
       <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions ?? seasonTools} />
       {dest && items.length > 0 && !leaf && !tool && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
     </div>
@@ -132,7 +133,7 @@ export function TeamChrome() {
   // the season page opens with its own stage (one stage per screen, at the top)
   if (/\/season$/.test(path)) return null;
   // the fixture list has its own title and actions
-  if (active === "fixtures") return <AreaSubNav />;
+  if (active === "fixtures" && !/\/paper$/.test(path)) return <AreaSubNav />;
   return <AreaHeader />;
 }
 
