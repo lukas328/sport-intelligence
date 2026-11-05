@@ -58,6 +58,10 @@ TEMPLATES = {
     "tmpl_camera": (("pan", "energy"), (0,)),
     "tmpl_people_flow": (("cx_v", "flow_x", "flow_share"), (0, 1)),
 }
+# games looked at while designing `lull_after`, the restart detector and RESTART_LAG; the others
+# are a held-out test
+DEV_GAMES = ("CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03", "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+             "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10")
 MAX_ANCHOR_GAP_S = 5.0  # log entries counted from a clock reading further away are unreliable
 CAMERA_FIXED_PX_S = 25.0  # 90th percentile |pan| below this: fixed camera
 
@@ -390,6 +394,7 @@ def main() -> None:
         groups.setdefault(f"camera:{camera_type(segs[k]['x'])}", []).append(k)
         groups.setdefault(f"overlay:{'yes' if lab['overlay'] else 'no'}", []).append(k)
         groups.setdefault(f"ref:{src[k]}", []).append(k)
+        groups.setdefault(f"split:{'dev' if lab['game'] in DEV_GAMES else 'test'}", []).append(k)
     results = {}
     for gname, subset in groups.items():
         r = evaluate(scores, segs, refs, subset, rng)
@@ -397,7 +402,7 @@ def main() -> None:
         n = r["_n"]
         print(f"\n== {gname}: {n['goals']} goals, {n['segments']} segments, {n['minutes']} min; "
               f"random r@1/2/4 {r['_random']['r@1']:.2f}/{r['_random']['r@2']:.2f}/{r['_random']['r@4']:.2f}")
-        if gname != "all" and not gname.startswith(("camera", "overlay", "ref")):
+        if gname != "all" and not gname.startswith(("camera", "overlay", "ref", "split")):
             names = ["pan_rev", "cen_rev", "flow_rev", "sum_all", "tmpl_all", "tmpl_people_flow", "logreg"]
         else:
             names = [k for k in r if not k.startswith("_")]
