@@ -528,7 +528,7 @@ def track(
     points = []
     number_reads: dict[int, list[Reading]] = defaultdict(list)
     vectors: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
-    role_samples: dict[int, list[NDArray[np.float64]]] = defaultdict(list)
+    role_samples: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
     n_dets = n_lost = 0
     for k, fo in enumerate(obs.frames):
         t0 = time.perf_counter()
@@ -581,11 +581,11 @@ def track(
         stepped = [replace(tp, frame=fo.index) for tp in stepped]  # original frame numbers
         for tp in stepped:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.samples[tp.track_id].append(feats[tp.det_index])
+                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
             if tp.det_index is not None and keep[tp.det_index] in fo.embeds:
                 vectors[tp.track_id].append((fo.index, fo.embeds[keep[tp.det_index]]))
             if tp.det_index is not None and keep[tp.det_index] in fo.roles:
-                role_samples[tp.track_id].append(fo.roles[keep[tp.det_index]])
+                role_samples[tp.track_id].append((fo.index, fo.roles[keep[tp.det_index]]))
             if tp.det_index is not None and keep[tp.det_index] in fo.numbers:
                 num, conf = fo.numbers[keep[tp.det_index]]
                 number_reads[tp.track_id].append(Reading(num, conf, fo.index))

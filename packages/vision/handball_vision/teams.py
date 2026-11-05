@@ -63,6 +63,12 @@ class TeamAssigner:
         self.kits = {k: bgr_to_lab(v) for k, v in kits.items()}
         self.floor = floor_lab
         self.samples: dict[int, list[NDArray[Any]]] = defaultdict(list)
+        # video frame of each sample (parallel to `samples`, filled by `add_sample`)
+        self.frames: dict[int, list[int]] = defaultdict(list)
+
+    def add_sample(self, track_id: int, colour: NDArray[Any], frame: int) -> None:
+        self.samples[track_id].append(colour)
+        self.frames[track_id].append(frame)
 
     def torso_colour(self, frame: NDArray[np.uint8], d: Detection) -> NDArray[np.float64] | None:
         h, w = d.y2 - d.y1, d.x2 - d.x1

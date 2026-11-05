@@ -324,7 +324,7 @@ def analyse_video(
         timings["tracking"] += time.perf_counter() - t0
         for tp in step:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.samples[tp.track_id].append(feats[tp.det_index])
+                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
         points += step
         n += 1
         if progress and total and n % 100 == 0:
@@ -344,27 +344,37 @@ def _finish(
     extra: dict[str, Any],
     number_reads: dict[int, list[Reading]] | None = None,
     vectors: dict[int, list[tuple[int, NDArray[np.float64]]]] | None = None,
-    role_samples: dict[int, list[NDArray[np.float64]]] | None = None,
+    role_samples: dict[int, list[tuple[int, NDArray[np.float64]]]] | None = None,
     rosters: dict[str, set[int]] | None = None,
 ) -> AnalysisResult:
     t0 = time.perf_counter()
     colours = {tid: np.median(np.stack(v), axis=0) for tid, v in teams.samples.items() if v}
     raw_tracks = len({p.track_id for p in points})
     points, mapping = stitch(points, fps, colours=colours)
+    framed = all(len(teams.frames.get(t, [])) == len(v) for t, v in teams.samples.items())
     stitched: dict[int, list[NDArray[Any]]] = defaultdict(list)
+    stitched_frames: dict[int, list[int]] = defaultdict(list)
     for old, samples in teams.samples.items():
         stitched[mapping.get(old, old)].extend(samples)
-    teams.samples = stitched
+        stitched_frames[mapping.get(old, old)].extend(teams.frames.get(old, []))
+    teams.samples, teams.frames = stitched, stitched_frames
     reads: dict[int, list[Reading]] = defaultdict(list)
     for old, rs in (number_reads or {}).items():
         reads[mapping.get(old, old)].extend(rs)
     looks: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
     for old, vs in (vectors or {}).items():
         looks[mapping.get(old, old)].extend(vs)
-    role_looks: dict[int, list[NDArray[np.float64]]] = defaultdict(list)
+    role_framed: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
     for old, role_list in (role_samples or {}).items():
-        role_looks[mapping.get(old, old)].extend(role_list)
+        role_framed[mapping.get(old, old)].extend(role_list)
     timings["stitching"] += time.perf_counter() - t0
+    # people outside play (bench, staff, spectators at the court edge) leave the tracks before
+    # anything is learned from them (handball_vision.bench, ADR 028 addendum)
+    t0 = time.perf_counter()
+    points, bench = _drop_bench(points, fps, calib, teams, reads, looks, role_framed, framed)
+    extra = {**extra, "bench": bench}
+    timings["bench"] += time.perf_counter() - t0
+    role_looks = {t: [v for _, v in vs] for t, vs in role_framed.items() if vs}
     team_out: dict[int, dict[str, Any]] = {}
     for tid in {p.track_id for p in points}:
         r = teams.result(tid)
@@ -439,6 +449,57 @@ def _finish(
         detections_per_frame=n_dets / max(1, n),
         extra={"raw_tracks": raw_tracks, "tracks": len(team_out), **extra},
     )
+
+
+def _drop_bench(
+    points: list[TrackPoint],
+    fps: float,
+    calib: Calibration,
+    teams: TeamAssigner,
+    reads: dict[int, list[Reading]],
+    looks: dict[int, list[tuple[int, NDArray[np.float64]]]],
+    role_looks: dict[int, list[tuple[int, NDArray[np.float64]]]],
+    framed: bool = True,
+) -> tuple[list[TrackPoint], dict[str, Any]]:
+    """Cut the bench stretches out of the tracks and move every look (colour, number, appearance,
+    role) to the track it now belongs to; looks on a bench stretch are dropped. Without frames
+    for the colour samples (`framed` False) a track keeps its samples and a new piece copies its
+    parent's."""
+    from handball_vision.bench import split_bench
+
+    split = split_bench(points, fps, calib)
+    if not split.stretches:
+        return points, {"stretches": 0, "tracks_removed": 0, "pieces": 0, "items": []}
+
+    def regroup(items: dict[int, list[Any]], frame_of: Callable[[Any], int]) -> None:
+        out: dict[int, list[Any]] = defaultdict(list)
+        for t, vs in items.items():
+            for v in vs:
+                owner = split.owner(t, frame_of(v))
+                if owner is not None:
+                    out[owner].append(v)
+        items.clear()
+        items.update(out)
+
+    if framed:
+        pairs = {t: list(zip(teams.frames[t], vs, strict=True)) for t, vs in teams.samples.items()}
+        regroup(pairs, lambda v: int(v[0]))
+        teams.samples = defaultdict(list, {t: [c for _, c in vs] for t, vs in pairs.items()})
+        teams.frames = defaultdict(list, {t: [f for f, _ in vs] for t, vs in pairs.items()})
+    else:
+        for t in split.removed:
+            teams.samples.pop(t, None)
+        for new, (old, _, _) in split.pieces.items():
+            teams.samples[new] = list(teams.samples.get(old, []))
+    regroup(reads, lambda r: int(r.frame))
+    regroup(looks, lambda v: int(v[0]))
+    regroup(role_looks, lambda v: int(v[0]))
+    return split.points, {
+        "stretches": len(split.stretches),
+        "tracks_removed": len(split.removed),
+        "pieces": len(split.pieces),
+        "items": [s.to_dict(fps) for s in split.stretches],
+    }
 
 
 def _apply_role_votes(
@@ -785,7 +846,7 @@ def _analyse_moving(
         timings["tracking"] += time.perf_counter() - t0
         for tp in step:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.samples[tp.track_id].append(feats[tp.det_index])
+                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
         points += step
         n += 1
         if progress and total and n % 100 == 0:

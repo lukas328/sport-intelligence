@@ -9,18 +9,22 @@ The rule works on court positions (calibration) and on stretches of a track, not
 the tracker often hands a bench person's track to a player who passes the bench, or the other way
 round (a substitute walks onto the court).
 
-1. **Off court**: an observed foot point is beyond a *sideline* by a margin. The margin grows with
-   the distance from the camera: at least `margin_m`, or `margin_px` image pixels across the line
-   at that spot (far-side calibration errors of a few pixels are most of a metre). Points beyond
-   the goal lines never count: goalkeepers and the goal-line referee stand there.
-2. **Still**: within a window of `window_s` around the point the track stays within `still_m` of
-   its median position. Referees and players along a sideline keep moving.
-3. **Bench stretch**: a run of points that are still and mostly off court (`off_share` of the
-   window), lasting at least `min_run_s`.
+1. **Off court**: the median foot point over a window of `window_s` lies beyond a *sideline* by
+   a margin. The margin grows with the distance from the camera: at least `margin_m`, or
+   `margin_px` image pixels across the line at that spot (on the far side a few pixels of
+   calibration error are most of a metre, and wings stand on that line). Points beyond the goal
+   lines never count: goalkeepers and the goal-line referee stand there.
+2. **Still**: in that window the track stays within `still_m` of its median (90th percentile).
+   Referees and players along a sideline keep moving.
+3. **Bench stretch**: a run of such points lasting at least `min_run_s` (gaps in the
+   observations do not break it while the person stays at the same spot). It takes in the
+   neighbouring looks within `still_m` of its median (standing up moves the foot point just
+   inside the margin).
 
-A track that is mostly bench (`track_share` of its observed points) is bench as a whole. Otherwise
-its bench stretches are cut out and the pieces in between become tracks of their own (the person
-before and after a bench stretch is often not the same).
+The bench stretches are cut out of the track. The pieces in between become tracks of their own
+(the person before and after a bench stretch is often not the same), unless they are leftovers
+of the bench: fewer than `min_piece_points` looks, or a median off court without moving like a
+referee. A track with nothing left is bench as a whole.
 """
 
 from __future__ import annotations
@@ -49,7 +53,6 @@ class BenchRule:
     min_run_s: float = 6.0
     max_gap_s: float = 2.0
     min_piece_points: int = 5
-    line_m: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -164,9 +167,22 @@ def bench_frames(
         if joins:
             continue
         if start is not None and t[i - 1] - t[start] >= rule.min_run_s:
-            runs.append((int(frames[start]), int(frames[i - 1])))
+            runs.append((start, i - 1))
         start = i if i < n and bench[i] else None
-    return runs
+    # a run takes in the neighbouring looks at the same spot (standing up moves the foot point
+    # just inside the margin; the person is the same)
+    grown: list[tuple[int, int]] = []
+    for a, b in runs:
+        med = np.median(xy[a : b + 1], axis=0)
+        while a > 0 and float(np.linalg.norm(xy[a - 1] - med)) <= rule.still_m:
+            a -= 1
+        while b < n - 1 and float(np.linalg.norm(xy[b + 1] - med)) <= rule.still_m:
+            b += 1
+        if grown and a <= grown[-1][1] + 1:
+            grown[-1] = (grown[-1][0], b)
+        else:
+            grown.append((a, b))
+    return [(int(frames[a]), int(frames[b])) for a, b in grown]
 
 
 def split_bench(
@@ -210,7 +226,7 @@ def split_bench(
                 groups[-1].append(p)
             else:
                 groups.append([p])
-        groups = [g for g in groups if _piece_survives(g, fps, calib, rule)]
+        groups = [g for g in groups if _piece_survives(g, calib, rule)]
         if not groups:
             removed.add(tid)
             stretches.append(_stretch(tid, ps[0].frame, ps[-1].frame, xy, True))
@@ -232,28 +248,18 @@ def split_bench(
     return BenchSplit(kept, stretches, removed, pieces, cut)
 
 
-def _piece_survives(
-    g: list[TrackPoint], fps: float, calib: Calibration | None, rule: BenchRule
-) -> bool:
+def _piece_survives(g: list[TrackPoint], calib: Calibration | None, rule: BenchRule) -> bool:
     """A piece of a track cut by bench stretches stays a track of its own unless it is a leftover
-    of the bench: too few looks, its median off court (and not moving like a referee), or a short
-    still stay right at the sideline (the same person as the stretch next to it, the foot point
-    just inside the margin)."""
+    of the bench: too few looks, or its median off court and not moving like a referee."""
     seen = [p for p in g if p.observed]
     if len(seen) < rule.min_piece_points:
         return False
     xy = np.array([(p.x, p.y) for p in seen], np.float64)
     med = np.median(xy, axis=0)
     near, far = sideline_margins(calib, med[:1], rule)
-    spread = np.linalg.norm(xy - med, axis=1)
     if float(np.linalg.norm(xy.std(axis=0))) >= 1.5 * rule.still_m:
         return True  # moves like a player or a referee
-    if not -near[0] <= med[1] <= COURT_W + far[0]:
-        return False
-    at_line = min(abs(med[1]), abs(med[1] - COURT_W)) <= rule.line_m
-    short = (g[-1].frame - g[0].frame) / fps < rule.min_run_s
-    still = float(np.percentile(spread, 90)) <= rule.still_m
-    return not (at_line and short and still)
+    return bool(-near[0] <= med[1] <= COURT_W + far[0])
 
 
 def _ranges(frames: list[int], ps: list[TrackPoint]) -> list[tuple[int, int]]:
