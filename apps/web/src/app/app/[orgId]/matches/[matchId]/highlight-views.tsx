@@ -113,7 +113,7 @@ export function HighlightsView({
               <div
                 className={cn(
                   "grid place-items-center bg-surface text-sm text-muted",
-                  r.format === "9x16" ? "mx-auto aspect-[9/16] max-h-72" : "aspect-video w-full",
+                  r.format === "9x16" ? "aspect-[9/16] h-56" : "aspect-video w-full max-w-sm",
                 )}
               >
                 {t(`status_${r.status}` as "status_queued")}
