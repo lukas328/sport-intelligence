@@ -1178,7 +1178,7 @@
   },
   "opponent": {
     "title": "Gegner-Profil",
-    "record": "Bilanz: {won, plural, one {# Sieg} other {# Siege}}, {drawn} Unentschieden, {lost, plural, one {# Niederlage} other {# Niederlagen}}",
+    "record": "Unsere Bilanz gegen sie: {won, plural, one {# Sieg} other {# Siege}}, {drawn} Unentschieden, {lost, plural, one {# Niederlage} other {# Niederlagen}}",
     "tagged": "Ausgewertet aus {count, plural, one {# Spiel} other {# Spielen}} mit erfassten Ereignissen.",
     "none": "Noch keine Spiele mit erfassten Ereignissen gegen diesen Gegner.",
     "goals": "Tore",
@@ -1195,7 +1195,12 @@
     "open": "Gegner-Profil",
     "goalsPerMatch": "Tore pro Spiel",
     "fastBreakPerMatch": "Gegenstosstore pro Spiel",
-    "turnoversPerMatch": "Ballverluste pro Spiel"
+    "turnoversPerMatch": "Ballverluste pro Spiel",
+    "goalZonesBasis": "{n} von {total} Toren mit Zielpunkt erfasst.",
+    "won": "Sieg",
+    "lost": "Niederlage",
+    "drawn": "Unentschieden",
+    "ourScoreFirst": "unser Resultat zuerst"
   },
   "billing": {
     "title": "Abo und Rechnungen",
@@ -1406,7 +1411,7 @@
     "reset": "Filter zurücksetzen",
     "count": "{n, plural, =0 {Keine Szene} one {# Szene} other {# Szenen}}",
     "none": "Keine Szenen für diesen Filter.",
-    "clip": "Clip",
+    "clip": "Eigener Clip",
     "watch": "Ansehen",
     "tagsOf": "Tags dieser Szene",
     "truncated": "Die ersten {n} Szenen werden angezeigt.",
@@ -1751,7 +1756,8 @@
     "bad": "Nicht hilfreich",
     "history": "Frühere Gespräche",
     "new": "Neues Gespräch",
-    "examples": "Zum Beispiel:"
+    "examples": "Zum Beispiel:",
+    "historyNone": "Noch keine Gespräche."
   },
   "exchange": {
     "title": "Daten austauschen",
@@ -1902,7 +1908,8 @@
     "settings": "Auswahl",
     "export": "Export",
     "shirtPrefix": "Nr. ",
-    "metricsN": "{n, plural, one {# Kennzahl} other {# Kennzahlen}}"
+    "metricsN": "{n, plural, one {# Kennzahl} other {# Kennzahlen}}",
+    "allMatches": "alle"
   },
   "training": {
     "nav": "Training",

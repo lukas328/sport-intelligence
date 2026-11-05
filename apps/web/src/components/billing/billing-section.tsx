@@ -6,7 +6,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { InvoiceOrder } from "./invoice-order";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,17 @@ interface Billing {
 /** Usage against the plan; red only when a limit is enforced and reached (limits off: ink). */
 function Meter({ label, used, limit, unit = "", enforced }: { label: string; used: number; limit: number | null; unit?: string; enforced: boolean }) {
   const share = limit ? Math.min(1, used / limit) : 0;
+  // limits off: the usage as text, no bar that reads full or over
+  if (!enforced)
+    return (
+      <div className="flex justify-between gap-2 border-b border-foreground/10 py-1.5 text-sm">
+        <span>{label}</span>
+        <span className="tabular-nums">
+          {used}
+          {unit}
+        </span>
+      </div>
+    );
   return (
     <div className="space-y-1 text-sm">
       <div className="flex justify-between gap-2">
@@ -48,7 +59,7 @@ function Meter({ label, used, limit, unit = "", enforced }: { label: string; use
         </span>
       </div>
       <div className="h-2 overflow-hidden rounded bg-surface" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={limit ?? 0} aria-valuenow={used}>
-        <div className={cn("h-full", enforced && share >= 1 ? "bg-error" : "bg-foreground/70")} style={{ width: `${share * 100}%` }} />
+        <div className={cn("h-full", share >= 1 ? "bg-error" : "bg-foreground/70")} style={{ width: `${share * 100}%` }} />
       </div>
     </div>
   );
@@ -80,7 +91,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
       <h2 id="billing-title" className="text-lg font-semibold">
         {t("title")}
       </h2>
-      <Card className="space-y-4" data-testid="billing">
+      <div className="border-t border-foreground/15 pt-5 space-y-4" data-testid="billing">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <p>
             <span className="font-semibold">{t(`plan_${b.plan as "free"}`)}</span>
@@ -110,7 +121,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
                 <span className="block font-semibold">{t(`plan_${p.plan}`)}</span>
                 {p.plan === b.plan && <span className="block text-[0.8125rem] font-semibold text-muted">{t("current")}</span>}
               </span>
-              <span className="w-40 shrink-0 font-semibold tabular-nums">{p.price_chf_month ? t("price", { price: p.price_chf_month }) : t("free")}</span>
+              <span className="w-40 shrink-0 font-semibold tabular-nums">{t("price", { price: p.price_chf_month ?? 0 })}</span>
               <span className="min-w-48 flex-1 text-sm text-muted">
                 {[
                   t("teamsN", { count: p.teams }),
@@ -143,7 +154,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
         </label>
         {!b.checkout_available && <p className="text-xs text-muted">{t("unavailable")}</p>}
         {problem && <Alert>{problem === "two-factor-required" ? t("needs2fa") : t("failed")}</Alert>}
-      </Card>
+      </div>
       <InvoiceOrder orgId={orgId} goalkeepers={goalkeepers} />
     </section>
   );

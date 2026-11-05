@@ -108,6 +108,10 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
                   ))}
               </ul>
               <h3 className="pt-2 text-sm font-semibold">{t("goalZones")}</h3>
+              {/* not every goal has a target point: say how many do */}
+              <p className="text-[0.8125rem] text-muted">
+                {t("goalZonesBasis", { n: Object.values(p.goal_zones).reduce((a, v) => a + v.goals, 0), total: p.totals.goals })}
+              </p>
               <ul className="divide-y divide-foreground/10 border-t-2 border-foreground text-sm">
                 {Object.entries(p.goal_zones)
                   .sort((a, b) => b[1].goals - a[1].goals)
@@ -141,13 +145,20 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
         </>
       )}
       <section aria-label={t("matches")}>
-        <h2 className="mb-2 font-semibold">{t("matches")}</h2>
+        <h2 className="mb-2 font-semibold">
+          {t("matches")} <span className="text-sm font-normal text-muted">{t("ourScoreFirst")}</span>
+        </h2>
         <ul className="divide-y divide-foreground/10 border-t-2 border-foreground">
           {p.matches.map((m) => (
             <li key={m.match_id}>
               <Link href={`/app/${orgId}/matches/${m.match_id}`} className="group flex min-h-11 items-center justify-between gap-3 py-2">
                 <span className="group-hover:underline group-hover:underline-offset-4">{format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })}</span>
-                <span className="font-score text-lg tabular-nums">{m.score_own != null && m.score_opponent != null ? `${m.score_own}:${m.score_opponent}` : "-"}</span>
+                <span className="flex items-baseline gap-3">
+                  {m.score_own != null && m.score_opponent != null && (
+                    <span className="text-sm text-muted">{t(m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "drawn")}</span>
+                  )}
+                  <span className="font-score text-lg tabular-nums">{m.score_own != null && m.score_opponent != null ? `${m.score_own}:${m.score_opponent}` : ""}</span>
+                </span>
               </Link>
             </li>
           ))}

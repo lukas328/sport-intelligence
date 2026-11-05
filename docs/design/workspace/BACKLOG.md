@@ -21,7 +21,7 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
   Playlist"; "Free", "Fair Use".
 - [x] P2 Phone tab bar: the indicator is already flush at the top edge of the active tab; the
   floating strip was an artifact of full-page captures.
-- [ ] Decision for the owner: club red is the accent, so for a red club primary buttons and links
+- [x] Decision for the owner (options A, B, C written in `docs/design/identity/FOR_LUKAS.md`, item 8): club red is the accent, so for a red club primary buttons and links
   read like errors (red means goals against and errors). Options in `FOR_LUKAS.md`.
 
 ## Batch 2: courtside tools (used under pressure)
@@ -67,6 +67,27 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 - [x] P1 Gegner: shooter numbers with names from the opponent's squad, open columns, the squad editor after the figures.
   Home or away per game needs the profile API to return it (Later).
 - [x] P1 Scouting: no opponent or date in the title; the empty state contradicts its button.
+
+## Review round 1 over batches 4 and 5
+
+A fresh-eyes review scored the new pages; weakest were Gegner (whose result, zone counts) and
+Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the review:
+
+- [x] Gegner: "Unsere Bilanz gegen sie", Sieg/Niederlage and "unser Resultat zuerst" on game rows,
+  "13 von 18 Toren mit Zielpunkt erfasst".
+- [x] Einstellungen: no cards (section rules), usage as plain text while limits are off, plan price
+  "CHF 0 pro Monat" instead of "Gratis gratis", a gap under "Alle … Geräte anzeigen".
+- [x] Disabled primary buttons in neutral grey everywhere (a faded club red read like an error).
+- [x] Szenensuche: own shirt numbers with names, labelled filter groups that scroll on phones,
+  "Eigener Clip" instead of a bare "Clip", "Ansehen" with a play mark and no underline wall.
+- [x] Assistent: "Noch keine Gespräche."; Matrix: "Letzte Spiele" shows "alle".
+- [ ] Kader (phone): "Kader" three times (H1, tab, group heading); "Liste bearbeiten" alone; the
+  red "Spieler hinzufügen" competes with the red numbers (depends on the club-red decision).
+- [ ] Sidebar highlight for tools (Assistent, Suche, Gegner) should follow the back link.
+- [ ] Einstellungen on phones: the section tabs have no active underline and are cut at the edge.
+- [ ] Gegner: back link "Zurück" without eyebrow; the zone "Fernwurf / leeres Tor" mixes two
+  situations (analysis data, already reported).
+- [ ] Dates: "29. Okt. 26" (Suche) and "29.10.2026" (Gegner): one format.
 
 ## Later (features)
 

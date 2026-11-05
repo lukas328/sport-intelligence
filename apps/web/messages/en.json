@@ -1178,7 +1178,7 @@
   },
   "opponent": {
     "title": "Opponent profile",
-    "record": "Record: {won, plural, one {# win} other {# wins}}, {drawn, plural, one {# draw} other {# draws}}, {lost, plural, one {# loss} other {# losses}}",
+    "record": "Our record against them: {won, plural, one {# win} other {# wins}}, {drawn} draws, {lost, plural, one {# loss} other {# losses}}",
     "tagged": "Based on {count, plural, one {# match} other {# matches}} with tagged events.",
     "none": "No matches with tagged events against this opponent yet.",
     "goals": "Goals",
@@ -1195,7 +1195,12 @@
     "open": "Opponent profile",
     "goalsPerMatch": "Goals per match",
     "fastBreakPerMatch": "Fast-break goals per match",
-    "turnoversPerMatch": "Turnovers per match"
+    "turnoversPerMatch": "Turnovers per match",
+    "goalZonesBasis": "{n} of {total} goals with a target point.",
+    "won": "Win",
+    "lost": "Loss",
+    "drawn": "Draw",
+    "ourScoreFirst": "our score first"
   },
   "billing": {
     "title": "Plan and billing",
@@ -1406,7 +1411,7 @@
     "reset": "Reset filter",
     "count": "{n, plural, =0 {No scene} one {# scene} other {# scenes}}",
     "none": "No scenes for this filter.",
-    "clip": "Clip",
+    "clip": "Own clip",
     "watch": "Watch",
     "tagsOf": "Tags of this scene",
     "truncated": "Showing the first {n} scenes.",
@@ -1751,7 +1756,8 @@
     "bad": "Not helpful",
     "history": "Earlier conversations",
     "new": "New conversation",
-    "examples": "For example:"
+    "examples": "For example:",
+    "historyNone": "No conversations yet."
   },
   "exchange": {
     "title": "Exchange data",
@@ -1902,7 +1908,8 @@
     "settings": "Selection",
     "export": "Export",
     "shirtPrefix": "No. ",
-    "metricsN": "{n, plural, one {# figure} other {# figures}}"
+    "metricsN": "{n, plural, one {# figure} other {# figures}}",
+    "allMatches": "all"
   },
   "training": {
     "nav": "Training",

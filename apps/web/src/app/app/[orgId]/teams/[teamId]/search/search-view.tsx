@@ -2,6 +2,7 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Play } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
@@ -31,7 +32,7 @@ function Chip({ on, children, onClick, color }: { on: boolean; children: React.R
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-8 items-center gap-1 rounded-md border px-3 py-1 text-sm",
+        "inline-flex min-h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-3 py-1 text-sm",
         on ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface",
       )}
     >
@@ -46,7 +47,7 @@ function toggle<T>(list: T[] | undefined, v: T): T[] {
   return l.includes(v) ? l.filter((x) => x !== v) : [...l, v];
 }
 
-export function SearchView({ orgId, teamId, teamName }: { orgId: string; teamId: string; teamName: string }) {
+export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: string; teamId: string; teamName: string; seasonId: string | null }) {
   const t = useTranslations("search");
   const te = useTranslations("events");
   const tr = useTranslations();
@@ -155,6 +156,17 @@ export function SearchView({ orgId, teamId, teamName }: { orgId: string; teamId:
       staleTime: 60_000,
     })),
   });
+  // own shirt numbers read as names
+  const roster = useQuery({
+    queryKey: ["roster", seasonId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", { params: { path: { ...team, season_id: seasonId! } } })).data ?? [],
+    enabled: !!seasonId,
+  });
+  const player = (h: Hit) => {
+    if (h.number == null) return null;
+    const p = h.side === "own" ? (roster.data ?? []).find((r) => r.jersey_number === h.number) : undefined;
+    return p ? `${t("shirt", { n: h.number })} ${p.first_name} ${p.last_name}` : t("shirt", { n: h.number });
+  };
   const matchOf = (id: string) => matches[matchIds.indexOf(id)]?.data;
   const clockOf = (h: Hit) => {
     const m = matchOf(h.match_id);
@@ -168,14 +180,17 @@ export function SearchView({ orgId, teamId, teamName }: { orgId: string; teamId:
     side === "own" ? teamName : side === "opponent" ? m?.opponent?.name ?? t("side_opponent") : null;
   const filters = (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-1" role="group" aria-label={t("types")}>
+      {/* labelled groups; on phones each group is one scrolling row */}
+      <div className="scrollbar-none -mx-1 flex items-center gap-1 overflow-x-auto px-1 sm:flex-wrap" role="group" aria-label={t("types")}>
+        <span className="mr-1 shrink-0 text-[0.8125rem] font-semibold text-muted">{t("types")}</span>
         {TYPES.map((ty) => (
           <Chip key={ty} on={(filter.types ?? []).includes(ty)} onClick={() => setFilter((f) => ({ ...f, types: toggle(f.types, ty) }))}>
             {t(`type_${ty}`)}
           </Chip>
         ))}
       </div>
-      <div className="flex flex-wrap gap-1" role="group" aria-label={t("outcomes")}>
+      <div className="scrollbar-none -mx-1 flex items-center gap-1 overflow-x-auto px-1 sm:flex-wrap" role="group" aria-label={t("outcomes")}>
+        <span className="mr-1 shrink-0 text-[0.8125rem] font-semibold text-muted">{t("outcomes")}</span>
         {OUTCOMES.map((o) => (
           <Chip key={o} on={(filter.outcomes ?? []).includes(o)} onClick={() => setFilter((f) => ({ ...f, outcomes: toggle(f.outcomes, o) }))}>
             {te(o)}
@@ -229,7 +244,7 @@ export function SearchView({ orgId, teamId, teamName }: { orgId: string; teamId:
                     {(h.side || h.number != null) && (
                       <span className="text-sm text-muted">
                         {" · "}
-                        {[sideName(h.side, m), h.number != null && t("shirt", { n: h.number })].filter(Boolean).join(" ")}
+                        {[sideName(h.side, m), player(h)].filter(Boolean).join(" ")}
                       </span>
                     )}
                   </span>
@@ -240,7 +255,8 @@ export function SearchView({ orgId, teamId, teamName }: { orgId: string; teamId:
                       </Button>
                     )}
                     {playable ? (
-                      <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="inline-flex min-h-9 items-center text-sm font-semibold underline underline-offset-4 hover:text-accent">
+                      <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="inline-flex min-h-9 items-center gap-1 text-sm font-semibold hover:underline hover:underline-offset-4">
+                        <Play aria-hidden className="size-3 fill-current" />
                         {t("watch")}
                       </Link>
                     ) : (

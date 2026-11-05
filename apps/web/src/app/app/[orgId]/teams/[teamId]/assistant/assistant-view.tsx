@@ -225,6 +225,7 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
             {t("new")}
           </button>
         </div>
+        {history.data && history.data.length === 0 && <p className="text-sm text-muted">{t("historyNone")}</p>}
         <ul className="space-y-1 text-sm">
           {(history.data ?? []).map((c) => (
             <li key={c.id}>

@@ -162,6 +162,7 @@ export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: strin
               min={1}
               max={100}
               className={`${select} w-24`}
+              placeholder={t("allMatches")}
               value={filter.last_n_matches ?? ""}
               onChange={(e) => setFilter("last_n_matches", e.target.value ? Number(e.target.value) : undefined)}
             />

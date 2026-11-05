@@ -1178,7 +1178,7 @@
   },
   "opponent": {
     "title": "Profil adversaire",
-    "record": "Bilan : {won, plural, one {# victoire} other {# victoires}}, {drawn, plural, one {# nul} other {# nuls}}, {lost, plural, one {# défaite} other {# défaites}}",
+    "record": "Notre bilan contre eux : {won, plural, one {# victoire} other {# victoires}}, {drawn} nuls, {lost, plural, one {# défaite} other {# défaites}}",
     "tagged": "Basé sur {count, plural, one {# match} other {# matchs}} avec événements saisis.",
     "none": "Pas encore de match avec événements saisis contre cet adversaire.",
     "goals": "Buts",
@@ -1195,7 +1195,12 @@
     "open": "Profil adversaire",
     "goalsPerMatch": "Buts par match",
     "fastBreakPerMatch": "Buts en contre-attaque par match",
-    "turnoversPerMatch": "Pertes de balle par match"
+    "turnoversPerMatch": "Pertes de balle par match",
+    "goalZonesBasis": "{n} buts sur {total} avec point d'impact.",
+    "won": "Victoire",
+    "lost": "Défaite",
+    "drawn": "Nul",
+    "ourScoreFirst": "notre score d'abord"
   },
   "billing": {
     "title": "Abonnement et factures",
@@ -1406,7 +1411,7 @@
     "reset": "Réinitialiser le filtre",
     "count": "{n, plural, =0 {Aucune scène} one {# scène} other {# scènes}}",
     "none": "Aucune scène pour ce filtre.",
-    "clip": "Clip",
+    "clip": "Clip personnel",
     "watch": "Regarder",
     "tagsOf": "Tags de cette scène",
     "truncated": "Les {n} premières scènes sont affichées.",
@@ -1751,7 +1756,8 @@
     "bad": "Pas utile",
     "history": "Conversations précédentes",
     "new": "Nouvelle conversation",
-    "examples": "Par exemple :"
+    "examples": "Par exemple :",
+    "historyNone": "Pas encore de conversation."
   },
   "exchange": {
     "title": "Échanger des données",
@@ -1902,7 +1908,8 @@
     "settings": "Sélection",
     "export": "Export",
     "shirtPrefix": "N° ",
-    "metricsN": "{n, plural, one {# indicateur} other {# indicateurs}}"
+    "metricsN": "{n, plural, one {# indicateur} other {# indicateurs}}",
+    "allMatches": "tous"
   },
   "training": {
     "nav": "Entraînement",

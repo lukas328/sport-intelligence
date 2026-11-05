@@ -11,7 +11,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { AccountSection } from "@/components/account-section";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
@@ -113,7 +113,7 @@ function ClubSection({ org }: { org: Org }) {
       <h2 id="club" className="text-lg font-semibold">
         {t("settings.club")}
       </h2>
-      <Card>
+      <div className="border-t border-foreground/15 pt-5">
         <form onSubmit={submit} className="space-y-4">
           {error && <Alert>{t(`errors.${error}`)}</Alert>}
           {saved && <Alert kind="success">{t("common.saved")}</Alert>}
@@ -127,7 +127,7 @@ function ClubSection({ org }: { org: Org }) {
             {t("common.save")}
           </Button>
         </form>
-      </Card>
+      </div>
     </section>
   );
 }
@@ -201,7 +201,7 @@ function PeopleSection({
         {t("settings.people")}
       </h2>
       {isAdmin && (
-        <Card className="space-y-3">
+        <div className="border-t border-foreground/15 pt-5 space-y-3">
           <h3 className="font-semibold">{t("settings.membersTitle")}</h3>
           {roleError && <Alert>{t(`errors.${roleError}`)}</Alert>}
           {members.data && members.data.length > 0 ? (
@@ -234,9 +234,9 @@ function PeopleSection({
           ) : (
             <EmptyState title={t("settings.membersEmpty")} />
           )}
-        </Card>
+        </div>
       )}
-      <Card className="space-y-3">
+      <div className="border-t border-foreground/15 pt-5 space-y-3">
         <h3 className="font-semibold">{t("settings.inviteTitle")}</h3>
         <InviteForm
           orgId={orgId}
@@ -244,8 +244,8 @@ function PeopleSection({
           isAdmin={isAdmin}
           onInvited={() => void qc.invalidateQueries({ queryKey: ["invitations", orgId] })}
         />
-      </Card>
-      <Card className="space-y-3">
+      </div>
+      <div className="border-t border-foreground/15 pt-5 space-y-3">
         <h3 className="font-semibold">{t("settings.invitationsTitle")}</h3>
         {pending.length === 0 ? (
           <p className="text-sm text-muted">{t("settings.noInvitations")}</p>
@@ -267,7 +267,7 @@ function PeopleSection({
             ))}
           </ul>
         )}
-      </Card>
+      </div>
     </section>
   );
 }
@@ -315,7 +315,7 @@ function SecuritySection({ me }: { me: Me }) {
       <h2 id="security-title" className="text-lg font-semibold">
         {t("settings.security")}
       </h2>
-      <Card className="space-y-4">
+      <div className="border-t border-foreground/15 pt-5 space-y-4">
         <h3 className="font-semibold">{t("settings.twoFactorTitle")}</h3>
         {error && <Alert>{t(`errors.${error}`)}</Alert>}
         <p className="text-sm text-muted" data-testid="totp-state">
@@ -380,7 +380,7 @@ function SecuritySection({ me }: { me: Me }) {
             </Button>
           </form>
         )}
-      </Card>
+      </div>
     </section>
   );
 }

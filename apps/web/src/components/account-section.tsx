@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -88,7 +88,7 @@ export function AccountSection({ me }: { me: Me }) {
           )}
         </Alert>
       )}
-      <Card className="space-y-3">
+      <div className="border-t border-foreground/15 pt-5 space-y-3">
         <h3 className="font-semibold">{t("account.passwordTitle")}</h3>
         {me.linked_providers.length > 0 && (
           <p className="text-sm text-muted">
@@ -117,8 +117,8 @@ export function AccountSection({ me }: { me: Me }) {
             </Button>
           </div>
         </form>
-      </Card>
-      <Card className="space-y-3">
+      </div>
+      <div className="border-t border-foreground/15 pt-5 space-y-3">
         <h3 className="font-semibold">{t("account.sessionsTitle")}</h3>
         <ul className="divide-y divide-border/70 text-sm" data-testid="sessions">
           {[...(sessions.data ?? [])]
@@ -146,7 +146,7 @@ export function AccountSection({ me }: { me: Me }) {
           ))}
         </ul>
         {!allSessions && (sessions.data ?? []).length > 5 && (
-          <button type="button" className="min-h-8 text-sm font-medium underline underline-offset-4" onClick={() => setAllSessions(true)}>
+          <button type="button" className="block min-h-8 text-sm font-medium underline underline-offset-4" onClick={() => setAllSessions(true)}>
             {t("account.sessionsAll", { n: (sessions.data ?? []).length })}
           </button>
         )}
@@ -155,7 +155,7 @@ export function AccountSection({ me }: { me: Me }) {
             {t("account.signOutOthers")}
           </Button>
         )}
-      </Card>
+      </div>
     </section>
   );
 }
