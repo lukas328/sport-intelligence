@@ -268,7 +268,7 @@ def test_a_fixed_camera_keeps_every_focal_length_the_lines_allow(focal: float) -
     cameras looked flat). The true focal length is among the few candidates kept."""
     obs = _fixed_camera_observations(focal, np.array([20.0, -8.0, 6.0]))
     found = observe._fixed_focals(obs)
-    assert 1 <= len(found) <= 3
+    assert 1 <= len(found) <= 4
     assert any(abs(f / focal - 1) < 0.15 for f in found)
     assert all(max(a / b, b / a) >= 1.25 for a in found for b in found if a != b)
 

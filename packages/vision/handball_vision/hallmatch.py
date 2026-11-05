@@ -35,8 +35,11 @@ U8 = NDArray[Any]
 
 MAX_SIDE = 2000  # hall images are matched at this width at most (panoramas reach 3600 px)
 MIN_INLIERS = 30  # matches that agree with the whole-image homography
-MIN_FLOOR_INLIERS = 12  # matches on the floor that agree with it
-MIN_FLOOR_SHARE = 0.5  # share of the floor matches that agree
+MIN_FLOOR_INLIERS = 25  # matches on the floor that agree with it
+# share of the floor matches that agree: between two games of the same hall the floor stickers,
+# the banners and a stream's score box move (two half-time views of one hall: 70 of 227, the
+# floor lines then lie on each other to a pixel); another hall gives a handful at most
+MIN_FLOOR_SHARE = 0.2
 
 
 @dataclass(frozen=True)
@@ -103,6 +106,34 @@ class FloorMatch:
     error_px: float
 
 
+MIN_SPREAD = 0.05  # floor inliers must span this share of the visible floor
+
+
+def _check_spread(h: F64, pts: F64, floor_polygon: F64, shape: tuple[int, ...]) -> None:
+    """A real floor match spreads over the floor and keeps it the right way up. A stream's logo
+    or score box sits at the same screen place in both images and matches perfectly, but only
+    in a corner; a homography fitted to a few points on a line can fold the floor over."""
+    hh, ww = shape[:2]
+    frame = np.array([[0, 0], [ww - 1, 0], [ww - 1, hh - 1], [0, hh - 1]], np.float32)
+    area, inter = cv2.intersectConvexConvex(floor_polygon.astype(np.float32), frame)
+    if inter is None or area <= 0:
+        raise CalibrationError("the earlier court is not in its hall image")
+    poly = inter.reshape(-1, 2)
+    hull = cv2.convexHull(pts.astype(np.float32)) if len(pts) >= 3 else None
+    spread = float(cv2.contourArea(hull)) / area if hull is not None and area > 0 else 0.0
+    if spread < MIN_SPREAD:
+        raise CalibrationError(
+            f"not the same hall or camera position (the matches cover {spread:.0%} of the floor)"
+        )
+    warped = geometry.apply(h, poly.astype(np.float64)).astype(np.float32)
+    if (
+        np.linalg.det(h[:2, :2]) <= 0
+        or not np.isfinite(warped).all()
+        or not cv2.isContourConvex(warped.reshape(-1, 1, 2))
+    ):
+        raise CalibrationError("not the same hall or camera position (the floor folds over)")
+
+
 def match_floor(reference: U8, image: U8, floor_polygon: F64, ransac_px: float = 4.0) -> FloorMatch:
     """The homography that carries the floor of `reference` (inside `floor_polygon`, reference
     pixels) onto `image`; CalibrationError when the two images do not show the same floor."""
@@ -148,6 +179,7 @@ def match_floor(reference: U8, image: U8, floor_polygon: F64, ransac_px: float =
                 f"({int(ok.sum())} of {n_floor} floor matches agree)"
             )
     floor_ok = ok & floor
+    _check_spread(h, a[floor_ok], floor_polygon * s_ref, ref_s.shape)
     err_px = np.linalg.norm(geometry.apply(h, a[floor_ok]) - b[floor_ok], axis=1) / s_img
     full = np.diag([1 / s_img, 1 / s_img, 1.0]) @ h @ np.diag([s_ref, s_ref, 1.0])
     return FloorMatch(

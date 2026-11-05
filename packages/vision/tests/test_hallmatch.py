@@ -106,3 +106,16 @@ def test_transfer_keeps_court_metres() -> None:
     found = register(ref, ref_h, ref.copy())
     pts = np.array([[0.0, 0.0], [40.0, 20.0], [6.0, 10.0]])
     assert np.allclose(found.calibration.to_image(pts), geometry.apply(ref_h, pts), atol=1.0)
+
+
+def test_a_stream_logo_alone_is_not_the_same_hall() -> None:
+    """Two halls filmed by the same stream: its logo sits at the same screen place in both hall
+    images and matches to a pixel, but only in a corner of the floor."""
+    ref, ref_h = _hall_image(_camera(20, -9, 6), _floor_texture(12), 13)
+    other, _ = _hall_image(_camera(21, -8, 5), _floor_texture(14), 15)
+    logo = np.random.default_rng(16).integers(0, 255, (90, 140, 3)).astype(np.uint8)
+    logo = cv2.resize(cv2.resize(logo, (35, 22)), (140, 90), interpolation=cv2.INTER_NEAREST)
+    for img in (ref, other):
+        img[610:700, 1120:1260] = logo
+    with pytest.raises(CalibrationError, match="not the same hall"):
+        register(ref, ref_h, other)

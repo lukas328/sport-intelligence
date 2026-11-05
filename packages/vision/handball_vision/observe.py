@@ -335,15 +335,17 @@ def people_on_canvas(
     return np.array(feet).reshape(-1, 2), np.array(heads).reshape(-1, 2)
 
 
-def _fixed_focals(obs: Observations, max_candidates: int = 3) -> list[float]:
+def _fixed_focals(obs: Observations, max_candidates: int = 4) -> list[float]:
     """Focal lengths a fixed camera may have, the best line fit first.
 
     The floor markings fix the focal length only when both line directions converge in the
     image. A camera that looks square onto the sidelines sees them nearly parallel, and then a
     long lens tilted a little and a wide one tilted more explain the markings about equally
-    (they share the horizon): the line fit alone picked the long lens and the view looked flat
-    (stream cameras on the gallery, 2026-11-05). The local optima of the line fit within 15 %
-    of the best and at least 25 % apart are kept; the court and the goals decide between them."""
+    (they share the horizon; the line fit rises by a few per cent from 0.5 to 2.5 frame
+    widths): the line fit alone picked the long lens and the view looked flat (stream cameras on
+    the gallery, 2026-11-05). Kept are the focal lengths within 10 % of the best fit: its local
+    optima first, then, where the fit is flat, the ones farthest from those taken; all at least
+    25 % apart. The court and the goals decide between them."""
     w, h = obs.motion.frame_size
     segs = (
         np.vstack([s for s in obs.segments.values() if len(s)])
@@ -360,21 +362,23 @@ def _fixed_focals(obs: Observations, max_candidates: int = 3) -> list[float]:
         shares.append(topview.orientation_from_normals(m, length)[3])
     share = np.array(shares)
     n = len(grid)
+    near = [i for i in range(n) if share[i] >= max(MIN_FLOOR_FIT, 0.9 * share.max())]
     peaks = [
-        i
-        for i in range(n)
-        if share[i] >= share[max(0, i - 1)] and share[i] >= share[min(n - 1, i + 1)]
+        i for i in near if share[i] >= share[max(0, i - 1)] and share[i] >= share[min(n - 1, i + 1)]
     ]
-    out: list[float] = []
+    log_f = np.log(grid)
+    apart = np.log(1.25)
+    picked = [int(np.argmax(share))]
     for i in sorted(peaks, key=lambda i: -share[i]):
-        if share[i] < max(MIN_FLOOR_FIT, 0.85 * share.max()):
-            continue
-        if any(max(grid[i] / g, g / grid[i]) < 1.25 for g in out):
-            continue
-        out.append(float(grid[i]))
-        if len(out) == max_candidates:
+        if len(picked) < max_candidates and all(abs(log_f[i] - log_f[j]) >= apart for j in picked):
+            picked.append(i)
+    while len(picked) < max_candidates:
+        gap = {i: min(abs(log_f[i] - log_f[j]) for j in picked) for i in near}
+        best = max(gap, key=lambda i: gap[i]) if gap else picked[0]
+        if gap.get(best, 0.0) < apart:
             break
-    return out or [float(grid[int(np.argmax(share))])]
+        picked.append(best)
+    return [float(grid[i]) for i in picked]
 
 
 MIN_FLOOR_FIT = 0.35  # share of the marking length along two floor directions (within 1 degree)
@@ -479,7 +483,7 @@ def _calibrate(
     if fit < MIN_FLOOR_FIT:
         raise CalibrationError(
             "the hall's markings do not show a clear floor (only "
-            f"{fit:.0%} of the line length runs along two floor directions, "
+            f"{int(fit * 100)}% of the line length runs along two floor directions, "
             f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, a very low "
             "camera or a camera motion that was not followed well): click the court points",
             "no_floor",
