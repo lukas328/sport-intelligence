@@ -94,3 +94,48 @@ Behaviour and data flows, not looks. Each item names the API it uses.
 - Shots with position and outcome from the official logs plus the video.
 - More automatic shirt numbers; per-player timelines and clips.
 - Full games (60 to 120 minutes) as the normal case, not 5-minute clips.
+
+## API additions from the analysis session
+Shot candidates (2026-11-05): the same one-click review as the goal candidates, for every shot
+(goal, save, miss, post, blocked), with the official report's entry suggested so one key confirms.
+Both kinds live in the goal-candidate table and share the review endpoint.
+- `GET /v1/orgs/{org}/matches/{id}/shot-candidates` (same as `goal-candidates?kind=shot`; the plain
+  `goal-candidates` still returns the goal candidates, unchanged apart from new fields). Response:
+  `kind`, `template`, `rates` (shots: `[2, 4, 6]` per minute), `default_rate` (shots: 4), `counts`
+  (new: `suggested` = open candidates with a report suggestion), `candidates`, and `official`
+  (null without a report): `{counts: {total, confirmed, suggested, missing, outside}, shots: [...]}`,
+  every shot of the report with `status` confirmed (its video time is known: confirmed on a
+  candidate, or a goal read from the overlay), suggested (an open candidate suggests it, see
+  `candidate_id`), outside (its time lies before or after the video) or missing (no candidate near
+  it: the coach can still tag it by hand at `t_ms`).
+- New fields on every candidate row: `kind` ("goal" | "shot"), `outcome` (confirmed outcome),
+  `suggestion` (open shot candidates only, else null): the report entry at this moment,
+  `{event_id, side, outcome, penalty, number, player_id, name, period, clock_s, official_time,
+  t_ms, uncertainty_ms}`. `known` (a stored shot already at this moment) gained `outcome`; for shot
+  candidates it is any shot with a known video time within 8 s (tagged, courtside mark, confirmed
+  candidate, overlay goal), never a report entry whose time only comes from the clock (that is a
+  suggestion instead). Shot candidate clips run from 8 s before to 4 s after the peak; `goal_ms` is
+  the estimated shot time.
+- Report rows (`suggestion`, `official.shots`) carry `t_ms` from the match clock map: the overlay
+  clock of the analysis where it was read (`uncertainty_ms` 0), else counted from the nearest
+  anchor (throw-off, an entry already confirmed on video); `uncertainty_ms` is the clock stop
+  between the anchors around it, null when unknown. Every confirmation adds an anchor, so the
+  suggestions get better while the coach works through the list.
+- `PUT .../goal-candidates/{candidate_id}/review` body, all optional apart from `status`:
+  `status` ("confirmed" | "rejected" | null to undo), `side`, `outcome` ("goal" | "save" | "miss" |
+  "post" | "blocked"; goal candidates default to "goal", so the old body still works),
+  `official_event_id` (pin this report entry), `number`, `player_id` (shooter when there is no
+  report entry). One key: `{"status": "confirmed"}` on a shot candidate with a suggestion confirms
+  that entry: no second event is made, the report entry (with its player) takes the candidate's
+  video time (`attributes.video.source` "goal_candidate") and the row's `event_id` points to it.
+  Without a suggestion `side` and `outcome` are required (422 `invalid-side`, `invalid-outcome`);
+  a side or outcome that contradicts the pinned entry gives 422 `official-differs` (then send
+  `side`/`outcome` without `official_event_id` to record the coach's own shot). 409
+  `already-a-goal` when the moment is already a known shot. Undo or reject removes the candidate's
+  own event or moves the report entry back to its clock time. A re-import of the report keeps
+  confirmed video times, and saves or misses confirmed before the import are taken over by the
+  report entry (the candidate follows it).
+- A confirmed save or miss also covers a goal candidate at the same moment (`known`), so the two
+  lists do not ask twice. Suggested UI: one "Shots" review list next to "Goals"; with a report,
+  show the suggestion (player, outcome, official time) and confirm with Enter, reject with X; a
+  filter "only with a report entry" turns 4 candidates per minute into roughly the logged shots.
