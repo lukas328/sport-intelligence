@@ -12,6 +12,7 @@ import copy
 import json
 import re
 from collections.abc import Callable, Iterator
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -226,6 +227,7 @@ async def test_claim_creates_club_and_team_and_prefills(
     assert c["status"] == "claimed" and c["created_organization"] is True
     assert c["verification"] == "unverified"
     assert c["prefill"]["matches_created"] == GAMES
+    assert c["prefill"]["matches_held_back"] == 0  # no plan limit without billing enforcement
     assert c["prefill"]["results"] == PLAYED
     assert c["prefill"]["roster_suggestions"] == PLAYERS
     assert c["prefill"]["report_suggestions"] == PLAYED
@@ -271,6 +273,17 @@ async def test_claim_creates_club_and_team_and_prefills(
         "last_name": "Muster",
         "jersey_number": 55,
         "appearances": 7,
+        # the recorded answers have goals only; the other statistics are None (not available)
+        "stats": {
+            "games": 7,
+            "goals": 5,
+            "goals_7m": None,
+            "attempts_7m": None,
+            "suspensions_2min": None,
+            "goalkeeper": False,
+            "saves": None,
+            "shots_faced": None,
+        },
     }
     reports = await suggestions(api, c, "report")
     assert {s["payload"]["game_id"] for s in reports} >= {509192, 509203}
@@ -478,6 +491,160 @@ async def test_roster_from_official_data_hidden_until_join_or_consent(
         e["first_name"] for e in (await player.get(base(c) + f"/seasons/{season}/roster")).json()
     }
     assert seen == {"Hand", "Luca"}
+
+
+async def test_roster_suggestions_carry_official_statistics(
+    make_api: Callable[[], Api], hch: Recorded, outbox: MemoryEmailSender
+) -> None:
+    # the recorded answers predate the statistic fields: add them to every played game
+    for f in FIXTURES.glob("getGamePlayers_*.json"):
+        game = {"gameId": int(f.stem.split("_")[1])}
+        data = hch.data("getGamePlayers", game)
+        for p in data["gamePlayerStats"]:
+            if p["teamId"] != TEAM:
+                continue
+            if p["playerName"] == "MUSTER Simon":
+                p.update(totalScore7m=2, totalShots7m=3, total2Minutes=1)
+            elif p["function"] == "goalkeeper":
+                p.update(totalScore7m=0, totalShots7m=0, total2Minutes=0)
+                p.update(totalSaves=5, totalShotsGK=20)
+            else:
+                p.update(totalScore7m=0, totalShots7m=0, total2Minutes=0, totalSaves=0)
+        hch.set("getGamePlayers", game, data)
+    api = await coach(make_api)
+    c = await claim(api)
+    roster = {
+        s["payload"]["first_name"]: s["payload"] for s in await suggestions(api, c, "roster_add")
+    }
+    assert len(roster) == PLAYERS
+    # name, number and appearances as before, the statistics next to them
+    simon = roster["Simon"]
+    assert simon["appearances"] == 8 and simon["jersey_number"] is not None
+    assert simon["stats"] == {
+        "games": 8,
+        "goals": 39,
+        "goals_7m": 16,
+        "attempts_7m": 24,
+        "suspensions_2min": 8,
+        "goalkeeper": False,
+        "saves": None,  # field players: no keeper statistics
+        "shots_faced": None,
+    }
+    # goalkeepers: saves and shots faced (Elias kept goal in 6 of his 7 games)
+    assert roster["Leon"]["stats"] == {
+        "games": 7,
+        "goals": 2,
+        "goals_7m": 0,
+        "attempts_7m": 0,
+        "suspensions_2min": 0,
+        "goalkeeper": True,
+        "saves": 35,
+        "shots_faced": 140,
+    }
+    elias = roster["Elias"]["stats"]
+    assert (elias["games"], elias["goalkeeper"], elias["saves"], elias["shots_faced"]) == (
+        7,
+        True,
+        30,
+        120,
+    )
+    # registered but no game yet: no statistics
+    assert all(p["stats"] is None for p in roster.values() if p["appearances"] == 0)
+
+    # show or hide: the organisers' choice is kept per team (display only, the data is there)
+    link = (await api.get(base(c) + "/official")).json()
+    assert link["roster_stats"] is False
+    r = await api.patch(base(c) + "/official", json={"roster_stats": True})
+    assert r.status_code == 200, r.text
+    assert r.json()["roster_stats"] is True and r.json()["linked"] is True
+    assert (await api.get(base(c) + "/official")).json()["roster_stats"] is True
+
+    # data protection: names and statistics only for organisers
+    player = await invite(api, make_api, outbox, c, "player")
+    assert (await player.get(base(c) + "/official/suggestions")).status_code == 403
+    r = await player.patch(base(c) + "/official", json={"roster_stats": False})
+    assert r.status_code == 403
+    other = make_api()
+    await setup_club(other, "coach@other-club.ch")
+    assert (await other.get(base(c) + "/official/suggestions")).status_code == 404
+    r = await other.patch(base(c) + "/official", json={"roster_stats": False})
+    assert r.status_code == 404
+
+
+# ---- plan limit --------------------------------------------------------------------------------
+
+
+@pytest.fixture
+def enforce(db_app: FastAPI) -> Iterator[None]:
+    s = db_app.state.settings
+    old = s.billing_enforce
+    s.billing_enforce = True
+    yield
+    s.billing_enforce = old
+
+
+@pytest.mark.usefixtures("enforce")
+async def test_official_games_count_toward_the_plan_limit(
+    make_api: Callable[[], Api], hch: Recorded, owner_conn: asyncpg.Connection
+) -> None:
+    # the played games and one upcoming game (next week)
+    games = hch.data("getTeamGames", {"teamId": TEAM})
+    upcoming = next(g for g in games["games"] if g["objectId"] == 509159)
+    next_week = datetime.now(handball_ch.TZ) + timedelta(days=7)
+    upcoming["gameDateTime"] = next_week.replace(tzinfo=None, microsecond=0).isoformat()
+    games["games"] = [g for g in games["games"] if g["gameStatusId"] == 2] + [upcoming]
+    hch.set("getTeamGames", {"teamId": TEAM}, games)
+
+    api = await coach(make_api)
+    c = await claim(api)
+    # free plan, 2 matches per season: the next upcoming game, then the most recent played one
+    assert c["prefill"]["matches_created"] == 2
+    assert c["prefill"]["matches_held_back"] == PLAYED - 1
+    assert c["prefill"]["results"] == 1 and c["prefill"]["report_suggestions"] == 1
+    assert c["prefill"]["other_suggestions"] == 0
+    rows = await owner_conn.fetch("SELECT official_game_id FROM matches")
+    assert {r["official_game_id"] for r in rows} == {509159, 509203}
+    held = {s["payload"]["game_id"]: s for s in await suggestions(api, c, "match_new")}
+    assert len(held) == PLAYED - 1 and 509192 in held
+    assert {(s["payload"]["reason"], s["blocked"]) for s in held.values()} == {
+        ("plan_limit", "plan_limit")
+    }
+    assert all(s["blocked"] is None for s in await suggestions(api, c, "roster_add"))
+    # accepting one, or a match by hand, is over the limit too
+    r = await api.post(base(c) + f"/official/suggestions/{held[509192]['id']}/accept")
+    assert r.status_code == 402 and r.json()["type"].endswith("plan-limit-matches")
+    r = await api.post(
+        base(c) + "/matches",
+        json={"opponent_name": "Dritter", "kickoff_at": "2026-12-20T18:00:00+01:00"},
+    )
+    assert r.status_code == 402 and r.json()["type"].endswith("plan-limit-matches")
+    # a sync keeps them as they are (reason and all), nothing new
+    r = await api.post(base(c) + "/official/sync")
+    assert r.status_code == 200, r.text
+    assert (r.json()["other_suggestions"], r.json()["matches_held_back"]) == (0, 0)
+    assert all(
+        s["payload"]["reason"] == "plan_limit" for s in await suggestions(api, c, "match_new")
+    )
+
+    # after an upgrade the held-back games can be taken over: result and report come along
+    await owner_conn.execute(
+        "UPDATE organizations SET plan = 'team', subscription_status = 'active'"
+    )
+    held = {s["payload"]["game_id"]: s for s in await suggestions(api, c, "match_new")}
+    assert all(s["blocked"] is None for s in held.values())
+    r = await api.post(base(c) + f"/official/suggestions/{held[509192]['id']}/accept")
+    assert r.status_code == 200, r.text
+    match = (
+        await api.get(f"/v1/orgs/{c['organization_id']}/matches/{r.json()['match_id']}")
+    ).json()
+    assert (match["score_own"], match["score_opponent"]) == (26, 19)
+    report = next(
+        s for s in await suggestions(api, c, "report") if s["payload"]["game_id"] == 509192
+    )
+    assert "reason" not in report["payload"]
+    r = await api.post(base(c) + f"/official/suggestions/{report['id']}/accept")
+    assert r.status_code == 200, r.text
+    assert r.json()["report"]["created"] > 40
 
 
 # ---- join requests -----------------------------------------------------------------------------

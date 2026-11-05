@@ -45,9 +45,17 @@ Kleine Lücke aus dem Onboarding: Namen offizieller Kader-Einträge ohne Einwill
 Ereignis- und Statistik-Ansichten verbergen (mit 5).
 
 ## Entscheide von Lukas (offen)
-- Zählen übernommene offizielle Spiele zur Spiel-Limite des Gratis-Plans?
-- Vereins-Bestätigung durch eine zweite Person: Vereins-Domain verlangen oder Prüfung durch uns?
-- Kader-Vorschlag nur Name, Nummer, Einsätze, oder auch Statistik?
+- keine
+
+## Entscheide von Lukas (entschieden, 2026-11-05)
+- Übernommene offizielle Spiele zählen zur Spiel-Limite des Plans: bis zur Limite werden Spiele
+  angelegt (nächste anstehende, dann zuletzt gespielte), der Rest wird Vorschlag mit Grund
+  `plan_limit`, nach einem Upgrade annehmbar. Umgesetzt.
+- Vereins-Bestätigung bleibt grosszügig: eine zweite Person mit Vereinsfunktion (Admin oder
+  Trainer) genügt, keine Vereins-Domain, keine Prüfung durch uns. So umgesetzt.
+- Kader-Vorschlag: Name, Nummer, Einsätze und dazu wählbare Statistik (Tore, 7 m, 2 Minuten,
+  Spiele, Paraden bei Torhütern); der Trainer blendet sie in der UI ein oder aus. Umgesetzt.
+  Details in `docs/plans/federation-onboarding.md` (Entscheide).
 
 ## Später / wartet
 - Datenanfragen DHB und BHV (Entwürfe in `docs/plans/outreach-data-de.md`), Partnerschaft SHV.

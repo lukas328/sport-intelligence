@@ -193,7 +193,7 @@
                 "type": "null"
               }
             ],
-            "description": "automatic calibration: goal fit, players on the court, camera position",
+            "description": "automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id); hall_tried lists earlier videos that did not fit",
             "title": "Calibration Info"
           },
           "camera": {
@@ -295,6 +295,16 @@
               }
             ],
             "title": "Fps"
+          },
+          "hall": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HallOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "needs_calibration": {
             "default": false,
@@ -4448,6 +4458,50 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HallOut": {
+        "properties": {
+          "calibrated_videos": {
+            "default": 0,
+            "description": "earlier videos of this hall with a court a person clicked or confirmed: the analysis carries their court over when the camera stood at the same place",
+            "title": "Calibrated Videos",
+            "type": "integer"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the match's hall (venue), or a suggestion",
+            "title": "Name"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "official",
+                  "match",
+                  "home_matches"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "official game data, the match as entered, or the team's usual home hall (a home game without a venue)",
+            "title": "Source"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "HallOut",
+        "type": "object"
+      },
       "Hand": {
         "enum": [
           "left",
@@ -7592,6 +7646,11 @@
             ],
             "title": "Provider"
           },
+          "roster_stats": {
+            "default": false,
+            "title": "Roster Stats",
+            "type": "boolean"
+          },
           "standing": {
             "items": {
               "additionalProperties": true,
@@ -7617,6 +7676,19 @@
           "linked"
         ],
         "title": "OfficialLinkOut",
+        "type": "object"
+      },
+      "OfficialPreferencesIn": {
+        "properties": {
+          "roster_stats": {
+            "title": "Roster Stats",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "roster_stats"
+        ],
+        "title": "OfficialPreferencesIn",
         "type": "object"
       },
       "OfficialReportIn": {
@@ -9774,6 +9846,11 @@
           "matches_created": {
             "default": 0,
             "title": "Matches Created",
+            "type": "integer"
+          },
+          "matches_held_back": {
+            "default": 0,
+            "title": "Matches Held Back",
             "type": "integer"
           },
           "other_suggestions": {
@@ -11943,6 +12020,18 @@
       },
       "SuggestionOut": {
         "properties": {
+          "blocked": {
+            "anyOf": [
+              {
+                "const": "plan_limit",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -13923,6 +14012,11 @@
           "matches_created": {
             "default": 0,
             "title": "Matches Created",
+            "type": "integer"
+          },
+          "matches_held_back": {
+            "default": 0,
+            "title": "Matches Held Back",
             "type": "integer"
           },
           "other_suggestions": {
@@ -26539,6 +26633,68 @@
           }
         },
         "summary": "Team Official",
+        "tags": [
+          "official"
+        ]
+      },
+      "patch": {
+        "description": "Organisers: show the official statistics in roster suggestions or not (roster_stats).",
+        "operationId": "team_official_preferences_v1_orgs__org_id__teams__team_id__official_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficialPreferencesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialLinkOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Team Official Preferences",
         "tags": [
           "official"
         ]

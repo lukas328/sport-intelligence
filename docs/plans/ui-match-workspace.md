@@ -254,3 +254,25 @@ Official report import from nuLiga and the HLA (2026-11-05, backlog item 6): `PO
   are imported, and `warnings[0]` says so and points to the ÖHB nuLiga report. Suggested UI: show
   the warnings as they come; the input hint can read "Link zum Spielbericht (handball.ch, DHB,
   nuLiga, HLA)".
+
+Official onboarding, three decisions (2026-11-05, docs/plans/federation-onboarding.md
+"Entscheide"; api-client regenerated):
+- Plan limit: official games count toward the plan's matches per season (free: 2). With billing
+  enforced the claim creates matches only up to the limit (next upcoming games first, then the
+  most recent played ones); the claim's `prefill` has the new count `matches_held_back` (also in
+  the sync answer, there always 0). The held-back games are `match_new` suggestions with
+  `payload.reason: "plan_limit"`; `SuggestionOut` has the new field `blocked: "plan_limit" | null`
+  (set on open `match_new` while accepting would exceed the plan; accept gives 402
+  `plan-limit-matches`). After an upgrade `blocked` is null and accepting works; a played game
+  then also gets its result and a `report` suggestion. Suggested UI: on the claim summary "X
+  weitere Spiele im Gratis-Plan nicht übernommen" with an upgrade link; in the inbox those rows
+  with a lock and "Upgrade" instead of "Übernehmen" while `blocked`.
+- Roster suggestions with statistics: `roster_add` payload has the new `stats` (null when the
+  player has no game yet) `{games, goals, goals_7m, attempts_7m, suspensions_2min, goalkeeper,
+  saves, shots_faced}` (each null when handball.ch gives no value; `saves`/`shots_faced` only for
+  goalkeepers), over the last 10 played games of the season like `appearances`. The coach chooses
+  whether to show them: `GET .../teams/{team}/official` has `roster_stats` (bool, default false),
+  `PATCH /v1/orgs/{org}/teams/{team}/official` body `{roster_stats}` (organisers; returns the link)
+  keeps the choice for all organisers of the team. Suggested UI: a toggle "Statistik anzeigen"
+  above the roster confirmation, extra columns Tore, 7 m, 2', Sp., Paraden (keepers).
+- Club verification: unchanged (a second club admin or coach confirming is enough).

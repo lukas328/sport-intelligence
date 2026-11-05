@@ -4,9 +4,11 @@ docs/plans/federation-onboarding.md, phases 1 and 3:
 - search: club name or town, the hits are the registered teams of the current season;
 - claim: creates or links the organisation (one per official club) and the team with the
   official ids and prefills the season schedule with results, the standing, roster suggestions
-  (name, shirt number, appearances; the coach confirms) and the past games with a game log as
-  importable reports. Someone claiming a club or team that is already in the app asks its admins
-  for access instead (org_access_requests);
+  (name, shirt number, appearances and the official statistics the coach may show; the coach
+  confirms) and the past games with a game log as importable reports. Official games count toward
+  the plan's matches per season: over the limit they stay suggestions (reason plan_limit).
+  Someone claiming a club or team that is already in the app asks its admins for access instead
+  (org_access_requests);
 - sync: daily (worker tick) and on demand. Moved and new games, roster changes and the next
   season come in as suggestions; results are taken over; after each game the official report is
   imported automatically.

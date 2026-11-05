@@ -3625,7 +3625,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Team Official Preferences
+         * @description Organisers: show the official statistics in roster suggestions or not (roster_stats).
+         */
+        patch: operations["team_official_preferences_v1_orgs__org_id__teams__team_id__official_patch"];
         trace?: never;
     };
     "/v1/orgs/{org_id}/teams/{team_id}/official/suggestions": {
@@ -4500,7 +4504,7 @@ export interface components {
             calibration_error?: string | null;
             /**
              * Calibration Info
-             * @description automatic calibration: goal fit, players on the court, camera position
+             * @description automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id); hall_tried lists earlier videos that did not fit
              */
             calibration_info?: {
                 [key: string]: unknown;
@@ -4526,6 +4530,7 @@ export interface components {
             formations?: components["schemas"]["FormationSegment"][];
             /** Fps */
             fps: number | null;
+            hall?: components["schemas"]["HallOut"] | null;
             /**
              * Needs Calibration
              * @default false
@@ -5868,6 +5873,25 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HallOut */
+        HallOut: {
+            /**
+             * Calibrated Videos
+             * @description earlier videos of this hall with a court a person clicked or confirmed: the analysis carries their court over when the camera stood at the same place
+             * @default 0
+             */
+            calibrated_videos?: number;
+            /**
+             * Name
+             * @description the match's hall (venue), or a suggestion
+             */
+            name: string | null;
+            /**
+             * Source
+             * @description official game data, the match as entered, or the team's usual home hall (a home game without a venue)
+             */
+            source?: ("official" | "match" | "home_matches") | null;
+        };
         /**
          * Hand
          * @enum {string}
@@ -6977,12 +7001,22 @@ export interface components {
             open_suggestions?: number;
             /** Provider */
             provider?: string | null;
+            /**
+             * Roster Stats
+             * @default false
+             */
+            roster_stats?: boolean;
             /** Standing */
             standing?: {
                 [key: string]: unknown;
             }[];
             /** Synced At */
             synced_at?: string | null;
+        };
+        /** OfficialPreferencesIn */
+        OfficialPreferencesIn: {
+            /** Roster Stats */
+            roster_stats: boolean;
         };
         /** OfficialReportIn */
         OfficialReportIn: {
@@ -7712,6 +7746,11 @@ export interface components {
              * @default 0
              */
             matches_created?: number;
+            /**
+             * Matches Held Back
+             * @default 0
+             */
+            matches_held_back?: number;
             /**
              * Other Suggestions
              * @default 0
@@ -8523,6 +8562,8 @@ export interface components {
         };
         /** SuggestionOut */
         SuggestionOut: {
+            /** Blocked */
+            blocked?: "plan_limit" | null;
             /**
              * Created At
              * Format: date-time
@@ -9126,6 +9167,11 @@ export interface components {
              * @default 0
              */
             matches_created?: number;
+            /**
+             * Matches Held Back
+             * @default 0
+             */
+            matches_held_back?: number;
             /**
              * Other Suggestions
              * @default 0
@@ -16934,6 +16980,42 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialLinkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    team_official_preferences_v1_orgs__org_id__teams__team_id__official_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfficialPreferencesIn"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

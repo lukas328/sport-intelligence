@@ -58,10 +58,35 @@ offiziellen Daten.
 ## Offene Fragen (Lukas)
 1. Nutzung der handball.ch-Schnittstelle im Produkt: Sie ist öffentlich, aber nicht dokumentiert.
    Für den Betrieb besser eine Erlaubnis oder Partnerschaft mit dem SHV einholen.
-2. Wer bestätigt Vereine: reicht Domain/zweite Person, oder wollen wir jeden Verein prüfen?
+2. ~~Wer bestätigt Vereine~~: entschieden, siehe unten.
 3. Deutschland: Welche Quelle? DHB nur oben; regional nuLiga/Handball4all prüfen, oder in DE zuerst
    ohne Vorbefüllung starten.
-4. Kader-Vorschlag: nur Name und Nummer, oder auch Statistik der Vorsaison anzeigen?
+4. ~~Kader-Vorschlag mit Statistik~~: entschieden, siehe unten.
+
+## Entscheide (Lukas, 2026-11-05)
+1. **Übernommene offizielle Spiele zählen zur Spiel-Limite des Plans.** Gratis-Plan: 2 Spiele pro
+   Saison und Mannschaft. Mit eingeschalteter Abrechnung (`HB_BILLING_ENFORCE`) legt die Übernahme
+   (und jede Erstbefüllung, auch bei neuer Saison oder genehmigter Zugangsanfrage) Spiele nur bis
+   zur Limite an: zuerst die nächsten anstehenden Spiele, dann die zuletzt gespielten. Die übrigen
+   werden Vorschläge `match_new` mit `reason: "plan_limit"`; solange die Limite erreicht ist, zeigt
+   die Vorschlagsliste `blocked: "plan_limit"` und Annehmen gibt 402 `plan-limit-matches`. Nach
+   einem Upgrade lassen sie sich annehmen (gespielte Spiele bringen Resultat und Spielbericht als
+   Vorschlag mit). Die Antwort der Übernahme meldet `prefill.matches_held_back`. Ohne Abrechnung
+   wie bisher (alle Spiele). Umsetzung: `services/official.py` (`_held_back`), `billing.matches_left`.
+2. **Vereins-Bestätigung bleibt grosszügig.** Eine zweite Person mit Vereinsfunktion (Vereins-Admin
+   oder Trainer, nicht die Person, die übernommen hat, mit bestätigter Mail-Adresse) genügt; keine
+   Vereins-Domain nötig und keine Prüfung jedes Vereins durch uns. Die übrigen Wege (Mail-Domain
+   des Vereins, Verbandslizenz, Prüfung durch uns) bleiben zusätzlich. So umgesetzt in
+   `services/org_verification.py`, keine Änderung nötig.
+3. **Kader-Vorschlag mit wählbarer Statistik.** Name, Rückennummer und Einsätze wie bisher, dazu
+   im Vorschlag `stats` aus der offiziellen Spielerstatistik, soweit vorhanden: Spiele, Tore, 7-m-Tore
+   und -Versuche, 2-Minuten-Strafen, bei Torhütern Paraden und Würfe aufs Tor (`null`, wo handball.ch
+   keinen Wert liefert; `stats` null ohne Einsatz). Gerechnet über die gelesenen Spiele der laufenden
+   Saison (die letzten 10 gespielten, wie die Einsätze). Der Trainer entscheidet in der UI, ob sie
+   angezeigt werden; die Wahl gilt pro Mannschaft für alle ihre Organisatoren
+   (`PATCH .../official {roster_stats}`, Standard aus). Datenschutz unverändert: Vorschläge sehen
+   nur die Organisatoren der Mannschaft. Statistik der Vorsaison (andere offizielle Team-ID) ist
+   noch nicht drin.
 
 ## Technische Skizze
 - Neue Felder: `organizations.official_ref` (Anbieter, Vereins-ID), `teams.official_ref`
