@@ -50,7 +50,9 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   // processing runs in the worker; progress arrives via SSE
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByText("Videoqualität:")).toBeVisible();
-  // stages 2 to 5 run in the GPU worker (CPU locally): calibration, detection, tracking, teams
+  // stages 2 to 5 run in the GPU worker (CPU locally): calibration, detection, tracking, teams;
+  // the court is the first work step beside the player
+  await page.getByTestId("step-court").click();
   await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByTestId("analysis-panel")).toContainText("Personen verfolgt");
   await expect(page.getByTestId("analysis-panel")).toContainText("Kalibrierung: automatisch");
@@ -69,7 +71,8 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.keyboard.press("ArrowRight");
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(t0 + 4);
 
-  // comment at the current time
+  // comment at the current time (notes beside the player)
+  await page.getByRole("tab", { name: "Notizen", exact: true }).click();
   await page.getByPlaceholder(/Kommentar bei/).fill("Rückzug zu langsam");
   await page.getByRole("button", { name: "Kommentieren" }).click();
   await expect(page.getByTestId("comments")).toContainText("Rückzug zu langsam");
@@ -132,7 +135,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(3.5);
 
   // tracks can be assigned to players; physical load per track with heatmap
-  await page.getByRole("tab", { name: "Spuren zuordnen", exact: true }).click();
+  await page.getByTestId("step-players").click();
   await expect(page.getByTestId("identity-panel")).toBeVisible();
   await openAnalysis(page, "Laufleistung");
   await expect(page.getByTestId("physical-table")).toContainText("km");

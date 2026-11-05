@@ -35,8 +35,7 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
-import { OfficialGoalsPanel, officialGoalsKey } from "./official-goals";
-import { GoalCandidatesPanel } from "./goal-candidates";
+import { officialGoalsKey } from "./official-goals";
 import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
@@ -85,7 +84,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       setLive((l) => ({ ...l, [ev.job_id]: ev }));
       if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
       // a new analysis reads the goals again: the comparison with the official report changes
-      if (ev.status === "succeeded") void qc.invalidateQueries({ queryKey: officialGoalsKey(initial.id) });
+      if (ev.status === "succeeded") {
+        void qc.invalidateQueries({ queryKey: officialGoalsKey(initial.id) });
+        void qc.invalidateQueries({ queryKey: ["goal-candidates", initial.id] });
+        void qc.invalidateQueries({ queryKey: ["analysis"] });
+      }
       // the moment the analysis is done: said on the stage, not in a toast
       if (ev.status === "succeeded" && ev.kind !== "ingest") setJustDone(true);
     });
@@ -167,8 +170,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     window.setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
-  // lists that jump to a moment (official goals, goal candidates) sit below the player, often a
-  // screen or more: bring the player into view, the focus stays where it is
+  // numbers in the analysis and scenes views jump to a moment: bring the player into view, the
+  // focus stays where it is
   function reveal() {
     const v = player.current?.video();
     if (!v) return;
@@ -185,37 +188,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       player.current?.seek(ms);
       player.current?.play();
       reveal();
-    });
-  }
-
-  // a clip (goal candidate): plays from `from` and stops at `to`; a seek elsewhere ends it
-  const clipEnd = useRef<(() => void) | null>(null);
-  useEffect(() => () => clipEnd.current?.(), []);
-  function onClip(from: number, to: number) {
-    clipEnd.current?.();
-    setView("video");
-    requestAnimationFrame(() => {
-      player.current?.seek(from);
-      player.current?.play();
-      reveal();
-      const v = player.current?.video();
-      if (!v) return;
-      let started = false; // the seek may land after the first time updates
-      const tick = () => {
-        const ms = v.currentTime * 1000;
-        if (!started) started = ms >= from - 500 && ms < to;
-        else if (ms < from - 2000 || ms > to + 1500) stop(); // the coach seeked elsewhere
-        else if (ms >= to) {
-          v.pause();
-          stop();
-        }
-      };
-      const stop = () => {
-        v.removeEventListener("timeupdate", tick);
-        clipEnd.current = null;
-      };
-      v.addEventListener("timeupdate", tick);
-      clipEnd.current = stop;
     });
   }
 
@@ -388,7 +360,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       <div hidden={view !== "video"} className="space-y-6">
         {main ? (
-          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} handle={player} />
+          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} />
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
@@ -409,12 +381,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
             )}
           </div>
-        )}
-        {staff && main && match.report_extra?.official_report != null && (
-          <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} isHome={match.is_home} names={names} onPlay={onPlay} />
-        )}
-        {staff && main && (
-          <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} onClip={onClip} />
         )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
         {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}

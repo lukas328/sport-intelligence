@@ -11,7 +11,7 @@ import { CourtCalibration } from "@/components/analysis/court-calibration";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/tabs";
 import { control, Input, Select } from "@/components/ui/field";
 import { SpotlightControls, useSpotlight } from "@/components/video/spotlight-controls";
@@ -26,12 +26,19 @@ import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
+import { coverage, firstOpen, steps } from "@/lib/match-workflow";
+import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
+import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
+import { KickoffPanel } from "./kickoff-panel";
+import { MatchTimeline } from "./match-timeline";
+import { OfficialGoalsPanel, useOfficialGoals } from "./official-goals";
+import { OfficialReportImport } from "./official-report";
+import { WorkRail, type Pane } from "./work-rail";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
-type Tab = "comments" | "clips" | "drawings" | "events";
-type Deck = "detection" | "formations" | "identity";
+type Tab = "comments" | "clips" | "drawings";
 const TOOLS: Tool[] = ["arrow", "line", "circle", "freehand", "spotlight"];
 const COLORS = ["#facc15", "#ef4444", "#22c55e", "#3b82f6", "#ffffff"];
 
@@ -41,6 +48,8 @@ export function Workspace({
   video,
   staff,
   teamName,
+  oppName,
+  names,
   handle,
 }: {
   orgId: string;
@@ -48,6 +57,8 @@ export function Workspace({
   video: Video;
   staff: boolean;
   teamName: string;
+  oppName: string;
+  names: Record<string, string>;
   handle?: Ref<PlayerHandle | null>;
 }) {
   const t = useTranslations();
@@ -90,7 +101,8 @@ export function Workspace({
   }
   const [now, setNow] = useState(0);
   const [tab, setTab] = useState<Tab>("comments");
-  const [deck, setDeck] = useState<Deck>("detection");
+  const [pane, setPane] = useState<Pane | null>(null);
+  const [goalList, setGoalList] = useState<"candidates" | "report" | null>(null);
   const [drawing, setDrawing] = useState(false);
   const [tool, setTool] = useState<Tool>("arrow");
   const [color, setColor] = useState(COLORS[0]!);
@@ -166,6 +178,7 @@ export function Workspace({
   const startDrawing = useCallback(() => {
     player.current.pause();
     setDrawing(true);
+    setPane("notes");
     setTab("drawings");
   }, []);
 
@@ -243,21 +256,89 @@ export function Workspace({
     return tr ? (tr.player_id && spotNames[tr.player_id]) || (tr.number != null ? `#${tr.number}` : "") : "";
   })();
 
+  // the order of work: court, throw-off, goals, players; the lists share the panels' caches
+  const hasReport = match.report_extra?.official_report != null;
+  const candidates = useGoalCandidates(orgId, match.id, staff);
+  const official = useOfficialGoals(orgId, match.id, staff && hasReport);
+  const durationMs = video.duration_s ? video.duration_s * 1000 : null;
+  const rate = candidates.data?.default_rate ?? 2;
+  const a = analysis.data;
+  const spansFor = coverage(match.kickoff_ms, match.period_s, video.duration_s ? video.duration_s * 1000 : null);
+  const stepList = steps({
+    analysis: a
+      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: a.camera === "moving" && a.calibration?.source === "heuristic" }
+      : null,
+    kickoff: match.kickoff_ms,
+    periodS: match.period_s,
+    durationMs,
+    candidatesOpen: candidates.data && candidates.data.counts.total > 0 ? (candidates.data.counts.open_by_rate[String(rate)] ?? 0) : null,
+    // only goals the video can show: one beyond the clip is not open
+    officialOpen: hasReport && official.data?.imported ? goalRows(official.data, "open", false, spansFor).length : null,
+    unassigned: a?.status === "ready" && a.tracks.length > 0 ? ownTracks(a.tracks).filter((tr) => !tr.player_id).length : null,
+  });
+  const loaded = !analysis.isLoading && !candidates.isLoading && !(hasReport && official.isLoading);
+  const tools: Pane[] = [...(staff ? (["events"] as const) : (["court"] as const)), ...(a?.status === "ready" ? (["formations"] as const) : []), "notes"];
+  const shown: Pane = pane ?? (staff ? (firstOpen(stepList) ?? "notes") : "notes");
+  // the first open step is shown once the lists are in; from then on the coach decides
+  useEffect(() => {
+    if (pane == null && loaded) setPane(shown);
+  }, [loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  const jump = useCallback((ms: number) => {
+    player.current.seek(ms);
+    player.current.play();
+  }, []);
+  // a clip (goal candidate): plays from `from` and stops at `to`; a seek elsewhere ends it
+  const clipEnd = useRef<(() => void) | null>(null);
+  useEffect(() => () => clipEnd.current?.(), []);
+  const playClip = useCallback((from: number, to: number) => {
+    clipEnd.current?.();
+    player.current.seek(from);
+    player.current.play();
+    const v = player.current.video();
+    if (!v) return;
+    let started = false; // the seek may land after the first time updates
+    const tick = () => {
+      const ms = player.current.time();
+      if (!started) started = ms >= from - 500 && ms < to;
+      else if (ms < from - 2000 || ms > to + 1500) stop(); // the coach seeked elsewhere
+      else if (ms >= to) {
+        v.pause();
+        stop();
+      }
+    };
+    const stop = () => {
+      v.removeEventListener("timeupdate", tick);
+      clipEnd.current = null;
+    };
+    v.addEventListener("timeupdate", tick);
+    clipEnd.current = stop;
+  }, []);
+
   const onKey = useCallback(
     (key: string) => {
       if (!staff) return false;
       const ms = player.current.time() ?? 0;
-      if (key === "i") return setMarkIn(ms), setTab("clips"), true;
-      if (key === "o") return setMarkOut(ms), setTab("clips"), true;
+      if (key === "i") return setMarkIn(ms), setPane("notes"), setTab("clips"), true;
+      if (key === "o") return setMarkOut(ms), setPane("notes"), setTab("clips"), true;
       if (key === "d") return startDrawing(), true;
       return false;
     },
     [staff, startDrawing],
   );
 
+  const paneId = `ws-${match.id}`;
+  const seekPaused = (ms: number) => {
+    player.current.pause();
+    player.current.seek(ms);
+  };
+  const openCandidates = candidates.data && candidates.data.counts.total > 0;
+  const list = goalList ?? (openCandidates || !hasReport ? "candidates" : "report");
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="min-w-0 space-y-2">
+    <div className="space-y-5">
+      <WorkRail steps={staff ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
+      {/* the player stays in view while the coach works through a list beside it */}
+      <div className="min-w-0 space-y-3 lg:sticky lg:top-4">
         <div className={cn("relative", multi.mode === "side" && multi.secondary && !offset && "grid gap-2 md:grid-cols-2")}>
         <VideoPlayer
           ref={raw}
@@ -344,56 +425,16 @@ export function Workspace({
             <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-md bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
           </details>
         </div>
-        <div className="space-y-4 rounded-lg bg-raised p-4 border border-border sm:p-5">
-          {analysis.data?.status === "ready" && (
-            <Segmented<Deck>
-              label={t("player.deck")}
-              size="sm"
-              value={deck}
-              onChange={setDeck}
-              items={[
-                { value: "detection", label: t("player.deckDetection") },
-                { value: "formations", label: t("formations.title") },
-                ...(staff ? [{ value: "identity" as const, label: t("identity.title") }] : []),
-              ]}
-            />
-          )}
-          {(deck === "detection" || !(analysis.data?.status === "ready")) && (
-            <AnalysisPanel
-              analysis={analysis.data ?? null}
-              orgId={orgId}
-              videoId={video.id}
-              colours={kitColours}
-              getTime={getTime}
-              canCalibrate={staff}
-            />
-          )}
-          {deck === "formations" && analysis.data?.status === "ready" && (
-            (
-              <FormationsCard
-                formations={analysis.data.formations ?? []}
-                onSeek={(ms) => {
-                  player.current.seek(ms);
-                  player.current.play();
-                }}
-              />
-            )
-          )}
-          {deck === "identity" && staff && analysis.data?.status === "ready" && (
-            (
-              <IdentityPanel
-                orgId={orgId}
-                match={match}
-                videoId={video.id}
-                tracks={analysis.data.tracks}
-                onSeek={(ms) => {
-                  player.current.pause();
-                  player.current.seek(ms);
-                }}
-              />
-            )
-          )}
-        </div>
+        <MatchTimeline
+          spans={spansFor}
+          periodS={match.period_s}
+          kickoff={match.kickoff_ms}
+          nowMs={now}
+          official={hasReport ? official.data : null}
+          candidates={staff ? candidates.data : null}
+          rate={rate}
+          onSetKickoff={staff ? () => setPane("kickoff") : undefined}
+        />
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
         {notice && (
           <Alert kind="success" className="py-2">
@@ -402,24 +443,69 @@ export function Workspace({
         )}
       </div>
 
-      <div className="flex max-h-[44rem] min-w-0 flex-col gap-4 rounded-lg bg-raised p-4 border border-border">
-        <Segmented<Tab>
-          label={t("tabs.video")}
-          size="sm"
-          value={tab}
-          onChange={setTab}
-          items={(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => ({
-            value: k,
-            label: t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`),
-          }))}
-        />
-
-        {tab === "events" && staff && (
-          <div role="tabpanel" className="flex min-h-0 flex-1 flex-col">
+      <div
+        id={`${paneId}-pane`}
+        role="tabpanel"
+        aria-labelledby={`${paneId}-tab-${shown}`}
+        className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:pr-1"
+      >
+        {shown === "court" && (
+          <AnalysisPanel analysis={a ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} canCalibrate={staff} />
+        )}
+        {shown === "kickoff" && staff && (
+          <KickoffPanel orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} durationMs={durationMs} getTime={getTime} onSeek={seekPaused} />
+        )}
+        {shown === "goals" && staff && (
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            {hasReport && openCandidates && (
+              <Segmented<"candidates" | "report">
+                label={t("workflow.goalLists")}
+                size="sm"
+                value={list}
+                onChange={setGoalList}
+                items={[
+                  { value: "candidates", label: t("workflow.listCandidates") },
+                  { value: "report", label: t("workflow.listReport") },
+                ]}
+              />
+            )}
+            {list === "report" && hasReport ? (
+              <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} isHome={match.is_home} names={names} covers={spansFor} onPlay={jump} />
+            ) : openCandidates ? (
+              <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} onClip={playClip} />
+            ) : (
+              <p className="text-sm text-muted">{t("workflow.goalsNone")}</p>
+            )}
+            {!hasReport && (
+              <div className="space-y-1">
+                <p className="text-sm text-muted">{t("workflow.noReport")}</p>
+                <OfficialReportImport orgId={orgId} matchId={match.id} />
+              </div>
+            )}
+          </div>
+        )}
+        {shown === "players" && staff && a?.status === "ready" && (
+          <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} onSeek={seekPaused} />
+        )}
+        {shown === "players" && staff && a?.status !== "ready" && <p className="text-sm text-muted">{t("workflow.players_waiting")}</p>}
+        {shown === "events" && staff && (
+          <div className="flex min-h-0 flex-1 flex-col">
             <Tagger orgId={orgId} match={match} teamName={teamName} getTime={getTime} />
           </div>
         )}
-
+        {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
+        {shown === "notes" && (
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <Segmented<Tab>
+          label={t("workflow.notes")}
+          size="sm"
+          value={tab}
+          onChange={setTab}
+          items={(["comments", "clips", "drawings"] as const).map((k) => ({
+            value: k,
+            label: t(k === "drawings" ? "draw.list" : `${k}.title`),
+          }))}
+        />
         {tab === "comments" && (
           <div role="tabpanel" className="flex min-h-0 flex-1 flex-col gap-2">
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
@@ -567,11 +653,13 @@ export function Workspace({
             </ul>
           </div>
         )}
+          </div>
+        )}
+      </div>
       </div>
     </div>
   );
 }
-
 
 type Analysis = Schemas["AnalysisOut"];
 
@@ -600,7 +688,7 @@ function AnalysisPanel({
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
   const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
   return (
-    <Card className="space-y-3 p-3" data-testid="analysis-panel">
+    <section className="space-y-3" data-testid="analysis-panel">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold">{t("title")}</h2>
         {analysis.detector === "heuristic" && (
@@ -666,8 +754,16 @@ function AnalysisPanel({
         )}
         {analysis.tracks.length > 0 && <span>{t("tracks", { count: analysis.tracks.length })}</span>}
       </div>
-    </Card>
+    </section>
   );
+}
+
+/** Own-team tracks worth naming: the longest 40. */
+function ownTracks(tracks: Analysis["tracks"]) {
+  return tracks
+    .filter((tr) => tr.team === "home" || tr.team === "home_gk")
+    .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
+    .slice(0, 40);
 }
 
 
@@ -689,10 +785,7 @@ function IdentityPanel({
   const qc = useQueryClient();
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const [notice, setNotice] = useState<string | null>(null);
-  const own = tracks
-    .filter((tr) => tr.team === "home" || tr.team === "home_gk")
-    .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
-    .slice(0, 40);
+  const own = ownTracks(tracks);
   if (own.length === 0) return null;
   async function assign(trackNo: number, playerId: string) {
     const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
@@ -706,13 +799,12 @@ function IdentityPanel({
     }
   }
   return (
-    <Card className="p-3" data-testid="identity-panel">
-      <details>
-        <summary className="cursor-pointer font-semibold">{t("title")}</summary>
-        <p className="mt-2 text-xs text-muted">{t("hint")}</p>
-        <ul className="mt-2 max-h-72 space-y-1 overflow-auto text-sm">
+    <section data-testid="identity-panel" aria-labelledby="identity-title">
+        <h2 id="identity-title" className="font-display text-xl">{t("title")}</h2>
+        <p className="mt-1 text-sm text-muted">{t("hint")}</p>
+        <ul className="mt-3 divide-y divide-border/70 text-sm">
           {own.map((tr) => (
-            <li key={tr.track_no} className="flex flex-wrap items-center gap-2">
+            <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5">
               <button className="w-36 text-left font-mono text-xs underline" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}`}>
                 {t("track", { n: tr.track_no })} · {formatClock(tr.first_ms)}
               </button>
@@ -744,8 +836,7 @@ function IdentityPanel({
             {notice}
           </p>
         )}
-      </details>
-    </Card>
+    </section>
   );
 }
 
@@ -828,7 +919,7 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
   const t = useTranslations("formations");
   const label = (f: string) => (f === "open" ? t("open") : f.replaceAll("-", ":"));
   return (
-    <Card className="space-y-2 p-3" data-testid="formations">
+    <section className="space-y-2" data-testid="formations">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">{t("title")}</h2>
         <p className="text-xs text-muted">{t("hint")}</p>
@@ -863,6 +954,6 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
           </div>
         );
       })}
-    </Card>
+    </section>
   );
 }

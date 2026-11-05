@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, CardTitle } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/tabs";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -27,6 +27,17 @@ import {
 import { cn } from "@/lib/utils";
 
 export const goalCandidatesKey = (matchId: string) => ["goal-candidates", matchId];
+
+/** The candidate list; the work steps read the open count from the same cache. */
+export function useGoalCandidates(orgId: string, matchId: string, enabled = true) {
+  return useQuery({
+    queryKey: goalCandidatesKey(matchId),
+    enabled,
+    queryFn: async () =>
+      (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates", { params: { path: { org_id: orgId, match_id: matchId } } }))
+        .data ?? null,
+  });
+}
 
 const KNOWN_SOURCE: Record<string, string> = {
   scoreboard_ocr: "knownOverlay",
@@ -60,12 +71,7 @@ export function GoalCandidatesPanel({
   const [focus, setFocus] = useState(0);
   const rowRefs = useRef<(HTMLLIElement | null)[]>([]);
   const refocus = useRef<number | null>(null);
-  const q = useQuery({
-    queryKey: key,
-    queryFn: async () =>
-      (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates", { params: { path } }))
-        .data ?? null,
-  });
+  const q = useGoalCandidates(orgId, matchId);
   const reviewKey = ["review", ...key];
   const review = useMutation({
     // one at a time, in key order: "1" and then "U" must reach the server in that order
@@ -164,26 +170,13 @@ export function GoalCandidatesPanel({
   const active = Math.min(focus, rows.length - 1);
 
   return (
-    <Card className="space-y-4" data-testid="goal-candidates">
+    <section className="flex min-h-0 flex-1 flex-col gap-3" data-testid="goal-candidates" aria-labelledby={`gc-title-${matchId}`}>
       <div className="space-y-1">
-        <CardTitle>{t("title")}</CardTitle>
-        <p className="text-sm text-muted">{t("hint")}</p>
+        <h2 id={`gc-title-${matchId}`} className="sr-only">{t("title")}</h2>
+        <p className="text-sm" data-testid="goal-candidates-counts">
+          {t("summary", { open: openAt(current), confirmed: list.counts.confirmed, rejected: list.counts.rejected })}
+        </p>
       </div>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="goal-candidates-counts">
-        {(
-          [
-            ["countOpen", openAt(current)],
-            ["countConfirmed", list.counts.confirmed],
-            ["countRejected", list.counts.rejected],
-            ["countKnown", list.counts.known],
-          ] as const
-        ).map(([label, value]) => (
-          <div key={label} className="rounded-md bg-surface px-3 py-2.5">
-            <dt className="text-[0.8125rem] text-muted">{t(label)}</dt>
-            <dd className="mt-1 font-score text-[1.75rem] leading-none tabular-nums">{value}</dd>
-          </div>
-        ))}
-      </dl>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Segmented<CandidateFilter>
@@ -223,7 +216,7 @@ export function GoalCandidatesPanel({
         <ul
           // rows reach the scroll box's edges (focus ring drawn inside); the lines between them
           // stay in line with the card's content
-          className="-mx-1.5 max-h-[28rem] overflow-auto text-sm"
+          className="-mx-1.5 max-h-[28rem] min-h-0 flex-1 overflow-auto text-sm lg:max-h-none"
           aria-label={t("title")}
           aria-describedby={`gc-keys-${matchId}`}
         >
@@ -347,6 +340,6 @@ export function GoalCandidatesPanel({
         <p className="text-xs text-muted">{t("knownHint", { n: list.counts.known })}</p>
       )}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-    </Card>
+    </section>
   );
 }

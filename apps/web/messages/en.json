@@ -1713,7 +1713,10 @@
     "noGoals": "The report has no goals.",
     "outsideHint": "{n, plural, one {# goal is} other {# goals are}} before or after the video.",
     "showOutside": "Show goals",
-    "hideOutside": "Hide goals"
+    "hideOutside": "Hide goals",
+    "summary": "{inVideo, plural, one {# goal is} other {# goals are}} in the video: {found} found, {missing} missing.",
+    "summaryNone": "None of the {n} goals is in the video.",
+    "summaryExtra": "{n} only in the video."
   },
   "goalCandidates": {
     "title": "Goal candidates",
@@ -1745,7 +1748,8 @@
     "rejected": "Rejected",
     "reject": "Reject",
     "undo": "Undo",
-    "knownHint": "{n, plural, one {# candidate is} other {# candidates are}} already a goal (score overlay, match report or entered by hand) and shown under \"All\"."
+    "knownHint": "{n, plural, one {# candidate is} other {# candidates are}} already a goal (score overlay, match report or entered by hand) and shown under \"All\".",
+    "summary": "{open} open · {confirmed} confirmed · {rejected} rejected"
   },
   "matrix": {
     "nav": "Matrix",
@@ -2182,5 +2186,51 @@
     "noneFiltered": "No attacks in this selection.",
     "showAll": "Show all {n}",
     "showLess": "Show less"
+  },
+  "workflow": {
+    "rail": "Work steps",
+    "court": "Court",
+    "kickoff": "Throw-off",
+    "goals": "Check goals",
+    "players": "Assign players",
+    "events": "Events",
+    "formations": "Defence systems",
+    "notes": "Notes",
+    "court_done": "confirmed",
+    "court_mark": "mark in the picture",
+    "court_check": "please check",
+    "court_failed": "analysis failed",
+    "court_waiting": "analysis running",
+    "kickoff_done": "set",
+    "kickoff_period1": "1st half missing",
+    "kickoff_period2": "2nd half missing",
+    "goals_open": "{n} open",
+    "goals_done": "checked",
+    "goals_waiting": "nothing to check",
+    "players_open": "{n, plural, one {# track open} other {# tracks open}}",
+    "players_done": "assigned",
+    "players_waiting": "Tracks appear after the analysis.",
+    "kickoffHint": "Move the video to the throw-off of the half and set it there. Official goals, goal candidates and events then line up with the match clock.",
+    "period": "Half {n}",
+    "setHere": "Set here",
+    "notSet": "Not set",
+    "notNeeded": "Not in the video",
+    "jumpKickoff": "Go to the throw-off at {time}",
+    "kickoffSaved": "Throw-off of half {n} set at {time}.",
+    "goalLists": "Goals from",
+    "listCandidates": "Goal candidates",
+    "listReport": "Match report",
+    "goalsNone": "The analysis proposed no goal candidates.",
+    "noReport": "With the official match report you see which goals are missing in the video.",
+    "timeline": "Match time",
+    "coverage": "Video: {clip}.",
+    "coverageGoals": "{inside} of {total} goals from the match report are in the video.",
+    "to": "to",
+    "coverageUnknown": "Without a throw-off the video is not on the match clock yet.",
+    "setKickoff": "Set throw-off",
+    "halftime": "Break",
+    "laneVideo": "Video",
+    "laneReport": "Match report",
+    "laneCandidates": "Candidates"
   }
 }

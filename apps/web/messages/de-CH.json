@@ -1713,7 +1713,10 @@
     "noGoals": "Der Bericht enthält keine Tore.",
     "outsideHint": "{n, plural, one {# Tor liegt} other {# Tore liegen}} vor oder nach dem Video.",
     "showOutside": "Tore anzeigen",
-    "hideOutside": "Tore ausblenden"
+    "hideOutside": "Tore ausblenden",
+    "summary": "{inVideo, plural, one {# Tor liegt} other {# Tore liegen}} im Video: {found} gefunden, {missing} fehlen.",
+    "summaryNone": "Keines der {n} Tore liegt im Video.",
+    "summaryExtra": "{n} nur im Video."
   },
   "goalCandidates": {
     "title": "Torkandidaten",
@@ -1745,7 +1748,8 @@
     "rejected": "Verworfen",
     "reject": "Verwerfen",
     "undo": "Rückgängig",
-    "knownHint": "{n, plural, one {# Kandidat ist} other {# Kandidaten sind}} schon als Tor erfasst (Einblendung, Matchbericht oder von Hand) und unter «Alle» zu sehen."
+    "knownHint": "{n, plural, one {# Kandidat ist} other {# Kandidaten sind}} schon als Tor erfasst (Einblendung, Matchbericht oder von Hand) und unter «Alle» zu sehen.",
+    "summary": "{open} offen · {confirmed} bestätigt · {rejected} verworfen"
   },
   "matrix": {
     "nav": "Matrix",
@@ -2182,5 +2186,51 @@
     "noneFiltered": "Keine Angriffe in dieser Auswahl.",
     "showAll": "Alle {n} zeigen",
     "showLess": "Weniger zeigen"
+  },
+  "workflow": {
+    "rail": "Arbeitsschritte",
+    "court": "Spielfeld",
+    "kickoff": "Anwurf",
+    "goals": "Tore prüfen",
+    "players": "Spieler zuordnen",
+    "events": "Ereignisse",
+    "formations": "Abwehrsysteme",
+    "notes": "Notizen",
+    "court_done": "bestätigt",
+    "court_mark": "im Bild markieren",
+    "court_check": "bitte prüfen",
+    "court_failed": "Analyse fehlgeschlagen",
+    "court_waiting": "Analyse läuft",
+    "kickoff_done": "gesetzt",
+    "kickoff_period1": "1. Halbzeit fehlt",
+    "kickoff_period2": "2. Halbzeit fehlt",
+    "goals_open": "{n} offen",
+    "goals_done": "geprüft",
+    "goals_waiting": "nichts zu prüfen",
+    "players_open": "{n, plural, one {# Spur offen} other {# Spuren offen}}",
+    "players_done": "zugeordnet",
+    "players_waiting": "Spuren gibt es nach der Analyse.",
+    "kickoffHint": "Spul im Video zum Anwurf der Halbzeit und setze ihn dort. Damit liegen offizielle Tore, Torkandidaten und Ereignisse auf der Spielzeit.",
+    "period": "{n}. Halbzeit",
+    "setHere": "Hier setzen",
+    "notSet": "Nicht gesetzt",
+    "notNeeded": "Nicht im Video",
+    "jumpKickoff": "Zum Anwurf bei {time}",
+    "kickoffSaved": "Anwurf {n}. Halbzeit bei {time} gesetzt.",
+    "goalLists": "Tore aus",
+    "listCandidates": "Torkandidaten",
+    "listReport": "Matchbericht",
+    "goalsNone": "Die Analyse hat keine Torkandidaten vorgeschlagen.",
+    "noReport": "Mit dem offiziellen Matchbericht siehst du, welche Tore im Video fehlen.",
+    "timeline": "Spielzeit",
+    "coverage": "Video: {clip}.",
+    "coverageGoals": "{inside} von {total} Toren aus dem Matchbericht liegen im Video.",
+    "to": "bis",
+    "coverageUnknown": "Ohne Anwurf liegt das Video noch nicht auf der Spielzeit.",
+    "setKickoff": "Anwurf setzen",
+    "halftime": "Pause",
+    "laneVideo": "Video",
+    "laneReport": "Matchbericht",
+    "laneCandidates": "Kandidaten"
   }
 }

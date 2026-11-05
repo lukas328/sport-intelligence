@@ -1713,7 +1713,10 @@
     "noGoals": "Le rapport ne contient aucun but.",
     "outsideHint": "{n, plural, one {# but est} other {# buts sont}} avant ou après la vidéo.",
     "showOutside": "Afficher les buts",
-    "hideOutside": "Masquer les buts"
+    "hideOutside": "Masquer les buts",
+    "summary": "{inVideo, plural, one {# but est} other {# buts sont}} dans la vidéo : {found} trouvés, {missing} manquants.",
+    "summaryNone": "Aucun des {n} buts n'est dans la vidéo.",
+    "summaryExtra": "{n} seulement dans la vidéo."
   },
   "goalCandidates": {
     "title": "Buts potentiels",
@@ -1745,7 +1748,8 @@
     "rejected": "Écarté",
     "reject": "Écarter",
     "undo": "Annuler",
-    "knownHint": "{n, plural, one {# but potentiel est déjà un but (incrustation, rapport de match ou saisie manuelle) et figure sous « Tous ».} other {# buts potentiels sont déjà des buts (incrustation, rapport de match ou saisie manuelle) et figurent sous « Tous ».}}"
+    "knownHint": "{n, plural, one {# but potentiel est déjà un but (incrustation, rapport de match ou saisie manuelle) et figure sous « Tous ».} other {# buts potentiels sont déjà des buts (incrustation, rapport de match ou saisie manuelle) et figurent sous « Tous ».}}",
+    "summary": "{open} à vérifier · {confirmed} confirmés · {rejected} écartés"
   },
   "matrix": {
     "nav": "Matrice",
@@ -2182,5 +2186,51 @@
     "noneFiltered": "Aucune attaque dans cette sélection.",
     "showAll": "Tout afficher ({n})",
     "showLess": "Afficher moins"
+  },
+  "workflow": {
+    "rail": "Étapes de travail",
+    "court": "Terrain",
+    "kickoff": "Engagement",
+    "goals": "Vérifier les buts",
+    "players": "Attribuer les joueurs",
+    "events": "Événements",
+    "formations": "Systèmes défensifs",
+    "notes": "Notes",
+    "court_done": "confirmé",
+    "court_mark": "à marquer dans l'image",
+    "court_check": "à vérifier",
+    "court_failed": "analyse échouée",
+    "court_waiting": "analyse en cours",
+    "kickoff_done": "défini",
+    "kickoff_period1": "1re mi-temps manquante",
+    "kickoff_period2": "2e mi-temps manquante",
+    "goals_open": "{n} à vérifier",
+    "goals_done": "vérifiés",
+    "goals_waiting": "rien à vérifier",
+    "players_open": "{n, plural, one {# trace ouverte} other {# traces ouvertes}}",
+    "players_done": "attribuées",
+    "players_waiting": "Les traces apparaissent après l'analyse.",
+    "kickoffHint": "Amène la vidéo à l'engagement de la mi-temps et définis-le là. Les buts officiels, les buts possibles et les événements suivent alors le temps de jeu.",
+    "period": "{n}e mi-temps",
+    "setHere": "Définir ici",
+    "notSet": "Non défini",
+    "notNeeded": "Pas dans la vidéo",
+    "jumpKickoff": "Aller à l'engagement à {time}",
+    "kickoffSaved": "Engagement de la {n}e mi-temps défini à {time}.",
+    "goalLists": "Buts selon",
+    "listCandidates": "Buts possibles",
+    "listReport": "Feuille de match",
+    "goalsNone": "L'analyse n'a proposé aucun but possible.",
+    "noReport": "Avec la feuille de match officielle, tu vois quels buts manquent dans la vidéo.",
+    "timeline": "Temps de jeu",
+    "coverage": "Vidéo : {clip}.",
+    "coverageGoals": "{inside} des {total} buts de la feuille de match sont dans la vidéo.",
+    "to": "à",
+    "coverageUnknown": "Sans engagement, la vidéo n'est pas encore placée sur le temps de jeu.",
+    "setKickoff": "Définir l'engagement",
+    "halftime": "Pause",
+    "laneVideo": "Vidéo",
+    "laneReport": "Feuille de match",
+    "laneCandidates": "Buts possibles"
   }
 }
