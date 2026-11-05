@@ -45,18 +45,20 @@ NMS_S = 8.0
 HIT = (-3.0, 8.0)  # candidate - goal (s)
 RATES = (1, 2, 4)
 SINGLE = ("pan_rev", "still_swing", "pan_after", "cen_rev", "flow_rev", "play_rev", "energy_drop",
-          "restart", "restart_back")
+          "restart", "restart_back", "lull_after")
 SUMS = {
     "sum_camera": ("pan_rev", "still_swing"),
     "sum_people_flow": ("cen_rev", "flow_rev"),
     "sum_all": ("pan_rev", "still_swing", "cen_rev", "flow_rev"),
     "sum_all_restart": ("pan_rev", "still_swing", "cen_rev", "flow_rev", "restart_back"),
+    "sum_all_lull": ("pan_rev", "still_swing", "cen_rev", "flow_rev", "lull_after"),
 }
 TEMPLATES = {
     "tmpl_all": (("pan", "cx_v", "flow_x", "flow_share", "energy"), (0, 1, 2)),
     "tmpl_camera": (("pan", "energy"), (0,)),
     "tmpl_people_flow": (("cx_v", "flow_x", "flow_share"), (0, 1)),
 }
+MAX_ANCHOR_GAP_S = 5.0  # log entries counted from a clock reading further away are unreliable
 CAMERA_FIXED_PX_S = 25.0  # 90th percentile |pan| below this: fixed camera
 
 
@@ -89,6 +91,8 @@ def log_delay(labels: dict) -> tuple[float | None, list[float]]:
     for lab in labels.values():
         ov = {tuple(g["score"]): g["t"] for g in lab["overlay_goals"]}
         for g in lab["log_goals"]:
+            if (g.get("anchor_gap_s") or 0) > MAX_ANCHOR_GAP_S:
+                continue
             sc_ = tuple(g["score"] or ())
             for key in (sc_, sc_[::-1]):
                 if key in ov:
@@ -104,7 +108,8 @@ def reference(lab: dict, delay: float | None) -> tuple[list[float], str]:
         # a jump by several goals (overlay hidden or misread for a while) has no usable time
         return [g["t"] for g in lab["overlay_goals"] if g.get("single", True)], "overlay"
     if lab["log_goals"] and delay is not None:
-        return [g["t"] - delay for g in lab["log_goals"] if 0 <= g["t"] - delay <= dur], "log"
+        return [g["t"] - delay for g in lab["log_goals"]
+                if 0 <= g["t"] - delay <= dur and (g.get("anchor_gap_s") or 0) <= MAX_ANCHOR_GAP_S], "log"
     return [], "none"
 
 
@@ -191,6 +196,12 @@ def all_scores(segs: dict, refs: dict, shift: float, bc: dict | None) -> dict[st
         for stem, s in segs.items():
             others = [e for g, v in ex.items() if g != s["lab"]["game"] for e in v]
             out[stem][name] = template_series(chs[stem], np.mean(others, axis=0), sign) if others else np.zeros(len(chs[stem]))
+    # matched filter (the transition) plus the post-goal lull (goal-specific evidence)
+    for stem in segs:
+        o = out[stem]
+        o["tmpl_all+lull"] = rz(o["tmpl_all"]) + rz(o["lull_after"])
+        o["tmpl_people_flow+lull"] = rz(o["tmpl_people_flow"]) + rz(o["lull_after"])
+        o["tmpl_camera+lull"] = rz(o["tmpl_camera"]) + rz(o["lull_after"])
     if bc is not None:
         for stem, s in segs.items():
             ch = bcast_channels(s["x"])
@@ -199,7 +210,7 @@ def all_scores(segs: dict, refs: dict, shift: float, bc: dict | None) -> dict[st
             out[stem]["bcast_segnorm"] = template_series(seg, bc["tmpl"], (0,))
     # leave-one-game-out logistic regression on the cues at t (z-scored per segment)
     feats = ("pan_rev", "still_swing", "pan_after", "cen_rev", "flow_rev", "play_rev", "energy_drop",
-             "restart_back", "tmpl_all")
+             "restart_back", "lull_after", "tmpl_all")
     X, Y, G = {}, {}, {}
     for stem, s in segs.items():
         n = len(s["x"]["t"])

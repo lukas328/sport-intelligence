@@ -23,8 +23,10 @@ Cues (`compute`, one value per grid step t, windows `BEFORE` back and `AFTER` ah
 - `flow_rev`: the same with the moving pixels' mean residual flow;
 - `play_rev`: the same with the mean of the three normalised velocities (pan, centroid, flow);
 - `energy_drop`: motion energy before / after;
-- `restart`: throw-off detector, see `restart_score`. It fires at the restart, 10-25 s after the
-  goal; `restart_back` is the same series moved back by `RESTART_LAG` so it points at the goal.
+- `restart`: throw-off detector, see `restart_score`. It fires at the restart, 15-35 s after the
+  goal at this level; `restart_back` is the same series moved back by `RESTART_LAG` so it points at
+  the goal;
+- `lull_after`: busy around t, quiet 8-24 s later (the post-goal lull, see `lull_after`).
 
 usage (look at it): python ml/goals/seg_cues.py SEG.npz
 """
@@ -38,7 +40,7 @@ import numpy as np
 
 DT = 0.1
 BEFORE, AFTER = 2.0, 2.0
-RESTART_LAG = 14.0  # median throw-off start - goal (s), set from the labelled segments (seg_eval.py)
+RESTART_LAG = 27.0  # median throw-off start - goal (s) on the first 9 labelled segments (13 goals, IQR 24-30)
 
 
 def _bin_mean(t: np.ndarray, x: np.ndarray, tg: np.ndarray) -> np.ndarray:
@@ -175,29 +177,45 @@ def activity(s: dict[str, np.ndarray]) -> np.ndarray:
 
 
 def restart_score(s: dict[str, np.ndarray]) -> np.ndarray:
-    """Throw-off restart at t: (1) a lull in [t-2.5, t] (activity and camera below the segment's
-    usual level), (2) the play near the court centre during it, (3) people on both sides of the
-    centre line, (4) activity or the camera picks up after t, (5) in [t-20, t-4] the play was near one
-    end (the goal before). Product of soft terms in 0..1."""
+    """Throw-off restart at t: (1) a lull in [t-8, t] (activity and camera speed well below the
+    segment's usual level: players walk back, regroup into their halves), (2) activity or the camera
+    picks up in [t, t+3] (the throw-off), softly weighted by (3) the play near the court centre and
+    (4) people on both sides of the centre line during the lull. Product of soft terms in 0..1.
+    The centre and balance terms only modulate (0.5..1): from a panning camera's canvas the court
+    centre is a rough estimate."""
     tg = s["t"]
     act = activity(s)
     pan = np.abs(s["pan"]) / _robust_scale(s["pan"])
     p = s["p"]
     out = np.zeros(len(tg))
-    kl, ka = round(2.5 / DT), round(2 / DT)
+    kl, ka = round(8 / DT), round(3 / DT)
     for i in range(kl, len(tg) - ka):
         a_b = act[i - kl:i].mean()
         pb = pan[i - kl:i].mean()
-        lull = float(np.clip(1.2 - a_b, 0, 1) * np.clip(1.0 - pb, 0, 1))
+        lull = float(np.clip(1.0 - a_b, 0, 1) * np.clip(1.0 - 2 * pb, 0, 1))
         if lull <= 0:
             continue
-        centre = float(np.exp(-(p[i - kl:i].mean() / 0.45) ** 2))
-        bal = 0.5 + 0.5 * float(s["bal"][i - kl:i].mean())
-        rise = max((act[i:i + ka].mean() - a_b) / max(a_b, 0.3), pan[i:i + ka].mean() - pb)
+        rise = max((act[i:i + ka].mean() - a_b) / max(a_b, 0.2), 2 * (pan[i:i + ka].mean() - pb))
         start = float(np.clip(rise, 0, 1))
-        j0, j1 = max(0, i - round(20 / DT)), max(0, i - round(4 / DT))
-        end_before = float(np.clip((np.abs(p[j0:j1]).max() - 0.3) / 0.4, 0, 1)) if j1 > j0 else 0.0
-        out[i] = lull * centre * bal * start * end_before
+        centre = 0.5 + 0.5 * float(np.exp(-(p[i - kl // 4:i].mean() / 0.45) ** 2))
+        bal = 0.5 + 0.5 * float(s["bal"][i - kl // 4:i].mean())
+        out[i] = lull * start * centre * bal
+    return out
+
+
+def lull_after(s: dict[str, np.ndarray]) -> np.ndarray:
+    """Busy play around t, then a long lull: log ratio of activity (and camera speed) in [t-4, t+4]
+    to [t+8, t+24]. After a goal the players celebrate, walk back and wait for the throw-off; after a
+    turnover or a save the play goes straight on."""
+    act = activity(s)
+    pan = np.abs(s["pan"]) / _robust_scale(s["pan"])
+    n = len(act)
+    out = np.zeros(n)
+    k4, k8, k24 = round(4 / DT), round(8 / DT), round(24 / DT)
+    for i in range(n):
+        busy = act[max(0, i - k4):i + k4].mean() + pan[max(0, i - k4):i + k4].mean()
+        quiet = act[i + k8:i + k24].mean() + pan[i + k8:i + k24].mean() if i + k8 < n else busy
+        out[i] = float(np.log((busy + 0.2) / (quiet + 0.2)))
     return out
 
 
@@ -225,6 +243,7 @@ def compute(s: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         out["energy_drop"].append(float(np.log((eb + 0.1) / (ea + 0.1))))
     res = {k: np.array(v) for k, v in out.items()}
     res["restart"] = restart_score(s)
+    res["lull_after"] = lull_after(s)
     lag = round(RESTART_LAG / DT)
     res["restart_back"] = np.r_[res["restart"][lag:], np.zeros(lag)]
     return res
