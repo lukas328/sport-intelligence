@@ -67,8 +67,9 @@ Ereignis- und Statistik-Ansichten verbergen (mit 5).
 5. Grosse Abfragen: `team_data.load` auf Saison begrenzen, `halls.references` per DISTINCT ON.
 6. Klein: `_download` erlaubt Weiterleitung auf anderen Port; Sperre im handball.ch-Client über den
    ganzen HTTP-Aufruf; `focus.create` liest die Videolänge pro Eintrag.
-7. Echte Spielernamen im Repo: `ml/data/official/*.json` (öffentliche Spielprotokolle), einige
-   Web-Tests und Doku. Entscheid Lukas (siehe unten); PR 3 deshalb als Squash mergen.
+7. Echte Spielernamen im Repo: `ml/data/official/*.json` (öffentliche Spielprotokolle).
+   Entschieden (Lukas, 2026-11-05): bleiben vorerst im Repo, die Daten sind öffentlich online;
+   Repo bleibt privat. Test-Fixtures nutzen weiter erfundene Namen.
 
 ## Nach dem Merge der UI-Branch
 - `apps/api/tests/test_report_pdf.py::test_insight_texts_match_the_web_app` wieder für
