@@ -630,7 +630,9 @@ def identify_by_appearance(
         vectors = np.stack([v[1] if isinstance(v, tuple) else v for v in items])
         frames = np.array([v[0] for v in items if isinstance(v, tuple)], np.int64)
         readings = tuple(
-            (r.frame, r.number) for r in (reads or {}).get(tid, []) if r.confidence >= MIN_CONFIDENCE
+            (r.frame, r.number)
+            for r in (reads or {}).get(tid, [])
+            if r.confidence >= MIN_CONFIDENCE
         )
         frags.append(
             Fragment(

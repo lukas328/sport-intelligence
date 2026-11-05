@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import pytest
 
-from handball_vision.numbers import NumberReader, Reading, split_points, vote
+from handball_vision.numbers import NumberReader, Reading, split_points, stretch_contrast, vote
 from handball_vision.pipeline import merge_by_number
 from handball_vision.tracking import TrackPoint
 
@@ -113,6 +113,8 @@ def test_fragments_with_the_same_number_become_one_player() -> None:
     tracks = {p.track_id for p in out}
     assert tracks == {1, 3}
     assert team[1]["number"] == 7 and team[1]["merged_from"] == [2] and team[3]["number"] == 9
+    # the readings follow the joined track (re-identification uses them per final track)
+    assert sorted(x.frame for x in reads[1]) == [10, 40, 70, 160, 200, 250] and 2 not in reads
 
 
 def test_a_swapped_track_is_cut_and_both_parts_get_their_number() -> None:
@@ -128,6 +130,8 @@ def test_a_swapped_track_is_cut_and_both_parts_get_their_number() -> None:
     assert len(by) == 2
     numbers = sorted((min(fr), team[t]["number"]) for t, fr in by.items())
     assert numbers == [(0, 43), (150, 5)]
+    # and so do the readings of the cut-off part
+    assert {t: {x.number for x in rs} for t, rs in reads.items()} == {1: {43}, 2: {5}}
 
 
 def test_overlapping_fragments_keep_only_the_stronger_number() -> None:
@@ -152,3 +156,29 @@ def test_reads_a_printed_shirt_number() -> None:
     cv2.putText(img, "14", (10, 75), cv2.FONT_HERSHEY_DUPLEX, 1.1, (20, 20, 20), 3)
     got = reader.read_player(img, (0, 0, 70, 160))
     assert got is not None and got.number == 14 and got.confidence > 0.8
+
+
+def test_stretch_spreads_a_faint_channel() -> None:
+    faint = np.full((40, 30), 180, np.uint8)
+    faint[10:30, 10:20] = 160  # a mid-grey digit on a light-grey shirt
+    out = stretch_contrast(faint)
+    assert out.min() == 0 and out.max() == 255
+    assert out[20, 15] < 10 and out[0, 0] > 245
+    flat = np.full((8, 8), 77, np.uint8)
+    assert np.array_equal(stretch_contrast(flat), flat)  # nothing to stretch: unchanged
+
+
+@pytest.mark.skipif(
+    not (MODELS / "ch_PP-OCRv4_rec_infer.onnx").exists(), reason="text models not downloaded"
+)
+def test_reads_a_faint_number_on_a_white_shirt() -> None:
+    """White shirt in a dim hall: light grey with a slightly darker, blurred number (stream
+    footage). The text detector finds it only after the contrast stretch."""
+    reader = NumberReader(
+        MODELS / "ch_PP-OCRv4_det_infer.onnx", MODELS / "ch_PP-OCRv4_rec_infer.onnx", threads=1
+    )
+    img = np.full((100, 44, 3), (178, 182, 186), np.uint8)
+    cv2.putText(img, "9", (12, 42), cv2.FONT_HERSHEY_DUPLEX, 0.8, (155, 165, 170), 2)
+    blurred = cv2.GaussianBlur(img, (3, 3), 0)
+    got = reader.read_player(blurred, (0, 0, 44, 100))
+    assert got is not None and got.number == 9 and got.confidence > 0.8

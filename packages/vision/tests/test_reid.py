@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 
-from handball_vision.reid import Fragment, assign, fit_projection
+from handball_vision.reid import Fragment, anchor_vectors, assign, contradicts, fit_projection
 
 FPS = 30.0
 
@@ -67,3 +69,77 @@ def test_a_player_cannot_be_on_court_twice_or_teleport() -> None:
     # looks like #7, 0.1 s after #7's fragment ended but 30 m away: not #7 either
     far = _frag(11, None, 303, 500, _player_vectors(rng, players[7], 8), xy=(40.0, 10.0))
     assert assign([*base, far], FPS).get(11) != 7
+
+
+def _mixed_anchor(
+    rng: np.random.Generator, players: dict[int, np.ndarray], framed: bool
+) -> list[Fragment]:
+    """#7's track carries #11 for most of its length (the tracker swapped them in a crowd); the
+    number was read only while #7 was in the box (frames 0 to 90)."""
+    own = _player_vectors(rng, players[7], 8)
+    other = _player_vectors(rng, players[11], 24)
+    frames = np.concatenate([np.arange(0, 96, 12), np.arange(200, 680, 20)]).astype(np.int64)
+    mixed = Fragment(
+        2,
+        "home",
+        0,
+        680,
+        (10.0, 10.0),
+        (10.0, 10.0),
+        np.vstack([own, other]),
+        7,
+        frames if framed else None,
+        tuple((f, 7) for f in range(0, 91, 15)) if framed else (),
+    )
+    return [
+        _frag(1, 4, 0, 680, _player_vectors(rng, players[4], 20)),
+        mixed,
+        _frag(3, 11, 700, 900, _player_vectors(rng, players[11], 20)),
+    ]
+
+
+def test_anchor_vectors_are_the_read_stretches() -> None:
+    rng, players = _setup()
+    mixed = _mixed_anchor(rng, players, framed=True)[1]
+    assert len(anchor_vectors(mixed, FPS)) == 8  # within 2 s of a reading: #7's own vectors
+    plain = _mixed_anchor(rng, players, framed=False)[1]
+    assert len(anchor_vectors(plain, FPS)) == 32  # no frames: everything, as before
+
+
+def test_a_mixed_anchor_teaches_only_its_read_stretch() -> None:
+    rng, players = _setup()
+    # a later piece of #11: with the whole mixed track teaching, #7 looks like #11 as well and
+    # the ratio test gives up; with the read stretches only, #11 is clearly nearest
+    probe = _player_vectors(rng, players[11], 8)
+    got = {}
+    for framed in (True, False):
+        base = _mixed_anchor(np.random.default_rng(1), players, framed)
+        got[framed] = assign([*base, _frag(10, None, 950, 1100, probe)], FPS).get(10)
+    assert got == {True: 11, False: None}
+
+
+def test_own_readings_veto_another_number() -> None:
+    rng, players = _setup()
+    base = [
+        _frag(1, 4, 0, 300, _player_vectors(rng, players[4], 20)),
+        _frag(2, 7, 0, 300, _player_vectors(rng, players[7], 20)),
+        _frag(3, 11, 0, 300, _player_vectors(rng, players[11], 20)),
+    ]
+    looks_like_7 = _player_vectors(rng, players[7], 8)
+    read_33 = Fragment(
+        10,
+        "home",
+        400,
+        600,
+        (10.0, 10.0),
+        (10.0, 10.0),
+        looks_like_7,
+        None,
+        None,
+        ((420, 33), (450, 33)),
+    )
+    assert contradicts(read_33, 7) and not contradicts(read_33, 33)
+    read_1 = replace(read_33, readings=((420, 1), (450, 1)))
+    assert not contradicts(read_1, 7)  # 1 <-> 7 is a known misreading
+    assert assign([*base, read_33], FPS).get(10) is None
+    assert assign([*base, read_1], FPS).get(10) == 7
