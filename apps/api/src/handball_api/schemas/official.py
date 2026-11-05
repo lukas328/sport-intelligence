@@ -53,6 +53,8 @@ class ClaimIn(ApiModel):
 
 class PrefillOut(ApiModel):
     matches_created: int = 0
+    # games over the plan's matches per season: match_new suggestions with reason plan_limit
+    matches_held_back: int = 0
     results: int = 0
     roster_suggestions: int = 0
     report_suggestions: int = 0
@@ -83,6 +85,12 @@ class OfficialLinkOut(ApiModel):
     synced_at: datetime | None = None
     standing: list[dict[str, Any]] = Field(default_factory=list)
     open_suggestions: int = 0
+    # organisers' choice: show the official statistics in roster suggestions (display only)
+    roster_stats: bool = False
+
+
+class OfficialPreferencesIn(ApiModel):
+    roster_stats: bool
 
 
 SuggestionKind = Literal[
@@ -97,6 +105,8 @@ class SuggestionOut(ApiModel):
     payload: dict[str, Any]
     created_at: datetime
     resolved_at: datetime | None
+    # open match_new: accepting it would exceed the plan's matches per season (402 until upgrade)
+    blocked: Literal["plan_limit"] | None = None
 
 
 class SuggestionAcceptIn(ApiModel):
@@ -114,6 +124,7 @@ class SuggestionResultOut(ApiModel):
 
 class SyncOut(ApiModel):
     matches_created: int = 0
+    matches_held_back: int = 0
     results: int = 0
     roster_suggestions: int = 0
     report_suggestions: int = 0

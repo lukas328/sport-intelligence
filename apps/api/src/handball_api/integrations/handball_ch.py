@@ -64,9 +64,11 @@ Q_TEAM_PLAYERS = """query getTeamPlayers($teamId: Int) { playerStaff(teamId: $te
   player { playerId firstName lastName } } }"""
 Q_STANDING = """query getStanding($groupId: Int) { standing(groupId: $groupId) { teamId clubId
   name rank games won drawn lost goalsFor goalsAgainst goalDifference points } }"""
+# per player and game: goals, 7 m goals and attempts, 2-minute suspensions, keeper saves and the
+# shots a keeper faced (missing for some games: None then)
 Q_GAME_PLAYERS = """query getGamePlayers($gameId: Int, $isLive: Boolean) {
   gamePlayerStats(gameId: $gameId, isLive: $isLive) { playerId teamId dressNr playerName isHome
-    function totalScore } }"""
+    function totalScore totalScore7m totalShots7m total2Minutes totalSaves totalShotsGK } }"""
 Q_REPORT = """query getReport($gameId: Int, $isLive: Boolean) {
   game(gameId: $gameId) { homeTeamName awayTeamName homeTeamScore awayTeamScore
     homeTeamScoreInterval awayTeamScoreInterval gameDateTime leagueName }
@@ -278,6 +280,13 @@ class GameAppearance:
     number: int | None
     name: str | None
     goals: int
+    goalkeeper: bool = False
+    # None when the official data has no value for the game
+    goals_7m: int | None = None
+    attempts_7m: int | None = None
+    suspensions: int | None = None
+    saves: int | None = None
+    shots_faced: int | None = None
 
 
 def fold(s: str | None) -> str:
@@ -440,6 +449,12 @@ async def game_players(db: AsyncSession | None, game_id: int) -> list[GameAppear
             number=_int(p.get("dressNr")),
             name=p.get("playerName"),
             goals=int(p.get("totalScore") or 0),
+            goalkeeper=p.get("function") == "goalkeeper",
+            goals_7m=_int(p.get("totalScore7m")),
+            attempts_7m=_int(p.get("totalShots7m")),
+            suspensions=_int(p.get("total2Minutes")),
+            saves=_int(p.get("totalSaves")),
+            shots_faced=_int(p.get("totalShotsGK")),
         )
         for p in rows
         # team officials carry placeholder ids shared across teams: players only

@@ -25,6 +25,7 @@ from handball_api.schemas.official import (
     MyAccessRequestOut,
     MyJoinRequestOut,
     OfficialLinkOut,
+    OfficialPreferencesIn,
     OfficialTeamHit,
     OperatorVerifyIn,
     SuggestionAcceptIn,
@@ -185,6 +186,14 @@ async def team_official(team_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
     return await service.link(scope.ctx, team_id)
 
 
+@router.patch("/orgs/{org_id}/teams/{team_id}/official", response_model=OfficialLinkOut)
+async def team_official_preferences(
+    team_id: uuid.UUID, data: OfficialPreferencesIn, scope: OrgDep
+) -> dict[str, Any]:
+    """Organisers: show the official statistics in roster suggestions or not (roster_stats)."""
+    return await service.set_preferences(scope.ctx, team_id, data.roster_stats)
+
+
 @router.post(
     "/orgs/{org_id}/teams/{team_id}/official/sync",
     response_model=SyncOut,
@@ -205,7 +214,7 @@ async def list_suggestions(
         "open"
     ),
     kind: Annotated[str | None, Query(max_length=20)] = None,
-) -> list[OfficialSuggestion]:
+) -> list[dict[str, Any]]:
     return await service.list_suggestions(scope.ctx, team_id, status_, kind)
 
 

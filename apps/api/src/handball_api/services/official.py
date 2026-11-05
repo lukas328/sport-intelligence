@@ -70,6 +70,10 @@ REPORT_AFTER = timedelta(minutes=90)  # a game is over and the log complete
 REPORT_WINDOW = timedelta(days=7)
 REPORT_BATCH = 20
 SYSTEM_USER = uuid.UUID(int=0)
+# reason of a match_new suggestion made at the claim instead of a match: the plan's match limit
+PLAN_LIMIT = "plan_limit"
+# team preference (team.settings): show the official statistics in roster suggestions
+ROSTER_STATS = "official_roster_stats"
 
 
 def _now() -> datetime:
@@ -400,7 +404,9 @@ class _Suggester:
         s = self.known.get((kind, key))
         if s is not None:
             if s.status == "open":
-                s.payload = payload
+                # a game held back by the plan limit keeps its reason
+                reason = {"reason": s.payload["reason"]} if "reason" in s.payload else {}
+                s.payload = {**payload, **reason}
             return
         s = OfficialSuggestion(
             organization_id=self.team.organization_id,
@@ -489,6 +495,47 @@ def _split_name(official: str | None) -> tuple[str, str]:
     return " ".join(first), " ".join(w.capitalize() for w in last)
 
 
+def _add(total: int | None, value: int | None) -> int | None:
+    return total if value is None else (total or 0) + value
+
+
+class _Stats:
+    """A player's official statistics over the games read for the roster (STATS_GAMES): shown in
+    the roster suggestion if the coach wants them (only organisers see suggestions)."""
+
+    def __init__(self) -> None:
+        self.games = self.goals = 0
+        self.goalkeeper = False
+        self.goals_7m: int | None = None
+        self.attempts_7m: int | None = None
+        self.suspensions: int | None = None
+        self.saves: int | None = None
+        self.shots_faced: int | None = None
+
+    def add(self, a: ch.GameAppearance) -> None:
+        self.games += 1
+        self.goals += a.goals
+        self.goalkeeper = self.goalkeeper or a.goalkeeper
+        self.goals_7m = _add(self.goals_7m, a.goals_7m)
+        self.attempts_7m = _add(self.attempts_7m, a.attempts_7m)
+        self.suspensions = _add(self.suspensions, a.suspensions)
+        if a.goalkeeper:
+            self.saves = _add(self.saves, a.saves)
+            self.shots_faced = _add(self.shots_faced, a.shots_faced)
+
+    def payload(self) -> dict[str, Any]:
+        return {
+            "games": self.games,
+            "goals": self.goals,
+            "goals_7m": self.goals_7m,
+            "attempts_7m": self.attempts_7m,
+            "suspensions_2min": self.suspensions,
+            "goalkeeper": self.goalkeeper,
+            "saves": self.saves if self.goalkeeper else None,
+            "shots_faced": self.shots_faced if self.goalkeeper else None,
+        }
+
+
 async def _roster(
     ctx: Ctx, team: Team, season: Season, games: list[ch.OfficialGame], suggest: _Suggester
 ) -> None:
@@ -499,11 +546,13 @@ async def _roster(
     played = [g for g in games if g.played and g.season_id >= ch.FIRST_LOG_SEASON]
     numbers: dict[int, int] = {}
     seen: Counter[int] = Counter()
+    stats: dict[int, _Stats] = {}
     for g in played[-STATS_GAMES:]:  # oldest first: the newest number wins
         for a in await ch.game_players(ctx.db, g.id):
             if a.team_id != team.official_team_id:
                 continue
             seen[a.player_id] += 1
+            stats.setdefault(a.player_id, _Stats()).add(a)
             if a.number is not None:
                 numbers[a.player_id] = a.number
             if not registered and a.player_id not in players and a.name:
@@ -533,6 +582,7 @@ async def _roster(
                     "last_name": p.last_name,
                     "jersey_number": number,
                     "appearances": seen.get(pid, 0),
+                    "stats": stats[pid].payload() if pid in stats else None,
                 },
             )
             continue
@@ -639,11 +689,17 @@ async def sync_team(ctx: Ctx, team: Team, *, initial: bool = False) -> dict[str,
             ).all()
         }
         now = _now()
+        held = await _held_back(ctx, team, season, games, existing, now) if initial else set()
+        held_new = 0
         for g in games:
             payload = _game_payload(g, team)
             home = bool(payload["is_home"])
             m = existing.get(g.id)
             if m is None:
+                if g.id in held:  # over the plan's match limit: a suggestion instead
+                    held_new += ("match_new", f"game:{g.id}") not in suggest.known
+                    suggest("match_new", f"game:{g.id}", {**payload, "reason": PLAN_LIMIT})
+                    continue
                 if not initial:
                     suggest("match_new", f"game:{g.id}", payload)
                     continue
@@ -687,13 +743,40 @@ async def sync_team(ctx: Ctx, team: Team, *, initial: bool = False) -> dict[str,
     created = suggest.created
     return {
         "matches_created": counts["matches_created"],
+        "matches_held_back": len(held),
         "results": counts["results"],
         "roster_suggestions": created["roster_add"]
         + created["roster_number"]
         + created["roster_left"],
         "report_suggestions": created["report"],
-        "other_suggestions": created["match_new"] + created["match_moved"] + created["season_new"],
+        "other_suggestions": created["match_new"]
+        - held_new
+        + created["match_moved"]
+        + created["season_new"],
     }
+
+
+async def _held_back(
+    ctx: Ctx,
+    team: Team,
+    season: Season,
+    games: list[ch.OfficialGame],
+    existing: dict[int | None, Match],
+    now: datetime,
+) -> set[int]:
+    """Games of the prefill that would exceed the plan's matches per season (enforcement on): the
+    next upcoming games become matches first, then the most recent played ones; the rest are
+    held back as match_new suggestions with reason plan_limit (acceptable after an upgrade)."""
+    new = [g for g in games if g.id not in existing]
+    left = await billing.matches_left(ctx, team.organization_id, team.id, season.id)
+    if left is None or len(new) <= left:
+        return set()
+    upcoming = sorted(
+        (g for g in new if not g.played and g.kickoff_at >= now), key=lambda g: g.kickoff_at
+    )
+    first = {g.id for g in upcoming}
+    past = sorted((g for g in new if g.id not in first), key=lambda g: g.kickoff_at, reverse=True)
+    return {g.id for g in (upcoming + past)[left:]}
 
 
 async def sync_now(ctx: Ctx, team_id: uuid.UUID) -> dict[str, Any]:
@@ -731,23 +814,67 @@ async def link(ctx: Ctx, team_id: uuid.UUID) -> dict[str, Any]:
         "synced_at": team.official_synced_at,
         "standing": state.get("standing") or [],
         "open_suggestions": open_count,
+        "roster_stats": bool((team.settings or {}).get(ROSTER_STATS, False)),
     }
+
+
+async def set_preferences(ctx: Ctx, team_id: uuid.UUID, roster_stats: bool) -> dict[str, Any]:
+    """The organisers' choice whether the roster suggestions show the official statistics (a
+    display preference for all organisers of the team; the data is in the payload either way)."""
+    team = await org_service.get_team(ctx, team_id, Action.OFFICIAL_MANAGE)
+    team.settings = {**(team.settings or {}), ROSTER_STATS: roster_stats}
+    await audit.record(
+        ctx,
+        "official.preferences_updated",
+        target_type="team",
+        target_id=team.id,
+        data={"roster_stats": roster_stats},
+    )
+    await ctx.db.flush()
+    return await link(ctx, team_id)
 
 
 # ---- suggestions -------------------------------------------------------------------------------
 
 
+def _out(s: OfficialSuggestion, blocked: str | None = None) -> dict[str, Any]:
+    return {
+        "id": s.id,
+        "kind": s.kind,
+        "status": s.status,
+        "payload": s.payload,
+        "created_at": s.created_at,
+        "resolved_at": s.resolved_at,
+        "blocked": blocked,
+    }
+
+
 async def list_suggestions(
     ctx: Ctx, team_id: uuid.UUID, status: str | None = "open", kind: str | None = None
-) -> list[OfficialSuggestion]:
-    await org_service.get_team(ctx, team_id, Action.OFFICIAL_MANAGE)
+) -> list[dict[str, Any]]:
+    """Open match_new suggestions carry blocked "plan_limit" while accepting them would exceed the
+    plan's matches per season (gone after an upgrade)."""
+    team = await org_service.get_team(ctx, team_id, Action.OFFICIAL_MANAGE)
     q = select(OfficialSuggestion).where(OfficialSuggestion.team_id == team_id)
     if status:
         q = q.where(OfficialSuggestion.status == status)
     if kind:
         q = q.where(OfficialSuggestion.kind == kind)
-    rows = await ctx.db.scalars(q.order_by(OfficialSuggestion.kind, OfficialSuggestion.created_at))
-    return list(rows.all())
+    rows = list(
+        (
+            await ctx.db.scalars(q.order_by(OfficialSuggestion.kind, OfficialSuggestion.created_at))
+        ).all()
+    )
+    full = False
+    if any(s.kind == "match_new" and s.status == "open" for s in rows):
+        season = (await org_service.current_seasons(ctx, [team.id])).get(team.id)
+        if season is not None:
+            left = await billing.matches_left(ctx, team.organization_id, team.id, season.id)
+            full = left is not None and left <= 0
+    return [
+        _out(s, PLAN_LIMIT if full and s.kind == "match_new" and s.status == "open" else None)
+        for s in rows
+    ]
 
 
 async def _suggestion(
@@ -876,7 +1003,10 @@ async def accept(
     elif s.kind in ("match_new", "match_moved", "report"):
         if s.kind == "match_new":
             season = await _team_season(ctx, team)
+            # official games count toward the plan's matches per season (402 plan-limit-matches)
+            await billing.check_new_match(ctx, team.organization_id, team.id, season.id)
             m = await _new_match(ctx, team, season, p, {})
+            await _played_match(ctx, team, m, p)
         else:
             found = await ctx.db.get(Match, uuid.UUID(str(p["match_id"])))
             if found is None or found.team_id != team.id:
@@ -897,6 +1027,20 @@ async def accept(
     await _resolve(ctx, s, "accepted")
     await ctx.db.flush()
     return {"suggestion": s, **out}
+
+
+async def _played_match(ctx: Ctx, team: Team, m: Match, p: dict[str, Any]) -> None:
+    """A past game accepted later (held back by the plan limit at the claim): its result, and
+    its official report as a suggestion like at the claim."""
+    if not p.get("played"):
+        return
+    own, opp = p.get("score_own"), p.get("score_opponent")
+    if m.score_own is None and own is not None and opp is not None:
+        m.score_own, m.score_opponent = int(own), int(opp)
+    if m.kickoff_at < _now() - REPORT_AFTER:
+        suggest = _Suggester(ctx, team, await _suggestions(ctx, team.id))
+        payload = {k: v for k, v in p.items() if k != "reason"}
+        suggest("report", f"game:{m.official_game_id}", {**payload, "match_id": str(m.id)})
 
 
 async def _start_season(ctx: Ctx, team: Team, p: dict[str, Any]) -> uuid.UUID:

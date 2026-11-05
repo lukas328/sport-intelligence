@@ -29,7 +29,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, auto_events, billing, feed, segments, training
+from handball_api.services import audit, auto_events, billing, feed, halls, segments, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match, timeline_video
 from handball_api.services.policies import Action
@@ -576,6 +576,11 @@ async def start_analysis(
         # fails the automatic court again and the run would drop the tracks and identities
         clicked = meta[CLICKED]
         points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
+    refs: list[dict[str, Any]] = []
+    if points is None:
+        # the court clicked or confirmed on an earlier video of the same hall: the worker tries
+        # to carry it over before the automatic court
+        refs = await halls.references(ctx, asset, (await halls.hall_of(ctx, match))[0])
     payload: dict[str, object] = {
         "job_id": str(job.id),
         "organization_id": str(asset.organization_id),
@@ -601,6 +606,8 @@ async def start_analysis(
     rosters = await _rosters(ctx, match)
     if rosters:
         payload["rosters"] = rosters
+    if refs:
+        payload["hall_references"] = refs
     ctx.require_jobs().enqueue(
         "gpu",
         ANALYSIS_FUNC,
@@ -824,6 +831,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         .limit(1)
     )
     meta = asset.analysis or {}
+    match = await ctx.db.get(Match, asset.match_id)
     status = "none"
     if job is not None:
         status = {
@@ -849,6 +857,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "needs_calibration": bool(meta.get("needs_calibration")),
         "calibration_error": meta.get("calibration_error"),
         "calibration_info": meta.get("calibration_info"),
+        "hall": await halls.summary(ctx, asset, match) if match is not None else None,
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,

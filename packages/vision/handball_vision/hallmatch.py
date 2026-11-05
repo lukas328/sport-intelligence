@@ -115,7 +115,7 @@ def register(reference: U8, reference_court: F64, image: U8, ransac_px: float = 
     def fit(sel: NDArray[np.bool_]) -> tuple[F64 | None, NDArray[np.bool_]]:
         if sel.sum() < 4:
             return None, np.zeros(len(a), bool)
-        h, mask = cv2.findHomography(a[sel], b[sel], cv2.RANSAC, ransac_px, maxIters=4000)
+        h, _ = cv2.findHomography(a[sel], b[sel], cv2.RANSAC, ransac_px, maxIters=4000)
         if h is None:
             return None, np.zeros(len(a), bool)
         err = np.linalg.norm(geometry.apply(h, a) - b, axis=1)
