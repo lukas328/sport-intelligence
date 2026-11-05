@@ -483,9 +483,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "scenes" && (
         <div className="animate-fade space-y-8">
+          {/* the coach's job here first: feedback per player; then the reels to share */}
+          {staff && <TeamFeedView orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} kickoff={match.kickoff_ms} periodS={match.period_s} />}
           <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />
           {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
-          {staff && <TeamFeedView orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
         </div>
       )}
 

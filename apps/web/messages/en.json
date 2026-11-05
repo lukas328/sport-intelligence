@@ -1453,7 +1453,14 @@
     "youth_seven_m_won": "7 m won",
     "youth_suspension": "Learning moment: duels",
     "youth_foul": "Learning moment: duels",
-    "youth_coach_choice": "Picked by the coach"
+    "youth_coach_choice": "Picked by the coach",
+    "summary": "{players} players, {scenes} scenes, {waiting, plural, =0 {all self-assessments in} one {# self-assessment open} other {# self-assessments open}}.",
+    "noAssessmentLong": "Self-assessment open",
+    "play": "Play {what} at {time}",
+    "positive": "positive",
+    "toLearn": "to learn from",
+    "addNote": "Note",
+    "editNote": "Edit note"
   },
   "scouting": {
     "title": "Preparation report",
@@ -1615,7 +1622,8 @@
     "status_queued": "Being prepared...",
     "status_rendering": "Rendering...",
     "status_failed": "Creation failed.",
-    "status_blocked_consent": "Not possible because consents are missing."
+    "status_blocked_consent": "Not possible because consents are missing.",
+    "newReel": "Create a new reel"
   },
   "parts": {
     "title": "Video files of the match",

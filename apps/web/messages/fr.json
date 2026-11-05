@@ -1453,7 +1453,14 @@
     "youth_seven_m_won": "7 m obtenu",
     "youth_suspension": "Moment d'apprentissage : duels",
     "youth_foul": "Moment d'apprentissage : duels",
-    "youth_coach_choice": "Choisi par l'entraîneur·e"
+    "youth_coach_choice": "Choisi par l'entraîneur·e",
+    "summary": "{players} joueurs, {scenes} scènes, {waiting, plural, =0 {toutes les auto-évaluations reçues} one {# auto-évaluation en attente} other {# auto-évaluations en attente}}.",
+    "noAssessmentLong": "Auto-évaluation en attente",
+    "play": "Lire {what} à {time}",
+    "positive": "positif",
+    "toLearn": "pour apprendre",
+    "addNote": "Note",
+    "editNote": "Modifier la note"
   },
   "scouting": {
     "title": "Rapport de préparation",
@@ -1615,7 +1622,8 @@
     "status_queued": "En préparation...",
     "status_rendering": "Rendu en cours...",
     "status_failed": "La création a échoué.",
-    "status_blocked_consent": "Impossible faute de consentements."
+    "status_blocked_consent": "Impossible faute de consentements.",
+    "newReel": "Créer un nouveau reel"
   },
   "parts": {
     "title": "Fichiers vidéo du match",

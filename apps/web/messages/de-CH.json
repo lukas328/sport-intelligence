@@ -1453,7 +1453,14 @@
     "youth_seven_m_won": "7 m herausgeholt",
     "youth_suspension": "Lernmoment: Zweikampf",
     "youth_foul": "Lernmoment: Zweikampf",
-    "youth_coach_choice": "Vom Trainer ausgewählt"
+    "youth_coach_choice": "Vom Trainer ausgewählt",
+    "summary": "{players} Spieler, {scenes} Szenen, {waiting, plural, =0 {alle Selbsteinschätzungen da} one {# Selbsteinschätzung offen} other {# Selbsteinschätzungen offen}}.",
+    "noAssessmentLong": "Selbsteinschätzung offen",
+    "play": "{what} bei {time} abspielen",
+    "positive": "positiv",
+    "toLearn": "zum Lernen",
+    "addNote": "Notiz",
+    "editNote": "Notiz ändern"
   },
   "scouting": {
     "title": "Vorbereitungsbericht",
@@ -1615,7 +1622,8 @@
     "status_queued": "Wird vorbereitet...",
     "status_rendering": "Wird gerendert...",
     "status_failed": "Erstellen fehlgeschlagen.",
-    "status_blocked_consent": "Wegen fehlender Einwilligungen nicht möglich."
+    "status_blocked_consent": "Wegen fehlender Einwilligungen nicht möglich.",
+    "newReel": "Neues Reel erstellen"
   },
   "parts": {
     "title": "Videodateien des Spiels",

@@ -50,15 +50,18 @@ export function HighlightsView({
   });
   return (
     <section className="space-y-4" aria-labelledby="highlights-title">
-      <div>
-        <h2 id="highlights-title" className="text-lg font-semibold">
+      <div className="space-y-1 border-b border-foreground/15 pb-3">
+        <h2 id="highlights-title" className="font-display text-2xl">
           {t("title")}
         </h2>
         <p className="max-w-prose text-sm text-muted">{t("intro")}</p>
       </div>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       {staff && (
-        <div className="flex flex-wrap items-end gap-3">
+        // a new reel is an occasional job: folded, not a form on top of the reels
+        <details className="text-sm">
+        <summary className="cursor-pointer font-medium text-accent">{t("newReel")}</summary>
+        <div className="flex flex-wrap items-end gap-3 pt-3">
           <Select label={t("format")} value={format} onChange={(e) => setFormat(e.target.value as "16x9")}>
             <option value="16x9">{t("landscape")}</option>
             <option value="9x16">{t("portrait")}</option>
@@ -75,12 +78,13 @@ export function HighlightsView({
             {t("create")}
           </Button>
         </div>
+        </details>
       )}
       {q.data && q.data.length === 0 && <EmptyState title={t("none")}>{t("noneHint")}</EmptyState>}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-x-12 gap-y-6 md:grid-cols-2">
         {(q.data ?? []).map((r) => (
-          <Card key={r.id} className="space-y-2" data-testid="reel">
-            <p className="font-medium">
+          <div key={r.id} className="space-y-2 border-t-2 border-foreground pt-3" data-testid="reel">
+            <p className="font-semibold">
               {r.player_id ? names[r.player_id] ?? t("playerReel") : t("teamReel")} · {r.format === "9x16" ? t("portrait") : t("landscape")}
             </p>
             <p className="text-sm text-muted">
@@ -104,9 +108,9 @@ export function HighlightsView({
                 </div>
               </>
             ) : (
-              <p className="text-sm">{t(`status_${r.status}` as "status_queued")}</p>
+              <p className="text-sm text-muted">{t(`status_${r.status}` as "status_queued")}</p>
             )}
-          </Card>
+          </div>
         ))}
       </div>
     </section>
