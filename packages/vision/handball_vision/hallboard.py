@@ -14,7 +14,12 @@ Two layouts:
   graphic). A field with team codes glued to it ("SGW27:30") is a score; two bare `mm:ss` fields one
   above the other are told apart over the whole video (`HallBoardReader`): the clock changes from
   one sample to the next, the score rarely.
-Fields that OCR merged into one box are split first ("32:10 11", "32:1011").
+Fields that OCR merged into one box are split first ("32:10 11", "32:1011"). Of several clock-like
+fields the clock is the one under the score (the most centred; a penalty timer "0:18" may stand
+beside it), or with two-digit minutes over a timer of the same size; a field with letters ("16:00
+Uhr" on a pre-match graphic) is never the clock. Once the layout is known, a field in the score's
+place is never the clock either, however the clock under it came out ("51-14", "50" ".10").
+`read_tokens` is the text reading itself (also used by ml/data/segment_clock.py).
 
 Finding the board (`HallBoardReader.add`): the first reading comes from text detection on the whole
 frame. Then the board region is locked: a grey template of it is matched at its last position
@@ -245,6 +250,35 @@ def _pick_clock(clocks: Sequence[tuple[Token, int]]) -> tuple[Token, int]:
     return max(big, key=lambda c: (_two_digit_minutes(c[0]), c[0].score * c[0].h))
 
 
+DASHED = re.compile(r"^\d{1,2} ?- ?\d{1,2}$")  # "51-14": a score, or a clock's colon read as a dash
+
+
+def _sure_score(tk: Token) -> bool:
+    """A field that is a score whatever the layout: `_pair`, but not bare numbers around a dash
+    (the recogniser reads a clock's colon as a dash now and then: "51-14", "51-0")."""
+    return _pair(tk) is not None and not DASHED.match(tk.text.strip())
+
+
+def _score_side(stacked: Stacked, field: Token, other: Token) -> bool:
+    """`other` is on the score's side of `field` in a stacked board."""
+    return (other.cy < field.cy) == (stacked == "above")
+
+
+def _in_score_line(field: Token, tokens: Sequence[Token], stacked: Stacked) -> bool:
+    """With the layout known: a bare `mm:ss` field with text stacked on its clock side and none on
+    its score side stands where the score does, however the clock under it was read ("51-14",
+    "50" and ".10"). A penalty timer ("1:32") under a clock says nothing."""
+    clock_side = score_side = False
+    for tk in tokens:
+        if tk is field or not _stacked_with(tk, field):
+            continue
+        if _score_side(stacked, field, tk):
+            score_side = True
+        elif _clock_s(tk.text) is None or _two_digit_minutes(tk):
+            clock_side = True
+    return clock_side and not score_side
+
+
 def parse_board(
     tokens: Sequence[Token],
     t_ms: int = 0,
@@ -256,18 +290,28 @@ def parse_board(
     `stacked`: where the score field sits relative to the clock when two bare `mm:ss` fields are
     stacked ("above": the upper one is the score). Unknown (None), such a frame gives neither
     clock nor score (either field may be the clock), only a reading that says a board is there.
-    A field with letters ("16:00 Uhr" on a pre-match graphic) is never the clock."""
+    A field with letters ("16:00 Uhr" on a pre-match graphic) is never the clock. Known, a field
+    in the score's place is never the clock either (`_in_score_line`): such a frame gives a reading
+    without clock when nothing else is a clock."""
     toks = [s for tk in tokens for s in split_token(tk)]
     clocks = clock_fields(toks)
     if not clocks:
         return None
+    if stacked is not None:
+        clocks = [c for c in clocks if not _in_score_line(c[0], toks, stacked)]
+        if not clocks:
+            return BoardReading(t_ms, None, None, None)
     # a score field with team codes stacked with a clock: the nearest line, then the field most
     # centred on the score (a penalty timer may stand beside the clock or on the line under it)
     for tk in toks:
         pair = _pair(tk)
         if pair is None:
             continue
-        near = [(c, s) for c, s in clocks if _stacked_with(tk, c)]
+        near = [
+            (c, s)
+            for c, s in clocks
+            if _stacked_with(tk, c) and (stacked is None or _score_side(stacked, c, tk))
+        ]
         if near:
             score = tk
             clock, clock_s = min(
@@ -303,8 +347,9 @@ def parse_board(
 
 class StackedVotes:
     """Where the score field sits in a stacked board, voted over the samples (`add` each in
-    turn): a score field with team codes says it directly; of two bare `mm:ss` fields one above
-    the other, the one that changes between samples a few seconds apart is the clock."""
+    turn): a score field with team codes says it directly (`_sure_score`; "51-14" may be a clock
+    misread and does not vote); of two bare `mm:ss` fields one above the other, the one that
+    changes between samples a few seconds apart is the clock."""
 
     def __init__(self) -> None:
         self.votes = {"above": 0.0, "below": 0.0}
@@ -314,7 +359,7 @@ class StackedVotes:
         toks = [s for tk in tokens for s in split_token(tk)]
         clocks = [tk for tk, _ in clock_fields(toks)]
         for tk in toks:
-            if _pair(tk) is not None:
+            if _sure_score(tk):
                 for c in clocks:
                     if _stacked_with(tk, c):
                         self.votes["above" if tk.cy < c.cy else "below"] += 1

@@ -251,3 +251,16 @@ def test_stacked_stream_graphic_gives_the_running_clock_not_score_or_timer(
     assert len(samples) >= 28
     assert all(c == 2546 + v // 1000 for v, c in samples)  # the clock field on every reading
     assert sc.plausible(sc.clean(samples))
+
+
+def test_a_standing_field_without_score_is_no_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The half-time graphic "Pausenstand 11 : 17" reads as a lone, standing "11:17"."""
+    import segment_clock as sc
+
+    ocr = _FieldOcr({120: lambda t: "11:17"})
+    monkeypatch.setattr(sc, "frames", lambda path, every_ms=0, skip="NONREF": _graphic_frames(
+        ocr, {120: (250, 150, 390, 190)}, 30))
+    samples, reader = sc.read_clock(Path("x.mp4"), ocr, 2.0, budget_s=1e9)
+    assert len(samples) >= 10 and {c for _, c in samples} == {677.0}
+    assert sc.plausible(samples) and not sc.with_score(reader)
+    assert not sc.plausible(samples, standing_ok=sc.with_score(reader))

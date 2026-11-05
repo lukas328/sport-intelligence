@@ -29,8 +29,9 @@ is no clock):
 
 Readings that disagree with both neighbours are dropped (`align_official._clean`, then runs of up
 to two readings that disagree with the runs on both sides); fewer than two
-readings left, or readings that move but never run at 1 s/s for 10 s in total (not a match clock),
-mean no clock.
+readings left, readings that move but never run at 1 s/s for 10 s in total (not a match clock), or
+readings that stand still throughout with no score ever read beside them (a half-time graphic
+"Pausenstand 11 : 17") mean no clock.
 
     # clock of single segments (JSON per line; what the ingest calls in a subprocess)
     python ml/data/segment_clock.py SEG.mp4 [SEG.mp4 ...]
@@ -272,7 +273,10 @@ def overlay_windows(keys: Sequence[tuple[int, Any]]) -> list[Window]:
     out = []
     for band in sorted((b for b in bands if b), key=lambda b: -sum(x[2] * x[3] for x in b)):
         x, y, bw, bh = scoreboard._union(band, 10, (w, h))
-        out.append((x, y, x + bw, y + bh))
+        # the stable boxes may leave out part of a field (the clock line of a stream graphic on
+        # a plain box): a margin of a third of the window's height
+        m = round(bh / 3)
+        out.append((max(0, x - m), max(0, y - m), min(w, x + bw + m), min(h, y + bh + m)))
     return out
 
 
@@ -327,10 +331,12 @@ def clean(samples: Sequence[Sample], max_run: int = 2) -> list[Sample]:
     return out
 
 
-def plausible(samples: Sequence[Sample], min_running_s: float = 10.0) -> bool:
+def plausible(
+    samples: Sequence[Sample], min_running_s: float = 10.0, standing_ok: bool = True
+) -> bool:
     """A match clock either runs at 1 s/s or stands still. Readings that never run for
     `min_running_s` in total but do move (a wall clock, a counter, a misread field) are not one;
-    a clock that stands still throughout (time-out, half time) is kept."""
+    a clock that stands still throughout (time-out, half time) is kept if `standing_ok`."""
     if len(samples) < 2:
         return False
     running, moved = 0.0, False
@@ -340,7 +346,14 @@ def plausible(samples: Sequence[Sample], min_running_s: float = 10.0) -> bool:
             moved = True
         if dc > 0 and abs(dc - dv) <= max(1.5, 0.15 * dv):
             running += dv
-    return running >= min_running_s or not moved
+    return running >= min_running_s or (standing_ok and not moved)
+
+
+def with_score(reader: Any) -> bool:
+    """Whether the board a `hallboard.HallBoardReader` read showed a score next to its clock on
+    any sample. A field that never runs and never has a score beside it is no clock to trust: the
+    half-time graphic "Pausenstand 11 : 17" reads as a standing "11:17"."""
+    return any(r.home is not None or r.away is not None for r in reader.readings)
 
 
 def _spread(items: Sequence[Any], n: int) -> list[Any]:
@@ -388,7 +401,7 @@ def read_segment_clock(
         )
         readers.append(reader)
         samples = clean(got)
-        if plausible(samples):
+        if plausible(samples, standing_ok=with_score(reader)):
             result |= {"source": "overlay", "samples": [list(s) for s in samples]}
             result["stacked"] = reader.stacked
         else:  # a frozen overlay clock: hide it from the board reader
@@ -403,7 +416,7 @@ def read_segment_clock(
             )
             readers.append(reader)
             samples = clean(got)
-            if plausible(samples):
+            if plausible(samples, standing_ok=with_score(reader)):
                 result |= {"source": "hall_board", "samples": [list(s) for s in samples]}
                 result["stacked"] = reader.stacked
     result["ocr_calls"] = {

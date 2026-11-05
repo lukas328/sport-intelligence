@@ -216,3 +216,18 @@ def test_clock_of_a_stream_graphic_with_penalty_timers() -> None:
     assert r is not None and r.clock_s is None
     # a pre-match graphic ("16:00 Uhr") is no clock
     assert hb.parse_board([_tk("16:00 Uhr", 535, y=562, w=210, h=39)]) is None
+
+
+def test_layout_known_a_misread_clock_does_not_make_the_score_the_clock() -> None:
+    score = _tk("30:26", 599, y=57, w=80, h=24)
+    # the clock's colon read as a dash ("51-14" looks like a score) or the clock split in two
+    dashed = [score, _tk("51-14", 606, y=87, w=72, h=26)]
+    split = [score, _tk("50", 606, y=87, w=30, h=26), _tk(".10", 640, y=87, w=38, h=26)]
+    for tokens in (dashed, split):
+        r = hb.parse_board(tokens, stacked="above")
+        assert r is not None and r.clock_s is None
+    r = hb.parse_board([score, _tk("51:14", 606, y=87, w=72, h=26)], stacked="above")
+    assert r is not None and (r.home, r.away, r.clock_s) == (30, 26, 51 * 60 + 14)
+    # a dashed clock under a bare score casts no vote for "below"
+    votes = [(k * 2000, dashed) for k in range(4)]
+    assert hb.stacked_vote(votes) is None
