@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { CourtHalf, ShotDot } from "./court-half";
 import { GoalGrid } from "./goal-grid";
 import { useOpponentName } from "@/lib/opponent";
+import { FileField } from "@/components/ui/file-field";
 
 type EventIn = Schemas["EventIn"];
 type Outcome = "goal" | "save" | "miss" | "post" | "blocked";
@@ -53,6 +54,7 @@ export function Tagger({
   const oppName = useOpponentName();
   const te = useTranslations("errors");
   const tk = useTranslations("keepers");
+  const tf = useTranslations("file");
   const qc = useQueryClient();
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const [side, setSide] = useState<"own" | "opponent">("own");
@@ -347,7 +349,7 @@ export function Tagger({
           </div>
           <label className="flex flex-col gap-1">
             <span className="text-[0.8125rem] font-medium">{t("import")}</span>
-            <input type="file" accept=".csv,.json,text/csv,application/json" onChange={importFeed} className="text-xs" />
+            <FileField accept=".csv,.json,text/csv,application/json" onChange={importFeed} button={tf("choose")} empty={tf("none")} />
           </label>
         </div>
       </details>

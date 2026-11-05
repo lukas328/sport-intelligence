@@ -67,7 +67,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await page.getByRole("button", { name: "Einladung senden" }).click();
   await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await expect(page.getByRole("heading", { name: "Herren 1" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Kader" })).toBeVisible();
+  await expect(page.getByText("Team · Herren 1")).toBeVisible();
   await expect(page.getByTestId("roster-count")).toHaveText("4 Spieler");
 
   const elapsed = Date.now() - started;

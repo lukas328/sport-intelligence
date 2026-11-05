@@ -10,6 +10,7 @@ import { Alert, Card } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { cn } from "@/lib/utils";
+import { FileField } from "@/components/ui/file-field";
 
 type Upload = Schemas["PaperUploadOut"];
 interface PlayerRow {
@@ -147,6 +148,7 @@ function Review({ orgId, upload, onDone }: { orgId: string; upload: Upload; onDo
 export function PaperView({ orgId, teamId }: { orgId: string; teamId: string }) {
   const t = useTranslations("paper");
   const tr = useTranslations();
+  const tf = useTranslations("file");
   const qc = useQueryClient();
   const [open, setOpen] = useState<string | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
@@ -189,7 +191,7 @@ export function PaperView({ orgId, teamId }: { orgId: string; teamId: string }) 
         <form onSubmit={upload} className="flex flex-wrap items-end gap-3">
           <label className="text-sm">
             <span className="block font-medium">{t("photo")}</span>
-            <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" required className="text-sm" />
+            <FileField name="photo" accept="image/jpeg,image/png,image/webp" capture="environment" required button={tf("choosePhoto")} empty={tf("none")} />
           </label>
           <Button type="submit" disabled={busy}>{busy ? t("reading") : t("read")}</Button>
         </form>

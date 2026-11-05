@@ -109,7 +109,7 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-semibold">{t("title")}</h2>
+        {/* the page title says "Statistik-Matrix"; here only what it does */}
         <p className="text-sm text-muted">{t("hint")}</p>
       </div>
       <Card className="space-y-4">

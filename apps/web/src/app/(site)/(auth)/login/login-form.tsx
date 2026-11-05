@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,6 @@ type Mode = "password" | "magic" | "totp" | "magic-sent";
 
 export function LoginForm({ oauth }: { oauth?: ReactNode }) {
   const t = useTranslations();
-  const router = useRouter();
   const params = useSearchParams();
   const next = safeNext(params.get("next"));
   const [mode, setMode] = useState<Mode>(params.get("totp") ? "totp" : "password");
@@ -34,13 +33,15 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
         });
         if (error) return setError(errorKey(error));
         if (data.status === "totp_required") return setMode("totp");
-        router.push(next);
-        router.refresh();
+        // a full load after sign-in: the session is new, and a client push plus refresh raced the
+        // server redirect of /app (the org layout rendered once without its translations)
+        window.location.assign(next);
       } else if (mode === "totp") {
         const { error } = await api.POST("/v1/auth/login/totp", { body: { code: String(form.get("code")) } });
         if (error) return setError(errorKey(error));
-        router.push(next);
-        router.refresh();
+        // a full load after sign-in: the session is new, and a client push plus refresh raced the
+        // server redirect of /app (the org layout rendered once without its translations)
+        window.location.assign(next);
       } else if (mode === "magic") {
         const { error } = await api.POST("/v1/auth/magic-link", { body: { email: String(form.get("email")) } });
         if (error) return setError(errorKey(error));

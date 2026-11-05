@@ -12,11 +12,11 @@ import { destOf, sectionOf, sectionsFor, type Dest, type Section } from "@/lib/n
 import { cn } from "@/lib/utils";
 import { useShell } from "./context";
 
-/** Second (and last) level of navigation: a few pill links below the page title. */
+/** Second (and last) level of navigation: underline links below the page title, like the tabs. */
 export function SubNav({ label, items, active }: { label: string; items: { key: string; href: string; label: ReactNode }[]; active: string | null }) {
   return (
-    <nav aria-label={label} className="scrollbar-none -mx-1 overflow-x-auto px-1 lg:hidden">
-      <ul className="inline-flex gap-1">
+    <nav aria-label={label} className="scrollbar-none -mx-1 overflow-x-auto border-b border-foreground/15 px-1 lg:hidden">
+      <ul className="inline-flex gap-5">
         {items.map((it) => {
           const on = it.key === active;
           return (
@@ -25,8 +25,8 @@ export function SubNav({ label, items, active }: { label: string; items: { key: 
                 href={it.href}
                 aria-current={on ? "page" : undefined}
                 className={cn(
-                  "block whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
-                  on ? "bg-foreground text-background" : "text-muted hover:bg-surface hover:text-foreground",
+                  "-mb-px block min-h-11 whitespace-nowrap border-b-2 pt-2.5 text-[0.9375rem] font-semibold transition-colors",
+                  on ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground",
                 )}
               >
                 {it.label}
@@ -81,43 +81,46 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
   const seasonTools =
     teamBase && active === "season" ? (
       <>
-        <Link href={`${teamBase}/matrix`} className={buttonClass("secondary", "sm")} aria-current={page === "matrix" ? "page" : undefined}>
-          <Grid3x3 aria-hidden />
-          {tr("palette.matrix")}
-        </Link>
-        <Link href={`${teamBase}/assistant`} className={buttonClass("secondary", "sm")} aria-current={page === "assistant" ? "page" : undefined}>
-          <IconAsk />
-          {tr("palette.ask")}
-        </Link>
+        {/* on a tool page only the other tool */}
+        {page !== "matrix" && (
+          <Link href={`${teamBase}/matrix`} className={buttonClass("secondary", "sm")}>
+            <Grid3x3 aria-hidden />
+            {tr("palette.matrix")}
+          </Link>
+        )}
+        {page !== "assistant" && (
+          <Link href={`${teamBase}/assistant`} className={buttonClass("secondary", "sm")}>
+            <IconAsk />
+            {tr("palette.ask")}
+          </Link>
+        )}
       </>
     ) : null;
-  const heading =
-    dest === "matches"
-      ? { eyebrow: team?.name, title: t("matches") }
-      : dest === "training"
-        ? { eyebrow: team?.name, title: t("training") }
-        : dest === "team" && team
-          ? { eyebrow: team.season ?? org.name, title: team.name }
-          : { eyebrow: undefined, title: fallbackTitle ?? "" };
+  // the title names the page; the destination and the team go into the eyebrow
+  const destTitle = dest === "matches" ? t("matches") : dest === "training" ? t("training") : dest === "team" ? t("team") : undefined;
+  const tool = page === "matrix" ? tr("palette.matrix") : page === "assistant" ? tr("palette.ask") : null;
+  const pageTitle = (leaf && tr(leaf.title as "library.plays")) || tool || items.find((i) => i.key === active)?.label || destTitle || fallbackTitle || "";
+  const heading = dest
+    ? { eyebrow: [destTitle, team?.name].filter(Boolean).join(" · ") || undefined, title: pageTitle }
+    : { eyebrow: undefined, title: fallbackTitle ?? "" };
   return (
     <div className="space-y-5">
+      {(leaf || tool) && teamBase && <BackLink href={`${teamBase}/${leaf ? leaf.parent : "season"}`} parent={leaf ? leaf.parent : "season"} />}
       <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions ?? seasonTools} />
-      {dest && items.length > 0 && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
-      {leaf && teamBase && <LeafTitle href={`${teamBase}/${leaf.parent}`} parent={leaf.parent} title={tr(leaf.title as "library.plays")} search={page === "search"} />}
+      {dest && items.length > 0 && !leaf && !tool && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
     </div>
   );
 }
 
-function LeafTitle({ href, parent, title, search }: { href: string; parent: Section; title: string; search: boolean }) {
+/** The way back from a page one level below a section item: a text link above the title. */
+function BackLink({ href, parent }: { href: string; parent: Section }) {
   const t = useTranslations();
   const parentLabel = parent === "library" ? t("library.title") : t(`shell.${parent}` as "shell.season");
   return (
-    <div className="flex items-center gap-2 pt-2">
-      <Link href={href} aria-label={t("library.back", { name: parentLabel })} className="grid size-8 place-items-center rounded-md text-muted ring-1 ring-border hover:bg-surface hover:text-foreground">
-        <ChevronLeft aria-hidden className="size-4" />
-      </Link>
-      {search ? <span className="text-sm font-medium text-muted">{parentLabel}</span> : <h2 className="text-xl font-bold">{title}</h2>}
-    </div>
+    <Link href={href} className="-mb-3 inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
+      <ChevronLeft aria-hidden className="size-4" />
+      {parentLabel}
+    </Link>
   );
 }
 

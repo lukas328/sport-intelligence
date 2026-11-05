@@ -1169,7 +1169,7 @@
   },
   "opponent": {
     "title": "Profil adversaire",
-    "record": "Bilan : {won} victoires, {drawn} nuls, {lost} défaites",
+    "record": "Bilan : {won, plural, one {# victoire} other {# victoires}}, {drawn, plural, one {# nul} other {# nuls}}, {lost, plural, one {# défaite} other {# défaites}}",
     "tagged": "Basé sur {count, plural, one {# match} other {# matchs}} avec événements saisis.",
     "none": "Pas encore de match avec événements saisis contre cet adversaire.",
     "goals": "Buts",
@@ -1183,7 +1183,10 @@
     "goalZones": "Où l'adversaire marque",
     "formations": "Systèmes défensifs (estimés)",
     "matches": "Matchs",
-    "open": "Profil adversaire"
+    "open": "Profil adversaire",
+    "goalsPerMatch": "Buts par match",
+    "fastBreakPerMatch": "Buts en contre-attaque par match",
+    "turnoversPerMatch": "Pertes de balle par match"
   },
   "billing": {
     "title": "Abonnement et factures",
@@ -1395,7 +1398,8 @@
     "clip": "Clip",
     "watch": "Regarder",
     "tagsOf": "Tags de cette scène",
-    "truncated": "Les {n} premières scènes sont affichées."
+    "truncated": "Les {n} premières scènes sont affichées.",
+    "type_timeout": "Temps mort"
   },
   "feed": {
     "title": "Tes scènes",
@@ -1482,7 +1486,7 @@
     "missing_video": "vidéos des matchs précédents",
     "missing_play_detection": "détection automatique des systèmes adverses (à venir)",
     "glance": "L'adversaire en bref",
-    "record": "Bilan de notre point de vue : {won} victoires, {drawn} nuls, {lost} défaites",
+    "record": "Bilan de notre point de vue : {won, plural, one {# victoire} other {# victoires}}, {drawn, plural, one {# nul} other {# nuls}}, {lost, plural, one {# défaite} other {# défaites}}",
     "goalsPerMatch": "Buts par match : {v}",
     "shooters": "Meilleurs tireurs",
     "plays": "Systèmes de jeu",
@@ -2327,5 +2331,10 @@
     "laneEvents": "Événements",
     "feedback": "Retours",
     "legendSidesNamed": "{own} en haut, {opp} en bas"
+  },
+  "file": {
+    "choose": "Choisir un fichier",
+    "choosePhoto": "Choisir une photo",
+    "none": "Aucun fichier choisi"
   }
 }

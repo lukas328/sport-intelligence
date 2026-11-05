@@ -10,7 +10,9 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "U17" })).toBeVisible();
+  // the title names the page, the team sits in the eyebrow above it
+  await expect(page.getByRole("heading", { level: 1, name: "Kader" })).toBeVisible();
+  await expect(page.getByText("Team · U17")).toBeVisible();
   const teamUrl = page.url();
 
   // the bell shows no unread notifications for a new coach
@@ -41,7 +43,7 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   // plan and usage in the settings (limits are not enforced in this installation)
   await page.goto(teamUrl.replace(/\/teams\/.*/, "/settings"));
   const billing = page.getByTestId("billing");
-  await expect(billing).toContainText("Free");
+  await expect(billing).toContainText("Gratis");
   await expect(billing).toContainText("Limiten sind in dieser Installation nicht aktiv.");
   await expect(page.getByTestId("plans").getByRole("listitem").filter({ hasText: "CHF 39 pro Monat" })).toBeVisible();
   await expectAccessible(page);

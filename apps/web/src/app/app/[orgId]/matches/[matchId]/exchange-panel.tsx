@@ -8,12 +8,14 @@ import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { OfficialReportImport } from "./official-report";
+import { FileField } from "@/components/ui/file-field";
 
 /** Sportscode XML and CSV export, Sportscode XML import as own tags (addendum 01, 5.4), official
  * match report import by link. */
 export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; matchId: string; canImport: boolean }) {
   const t = useTranslations("exchange");
   const tr = useTranslations();
+  const tf = useTranslations("file");
   const qc = useQueryClient();
   const [result, setResult] = useState<{ clips: number; tags_created: number } | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
@@ -57,7 +59,7 @@ export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; ma
           <form onSubmit={submit} className="space-y-2">
             <label className="block text-sm font-medium">
               {t("importLabel")}
-              <input name="file" type="file" accept=".xml,application/xml,text/xml" required className="mt-1 block text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-foreground" />
+              <FileField name="file" accept=".xml,application/xml,text/xml" required className="mt-1" button={tf("choose")} empty={tf("none")} />
             </label>
             <p className="text-xs text-muted">{t("importHint")}</p>
             <Button type="submit" disabled={busy}>

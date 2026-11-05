@@ -9,6 +9,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { control } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
+import { FileField } from "@/components/ui/file-field";
 
 declare global {
   interface Window {
@@ -23,6 +24,7 @@ type Chat = { provider?: string; website_id?: unknown; token_id?: unknown } | nu
 /** Feedback with page, match and browser attached; support chat loaded only on click (4.11). */
 export function FeedbackDialog({ orgId, open, onOpenChange, chat }: { orgId: string; open: boolean; onOpenChange: (o: boolean) => void; chat: Chat }) {
   const t = useTranslations("support");
+  const tf = useTranslations("file");
   const path = usePathname();
   const [sent, setSent] = useState(false);
   const [error, setError] = useState(false);
@@ -86,7 +88,7 @@ export function FeedbackDialog({ orgId, open, onOpenChange, chat }: { orgId: str
           </div>
           <label className="block text-[0.8125rem] font-medium">
             {t("screenshot")}
-            <input name="shot" type="file" accept="image/png" className="mt-1 block text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-foreground" />
+            <FileField name="shot" accept="image/png" className="mt-1" button={tf("choose")} empty={tf("none")} />
           </label>
           <div className="flex flex-wrap gap-2">
             <Button type="submit" loading={busy}>

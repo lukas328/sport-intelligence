@@ -172,7 +172,7 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
     <div className="grid gap-6 lg:grid-cols-[1fr_16rem]">
       <section className="space-y-4" aria-labelledby="assistant-title">
         <div>
-          <h2 id="assistant-title" className="text-xl font-bold">{t("title")}</h2>
+          <h2 id="assistant-title" className="sr-only">{t("title")}</h2>
           <p className="text-sm text-muted">{t("hint")}</p>
         </div>
         {messages.length === 0 && (

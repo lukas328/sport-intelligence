@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("opponent"))("title") };
 }
 
+const avg = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+
 export default async function OpponentPage({ params }: { params: Promise<{ orgId: string; opponentId: string }> }) {
   const { orgId, opponentId } = await params;
   const t = await getTranslations("opponent");
@@ -55,17 +57,18 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
       ) : (
         <>
           <p className="text-sm text-muted">{t("tagged", { count: p.tagged_matches })}</p>
-          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5" data-testid="opponent-tiles">
+          {/* one line of the match sheet, not five tiles; averages say so and drop a ".0" */}
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-4 border-t-2 border-foreground pt-4 sm:grid-cols-5" data-testid="opponent-tiles">
             {[
-              [t("goals"), (p.totals.goals / n).toFixed(1)],
+              [t("goalsPerMatch"), avg(p.totals.goals / n)],
               [t("shootingPct"), pct(p.totals.shooting_pct)],
               [t("sevenM"), `${p.totals.seven_m_goals}/${p.totals.seven_m_shots}`],
-              [t("fastBreak"), (p.totals.fast_break_goals / n).toFixed(1)],
-              [t("turnovers"), (p.totals.turnovers / n).toFixed(1)],
+              [t("fastBreakPerMatch"), avg(p.totals.fast_break_goals / n)],
+              [t("turnoversPerMatch"), avg(p.totals.turnovers / n)],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-lg bg-raised px-4 py-4 border border-border sm:px-5">
+              <div key={label}>
                 <dt className="text-[0.8125rem] text-muted">{label}</dt>
-                <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{value}</dd>
+                <dd className="mt-1 font-score text-[1.75rem] leading-none tabular-nums sm:text-3xl">{value}</dd>
               </div>
             ))}
           </dl>

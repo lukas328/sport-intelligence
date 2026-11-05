@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/field";
 import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { FileField } from "@/components/ui/file-field";
 
 type Org = Schemas["OrgOut"];
 type Team = Schemas["TeamOut"];
@@ -121,7 +122,7 @@ function ClubSection({ org }: { org: Org }) {
             <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue={org.primary_color} className="h-11 w-24 p-1" />
             <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue={org.secondary_color} className="h-11 w-24 p-1" />
           </div>
-          <Input label={t("onboarding.logo")} name="logo" type="file" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} />
+          <FileField label={t("onboarding.logo")} name="logo" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} button={t("file.choose")} empty={t("file.none")} />
           <Button type="submit" loading={busy}>
             {t("common.save")}
           </Button>

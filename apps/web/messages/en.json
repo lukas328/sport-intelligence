@@ -1169,7 +1169,7 @@
   },
   "opponent": {
     "title": "Opponent profile",
-    "record": "Record: {won} won, {drawn} drawn, {lost} lost",
+    "record": "Record: {won, plural, one {# win} other {# wins}}, {drawn, plural, one {# draw} other {# draws}}, {lost, plural, one {# loss} other {# losses}}",
     "tagged": "Based on {count, plural, one {# match} other {# matches}} with tagged events.",
     "none": "No matches with tagged events against this opponent yet.",
     "goals": "Goals",
@@ -1183,7 +1183,10 @@
     "goalZones": "Where the opponent scores",
     "formations": "Defence systems (estimated)",
     "matches": "Matches",
-    "open": "Opponent profile"
+    "open": "Opponent profile",
+    "goalsPerMatch": "Goals per match",
+    "fastBreakPerMatch": "Fast-break goals per match",
+    "turnoversPerMatch": "Turnovers per match"
   },
   "billing": {
     "title": "Plan and billing",
@@ -1395,7 +1398,8 @@
     "clip": "Clip",
     "watch": "Watch",
     "tagsOf": "Tags of this scene",
-    "truncated": "Showing the first {n} scenes."
+    "truncated": "Showing the first {n} scenes.",
+    "type_timeout": "Timeout"
   },
   "feed": {
     "title": "Your scenes",
@@ -1482,7 +1486,7 @@
     "missing_video": "videos of earlier matches",
     "missing_play_detection": "automatic detection of opponent plays (coming)",
     "glance": "Opponent at a glance",
-    "record": "Record from our side: {won} wins, {drawn} draws, {lost} losses",
+    "record": "Record from our side: {won, plural, one {# win} other {# wins}}, {drawn, plural, one {# draw} other {# draws}}, {lost, plural, one {# loss} other {# losses}}",
     "goalsPerMatch": "Goals per match: {v}",
     "shooters": "Top shooters",
     "plays": "Plays",
@@ -2327,5 +2331,10 @@
     "laneEvents": "Events",
     "feedback": "Feedback",
     "legendSidesNamed": "{own} above, {opp} below"
+  },
+  "file": {
+    "choose": "Choose file",
+    "choosePhoto": "Choose photo",
+    "none": "No file chosen"
   }
 }
