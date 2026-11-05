@@ -169,9 +169,15 @@ def run_once(a: argparse.Namespace, state: dict[str, Any]) -> int:
         tmp = work / "tmp" / f"{name}.mp4"
         tmp.parent.mkdir(exist_ok=True)
         print(f"{name}: downloading", flush=True)
-        gdown.download(id=ids["video"], output=str(tmp), quiet=True)
-        if "info" in ids:
-            gdown.download(id=ids["info"], output=str(batch / f"{name}.info.json"), quiet=True)
+        try:
+            gdown.download(id=ids["video"], output=str(tmp), quiet=True)
+            if "info" in ids:
+                gdown.download(id=ids["info"], output=str(batch / f"{name}.info.json"), quiet=True)
+        except Exception as exc:  # noqa: BLE001 - Drive quota or network: retry on a later poll
+            tmp.unlink(missing_ok=True)
+            print(f"{name}: download failed, retry later: {str(exc).strip().splitlines()[0][:120]}",
+                  flush=True)
+            continue
         try:
             meta = probe(tmp)
             pieces = []
