@@ -75,6 +75,7 @@ async def references(
         .where(
             CameraCalibration.organization_id == asset.organization_id,
             VideoAsset.id != asset.id,
+            Match.venue.is_not(None),
         )
         .order_by(CameraCalibration.created_at.desc())
     )
