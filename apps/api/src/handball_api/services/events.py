@@ -88,6 +88,8 @@ def _zone(data: EventIn | Event) -> str | None:
         return None
     if data.shot_type in ("penalty", "fast_break"):
         return "penalty" if data.shot_type == "penalty" else "fast_break"
+    if data.shot_type == "empty_net":
+        return "empty_goal"  # from any distance, not "long_range" (zones spec version 2)
     if data.x is not None and data.y is not None:
         return shot_zone(data.x, data.y)
     return None

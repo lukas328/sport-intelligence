@@ -320,8 +320,9 @@ async def test_import_dhb_report_merges_video_goals(
 
     await check()
     stats = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/stats")).json()
-    # 25 official + 1 tagged; the opponent's extra goal is the overlay reading to check
-    assert (stats["own"]["goals"], stats["opponent"]["goals"]) == (26, 27)
+    # 25 official + 1 tagged = the official result; the opponent's overlay goal without an
+    # official one is a reading to check: it counts only once the coach confirms it
+    assert (stats["own"]["goals"], stats["opponent"]["goals"]) == (26, 26)
     match = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).json()
     assert (match["score_own"], match["score_opponent"], match["halftime_own"]) == (26, 26, 13)
 
@@ -576,3 +577,22 @@ async def test_goal_comparison_and_review(
         assert r.status_code == 404, r.text
     r = await api.put(review_url, json={"event_id": lone["id"], "status": "maybe"})
     assert r.status_code == 422
+
+
+@pytest.mark.usefixtures("clean_db")
+async def test_import_is_rate_limited_per_user(make_api: Callable[[], Api]) -> None:
+    """Each import fetches from the federation's server and reads a PDF: limited per person."""
+
+    class Spent:
+        async def hit(self, key: str, limit: int, window: int) -> bool:
+            return not key.startswith("official-report:")
+
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    api.app.state.rate_limiter = Spent()
+    r = await api.post(
+        f"/v1/orgs/{ids['org']}/matches/{m['id']}/official-report",
+        json={"url": "https://www.handball.ch/de/matchcenter/spiele/484345"},
+    )
+    assert r.status_code == 429, r.text

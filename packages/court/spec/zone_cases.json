@@ -13,6 +13,8 @@
     { "x": 38.0, "y": 18.5, "zone": "wing_left" },
     { "x": 37.0, "y": 1.0, "zone": "wing_right" },
     { "x": 20.0, "y": 10.0, "zone": "long_range" },
+    { "x": 20.0, "y": 10.0, "zone": "empty_goal", "empty_goal": true },
+    { "x": 31.0, "y": 10.0, "zone": "empty_goal", "empty_goal": true },
     { "x": 33.0, "y": 10.0, "zone": "penalty", "penalty": true },
     { "x": 30.0, "y": 12.0, "zone": "fast_break", "fast_break": true }
   ]

@@ -49,6 +49,25 @@ async def _matches_with_events(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUI
     )
 
 
+async def _played_matches(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> list[Match]:
+    """Matches of the season that were played: a result is stored or events are (tagged or not)."""
+    has_events = select(Event.match_id).distinct()
+    return list(
+        (
+            await ctx.db.scalars(
+                select(Match)
+                .where(
+                    Match.team_id == team_id,
+                    Match.season_id == season_id,
+                    Match.kind == "match",
+                    Match.score_own.is_not(None) | Match.id.in_(has_events),
+                )
+                .order_by(Match.kickoff_at)
+            )
+        ).all()
+    )
+
+
 async def _season_version(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> str:
     """One aggregated query that changes whenever a match or an event of the season changes."""
     rows = (
@@ -165,7 +184,12 @@ async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> di
 
 
 async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str, Any]:
-    matches = await _matches_with_events(ctx, team.id, season_id)
+    """Every played match counts; goals per match from its events (one source per goal, see
+    handball_metrics.stats.one_source_per_goal), from the stored result when nothing is tagged.
+    Shots, saves and turnovers come from the tagged matches; the shooting and save percentages
+    only from matches with recorded misses or saves; xG only covers shots with a position:
+    `xg_coverage` = shots with xG / shots on target."""
+    matches = await _played_matches(ctx, team.id, season_id)
     names = {
         o.id: o.name
         for o in (
@@ -176,10 +200,23 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
     }
     rows: list[dict[str, Any]] = []
     players: dict[str, dict[str, Any]] = {}
-    totals = {"goals": 0, "shots": 0, "saves": 0, "goals_against": 0, "turnovers": 0, "xg": 0.0}
+    totals: dict[str, Any] = {
+        "goals": 0,
+        "goals_against": 0,
+        "tagged_matches": 0,
+        "shots": 0,
+        "saves": 0,
+        "turnovers": 0,
+        "xg": 0.0,
+        "xg_shots": 0,
+    }
+    pct = {"goals": 0, "shots": 0, "saves": 0, "goals_against": 0}  # matches with attempts
     for m in matches:
         s = await events_service.stats_for(ctx, m)
         own, opp = s["own"], s["opponent"]
+        tagged = bool(s["quality"]["events"])
+        goals = own["goals"] if tagged else m.score_own or 0
+        against = opp["goals"] if tagged else m.score_opponent or 0
         rows.append(
             {
                 "match_id": str(m.id),
@@ -190,19 +227,28 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
                 "score_opponent": m.score_opponent
                 if m.score_opponent is not None
                 else opp["goals"],
-                "goals": own["goals"],
+                "tagged": tagged,
+                "goals": goals,
+                "goals_against": against,
                 "shots": own["shots"],
                 "shooting_pct": own["shooting_pct"],
                 "save_pct": own["save_pct"],
                 "turnovers": own["turnovers"],
                 "xg": own["xg"],
+                "xg_coverage": own["xg_coverage"],
                 "xg_against": opp["xg"],
                 "seven_m": [own["seven_m_goals"], own["seven_m_shots"]],
             }
         )
-        for k in ("goals", "shots", "saves", "goals_against", "turnovers"):
+        totals["goals"] += goals
+        totals["goals_against"] += against
+        totals["tagged_matches"] += tagged
+        for k in ("shots", "saves", "turnovers", "xg_shots"):
             totals[k] += own[k]
         totals["xg"] = round(totals["xg"] + own["xg"], 2)
+        if s["quality"]["attempts_known"]:
+            for k in pct:
+                pct[k] += own[k]
         for p in s["players"].values():
             if p["side"] != "own" or not p.get("player_id"):
                 continue
@@ -241,11 +287,12 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
         "totals": {
             **totals,
             "matches": len(rows),
-            "shooting_pct": round(totals["goals"] / totals["shots"], 4)
-            if totals["shots"]
+            "shooting_pct": round(pct["goals"] / pct["shots"], 4) if pct["shots"] else None,
+            "save_pct": round(pct["saves"] / (pct["saves"] + pct["goals_against"]), 4)
+            if pct["saves"] + pct["goals_against"]
             else None,
-            "save_pct": round(totals["saves"] / (totals["saves"] + totals["goals_against"]), 4)
-            if totals["saves"] + totals["goals_against"]
+            "xg_coverage": round(totals["xg_shots"] / totals["shots"], 4)
+            if totals["shots"]
             else None,
         },
         "players": player_list,
@@ -272,6 +319,7 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
         "fast_break_goals": 0,
         "turnovers": 0,
         "xg": 0.0,
+        "xg_shots": 0,
     }
     zones: dict[str, dict[str, int]] = {}
     goal_zones: dict[str, dict[str, int]] = {}
@@ -294,6 +342,7 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
             {
                 "match_id": str(m.id),
                 "kickoff_at": m.kickoff_at.isoformat(),
+                "is_home": m.is_home,
                 "score_own": m.score_own,
                 "score_opponent": m.score_opponent,
                 "events": s["quality"]["events"],
@@ -310,6 +359,7 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
             "seven_m_shots",
             "fast_break_goals",
             "turnovers",
+            "xg_shots",
         ):
             agg[k] += opp[k]
         agg["xg"] = round(agg["xg"] + opp["xg"], 2)
@@ -330,6 +380,7 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
                 f = str(seg["formation"])
                 formations[f] = formations.get(f, 0) + int(seg["end_ms"]) - int(seg["start_ms"])
     agg["shooting_pct"] = round(agg["goals"] / agg["shots"], 4) if agg["shots"] else None
+    agg["xg_coverage"] = round(agg["xg_shots"] / agg["shots"], 4) if agg["shots"] else None
     top = sorted(scorers.items(), key=lambda kv: (-kv[1]["goals"], kv[0]))[:8]
     return {
         "opponent": {"id": str(opponent.id), "name": opponent.name},

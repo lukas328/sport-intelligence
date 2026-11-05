@@ -2271,7 +2271,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Match Stats */
+        /**
+         * Match Stats
+         * @description Match statistics (packages/metrics). Each goal counts once: with an imported official report,
+         *     a tagged or video goal of the same side within 20 s of an official goal is that goal.
+         *     `own`/`opponent`: `xg` covers only shots on target with a known position (and penalties),
+         *     `xg_shots` counts them and `xg_coverage` = xg_shots / shots (null without shots); players have
+         *     `xg_shots`, goalkeepers `xg_shots` and `xg_coverage`. Shot zones include `empty_goal`
+         *     (shots on the empty goal, from any distance) apart from `long_range` (over 15 m).
+         */
         get: operations["match_stats_v1_orgs__org_id__matches__match_id__stats_get"];
         put?: never;
         post?: never;
@@ -2688,7 +2696,8 @@ export interface paths {
         };
         /**
          * Opponent Profile
-         * @description Scouting profile from all tagged matches against this opponent.
+         * @description Scouting profile from all tagged matches against this opponent. `matches` rows carry
+         *     `is_home` (our home game); `totals` carry `xg_shots` and `xg_coverage` like the season stats.
          */
         get: operations["opponent_profile_v1_orgs__org_id__opponents__opponent_id__profile_get"];
         put?: never;
@@ -3954,7 +3963,11 @@ export interface paths {
         };
         /**
          * Season Stats
-         * @description Per-match key numbers, totals and player totals for a season.
+         * @description Per-match key numbers, totals and player totals for a season. Every played match counts (a
+         *     result stored or events): rows have `tagged`, `goals`/`goals_against` from the events (from the
+         *     result when untagged) and `xg_coverage`; totals have `matches`, `tagged_matches`, `xg`,
+         *     `xg_shots` and `xg_coverage` = shots with xG / shots on target (null without shots), and
+         *     shooting/save percentages only from matches with recorded misses or saves.
          */
         get: operations["season_stats_v1_orgs__org_id__teams__team_id__seasons__season_id__stats_get"];
         put?: never;

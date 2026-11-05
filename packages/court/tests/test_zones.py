@@ -17,6 +17,7 @@ def test_shared_cases(case: dict[str, object]) -> None:
         float(case["y"]),  # type: ignore[arg-type]
         penalty=bool(case.get("penalty")),
         fast_break=bool(case.get("fast_break")),
+        empty_goal=bool(case.get("empty_goal")),
     )
     assert got == case["zone"]
 

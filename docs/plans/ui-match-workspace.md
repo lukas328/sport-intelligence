@@ -297,3 +297,29 @@ confirmed on one video is carried over to every later video of the same hall.
   hint "Einmal pro Halle markieren, die nächsten Videos aus dieser Halle übernehmen es".
 - `calibration_error` texts are clearer now (see ADR 025 addendum 2): flat views, broken camera
   motion (cuts, zoom) and missing markings each say what to do.
+
+Statistics fixes from the UI session (2026-11-05, metrics 0.3.0; cached stats recompute).
+- Each goal counts once (match stats, season, scouting, PDF): with an imported official report, a
+  tagged, overlay or confirmed-candidate goal of the same side within 20 s (match clock) of an
+  official goal is that goal; the official goal takes over its shot position, zones and scorer.
+  An overlay or candidate goal without an official one counts only after the coach confirmed it
+  in the report comparison; goals a person tagged away from every official goal still count.
+- Season stats (`GET .../teams/{team}/seasons/{season}/stats`) count every played match (a result
+  stored or events), not only tagged ones. Rows: new `tagged`, `goals_against`, `xg_coverage`;
+  `goals`/`goals_against` come from the result when the match is not tagged. Totals: new
+  `tagged_matches`, `goals_against`, `xg_shots`, `xg_coverage`; `shooting_pct` and `save_pct` only
+  from matches with recorded misses or saves (score-only matches would inflate them).
+- xG covers only shots on target with a known position (penalties always): goals from the report
+  or the overlay have none and no longer add a made-up 0.5 or fall out unnoticed. New
+  `xg_shots` and `xg_coverage` (= xg_shots / shots on target, null without shots) on the team
+  blocks of `GET .../matches/{id}/stats` (`own`, `opponent`), on season rows and totals and on the
+  scouting totals; players have `xg_shots`, goalkeepers `xg_shots` and `xg_coverage` (GSAx only
+  over shots with xG). Suggested UI: show xG only above a coverage of about 0.7, else "xG: zu
+  wenige Würfe mit Position (n von m)".
+- Scouting (`GET .../opponents/{id}/profile`): every `matches` row has `is_home` (our home game).
+- Shot zone "Fernwurf / leeres Tor" is split: `long_range` "Fernwurf" (over 15 m) and the new
+  `empty_goal` "Leeres Tor" (shot type `empty_net`, from any distance; de-CH "Leeres Tor", en
+  "Empty goal", fr "But vide"). Stored shots were migrated (alembic 0033); a saved filter on
+  `long_range` no longer finds empty-goal shots. The web messages (`zones` in
+  apps/web/messages/*.json) need `long_range` relabelled and `empty_goal` added; the court
+  package exports both (`SHOT_ZONES`, `ZONE_LABELS`, `shotZone(x, y, {emptyGoal})`).
