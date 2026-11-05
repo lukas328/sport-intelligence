@@ -682,7 +682,10 @@
     "byType": "par type",
     "opponentPlayers": "Adversaire par numéro",
     "noVideo": "sans vidéo",
-    "noDataHint": "Téléversez la vidéo ; l'analyse démarre ensuite automatiquement."
+    "noDataHint": "Téléversez la vidéo ; l'analyse démarre ensuite automatiquement.",
+    "basis": "Base : {list}.",
+    "scoreMismatch": "Les événements donnent {events}, le résultat est {score} : des buts manquent ou sont saisis deux fois.",
+    "scorers": "Buteurs"
   },
   "shotsView": {
     "title": "Tirs",
@@ -957,7 +960,7 @@
     "jump": "Lire {formation} à partir de {time}"
   },
   "insights": {
-    "title": "Constats",
+    "title": "Ce qui ressort",
     "hint": "Calculés à partir des événements saisis et comparés aux autres matchs de la saison. Seulement avec assez de tirs.",
     "none": "Pas encore de constat marquant. Il faut plus d'événements saisis.",
     "evidence": "Voir les preuves",
@@ -1000,7 +1003,8 @@
     "trainDone": "Créé. Séance et suivi se trouvent sous Entraînement.",
     "trainOpen": "Vers l'entraînement",
     "whoKeeper": "Votre gardien",
-    "whoPlayer": "Un joueur non attribué"
+    "whoPlayer": "Un joueur non attribué",
+    "hintAlone": "Automatiquement à partir des événements saisis de ce match. Avec d'autres matchs de la saison, la comparaison s'ajoute."
   },
   "zones": {
     "wing_left": "Ailier gauche",

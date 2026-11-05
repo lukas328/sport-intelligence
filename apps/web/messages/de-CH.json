@@ -682,7 +682,10 @@
     "byType": "nach Typ",
     "opponentPlayers": "Gegner nach Rückennummer",
     "noVideo": "ohne Video",
-    "noDataHint": "Lade das Video hoch, die Analyse startet danach automatisch."
+    "noDataHint": "Lade das Video hoch, die Analyse startet danach automatisch.",
+    "basis": "Grundlage: {list}.",
+    "scoreMismatch": "Die Ereignisse ergeben {events}, das Resultat lautet {score}: Tore fehlen oder sind doppelt erfasst.",
+    "scorers": "Torschützen"
   },
   "shotsView": {
     "title": "Würfe",
@@ -957,7 +960,7 @@
     "jump": "{formation} ab {time} abspielen"
   },
   "insights": {
-    "title": "Erkenntnisse",
+    "title": "Was auffällt",
     "hint": "Automatisch aus den erfassten Ereignissen, verglichen mit den anderen Spielen der Saison. Nur Aussagen mit genügend Würfen.",
     "none": "Noch keine auffälligen Erkenntnisse. Dafür braucht es mehr erfasste Ereignisse.",
     "evidence": "Belege anzeigen",
@@ -1000,7 +1003,8 @@
     "trainDone": "Angelegt. Du findest Einheit und Verlauf unter Training.",
     "trainOpen": "Zum Training",
     "whoKeeper": "Euer Torhüter",
-    "whoPlayer": "Ein nicht zugeordneter Spieler"
+    "whoPlayer": "Ein nicht zugeordneter Spieler",
+    "hintAlone": "Automatisch aus den erfassten Ereignissen dieses Spiels. Mit weiteren Spielen der Saison kommt der Vergleich dazu."
   },
   "zones": {
     "wing_left": "Aussen links",

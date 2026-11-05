@@ -139,8 +139,9 @@ function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnT
   );
 }
 
-export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false }: ViewProps) {
+export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false, videoNote = null }: ViewProps & { videoNote?: string | null }) {
   const t = useTranslations("stats");
+  const te = useTranslations("events");
   const oppName = useOpponentName();
   const { drill, open, close } = useDrill();
   const attempts = stats.quality.attempts_known !== false;
@@ -161,8 +162,32 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
     { label: t("xg"), own: attempts ? stats.own.xg.toFixed(1) : "-", opp: attempts ? stats.opponent.xg.toFixed(1) : "-" },
   ];
   const run = stats.timeline.best_run.own;
+  // where the figures come from, and where they disagree with the result: said, not hidden
+  const sources = Object.entries(stats.quality.sources)
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, n]) => `${n} ${te.has(`source_${k}` as "source_model") ? te(`source_${k}` as "source_model") : k}`)
+    .join(", ");
+  const mismatch =
+    match.score_own != null && match.score_opponent != null && (stats.own.goals !== match.score_own || stats.opponent.goals !== match.score_opponent);
+  const scorers = Object.values(stats.players)
+    .filter((p) => p.side === "own" && p.goals > 0)
+    .sort((a, b) => b.goals - a.goals || (a.number ?? 99) - (b.number ?? 99))
+    .slice(0, 8);
+  const who = (p: (typeof scorers)[number]) => (p.player_id && names[p.player_id]) || `#${p.number ?? "?"}`;
   return (
     <div className="space-y-10">
+      <div className="space-y-1 text-sm" data-testid="analysis-basis">
+        <p>
+          {t("basis", { list: sources })}
+          {videoNote && ` ${videoNote}`}
+        </p>
+        {mismatch && (
+          <p className="font-medium">
+            {t("scoreMismatch", { events: `${stats.own.goals}:${stats.opponent.goals}`, score: `${match.score_own}:${match.score_opponent}` })}
+          </p>
+        )}
+      </div>
       <InsightsCard orgId={orgId} matchId={match.id} names={names} staff={staff} onEvidence={open} />
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
         <Sheet className="space-y-3">
@@ -192,7 +217,10 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {rows
+                // a row without a figure on either side says nothing
+                .filter((r) => !(r.own === "-" && r.opp === "-"))
+                .map((r) => (
                 <tr key={r.label} className="border-t border-border/70">
                   <th scope="row" className="py-1.5 text-left font-normal">{r.label}</th>
                   <td className="text-right">
@@ -208,6 +236,23 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           <p className="text-xs text-muted">{t(stats.possessions_source === "tracking" ? "possessionsTracked" : "possessionsHint")}</p>
         </Sheet>
       </div>
+      {scorers.length > 0 && (
+        <Sheet className="space-y-3">
+          <h2 className="font-semibold">{t("scorers")}</h2>
+          <ul className="grid gap-x-10 sm:grid-cols-2">
+            {scorers.map((p) => (
+              <li key={`${p.player_id}-${p.number}`} className="flex items-baseline justify-between gap-3 border-b border-border/70 py-1.5 text-sm">
+                <span className="min-w-0 truncate">{who(p)}</span>
+                <N
+                  value={p.shots ? `${p.goals}/${p.shots}` : p.goals}
+                  label={`${t("goals")} ${who(p)}`}
+                  onClick={() => open(`${t("goals")}: ${who(p)}`, { ...(p.player_id ? { player_id: p.player_id } : { side: "own" as const, number: p.number ?? undefined }), type: "shot", outcome: "goal" })}
+                />
+              </li>
+            ))}
+          </ul>
+        </Sheet>
+      )}
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
   );
@@ -319,14 +364,17 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
     { key: "assists", label: t("assists") },
     { key: "saves", label: t("saves") },
   ];
-  const table = (rows: PlayerRow[], caption: string) => (
-    <div className="overflow-x-auto rounded-lg bg-raised border border-border">
+  const table = (rows: PlayerRow[], caption: string) => {
+    // like a printed match sheet: columns that are zero for everyone are left out
+    const used = cols.filter((c) => rows.some((p) => Number(p[c.key] ?? 0) > 0));
+    return (
+    <div className="overflow-x-auto border-t-2 border-foreground">
       <table className="w-full text-sm" data-testid="report-table">
         <caption className="sr-only">{caption}</caption>
         <thead className="text-xs text-muted">
           <tr>
             <th scope="col" className="px-3 py-2 text-left font-medium">{t("player")}</th>
-            {cols.map((c) => (
+            {used.map((c) => (
               <th key={c.key} scope="col" className="px-2 py-2 text-right font-medium">{c.label}</th>
             ))}
             <th scope="col" className="px-2 py-2 text-right font-medium">{t("shootingPct")}</th>
@@ -336,11 +384,11 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
           {rows.map((p) => (
             <tr key={`${p.player_id}-${p.number}`} className="border-t border-border/70">
               <th scope="row" className="px-3 py-1.5 text-left font-medium">
-                {p.number != null && <span className="mr-2 text-muted tabular-nums">{p.number}</span>}
+                {p.number != null && <span className="mr-2 inline-block w-5 text-right font-score text-accent tabular-nums">{p.number}</span>}
                 {nameOf(p)}
               </th>
-              {cols.map((c) => (
-                <td key={c.key} className="px-2 py-1.5 text-right">
+              {used.map((c) => (
+                <td key={c.key} className="px-2 py-1.5 text-right font-score text-base tabular-nums">
                   <N
                     value={p[c.key] as number}
                     label={`${c.label} ${nameOf(p)}`}
@@ -354,7 +402,8 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
         </tbody>
       </table>
     </div>
-  );
+    );
+  };
   const tt = stats.own.turnovers_by_type;
   return (
     <div className="space-y-4">

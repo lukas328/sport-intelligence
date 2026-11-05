@@ -682,7 +682,10 @@
     "byType": "by type",
     "opponentPlayers": "Opponent by jersey number",
     "noVideo": "no video",
-    "noDataHint": "Upload the video; the analysis starts automatically afterwards."
+    "noDataHint": "Upload the video; the analysis starts automatically afterwards.",
+    "basis": "Based on: {list}.",
+    "scoreMismatch": "The events add up to {events}, the result is {score}: goals are missing or recorded twice.",
+    "scorers": "Scorers"
   },
   "shotsView": {
     "title": "Shots",
@@ -957,7 +960,7 @@
     "jump": "Play {formation} from {time}"
   },
   "insights": {
-    "title": "Insights",
+    "title": "What stands out",
     "hint": "Computed from the tagged events and compared with the other matches of the season. Only statements with enough shots.",
     "none": "No notable insights yet. More tagged events are needed.",
     "evidence": "Show evidence",
@@ -1000,7 +1003,8 @@
     "trainDone": "Created. Session and follow-up are under Training.",
     "trainOpen": "Go to training",
     "whoKeeper": "Your goalkeeper",
-    "whoPlayer": "An unassigned player"
+    "whoPlayer": "An unassigned player",
+    "hintAlone": "Automatically from the recorded events of this match. With more matches of the season, the comparison is added."
   },
   "zones": {
     "wing_left": "Left wing",

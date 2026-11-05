@@ -86,7 +86,7 @@ export function InsightsCard({
     <Sheet className="space-y-3" data-testid="insights">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-xl">{t("title")}</h2>
-        <p className="text-xs text-muted">{t("baseline", { count: data.baseline_matches })}</p>
+        {data.baseline_matches > 0 && <p className="text-xs text-muted">{t("baseline", { count: data.baseline_matches })}</p>}
       </div>
       {data.insights.length === 0 ? (
         <p className="text-sm text-muted">{t("none")}</p>
@@ -95,7 +95,7 @@ export function InsightsCard({
           {data.insights.map((i) => (
             <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
               <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
-                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? "size-2.5 rounded-[2px] bg-error" : "size-2.5 rounded-[2px] bg-muted"} />
+                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? "size-2.5 rounded-[2px] bg-signal ring-1 ring-foreground/30" : "size-2.5 rounded-[2px] bg-muted"} />
                 {t(i.kind)}
               </span>
               <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">{text(i)}</span>
@@ -130,7 +130,8 @@ export function InsightsCard({
           {problem === "text-unavailable" ? t("summaryUnavailable") : t("summaryRejected")}
         </p>
       )}
-      <p className="text-xs text-muted">{t("hint")}</p>
+      {/* no other match yet: the hint must not claim a comparison */}
+      <p className="text-xs text-muted">{t(data.baseline_matches > 0 ? "hint" : "hintAlone")}</p>
     </Sheet>
   );
 }

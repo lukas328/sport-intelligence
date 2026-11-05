@@ -33,6 +33,8 @@ import { cn } from "@/lib/utils";
 import { UploadPanel } from "./upload-panel";
 import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
+import { formatClock } from "@/lib/format";
+import { coverage } from "@/lib/match-workflow";
 import { TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
@@ -192,6 +194,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }
 
   const base = `/app/${orgId}/matches/${match.id}`;
+  // what the video covers of the match, for the analysis to say which figures it can carry
+  const covers = main ? coverage(match.kickoff_ms, match.period_s, main.duration_s ? main.duration_s * 1000 : null) : null;
+  const videoNote = covers?.length
+    ? t("workflow.coverage", { clip: covers.map((c) => `${formatClock(c.from * 1000)} ${t("workflow.to")} ${formatClock(c.to * 1000)}`).join(", ") })
+    : null;
   // the main video is there: more cameras (goal cameras, a second angle) and the quality of the
   // recording belong to the court step of the workspace, not under every step
   const setup = main ? (
@@ -417,7 +424,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               if (sub === "overview")
                 return (
                   <div className="space-y-10">
-                    <OverviewView {...props} />
+                    <OverviewView {...props} videoNote={videoNote} />
                     {/* what the video itself shows (possession, attacks) belongs to the overview too */}
                     {main && (
                       <VideoOverview
