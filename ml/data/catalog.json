@@ -1,15 +1,15 @@
 {
- "generated": "2026-11-05T14:16:25",
+ "generated": "2026-11-05T15:17:07",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
   "swiss": 179,
-  "swiss_matched": 140,
-  "with_log": 63,
-  "in_ingest": 61,
-  "local": 40,
-  "local_matched": 28,
-  "local_with_log": 6
+  "swiss_matched": 143,
+  "with_log": 65,
+  "in_ingest": 81,
+  "local": 60,
+  "local_matched": 47,
+  "local_with_log": 22
  },
  "games": [
   {
@@ -3835,36 +3835,32 @@
    ],
    "date": "ca2022",
    "date_kind": "approx",
-   "info_json": false,
-   "game_id": null,
-   "reason": "ambiguous: 3 candidate games",
-   "candidates": [
-    {
-     "game_id": 429154,
-     "date": "2022-02-05",
-     "home": "LK Zug",
-     "away": "GC Amicitia Zürich",
-     "league": "SPL1",
-     "score": 1.0
-    },
-    {
-     "game_id": 441532,
-     "date": "2022-09-10",
-     "home": "LK Zug",
-     "away": "GC Amicitia Zürich",
-     "league": "SPL1",
-     "score": 1.0
-    },
-    {
-     "game_id": 458415,
-     "date": "2023-09-23",
-     "home": "LK Zug",
-     "away": "GC Amicitia Zürich",
-     "league": "SPL1",
-     "score": 1.0
-    }
-   ],
-   "video": null
+   "info_json": true,
+   "game_id": 441532,
+   "match": "search + stream/upload date",
+   "match_score": 1.0,
+   "official": {
+    "home": "LK Zug",
+    "away": "GC Amicitia Zürich",
+    "date": "2022-09-10T18:00:00",
+    "result": "20:26",
+    "league": "SPL1"
+   },
+   "has_log": false,
+   "log_entries": 0,
+   "log_goals": 0,
+   "players": 28,
+   "file": "ml/data/official/CH_Frauen_SPL1_LKZug_GCAmicitia_ca2022.json",
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 6335.774,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL1_SpOnoEagles_GCAmicitia_ca2020",
@@ -3877,7 +3873,7 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "ambiguous: 3 candidate games",
    "candidates": [
@@ -3906,7 +3902,16 @@
      "score": 1.0
     }
    ],
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 6421.374,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL1_GCAmicitia_LKZug_ca2020",
@@ -4202,7 +4207,7 @@
    ],
    "date": "2017-05-13",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 341533,
    "match": "search",
    "match_score": 1.0,
@@ -4218,7 +4223,16 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_Frauen_SPL2_GCAmicitia_Bruehl2_2017-05-13.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 7283.214,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18",
@@ -4269,7 +4283,7 @@
    ],
    "date": "2023-02-12",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 451902,
    "match": "search",
    "match_score": 1.0,
@@ -4285,7 +4299,16 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_BSVStans_2023-02-12.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5540.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_U15I_HSGLeimental_SGVaudLaCote_2023-09-02",
@@ -4414,9 +4437,9 @@
    ],
    "date": "2024-04-13",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 469236,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "LC Brühl Handball II",
@@ -4430,7 +4453,16 @@
    "log_goals": 54,
    "players": 30,
    "file": "ml/data/official/CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6055.334,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
@@ -4472,9 +4504,9 @@
    ],
    "date": "2024-05-18",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 469258,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HC Arbon",
@@ -4488,7 +4520,16 @@
    "log_goals": 65,
    "players": 36,
    "file": "ml/data/official/CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5980.033333,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
@@ -4501,9 +4542,9 @@
    ],
    "date": "2024-09-01",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484333,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HSG Aargau Ost",
@@ -4517,7 +4558,16 @@
    "log_goals": 71,
    "players": 36,
    "file": "ml/data/official/CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5667.214,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HSGLeimental_SpOno2_2024-09-07",
@@ -4530,9 +4580,9 @@
    ],
    "date": "2024-09-07",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484337,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HSG Leimental",
@@ -4546,7 +4596,16 @@
    "log_goals": 63,
    "players": 37,
    "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_SpOno2_2024-09-07.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6385.554,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
@@ -4588,9 +4647,9 @@
    ],
    "date": "2024-09-28",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484347,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "BSV Stans",
@@ -4604,7 +4663,16 @@
    "log_goals": 58,
    "players": 37,
    "file": "ml/data/official/CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5537.7,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
@@ -4646,9 +4714,9 @@
    ],
    "date": "2024-10-12",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484355,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "LC Brühl Handball II",
@@ -4662,7 +4730,16 @@
    "log_goals": 55,
    "players": 31,
    "file": "ml/data/official/CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5542.466667,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
@@ -4713,9 +4790,9 @@
    ],
    "date": "2024-11-02",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484361,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HSG Leimental",
@@ -4729,7 +4806,16 @@
    "log_goals": 73,
    "players": 37,
    "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_AargauOst_2024-11-02.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6205.034,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
@@ -4771,9 +4857,9 @@
    ],
    "date": "2024-11-17",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484369,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HSG Leimental",
@@ -4787,7 +4873,16 @@
    "log_goals": 63,
    "players": 35,
    "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_LKZug2_2024-11-17.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6201.674,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HSGLeimental_BSVStans_2025-01-12",
@@ -4800,9 +4895,9 @@
    ],
    "date": "2025-01-12",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484375,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HSG Leimental",
@@ -4816,7 +4911,16 @@
    "log_goals": 55,
    "players": 36,
    "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_BSVStans_2025-01-12.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6103.274,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HSGLeimental_Uster_2025-01-18",
@@ -4858,9 +4962,9 @@
    ],
    "date": "2025-03-22",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 493305,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HC Arbon",
@@ -4874,7 +4978,16 @@
    "log_goals": 61,
    "players": 29,
    "file": "ml/data/official/CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6095.333333,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
@@ -4916,9 +5029,9 @@
    ],
    "date": "2025-05-03",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 493317,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "LC Brühl Handball II",
@@ -4932,7 +5045,16 @@
    "log_goals": 62,
    "players": 31,
    "file": "ml/data/official/CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6479.4,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HSGLeimental_HCArbon_2025-05-10",
@@ -4945,9 +5067,9 @@
    ],
    "date": "2025-05-10",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 493320,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HSG Leimental",
@@ -4961,7 +5083,16 @@
    "log_goals": 49,
    "players": 35,
    "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_HCArbon_2025-05-10.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 7210.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HSGLeimental_SpOno2_ca2025",
@@ -5016,44 +5147,32 @@
    ],
    "date": "ca2025",
    "date_kind": "approx",
-   "info_json": false,
-   "game_id": null,
-   "reason": "ambiguous: 4 candidate games",
-   "candidates": [
-    {
-     "game_id": 469251,
-     "date": "2024-05-04",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 458497,
-     "date": "2024-01-06",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 493302,
-     "date": "2025-03-16",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 484383,
-     "date": "2025-01-25",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    }
-   ],
-   "video": null
+   "info_json": true,
+   "game_id": 493302,
+   "match": "description link",
+   "match_score": 1.0,
+   "official": {
+    "home": "HSG Leimental",
+    "away": "LC Brühl Handball II",
+    "date": "2025-03-16T18:00:00",
+    "result": "35:26",
+    "league": "SPL2"
+   },
+   "has_log": true,
+   "log_entries": 151,
+   "log_goals": 61,
+   "players": 30,
+   "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_Bruehl2_ca2025.json",
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 5706.24,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HSGLeimental_Bruehl2_b_ca2025",
@@ -5066,45 +5185,33 @@
    ],
    "date": "ca2025",
    "date_kind": "approx",
-   "info_json": false,
-   "game_id": null,
+   "info_json": true,
+   "game_id": 484383,
    "part": "b",
-   "reason": "ambiguous: 4 candidate games",
-   "candidates": [
-    {
-     "game_id": 469251,
-     "date": "2024-05-04",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 458497,
-     "date": "2024-01-06",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 493302,
-     "date": "2025-03-16",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 484383,
-     "date": "2025-01-25",
-     "home": "HSG Leimental",
-     "away": "LC Brühl Handball II",
-     "league": "SPL2",
-     "score": 1.0
-    }
-   ],
-   "video": null
+   "match": "description link",
+   "match_score": 1.0,
+   "official": {
+    "home": "HSG Leimental",
+    "away": "LC Brühl Handball II",
+    "date": "2025-01-25T19:00:00",
+    "result": "38:30",
+    "league": "SPL2"
+   },
+   "has_log": true,
+   "log_entries": 187,
+   "log_goals": 68,
+   "players": 32,
+   "file": "ml/data/official/CH_Frauen_SPL2_HSGLeimental_Bruehl2_b_ca2025.json",
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 4699.214,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
@@ -5211,10 +5318,10 @@
    ],
    "date": "ca2025",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484373,
    "part": "hz1",
-   "match": "search + approximate date (other candidates have dated videos)",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HC Arbon",
@@ -5228,33 +5335,16 @@
    "log_goals": 55,
    "players": 34,
    "file": "ml/data/official/CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025.json",
-   "candidates": [
-    {
-     "game_id": 469258,
-     "date": "2024-05-18",
-     "home": "HC Arbon",
-     "away": "HSG Leimental",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 493305,
-     "date": "2025-03-22",
-     "home": "HC Arbon",
-     "away": "HSG Leimental",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 484373,
-     "date": "2024-12-21",
-     "home": "HC Arbon",
-     "away": "HSG Leimental",
-     "league": "SPL2",
-     "score": 1.0
-    }
-   ],
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 2382.054,
+    "codec": "vp9",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
@@ -5267,10 +5357,10 @@
    ],
    "date": "ca2025",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": 484373,
    "part": "hz2",
-   "match": "search + approximate date (other candidates have dated videos)",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "HC Arbon",
@@ -5284,33 +5374,16 @@
    "log_goals": 55,
    "players": 34,
    "file": "ml/data/official/CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025.json",
-   "candidates": [
-    {
-     "game_id": 469258,
-     "date": "2024-05-18",
-     "home": "HC Arbon",
-     "away": "HSG Leimental",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 493305,
-     "date": "2025-03-22",
-     "home": "HC Arbon",
-     "away": "HSG Leimental",
-     "league": "SPL2",
-     "score": 1.0
-    },
-    {
-     "game_id": 484373,
-     "date": "2024-12-21",
-     "home": "HC Arbon",
-     "away": "HSG Leimental",
-     "league": "SPL2",
-     "score": 1.0
-    }
-   ],
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 2329.674,
+    "codec": "vp9",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l03",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_Uster_LKZug2_ca2025",
