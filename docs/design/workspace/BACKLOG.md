@@ -119,6 +119,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
   official report), and a plain fallback for any kind without a text.
 - [ ] Official team search, claim, join requests and club verification: screens to build.
 - [ ] `PUT /kickoff` with `clock_s` for clips that start mid-half: use it in the throw-off step.
+- [x] Shot zone split: "Fernwurf" and "Leeres Tor" (`empty_goal`) in the web texts.
 - [ ] Search hits outside the video come with null windows ("ohne Video" already handles it).
 - [ ] `no-video` errors on clip slides; nuLiga/HLA report links; referee kit; roster suggestion
   stats with the per-team `roster_stats` toggle.

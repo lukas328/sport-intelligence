@@ -1059,7 +1059,8 @@
     "circle_right": "Kreis rechts",
     "penalty": "7 m",
     "fast_break": "Gegenstoss",
-    "long_range": "Fernwurf / leeres Tor"
+    "long_range": "Fernwurf",
+    "empty_goal": "Leeres Tor"
   },
   "goalZones": {
     "TL": "oben links",

@@ -1059,7 +1059,8 @@
     "circle_right": "Pivot right",
     "penalty": "7 m",
     "fast_break": "Fast break",
-    "long_range": "Long range / empty net"
+    "long_range": "Long range",
+    "empty_goal": "Empty goal"
   },
   "goalZones": {
     "TL": "top left",

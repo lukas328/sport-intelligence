@@ -1059,7 +1059,8 @@
     "circle_right": "Pivot droit",
     "penalty": "7 m",
     "fast_break": "Contre-attaque",
-    "long_range": "Tir lointain / but vide"
+    "long_range": "Tir lointain",
+    "empty_goal": "But vide"
   },
   "goalZones": {
     "TL": "en haut à gauche",
