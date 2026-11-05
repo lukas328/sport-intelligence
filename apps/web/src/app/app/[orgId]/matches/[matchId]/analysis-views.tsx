@@ -166,7 +166,11 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const sources = Object.entries(stats.quality.sources)
     .filter(([, n]) => n > 0)
     .sort((a, b) => b[1] - a[1])
-    .map(([k, n]) => `${n} ${te.has(`source_${k}` as "source_model") ? te(`source_${k}` as "source_model") : k}`)
+    .map(([k, n]) =>
+      t.has(`basis_${k}` as "basis_heuristic")
+        ? t(`basis_${k}` as "basis_heuristic", { n })
+        : `${n} ${te.has(`source_${k}` as "source_model") ? te(`source_${k}` as "source_model") : k}`,
+    )
     .join(", ");
   const mismatch =
     match.score_own != null && match.score_opponent != null && (stats.own.goals !== match.score_own || stats.opponent.goals !== match.score_opponent);

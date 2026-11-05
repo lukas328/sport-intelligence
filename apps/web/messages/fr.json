@@ -683,9 +683,17 @@
     "opponentPlayers": "Adversaire par numéro",
     "noVideo": "sans vidéo",
     "noDataHint": "Téléversez la vidéo ; l'analyse démarre ensuite automatiquement.",
-    "basis": "Base : {list}.",
+    "basis": "Événements : {list}.",
     "scoreMismatch": "Les événements donnent {events}, le résultat est {score} : des buts manquent ou sont saisis deux fois.",
-    "scorers": "Buteurs"
+    "scorers": "Buteurs",
+    "basis_user_correction": "{n} saisis à la main",
+    "basis_official_report": "{n} de la feuille de match officielle",
+    "basis_heuristic": "{n} estimés à partir de la vidéo",
+    "basis_model": "{n} détectés dans la vidéo",
+    "basis_scoreboard_ocr": "{n} du tableau d'affichage",
+    "basis_paper_report": "{n} du rapport papier",
+    "basis_goal_candidate": "{n} des buts possibles vérifiés",
+    "basis_official_feed": "{n} du déroulement du match"
   },
   "shotsView": {
     "title": "Tirs",

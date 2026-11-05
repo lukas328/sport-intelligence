@@ -683,9 +683,17 @@
     "opponentPlayers": "Opponent by jersey number",
     "noVideo": "no video",
     "noDataHint": "Upload the video; the analysis starts automatically afterwards.",
-    "basis": "Based on: {list}.",
+    "basis": "Events: {list}.",
     "scoreMismatch": "The events add up to {events}, the result is {score}: goals are missing or recorded twice.",
-    "scorers": "Scorers"
+    "scorers": "Scorers",
+    "basis_user_correction": "{n} recorded by hand",
+    "basis_official_report": "{n} from the official match report",
+    "basis_heuristic": "{n} estimated from the video",
+    "basis_model": "{n} detected in the video",
+    "basis_scoreboard_ocr": "{n} from the scoreboard",
+    "basis_paper_report": "{n} from the paper report",
+    "basis_goal_candidate": "{n} from checked goal candidates",
+    "basis_official_feed": "{n} from the play-by-play"
   },
   "shotsView": {
     "title": "Shots",

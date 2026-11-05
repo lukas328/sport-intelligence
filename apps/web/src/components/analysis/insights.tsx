@@ -81,6 +81,8 @@ export function InsightsCard({
   });
   const data = q.data;
   if (!data) return null;
+  // one signal per screen: only the first weakness carries it
+  const firstWeak = data.insights.findIndex((i) => i.kind === "weakness");
 
   return (
     <Sheet className="space-y-3" data-testid="insights">
@@ -92,10 +94,10 @@ export function InsightsCard({
         <p className="text-sm text-muted">{t("none")}</p>
       ) : (
         <ul className="divide-y divide-border/70">
-          {data.insights.map((i) => (
+          {data.insights.map((i, n) => (
             <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
               <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
-                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? "size-2.5 rounded-[2px] bg-signal ring-1 ring-foreground/30" : "size-2.5 rounded-[2px] bg-muted"} />
+                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? (n === firstWeak ? "size-2.5 rounded-[2px] bg-signal ring-1 ring-foreground/30" : "size-2.5 rounded-[2px] bg-foreground/45") : "size-2.5 rounded-[2px] bg-muted"} />
                 {t(i.kind)}
               </span>
               <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">{text(i)}</span>

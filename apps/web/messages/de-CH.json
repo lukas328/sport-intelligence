@@ -683,9 +683,17 @@
     "opponentPlayers": "Gegner nach Rückennummer",
     "noVideo": "ohne Video",
     "noDataHint": "Lade das Video hoch, die Analyse startet danach automatisch.",
-    "basis": "Grundlage: {list}.",
+    "basis": "Ereignisse: {list}.",
     "scoreMismatch": "Die Ereignisse ergeben {events}, das Resultat lautet {score}: Tore fehlen oder sind doppelt erfasst.",
-    "scorers": "Torschützen"
+    "scorers": "Torschützen",
+    "basis_user_correction": "{n} von Hand erfasst",
+    "basis_official_report": "{n} aus dem offiziellen Matchbericht",
+    "basis_heuristic": "{n} aus dem Video geschätzt",
+    "basis_model": "{n} aus dem Video erkannt",
+    "basis_scoreboard_ocr": "{n} von der Anzeigetafel",
+    "basis_paper_report": "{n} aus dem Papierbericht",
+    "basis_goal_candidate": "{n} aus geprüften Torkandidaten",
+    "basis_official_feed": "{n} aus dem Spielverlauf"
   },
   "shotsView": {
     "title": "Würfe",
