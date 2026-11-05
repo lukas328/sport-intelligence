@@ -294,7 +294,9 @@
     "group_back": "Rückraum",
     "group_wing": "Flügel",
     "group_pivot": "Kreis",
-    "group_other": "Ohne Position"
+    "group_other": "Ohne Position",
+    "editList": "Liste bearbeiten",
+    "editDone": "Fertig"
   },
   "settings": {
     "title": "Einstellungen",

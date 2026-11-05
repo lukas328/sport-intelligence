@@ -7,6 +7,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { FileUp, Trash2, UserPlus, Users } from "lucide-react";
 import { Alert, Card, EmptyState, Skeleton } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { useConfirm } from "@/components/ui/confirm";
 import { Dialog } from "@/components/ui/dialog";
 import { Input, Select } from "@/components/ui/field";
@@ -55,6 +56,8 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   });
   const [error, setError] = useState<ErrorKey | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  // phones: removing players is an edit mode, not a trash can on every row
+  const [editing, setEditing] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   const add = useMutation({
@@ -189,6 +192,11 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
         ) : (
           // the squad as it lines up on the match sheet: by position, shirt number first in the club colour
           <div className="space-y-8">
+            {canEdit && (
+              <Button variant="ghost" size="sm" className="lg:hidden" aria-pressed={editing} onClick={() => setEditing((v) => !v)}>
+                {editing ? t("roster.editDone") : t("roster.editList")}
+              </Button>
+            )}
             {GROUPS.map(([g, positions]) => {
               const members = entries.filter((p) => (g === "other" ? !ALL_POSITIONS.includes(p.main_position ?? "") : (positions as readonly string[]).includes(p.main_position ?? "")));
               if (members.length === 0) return null;
@@ -210,7 +218,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                   </span>
                   <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
                     {p.main_position && (
-                      <span className="rounded-sm bg-surface px-1.5 py-px text-xs font-bold text-foreground" title={t(`positions.${p.main_position}`)}>
+                      <span className="text-xs font-bold tracking-wide text-foreground" title={t(`positions.${p.main_position}`)}>
                         {p.main_position}
                       </span>
                     )}
@@ -229,7 +237,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                   <Button
                     variant="quiet"
                     size="icon-sm"
-                    className="lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
+                    className={cn(!editing && "max-lg:hidden", "lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100")}
                     aria-label={`${t("roster.remove")}: ${p.first_name} ${p.last_name}`}
                     title={t("roster.remove")}
                     onClick={async () => {

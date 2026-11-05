@@ -294,7 +294,9 @@
     "group_back": "Arrière",
     "group_wing": "Ailes",
     "group_pivot": "Pivot",
-    "group_other": "Sans poste"
+    "group_other": "Sans poste",
+    "editList": "Modifier la liste",
+    "editDone": "Terminé"
   },
   "settings": {
     "title": "Paramètres",

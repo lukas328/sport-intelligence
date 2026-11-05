@@ -294,7 +294,9 @@
     "group_back": "Back court",
     "group_wing": "Wings",
     "group_pivot": "Pivot",
-    "group_other": "No position"
+    "group_other": "No position",
+    "editList": "Edit list",
+    "editDone": "Done"
   },
   "settings": {
     "title": "Settings",
