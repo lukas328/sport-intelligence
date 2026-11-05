@@ -113,6 +113,8 @@ def test_parsers() -> None:
     assert sb.parse_score("2:") is None
     assert sb.parse_clock("03:34") == 214
     assert sb.parse_clock("3:74") is None
+    assert sb.parse_clock("102:28") == 148  # the box edge read as a leading 1
+    assert sb.parse_clock("199:28") is None  # 99 minutes: no handball clock
 
 
 def test_no_overlay_in_a_plain_or_fixed_video() -> None:
@@ -132,7 +134,9 @@ def test_reads_score_and_clock_from_a_video() -> None:
     x, y, w, h = sb._union(boxes, 6, (W, H))
     assert y < 40 and x < 380 and x + w > 640
     step = len(frames) // 24
-    crops = [(k * step / FPS, f[y : y + h, x : x + w]) for k, f in enumerate(sample)][::3]
+    # every other sampled frame: Tesseract builds differ in how often they read the small dark
+    # clock, and 8 crops left CI with a single reading (a field needs two)
+    crops = [(k * step / FPS, f[y : y + h, x : x + w]) for k, f in enumerate(sample)][::2]
     fields = sb.find_fields(crops, (x, y))
     assert {f.kind for f in fields} == {"score", "clock"}
     reader = sb.Reader(fields, FPS, clock_every_s=5)

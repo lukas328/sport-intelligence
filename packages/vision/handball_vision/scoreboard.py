@@ -87,7 +87,11 @@ def parse_score(text: str) -> tuple[int, int] | None:
 
 
 def parse_clock(text: str) -> int | None:
-    m = CLOCK_RE.match(text.replace(" ", ""))
+    t = text.replace(" ", "")
+    m = CLOCK_RE.match(t)
+    if (m is None or int(m.group(1)) > 80) and len(t) == 6 and t[:1] in "1lI|":
+        # the box edge read as a leading "1" ("102:28" for 02:28)
+        m = CLOCK_RE.match(t[1:])
     if not m:
         return None
     mm, ss = int(m.group(1)), int(m.group(2))
