@@ -1014,3 +1014,12 @@ async def test_daily_tick_syncs_and_imports_reports(
     assert (await api.http.post("/internal/official/sync")).status_code == 403
     sync = await api.post(base(c) + "/official/sync")
     assert sync.status_code == 503
+
+
+def test_public_mail_providers_prove_no_club_role() -> None:
+    from handball_api.services.org_verification import club_domains
+
+    # a club listed with a free-mail address: anyone could sign up there
+    assert club_domains(["bluemail.ch", "GMX.at", "hotmail.de", "tvt-handball.ch"]) == [
+        "tvt-handball.ch"
+    ]

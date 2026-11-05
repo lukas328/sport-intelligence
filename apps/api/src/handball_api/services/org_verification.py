@@ -53,6 +53,28 @@ PUBLIC_MAIL = frozenset(
         "proton.me",
         "web.de",
         "t-online.de",
+        # more providers of Switzerland, Germany and Austria anyone can sign up at
+        "bluemail.ch",
+        "mail.ch",
+        "freesurf.ch",
+        "vtxmail.ch",
+        "yahoo.ch",
+        "gmx.at",
+        "gmx.com",
+        "hotmail.de",
+        "outlook.de",
+        "live.de",
+        "msn.com",
+        "aol.com",
+        "mail.com",
+        "posteo.de",
+        "online.de",
+        "freenet.de",
+        "arcor.de",
+        "aon.at",
+        "chello.at",
+        "a1.net",
+        "tutanota.com",
     }
 )
 
