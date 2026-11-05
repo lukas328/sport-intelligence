@@ -9,14 +9,22 @@ recognisable on many more. So:
    this match. Per team, a projection is learned from them (PCA, then LDA: directions that separate
    today's players; all shirts of a team are equal, hair, build and shoes are not).
    Only consistent fragments teach (`consistency`): a track jumping between people would teach a
-   mixture.
+   mixture. With the frames of the vectors and the track's readings, a fragment teaches only with
+   the vectors next to readings of its number (`anchor_vectors`): the reading says who is in the
+   box at that moment, also on tracks that carry a second person (bench, referee, a crowd).
 3. Every fragment without a number goes to the nearest player when that is clearly nearer than the
-   second nearest (ratio test), the player is not on court elsewhere at the same time, and the
-   distances to the player's fragments before and after can be run. Unsure stays unknown.
+   second nearest (ratio test), the player is not on court elsewhere at the same time, the
+   distances to the player's fragments before and after can be run, and the fragment's own
+   readings (if any) do not say another number (`contradicts`). Unsure stays unknown.
 
 Measured on a 5-minute NLB clip (12 numbered players, numbers hidden on 15-second pieces of their
 tracks): 65 % of the pieces found, 70 to 75 % of the found ones right (some "errors" are misread
-numbers in the labels). Colour statistics alone found 19 %.
+numbers in the labels). Colour statistics alone found 19 %. On a 3-minute SG Wädenswil/Horgen
+stream segment (10 players with numbers on the match sheet, 56 pieces of 10 s hidden): 31 right
+and 14 wrong with whole tracks teaching, 34 right and 12 wrong with the read stretches; in the
+full pipeline the appearance numbers no longer went to bench and referee anchors. The network
+itself separates teammates well when the examples are clean: 25 of 29 five-second pieces with
+agreeing readings go to the right player (LDA, nearest centre).
 """
 
 from __future__ import annotations

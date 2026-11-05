@@ -9,6 +9,9 @@ Per crop:
    footage are 15 to 25 px tall.
 2. Text detection (DB): probability map, threshold, boxes slightly widened ("unclip").
 3. Recognition (CTC) of every box on the green channel; only one or two digits count.
+4. Without a confident reading, a second look with the contrast stretched (`stretch_contrast`):
+   white shirts in a dim hall are grey on grey on stream footage. This doubles the cost of the
+   crops without a reading (most of them).
 
 On 720p club footage about one crop in ten shows a readable number (backs, sharp, unoccluded), and
 about 40 % of those are read; all readings with a confidence of 0.8 or more were correct on the
@@ -148,7 +151,8 @@ class NumberReader:
     # --- numbers ------------------------------------------------------------------------------
 
     def read_player(self, frame: U8, box: tuple[float, float, float, float]) -> Reading | None:
-        """The shirt number of one player box, or None."""
+        """The shirt number of one player box, or None. Torsos without a confident reading get a
+        second look with the contrast stretched (`stretch_contrast`)."""
         x1, y1, x2, y2 = (round(v) for v in box)
         h = y2 - y1
         if h < MIN_BOX_HEIGHT:
@@ -159,9 +163,18 @@ class NumberReader:
             return None
         # the green channel separates white digits from red shirts and dark digits from yellow or
         # white ones better than colour or plain grey (more correct readings on the checked clips)
-        green = stretch_contrast(torso[..., 1] if torso.ndim == 3 else torso)
+        green = torso[..., 1] if torso.ndim == 3 else torso
+        best = self._read_channel(green)
+        if best is None or best.confidence < MIN_CONFIDENCE:
+            second = self._read_channel(stretch_contrast(green))
+            if second is not None and (best is None or second.confidence > best.confidence):
+                best = second
+        return best
+
+    def _read_channel(self, channel: U8) -> Reading | None:
+        """One or two digits in a single-channel torso crop, enlarged three times."""
         big = cv2.resize(
-            cv2.merge([green, green, green]), None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC
+            cv2.merge([channel, channel, channel]), None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC
         )
         self.calls += 1
         boxes = self.detect(big)
@@ -176,9 +189,13 @@ class NumberReader:
 
 def stretch_contrast(channel: U8, low: float = 2.0, high: float = 98.0) -> U8:
     """The channel's `low` to `high` percentile spread to 0..255. On stream footage of a dim hall
-    a white shirt is light grey and its number mid grey: the text detector misses such numbers
-    at their own contrast and finds them stretched (club footage: 9 of 15 legible numbers missed
-    before, the white-shirt ones found after)."""
+    a white shirt is light grey and its number mid grey, and the text detector misses part of
+    such numbers at their own contrast. As a second look on torsos without a confident reading
+    (3-minute segments of four SG Wädenswil/Horgen stream recordings): 21 to 29 % more confident
+    readings, the share of numbers on the official match sheet the same within 3 points, at most
+    one more sheet number found per team. Stretching every torso instead was not better than
+    not stretching (-8 to +7 % readings), nor was a larger detector input (480 instead of 320:
+    +25 % readings, less precise, 2.7 times the cost)."""
     lo, hi = np.percentile(channel, (low, high))
     if hi - lo < 1:
         return channel
