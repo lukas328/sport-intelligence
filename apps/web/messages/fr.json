@@ -1745,7 +1745,8 @@
     "good": "Utile",
     "bad": "Pas utile",
     "history": "Conversations précédentes",
-    "new": "Nouvelle conversation"
+    "new": "Nouvelle conversation",
+    "examples": "Par exemple :"
   },
   "exchange": {
     "title": "Échanger des données",
@@ -1847,7 +1848,7 @@
   "matrix": {
     "nav": "Matrice",
     "title": "Matrice statistique",
-    "hint": "Choisis librement lignes, chiffres et filtres. Chaque cellule mène aux scènes correspondantes.",
+    "hint": "Choisissez librement lignes, chiffres et filtres. Les chiffres soulignés ouvrent les scènes correspondantes.",
     "rows": "Lignes",
     "side": "Équipe",
     "both": "Les deux",
@@ -1892,7 +1893,11 @@
     "m_seven_m_goals": "Buts à 7 m",
     "m_seven_m_pct": "Réussite à 7 m",
     "m_fast_break_goals": "Buts en contre-attaque",
-    "m_events": "Événements"
+    "m_events": "Événements",
+    "settings": "Sélection",
+    "export": "Export",
+    "shirtPrefix": "N° ",
+    "metricsN": "{n, plural, one {# indicateur} other {# indicateurs}}"
   },
   "training": {
     "nav": "Entraînement",

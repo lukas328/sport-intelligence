@@ -49,9 +49,9 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 
 - [x] P1 Suche: rows without match clock, own and opponent identical, half without video and
   without a reason, 135 rows in a card -> match clock, team, "ohne Video", hairline rows, paging.
-- [ ] P1 Matrix: "Jede Zelle führt zu den Szenen" but cells are plain text; rows "#6" without
+- [x] P1 Matrix: "Jede Zelle führt zu den Szenen" but cells are plain text; rows "#6" without
   names; "Wir"; two red primaries for CSV and Excel; filters in a card fill the phone screen.
-- [ ] P1 Assistent: on phones the input is below the fold; pill input; suggestion cards.
+- [x] P1 Assistent: on phones the input is below the fold; pill input; suggestion cards.
 - [ ] P2 Bibliothek: the "Szenensuche" black banner; "0" counts with "Alle anzeigen" into empty
   lists; "Smart Playlist".
 - [ ] P2 Playlists, Präsentationen: two different create patterns, card around one field, boxed

@@ -1,15 +1,16 @@
 "use client";
 
-import { Play, X } from "lucide-react";
+import { ChevronDown, Play, X } from "lucide-react";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { cn } from "@/lib/utils";
 
 type Spec = Schemas["MatrixIn"];
 type Cell = Schemas["MatrixCell"];
@@ -38,7 +39,7 @@ export function formatCell(metric: string, c: Cell | undefined): string {
   return String(c.value);
 }
 
-export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string }) {
+export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: string; teamId: string; teamName: string; seasonId: string | null }) {
   const t = useTranslations("matrix");
   const tr = useTranslations();
   const qc = useQueryClient();
@@ -47,6 +48,15 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
   const [open, setOpen] = useState<{ label: string; metric: string; cell: Cell } | null>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState<ErrorKey | null>(null);
+  // on phones the settings fold away behind one line, so the table is on the first screen
+  const [settings, setSettings] = useState(false);
+  // shirt numbers of the own team read as names
+  const roster = useQuery({
+    queryKey: ["roster", seasonId],
+    queryFn: async () =>
+      (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", { params: { path: { ...team, season_id: seasonId! } } })).data ?? [],
+    enabled: !!seasonId,
+  });
   const filter = (spec.filter ?? {}) as Record<string, string | number | undefined>;
   const setFilter = (k: string, v: string | number | undefined) =>
     setSpec((s) => {
@@ -103,16 +113,31 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
       ...s,
       metrics: s.metrics.includes(m) ? s.metrics.filter((x) => x !== m) : s.metrics.length < 8 ? [...s.metrics, m] : s.metrics,
     }));
-  const select = "min-h-9 rounded-md border border-border bg-background px-2 text-sm";
   const data = result.data;
+  const rowLabel = (label: string) => {
+    if (!data || data.by !== "number" || filter.side !== "own") return label;
+    const n = Number(label.replace("#", ""));
+    const p = (roster.data ?? []).find((r) => r.jersey_number === n);
+    return p ? `${n} ${p.first_name} ${p.last_name}` : label.replace("#", t("shirtPrefix"));
+  };
+  const select = "min-h-9 rounded-md border border-border bg-background px-2 text-sm";
 
+  const summary = [t(`dim_${spec.rows}`), filter.side === "own" ? teamName || t("own") : filter.side === "opponent" ? t("opponent") : t("both"), t("metricsN", { n: spec.metrics.length })].join(" · ");
   return (
     <div className="space-y-5">
-      <div>
-        {/* the page title says "Statistik-Matrix"; here only what it does */}
-        <p className="text-sm text-muted">{t("hint")}</p>
-      </div>
-      <Card className="space-y-4">
+      <p className="text-sm text-muted">{t("hint")}</p>
+      <button
+        type="button"
+        aria-expanded={settings}
+        onClick={() => setSettings((v) => !v)}
+        className="flex min-h-11 w-full items-center justify-between gap-3 border-y border-foreground/15 text-left text-sm sm:hidden"
+      >
+        <span>
+          <span className="font-semibold">{t("settings")}</span> <span className="text-muted">{summary}</span>
+        </span>
+        <ChevronDown aria-hidden className={cn("size-4 shrink-0 transition-transform", settings && "rotate-180")} />
+      </button>
+      <section className={cn("space-y-4 border-b border-foreground/15 pb-5", !settings && "hidden sm:block")} aria-label={t("settings")}>
         <div className="flex flex-wrap items-end gap-4">
           <label className="text-sm">
             <span className="block font-medium">{t("rows")}</span>
@@ -126,7 +151,7 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
             <span className="block font-medium">{t("side")}</span>
             <select className={select} value={String(filter.side ?? "")} onChange={(e) => setFilter("side", e.target.value)}>
               <option value="">{t("both")}</option>
-              <option value="own">{t("own")}</option>
+              <option value="own">{teamName || t("own")}</option>
               <option value="opponent">{t("opponent")}</option>
             </select>
           </label>
@@ -159,7 +184,7 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
                 type="button"
                 aria-pressed={spec.metrics.includes(m)}
                 onClick={() => toggleMetric(m)}
-                className="rounded-md border border-border px-3 py-1 text-sm aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-contrast"
+                className="min-h-8 rounded-md border border-border px-3 py-1 text-sm aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background"
               >
                 {t(`m_${m}`)}
               </button>
@@ -167,22 +192,19 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
           </div>
         </fieldset>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" onClick={() => void download("csv")}>{t("csv")}</Button>
-          <Button type="button" onClick={() => void download("xlsx")}>{t("xlsx")}</Button>
-          <span className="mx-2 h-6 w-px bg-border" aria-hidden />
           <input className={select} placeholder={t("templateName")} aria-label={t("templateName")} value={name} onChange={(e) => setName(e.target.value)} maxLength={120} />
-          <Button type="button" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
+          <Button type="button" variant="secondary" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
             {t("save")}
           </Button>
         </div>
         {(templates.data ?? []).length > 0 && (
-          <ul className="flex flex-wrap gap-2 text-sm" aria-label={t("templates")}>
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm" aria-label={t("templates")}>
             {(templates.data ?? []).map((tp) => (
-              <li key={tp.id} className="flex items-center gap-1 rounded-full border border-border pl-3">
-                <button type="button" className="hover:underline" onClick={() => setSpec(tp.config)}>
+              <li key={tp.id} className="flex items-center gap-1">
+                <button type="button" className="min-h-8 font-medium underline underline-offset-4" onClick={() => setSpec(tp.config)}>
                   {tp.name}
                 </button>
-                <button type="button" aria-label={t("deleteTemplate", { name: tp.name })} className="px-2 text-muted" onClick={() => remove.mutate(tp.id)}>
+                <button type="button" aria-label={t("deleteTemplate", { name: tp.name })} className="grid size-8 place-items-center text-muted hover:text-foreground" onClick={() => remove.mutate(tp.id)}>
                   <X aria-hidden className="size-3.5" />
                 </button>
               </li>
@@ -190,15 +212,21 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
           </ul>
         )}
         {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-      </Card>
+      </section>
 
       {!data || data.rows.length === 0 ? (
         <EmptyState title={result.isLoading ? "…" : t("empty")} />
       ) : (
+        <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted">{t("export")}</span>
+          <Button type="button" variant="ghost" size="sm" onClick={() => void download("csv")}>{t("csv")}</Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => void download("xlsx")}>{t("xlsx")}</Button>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm" data-testid="matrix">
+          <table className="sheet w-full text-sm" data-testid="matrix">
             <thead>
-              <tr className="border-b border-border text-left">
+              <tr className="border-b border-foreground/15 text-left">
                 <th className="py-2 pr-4">{t(`dim_${data.by}`)}</th>
                 {data.metrics.map((m) => (
                   <th key={m} className="py-2 pr-4" title={data.definitions[m]}>{t(`m_${m}`)}</th>
@@ -207,14 +235,19 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
             </thead>
             <tbody>
               {[...data.rows, { ...data.totals, label: t("total") }].map((row) => (
-                <tr key={row.key} className="border-b border-border">
-                  <th scope="row" className="py-2 pr-4 text-left font-normal">{row.label}</th>
+                <tr key={row.key} className={cn("border-b border-foreground/10", row.key === "total" && "border-t-2 border-t-foreground/40 font-semibold")}>
+                  <th scope="row" className={cn("py-2 pr-4 text-left", row.key === "total" ? "font-semibold" : "font-normal")}>{row.key === "total" ? row.label : rowLabel(row.label)}</th>
                   {data.metrics.map((m) => {
                     const c = row.cells[m];
                     return (
                       <td key={m} className="py-1 pr-4 tabular-nums">
                         {c && c.events > 0 ? (
-                          <button type="button" className="hover:underline" onClick={() => setOpen({ label: row.label, metric: m, cell: c })}>
+                          <button
+                            type="button"
+                            aria-pressed={open?.label === row.label && open.metric === m}
+                            className="min-h-8 underline decoration-dotted decoration-foreground/50 underline-offset-4 hover:decoration-solid aria-pressed:font-semibold aria-pressed:decoration-solid"
+                            onClick={() => setOpen({ label: row.key === "total" ? row.label : rowLabel(row.label), metric: m, cell: c })}
+                          >
                             {formatCell(m, c)}
                           </button>
                         ) : (
@@ -228,10 +261,11 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
             </tbody>
           </table>
         </div>
+        </div>
       )}
 
       {open && (
-        <Card className="space-y-2" aria-live="polite">
+        <section className="space-y-2 border-t-2 border-foreground pt-3" aria-live="polite">
           <h3 className="font-semibold">{t("cellClips", { row: open.label, metric: t(`m_${open.metric}`) })}</h3>
           {open.cell.clips.length === 0 ? (
             <p className="text-sm text-muted">{t("noVideo", { n: open.cell.events })}</p>
@@ -239,14 +273,14 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
             <ul className="flex flex-wrap gap-2">
               {open.cell.clips.map((c, i) => (
                 <li key={c.event_id}>
-                  <Link className="inline-flex min-h-8 items-center gap-1.5 rounded-md bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
+                  <Link className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-sm font-semibold ring-1 ring-inset ring-foreground/20 hover:bg-surface" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
                     <Play aria-hidden className="size-3 fill-current" /> {i + 1}
                   </Link>
                 </li>
               ))}
             </ul>
           )}
-        </Card>
+        </section>
       )}
     </div>
   );

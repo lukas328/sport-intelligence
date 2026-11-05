@@ -1745,7 +1745,8 @@
     "good": "Helpful",
     "bad": "Not helpful",
     "history": "Earlier conversations",
-    "new": "New conversation"
+    "new": "New conversation",
+    "examples": "For example:"
   },
   "exchange": {
     "title": "Exchange data",
@@ -1847,7 +1848,7 @@
   "matrix": {
     "nav": "Matrix",
     "title": "Statistics matrix",
-    "hint": "Pick rows, figures and filters freely. Every cell leads to the scenes behind it.",
+    "hint": "Choose rows, figures and filters freely. Underlined figures open the scenes behind them.",
     "rows": "Rows",
     "side": "Team",
     "both": "Both",
@@ -1892,7 +1893,11 @@
     "m_seven_m_goals": "7 m goals",
     "m_seven_m_pct": "7 m rate",
     "m_fast_break_goals": "Fast break goals",
-    "m_events": "Events"
+    "m_events": "Events",
+    "settings": "Selection",
+    "export": "Export",
+    "shirtPrefix": "No. ",
+    "metricsN": "{n, plural, one {# figure} other {# figures}}"
   },
   "training": {
     "nav": "Training",

@@ -1745,7 +1745,8 @@
     "good": "Hilfreich",
     "bad": "Nicht hilfreich",
     "history": "Frühere Gespräche",
-    "new": "Neues Gespräch"
+    "new": "Neues Gespräch",
+    "examples": "Zum Beispiel:"
   },
   "exchange": {
     "title": "Daten austauschen",
@@ -1847,11 +1848,11 @@
   "matrix": {
     "nav": "Matrix",
     "title": "Statistik-Matrix",
-    "hint": "Zeilen, Kennzahlen und Filter frei wählen. Jede Zelle führt zu den Szenen dahinter.",
+    "hint": "Zeilen, Kennzahlen und Filter frei wählen. Unterstrichene Zahlen öffnen die Szenen dahinter.",
     "rows": "Zeilen",
     "side": "Team",
     "both": "Beide",
-    "own": "Wir",
+    "own": "Eigenes Team",
     "opponent": "Gegner",
     "lastN": "Letzte Spiele",
     "period": "Halbzeit",
@@ -1892,7 +1893,11 @@
     "m_seven_m_goals": "7-m-Tore",
     "m_seven_m_pct": "7-m-Quote",
     "m_fast_break_goals": "Gegenstosstore",
-    "m_events": "Ereignisse"
+    "m_events": "Ereignisse",
+    "settings": "Auswahl",
+    "export": "Export",
+    "shirtPrefix": "Nr. ",
+    "metricsN": "{n, plural, one {# Kennzahl} other {# Kennzahlen}}"
   },
   "training": {
     "nav": "Training",

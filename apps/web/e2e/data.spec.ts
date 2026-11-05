@@ -45,6 +45,9 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await follow(page, page.getByRole("link", { name: "Statistik-Matrix" }), /\/matrix$/);
   await expect(page.getByRole("heading", { name: "Statistik-Matrix" })).toBeVisible();
   await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
+  // on phones the selection is folded behind one line
+  const selection = page.getByRole("button", { name: /^Auswahl/ });
+  if (await selection.isVisible()) await selection.click();
   await page.getByRole("button", { name: "Paraden", exact: true }).click();
   await expect(page.getByRole("button", { name: "Paraden", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expectAccessible(page);
