@@ -27,9 +27,14 @@ cup, friendlies abroad, regional selections) or without team names.
 
 ## Segment library: clock for the batches from the owner's computer
 `local_ingest.py` uploads `handball-segs-lNN` without clock data. `library.py` lists the account's
-`handball-segs-*` datasets on Kaggle and, for each one not yet done, downloads index.json and the
-info JSONs, then one segment at a time, reads the match clock (`segment_clock.py`, as the ingest
-does) and deletes the segment. Segments the cloud ingest already read (bNN) are not downloaded.
+`handball-segs-*` datasets on Kaggle and, for each one not yet done, downloads index.json, then
+the whole dataset as one zip (one request; per-file downloads got "rate limited"), takes the info
+JSONs and the segments out of it one at a time and reads the match clock (`segment_clock.py`, as
+the ingest does) with three readers in parallel (`--workers`, nice 10, one thread each); each
+segment is deleted once read. The zip is downloaded only when it fits with `--min-free-gb` (1.5)
+to spare and is cut back behind every segment taken out; a larger one is read in place on Kaggle's
+storage with HTTP range requests (no disk). Rate-limit answers are retried with exponential
+backoff. Segments the cloud ingest already read (bNN) are not downloaded.
 Results go to `<scratch>/library/library.json` (per game as in the ingest state.json, plus
 `kaggle_dataset`); resumable after every segment, `--watch 900` polls for new datasets. File
 names that differ from a `videos*.csv` name only in case, punctuation or a `.fNNN` suffix are
@@ -43,7 +48,7 @@ a container restart; stop with `pkill -g $(pgrep -f 'ml/data/library.py --watch'
     export KAGGLE_USERNAME=lukasde1000 KAGGLE_KEY=injected-by-proxy KAGGLE_CONFIG_DIR=$S/kg REQUESTS_CA_BUNDLE=/root/.ccr/ca-bundle.crt
     export PATH=$S/torchenv/.venv/bin:$PATH
     cd /home/user/handball-ai
-    setsid nohup nice -n 10 $S/torchenv/.venv/bin/python -I ml/data/library.py --watch 900 > $S/library/library.log 2>&1 < /dev/null &
+    setsid nohup $S/torchenv/.venv/bin/python -I ml/data/library.py --watch 900 >> $S/library/library.log 2>&1 < /dev/null &
 
 Offline test of the whole path: `--local-dir DIR` reads `DIR/handball-segs-*/` folders laid out
 like a dataset (index.json, segments, info JSONs) instead of Kaggle; use another `--libdir`.

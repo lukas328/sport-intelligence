@@ -518,3 +518,64 @@ def test_only_the_kits_sent_reach_tracking(
     assert set(seen["kits"]) == expected
     if referee:
         assert seen["kits"]["referee"] == (0x13, 0x6A, 0xFF)  # BGR
+
+
+def test_hall_reference_with_most_floor_matches_wins(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Earlier videos of the same hall: a missing hall image or another camera position is
+    skipped (and recorded), the reference with most floor matches gives the court."""
+    import cv2
+
+    from handball_vision import hallmatch
+    from handball_vision.calibration import Calibration
+
+    root = tmp_path / "s3"
+    for name in ("b", "c"):
+        (root / "artifacts" / name / "analysis").mkdir(parents=True)
+        cv2.imwrite(
+            str(root / "artifacts" / name / "analysis" / "panorama.jpg"),
+            np.full((20, 40, 3), 9 if name == "b" else 7, np.uint8),
+        )
+    calls: list[int] = []
+
+    def register(reference: Any, court: Any, image: Any) -> Any:
+        calls.append(int(reference[0, 0, 0]))
+        if reference[0, 0, 0] == 7:
+            raise CalibrationError("not the same hall or camera position (3 matches)")
+        calib = Calibration(np.asarray(court), 1.0, 0.5, "heuristic", (40, 20))
+        return hallmatch.HallMatch(calib, 80, 40, 120, "same_place", 0.5)
+
+    monkeypatch.setattr(hallmatch, "register", register)
+    refs = [
+        {"video_id": "a", "panorama_key": "a/analysis/panorama.jpg", "homography": np.eye(3)},
+        {"video_id": "c", "panorama_key": "c/analysis/panorama.jpg", "homography": np.eye(3)},
+        {
+            "video_id": "b",
+            "panorama_key": "b/analysis/panorama.jpg",
+            "homography": (np.eye(3) * 2).tolist(),
+            "hall": "Halle Untermosen",
+        },
+    ]
+    tried: list[dict[str, Any]] = []
+    found = analysis._hall_calibration(
+        FakeS3(root), "artifacts", np.zeros((20, 40, 3), np.uint8), refs, tmp_path, tried
+    )
+    assert found is not None
+    calib, info = found
+    assert calib.homography[0, 0] == 2
+    assert info["method"] == "hall" and info["reference_video_id"] == "b"
+    assert info["hall"] == "Halle Untermosen" and info["floor_inliers"] == 40
+    assert [t["video_id"] for t in tried] == ["a", "c", "b"]
+    assert tried[0]["error"] == "the earlier hall image is missing"
+    assert "not the same hall" in tried[1]["error"]
+    assert calls == [7, 9]
+
+
+def test_no_fitting_hall_reference_leaves_the_automatic_court(tmp_path: Path) -> None:
+    tried: list[dict[str, Any]] = []
+    refs = [{"video_id": "a", "panorama_key": "a/analysis/panorama.jpg", "homography": np.eye(3)}]
+    hall = np.zeros((20, 40, 3), np.uint8)
+    assert analysis._hall_calibration(FakeS3(tmp_path), "x", hall, refs, tmp_path, tried) is None
+    assert tried == [{"video_id": "a", "error": "the earlier hall image is missing"}]
+    assert analysis._hall_calibration(FakeS3(tmp_path), "x", hall, [], tmp_path, tried) is None
