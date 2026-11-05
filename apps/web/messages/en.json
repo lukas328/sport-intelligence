@@ -1406,7 +1406,11 @@
     "watch": "Watch",
     "tagsOf": "Tags of this scene",
     "truncated": "Showing the first {n} scenes.",
-    "type_timeout": "Timeout"
+    "type_timeout": "Timeout",
+    "shirt": "No. {n}",
+    "noVideo": "no video",
+    "noTime": "no video time",
+    "more": "Show {n} more ({shown} of {total})"
   },
   "feed": {
     "title": "Your scenes",

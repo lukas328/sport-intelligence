@@ -1,16 +1,18 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { formatClock } from "@/lib/format";
+import { clockAt } from "@/lib/match-workflow";
 import { cn } from "@/lib/utils";
 
 type Filter = Schemas["SearchFilter"];
@@ -19,6 +21,8 @@ type TagSet = Schemas["TagSetOut"];
 
 const TYPES = ["shot", "turnover", "steal", "suspension_2min", "seven_meter_awarded"] as const;
 const OUTCOMES = ["goal", "save", "miss", "post", "blocked"] as const;
+/** rows per page: 135 scenes in one block were a wall */
+const PAGE = 40;
 
 function Chip({ on, children, onClick, color }: { on: boolean; children: React.ReactNode; onClick: () => void; color?: string | null }) {
   return (
@@ -42,7 +46,7 @@ function toggle<T>(list: T[] | undefined, v: T): T[] {
   return l.includes(v) ? l.filter((x) => x !== v) : [...l, v];
 }
 
-export function SearchView({ orgId, teamId }: { orgId: string; teamId: string }) {
+export function SearchView({ orgId, teamId, teamName }: { orgId: string; teamId: string; teamName: string }) {
   const t = useTranslations("search");
   const te = useTranslations("events");
   const tr = useTranslations();
@@ -136,16 +140,162 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
   }
 
   const tagName = (id: string) => tags.find((x) => x.id === id);
-  const hits = result.data?.hits ?? [];
+  const all = result.data?.hits ?? [];
+  // paging starts over with every new filter
+  const fkey = JSON.stringify(filter);
+  const [page, setPage] = useState({ key: fkey, n: PAGE });
+  const shown = page.key === fkey ? page.n : PAGE;
+  const hits = all.slice(0, shown);
+  // the match clock needs each match's throw-off; one request per match on the page
+  const matchIds = [...new Set(hits.map((h) => h.match_id))];
+  const matches = useQueries({
+    queries: matchIds.map((id) => ({
+      queryKey: ["match", id],
+      queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}", { params: { path: { org_id: orgId, match_id: id } } })).data,
+      staleTime: 60_000,
+    })),
+  });
+  const matchOf = (id: string) => matches[matchIds.indexOf(id)]?.data;
+  const clockOf = (h: Hit) => {
+    const m = matchOf(h.match_id);
+    if (!m || h.t_ms == null) return null;
+    const c = clockAt(m.kickoff_ms, m.period_s, h.t_ms);
+    return c == null || c < 0 ? null : te("at", { period: Math.min(2, Math.floor(c / m.period_s) + 1), clock: formatClock(c * 1000) });
+  };
   const facetTags: Record<string, number> = result.data?.facets.tags ?? {};
 
+  const sideName = (side: string | null | undefined, m = undefined as ReturnType<typeof matchOf>) =>
+    side === "own" ? teamName : side === "opponent" ? m?.opponent?.name ?? t("side_opponent") : null;
+  const filters = (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-1" role="group" aria-label={t("types")}>
+        {TYPES.map((ty) => (
+          <Chip key={ty} on={(filter.types ?? []).includes(ty)} onClick={() => setFilter((f) => ({ ...f, types: toggle(f.types, ty) }))}>
+            {t(`type_${ty}`)}
+          </Chip>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1" role="group" aria-label={t("outcomes")}>
+        {OUTCOMES.map((o) => (
+          <Chip key={o} on={(filter.outcomes ?? []).includes(o)} onClick={() => setFilter((f) => ({ ...f, outcomes: toggle(f.outcomes, o) }))}>
+            {te(o)}
+          </Chip>
+        ))}
+        {(["own", "opponent"] as const).map((side) => (
+          <Chip key={side} on={(filter.sides ?? []).includes(side)} onClick={() => setFilter((f) => ({ ...f, sides: toggle(f.sides, side) }))}>
+            {side === "own" && teamName ? teamName : t(`side_${side}`)}
+          </Chip>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
-      <aside className="space-y-4">
-        <Card className="space-y-3">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_17rem]">
+      <section className="min-w-0 space-y-4" aria-labelledby="search-title">
+        <h2 id="search-title" className="sr-only">
+          {t("title")}
+        </h2>
+        {error && <Alert>{tr(`errors.${error}`)}</Alert>}
+        {filters}
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b-2 border-foreground pb-2">
+          <p className="font-semibold" role="status" data-testid="search-count">
+            {result.data ? t("count", { n: result.data.total }) : ""}
+          </p>
+          {fkey !== "{}" && (
+            <button type="button" className="text-sm font-medium text-muted underline underline-offset-4 hover:text-foreground" onClick={() => setFilter({})}>
+              {t("reset")}
+            </button>
+          )}
+        </div>
+        {result.data && hits.length === 0 && <EmptyState title={t("none")} />}
+        <ul className="divide-y divide-foreground/10" data-testid="search-hits">
+          {hits.map((h, i) => {
+            const m = matchOf(h.match_id);
+            const first = i === 0 || hits[i - 1]!.match_id !== h.match_id;
+            const playable = h.video_id && h.start_ms != null;
+            const what = h.kind === "clip" ? h.title ?? t("clip") : [h.type && t(`type_${h.type as "shot"}`), h.outcome && te(h.outcome as "goal")].filter(Boolean).join(" · ");
+            return (
+              <li key={`${h.kind}-${h.id}`} className={cn("py-2.5", first && i > 0 && "mt-4 border-t-2 border-t-foreground/30")}>
+                {first && (
+                  <p className="pb-1.5 text-[0.8125rem] font-semibold text-muted">
+                    {format.dateTime(new Date(h.kickoff_at), { day: "numeric", month: "short", year: "2-digit" })} · {h.match_label}
+                  </p>
+                )}
+                <div className="grid grid-cols-[6.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3">
+                  <span className="font-score text-sm tabular-nums">{clockOf(h)}</span>
+                  <span className="min-w-0">
+                    <span className="font-medium">{what}</span>
+                    {(h.side || h.number != null) && (
+                      <span className="text-sm text-muted">
+                        {" · "}
+                        {[sideName(h.side, m), h.number != null && t("shirt", { n: h.number })].filter(Boolean).join(" ")}
+                      </span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    {target && playable && (
+                      <Button variant="secondary" className="min-h-8 px-3 py-1" disabled={added.includes(h.id)} onClick={() => toPresentation.mutate(h)}>
+                        {added.includes(h.id) ? tp("addedToPresentation") : tp("addToPresentation")}
+                      </Button>
+                    )}
+                    {playable ? (
+                      <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="inline-flex min-h-9 items-center text-sm font-semibold underline underline-offset-4 hover:text-accent">
+                        {t("watch")}
+                      </Link>
+                    ) : (
+                      <span className="text-sm text-muted">{t(h.t_ms == null ? "noTime" : "noVideo")}</span>
+                    )}
+                  </span>
+                </div>
+                {tags.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1 pl-0 sm:pl-[7.25rem]" role="group" aria-label={t("tagsOf")}>
+                    {tags.map((tag) => (
+                      <Chip key={tag.id} on={h.tag_ids.includes(tag.id)} color={tag.color} onClick={() => setLinks.mutate({ hit: h, tagIds: toggle(h.tag_ids, tag.id) })}>
+                        {tagName(tag.id)?.name}
+                      </Chip>
+                    ))}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        {all.length > shown && (
+          <Button variant="secondary" onClick={() => setPage({ key: fkey, n: shown + PAGE })}>
+            {t("more", { n: Math.min(PAGE, all.length - shown), shown, total: all.length })}
+          </Button>
+        )}
+        {result.data?.truncated && all.length <= shown && <p className="text-sm text-muted">{t("truncated", { n: all.length })}</p>}
+      </section>
+
+      <aside className="space-y-8 lg:border-l lg:border-foreground/15 lg:pl-6">
+        <section className="space-y-2">
+          <h2 className="font-semibold">{t("smart")}</h2>
+          {(saved.data ?? []).length === 0 && <p className="text-sm text-muted">{t("smartNone")}</p>}
+          <ul className="space-y-1">
+            {(saved.data ?? []).map((sf) => (
+              <li key={sf.id}>
+                <button type="button" className="min-h-8 text-sm font-medium underline underline-offset-4 hover:text-accent" onClick={() => setFilter(sf.query)}>
+                  {sf.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+          {fkey !== "{}" && (
+            <form onSubmit={(e) => submitName(e, (name) => save.mutate(name))} className="flex gap-2" aria-label={t("saveSmart")}>
+              <Input label={t("smartName")} name="name" maxLength={120} />
+              <Button type="submit" variant="secondary" className="self-end">
+                {t("saveSmart")}
+              </Button>
+            </form>
+          )}
+        </section>
+        <section className="space-y-3">
           <h2 className="font-semibold">{t("tagSets")}</h2>
+          <p className="text-sm text-muted">{t("ownTagsHint")}</p>
           {(sets.data ?? []).map((s) => (
-            <div key={s.id} className="space-y-2">
+            <div key={s.id} className="space-y-2 border-t border-foreground/10 pt-3">
               <p className="text-sm font-medium">{s.name}</p>
               <div className="flex flex-wrap gap-1">
                 {s.tags.map((tag) => (
@@ -163,105 +313,14 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
               </form>
             </div>
           ))}
-          <form onSubmit={(e) => submitName(e, (name) => createSet.mutate(name))} className="flex gap-2" aria-label={t("newSet")}>
+          <form onSubmit={(e) => submitName(e, (name) => createSet.mutate(name))} className="flex gap-2 border-t border-foreground/10 pt-3" aria-label={t("newSet")}>
             <Input label={t("newSet")} name="name" maxLength={60} placeholder={t("newSetPlaceholder")} />
             <Button type="submit" variant="secondary" className="self-end">
               {t("add")}
             </Button>
           </form>
-          <p className="text-xs text-muted">{t("ownTagsHint")}</p>
-        </Card>
-        <Card className="space-y-2">
-          <h2 className="font-semibold">{t("smart")}</h2>
-          {(saved.data ?? []).length === 0 && <p className="text-sm text-muted">{t("smartNone")}</p>}
-          <ul className="space-y-1">
-            {(saved.data ?? []).map((sf) => (
-              <li key={sf.id}>
-                <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setFilter(sf.query)}>
-                  {sf.name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </Card>
+        </section>
       </aside>
-
-      <section className="space-y-4" aria-labelledby="search-title">
-        <h2 id="search-title" className="text-lg font-semibold">
-          {t("title")}
-        </h2>
-        {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-1" role="group" aria-label={t("types")}>
-            {TYPES.map((ty) => (
-              <Chip key={ty} on={(filter.types ?? []).includes(ty)} onClick={() => setFilter((f) => ({ ...f, types: toggle(f.types, ty) }))}>
-                {t(`type_${ty}`)}
-              </Chip>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-1" role="group" aria-label={t("outcomes")}>
-            {OUTCOMES.map((o) => (
-              <Chip key={o} on={(filter.outcomes ?? []).includes(o)} onClick={() => setFilter((f) => ({ ...f, outcomes: toggle(f.outcomes, o) }))}>
-                {te(o)}
-              </Chip>
-            ))}
-            {(["own", "opponent"] as const).map((side) => (
-              <Chip key={side} on={(filter.sides ?? []).includes(side)} onClick={() => setFilter((f) => ({ ...f, sides: toggle(f.sides, side) }))}>
-                {t(`side_${side}`)}
-              </Chip>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-end gap-3">
-            <Button variant="ghost" onClick={() => setFilter({})}>
-              {t("reset")}
-            </Button>
-            <form onSubmit={(e) => submitName(e, (name) => save.mutate(name))} className="flex gap-2" aria-label={t("saveSmart")}>
-              <Input label={t("smartName")} name="name" maxLength={120} />
-              <Button type="submit" variant="secondary" className="self-end">
-                {t("saveSmart")}
-              </Button>
-            </form>
-          </div>
-        </div>
-        <p className="text-sm text-muted" role="status" data-testid="search-count">
-          {result.data ? t("count", { n: result.data.total }) : ""}
-        </p>
-        {result.data && hits.length === 0 && <EmptyState title={t("none")} />}
-        <ul className="divide-y divide-border/70 rounded-lg bg-raised border border-border" data-testid="search-hits">
-          {hits.map((h) => (
-            <li key={`${h.kind}-${h.id}`} className="space-y-2 px-3 py-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted tabular-nums">{format.dateTime(new Date(h.kickoff_at), { dateStyle: "short" })}</span>
-                <span className="font-medium">{h.match_label}</span>
-                <span className="text-sm">
-                  {h.kind === "clip" ? h.title ?? t("clip") : [h.type && t(`type_${h.type as "shot"}`), h.outcome && te(h.outcome as "goal"), h.number != null && `#${h.number}`].filter(Boolean).join(" · ")}
-                </span>
-                {target && h.video_id && h.start_ms != null && (
-                  <Button variant="secondary" className="min-h-8 px-3 py-1" disabled={added.includes(h.id)} onClick={() => toPresentation.mutate(h)}>
-                    {added.includes(h.id) ? tp("addedToPresentation") : tp("addToPresentation")}
-                  </Button>
-                )}
-                {h.video_id && h.start_ms != null && (
-                  <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
-                    {t("watch")}
-                  </Link>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1" role="group" aria-label={t("tagsOf")}>
-                {tags.map((tag) => {
-                  const on = h.tag_ids.includes(tag.id);
-                  return (
-                    <Chip key={tag.id} on={on} color={tag.color} onClick={() => setLinks.mutate({ hit: h, tagIds: toggle(h.tag_ids, tag.id) })}>
-                      {tagName(tag.id)?.name}
-                    </Chip>
-                  );
-                })}
-              </div>
-            </li>
-          ))}
-        </ul>
-        {result.data?.truncated && <p className="text-sm text-muted">{t("truncated", { n: hits.length })}</p>}
-      </section>
     </div>
   );
 }

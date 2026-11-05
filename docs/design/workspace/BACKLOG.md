@@ -47,7 +47,7 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 
 ## Batch 4: library and tools
 
-- [ ] P1 Suche: rows without match clock, own and opponent identical, half without video and
+- [x] P1 Suche: rows without match clock, own and opponent identical, half without video and
   without a reason, 135 rows in a card -> match clock, team, "ohne Video", hairline rows, paging.
 - [ ] P1 Matrix: "Jede Zelle führt zu den Szenen" but cells are plain text; rows "#6" without
   names; "Wir"; two red primaries for CSV and Excel; filters in a card fill the phone screen.

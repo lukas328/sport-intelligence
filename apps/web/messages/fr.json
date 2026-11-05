@@ -1406,7 +1406,11 @@
     "watch": "Regarder",
     "tagsOf": "Tags de cette scène",
     "truncated": "Les {n} premières scènes sont affichées.",
-    "type_timeout": "Temps mort"
+    "type_timeout": "Temps mort",
+    "shirt": "N° {n}",
+    "noVideo": "sans vidéo",
+    "noTime": "sans temps vidéo",
+    "more": "Afficher {n} de plus ({shown} sur {total})"
   },
   "feed": {
     "title": "Tes scènes",
