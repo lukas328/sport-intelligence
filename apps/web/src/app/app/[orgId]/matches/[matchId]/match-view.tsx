@@ -240,7 +240,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                       [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
                       ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
                     ]
-                ).map(([label, a, b]) => (
+                )
+                  // a row of dashes says nothing on the stage
+                  .filter(([, a, b]) => !(a === "-" && b === "-"))
+                  .map(([label, a, b]) => (
                   <tr key={String(label)} className="border-t border-current/20">
                     <th scope="row" className="py-1.5 pr-4 text-left font-medium">{label}</th>
                     <td className="px-3 py-1.5 text-right font-score text-2xl leading-none">{a}</td>

@@ -94,7 +94,8 @@ export function useStats(orgId: string, matchId: string) {
   });
 }
 
-const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
+// a share above 100 % means the sources disagree (goals from a report, attacks from a clip): no figure
+const pct = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Math.round(v * 100)} %`);
 
 /** A number that opens the events behind it. */
 function N({ value, onClick, label }: { value: string | number; onClick?: () => void; label: string }) {
