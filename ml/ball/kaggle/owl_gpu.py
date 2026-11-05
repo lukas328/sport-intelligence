@@ -52,11 +52,14 @@ def detect(frame_bgr, thr=0.04, max_side=60):
 
 
 # 1) bench frames (centre frame of each labelled triplet)
-B = glob.glob("/kaggle/input/handball-ball-bench/**/labels/*.json", recursive=True)
+ALL = glob.glob("/kaggle/input/**/*", recursive=True)
+print(len(ALL), "input files", sorted({os.path.dirname(a) for a in ALL})[:40], flush=True)
+JPG = {os.path.basename(a)[:-4]: a for a in ALL if a.endswith(".jpg")}
+B = [a for a in ALL if a.endswith(".json") and os.path.basename(os.path.dirname(a)) == "labels"]
 bench = {}
 for f in B:
     lab = json.load(open(f)); i = os.path.basename(f)[:-5]
-    im = cv2.imread(os.path.join(os.path.dirname(os.path.dirname(f)), "t", i + ".jpg"))
+    im = cv2.imread(JPG[i]) if i in JPG else None
     if im is None:
         continue
     W = lab["w"]; bench[i] = detect(im[:, W:2 * W])
@@ -64,7 +67,7 @@ json.dump(bench, open(f"{OUT}/bench_owl.json", "w"))
 print("bench", len(bench), "frames", f"{time.time() - T0:.0f}s", flush=True)
 
 # 2) bursts from the ingested segments
-vids = sorted(glob.glob("/kaggle/input/handball-segs-b*/**/*.mp4", recursive=True))
+vids = sorted(a for a in ALL if a.endswith(".mp4"))
 print(len(vids), "segments", flush=True)
 for v in vids:
     if time.time() - T0 > BUDGET:
