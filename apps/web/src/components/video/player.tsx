@@ -283,7 +283,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           {win && (
             <div
               aria-hidden
-              className="pointer-events-none absolute top-0 h-1 bg-yellow-400"
+              className="pointer-events-none absolute top-0 h-1 bg-white/80"
               style={{ left: `${pct(win.start_ms)}%`, width: `${pct(win.end_ms - win.start_ms)}%` }}
             />
           )}
@@ -293,8 +293,9 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               aria-hidden
               title={m.label}
               className={cn(
-                "pointer-events-none absolute bottom-0 h-2 w-1 -translate-x-1/2 rounded-sm",
-                m.kind === "comment" ? "bg-sky-400" : m.kind === "clip" ? "bg-yellow-400" : m.kind === "drawing" ? "bg-pink-400" : "bg-white",
+                // one ink on the scrubber, told apart by shape: a clip is wider, a drawing shorter
+                "pointer-events-none absolute bottom-0 -translate-x-1/2 rounded-[1px] bg-white",
+                m.kind === "clip" ? "h-2 w-2" : m.kind === "drawing" ? "h-1.5 w-0.5" : "h-2 w-0.5",
               )}
               style={{ left: `${pct(m.t_ms)}%` }}
             />

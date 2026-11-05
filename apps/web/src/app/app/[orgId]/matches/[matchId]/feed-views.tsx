@@ -72,7 +72,7 @@ export function TeamFeedView({
                 <>
                   {" · "}
                   {t("nextUp")}{" "}
-                  <span className="underline decoration-resin decoration-[5px] underline-offset-[5px]">{next.name}</span>
+                  <span>{next.name}</span>
                 </>
               )}
             </p>

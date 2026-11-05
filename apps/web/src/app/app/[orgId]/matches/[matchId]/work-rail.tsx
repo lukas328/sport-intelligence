@@ -31,7 +31,8 @@ export function WorkRail({
   // the one thing on screen that asks for attention: the first open step, unless it is the one
   // shown (then the signal sits on the item to act on, e.g. the candidate on the timeline)
   const firstOpenStep = steps.find((s) => s.state === "open")?.id;
-  const signal = firstOpenStep === value ? undefined : firstOpenStep;
+  // tools with their own mark (the feedback queue) keep the rail quiet
+  const signal = firstOpenStep === value || value === "feedback" ? undefined : firstOpenStep;
   // the open tab stays in view in the scrolling row on phones
   // (sideways only: the page itself must not jump)
   const box = useRef<HTMLDivElement>(null);
