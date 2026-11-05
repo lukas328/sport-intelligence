@@ -145,7 +145,8 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
       <section aria-labelledby="roster-list" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-baseline gap-3">
-            <h2 id="roster-list" className="text-lg font-semibold">
+            {/* on the squad page the H1 already says "Kader": the count is enough here */}
+            <h2 id="roster-list" className={cn("text-lg font-semibold", !inline && "sr-only")}>
               {t("roster.title")}
             </h2>
             <span className="text-sm text-muted" data-testid="roster-count">
@@ -154,6 +155,11 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
           </div>
           {canEdit && !inline && (
             <div className="flex flex-wrap gap-2">
+              {entries.length > 0 && (
+                <Button variant="ghost" size="sm" className="lg:hidden" aria-pressed={editing} onClick={() => setEditing((v) => !v)}>
+                  {editing ? t("roster.editDone") : t("roster.editList")}
+                </Button>
+              )}
               <Dialog
                 title={t("roster.addTitle")}
                 trigger={
@@ -192,7 +198,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
         ) : (
           // the squad as it lines up on the match sheet: by position, shirt number first in the club colour
           <div className="space-y-8">
-            {canEdit && (
+            {canEdit && inline && (
               <Button variant="ghost" size="sm" className="lg:hidden" aria-pressed={editing} onClick={() => setEditing((v) => !v)}>
                 {editing ? t("roster.editDone") : t("roster.editList")}
               </Button>

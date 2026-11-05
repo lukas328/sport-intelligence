@@ -38,11 +38,12 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
     <div className="space-y-8">
       <PageHeader title={t("settings.title")} />
       <div className="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-10">
-        <nav aria-label={t("settings.title")} className="scrollbar-none -mx-1 mb-6 overflow-x-auto px-1 lg:sticky lg:top-10 lg:mb-0 lg:self-start">
-          <ul className="flex gap-1 lg:flex-col">
+        {/* jump links, not tabs: on phones they wrap instead of being cut at the edge */}
+        <nav aria-label={t("settings.title")} className="mb-6 border-b border-foreground/15 pb-3 lg:sticky lg:top-10 lg:mb-0 lg:self-start lg:border-0 lg:pb-0">
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1">
             {sections.map(([id, label]) => (
               <li key={id}>
-                <a href={`#${id}`} className="block whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium text-muted hover:bg-surface hover:text-foreground lg:rounded-md">
+                <a href={`#${id}`} className="block min-h-8 whitespace-nowrap py-1.5 text-sm font-medium text-muted underline-offset-4 hover:text-foreground hover:underline lg:rounded-md lg:px-3.5 lg:hover:bg-surface lg:hover:no-underline">
                   {label}
                 </a>
               </li>

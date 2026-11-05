@@ -234,7 +234,7 @@ export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: strin
               <li key={`${h.kind}-${h.id}`} className={cn("py-2.5", first && i > 0 && "mt-4 border-t-2 border-t-foreground/30")}>
                 {first && (
                   <p className="pb-1.5 text-[0.8125rem] font-semibold text-muted">
-                    {format.dateTime(new Date(h.kickoff_at), { day: "numeric", month: "short", year: "2-digit" })} · {h.match_label}
+                    {format.dateTime(new Date(h.kickoff_at), { dateStyle: "medium" })} · {h.match_label}
                   </p>
                 )}
                 <div className="grid grid-cols-[6.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3">

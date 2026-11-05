@@ -81,13 +81,14 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] Szenensuche: own shirt numbers with names, labelled filter groups that scroll on phones,
   "Eigener Clip" instead of a bare "Clip", "Ansehen" with a play mark and no underline wall.
 - [x] Assistent: "Noch keine Gespräche."; Matrix: "Letzte Spiele" shows "alle".
-- [ ] Kader (phone): "Kader" three times (H1, tab, group heading); "Liste bearbeiten" alone; the
-  red "Spieler hinzufügen" competes with the red numbers (depends on the club-red decision).
+- [x] Kader (phone): "Kader" three times (H1, tab, group heading); "Liste bearbeiten" alone; the
+  red "Spieler hinzufügen" competes with the red numbers (the button colour waits for the club-red
+  decision; heading and edit button fixed).
 - [ ] Sidebar highlight for tools (Assistent, Suche, Gegner) should follow the back link.
-- [ ] Einstellungen on phones: the section tabs have no active underline and are cut at the edge.
+- [x] Einstellungen on phones (jump links that wrap): the section tabs have no active underline and are cut at the edge.
 - [ ] Gegner: back link "Zurück" without eyebrow; the zone "Fernwurf / leeres Tor" mixes two
   situations (analysis data, already reported).
-- [ ] Dates: "29. Okt. 26" (Suche) and "29.10.2026" (Gegner): one format.
+- [x] Dates: "29. Okt. 26" (Suche) and "29.10.2026" (Gegner): one format.
 
 ## Later (features)
 
