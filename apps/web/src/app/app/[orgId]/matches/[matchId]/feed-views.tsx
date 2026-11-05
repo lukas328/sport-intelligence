@@ -93,7 +93,8 @@ export function TeamFeedView({
               </p>
             </div>
             <ol>
-              {p.items.map((s) => (
+              {/* in match order, as the coach will watch them */}
+              {[...p.items].sort((a, b) => a.start_ms - b.start_ms).map((s) => (
                 <Scene
                   key={s.id}
                   label={t(`reason_${s.reason}` as "reason_goal")}
