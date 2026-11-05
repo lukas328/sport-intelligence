@@ -1,12 +1,12 @@
 {
- "generated": "2026-11-04T23:11:30",
+ "generated": "2026-11-05T00:14:16",
  "source": "ml/data/match_official.py",
  "summary": {
-  "games": 246,
-  "swiss": 178,
+  "games": 247,
+  "swiss": 179,
   "swiss_matched": 138,
   "with_log": 63,
-  "in_ingest": 12
+  "in_ingest": 17
  },
  "games": [
   {
@@ -221,7 +221,15 @@
    "log_goals": 0,
    "players": 29,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_BSVStans_2022-11-05.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7028.374,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b03"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_Emmen_2022-11-17",
@@ -501,7 +509,15 @@
    "log_goals": 0,
    "players": 30,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_Chenois_2023-05-13.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 8503.794,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b03"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
@@ -654,7 +670,15 @@
    "log_goals": 62,
    "players": 38,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7087.794,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b03"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
@@ -712,7 +736,15 @@
    "log_goals": 69,
    "players": 33,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6543.374,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b03"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_YellowPfadiEspoirs_2024-02-17",
@@ -6926,6 +6958,31 @@
    "game_id": null,
    "reason": "no handball.ch",
    "video": null
+  },
+  {
+   "name": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+   "url": null,
+   "country": "CH",
+   "league": "NLB",
+   "teams": [
+    "SGWaedenswilHorgen",
+    "FortitudoGossau",
+    "2023-09-23.f298"
+   ],
+   "date": null,
+   "date_kind": "none",
+   "info_json": false,
+   "game_id": null,
+   "reason": "no date in the name and no game found",
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6000.016667,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b03"
+   }
   }
  ]
 }

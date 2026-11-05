@@ -1,0 +1,362 @@
+{
+ "name": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+ "official": "ml/data/official/CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19.json",
+ "game_id": 453474,
+ "result": "33:29",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 60.0,
+  "duration_s": 7087.794,
+  "batch": "batch_03"
+ },
+ "segments": [
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s0.mp4",
+   "start_s": 1063.17,
+   "clock_source": "hall_board",
+   "readings": 66,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    960.0,
+    1912.0
+   ],
+   "entries": 4,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s1.mp4",
+   "start_s": 2126.34,
+   "clock_source": "overlay",
+   "readings": 37,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    949.0,
+    1043.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s2.mp4",
+   "start_s": 3543.9,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3.mp4",
+   "start_s": 4961.46,
+   "clock_source": "hall_board",
+   "readings": 91,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2358.0,
+    2530.0
+   ],
+   "entries": 4,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4.mp4",
+   "start_s": 6024.62,
+   "clock_source": "hall_board",
+   "readings": 90,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    3113.0,
+    3229.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "goal": 7,
+  "turnover": 2,
+  "penalty_goal": 1,
+  "timeout": 1,
+  "shot_saved": 1,
+  "shot_missed": 1,
+  "suspension": 1
+ },
+ "entries": [
+  {
+   "match_s": 972,
+   "time": "16:12",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 11,
+   "name": "SIDOROWICZ Roman",
+   "score": [
+    7,
+    9
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 30000,
+   "video_ms": 1093170,
+   "anchor_gap_s": 12.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 992,
+   "time": "16:32",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 34,
+   "name": "BUCHER Leon",
+   "score": [
+    7,
+    10
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 50000,
+   "video_ms": 1113170,
+   "anchor_gap_s": 32.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1830,
+   "time": "30:30",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 23,
+   "name": "WÜNSCH Tim",
+   "score": [
+    16,
+    16
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 98000,
+   "video_ms": 1161170,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1856,
+   "time": "30:56",
+   "action": "7m Tor",
+   "kind": "penalty_goal",
+   "team": "away",
+   "number": 22,
+   "name": "GRAU Noah",
+   "score": [
+    16,
+    17
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 124000,
+   "video_ms": 1187170,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 972,
+   "time": "16:12",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 11,
+   "name": "SIDOROWICZ Roman",
+   "score": [
+    7,
+    9
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 23000,
+   "video_ms": 2149340,
+   "anchor_gap_s": 2.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 992,
+   "time": "16:32",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 34,
+   "name": "BUCHER Leon",
+   "score": [
+    7,
+    10
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 43000,
+   "video_ms": 2169340,
+   "anchor_gap_s": 2.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1043,
+   "time": "17:23",
+   "action": "Team Time-Out",
+   "kind": "timeout",
+   "team": null,
+   "number": null,
+   "name": null,
+   "score": [
+    7,
+    10
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 94000,
+   "video_ms": 2220340,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2406,
+   "time": "40:06",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 22,
+   "name": "GRAU Noah",
+   "score": [
+    21,
+    20
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "STEINER Jonas"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 55983,
+   "video_ms": 5017443,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2448,
+   "time": "40:48",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    21,
+    20
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 97983,
+   "video_ms": 5059443,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2481,
+   "time": "41:21",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 2,
+   "name": "GANTNER Simon",
+   "score": [
+    22,
+    20
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 130983,
+   "video_ms": 5092443,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2526,
+   "time": "42:06",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 19,
+   "name": "GALOVIC Maro",
+   "score": [
+    22,
+    21
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 175983,
+   "video_ms": 5137443,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3134,
+   "time": "52:14",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "away",
+   "number": 19,
+   "name": "GALOVIC Maro",
+   "score": [
+    28,
+    23
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 21000,
+   "video_ms": 6045620,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3203,
+   "time": "53:23",
+   "action": "Zeitstrafe",
+   "kind": "suspension",
+   "team": "home",
+   "number": 11,
+   "name": "SIDOROWICZ Roman",
+   "score": [
+    28,
+    24
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 129983,
+   "video_ms": 6154603,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3203,
+   "time": "53:23",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 19,
+   "name": "GALOVIC Maro",
+   "score": [
+    28,
+    24
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 129983,
+   "video_ms": 6154603,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  }
+ ]
+}
