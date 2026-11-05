@@ -102,6 +102,8 @@ OVERLAY_FULL_EVERY_S = 4.0  # text detection on the overlay window while no cloc
 BOARD_PROBES = 6
 BOARD_GIVE_UP_S = 60.0  # under two board readings in the first minute: give up
 MAX_CPU_S = 90.0  # stop reading (keep what was read) beyond this
+# threads of decoder, OpenCV and OCR per reader (library.py runs several readers with 1 each)
+THREADS = max(1, int(os.environ.get("HANDBALL_CLOCK_THREADS") or 2))
 SEGMENT_S = 180.0
 FEED_MS = 250  # frames handed to the board reader; it reads those due and probes in between
 PROBE_EVERY_S = 1.0  # template probes for a locked board that is out of view
@@ -130,7 +132,7 @@ def _open(path: Path, skip: str) -> tuple[Any, Any, float, tuple[int, int]]:
     container = av.open(str(path))
     stream = container.streams.video[0]
     stream.thread_type = "AUTO"
-    stream.codec_context.thread_count = 2
+    stream.codec_context.thread_count = THREADS
     stream.codec_context.skip_frame = skip  # type: ignore[assignment]  # av checks the name
     start = float(stream.start_time * stream.time_base) if stream.start_time is not None else 0.0
     w, h = stream.codec_context.width, stream.codec_context.height
@@ -174,7 +176,7 @@ def duration_ms(path: Path) -> int:
 Window = tuple[int, int, int, int]  # x0, y0, x1, y1
 
 
-def ocr_reader(models: Path, threads: int = 2) -> Any:
+def ocr_reader(models: Path, threads: int = THREADS) -> Any:
     """The PP-OCR text detector and recogniser of `hallboard` (data/models/ch_PP-OCRv4_*)."""
     from handball_vision.numbers import NumberReader
 
@@ -379,7 +381,7 @@ def read_segment_clock(
     shown (a second half may restart at 0 or continue at 30:00), misreads dropped."""
     import cv2
 
-    cv2.setNumThreads(2)
+    cv2.setNumThreads(THREADS)
     path = Path(path)
     c0, w0 = cpu_s(), time.time()
     budget = c0 + max_cpu_s

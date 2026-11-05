@@ -4,8 +4,12 @@ reader: the reader is replaced by a stub)."""
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import sys
+import threading
+import time
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -15,12 +19,15 @@ import library
 from library import (
     CLOCK_READER,
     MAX_ATTEMPTS,
+    Archive,
     LocalSource,
+    RangeFile,
     add_index,
     base_name,
     canonical_name,
     dataset_of,
     dataset_slug,
+    fits_on_disk,
     known_names,
     merge_games,
     needs_visit,
@@ -28,6 +35,7 @@ from library import (
     run_once,
     set_clock,
     todo_segments,
+    with_backoff,
 )
 from segment_clock import all_games, labels
 
@@ -207,7 +215,7 @@ def test_run_is_resumable_and_idempotent(tmp_path: Path, monkeypatch: Any) -> No
         return clock()
 
     monkeypatch.setattr(library, "read_clock", fake_read)
-    a = argparse.Namespace(libdir=libdir, ingest=ingest, only="", min_free_gb=0.0)
+    a = argparse.Namespace(libdir=libdir, ingest=ingest, only="", min_free_gb=0.0, workers=1)
     src = LocalSource(src_dir)
     try:
         run_once(src, a, {})
@@ -250,3 +258,148 @@ def test_labels_for_a_library_game(tmp_path: Path) -> None:
     assert [p.name for p in written] == ["l.json"]
     rows = json.loads(written[0].read_text())["entries"]
     assert len(rows) == 1 and rows[0]["segment_ms"] == 100_000
+
+
+# --- zip archive, backoff, parallel readers -----------------------------------------------------
+
+
+def make_zip(path: Path, members: dict[str, bytes]) -> None:
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        for name, data in members.items():
+            z.writestr(f"handball-segs-l09/{name}" if name.endswith(".mp4") else name, data)
+
+
+def test_local_zip_is_read_member_by_member_and_cut_back(tmp_path: Path) -> None:
+    members = {f"g_s{k}.mp4": bytes([k]) * (5000 + k) for k in range(4)}
+    members["index.json"] = b"{}"
+    zpath = tmp_path / "l09.zip"
+    make_zip(zpath, members)
+    out = tmp_path / "out"
+    with Archive(zpath) as arch:
+        assert set(arch.members) == set(members)  # by file name, folders in the zip ignored
+        assert arch.extract("index.json", out).read_bytes() == b"{}"
+        size = zpath.stat().st_size
+        order = sorted((n for n in members if n.endswith(".mp4")), key=arch.offset, reverse=True)
+        for name in order:
+            got = arch.extract(name, out, cut=True)
+            assert got.read_bytes() == members[name] and got.parent == out
+            assert zpath.stat().st_size < size  # the zip shrinks behind every member taken out
+            size = zpath.stat().st_size
+            got.unlink()
+        assert not list(out.glob("*.part"))
+    assert not zpath.exists()  # deleted on close
+
+
+def test_remote_zip_is_read_with_range_requests(tmp_path: Path) -> None:
+    members = {f"g_s{k}.mp4": bytes(range(256)) * (400 + k) for k in range(3)}
+    zpath = tmp_path / "remote.zip"
+    make_zip(zpath, members)
+    data = zpath.read_bytes()
+    ranges: list[tuple[int, int]] = []
+
+    def get(start: int, end: int) -> bytes:
+        ranges.append((start, end))
+        return data[start : end + 1]
+
+    with Archive(io.BufferedReader(RangeFile(len(data), get), buffer_size=1 << 16)) as arch:
+        for name, content in members.items():
+            assert arch.extract(name, tmp_path / "out").read_bytes() == content
+    assert ranges and all(0 <= s <= e < len(data) for s, e in ranges)
+    assert zpath.exists()  # a remote archive deletes nothing
+
+
+def test_backoff_on_rate_limit_only() -> None:
+    waits: list[float] = []
+    answers = iter([RuntimeError("kaggle datasets download: You have been rate limited. Wait"),
+                    RuntimeError("429 Client Error: Too Many Requests"), "ok"])
+
+    def call() -> str:
+        x = next(answers)
+        if isinstance(x, Exception):
+            raise x
+        return x
+
+    assert with_backoff(call, "t", base_s=10, sleep=waits.append) == "ok"
+    assert waits == [10, 20]
+    waits.clear()
+    try:  # other errors are not retried
+        with_backoff(lambda: (_ for _ in ()).throw(RuntimeError("403 Forbidden")), "t",
+                     sleep=waits.append)
+    except RuntimeError as exc:
+        assert "403" in str(exc)
+    assert waits == []
+
+    def always() -> None:
+        raise RuntimeError("You have been rate limited")
+
+    try:  # gives up after `tries` calls, waits capped
+        with_backoff(always, "t", tries=5, base_s=100, cap_s=300, sleep=waits.append)
+    except RuntimeError:
+        pass
+    assert waits == [100, 200, 300, 300]
+
+
+def test_zip_only_downloaded_with_disk_to_spare() -> None:
+    assert fits_on_disk(4.5, 2_000_000_000, 1.5)
+    assert not fits_on_disk(4.2, 2_843_216_621, 1.5)  # l05: read in place instead
+    assert not fits_on_disk(10.0, None, 1.5) and not fits_on_disk(10.0, 0, 1.5)
+
+
+def test_parallel_readers(tmp_path: Path, monkeypatch: Any) -> None:
+    src_dir, libdir, ingest = tmp_path / "kaggle", tmp_path / "lib", tmp_path / "ingest"
+    ingest.mkdir()
+    make_dataset(src_dir, "handball-segs-l01", ["g1", "g2", "g3"], 3)
+    lock, running, peak, calls = threading.Lock(), [0], [0], []
+
+    def slow_read(path: Path) -> dict[str, Any]:
+        assert path.exists() and path.parent == libdir / "tmp"
+        with lock:
+            running[0] += 1
+            peak[0] = max(peak[0], running[0])
+            calls.append(path.name)
+        time.sleep(0.15)
+        with lock:
+            running[0] -= 1
+        return clock(source=None if path.name.endswith("_s1.mp4") else "overlay")
+
+    saves: list[int] = []
+    real_save = library.save
+
+    def counting_save(d: Path, lib: dict[str, Any]) -> None:
+        saves.append(sum(1 for g in lib["games"].values() for s in g["segments"] if "clock" in s))
+        real_save(d, lib)
+
+    monkeypatch.setattr(library, "read_clock", slow_read)
+    monkeypatch.setattr(library, "save", counting_save)
+    a = argparse.Namespace(libdir=libdir, ingest=ingest, only="", min_free_gb=0.0, workers=3)
+    t0 = time.time()
+    run_once(LocalSource(src_dir), a, {})
+    assert peak[0] == 3 and len(calls) == 9 and len(set(calls)) == 9
+    assert time.time() - t0 < 9 * 0.15  # in parallel
+    assert all(n in saves for n in range(1, 10))  # saved after every single segment
+    lib = json.loads((libdir / "library.json").read_text())
+    assert lib["datasets"]["handball-segs-l01"]["status"] == "done"
+    assert lib["summary"]["segments_with_clock_data"] == 9
+    assert lib["summary"]["segments_with_clock"] == 6
+    assert (libdir / "info" / "g3.info.json").exists()  # info JSONs come out of the zip
+    assert not (libdir / "tmp").exists()  # segments and zip deleted
+    assert run_once(LocalSource(src_dir), a, {}) == 0 and len(calls) == 9
+
+
+def test_take_failures_and_low_disk(tmp_path: Path, monkeypatch: Any) -> None:
+    got: list[str] = []
+    monkeypatch.setattr(library, "read_clock", lambda p: clock())
+    seg = [("g", {"file": f"s{k}.mp4"}) for k in range(5)]
+
+    def take(name: str, s: dict[str, Any]) -> Path:
+        if s["file"] == "s1.mp4":
+            raise KeyError("s1.mp4 is not in the archive")
+        if s["file"] == "s3.mp4":
+            raise library.LowDiskError("only 1.2 GB free")
+        p = tmp_path / s["file"]
+        p.write_bytes(b"x")
+        return p
+
+    failed = library.read_parallel(seg, take, lambda n, s, c: got.append(s["file"]), 2)
+    assert got == ["s0.mp4", "s2.mp4"] and failed == 3  # s1 skipped, s3 and s4 left for later
+    assert not list(tmp_path.glob("*.mp4"))  # read segments deleted

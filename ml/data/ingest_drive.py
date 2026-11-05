@@ -87,7 +87,7 @@ def read_clock(seg: Path) -> dict[str, Any]:
         res = subprocess.run(  # noqa: S603
             ["nice", "-n", "10", clock_python(), "-I", str(CLOCK_SCRIPT), str(seg)],  # noqa: S607
             capture_output=True, text=True, timeout=CLOCK_TIMEOUT_S, cwd=REPO,
-            env={**os.environ, "OMP_NUM_THREADS": "2"},
+            env={**os.environ, "OMP_NUM_THREADS": os.environ.get("HANDBALL_CLOCK_THREADS") or "2"},
         )
         lines = [ln for ln in res.stdout.splitlines() if ln.startswith("{")]
         if res.returncode or not lines:
