@@ -224,6 +224,20 @@ def stacked_pairs(tokens: Sequence[Token]) -> list[tuple[Token, Token]]:
     return out
 
 
+def _two_digit_minutes(tk: Token) -> bool:
+    m = CLOCK.match(tk.text.strip())
+    return m is not None and len(m.group(1)) == 2
+
+
+def _pick_clock(clocks: Sequence[tuple[Token, int]]) -> tuple[Token, int]:
+    """The match clock among `mm:ss` fields: the most confident, tallest; among fields about as
+    tall as the tallest, one with two-digit minutes ("42:26", "00:22") before a penalty timer of
+    the same size ("0:18", "1:32")."""
+    tallest = max(c[0].h for c in clocks)
+    big = [c for c in clocks if c[0].h >= 0.85 * tallest]
+    return max(big, key=lambda c: (_two_digit_minutes(c[0]), c[0].score * c[0].h))
+
+
 def parse_board(
     tokens: Sequence[Token],
     t_ms: int = 0,
@@ -233,36 +247,45 @@ def parse_board(
     """Home score, clock and away score from the text on one frame, or None without a clock.
 
     `stacked`: where the score field sits relative to the clock when two bare `mm:ss` fields are
-    stacked ("above": the upper one is the score). Unknown (None), such a frame gives the clock
-    as before (the most confident, tallest `mm:ss`) and no score."""
+    stacked ("above": the upper one is the score). Unknown (None), such a frame gives neither
+    clock nor score (either field may be the clock), only a reading that says a board is there.
+    A field with letters ("16:00 Uhr" on a pre-match graphic) is never the clock."""
     toks = [s for tk in tokens for s in split_token(tk)]
     clocks = [(tk, c) for tk in toks if (c := _clock_s(tk.text)) is not None and _pair(tk) is None]
     if not clocks:
         return None
-    # a score field with team codes stacked with a clock
+    # a score field with team codes stacked with a clock: the nearest line, then the field most
+    # centred on the score (a penalty timer may stand beside the clock or on the line under it)
     for tk in toks:
         pair = _pair(tk)
         if pair is None:
             continue
         near = [(c, s) for c, s in clocks if _stacked_with(tk, c)]
         if near:
-            clock, clock_s = max(near, key=lambda c: c[0].score * c[0].h)
+            score = tk
+            clock, clock_s = min(
+                near,
+                key=lambda c: (
+                    round(abs(c[0].cy - score.cy) / max(c[0].h, 1.0)),
+                    abs(c[0].cx - score.cx),
+                ),
+            )
             return BoardReading(t_ms, pair[0], pair[1], clock_s)
     # two bare mm:ss fields one above the other: one is the score
     pairs = stacked_pairs(toks)
     if pairs:
         if stacked is None:
-            clock, clock_s = max(clocks, key=lambda c: c[0].score * c[0].h)
-            return BoardReading(t_ms, None, None, clock_s)
-        # the score field is the outermost line (penalty timers may stack under the clock)
+            return BoardReading(t_ms, None, None, None)
+        # the score field is the outermost line (penalty timers may stack under the clock), the
+        # clock the line next to it
         if stacked == "above":
-            score_tk, clock = min(pairs, key=lambda p: p[0].cy)
+            score_tk, clock = min(pairs, key=lambda p: (p[0].cy, p[1].cy))
         else:
-            clock, score_tk = max(pairs, key=lambda p: p[1].cy)
+            clock, score_tk = max(pairs, key=lambda p: (p[1].cy, p[0].cy))
         m = PAIR.search(score_tk.text)
         home, away = (int(m.group(1)), int(m.group(2))) if m else (None, None)
         return BoardReading(t_ms, home, away, _clock_s(clock.text))
-    clock, clock_s = max(clocks, key=lambda c: c[0].score * c[0].h)
+    clock, clock_s = _pick_clock(clocks)
     home, away = _row_numbers(toks, clock, reach)
     if home is None and away is None and stacked is not None:
         # a stacked board whose score field came out as separate numbers ("27", "30")
@@ -539,6 +562,52 @@ def _gray(frame: NDArray[Any]) -> NDArray[np.uint8]:
     return np.asarray(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), np.uint8)
 
 
+def read_tokens(
+    ocr: Any,
+    frame: NDArray[Any],
+    win: tuple[int, int, int, int] | None = None,
+    zoom: float = 1.0,
+) -> tuple[list[Token], list[tuple[float, float, float, float]]]:
+    """Text with digits in `win` of the frame (None: all of it), enlarged by `zoom` before
+    reading: (tokens split into fields with `split_token`, the recognised boxes before the split),
+    in frame px. `ocr` is a `handball_vision.numbers.NumberReader` (detect + recognise). A number
+    cut by the frame edge ("1" of "11") is left out."""
+    h, w = frame.shape[:2]
+    x0, y0, x1, y1 = win or (0, 0, w, h)
+    img = frame[y0:y1, x0:x1]
+    if img.size == 0:
+        return [], []
+    if zoom > 1.01:
+        img = cv2.resize(img, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
+    crops, kept = [], []
+    for b in ocr.detect(img):
+        bx1, by1 = np.asarray(b).min(axis=0)
+        bx2, by2 = np.asarray(b).max(axis=0)
+        if by2 - by1 < 8:
+            continue
+        crops.append(img[max(0, int(by1) - 2) : int(by2) + 2, max(0, int(bx1) - 2) : int(bx2) + 2])
+        kept.append(
+            (
+                float(bx1) / zoom + x0,
+                float(by1) / zoom + y0,
+                float(bx2) / zoom + x0,
+                float(by2) / zoom + y0,
+            )
+        )
+    out: list[Token] = []
+    raw: list[tuple[float, float, float, float]] = []
+    for (text, score), box in zip(ocr.recognise(crops), kept, strict=True):
+        if score < 0.6 or not any(ch.isdigit() for ch in text):
+            continue
+        raw.append(box)
+        touches = box[0] <= 1 or box[2] >= w - 2
+        for tk in split_token(Token(text, *box, score)):
+            if touches and NUMBER.match(tk.text.strip()) and (tk.x1 <= 1 or tk.x2 >= w - 2):
+                continue
+            out.append(tk)
+    return out, raw
+
+
 class HallBoardReader:
     """Reads the hall scoreboard every `every_s` seconds from decoded frames (`add`).
 
@@ -578,44 +647,8 @@ class HallBoardReader:
     def _ocr(
         self, frame: NDArray[Any], win: tuple[int, int, int, int] | None, zoom: float
     ) -> list[Token]:
-        h, w = frame.shape[:2]
-        x0, y0, x1, y1 = win or (0, 0, w, h)
-        img = frame[y0:y1, x0:x1]
-        if img.size == 0:
-            return []
-        if zoom > 1.01:
-            img = cv2.resize(img, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
-        boxes = self.ocr.detect(img)
-        crops, kept = [], []
-        for b in boxes:
-            bx1, by1 = np.asarray(b).min(axis=0)
-            bx2, by2 = np.asarray(b).max(axis=0)
-            if by2 - by1 < 8:
-                continue
-            crops.append(
-                img[max(0, int(by1) - 2) : int(by2) + 2, max(0, int(bx1) - 2) : int(bx2) + 2]
-            )
-            kept.append(
-                (
-                    float(bx1) / zoom + x0,
-                    float(by1) / zoom + y0,
-                    float(bx2) / zoom + x0,
-                    float(by2) / zoom + y0,
-                )
-            )
-        out = []
-        self._raw = []
-        for (text, score), box in zip(self.ocr.recognise(crops), kept, strict=True):
-            if score < 0.6 or not any(ch.isdigit() for ch in text):
-                continue
-            self._raw.append(box)
-            touches = box[0] <= 1 or box[2] >= w - 2
-            for tk in split_token(Token(text, *box, score)):
-                # a number cut by the frame edge ("1" of "11") is no reading
-                if touches and NUMBER.match(tk.text.strip()) and (tk.x1 <= 1 or tk.x2 >= w - 2):
-                    continue
-                out.append(tk)
-        return out
+        tokens, self._raw = read_tokens(self.ocr, frame, win, zoom)
+        return tokens
 
     # --- locating -----------------------------------------------------------------------------
 

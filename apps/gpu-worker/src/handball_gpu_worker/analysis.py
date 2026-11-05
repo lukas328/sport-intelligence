@@ -27,7 +27,7 @@ import structlog
 
 from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_dir
 from handball_vision import __version__ as vision_version
-from handball_vision import formation, scoreboard
+from handball_vision import formation, goalcandidates, scoreboard
 from handball_vision import observe as learned
 from handball_vision.calibration import (
     Calibration,
@@ -395,6 +395,16 @@ def _cached_observations(
         return None
 
 
+def goal_candidates(obs: learned.Observations) -> dict[str, Any] | None:
+    """Moments that are probably goals, from the camera motion and the people of the observation
+    pass (no court needed): the coach confirms or rejects each. Never fails the analysis."""
+    try:
+        return goalcandidates.from_observations(obs)
+    except Exception as exc:  # pragma: no cover - defensive
+        log.warning("goal_candidates_failed", error=str(exc))
+        return None
+
+
 def _people(found: list[Any]) -> list[Any]:
     return [d for d in found if d.cls != "ball"]
 
@@ -567,6 +577,7 @@ def _run_learned(
                 "stats": {"camera": view["camera"], "motion": obs.motion.stats},
                 "formations": [],
                 "scoreboard": overlay,
+                "goal_candidates": goal_candidates(obs),
             }
             rep.succeed(pending)
             log.info("analysis_needs_calibration", job_id=job_id, reason=str(exc))
@@ -593,6 +604,8 @@ def _run_learned(
                 ),
             }
         rep.stage("upload")
+        # computed by the tracking stage from the observations; sent on its own, not as a stat
+        goals = result.extra.pop("goal_candidates", None)
         out = work / "analysis"
         out.mkdir()
         result.write_parquet(out / "tracks.parquet")
@@ -616,6 +629,7 @@ def _run_learned(
             "formations": detect_formations(result),
             "events": events_payload(result),
             "scoreboard": overlay,
+            "goal_candidates": goals,
         }
         rep.succeed(payload)
         log.info(

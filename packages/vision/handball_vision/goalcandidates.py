@@ -155,14 +155,20 @@ def _robust_scale(x: F64) -> float:
     return float(max(np.percentile(np.abs(x), 90), 1e-6)) if len(x) else 1.0
 
 
+def _window_bounds(n: int, win_s: float) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
+    """[lo, hi) of a window of `win_s` centred on each grid index, moved inwards at the ends so
+    it keeps its full length (a video as short as the window gets one set of statistics, as the
+    3-minute training segments did)."""
+    m = min(n, max(1, round(win_s / DT)))
+    lo = np.clip(np.arange(n) - m // 2, 0, n - m)
+    return lo, lo + m
+
+
 def rolling_standardise(ch: F64, win_s: float = BLOCK_S) -> F64:
-    """(x - mean) / sd per column over a centred window of `win_s` (cut at the ends)."""
-    n = len(ch)
-    k = max(1, round(win_s / DT / 2))
+    """(x - mean) / sd per column over a rolling window of `win_s` (`_window_bounds`)."""
+    lo, hi = _window_bounds(len(ch), win_s)
     c1 = np.vstack([np.zeros((1, ch.shape[1])), np.cumsum(ch, axis=0)])
     c2 = np.vstack([np.zeros((1, ch.shape[1])), np.cumsum(ch**2, axis=0)])
-    lo = np.clip(np.arange(n) - k, 0, n)
-    hi = np.clip(np.arange(n) + k, 0, n)
     cnt = (hi - lo)[:, None].astype(np.float64)
     mean = (c1[hi] - c1[lo]) / cnt
     var = np.maximum((c2[hi] - c2[lo]) / cnt - mean**2, 0.0)
@@ -170,17 +176,16 @@ def rolling_standardise(ch: F64, win_s: float = BLOCK_S) -> F64:
 
 
 def rolling_rz(v: F64, win_s: float = BLOCK_S, step_s: float = 5.0) -> F64:
-    """Robust z-score (median / IQR, clipped to -3..10) over a centred window of `win_s`, the
-    statistics taken every `step_s` and interpolated."""
+    """Robust z-score (median / IQR, clipped to -3..10) over a rolling window of `win_s`
+    (`_window_bounds`), the statistics taken every `step_s` and interpolated."""
     n = len(v)
     if n == 0:
         return v
-    k = max(1, round(win_s / DT / 2))
+    lo, hi = _window_bounds(n, win_s)
     at = np.unique(np.r_[np.arange(0, n, max(1, round(step_s / DT))), n - 1])
     med, iqr = [], []
     for i in at:
-        w = v[max(0, i - k) : i + k]
-        q1, q2, q3 = np.percentile(w, [25, 50, 75])
+        q1, q2, q3 = np.percentile(v[lo[i] : hi[i]], [25, 50, 75])
         med.append(q2)
         iqr.append(max(q3 - q1, 1e-6))
     idx = np.arange(n)

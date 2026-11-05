@@ -623,4 +623,11 @@ def track(
     if ball is not None:
         result.extra["ball"] = ball
     result.timings_s["ball"] = time.perf_counter() - t0
+    from handball_vision.goalcandidates import from_observations as goal_candidates
+
+    t0 = time.perf_counter()
+    goals = goal_candidates(obs)  # camera motion and people only: no court needed
+    if goals is not None:
+        result.extra["goal_candidates"] = goals
+    result.timings_s["goal_candidates"] = time.perf_counter() - t0
     return result

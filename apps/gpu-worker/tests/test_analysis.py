@@ -335,6 +335,14 @@ def test_learned_path_needs_calibration_then_reuses_observations(
     s3 = FakeS3(root)
     monkeypatch.setattr(analysis, "s3_client", lambda *a: s3)
     monkeypatch.setattr(analysis, "load_detector", lambda settings: Oracle())
+    # 6 s are too short for goal candidates: what the observation pass would give for a game
+    seen: list[int] = []
+
+    def fake_candidates(obs: Any) -> dict[str, Any]:
+        seen.append(len(obs.frames))
+        return {"template": "t", "candidates": [{"t_ms": 4000, "rate": 1}]}
+
+    monkeypatch.setattr(analysis.goalcandidates, "from_observations", fake_candidates)
     rep, _ = reporter()
     first = analysis.run_analysis(
         "j",
@@ -350,6 +358,8 @@ def test_learned_path_needs_calibration_then_reuses_observations(
     )
     # synthetic goals are not striped: no trustworthy automatic court, the user marks it
     assert first["needs_calibration"] is True and first["detector"] == "model"
+    # goal candidates need no court: they come with the request to mark it
+    assert first["goal_candidates"]["candidates"] == [{"t_ms": 4000, "rate": 1}]
     assert (root / "artifacts/o/m/a/analysis/observations.npz").exists()
     # the re-run with clicked corners reuses the stored observations (no second download)
     h = truth[0].homography if truth[0].homography is not None else None
@@ -384,6 +394,9 @@ def test_learned_path_needs_calibration_then_reuses_observations(
         and second["calibration"]["source"] == "user_correction"
     )
     assert len(second["tracks"]) >= 8
+    assert second["goal_candidates"]["template"] == "t"
+    assert "goal_candidates" not in second["stats"]  # sent on its own, not as a stat
+    assert "goal_candidates" in second["timings_s"] and len(seen) == 2 and seen[0] > 0
 
 
 @pytest.mark.parametrize(
