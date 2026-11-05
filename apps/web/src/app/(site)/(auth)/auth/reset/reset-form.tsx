@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,10 @@ import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { enterApp } from "@/lib/nav";
 
 export function ResetForm() {
   const t = useTranslations();
-  const router = useRouter();
   const token = useSearchParams().get("token") ?? "";
   const [error, setError] = useState<ErrorKey | null>(token ? null : "invalid-token");
   const [busy, setBusy] = useState(false);
@@ -24,8 +24,7 @@ export function ResetForm() {
     });
     setBusy(false);
     if (error) return setError(errorKey(error));
-    router.replace(data.status === "totp_required" ? "/login?totp=1" : "/app");
-    router.refresh();
+    enterApp(data.status === "totp_required" ? "/login?totp=1" : "/app", { replace: true });
   }
 
   return (

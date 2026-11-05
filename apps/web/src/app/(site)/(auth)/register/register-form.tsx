@@ -2,7 +2,6 @@
 
 import { track } from "@/lib/analytics";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
+import { enterApp } from "@/lib/nav";
 
 export function RegisterForm({
   invitationToken,
@@ -22,7 +22,6 @@ export function RegisterForm({
 }) {
   const t = useTranslations();
   const locale = useLocale();
-  const router = useRouter();
   const [error, setError] = useState<ErrorKey | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -50,8 +49,7 @@ export function RegisterForm({
       setFields(fieldErrors(error));
       return;
     }
-    router.push(invitationToken ? "/app" : "/onboarding");
-    router.refresh();
+    enterApp(invitationToken ? "/app" : "/onboarding");
   }
 
   return (

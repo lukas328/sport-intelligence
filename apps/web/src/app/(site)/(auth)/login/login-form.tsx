@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,12 @@ import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
-import { safeNext } from "@/lib/nav";
+import { enterApp, safeNext } from "@/lib/nav";
 
 type Mode = "password" | "magic" | "totp" | "magic-sent";
 
 export function LoginForm({ oauth }: { oauth?: ReactNode }) {
   const t = useTranslations();
-  const router = useRouter();
   const params = useSearchParams();
   const next = safeNext(params.get("next"));
   const [mode, setMode] = useState<Mode>(params.get("totp") ? "totp" : "password");
@@ -27,6 +26,7 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
     const form = new FormData(e.currentTarget);
     setBusy(true);
     setError(null);
+    let leaving = false;
     try {
       if (mode === "password") {
         const { data, error } = await api.POST("/v1/auth/login", {
@@ -34,20 +34,21 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
         });
         if (error) return setError(errorKey(error));
         if (data.status === "totp_required") return setMode("totp");
-        router.push(next);
-        router.refresh();
+        leaving = true;
+        enterApp(next);
       } else if (mode === "totp") {
         const { error } = await api.POST("/v1/auth/login/totp", { body: { code: String(form.get("code")) } });
         if (error) return setError(errorKey(error));
-        router.push(next);
-        router.refresh();
+        leaving = true;
+        enterApp(next);
       } else if (mode === "magic") {
         const { error } = await api.POST("/v1/auth/magic-link", { body: { email: String(form.get("email")) } });
         if (error) return setError(errorKey(error));
         setMode("magic-sent");
       }
     } finally {
-      setBusy(false);
+      // keep the button busy while the next page loads
+      if (!leaving) setBusy(false);
     }
   }
 
