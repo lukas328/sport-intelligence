@@ -122,9 +122,6 @@ def anchor_vectors(f: Fragment, fps: float, window_s: float = ANCHOR_WINDOW_S) -
     return np.asarray(f.vectors[gap <= window_s * fps], np.float64)
 
 
-import os
-
-_MODE = os.environ.get("REID_ROLE_MODE", "all")
 MIN_PLAYER_P = 0.75  # mean player probability a fragment needs to teach or to get a number
 
 
@@ -257,7 +254,7 @@ def assign(
             f
             for f in fragments
             if f.team.removesuffix("_gk") == team
-            and (plays(f) if f.number is not None or _MODE != "anchors" else not f.team.endswith("_gk"))
+            and plays(f)
             and len(f.vectors)
             and (
                 consistency(f.vectors) >= MIN_CANDIDATE_CONSISTENCY
