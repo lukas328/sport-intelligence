@@ -598,7 +598,12 @@ async def test_rerun_keeps_the_clicked_court(
     vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
     jobs: MemoryJobQueue = api.app.state.jobs
     await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)
-    flat = {"needs_calibration": True, "calibration": None, "tracks": [], "chunks": 0}
+    flat: dict[str, Any] = {
+        "needs_calibration": True,
+        "calibration": None,
+        "tracks": [],
+        "chunks": 0,
+    }
     await _finish(api, jobs.jobs[-1][2], {**flat, "panorama": {"width": 3600, "height": 1100}})
     pts = [{"image": [100 * i, 50 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
     body = {"points": pts, "space": "panorama", "frame_ms": 0}

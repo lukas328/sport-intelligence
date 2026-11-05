@@ -230,9 +230,7 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
     return asset
 
 
-def job_budget_s(
-    kind: str, duration_s: float | None = None, size_bytes: int | None = None
-) -> int:
+def job_budget_s(kind: str, duration_s: float | None = None, size_bytes: int | None = None) -> int:
     """How long a video job may run before the worker stops it (and before the alerting calls it
     stuck). Six hours covered the five-minute test clips; a full game of 120 minutes takes about
     2.2 x real time to analyse on a CPU worker (docs/perf/real-videos.md), the ingest of a file of
