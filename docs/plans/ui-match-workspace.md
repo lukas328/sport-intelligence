@@ -276,3 +276,24 @@ Official onboarding, three decisions (2026-11-05, docs/plans/federation-onboardi
   keeps the choice for all organisers of the team. Suggested UI: a toggle "Statistik anzeigen"
   above the roster confirmation, extra columns Tore, 7 m, 2', Sp., Paraden (keepers).
 - Club verification: unchanged (a second club admin or coach confirming is enough).
+
+Court once per hall (2026-11-05, backlog item 1, ADR 025 addendum 2): a court the coach clicked or
+confirmed on one video is carried over to every later video of the same hall.
+- `GET .../videos/{id}/analysis` has the new field `hall` (null only without a match):
+  `{name, source, calibrated_videos}`. `name` is the match's venue (filled from the official game
+  data, handball.ch `venueName`) or, for a home game without a venue, the venue of most of the
+  team's home games (`source` "official" | "match" | "home_matches" | null). `calibrated_videos`
+  counts earlier videos of that hall whose current court a person clicked or confirmed.
+- A fresh analysis (no clicked points) tries those courts first: the worker matches the two hall
+  images and, when the camera stood at the same place (or the floor alone matches), takes the
+  court over. Such a court comes back as `calibration.source` "heuristic" with
+  `calibration_info.method` "hall", `reference_video_id`, `hall`, `floor_inliers`, `error_px`;
+  when none fits, `calibration_info.hall_tried` lists the attempts (`video_id`, `error`) and the
+  automatic court or the click dialog follows as before.
+- Confirming (`POST .../calibration/confirm`) or clicking a court makes that video a reference for
+  the hall's next videos. Suggested UI: in the court check "Spielfeld aus dem Spiel vom <date>
+  übernommen (Halle <name>)" with "Passt" (confirm) / "Neu markieren"; in the click dialog
+  "Halle: <name>" (edit the match venue when it is missing or wrong, `PATCH` match `venue`) and a
+  hint "Einmal pro Halle markieren, die nächsten Videos aus dieser Halle übernehmen es".
+- `calibration_error` texts are clearer now (see ADR 025 addendum 2): flat views, broken camera
+  motion (cuts, zoom) and missing markings each say what to do.

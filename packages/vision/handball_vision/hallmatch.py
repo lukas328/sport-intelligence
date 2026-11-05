@@ -71,9 +71,9 @@ def _features(image: U8) -> tuple[F64, NDArray[np.float32] | None]:
     seen = image.max(axis=2) if image.ndim == 3 else image
     mask = cv2.erode((seen > 0).astype(np.uint8) * 255, np.ones((9, 9), np.uint8))
     grey = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(grey)
-    kp, desc = cv2.SIFT_create(nfeatures=6000).detectAndCompute(grey, mask)
+    kp, desc = cv2.SIFT.create(nfeatures=6000).detectAndCompute(grey, mask)
     pts = np.array([k.pt for k in kp], dtype=np.float64).reshape(-1, 2)
-    return pts, desc
+    return pts, None if desc is None else np.asarray(desc, np.float32)
 
 
 def _floor_polygon(court_to_image: F64, margin_m: float = 3.0) -> F64:
@@ -115,11 +115,12 @@ def register(reference: U8, reference_court: F64, image: U8, ransac_px: float = 
     def fit(sel: NDArray[np.bool_]) -> tuple[F64 | None, NDArray[np.bool_]]:
         if sel.sum() < 4:
             return None, np.zeros(len(a), bool)
-        h, _ = cv2.findHomography(a[sel], b[sel], cv2.RANSAC, ransac_px, maxIters=4000)
-        if h is None:
+        found, _ = cv2.findHomography(a[sel], b[sel], cv2.RANSAC, ransac_px, maxIters=4000)
+        if found is None:
             return None, np.zeros(len(a), bool)
+        h = np.asarray(found, np.float64)
         err = np.linalg.norm(geometry.apply(h, a) - b, axis=1)
-        return np.asarray(h, np.float64), err < ransac_px
+        return h, err < ransac_px
 
     method = "same_place"
     h, ok = fit(np.ones(len(a), bool))

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 import numpy as np
@@ -547,7 +547,7 @@ def test_hall_reference_with_most_floor_matches_wins(
         return hallmatch.HallMatch(calib, 80, 40, 120, "same_place", 0.5)
 
     monkeypatch.setattr(hallmatch, "register", register)
-    refs = [
+    refs: list[dict[str, Any]] = [
         {"video_id": "a", "panorama_key": "a/analysis/panorama.jpg", "homography": np.eye(3)},
         {"video_id": "c", "panorama_key": "c/analysis/panorama.jpg", "homography": np.eye(3)},
         {
@@ -579,3 +579,107 @@ def test_no_fitting_hall_reference_leaves_the_automatic_court(tmp_path: Path) ->
     assert analysis._hall_calibration(FakeS3(tmp_path), "x", hall, refs, tmp_path, tried) is None
     assert tried == [{"video_id": "a", "error": "the earlier hall image is missing"}]
     assert analysis._hall_calibration(FakeS3(tmp_path), "x", hall, [], tmp_path, tried) is None
+
+
+@pytest.mark.parametrize("fits", [True, False])
+def test_an_earlier_court_of_the_hall_comes_before_the_automatic_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fits: bool
+) -> None:
+    """A fresh analysis with hall references: the court carried over from the earlier video
+    is used when it fits; otherwise the automatic court decides and the attempts are reported
+    (here it fails too, so the coach is asked for the points)."""
+    from handball_vision import observe as learned
+    from handball_vision.calibration import Calibration
+    from handball_vision.detection import Detection
+
+    class StopError(Exception):
+        pass
+
+    person = Detection(0, 0, 10, 30, 0.9)
+
+    class Detector:
+        source = "model"
+        model = "stub"
+
+        def detect(self, frames: list[Any]) -> list[list[Any]]:
+            return [[person] * 4 for _ in frames]
+
+    class Motion:
+        moving = False
+        stats: ClassVar[dict[str, float]] = {}
+
+        def background(self) -> Any:
+            return np.zeros((20, 40, 3), np.uint8)
+
+    class Frame:
+        people = [person] * 4
+
+    class Obs:
+        motion = Motion()
+        frames = [Frame()] * 5
+        fps = 25.0
+        timings_s: ClassVar[dict[str, float]] = {}
+
+    carried = Calibration(np.eye(3), 1.0, 0.4, "heuristic", (40, 20))
+    seen: dict[str, Any] = {}
+
+    def hall_calibration(s3: Any, bucket: str, hall: Any, refs: Any, work: Any, tried: Any) -> Any:
+        seen["refs"] = refs
+        if fits:
+            tried.append({"video_id": "v1", "floor_inliers": 50})
+            return carried, {"method": "hall", "reference_video_id": "v1"}
+        tried.append({"video_id": "v1", "error": "not the same hall or camera position"})
+        return None
+
+    def auto(obs: Any, hall: Any) -> Any:
+        seen["auto"] = True
+        raise CalibrationError("the camera sees the floor too flatly")
+
+    def track(obs: Any, calib: Any, *args: Any, **kw: Any) -> Any:
+        seen["calib"] = calib
+        raise StopError
+
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: FakeS3(tmp_path))
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Detector())
+    monkeypatch.setattr(analysis, "sample_frames", lambda *a: [np.zeros((20, 40, 3))] * 12)
+    monkeypatch.setattr(analysis, "_open", lambda *a: (None, None, 25.0, 100))
+    monkeypatch.setattr(analysis, "load_number_reader", lambda settings: None)
+    monkeypatch.setattr(analysis, "upload_dir_files", lambda *a: None)
+    monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
+    monkeypatch.setattr(analysis, "_hall_calibration", hall_calibration)
+    monkeypatch.setattr(analysis, "goal_candidates", lambda obs: None)
+    monkeypatch.setattr(learned, "observe", lambda *a, **kw: Obs())
+    monkeypatch.setattr(learned, "save_observations", lambda *a: None)
+    monkeypatch.setattr(learned, "auto_calibrate", auto)
+    monkeypatch.setattr(learned, "track", track)
+    (tmp_path / "videos" / "o/m/a").mkdir(parents=True)
+    (tmp_path / "videos" / "o/m/a/proxy.mp4").write_bytes(b"x")
+    refs = [{"video_id": "v1", "panorama_key": "o/m/v1/analysis/panorama.jpg"}]
+    rep, _ = reporter()
+
+    def call() -> dict[str, Any]:
+        return analysis.run_analysis(
+            "j",
+            "o",
+            "m",
+            "a",
+            "videos",
+            "o/m/a/proxy.mp4",
+            "o/m/a/",
+            KITS,
+            settings=JobSettings(work_dir=str(tmp_path / "w")),
+            reporter=rep,
+            hall_references=refs,
+        )
+
+    if fits:
+        with pytest.raises(StopError):
+            call()
+        assert seen["calib"] is carried and "auto" not in seen
+    else:
+        res = call()
+        assert res["needs_calibration"] is True and seen["auto"] is True
+        assert res["calibration_info"] == {
+            "hall_tried": [{"video_id": "v1", "error": "not the same hall or camera position"}]
+        }
+    assert seen["refs"] == refs

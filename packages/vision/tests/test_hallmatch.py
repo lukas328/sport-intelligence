@@ -42,7 +42,9 @@ def _camera(x: float, y: float, z: float, yaw_deg: float = 0.0) -> tuple[np.ndar
     return k, r, -r @ centre
 
 
-def _hall_image(cam: tuple[np.ndarray, ...], floor: np.ndarray, seed: int) -> tuple:
+def _hall_image(
+    cam: tuple[np.ndarray, ...], floor: np.ndarray, seed: int
+) -> tuple[np.ndarray, np.ndarray]:
     """The hall from a camera: the textured floor, stands and walls (random blocks) above it."""
     k, r, t = cam
     court_to_img = pose_homography(r, t, k)

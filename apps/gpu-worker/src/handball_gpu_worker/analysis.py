@@ -401,9 +401,7 @@ def _hall_calibration(
             image = cv2.imread(str(path))
             if image is None:
                 raise CalibrationError("the earlier hall image is unreadable")
-            found = hallmatch.register(
-                image, np.asarray(ref["homography"], dtype=np.float64), hall
-            )
+            found = hallmatch.register(image, np.asarray(ref["homography"], dtype=np.float64), hall)
         except CalibrationError as exc:
             tried.append({"video_id": video_id, "error": str(exc)})
             continue

@@ -130,7 +130,7 @@ async def test_a_court_on_a_single_frame_is_not_offered(make_api: Callable[[], A
     """Only courts on the hall image can be carried over (the worker matches hall images)."""
     api = make_api()
     ids = await setup_club(api)
-    first, job, _ = await _video(api, ids, venue="Halle A")
+    _, job, _ = await _video(api, ids, venue="Halle A")
     await _finish(
         api,
         job,
