@@ -73,8 +73,22 @@ scorers, about 60 hand-tagged shots, saves, turnovers and suspensions), not comm
 - A3: one statement of what decided the match from the head-to-head figures
   (`lib/match-decided.ts`, tested), one resin mark per sub-tab (weakest shot zone, keeper's weakest
   zone, most turnovers), zones as hairline rows, a readable goal picture.
+- A3 review (last round): overview Q7 4 (the statement of what decided the match), hairlines 4 on
+  shots and keepers, but the overview had no signal left and physical load overflowed on phones.
+  Fixed after the review: the overview's signal sits on the counted row the opponent won most
+  clearly (after a win the thing to work on), the statement leads to its scenes, the goal picture
+  fill is visible in dark mode and has a one-line key, physical load sits on an open sheet without
+  the doubled sentence and fits 390 px, the sub-tab row fades at the edge on phones. Slice closed.
+
+Still open in the analysis: goal cells and the keeper table do not open scenes yet; a one-line
+reading above shots and keepers ("Mia Meier hielt oben links 3 von 4").
 
 ## Open
+
+- Data/API (for the analysis session): an insight files the goalkeeper with a 44 % save rate as a
+  weakness ("14.8 Tore unter Erwartung" against an xG of 3.2); xG 3.4 for 26 goals; the shot-zone
+  "Fernwurf / leeres Tor" mixes two situations; the goal picture adds up to 35 of 39 shots; sprint
+  counts and top speeds of 31 to 32 km/h from one minute look implausible.
 
 - Team by side on the axis still reads weakly (2): a lane label per side ("H1" / opponent) would
   make it explicit.

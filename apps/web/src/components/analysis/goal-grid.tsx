@@ -69,7 +69,7 @@ export function GoalGrid({
               )}
             >
               {/* the rate as a fill from the bottom; the figures stay ink on a light cell */}
-              {mode === "stats" && pct != null && <span aria-hidden className="absolute inset-x-0 bottom-0 bg-foreground/15" style={{ height: `${pct}%` }} />}
+              {mode === "stats" && pct != null && <span aria-hidden className="absolute inset-x-0 bottom-0 bg-foreground/25" style={{ height: `${pct}%` }} />}
               {mode === "stats" ? (
                 d ? (
                   <>
@@ -89,6 +89,7 @@ export function GoalGrid({
         })}
       </div>
       </div>
+      {mode === "stats" && <p className="text-xs text-muted">{t(saves ? "fillSaves" : "fillGoals")}</p>}
     </div>
   );
 }

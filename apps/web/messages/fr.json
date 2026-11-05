@@ -700,7 +700,11 @@
     "edge_saves": "les arrêts ({a} contre {b})",
     "edge_shooting": "la réussite au tir ({a} contre {b})",
     "edge_turnovers": "moins de pertes de balle ({a} contre {b})",
-    "edge_fastBreaks": "les contre-attaques ({a} contre {b} buts)"
+    "edge_fastBreaks": "les contre-attaques ({a} contre {b} buts)",
+    "edgeScenes_saves": "Voir les arrêts",
+    "edgeScenes_shooting": "Voir les tirs",
+    "edgeScenes_turnovers": "Voir les pertes de balle adverses",
+    "edgeScenes_fastBreaks": "Voir les buts en contre-attaque"
   },
   "shotsView": {
     "title": "Tirs",
@@ -718,7 +722,9 @@
     "outcome_blocked": "Contré",
     "zones": "Zones de tir",
     "noPosition": "{count} tirs sans position",
-    "noPositions": "Aucune position de tir n'est saisie pour ces tirs. Touche le terrain en saisissant dans l'onglet Événements et la carte des tirs apparaît ici."
+    "noPositions": "Aucune position de tir n'est saisie pour ces tirs. Touche le terrain en saisissant dans l'onglet Événements et la carte des tirs apparaît ici.",
+    "fillGoals": "Le remplissage de chaque case montre la part de buts.",
+    "fillSaves": "Le remplissage de chaque case montre la part d'arrêts."
   },
   "events": {
     "title": "Événements",

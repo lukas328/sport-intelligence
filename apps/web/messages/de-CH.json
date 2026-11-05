@@ -700,7 +700,11 @@
     "edge_saves": "die Paraden ({a} zu {b})",
     "edge_shooting": "die Wurfquote ({a} zu {b})",
     "edge_turnovers": "weniger Ballverluste ({a} zu {b})",
-    "edge_fastBreaks": "die Gegenstösse ({a} zu {b} Tore)"
+    "edge_fastBreaks": "die Gegenstösse ({a} zu {b} Tore)",
+    "edgeScenes_saves": "Paraden ansehen",
+    "edgeScenes_shooting": "Würfe ansehen",
+    "edgeScenes_turnovers": "Ballverluste des Gegners ansehen",
+    "edgeScenes_fastBreaks": "Gegenstosstore ansehen"
   },
   "shotsView": {
     "title": "Würfe",
@@ -718,7 +722,9 @@
     "outcome_blocked": "Geblockt",
     "zones": "Wurfzonen",
     "noPosition": "{count} Würfe ohne Position",
-    "noPositions": "Für diese Würfe ist keine Wurfposition erfasst. Beim Erfassen im Tab Ereignisse auf das Feld tippen, dann erscheint hier das Wurfbild."
+    "noPositions": "Für diese Würfe ist keine Wurfposition erfasst. Beim Erfassen im Tab Ereignisse auf das Feld tippen, dann erscheint hier das Wurfbild.",
+    "fillGoals": "Die Füllung jedes Feldes zeigt den Anteil Tore.",
+    "fillSaves": "Die Füllung jedes Feldes zeigt den Anteil Paraden."
   },
   "events": {
     "title": "Ereignisse",

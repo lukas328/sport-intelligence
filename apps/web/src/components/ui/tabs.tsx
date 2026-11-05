@@ -43,7 +43,14 @@ export function Segmented<T extends string>({
     onChange(items[to]!.value);
   }
   return (
-    <div className={cn("scrollbar-none -mx-1 overflow-x-auto px-1", className)}>
+    <div
+      className={cn(
+        "scrollbar-none -mx-1 overflow-x-auto px-1",
+        // phones: a fade at the right edge says the row scrolls
+        variant === "underline" && size === "sm" && "max-sm:[mask-image:linear-gradient(to_right,black_82%,transparent)]",
+        className,
+      )}
+    >
       <div role="tablist" aria-label={label} className={variant === "underline" ? (size === "sm" ? "inline-flex gap-5" : "inline-flex gap-7") : "inline-flex gap-0.5 rounded-md bg-surface p-1"}>
         {items.map((it, i) => {
           const active = it.value === value;

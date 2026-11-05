@@ -700,7 +700,11 @@
     "edge_saves": "the saves ({a} to {b})",
     "edge_shooting": "the shooting ({a} to {b})",
     "edge_turnovers": "fewer turnovers ({a} to {b})",
-    "edge_fastBreaks": "the fast breaks ({a} to {b} goals)"
+    "edge_fastBreaks": "the fast breaks ({a} to {b} goals)",
+    "edgeScenes_saves": "Watch the saves",
+    "edgeScenes_shooting": "Watch the shots",
+    "edgeScenes_turnovers": "Watch the opponent's turnovers",
+    "edgeScenes_fastBreaks": "Watch the fast-break goals"
   },
   "shotsView": {
     "title": "Shots",
@@ -718,7 +722,9 @@
     "outcome_blocked": "Blocked",
     "zones": "Shot zones",
     "noPosition": "{count} shots without position",
-    "noPositions": "No shot position is recorded for these shots. Tap the court when tagging in the Events tab and the shot map appears here."
+    "noPositions": "No shot position is recorded for these shots. Tap the court when tagging in the Events tab and the shot map appears here.",
+    "fillGoals": "The fill of each cell shows the share of goals.",
+    "fillSaves": "The fill of each cell shows the share of saves."
   },
   "events": {
     "title": "Events",

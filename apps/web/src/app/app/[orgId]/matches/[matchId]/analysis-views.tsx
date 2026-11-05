@@ -148,14 +148,14 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const oppName = useOpponentName();
   const { drill, open, close } = useDrill();
   const attempts = stats.quality.attempts_known !== false;
-  const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter }[] = [
+  const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter; low?: boolean }[] = [
     { label: t("goals"), own: stats.own.goals, opp: stats.opponent.goals, filter: (s) => ({ side: s, type: "shot", outcome: "goal" }) },
     // goals alone (score overlay): shot counts and xG would only repeat the goals
     ...(attempts ? [{ label: t("shots"), own: stats.own.shots, opp: stats.opponent.shots, filter: (s: "own" | "opponent") => ({ side: s, type: "shot" }) as EventFilter }] : []),
     { label: t("shootingPct"), own: pct(stats.own.shooting_pct), opp: pct(stats.opponent.shooting_pct) },
     ...(attempts ? [{ label: t("saves"), own: stats.own.saves, opp: stats.opponent.saves, filter: (s: "own" | "opponent") => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) as EventFilter }] : []),
     { label: t("savePct"), own: pct(stats.own.save_pct), opp: pct(stats.opponent.save_pct) },
-    { label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s) => ({ side: s, type: "turnover" }) },
+    { label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s) => ({ side: s, type: "turnover" }), low: true },
     ...(stats.own.seven_m_shots + stats.opponent.seven_m_shots > 0 ? [{ label: t("sevenM"), own: `${stats.own.seven_m_goals}/${stats.own.seven_m_shots}`, opp: `${stats.opponent.seven_m_goals}/${stats.opponent.seven_m_shots}` }] : []),
     { label: t("fastBreakGoals"), own: stats.own.fast_break_goals, opp: stats.opponent.fast_break_goals, filter: (s) => ({ side: s, zone: "fast_break", outcome: "goal" }) },
     ...(stats.own.suspensions + stats.opponent.suspensions > 0
@@ -164,10 +164,26 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
     { label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) },
     { label: t("xg"), own: attempts ? stats.own.xg.toFixed(1) : "-", opp: attempts ? stats.opponent.xg.toFixed(1) : "-" },
   ];
+  // the one signal of the overview: the counted row the opponent won most clearly (after a win
+  // that is the thing to work on); figures as percentages compare by points
+  const num = (v: string | number) => (typeof v === "number" ? v : Number.parseFloat(v));
+  const signalRow = rows
+    .filter((r) => r.filter && Number.isFinite(num(r.own)) && Number.isFinite(num(r.opp)))
+    .map((r) => ({ r, gap: (r.low ? num(r.own) - num(r.opp) : num(r.opp) - num(r.own)) / Math.max(1, Math.abs(num(r.opp))) }))
+    .filter((x) => x.gap > 0)
+    .sort((a, b) => b.gap - a.gap)[0]?.r.label;
   const run = stats.timeline.best_run.own;
   const result =
     match.score_own == null || match.score_opponent == null ? null : match.score_own > match.score_opponent ? "won" : match.score_own < match.score_opponent ? "lost" : "draw";
   const decision = result ? decided(stats.own, stats.opponent, result) : null;
+  const edgeSide = decision?.side ?? "own";
+  const other = edgeSide === "own" ? "opponent" : "own";
+  const edgeFilter: Record<string, EventFilter> = {
+    saves: { side: other, type: "shot", outcome: "save" },
+    shooting: { side: edgeSide, type: "shot" },
+    turnovers: { side: other, type: "turnover" },
+    fastBreaks: { side: edgeSide, zone: "fast_break", outcome: "goal" },
+  };
   const edgeFigures = {
     saves: { a: pct(stats.own.save_pct), b: pct(stats.opponent.save_pct) },
     shooting: { a: pct(stats.own.shooting_pct), b: pct(stats.opponent.shooting_pct) },
@@ -212,6 +228,16 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           })}
         </p>
       )}
+      {decision && (
+        // the statement leads to its scenes
+        <p className="-mt-6 flex flex-wrap gap-x-4 text-sm">
+          {decision.edges.map((e) => (
+            <button key={e} type="button" className="font-medium underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-solid" onClick={() => open(t(`edgeScenes_${e}`), edgeFilter[e]!)}>
+              {t(`edgeScenes_${e}`)}
+            </button>
+          ))}
+        </p>
+      )}
       <InsightsCard
         noSignal={decision != null}
         orgId={orgId}
@@ -254,7 +280,9 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
                 .filter((r) => !(r.own === "-" && r.opp === "-"))
                 .map((r) => (
                 <tr key={r.label} className="border-t border-border/70">
-                  <th scope="row" className="py-1.5 text-left font-normal">{r.label}</th>
+                  <th scope="row" className="py-1.5 text-left font-normal">
+                    <span className={cn(r.label === signalRow && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{r.label}</span>
+                  </th>
                   <td className="text-right">
                     <N value={r.own} label={`${r.label} ${teamName}`} onClick={r.filter && (() => open(`${r.label}: ${teamName}`, r.filter!("own")))} />
                   </td>
@@ -465,7 +493,7 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
       )}
       {opp.length > 0 && (
         <details>
-          <summary className="cursor-pointer text-sm font-medium">{t("opponentPlayers")}</summary>
+          <summary className="cursor-pointer border-t border-foreground/15 pt-3 text-sm font-semibold">{t("opponentPlayers")}</summary>
           <div className="mt-2">{table(opp, t("opponentPlayers"))}</div>
         </details>
       )}
