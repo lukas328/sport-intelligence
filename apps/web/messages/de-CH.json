@@ -1114,11 +1114,18 @@
     "assignment_done": "{name} hat «{title}» erledigt",
     "analysis_ready": "Die Videoanalyse ist fertig.",
     "payment_failed": "Eine Zahlung ist fehlgeschlagen. Bitte Zahlungsmittel prüfen.",
-    "subscription_canceled": "Das Abo wurde beendet. Es gilt wieder Free.",
+    "subscription_canceled": "Das Abo wurde beendet. Es gilt wieder Gratis.",
     "feed_ready": "Deine Szenen aus dem letzten Spiel sind da.",
     "scouting_ready": "Der Vorbereitungsbericht zum nächsten Gegner ist da.",
     "analysis_failed": "Die Analyse eines Spiels ist fehlgeschlagen. Das Spiel wurde dem Kontingent gutgeschrieben.",
-    "originals_purge": "In 7 Tagen werden {count} Originalvideos auf die komprimierte Fassung reduziert. Analyse und Wiedergabe bleiben unverändert."
+    "originals_purge": "In 7 Tagen werden {count} Originalvideos auf die komprimierte Fassung reduziert. Analyse und Wiedergabe bleiben unverändert.",
+    "join_request": "Jemand möchte deinem Team beitreten.",
+    "join_approved": "Deine Anfrage wurde angenommen. Du bist jetzt im Team.",
+    "access_request": "Jemand bittet um Zugang zu eurem Verein.",
+    "access_approved": "Dein Zugang wurde freigegeben.",
+    "official_suggestions": "{count, plural, one {# Vorschlag} other {# Vorschläge}} aus den offiziellen Daten für dein Team.",
+    "official_report": "Der offizielle Matchbericht ist da.",
+    "other": "Neue Mitteilung."
   },
   "assignments": {
     "title": "Aufgaben",

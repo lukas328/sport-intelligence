@@ -1118,7 +1118,14 @@
     "feed_ready": "Tes scènes du dernier match sont prêtes.",
     "scouting_ready": "Le rapport de préparation pour le prochain adversaire est prêt.",
     "analysis_failed": "L'analyse d'un match a échoué. Le match a été crédité sur votre quota.",
-    "originals_purge": "Dans 7 jours, {count} vidéos originales seront réduites à la version compressée. L'analyse et la lecture restent inchangées."
+    "originals_purge": "Dans 7 jours, {count} vidéos originales seront réduites à la version compressée. L'analyse et la lecture restent inchangées.",
+    "join_request": "Quelqu'un souhaite rejoindre ton équipe.",
+    "join_approved": "Ta demande a été acceptée. Tu fais maintenant partie de l'équipe.",
+    "access_request": "Quelqu'un demande l'accès à ton club.",
+    "access_approved": "Ton accès a été validé.",
+    "official_suggestions": "{count, plural, one {# suggestion} other {# suggestions}} issues des données officielles pour ton équipe.",
+    "official_report": "Le rapport de match officiel est disponible.",
+    "other": "Nouvelle notification."
   },
   "assignments": {
     "title": "Tâches",

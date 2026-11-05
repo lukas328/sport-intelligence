@@ -1118,7 +1118,14 @@
     "feed_ready": "Your scenes from the last match are ready.",
     "scouting_ready": "The preparation report for the next opponent is ready.",
     "analysis_failed": "The analysis of a match failed. The match was credited to your plan.",
-    "originals_purge": "In 7 days {count} original videos will be reduced to the compressed version. Analysis and playback stay the same."
+    "originals_purge": "In 7 days {count} original videos will be reduced to the compressed version. Analysis and playback stay the same.",
+    "join_request": "Someone wants to join your team.",
+    "join_approved": "Your request was accepted. You are now on the team.",
+    "access_request": "Someone asks for access to your club.",
+    "access_approved": "Your access was approved.",
+    "official_suggestions": "{count, plural, one {# suggestion} other {# suggestions}} from the official data for your team.",
+    "official_report": "The official match report is in.",
+    "other": "New notification."
   },
   "assignments": {
     "title": "Assignments",

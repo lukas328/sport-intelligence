@@ -30,7 +30,8 @@ export function NotificationBell({ orgId }: { orgId: string }) {
   });
   const unread = q.data?.unread ?? 0;
   const items = q.data?.items ?? [];
-  const text = (n: Note) => t(n.kind as "assignment", n.params as never);
+  // a kind the web has no text for yet still shows as a notification, not as a raw key
+  const text = (n: Note) => (t.has(n.kind as "assignment") ? t(n.kind as "assignment", n.params as never) : t("other"));
   return (
     <M.Root>
       <M.Trigger

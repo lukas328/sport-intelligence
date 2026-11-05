@@ -113,6 +113,16 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] P3 Spielplan: "Alles Demo-Spiele"; score emphasis on the winner instead of the own team.
 - [ ] P3 Einwilligungen: guardian wording ("Du selbst") for an adult player.
 
+## From the analysis session (API additions, see `docs/plans/ui-match-workspace.md` on main)
+
+- [x] Web texts for the new notification kinds (join and access requests, official suggestions,
+  official report), and a plain fallback for any kind without a text.
+- [ ] Official team search, claim, join requests and club verification: screens to build.
+- [ ] `PUT /kickoff` with `clock_s` for clips that start mid-half: use it in the throw-off step.
+- [ ] Search hits outside the video come with null windows ("ohne Video" already handles it).
+- [ ] `no-video` errors on clip slides; nuLiga/HLA report links; referee kit; roster suggestion
+  stats with the per-team `roster_stats` toggle.
+
 ## Later (features)
 
 - Opponent profile: home or away per game (API field).
