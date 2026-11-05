@@ -19,7 +19,6 @@ import { EmptyState, Skeleton } from "@/components/ui/card";
 import { control } from "@/components/ui/field";
 import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
-import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { matchStatement } from "@/lib/voice";
 import { targetLink } from "./assignments/my-assignments";
@@ -233,7 +232,6 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
   const greeting = useGreeting();
   const href = `/app/${orgId}/matches/${m.id}`;
   const statement = matchStatement({ own: m.score_own, opp: m.score_opponent, opponent: m.opponent_name });
-  const state = matchState(m);
   const needsVideo = !m.has_video && m.status !== "processing" && m.status !== "uploading";
   const teamName = useShell().team?.name;
   return (
@@ -254,9 +252,10 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
       <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
         {statement ? t(statement.headline.key as "voice.won", statement.headline.params as never) : m.kind === "training" ? t("matches.training") : m.opponent_name}
       </h1>
-      <p className="mt-3 text-lg">
-        {m.status === "processing" || m.status === "uploading" ? t("today.analysing") : needsVideo ? t("today.uploadHint") : t(state.label)}
-      </p>
+      {/* the state only when it asks for something (running, or a video to upload) */}
+      {(m.status === "processing" || m.status === "uploading" || needsVideo) && (
+        <p className="mt-3 text-lg">{m.status === "processing" || m.status === "uploading" ? t("today.analysing") : t("today.uploadHint")}</p>
+      )}
       {m.is_demo && (
         <p className="mt-3">
           <StageTag>{t("matches.demo")}</StageTag>
@@ -307,7 +306,10 @@ function TopInsights({ orgId, m }: { orgId: string; m: Match }) {
   const roster = useRosterNames(orgId, m.team_id, team?.season_id ?? "");
   const names = useMemo(() => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.first_name} ${r.last_name}`])), [roster.data]);
   const text = useInsightText(names);
-  const top = (q.data?.insights ?? []).slice(0, 3);
+  // the same order as on the match page: a win opens with what worked
+  const won = m.score_own != null && m.score_opponent != null && m.score_own > m.score_opponent;
+  const rank = (k: string) => (k === "strength" ? (won ? 0 : 1) : k === "weakness" ? (won ? 1 : 0) : 2);
+  const top = [...(q.data?.insights ?? [])].sort((a, b) => rank(a.kind) - rank(b.kind)).slice(0, 3);
   if (q.isLoading) return <Skeleton className="h-24" />;
   if (top.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.noInsights")}</p>;
   // the first weakness carries the signal: the one thing to take into the next training
@@ -318,9 +320,16 @@ function TopInsights({ orgId, m }: { orgId: string; m: Match }) {
         <li key={i.id} className="border-b border-foreground/10 last:border-0">
           <Link
             href={`/app/${orgId}/matches/${m.id}`}
-            className={cn("flex items-start gap-3 px-2 py-3 text-[0.9375rem] transition-colors", i.id === focus ? "-mx-0 rounded-md bg-signal text-signal-ink" : "hover:bg-surface")}
+            className="flex items-start gap-3 px-2 py-3 text-[0.9375rem] transition-colors hover:bg-surface"
           >
-            <span aria-hidden className={cn("mt-2 size-2 shrink-0 rounded-full", i.kind === "strength" ? "bg-ok" : i.kind === "weakness" ? (i.id === focus ? "bg-signal-ink" : "bg-error") : "bg-muted")} />
+            {/* the same marks as on the match page: strength green, the first weakness the signal */}
+            <span
+              aria-hidden
+              className={cn(
+                "mt-1.5 size-2.5 shrink-0 rounded-[2px]",
+                i.kind === "strength" ? "bg-ok" : i.id === focus ? "bg-signal ring-1 ring-foreground/30" : "bg-foreground/45",
+              )}
+            />
             <span>
               <span className="sr-only">{t(`insights.${i.kind}`)}: </span>
               {text(i)}

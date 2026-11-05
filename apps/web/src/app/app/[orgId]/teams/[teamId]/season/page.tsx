@@ -196,7 +196,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                     {recent.map((m) => {
                       const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
                       return (
-                        <li key={m.match_id} className="min-w-0 flex-1 sm:max-w-12">
+                        <li key={m.match_id} className="min-w-0 max-w-12 flex-1">
                           <Link
                             href={`/app/${orgId}/matches/${m.match_id}`}
                             title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}

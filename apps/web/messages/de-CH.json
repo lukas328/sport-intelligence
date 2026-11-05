@@ -426,7 +426,9 @@
     "card": "Matchkarte herunterladen",
     "cardShots": "{value} Würfe",
     "cardSaves": "{value} Paraden",
-    "cardDemo": "Demo-Daten"
+    "cardDemo": "Demo-Daten",
+    "withoutVideo": "{n} von {total} ohne Video",
+    "allDemo": "Alles Demo-Spiele"
   },
   "upload": {
     "title": "Video hochladen",
@@ -1090,7 +1092,7 @@
     "allMatches": "Alle Spiele im Detail",
     "unknownPlayer": "Nicht zugeordnet",
     "xgNote": "xG: erwartete Tore, geschätzt aus Wurfposition und Situation.",
-    "formLast": "Die letzten {n} Spiele, das neueste rechts."
+    "formLast": "{n, plural, one {Das letzte Spiel.} other {Die letzten # Spiele, das neueste rechts.}}"
   },
   "notifications": {
     "title": "Mitteilungen",
@@ -2095,7 +2097,7 @@
     "askHint": "Antworten mit Quelle und Link zu den Szenen.",
     "insightsTitle": "Was auffällt",
     "morning": "Guten Morgen, {name}",
-    "noTraining": "Noch kein Training geplant.",
+    "noTraining": "Training planen",
     "allDates": "Alle Termine",
     "ask": "Frag deine Daten",
     "evening": "Guten Abend, {name}",
@@ -2119,7 +2121,7 @@
     "upNext": "Als Nächstes",
     "match": "Spiel",
     "trainingRow": "Training",
-    "noMatchPlanned": "Noch keins angesetzt",
+    "noMatchPlanned": "Spiel ansetzen",
     "notAnalysed": "Sobald ein Spiel analysiert ist, steht hier, was auffällt, mit Link zu den Szenen.",
     "forYou": "Für dich",
     "noDates": "Keine Termine in den nächsten 30 Tagen.",

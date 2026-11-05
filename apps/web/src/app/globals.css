@@ -252,10 +252,9 @@
     font-weight: 700;
   }
   /* match-sheet table: hairline grid, figures right-aligned, a firm rule under the head */
+  /* a table like a printed match sheet: a strong rule on top, hairlines between rows, no card */
   .sheet {
-    border-radius: 8px;
-    border: 1px solid color-mix(in srgb, var(--foreground) 22%, transparent);
-    background: var(--raised);
+    border-top: 2px solid var(--foreground);
   }
   .sheet table {
     border-collapse: collapse;

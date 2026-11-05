@@ -426,7 +426,9 @@
     "card": "Download match card",
     "cardShots": "{value} shooting",
     "cardSaves": "{value} saves",
-    "cardDemo": "Demo data"
+    "cardDemo": "Demo data",
+    "withoutVideo": "{n} of {total} without video",
+    "allDemo": "All demo matches"
   },
   "upload": {
     "title": "Upload video",
@@ -1090,7 +1092,7 @@
     "allMatches": "All matches in detail",
     "unknownPlayer": "Unassigned",
     "xgNote": "xG: expected goals, estimated from shot position and situation.",
-    "formLast": "The last {n} matches, newest on the right."
+    "formLast": "{n, plural, one {The last match.} other {The last # matches, newest on the right.}}"
   },
   "notifications": {
     "title": "Notifications",
@@ -2095,7 +2097,7 @@
     "askHint": "Answers with their source and links to the scenes.",
     "insightsTitle": "What stands out",
     "morning": "Good morning, {name}",
-    "noTraining": "No training planned yet.",
+    "noTraining": "Plan a training",
     "allDates": "All dates",
     "ask": "Ask your data",
     "evening": "Good evening, {name}",
@@ -2119,7 +2121,7 @@
     "upNext": "Up next",
     "match": "Match",
     "trainingRow": "Training",
-    "noMatchPlanned": "None scheduled yet",
+    "noMatchPlanned": "Schedule a match",
     "notAnalysed": "Once a match is analysed, what stands out appears here, with links to the scenes.",
     "forYou": "For you",
     "noDates": "No dates in the next 30 days.",

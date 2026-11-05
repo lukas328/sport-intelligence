@@ -426,7 +426,9 @@
     "card": "Télécharger la carte de match",
     "cardShots": "{value} tirs",
     "cardSaves": "{value} arrêts",
-    "cardDemo": "Données de démo"
+    "cardDemo": "Données de démo",
+    "withoutVideo": "{n} sur {total} sans vidéo",
+    "allDemo": "Tous des matchs de démo"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -1090,7 +1092,7 @@
     "allMatches": "Tous les matchs en détail",
     "unknownPlayer": "Non attribué",
     "xgNote": "xG : buts attendus, estimés d'après la position et la situation du tir.",
-    "formLast": "Les {n} derniers matchs, le plus récent à droite."
+    "formLast": "{n, plural, one {Le dernier match.} other {Les # derniers matchs, le plus récent à droite.}}"
   },
   "notifications": {
     "title": "Notifications",
@@ -2095,7 +2097,7 @@
     "askHint": "Réponses avec source et liens vers les scènes.",
     "insightsTitle": "Ce qui ressort",
     "morning": "Bonjour, {name}",
-    "noTraining": "Aucun entraînement prévu.",
+    "noTraining": "Planifier un entraînement",
     "allDates": "Tous les rendez-vous",
     "ask": "Interrogez vos données",
     "evening": "Bonsoir, {name}",
@@ -2119,7 +2121,7 @@
     "upNext": "À venir",
     "match": "Match",
     "trainingRow": "Entraînement",
-    "noMatchPlanned": "Aucun prévu",
+    "noMatchPlanned": "Programmer un match",
     "notAnalysed": "Dès qu'un match est analysé, ce qui ressort apparaît ici, avec des liens vers les scènes.",
     "forYou": "Pour vous",
     "noDates": "Aucun rendez-vous dans les 30 prochains jours.",

@@ -212,7 +212,7 @@ export function PhysicalView({
       </div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-x-10">
         <div className="min-w-0 space-y-2">
-          <div className="sheet overflow-x-auto !rounded-none !border-0 !border-t-2 !border-foreground !bg-transparent">
+          <div className="sheet overflow-x-auto">
             <table className="w-full text-sm" data-testid="physical-table">
               <caption className="sr-only">{t("title")}</caption>
               <thead>
