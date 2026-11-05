@@ -11,6 +11,10 @@ Behind a VPN or company network YouTube answers with the bot check as well: use 
 (`videos_priority.csv`, 71 games from many countries and halls, `-Pieces 2`, about 5 GB) or
 `-Browser chrome|edge|firefox` to use the signed-in YouTube session (slow, with pauses).
 
+`videos_next.csv` (60 games) is the list to download next: every Swiss game from season
+2023/24 on that has a full official game log and is not ingested yet, most goals first. Only
+these give free labels for goals, shots and (from 2023/24) shirt numbers.
+
 ## Official data per game
 `match_official.py` finds the handball.ch game for each name (description link first, else date
 window and fuzzy team names over the public match centre API, cached) and writes the game log and
