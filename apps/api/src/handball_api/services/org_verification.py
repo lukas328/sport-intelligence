@@ -22,7 +22,7 @@ from typing import Any
 from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import FederationMembership, Membership, Organization, OrgMembership, User
+from handball_api.models import FederationMembership, Organization, OrgMembership, User
 from handball_api.models.enums import OrgRole, TeamRole
 from handball_api.services import audit
 from handball_api.services.context import Ctx
@@ -152,15 +152,6 @@ async def operator_set(ctx: Ctx, org_id: uuid.UUID, verified: bool) -> Organizat
             ctx, "org.unverified", org_id=org.id, target_type="organization", target_id=org.id
         )
     return org
-
-
-async def team_coaches(ctx: Ctx, org_id: uuid.UUID) -> list[uuid.UUID]:
-    rows = await ctx.db.scalars(
-        select(Membership.user_id).where(
-            Membership.organization_id == org_id, Membership.role == TeamRole.COACH
-        )
-    )
-    return list(rows.all())
 
 
 def status(org: Organization) -> dict[str, Any]:
