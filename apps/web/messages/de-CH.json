@@ -1306,7 +1306,7 @@
     "format_mini": "Minihandball, 2 × 10 Min.",
     "format_tournament": "Turnier, 1 × 10 Min.",
     "format_custom": "Eigenes Format",
-    "kitWarning": "Die Trikotfarben sind sehr ähnlich ({pairs}). Die automatische Teamzuordnung wird unsicherer. Wenn möglich: Leibchen oder andere Farbe eintragen.",
+    "kitWarning": "Ähnliche Farben ({pairs}): Die Analyse kann diese Trikots schlechter auseinanderhalten. Nach der Analyse kurz die Teamzuordnung prüfen. Eine Schiedsrichterfarbe, die einem Team gleicht, wird nicht verwendet.",
     "kit_own": "Eigenes Team",
     "kit_own_gk": "Eigener Torhüter",
     "kit_opponent": "Gegner",

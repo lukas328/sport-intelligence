@@ -1306,7 +1306,7 @@
     "format_mini": "Mini handball, 2 × 10 min",
     "format_tournament": "Tournament, 1 × 10 min",
     "format_custom": "Custom format",
-    "kitWarning": "The kit colours are very similar ({pairs}). Automatic team assignment becomes less certain. If possible, enter bibs or another colour.",
+    "kitWarning": "Similar colours ({pairs}): the analysis tells these kits apart less reliably. Check the team assignment briefly after the analysis. A referee colour that resembles a team kit is not used.",
     "kit_own": "Own team",
     "kit_own_gk": "Own goalkeeper",
     "kit_opponent": "Opponent",

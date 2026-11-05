@@ -1306,7 +1306,7 @@
     "format_mini": "Minihandball, 2 × 10 min",
     "format_tournament": "Tournoi, 1 × 10 min",
     "format_custom": "Format personnalisé",
-    "kitWarning": "Les couleurs des maillots sont très proches ({pairs}). L'attribution automatique des équipes devient moins sûre. Si possible, indique des chasubles ou une autre couleur.",
+    "kitWarning": "Couleurs proches ({pairs}) : l'analyse distingue moins bien ces maillots. Vérifie rapidement l'attribution des équipes après l'analyse. Une couleur d'arbitre proche d'une équipe n'est pas utilisée.",
     "kit_own": "Propre équipe",
     "kit_own_gk": "Propre gardien·ne",
     "kit_opponent": "Adversaire",
