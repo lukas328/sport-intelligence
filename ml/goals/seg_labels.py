@@ -9,7 +9,7 @@
    shows a score. Reference only: the detector never sees them.
 
 Writes LABELS.json {segment stem: {game, segment, duration_s, clock_source, log_goals [{t, score,
-kind, anchor_gap_s}], log_other [{t, kind, team}], overlay_goals [{t, score}], board_goals
+kind, anchor_gap_s}], log_other [{t, kind, team}], overlay_goals [{t, score, side, single}], board_goals
 [{t, score_side, side, window_s}], first_score}} with t in seconds from the segment start.
 
 usage: uv run --project packages/vision python ml/goals/seg_labels.py CACHE_DIR LABELS.json
@@ -62,8 +62,13 @@ def log_labels(workdir: Path) -> dict[str, dict]:
 
 def picture_goals(z: np.lib.npyio.NpzFile) -> tuple[list[dict], list[dict], list[int] | None]:
     reads = [(int(t), (int(a), int(b))) for t, a, b in z["score_reads"]]
-    overlay = [{"t": g.t_ms / 1000, "score": list(g.score), "side": g.side}
-               for g in scoreboard.goals_from_scores(reads)]
+    goals = scoreboard.goals_from_scores(reads)
+    overlay = []
+    for g in goals:
+        same = [h for h in goals if h.t_ms == g.t_ms]
+        if overlay and overlay[-1]["t"] == g.t_ms / 1000:
+            continue  # one entry per score change; `single` False: it added several goals
+        overlay.append({"t": g.t_ms / 1000, "score": list(g.score), "side": g.side, "single": len(same) == 1})
     first = scoreboard.first_score(reads)
     board = []
     if "board_reads" in z and len(z["board_reads"]):

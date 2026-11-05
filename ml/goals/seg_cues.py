@@ -163,28 +163,39 @@ def _robust_scale(x: np.ndarray) -> float:
     return float(max(np.percentile(np.abs(x), 90), 1e-6))
 
 
+def activity(s: dict[str, np.ndarray]) -> np.ndarray:
+    """Share of moving pixels relative to the segment median, with the part that follows the camera
+    speed taken out (a fast pan leaves residual flow from parallax and blur): least-squares fit of
+    flow_share on |pan|, the residual added back to the median, divided by the median."""
+    fs, ap = s["flow_share"], np.abs(s["pan"])
+    A = np.column_stack([np.ones_like(ap), ap])
+    coef, *_ = np.linalg.lstsq(A, fs, rcond=None)
+    med = max(float(np.median(fs)), 1e-6)
+    return np.clip((fs - coef[1] * ap) / med, 0, 10)
+
+
 def restart_score(s: dict[str, np.ndarray]) -> np.ndarray:
-    """Throw-off restart at t: (1) a lull in [t-3, t] (little motion, slow camera), (2) the play at
-    the court centre during it, (3) people on both sides of the centre line, (4) activity picks up
-    after t, (5) in [t-20, t-5] the play was near one end (the goal before). Product of soft terms
-    in 0..1."""
+    """Throw-off restart at t: (1) a lull in [t-2.5, t] (activity and camera below the segment's
+    usual level), (2) the play near the court centre during it, (3) people on both sides of the
+    centre line, (4) activity or the camera picks up after t, (5) in [t-20, t-4] the play was near one
+    end (the goal before). Product of soft terms in 0..1."""
     tg = s["t"]
-    act = s["flow_share"] / max(np.median(s["flow_share"]), 1e-6)
+    act = activity(s)
     pan = np.abs(s["pan"]) / _robust_scale(s["pan"])
-    spd = np.abs(s["cx_v"]) / _robust_scale(s["cx_v"])
     p = s["p"]
     out = np.zeros(len(tg))
-    k3, k2 = round(3 / DT), round(2 / DT)
-    for i in range(k3, len(tg) - k2):
-        a_b = act[i - k3:i].mean()
-        lull = np.clip(1.3 - a_b, 0, 1) * np.clip(1.2 - pan[i - k3:i].mean(), 0, 1) * np.clip(1.2 - spd[i - k3:i].mean(), 0, 1)
+    kl, ka = round(2.5 / DT), round(2 / DT)
+    for i in range(kl, len(tg) - ka):
+        a_b = act[i - kl:i].mean()
+        pb = pan[i - kl:i].mean()
+        lull = float(np.clip(1.2 - a_b, 0, 1) * np.clip(1.0 - pb, 0, 1))
         if lull <= 0:
             continue
-        centre = float(np.exp(-(p[i - k3:i].mean() / 0.35) ** 2))
-        bal = 0.5 + 0.5 * float(s["bal"][i - k3:i].mean())
-        a_a = act[i:i + k2].mean()
-        start = float(np.clip((a_a - a_b) / max(a_b, 0.2), 0, 1))
-        j0, j1 = max(0, i - round(20 / DT)), max(0, i - round(5 / DT))
+        centre = float(np.exp(-(p[i - kl:i].mean() / 0.45) ** 2))
+        bal = 0.5 + 0.5 * float(s["bal"][i - kl:i].mean())
+        rise = max((act[i:i + ka].mean() - a_b) / max(a_b, 0.3), pan[i:i + ka].mean() - pb)
+        start = float(np.clip(rise, 0, 1))
+        j0, j1 = max(0, i - round(20 / DT)), max(0, i - round(4 / DT))
         end_before = float(np.clip((np.abs(p[j0:j1]).max() - 0.3) / 0.4, 0, 1)) if j1 > j0 else 0.0
         out[i] = lull * centre * bal * start * end_before
     return out

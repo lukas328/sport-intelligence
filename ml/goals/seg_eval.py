@@ -101,7 +101,8 @@ def log_delay(labels: dict) -> tuple[float | None, list[float]]:
 def reference(lab: dict, delay: float | None) -> tuple[list[float], str]:
     dur = lab["duration_s"]
     if lab["score_reads"] >= 0.5 * dur / 0.5:  # overlay read on at least half of the probes
-        return [g["t"] for g in lab["overlay_goals"]], "overlay"
+        # a jump by several goals (overlay hidden or misread for a while) has no usable time
+        return [g["t"] for g in lab["overlay_goals"] if g.get("single", True)], "overlay"
     if lab["log_goals"] and delay is not None:
         return [g["t"] - delay for g in lab["log_goals"] if 0 <= g["t"] - delay <= dur], "log"
     return [], "none"
@@ -122,12 +123,13 @@ def rz(v: np.ndarray) -> np.ndarray:
 
 def template_series(ch: np.ndarray, tmpl: np.ndarray, sign_cols: tuple[int, ...]) -> np.ndarray:
     tpv = (tmpl - tmpl.mean()).ravel()
-    out = np.zeros(len(ch))
-    for i in range(0, len(ch), STEP):
+    idx = np.arange(0, len(ch), STEP)
+    vals = []
+    for i in idx:
         w = sc.profile_at(ch, i, sign_cols).ravel()
         w = w - w.mean()
-        out[i] = float(w @ tpv / (np.linalg.norm(w) * np.linalg.norm(tpv) + 1e-9))
-    return out
+        vals.append(float(w @ tpv / (np.linalg.norm(w) * np.linalg.norm(tpv) + 1e-9)))
+    return np.interp(np.arange(len(ch)), idx, vals)
 
 
 def seg_channels(x: dict, names: tuple[str, ...]) -> np.ndarray:
@@ -217,9 +219,9 @@ def all_scores(segs: dict, refs: dict, shift: float, bc: dict | None) -> dict[st
             w = ev.logreg(np.concatenate([X[k] for k in tr]), np.concatenate([Y[k] for k in tr]), l2=10.0, iters=50)
         for k in segs:
             if G[k] == g:
-                sco = np.zeros(len(segs[k]["x"]["t"]))
-                sco[::STEP] = X[k] @ w[:-1]
-                out[k]["logreg"] = sco
+                n = len(segs[k]["x"]["t"])
+                idx = np.arange(0, n, STEP)
+                out[k]["logreg"] = np.interp(np.arange(n), idx, X[k] @ w[:-1])
     return out
 
 
@@ -312,6 +314,33 @@ def evaluate(scores: dict, segs: dict, refs: dict, subset: list[str], rng: np.ra
     return res
 
 
+def inspect(name: str, scores: dict, segs: dict, refs: dict, use: list[str], delay: float) -> None:
+    """Candidates of one score at 2 per minute: hits, misses, and false alarms explained by the
+    nearest official log entry (shot saved / missed, turnover, ...) up to 10 s before them."""
+    kinds: dict[str, int] = {}
+    n_fa = 0
+    for k in use:
+        ts = segs[k]["x"]["t"][::STEP]
+        cands = peaks(ts, scores[k][name][::STEP], round(2 * segs[k]["lab"]["duration_s"] / 60))
+        hit_c = set()
+        for g in refs[k]:
+            ok = [c for c in cands if HIT[0] <= c - g <= HIT[1]]
+            if ok:
+                hit_c.add(min(ok, key=lambda c: abs(c - g - 2)))
+        misses = [round(g) for g in refs[k] if not any(HIT[0] <= c - g <= HIT[1] for c in cands)]
+        fas = sorted(c for c in cands if c not in hit_c)
+        expl = []
+        for c in fas:
+            near = [e for e in segs[k]["lab"]["log_other"] if -2 <= c - (e["t"] - delay) <= 10]
+            kind = near[-1]["kind"] if near else ("?" if segs[k]["lab"]["log_goals"] or segs[k]["lab"]["has_log"] else "no log")
+            expl.append(f"{c:.0f}:{kind}")
+            if segs[k]["lab"]["has_log"] and segs[k]["lab"]["clock_source"]:
+                kinds[kind] = kinds.get(kind, 0) + 1
+                n_fa += 1
+        print(f"{k[26:]}: goals {[round(g) for g in refs[k]]} missed {misses} false {expl}")
+    print(f"false alarms in segments with a clock and a log ({n_fa}):", kinds)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("cache", type=Path)
@@ -320,6 +349,8 @@ def main() -> None:
                     default=Path("/tmp/claude-0/-home-user/3dc450e2-2499-5e21-b252-1c4e366c6b5a/scratchpad/goals/cache"))
     ap.add_argument("--shift", type=float, default=2.0, help="template centre - reference goal (s)")
     ap.add_argument("--out", type=Path)
+    ap.add_argument("--inspect", help="score name: list its candidates at 2/min, misses and what the "
+                    "false alarms were in the official log")
     a = ap.parse_args()
     labels = json.loads(a.labels.read_text())
     delay, pairs = log_delay(labels)
@@ -363,6 +394,8 @@ def main() -> None:
             row = r[name]
             print(f"  {name:18s} r@1 {row['r@1']:.2f}  r@2 {row['r@2']:.2f}  r@4 {row['r@4']:.2f}  "
                   f"AUC {row['auc']:.3f}  err {row['err_med']} (IQR {row['err_iqr']})")
+    if a.inspect:
+        inspect(a.inspect, scores, segs, refs, use, delay or 0.0)
     if a.out:
         a.out.write_text(json.dumps({"log_delay_s": delay, "log_pairs": pairs, "results": results,
                                      "refs": {k: refs[k] for k in use}, "src": src}, indent=1))
