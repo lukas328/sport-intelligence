@@ -74,3 +74,92 @@ weights were unreachable when ADR 012 was written; GitHub release assets are rea
   help yet.
 - Open: a pose fit against the panorama in pixels for flat views; goal detection only knows red
   stripes (black-and-white goals are missed, red banners can fool it).
+
+## Addendum 2026-11-05 (2): stream and amateur footage, a court once per hall
+Measured on 39 games (backlog item 1), one 90 s piece per game (from 20 s into a segment, mostly
+the first-half one; the worker's proxy: 1280 px, 25 fps; people every 12th frame, markings every
+90th): 17 SG Wädenswil/Horgen (SGWH) stream games from handball-segs-b01..b03 and 22 games of the
+owner's batches l01..l03 (HLA TV, cup finals, 1. and 2. Liga, women's amateur recordings). Every
+court was checked by eye on a contact sheet with the court and the goal frames drawn on the hall
+image (`<scratch>/calib2/`, local only).
+
+| result (39 games) | before | after |
+|---|---|---|
+| court found, right by eye (goal frames on the goals, lines on lines) | 5 | 7 |
+| court found, wrong (accepted by the checks) | 2 | 2 |
+| no clear floor (`no_floor`) | 23 | 20 |
+| court not trustworthy (`court`) | 5 | 6 |
+| flat view (`flat_view`) | 4 | 1 |
+| camera motion lost (`camera_motion`) | - | 3 |
+
+Right before and after: 1. Liga Stäfa, 2. Liga Zofingen (2 halls), Aufstieg Schwamendingen, SGWH
+- Yellow/Pfadi. New: Cup Kriens - Yverdon (fixed camera, focal 0.65 frame widths instead of the
+long lens) and SGWH - Emmen 2022 (loose floor tolerance; goals placed on the goal frames, the
+ghosted panorama leaves about a metre of doubt). Wrong in both: 1. Liga Leimental (low camera,
+2.1 m, court shifted onto a door) and the 2015 cup final broadcast. Of the 17 SGWH stream games
+two calibrate; the HLA broadcasts and the cup finals (cuts, replays, zoom) fail as before, now
+partly with the right reason. The two fixed half-time views and the Chenois gallery camera no
+longer "look flat" but reach the court check, which rejects them (a wrong court at another focal
+length passed the goal check there in a test with a forced focal length: the goal check is the
+only guard).
+
+What the measurement showed:
+- **SG Wädenswil/Horgen streams** (SGHW-TV): an operator pans and zooms a wide-angle camera at
+  about bench height (2 to 4 m, beside the near sideline); at half-time the stream switches to a
+  fixed camera high behind a goal, with a score panel. The camera motion of the game camera is a
+  degree or two off between frames (the panorama shows the banners twice): one frame alone has
+  50 to 60 % of its line length along two floor directions, all frames together 12 to 33 %, so the
+  automatic court stopped at "no clear floor". Where the floor passed, the goal frames in the
+  ghosted panorama were too blurred for the stripe check.
+- **Fixed cameras** (half-time camera, tripods): the focal length was taken from the line fit
+  alone, which cannot tell a long lens tilted a little from a wide one tilted more when the camera
+  looks square onto the sidelines (the fit rises by 5 % from 0.5 to 2.5 frame widths, 3 times off
+  on a synthetic camera). It picked the long lens, so the view "looked" flat (players 3 to 5
+  degrees below the horizon for a gallery camera 6 m up).
+- **Lost camera motion**: streams with cuts and replays gave focal lengths of 4 frame widths; the
+  panorama shows the hall several times and the failure said "flat view".
+
+Decisions:
+1. **Fixed cameras try the focal lengths the lines allow** (`observe._fixed_focals`): within 10 %
+   of the best line fit, its optima first, then where the fit is flat the ones farthest from those
+   taken (at least 25 % apart, at most four), each calibrated; the best goal fit wins and the info
+   carries `focal_px`. Costs up to four calibrations for a fixed camera.
+2. **Lost camera motion fails at once with its reason** (`check_motion`: focal length beyond three
+   frame widths or zoom beyond x6; an amateur zoom of x3.2 still had a court).
+3. **A slightly wrong motion gets a looser floor tolerance**: moving cameras whose lines miss the
+   strict fit (35 % within 1 degree) are accepted when 45 % lie within 2 degrees
+   (`floor_tolerance_deg` in the info); the court checks stay the same, and a loose floor that
+   still looks flat reports "no clear floor".
+4. **Stream overlays are masked**: edges that stay at the same frame pixels while a moving camera
+   pans (score bug, logo, "LIVE") are stored with the observations (`Observations.static`) and the
+   segments on them dropped.
+5. **Every failure has a reason** (`CalibrationError.reason`, `calibration_info.reason`):
+   `camera_motion`, `no_floor`, `flat_view`, `few_people`, `court`.
+6. **A court once per hall** (`hallmatch`, `services/halls.py`): the API sends the analysis the
+   courts a person clicked or confirmed on earlier videos of the same hall (the match venue from
+   the official game data, handball.ch `venueName`; a home game without a venue takes the team's
+   usual home hall), newest first, at most three. The worker matches the two hall images (SIFT on
+   both, one homography for a camera at the same place, the floor alone when the walls moved) and
+   carries the court over before it tries the automatic court; the result is shown as an
+   automatic court (`calibration_info.method` "hall") for the coach to confirm. Measured on 18 hall images of the
+   sample (13 SGWH games, half-time views included), all 306 ordered pairs: 5 matches, all
+   between game panoramas of one SGWH hall (4 games, floor error 1 to 2.5 px median, floor lines
+   on each other in the blend); 3 of its 4 later games would have taken the court over from an
+   earlier one. No pair of different halls or cameras matched once matches had to cover 5 % of
+   the floor (before that rule a stream logo at the same screen place matched half-time views to
+   game panoramas). In the other SGWH hall the camera stood at a different place in each game and
+   nothing matched; there the coach clicks again (and that game becomes the next reference).
+
+Open:
+- The game camera of the SG Wädenswil/Horgen streams needs a better camera motion (lens
+  distortion of the wide lens, zoom) before any court, clicked or automatic, gives positions to
+  better than a metre or two; a stream that switches cameras needs the video split per camera.
+- A pose fit against the line mask in image pixels (for flat views) was tried: from the top-view
+  start a bounded Powell fit did not converge reliably even on synthetic courts (it slides lines
+  along each other); it needs a two-sided chamfer and several starts.
+- The goal check only knows red and white stripes and needs a sharp hall image; it let two wrong
+  courts through (goal fit 0.23 and 0.33) while right ones scored 0.23 to 0.63.
+- The lines alone do not fix the tilt of a camera in the middle of the sideline looking square
+  (synthetic: the line fit is flat from 1 to 27 degrees); the spread of the players' heights
+  finds it (minimum at the true tilt). On the real halls the line fit had a clear peak at the
+  same tilt as the players, so this is not what fails there and was not built in.
