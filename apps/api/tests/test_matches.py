@@ -8,6 +8,7 @@ from typing import Any
 import asyncpg
 import pytest
 
+from handball_api.core.colors import analysis_kits
 from handball_api.core.email import MemoryEmailSender
 from handball_api.core.jobs import MemoryEventBus, MemoryJobQueue
 from handball_api.core.storage import MemoryStorage
@@ -430,6 +431,7 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     queue, func, analysis_id, payload = jobs.jobs[-1]
     assert (queue, func) == ("gpu", "handball_gpu_worker.analysis.run_analysis")
     assert payload["kits"]["home"] == "#2828c8"
+    assert "referee" not in payload["kits"]  # no referee colour guessed
     assert payload["calibration_points"] is None
     assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()["status"] == "running"
     storage: MemoryStorage = api.app.state.storage
@@ -655,3 +657,56 @@ async def test_possessions_summary(
     assert len(data["phases"]) == 3 and data["estimated"]
     assert data["summary"]["own"] == {"count": 2, "fast_breaks": 0, "avg_s": 15.0, "share": 0.5}
     assert data["summary"]["opponent"]["count"] == 1
+
+
+def test_analysis_kits_send_the_referee_only_when_known_and_distinct() -> None:
+    kits: dict[str, str | None] = {
+        "own": "#f0f0f0",
+        "own_gk": "#f59e0b",
+        "opponent": "#202020",
+        "opponent_gk": "#16a34a",
+    }
+    base = {"home": "#f0f0f0", "home_gk": "#f59e0b", "away": "#202020", "away_gk": "#16a34a"}
+    assert analysis_kits(kits) == base
+    assert analysis_kits({**kits, "referee": None}) == base
+    # black referees against a black opponent: left out (they would take the opponents' label)
+    assert analysis_kits({**kits, "referee": "#1a1a1a"}) == base
+    assert analysis_kits({**kits, "referee": "#f2f2f2"}) == base  # like the own kit
+    assert analysis_kits({**kits, "referee": "#ff6a13"}) == {**base, "referee": "#ff6a13"}
+
+
+async def test_referee_kit_is_a_user_choice(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids, kit_own="#f0f0f0", kit_opponent="#202020")
+    assert m["kit_referee"] is None and m["kit_warnings"] == []
+    murl = f"/v1/orgs/{org}/matches/{m['id']}"
+    black = (await api.patch(murl, json={"kit_referee": "#1a1a1a"})).json()
+    assert black["kit_referee"] == "#1a1a1a" and black["kit_warnings"] == ["opponent/referee"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+
+    async def analysis_kits_sent() -> dict[str, str]:
+        await upload(api, ids, m["id"], b"v" * 100)
+        ingest_id, prefix = jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"]
+        await api.http.post(
+            f"/internal/jobs/{ingest_id}",
+            headers=token,
+            json={
+                "status": "succeeded",
+                "progress": 1,
+                "result": {"proxy_key": prefix + "proxy.mp4", "hls_prefix": prefix + "hls/"},
+            },
+        )
+        assert jobs.jobs[-1][1] == "handball_gpu_worker.analysis.run_analysis"
+        return dict(jobs.jobs[-1][3]["kits"])
+
+    # the referee colour equals the opponent's: not sent
+    assert "referee" not in await analysis_kits_sent()
+    orange = (await api.patch(murl, json={"kit_referee": "#ff6a13"})).json()
+    assert orange["kit_referee"] == "#ff6a13" and orange["kit_warnings"] == []
+    assert (await analysis_kits_sent())["referee"] == "#ff6a13"
+    cleared = (await api.patch(murl, json={"kit_referee": None})).json()
+    assert cleared["kit_referee"] is None
+    assert (await api.patch(murl, json={"kit_referee": "orange"})).status_code == 422

@@ -5815,6 +5815,11 @@ export interface components {
              * @default #f59e0b
              */
             kit_own_gk?: string;
+            /**
+             * Kit Referee
+             * @description referee shirt colour when known; left out of the analysis when it is close to a team's kit
+             */
+            kit_referee?: string | null;
             /** Opponent Id */
             opponent_id?: string | null;
             /** Opponent Name */
@@ -5882,6 +5887,11 @@ export interface components {
             kit_own: string;
             /** Kit Own Gk */
             kit_own_gk: string;
+            /**
+             * Kit Referee
+             * @description null: unknown
+             */
+            kit_referee?: string | null;
             /**
              * Kit Warnings
              * @description kit pairs with similar colours, e.g. own/opponent
@@ -5994,6 +6004,11 @@ export interface components {
             kit_own?: string | null;
             /** Kit Own Gk */
             kit_own_gk?: string | null;
+            /**
+             * Kit Referee
+             * @description null clears it (unknown)
+             */
+            kit_referee?: string | null;
             /** Period S */
             period_s?: number | null;
             /** Periods */

@@ -257,7 +257,8 @@ def run_analysis(
                 [(p["court"][0], p["court"][1]) for p in calibration_points],
                 size,
             )
-        bgr = {k: hex_to_bgr(v) for k, v in kits.items()}
+        # a kit the API does not know (e.g. the referee's) is left out, not guessed
+        bgr = {k: hex_to_bgr(v) for k, v in kits.items() if v}
         rep.stage("tracking")
         try:
             result = analyse_video(

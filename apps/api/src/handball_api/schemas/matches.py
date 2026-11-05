@@ -71,6 +71,11 @@ class MatchCreate(ApiModel):
     kit_own_gk: HexColor = "#f59e0b"
     kit_opponent: HexColor = "#dc2626"
     kit_opponent_gk: HexColor = "#16a34a"
+    kit_referee: HexColor | None = Field(
+        default=None,
+        description="referee shirt colour when known; left out of the analysis when it is close "
+        "to a team's kit",
+    )
     format: MatchFormatKey | None = Field(
         default=None, description="template; default adult_2x30, youth teams youth_2x25"
     )
@@ -101,6 +106,7 @@ class MatchUpdate(ApiModel):
     kit_own_gk: HexColor | None = None
     kit_opponent: HexColor | None = None
     kit_opponent_gk: HexColor | None = None
+    kit_referee: HexColor | None = Field(default=None, description="null clears it (unknown)")
     format: MatchFormatKey | None = None
     period_s: int | None = Field(default=None, ge=60, le=3600)
     periods: int | None = Field(default=None, ge=1, le=4)
@@ -166,6 +172,7 @@ class MatchOut(ApiModel):
     kit_own_gk: str
     kit_opponent: str
     kit_opponent_gk: str
+    kit_referee: str | None = Field(default=None, description="null: unknown")
     kit_warnings: list[str] = Field(description="kit pairs with similar colours, e.g. own/opponent")
     format: str
     period_s: int

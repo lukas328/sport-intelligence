@@ -6,7 +6,15 @@ from dataclasses import replace
 
 import numpy as np
 
-from handball_vision.reid import Fragment, anchor_vectors, assign, contradicts, fit_projection
+from handball_vision.reid import (
+    Fragment,
+    anchor_vectors,
+    assign,
+    contradicts,
+    fit_projection,
+    fragment_roles,
+    plays,
+)
 
 FPS = 30.0
 
@@ -143,3 +151,47 @@ def test_own_readings_veto_another_number() -> None:
     assert not contradicts(read_1, 7)  # 1 <-> 7 is a known misreading
     assert assign([*base, read_33], FPS).get(10) is None
     assert assign([*base, read_1], FPS).get(10) == 7
+
+
+PLAYER, REFEREE, KEEPER = (0.95, 0.03, 0.02), (0.1, 0.0, 0.9), (0.2, 0.75, 0.05)
+
+
+def test_role_of_a_fragment_from_the_looks_next_to_its_readings() -> None:
+    looks = [(f, np.array(PLAYER)) for f in (0, 30, 60)] + [
+        (f, np.array(REFEREE)) for f in (300, 330, 360)
+    ]
+    whole = fragment_roles(looks, (), None, FPS)
+    assert whole is not None and abs(whole[0] - 0.525) < 1e-9
+    read = fragment_roles(looks, ((30, 7), (45, 7), (330, 9)), 7, FPS)
+    assert read is not None and abs(read[0] - 0.95) < 1e-9  # where #7 was read: a player
+    assert fragment_roles(looks[:1], (), None, FPS) is None  # one look is not enough
+    assert fragment_roles([], (), None, FPS) is None
+    vecs = np.zeros((3, 4))
+    assert plays(Fragment(1, "home", 0, 1, (0, 0), (0, 0), vecs, role_p=PLAYER))
+    assert plays(Fragment(1, "home", 0, 1, (0, 0), (0, 0), vecs))  # no role model: the label
+    assert not plays(Fragment(1, "home", 0, 1, (0, 0), (0, 0), vecs, role_p=REFEREE))
+    assert not plays(Fragment(1, "away", 0, 1, (0, 0), (0, 0), vecs, role_p=KEEPER))
+    assert not plays(Fragment(1, "away_gk", 0, 1, (0, 0), (0, 0), vecs, role_p=PLAYER))
+
+
+def test_referees_and_goalkeepers_neither_teach_nor_get_numbers() -> None:
+    rng, players = _setup()
+    base = [
+        _frag(1, 4, 0, 300, _player_vectors(rng, players[4], 20)),
+        _frag(2, 7, 0, 300, _player_vectors(rng, players[7], 20)),
+        _frag(3, 11, 0, 300, _player_vectors(rng, players[11], 20)),
+    ]
+    # a referee track in the home colour read as 9 (a dirty anchor) and a later piece of it
+    ref = rng.standard_normal(64)
+    dirty = _frag(4, 9, 0, 300, _player_vectors(rng, ref, 20))
+    later = _frag(10, None, 400, 600, _player_vectors(rng, ref, 8))
+    assert assign([*base, dirty, later], FPS) == {10: 9}  # the label alone lets it teach
+    # with its role it does not teach, so #9 is never given out
+    assert assign([*base, replace(dirty, role_p=REFEREE), later], FPS) == {}
+    # and a piece that looks like #7 but like a referee to the role classifier (a referee or
+    # staff member in a similar shirt) gets no player's number
+    like_7 = _frag(10, None, 400, 600, _player_vectors(rng, players[7], 8))
+    assert assign([*base, like_7], FPS) == {10: 7}
+    assert assign([*base, replace(like_7, role_p=REFEREE)], FPS) == {}
+    keeper = replace(_frag(11, None, 400, 600, _player_vectors(rng, players[7], 8)), team="home_gk")
+    assert assign([*base, keeper], FPS) == {}

@@ -17,6 +17,7 @@ import time
 from collections import defaultdict
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, replace
+from itertools import pairwise
 from pathlib import Path
 from typing import Any, Literal
 
@@ -43,7 +44,7 @@ from handball_vision.events import detect as detect_events
 from handball_vision.motion import CameraMotion, estimate_motion
 from handball_vision.numbers import MIN_CONFIDENCE, Reading, split_points, vote
 from handball_vision.physical import physical
-from handball_vision.reid import Fragment, assign
+from handball_vision.reid import Fragment, assign, fragment_roles
 from handball_vision.teams import (
     TeamAssigner,
     colour_runs,
@@ -585,51 +586,60 @@ def split_by_reading_colour(
     `framed_items` (appearance vectors, role samples) and the colour samples in `teams` move to
     the new pieces in place."""
     stats = {"tracks_split": 0, "pieces": 0, "readings_dropped": 0}
-    centres = team_centres(team_out)
+    centres = team_centres(team_out, teams.samples)
     if not centres:
         return points, stats
     colour_at = {
-        (t, f): c for t, cs in teams.samples.items() for f, c in zip(teams.frames[t], cs, strict=True)
+        (t, f): c
+        for t, cs in teams.samples.items()
+        for f, c in zip(teams.frames[t], cs, strict=True)
     }
 
     def side(t: int, frame: int) -> str | None:
         return side_of(colour_at.get((t, frame)), centres)
 
     next_id = max([p.track_id for p in points], default=0) + 1
-    cuts: dict[int, list[tuple[int, int]]] = {}  # track -> [(from frame, piece id)]
+    cuts: dict[int, list[tuple[int, int, int]]] = {}  # track -> [(from, to frame, piece id)]
     for t, rs in reads.items():
         label = str(team_out.get(t, {}).get("label", ""))
         if label not in ("home", "away"):
             continue
-        against = [r for r in rs if r.confidence >= MIN_CONFIDENCE and side(t, r.frame) not in (None, label)]
+        against = [
+            r
+            for r in rs
+            if r.confidence >= MIN_CONFIDENCE and side(t, r.frame) not in (None, label)
+        ]
         if len(against) < min_side:
             continue
         runs = colour_runs(teams.frames[t], [side_of(c, centres) for c in teams.samples[t]], fps)
         if len(runs) < 2:
             continue
-        bounds = [(0, t)]
-        for (_, last, _), (first, _, _) in zip(runs, runs[1:], strict=False):
-            bounds.append(((last + first) // 2 + 1, next_id))
-            next_id += 1
-        cuts[t] = bounds
+        edges = [(a + b) // 2 + 1 for (_, a, _), (b, _, _) in pairwise(runs)]
+        parent = {
+            k: v
+            for k, v in team_out[t].items()
+            if k not in ("number", "number_confidence", "number_readings")
+        }
+        pieces = []
+        for k, (_, _, run_side) in enumerate(runs):
+            nid = t if k == 0 else next_id
+            if k:
+                pieces.append((edges[k - 1], edges[k] if k < len(edges) else 2**62, nid))
+                next_id += 1
+            team_out[nid] = (
+                dict(parent)
+                if run_side == label
+                else {**parent, "label": run_side, "label_source": "reading_colour"}
+            )
+        cuts[t] = pieces
         stats["tracks_split"] += 1
-        stats["pieces"] += len(bounds)
-        for (_, nid), (_, _, run_side) in zip(bounds, runs, strict=True):
-            entry = {
-                k: v
-                for k, v in team_out[t].items()
-                if k not in ("number", "number_confidence", "number_readings", "merged_from")
-            }
-            if run_side != label:
-                entry.update(label=run_side, label_source="reading_colour")
-            team_out[nid] = entry
+        stats["pieces"] += len(runs)
 
     def owner(t: int, frame: int) -> int:
-        tid = t
-        for f, nid in cuts.get(t, []):
-            if frame >= f:
-                tid = nid
-        return tid
+        for a, b, nid in cuts.get(t, []):
+            if a <= frame < b:
+                return nid
+        return t
 
     if cuts:
         moved = {
@@ -637,21 +647,22 @@ def split_by_reading_colour(
             for t in cuts
         }
         for t, items in moved.items():
-            for nid in {n for _, n in cuts[t]}:
+            for nid in [t, *(n for _, _, n in cuts[t])]:
                 teams.samples[nid], teams.frames[nid] = [], []
             for nid, f, c in items:
                 teams.samples[nid].append(c)
                 teams.frames[nid].append(f)
-            for _, nid in cuts[t]:
+            for nid in [t, *(n for _, _, n in cuts[t])]:
                 cs = teams.samples[nid]
                 if cs:
                     lab = np.median(np.stack(cs), axis=0)
                     team_out[nid].update(lab=[round(float(v), 1) for v in lab], samples=len(cs))
-        for items in (reads, *framed_items):
-            for t in [t for t in items if t in cuts]:
-                for v in items.pop(t):
+        per_track: list[dict[int, list[Any]]] = [reads, *framed_items]
+        for group in per_track:
+            for t in [t for t in group if t in cuts]:
+                for v in group.pop(t):
                     f = v.frame if isinstance(v, Reading) else int(v[0])
-                    items.setdefault(owner(t, f), []).append(v)
+                    group.setdefault(owner(t, f), []).append(v)
         points = [replace(p, track_id=owner(p.track_id, p.frame)) for p in points]
         colour_at = {
             (t, f): c
@@ -736,7 +747,9 @@ def identify_by_appearance(
     this match teach what each player looks like. `looks` is keyed by the final track ids, as
     vectors or (frame, vector); with frames and the tracks' `reads` a numbered track teaches only
     with the vectors next to readings of its number (reid.anchor_vectors), and a track whose own
-    readings say otherwise is not given the number (reid.contradicts)."""
+    readings say otherwise is not given the number (reid.contradicts). With the tracks' `roles`
+    ((frame, role probabilities), roles.py) only fragments that look like field players teach or
+    are given a number (reid.plays): not referees, goalkeepers, staff or the bench."""
     span: dict[int, list[TrackPoint]] = defaultdict(list)
     for p in points:
         span[p.track_id].append(p)
@@ -758,6 +771,7 @@ def identify_by_appearance(
             for r in (reads or {}).get(tid, [])
             if r.confidence >= MIN_CONFIDENCE
         )
+        number = info.get("number") if anchor else None
         frags.append(
             Fragment(
                 tid,
@@ -767,9 +781,10 @@ def identify_by_appearance(
                 (ps[0].x, ps[0].y),
                 (ps[-1].x, ps[-1].y),
                 vectors,
-                info.get("number") if anchor else None,
+                number,
                 frames if framed and reads is not None else None,
                 readings,
+                fragment_roles(list((roles or {}).get(tid, [])), readings, number, fps),
             )
         )
     found = assign(frags, fps)

@@ -118,7 +118,7 @@ export function Workspace({
         .data ?? null,
   });
   const kitColours = useMemo(
-    () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: "#111827" }),
+    () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: match.kit_referee ?? "#111827" }),
     [match],
   );
   const getTime = useCallback(() => player.current.time() ?? 0, []);

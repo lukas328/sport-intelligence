@@ -5285,6 +5285,18 @@
             "title": "Kit Own Gk",
             "type": "string"
           },
+          "kit_referee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "referee shirt colour when known; left out of the analysis when it is close to a team's kit",
+            "title": "Kit Referee"
+          },
           "opponent_id": {
             "anyOf": [
               {
@@ -5502,6 +5514,18 @@
           "kit_own_gk": {
             "title": "Kit Own Gk",
             "type": "string"
+          },
+          "kit_referee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null: unknown",
+            "title": "Kit Referee"
           },
           "kit_warnings": {
             "description": "kit pairs with similar colours, e.g. own/opponent",
@@ -5891,6 +5915,18 @@
               }
             ],
             "title": "Kit Own Gk"
+          },
+          "kit_referee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null clears it (unknown)",
+            "title": "Kit Referee"
           },
           "period_s": {
             "anyOf": [

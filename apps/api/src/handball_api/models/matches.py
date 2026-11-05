@@ -67,6 +67,9 @@ class Match(Base, EntityMixin, TenantMixin):
     kit_own_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#f59e0b")
     kit_opponent: Mapped[str] = mapped_column(String(7), nullable=False, default="#dc2626")
     kit_opponent_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#16a34a")
+    # only when known (the user's choice): referees often wear black like many teams, and a guessed
+    # referee colour takes those players away from their team (ADR 027 addendum)
+    kit_referee: Mapped[str | None] = mapped_column(String(7))
     score_own: Mapped[int | None] = mapped_column(SmallInteger)
     score_opponent: Mapped[int | None] = mapped_column(SmallInteger)
     halftime_own: Mapped[int | None] = mapped_column(SmallInteger)

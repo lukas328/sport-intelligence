@@ -211,7 +211,7 @@ def relabel_by_clusters(
 
 # ---- the team of single looks (ADR 027 addendum: per-reading team colour) -------------------
 
-MIN_TEAM_GAP = 20.0  # team centres closer than this (feature units) cannot tell single looks apart
+MIN_TEAM_GAP = 12.0  # team centres closer than this (feature units) cannot tell single looks apart
 SIDE_RATIO = 0.6  # a look belongs to a team when clearly nearer it than to the other
 
 
@@ -221,9 +221,13 @@ def _feature(lab: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
     return np.array([0.6 * v[0], v[1], v[2]])
 
 
-def team_centres(team_out: dict[int, dict[str, Any]]) -> dict[str, NDArray[np.float64]]:
-    """This match's home and away torso colours: the median of the field tracks of each team,
-    only when the two are far enough apart to tell single looks apart."""
+def team_centres(
+    team_out: dict[int, dict[str, Any]], samples: dict[int, list[NDArray[Any]]]
+) -> dict[str, NDArray[np.float64]]:
+    """This match's home and away torso colours, from single looks: the colour samples of the
+    field tracks are split in two around the teams' track medians (2-means started there; the
+    track labels are noisy, a dim hall makes white shirts grey). Empty when either team has too
+    few tracks or the two colours are too close to tell single looks apart."""
     labs: dict[str, list[list[float]]] = defaultdict(list)
     for v in team_out.values():
         if v.get("label") in ("home", "away") and "lab" in v:
@@ -231,6 +235,25 @@ def team_centres(team_out: dict[int, dict[str, Any]]) -> dict[str, NDArray[np.fl
     if len(labs.get("home", [])) < 2 or len(labs.get("away", [])) < 2:
         return {}
     centres = {k: np.median(np.asarray(v), axis=0) for k, v in labs.items()}
+    looks = [
+        np.asarray(c, np.float64)
+        for t, v in team_out.items()
+        if v.get("label") in ("home", "away")
+        for c in samples.get(t, [])
+    ]
+    if looks:
+        x = np.stack(looks)
+        f = x * np.array([0.6, 1.0, 1.0])
+        for _ in range(10):
+            dh = np.linalg.norm(f - _feature(centres["home"]), axis=1)
+            da = np.linalg.norm(f - _feature(centres["away"]), axis=1)
+            home = dh < da
+            if home.sum() < 10 or (~home).sum() < 10:
+                break
+            new = {"home": np.median(x[home], axis=0), "away": np.median(x[~home], axis=0)}
+            if all(np.allclose(new[k], centres[k]) for k in new):
+                break
+            centres = new
     if np.linalg.norm(_feature(centres["home"]) - _feature(centres["away"])) < MIN_TEAM_GAP:
         return {}
     return centres
@@ -241,7 +264,7 @@ def side_of(
     centres: dict[str, NDArray[np.float64]],
     ratio: float = SIDE_RATIO,
 ) -> str | None:
-    """"home" or "away" for one torso colour when it is clearly nearer that team's centre
+    """ "home" or "away" for one torso colour when it is clearly nearer that team's centre
     (`team_centres`), else None (referees, other kits, shadows, unsure)."""
     if colour is None or "home" not in centres or "away" not in centres:
         return None
@@ -272,7 +295,9 @@ def colour_runs(
     hi = np.searchsorted(fr, fr + half, side="right")
     csum = np.concatenate([[0], np.cumsum(home)])
     share = (csum[hi] - csum[lo]) / (hi - lo)
-    smooth = ["home" if s > 0.5 else "away" if s < 0.5 else known[k][1] for k, s in enumerate(share)]
+    smooth = [
+        "home" if s > 0.5 else "away" if s < 0.5 else known[k][1] for k, s in enumerate(share)
+    ]
     runs: list[list[Any]] = []  # [first, last, side]
     for f, s in zip(fr.tolist(), smooth, strict=True):
         if runs and runs[-1][2] == s:

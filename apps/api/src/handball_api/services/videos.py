@@ -13,6 +13,7 @@ from typing import Any
 
 from sqlalchemy import delete, select
 
+from handball_api.core.colors import analysis_kits
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.net import UnsafeUrlError, check_public_https_url
@@ -545,13 +546,15 @@ async def start_analysis(
         "bucket": ctx.settings.s3_bucket_videos,
         "proxy_key": asset.proxy_key,
         "prefix": media_prefix(asset),
-        "kits": {
-            "home": match.kit_own,
-            "home_gk": match.kit_own_gk,
-            "away": match.kit_opponent,
-            "away_gk": match.kit_opponent_gk,
-            "referee": "#1a1a1a",
-        },
+        "kits": analysis_kits(
+            {
+                "own": match.kit_own,
+                "own_gk": match.kit_own_gk,
+                "opponent": match.kit_opponent,
+                "opponent_gk": match.kit_opponent_gk,
+                "referee": match.kit_referee,
+            }
+        ),
         "calibration_points": points,
         "calibration_space": space,
         "calibration_frame_ms": frame_ms,

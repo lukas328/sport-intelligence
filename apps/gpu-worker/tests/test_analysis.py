@@ -458,3 +458,63 @@ def test_rosters_reach_the_number_vote(
             rosters=rosters,
         )
     assert seen["rosters"] == expected
+
+
+@pytest.mark.parametrize("referee", [None, "#ff6a13"])
+def test_only_the_kits_sent_reach_tracking(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, referee: str | None
+) -> None:
+    """The API sends a referee kit only when it is known (ADR 027 addendum); without one the
+    tracking gets no referee colour and finds referees by appearance (roles.py)."""
+
+    class StopError(Exception):
+        pass
+
+    class Detector:
+        source = "model"
+        model = "stub"
+
+    class Motion:
+        moving = False
+
+        def background(self) -> Any:
+            return np.zeros((20, 40, 3), np.uint8)
+
+    class Obs:
+        motion = Motion()
+
+    seen: dict[str, Any] = {}
+
+    def track(obs: Any, calib: Any, kits: dict[str, Any], *args: Any, **kw: Any) -> Any:
+        seen["kits"] = kits
+        raise StopError
+
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: FakeS3(tmp_path))
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Detector())
+    monkeypatch.setattr(analysis, "_cached_observations", lambda *a: Obs())
+    monkeypatch.setattr(analysis, "_cached_overlay", lambda *a: None)
+    monkeypatch.setattr(analysis, "_points_calibration", lambda *a: object())
+    monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
+    monkeypatch.setattr("handball_vision.observe.track", track)
+    kits = {k: v for k, v in KITS.items() if k != "referee"}
+    if referee:
+        kits["referee"] = referee
+    rep, _ = reporter()
+    with pytest.raises(StopError):
+        analysis.run_analysis(
+            "j",
+            "o",
+            "m",
+            "a",
+            "videos",
+            "o/m/a/proxy.mp4",
+            "o/m/a/",
+            kits,
+            calibration_points=[{"image": [0, 0], "court": [0, 0]}],
+            settings=JobSettings(work_dir=str(tmp_path / "w")),
+            reporter=rep,
+        )
+    expected = {"home", "home_gk", "away", "away_gk"} | ({"referee"} if referee else set())
+    assert set(seen["kits"]) == expected
+    if referee:
+        assert seen["kits"]["referee"] == (0x13, 0x6A, 0xFF)  # BGR

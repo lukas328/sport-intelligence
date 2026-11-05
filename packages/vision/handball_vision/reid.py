@@ -16,6 +16,10 @@ recognisable on many more. So:
    second nearest (ratio test), the player is not on court elsewhere at the same time, the
    distances to the player's fragments before and after can be run, and the fragment's own
    readings (if any) do not say another number (`contradicts`). Unsure stays unknown.
+4. Only field players take part (`plays`): fragments labelled referee or goalkeeper, and those
+   the role classifier (roles.py, averaged next to the readings for a numbered fragment) does not
+   call a player, neither teach nor get a number. Referees, staff and the bench in a team-like
+   colour otherwise become anchors that pull other fragments to their number.
 
 Measured on a 5-minute NLB clip (12 numbered players, numbers hidden on 15-second pieces of their
 tracks): 65 % of the pieces found, 70 to 75 % of the found ones right (some "errors" are misread
@@ -96,6 +100,8 @@ class Fragment:
     number: int | None = None
     frames: NDArray[np.int64] | None = None  # video frame of each vector (same order)
     readings: tuple[tuple[int, int], ...] = ()  # (frame, number): confident shirt-number readings
+    # mean role probabilities (player, goalkeeper, referee; roles.py), see `fragment_roles`
+    role_p: tuple[float, float, float] | None = None
 
 
 ANCHOR_WINDOW_S = 2.0  # vectors this close to a reading of the number show its owner
@@ -114,6 +120,45 @@ def anchor_vectors(f: Fragment, fps: float, window_s: float = ANCHOR_WINDOW_S) -
         return f.vectors[:0]
     gap = np.abs(np.asarray(f.frames, np.float64)[:, None] - at[None, :]).min(axis=1)
     return np.asarray(f.vectors[gap <= window_s * fps], np.float64)
+
+
+MIN_PLAYER_P = 0.75  # mean player probability a fragment needs to teach or to get a number
+
+
+def fragment_roles(
+    looks: list[tuple[int, F64]],
+    readings: tuple[tuple[int, int], ...],
+    number: int | None,
+    fps: float,
+    window_s: float = ANCHOR_WINDOW_S,
+    min_looks: int = 2,
+) -> tuple[float, float, float] | None:
+    """What a fragment is to the role classifier (player, goalkeeper, referee): the mean of its
+    (frame, probabilities) looks; for a numbered fragment the looks next to readings of its
+    number when there are enough (the reading says who is in the box, like `anchor_vectors`).
+    None with fewer than `min_looks` looks."""
+    if not looks:
+        return None
+    frames = np.array([f for f, _ in looks], np.float64)
+    probs = np.stack([np.asarray(p, np.float64) for _, p in looks])
+    at = np.array([fr for fr, n in readings if n == number], np.float64)
+    if number is not None and len(at):
+        near = np.abs(frames[:, None] - at[None, :]).min(axis=1) <= window_s * fps
+        if near.sum() >= min_looks:
+            probs = probs[near]
+    if len(probs) < min_looks:
+        return None
+    m = probs.mean(axis=0)
+    return (float(m[0]), float(m[1]), float(m[2]))
+
+
+def plays(f: Fragment, min_player_p: float = MIN_PLAYER_P) -> bool:
+    """Whether a fragment may teach or be given a number: a field player by its label and, when
+    known, by the role classifier. Referees, goalkeepers, staff and bench people in a team's
+    colour otherwise become anchors that attract other fragments, or get a player's number."""
+    if f.team == "referee" or f.team.endswith("_gk"):
+        return False
+    return f.role_p is None or f.role_p[0] >= min_player_p
 
 
 def contradicts(f: Fragment, number: int) -> bool:
@@ -209,6 +254,7 @@ def assign(
             f
             for f in fragments
             if f.team.removesuffix("_gk") == team
+            and plays(f)
             and len(f.vectors)
             and (
                 consistency(f.vectors) >= MIN_CANDIDATE_CONSISTENCY

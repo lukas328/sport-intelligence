@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import cv2
 import numpy as np
 import pytest
 
 from handball_vision.numbers import NumberReader, Reading, split_points, stretch_contrast, vote
-from handball_vision.pipeline import merge_by_number
+from handball_vision.pipeline import merge_by_number, split_by_reading_colour
+from handball_vision.teams import TeamAssigner, colour_runs, side_of, team_centres
 from handball_vision.tracking import TrackPoint
 
 MODELS = Path(__file__).resolve().parents[3] / "data" / "models"
@@ -134,6 +136,21 @@ def test_a_swapped_track_is_cut_and_both_parts_get_their_number() -> None:
     assert {t: {x.number for x in rs} for t, rs in reads.items()} == {1: {43}, 2: {5}}
 
 
+def test_role_samples_follow_cuts_and_joins() -> None:
+    pts = _points(1, range(0, 300)) + _points(3, range(400, 500))
+    team = {t: {"label": "away", "confidence": 0.9, "samples": 10} for t in (1, 3)}
+    reads = {
+        1: [r(43, 0.9, f) for f in (10, 40, 70, 100)] + [r(5, 0.95, f) for f in (200, 230, 260)],
+        3: [r(5, 0.95, f) for f in (410, 440, 470)],
+    }
+    p = np.array([0.9, 0.05, 0.05])
+    roles: dict[int, list[tuple[int, Any]]] = {1: [(30, p), (240, p)], 3: [(450, p)]}
+    out, merged = merge_by_number(pts, team, reads, fps=30.0, roles=roles)
+    later = next(t for t in {q.track_id for q in out} if t != 1)
+    assert merged == 1  # the cut-off #5 and track 3 are one player
+    assert {t: [f for f, _ in v] for t, v in roles.items()} == {1: [30], later: [240, 450]}
+
+
 def test_overlapping_fragments_keep_only_the_stronger_number() -> None:
     pts = _points(1, range(0, 300)) + _points(2, range(100, 200), 20)
     team = {t: {"label": "home", "confidence": 0.9, "samples": 10} for t in (1, 2)}
@@ -143,6 +160,93 @@ def test_overlapping_fragments_keep_only_the_stronger_number() -> None:
     }
     _, merged = merge_by_number(pts, team, reads, fps=30.0)
     assert merged == 0 and team[1]["number"] == 7 and "number" not in team[2]
+
+
+WHITE, BLACK = [200.0, 128.0, 128.0], [35.0, 128.0, 128.0]
+
+
+def _colours(
+    team: TeamAssigner, track: int, frames: range, colour: list[float], noise: float = 0.0
+) -> None:
+    rng = np.random.default_rng(track)
+    for f in frames:
+        team.add_sample(track, np.asarray(colour) + rng.normal(0, noise, 3), f)
+
+
+def test_single_looks_get_the_team_of_their_colour() -> None:
+    team_out = {
+        1: {"label": "home", "lab": WHITE},
+        2: {"label": "home", "lab": [150.0, 128.0, 128.0]},  # a mixed track pulls the median
+        3: {"label": "away", "lab": BLACK},
+        4: {"label": "away", "lab": [60.0, 128.0, 128.0]},
+    }
+    samples = {
+        1: [np.array(WHITE)] * 30,
+        2: [np.array(WHITE)] * 10 + [np.array(BLACK)] * 10,
+        3: [np.array(BLACK)] * 30,
+        4: [np.array(BLACK)] * 10,
+    }
+    centres = team_centres(team_out, samples)
+    # the looks, not the track medians: white and black as they are seen
+    assert abs(centres["home"][0] - 200) < 1 and abs(centres["away"][0] - 35) < 1
+    assert side_of(np.array([190.0, 128, 128]), centres) == "home"
+    assert side_of(np.array([40.0, 128, 128]), centres) == "away"
+    assert side_of(np.array([118.0, 128, 128]), centres) is None  # halfway: unsure
+    assert side_of(None, centres) is None
+    # teams too alike, or too few tracks: no single-look teams
+    grey = {t: {**v, "lab": [100.0, 128.0, 128.0]} for t, v in team_out.items()}
+    assert team_centres(grey, {}) == {}
+    assert team_centres({1: team_out[1], 3: team_out[3]}, samples) == {}
+
+
+def test_colour_runs_ignore_flicker() -> None:
+    frames = list(range(0, 300, 3))
+    sides: list[str | None] = ["home" if f < 150 else "away" for f in frames]
+    sides[10] = "away"  # one look in a crowd
+    sides[20] = None
+    sides[70:74] = ["home"] * 4  # 0.5 s: too short to be another person
+    assert colour_runs(frames, sides, fps=25.0) == [(0, 147, "home"), (150, 297, "away")]
+    assert colour_runs(frames, [None] * len(frames), fps=25.0) == []
+
+
+def test_a_number_read_on_the_other_teams_shirt_is_cut_out() -> None:
+    kits = {"home": (240, 240, 240), "away": (30, 30, 30)}
+    team = TeamAssigner(kits)
+    _colours(team, 1, range(0, 150, 3), WHITE, 3.0)  # a white player, then a black one
+    _colours(team, 1, range(150, 300, 3), BLACK, 3.0)
+    _colours(team, 2, range(0, 300, 3), WHITE)
+    _colours(team, 3, range(0, 300, 3), BLACK)
+    _colours(team, 4, range(0, 300, 3), BLACK)
+    _colours(team, 5, range(0, 300, 3), WHITE)  # a white player with a stray black reading
+    _colours(team, 6, range(0, 300, 3), BLACK)  # a goalkeeper: never cut
+    team_out: dict[int, dict[str, Any]] = {
+        t: {"label": lab, "lab": WHITE if lab == "home" else BLACK, "confidence": 0.9}
+        for t, lab in ((1, "home"), (2, "home"), (3, "away"), (4, "away"), (5, "home"))
+    }
+    team_out[6] = {"label": "home_gk", "lab": BLACK, "confidence": 0.9}
+    team.samples[5][50] = np.asarray(BLACK)
+    pts = [p for t in range(1, 7) for p in _points(t, range(0, 300, 3))]
+    reads = {
+        1: [r(7, 0.95, f) for f in (30, 60, 90)] + [r(8, 0.9, f) for f in (180, 210, 240)],
+        5: [r(4, 0.95, f) for f in (30, 60, 90)] + [r(8, 0.95, 150)],
+        6: [r(1, 0.95, f) for f in (30, 60, 90)],
+    }
+    looks: dict[int, list[tuple[int, Any]]] = {1: [(30, "a"), (240, "b")]}
+    out, stats = split_by_reading_colour(pts, team_out, team, reads, [looks], fps=25.0)
+    assert stats == {"tracks_split": 1, "pieces": 2, "readings_dropped": 1}
+    new = max(team_out)
+    assert team_out[1]["label"] == "home"
+    assert team_out[new]["label"] == "away" and team_out[new]["label_source"] == "reading_colour"
+    assert team_out[new]["lab"][0] < 50 and team_out[1]["lab"][0] > 150
+    frames = {t: sorted(p.frame for p in out if p.track_id == t) for t in (1, new)}
+    assert frames[1][-1] < 150 <= frames[new][0]
+    assert {x.number for x in reads[1]} == {7} and {x.number for x in reads[new]} == {8}
+    assert looks == {1: [(30, "a")], new: [(240, "b")]}
+    assert [x.number for x in reads[5]] == [4, 4, 4]  # the stray reading is dropped
+    assert len(reads[6]) == 3 and team_out[6]["label"] == "home_gk"
+    # the number vote afterwards: two players, one per team
+    merge_by_number(out, team_out, reads, fps=25.0)
+    assert (team_out[1]["number"], team_out[new]["number"]) == (7, 8)
 
 
 @pytest.mark.skipif(
