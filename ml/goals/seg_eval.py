@@ -243,7 +243,9 @@ def all_scores(segs: dict, refs: dict, shift: float, bc: dict | None) -> dict[st
 # --- metrics -------------------------------------------------------------------------------------
 
 
-def peaks(ts: np.ndarray, s: np.ndarray, k: int, nms: float = NMS_S) -> list[float]:
+def peaks(ts: np.ndarray, s: np.ndarray, k: int, nms: float = NMS_S, edge: float = 2.0) -> list[float]:
+    """The k best non-suppressed peaks, none within `edge` s of the segment's ends (window artefacts)."""
+    s = np.where((ts >= ts[0] + edge) & (ts <= ts[-1] - edge), s, -np.inf)
     order = np.argsort(-s)
     got: list[float] = []
     for i in order:
