@@ -164,12 +164,24 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     window.setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
+  // lists that jump to a moment (official goals, goal candidates) sit below the player, often a
+  // screen or more: bring the player into view, the focus stays where it is
+  function reveal() {
+    const v = player.current?.video();
+    if (!v) return;
+    const box = v.getBoundingClientRect();
+    if (box.top >= 0 && box.bottom <= window.innerHeight) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    v.scrollIntoView({ block: "nearest", behavior: still ? "auto" : "smooth" });
+  }
+
   function onPlay(ms: number) {
     setView("video");
     // the player is kept mounted, so the seek works right after the switch
     requestAnimationFrame(() => {
       player.current?.seek(ms);
       player.current?.play();
+      reveal();
     });
   }
 
@@ -182,6 +194,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     requestAnimationFrame(() => {
       player.current?.seek(from);
       player.current?.play();
+      reveal();
       const v = player.current?.video();
       if (!v) return;
       let started = false; // the seek may land after the first time updates

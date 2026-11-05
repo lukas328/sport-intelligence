@@ -66,7 +66,11 @@ export function GoalCandidatesPanel({
       (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates", { params: { path } }))
         .data ?? null,
   });
+  const reviewKey = ["review", ...key];
   const review = useMutation({
+    // one at a time, in key order: "1" and then "U" must reach the server in that order
+    mutationKey: reviewKey,
+    scope: { id: reviewKey.join(":") },
     mutationFn: async (v: {
       id: string;
       status: CandidateReview | null;
@@ -93,6 +97,8 @@ export function GoalCandidatesPanel({
       setError(errorKey(err));
     },
     onSettled: () => {
+      // the last queued review refetches; earlier ones would overwrite the optimistic rows
+      if (qc.isMutating({ mutationKey: reviewKey }) > 1) return;
       void qc.invalidateQueries({ queryKey: key });
       // a confirmed goal is an event: the score, the statistics and the comparison change
       void qc.invalidateQueries({ queryKey: ["stats", matchId] });
@@ -199,7 +205,8 @@ export function GoalCandidatesPanel({
           />
         </div>
       </div>
-      <p className="text-xs text-muted" id={`gc-keys-${matchId}`}>
+      {/* keys only help with a keyboard; the list still points at the text (aria-describedby) */}
+      <p className="text-xs text-muted pointer-coarse:hidden" id={`gc-keys-${matchId}`}>
         {t.rich("keys", {
           own: ownName,
           opp: oppName,
@@ -214,7 +221,9 @@ export function GoalCandidatesPanel({
         <p className="text-sm text-muted">{filter === "open" ? t("nothingOpen") : t("none")}</p>
       ) : (
         <ul
-          className="max-h-[28rem] divide-y divide-border/70 overflow-auto text-sm"
+          // rows reach the scroll box's edges (focus ring drawn inside); the lines between them
+          // stay in line with the card's content
+          className="-mx-1.5 max-h-[28rem] overflow-auto text-sm"
           aria-label={t("title")}
           aria-describedby={`gc-keys-${matchId}`}
         >
@@ -242,7 +251,7 @@ export function GoalCandidatesPanel({
                 aria-label={t("row", { label })}
                 onKeyDown={(e) => onRowKey(e, c, i)}
                 onFocus={() => setFocus(i)}
-                className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-sm px-1 py-2 outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="relative flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-sm px-1.5 py-2 outline-none after:absolute after:inset-x-1.5 after:bottom-0 after:h-px after:bg-border/70 last:after:hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
                 data-testid="goal-candidate-row"
               >
                 <Button
@@ -289,16 +298,13 @@ export function GoalCandidatesPanel({
                     return (
                       <Button
                         key={side}
-                        variant={on ? "secondary" : "quiet"}
+                        variant="secondary"
                         size="sm"
                         tabIndex={i === active ? undefined : -1}
                         disabled={c.known != null}
                         aria-pressed={on}
                         aria-keyshortcuts={String(k + 1)}
-                        className={cn(
-                          on && "text-ok",
-                          c.suggested_side === side && !on && "text-foreground",
-                        )}
+                        className={cn(on && "bg-ok/12 text-ok ring-ok/50 hover:bg-ok/12")}
                         onClick={() => decide(c, i, on ? null : "confirmed", on ? null : side)}
                       >
                         {t("goalFor", { team: team(side) ?? "" })}

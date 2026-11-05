@@ -23,7 +23,12 @@ import {
 } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
 
-const TONE: Record<GoalRow["kind"], Tone> = { found: "ok", missing: "warn", extra: "accent" };
+const TONE: Record<GoalRow["kind"], Tone> = {
+  found: "ok",
+  missing: "warn",
+  outside: "neutral",
+  extra: "accent",
+};
 
 export const officialGoalsKey = (matchId: string) => ["official-goals", matchId];
 
@@ -52,6 +57,7 @@ export function OfficialGoalsPanel({
   const key = officialGoalsKey(matchId);
   const path = { org_id: orgId, match_id: matchId };
   const [filter, setFilter] = useState<GoalFilter>("all");
+  const [showOutside, setShowOutside] = useState(false);
   const [error, setError] = useState<ErrorKey | null>(null);
   const q = useQuery({
     queryKey: key,
@@ -62,7 +68,11 @@ export function OfficialGoalsPanel({
         })
       ).data ?? null,
   });
+  const reviewKey = ["review", ...key];
   const review = useMutation({
+    // one at a time, in click order: a confirm and its undo must reach the server in that order
+    mutationKey: reviewKey,
+    scope: { id: reviewKey.join(":") },
     mutationFn: async ({ id, status }: { id: string; status: Review | null }) => {
       const r = await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/official-report/review", {
         params: { path },
@@ -81,12 +91,17 @@ export function OfficialGoalsPanel({
       if (ctx?.before) qc.setQueryData(key, ctx.before);
       setError(errorKey(err));
     },
-    onSettled: () => void qc.invalidateQueries({ queryKey: key }),
+    onSettled: () => {
+      // the last queued review refetches; earlier ones would overwrite the optimistic rows
+      if (qc.isMutating({ mutationKey: reviewKey }) <= 1)
+        void qc.invalidateQueries({ queryKey: key });
+    },
   });
 
   const cmp = q.data;
   if (!cmp?.imported) return null;
-  const rows = goalRows(cmp, filter);
+  const rows = goalRows(cmp, filter, showOutside);
+  const outside = cmp.counts.outside;
   const team = (side: string) => (side === "own" ? ownName : oppName);
   const score = (s: number[] | null) =>
     s && s.length === 2 ? (isHome ? `${s[0]}:${s[1]}` : `${s[1]}:${s[0]}`) : null;
@@ -122,7 +137,12 @@ export function OfficialGoalsPanel({
           value={filter}
           onChange={setFilter}
           items={[
-            { value: "all", label: t("all", { n: cmp.counts.official + cmp.counts.extra }) },
+            {
+              value: "all",
+              label: t("all", {
+                n: cmp.counts.official + cmp.counts.extra - (showOutside ? 0 : outside),
+              }),
+            },
             { value: "open", label: t("open", { n: cmp.counts.open }) },
           ]}
         />
@@ -132,16 +152,19 @@ export function OfficialGoalsPanel({
         <p className="text-sm text-muted">{filter === "open" ? t("nothingOpen") : t("noGoals")}</p>
       ) : (
         <ul
-          className="max-h-[28rem] divide-y divide-border/70 overflow-auto text-sm"
+          // the padding keeps the focus outlines of the buttons at the edges inside the scroll box
+          className="-mx-1.5 max-h-[28rem] divide-y divide-border/70 overflow-auto px-1.5 text-sm"
           aria-label={t("title")}
         >
           {rows.map((r) => {
             const target = jumpTarget(r);
             const label = [r.time, team(r.side), who(r)].filter(Boolean).join(", ");
+            const away = r.kind === "outside";
             return (
               <li
                 key={r.id}
-                className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2"
+                // phone: time and checks on top, the goal below; wider: one line
+                className="grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-2 sm:flex sm:flex-wrap"
                 data-testid="official-goal-row"
               >
                 {target != null ? (
@@ -156,7 +179,9 @@ export function OfficialGoalsPanel({
                     {formatClock(r.tMs!)}
                   </Button>
                 ) : (
-                  <span className="inline-flex w-[5.5rem] text-xs text-muted">{t("noTime")}</span>
+                  <span className="inline-flex w-[5.5rem] text-xs text-muted">
+                    {away ? t("outside") : t("noTime")}
+                  </span>
                 )}
                 <span className="w-12 font-mono text-xs tabular-nums">
                   <span className="sr-only">{t("gameTime")} </span>
@@ -164,7 +189,8 @@ export function OfficialGoalsPanel({
                 </span>
                 <span
                   className={cn(
-                    "min-w-0 flex-1",
+                    "col-span-full row-start-2 min-w-0 sm:min-w-48 sm:flex-1",
+                    away && "text-muted",
                     r.review === "dismissed" && "line-through decoration-muted",
                   )}
                 >
@@ -177,37 +203,61 @@ export function OfficialGoalsPanel({
                     </span>
                   )}
                 </span>
-                <span className="flex flex-wrap items-center gap-1.5">
-                  <Badge tone={TONE[r.kind]}>{t(r.kind)}</Badge>
-                  {r.kind === "missing" && r.estimated && target != null && (
-                    <Badge>{t("estimated")}</Badge>
-                  )}
-                  {r.review && <Badge tone="neutral">{t(r.review)}</Badge>}
-                </span>
-                <span role="group" aria-label={label} className="flex gap-1">
-                  {(["confirmed", "dismissed"] as const).map((s) => {
-                    const Icon = s === "confirmed" ? Check : X;
-                    const active = r.review === s;
-                    return (
-                      <Button
-                        key={s}
-                        variant={active ? "secondary" : "quiet"}
-                        size="icon-sm"
-                        aria-pressed={active}
-                        aria-label={t(s === "confirmed" ? "confirm" : "dismiss")}
-                        title={t(s === "confirmed" ? "confirm" : "dismiss")}
-                        className={cn(active && (s === "confirmed" ? "text-ok" : "text-error"))}
-                        onClick={() => review.mutate({ id: r.id, status: nextReview(r.review, s) })}
-                      >
-                        <Icon aria-hidden />
-                      </Button>
-                    );
-                  })}
-                </span>
+                {!away && (
+                  <span className="col-span-full row-start-3 flex flex-wrap items-center gap-1.5">
+                    <Badge tone={TONE[r.kind]}>{t(r.kind)}</Badge>
+                    {r.kind === "missing" && r.estimated && target != null && (
+                      <Badge>{t("estimated")}</Badge>
+                    )}
+                    {r.review && <Badge tone="neutral">{t(r.review)}</Badge>}
+                  </span>
+                )}
+                {!away && (
+                  <span
+                    role="group"
+                    aria-label={label}
+                    className="col-start-4 row-start-1 flex gap-1 justify-self-end"
+                  >
+                    {(["confirmed", "dismissed"] as const).map((s) => {
+                      const Icon = s === "confirmed" ? Check : X;
+                      const active = r.review === s;
+                      return (
+                        <Button
+                          key={s}
+                          variant={active ? "secondary" : "quiet"}
+                          size="icon-sm"
+                          aria-pressed={active}
+                          aria-label={t(s === "confirmed" ? "confirm" : "dismiss")}
+                          title={t(s === "confirmed" ? "confirm" : "dismiss")}
+                          className={cn(active && (s === "confirmed" ? "text-ok" : "text-error"))}
+                          onClick={() =>
+                            review.mutate({ id: r.id, status: nextReview(r.review, s) })
+                          }
+                        >
+                          <Icon aria-hidden />
+                        </Button>
+                      );
+                    })}
+                  </span>
+                )}
               </li>
             );
           })}
         </ul>
+      )}
+      {outside > 0 && filter === "all" && (
+        <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
+          {t("outsideHint", { n: outside })}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-my-1"
+            aria-expanded={showOutside}
+            onClick={() => setShowOutside((v) => !v)}
+          >
+            {showOutside ? t("hideOutside") : t("showOutside")}
+          </Button>
+        </p>
       )}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
     </Card>

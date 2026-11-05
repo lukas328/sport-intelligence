@@ -5356,6 +5356,8 @@ export interface components {
             official: number;
             /** Open */
             open: number;
+            /** Outside */
+            outside: number;
         };
         /** GoalReviewIn */
         GoalReviewIn: {
@@ -6297,7 +6299,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "found" | "missing";
+            status: "found" | "missing" | "outside";
             /** T Ms */
             t_ms: number | null;
             video: components["schemas"]["VideoReading"] | null;

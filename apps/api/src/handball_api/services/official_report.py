@@ -25,7 +25,8 @@ Only these fixed hosts are contacted; the given URL only names the game.
   * suspensions, time-outs and the other entries are added as they are.
 
 `comparison` lists the official goals next to what the video found (the import's video data, or an
-automatic goal within the same 20 s) and the video goals without an official one; the coach
+automatic goal within the same 20 s) and the video goals without an official one; goals before
+or after the main video (a clip of part of the game) are "outside", not missing. The coach
 confirms or dismisses each row (`review`, kept in attributes.review, kept by a re-import).
 """
 
@@ -45,7 +46,8 @@ import httpx
 from sqlalchemy import delete, select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import Event, Match, Opponent, RosterEntry
+from handball_api.models import Event, Match, Opponent, RosterEntry, VideoAsset
+from handball_api.models.enums import VideoRole, VideoStatus
 from handball_api.services import audit
 from handball_api.services.auto_events import CANDIDATE, OFFICIAL, OVERLAY
 from handball_api.services.context import Ctx
@@ -722,8 +724,21 @@ def _video_goal(e: Event) -> dict[str, Any]:
 async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     """Each official goal with what the video found: the video data the import took over (or the
     analysis noted), else an automatic goal of the same side within MATCH_WINDOW_S of match
-    clock, as the import pairs them; then the automatic goals without an official counterpart."""
+    clock, as the import pairs them; then the automatic goals without an official counterpart.
+    An official goal the video did not find whose time (from the match clock) lies before or after
+    the main video is "outside": a clip of a few minutes is not missing the rest of the game."""
     match = await get_match(ctx, match_id)
+    duration_s = await ctx.db.scalar(
+        select(VideoAsset.duration_s)
+        .where(
+            VideoAsset.match_id == match.id,
+            VideoAsset.role == VideoRole.MAIN,
+            VideoAsset.status == VideoStatus.READY,
+        )
+        .order_by(VideoAsset.created_at.desc())
+        .limit(1)
+    )
+    length_ms = int(duration_s * 1000) if duration_s else None
     goals = (
         await ctx.db.scalars(
             select(Event)
@@ -763,6 +778,15 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                     "event_id": hit.event.id,
                 }
         video_t = video.get("t_ms") if video else None
+        t_ms = int(video_t) if video_t is not None else o.t_ms
+        status = "found" if video else "missing"
+        if (
+            status == "missing"
+            and t_ms is not None
+            and length_ms is not None
+            and not 0 <= t_ms <= length_ms
+        ):
+            status = "outside"
         attrs = o.attributes or {}
         rows.append(
             {
@@ -772,14 +796,14 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 "clock_s": o.clock_s,
                 "official_time": attrs.get("official_time") or _official_time(o.clock_s),
                 # where the video shows it: the video reading, else the time from the clock
-                "t_ms": int(video_t) if video_t is not None else o.t_ms,
+                "t_ms": t_ms,
                 "estimated": video_t is None,
                 "number": o.number,
                 "player_id": o.player_id,
                 "name": attrs.get("name"),
                 "score": attrs.get("score"),
                 "penalty": o.shot_type == "penalty",
-                "status": "found" if video else "missing",
+                "status": status,
                 "video": video,
                 "review": _review(o),
             }
@@ -787,6 +811,7 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     paired = {id(c.event) for c in cands if id(c) in used}
     extra = [_video_goal(g) for g in auto if id(g) not in paired]
     found = sum(1 for r in rows if r["status"] == "found")
+    outside = sum(1 for r in rows if r["status"] == "outside")
     report = (match.report_extra or {}).get("official_report") or {}
     return {
         "imported": bool(report) or bool(official),
@@ -798,7 +823,8 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         "counts": {
             "official": len(rows),
             "found": found,
-            "missing": len(rows) - found,
+            "missing": len(rows) - found - outside,
+            "outside": outside,
             "extra": len(extra),
             "open": sum(1 for r in rows if r["status"] == "missing" and r["review"] is None)
             + sum(1 for r in extra if r["review"] is None),

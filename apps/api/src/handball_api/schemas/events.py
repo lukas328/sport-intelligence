@@ -183,7 +183,8 @@ class OfficialGoalRow(ApiModel):
     name: str | None
     score: list[int] | None  # own, opponent after the goal
     penalty: bool
-    status: Literal["found", "missing"]
+    # outside: not found, and its time from the match clock is before or after the main video
+    status: Literal["found", "missing", "outside"]
     video: VideoReading | None
     review: ReviewStatus | None
 
@@ -209,7 +210,8 @@ class VideoGoalRow(ApiModel):
 class GoalComparisonCounts(ApiModel):
     official: int
     found: int  # official goals the video saw
-    missing: int  # official goals the video did not see
+    missing: int  # official goals the video did not see (within the video's time range)
+    outside: int  # official goals before or after the main video (a clip of part of the game)
     extra: int  # video goals without an official one
     open: int  # missing and extra rows nobody confirmed or dismissed yet
 

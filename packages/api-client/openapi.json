@@ -4035,12 +4035,17 @@
           "open": {
             "title": "Open",
             "type": "integer"
+          },
+          "outside": {
+            "title": "Outside",
+            "type": "integer"
           }
         },
         "required": [
           "official",
           "found",
           "missing",
+          "outside",
           "extra",
           "open"
         ],
@@ -6731,7 +6736,8 @@
           "status": {
             "enum": [
               "found",
-              "missing"
+              "missing",
+              "outside"
             ],
             "title": "Status",
             "type": "string"

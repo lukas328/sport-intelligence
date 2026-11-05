@@ -5,11 +5,12 @@ export type GoalComparison = Schemas["GoalComparison"];
 export type Review = "confirmed" | "dismissed";
 export type GoalFilter = "all" | "open";
 
-/** One row of the list: an official goal (found in the video or missing) or a video goal that the
- * report does not have. */
+/** One row of the list: an official goal (found in the video, missing, or outside: before or
+ * after the video, which is a clip of part of the game) or a video goal that the report does not
+ * have. */
 export interface GoalRow {
   id: string;
-  kind: "found" | "missing" | "extra";
+  kind: "found" | "missing" | "outside" | "extra";
   side: string;
   period: number;
   clockS: number | null;
@@ -29,8 +30,13 @@ export interface GoalRow {
 export const LEAD_MS = 4000;
 
 /** Official and extra goals in one list, in match order; "open" keeps only what still needs a
- * look: missing and extra goals nobody confirmed or dismissed. */
-export function goalRows(cmp: GoalComparison, filter: GoalFilter = "all"): GoalRow[] {
+ * look: missing and extra goals nobody confirmed or dismissed. Goals outside the video only with
+ * `outside` (there is nothing to look at). */
+export function goalRows(
+  cmp: GoalComparison,
+  filter: GoalFilter = "all",
+  outside = false,
+): GoalRow[] {
   const rows: GoalRow[] = [
     ...cmp.goals.map((g) => ({
       id: g.event_id,
@@ -75,16 +81,18 @@ export function goalRows(cmp: GoalComparison, filter: GoalFilter = "all"): GoalR
       key(a) - key(b) ||
       (a.kind === "extra" ? 1 : 0) - (b.kind === "extra" ? 1 : 0),
   );
-  return filter === "open" ? rows.filter(isOpen) : rows;
+  if (filter === "open") return rows.filter(isOpen);
+  return outside ? rows : rows.filter((r) => r.kind !== "outside");
 }
 
 export function isOpen(r: GoalRow): boolean {
-  return r.kind !== "found" && r.review == null;
+  return (r.kind === "missing" || r.kind === "extra") && r.review == null;
 }
 
-/** Where the player jumps for a row, or null when the video time is not known yet. */
+/** Where the player jumps for a row, or null when the video time is not known yet or the goal is
+ * not in the video. */
 export function jumpTarget(r: GoalRow): number | null {
-  return r.tMs == null ? null : Math.max(0, r.tMs - LEAD_MS);
+  return r.tMs == null || r.kind === "outside" ? null : Math.max(0, r.tMs - LEAD_MS);
 }
 
 /** Clicking the active review again undoes it. */

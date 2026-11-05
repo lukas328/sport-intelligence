@@ -1694,6 +1694,7 @@
     "found": "In video",
     "missing": "Missing in video",
     "extra": "Not in report",
+    "outside": "Not in the video",
     "estimated": "Time from match clock",
     "noTime": "No video time",
     "jump": "Play video at {time}: {goal}",
@@ -1705,7 +1706,10 @@
     "dismissed": "Dismissed",
     "reviewHint": "Confirm: the moment in the video is right. Dismiss: wrongly detected or not visible. Click again to undo.",
     "nothingOpen": "Everything checked.",
-    "noGoals": "The report has no goals."
+    "noGoals": "The report has no goals.",
+    "outsideHint": "{n, plural, one {# goal is} other {# goals are}} before or after the video.",
+    "showOutside": "Show goals",
+    "hideOutside": "Hide goals"
   },
   "goalCandidates": {
     "title": "Goal candidates",

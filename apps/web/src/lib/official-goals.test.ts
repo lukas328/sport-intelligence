@@ -39,7 +39,7 @@ const cmp: GoalComparison = {
   home: "A",
   away: "B",
   window_s: 20,
-  counts: { official: 3, found: 1, missing: 2, extra: 1, open: 3 },
+  counts: { official: 4, found: 1, missing: 2, outside: 1, extra: 1, open: 3 },
   goals: [
     official("b", 1846, { status: "missing", t_ms: 1_900_000 }),
     official("a", 93, {
@@ -55,6 +55,7 @@ const cmp: GoalComparison = {
       },
     }),
     official("c", 240, { status: "missing", review: "confirmed" }),
+    official("o", 3300, { status: "outside", t_ms: 3_400_000 }),
   ],
   extra: [
     {
@@ -86,6 +87,15 @@ describe("official goals compared with the video", () => {
     ]);
     expect(rows[0]!.source).toBe("scoreboard_ocr");
     expect(rows[2]!.estimated).toBe(false);
+  });
+
+  it("leaves the goals outside the video out unless asked", () => {
+    expect(goalRows(cmp).some((r) => r.kind === "outside")).toBe(false);
+    const all = goalRows(cmp, "all", true);
+    expect(all.at(-1)!.id).toBe("o");
+    expect(isOpen(all.at(-1)!)).toBe(false);
+    expect(jumpTarget(all.at(-1)!)).toBeNull();
+    expect(goalRows(cmp, "open", true).map((r) => r.id)).toEqual(["x", "b"]);
   });
 
   it("keeps only the rows still to check", () => {

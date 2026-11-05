@@ -1694,6 +1694,7 @@
     "found": "Dans la vidéo",
     "missing": "Absent de la vidéo",
     "extra": "Pas dans le rapport",
+    "outside": "Hors de la vidéo",
     "estimated": "Temps selon le chrono",
     "noTime": "Sans temps vidéo",
     "jump": "Lire la vidéo à {time} : {goal}",
@@ -1705,7 +1706,10 @@
     "dismissed": "Écarté",
     "reviewHint": "Confirmer : le moment dans la vidéo est juste. Écarter : mal détecté ou pas visible. Cliquer à nouveau pour annuler.",
     "nothingOpen": "Tout est vérifié.",
-    "noGoals": "Le rapport ne contient aucun but."
+    "noGoals": "Le rapport ne contient aucun but.",
+    "outsideHint": "{n, plural, one {# but est} other {# buts sont}} avant ou après la vidéo.",
+    "showOutside": "Afficher les buts",
+    "hideOutside": "Masquer les buts"
   },
   "goalCandidates": {
     "title": "Buts potentiels",
@@ -1727,7 +1731,7 @@
     "noSuggestion": "Équipe à choisir",
     "row": "But potentiel {label}",
     "knownOverlay": "But de l'incrustation ({team})",
-    "knownReport": "But de la feuille de match ({team})",
+    "knownReport": "But du rapport de match ({team})",
     "knownTagged": "Déjà saisi ({team})",
     "play": "Lire le clip à {time}",
     "gameTime": "Temps de jeu",
@@ -1737,7 +1741,7 @@
     "rejected": "Écarté",
     "reject": "Écarter",
     "undo": "Annuler",
-    "knownHint": "{n, plural, one {# but potentiel est} other {# buts potentiels sont}} déjà un but (incrustation, feuille de match ou saisie manuelle) et visibles sous « Tous »."
+    "knownHint": "{n, plural, one {# but potentiel est déjà un but (incrustation, rapport de match ou saisie manuelle) et figure sous « Tous ».} other {# buts potentiels sont déjà des buts (incrustation, rapport de match ou saisie manuelle) et figurent sous « Tous ».}}"
   },
   "matrix": {
     "nav": "Matrice",

@@ -313,7 +313,7 @@ async def test_import_errors(make_api: Callable[[], Api], recorded: list[tuple[s
 
 @pytest.mark.usefixtures("clean_db")
 async def test_analysis_after_import_does_not_count_goals_twice(
-    make_api: Callable[[], Api], recorded: list[tuple[str, int]]
+    make_api: Callable[[], Api], recorded: list[tuple[str, int]], owner_conn: Any
 ) -> None:
     """The report came first (no video time yet); the overlay of a later analysis sets the clock:
     the official goals get their video time and the overlay goals close to them are dropped, and
@@ -365,7 +365,14 @@ async def test_analysis_after_import_does_not_count_goals_twice(
         "confidence": 0.95,
     }
     cmp = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/official-report/comparison")).json()
-    assert cmp["counts"] == {"official": 8, "found": 2, "missing": 6, "extra": 1, "open": 7}
+    assert cmp["counts"] == {
+        "official": 8,
+        "found": 2,
+        "missing": 6,
+        "outside": 0,
+        "extra": 1,
+        "open": 7,
+    }
     row = next(r for r in cmp["goals"] if r["clock_s"] == 93)
     assert (row["status"], row["t_ms"], row["estimated"], row["official_time"]) == (
         "found",
@@ -374,6 +381,27 @@ async def test_analysis_after_import_does_not_count_goals_twice(
         "01:33",
     )
     assert [(x["side"], x["t_ms"]) for x in cmp["extra"]] == [("opponent", 500_000)]
+
+    # the video is a clip of five minutes: goals the clock puts after it are outside, not missing
+    await owner_conn.execute(
+        "UPDATE video_assets SET duration_s = 300 WHERE match_id = $1::uuid", m["id"]
+    )
+    later = [
+        g["event_id"]
+        for g in cmp["goals"]
+        if g["status"] == "missing" and g["t_ms"] is not None and g["t_ms"] > 300_000
+    ]
+    assert later
+    clip = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/official-report/comparison")).json()
+    assert [g["event_id"] for g in clip["goals"] if g["status"] == "outside"] == later
+    assert clip["counts"] == {
+        "official": 8,
+        "found": 2,
+        "missing": 6 - len(later),
+        "outside": len(later),
+        "extra": 1,
+        "open": 7 - len(later),
+    }
 
 
 # ---- official goals compared with the video ----------------------------------------------------
@@ -393,7 +421,14 @@ async def test_goal_comparison_and_review(
     # nothing imported yet: an empty comparison
     empty = (await api.get(cmp_url)).json()
     assert empty["imported"] is False and empty["goals"] == [] and empty["extra"] == []
-    assert empty["counts"] == {"official": 0, "found": 0, "missing": 0, "extra": 0, "open": 0}
+    assert empty["counts"] == {
+        "official": 0,
+        "found": 0,
+        "missing": 0,
+        "outside": 0,
+        "extra": 0,
+        "open": 0,
+    }
 
     shot = {"type": "shot", "outcome": "goal", "period": 1}
     overlay = (
@@ -419,7 +454,14 @@ async def test_goal_comparison_and_review(
         20.0,
     )
     # 52 goals in the report; merged on import: Pedersen's goal at 04:31
-    assert cmp["counts"] == {"official": 52, "found": 1, "missing": 51, "extra": 1, "open": 52}
+    assert cmp["counts"] == {
+        "official": 52,
+        "found": 1,
+        "missing": 51,
+        "outside": 0,
+        "extra": 1,
+        "open": 52,
+    }
     goals = cmp["goals"]
     assert [g["clock_s"] for g in goals] == sorted(g["clock_s"] for g in goals)
     merged = next(g for g in goals if g["status"] == "found")

@@ -1694,6 +1694,7 @@
     "found": "Im Video",
     "missing": "Fehlt im Video",
     "extra": "Nicht im Bericht",
+    "outside": "Nicht im Video",
     "estimated": "Zeit aus Matchuhr",
     "noTime": "Ohne Videozeit",
     "jump": "Video bei {time} abspielen: {goal}",
@@ -1705,7 +1706,10 @@
     "dismissed": "Verworfen",
     "reviewHint": "Bestätigen: die Stelle im Video stimmt. Verwerfen: falsch erkannt oder nicht zu sehen. Nochmals klicken hebt es auf.",
     "nothingOpen": "Alles geprüft.",
-    "noGoals": "Der Bericht enthält keine Tore."
+    "noGoals": "Der Bericht enthält keine Tore.",
+    "outsideHint": "{n, plural, one {# Tor liegt} other {# Tore liegen}} vor oder nach dem Video.",
+    "showOutside": "Tore anzeigen",
+    "hideOutside": "Tore ausblenden"
   },
   "goalCandidates": {
     "title": "Torkandidaten",
