@@ -37,6 +37,9 @@ from handball_api.services.segments import parse_recorded
 from handball_api.services.support import failure_code
 
 PIPELINE_VERSION = "0.2.0"
+# keys of VideoAsset.analysis: the court points the coach clicked (of the last run that succeeded
+# with them, reused by every later run) and those of a run still going
+CLICKED, PENDING = "court_points", "court_points_pending"
 INGEST_FUNC = "handball_worker.ingest.run_ingest"
 ANALYSIS_FUNC = "handball_gpu_worker.analysis.run_analysis"
 SYNC_FUNC = "handball_gpu_worker.sync.run_sync"
@@ -539,6 +542,21 @@ async def start_analysis(
     frame_ms: int = 0,
 ) -> ProcessingJob:
     job = await _new_job(ctx, asset, "analysis")
+    meta = dict(asset.analysis or {})
+    if points is not None:
+        # remembered with the job: stored as the video's court points once the run succeeds
+        meta[PENDING] = {
+            "job_id": str(job.id),
+            "points": points,
+            "space": space,
+            "frame_ms": frame_ms,
+        }
+        asset.analysis = meta
+    elif isinstance(meta.get(CLICKED), dict):
+        # a re-run (reprocess, retry) keeps the court the coach clicked: without it a flat view
+        # fails the automatic court again and the run would drop the tracks and identities
+        clicked = meta[CLICKED]
+        points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
     payload: dict[str, object] = {
         "job_id": str(job.id),
         "organization_id": str(asset.organization_id),
@@ -614,20 +632,14 @@ async def _apply_analysis_result(
     timeline = await timeline_video(ctx, asset.match_id)
     on_timeline = asset.role == VideoRole.MAIN and timeline is not None and timeline.id == asset.id
     cal = r.get("calibration")
+    before = dict(asset.analysis or {})
+    pending = before.get(PENDING) if isinstance(before.get(PENDING), dict) else None
+    clicked = before.get(CLICKED) if isinstance(before.get(CLICKED), dict) else None
+    if pending is not None and pending.get("job_id") == str(job.id):
+        if isinstance(cal, dict) and cal.get("source") == "user_correction":
+            clicked = {k: pending[k] for k in ("points", "space", "frame_ms")}
+        pending = None
     if isinstance(cal, dict):
-        prev_points = (
-            await ctx.db.scalar(
-                select(CameraCalibration.points)
-                .where(
-                    CameraCalibration.video_asset_id == asset.id,
-                    CameraCalibration.source == "user_correction",
-                )
-                .order_by(CameraCalibration.created_at.desc())
-                .limit(1)
-            )
-            if cal.get("source") == "user_correction"
-            else None
-        )
         ctx.db.add(
             CameraCalibration(
                 organization_id=asset.organization_id,
@@ -637,7 +649,9 @@ async def _apply_analysis_result(
                 confidence=float(cal["confidence"]),
                 reprojection_px=float(cal["reprojection_px"]),
                 source=str(cal["source"]),
-                points=prev_points,
+                points=clicked["points"]
+                if clicked and cal.get("source") == "user_correction"
+                else None,
                 pipeline_version=job.pipeline_version,
             )
         )
@@ -712,6 +726,10 @@ async def _apply_analysis_result(
             "scoreboard",
         )
     }
+    if clicked is not None:
+        asset.analysis[CLICKED] = clicked
+    if pending is not None:  # a newer run with clicked points is still running
+        asset.analysis[PENDING] = pending
     auto = r.get("events")
     sb_raw = r.get("scoreboard")
     overlay: dict[str, Any] | None = sb_raw if isinstance(sb_raw, dict) else None

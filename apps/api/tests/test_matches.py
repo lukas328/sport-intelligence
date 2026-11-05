@@ -578,6 +578,61 @@ async def test_court_marked_on_the_hall_image(make_api: Callable[[], Api]) -> No
     assert bad.status_code == 422
 
 
+async def test_rerun_keeps_the_clicked_court(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Flat view: the court was clicked on the hall image and a player assigned to a track. A
+    reprocess (or a retry of the analysis) used to start without the points: the automatic court
+    failed again, the run ended as "needs court points" and dropped every track, the coach's
+    assignments with them. The re-run now takes the stored points."""
+    from .test_identity_sync import _finish, _ingest, _tracks
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    roster = f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/roster"
+    mia = (
+        await api.post(roster, json={"first_name": "Mia", "last_name": "K", "jersey_number": 7})
+    ).json()
+    m = await new_match(api, ids)
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)
+    flat = {"needs_calibration": True, "calibration": None, "tracks": [], "chunks": 0}
+    await _finish(api, jobs.jobs[-1][2], {**flat, "panorama": {"width": 3600, "height": 1100}})
+    pts = [{"image": [100 * i, 50 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
+    body = {"points": pts, "space": "panorama", "frame_ms": 0}
+    assert (
+        await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json=body)
+    ).status_code == 202
+    court = {
+        "homography": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+        "image_size": [3600, 1100],
+        "confidence": 1.0,
+        "reprojection_px": 0.5,
+        "source": "user_correction",
+    }
+    await _finish(api, jobs.jobs[-1][2], {"calibration": court, "tracks": _tracks()})
+    stored = await owner_conn.fetchval(
+        "SELECT points::text FROM calibrations WHERE video_asset_id = $1::uuid", vid
+    )
+    assert stored is not None and '"court": [10.0, 5.0]' in stored
+    track = f"/v1/orgs/{org}/videos/{vid}/tracks/1/identity"
+    assert (await api.put(track, json={"player_id": mia["player_id"]})).status_code == 200
+
+    assert (await api.post(f"/v1/orgs/{org}/videos/{vid}/reprocess")).status_code in (200, 202)
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)
+    _, func, job, payload = jobs.jobs[-1]
+    assert func == "handball_gpu_worker.analysis.run_analysis"
+    assert [p["court"] for p in payload["calibration_points"]] == [p["court"] for p in pts]
+    assert (payload["calibration_space"], payload["calibration_frame_ms"]) == ("panorama", 0)
+    await _finish(api, job, {"calibration": court, "tracks": _tracks()})
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert a["needs_calibration"] is False and a["calibration"]["source"] == "user_correction"
+    one = next(t for t in a["tracks"] if t["track_no"] == 1)
+    assert (one["player_id"], one["identity_source"]) == (mia["player_id"], "user_correction")
+
+
 async def test_opponent_players_number_first(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)
