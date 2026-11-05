@@ -13,7 +13,7 @@ Needs Python 3.10+, ffmpeg/ffprobe on PATH and the Kaggle CLI (`pip install kagg
 ~/.kaggle/kaggle.json or %USERPROFILE%\\.kaggle\\kaggle.json).
 
 usage: python ml/data/local_ingest.py VIDEO_DIR WORKDIR --user KAGGLE_USERNAME
-       [--batch 20] [--pieces 5] [--seconds 180] [--max-games N] [--dry-run]
+       [--batch 20] [--pieces 5] [--seconds 180] [--max-games N] [--jobs 5] [--dry-run]
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -102,6 +103,7 @@ def main() -> None:
     ap.add_argument("--pieces", type=int, default=5)
     ap.add_argument("--seconds", type=float, default=180)
     ap.add_argument("--max-games", type=int, default=0)
+    ap.add_argument("--jobs", type=int, default=1, help="segments of a game cut in parallel")
     ap.add_argument("--dry-run", action="store_true", help="cut, but do not upload or delete")
     a = ap.parse_args()
     work = a.workdir
@@ -131,11 +133,12 @@ def main() -> None:
                 seg = batch / f"{name}_s0.mp4"
                 cut(src, seg, 0.0, meta["duration_s"])
                 pieces.append({"file": seg.name, "start_s": 0.0, "piece": True})
-            for k, f in enumerate(FRACTIONS[: a.pieces] if not pieces else ()):
-                start = max(0.0, meta["duration_s"] * f)
-                seg = batch / f"{name}_s{k}.mp4"
-                cut(src, seg, start, a.seconds)
-                pieces.append({"file": seg.name, "start_s": round(start, 2)})
+            jobs = [(batch / f"{name}_s{k}.mp4", max(0.0, meta["duration_s"] * f))
+                    for k, f in enumerate(FRACTIONS[: a.pieces] if not pieces else ())]
+            # one ffmpeg uses only a few cores; cut the segments of a game side by side
+            with ThreadPoolExecutor(max_workers=max(1, a.jobs)) as pool:
+                list(pool.map(lambda j: cut(src, j[0], j[1], a.seconds), jobs))
+            pieces += [{"file": seg.name, "start_s": round(start, 2)} for seg, start in jobs]
             state["games"][name] = {**meta, "batch": batch.name, "segments": pieces,
                                     "source": "local"}
             print(f"[{done + 1}/{len(todo)}] {name}: {meta['duration_s'] / 60:.0f} min, "
