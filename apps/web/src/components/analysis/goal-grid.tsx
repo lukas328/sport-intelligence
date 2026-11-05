@@ -32,13 +32,13 @@ export function GoalGrid({
   return (
     <div className="space-y-2">
       {mode === "stats" && (
-        <div className="flex gap-1 text-xs" role="group" aria-label={t("goal")}>
+        <div className="flex gap-3 text-xs" role="group" aria-label={t("goal")}>
           {[false, true].map((k) => (
             <button
               key={String(k)}
               aria-pressed={keeper === k}
               onClick={() => setKeeper(k)}
-              className={cn("rounded-md px-2 py-1", keeper === k ? "bg-foreground text-background" : "bg-surface hover:bg-border")}
+              className={cn("min-h-7 border-b-2 font-semibold", keeper === k ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
             >
               {k ? t("keeperView") : t("shooterView")}
             </button>
@@ -63,19 +63,20 @@ export function GoalGrid({
               aria-pressed={mode === "pick" ? selected === zone : undefined}
               aria-label={`${zone}${d ? `: ${d.goals}/${d.shots}` : ""}`}
               className={cn(
-                "flex flex-col items-center justify-center bg-raised text-xs transition-colors hover:brightness-95",
+                "relative flex flex-col items-center justify-center overflow-hidden bg-raised text-xs transition-colors hover:brightness-95",
                 mode === "pick" && selected === zone && "bg-accent text-accent-contrast",
                 d && d.shots > 0 && mode === "stats" && "font-semibold",
               )}
-              style={mode === "stats" && pct != null ? { background: `color-mix(in srgb, var(--foreground) ${Math.round(Math.min(70, pct * 0.7))}%, var(--raised))`, color: pct > 55 ? "var(--background)" : undefined } : undefined}
             >
+              {/* the rate as a fill from the bottom; the figures stay ink on a light cell */}
+              {mode === "stats" && pct != null && <span aria-hidden className="absolute inset-x-0 bottom-0 bg-foreground/15" style={{ height: `${pct}%` }} />}
               {mode === "stats" ? (
                 d ? (
                   <>
-                    <span className="text-sm font-bold tabular-nums font-wide">
+                    <span className="relative text-sm font-bold tabular-nums font-wide">
                       {d.goals}/{d.shots}
                     </span>
-                    {pct != null && <span className="opacity-70">{pct} %</span>}
+                    {pct != null && <span className="relative">{pct} %</span>}
                   </>
                 ) : (
                   <span className="opacity-40">0</span>

@@ -27,6 +27,10 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
     (k.number != null ? t("number", { number: k.number }) : t("unknown"));
   // one match sheet: a row per goalkeeper, then where they were beaten, side by side
   const teamOf = (k: KeeperRow) => (k.side === "own" ? teamName : oppName(match));
+  // the one mark of the tab: where the first (own) keeper saved least, from at least five shots
+  const weakZone = Object.entries(rows[0]?.shot_zones ?? {})
+    .filter(([, v]) => v.faced >= 5)
+    .sort((a, b) => a[1].saves / a[1].faced - b[1].saves / b[1].faced)[0]?.[0];
   return (
     <div className="space-y-10">
       <Sheet className="space-y-3">
@@ -77,7 +81,9 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
                   .sort((a, b) => b[1].faced - a[1].faced)
                   .map(([z, v]) => (
                     <li key={z} className="flex items-center gap-3 border-b border-border/70 py-1.5">
-                      <span className="w-40 truncate">{tz.has(z as "penalty") ? tz(z as "penalty") : z}</span>
+                      <span className={cn("w-40 truncate", k === rows[0] && z === weakZone && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>
+                        {tz.has(z as "penalty") ? tz(z as "penalty") : z}
+                      </span>
                       <span aria-hidden className="h-1.5 flex-1 bg-foreground/10">
                         <span className="block h-full bg-foreground" style={{ width: `${v.faced ? (v.saves / v.faced) * 100 : 0}%` }} />
                       </span>

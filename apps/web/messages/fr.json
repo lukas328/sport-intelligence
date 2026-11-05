@@ -693,7 +693,14 @@
     "basis_scoreboard_ocr": "{n} du tableau d'affichage",
     "basis_paper_report": "{n} du rapport papier",
     "basis_goal_candidate": "{n} des buts possibles vérifiés",
-    "basis_official_feed": "{n} du déroulement du match"
+    "basis_official_feed": "{n} du déroulement du match",
+    "decidedOwn": "La différence : {list}.",
+    "decidedOpp": "L'adversaire était meilleur : {list}.",
+    "and": "et",
+    "edge_saves": "les arrêts ({a} contre {b})",
+    "edge_shooting": "la réussite au tir ({a} contre {b})",
+    "edge_turnovers": "moins de pertes de balle ({a} contre {b})",
+    "edge_fastBreaks": "les contre-attaques ({a} contre {b} buts)"
   },
   "shotsView": {
     "title": "Tirs",

@@ -693,7 +693,14 @@
     "basis_scoreboard_ocr": "{n} von der Anzeigetafel",
     "basis_paper_report": "{n} aus dem Papierbericht",
     "basis_goal_candidate": "{n} aus geprüften Torkandidaten",
-    "basis_official_feed": "{n} aus dem Spielverlauf"
+    "basis_official_feed": "{n} aus dem Spielverlauf",
+    "decidedOwn": "Den Unterschied machten {list}.",
+    "decidedOpp": "Der Gegner war besser: {list}.",
+    "and": "und",
+    "edge_saves": "die Paraden ({a} zu {b})",
+    "edge_shooting": "die Wurfquote ({a} zu {b})",
+    "edge_turnovers": "weniger Ballverluste ({a} zu {b})",
+    "edge_fastBreaks": "die Gegenstösse ({a} zu {b} Tore)"
   },
   "shotsView": {
     "title": "Würfe",

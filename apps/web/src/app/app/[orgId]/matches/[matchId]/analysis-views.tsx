@@ -11,6 +11,7 @@ import { GoalGrid } from "@/components/analysis/goal-grid";
 import { InsightsCard } from "@/components/analysis/insights";
 import { Sheet, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
+import { decided } from "@/lib/match-decided";
 import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
 
@@ -164,6 +165,15 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
     { label: t("xg"), own: attempts ? stats.own.xg.toFixed(1) : "-", opp: attempts ? stats.opponent.xg.toFixed(1) : "-" },
   ];
   const run = stats.timeline.best_run.own;
+  const result =
+    match.score_own == null || match.score_opponent == null ? null : match.score_own > match.score_opponent ? "won" : match.score_own < match.score_opponent ? "lost" : "draw";
+  const decision = result ? decided(stats.own, stats.opponent, result) : null;
+  const edgeFigures = {
+    saves: { a: pct(stats.own.save_pct), b: pct(stats.opponent.save_pct) },
+    shooting: { a: pct(stats.own.shooting_pct), b: pct(stats.opponent.shooting_pct) },
+    turnovers: { a: stats.own.turnovers, b: stats.opponent.turnovers },
+    fastBreaks: { a: stats.own.fast_break_goals, b: stats.opponent.fast_break_goals },
+  };
   // where the figures come from, and where they disagree with the result: said, not hidden
   const sources = Object.entries(stats.quality.sources)
     .filter(([, n]) => n > 0)
@@ -194,7 +204,16 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           </p>
         )}
       </div>
+      {decision && (
+        // the one statement of the tab: what decided the match, from the head-to-head figures
+        <p className="max-w-3xl font-display text-2xl leading-tight sm:text-3xl" data-testid="decided">
+          {t(decision.side === "own" ? "decidedOwn" : "decidedOpp", {
+            list: decision.edges.map((e) => t(`edge_${e}`, edgeFigures[e])).join(` ${t("and")} `),
+          })}
+        </p>
+      )}
       <InsightsCard
+        noSignal={decision != null}
         orgId={orgId}
         matchId={match.id}
         names={names}
@@ -383,6 +402,8 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
   const table = (rows: PlayerRow[], caption: string) => {
     // like a printed match sheet: columns that are zero for everyone are left out
     const used = cols.filter((c) => rows.some((p) => Number(p[c.key] ?? 0) > 0));
+    // the one mark of the sheet: who lost the ball most often (own team, at least three)
+    const mostTurnovers = rows === own ? [...rows].sort((a, b) => b.turnovers - a.turnovers).find((p) => p.turnovers >= 3) : undefined;
     return (
     <div className="overflow-x-auto border-t-2 border-foreground">
       <table className="w-full text-sm" data-testid="report-table">
@@ -399,12 +420,18 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
         <tbody>
           {rows.map((p) => (
             <tr key={`${p.player_id}-${p.number}`} className="border-t border-border/70">
-              <th scope="row" className="px-3 py-1.5 text-left font-medium">
+              <th scope="row" className="px-3 py-1.5 text-left font-medium whitespace-nowrap">
                 {p.number != null && <span className="mr-2 inline-block w-5 text-right font-score text-accent tabular-nums">{p.number}</span>}
                 {nameOf(p)}
               </th>
               {used.map((c) => (
-                <td key={c.key} className="px-2 py-1.5 text-right font-score text-base tabular-nums">
+                <td
+                  key={c.key}
+                  className={cn(
+                    "px-2 py-1.5 text-right font-score text-base tabular-nums",
+                    c.key === "turnovers" && p === mostTurnovers && "underline decoration-resin decoration-[5px] underline-offset-[5px]",
+                  )}
+                >
                   <N
                     value={p[c.key] as number}
                     label={`${c.label} ${nameOf(p)}`}
@@ -463,6 +490,10 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
   const list = useMemo(() => (shots.data ?? []).filter((e) => !outcome || e.outcome === outcome), [shots.data, outcome]);
   const placed = list.filter((e) => e.x != null && e.y != null);
   const team = side === "own" ? stats.own : stats.opponent;
+  // the one mark of the tab: the zone with the lowest rate from at least five shots
+  const weakest = Object.entries(team.zones)
+    .filter(([, v]) => v.shots >= 5)
+    .sort((a, b) => a[1].goals / a[1].shots - b[1].goals / b[1].shots)[0]?.[0];
   return (
     <div className="space-y-10">
       <div className="flex flex-wrap gap-3">
@@ -510,10 +541,13 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
         {Object.keys(team.zones).length === 0 ? (
           <EmptyState title={t("noPosition", { count: list.length })} />
         ) : (
-          <ul className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-x-10 text-sm sm:grid-cols-2">
             {Object.entries(team.zones).sort((a, b) => b[1].shots - a[1].shots).map(([z, v]) => (
-              <li key={z} className="flex justify-between rounded bg-surface px-3 py-2">
-                <span>{ZONE_LABELS[z] ?? z}</span>
+              <li key={z} className="flex items-center gap-3 border-b border-border/70 py-1.5">
+                <span className={cn("w-40 truncate", z === weakest && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{ZONE_LABELS[z] ?? z}</span>
+                <span aria-hidden className="h-1.5 flex-1 bg-foreground/10">
+                  <span className="block h-full bg-foreground" style={{ width: `${v.shots ? (v.goals / v.shots) * 100 : 0}%` }} />
+                </span>
                 <N value={`${v.goals}/${v.shots}`} label={`${ZONE_LABELS[z] ?? z}`} onClick={() => open(ZONE_LABELS[z] ?? z, { side, type: "shot", zone: z })} />
               </li>
             ))}

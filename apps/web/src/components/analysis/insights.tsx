@@ -56,6 +56,7 @@ export function InsightsCard({
   staff,
   onEvidence,
   won = false,
+  noSignal = false,
 }: {
   orgId: string;
   matchId: string;
@@ -64,6 +65,8 @@ export function InsightsCard({
   onEvidence: (title: string, filter: EventFilter) => void;
   /** a win opens with what worked */
   won?: boolean;
+  /** the screen's signal sits elsewhere (e.g. on what decided the match) */
+  noSignal?: boolean;
 }) {
   const t = useTranslations("insights");
   const [all, setAll] = useState(false);
@@ -90,7 +93,7 @@ export function InsightsCard({
   const ordered = [...data.insights].sort((a, b) => rank(a.kind) - rank(b.kind));
   const shown = all ? ordered : ordered.slice(0, 3);
   // one signal per screen: only the first weakness carries it
-  const firstWeak = shown.findIndex((i) => i.kind === "weakness");
+  const firstWeak = noSignal ? -1 : shown.findIndex((i) => i.kind === "weakness");
 
   return (
     <Sheet className="space-y-3" data-testid="insights">
@@ -125,7 +128,7 @@ export function InsightsCard({
         </ul>
       )}
       {ordered.length > shown.length && (
-        <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setAll(true)}>
+        <button type="button" className="block text-sm font-medium text-accent hover:underline" onClick={() => setAll(true)}>
           {t("showAll", { n: ordered.length })}
         </button>
       )}

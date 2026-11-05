@@ -693,7 +693,14 @@
     "basis_scoreboard_ocr": "{n} from the scoreboard",
     "basis_paper_report": "{n} from the paper report",
     "basis_goal_candidate": "{n} from checked goal candidates",
-    "basis_official_feed": "{n} from the play-by-play"
+    "basis_official_feed": "{n} from the play-by-play",
+    "decidedOwn": "The difference was {list}.",
+    "decidedOpp": "The opponent was better: {list}.",
+    "and": "and",
+    "edge_saves": "the saves ({a} to {b})",
+    "edge_shooting": "the shooting ({a} to {b})",
+    "edge_turnovers": "fewer turnovers ({a} to {b})",
+    "edge_fastBreaks": "the fast breaks ({a} to {b} goals)"
   },
   "shotsView": {
     "title": "Shots",
