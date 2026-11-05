@@ -1,15 +1,15 @@
 {
- "generated": "2026-11-05T13:16:12",
+ "generated": "2026-11-05T14:16:25",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
   "swiss": 179,
   "swiss_matched": 140,
   "with_log": 63,
-  "in_ingest": 38,
-  "local": 20,
-  "local_matched": 14,
-  "local_with_log": 3
+  "in_ingest": 61,
+  "local": 40,
+  "local_matched": 28,
+  "local_with_log": 6
  },
  "games": [
   {
@@ -609,7 +609,16 @@
    "log_goals": 48,
    "players": 38,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7626.114,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b04",
+    "source": "ingest"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
@@ -667,7 +676,16 @@
    "log_goals": 46,
    "players": 37,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7365.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b04",
+    "source": "ingest"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
@@ -734,7 +752,16 @@
    "log_goals": 57,
    "players": 39,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7248.514,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b04",
+    "source": "ingest"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
@@ -3082,10 +3109,19 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no game of these teams in the date window",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 4954.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Nati_Schweiz_Rumaenien_2017-01-07",
@@ -3883,7 +3919,7 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "ambiguous: 3 candidate games",
    "candidates": [
@@ -3912,7 +3948,16 @@
      "score": 1.0
     }
    ],
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 6348.734,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020",
@@ -3925,10 +3970,19 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no game of these teams in the date window",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 5764.84,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL1_GCAmicitia_Kreuzlingen_ca2020",
@@ -3941,7 +3995,7 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "ambiguous: 4 candidate games",
    "candidates": [
@@ -3978,7 +4032,16 @@
      "score": 1.0
     }
    ],
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 5970.414,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL1_GCAmicitia_TVUster_ca2020",
@@ -3991,7 +4054,7 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "ambiguous: 2 candidate games",
    "candidates": [
@@ -4012,7 +4075,16 @@
      "score": 0.67
     }
    ],
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 5399.214,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL1_GCAmicitia_HSGLeimental_ca2020",
@@ -4025,7 +4097,7 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": 384419,
    "match": "search",
    "match_score": 1.0,
@@ -4041,7 +4113,16 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_Frauen_SPL1_GCAmicitia_HSGLeimental_ca2020.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 7082.44,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_Final4_GCAmicitia_Yellow_ca2020",
@@ -4054,7 +4135,7 @@
    ],
    "date": "ca2020",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "ambiguous: 5 candidate games",
    "candidates": [
@@ -4099,7 +4180,16 @@
      "score": 1.0
     }
    ],
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 6287.054,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_GCAmicitia_Bruehl2_2017-05-13",
@@ -4585,7 +4675,7 @@
    ],
    "date": "2024-10-16",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 488311,
    "match": "search",
    "match_score": 1.0,
@@ -4601,7 +4691,16 @@
    "log_goals": 61,
    "players": 36,
    "file": "ml/data/official/CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6230.966667,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_SPL2_HSGLeimental_AargauOst_2024-11-02",
@@ -5266,9 +5365,9 @@
    ],
    "date": "2024-11-02",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 481710,
-   "match": "search",
+   "match": "description link",
    "match_score": 1.0,
    "official": {
     "home": "ATV/KV Basel",
@@ -5282,7 +5381,16 @@
    "log_goals": 56,
    "players": 33,
    "file": "ml/data/official/CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5425.0,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_1Liga_vs_STVWillisau_2019-02-23",
@@ -5294,7 +5402,7 @@
    ],
    "date": "2019-02-23",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 383342,
    "match": "search",
    "match_score": 0.85,
@@ -5310,7 +5418,16 @@
    "log_goals": 0,
    "players": 20,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_STVWillisau_2019-02-23.json",
-   "video": null
+   "video": {
+    "width": 854,
+    "height": 480,
+    "fps": 25.0,
+    "duration_s": 4175.994,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_1Liga_vs_KoenizCats_2019-02-08",
@@ -5322,7 +5439,7 @@
    ],
    "date": "2019-02-08",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 383340,
    "match": "search",
    "match_score": 0.85,
@@ -5338,7 +5455,16 @@
    "log_goals": 0,
    "players": 24,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_KoenizCats_2019-02-08.json",
-   "video": null
+   "video": {
+    "width": 854,
+    "height": 480,
+    "fps": 25.0,
+    "duration_s": 3995.634,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_1Liga_vs_RWThun2_2019-01-20",
@@ -5350,7 +5476,7 @@
    ],
    "date": "2019-01-20",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 383333,
    "match": "search",
    "match_score": 0.61,
@@ -5366,7 +5492,16 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_RWThun2_2019-01-20.json",
-   "video": null
+   "video": {
+    "width": 854,
+    "height": 480,
+    "fps": 25.0,
+    "duration_s": 4067.654,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_1Liga_vs_Herzogenbuchsee2_2019-01-27",
@@ -5378,7 +5513,7 @@
    ],
    "date": "2019-01-27",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 383335,
    "match": "search",
    "match_score": 0.85,
@@ -5394,7 +5529,16 @@
    "log_goals": 0,
    "players": 26,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_Herzogenbuchsee2_2019-01-27.json",
-   "video": null
+   "video": {
+    "width": 854,
+    "height": 480,
+    "fps": 25.0,
+    "duration_s": 3810.274,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_1Liga_vs_TVZofingen_2017-11-04",
@@ -5406,7 +5550,7 @@
    ],
    "date": "2017-11-04",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 345423,
    "match": "search",
    "match_score": 0.85,
@@ -5422,7 +5566,16 @@
    "log_goals": 0,
    "players": 26,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_TVZofingen_2017-11-04.json",
-   "video": null
+   "video": {
+    "width": 854,
+    "height": 480,
+    "fps": 25.0,
+    "duration_s": 4320.154,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_SGPilatus_Staefa_ca2024",
@@ -5616,7 +5769,7 @@
    ],
    "date": "2021-05-08",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 429244,
    "match": "search",
    "match_score": 1.0,
@@ -5632,7 +5785,16 @@
    "log_goals": 0,
    "players": 29,
    "file": "ml/data/official/CH_Frauen_Cupfinal_LKZug_SpOno_2021-05-08.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 50.0,
+    "duration_s": 7267.054,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_Cup_SpOno_LKZug_2022-05-07",
@@ -5645,7 +5807,7 @@
    ],
    "date": "2022-05-07",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 440453,
    "match": "search",
    "match_score": 1.0,
@@ -5661,7 +5823,16 @@
    "log_goals": 0,
    "players": 32,
    "file": "ml/data/official/CH_Frauen_Cup_SpOno_LKZug_2022-05-07.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 50.0,
+    "duration_s": 9002.274,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_Cup_Bruehl_SpOno_2023-05-06",
@@ -5674,7 +5845,7 @@
    ],
    "date": "2023-05-06",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 452043,
    "match": "search",
    "match_score": 1.0,
@@ -5690,7 +5861,16 @@
    "log_goals": 0,
    "players": 32,
    "file": "ml/data/official/CH_Frauen_Cup_Bruehl_SpOno_2023-05-06.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 50.0,
+    "duration_s": 7665.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
@@ -5703,7 +5883,7 @@
    ],
    "date": "2024-04-27",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 469477,
    "match": "search",
    "match_score": 1.0,
@@ -5719,7 +5899,16 @@
    "log_goals": 67,
    "players": 40,
    "file": "ml/data/official/CH_Frauen_Cup_Bruehl_LKZug_2024-04-27.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 50.0,
+    "duration_s": 7695.0,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_Cupfinal_Bruehl_Yellow_2016-05-08",
@@ -5732,7 +5921,7 @@
    ],
    "date": "2016-05-08",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 317415,
    "match": "search",
    "match_score": 0.95,
@@ -5748,7 +5937,16 @@
    "log_goals": 0,
    "players": 28,
    "file": "ml/data/official/CH_Frauen_Cupfinal_Bruehl_Yellow_2016-05-08.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 24.927,
+    "duration_s": 6131.254,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Frauen_Cupfinal_LKZug_RotweissThun_2015-05-10",
@@ -5761,7 +5959,7 @@
    ],
    "date": "2015-05-10",
    "date_kind": "exact",
-   "info_json": false,
+   "info_json": true,
    "game_id": 295250,
    "match": "search",
    "match_score": 0.95,
@@ -5777,7 +5975,16 @@
    "log_goals": 0,
    "players": 28,
    "file": "ml/data/official/CH_Frauen_Cupfinal_LKZug_RotweissThun_2015-05-10.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 6825.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l02",
+    "source": "local"
+   }
   },
   {
    "name": "CH_Nati_Frauen_Schweiz_Norwegen_2017-10-01",
