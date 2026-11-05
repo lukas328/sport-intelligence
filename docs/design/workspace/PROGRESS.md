@@ -83,6 +83,27 @@ scorers, about 60 hand-tagged shots, saves, turnovers and suspensions), not comm
 Still open in the analysis: goal cells and the keeper table do not open scenes yet; a one-line
 reading above shots and keepers ("Mia Meier hielt oben links 3 von 4").
 
+## Slice 3: Szenen tab and feedback
+
+Test data: scenes inside the short clip, consents for the squad except two players, one coach note.
+
+- S1 (s0 was cards inside cards with a comment form under each of 25 scenes): per-player blocks on
+  rules, one line per scene with the match clock, notes on request, saved notes in handwriting;
+  hairlines 1.5 to 4. Not ready: no video on the page, no signal, no progress.
+- S2: "Feedback" became a tool of the video workspace (scenes beside the docked player); a queue
+  line ("Notizen 1 von 25 · weiter mit ...") with the signal on the next player; squad order;
+  scrubber marks in one ink; reels first on the tab. Review: feedback tool ready (anchor 4,
+  signal 4, speed 3); the scenes tab still cold (anchor 2, signal 1).
+- S3 (last round): the tab opens with the feedback state, the next player with the signal, a
+  "Weiter mit ..." button into the tool and the latest real coach note in handwriting; reels not
+  ready yet show their frame in the real format; positive and to-learn as words, not fill and
+  ring (those mean proposed and confirmed in the workspace); "Notiz" visible on every row.
+
+Backend findings (analysis session): feed generation crashes on events outside the video (a clip
+from mid-half has negative or too large video times; such events should be skipped); the API
+queues `handball_worker.export.run_highlight_reel`, which lives in `handball_worker.reels`, so
+reels never render (the test patches the same wrong path).
+
 ## Open
 
 - Data/API (for the analysis session): an insight files the goalkeeper with a 44 % save rate as a

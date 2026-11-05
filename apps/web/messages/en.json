@@ -1466,7 +1466,9 @@
     "notesOf": "{n}/{m} notes",
     "selfShort": "self",
     "feedbackLink": "Give feedback",
-    "feedbackHere": "You give notes on the players' scenes in the Video tab, next to the player."
+    "feedbackHere": "You write notes on the scenes in the video, next to the player.",
+    "feedbackTitle": "Feedback",
+    "continueWith": "Continue with {name}"
   },
   "scouting": {
     "title": "Preparation report",
@@ -1625,8 +1627,8 @@
     "scenes": "{n, plural, one {# scene} other {# scenes}}",
     "excluded": "{n, plural, one {# player without consent left out} other {# players without consent left out}}",
     "download": "Download",
-    "status_queued": "Being prepared...",
-    "status_rendering": "Rendering...",
+    "status_queued": "Being prepared…",
+    "status_rendering": "Rendering…",
     "status_failed": "Creation failed.",
     "status_blocked_consent": "Not possible because consents are missing.",
     "newReel": "Create a new reel"

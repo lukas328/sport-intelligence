@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, Card, EmptyState } from "@/components/ui/card";
 import { Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { cn } from "@/lib/utils";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 
 /** Automatic highlights (addendum 01, 4.3): team reels and player reels, 16:9 and 9:16. */
@@ -108,7 +109,15 @@ export function HighlightsView({
                 </div>
               </>
             ) : (
-              <p className="text-sm text-muted">{t(`status_${r.status}` as "status_queued")}</p>
+              // the reel's frame in its real format, so the coach sees what is coming and where
+              <div
+                className={cn(
+                  "grid place-items-center bg-surface text-sm text-muted",
+                  r.format === "9x16" ? "mx-auto aspect-[9/16] max-h-72" : "aspect-video w-full",
+                )}
+              >
+                {t(`status_${r.status}` as "status_queued")}
+              </div>
             )}
           </div>
         ))}

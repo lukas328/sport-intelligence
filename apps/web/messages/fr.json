@@ -1466,7 +1466,9 @@
     "notesOf": "{n}/{m} notes",
     "selfShort": "auto",
     "feedbackLink": "Donner un retour",
-    "feedbackHere": "Les notes sur les scènes des joueurs se donnent dans l'onglet Vidéo, à côté du lecteur."
+    "feedbackHere": "Les notes sur les scènes se donnent dans la vidéo, à côté du lecteur.",
+    "feedbackTitle": "Retours",
+    "continueWith": "Continuer avec {name}"
   },
   "scouting": {
     "title": "Rapport de préparation",
@@ -1625,8 +1627,8 @@
     "scenes": "{n, plural, one {# scène} other {# scènes}}",
     "excluded": "{n, plural, one {# joueur·euse sans consentement exclu·e} other {# joueur·euse·s sans consentement exclu·e·s}}",
     "download": "Télécharger",
-    "status_queued": "En préparation...",
-    "status_rendering": "Rendu en cours...",
+    "status_queued": "En préparation…",
+    "status_rendering": "Rendu en cours…",
     "status_failed": "La création a échoué.",
     "status_blocked_consent": "Impossible faute de consentements.",
     "newReel": "Créer un nouveau reel"

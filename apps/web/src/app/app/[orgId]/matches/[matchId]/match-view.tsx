@@ -35,7 +35,7 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
-import { TeamFeedView } from "./feed-views";
+import { FeedbackSummary, TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
 import { VideoOverview } from "./video-overview";
@@ -485,17 +485,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       {view === "scenes" && (
         <div className="animate-fade space-y-8">
           {/* the coach's job here first: feedback per player; then the reels to share */}
-          <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />
           {staff && main && (
             // feedback on the players' scenes happens beside the player in the video tab
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-foreground/15 pt-3 text-sm">
-              <span className="font-semibold">{t("feed.overview")}</span>
-              <span className="text-muted">{t("feed.feedbackHere")}</span>
-              <Button size="sm" variant="secondary" onClick={() => (setView("video"), setAskPane({ pane: "feedback" }))} data-testid="open-feedback">
-                {t("feed.feedbackLink")}
-              </Button>
-            </div>
+            <FeedbackSummary orgId={orgId} matchId={match.id} onOpen={() => (setView("video"), setAskPane({ pane: "feedback" }))} />
           )}
+          <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />
           {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
           {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
         </div>

@@ -79,13 +79,7 @@ export function TeamFeedView({
           )}
           <p className="text-sm text-muted">
             {players.length > 0 && `${t("summary", { players: players.length, waiting })} `}
-            {t("overviewIntro")}{" "}
-            <span className="whitespace-nowrap">
-              <span aria-hidden className="mr-1 inline-block size-2 rounded-full bg-foreground align-middle" />
-              {t("positive")}
-              <span aria-hidden className="mr-1 ml-3 inline-block size-2 rounded-full ring-[1.5px] ring-inset ring-foreground align-middle" />
-              {t("toLearn")}
-            </span>
+            {t("overviewIntro")}
           </p>
         </div>
         <Button variant="secondary" size="sm" loading={generate.isPending} onClick={() => generate.mutate()}>
@@ -172,14 +166,13 @@ function Scene({
           <span className="px-2 font-score tabular-nums">{time}</span>
         )}
         <span className="flex min-w-0 flex-1 items-center gap-2">
-          {/* filled: positive, ring: to learn from (not colour alone) */}
-          <span aria-hidden className={cn("size-2 shrink-0 rounded-full", positive ? "bg-foreground" : "ring-[1.5px] ring-inset ring-foreground")} />
           <span>{label}</span>
-          <span className="sr-only">{positive ? t("positive") : t("toLearn")}</span>
+          {/* a word, not a mark: fill and ring mean proposed and confirmed elsewhere in the workspace */}
+          <span className="text-xs text-muted">{positive ? t("positive") : t("toLearn")}</span>
           {seen && <span className="text-xs text-muted">{t("seen")}</span>}
         </span>
         {!editing && (
-          <Button variant="ghost" size="sm" className={cn(!note && "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100")} onClick={() => setEditing(true)}>
+          <Button variant="ghost" size="sm" className={cn(!note && "text-muted")} onClick={() => setEditing(true)}>
             {note ? t("editNote") : t("addNote")}
           </Button>
         )}
@@ -202,5 +195,48 @@ function Scene({
         </form>
       )}
     </li>
+  );
+}
+
+/** The scenes tab's line about the coach's feedback: how far, who is next, the latest real note. */
+export function FeedbackSummary({ orgId, matchId, onOpen }: { orgId: string; matchId: string; onOpen: () => void }) {
+  const t = useTranslations("feed");
+  const q = useQuery({
+    queryKey: ["team-feed", matchId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/feed", { params: { path: { org_id: orgId, match_id: matchId } } })).data ?? [],
+  });
+  const players = [...(q.data ?? [])].sort((a, b) => (a.number ?? 99) - (b.number ?? 99));
+  if (players.length === 0) return null;
+  const total = players.reduce((n, p) => n + p.items.length, 0);
+  const done = players.reduce((n, p) => n + p.items.filter((s) => s.coach_comment).length, 0);
+  const next = players.find((p) => p.items.length > 0 && !p.items.some((s) => s.coach_comment));
+  const last = players.flatMap((p) => p.items.filter((s) => s.coach_comment).map((s) => ({ p, s })))[0];
+  return (
+    <section className="space-y-2 border-t-2 border-foreground pt-3" aria-labelledby="feedback-summary" data-testid="feedback-summary">
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+        <h2 id="feedback-summary" className="font-display text-2xl">
+          {t("feedbackTitle")}
+        </h2>
+        <p className="font-score text-lg tabular-nums">
+          {t("progress", { done, total })}
+          {next && (
+            <>
+              {" · "}
+              {t("nextUp")} <span className="underline decoration-resin decoration-[5px] underline-offset-[5px]">{next.name}</span>
+            </>
+          )}
+        </p>
+        <Button size="sm" className="ml-auto" onClick={onOpen} data-testid="open-feedback">
+          {next ? t("continueWith", { name: next.name.split(" ")[0] ?? next.name }) : t("feedbackLink")}
+        </Button>
+      </div>
+      {last && (
+        <p className="flex flex-wrap items-baseline gap-x-3">
+          <span className="text-sm text-muted">{last.p.name}</span>
+          <span className="font-hand text-2xl leading-none">{last.s.coach_comment}</span>
+        </p>
+      )}
+      <p className="text-sm text-muted">{t("feedbackHere")}</p>
+    </section>
   );
 }

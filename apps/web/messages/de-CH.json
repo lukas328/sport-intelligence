@@ -1466,7 +1466,9 @@
     "notesOf": "{n}/{m} Notizen",
     "selfShort": "selbst",
     "feedbackLink": "Feedback geben",
-    "feedbackHere": "Szenen der Spieler mit Notizen gibst du im Video-Tab, neben dem Player."
+    "feedbackHere": "Notizen zu den Szenen gibst du im Video, neben dem Player.",
+    "feedbackTitle": "Feedback",
+    "continueWith": "Weiter mit {name}"
   },
   "scouting": {
     "title": "Vorbereitungsbericht",
@@ -1625,8 +1627,8 @@
     "scenes": "{n, plural, one {# Szene} other {# Szenen}}",
     "excluded": "{n, plural, one {# Spieler ohne Einwilligung ausgelassen} other {# Spieler ohne Einwilligung ausgelassen}}",
     "download": "Herunterladen",
-    "status_queued": "Wird vorbereitet...",
-    "status_rendering": "Wird gerendert...",
+    "status_queued": "Wird vorbereitet…",
+    "status_rendering": "Wird gerendert…",
     "status_failed": "Erstellen fehlgeschlagen.",
     "status_blocked_consent": "Wegen fehlender Einwilligungen nicht möglich.",
     "newReel": "Neues Reel erstellen"
