@@ -19,6 +19,7 @@ from handball_api.core.email import MemoryEmailSender
 from handball_api.core.ratelimit import MemoryRateLimiter
 
 from .conftest import Api
+from .test_official_report import recorded  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("clean_db")
 
@@ -480,3 +481,92 @@ async def test_unauthenticated_gets_401(
             continue
         r = await call(anon, w)
         assert r.status_code == 401, (name, r.status_code)
+
+
+@pytest.mark.usefixtures("recorded")
+async def test_analysis_review_endpoints(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender
+) -> None:
+    """The newer endpoints of the match workspace (official report, goal candidates, court,
+    track identities, referee kit) against every role: a player or parent cannot change them, a
+    coach of another club gets 404 for each of them."""
+    from handball_api.core.jobs import MemoryJobQueue
+
+    from .test_goal_candidates import FOUND
+    from .test_identity_sync import _finish, _ingest, _tracks
+    from .test_matches import upload
+    from .test_official_report import CH_URL
+
+    w, clients = await build_world(make_api, outbox)
+    admin = w.admin
+    m = f"/v1/orgs/{w.org}/matches/{w.match}"
+    r = await admin.post(f"{m}/official-report", json={"url": CH_URL})
+    assert r.status_code == 200, r.text
+    video = await upload(admin, {"org": w.org}, w.match, b"v" * 100)
+    jobs: MemoryJobQueue = admin.app.state.jobs
+    await _ingest(admin, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)
+    court = {
+        "homography": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+        "image_size": [1280, 720],
+        "confidence": 0.8,
+        "reprojection_px": 1.0,
+        "source": "heuristic",
+    }
+    await _finish(
+        admin,
+        jobs.jobs[-1][2],
+        {"calibration": court, "tracks": _tracks(), "goal_candidates": FOUND},
+    )
+    goal = next(g for g in (await admin.get(f"{m}/official-report/comparison")).json()["goals"])
+    cand = (await admin.get(f"{m}/goal-candidates")).json()["candidates"][0]
+    v = f"/v1/orgs/{w.org}/videos/{video['id']}"
+
+    checks: list[tuple[str, set[str], Call]] = [
+        ("GET comparison", READERS, lambda a, w: a.get(f"{m}/official-report/comparison")),
+        (
+            "PUT official review",
+            STAFF,
+            lambda a, w: a.put(
+                f"{m}/official-report/review", json={"event_id": goal["event_id"], "status": None}
+            ),
+        ),
+        (
+            "POST official report",
+            STAFF,
+            lambda a, w: a.post(f"{m}/official-report", json={"url": CH_URL}),
+        ),
+        ("GET goal candidates", READERS, lambda a, w: a.get(f"{m}/goal-candidates")),
+        (
+            "PUT candidate review",
+            STAFF,
+            lambda a, w: a.put(f"{m}/goal-candidates/{cand['id']}/review", json={"status": None}),
+        ),
+        ("GET analysis", READERS, lambda a, w: a.get(f"{v}/analysis")),
+        ("POST court confirm", MATCH_WRITE, lambda a, w: a.post(f"{v}/calibration/confirm")),
+        (
+            "PUT track identity",
+            STAFF,
+            lambda a, w: a.put(f"{v}/tracks/1/identity", json={"number": 7}),
+        ),
+        (
+            "PATCH referee kit",
+            MATCH_WRITE,
+            lambda a, w: a.patch(m, json={"kit_referee": "#111111"}),
+        ),
+    ]
+    failures: list[str] = []
+    for name, allowed, call in checks:
+        for role in ROLES:
+            r = await call(clients[role], w)
+            ok = 200 <= r.status_code < 300
+            if role in allowed and not ok:
+                failures.append(
+                    f"{name:22} {role:16} expected 2xx, got {r.status_code} {r.text[:100]}"
+                )
+            if role not in allowed:
+                expected = {404} if role == "outsider" else {403, 404}
+                if r.status_code not in expected:
+                    failures.append(
+                        f"{name:22} {role:16} expected {sorted(expected)}, got {r.status_code}"
+                    )
+    assert not failures, "\n" + "\n".join(failures)
