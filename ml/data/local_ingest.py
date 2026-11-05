@@ -47,6 +47,17 @@ def find_videos(root: Path) -> dict[str, Path]:
     return games
 
 
+def already_on_kaggle() -> dict[str, str]:
+    """Games whose segments are already in a Kaggle dataset (cloud ingest bNN), from catalog.json,
+    so a local run never uploads them a second time."""
+    cat = Path(__file__).resolve().parent / "catalog.json"
+    if not cat.exists():
+        return {}
+    games = json.loads(cat.read_text(encoding="utf-8")).get("games", [])
+    return {re.sub(r"\.f\d+$", "", g["name"]): g["video"]["kaggle_dataset"]
+            for g in games if (g.get("video") or {}).get("kaggle_dataset")}
+
+
 def upload(batch_dir: Path, user: str, slug: str) -> bool:
     meta = {"title": slug, "id": f"{user}/{slug}", "licenses": [{"name": "other"}]}
     (batch_dir / "dataset-metadata.json").write_text(json.dumps(meta))
@@ -98,8 +109,11 @@ def main() -> None:
     sp = work / "state.json"
     state: dict[str, Any] = json.loads(sp.read_text()) if sp.exists() else {"batch": 1, "games": {}}
     videos = find_videos(a.videos)
-    todo = [n for n in videos if n not in state["games"]]
-    print(f"{len(videos)} videos, {len(todo)} to do", flush=True)
+    on_kaggle = already_on_kaggle()
+    todo = [n for n in videos if n not in state["games"] and n not in on_kaggle]
+    skipped = sorted(n for n in videos if n in on_kaggle)
+    print(f"{len(videos)} videos, {len(skipped)} already on Kaggle (skipped), "
+          f"{len(todo)} to do", flush=True)
     done = 0
     for name in todo:
         if a.max_games and done >= a.max_games:
