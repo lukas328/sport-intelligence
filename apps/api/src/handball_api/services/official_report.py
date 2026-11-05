@@ -470,29 +470,10 @@ async def _pdf_text(pdf: bytes) -> str:
 
 async def fetch_dhb(match_id: int) -> str:
     """Text of a DHB press report (replaced by recorded text in tests)."""
-    url = DHB_PDF.format(match_id)
-    try:
-        async with (
-            httpx.AsyncClient(
-                timeout=TIMEOUT, headers=HEADERS, follow_redirects=True, max_redirects=3
-            ) as client,
-            client.stream("GET", url) as r,
-        ):
-            if r.status_code == 404:
-                raise ProblemError(404, "report-not-found", f"DHB has no press report {match_id}")
-            r.raise_for_status()
-            pdf = bytearray()
-            async for chunk in r.aiter_bytes():
-                pdf += chunk
-                if len(pdf) > MAX_PDF_BYTES:
-                    raise ProblemError(422, "report-unreadable", "The PDF is too large")
-    except httpx.HTTPError as exc:
-        raise ProblemError(
-            502, "report-unavailable", "The DHB server did not answer, try again later"
-        ) from exc
+    pdf = await _download(DHB_PDF.format(match_id), MAX_PDF_BYTES, "DHB")
     if not pdf.startswith(b"%PDF"):
         raise ProblemError(422, "report-unreadable", "The DHB link did not return a PDF")
-    return await _pdf_text(bytes(pdf))
+    return await _pdf_text(pdf)
 
 
 # ---- nuLiga game report --------------------------------------------------------------------

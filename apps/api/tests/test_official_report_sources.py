@@ -261,7 +261,7 @@ def transport(monkeypatch: pytest.MonkeyPatch) -> list[httpx.Request]:
             )
         if url == pdf_url:
             return httpx.Response(200, content=b"%PDF-1.4 recorded")
-        if "meeting=666" in url:
+        if "meeting=666" in url or "/match/666/" in url:
             return httpx.Response(302, headers={"location": "https://evil.example/x.pdf"})
         if "meeting=404" in url:
             return httpx.Response(404)
@@ -296,6 +296,15 @@ async def test_download_follows_redirects_on_the_same_host_only(
     with pytest.raises(ProblemError) as err:  # HTML where the PDF should be
         await service.fetch_hla(1)
     assert (err.value.status, err.value.code) == (422, "report-unreadable")
+
+
+async def test_dhb_download_follows_redirects_on_the_same_host_only(
+    transport: list[httpx.Request],
+) -> None:
+    with pytest.raises(ProblemError) as err:
+        await service.fetch_dhb(666)
+    assert (err.value.status, err.value.code) == (502, "report-unavailable")
+    assert [r.url.host for r in transport] == ["dhbdata.fmp.sportradar.com"]
 
 
 # ---- import into a match ---------------------------------------------------------------------
