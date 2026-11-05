@@ -6,8 +6,8 @@ import glob, json, os, time
 import cv2, numpy as np, torch
 from transformers import Owlv2ForObjectDetection, Owlv2Processor
 
-T0 = time.time(); BUDGET = 8.3 * 3600
-OUT = "/kaggle/working"; os.makedirs(f"{OUT}/segs", exist_ok=True)
+T0 = time.time(); BUDGET = float(os.environ.get("OWL_BUDGET_H", "8.3")) * 3600
+IN = os.environ.get("OWL_INPUT", "/kaggle/input"); OUT = os.environ.get("OWL_OUT", "/kaggle/working"); os.makedirs(f"{OUT}/segs", exist_ok=True)
 QUERIES = ["a photo of a handball", "a ball", "a small ball in the air"]
 TILE = 480; XS = (0, 400, 800); YS = (0, 240)
 dev = "cuda"
@@ -52,7 +52,7 @@ def detect(frame_bgr, thr=0.04, max_side=60):
 
 
 # 1) bench frames (centre frame of each labelled triplet)
-ALL = glob.glob("/kaggle/input/**/*", recursive=True)
+ALL = glob.glob(f"{IN}/**/*", recursive=True)
 print(len(ALL), "input files", sorted({os.path.dirname(a) for a in ALL})[:40], flush=True)
 JPG = {os.path.basename(a)[:-4]: a for a in ALL if a.endswith(".jpg")}
 B = [a for a in ALL if a.endswith(".json") and os.path.basename(os.path.dirname(a)) == "labels"]
