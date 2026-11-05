@@ -194,9 +194,10 @@ export function MatchRow({ orgId, m, demoTag = true, signal = false }: { orgId: 
             {t(`matches.${result}`).charAt(0)}
           </span>
           <span className="w-[4.5rem] text-right font-score text-[1.75rem] leading-none tabular-nums sm:w-[5.25rem] sm:text-[2rem]">
-            <span className={result === "lost" ? "text-muted" : ""}>{m.score_own}</span>
+            {/* own score always in ink, the opponent's quiet: the square says who won */}
+            <span>{m.score_own}</span>
             <span className="px-0.5 text-muted">:</span>
-            <span className={result === "won" ? "text-muted" : ""}>{m.score_opponent}</span>
+            <span className="text-muted">{m.score_opponent}</span>
           </span>
           <span className="sr-only"> {t(`matches.${result}`)}</span>
         </span>

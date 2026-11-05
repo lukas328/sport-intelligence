@@ -110,7 +110,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
   "Paraden" for a field player.
 - [x] P2 Aufgaben and Termine empty states without a sentence on who sets them.
 - [x] P2 Einstellungen: the 2FA admin sentence shown to players.
-- [x] P3 Spielplan (wording done; score emphasis open): "Alles Demo-Spiele"; score emphasis on the winner instead of the own team.
+- [x] P3 Spielplan: "Alles Demo-Spiele"; score emphasis on the winner instead of the own team.
 - [ ] P3 Einwilligungen: guardian wording ("Du selbst") for an adult player.
 
 ## Later (features)
