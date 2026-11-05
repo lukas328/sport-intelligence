@@ -30,3 +30,5 @@ class JobSettings(BaseSettings):
     role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)
     role_every: int = 30
     hallboard_every_s: float = 1.0  # hall scoreboard reading when the video has no overlay
+    hallboard_full_every_s: float = 4.0  # whole-frame search for the board while it is not in view
+    hallboard_probe_every_s: float = 0.25  # template probes for a locked board out of view

@@ -483,7 +483,13 @@ def _run_learned(
             numbers = load_number_reader(settings)
             # no overlay: the hall's own scoreboard, when the camera shows it (raw recordings)
             board = (
-                HallBoardReader(numbers, fps, every_s=settings.hallboard_every_s)
+                HallBoardReader(
+                    numbers,
+                    fps,
+                    every_s=settings.hallboard_every_s,
+                    full_every_s=settings.hallboard_full_every_s,
+                    probe_every_s=settings.hallboard_probe_every_s,
+                )
                 if reader is None and numbers is not None and fps
                 else None
             )

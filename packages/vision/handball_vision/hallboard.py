@@ -24,12 +24,15 @@ and only a window around it is read, enlarged when the board's text is small (a 
 `probe_every_s`, so a pan across it is caught between two regular reads; the whole frame is read
 again at most every `full_every_s`.
 
-Goals (`goals_from_board`): per side the most likely score sequence that never goes down: each
-reading that disagrees costs one, each goal costs 1.5 (so a new value needs two more readings for it
-than against it), several goals at once cost more. With the official running score (`sequence`)
-the decoding follows that sequence instead, both sides at once. A goal is placed at the first
-reading of the new value; with a panning camera that is late by the time the board was out of view
-(`window_ms`), so the API moves it to the end of the scoring side's attack (as for the overlay).
+Goals (`goals_from_board`): per side the most likely score sequence that never goes down: a
+reading that disagrees costs as much as a misread is unlikely (about one in twenty), a goal as much
+as a goal is unlikely in the time since the reading before (Poisson, 30 goals a side in 60 minutes):
+a second apart a new value needs two readings, after a minute out of view one is enough, and the
+readings before and after decide how many goals fell in between. With the official running score
+(`sequence`) the decoding follows that sequence instead, both sides at once. A goal is placed at
+the first reading of the new value; with a panning camera that is late by the time the board was
+out of view (`window_ms`), so the API moves it to the end of the scoring side's attack (as for the
+overlay).
 """
 
 from __future__ import annotations
@@ -52,9 +55,11 @@ LETTER = re.compile(r"[A-Za-z]")
 
 Stacked = Literal["above", "below"]
 
-MISREAD_COST = 1.0
-GOAL_COST = 1.5
-EXTRA_GOAL_COST = 1.0  # each further goal between two readings
+# score decoding (`goals_from_board`), costs as -log odds
+MISREAD_COST = 3.0  # a reading that disagrees with the score (about one in twenty)
+GOAL_RATE_PER_S = 1 / 120  # goals of one side: about 30 in 60 minutes
+MIN_GOAL_COST = 0.2
+MAX_STEP = 6  # goals of one side (or of the official sequence) between two readings
 
 
 @dataclass(frozen=True)
@@ -146,7 +151,7 @@ def split_token(tk: Token) -> list[Token]:
         return [_sub(tk, 0, 2, 8, text[:2]), _sub(tk, 2, 6, 8, clock), _sub(tk, 6, 8, 8, text[6:])]
     m = MERGED.match(text)
     # one digit glued on behind the seconds may be the rest of a score cut off by the frame edge
-    if m is None or len(m.group(1)) <= 2 and len(m.group(2)) != 4:
+    if m is None or (len(m.group(1)) <= 2 and len(m.group(2)) != 4):
         return [tk]
     pre, post = m.group(1), m.group(2)
     n = len(text)
@@ -316,19 +321,24 @@ def stacked_vote(samples: Sequence[tuple[int, Sequence[Token]]]) -> Stacked | No
 # --- goals --------------------------------------------------------------------------------------
 
 
+def _goal_cost(n: int, dt_ms: int, rate_per_s: float) -> float:
+    """-log of the odds of n goals against none in dt (Poisson, `rate_per_s` goals a second),
+    at least MIN_GOAL_COST a goal."""
+    per_goal = max(MIN_GOAL_COST, -math.log(max(rate_per_s * dt_ms / 1000, 1e-9)))
+    return n * per_goal + math.lgamma(n + 1)
+
+
 def _decode(
     obs: Sequence[tuple[int, Sequence[int | None]]],
     states: Sequence[Sequence[int]],
+    rate_per_s: float,
 ) -> list[int]:
-    """Index into `states` (ordered, never going back) per observation that explains the readings
-    best: a reading that disagrees costs MISREAD_COST, each step forward GOAL_COST (plus
-    EXTRA_GOAL_COST per further step taken between two readings)."""
+    """Index into `states` (ordered, never going back, at most MAX_STEP steps between two
+    readings) per observation that explains the readings best: a reading that disagrees costs
+    MISREAD_COST, steps forward cost `_goal_cost` for the time since the reading before."""
     n, m = len(obs), len(states)
     if not n or not m:
         return []
-    inf = math.inf
-    cost = [0.0] * m
-    back: list[list[int]] = []
 
     def emit(values: Sequence[int | None], k: int) -> float:
         return sum(
@@ -336,25 +346,20 @@ def _decode(
         )
 
     cost = [emit(obs[0][1], k) for k in range(m)]
+    back: list[list[int]] = []
     for i in range(1, n):
+        dt = obs[i][0] - obs[i - 1][0]
+        steps = [_goal_cost(j, dt, rate_per_s) for j in range(MAX_STEP + 1)]
+        new = [0.0] * m
         best_prev = [0] * m
-        new = [inf] * m
-        # cheapest way to arrive at k: stay, or come from j < k
-        run_best, run_arg = inf, 0
         for k in range(m):
-            # candidates j < k: cost[j] + GOAL_COST + EXTRA_GOAL_COST * (k - j - 1)
-            # = (cost[j] - EXTRA * j) + GOAL - EXTRA + EXTRA * (k - 1) ... kept as a running min
-            if k > 0:
-                cand = cost[k - 1] - EXTRA_GOAL_COST * (k - 1)
-                if cand < run_best:
-                    run_best, run_arg = cand, k - 1
-            stay = cost[k]
-            move = run_best + GOAL_COST + EXTRA_GOAL_COST * (k - 1) if k > 0 else inf
-            if stay <= move:
-                new[k], best_prev[k] = stay, k
-            else:
-                new[k], best_prev[k] = move, run_arg
-            new[k] += emit(obs[i][1], k)
+            best, arg = cost[k], k
+            for j in range(1, min(MAX_STEP, k) + 1):
+                c = cost[k - j] + steps[j]
+                if c < best:
+                    best, arg = c, k - j
+            new[k] = best + emit(obs[i][1], k)
+            best_prev[k] = arg
         back.append(best_prev)
         cost = new
     k = min(range(m), key=lambda j: (cost[j], j))
@@ -410,7 +415,7 @@ def goals_from_board(
             states.insert(0, (0, 0))
         side_of = [0] + [0 if b[0] > a[0] else 1 for a, b in itertools.pairwise(states)]
         obs = [(r.t_ms, (r.home, r.away)) for r in rows]
-        path = _decode(obs, states)
+        path = _decode(obs, states, 2 * GOAL_RATE_PER_S)
         for t, side, v, window, k in _goal_events(obs, states, path, side_of):
             out.append(
                 {
@@ -432,7 +437,7 @@ def goals_from_board(
             continue
         # states: every value from the lowest to the highest reading (a goal may go unseen)
         side_states = [(v,) for v in range(values[0], values[-1] + 1)]
-        path = _decode(side_obs, side_states)
+        path = _decode(side_obs, side_states, GOAL_RATE_PER_S)
         decoded.append([(o[0], side_states[k][0]) for o, k in zip(side_obs, path, strict=True)])
         for t, _, v, window, _k in _goal_events(
             side_obs, side_states, path, [0] * len(side_states)

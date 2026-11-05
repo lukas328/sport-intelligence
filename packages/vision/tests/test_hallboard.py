@@ -59,7 +59,7 @@ def test_split_merged_fields() -> None:
     assert texts("32:101") == ["32:101"]  # one digit behind: maybe a cut score, the clock alone
     assert texts("18333013") == ["18", "33:30", "13"]  # the colon lost
     assert texts("18 3326 13") == ["18", "33:26", "13"]
-    assert texts("1833：3513") == ["18", "33:35", "13"]  # full-width colon
+    assert texts("1833" + chr(0xFF1A) + "3513") == ["18", "33:35", "13"]  # full-width colon
     assert texts("SGW22:25HSK") == ["SGW22:25HSK"]
     parts = hb.split_token(_tk("16 32:10 11", 100, w=110))
     assert parts[0].x2 <= parts[1].x1 + 1e-6 and parts[1].x2 <= parts[2].x1 + 1e-6
@@ -165,7 +165,9 @@ def _scene(x: int | None, y: int, w: int = 1280, h: int = 720) -> NDArray[np.uin
     if x is not None:
         cv2.rectangle(img, (x - 6, y - 6), (x + 166, y + 96), (185, 185, 185), -1)
         cv2.rectangle(img, (x, y), (x + 160, y + 90), (25, 25, 25), -1)
-        cv2.putText(img, "16 32:10 11", (x + 8, y + 32), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (240,) * 3, 2)
+        cv2.putText(
+            img, "16 32:10 11", (x + 8, y + 32), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (240,) * 3, 2
+        )
         cv2.circle(img, (x + 40, y + 65), 12, (60, 140, 60), -1)  # a logo
     return img
 
