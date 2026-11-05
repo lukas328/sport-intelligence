@@ -239,7 +239,10 @@ export function GoalCandidatesPanel({
         <div className="space-y-3 border-y border-foreground/15 py-3" data-testid="goal-candidate-focus">
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className={cn("font-display leading-none", focusMode ? "text-4xl" : "text-3xl")}>{t("question")}</span>
-            <span className="font-score text-lg tabular-nums">{game(deciding)}</span>
+            {/* phones: the timeline's signal ring is out of view, so the moment carries the mark */}
+            <span className="font-score text-lg tabular-nums max-lg:underline max-lg:decoration-resin max-lg:decoration-[5px] max-lg:underline-offset-[5px]">
+              {game(deciding)}
+            </span>
             <span className="text-sm text-muted">
               {deciding.suggested_side ? t("suggested", { team: team(deciding.suggested_side) ?? "" }) : t("noSuggestion")}
             </span>

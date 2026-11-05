@@ -889,7 +889,9 @@ function IdentityPanel({
   const own = [...ownTracks(tracks)].sort((a, b) => a.first_ms - b.first_ms);
   const open = own.filter((tr) => !tr.player_id);
   // the next open people first; the whole list on request
-  const shown = all ? own : [...open.slice(0, 8), ...own.filter((tr) => tr.player_id)].sort((a, b) => a.first_ms - b.first_ms);
+  // a few seconds on screen is rarely worth a name: those fold away with the rest
+  const long = open.filter((tr) => tr.last_ms - tr.first_ms >= 5000);
+  const shown = all ? own : [...long.slice(0, 8), ...own.filter((tr) => tr.player_id)].sort((a, b) => a.first_ms - b.first_ms);
   if (own.length === 0) return null;
   async function assign(trackNo: number, playerId: string) {
     const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {

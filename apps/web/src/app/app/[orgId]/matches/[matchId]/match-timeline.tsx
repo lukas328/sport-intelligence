@@ -80,7 +80,7 @@ export function MatchTimeline({
         {spans.map((s) => (
           <span key={s.from} className="absolute inset-y-0 bg-accent/8" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
         ))}
-        {sided && <span className="absolute inset-x-0 top-1/2 h-px bg-foreground/10" />}
+        {sided && <span className="absolute inset-x-0 top-1/2 h-px bg-foreground/25" />}
         {children}
         {now != null && seen(now) && <span className="absolute -inset-y-1 w-0.5 bg-foreground" style={{ left: x(now) }} />}
       </div>

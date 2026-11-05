@@ -18,7 +18,7 @@ type EventIn = Schemas["EventIn"];
 type Outcome = "goal" | "save" | "miss" | "post" | "blocked";
 const OUTCOMES: Outcome[] = ["goal", "save", "miss", "post", "blocked"];
 const TURNOVERS = ["bad_pass", "catch_error", "steps", "double_dribble", "offensive_foul", "line_violation", "passive_play", "other"] as const;
-const HOTKEYS: Record<string, Outcome | "turnover"> = { g: "goal", s: "save", m: "miss", p: "post", t: "turnover" };
+const HOTKEYS: Record<string, Outcome | "turnover"> = { g: "goal", s: "save", m: "miss", p: "post", b: "blocked", t: "turnover" };
 
 export function useRosterNames(orgId: string, teamId: string, seasonId: string) {
   return useQuery({

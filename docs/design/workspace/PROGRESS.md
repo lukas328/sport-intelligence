@@ -39,9 +39,35 @@ moves to the candidate on the axis when its step is open; recorded candidates fi
 lanes and a notes lane; people as play buttons with the read shirt number; no wrong "Hier setzen";
 the court step in one sentence with technical details folded; the mini court follows dark mode.
 
-Scores: see the round 2 review below once it is in.
+Scores: anchor 3, signal 4, hairlines 3, game language 4, team by side 3, numbers to video 3,
+review speed 4, proposed vs confirmed 4, type 4, edge states 3. Desktop passes the rubric's rule
+(no score below 3 on anchor, signal, review speed); phone did not (video and decision not on one
+screen, no timeline in view).
+
+## Round 3 (last review round of this slice)
+
+Changed: on phones the decision sits right under the sticky player and the stage keeps only the
+score; an events lane on the axis; recorded candidates as squares, confirmed goals as dots; R
+replays; the undo hint shows before the first decision; people anchored as "Person 9 · 60 s im
+Bild"; after the review the moment carries the signal stroke on phones, short tracks fold away,
+B tags a blocked shot, the axis centre line is stronger.
+
+Scores (desktop / phone): anchor 4 / 3, signal 4 / 2 (fixed after the review), hairlines 4 / 4,
+game language 4 / 4, team by side 2 / 2, numbers to video 3 / 3, review speed 4 / 4, proposed vs
+confirmed 4 / 3, type 4 / 4, edge states 3 / 3. Desktop ready; phone ready after the signal fix.
+The slice is closed after three rounds as the method says; the rest goes to the open list.
 
 ## Open
+
+- Team by side on the axis still reads weakly (2): a lane label per side ("H1" / opponent) would
+  make it explicit.
+- The player's control bar shows video time while the picture shows the match clock; on phones it
+  covers the lower half of the frame.
+- Event keys are English mnemonics (G, S, M, P, T); German letters would collide (T for Tor and
+  Ballverlust), so they stay until a coach asks.
+- Goal candidates counted as "schon erfasst" by the API can match a report goal just before the
+  clip starts (12:26 for a clip from 12:40): the matching window of the analysis, to raise with the
+  analysis session.
 
 - Analyse tab (next slice): possession, attacks, physical load, shots in the same language.
 - Phone: "Teilen" and "…" take their own row under the tabs.

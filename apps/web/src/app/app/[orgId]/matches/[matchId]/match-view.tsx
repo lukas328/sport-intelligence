@@ -401,6 +401,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         <div className="animate-fade space-y-6">
           <Segmented<Sub>
             label={t("tabs.analysis")}
+            variant="underline"
+            className="border-b border-foreground/15"
             size="sm"
             value={sub}
             onChange={setSub}
@@ -412,7 +414,28 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           ) : stats.data && stats.data.quality.events > 0 ? (
             (() => {
               const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
-              if (sub === "overview") return <OverviewView {...props} />;
+              if (sub === "overview")
+                return (
+                  <div className="space-y-10">
+                    <OverviewView {...props} />
+                    {/* what the video itself shows (possession, attacks) belongs to the overview too */}
+                    {main && (
+                      <VideoOverview
+                        orgId={orgId}
+                        matchId={match.id}
+                        teamId={match.team_id}
+                        ownName={teamName}
+                        oppName={oppName(match)}
+                        durationMs={main.duration_s ? main.duration_s * 1000 : null}
+                        kickoff={match.kickoff_ms}
+                        periodS={match.period_s}
+                        onPlay={onPlay}
+                        onPhysical={() => setSub("physical")}
+                        staff={false}
+                      />
+                    )}
+                  </div>
+                );
               if (sub === "report") return <ReportView {...props} />;
               if (sub === "keepers") return <KeepersView {...props} />;
               return <ShotsView {...props} />;
@@ -427,6 +450,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               ownName={teamName}
               oppName={oppName(match)}
               durationMs={main.duration_s ? main.duration_s * 1000 : null}
+              kickoff={match.kickoff_ms}
+              periodS={match.period_s}
               onPlay={onPlay}
               onPhysical={() => setSub("physical")}
               staff={staff}
