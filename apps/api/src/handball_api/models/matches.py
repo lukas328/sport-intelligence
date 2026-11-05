@@ -67,6 +67,9 @@ class Match(Base, EntityMixin, TenantMixin):
     kit_own_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#f59e0b")
     kit_opponent: Mapped[str] = mapped_column(String(7), nullable=False, default="#dc2626")
     kit_opponent_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#16a34a")
+    # only when known (the user's choice): referees often wear black like many teams, and a guessed
+    # referee colour takes those players away from their team (ADR 027 addendum)
+    kit_referee: Mapped[str | None] = mapped_column(String(7))
     score_own: Mapped[int | None] = mapped_column(SmallInteger)
     score_opponent: Mapped[int | None] = mapped_column(SmallInteger)
     halftime_own: Mapped[int | None] = mapped_column(SmallInteger)
@@ -329,6 +332,38 @@ class Possession(Base, EntityMixin, TenantMixin):
     phase: Mapped[str | None] = mapped_column(String(30))
     confidence: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     source: Mapped[str] = mapped_column(String(20), nullable=False)
+
+
+class GoalCandidate(Base, EntityMixin, TenantMixin):
+    """A moment of the video that is probably a goal (handball_vision.goalcandidates): the coach
+    confirms it (a goal event of the chosen side) or rejects it. Reviewed candidates survive a
+    re-analysis; rejected ones are kept as hard negatives for training."""
+
+    __tablename__ = "goal_candidates"
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    video_asset_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("video_assets.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    t_ms: Mapped[int] = mapped_column(Integer, nullable=False)  # score peak
+    goal_ms: Mapped[int] = mapped_column(Integer, nullable=False)  # estimated goal time
+    start_ms: Mapped[int] = mapped_column(Integer, nullable=False)  # clip
+    end_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    score: Mapped[float] = mapped_column(Float, nullable=False)
+    rate: Mapped[int] = mapped_column(SmallInteger, nullable=False)  # candidates per minute
+    rank: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)
+    suggested_side: Mapped[str | None] = mapped_column(String(10))  # own, opponent
+    status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
+    side: Mapped[str | None] = mapped_column(String(10))  # confirmed goal of this side
+    event_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("events.id", ondelete="SET NULL"))
+    reviewed_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    template_version: Mapped[str | None] = mapped_column(String(20))
+    pipeline_version: Mapped[str | None] = mapped_column(String(20))
 
 
 class Correction(Base, EntityMixin, TenantMixin):

@@ -4,14 +4,17 @@ import { ShareButton } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
+import { KitFields } from "@/components/domain/kit-fields";
 import { useCountUp } from "@/components/domain/match-score";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB } from "@/lib/color";
+import type { Kits } from "@/lib/kit";
+import { playerLabel } from "@/lib/player-name";
 import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
 import { EmptyState, Skeleton } from "@/components/ui/card";
@@ -32,6 +35,9 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
+import { OfficialGoalsPanel, officialGoalsKey } from "./official-goals";
+import { GoalCandidatesPanel } from "./goal-candidates";
+import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
 
@@ -78,6 +84,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       const ev = JSON.parse((e as MessageEvent).data) as Job & { job_id: string };
       setLive((l) => ({ ...l, [ev.job_id]: ev }));
       if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
+      // a new analysis reads the goals again: the comparison with the official report changes
+      if (ev.status === "succeeded") void qc.invalidateQueries({ queryKey: officialGoalsKey(initial.id) });
       // the moment the analysis is done: said on the stage, not in a toast
       if (ev.status === "succeeded" && ev.kind !== "ingest") setJustDone(true);
     });
@@ -104,7 +112,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const stats = useStats(orgId, initial.id);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(
-    () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.jersey_number != null ? `#${r.jersey_number} ` : ""}${r.first_name} ${r.last_name}`])),
+    () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
     [roster.data],
   );
 
@@ -159,12 +167,55 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     window.setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
+  // lists that jump to a moment (official goals, goal candidates) sit below the player, often a
+  // screen or more: bring the player into view, the focus stays where it is
+  function reveal() {
+    const v = player.current?.video();
+    if (!v) return;
+    const box = v.getBoundingClientRect();
+    if (box.top >= 0 && box.bottom <= window.innerHeight) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    v.scrollIntoView({ block: "nearest", behavior: still ? "auto" : "smooth" });
+  }
+
   function onPlay(ms: number) {
     setView("video");
     // the player is kept mounted, so the seek works right after the switch
     requestAnimationFrame(() => {
       player.current?.seek(ms);
       player.current?.play();
+      reveal();
+    });
+  }
+
+  // a clip (goal candidate): plays from `from` and stops at `to`; a seek elsewhere ends it
+  const clipEnd = useRef<(() => void) | null>(null);
+  useEffect(() => () => clipEnd.current?.(), []);
+  function onClip(from: number, to: number) {
+    clipEnd.current?.();
+    setView("video");
+    requestAnimationFrame(() => {
+      player.current?.seek(from);
+      player.current?.play();
+      reveal();
+      const v = player.current?.video();
+      if (!v) return;
+      let started = false; // the seek may land after the first time updates
+      const tick = () => {
+        const ms = v.currentTime * 1000;
+        if (!started) started = ms >= from - 500 && ms < to;
+        else if (ms < from - 2000 || ms > to + 1500) stop(); // the coach seeked elsewhere
+        else if (ms >= to) {
+          v.pause();
+          stop();
+        }
+      };
+      const stop = () => {
+        v.removeEventListener("timeupdate", tick);
+        clipEnd.current = null;
+      };
+      v.addEventListener("timeupdate", tick);
+      clipEnd.current = stop;
     });
   }
 
@@ -187,12 +238,20 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 </tr>
               </thead>
               <tbody>
-                {[
-                  [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
-                  [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
-                  [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
-                  ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
-                ].map(([label, a, b]) => (
+                {(stats.data.quality.attempts_known === false
+                  ? // only goals are known (score overlay): goals, attacks and goals per attack
+                    [
+                      [t("stats.goals"), stats.data.own.goals, stats.data.opponent.goals],
+                      [t("stats.possessions"), stats.data.own.possessions ?? "-", stats.data.opponent.possessions ?? "-"],
+                      [t("stats.efficiency"), pctLabel(stats.data.own.attack_efficiency), pctLabel(stats.data.opponent.attack_efficiency)],
+                    ]
+                  : [
+                      [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
+                      [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
+                      [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
+                      ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
+                    ]
+                ).map(([label, a, b]) => (
                   <tr key={String(label)} className="border-t border-current/20">
                     <th scope="row" className="py-1.5 pr-4 text-left font-medium">{label}</th>
                     <td className="px-3 py-1.5 text-right font-score text-2xl leading-none">{a}</td>
@@ -333,10 +392,29 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
-        {staff && (pendingVideos.length > 0 || !main) && match.source !== "paper_report" && (
+        {staff && match.source !== "paper_report" && (
           <div id="upload" className="scroll-mt-24">
-            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            {main ? (
+              // the main video is there: more cameras (goal cameras, a second angle) on demand
+              <details className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
+                <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                  <Plus aria-hidden className="size-4" />
+                  {t("upload.addCamera")}
+                </summary>
+                <div className="pt-3">
+                  <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+                </div>
+              </details>
+            ) : (
+              <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            )}
           </div>
+        )}
+        {staff && main && match.report_extra?.official_report != null && (
+          <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} isHome={match.is_home} names={names} onPlay={onPlay} />
+        )}
+        {staff && main && (
+          <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} onClip={onClip} />
         )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
         {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
@@ -364,9 +442,21 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             })()
           ) : stats.isLoading ? (
             <Skeleton className="h-64" />
+          ) : main ? (
+            <VideoOverview
+              orgId={orgId}
+              matchId={match.id}
+              teamId={match.team_id}
+              ownName={teamName}
+              oppName={oppName(match)}
+              durationMs={main.duration_s ? main.duration_s * 1000 : null}
+              onPlay={onPlay}
+              onPhysical={() => setSub("physical")}
+              staff={staff}
+            />
           ) : (
             <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
-              {staff && !main && match.source !== "paper_report" ? t("stats.noDataHint") : null}
+              {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
             </EmptyState>
           )}
           </div>
@@ -393,33 +483,48 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
 function Processing({ jobs, orgId, staff }: { jobs: Job[]; orgId: string; staff: boolean }) {
   const t = useTranslations("processing");
+  const now = useNow({ updateInterval: 5000 });
   return (
     <Card className="space-y-5" aria-live="polite">
-      <h2 className="text-base font-semibold">{t("title")}</h2>
       {jobs
         .filter((j) => j.status !== "succeeded")
-        .map((j) => (
-          <div key={j.id} className="space-y-3" data-testid="job">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">{t(j.status as "running")}</span>
-              <span className="font-semibold tabular-nums">{Math.round(j.progress * 100)} %</span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-surface">
-              <div className={cn("h-full rounded-full transition-all duration-500", j.status === "failed" ? "bg-error" : "bg-accent")} style={{ width: `${j.progress * 100}%` }} />
-            </div>
-            {j.kind === "ingest" && (
-              <ol className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                {STAGES.map((s) => {
-                  const st = (j.stages as Record<string, { status?: string }>)[s]?.status ?? "pending";
-                  return (
-                    <li key={s} className={cn("flex items-center gap-1.5", st === "done" ? "text-ok" : st === "running" ? "font-semibold text-foreground" : st === "failed" ? "text-error" : "text-muted")}>
-                      <span aria-hidden className={cn("size-1.5 rounded-full", st === "done" ? "bg-ok" : st === "running" ? "animate-pulse bg-accent" : st === "failed" ? "bg-error" : "bg-border")} />
-                      {t(`stage_${s}`)}
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
+        .map((j) => {
+          // the stages the worker reported, in its order (ingest and analysis have different ones)
+          const reported = Object.keys((j.stages ?? {}) as Record<string, unknown>);
+          const stages = reported.length > 0 ? reported : j.kind === "ingest" ? [...STAGES] : [];
+          const started = j.started_at ? new Date(j.started_at).getTime() : null;
+          const elapsed = started ? (now.getTime() - started) / 1000 : 0;
+          const etaMin =
+            j.status === "running" && j.progress > 0.05 && elapsed > 20
+              ? Math.max(1, Math.round(((elapsed / j.progress) * (1 - j.progress)) / 60))
+              : null;
+          return (
+            <div key={j.id} className="space-y-3" data-testid="job">
+              <h2 className="text-base font-semibold">{t(j.kind === "analysis" ? "titleAnalysis" : "title")}</h2>
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="font-medium">
+                  {t(j.status as "running")}
+                  {etaMin != null && <span className="font-normal text-muted"> · {t("eta", { minutes: etaMin })}</span>}
+                </span>
+                <span className="font-semibold tabular-nums">{Math.round(j.progress * 100)} %</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-surface">
+                <div className={cn("h-full rounded-full transition-all duration-500", j.status === "failed" ? "bg-error" : "bg-accent")} style={{ width: `${j.progress * 100}%` }} />
+              </div>
+              {stages.length > 0 && (
+                <ol className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                  {stages.map((s) => {
+                    const st = (j.stages as Record<string, { status?: string }>)[s]?.status ?? "pending";
+                    return (
+                      <li key={s} className={cn("flex items-center gap-1.5", st === "done" ? "text-ok" : st === "running" ? "font-semibold text-foreground" : st === "failed" ? "text-error" : "text-muted")}>
+                        <span aria-hidden className={cn("size-1.5 rounded-full", st === "done" ? "bg-ok" : st === "running" ? "animate-pulse bg-accent" : st === "failed" ? "bg-error" : "bg-border")} />
+                        {t.has(`stage_${j.kind}_${s}`) ? t(`stage_${j.kind}_${s}` as "stage_download") : t.has(`stage_${s}`) ? t(`stage_${s}` as "stage_download") : s}
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+              {j.kind === "analysis" && j.status === "running" && <p className="text-sm text-muted">{t("analysisHint")}</p>}
             {j.error && <Alert>{j.error}</Alert>}
             {j.status === "failed" && staff && j.video_asset_id && (
               <Button
@@ -435,7 +540,8 @@ function Processing({ jobs, orgId, staff }: { jobs: Job[]; orgId: string; staff:
               </Button>
             )}
           </div>
-        ))}
+          );
+        })}
     </Card>
   );
 }
@@ -474,6 +580,14 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
   const oppName = useOpponentName();
   const qc = useQueryClient();
   const [custom, setCustom] = useState(match.format === "custom");
+  const saved: Kits = {
+    own: match.kit_own,
+    own_gk: match.kit_own_gk,
+    opponent: match.kit_opponent,
+    opponent_gk: match.kit_opponent_gk,
+    referee: match.kit_referee ?? null,
+  };
+  const [kits, setKits] = useState(saved);
   async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -487,6 +601,8 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
         halftime_own: n("ht_own"),
         halftime_opponent: n("ht_opp"),
         ...(format === "custom" ? { format: "custom" as const, period_s: Number(f.get("minutes")) * 60, periods: Number(f.get("periods")) } : { format: format as "mini" }),
+        // only the kits that changed: null clears the referee kit
+        ...Object.fromEntries((Object.keys(kits) as (keyof Kits)[]).filter((k) => kits[k] !== saved[k]).map((k) => [`kit_${k}`, kits[k]])),
       },
     });
     await qc.invalidateQueries({ queryKey: ["match", match.id] });
@@ -521,6 +637,10 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
           </>
         )}
       </div>
+      <fieldset>
+        <legend className="mb-2 text-sm font-semibold">{t("matches.kits")}</legend>
+        <KitFields kits={kits} onChange={setKits} />
+      </fieldset>
       <Button type="submit">{t("common.save")}</Button>
     </form>
   );

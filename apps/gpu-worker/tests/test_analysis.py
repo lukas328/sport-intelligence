@@ -11,7 +11,7 @@ import pytest
 
 from handball_gpu_worker import analysis
 from handball_jobkit import JobSettings, Reporter
-from handball_vision import geometry, pipeline
+from handball_vision import geometry, goalcandidates, pipeline
 from handball_vision.calibration import CalibrationError
 from handball_vision.motion import CameraMotion
 from handball_vision.synthetic import SyntheticConfig, SyntheticMatch
@@ -272,3 +272,249 @@ def test_panning_camera_with_points_on_the_panorama(
         if round(t * fps / 1000) in gt
     ]
     assert float(np.median(dist)) < 0.6
+
+
+class _Blind:
+    """A learned detector that sees nobody (unusual footage)."""
+
+    source = "model"
+    model = "blind"
+
+    def detect(self, frames: list[Any]) -> list[list[Any]]:
+        return [[] for _ in frames]
+
+
+def test_learned_detector_that_sees_nobody_falls_back_to_the_classical_path(
+    synthetic: tuple[SyntheticMatch, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _m, root = synthetic
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: FakeS3(root))
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: _Blind())
+    rep, posts = reporter()
+    res = analysis.run_analysis(
+        "j",
+        "o",
+        "m",
+        "a",
+        "videos",
+        "o/m/a/proxy.mp4",
+        "o/m/a/",
+        KITS,
+        settings=JobSettings(work_dir=str(tmp_path)),
+        reporter=rep,
+    )
+    assert posts[-1]["status"] == "succeeded"
+    assert res["detector"] == "heuristic" and res["needs_calibration"] is False
+
+
+def test_learned_path_needs_calibration_then_reuses_observations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from handball_vision.detection import Detection
+
+    root = tmp_path / "s3"
+    (root / "videos" / "o/m/a").mkdir(parents=True)
+    m = SyntheticMatch(SyntheticConfig(seconds=6))
+    truth = m.write(root / "videos" / "o/m/a/proxy.mp4")
+    boxes = {
+        g.index: [Detection(*o.bbox, 0.9) for o in g.objects if o.label != "ball"] for g in truth
+    }
+
+    class Oracle:
+        source = "model"
+        model = "oracle"
+
+        def __init__(self) -> None:
+            self.n = 0
+
+        def detect(self, frames: list[Any]) -> list[list[Any]]:
+            out = [boxes.get(self.n, [])]
+            self.n += 3
+            return out
+
+    s3 = FakeS3(root)
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: s3)
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Oracle())
+    # 6 s are too short for goal candidates: what the observation pass would give for a game
+    seen: list[int] = []
+
+    def fake_candidates(obs: Any) -> dict[str, Any]:
+        seen.append(len(obs.frames))
+        return {"template": "t", "candidates": [{"t_ms": 4000, "rate": 1}]}
+
+    monkeypatch.setattr(goalcandidates, "from_observations", fake_candidates)
+    rep, _ = reporter()
+    first = analysis.run_analysis(
+        "j",
+        "o",
+        "m",
+        "a",
+        "videos",
+        "o/m/a/proxy.mp4",
+        "o/m/a/",
+        KITS,
+        settings=JobSettings(work_dir=str(tmp_path / "w1")),
+        reporter=rep,
+    )
+    # synthetic goals are not striped: no trustworthy automatic court, the user marks it
+    assert first["needs_calibration"] is True and first["detector"] == "model"
+    # goal candidates need no court: they come with the request to mark it
+    assert first["goal_candidates"]["candidates"] == [{"t_ms": 4000, "rate": 1}]
+    assert (root / "artifacts/o/m/a/analysis/observations.npz").exists()
+    # the re-run with clicked corners reuses the stored observations (no second download)
+    h = truth[0].homography if truth[0].homography is not None else None
+    if h is None:
+        from handball_vision.calibration import calibrate_frames
+
+        h = calibrate_frames(
+            pipeline.sample_frames(root / "videos" / "o/m/a/proxy.mp4", 8)
+        ).homography
+    corners = [(0.0, 0.0), (40.0, 0.0), (40.0, 20.0), (0.0, 20.0), (20.0, 0.0), (20.0, 20.0)]
+    pts = [{"image": list(geometry.apply(h, np.array([c]))[0]), "court": list(c)} for c in corners]
+    s3.downloads.clear()
+    rep2, posts2 = reporter()
+    second = analysis.run_analysis(
+        "j",
+        "o",
+        "m",
+        "a",
+        "videos",
+        "o/m/a/proxy.mp4",
+        "o/m/a/",
+        KITS,
+        calibration_points=pts,
+        calibration_space="panorama",
+        settings=JobSettings(work_dir=str(tmp_path / "w2")),
+        reporter=rep2,
+    )
+    assert posts2[-1]["status"] == "succeeded"
+    assert "o/m/a/proxy.mp4" not in s3.downloads
+    assert (
+        second["needs_calibration"] is False
+        and second["calibration"]["source"] == "user_correction"
+    )
+    assert len(second["tracks"]) >= 8
+    assert second["goal_candidates"]["template"] == "t"
+    assert "goal_candidates" not in second["stats"]  # sent on its own, not as a stat
+    assert "goal_candidates" in second["timings_s"] and len(seen) == 2 and seen[0] > 0
+
+
+@pytest.mark.parametrize(
+    ("rosters", "expected"),
+    [
+        ({"home": [7, 14, 7], "away": [3], "away_gk": []}, {"home": {7, 14}, "away": {3}}),
+        (None, None),  # older payloads without rosters
+    ],
+)
+def test_rosters_reach_the_number_vote(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    rosters: dict[str, list[int]] | None,
+    expected: dict[str, set[int]] | None,
+) -> None:
+    class StopError(Exception):
+        pass
+
+    class Detector:
+        source = "model"
+        model = "stub"
+
+    class Motion:
+        moving = False
+
+        def background(self) -> Any:
+            return np.zeros((20, 40, 3), np.uint8)
+
+    class Obs:
+        motion = Motion()
+
+    seen: dict[str, Any] = {}
+
+    def track(*args: Any, rosters: dict[str, set[int]] | None = None, **kw: Any) -> Any:
+        seen["rosters"] = rosters
+        raise StopError
+
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: FakeS3(tmp_path))
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Detector())
+    monkeypatch.setattr(analysis, "_cached_observations", lambda *a: Obs())
+    monkeypatch.setattr(analysis, "_cached_overlay", lambda *a: None)
+    monkeypatch.setattr(analysis, "_points_calibration", lambda *a: object())
+    monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
+    monkeypatch.setattr("handball_vision.observe.track", track)
+    rep, _ = reporter()
+    with pytest.raises(StopError):
+        analysis.run_analysis(
+            "j",
+            "o",
+            "m",
+            "a",
+            "videos",
+            "o/m/a/proxy.mp4",
+            "o/m/a/",
+            KITS,
+            calibration_points=[{"image": [0, 0], "court": [0, 0]}],
+            settings=JobSettings(work_dir=str(tmp_path / "w")),
+            reporter=rep,
+            rosters=rosters,
+        )
+    assert seen["rosters"] == expected
+
+
+@pytest.mark.parametrize("referee", [None, "#ff6a13"])
+def test_only_the_kits_sent_reach_tracking(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, referee: str | None
+) -> None:
+    """The API sends a referee kit only when it is known (ADR 027 addendum); without one the
+    tracking gets no referee colour and finds referees by appearance (roles.py)."""
+
+    class StopError(Exception):
+        pass
+
+    class Detector:
+        source = "model"
+        model = "stub"
+
+    class Motion:
+        moving = False
+
+        def background(self) -> Any:
+            return np.zeros((20, 40, 3), np.uint8)
+
+    class Obs:
+        motion = Motion()
+
+    seen: dict[str, Any] = {}
+
+    def track(obs: Any, calib: Any, kits: dict[str, Any], *args: Any, **kw: Any) -> Any:
+        seen["kits"] = kits
+        raise StopError
+
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: FakeS3(tmp_path))
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Detector())
+    monkeypatch.setattr(analysis, "_cached_observations", lambda *a: Obs())
+    monkeypatch.setattr(analysis, "_cached_overlay", lambda *a: None)
+    monkeypatch.setattr(analysis, "_points_calibration", lambda *a: object())
+    monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
+    monkeypatch.setattr("handball_vision.observe.track", track)
+    kits = {k: v for k, v in KITS.items() if k != "referee"}
+    if referee:
+        kits["referee"] = referee
+    rep, _ = reporter()
+    with pytest.raises(StopError):
+        analysis.run_analysis(
+            "j",
+            "o",
+            "m",
+            "a",
+            "videos",
+            "o/m/a/proxy.mp4",
+            "o/m/a/",
+            kits,
+            calibration_points=[{"image": [0, 0], "court": [0, 0]}],
+            settings=JobSettings(work_dir=str(tmp_path / "w")),
+            reporter=rep,
+        )
+    expected = {"home", "home_gk", "away", "away_gk"} | ({"referee"} if referee else set())
+    assert set(seen["kits"]) == expected
+    if referee:
+        assert seen["kits"]["referee"] == (0x13, 0x6A, 0xFF)  # BGR

@@ -7,10 +7,23 @@ from fastapi import APIRouter, File, Query, Response, UploadFile
 
 from handball_api.models import Event
 from handball_api.routers.deps import OrgDep
-from handball_api.schemas.events import EventIn, EventOut, EventPatch, FeedImportResult, KickoffIn
+from handball_api.schemas.events import (
+    EventIn,
+    EventOut,
+    EventPatch,
+    FeedImportResult,
+    GoalCandidateList,
+    GoalCandidateReviewIn,
+    GoalCandidateRow,
+    GoalComparison,
+    GoalReviewIn,
+    KickoffIn,
+    OfficialReportIn,
+    OfficialReportResult,
+)
 from handball_api.services import events as service
+from handball_api.services import goal_candidates, official_report, paper_reports
 from handball_api.services import insights as insights_service
-from handball_api.services import paper_reports
 
 router = APIRouter(prefix="/v1/orgs/{org_id}", tags=["events"])
 MAX_IMPORT = 2_000_000
@@ -84,6 +97,47 @@ async def import_feed(
     return await service.import_feed(
         scope.ctx, match_id, data[:MAX_IMPORT], file.filename or "feed.csv"
     )
+
+
+@router.post("/matches/{match_id}/official-report", response_model=OfficialReportResult)
+async def import_official_report(
+    match_id: uuid.UUID, data: OfficialReportIn, scope: OrgDep
+) -> dict[str, Any]:
+    """Official match report (handball.ch match centre or DHB press report) as events: goals with
+    scorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous
+    one; automatic goals from the video within 20 s are merged with the official goal."""
+    return await official_report.import_report(scope.ctx, match_id, data.url, data.provider)
+
+
+@router.get("/matches/{match_id}/official-report/comparison", response_model=GoalComparison)
+async def official_goal_comparison(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Official goals next to the goals the video analysis found (same side, at most 20 s of
+    match clock apart), and video goals without an official one, with the coach's checks."""
+    return await official_report.comparison(scope.ctx, match_id)
+
+
+@router.put("/matches/{match_id}/official-report/review", status_code=204)
+async def review_official_goal(match_id: uuid.UUID, data: GoalReviewIn, scope: OrgDep) -> None:
+    """Confirm or dismiss a row of the comparison (null undoes it)."""
+    await official_report.review(scope.ctx, match_id, data.event_id, data.status)
+
+
+@router.get("/matches/{match_id}/goal-candidates", response_model=GoalCandidateList)
+async def list_goal_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Moments of the video that are probably goals (video analysis, a fixed number per minute),
+    with the coach's reviews and the goals already stored that cover them."""
+    return await goal_candidates.listing(scope.ctx, match_id)
+
+
+@router.put(
+    "/matches/{match_id}/goal-candidates/{candidate_id}/review", response_model=GoalCandidateRow
+)
+async def review_goal_candidate(
+    match_id: uuid.UUID, candidate_id: uuid.UUID, data: GoalCandidateReviewIn, scope: OrgDep
+) -> dict[str, Any]:
+    """Confirm a candidate (a goal of the given side), reject it (kept as a hard negative for
+    training) or undo the review (null)."""
+    return await goal_candidates.review(scope.ctx, match_id, candidate_id, data.status, data.side)
 
 
 @router.post(

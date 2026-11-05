@@ -1724,6 +1724,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Goal Candidates
+         * @description Moments of the video that are probably goals (video analysis, a fixed number per minute),
+         *     with the coach's reviews and the goals already stored that cover them.
+         */
+        get: operations["list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Review Goal Candidate
+         * @description Confirm a candidate (a goal of the given side), reject it (kept as a hard negative for
+         *     training) or undo the review (null).
+         */
+        put: operations["review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
         parameters: {
             query?: never;
@@ -1856,6 +1898,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Official Report
+         * @description Official match report (handball.ch match centre or DHB press report) as events: goals with
+         *     scorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous
+         *     one; automatic goals from the video within 20 s are merged with the official goal.
+         */
+        post: operations["import_official_report_v1_orgs__org_id__matches__match_id__official_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/comparison": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Official Goal Comparison
+         * @description Official goals next to the goals the video analysis found (same side, at most 20 s of
+         *     match clock apart), and video goals without an official one, with the coach's checks.
+         */
+        get: operations["official_goal_comparison_v1_orgs__org_id__matches__match_id__official_report_comparison_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Review Official Goal
+         * @description Confirm or dismiss a row of the comparison (null undoes it).
+         */
+        put: operations["review_official_goal_v1_orgs__org_id__matches__match_id__official_report_review_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/parts": {
         parameters: {
             query?: never;
@@ -1889,6 +1994,26 @@ export interface paths {
          * @description Distance, speed bands, sprints and heatmap per player (estimated from video tracking).
          */
         get: operations["match_physical_v1_orgs__org_id__matches__match_id__physical_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/possessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Match Possessions
+         * @description Possession phases (estimated from video tracking or imported) with a summary per side.
+         */
+        get: operations["match_possessions_v1_orgs__org_id__matches__match_id__possessions_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3639,6 +3764,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm Calibration
+         * @description The automatic court fits: keep it as confirmed (no re-run).
+         */
+        post: operations["confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/videos/{video_id}/complete": {
         parameters: {
             query?: never;
@@ -3932,6 +4077,13 @@ export interface components {
             calibration: components["schemas"]["CalibrationOut"] | null;
             /** Calibration Error */
             calibration_error?: string | null;
+            /**
+             * Calibration Info
+             * @description automatic calibration: goal fit, players on the court, camera position
+             */
+            calibration_info?: {
+                [key: string]: unknown;
+            } | null;
             /** Camera */
             camera?: ("fixed" | "moving") | null;
             /** Chunk Ms */
@@ -4314,11 +4466,34 @@ export interface components {
                 number,
                 number
             ];
+            /**
+             * Height M
+             * @description above the floor, e.g. 2 for the crossbar
+             * @default 0
+             */
+            height_m?: number;
             /** Image */
             image: [
                 number,
                 number
             ];
+        };
+        /**
+         * CandidateGoal
+         * @description A goal already stored that covers a candidate (same moment).
+         */
+        CandidateGoal: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Side */
+            side: string;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
         };
         /** Chart */
         Chart: {
@@ -5069,6 +5244,131 @@ export interface components {
             /** Tokens */
             tokens: components["schemas"]["handball_api__schemas__tactics__TokenIn"][];
         };
+        /** GoalCandidateCounts */
+        GoalCandidateCounts: {
+            /** Confirmed */
+            confirmed: number;
+            /** Known */
+            known: number;
+            /** Open */
+            open: number;
+            /** Open By Rate */
+            open_by_rate: {
+                [key: string]: number;
+            };
+            /** Rejected */
+            rejected: number;
+            /** Total */
+            total: number;
+        };
+        /** GoalCandidateList */
+        GoalCandidateList: {
+            /** Candidates */
+            candidates: components["schemas"]["GoalCandidateRow"][];
+            counts: components["schemas"]["GoalCandidateCounts"];
+            /** Default Rate */
+            default_rate: number;
+            /** Rates */
+            rates: number[];
+            /** Template */
+            template: string | null;
+        };
+        /** GoalCandidateReviewIn */
+        GoalCandidateReviewIn: {
+            /** Side */
+            side?: ("own" | "opponent") | null;
+            /** Status */
+            status: ("confirmed" | "rejected") | null;
+        };
+        /**
+         * GoalCandidateRow
+         * @description A moment of the video that is probably a goal (analysis), with the coach's review.
+         */
+        GoalCandidateRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** End Ms */
+            end_ms: number;
+            /** Event Id */
+            event_id: string | null;
+            /** Goal Ms */
+            goal_ms: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            known: components["schemas"]["CandidateGoal"] | null;
+            /** Period */
+            period: number | null;
+            /** Rate */
+            rate: number;
+            /** Score */
+            score: number;
+            /** Side */
+            side: ("own" | "opponent") | null;
+            /** Start Ms */
+            start_ms: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "confirmed" | "rejected";
+            /** Suggested Side */
+            suggested_side: ("own" | "opponent") | null;
+            /** T Ms */
+            t_ms: number;
+            /**
+             * Video Asset Id
+             * Format: uuid
+             */
+            video_asset_id: string;
+        };
+        /** GoalComparison */
+        GoalComparison: {
+            /** Away */
+            away: string | null;
+            counts: components["schemas"]["GoalComparisonCounts"];
+            /** Extra */
+            extra: components["schemas"]["VideoGoalRow"][];
+            /** Goals */
+            goals: components["schemas"]["OfficialGoalRow"][];
+            /** Home */
+            home: string | null;
+            /** Imported */
+            imported: boolean;
+            /** Provider */
+            provider: string | null;
+            /** Source Url */
+            source_url: string | null;
+            /** Window S */
+            window_s: number;
+        };
+        /** GoalComparisonCounts */
+        GoalComparisonCounts: {
+            /** Extra */
+            extra: number;
+            /** Found */
+            found: number;
+            /** Missing */
+            missing: number;
+            /** Official */
+            official: number;
+            /** Open */
+            open: number;
+            /** Outside */
+            outside: number;
+        };
+        /** GoalReviewIn */
+        GoalReviewIn: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Status */
+            status: ("confirmed" | "dismissed") | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -5517,6 +5817,11 @@ export interface components {
              * @default #f59e0b
              */
             kit_own_gk?: string;
+            /**
+             * Kit Referee
+             * @description referee shirt colour when known; left out of the analysis when it is close to a team's kit
+             */
+            kit_referee?: string | null;
             /** Opponent Id */
             opponent_id?: string | null;
             /** Opponent Name */
@@ -5584,6 +5889,11 @@ export interface components {
             kit_own: string;
             /** Kit Own Gk */
             kit_own_gk: string;
+            /**
+             * Kit Referee
+             * @description null: unknown
+             */
+            kit_referee?: string | null;
             /**
              * Kit Warnings
              * @description kit pairs with similar colours, e.g. own/opponent
@@ -5696,6 +6006,11 @@ export interface components {
             kit_own?: string | null;
             /** Kit Own Gk */
             kit_own_gk?: string | null;
+            /**
+             * Kit Referee
+             * @description null clears it (unknown)
+             */
+            kit_referee?: string | null;
             /** Period S */
             period_s?: number | null;
             /** Periods */
@@ -5950,6 +6265,80 @@ export interface components {
         NotificationsRead: {
             /** Ids */
             ids?: string[];
+        };
+        /** OfficialGoalRow */
+        OfficialGoalRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Estimated */
+            estimated: boolean;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Penalty */
+            penalty: boolean;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Review */
+            review: ("confirmed" | "dismissed") | null;
+            /** Score */
+            score: number[] | null;
+            /** Side */
+            side: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "found" | "missing" | "outside";
+            /** T Ms */
+            t_ms: number | null;
+            video: components["schemas"]["VideoReading"] | null;
+        };
+        /** OfficialReportIn */
+        OfficialReportIn: {
+            /** Provider */
+            provider?: ("handball_ch" | "dhb") | null;
+            /** Url */
+            url: string;
+        };
+        /** OfficialReportResult */
+        OfficialReportResult: {
+            /** Away */
+            away: string | null;
+            /** Created */
+            created: number;
+            /** Final */
+            final: number[] | null;
+            /** Game Id */
+            game_id: number;
+            /** Home */
+            home: string | null;
+            /** Kept Manual Goals */
+            kept_manual_goals: number;
+            /** Matched Video Goals */
+            matched_video_goals: number;
+            /** Provider */
+            provider: string;
+            /** Replaced */
+            replaced: number;
+            /** Skipped */
+            skipped: number;
+            /** Source Url */
+            source_url: string;
+            /** Unmatched Video Goals */
+            unmatched_video_goals: number;
+            /** Warnings */
+            warnings: string[];
         };
         /** OffsetIn */
         OffsetIn: {
@@ -7658,6 +8047,41 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /**
+         * VideoGoalRow
+         * @description An automatic goal from the video with no official counterpart.
+         */
+        VideoGoalRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Confidence */
+            confidence: number;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Review */
+            review: ("confirmed" | "dismissed") | null;
+            /** Score */
+            score: number[] | null;
+            /** Side */
+            side: string;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
+        };
         /** VideoOut */
         VideoOut: {
             /** Codec */
@@ -7701,6 +8125,22 @@ export interface components {
             time_offset_ms: number;
             /** Width */
             width: number | null;
+        };
+        /**
+         * VideoReading
+         * @description What the video analysis read for an official goal.
+         */
+        VideoReading: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Confidence */
+            confidence: number | null;
+            /** Event Id */
+            event_id: string | null;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
         };
         /**
          * VideoRole
@@ -11210,6 +11650,75 @@ export interface operations {
             };
         };
     };
+    list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalCandidateList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                candidate_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalCandidateReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalCandidateRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_reels_v1_orgs__org_id__matches__match_id__highlights_get: {
         parameters: {
             query?: never;
@@ -11484,6 +11993,108 @@ export interface operations {
             };
         };
     };
+    import_official_report_v1_orgs__org_id__matches__match_id__official_report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfficialReportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialReportResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    official_goal_comparison_v1_orgs__org_id__matches__match_id__official_report_comparison_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalComparison"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_official_goal_v1_orgs__org_id__matches__match_id__official_report_review_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     parts_v1_orgs__org_id__matches__match_id__parts_get: {
         parameters: {
             query?: never;
@@ -11553,6 +12164,40 @@ export interface operations {
         };
     };
     match_physical_v1_orgs__org_id__matches__match_id__physical_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    match_possessions_v1_orgs__org_id__matches__match_id__possessions_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -16075,6 +16720,40 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -9,9 +9,11 @@ import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
+from typing import Any
 
 from sqlalchemy import delete, select
 
+from handball_api.core.colors import analysis_kits
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.net import UnsafeUrlError, check_public_https_url
@@ -19,6 +21,7 @@ from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     CameraCalibration,
     Match,
+    OpponentPlayer,
     ProcessingJob,
     RosterEntry,
     Track,
@@ -530,7 +533,7 @@ async def start_analysis(
     ctx: Ctx,
     asset: VideoAsset,
     match: Match,
-    points: list[dict[str, list[float]]] | None = None,
+    points: list[dict[str, Any]] | None = None,
     space: str = "frame",
     frame_ms: int = 0,
 ) -> ProcessingJob:
@@ -543,19 +546,60 @@ async def start_analysis(
         "bucket": ctx.settings.s3_bucket_videos,
         "proxy_key": asset.proxy_key,
         "prefix": media_prefix(asset),
-        "kits": {
-            "home": match.kit_own,
-            "home_gk": match.kit_own_gk,
-            "away": match.kit_opponent,
-            "away_gk": match.kit_opponent_gk,
-            "referee": "#1a1a1a",
-        },
+        "kits": analysis_kits(
+            {
+                "own": match.kit_own,
+                "own_gk": match.kit_own_gk,
+                "opponent": match.kit_opponent,
+                "opponent_gk": match.kit_opponent_gk,
+                "referee": match.kit_referee,
+            }
+        ),
         "calibration_points": points,
         "calibration_space": space,
         "calibration_frame_ms": frame_ms,
+        "own_is_home": match.is_home,  # the overlay shows the home team on the left
     }
+    rosters = await _rosters(ctx, match)
+    if rosters:
+        payload["rosters"] = rosters
     ctx.require_jobs().enqueue("gpu", ANALYSIS_FUNC, str(job.id), payload)
     return job
+
+
+async def _own_roster(ctx: Ctx, match: Match) -> dict[int, uuid.UUID]:
+    """Shirt number -> player of the own team's active roster in the match's season."""
+    rows = await ctx.db.execute(
+        select(RosterEntry.jersey_number, RosterEntry.player_id).where(
+            RosterEntry.season_id == match.season_id,
+            RosterEntry.team_id == match.team_id,
+            RosterEntry.active.is_(True),
+        )
+    )
+    return {n: pid for n, pid in rows.all() if n is not None}
+
+
+async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
+    """Shirt numbers per kit label for the number vote of the analysis. The labels follow the
+    kits in the job payload, so "home" is always the own kit (match.is_home only moves the
+    overlay); the opponent side only when its players were entered. Empty sides are left out."""
+    out: dict[str, list[int]] = {}
+    own = sorted(await _own_roster(ctx, match))
+    if own:
+        out["home"] = own
+    if match.opponent_id is not None:
+        opp = sorted(
+            (
+                await ctx.db.scalars(
+                    select(OpponentPlayer.number).where(
+                        OpponentPlayer.opponent_id == match.opponent_id
+                    )
+                )
+            ).all()
+        )
+        if opp:
+            out["away"] = opp
+    return out
 
 
 async def _apply_analysis_result(
@@ -603,6 +647,12 @@ async def _apply_analysis_result(
     await ctx.db.execute(delete(Track).where(Track.video_asset_id == asset.id))
     tracks = r.get("tracks")
     detector = str(r.get("detector") or "heuristic")
+    # own players by shirt number (read or recognised by the analysis): "home" is the own kit
+    roster: dict[int, uuid.UUID] = {}
+    if isinstance(tracks, list) and any(t.get("number") is not None for t in tracks):
+        owner = await ctx.db.get(Match, asset.match_id)
+        if owner is not None and owner.season_id is not None:
+            roster = await _own_roster(ctx, owner)
     if isinstance(tracks, list):
         for t in tracks:
             first, last = int(t["first_ms"]), int(t["last_ms"])
@@ -622,6 +672,10 @@ async def _apply_analysis_result(
                 source=detector,
                 pipeline_version=job.pipeline_version,
             )
+            if track.number is not None and str(track.team or "").startswith("home"):
+                track.player_id = roster.get(track.number)
+                if track.player_id is not None:
+                    track.player_confidence = float(t.get("number_confidence") or 0.6)
             for team, f0, l0, pid, num in previous:
                 shared = min(last, l0) - max(first, f0)
                 if team == track.team and shared > 0.8 * max(1, last - first):
@@ -646,17 +700,26 @@ async def _apply_analysis_result(
             "panorama",
             "needs_calibration",
             "calibration_error",
+            "calibration_info",
+            "scoreboard",
         )
     }
     auto = r.get("events")
-    if isinstance(auto, dict):
+    sb_raw = r.get("scoreboard")
+    overlay: dict[str, Any] | None = sb_raw if isinstance(sb_raw, dict) else None
+    if isinstance(auto, dict) or overlay:
+        auto = auto if isinstance(auto, dict) else {}
         match = await ctx.db.get(Match, asset.match_id)
         if match is not None and asset.role == VideoRole.MAIN:
-            counts = await auto_events.apply(ctx, match, auto)
+            counts = await auto_events.apply(ctx, match, auto or None, overlay)
             # courtside marks with device time follow the new goals (5.3)
             from handball_api.services import marks
 
             await marks.sync_match(ctx, match.id, authorised=True)
+            # goals marked by hand get their shot position from the tracking
+            from handball_api.services import shot_positions
+
+            await shot_positions.fill(ctx, match)
             asset.analysis = {
                 **asset.analysis,
                 "auto_events": {
@@ -674,6 +737,19 @@ async def _apply_analysis_result(
                     ],
                 },
             }
+    if "goal_candidates" in r and asset.role == VideoRole.MAIN:
+        # moments that are probably goals, for the coach to confirm (needs no court, so also
+        # when the analysis waits for court points); after the automatic events: their
+        # possessions suggest the side
+        from handball_api.services import goal_candidates
+
+        owner = await ctx.db.get(Match, asset.match_id)
+        found = r.get("goal_candidates")
+        if owner is not None:
+            counts = await goal_candidates.store(
+                ctx, owner, asset, found if isinstance(found, dict) else None, job.pipeline_version
+            )
+            asset.analysis = {**asset.analysis, "goal_candidates": counts}
 
 
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
@@ -720,6 +796,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "panorama": meta.get("panorama"),
         "needs_calibration": bool(meta.get("needs_calibration")),
         "calibration_error": meta.get("calibration_error"),
+        "calibration_info": meta.get("calibration_info"),
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,
@@ -758,7 +835,7 @@ async def read_track_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
 async def calibrate_manually(
     ctx: Ctx,
     asset_id: uuid.UUID,
-    points: list[dict[str, list[float]]],
+    points: list[dict[str, Any]],
     space: str = "frame",
     frame_ms: int = 0,
 ) -> ProcessingJob:
@@ -782,6 +859,37 @@ async def calibrate_manually(
         data={"points": len(points), "space": space},
     )
     return await start_analysis(ctx, asset, match, points, space, frame_ms)
+
+
+async def confirm_calibration(ctx: Ctx, asset_id: uuid.UUID) -> CameraCalibration:
+    """A person checked the automatic court on the hall image and it fits: the same homography is
+    stored again as a user correction (no re-run needed; analysis results stay valid)."""
+    asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    latest = await ctx.db.scalar(
+        select(CameraCalibration)
+        .where(CameraCalibration.video_asset_id == asset.id)
+        .order_by(CameraCalibration.created_at.desc())
+        .limit(1)
+    )
+    if latest is None:
+        raise ProblemError(409, "no-calibration", "There is no court to confirm yet")
+    if latest.source == "user_correction":
+        return latest
+    confirmed = CameraCalibration(
+        organization_id=asset.organization_id,
+        video_asset_id=asset.id,
+        homography=latest.homography,
+        image_size=latest.image_size,
+        confidence=1.0,
+        reprojection_px=latest.reprojection_px,
+        source="user_correction",
+        points=None,
+        pipeline_version=latest.pipeline_version,
+    )
+    ctx.db.add(confirmed)
+    await audit.record(ctx, "video.calibration_confirmed", target_type="video", target_id=asset.id)
+    await ctx.db.flush()
+    return confirmed
 
 
 # ---- identities and physical load (M5) ------------------------------------------------------

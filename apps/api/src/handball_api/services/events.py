@@ -376,7 +376,11 @@ async def set_kickoff(ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int) -> 
         )
     ).all()
     for e in events:
-        if e.source in ("official_feed", "paper_report") or e.t_ms is None:
+        # official report goals matched with the video keep the video time
+        from_video = e.source == "official_report" and "video" in (e.attributes or {})
+        if e.t_ms is None or (
+            e.source in ("official_feed", "paper_report", "official_report") and not from_video
+        ):
             e.t_ms = video_from_clock(match, period, e.clock_s or 0.0)
     return match
 
@@ -547,4 +551,43 @@ async def shot_export(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             }
             for e in shots
         ],
+    }
+
+
+async def match_possessions(ctx: Ctx, match_id: uuid.UUID) -> dict[str, object]:
+    """Possession phases of a match (from video tracking or imports) and a summary per side:
+    number of attacks, average length and share of the observed time."""
+    match = await get_match(ctx, match_id)
+    rows = (
+        await ctx.db.scalars(
+            select(Possession).where(Possession.match_id == match.id).order_by(Possession.start_ms)
+        )
+    ).all()
+    phases = [
+        {
+            "side": p.side,
+            "start_ms": p.start_ms,
+            "end_ms": p.end_ms,
+            "outcome": p.outcome,
+            "phase": p.phase,
+            "confidence": round(p.confidence, 3),
+            "source": p.source,
+        }
+        for p in rows
+    ]
+    total = sum(max(0, p.end_ms - p.start_ms) for p in rows) or 1
+    summary: dict[str, dict[str, float]] = {}
+    for side in ("own", "opponent"):
+        mine = [p for p in rows if p.side == side]
+        dur = sum(max(0, p.end_ms - p.start_ms) for p in mine)
+        summary[side] = {
+            "count": len(mine),
+            "fast_breaks": sum(p.phase == "fast_break" for p in mine),
+            "avg_s": round(dur / len(mine) / 1000, 1) if mine else 0.0,
+            "share": round(dur / total, 3),
+        }
+    return {
+        "phases": phases,
+        "summary": summary,
+        "estimated": any(p.source != "manual" for p in rows),
     }

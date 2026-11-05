@@ -1,0 +1,217 @@
+<title>Ball-Pfade Halle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one frame at a time with a 30-cell filmstrip under it; magnifier and keys on the right. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --ink: #17202b; --muted: #5a6675; --line: #d3d9e1;
+  --ball: #e8b100; --ball-ink: #1b1600; --court: #2b6cb0; --good: #1f8a4c; --warn: #b25d00; --mark: #ff3b5c; --ghost: #33d1ff;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+    --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85; --ghost: #5fdcff; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+  --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85; --ghost: #5fdcff; color-scheme: dark; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 24px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 12px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; text-wrap: balance; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--warn); }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+canvas#stage { display: block; width: 100%; max-width: 100%; height: auto; background: #000; border-radius: 6px; cursor: crosshair; touch-action: manipulation; }
+.strip { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 2px; margin-top: 8px; }
+.strip button { height: 18px; padding: 0; border-radius: 2px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+.strip button.ball { background: var(--ball); border-color: transparent; }
+.strip button.none { background: var(--muted); border-color: transparent; opacity: .55; }
+.strip button.cur { outline: 2px solid var(--court); outline-offset: 1px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+canvas#zoom { width: 100%; max-width: 100%; aspect-ratio: 1; background: #000; border-radius: 4px; display: block; image-rendering: pixelated; }
+.label { font-family: var(--display); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button.b { font: 600 14px var(--body); padding: 10px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+button.b:hover { border-color: var(--muted); }
+button:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+button.wide { grid-column: 1 / -1; }
+button.on { background: var(--court); color: #fff; border-color: transparent; }
+kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
+.help { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; padding-left: 18px; }
+.toast { min-height: 18px; font-size: 13px; color: var(--good); }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 2px solid; vertical-align: -1px; margin-right: 4px; }
+</style>
+
+<header>
+  <h1>Ball-Pfade Halle</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <span class="note" id="note" hidden></span>
+</header>
+
+<main>
+  <section>
+    <canvas id="stage" width="1280" height="720" aria-label="Aktuelles Bild der Sequenz, Klick markiert den Ball und springt weiter"></canvas>
+    <div class="strip" id="strip" aria-label="30 Bilder der Sequenz"></div>
+    <div class="meta" id="meta"></div>
+  </section>
+  <aside>
+    <div>
+      <div class="label">Lupe (3×, folgt der Maus)</div>
+      <canvas id="zoom" width="240" height="240" aria-hidden="true"></canvas>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="border-color:var(--ball)"></i>Vorschlag 1 bis 3</span>
+      <span><i class="dot" style="border-color:var(--ghost)"></i>dein letzter Klick</span>
+    </div>
+    <div class="btns">
+      <button class="b" id="noBall">Nicht sichtbar <kbd>N</kbd></button>
+      <button class="b" id="skip">Überspringen <kbd>→</kbd></button>
+      <button class="b" id="back">Zurück <kbd>←</kbd></button>
+      <button class="b" id="flip">Vorbild zeigen <kbd>Leertaste</kbd></button>
+      <button class="b wide" id="nextSeq">Nächste Sequenz <kbd>S</kbd></button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div>
+      <div class="label">So geht’s</div>
+      <ul class="help">
+        <li>Ball anklicken: gespeichert, das nächste Bild (0,1 s später) erscheint sofort.</li>
+        <li>Passt ein gelber Vorschlag, reicht <kbd>1</kbd>, <kbd>2</kbd> oder <kbd>3</kbd>.</li>
+        <li>Ball nicht zu sehen (verdeckt, aus dem Bild): <kbd>N</kbd>. Unklar: <kbd>→</kbd>.</li>
+        <li><kbd>Leertaste</kbd> halten zeigt das vorherige Bild: so springt der Ball ins Auge.</li>
+      </ul>
+    </div>
+  </aside>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const st = { seqs: [], si: 0, ki: 0, marks: {}, hover: null, flip: false, db: null, pending: {}, timers: {} };
+const sprites = {};
+function sprite(seq) {
+  if (!sprites[seq.id]) { const im = new Image(); im.onload = () => { if (cur() === seq) draw(); }; im.src = "s/" + seq.id + ".jpg"; sprites[seq.id] = im; }
+  return sprites[seq.id];
+}
+function cur() { return st.seqs[st.si]; }
+function marksOf(seq) { if (!st.marks[seq.id]) st.marks[seq.id] = new Array(seq.frames.length).fill(null); return st.marks[seq.id]; }
+function hallName(h) {
+  return ({ uznach_dietikon: "Uznach", leimental_frauenfeld: "Leimental/Frauenfeld", muelheim_suedpfalz: "Mülheim", u20_sui_ger: "U20 SUI-GER",
+    eisenach_wetzlar: "Eisenach", horgen_moehlin: "Horgen/Möhlin", horgen_staefa: "Horgen/Stäfa", leimental_arbon: "Leimental/Arbon", cottbus_seg: "Cottbus (Veo)" })[h] || h;
+}
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function drawFrame(g, seq, k, dx, dy, dw, dh, sx, sy, sw, sh) {
+  const im = sprite(seq); if (!im.complete || !im.naturalWidth) return false;
+  const r = Math.floor(k / seq.cols), c = k % seq.cols;
+  g.drawImage(im, c * seq.w + sx, r * seq.h + sy, sw, sh, dx, dy, dw, dh); return true;
+}
+function draw() {
+  const seq = cur(); if (!seq) return;
+  const cv = $("stage"); if (cv.width !== seq.w || cv.height !== seq.h) { cv.width = seq.w; cv.height = seq.h; }
+  const g = cv.getContext("2d"); g.fillStyle = "#000"; g.fillRect(0, 0, cv.width, cv.height);
+  const k = st.flip && st.ki > 0 ? st.ki - 1 : st.ki;
+  if (!drawFrame(g, seq, k, 0, 0, seq.w, seq.h, 0, 0, seq.w, seq.h)) { g.fillStyle = "#fff"; g.font = "20px sans-serif"; g.fillText("Bilder laden …", 20, 40); }
+  const m = marksOf(seq);
+  // previous click as ghost
+  for (let j = st.ki - 1; j >= Math.max(0, st.ki - 3); j--) {
+    if (m[j] && !m[j].none) { ring(g, m[j].x, m[j].y, 14, css("--ghost"), 2, j === st.ki - 1 ? 1 : 0.4); break; }
+  }
+  (seq.sugg[st.ki] || []).forEach((p, i) => { ring(g, p[0], p[1], 16, css("--ball"), 2, 0.95); label(g, p[0] + 14, p[1] - 14, String(i + 1)); });
+  if (m[st.ki] && !m[st.ki].none) ring(g, m[st.ki].x, m[st.ki].y, 12, css("--mark"), 3, 1);
+  drawZoom(); renderStrip(); renderMeta();
+}
+function ring(g, x, y, r, col, w, a) { g.globalAlpha = a; g.strokeStyle = col; g.lineWidth = w; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.stroke(); g.globalAlpha = 1; }
+function label(g, x, y, t) { g.font = "bold 16px monospace"; g.fillStyle = "rgba(0,0,0,.7)"; g.fillRect(x - 2, y - 14, 14, 18); g.fillStyle = css("--ball"); g.fillText(t, x, y); }
+function drawZoom() {
+  const seq = cur(); const c = $("zoom"); const g = c.getContext("2d"); g.fillStyle = "#000"; g.fillRect(0, 0, c.width, c.height);
+  const p = st.hover; if (!p) return; const r = 40; g.imageSmoothingEnabled = false;
+  drawFrame(g, seq, st.ki, 0, 0, c.width, c.height, p.x - r, p.y - r, 2 * r, 2 * r);
+  g.strokeStyle = css("--mark"); g.lineWidth = 1; g.beginPath(); g.moveTo(c.width / 2 - 8, c.height / 2); g.lineTo(c.width / 2 + 8, c.height / 2); g.moveTo(c.width / 2, c.height / 2 - 8); g.lineTo(c.width / 2, c.height / 2 + 8); g.stroke();
+}
+function renderStrip() {
+  const seq = cur(); const m = marksOf(seq); const el = $("strip");
+  if (el.children.length !== seq.frames.length) { el.innerHTML = ""; seq.frames.forEach((_, i) => { const b = document.createElement("button"); b.title = "Bild " + (i + 1); b.onclick = () => { st.ki = i; draw(); }; el.appendChild(b); }); }
+  [...el.children].forEach((b, i) => { b.className = (m[i] ? (m[i].none ? "none" : "ball") : "") + (i === st.ki ? " cur" : ""); });
+}
+function renderMeta() {
+  const seq = cur(); const m = marksOf(seq);
+  const done = m.filter((x) => x).length;
+  $("meta").innerHTML = `<span>Sequenz <b>${st.si + 1}</b> / ${st.seqs.length}</span><span>Halle <b>${hallName(seq.hall)}</b></span><span>Bild <b>${st.ki + 1}</b> / ${seq.frames.length}</span><span>${done} erledigt</span>`;
+  let tot = 0, balls = 0, seqDone = 0;
+  for (const s of st.seqs) { const mm = st.marks[s.id] || []; const d = mm.filter((x) => x).length; tot += d; balls += mm.filter((x) => x && !x.none).length; if (d >= s.frames.length - 2) seqDone++; }
+  $("progress").textContent = `${seqDone} von ${st.seqs.length} Sequenzen · ${balls} Bälle markiert`;
+}
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2000); }
+
+function persist(seq) {
+  if (!st.db) return;
+  clearTimeout(st.timers[seq.id]);
+  st.timers[seq.id] = setTimeout(async () => {
+    if (st.pending[seq.id]) { persist(seq); return; }
+    st.pending[seq.id] = true;
+    const body = { hall: seq.hall, video: seq.video, fps: seq.fps, step: seq.step, gap: seq.gap, frames: seq.frames, w: seq.w, h: seq.h,
+      marks: marksOf(seq).map((x) => x === null ? null : x), at: Date.now() };
+    try { await st.db.collection("paths").doc(seq.id).set(body); toast("Gespeichert"); }
+    catch (e) { toast("Speichern fehlgeschlagen: " + (e && e.message ? e.message : "Fehler")); }
+    st.pending[seq.id] = false;
+  }, 700);
+}
+function decide(v) {
+  const seq = cur(); marksOf(seq)[st.ki] = v; persist(seq);
+  if (st.ki < seq.frames.length - 1) st.ki++; else { toast("Sequenz fertig"); nextSeq(); return; }
+  draw();
+}
+function nextSeq() {
+  for (let d = 1; d <= st.seqs.length; d++) {
+    const j = (st.si + d) % st.seqs.length; const m = st.marks[st.seqs[j].id];
+    if (!m || m.filter((x) => x).length < st.seqs[j].frames.length - 2) { st.si = j; st.ki = m ? Math.max(0, m.findIndex((x) => !x)) : 0; break; }
+  }
+  const nx = st.seqs[(st.si + 1) % st.seqs.length]; if (nx) sprite(nx);
+  draw();
+}
+function pos(ev) { const b = $("stage").getBoundingClientRect(); const s = cur(); return { x: (ev.clientX - b.left) / b.width * s.w, y: (ev.clientY - b.top) / b.height * s.h }; }
+$("stage").addEventListener("click", (ev) => { const p = pos(ev); decide({ x: Math.round(p.x * 10) / 10, y: Math.round(p.y * 10) / 10 }); });
+$("stage").addEventListener("mousemove", (ev) => { st.hover = pos(ev); drawZoom(); });
+$("noBall").onclick = () => decide({ none: true });
+$("skip").onclick = () => { const s = cur(); if (st.ki < s.frames.length - 1) { st.ki++; draw(); } };
+$("back").onclick = () => { if (st.ki > 0) { st.ki--; draw(); } };
+$("nextSeq").onclick = () => nextSeq();
+$("flip").onmousedown = () => { st.flip = true; draw(); };
+$("flip").onmouseup = $("flip").onmouseleave = () => { if (st.flip) { st.flip = false; draw(); } };
+document.addEventListener("keydown", (ev) => {
+  const k = ev.key.toLowerCase(); const s = cur(); if (!s) return;
+  if (["1", "2", "3"].includes(k)) { const p = (s.sugg[st.ki] || [])[+k - 1]; if (p) decide({ x: p[0], y: p[1], sugg: +k }); }
+  else if (k === "n") decide({ none: true });
+  else if (k === "arrowright") { ev.preventDefault(); if (st.ki < s.frames.length - 1) { st.ki++; draw(); } }
+  else if (k === "arrowleft" || k === "backspace") { ev.preventDefault(); if (st.ki > 0) { st.ki--; draw(); } }
+  else if (k === "s") nextSeq();
+  else if (k === " ") { ev.preventDefault(); if (!st.flip) { st.flip = true; draw(); } }
+});
+document.addEventListener("keyup", (ev) => { if (ev.key === " " && st.flip) { st.flip = false; draw(); } });
+
+async function start() {
+  try { st.seqs = await (await fetch("seqs.json")).json(); } catch (e) { $("progress").textContent = "Sequenzliste konnte nicht geladen werden."; return; }
+  draw();
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
+  st.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Pfade noch nicht erreichbar."; }, 10000);
+  let first = true;
+  db.collection("paths").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); $("note").hidden = true; }
+    if (first) {
+      for (const d of snap.docs) { const b = d.data(); if (b && Array.isArray(b.marks)) st.marks[d.id] = b.marks.map((x) => x || null); }
+      first = false; st.si = 0; st.ki = 0;
+      const m = st.marks[cur().id]; if (m && m.filter((x) => x).length >= cur().frames.length - 2) nextSeq(); else { if (m) st.ki = Math.max(0, m.findIndex((x) => !x)); draw(); }
+    }
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Pfade konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>

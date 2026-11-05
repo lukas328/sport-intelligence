@@ -20,7 +20,9 @@ Status of the platform at the end of M9 and what has to happen before real clubs
 
 ## Infrastructure (ADR 002, Q-INFRA-1)
 - ✅ Object storage decided: Cloudflare R2 with EU jurisdiction (ADR 002); test-data bucket via `scripts/testdata.py`
-- ☐ Choose app hosting in the EU, managed Postgres with PITR, S3-compatible storage with versioning, GPU provider with DPA
+- ✅ App hosting decided: Azure West Europe (ADR 002); owner checklist in German: `docs/LIVEGANG.md`
+- ☐ Serve HLS segments from R2 directly, not through the API and web proxy (ADR 002 point 7)
+- ☐ GPU provider with DPA (CPU workers first)
 - ☐ Terraform module for the chosen provider (`infra/terraform`)
 - ☐ TLS on the load balancer, HSTS preload decision, CDN for HLS segments
 - ☐ Off-site backup bucket with object lock; schedule `backup.sh`; first production restore test recorded

@@ -22,6 +22,20 @@ Lookup: `handball_api.integrations.adapter("team_ops", "ics")`.
 number`. Events: `goal, miss, save, 7m_goal, 7m_miss, 2min, yellow, red, timeout`. JSON: a list of the
 same objects or `{"events": [...]}`.
 
+**Official match report by link** (`services/official_report.py`, not an adapter: public data, no
+contract): `POST /v1/orgs/{org}/matches/{match}/official-report` with `{"url": "..."}` (coach, analyst).
+A handball.ch match centre link (`.../matchcenter/spiele/<id>`, GraphQL game log) or a DHB press report
+(`dhbdata.fmp.sportradar.com/match/<id>/pressReport.pdf`, read with `pdftotext`, poppler-utils in the API
+image); a plain id needs `"provider": "handball_ch" | "dhb"`. Only these fixed hosts are fetched (15 s
+timeout). Goals with scorer and shirt number, 7 m, shots and saves (handball.ch), technical errors,
+warnings, suspensions, disqualifications and time-outs become events with source `official_report`;
+a re-import replaces them. Goals already stored on the same side within 20 s of match clock: a goal a
+person entered wins (no official duplicate); an automatic goal (overlay, heuristic) is merged into the
+official goal, which keeps its video time and position (`attributes.video`). Overlay goals without an
+official counterpart stay, so the video reading can be checked against the report; a later analysis
+drops overlay goals next to official ones and estimates no goals. Errors: 422 `report-url-unsupported`,
+404 `report-not-found`, 422 `report-unreadable` / `report-empty`, 502/503 `report-unavailable`.
+
 **Wearable CSV**: `t_ms` and `number` are required; `x` (0 to 40 m), `y` (0 to 20 m), `heart_rate`,
 `load` are optional. Decimal comma is accepted.
 

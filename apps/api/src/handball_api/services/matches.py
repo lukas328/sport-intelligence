@@ -277,12 +277,14 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         kit_own_gk=match.kit_own_gk,
         kit_opponent=match.kit_opponent,
         kit_opponent_gk=match.kit_opponent_gk,
+        kit_referee=match.kit_referee,
         kit_warnings=kit_warnings(
             {
                 "own": match.kit_own,
                 "own_gk": match.kit_own_gk,
                 "opponent": match.kit_opponent,
                 "opponent_gk": match.kit_opponent_gk,
+                **({"referee": match.kit_referee} if match.kit_referee else {}),
             }
         ),
         format=match.format,

@@ -135,6 +135,164 @@ class KickoffIn(ApiModel):
     t_ms: int = Field(ge=0)
 
 
+class OfficialReportIn(ApiModel):
+    # handball.ch match centre or DHB press report link; a plain game id needs the provider
+    url: str = Field(min_length=1, max_length=500)
+    provider: Literal["handball_ch", "dhb"] | None = None
+
+
+class OfficialReportResult(ApiModel):
+    provider: str
+    game_id: int
+    source_url: str
+    home: str | None
+    away: str | None
+    final: list[int] | None
+    created: int
+    replaced: int  # official report events of an earlier import
+    matched_video_goals: int  # automatic goals that are the same goal (video time kept)
+    unmatched_video_goals: int  # overlay goals without an official counterpart (kept)
+    kept_manual_goals: int  # goals entered by a person (no official duplicate added)
+    skipped: int
+    warnings: list[str]
+
+
+ReviewStatus = Literal["confirmed", "dismissed"]
+
+
+class VideoReading(ApiModel):
+    """What the video analysis read for an official goal."""
+
+    source: str  # scoreboard_ocr (broadcast overlay or hall scoreboard), heuristic, model
+    t_ms: int | None
+    clock_s: float | None
+    confidence: float | None
+    event_id: uuid.UUID | None  # the automatic goal paired at read time (none: merged on import)
+
+
+class OfficialGoalRow(ApiModel):
+    event_id: uuid.UUID
+    side: str
+    period: int
+    clock_s: float | None
+    official_time: str | None  # match time as in the report, "MM:SS"
+    t_ms: int | None  # video time: the video reading, else derived from the match clock
+    estimated: bool  # t_ms comes from the match clock only
+    number: int | None
+    player_id: uuid.UUID | None
+    name: str | None
+    score: list[int] | None  # own, opponent after the goal
+    penalty: bool
+    # outside: not found, and its time from the match clock is before or after the main video
+    status: Literal["found", "missing", "outside"]
+    video: VideoReading | None
+    review: ReviewStatus | None
+
+
+class VideoGoalRow(ApiModel):
+    """An automatic goal from the video with no official counterpart."""
+
+    event_id: uuid.UUID
+    side: str
+    period: int
+    clock_s: float | None
+    official_time: str | None
+    t_ms: int | None
+    source: str
+    confidence: float
+    number: int | None
+    player_id: uuid.UUID | None
+    name: str | None
+    score: list[int] | None
+    review: ReviewStatus | None
+
+
+class GoalComparisonCounts(ApiModel):
+    official: int
+    found: int  # official goals the video saw
+    missing: int  # official goals the video did not see (within the video's time range)
+    outside: int  # official goals before or after the main video (a clip of part of the game)
+    extra: int  # video goals without an official one
+    open: int  # missing and extra rows nobody confirmed or dismissed yet
+
+
+class GoalComparison(ApiModel):
+    imported: bool
+    provider: str | None
+    source_url: str | None
+    home: str | None
+    away: str | None
+    window_s: float  # an official and a video goal of the same side this close are the same goal
+    counts: GoalComparisonCounts
+    goals: list[OfficialGoalRow]
+    extra: list[VideoGoalRow]
+
+
+class GoalReviewIn(ApiModel):
+    event_id: uuid.UUID
+    status: ReviewStatus | None  # null: undo the check
+
+
+CandidateStatus = Literal["open", "confirmed", "rejected"]
+
+
+class CandidateGoal(ApiModel):
+    """A goal already stored that covers a candidate (same moment)."""
+
+    event_id: uuid.UUID
+    source: str
+    side: str
+    t_ms: int | None
+
+
+class GoalCandidateRow(ApiModel):
+    """A moment of the video that is probably a goal (analysis), with the coach's review."""
+
+    id: uuid.UUID
+    video_asset_id: uuid.UUID
+    t_ms: int  # score peak, a median 1.5 s after the goal
+    goal_ms: int  # estimated goal time (the goal event gets it on confirmation)
+    start_ms: int  # clip: 10 s before to 4 s after the peak
+    end_ms: int
+    score: float
+    rate: int  # lowest candidates-per-minute rate (1, 2, 4) that proposes it
+    suggested_side: Side | None  # whose attack ended just before it
+    status: CandidateStatus
+    side: Side | None  # confirmed: whose goal
+    event_id: uuid.UUID | None  # confirmed: the goal event
+    period: int | None
+    clock_s: float | None
+    known: CandidateGoal | None  # open but already a goal (overlay, report, tagged)
+
+
+class GoalCandidateCounts(ApiModel):
+    total: int
+    open: int  # open and not covered by a known goal
+    open_by_rate: dict[str, int]
+    confirmed: int
+    rejected: int
+    known: int
+
+
+class GoalCandidateList(ApiModel):
+    template: str | None
+    rates: list[int]
+    default_rate: int
+    counts: GoalCandidateCounts
+    candidates: list[GoalCandidateRow]
+
+
+class GoalCandidateReviewIn(ApiModel):
+    status: Literal["confirmed", "rejected"] | None  # null: back to open (undo)
+    side: Side | None = None  # required to confirm
+
+    @model_validator(mode="after")
+    def _side(self) -> GoalCandidateReviewIn:
+        if self.status == "confirmed" and self.side is None:
+            raise ValueError("a confirmed goal needs the side that scored")
+        return self
+
+
 class FeedImportResult(ApiModel):
     created: int
     skipped: int

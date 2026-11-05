@@ -477,6 +477,70 @@ def calibrate_points(
     )
 
 
+# goal posts (court metres): post feet on the floor, the crossbar 2 m above them
+GOAL_POSTS: dict[str, tuple[float, float]] = {
+    "goal_left_post_a": (0.0, 8.5),
+    "goal_left_post_b": (0.0, 11.5),
+    "goal_right_post_a": (40.0, 8.5),
+    "goal_right_post_b": (40.0, 11.5),
+}
+GOAL_HEIGHT_M = 2.0
+
+
+def pose_homography(r: F64, t: F64, k: F64) -> F64:
+    """Floor homography H = K [r1 r2 t] of a camera with rotation r and translation t."""
+    h = k @ np.column_stack([r[:, 0], r[:, 1], t.ravel()])
+    return np.asarray(h / h[2, 2], dtype=np.float64)
+
+
+def calibrate_pose(
+    image_pts: list[tuple[float, float]],
+    world_pts: list[tuple[float, float, float]],
+    intrinsics: F64,
+    image_size: tuple[int, int],
+    source: Literal["heuristic", "user_correction", "synthetic"] = "user_correction",
+) -> Calibration:
+    """Calibration from points with known 3D court coordinates and a known camera (focal length
+    from the camera motion). Only the camera pose is estimated (6 parameters), so few points that
+    span little width are enough: the four goal-post feet fix the court once the focal length is
+    known (a plain homography from the same points would leave the width loose), and points above
+    the floor (crossbar, z = 2 m) help further. Rejects poses no real camera could have."""
+    if len(image_pts) != len(world_pts) or len(image_pts) < 4:
+        raise CalibrationError("need at least four point pairs")
+    obj = np.array(world_pts, dtype=np.float64).reshape(-1, 1, 3)
+    img = np.array(image_pts, dtype=np.float64).reshape(-1, 1, 2)
+    k = np.asarray(intrinsics, dtype=np.float64)
+    best: tuple[float, F64, F64] | None = None
+    for flag in (cv2.SOLVEPNP_SQPNP, cv2.SOLVEPNP_ITERATIVE, cv2.SOLVEPNP_EPNP):
+        try:
+            ok, rvec, tvec = cv2.solvePnP(obj, img, k, None, flags=flag)
+        except cv2.error:
+            continue
+        if not ok:
+            continue
+        rvec, tvec = cv2.solvePnPRefineLM(obj, img, k, None, rvec, tvec)
+        proj, _ = cv2.projectPoints(obj, rvec, tvec, k, None)
+        err = float(np.linalg.norm(proj.reshape(-1, 2) - img.reshape(-1, 2), axis=1).mean())
+        if best is None or err < best[0]:
+            best = (err, np.asarray(rvec, np.float64), np.asarray(tvec, np.float64))
+    if best is None:
+        raise CalibrationError("points are degenerate")
+    err, rvec, tvec = best
+    r = np.asarray(cv2.Rodrigues(rvec)[0], dtype=np.float64)
+    centre = -r.T @ tvec.ravel()
+    # the camera stands above the floor, outside or at the edge of the court, not far away
+    if not (1.0 <= centre[2] <= 40.0) or np.hypot(centre[0] - 20, centre[1] - 10) > 80:
+        raise CalibrationError("these points give an impossible camera position; check them")
+    h = pose_homography(r, tvec, k)
+    return Calibration(
+        h,
+        confidence=1.0 if source == "user_correction" else max(0.0, min(1.0, 1 - err / 20)),
+        reprojection_px=err,
+        source=source,
+        image_size=image_size,
+    )
+
+
 def court_error_m(calib: Calibration, truth_h: F64) -> float:
     """Mean distance in metres between estimated and true court positions over the court."""
     grid = np.array([[x, y] for x in np.linspace(0, 40, 21) for y in np.linspace(0, 20, 11)])
