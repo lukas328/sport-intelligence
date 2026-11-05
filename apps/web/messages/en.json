@@ -1749,7 +1749,10 @@
     "reject": "Reject",
     "undo": "Undo",
     "knownHint": "{n, plural, one {# candidate is} other {# candidates are}} already a goal (score overlay, match report or entered by hand) and shown under \"All\".",
-    "summary": "{open} open · {confirmed} confirmed · {rejected} rejected"
+    "summary": "{open} open · {confirmed} confirmed · {rejected} rejected",
+    "question": "Goal?",
+    "noGoal": "No goal",
+    "focusHint": "The clip plays as soon as a candidate is up. 1 or 2 confirms, X rejects, U undoes, Enter plays again, Esc closes."
   },
   "matrix": {
     "nav": "Matrix",
@@ -2231,6 +2234,9 @@
     "halftime": "Break",
     "laneVideo": "Video",
     "laneReport": "Match report",
-    "laneCandidates": "Candidates"
+    "laneCandidates": "Candidates",
+    "reviewOpen": "Review full screen",
+    "reviewClose": "Close",
+    "reviewLeft": "{n} open"
   }
 }

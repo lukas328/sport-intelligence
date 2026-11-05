@@ -53,12 +53,15 @@ export function GoalCandidatesPanel({
   ownName,
   oppName,
   onClip,
+  focusMode = false,
 }: {
   orgId: string;
   matchId: string;
   ownName: string;
   oppName: string;
   onClip: (fromMs: number, toMs: number) => void;
+  /** review mode: the active candidate large, its clip plays as soon as it is active */
+  focusMode?: boolean;
 }) {
   const t = useTranslations("goalCandidates");
   const tr = useTranslations();
@@ -70,7 +73,9 @@ export function GoalCandidatesPanel({
   const [error, setError] = useState<ErrorKey | null>(null);
   const [focus, setFocus] = useState(0);
   const rowRefs = useRef<(HTMLLIElement | null)[]>([]);
-  const refocus = useRef<number | null>(null);
+  // the row to focus next, by id: the list changes only once the optimistic update is in
+  const refocus = useRef<string | null>(null);
+  const lastDecided = useRef<string | null>(null);
   const q = useGoalCandidates(orgId, matchId);
   const reviewKey = ["review", ...key];
   const review = useMutation({
@@ -118,10 +123,29 @@ export function GoalCandidatesPanel({
   const rows = list ? visibleRows(list, current, filter) : [];
   useEffect(() => {
     if (refocus.current == null) return;
-    const i = refocus.current;
+    const i = rows.findIndex((r) => r.id === refocus.current);
+    if (i < 0) return; // not in the list yet: try again after the next render
     refocus.current = null;
-    if (i >= 0) rowRefs.current[i]?.focus();
+    rowRefs.current[i]?.focus(); // the row's onFocus moves the active index
   });
+  const activeRow = rows[Math.min(focus, rows.length - 1)];
+  // review mode: each candidate's clip plays when it becomes the active one
+  useEffect(() => {
+    if (focusMode && activeRow) onClip(activeRow.start_ms, activeRow.end_ms);
+  }, [focusMode, activeRow?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (focusMode) rowRefs.current[Math.min(focus, rows.length - 1)]?.focus();
+  }, [focusMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  const undoRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    if (!focusMode) return;
+    // the last row decided leaves nothing focused: U still takes it back
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if ((e.key === "u" || e.key === "U") && (document.activeElement === document.body || document.activeElement == null)) undoRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [focusMode]);
   if (!list || list.counts.total === 0) return null;
 
   const team = (side: string | null | undefined) =>
@@ -136,9 +160,19 @@ export function GoalCandidatesPanel({
     const leaves = filter === "open" && status !== null;
     const next = focusAfter(rows.length, index, leaves);
     setFocus(Math.max(0, next));
-    refocus.current = next;
+    refocus.current = next < 0 ? null : (leaves ? rows.filter((r) => r.id !== c.id)[next]?.id : rows[next]?.id) ?? null;
+    if (status !== null) lastDecided.current = c.id;
     review.mutate({ id: c.id, status, side });
   };
+  // the decided row has left the open list: U takes back the last decision and goes there
+  function undoLast() {
+    const id = lastDecided.current;
+    if (!id) return;
+    lastDecided.current = null;
+    refocus.current = id;
+    review.mutate({ id, status: null, side: null });
+  }
+  undoRef.current = undoLast;
   const confirmed = (c: Candidate, side: CandidateSide) =>
     c.status === "confirmed" && c.side === side;
 
@@ -160,7 +194,10 @@ export function GoalCandidatesPanel({
     }
     if (action === "reject")
       return decide(c, index, c.status === "rejected" ? null : "rejected", null);
-    if (action === "undo") return c.status !== "open" ? decide(c, index, null, null) : undefined;
+    if (action === "undo") {
+      if (c.status !== "open") return decide(c, index, null, null);
+      return undoLast();
+    }
     const to = moveFocus(action, index, rows.length);
     setFocus(to);
     rowRefs.current[to]?.focus();
@@ -210,6 +247,37 @@ export function GoalCandidatesPanel({
           ),
         })}
       </p>
+      {focusMode && activeRow && (
+        <div className="space-y-3 border-y border-foreground/15 py-4" data-testid="goal-candidate-focus">
+          <p className="flex items-baseline gap-3">
+            <span className="font-display text-4xl leading-none">{t("question")}</span>
+            <span className="text-sm text-muted tabular-nums">
+              {activeRow.clock_s != null ? t("clock", { clock: formatClock(activeRow.clock_s * 1000) }) : formatClock(activeRow.goal_ms)}
+              {activeRow.suggested_side && ` · ${t("suggested", { team: team(activeRow.suggested_side) ?? "" })}`}
+            </span>
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {(["own", "opponent"] as const).map((side, k) => (
+              <Button
+                key={side}
+                size="lg"
+                variant={k === 0 ? "primary" : "secondary"}
+                disabled={activeRow.known != null}
+                className="h-auto min-w-0 px-3 py-2 text-left whitespace-normal"
+                onClick={() => decide(activeRow, Math.min(focus, rows.length - 1), "confirmed", side)}
+              >
+                {t("goalFor", { team: team(side) ?? "" })}
+                <kbd className="font-sans opacity-70">{k + 1}</kbd>
+              </Button>
+            ))}
+            <Button size="lg" variant="secondary" className="col-span-2" onClick={() => decide(activeRow, Math.min(focus, rows.length - 1), "rejected", null)}>
+              {t("noGoal")}
+              <kbd className="font-sans opacity-70">X</kbd>
+            </Button>
+          </div>
+          <p className="text-xs text-muted">{t("focusHint")}</p>
+        </div>
+      )}
       {rows.length === 0 ? (
         <p className="text-sm text-muted">{filter === "open" ? t("nothingOpen") : t("none")}</p>
       ) : (

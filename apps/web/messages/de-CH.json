@@ -1749,7 +1749,10 @@
     "reject": "Verwerfen",
     "undo": "Rückgängig",
     "knownHint": "{n, plural, one {# Kandidat ist} other {# Kandidaten sind}} schon als Tor erfasst (Einblendung, Matchbericht oder von Hand) und unter «Alle» zu sehen.",
-    "summary": "{open} offen · {confirmed} bestätigt · {rejected} verworfen"
+    "summary": "{open} offen · {confirmed} bestätigt · {rejected} verworfen",
+    "question": "Tor?",
+    "noGoal": "Kein Tor",
+    "focusHint": "Der Clip läuft, sobald ein Kandidat dran ist. 1 oder 2 bestätigt, X verwirft, U nimmt zurück, Enter spielt nochmals, Esc schliesst."
   },
   "matrix": {
     "nav": "Matrix",
@@ -2231,6 +2234,9 @@
     "halftime": "Pause",
     "laneVideo": "Video",
     "laneReport": "Matchbericht",
-    "laneCandidates": "Kandidaten"
+    "laneCandidates": "Kandidaten",
+    "reviewOpen": "Im Vollbild prüfen",
+    "reviewClose": "Schliessen",
+    "reviewLeft": "{n} offen"
   }
 }

@@ -1749,7 +1749,10 @@
     "reject": "Écarter",
     "undo": "Annuler",
     "knownHint": "{n, plural, one {# but potentiel est déjà un but (incrustation, rapport de match ou saisie manuelle) et figure sous « Tous ».} other {# buts potentiels sont déjà des buts (incrustation, rapport de match ou saisie manuelle) et figurent sous « Tous ».}}",
-    "summary": "{open} à vérifier · {confirmed} confirmés · {rejected} écartés"
+    "summary": "{open} à vérifier · {confirmed} confirmés · {rejected} écartés",
+    "question": "But ?",
+    "noGoal": "Pas de but",
+    "focusHint": "Le clip démarre dès qu'un but possible est actif. 1 ou 2 confirme, X écarte, U annule, Entrée rejoue, Échap ferme."
   },
   "matrix": {
     "nav": "Matrice",
@@ -2231,6 +2234,9 @@
     "halftime": "Pause",
     "laneVideo": "Vidéo",
     "laneReport": "Feuille de match",
-    "laneCandidates": "Buts possibles"
+    "laneCandidates": "Buts possibles",
+    "reviewOpen": "Vérifier en plein écran",
+    "reviewClose": "Fermer",
+    "reviewLeft": "{n} à vérifier"
   }
 }

@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Keyboard } from "lucide-react";
+import { Keyboard, Maximize2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
@@ -103,6 +103,19 @@ export function Workspace({
   const [tab, setTab] = useState<Tab>("comments");
   const [pane, setPane] = useState<Pane | null>(null);
   const [goalList, setGoalList] = useState<"candidates" | "report" | null>(null);
+  // review mode: the workspace full screen, one goal candidate after the other
+  const [reviewing, setReviewing] = useState(false);
+  useEffect(() => {
+    if (!reviewing) return;
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setReviewing(false);
+    window.addEventListener("keydown", onEsc);
+    const before = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onEsc);
+      document.body.style.overflow = before;
+    };
+  }, [reviewing]);
   const [drawing, setDrawing] = useState(false);
   const [tool, setTool] = useState<Tool>("arrow");
   const [color, setColor] = useState(COLORS[0]!);
@@ -278,10 +291,10 @@ export function Workspace({
   });
   const loaded = !analysis.isLoading && !candidates.isLoading && !(hasReport && official.isLoading);
   const tools: Pane[] = [...(staff ? (["events"] as const) : (["court"] as const)), ...(a?.status === "ready" ? (["formations"] as const) : []), "notes"];
-  const shown: Pane = pane ?? (staff ? (firstOpen(stepList) ?? "notes") : "notes");
+  const chosen: Pane = pane ?? (staff ? (firstOpen(stepList) ?? "notes") : "notes");
   // the first open step is shown once the lists are in; from then on the coach decides
   useEffect(() => {
-    if (pane == null && loaded) setPane(shown);
+    if (pane == null && loaded) setPane(chosen);
   }, [loaded]); // eslint-disable-line react-hooks/exhaustive-deps
   const jump = useCallback((ms: number) => {
     player.current.seek(ms);
@@ -333,9 +346,32 @@ export function Workspace({
   };
   const openCandidates = candidates.data && candidates.data.counts.total > 0;
   const list = goalList ?? (openCandidates || !hasReport ? "candidates" : "report");
+  const shown: Pane = reviewing ? "goals" : chosen;
+  const openNow = candidates.data?.counts.open_by_rate[String(rate)] ?? 0;
   return (
-    <div className="space-y-5">
-      <WorkRail steps={staff ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+    <div
+      className={cn("space-y-5", reviewing && "fixed inset-0 z-[60] !m-0 h-dvh overflow-y-auto bg-background p-4 sm:p-6 lg:px-10")}
+      role={reviewing ? "dialog" : undefined}
+      aria-modal={reviewing || undefined}
+      aria-labelledby={reviewing ? `${paneId}-review` : undefined}
+    >
+      {reviewing ? (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-foreground/15 pb-3">
+          <h2 id={`${paneId}-review`} className="font-display text-3xl">
+            {t("workflow.goals")}
+          </h2>
+          <span className="text-muted">{`${teamName} ${t("matches.vs")} ${oppName}`}</span>
+          <span className="ml-auto font-score text-xl tabular-nums" aria-live="polite">
+            {t("workflow.reviewLeft", { n: openNow })}
+          </span>
+          <Button variant="secondary" onClick={() => setReviewing(false)} data-testid="review-close">
+            <X aria-hidden />
+            {t("workflow.reviewClose")}
+          </Button>
+        </div>
+      ) : (
+        <WorkRail steps={staff ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+      )}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}
       <div className="min-w-0 space-y-3 lg:sticky lg:top-4">
@@ -393,9 +429,9 @@ export function Workspace({
         )}
         </div>
         {cams.length > 1 && !offset && <MultiAngleControls cams={cams} state={multi} />}
-        {spot.ready && !offset && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
+        {spot.ready && !offset && !reviewing && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className={cn("flex flex-wrap items-center gap-2", reviewing && "hidden")}>
           {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
             <Button
               variant="secondary"
@@ -445,8 +481,8 @@ export function Workspace({
 
       <div
         id={`${paneId}-pane`}
-        role="tabpanel"
-        aria-labelledby={`${paneId}-tab-${shown}`}
+        role={reviewing ? undefined : "tabpanel"}
+        aria-labelledby={reviewing ? undefined : `${paneId}-tab-${shown}`}
         className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:pr-1"
       >
         {shown === "court" && (
@@ -457,7 +493,7 @@ export function Workspace({
         )}
         {shown === "goals" && staff && (
           <div className="flex min-h-0 flex-1 flex-col gap-4">
-            {hasReport && openCandidates && (
+            {hasReport && openCandidates && !reviewing && (
               <Segmented<"candidates" | "report">
                 label={t("workflow.goalLists")}
                 size="sm"
@@ -469,10 +505,16 @@ export function Workspace({
                 ]}
               />
             )}
-            {list === "report" && hasReport ? (
+            {list === "candidates" && openCandidates && !reviewing && openNow > 0 && (
+              <Button variant="secondary" className="self-start" onClick={() => (setGoalList("candidates"), setReviewing(true))} data-testid="review-open">
+                <Maximize2 aria-hidden />
+                {t("workflow.reviewOpen")}
+              </Button>
+            )}
+            {list === "report" && hasReport && !reviewing ? (
               <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} isHome={match.is_home} names={names} covers={spansFor} onPlay={jump} />
             ) : openCandidates ? (
-              <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} onClip={playClip} />
+              <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} onClip={playClip} focusMode={reviewing} />
             ) : (
               <p className="text-sm text-muted">{t("workflow.goalsNone")}</p>
             )}
