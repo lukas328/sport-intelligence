@@ -251,8 +251,11 @@ async def test_claim_creates_club_and_team_and_prefills(
     row = await owner_conn.fetchrow(
         "SELECT venue, official_game_id, source FROM matches WHERE id = $1::uuid", m["id"]
     )
-    assert dict(row) == {"venue": "Thalwil Sonnenberg", "official_game_id": 509192,
-                         "source": "official"}
+    assert dict(row) == {
+        "venue": "Thalwil Sonnenberg",
+        "official_game_id": 509192,
+        "source": "official",
+    }
 
     link = (await api.get(base(c) + "/official")).json()
     assert link["linked"] is True and link["official_group_id"] == GROUP
@@ -327,9 +330,7 @@ async def test_duplicate_claim_becomes_access_request(
 
     org = c["organization_id"]
     pending = (await first.get(f"/v1/orgs/{org}/access-requests")).json()
-    assert [(p["email"], p["official_team_id"]) for p in pending] == [
-        ("other@example.org", TEAM)
-    ]
+    assert [(p["email"], p["official_team_id"]) for p in pending] == [("other@example.org", TEAM)]
     assert pending[0]["team_id"] == c["team_id"]
     r = await first.post(
         f"/v1/orgs/{org}/access-requests/{pending[0]['id']}/approve",
@@ -398,9 +399,7 @@ async def test_accept_roster_and_report_suggestions(
     assert r.status_code == 409 and r.json()["type"].endswith("suggestion-resolved")
 
     team = (await api.get(base(c))).json()
-    entries = (
-        await api.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")
-    ).json()
+    entries = (await api.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")).json()
     numbers = {e["first_name"]: e["jersey_number"] for e in entries}
     assert numbers == {"Luca": 55, "Noah": 9, "Yves": 15, "Silvan": None}
     assert len(await suggestions(api, c, "roster_add")) == PLAYERS - 5
@@ -434,9 +433,7 @@ async def test_roster_from_official_data_hidden_until_join_or_consent(
     api = await coach(make_api)
     c = await claim(api)
     roster = {s["payload"]["first_name"]: s for s in await suggestions(api, c, "roster_add")}
-    luca = (
-        await api.post(base(c) + f"/official/suggestions/{roster['Luca']['id']}/accept")
-    ).json()
+    luca = (await api.post(base(c) + f"/official/suggestions/{roster['Luca']['id']}/accept")).json()
     team = (await api.get(base(c))).json()
     season = team["current_season"]["id"]
     manual = await api.post(
@@ -444,9 +441,13 @@ async def test_roster_from_official_data_hidden_until_join_or_consent(
     )
     assert manual.status_code == 201
     player = await invite(api, make_api, outbox, c, "player")
-    seen = {e["first_name"] for e in (await player.get(base(c) + f"/seasons/{season}/roster")).json()}
+    seen = {
+        e["first_name"] for e in (await player.get(base(c) + f"/seasons/{season}/roster")).json()
+    }
     assert seen == {"Hand"}  # the official entry stays with the coach
-    assert {e["first_name"] for e in (await api.get(base(c) + f"/seasons/{season}/roster")).json()} == {
+    assert {
+        e["first_name"] for e in (await api.get(base(c) + f"/seasons/{season}/roster")).json()
+    } == {
         "Hand",
         "Luca",
     }
@@ -463,7 +464,9 @@ async def test_roster_from_official_data_hidden_until_join_or_consent(
         },
     )
     assert r.status_code == 201, r.text
-    seen = {e["first_name"] for e in (await player.get(base(c) + f"/seasons/{season}/roster")).json()}
+    seen = {
+        e["first_name"] for e in (await player.get(base(c) + f"/seasons/{season}/roster")).json()
+    }
     assert seen == {"Hand", "Luca"}
 
 
@@ -476,9 +479,7 @@ async def test_join_request_matches_roster_and_coach_approves(
     api = await coach(make_api)
     c = await claim(api)
     roster = {s["payload"]["first_name"]: s for s in await suggestions(api, c, "roster_add")}
-    luca = (
-        await api.post(base(c) + f"/official/suggestions/{roster['Luca']['id']}/accept")
-    ).json()
+    luca = (await api.post(base(c) + f"/official/suggestions/{roster['Luca']['id']}/accept")).json()
 
     joiner = await coach(make_api, "luca@example.org")
     hit = next(
@@ -520,13 +521,9 @@ async def test_join_request_matches_roster_and_coach_approves(
 
     team = (await joiner.get(base(c))).json()
     assert team["my_role"] == "player"
-    entries = (
-        await joiner.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")
-    ).json()
+    entries = (await joiner.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")).json()
     assert [(e["first_name"], e["has_account"]) for e in entries] == [("Luca", True)]
-    assert [m["status"] for m in (await joiner.get("/v1/me/join-requests")).json()] == [
-        "approved"
-    ]
+    assert [m["status"] for m in (await joiner.get("/v1/me/join-requests")).json()] == ["approved"]
     r = await joiner.post(
         f"/v1/teams/{hit['team_id']}/join-requests", json={"first_name": "L", "last_name": "M"}
     )
@@ -549,9 +546,7 @@ async def test_join_request_matches_an_open_suggestion(make_api: Callable[[], Ap
     assert r.status_code == 200, r.text
     team = (await joiner.get(base(c))).json()
     assert team["my_role"] == "goalkeeper"
-    entries = (
-        await joiner.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")
-    ).json()
+    entries = (await joiner.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")).json()
     assert [(e["first_name"], e["jersey_number"]) for e in entries] == [("Nico", 52)]
     left = {s["payload"]["first_name"] for s in await suggestions(api, c, "roster_add")}
     assert "Nico" not in left
@@ -580,9 +575,7 @@ async def test_join_request_matches_an_open_suggestion(make_api: Callable[[], Ap
     assert r.status_code == 200, r.text
     r = await api.post(base(c) + f"/join-requests/{pending['No']['id']}/decline")
     assert r.status_code == 200 and r.json()["status"] == "declined"
-    entries = (
-        await api.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")
-    ).json()
+    entries = (await api.get(base(c) + f"/seasons/{team['current_season']['id']}/roster")).json()
     numbers = {e["first_name"]: e["jersey_number"] for e in entries}
     assert numbers == {"Nico": 52, "Neu": None}  # 52 is taken
     assert (await other.get(base(c))).status_code == 404
@@ -623,9 +616,7 @@ async def test_permissions_other_club_player_and_unverified_club(
         f"/join-requests/{request_id}/decline",
     ):
         assert (await other.post(base(c) + path)).status_code == 404, path
-    assert (
-        await other.get(f"/v1/orgs/{c['organization_id']}/access-requests")
-    ).status_code == 404
+    assert (await other.get(f"/v1/orgs/{c['organization_id']}/access-requests")).status_code == 404
 
     # a player of the team reads the link and standing, but no suggestions or requests
     player = await invite(api, make_api, outbox, c, "player")
@@ -638,9 +629,7 @@ async def test_permissions_other_club_player_and_unverified_club(
         f"/join-requests/{request_id}/approve",
     ):
         assert (await player.post(base(c) + path)).status_code == 403, path
-    assert (
-        await player.get(f"/v1/orgs/{c['organization_id']}/access-requests")
-    ).status_code == 403
+    assert (await player.get(f"/v1/orgs/{c['organization_id']}/access-requests")).status_code == 403
     # a player cannot confirm the club
     r = await player.post(f"/v1/orgs/{c['organization_id']}/verification/confirm")
     assert r.status_code == 403
@@ -730,10 +719,16 @@ async def test_sync_brings_changes_as_suggestions(
     assert r.status_code == 200, r.text
     assert r.json()["other_suggestions"] == 2
     assert r.json()["roster_suggestions"] == 2  # Neu Zuzug joined, Noah left
-    kinds = {(s["kind"], s["payload"].get("first_name") or s["payload"].get("game_id")) for s in
-             await suggestions(api, c)}
-    assert {("match_moved", 509159), ("match_new", 599999), ("roster_add", "Neu"),
-            ("roster_left", "Noah")} <= kinds
+    kinds = {
+        (s["kind"], s["payload"].get("first_name") or s["payload"].get("game_id"))
+        for s in await suggestions(api, c)
+    }
+    assert {
+        ("match_moved", 509159),
+        ("match_new", 599999),
+        ("roster_add", "Neu"),
+        ("roster_left", "Noah"),
+    } <= kinds
     # idempotent: a second sync proposes nothing twice
     r = await api.post(base(c) + "/official/sync")
     assert r.json()["other_suggestions"] == 0 and r.json()["roster_suggestions"] == 0
@@ -815,7 +810,8 @@ async def test_daily_tick_syncs_and_imports_reports(
     assert (r.json()["teams"], r.json()["suggestions"], r.json()["stopped"]) == (1, 1, 0)
     # a game ended three hours ago: its report is imported (the suggestion is done)
     await owner_conn.execute(
-        "UPDATE matches SET kickoff_at = now() - interval '30 days' WHERE official_game_id <> 509192"
+        "UPDATE matches SET kickoff_at = now() - interval '30 days' "
+        "WHERE official_game_id <> 509192"
     )
     await owner_conn.execute(
         "UPDATE matches SET kickoff_at = now() - interval '3 hours' WHERE official_game_id = 509192"

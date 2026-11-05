@@ -119,6 +119,12 @@ ENDPOINTS: list[tuple[str, set[str], Call]] = [
         ),
     ),
     ("GET team", READERS, lambda a, w: a.get(w.t())),
+    # official league data (federation onboarding)
+    ("GET official link", READERS, lambda a, w: a.get(w.t("/official"))),
+    ("GET official suggestions", ORGANISE, lambda a, w: a.get(w.t("/official/suggestions"))),
+    ("GET join requests", ORGANISE, lambda a, w: a.get(w.t("/join-requests"))),
+    ("GET access requests", ADMIN, lambda a, w: a.get(f"/v1/orgs/{w.org}/access-requests")),
+    ("GET verification", MEMBERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/verification")),
     ("PATCH team", COACHES, lambda a, w: a.patch(w.t(), json={"league": "2. Liga"})),
     ("GET seasons", READERS, lambda a, w: a.get(w.t("/seasons"))),
     (

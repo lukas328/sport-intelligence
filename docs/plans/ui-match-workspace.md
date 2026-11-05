@@ -161,3 +161,81 @@ Real footage audit (2026-11-05): fixes for full games, clips from mid-half, seve
   dismissed) of an overlay or estimated goal moves to the new row at the same moment, and
   automatic rows the coach deleted or changed are not created again. Clicked court points are
   kept with the video: reprocess and retries use them, so a flat view does not ask again.
+
+Clubs and teams from the official data (2026-11-05, docs/plans/federation-onboarding.md phases 1
+to 3, Switzerland via handball.ch). Errors are problem codes; handball.ch down gives 503
+`official-unavailable` (try later). All new endpoints are in the api-client.
+- Onboarding flow, step 1 "Mannschaft suchen" (signed in, no club needed):
+  `GET /v1/official/teams?q=thalwil` (at least 3 letters, else 422 `query-too-short`; 30 per
+  minute). Hits: `official_id`, `name` (official team name, e.g. "TV Thalwil 2"), `league`
+  ("Männer 2. Liga"), `league_short`, `group_name`, `season_id`, `club {id, name, city}`,
+  `registered_club_id`, `status` ("available" | "claimed" | "member"), `team_id` (set when the team
+  is in the app: players use it for a join request), `organization_id` (only when "member").
+  Suggested UI: group the hits by club, show league per team; "available" offers "Übernehmen",
+  "claimed" offers "Zugang anfragen" (coach) and "Beitreten" (player), "member" opens the team.
+- Step 2 "Übernehmen": `POST /v1/official/teams/{official_id}/claim` body `{club_id, team_name?,
+  org_id?, message?}` (`club_id` = the hit's `club.id`; `org_id` links a club the user already
+  administers instead of creating one; `message` goes with an access request). Answers:
+  201 `{status: "claimed", organization_id, team_id, created_organization, verification,
+  prefill: {matches_created, results, roster_suggestions, report_suggestions, other_suggestions}}`,
+  202 `{status: "access_requested", access_request_id}` (club or team already in the app: its
+  admins decide), 200 `{status: "already_member", organization_id, team_id}`. After 201 the team
+  has the season schedule as matches (opponent, home/away, venue, `source` "official"), results of
+  played games, and suggestions. Suggested UI: a short "Wir haben X Spiele, Y Spieler und Z
+  Spielberichte gefunden" screen leading to the roster confirmation.
+- Step 3 "Kader bestätigen" and the suggestion inbox (coach, team manager, club admin; 403 for
+  others): `GET /v1/orgs/{org}/teams/{team}/official/suggestions?status=open&kind=` returns
+  `{id, kind, status, payload, created_at, resolved_at}`. Kinds and payload:
+  `roster_add` {official_player_id, first_name, last_name, jersey_number, appearances};
+  `roster_number` {roster_entry_id, player_id, first_name, last_name, from, to};
+  `roster_left` {roster_entry_id, player_id, first_name, last_name, jersey_number};
+  `report` (past game with official log) and `match_new` {game_id, kickoff_at, is_home, opponent,
+  venue, competition, played, score_own, score_opponent, match_id (report)};
+  `match_moved` {same plus match_id, from {kickoff_at, venue}, to {kickoff_at, venue}};
+  `season_new` {official_team_id, season_id, label, starts_on, ends_on, name, league, group_name}.
+  `POST .../official/suggestions/{id}/accept` (body optional; `roster_add` takes
+  `{jersey_number}` to override, null = none; a taken number is left empty) returns
+  `{suggestion, player_id?, match_id?, season_id?, report?}` (`report` = the import result as in
+  the manual report import); `POST .../dismiss`. 409 `suggestion-resolved` when already decided,
+  409 `suggestion-stale` when the match or entry is gone. A dismissed suggestion is not proposed
+  again. Suggested UI: roster list with checkboxes and number fields ("Alle übernehmen" = accept
+  one by one), report rows with "Importieren", schedule changes as "Verschoben: alt → neu".
+- Team page: `GET /v1/orgs/{org}/teams/{team}/official` (every team member) `{linked, provider,
+  official_team_id, official_club_id, official_group_id, official_season_id, league, group_name,
+  synced_at, standing: [{teamId, clubId, name, rank, games, won, drawn, lost, goalsFor,
+  goalsAgainst, goalDifference, points}], open_suggestions}` (`open_suggestions` only for
+  organisers, else 0); `{linked: false}` for teams made by hand. "Jetzt abgleichen":
+  `POST .../official/sync` (organisers, 6 per hour) returns the counts and `synced_at`. Otherwise
+  the sync runs daily; after each game the official report is imported automatically.
+  `TeamOut.official_team_id` and `OrgOut.official_club_id` / `OrgOut.verification` are new fields.
+- Join requests (players, way B): `POST /v1/teams/{team_id}/join-requests` body `{first_name,
+  last_name, jersey_number?, role: "player" | "goalkeeper", message?}` (signed in, not a member;
+  409 `join-request-pending`, 409 `already-member`) returns `{id, team_id, team_name,
+  organization_id, organization_name, status, created_at}`. `GET /v1/me/join-requests` (status
+  pending | approved | declined | withdrawn), `DELETE /v1/me/join-requests/{id}` withdraws. The
+  requester never sees the roster. Coach side: `GET /v1/orgs/{org}/teams/{team}/join-requests`
+  (pending) with `email` and `suggested` {kind: "player" | "suggestion", id, first_name,
+  last_name, jersey_number} (the matching roster entry or roster suggestion, null when none or
+  two equally good). `POST .../join-requests/{id}/approve` body optional `{player_id |
+  suggestion_id | new_entry: true}` (empty = take `suggested`, else a new roster entry from the
+  request); `POST .../decline`. Suggested UI: "Luca Müster möchte beitreten — passt zu #55 Luca
+  Muster? [Bestätigen]". Parents still come through the coach's invitation.
+- Access requests (second person of a claimed club): `GET /v1/orgs/{org}/access-requests` (club
+  admins) `{id, user_id, name, email, team_id, official_team_id, message, status, created_at}`;
+  `POST .../{id}/approve` body optional `{org_role: "member" | "org_admin", team_role: "coach"}`
+  (a requested team not yet in the app is created from the official data with the person as its
+  coach); `POST .../{id}/decline`. Requester: `GET /v1/me/access-requests`.
+- Verification of claimed clubs: `GET /v1/orgs/{org}/verification` `{verification: "none" |
+  "unverified" | "verified", verified_via: "mail_domain" | "second_official" | "federation" |
+  "operator", verified_at, official_club_id, club_domains, methods}` (checks the automatic ways on
+  each call). `POST /v1/orgs/{org}/verification/confirm`: a second club admin or coach (not the
+  claimant, confirmed e-mail) confirms (403 `second-person-required`, 403 `email-unverified`).
+  Operators: `POST /v1/ops/organizations/{org}/verification` `{verified}`. While "unverified":
+  share links and public profiles give 403 `org-unverified`, official reports keep opponent
+  players as numbers only. Suggested UI: a banner "Verein noch nicht bestätigt" with the ways
+  (mail at the club domain, second person, federation licence, support).
+- Data protection: roster entries taken from the official data are listed only for organisers
+  until the person joins (account) or a consent is recorded; other team members do not see them.
+- New notification kinds (in-app and push, need web texts): `join_request`, `join_approved`,
+  `access_request`, `access_approved`, `official_suggestions` (params `team_id`, `count`),
+  `official_report` (params `match_id`).
