@@ -130,7 +130,8 @@
     "pageBody": "The page could not be loaded. Try again; if it happens again, tell us via “Send feedback”.",
     "notFoundBody": "It may have been deleted, or you do not have access to it.",
     "home": "Go to the start page",
-    "pageTitle": "Something went wrong"
+    "pageTitle": "Something went wrong",
+    "already-a-goal": "This moment is already a goal."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -1705,6 +1706,38 @@
     "reviewHint": "Confirm: the moment in the video is right. Dismiss: wrongly detected or not visible. Click again to undo.",
     "nothingOpen": "Everything checked.",
     "noGoals": "The report has no goals."
+  },
+  "goalCandidates": {
+    "title": "Goal candidates",
+    "hint": "Moments in the video that are probably goals, found from the camera and the players. Watch the clip, then confirm the goal for a team or reject it. Rejected moments are kept and help to improve the detection.",
+    "countOpen": "To check",
+    "countConfirmed": "Confirmed goals",
+    "countRejected": "Rejected",
+    "countKnown": "Already a goal",
+    "filter": "Filter candidates",
+    "open": "To check ({n})",
+    "all": "All ({n})",
+    "rate": "Candidates per minute",
+    "perMinute": "{n} per min",
+    "keys": "In the list: <k>↑</k> <k>↓</k> select, <k>Enter</k> play the clip, <k>1</k> goal {own}, <k>2</k> goal {opp}, <k>X</k> reject, <k>U</k> undo.",
+    "nothingOpen": "All candidates are checked.",
+    "none": "No candidates at this rate per minute.",
+    "clock": "match time {clock}",
+    "suggested": "Suggested: {team}",
+    "noSuggestion": "Team open",
+    "row": "Goal candidate {label}",
+    "knownOverlay": "Goal from the score overlay ({team})",
+    "knownReport": "Goal from the match report ({team})",
+    "knownTagged": "Already recorded ({team})",
+    "play": "Play the clip at {time}",
+    "gameTime": "Match time",
+    "goalFor": "Goal {team}",
+    "extraRate": "Extra",
+    "confirmed": "Confirmed",
+    "rejected": "Rejected",
+    "reject": "Reject",
+    "undo": "Undo",
+    "knownHint": "{n, plural, one {# candidate is} other {# candidates are}} already a goal (score overlay, match report or entered by hand) and shown under \"All\"."
   },
   "matrix": {
     "nav": "Matrix",

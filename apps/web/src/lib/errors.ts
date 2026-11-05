@@ -57,6 +57,7 @@ export const KNOWN_ERRORS = [
   "report-unreadable",
   "report-empty",
   "report-unavailable",
+  "already-a-goal",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

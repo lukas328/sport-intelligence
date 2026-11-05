@@ -130,7 +130,8 @@
     "pageBody": "La page n'a pas pu être chargée. Réessayez ; si cela se reproduit, écrivez-nous via « Donner un avis ».",
     "notFoundBody": "Elle a peut-être été supprimée, ou vous n'y avez pas accès.",
     "home": "Aller à l'accueil",
-    "pageTitle": "Un problème est survenu"
+    "pageTitle": "Un problème est survenu",
+    "already-a-goal": "Ce moment est déjà un but."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -1705,6 +1706,38 @@
     "reviewHint": "Confirmer : le moment dans la vidéo est juste. Écarter : mal détecté ou pas visible. Cliquer à nouveau pour annuler.",
     "nothingOpen": "Tout est vérifié.",
     "noGoals": "Le rapport ne contient aucun but."
+  },
+  "goalCandidates": {
+    "title": "Buts potentiels",
+    "hint": "Moments de la vidéo qui sont probablement des buts, repérés grâce à la caméra et aux joueurs. Regarde le clip, puis confirme le but pour une équipe ou écarte-le. Les moments écartés sont conservés et aident à améliorer la détection.",
+    "countOpen": "À vérifier",
+    "countConfirmed": "Buts confirmés",
+    "countRejected": "Écartés",
+    "countKnown": "Déjà un but",
+    "filter": "Filtrer les buts potentiels",
+    "open": "À vérifier ({n})",
+    "all": "Tous ({n})",
+    "rate": "Buts potentiels par minute",
+    "perMinute": "{n} par min",
+    "keys": "Dans la liste : <k>↑</k> <k>↓</k> choisir, <k>Entrée</k> lire le clip, <k>1</k> but {own}, <k>2</k> but {opp}, <k>X</k> écarter, <k>U</k> annuler.",
+    "nothingOpen": "Tous les buts potentiels sont vérifiés.",
+    "none": "Aucun but potentiel à ce rythme par minute.",
+    "clock": "temps de jeu {clock}",
+    "suggested": "Suggestion : {team}",
+    "noSuggestion": "Équipe à choisir",
+    "row": "But potentiel {label}",
+    "knownOverlay": "But de l'incrustation ({team})",
+    "knownReport": "But de la feuille de match ({team})",
+    "knownTagged": "Déjà saisi ({team})",
+    "play": "Lire le clip à {time}",
+    "gameTime": "Temps de jeu",
+    "goalFor": "But {team}",
+    "extraRate": "En plus",
+    "confirmed": "Confirmé",
+    "rejected": "Écarté",
+    "reject": "Écarter",
+    "undo": "Annuler",
+    "knownHint": "{n, plural, one {# but potentiel est} other {# buts potentiels sont}} déjà un but (incrustation, feuille de match ou saisie manuelle) et visibles sous « Tous »."
   },
   "matrix": {
     "nav": "Matrice",

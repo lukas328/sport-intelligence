@@ -354,9 +354,7 @@ class GoalCandidate(Base, EntityMixin, TenantMixin):
     suggested_side: Mapped[str | None] = mapped_column(String(10))  # own, opponent
     status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
     side: Mapped[str | None] = mapped_column(String(10))  # confirmed goal of this side
-    event_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("events.id", ondelete="SET NULL")
-    )
+    event_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("events.id", ondelete="SET NULL"))
     reviewed_by_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )

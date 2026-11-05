@@ -12,6 +12,9 @@ from handball_api.schemas.events import (
     EventOut,
     EventPatch,
     FeedImportResult,
+    GoalCandidateList,
+    GoalCandidateReviewIn,
+    GoalCandidateRow,
     GoalComparison,
     GoalReviewIn,
     KickoffIn,
@@ -19,8 +22,8 @@ from handball_api.schemas.events import (
     OfficialReportResult,
 )
 from handball_api.services import events as service
+from handball_api.services import goal_candidates, official_report, paper_reports
 from handball_api.services import insights as insights_service
-from handball_api.services import official_report, paper_reports
 
 router = APIRouter(prefix="/v1/orgs/{org_id}", tags=["events"])
 MAX_IMPORT = 2_000_000
@@ -117,6 +120,24 @@ async def official_goal_comparison(match_id: uuid.UUID, scope: OrgDep) -> dict[s
 async def review_official_goal(match_id: uuid.UUID, data: GoalReviewIn, scope: OrgDep) -> None:
     """Confirm or dismiss a row of the comparison (null undoes it)."""
     await official_report.review(scope.ctx, match_id, data.event_id, data.status)
+
+
+@router.get("/matches/{match_id}/goal-candidates", response_model=GoalCandidateList)
+async def list_goal_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Moments of the video that are probably goals (video analysis, a fixed number per minute),
+    with the coach's reviews and the goals already stored that cover them."""
+    return await goal_candidates.listing(scope.ctx, match_id)
+
+
+@router.put(
+    "/matches/{match_id}/goal-candidates/{candidate_id}/review", response_model=GoalCandidateRow
+)
+async def review_goal_candidate(
+    match_id: uuid.UUID, candidate_id: uuid.UUID, data: GoalCandidateReviewIn, scope: OrgDep
+) -> dict[str, Any]:
+    """Confirm a candidate (a goal of the given side), reject it (kept as a hard negative for
+    training) or undo the review (null)."""
+    return await goal_candidates.review(scope.ctx, match_id, candidate_id, data.status, data.side)
 
 
 @router.post(

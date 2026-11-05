@@ -11,7 +11,7 @@ import pytest
 
 from handball_gpu_worker import analysis
 from handball_jobkit import JobSettings, Reporter
-from handball_vision import geometry, pipeline
+from handball_vision import geometry, goalcandidates, pipeline
 from handball_vision.calibration import CalibrationError
 from handball_vision.motion import CameraMotion
 from handball_vision.synthetic import SyntheticConfig, SyntheticMatch
@@ -342,7 +342,7 @@ def test_learned_path_needs_calibration_then_reuses_observations(
         seen.append(len(obs.frames))
         return {"template": "t", "candidates": [{"t_ms": 4000, "rate": 1}]}
 
-    monkeypatch.setattr(analysis.goalcandidates, "from_observations", fake_candidates)
+    monkeypatch.setattr(goalcandidates, "from_observations", fake_candidates)
     rep, _ = reporter()
     first = analysis.run_analysis(
         "j",

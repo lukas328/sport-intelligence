@@ -13,7 +13,8 @@ usage: python ml/data/ingest_drive.py FOLDER_URL WORKDIR [--watch 600] [--batch 
 Clock: segments[k]["clock"] = {"source": "overlay" | "hall_board" | None, "samples": [[ms, s]]}
 and per game "has_clock". The vision environment's python is HANDBALL_CLOCK_PYTHON, else the
 repo's .venv/bin/python. Clock data that `segment_clock.py --fill` wrote to WORKDIR/clocks.json
-is merged into the state at start and before every poll.
+is merged into the state at start and before every poll (into segments without clock data, and
+over data of an older clock reader: clock["reader"], see segment_clock.CLOCK_READER).
 """
 
 from __future__ import annotations
@@ -94,6 +95,8 @@ def read_clock(seg: Path) -> dict[str, Any]:
             raise RuntimeError(err)
         r = json.loads(lines[-1])
         clock = {"source": r.get("source"), "samples": r.get("samples") or []}
+        if r.get("reader"):
+            clock["reader"] = r["reader"]
         print(f"  {seg.name}: clock {clock['source']}, {len(clock['samples'])} readings, "
               f"{r.get('cpu_s')} s CPU, {time.time() - t0:.0f} s", flush=True)
         return clock
@@ -116,8 +119,13 @@ def merge_clock_sidecar(work: Path, state: dict[str, Any]) -> None:
         if not g or not g.get("segments"):
             continue
         for s in g["segments"]:
-            if "clock" not in s and s.get("file") in segs:
-                s["clock"] = segs[s["file"]]
+            # data of a newer clock reader replaces older data ("reader", absent: 1)
+            side = segs.get(s.get("file"))
+            old = s.get("clock")
+            if side is not None and (
+                old is None or int(side.get("reader", 1)) > int(old.get("reader", 1))
+            ):
+                s["clock"] = side
                 n += 1
         if any("clock" in s for s in g["segments"]):
             g["has_clock"] = any((s.get("clock") or {}).get("source") for s in g["segments"])

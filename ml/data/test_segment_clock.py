@@ -14,7 +14,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 
 from segment_clock import (
+    CLOCK_READER,
     REPO,
+    clock_reader,
     game_labels,
     labels,
     merge_clocks,
@@ -93,6 +95,19 @@ def test_merge_fills_only_segments_without_clock() -> None:
     assert g["has_clock"] is True
 
 
+def test_merge_replaces_clock_data_of_an_older_reader() -> None:
+    old = {"source": "hall_board", "samples": [[0, 960.0], [2000, 960.0]]}  # reader 1
+    new = {"source": "overlay", "samples": [[0, 11.0], [2000, 13.0]], "reader": CLOCK_READER}
+    state: dict[str, Any] = {"games": {"g": {"segments": [
+        {"file": "a.mp4", "clock": old},
+        {"file": "b.mp4", "clock": new},
+    ]}}}
+    side = {"g": {"a.mp4": new, "b.mp4": old}}
+    assert merge_clocks(state, side) == 1
+    assert [s["clock"] for s in state["games"]["g"]["segments"]] == [new, new]
+    assert clock_reader(None) == 0 and clock_reader(old) == 1
+
+
 def test_labels_writes_games_with_log_and_clock(tmp_path: Path) -> None:
     work, off, out = tmp_path / "w", tmp_path / "off", tmp_path / "out"
     work.mkdir()
@@ -155,3 +170,83 @@ def test_entry_at_a_clock_stopped_since_the_segment_start_is_left_out() -> None:
     out = game_labels("g", game, {"log": [log_entry(2267), log_entry(2300, result="2:0")]})
     assert [(e["match_s"], e["segment_ms"]) for e in out["entries"]] == [(2300, 98_000)]
     assert out["segments"][0]["skipped_at_stopped_start"] == 1
+
+
+class _FieldOcr:
+    """Fake PP-OCR for synthetic frames: every text field is a flat box of a grey level of its own;
+    detection returns one box per field in view, recognition that field's text at time `t`."""
+
+    def __init__(self, fields: dict[int, Any]) -> None:
+        self.fields = fields  # grey level -> text at a time (ms)
+        self.t = 0
+
+    def detect(self, img: Any) -> list[Any]:
+        import numpy as np
+
+        out = []
+        for level in self.fields:
+            ys, xs = np.nonzero(img[..., 0] == level)
+            if len(xs) >= 50:
+                x1, x2, y1, y2 = xs.min(), xs.max(), ys.min(), ys.max()
+                out.append(np.array([[x1, y1], [x2, y1], [x2, y2], [x1, y2]], np.float32))
+        return out
+
+    def recognise(self, crops: list[Any]) -> list[tuple[str, float]]:
+        import numpy as np
+
+        res = []
+        for c in crops:
+            levels, counts = np.unique(c[..., 0], return_counts=True)
+            known = [(n, int(v)) for v, n in zip(levels, counts, strict=True) if int(v) in self.fields]
+            res.append((self.fields[max(known)[1]](self.t), 0.95) if known else ("", 0.0))
+        return res
+
+
+def _graphic_frames(ocr: _FieldOcr, boxes: dict[int, tuple[int, int, int, int]], n_s: int):
+    """(ms, frame) every 250 ms of a fixed camera with a stream graphic: the fields as flat boxes
+    on a textured background."""
+    import numpy as np
+
+    rng = np.random.default_rng(3)
+    base = rng.integers(0, 60, (360, 640, 3), dtype=np.uint8)
+    for level, (x1, y1, x2, y2) in boxes.items():
+        base[y1:y2, x1:x2] = level
+    for t in range(0, n_s * 1000, 250):
+        ocr.t = t
+        yield t, base.copy()
+
+
+def _mmss(s: int) -> str:
+    return f"{s // 60:02d}:{s % 60:02d}"
+
+
+@pytest.mark.parametrize("score_text", ["{h}:{a}", "SGW {h} : {a} GOS"])
+def test_stacked_stream_graphic_gives_the_running_clock_not_score_or_timer(
+    monkeypatch: pytest.MonkeyPatch, score_text: str
+) -> None:
+    """SG Waedenswil/Horgen graphic: the score above the clock, a penalty timer counting down
+    beside the clock. The old per-frame pick (most confident, tallest `mm:ss`) took timer or score."""
+    import segment_clock as sc
+
+    def score(t: int) -> str:
+        h, a = (19, 16) if t < 40_000 else (20, 16)
+        return score_text.format(h=h, a=a)
+
+    wide = "SGW" in score_text
+    ocr = _FieldOcr({
+        120: score,
+        160: lambda t: _mmss(2546 + t // 1000),  # 42:26 running
+        200: lambda t: f"{max(0, 98 - t // 1000) // 60}:{max(0, 98 - t // 1000) % 60:02d}",
+    })
+    boxes = {
+        120: (230, 40, 420, 70) if wide else (290, 40, 360, 70),  # score (with codes: wide)
+        160: (290, 80, 360, 110),  # clock
+        200: (365, 80, 415, 110),  # 2-minute timer beside it
+    }
+    monkeypatch.setattr(sc, "frames", lambda path, every_ms=0, skip="NONREF": _graphic_frames(
+        ocr, boxes, 60))
+    samples, reader = sc.read_clock(Path("x.mp4"), ocr, 2.0, budget_s=1e9, give_up=True)
+    assert reader.stacked == "above"
+    assert len(samples) >= 28
+    assert all(c == 2546 + v // 1000 for v, c in samples)  # the clock field on every reading
+    assert sc.plausible(sc.clean(samples))

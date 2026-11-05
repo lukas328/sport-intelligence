@@ -1267,6 +1267,43 @@
         "title": "CalibrationPoint",
         "type": "object"
       },
+      "CandidateGoal": {
+        "description": "A goal already stored that covers a candidate (same moment).",
+        "properties": {
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "side": {
+            "title": "Side",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          }
+        },
+        "required": [
+          "event_id",
+          "source",
+          "side",
+          "t_ms"
+        ],
+        "title": "CandidateGoal",
+        "type": "object"
+      },
       "Chart": {
         "properties": {
           "labels": {
@@ -3623,6 +3660,272 @@
           "duration_ms"
         ],
         "title": "FrameIn",
+        "type": "object"
+      },
+      "GoalCandidateCounts": {
+        "properties": {
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "integer"
+          },
+          "known": {
+            "title": "Known",
+            "type": "integer"
+          },
+          "open": {
+            "title": "Open",
+            "type": "integer"
+          },
+          "open_by_rate": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Open By Rate",
+            "type": "object"
+          },
+          "rejected": {
+            "title": "Rejected",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "open",
+          "open_by_rate",
+          "confirmed",
+          "rejected",
+          "known"
+        ],
+        "title": "GoalCandidateCounts",
+        "type": "object"
+      },
+      "GoalCandidateList": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/GoalCandidateRow"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/GoalCandidateCounts"
+          },
+          "default_rate": {
+            "title": "Default Rate",
+            "type": "integer"
+          },
+          "rates": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Rates",
+            "type": "array"
+          },
+          "template": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template"
+          }
+        },
+        "required": [
+          "template",
+          "rates",
+          "default_rate",
+          "counts",
+          "candidates"
+        ],
+        "title": "GoalCandidateList",
+        "type": "object"
+      },
+      "GoalCandidateReviewIn": {
+        "properties": {
+          "side": {
+            "anyOf": [
+              {
+                "enum": [
+                  "own",
+                  "opponent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "confirmed",
+                  "rejected"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "GoalCandidateReviewIn",
+        "type": "object"
+      },
+      "GoalCandidateRow": {
+        "description": "A moment of the video that is probably a goal (analysis), with the coach's review.",
+        "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "end_ms": {
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "goal_ms": {
+            "title": "Goal Ms",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "known": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CandidateGoal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "rate": {
+            "title": "Rate",
+            "type": "integer"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "side": {
+            "anyOf": [
+              {
+                "enum": [
+                  "own",
+                  "opponent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side"
+          },
+          "start_ms": {
+            "title": "Start Ms",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "confirmed",
+              "rejected"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "suggested_side": {
+            "anyOf": [
+              {
+                "enum": [
+                  "own",
+                  "opponent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Side"
+          },
+          "t_ms": {
+            "title": "T Ms",
+            "type": "integer"
+          },
+          "video_asset_id": {
+            "format": "uuid",
+            "title": "Video Asset Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "video_asset_id",
+          "t_ms",
+          "goal_ms",
+          "start_ms",
+          "end_ms",
+          "score",
+          "rate",
+          "suggested_side",
+          "status",
+          "side",
+          "event_id",
+          "period",
+          "clock_s",
+          "known"
+        ],
+        "title": "GoalCandidateRow",
         "type": "object"
       },
       "GoalComparison": {
@@ -17222,6 +17525,134 @@
         "summary": "Create",
         "tags": [
           "training"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates": {
+      "get": {
+        "description": "Moments of the video that are probably goals (video analysis, a fixed number per minute),\nwith the coach's reviews and the goals already stored that cover them.",
+        "operationId": "list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalCandidateList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Goal Candidates",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review": {
+      "put": {
+        "description": "Confirm a candidate (a goal of the given side), reject it (kept as a hard negative for\ntraining) or undo the review (null).",
+        "operationId": "review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Candidate Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCandidateReviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalCandidateRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Goal Candidate",
+        "tags": [
+          "events"
         ]
       }
     },

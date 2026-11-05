@@ -271,7 +271,7 @@ def signals(
     time, canvas foot position and canvas height (reference px)."""
     end = float(duration_s if duration_s is not None else (cam_t[-1] if len(cam_t) else 0.0))
     n = max(1, int(np.ceil(end / DT)))
-    tg = np.arange(n) * DT
+    tg = np.arange(n, dtype=np.float64) * DT
     ok = np.isfinite(cam_x)
     if ok.sum() >= 2:
         cx_cam = np.interp(cam_t, cam_t[ok], cam_x[ok])
@@ -284,10 +284,10 @@ def signals(
     keep = (ph >= MIN_BOX_PX) & ~static_mask(pt, px, py)
     frames, med, vx, sp = people_motion(pt, px, py, ph, keep)
     cx = _interp(tg, frames, med, 1.0)
-    out = {
+    out: dict[str, F64] = {
         "t": tg,
-        "pan": pan,
-        "cx_v": np.gradient(cx, DT) - pan if n > 1 else np.zeros(n),
+        "pan": np.asarray(pan, dtype=np.float64),
+        "cx_v": np.asarray(np.gradient(cx, DT) - pan if n > 1 else np.zeros(n), dtype=np.float64),
         "vx": _interp(tg, frames, vx, 1.0) - pan,
         "speed": _interp(tg, frames, sp, 1.0),
     }
@@ -468,7 +468,10 @@ def inputs_from_observations(obs: Any) -> tuple[F64, F64, F64, F64, F64, F64, fl
         xs.append(feet[:, 0] * unit)
         ys.append(feet[:, 1] * unit)
         hs.append(np.hypot(*(feet - heads).T) * unit)
-    cat = lambda v: np.concatenate(v) if v else np.zeros(0)  # noqa: E731
+
+    def cat(v: list[F64]) -> F64:
+        return np.asarray(np.concatenate(v) if v else np.zeros(0), dtype=np.float64)
+
     return cam_t, cam_x, cat(ts), cat(xs), cat(ys), cat(hs), n_frames / fps
 
 

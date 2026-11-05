@@ -1724,6 +1724,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Goal Candidates
+         * @description Moments of the video that are probably goals (video analysis, a fixed number per minute),
+         *     with the coach's reviews and the goals already stored that cover them.
+         */
+        get: operations["list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Review Goal Candidate
+         * @description Confirm a candidate (a goal of the given side), reject it (kept as a hard negative for
+         *     training) or undo the review (null).
+         */
+        put: operations["review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
         parameters: {
             query?: never;
@@ -4436,6 +4478,23 @@ export interface components {
                 number
             ];
         };
+        /**
+         * CandidateGoal
+         * @description A goal already stored that covers a candidate (same moment).
+         */
+        CandidateGoal: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Side */
+            side: string;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
+        };
         /** Chart */
         Chart: {
             /** Labels */
@@ -5184,6 +5243,86 @@ export interface components {
             note?: string;
             /** Tokens */
             tokens: components["schemas"]["handball_api__schemas__tactics__TokenIn"][];
+        };
+        /** GoalCandidateCounts */
+        GoalCandidateCounts: {
+            /** Confirmed */
+            confirmed: number;
+            /** Known */
+            known: number;
+            /** Open */
+            open: number;
+            /** Open By Rate */
+            open_by_rate: {
+                [key: string]: number;
+            };
+            /** Rejected */
+            rejected: number;
+            /** Total */
+            total: number;
+        };
+        /** GoalCandidateList */
+        GoalCandidateList: {
+            /** Candidates */
+            candidates: components["schemas"]["GoalCandidateRow"][];
+            counts: components["schemas"]["GoalCandidateCounts"];
+            /** Default Rate */
+            default_rate: number;
+            /** Rates */
+            rates: number[];
+            /** Template */
+            template: string | null;
+        };
+        /** GoalCandidateReviewIn */
+        GoalCandidateReviewIn: {
+            /** Side */
+            side?: ("own" | "opponent") | null;
+            /** Status */
+            status: ("confirmed" | "rejected") | null;
+        };
+        /**
+         * GoalCandidateRow
+         * @description A moment of the video that is probably a goal (analysis), with the coach's review.
+         */
+        GoalCandidateRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** End Ms */
+            end_ms: number;
+            /** Event Id */
+            event_id: string | null;
+            /** Goal Ms */
+            goal_ms: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            known: components["schemas"]["CandidateGoal"] | null;
+            /** Period */
+            period: number | null;
+            /** Rate */
+            rate: number;
+            /** Score */
+            score: number;
+            /** Side */
+            side: ("own" | "opponent") | null;
+            /** Start Ms */
+            start_ms: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "confirmed" | "rejected";
+            /** Suggested Side */
+            suggested_side: ("own" | "opponent") | null;
+            /** T Ms */
+            t_ms: number;
+            /**
+             * Video Asset Id
+             * Format: uuid
+             */
+            video_asset_id: string;
         };
         /** GoalComparison */
         GoalComparison: {
@@ -11481,6 +11620,75 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FocusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalCandidateList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                candidate_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalCandidateReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalCandidateRow"];
                 };
             };
             /** @description Validation Error */

@@ -22,6 +22,7 @@ from handball_api.services.events import clock_from_video, video_from_clock
 SOURCE = "heuristic"
 OVERLAY = "scoreboard_ocr"
 OFFICIAL = "official_report"
+CANDIDATE = "goal_candidate"  # a goal the coach confirmed from a goal candidate of the video
 MIN_CONFIDENCE = 0.5
 DEDUPE_MS = 5000
 OVERLAY_DEDUPE_MS = 20000  # the overlay is updated a few seconds after the goal

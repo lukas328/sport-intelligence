@@ -8,17 +8,23 @@ is no clock):
 
 - frames are decoded without the non-reference frames (skip_frame NONREF, about half the decode
   work) and scaled to at most 1280 wide; the overlay finder and the probes use the key frames;
+- the reader is `hallboard`'s (PP-OCR, data/models/ch_PP-OCRv4_*.onnx; not Tesseract, whose
+  clock field merged score and clock on the SG Waedenswil/Horgen overlay): text split into fields
+  (`split_token`), a field with letters or spaces around the colon is a score, never the clock
+  ("SGW 19 : 16 GOS", "16:00 Uhr" on a pre-match graphic), the clock is the field under the score
+  (not a penalty timer beside it), and of two bare `mm:ss` fields stacked on a stream graphic the
+  one that keeps changing is the clock (`StackedVotes`, voted over the whole segment; until it is
+  decided such a frame gives no clock). `HallBoardReader` reads every 2 s: text detection until a
+  clock is in view, then the board is locked (template matching) and only a window around it is
+  read, recognition alone while it stands still; a lost board is probed for every 0.5 s;
 - overlay: `scoreboard.find_overlay` (stable, textured boxes in the top or bottom band; each band
-  on its own, so a logo in the other band does not blow up the crop); the band counts when PP-OCR
-  reads two different clock values in it on six key frames; then it is read every 5 s. The clock is
-  read with the PP-OCR models of `hallboard` (data/models/ch_PP-OCRv4_*.onnx), not Tesseract:
-  Tesseract's clock field merged score and clock on the SG Waedenswil/Horgen overlay (4 of 36
-  reads), PP-OCR reads both overlays seen so far on every probe. While the clock stays where it
-  was last read, recognition alone on that box (no detection) is enough;
-- hall board (`hallboard.parse_board`): first a probe on six key frames (no clock there: return
-  None), then a reading every 2 s, on a window around the board's last position while it is in
-  view, on the full frame at most every 10 s while it is not. A fixed camera hides an overlay from
-  `find_overlay` (everything is stable); its clock is then found here and called "hall_board".
+  on its own, so a logo in the other band does not blow up the crop); the band counts when its
+  clock fields change between six key frames; then the reader runs on that window;
+- hall board: first a probe on six key frames (no clock field there: return None), then the
+  reader on the whole frame from the probe before the first one with a clock (pre-match graphics
+  and tables come first), with text detection on the whole frame at most every 10 s while the
+  board is lost. A fixed camera hides an overlay from `find_overlay` (everything is stable); its
+  clock is then found here and called "hall_board".
 
 Readings that disagree with both neighbours are dropped (`align_official._clean`, then runs of up
 to two readings that disagree with the runs on both sides); fewer than two
@@ -27,7 +33,8 @@ mean no clock.
 
     # clock of single segments (JSON per line; what the ingest calls in a subprocess)
     python ml/data/segment_clock.py SEG.mp4 [SEG.mp4 ...]
-    # games of the ingest state without clock data whose batch folder is still local
+    # games of the ingest state without clock data of the current reader (CLOCK_READER) whose
+    # segments are local (WORKDIR/batch_NN, or --search DIR/batch_NN, DIR)
     python ml/data/segment_clock.py --fill [--workdir W] [--search DIR ...] [--batch batch_NN ...]
         [--write-state]
     # official log entries inside the segments -> ml/data/segment_labels/<name>.json
@@ -35,7 +42,9 @@ mean no clock.
 
 `--fill` writes WORKDIR/clocks.json (a running ingest owns state.json and would overwrite it; the
 ingest merges clocks.json into its state when it starts and before every poll). `--write-state`
-also merges into state.json: only while the ingest is stopped.
+also merges into state.json: only while the ingest is stopped. Clock data carries the version of
+its reader ("reader"); data of a newer reader replaces older data wherever the two are merged
+(`--labels` reads state.json with clocks.json merged in this way).
 
 Labels: per segment its own readings, the half from the readings of the whole game (a drop of the
 clock between or inside segments starts the second half; readings at 30:00 and above are a
@@ -207,13 +216,15 @@ def read_clock(
     hide: Window | None = None,
     full_every_s: float = BOARD_FULL_EVERY_S,
     give_up: bool = False,
+    start_ms: int = 0,
 ) -> tuple[list[Sample], Any]:
     """(clock readings, reader): `hallboard.HallBoardReader` over the segment, on `win` of each
     frame (None: the whole frame; `hide` blanked). It reads every `every_s`: text detection until
     a clock is in view, then the board locked by template matching and only a window around it
     read (recognition alone while it stands still); between reads it probes for a lost board.
-    Frames go to it every FEED_MS. `give_up`: stop when under two readings came in the first
-    BOARD_GIVE_UP_S, or the readings after twice that are still no match clock."""
+    Frames go to it every FEED_MS from `start_ms` on. `give_up`: stop when under two readings
+    came in the first BOARD_GIVE_UP_S, or the readings after twice that are still no match
+    clock."""
     from handball_vision.hallboard import HallBoardReader
 
     reader = HallBoardReader(
@@ -221,14 +232,20 @@ def read_clock(
     )
     checked = 0
     for t, frame in frames(path, FEED_MS):
+        if t < start_ms:
+            continue
         reader.add(t, _crop(_blank(frame, hide), win))  # fps 1000: the frame index is its ms
         if cpu_s() > budget_s:
             break
-        if give_up and len(reader.samples) != checked:
+        if not give_up:
+            continue
+        if len(reader.samples) != checked:
             checked = len(reader.samples)
-            if t > 2 * BOARD_GIVE_UP_S * 1000 and not plausible(clean(board_clock(reader))):
+            if t - start_ms > 2 * BOARD_GIVE_UP_S * 1000 and not plausible(
+                clean(board_clock(reader))
+            ):
                 break  # two minutes of readings and still no match clock
-        if give_up and len(reader.samples) < 2 and t > BOARD_GIVE_UP_S * 1000:
+        if len(reader.samples) < 2 and t - start_ms > BOARD_GIVE_UP_S * 1000:
             break
     return board_clock(reader), reader
 
@@ -364,9 +381,15 @@ def read_segment_clock(
         else:  # a frozen overlay clock: hide it from the board reader
             hide = win
     if result["source"] is None and keys and cpu_s() < budget:
-        probes = [_blank(f.copy(), hide) for _, f in _spread(keys, BOARD_PROBES)]
-        if any(clock_values(ocr, f) for f in probes):
-            got, reader = read_clock(path, ocr, board_every_s, budget, hide=hide, give_up=True)
+        probes = _spread(keys, BOARD_PROBES)
+        hits = [k for k, (_, f) in enumerate(probes) if clock_values(ocr, _blank(f.copy(), hide))]
+        if hits:
+            # the clock may come into view after the start (a pre-match graphic, a table): read
+            # from the probe before the first one that showed it
+            start = probes[hits[0] - 1][0] if hits[0] else 0
+            got, reader = read_clock(
+                path, ocr, board_every_s, budget, hide=hide, give_up=True, start_ms=start
+            )
             readers.append(reader)
             samples = clean(got)
             if plausible(samples):
@@ -408,20 +431,28 @@ def write_json(path: Path, data: Any) -> None:
     tmp.replace(path)
 
 
+def clock_reader(clock: dict[str, Any] | None) -> int:
+    """Version of the reader that made clock data (CLOCK_READER): 0 without data, 1 for data
+    from before versions were stamped."""
+    return int(clock.get("reader", 1)) if clock else 0
+
+
 def merge_clocks(state: dict[str, Any], sidecar: dict[str, Any]) -> int:
-    """Clock data of clocks.json ({name: {file: clock}}) into state entries that have none;
-    sets each touched game's has_clock. Returns the number of segments filled."""
+    """Clock data of clocks.json ({name: {file: clock}}) into state entries that have none or
+    data of an older reader (`clock_reader`); sets each touched game's has_clock. Returns the
+    number of segments filled."""
     n = 0
     for name, segs in sidecar.items():
         g = state.get("games", {}).get(name)
         if not g or not g.get("segments"):
             continue
         for s in g["segments"]:
-            if "clock" not in s and s.get("file") in segs:
-                s["clock"] = segs[s["file"]]
+            side = segs.get(s.get("file"))
+            if side is not None and clock_reader(side) > clock_reader(s.get("clock")):
+                s["clock"] = side
                 n += 1
         if any("clock" in s for s in g["segments"]):
-            g["has_clock"] = any(s.get("clock", {}).get("source") for s in g["segments"])
+            g["has_clock"] = any((s.get("clock") or {}).get("source") for s in g["segments"])
     return n
 
 
@@ -438,7 +469,12 @@ def fill(
     gone: list[str] = []
     for name, g in sorted(state.get("games", {}).items()):
         segs = g.get("segments") or []
-        todo = [s for s in segs if "clock" not in s and s["file"] not in sidecar.get(name, {})]
+        done = sidecar.get(name, {})
+        todo = [
+            s
+            for s in segs
+            if max(clock_reader(s.get("clock")), clock_reader(done.get(s["file"]))) < CLOCK_READER
+        ]
         if not todo or (batches and g.get("batch") not in batches):
             continue
         dirs = [workdir / g["batch"], *(d / g["batch"] for d in search), *search]
@@ -450,7 +486,7 @@ def fill(
             found += 1
             try:
                 r = read_segment_clock(seg, models)
-                clock = {"source": r["source"], "samples": r["samples"]}
+                clock = {"source": r["source"], "samples": r["samples"], "reader": r["reader"]}
             except Exception as exc:  # noqa: BLE001 - one bad file must not stop the rest
                 if not seg.exists():  # uploaded and deleted meanwhile
                     print(f"{s['file']}: gone while reading", flush=True)
@@ -463,7 +499,8 @@ def fill(
         if not found:
             gone.append(f"{name} ({g['batch']})")
     if gone:
-        print(f"{len(gone)} games without clock data whose segments are not local (uploaded):")
+        print(f"{len(gone)} games without current clock data whose segments are not local "
+              "(uploaded):")
         for line in gone:
             print(f"  {line}")
     if write_state:

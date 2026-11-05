@@ -7,6 +7,7 @@ import json
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 from handball_vision import goalcandidates as gc
 from handball_vision import observe
@@ -114,10 +115,14 @@ def test_template_finds_its_own_profile() -> None:
 
 
 def _pan_motion(n: int, yaw_deg_per_frame: float) -> CameraMotion:
-    rots = []
+    rots: list[NDArray[np.float64] | None] = []
     for i in range(n):
         a = np.radians(yaw_deg_per_frame * i)
-        rots.append(np.array([[np.cos(a), 0, -np.sin(a)], [0, 1, 0], [np.sin(a), 0, np.cos(a)]]))
+        rots.append(
+            np.array(
+                [[np.cos(a), 0, -np.sin(a)], [0, 1, 0], [np.sin(a), 0, np.cos(a)]], dtype=np.float64
+            )
+        )
     f = 1500.0
     return CameraMotion(
         (1280, 720),
@@ -141,8 +146,10 @@ def test_moving_camera_inputs_are_in_reference_pixels() -> None:
     frames = []
     for i in range(0, n, 3):
         people = []
+        r = motion.rotations[i]
+        assert r is not None
         for d in world:
-            p = k @ motion.rotations[i] @ d
+            p = k @ r @ d
             u, v = p[0] / p[2], p[1] / p[2]
             people.append(Detection(u - 20, v - 100, u + 20, v, 0.9))
         frames.append(observe.FrameObservation(i, people, [None] * 3, []))

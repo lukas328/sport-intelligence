@@ -130,7 +130,8 @@
     "pageBody": "Die Seite konnte nicht geladen werden. Versuch es noch einmal; wenn es wieder passiert, schreib uns über «Feedback geben».",
     "notFoundBody": "Vielleicht wurde sie gelöscht, oder du hast keinen Zugriff darauf.",
     "home": "Zur Startseite",
-    "pageTitle": "Da ist etwas schiefgelaufen"
+    "pageTitle": "Da ist etwas schiefgelaufen",
+    "already-a-goal": "Diese Stelle ist schon als Tor erfasst."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -1705,6 +1706,38 @@
     "reviewHint": "Bestätigen: die Stelle im Video stimmt. Verwerfen: falsch erkannt oder nicht zu sehen. Nochmals klicken hebt es auf.",
     "nothingOpen": "Alles geprüft.",
     "noGoals": "Der Bericht enthält keine Tore."
+  },
+  "goalCandidates": {
+    "title": "Torkandidaten",
+    "hint": "Stellen im Video, die wahrscheinlich ein Tor sind, erkannt an Kamera und Spielern. Clip ansehen, dann das Tor für ein Team bestätigen oder verwerfen. Verworfene Stellen bleiben gespeichert und helfen, die Erkennung zu verbessern.",
+    "countOpen": "Zu prüfen",
+    "countConfirmed": "Bestätigte Tore",
+    "countRejected": "Verworfen",
+    "countKnown": "Schon als Tor erfasst",
+    "filter": "Kandidaten filtern",
+    "open": "Zu prüfen ({n})",
+    "all": "Alle ({n})",
+    "rate": "Kandidaten pro Minute",
+    "perMinute": "{n} pro Min.",
+    "keys": "In der Liste: <k>↑</k> <k>↓</k> wählen, <k>Enter</k> Clip abspielen, <k>1</k> Tor {own}, <k>2</k> Tor {opp}, <k>X</k> verwerfen, <k>U</k> rückgängig.",
+    "nothingOpen": "Alle Kandidaten sind geprüft.",
+    "none": "Bei dieser Anzahl pro Minute gibt es keine Kandidaten.",
+    "clock": "Spielzeit {clock}",
+    "suggested": "Vorschlag: {team}",
+    "noSuggestion": "Team offen",
+    "row": "Torkandidat {label}",
+    "knownOverlay": "Tor aus der Einblendung ({team})",
+    "knownReport": "Tor aus dem Matchbericht ({team})",
+    "knownTagged": "Schon erfasst ({team})",
+    "play": "Clip bei {time} abspielen",
+    "gameTime": "Spielzeit",
+    "goalFor": "Tor {team}",
+    "extraRate": "Zusatz",
+    "confirmed": "Bestätigt",
+    "rejected": "Verworfen",
+    "reject": "Verwerfen",
+    "undo": "Rückgängig",
+    "knownHint": "{n, plural, one {# Kandidat ist} other {# Kandidaten sind}} schon als Tor erfasst (Einblendung, Matchbericht oder von Hand) und unter «Alle» zu sehen."
   },
   "matrix": {
     "nav": "Matrix",

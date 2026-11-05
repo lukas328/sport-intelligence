@@ -734,6 +734,19 @@ async def _apply_analysis_result(
                     ],
                 },
             }
+    if "goal_candidates" in r and asset.role == VideoRole.MAIN:
+        # moments that are probably goals, for the coach to confirm (needs no court, so also
+        # when the analysis waits for court points); after the automatic events: their
+        # possessions suggest the side
+        from handball_api.services import goal_candidates
+
+        owner = await ctx.db.get(Match, asset.match_id)
+        found = r.get("goal_candidates")
+        if owner is not None:
+            counts = await goal_candidates.store(
+                ctx, owner, asset, found if isinstance(found, dict) else None, job.pipeline_version
+            )
+            asset.analysis = {**asset.analysis, "goal_candidates": counts}
 
 
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:

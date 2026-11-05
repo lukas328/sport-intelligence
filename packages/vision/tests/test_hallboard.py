@@ -194,3 +194,25 @@ def test_reader_locks_the_board_and_reads_it_cheaply() -> None:
     assert len(reads) == 9 and {(r.home, r.away) for r in reads} == {(16, 11), (17, 11)}
     s = reader.summary()
     assert [(g["t_ms"], g["side"], g["score_side"]) for g in s["goals"]] == [(5000, "left", 17)]
+
+
+def test_clock_of_a_stream_graphic_with_penalty_timers() -> None:
+    clock = _tk("42:26", 593, y=90, w=95, h=28)
+    timer = _tk("0:18", 690, y=90, w=80, h=28)  # beside the clock, same size
+    # a score with codes over clock and timer: the field most centred under it is the clock
+    wide = _tk("SGW 19 : 16 GOS", 505, y=58, w=270, h=28)
+    r = hb.parse_board([wide, timer, clock])
+    assert r is not None and (r.home, r.away, r.clock_s) == (19, 16, 42 * 60 + 26)
+    # no score read: of two fields of the same size, the one with two-digit minutes
+    r = hb.parse_board([timer, clock])
+    assert r is not None and r.clock_s == 42 * 60 + 26
+    # bare score over the clock, a timer on the line under the clock: the line next to the score
+    score = _tk("19:16", 593, y=58, w=95, h=28)
+    under = _tk("1:32", 600, y=122, w=80, h=28)
+    r = hb.parse_board([score, under, clock], stacked="above")
+    assert r is not None and (r.home, r.away, r.clock_s) == (19, 16, 42 * 60 + 26)
+    # the layout not known yet: either field may be the clock, so no clock at all
+    r = hb.parse_board([score, clock])
+    assert r is not None and r.clock_s is None
+    # a pre-match graphic ("16:00 Uhr") is no clock
+    assert hb.parse_board([_tk("16:00 Uhr", 535, y=562, w=210, h=39)]) is None

@@ -1,4 +1,4 @@
-# Goal moments from the picture (research, not shipped)
+# Goal moments from the picture (research; the goal candidates are shipped, see the last section)
 
 How far can we find goal moments in handball video without the score overlay? The free ground truth
 is the official game log: every goal has a table time. This folder holds the first goal-moment
@@ -338,4 +338,50 @@ nice -n 10 uv run --project packages/vision python ml/goals/seg_extract.py $G/ca
 uv run --project packages/vision python ml/goals/seg_labels.py $G/cache $G/labels.json
 uv run --project packages/vision python ml/goals/seg_eval.py $G/cache $G/labels.json --edge-margin 6 \
   --broadcast $S/goals/cache --out $G/results.json [--inspect tmpl_people_flow]
+```
+
+## In the product: `handball_vision.goalcandidates`
+The analysis proposes goal candidates from what the observation pass (`observe.observe`) already
+has, the camera motion and the people detections: no optical flow, no motion energy, no second
+decoding pass and no court calibration. `goal_template.py` learns the template from the cached
+heavy pass above and exports it as `packages/vision/handball_vision/data/goal_template.json`
+(versioned: mean profile, channels, normalisation, lull windows, selection, evaluation). It runs
+the cached signals through the product code itself, so its numbers are those of the shipped code.
+
+- **Channels** (10 Hz, reference px = a 1280 px frame at the median zoom): camera pan (canvas x of
+  the frame centre per second, from `CameraMotion`), the people's median x velocity in the image
+  (canvas velocity minus the pan), the mean x velocity in the image and the mean speed (body
+  heights per second) of people matched mutual-nearest between detection frames 0.5 s apart.
+  People are sampled at 2 Hz as in the training data; static people (bench, table) are dropped.
+- **Score**: rz(template cosine) + rz(lull), where the lull uses the people speed instead of the
+  flow share. Channels and scores are normalised over a rolling 3-minute window that keeps its
+  full length at the video ends (a 3-minute video gets exactly the per-segment statistics).
+- **Candidates**: per 3-minute block the best peaks at 4 per minute, 8 s suppression; each carries
+  the lowest rate (1, 2 or 4 per minute) that proposes it. Clip -10 s to +4 s around the peak, goal
+  estimated 1.5 s before the peak.
+
+| Score (leave-one-game-out, 73 goals / 56 test goals) | recall @1 / 2 / 4 per min, all | test | window AUC all / test | peak - goal |
+|---|---|---|---|---|
+| research `tmpl_all` + `lull_after` (needs flow and energy) | 0.62 / 0.84 / 0.97 | 0.54 / 0.79 / 0.96 | 0.840 / 0.825 | +1.5 s (IQR 3.3) |
+| **product** (pan + people, people lull) | **0.59 / 0.88 / 0.95** | **0.54 / 0.84 / 0.93** | 0.864 / 0.861 | +1.6 s (IQR 2.9) |
+| product channels, people velocities on the canvas (pan not taken out) | 0.55 / 0.82 / 0.93 | 0.48 / 0.79 / 0.91 | 0.840 / 0.819 | +2.1 s |
+
+- **Canvas sign in `seg_cues.signals`**: `cv2.phaseCorrelate(prev, cur)` returns the content shift
+  (checked: +5 for content moved 5 px right; the cached pan correlates +0.93 with the median
+  Farneback flow), so the hall position is `image - cumsum(pan)`, not `image + cumsum(pan)`. The
+  research `cx`, `cx_v` and the static-people mask therefore used "image + content shift"
+  coordinates. The product uses the correct canvas, and takes the camera speed out of the people
+  velocities instead (image velocities plus a pan channel), which scores best of the variants
+  tried (people canvas velocities: 0.82 at 2 per minute; image velocities: 0.88).
+- **Cost**: 0.22 s for a 5-minute club clip on top of a 602 s observation pass (shared CPU,
+  YOLOX-s every 3rd frame), 1.8 s for a synthetic 60-minute game: well under 0.1 % of the pass.
+- **Not measured on the product path end to end**: the labelled segment videos were no longer on
+  disk, so the product pass (YOLOX-s at 8 Hz, pan from the rotation model) was only run on an
+  unlabelled 5-minute club clip. The template was learned with YOLOX-m at 2 Hz and phase
+  correlation; the per-window standardisation should absorb the scale differences, but a check on
+  labelled games through `observe` is the first thing to do with new footage.
+
+```bash
+uv run --project packages/vision python ml/goals/goal_template.py $G/cache $G/labels.json --version 2026-11-05.1
+uv run --project packages/vision python ml/goals/goal_template.py $G/cache $G/labels.json --check
 ```

@@ -16,11 +16,12 @@ Only these fixed hosts are contacted; the given URL only names the game.
   an event exactly at the end of the half belongs to it while the score is the half-time score;
 - goals are matched with the goals already stored, same side, at most 20 s of match clock apart:
   * a goal a person entered (tagging, feed, correction) wins: no official goal is added for it;
-  * an automatic goal (score overlay, heuristic) is the same goal seen on video: the official
-    goal takes over its video time and shot position (attributes.video keeps what the video
-    read) and the automatic row is dropped, so nothing is counted twice. Automatic goals without
-    an official counterpart are kept when read from the overlay (they show where the video and
-    the report disagree) and dropped when only estimated (heuristic);
+  * an automatic goal (score overlay, heuristic, a confirmed goal candidate) is the same goal
+    seen on video: the official goal takes over its video time and shot position
+    (attributes.video keeps what the video read) and the automatic row is dropped, so nothing is
+    counted twice. Automatic goals without an official counterpart are kept when read from the
+    overlay or confirmed by the coach (they show where the video and the report disagree) and
+    dropped when only estimated (heuristic);
   * suspensions, time-outs and the other entries are added as they are.
 
 `comparison` lists the official goals next to what the video found (the import's video data, or an
@@ -46,14 +47,16 @@ from sqlalchemy import delete, select
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, Match, Opponent, RosterEntry
 from handball_api.services import audit
-from handball_api.services.auto_events import OFFICIAL, OVERLAY
+from handball_api.services.auto_events import CANDIDATE, OFFICIAL, OVERLAY
 from handball_api.services.context import Ctx
 from handball_api.services.events import video_from_clock
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
 
 SOURCE = OFFICIAL
-AUTO_GOALS = ("heuristic", "model", OVERLAY)
+# goals seen on video: an official goal takes over their video time (a confirmed goal candidate
+# has no scorer; the report has)
+AUTO_GOALS = ("heuristic", "model", OVERLAY, CANDIDATE)
 REVIEW = ("confirmed", "dismissed")
 MATCH_WINDOW_S = 20.0  # the overlay changes a few seconds after the goal; minutes are rounded
 TIMEOUT = httpx.Timeout(15.0, connect=5.0)
@@ -598,11 +601,12 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
         created += 1
 
     # automatic goals: the matched ones are now official goals; estimates without a counterpart
-    # are dropped (the report has every goal), overlay readings without one stay for checking
+    # are dropped (the report has every goal), overlay readings and goals the coach confirmed
+    # from a candidate without one stay for checking
     taken = {id(c.event) for c in seen if c.event is not None and id(c) in used}
     unmatched_video = 0
     for g in auto:
-        if id(g) in taken or g.source != OVERLAY:
+        if id(g) in taken or g.source not in (OVERLAY, CANDIDATE):
             await ctx.db.delete(g)
         else:
             unmatched_video += 1

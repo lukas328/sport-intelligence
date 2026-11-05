@@ -33,6 +33,7 @@ import { useOpponentName } from "@/lib/opponent";
 import { TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
 import { OfficialGoalsPanel, officialGoalsKey } from "./official-goals";
+import { GoalCandidatesPanel } from "./goal-candidates";
 import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
@@ -169,6 +170,36 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     requestAnimationFrame(() => {
       player.current?.seek(ms);
       player.current?.play();
+    });
+  }
+
+  // a clip (goal candidate): plays from `from` and stops at `to`; a seek elsewhere ends it
+  const clipEnd = useRef<(() => void) | null>(null);
+  useEffect(() => () => clipEnd.current?.(), []);
+  function onClip(from: number, to: number) {
+    clipEnd.current?.();
+    setView("video");
+    requestAnimationFrame(() => {
+      player.current?.seek(from);
+      player.current?.play();
+      const v = player.current?.video();
+      if (!v) return;
+      let started = false; // the seek may land after the first time updates
+      const tick = () => {
+        const ms = v.currentTime * 1000;
+        if (!started) started = ms >= from - 500 && ms < to;
+        else if (ms < from - 2000 || ms > to + 1500) stop(); // the coach seeked elsewhere
+        else if (ms >= to) {
+          v.pause();
+          stop();
+        }
+      };
+      const stop = () => {
+        v.removeEventListener("timeupdate", tick);
+        clipEnd.current = null;
+      };
+      v.addEventListener("timeupdate", tick);
+      clipEnd.current = stop;
     });
   }
 
@@ -365,6 +396,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         )}
         {staff && main && match.report_extra?.official_report != null && (
           <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} isHome={match.is_home} names={names} onPlay={onPlay} />
+        )}
+        {staff && main && (
+          <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} onClip={onClip} />
         )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
         {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}

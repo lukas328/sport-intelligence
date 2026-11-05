@@ -231,6 +231,66 @@ class GoalReviewIn(ApiModel):
     status: ReviewStatus | None  # null: undo the check
 
 
+CandidateStatus = Literal["open", "confirmed", "rejected"]
+
+
+class CandidateGoal(ApiModel):
+    """A goal already stored that covers a candidate (same moment)."""
+
+    event_id: uuid.UUID
+    source: str
+    side: str
+    t_ms: int | None
+
+
+class GoalCandidateRow(ApiModel):
+    """A moment of the video that is probably a goal (analysis), with the coach's review."""
+
+    id: uuid.UUID
+    video_asset_id: uuid.UUID
+    t_ms: int  # score peak, a median 1.5 s after the goal
+    goal_ms: int  # estimated goal time (the goal event gets it on confirmation)
+    start_ms: int  # clip: 10 s before to 4 s after the peak
+    end_ms: int
+    score: float
+    rate: int  # lowest candidates-per-minute rate (1, 2, 4) that proposes it
+    suggested_side: Side | None  # whose attack ended just before it
+    status: CandidateStatus
+    side: Side | None  # confirmed: whose goal
+    event_id: uuid.UUID | None  # confirmed: the goal event
+    period: int | None
+    clock_s: float | None
+    known: CandidateGoal | None  # open but already a goal (overlay, report, tagged)
+
+
+class GoalCandidateCounts(ApiModel):
+    total: int
+    open: int  # open and not covered by a known goal
+    open_by_rate: dict[str, int]
+    confirmed: int
+    rejected: int
+    known: int
+
+
+class GoalCandidateList(ApiModel):
+    template: str | None
+    rates: list[int]
+    default_rate: int
+    counts: GoalCandidateCounts
+    candidates: list[GoalCandidateRow]
+
+
+class GoalCandidateReviewIn(ApiModel):
+    status: Literal["confirmed", "rejected"] | None  # null: back to open (undo)
+    side: Side | None = None  # required to confirm
+
+    @model_validator(mode="after")
+    def _side(self) -> GoalCandidateReviewIn:
+        if self.status == "confirmed" and self.side is None:
+            raise ValueError("a confirmed goal needs the side that scored")
+        return self
+
+
 class FeedImportResult(ApiModel):
     created: int
     skipped: int
