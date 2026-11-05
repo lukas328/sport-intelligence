@@ -1317,7 +1317,8 @@
     "undo": "Rückgängig",
     "rejected": "{count, plural, one {# Eintrag wurde} other {# Einträge wurden}} vom Server abgelehnt.",
     "eventSynced": "Gespeichert",
-    "eventPending": "Wird gespeichert"
+    "eventPending": "Wird gespeichert",
+    "logEmpty": "Noch nichts erfasst. Spieler wählen, dann Aktion."
   },
   "consents": {
     "title": "Einwilligungen",
@@ -1979,7 +1980,12 @@
     "source_manual": "von Hand korrigiert",
     "source_none": "nicht abgeglichen",
     "resync": "Neu abgleichen",
-    "half": "{n}. Halbzeit"
+    "half": "{n}. Halbzeit",
+    "vs": "gegen",
+    "goalFor": "Tor {team}",
+    "count": "{n, plural, one {# Markierung} other {# Markierungen}}",
+    "lastAt": "zuletzt {label}, {time}",
+    "noneYet": "Noch keine Markierung."
   },
   "profile": {
     "title": "Öffentliches Profil",

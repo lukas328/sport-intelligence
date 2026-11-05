@@ -1317,7 +1317,8 @@
     "undo": "Annuler",
     "rejected": "{count, plural, one {# entrée a été refusée} other {# entrées ont été refusées}} par le serveur.",
     "eventSynced": "Enregistré",
-    "eventPending": "Enregistrement"
+    "eventPending": "Enregistrement",
+    "logEmpty": "Rien de saisi. Choisis un joueur, puis l'action."
   },
   "consents": {
     "title": "Consentements",
@@ -1979,7 +1980,12 @@
     "source_manual": "corrigé à la main",
     "source_none": "non aligné",
     "resync": "Réaligner",
-    "half": "{n}e mi-temps"
+    "half": "{n}e mi-temps",
+    "vs": "contre",
+    "goalFor": "But {team}",
+    "count": "{n, plural, one {# marque} other {# marques}}",
+    "lastAt": "dernière : {label}, {time}",
+    "noneYet": "Pas encore de marque."
   },
   "profile": {
     "title": "Profil public",

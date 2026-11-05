@@ -23,9 +23,10 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
 
   // big buttons, marks go out right away when online
   await page.goto(`/app/${orgId}/matches/${match.id}/marks`);
-  await page.getByRole("button", { name: "Tor wir" }).click();
+  // the buttons carry the team names; a status line counts and names the last mark
+  await page.getByRole("button", { name: "Tor Herren 3" }).click();
   await page.getByRole("button", { name: "Gute Aktion" }).click();
-  await expect(page.getByText("Markiert: Gute Aktion")).toBeVisible();
+  await expect(page.getByText(/2 Markierungen · zuletzt Gute Aktion/)).toBeVisible();
   await expect(page.getByText("Alles hochgeladen")).toBeVisible({ timeout: 15_000 });
   await expectAccessible(page);
   await page.goto(`/app/${orgId}/matches/${match.id}`);

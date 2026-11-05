@@ -1317,7 +1317,8 @@
     "undo": "Undo",
     "rejected": "{count, plural, one {# entry was} other {# entries were}} rejected by the server.",
     "eventSynced": "Saved",
-    "eventPending": "Saving"
+    "eventPending": "Saving",
+    "logEmpty": "Nothing recorded yet. Choose a player, then the action."
   },
   "consents": {
     "title": "Consents",
@@ -1979,7 +1980,12 @@
     "source_manual": "corrected by hand",
     "source_none": "not aligned",
     "resync": "Align again",
-    "half": "Half {n}"
+    "half": "Half {n}",
+    "vs": "vs",
+    "goalFor": "Goal {team}",
+    "count": "{n, plural, one {# mark} other {# marks}}",
+    "lastAt": "last {label}, {time}",
+    "noneYet": "No mark yet."
   },
   "profile": {
     "title": "Public profile",

@@ -26,9 +26,9 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 
 ## Batch 2: courtside tools (used under pressure)
 
-- [ ] P1 Live: own "Tor" is the red button -> ink; "Gegentor" carries red. Action buttons below
+- [x] P1 Live: own "Tor" is the red button -> ink; "Gegentor" carries red. Action buttons below
   the fold on phones -> sticky action bar. Team names instead of "Wir / Gegner"; "1. HZ 0:00".
-- [ ] P1 Markieren: six buttons in six colours -> neutral outlines, red only for the opponent's
+- [x] P1 Markieren (undo needs an API to delete a mark: for the analysis session): six buttons in six colours -> neutral outlines, red only for the opponent's
   goal; no feedback after a tap -> status line with the last mark and undo; match context.
 
 ## Batch 3: team and training

@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/client";
 import { adjust, clockSeconds, enqueue, flush, load, remove, toggle, type Clock } from "@/lib/live-queue";
 import { cn } from "@/lib/utils";
+import { useOptionalShell } from "@/components/shell/context";
 import { useOpponentName } from "@/lib/opponent";
 
 type Match = Schemas["MatchOut"];
@@ -63,6 +64,7 @@ function useCached<T>(key: string, fetcher: () => Promise<T | undefined>, ready 
 export function LiveView({ orgId, matchId }: { orgId: string; matchId: string }) {
   const t = useTranslations("live");
   const oppName = useOpponentName();
+  const ownName = useOptionalShell()?.team?.name ?? null;
   const te = useTranslations("events");
   const path = { org_id: orgId, match_id: matchId };
   const match = useCached<Match>(`hb.live.match.${matchId}`, async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}", { params: { path } })).data);
@@ -258,14 +260,14 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
       </div>
 
       <section aria-label={t("own")} className="space-y-2">
-        <h2 className="font-semibold">{t("own")}</h2>
+        <h2 className="font-semibold">{ownName ?? t("own")}</h2>
         <div className="grid grid-cols-4 gap-1 sm:grid-cols-6" role="group" aria-label={t("player")}>
           {players.map((p) => (
             <button
               key={p.player_id}
               aria-pressed={player === p.player_id}
               onClick={() => setPlayer((cur) => (cur === p.player_id ? null : p.player_id))}
-              className={cn("rounded-full border py-2 text-sm", player === p.player_id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+              className={cn("min-h-14 rounded-md border py-2 text-sm", player === p.player_id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
             >
               <span className="block text-lg font-bold tabular-nums">{p.jersey_number ?? "?"}</span>
               <span className="block truncate text-xs">{p.first_name}</span>
@@ -276,9 +278,11 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
           <input type="checkbox" checked={seven} onChange={(e) => setSeven(e.target.checked)} />
           {te("penaltyShot")}
         </label>
-        <div className="grid grid-cols-3 gap-1">
+        {/* the actions stay at the thumb while the player grid scrolls; the own goal in ink (red
+            means a goal against) */}
+        <div className="sticky bottom-2 z-10 grid grid-cols-3 gap-1 bg-background/95 py-1 backdrop-blur">
           {own.map((a) => (
-            <button key={a.key} onClick={() => record("own", a.label, a.body, a.goal)} className={cn("rounded-md py-4 text-base font-semibold", a.goal ? "bg-accent text-accent-contrast" : "border border-border")}>
+            <button key={a.key} onClick={() => record("own", a.label, a.body, a.goal)} className={cn("rounded-md py-4 text-base font-semibold", a.goal ? "bg-foreground text-background" : "border border-border bg-raised")}>
               {a.label}
             </button>
           ))}
@@ -286,14 +290,18 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
       </section>
 
       <section aria-label={t("opponent")} className="space-y-2">
-        <h2 className="font-semibold">{t("opponent")}</h2>
+        <h2 className="font-semibold">{match ? oppName(match) : t("opponent")}</h2>
         <label className="flex items-center gap-2 text-sm">
           {te("opponentNumber")}
           <input inputMode="numeric" value={oppNumber} onChange={(e) => setOppNumber(e.target.value.replace(/\D/g, "").slice(0, 2))} className="min-h-10 w-16 rounded-md bg-raised ring-1 ring-inset ring-border px-2" />
         </label>
         <div className="grid grid-cols-3 gap-1">
           {opp.map((a) => (
-            <button key={a.key} onClick={() => record("opponent", a.label, a.body, a.goal)} className="rounded-md ring-1 ring-inset ring-border py-4 text-base font-semibold">
+            <button
+              key={a.key}
+              onClick={() => record("opponent", a.label, a.body, a.goal)}
+              className={cn("rounded-md py-4 text-base font-semibold ring-1 ring-inset", a.goal ? "text-error ring-error/60" : "ring-border")}
+            >
               {a.label}
             </button>
           ))}
@@ -308,11 +316,12 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
           </button>
         </div>
         {rejected > 0 && <p className="text-sm text-error">{t("rejected", { count: rejected })}</p>}
+        {log.length === 0 && <p className="text-sm text-muted">{t("logEmpty")}</p>}
         <ol className="space-y-1 text-sm" data-testid="live-log">
           {log.slice(0, 30).map((e) => (
             <li key={e.client_id} className="flex justify-between gap-2 rounded bg-surface px-2 py-1.5">
               <span>
-                <span className="mr-2 font-mono text-xs text-muted">{e.clock}</span>
+                <span className="mr-2 font-score text-xs text-muted tabular-nums">{e.clock}</span>
                 {e.label}
               </span>
               <span className="text-xs text-muted">{e.synced ? <Check aria-label={t("eventSynced")} className="size-3.5 text-ok" /> : <Clock3 aria-label={t("eventPending")} className="size-3.5" />}</span>
