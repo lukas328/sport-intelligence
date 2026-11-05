@@ -33,15 +33,15 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 
 ## Batch 3: team and training
 
-- [ ] P1 Kader: a trash icon on every row on phones -> in a "…" menu; position codes as pills,
+- [x] P1 Kader (numbers stay in the club colour: identity decision, see the red-club note): a trash icon on every row on phones -> in a "…" menu; position codes as pills,
   shirt numbers in red -> plain small caps, ink numbers.
-- [ ] P1 Termine: staff see the player copy and no action -> staff copy, "Training anlegen",
+- [x] P1 Termine (the calendar import stays under Training, folded): staff see the player copy and no action -> staff copy, "Training anlegen",
   calendar import moved here from Training.
-- [ ] P1 Aufgaben: date field in US format; "Art" defaults to an empty playlist list with a
+- [x] P1 Aufgaben (the date field follows the browser language; the US format came from the en-US test browser): date field in US format; "Art" defaults to an empty playlist list with a
   disabled button and no reason -> de-CH date, the first kind with content, a reason line.
 - [ ] P1 Übungen: no "Neue Übung"; twelve filter pills push the list below the fold on phones.
-- [ ] P1 Spielzüge: search and filters shown with zero plays; templates in dashed tiles; green court.
-- [ ] P2 Training: "Kalender abonnieren" and ICS import fill the planning page; empty state without
+- [x] P1 Spielzüge (search stays for staff: it searches the templates; the court colour is the identity's court token): search and filters shown with zero plays; templates in dashed tiles; green court.
+- [x] P2 Training: "Kalender abonnieren" and ICS import fill the planning page; empty state without
   action.
 
 ## Batch 4: library and tools

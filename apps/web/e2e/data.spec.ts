@@ -32,7 +32,8 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   expect(res.headers()["content-type"]).toContain("application/pdf");
   await expectAccessible(page);
 
-  // calendar link for subscription
+  // calendar link for subscription (the calendar tools fold away under the units)
+  await page.getByText("Kalender abonnieren und Termine importieren").click();
   await page.getByRole("button", { name: "Link erzeugen" }).click();
   const url = await page.getByLabel("Kalender abonnieren").inputValue();
   // the link is stored with the request's commit; poll instead of a single read

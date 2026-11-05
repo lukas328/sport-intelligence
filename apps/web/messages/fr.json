@@ -1143,7 +1143,11 @@
     "openTarget": "Ouvrir",
     "delete": "Supprimer la tâche",
     "noPlayers": "Personne dans l'équipe n'a encore le rôle joueur avec un compte. Invite d'abord des joueurs.",
-    "nav": "Tâches"
+    "nav": "Tâches",
+    "noneOf_playlist": "Pas encore de playlist. Rassemble des clips dans la recherche de scènes et enregistre-les.",
+    "noneOf_play": "Pas encore de combinaison. Crée-en une sous Entraînement, Combinaisons.",
+    "noneOf_match": "Pas encore de match.",
+    "noneOf_drill": "Aucun exercice disponible."
   },
   "drills": {
     "title": "Exercices",
@@ -1942,7 +1946,10 @@
     "trend_same": "pareil",
     "smallSample": "Pas encore assez de données pour en tirer quelque chose.",
     "observation": "Observation, pas une preuve.",
-    "noFollowup": "Ce constat n'a pas de chiffre à suivre."
+    "noFollowup": "Ce constat n'a pas de chiffre à suivre.",
+    "planFirst": "Planifier la première séance",
+    "noneHint": "Une séance avec exercices existe comme plan sur le téléphone et en PDF pour la salle.",
+    "calendarTools": "S'abonner au calendrier et importer des dates"
   },
   "schedule": {
     "nav": "Mes rendez-vous",
@@ -1957,7 +1964,10 @@
     "forYes": "Vient",
     "forNo": "Ne vient pas",
     "answered_yes": "Confirmé",
-    "answered_no": "Annulé"
+    "answered_no": "Annulé",
+    "hintStaff": "Entraînements et matchs des 30 prochains jours avec les réponses.",
+    "planTraining": "Planifier un entraînement",
+    "scheduleMatch": "Programmer un match"
   },
   "marks": {
     "title": "Marquer",

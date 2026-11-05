@@ -1143,7 +1143,11 @@
     "openTarget": "Open",
     "delete": "Delete assignment",
     "noPlayers": "Nobody in the team has the player role with an account yet. Invite players first.",
-    "nav": "Assignments"
+    "nav": "Assignments",
+    "noneOf_playlist": "No playlist yet. Collect clips in the scene search and save them as a playlist.",
+    "noneOf_play": "No play yet. Create one under Training, Plays.",
+    "noneOf_match": "No match yet.",
+    "noneOf_drill": "No drill available."
   },
   "drills": {
     "title": "Drills",
@@ -1942,7 +1946,10 @@
     "trend_same": "same",
     "smallSample": "Not enough data yet to read anything into it.",
     "observation": "Observation, not proof.",
-    "noFollowup": "This insight has no figure to follow."
+    "noFollowup": "This insight has no figure to follow.",
+    "planFirst": "Plan the first session",
+    "noneHint": "A session with drills comes as a plan on the phone and a PDF for the hall.",
+    "calendarTools": "Subscribe to the calendar and import dates"
   },
   "schedule": {
     "nav": "My dates",
@@ -1957,7 +1964,10 @@
     "forYes": "Coming",
     "forNo": "Not coming",
     "answered_yes": "Confirmed",
-    "answered_no": "Declined"
+    "answered_no": "Declined",
+    "hintStaff": "Trainings and matches of the next 30 days with the replies.",
+    "planTraining": "Plan a training",
+    "scheduleMatch": "Schedule a match"
   },
   "marks": {
     "title": "Mark",

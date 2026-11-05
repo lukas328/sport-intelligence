@@ -1143,7 +1143,11 @@
     "openTarget": "Öffnen",
     "delete": "Aufgabe löschen",
     "noPlayers": "Im Team hat noch niemand die Rolle Spieler/in mit Konto. Lade zuerst Spieler/innen ein.",
-    "nav": "Aufgaben"
+    "nav": "Aufgaben",
+    "noneOf_playlist": "Noch keine Playlist. In der Szenensuche Clips sammeln und als Playlist speichern.",
+    "noneOf_play": "Noch kein Spielzug. Unter Training, Spielzüge einen anlegen.",
+    "noneOf_match": "Noch kein Spiel angelegt.",
+    "noneOf_drill": "Keine Übung vorhanden."
   },
   "drills": {
     "title": "Übungen",
@@ -1942,7 +1946,10 @@
     "trend_same": "gleich",
     "smallSample": "Noch zu wenig Daten, um etwas abzulesen.",
     "observation": "Beobachtung, kein Beweis.",
-    "noFollowup": "Für diese Erkenntnis gibt es keine Kennzahl zum Verfolgen."
+    "noFollowup": "Für diese Erkenntnis gibt es keine Kennzahl zum Verfolgen.",
+    "planFirst": "Erste Einheit planen",
+    "noneHint": "Eine Einheit mit Übungen gibt es als Plan fürs Handy und als PDF für die Halle.",
+    "calendarTools": "Kalender abonnieren und Termine importieren"
   },
   "schedule": {
     "nav": "Meine Termine",
@@ -1957,7 +1964,10 @@
     "forYes": "Kommt",
     "forNo": "Kommt nicht",
     "answered_yes": "Zugesagt",
-    "answered_no": "Abgesagt"
+    "answered_no": "Abgesagt",
+    "hintStaff": "Trainings und Spiele der nächsten 30 Tage mit den Zu- und Absagen.",
+    "planTraining": "Training planen",
+    "scheduleMatch": "Spiel ansetzen"
   },
   "marks": {
     "title": "Markieren",

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { useConfirm } from "@/components/ui/confirm";
@@ -22,7 +22,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
   const format = useFormatter();
   const lang = useLocale() as Lang;
   const qc = useQueryClient();
-  const [kind, setKind] = useState<Kind>("playlist");
+  const [chosen, setKind] = useState<Kind | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const team = { org_id: orgId, team_id: teamId };
@@ -43,12 +43,15 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
     queryKey: ["team-matches", teamId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", { params: { path: team } })).data ?? [],
   });
-  const options: { id: string; label: string }[] = {
+  const byKind: Record<Kind, { id: string; label: string }[]> = {
     playlist: (playlists.data ?? []).map((p) => ({ id: p.id, label: p.title })),
     play: (plays.data ?? []).map((p) => ({ id: p.id, label: p.name })),
     match: (matches.data ?? []).map((m) => ({ id: m.id, label: `${format.dateTime(new Date(m.kickoff_at), { dateStyle: "short" })} ${m.opponent_name}` })),
     drill: DRILLS.map((d) => ({ id: d.id, label: d.name[lang] ?? d.name["de-CH"] })),
-  }[kind];
+  };
+  // start with the first kind that has something to give (drills always do)
+  const kind: Kind = chosen ?? KINDS.find((k) => byKind[k].length > 0) ?? "drill";
+  const options = byKind[kind];
 
   const confirm = useConfirm();
   const remove = useMutation({
@@ -117,7 +120,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
           ))}
         </ul>
       </section>
-      <Card className="h-fit space-y-3">
+      <section className="h-fit space-y-3 border-t-2 border-foreground pt-3">
         <h2 className="text-lg font-semibold">{t("new")}</h2>
         <form onSubmit={create} className="space-y-3" aria-label={t("new")}>
           <label className="flex flex-col gap-1 text-sm">
@@ -150,6 +153,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
           <p className="text-xs text-muted">
             {t("recipients")}: {t("allPlayers")}
           </p>
+          {options.length === 0 && <p className="text-sm text-muted">{t(`noneOf_${kind}`)}</p>}
           <Button type="submit" className="w-full" disabled={options.length === 0}>
             {t("create")}
           </Button>
@@ -162,7 +166,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
             </Alert>
           )}
         </div>
-      </Card>
+      </section>
     </div>
   );
 }
