@@ -304,12 +304,8 @@ export function Workspace({
     unassigned: a?.status === "ready" && a.tracks.length > 0 ? ownTracks(a.tracks).filter((tr) => !tr.player_id).length : null,
   });
   const loaded = !analysis.isLoading && !candidates.isLoading && !(hasReport && official.isLoading);
-  const tools: Pane[] = [
-    ...(staff ? (["events"] as const) : (["court"] as const)),
-    ...(a?.status === "ready" ? (["formations"] as const) : []),
-    "notes",
-    ...(staff ? (["feedback"] as const) : []),
-  ];
+  // players watch and comment; the court, defence systems and events are the coach's workbench
+  const tools: Pane[] = staff ? ["events", ...(a?.status === "ready" ? (["formations"] as const) : []), "notes", "feedback"] : ["notes"];
   // another tab asks for a pane (e.g. "Feedback geben" from the scenes tab)
   useEffect(() => {
     if (requestPane) setPane(requestPane.pane);
@@ -395,9 +391,9 @@ export function Workspace({
             {t("workflow.reviewClose")}
           </Button>
         </div>
-      ) : (
+      ) : staff || tools.length > 1 ? (
         <WorkRail steps={staff ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
-      )}
+      ) : null}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}
       {/* phones: the column dissolves into the grid, so the player can stay at the top while the
@@ -541,8 +537,9 @@ export function Workspace({
 
       <div
         id={`${paneId}-pane`}
-        role={reviewing ? undefined : "tabpanel"}
-        aria-labelledby={reviewing ? undefined : `${paneId}-tab-${shown}`}
+        // a tab panel only when there is a tab row (players see the one tool without tabs)
+        role={reviewing || !(staff || tools.length > 1) ? undefined : "tabpanel"}
+        aria-labelledby={reviewing || !(staff || tools.length > 1) ? undefined : `${paneId}-tab-${shown}`}
         className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:pr-1"
       >
         {shown === "court" && (

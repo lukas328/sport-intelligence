@@ -298,7 +298,9 @@
     "editList": "Edit list",
     "editDone": "Done",
     "consentsAll": "Video consents: all {n} complete.",
-    "consentsMissing": "Consent missing for {n} of {total}:"
+    "consentsMissing": "Consent missing for {n} of {total}:",
+    "hand_left": "Left-handed",
+    "hand_right": "Right-handed"
   },
   "settings": {
     "title": "Settings",
@@ -316,7 +318,7 @@
     "wholeClub": "Whole club (club admin)",
     "twoFactorTitle": "Two-factor sign-in",
     "twoFactorOn": "Active. Signing in also needs a code from your authenticator app.",
-    "twoFactorOff": "Not active. Club admins must enable it after 14 days.",
+    "twoFactorOff": "Not active.",
     "twoFactorRequired": "As a club admin you must enable two-factor sign-in.",
     "twoFactorStart": "Set up",
     "twoFactorScan": "Scan the QR code with an authenticator app (e.g. Google Authenticator, 1Password) or enter the key manually.",
@@ -327,7 +329,8 @@
     "recoveryTitle": "Recovery codes",
     "recoveryHint": "Keep these codes safe (for example printed). Each code works once when you cannot use your authenticator app. They are shown only now.",
     "recoveryLeft": "{count, plural, one {# recovery code} other {# recovery codes}} left.",
-    "recoveryNew": "New recovery codes"
+    "recoveryNew": "New recovery codes",
+    "twoFactorAdmins": "For club admins it is required after 14 days."
   },
   "dashboard": {
     "teamsTitle": "Teams",
@@ -433,7 +436,7 @@
     "cardSaves": "{value} saves",
     "cardDemo": "Demo data",
     "withoutVideo": "{n} of {total} without video",
-    "allDemo": "All demo matches",
+    "allDemo": "Demo matches only",
     "uploadVideo": "Upload video",
     "noneUpcoming": "No match scheduled.",
     "scheduleOne": "Schedule a match"
@@ -1120,7 +1123,7 @@
   "assignments": {
     "title": "Assignments",
     "mine": "My assignments",
-    "none": "No assignments.",
+    "none": "No open assignments. Videos, plays and drills your coach gives you appear here.",
     "team": "Team assignments",
     "new": "New assignment",
     "kind": "Type",
@@ -1429,12 +1432,12 @@
     "assessNow": "Rate now",
     "loading": "Loading...",
     "assessTitle": "How was your match?",
-    "assessIntro": "Your own view first, then you see the coach's comments.",
+    "assessIntro": "Your self-assessment first, then you see the coach's notes.",
     "rating": "Rating from 1 to 5",
     "ratingN": "{n} of 5",
     "sentence": "One sentence (optional)",
     "send": "Send rating",
-    "commentsWaiting": "{n, plural, one {# coach comment is} other {# coach comments are}} waiting for you.",
+    "commentsWaiting": "{n, plural, one {# note from the coach is} other {# notes from the coach are}} waiting for you.",
     "yourRating": "Your rating: {n} of 5",
     "sceneN": "Scene {n} of {total}",
     "noVideo": "The video is not ready yet.",
@@ -1497,7 +1500,10 @@
     "feedbackLink": "Give feedback",
     "feedbackHere": "You write notes on the scenes in the video, next to the player.",
     "feedbackTitle": "Feedback",
-    "continueWith": "Continue with {name}"
+    "continueWith": "Continue with {name}",
+    "ratingLow": "1 poor",
+    "ratingHigh": "5 very good",
+    "coachNote": "Coach's note:"
   },
   "scouting": {
     "title": "Preparation report",
@@ -1976,7 +1982,7 @@
     "nav": "My dates",
     "title": "My dates",
     "hint": "Sessions and matches of the next 30 days. Reply so the coaches can plan.",
-    "none": "No dates in the next 30 days.",
+    "none": "No dates in the next 30 days. Training sessions and matches appear here once your coach schedules them.",
     "training": "Training",
     "match": "Match against {opponent}",
     "for": "for {name}",
@@ -2173,7 +2179,9 @@
     "noDates": "No dates in the next 30 days.",
     "yourNext": "Your next date",
     "openTasks": "Open assignments",
-    "lastMatchOn": "Last match, {date}"
+    "lastMatchOn": "Last match, {date}",
+    "assessLead": "Your self-assessment is still missing",
+    "assessTask": "Rate your game against {opponent}"
   },
   "shell": {
     "search": "Search",

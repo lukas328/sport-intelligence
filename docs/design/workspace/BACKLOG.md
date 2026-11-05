@@ -90,9 +90,34 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
   situations (analysis data, already reported).
 - [x] Dates: "29. Okt. 26" (Suche) and "29.10.2026" (Gegner): one format.
 
+## Batch 6: the player's side (audit as a field player, local test account)
+
+- [x] P1 Analyse: the "Übungen" link on a weakness insight leads players to a 404 (drills are staff
+  only) -> staff only. The 404 seen was a wrong test URL outside a club (product brand, fine).
+- [x] P1 Start: "Zu erledigen: Nichts offen" while a self-assessment is waiting; the big stage is
+  spent on "Keine Termine" -> the waiting self-assessment leads the stage and is a to-do.
+- [x] P1 Match page: a player sees the coach's tools (comment field, drawings, spotlight, keys,
+  defence systems) -> players get comments, clips and drawings to watch, no tab row, no court
+  or defence systems (commenting stays: players may comment by design).
+- [x] P1 Feed item: "Zuerst deine Einschätzung" but "Weiter" is the strongest button.
+- [x] P1 Season: figures contradict the fixtures (season counts one match; xG 3.4 for 26 goals):
+  backend, already reported. No xG sentence when goals and xG differ by more than double
+  (`lib/voice.ts`, tested); the season counting itself stays with the analysis session.
+- [x] P2 Feed item: title names no match; "Kommentare des Trainers" -> "Notizen"; green pill as
+  decoration; rating scale without anchors.
+- [x] P2 Kader for players ("Du" on the own row still open): "Verknüpft" is staff wording; "Rechts" without "Wurfhand"; own row "Du".
+- [x] P2 Profil ("Paraden" for field players still open): missing consent as an error alert; form editable while it cannot go public;
+  "Paraden" for a field player.
+- [x] P2 Aufgaben and Termine empty states without a sentence on who sets them.
+- [x] P2 Einstellungen: the 2FA admin sentence shown to players.
+- [x] P3 Spielplan (wording done; score emphasis open): "Alles Demo-Spiele"; score emphasis on the winner instead of the own team.
+- [ ] P3 Einwilligungen: guardian wording ("Du selbst") for an adult player.
+
 ## Later (features)
 
 - Opponent profile: home or away per game (API field).
+- Player: one next-action list (self-assessments, assignments, replies to dates); personal season
+  line linked to clips; "Meine Szenen" on the match page; read-only drills a coach assigns.
 - Own drills ("Neue Übung"): needs a drills API; the library is static today.
 - Player status (verletzt, abwesend) on the squad; attendance on units and dates; assignment
   progress ("8 von 14 erledigt"); recurring training slots; a team consent table for staff.

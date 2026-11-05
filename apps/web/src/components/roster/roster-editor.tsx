@@ -244,16 +244,18 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                         {p.main_position}
                       </span>
                     )}
-                    {p.shooting_hand && <span>{t(`hands.${p.shooting_hand}`)}</span>}
+                    {p.shooting_hand && <span>{t(`roster.hand_${p.shooting_hand as "left"}`)}</span>}
                     {canEdit && !p.consent_complete && <span className="font-semibold text-foreground">{t("roster.consentMissing")}</span>}
-                    {p.has_account ? (
-                      <span className="inline-flex items-center gap-1.5">
-                        <span aria-hidden className="size-1.5 rounded-full bg-ok" />
-                        {t("roster.hasAccount")}
-                      </span>
-                    ) : (
-                      <span className="sr-only">{t("roster.noAccount")}</span>
-                    )}
+                    {/* whether a player has an account is staff business */}
+                    {canEdit &&
+                      (p.has_account ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span aria-hidden className="size-1.5 rounded-full bg-ok" />
+                          {t("roster.hasAccount")}
+                        </span>
+                      ) : (
+                        <span className="sr-only">{t("roster.noAccount")}</span>
+                      ))}
                   </span>
                 </span>
                 {canEdit && (

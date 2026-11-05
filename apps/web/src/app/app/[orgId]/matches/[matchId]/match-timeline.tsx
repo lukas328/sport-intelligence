@@ -83,7 +83,7 @@ export function MatchTimeline({
       <span className="font-score text-[0.8125rem] uppercase tracking-wide text-muted">{label}</span>
       <div className={cn("relative border-b border-foreground/15", sided ? "h-9" : "h-6")}>
         {spans.map((s) => (
-          <span key={s.from} className="absolute inset-y-0 bg-accent/8" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
+          <span key={s.from} className="absolute inset-y-0 bg-foreground/5" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
         ))}
         {sided && <span className="absolute inset-x-0 top-1/2 h-px bg-foreground/25" />}
         {children}
@@ -121,7 +121,7 @@ export function MatchTimeline({
         {lane(
           t("laneVideo"),
           spans.map((s) => (
-            <span key={s.from} className="absolute inset-y-2 bg-accent" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
+            <span key={s.from} className="absolute inset-y-2 bg-foreground/55" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
           )),
         )}
         {goals.length > 0 &&
@@ -194,7 +194,7 @@ export function MatchTimeline({
         <span />
         <div className="relative h-5 pt-1 font-score text-xs text-muted tabular-nums">
           {ticks.map((s, i) => (
-            <span key={i} className={cn("absolute", i === 0 ? "" : i === ticks.length - 1 ? "-translate-x-full" : "-translate-x-1/2")} style={{ left: `${(i / (ticks.length - 1)) * 100}%` }}>
+            <span key={i} className={cn("absolute whitespace-nowrap", i === 0 ? "" : i === ticks.length - 1 ? "-translate-x-full" : "-translate-x-1/2")} style={{ left: `${(i / (ticks.length - 1)) * 100}%` }}>
               {zoom === "game" ? (s === total / 2 ? `${Math.round(s / 60)}' ${t("halftime")}` : `${Math.round(s / 60)}'`) : tz("at", { period: Math.min(2, Math.floor(s / periodS) + 1), clock: formatClock(s * 1000) })}
             </span>
           ))}

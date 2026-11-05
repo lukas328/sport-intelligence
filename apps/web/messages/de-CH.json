@@ -298,7 +298,9 @@
     "editList": "Liste bearbeiten",
     "editDone": "Fertig",
     "consentsAll": "Einwilligungen für Video: alle {n} vollständig.",
-    "consentsMissing": "Einwilligung fehlt bei {n} von {total}:"
+    "consentsMissing": "Einwilligung fehlt bei {n} von {total}:",
+    "hand_left": "Wurfhand links",
+    "hand_right": "Wurfhand rechts"
   },
   "settings": {
     "title": "Einstellungen",
@@ -316,7 +318,7 @@
     "wholeClub": "Ganzer Verein (Vereinsadmin)",
     "twoFactorTitle": "Zwei-Faktor-Anmeldung",
     "twoFactorOn": "Aktiv. Bei der Anmeldung brauchst du zusätzlich einen Code aus deiner Authenticator-App.",
-    "twoFactorOff": "Nicht aktiv. Für Vereinsadmins ist sie nach 14 Tagen Pflicht.",
+    "twoFactorOff": "Nicht aktiv.",
     "twoFactorRequired": "Als Vereinsadmin musst du die Zwei-Faktor-Anmeldung aktivieren.",
     "twoFactorStart": "Einrichten",
     "twoFactorScan": "Scanne den QR-Code mit einer Authenticator-App (z. B. Google Authenticator, 1Password) oder gib den Schlüssel von Hand ein.",
@@ -327,7 +329,8 @@
     "recoveryTitle": "Wiederherstellungscodes",
     "recoveryHint": "Bewahre diese Codes sicher auf (zum Beispiel ausgedruckt). Jeder Code funktioniert einmal, wenn du keinen Zugriff auf deine Authenticator-App hast. Sie werden nur jetzt angezeigt.",
     "recoveryLeft": "{count, plural, one {# Wiederherstellungscode} other {# Wiederherstellungscodes}} übrig.",
-    "recoveryNew": "Neue Wiederherstellungscodes"
+    "recoveryNew": "Neue Wiederherstellungscodes",
+    "twoFactorAdmins": "Für Vereinsadmins ist sie nach 14 Tagen Pflicht."
   },
   "dashboard": {
     "teamsTitle": "Teams",
@@ -433,7 +436,7 @@
     "cardSaves": "{value} Paraden",
     "cardDemo": "Demo-Daten",
     "withoutVideo": "{n} von {total} ohne Video",
-    "allDemo": "Alles Demo-Spiele",
+    "allDemo": "Nur Demo-Spiele",
     "uploadVideo": "Video hochladen",
     "noneUpcoming": "Kein Spiel angesetzt.",
     "scheduleOne": "Spiel ansetzen"
@@ -564,7 +567,7 @@
     "add": "Kommentieren",
     "empty": "Noch keine Kommentare.",
     "delete": "Löschen",
-    "emptyHint": "Halte das Video an und schreib, was du siehst. Enter speichert die Notiz bei {time}."
+    "emptyHint": "Halte das Video an und schreib, was du siehst. Enter speichert den Kommentar bei {time}."
   },
   "draw": {
     "title": "Zeichnen",
@@ -1120,7 +1123,7 @@
   "assignments": {
     "title": "Aufgaben",
     "mine": "Meine Aufgaben",
-    "none": "Keine Aufgaben.",
+    "none": "Keine offenen Aufgaben. Videos, Spielzüge und Übungen, die dir der Trainer gibt, erscheinen hier.",
     "team": "Aufgaben im Team",
     "new": "Neue Aufgabe",
     "kind": "Art",
@@ -1429,12 +1432,12 @@
     "assessNow": "Jetzt einschätzen",
     "loading": "Laden...",
     "assessTitle": "Wie war dein Spiel?",
-    "assessIntro": "Zuerst deine Einschätzung, danach siehst du die Kommentare des Trainers.",
+    "assessIntro": "Zuerst deine Einschätzung, danach siehst du die Notizen des Trainers.",
     "rating": "Bewertung von 1 bis 5",
     "ratingN": "{n} von 5",
     "sentence": "Ein Satz dazu (optional)",
     "send": "Einschätzung senden",
-    "commentsWaiting": "{n, plural, one {# Kommentar des Trainers wartet} other {# Kommentare des Trainers warten}} auf dich.",
+    "commentsWaiting": "{n, plural, one {# Notiz des Trainers wartet} other {# Notizen des Trainers warten}} auf dich.",
     "yourRating": "Deine Einschätzung: {n} von 5",
     "sceneN": "Szene {n} von {total}",
     "noVideo": "Das Video ist noch nicht bereit.",
@@ -1497,7 +1500,10 @@
     "feedbackLink": "Feedback geben",
     "feedbackHere": "Notizen zu den Szenen gibst du im Video, neben dem Player.",
     "feedbackTitle": "Feedback",
-    "continueWith": "Weiter mit {name}"
+    "continueWith": "Weiter mit {name}",
+    "ratingLow": "1 schwach",
+    "ratingHigh": "5 sehr gut",
+    "coachNote": "Notiz des Trainers:"
   },
   "scouting": {
     "title": "Vorbereitungsbericht",
@@ -1976,7 +1982,7 @@
     "nav": "Meine Termine",
     "title": "Meine Termine",
     "hint": "Trainings und Spiele der nächsten 30 Tage. Sag zu oder ab, damit das Trainerteam planen kann.",
-    "none": "Keine Termine in den nächsten 30 Tagen.",
+    "none": "Keine Termine in den nächsten 30 Tagen. Trainings und Spiele erscheinen hier, sobald der Trainer sie ansetzt.",
     "training": "Training",
     "match": "Spiel gegen {opponent}",
     "for": "für {name}",
@@ -2173,7 +2179,9 @@
     "noDates": "Keine Termine in den nächsten 30 Tagen.",
     "yourNext": "Dein nächster Termin",
     "openTasks": "Offene Aufgaben",
-    "lastMatchOn": "Letztes Spiel, {date}"
+    "lastMatchOn": "Letztes Spiel, {date}",
+    "assessLead": "Deine Einschätzung fehlt noch",
+    "assessTask": "Spiel gegen {opponent} einschätzen"
   },
   "shell": {
     "search": "Suchen",

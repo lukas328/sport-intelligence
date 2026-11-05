@@ -298,7 +298,9 @@
     "editList": "Modifier la liste",
     "editDone": "Terminé",
     "consentsAll": "Consentements vidéo : les {n} sont complets.",
-    "consentsMissing": "Consentement manquant pour {n} sur {total} :"
+    "consentsMissing": "Consentement manquant pour {n} sur {total} :",
+    "hand_left": "Gaucher",
+    "hand_right": "Droitier"
   },
   "settings": {
     "title": "Paramètres",
@@ -316,7 +318,7 @@
     "wholeClub": "Tout le club (admin du club)",
     "twoFactorTitle": "Connexion à deux facteurs",
     "twoFactorOn": "Active. La connexion demande aussi un code de votre application d'authentification.",
-    "twoFactorOff": "Inactive. Obligatoire pour les admins du club après 14 jours.",
+    "twoFactorOff": "Inactive.",
     "twoFactorRequired": "En tant qu'admin du club, vous devez activer la connexion à deux facteurs.",
     "twoFactorStart": "Configurer",
     "twoFactorScan": "Scannez le code QR avec une application d'authentification (p. ex. Google Authenticator, 1Password) ou saisissez la clé à la main.",
@@ -327,7 +329,8 @@
     "recoveryTitle": "Codes de récupération",
     "recoveryHint": "Conserve ces codes en lieu sûr (par exemple imprimés). Chaque code fonctionne une fois si tu n'as pas accès à ton application d'authentification. Ils ne sont affichés que maintenant.",
     "recoveryLeft": "{count, plural, one {# code de récupération restant} other {# codes de récupération restants}}.",
-    "recoveryNew": "Nouveaux codes de récupération"
+    "recoveryNew": "Nouveaux codes de récupération",
+    "twoFactorAdmins": "Pour les admins du club, elle est obligatoire après 14 jours."
   },
   "dashboard": {
     "teamsTitle": "Équipes",
@@ -433,7 +436,7 @@
     "cardSaves": "{value} arrêts",
     "cardDemo": "Données de démo",
     "withoutVideo": "{n} sur {total} sans vidéo",
-    "allDemo": "Tous des matchs de démo",
+    "allDemo": "Uniquement des matchs de démo",
     "uploadVideo": "Téléverser la vidéo",
     "noneUpcoming": "Aucun match programmé.",
     "scheduleOne": "Programmer un match"
@@ -1120,7 +1123,7 @@
   "assignments": {
     "title": "Tâches",
     "mine": "Mes tâches",
-    "none": "Aucune tâche.",
+    "none": "Aucun devoir ouvert. Les vidéos, combinaisons et exercices de ton entraîneur apparaissent ici.",
     "team": "Tâches de l'équipe",
     "new": "Nouvelle tâche",
     "kind": "Type",
@@ -1429,12 +1432,12 @@
     "assessNow": "Évaluer maintenant",
     "loading": "Chargement...",
     "assessTitle": "Comment était ton match ?",
-    "assessIntro": "D'abord ton avis, ensuite tu vois les commentaires de l'entraîneur·e.",
+    "assessIntro": "D'abord ton auto-évaluation, ensuite tu vois les notes de l'entraîneur.",
     "rating": "Note de 1 à 5",
     "ratingN": "{n} sur 5",
     "sentence": "Une phrase (facultatif)",
     "send": "Envoyer l'évaluation",
-    "commentsWaiting": "{n, plural, one {# commentaire de l'entraîneur·e t'attend} other {# commentaires de l'entraîneur·e t'attendent}}.",
+    "commentsWaiting": "{n, plural, one {# note de l'entraîneur t'attend} other {# notes de l'entraîneur t'attendent}}.",
     "yourRating": "Ton évaluation : {n} sur 5",
     "sceneN": "Scène {n} sur {total}",
     "noVideo": "La vidéo n'est pas encore prête.",
@@ -1497,7 +1500,10 @@
     "feedbackLink": "Donner un retour",
     "feedbackHere": "Les notes sur les scènes se donnent dans la vidéo, à côté du lecteur.",
     "feedbackTitle": "Retours",
-    "continueWith": "Continuer avec {name}"
+    "continueWith": "Continuer avec {name}",
+    "ratingLow": "1 faible",
+    "ratingHigh": "5 très bien",
+    "coachNote": "Note de l'entraîneur :"
   },
   "scouting": {
     "title": "Rapport de préparation",
@@ -1976,7 +1982,7 @@
     "nav": "Mes rendez-vous",
     "title": "Mes rendez-vous",
     "hint": "Entraînements et matchs des 30 prochains jours. Confirme ou annule pour que le staff puisse planifier.",
-    "none": "Aucun rendez-vous dans les 30 prochains jours.",
+    "none": "Aucune date dans les 30 prochains jours. Entraînements et matchs apparaissent ici dès que l'entraîneur les planifie.",
     "training": "Entraînement",
     "match": "Match contre {opponent}",
     "for": "pour {name}",
@@ -2173,7 +2179,9 @@
     "noDates": "Aucun rendez-vous dans les 30 prochains jours.",
     "yourNext": "Votre prochain rendez-vous",
     "openTasks": "Tâches ouvertes",
-    "lastMatchOn": "Dernier match, {date}"
+    "lastMatchOn": "Dernier match, {date}",
+    "assessLead": "Ton auto-évaluation manque encore",
+    "assessTask": "Évaluer le match contre {opponent}"
   },
   "shell": {
     "search": "Rechercher",

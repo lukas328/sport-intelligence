@@ -4,7 +4,7 @@ import { BackLink } from "@/components/ui/back-link";
 import { track } from "@/lib/analytics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
  */
 export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId: string; playerId: string | null }) {
   const t = useTranslations("feed");
+  const tr = useTranslations();
+  const format = useFormatter();
   const qc = useQueryClient();
   const key = ["feed", orgId, matchId, playerId];
   const [index, setIndex] = useState(0);
@@ -47,6 +49,12 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
     },
   });
   const feed = q.data;
+  // the title names the match: opponent and date come from the list of my feeds
+  const feeds = useQuery({
+    queryKey: ["my-feeds", orgId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/me/feeds", { params: { path: { org_id: orgId } } })).data ?? [],
+  });
+  const meta = (feeds.data ?? []).find((f) => f.match_id === matchId && (!playerId || f.player_id === playerId));
   const player = useRef<PlayerHandle>(null);
   const analysis = useQuery({
     queryKey: ["analysis", feed?.video_id],
@@ -75,9 +83,15 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
   return (
     <div className="mx-auto max-w-xl space-y-4">
       <BackLink fallback={`/app/${orgId}/feed`} />
-      <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
+      <div>
+        <p className="text-sm font-semibold text-muted">
+          {t("title")}
+          {meta && ` · ${format.dateTime(new Date(meta.kickoff_at), { day: "numeric", month: "long" })}`}
+        </p>
+        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{meta?.opponent ? tr("schedule.match", { opponent: meta.opponent }) : t("title")}</h1>
+      </div>
       {!feed.self_assessment && (
-        <form onSubmit={submit} className="space-y-3 rounded-lg bg-raised border border-border p-4" aria-label={t("assessTitle")}>
+        <form onSubmit={submit} className="space-y-3 border-y-2 border-foreground py-4" aria-label={t("assessTitle")}>
           <h2 className="font-semibold">{t("assessTitle")}</h2>
           <p className="text-sm text-muted">{t("assessIntro")}</p>
           <fieldset className="flex gap-2">
@@ -95,6 +109,10 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
               </button>
             ))}
           </fieldset>
+          <p className="flex max-w-[17rem] justify-between text-[0.8125rem] text-muted" aria-hidden>
+            <span>{t("ratingLow")}</span>
+            <span>{t("ratingHigh")}</span>
+          </p>
           <label className="block text-sm font-medium" htmlFor="assess-text">
             {t("sentence")}
           </label>
@@ -106,7 +124,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
         </form>
       )}
       {feed.self_assessment && (
-        <p className="rounded-md bg-surface px-4 py-2.5 text-sm" data-testid="my-rating">
+        <p className="border-l-2 border-foreground/30 pl-3 text-sm" data-testid="my-rating">
           {t("yourRating", { n: feed.self_assessment.rating })}
           {feed.self_assessment.text && `: ${feed.self_assessment.text}`}
         </p>
@@ -141,16 +159,16 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
                   onClick={() => setIndex(i)}
                   className="block w-full py-2"
                 >
-                  <span className={cn("block h-1 rounded-full transition-colors", i < index ? "bg-foreground/60" : i === index ? "bg-accent" : "bg-border")} />
+                  <span className={cn("block h-1 rounded-full transition-colors", i < index ? "bg-foreground/60" : i === index ? "bg-foreground" : "bg-border")} />
                 </button>
               </li>
             ))}
           </ol>
           <h2 id="scene-title" className="flex flex-wrap items-center gap-2 text-lg font-bold">
-            <span className={cn("rounded-md px-2.5 py-0.5 text-xs font-semibold", scene.positive ? "bg-ok/15 text-ok" : "bg-surface text-muted")}>
-              {t("sceneN", { n: index + 1, total: feed.items.length })}
-            </span>
+            <span className="text-sm font-semibold text-muted tabular-nums">{t("sceneN", { n: index + 1, total: feed.items.length })}</span>
             {t(reasonKey(scene.reason) as "reason_goal")}
+            {/* positive and to-learn as words, not colours */}
+            <span className="text-sm font-medium text-muted">· {scene.positive ? t("positive") : t("toLearn")}</span>
           </h2>
           {feed.video_id ? (
             <VideoPlayer
@@ -178,8 +196,9 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
             <p className="text-muted">{t("noVideo")}</p>
           )}
           {scene.coach_comment && (
-            <p className="rounded-md bg-surface px-3 py-2 text-sm" data-testid="coach-comment">
-              {t("coach")}: {scene.coach_comment}
+            <p className="text-sm" data-testid="coach-comment">
+              <span className="font-semibold text-muted">{t("coachNote")}</span>{" "}
+              <span className="font-hand text-lg leading-snug">{scene.coach_comment}</span>
             </p>
           )}
           <div className="grid grid-cols-2 gap-3">
@@ -187,7 +206,8 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
               <ChevronLeft aria-hidden />
               {t("prev")}
             </Button>
-            <Button size="lg" disabled={index >= feed.items.length - 1} onClick={() => setIndex((i) => i + 1)}>
+            {/* while the self-assessment is open, "Weiter" stays quiet: the rating comes first */}
+            <Button size="lg" variant={feed.self_assessment ? "primary" : "secondary"} disabled={index >= feed.items.length - 1} onClick={() => setIndex((i) => i + 1)}>
               {t("next")}
               <ChevronRight aria-hidden />
             </Button>

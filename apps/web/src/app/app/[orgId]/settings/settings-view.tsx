@@ -61,7 +61,7 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
           <div id="account-section">
             <AccountSection me={me} />
           </div>
-          <SecuritySection me={me} />
+          <SecuritySection me={me} isAdmin={isAdmin} />
           <PrivacySection orgId={org.id} orgName={org.name} isAdmin={isAdmin} hasPassword={me.has_password ?? true} />
         </div>
       </div>
@@ -273,7 +273,7 @@ function PeopleSection({
   );
 }
 
-function SecuritySection({ me }: { me: Me }) {
+function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const [setup, setSetup] = useState<Schemas["TotpSetupOut"] | null>(null);
@@ -321,6 +321,7 @@ function SecuritySection({ me }: { me: Me }) {
         {error && <Alert>{t(`errors.${error}`)}</Alert>}
         <p className="text-sm text-muted" data-testid="totp-state">
           {enabled ? t("settings.twoFactorOn") : t("settings.twoFactorOff")}
+          {!enabled && isAdmin && ` ${t("settings.twoFactorAdmins")}`}
         </p>
         {!enabled && !setup && (
           <Button

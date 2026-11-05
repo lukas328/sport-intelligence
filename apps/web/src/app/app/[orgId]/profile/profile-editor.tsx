@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 
@@ -50,22 +50,23 @@ function Editor({ orgId, item }: { orgId: string; item: Mine }) {
   };
   const url = p ? `${typeof window === "undefined" ? "" : window.location.origin}/p/${p.slug}` : null;
   return (
-    <Card className="space-y-3">
+    <section className="space-y-3 border-t-2 border-foreground pt-4">
       <h2 className="text-lg font-semibold">
         {item.name}
         {item.relation === "guardian" && <span className="text-sm font-normal text-muted"> {t("child")}</span>}
       </h2>
+      {/* a missing consent is a step to take, not an error; the form waits until then */}
       {item.blocked && (
-        <Alert>
+        <p className="text-[0.9375rem]">
           {t(`blocked_${item.blocked}`)}{" "}
           {item.blocked === "consent-missing" && (
-            <Link href={`/app/${orgId}/consents`} className="underline">
+            <Link href={`/app/${orgId}/consents`} className="font-semibold underline underline-offset-4">
               {t("toConsents")}
             </Link>
           )}
-        </Alert>
+        </p>
       )}
-      <form onSubmit={submit} className="space-y-3" aria-label={t("formFor", { name: item.name })}>
+      {!item.blocked && <form onSubmit={submit} className="space-y-3" aria-label={t("formFor", { name: item.name })}>
         <label className="flex items-center gap-2 font-medium">
           <input type="checkbox" name="active" defaultChecked={p?.active ?? false} disabled={!!item.blocked} />
           {t("active")}
@@ -121,14 +122,14 @@ function Editor({ orgId, item }: { orgId: string; item: Mine }) {
             </button>
           )}
         </div>
-      </form>
+      </form>}
       {p?.active && url && (
         <p className="text-sm">
           {t("link")}{" "}
           <a className="break-all font-medium text-accent hover:underline" href={url}>{url}</a> · {t("views", { n: p.views })}
         </p>
       )}
-    </Card>
+    </section>
   );
 }
 

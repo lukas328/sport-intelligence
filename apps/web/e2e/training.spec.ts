@@ -31,7 +31,7 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
 
   // my assignments: empty
   await page.goto(teamUrl.replace(/\/teams\/.*/, "/assignments"));
-  await expect(page.getByText("Keine Aufgaben.")).toBeVisible();
+  await expect(page.getByText("Keine offenen Aufgaben.")).toBeVisible();
 
   // team assignments: a drill for everybody; without players the API explains why it cannot
   await page.goto(`${teamUrl}/assignments`);

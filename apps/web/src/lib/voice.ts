@@ -25,9 +25,14 @@ export interface SeasonRow {
 const round1 = (v: number) => Math.round(v * 10) / 10;
 const result = (r: Pick<SeasonRow, "score_own" | "score_opponent">) => (r.score_own > r.score_opponent ? "w" : r.score_own < r.score_opponent ? "l" : "d");
 
-/** Clear gap between goals and expected goals: at least 2 and at least 10 %. */
+/**
+ * Clear gap between goals and expected goals: at least 2 and at least 10 %. A gap of more than
+ * double either way says more about the estimate than the team (e.g. 26 goals from 3.4 when the
+ * shots were not tagged): then nothing is said.
+ */
 export function xgGap(goals: number, xg: number): "over" | "under" | null {
   if (xg <= 0) return null;
+  if (goals > xg * 2 || goals < xg / 2) return null;
   const d = goals - xg;
   if (Math.abs(d) < Math.max(2, xg * 0.1)) return null;
   return d > 0 ? "over" : "under";

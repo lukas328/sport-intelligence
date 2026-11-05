@@ -15,6 +15,9 @@ describe("voice", () => {
     expect(xgGap(20, 21)).toBeNull();
     expect(xgGap(15, 21)).toBe("under");
     expect(xgGap(3, 0)).toBeNull();
+    // an estimate off by more than double is not a statement about the team
+    expect(xgGap(26, 3.4)).toBeNull();
+    expect(xgGap(5, 20)).toBeNull();
   });
 
   it("says nothing without data", () => {

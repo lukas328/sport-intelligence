@@ -421,6 +421,9 @@ function PlayerToday({ orgId }: { orgId: string }) {
   const { schedule, tasks, feeds } = useMember(orgId);
   const dates = schedule.items.data ?? [];
   const next = dates[0];
+  // a self-assessment waiting is the player's to-do; without a date it takes the stage
+  const pending = (feeds.data ?? []).filter((f) => !f.assessed && f.relation !== "guardian");
+  const lead = !next && !schedule.items.isLoading ? pending[0] : undefined;
   const when = next ? new Date(next.starts_at ?? `${next.on_date}T12:00:00`) : null;
   const choice = (r: "yes" | "no") =>
     next && (
@@ -447,11 +450,26 @@ function PlayerToday({ orgId }: { orgId: string }) {
           ) : undefined
         }
       >
-        <p className="mt-6 text-lg font-semibold">{t("today.yourNext")}</p>
-        <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">
-          {schedule.items.isLoading ? "" : next ? (next.kind === "match" ? t("schedule.match", { opponent: next.title ?? "" }) : next.title || t("schedule.training")) : t("today.noDates")}
-        </h1>
-        {next && <div className="mt-7 flex flex-wrap gap-3">{choice("yes")}{choice("no")}</div>}
+        {lead ? (
+          <>
+            <p className="mt-6 text-lg font-semibold">{t("today.assessLead")}</p>
+            <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">{lead.opponent ? t("schedule.match", { opponent: lead.opponent }) : t("matches.training")}</h1>
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link href={`/app/${orgId}/feed/${lead.match_id}?player=${lead.player_id}`} className={stageButton("solid")}>
+                {t("feed.assessNow")}
+              </Link>
+              <span className="text-[0.9375rem] opacity-80">{t("today.noDates")}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="mt-6 text-lg font-semibold">{t("today.yourNext")}</p>
+            <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">
+              {schedule.items.isLoading ? "" : next ? (next.kind === "match" ? t("schedule.match", { opponent: next.title ?? "" }) : next.title || t("schedule.training")) : t("today.noDates")}
+            </h1>
+            {next && <div className="mt-7 flex flex-wrap gap-3">{choice("yes")}{choice("no")}</div>}
+          </>
+        )}
       </Stage>
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
         <Block title={t("today.newScenes")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
@@ -459,7 +477,7 @@ function PlayerToday({ orgId }: { orgId: string }) {
         </Block>
         <div className="space-y-12">
           <Block title={t("today.myTasks")} href={`/app/${orgId}/assignments`} linkLabel={t("today.allTasks")}>
-            <Tasks orgId={orgId} tasks={(tasks.data ?? []).filter((a) => !a.done_at)} />
+            <Tasks orgId={orgId} tasks={(tasks.data ?? []).filter((a) => !a.done_at)} assessments={pending} />
           </Block>
           {dates.length > 1 && (
             <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
@@ -536,12 +554,24 @@ function Scenes({ orgId, feeds, loading }: { orgId: string; feeds: Schemas["Feed
   );
 }
 
-function Tasks({ orgId, tasks }: { orgId: string; tasks: Schemas["AssignmentOut"][] }) {
+function Tasks({ orgId, tasks, assessments = [] }: { orgId: string; tasks: Schemas["AssignmentOut"][]; assessments?: Schemas["FeedListItem"][] }) {
   const t = useTranslations();
   const format = useFormatter();
-  if (tasks.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
+  if (tasks.length === 0 && assessments.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
   return (
     <ul>
+      {/* self-assessments are to-dos too ("Nichts offen" next to "Jetzt einschätzen" contradicted) */}
+      {assessments.slice(0, 2).map((f) => (
+        <li key={`a-${f.match_id}-${f.player_id}`} className="border-b border-foreground/10 last:border-0">
+          <Link href={`/app/${orgId}/feed/${f.match_id}?player=${f.player_id}`} className="group flex items-center gap-3 py-3.5 hover:text-accent">
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold">{t("today.assessTask", { opponent: f.opponent ?? t("matches.training") })}</span>
+              <span className="block text-sm text-muted">{format.dateTime(new Date(f.kickoff_at), { day: "numeric", month: "short" })}</span>
+            </span>
+            <ArrowRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </li>
+      ))}
       {tasks.slice(0, 4).map((a) => (
         <li key={a.id} className="border-b border-foreground/10 last:border-0">
           <Link href={targetLink(orgId, a)} className="group flex items-center gap-3 py-3.5 hover:text-accent">

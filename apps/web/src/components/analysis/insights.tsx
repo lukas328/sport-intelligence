@@ -115,7 +115,8 @@ export function InsightsCard({
               <button className="text-xs font-semibold text-accent hover:underline" onClick={() => onEvidence(text(i), i.evidence)}>
                 {t("evidence")}
               </button>
-              {i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
+              {/* drills are a staff page: players would land on a 404 */}
+              {staff && i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
                 <Link className="text-xs font-medium text-muted hover:text-foreground hover:underline" href={`/app/${orgId}/drills?focus=${focusForInsight(i.key, i.params.zone as string | null).join(",")}`}>
                   {t("drills")}
                 </Link>
