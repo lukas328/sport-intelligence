@@ -133,6 +133,12 @@ async def test_goal_candidates_review_flow(make_api: Callable[[], Api], owner_co
     # the side can be corrected; the same goal event is kept
     fixed = (await api.put(review, json={"status": "confirmed", "side": "opponent"})).json()
     assert fixed["event_id"] == done["event_id"] and fixed["side"] == "opponent"
+    # a correction names a player of this team only (the new-event path checks it too)
+    stranger = "00000000-0000-4000-8000-000000000001"
+    r = await api.put(
+        review, json={"status": "confirmed", "side": "opponent", "player_id": stranger}
+    )
+    assert r.status_code == 422 and r.json()["type"].endswith(":player-not-in-team")
 
     # reject: kept (a hard negative), hidden from the open list
     r = await api.put(f"{url}/{second['id']}/review", json={"status": "rejected"})

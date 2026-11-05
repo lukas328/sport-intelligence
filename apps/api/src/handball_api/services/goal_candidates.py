@@ -521,6 +521,8 @@ async def review(
                 _pin(official, c)
                 c.event_id = official.id
         elif mine and ev is not None:
+            # the new-event path checks the player in create_event; here the event is edited
+            await event_service._check_players(ctx, match, player_id)
             ev.side, ev.outcome = str(side), outcome
             if number is not None:
                 ev.number = number
