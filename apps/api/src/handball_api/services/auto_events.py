@@ -219,7 +219,7 @@ async def apply_scoreboard(
     await _align_official(ctx, match)
 
     manual = await _manual_goals(ctx, match)
-    # the overlay names the scorer after a goal ("7 Lisa ZIMMERLI"): own players by shirt number
+    # the overlay names the scorer after a goal ("7 Lisa ZUFALL"): own players by shirt number
     roster: dict[int, Any] = {
         n: pid
         for n, pid in (

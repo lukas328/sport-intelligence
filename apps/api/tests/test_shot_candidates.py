@@ -119,7 +119,7 @@ async def test_shot_candidates_with_the_official_report(
         "opponent",
         "save",
         5,
-        "ÖZCELIK Zerin",
+        "ÖRNEK Zerin",
     )
     assert (sugg["t_ms"], sugg["uncertainty_ms"], sugg["official_time"]) == (66_000, 0, "02:06")
     assert (miss["suggestion"]["side"], miss["suggestion"]["outcome"]) == ("own", "miss")

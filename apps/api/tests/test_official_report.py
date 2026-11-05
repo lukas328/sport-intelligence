@@ -95,7 +95,7 @@ def test_parse_handball_ch_resolves_sides_and_keepers() -> None:
         93,
         "home",
         32,
-        "KOHLBRENNER Seraina",
+        "PROBSTER Seraina",
         (1, 0),
     )
     assert {e.kind for e in r.entries} >= {"penalty_goal", "suspension", "turnover", "shot_missed"}
@@ -226,7 +226,7 @@ async def test_import_handball_ch_report(
     goals = [e for e in events if e["type"] == "shot" and e["outcome"] == "goal"]
     lisa = [e for e in goals if e["number"] == 7 and e["side"] == "own"]
     assert len(lisa) == 2 and {e["player_id"] for e in lisa} == {players[7]}
-    assert lisa[0]["attributes"]["name"] == "ZIMMERLI Lisa"
+    assert lisa[0]["attributes"]["name"] == "ZUFALL Lisa"
     second_half = next(e for e in goals if e["clock_s"] == 1846)
     assert (second_half["period"], second_half["player_id"]) == (2, players[33])
     assert second_half["attributes"]["score"] == [13, 19]

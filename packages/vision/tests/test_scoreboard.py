@@ -42,7 +42,7 @@ def _video(seconds: int = 40) -> list[np.ndarray]:
     for k in range(int(seconds * FPS)):
         t = k / FPS
         score = (1, 0) if t < 12 else (2, 0) if t < 25 else (2, 1)
-        banner = "11 Sophie WINDLER" if 26 <= t < 30 else None
+        banner = "11 Sophie DUMMLER" if 26 <= t < 30 else None
         out.append(_frame(score, 120 + int(t), rng, banner))
     return out
 
@@ -85,16 +85,16 @@ def test_clock_runs_and_stops() -> None:
 
 
 def test_banner_texts_and_votes() -> None:
-    assert sb.parse_banner("| 7 Amy HOCHREUTENER |") == (7, "Amy HOCHREUTENER")
-    assert sb.parse_banner("33DeniseSCHWAIGER") == (33, "Denise SCHWAIGER")
-    assert sb.parse_banner("11. Sophie WINDLER |") == (11, "Sophie WINDLER")
+    assert sb.parse_banner("| 7 Amy MUSTERMANN |") == (7, "Amy MUSTERMANN")
+    assert sb.parse_banner("33DeniseSAMPLER") == (33, "Denise SAMPLER")
+    assert sb.parse_banner("11. Sophie DUMMLER |") == (11, "Sophie DUMMLER")
     assert sb.parse_banner("ARB") is None
     reads = [
-        (174_000, "right", "11 Sophie WINDLER"),
-        (175_000, "right", "e . 11 Sophie WINDLER |"),
-        (291_000, "right", "} 44. Sophie WINDLER |"),  # misread number, same name
-        (292_000, "right", "} 44 Sophie WINDLER |"),
-        (92_000, "left", "| 7 Lisa ZIMMERLI ton"),
+        (174_000, "right", "11 Sophie DUMMLER"),
+        (175_000, "right", "e . 11 Sophie DUMMLER |"),
+        (291_000, "right", "} 44. Sophie DUMMLER |"),  # misread number, same name
+        (292_000, "right", "} 44 Sophie DUMMLER |"),
+        (92_000, "left", "| 7 Lisa ZUFALL ton"),
     ]
     shown = sb.banners(sorted(reads))
     assert [(b["t_ms"], b["side"], b["number"]) for b in shown] == [
@@ -104,7 +104,7 @@ def test_banner_texts_and_votes() -> None:
     ]
     goals = [sb.Goal(91_000, "left", (2, 1)), sb.Goal(173_000, "right", (2, 3))]
     attached = sb.attach_scorers(goals, shown)
-    assert [g["scorer"]["name"] for g in attached] == ["Lisa ZIMMERLI", "Sophie WINDLER"]
+    assert [g["scorer"]["name"] for g in attached] == ["Lisa ZUFALL", "Sophie DUMMLER"]
 
 
 def test_parsers() -> None:
@@ -146,7 +146,7 @@ def test_reads_score_and_clock_from_a_video() -> None:
     ]
     assert abs(summary["goals"][0]["t_ms"] - 12_000) <= 1000
     assert abs(summary["goals"][1]["t_ms"] - 25_000) <= 1000
-    assert summary["goals"][1]["scorer"] == {"number": 11, "name": "Sophie WINDLER"}
+    assert summary["goals"][1]["scorer"] == {"number": 11, "name": "Sophie DUMMLER"}
     assert "scorer" not in summary["goals"][0]
     (clock,) = summary["clock"]
     assert clock["start_ms"] == 0 and clock["start_clock_s"] == 120

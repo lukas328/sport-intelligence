@@ -1,7 +1,7 @@
 """Where goals were scored from (BRIEF 7.2 stages 9/10, without the ball).
 
 The overlay says when a goal fell, for which team and, after the goal, who scored ("7 Lisa
-ZIMMERLI", scoreboard.py). The tracks know where every player was. So the shot position of a goal
+ZUFALL", scoreboard.py). The tracks know where every player was. So the shot position of a goal
 is where the scorer was closest to the attacked goal in the seconds before the overlay changed:
 
 - with the scorer's shirt number and a track carrying that number (numbers.py, reid.py): that
