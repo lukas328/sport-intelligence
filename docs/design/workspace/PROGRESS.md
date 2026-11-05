@@ -57,6 +57,23 @@ game language 4 / 4, team by side 2 / 2, numbers to video 3 / 3, review speed 4 
 confirmed 4 / 3, type 4 / 4, edge states 3 / 3. Desktop ready; phone ready after the signal fix.
 The slice is closed after three rounds as the method says; the rest goes to the open list.
 
+## Slice 2: Analyse tab
+
+Test data on the local stack for this slice: a coherent 26:18 (44 goals of the official report with
+scorers, about 60 hand-tagged shots, saves, turnovers and suspensions), not committed.
+
+- A1 (review: no sub-tab ready; the voice said nothing true, a minute of video as loud as the
+  score, keepers as KPI tiles, raw keys): basis line with sources and coverage, a sentence when the
+  events do not add up to the result, empty rows left out, scorers list, "Was auffällt" with one
+  signal, match report on hairlines, possession and attacks also with events.
+- A2 (review: keepers +3 on hairlines; overview Q7 3; shots and report still without a signal):
+  three insights with a win opening on what worked, figures in ink with a dotted underline, the
+  video block as one line, keepers as one sheet with German zones, no empty court, shirt number
+  once, share button icon-only on phones, physical load with team names and its coverage.
+- A3: one statement of what decided the match from the head-to-head figures
+  (`lib/match-decided.ts`, tested), one resin mark per sub-tab (weakest shot zone, keeper's weakest
+  zone, most turnovers), zones as hairline rows, a readable goal picture.
+
 ## Open
 
 - Team by side on the axis still reads weakly (2): a lane label per side ("H1" / opponent) would
