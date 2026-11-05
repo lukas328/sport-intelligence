@@ -25,7 +25,7 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
@@ -238,6 +238,12 @@ async def _official_team(
 
 async def claim(ctx: Ctx, user: User, official_team_id: int, data: ClaimIn) -> dict[str, Any]:
     season, detail, oteam = await _official_team(ctx, data.club_id, official_team_id)
+    # two people claiming the same club at the same moment: the second waits here until the first
+    # committed, then finds the club taken and gets an access request (not a unique-key error)
+    await ctx.db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtext(:k))"),
+        {"k": f"official-club:{PROVIDER}:{detail.id}"},
+    )
     await enable_system_access(ctx.db, reason="official claim: one club per official club id")
     try:
         mine = set(

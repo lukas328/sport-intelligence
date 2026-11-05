@@ -7,6 +7,7 @@ player names. Tests change copies of them to simulate moved games, new players o
 
 from __future__ import annotations
 
+import asyncio
 import copy
 import json
 import re
@@ -302,6 +303,15 @@ async def test_claim_links_an_existing_club_of_mine(
     assert c["organization_id"] == ids["org"]
     org = (await api.get(f"/v1/orgs/{ids['org']}")).json()
     assert (org["official_club_id"], org["verification"]) == (CLUB, "unverified")
+
+
+async def test_simultaneous_claims_one_wins_one_asks(
+    make_api: Callable[[], Api], hch: Recorded
+) -> None:
+    a = await coach(make_api)
+    b = await coach(make_api, "other@example.org")
+    first, second = await asyncio.gather(claim(a), claim(b))
+    assert sorted(x["status"] for x in (first, second)) == ["access_requested", "claimed"]
 
 
 async def test_duplicate_claim_becomes_access_request(
