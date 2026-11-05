@@ -16,10 +16,11 @@ is no clock):
   one that keeps changing is the clock (`StackedVotes`, voted over the whole segment; until it is
   decided such a frame gives no clock). `HallBoardReader` reads every 2 s: text detection until a
   clock is in view, then the board is locked (template matching) and only a window around it is
-  read, recognition alone while it stands still; a lost board is probed for every 0.5 s;
+  read, recognition alone while it stands still; a lost board is probed for every second;
 - overlay: `scoreboard.find_overlay` (stable, textured boxes in the top or bottom band; each band
   on its own, so a logo in the other band does not blow up the crop); the band counts when its
-  clock fields change between six key frames; then the reader runs on that window;
+  clock fields change between six key frames; then the reader runs on that window, from the
+  probe before the first one with a clock;
 - hall board: first a probe on six key frames (no clock field there: return None), then the
   reader on the whole frame from the probe before the first one with a clock (pre-match graphics
   and tables come first), with text detection on the whole frame at most every 10 s while the
@@ -94,12 +95,13 @@ MAX_WIDTH = 1280  # the ingest's segments are 1280 wide; larger test videos are 
 OVERLAY_EVERY_S = 2.0
 BOARD_EVERY_S = 2.0
 BOARD_FULL_EVERY_S = 10.0  # full-frame text detection while the board is out of view
+OVERLAY_FULL_EVERY_S = 4.0  # text detection on the overlay window while no clock is in it
 BOARD_PROBES = 6
 BOARD_GIVE_UP_S = 60.0  # under two board readings in the first minute: give up
 MAX_CPU_S = 90.0  # stop reading (keep what was read) beyond this
 SEGMENT_S = 180.0
 FEED_MS = 250  # frames handed to the board reader; it reads those due and probes in between
-PROBE_EVERY_S = 0.5  # template probes for a locked board that is out of view
+PROBE_EVERY_S = 1.0  # template probes for a locked board that is out of view
 # version of the clock reading: clock data of an older reader is read again by --fill and
 # replaced on merge (1: `parse_board` per frame without layout; 2: `HallBoardReader`, layout voted)
 CLOCK_READER = 2
@@ -274,16 +276,23 @@ def overlay_windows(keys: Sequence[tuple[int, Any]]) -> list[Window]:
     return out
 
 
+def _start_ms(picks: Sequence[tuple[int, Any]], hits: Sequence[bool]) -> int:
+    """Where to start reading: at the probe before the first one that showed a clock (a pre-match
+    graphic or a table may come first)."""
+    first = hits.index(True)
+    return int(picks[first - 1][0]) if first else 0
+
+
 def find_overlay_clock(
     ocr: Any, keys: Sequence[tuple[int, Any]], probes: int = BOARD_PROBES
-) -> Window | None:
-    """The overlay window whose clock fields change between the probe key frames (a running
-    clock), or None."""
+) -> tuple[Window, int] | None:
+    """(window, start_ms) of the overlay band whose clock fields change between the probe key
+    frames (a running clock), or None."""
     picks = _spread(keys, probes)
     for win in overlay_windows(keys):
-        seen = {v for _, f in picks if (v := clock_values(ocr, f, win))}
-        if len(seen) >= 2:
-            return win
+        values = [clock_values(ocr, f, win) for _, f in picks]
+        if len({v for v in values if v}) >= 2:
+            return win, _start_ms(picks, [bool(v) for v in values])
     return None
 
 
@@ -369,10 +378,14 @@ def read_segment_clock(
         ]
     ocr = ocr_reader(models)
     readers: list[Any] = []
-    win = find_overlay_clock(ocr, keys)
+    found = find_overlay_clock(ocr, keys)
     hide: Window | None = None
-    if win is not None:
-        got, reader = read_clock(path, ocr, overlay_every_s, budget, win, full_every_s=0)
+    if found is not None:
+        win, start = found
+        got, reader = read_clock(
+            path, ocr, overlay_every_s, budget, win, full_every_s=OVERLAY_FULL_EVERY_S,
+            start_ms=start,
+        )
         readers.append(reader)
         samples = clean(got)
         if plausible(samples):
@@ -382,11 +395,9 @@ def read_segment_clock(
             hide = win
     if result["source"] is None and keys and cpu_s() < budget:
         probes = _spread(keys, BOARD_PROBES)
-        hits = [k for k, (_, f) in enumerate(probes) if clock_values(ocr, _blank(f.copy(), hide))]
-        if hits:
-            # the clock may come into view after the start (a pre-match graphic, a table): read
-            # from the probe before the first one that showed it
-            start = probes[hits[0] - 1][0] if hits[0] else 0
+        hits = [bool(clock_values(ocr, _blank(f.copy(), hide))) for _, f in probes]
+        if any(hits):
+            start = _start_ms(probes, hits)
             got, reader = read_clock(
                 path, ocr, board_every_s, budget, hide=hide, give_up=True, start_ms=start
             )

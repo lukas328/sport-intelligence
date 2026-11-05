@@ -4,7 +4,6 @@ the clock read of a real clip when it is available locally."""
 from __future__ import annotations
 
 import json
-import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -15,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from segment_clock import (
     CLOCK_READER,
+    MODELS,
     REPO,
     clock_reader,
     game_labels,
@@ -129,14 +129,15 @@ CLIP = REPO / "data" / "videos" / "ch-spl2-2024-leimental-arbon.mp4"
 
 
 @pytest.mark.skipif(
-    not CLIP.exists() or shutil.which("tesseract") is None, reason="test clip or tesseract missing"
+    not CLIP.exists() or not (MODELS / "ch_PP-OCRv4_rec_infer.onnx").exists(),
+    reason="test clip or PP-OCR models missing",
 )
 def test_overlay_clock_of_the_leimental_clip() -> None:
     r = read_segment_clock(CLIP)
-    assert r["source"] == "overlay"
+    assert r["source"] == "overlay" and r["reader"] == CLOCK_READER
     s = r["samples"]
-    assert len(s) >= 40  # 5 minutes, a reading every 5 s
-    assert all(b[0] - a[0] >= 4500 for a, b in zip(s, s[1:], strict=False))  # once per 5 s
+    assert len(s) >= 100  # 5 minutes, a reading every 2 s
+    assert all(b[0] - a[0] >= 1900 for a, b in zip(s, s[1:], strict=False))  # at most every 2 s
     # the clip shows the match clock from about 02:00 to 07:00
     assert 100 <= s[0][1] <= 150 and 400 <= s[-1][1] <= 440
 
