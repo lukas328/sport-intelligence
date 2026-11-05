@@ -1,0 +1,326 @@
+{
+ "name": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+ "official": "ml/data/official/CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14.json",
+ "game_id": 453453,
+ "result": "22:24",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 60.0,
+  "duration_s": 7365.014,
+  "batch": "batch_04"
+ },
+ "segments": [
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s0.mp4",
+   "start_s": 1104.75,
+   "clock_source": "hall_board",
+   "readings": 15,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    9.0,
+    38.0
+   ],
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1.mp4",
+   "start_s": 2209.5,
+   "clock_source": "overlay",
+   "readings": 90,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    898.0,
+    1037.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s2.mp4",
+   "start_s": 3682.51,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3.mp4",
+   "start_s": 5155.51,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2391.0,
+    2511.0
+   ],
+   "entries": 4,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s4.mp4",
+   "start_s": 6260.26,
+   "clock_source": "overlay",
+   "readings": 90,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2960.0,
+    3114.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "penalty_goal": 1,
+  "turnover": 5,
+  "warning": 1,
+  "goal": 3,
+  "shot_saved": 2
+ },
+ "entries": [
+  {
+   "match_s": 935,
+   "time": "15:35",
+   "action": "7m Tor",
+   "kind": "penalty_goal",
+   "team": "home",
+   "number": 22,
+   "name": "GANTNER Simon",
+   "score": [
+    6,
+    5
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 46000,
+   "video_ms": 2255500,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 995,
+   "time": "16:35",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 11,
+   "name": "MAHRER Valentin",
+   "score": [
+    6,
+    5
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 106000,
+   "video_ms": 2315500,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1009,
+   "time": "16:49",
+   "action": "Verwarnung",
+   "kind": "warning",
+   "team": "away",
+   "number": 4,
+   "name": "CEPPI Fabian",
+   "score": [
+    6,
+    5
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 120000,
+   "video_ms": 2329500,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1026,
+   "time": "17:06",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 22,
+   "name": "GANTNER Simon",
+   "score": [
+    6,
+    5
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 168733,
+   "video_ms": 2378233,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1030,
+   "time": "17:10",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 4,
+   "name": "CEPPI Fabian",
+   "score": [
+    6,
+    6
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 172733,
+   "video_ms": 2382233,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2391,
+   "time": "39:51",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    14,
+    15
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 250,
+   "video_ms": 5155760,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2427,
+   "time": "40:27",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 17,
+   "name": "GRANDI SELGAS Lucas",
+   "score": [
+    14,
+    16
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 36250,
+   "video_ms": 5191760,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2460,
+   "time": "41:00",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    14,
+    16
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 84983,
+   "video_ms": 5240493,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2474,
+   "time": "41:14",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 73,
+   "name": "WALDMEIER Jan",
+   "score": [
+    14,
+    16
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "STEINER Jonas"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 98983,
+   "video_ms": 5254493,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3039,
+   "time": "50:39",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 83,
+   "name": "LAROUCHE Justin",
+   "score": [
+    17,
+    19
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "CACHIN Philippe"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 103733,
+   "video_ms": 6363993,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3077,
+   "time": "51:17",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 22,
+   "name": "GANTNER Simon",
+   "score": [
+    18,
+    19
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 141733,
+   "video_ms": 6401993,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3091,
+   "time": "51:31",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 83,
+   "name": "LAROUCHE Justin",
+   "score": [
+    18,
+    19
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 155733,
+   "video_ms": 6415993,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  }
+ ]
+}

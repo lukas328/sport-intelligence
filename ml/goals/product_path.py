@@ -63,6 +63,13 @@ BREAKS = {
     "CH_NLB_SGWaedenswilHorgen_Chenois_2023-05-13_s3": [(155, 180)],  # team time-out
     "CH_NLB_SGWaedenswilHorgen_Emmen_2022-11-17_s4": [(0, 27)],  # clock stopped, injury
     "CH_NLB_PlayoffFinal4_SGWaedenswilHorgen_Kreuzlingen_2022-05-29_s4": [(80, 104)],  # clock stopped
+    "CH_NLB_SGWaedenswilHorgen_STVBaden_2023-04-05_s1": [(150, 180)],  # team time-out
+    "CH_NLB_SGWaedenswilHorgen_BSVStans_2022-11-05_s1": [(0, 14)],  # clock stopped (suspension)
+    "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-02-18_s3": [(4, 30)],  # clock stopped
+    # new halls (handball-segs-l03), on-screen "Pausenstand"
+    "CH_Frauen_SPL2_HSGLeimental_AargauOst_2024-11-02_s1": [(0, 28)],  # half-time statistics
+    "CH_Frauen_SPL2_HSGLeimental_AargauOst_2024-11-02_s2": [(0, 180)],  # half-time
+    "CH_Frauen_SPL2_HSGLeimental_LKZug2_2024-11-17_s2": [(0, 180)],  # half-time
 }
 GOAL_KINDS = ("goal", "penalty_goal")
 PANNING_GAMES = True  # every labelled game is filmed by an operated, panning camera
@@ -286,13 +293,14 @@ def cmd_eval(a: argparse.Namespace) -> None:
     }
     print("\nResearch set, leave-one-game-out templates (shipped selection; recall at 1 / 2 / 4 per "
           "minute, peak - goal at 2 per minute, window AUC)\n\n| signals, template | all: recall | "
-          "peak - goal (IQR) | AUC | test: recall | test AUC |\n|---|---|---|---|---|---|")
+          "peak - goal (IQR) | AUC | candidates at 2 / min | test: recall | test AUC |\n"
+          "|---|---|---|---|---|---|---|")
     out: dict[str, Any] = {}
     for name, (sigs, ser, play) in rows.items():
         r_all = measure(ser, sigs, refs, use_r, play)
         r_test = measure(ser, sigs, refs, test_r, play)
         out[name] = r_all
-        print(f"| {name} | {fmt(r_all)} | {r_test['r1']:.2f} / {r_test['r2']:.2f} / "
+        print(f"| {name} | {fmt(r_all)} | {r_all['n_cands'][2]} | {r_test['r1']:.2f} / {r_test['r2']:.2f} / "
               f"{r_test['r4']:.2f} | {r_test['auc']:.3f} |")
 
     # every game: product path as shipped (no-play mask), template held out from the game

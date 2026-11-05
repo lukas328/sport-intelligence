@@ -375,15 +375,162 @@ the cached signals through the product code itself, so its numbers are those of 
   tried (people canvas velocities: 0.82 at 2 per minute; image velocities: 0.88).
 - **Cost**: 0.22 s for a 5-minute club clip on top of a 602 s observation pass (shared CPU,
   YOLOX-s every 3rd frame), 1.8 s for a synthetic 60-minute game: well under 0.1 % of the pass.
-- **Not measured on the product path end to end**: the labelled segment videos were no longer on
-  disk, so the product pass (YOLOX-s at 8 Hz, pan from the rotation model) was only run on an
-  unlabelled 5-minute club clip. The template was learned with YOLOX-m at 2 Hz and phase
-  correlation; the per-window standardisation should absorb the scale differences, but a check on
-  labelled games through `observe` is the first thing to do with new footage.
+- **Measured on the product path end to end**: see the next section.
 
 ```bash
-uv run --project packages/vision python ml/goals/goal_template.py $G/cache $G/labels.json --version 2026-11-05.1
+uv run --project packages/vision python ml/goals/goal_template.py $G/cache $G/labels.json --version 2026-11-05.2 \
+  --product $S/gc_bench/obs
 uv run --project packages/vision python ml/goals/goal_template.py $G/cache $G/labels.json --check
+```
+
+## Product path: YOLOX-s at 8 Hz, the observation pass's camera, the no-play mask
+The numbers above come from the research pass (YOLOX-m at 2 Hz on the 60 fps segment, phase
+correlation pan). `product_path.py` runs what the worker runs instead, on every labelled segment
+it could get: the worker's proxy (1280 px, 25 fps, CRF 26), `observe`'s rotation-model camera on
+every frame and YOLOX-s on the frames that `goalcandidates` samples at 2 Hz from the every-3rd-frame
+detections (`--cheap`: the same inputs, since the detector has no state, at a quarter of its cost),
+then `goalcandidates` as shipped. About 3 min of transcode, 6 min of camera motion and 11 min of
+YOLOX-s per 3-minute segment on 2 threads of the (busy) shared CPU.
+
+- **Footage**: 74 segments with goal labels from 23 games, 178 goals in 222 min. The research set
+  (35 segments, 12 SG Wädenswil/Horgen games, 73 goals) plus 39 segments of 11 games never used for
+  any template: 3 more SG W/H games of the ingest (b04, official log), and from the owner's
+  `handball-segs-lNN` datasets the 4 l01 games with an overlay (3 cup games that also have an
+  official log, one Austrian HLA game), the 3 l02 games with an official log and 2 HSG Leimental
+  SPL2 home games of l03 with an overlay. Other halls and other producers: Austrian TV, cup
+  streams, women's league streams, the automatic camera of the Leimental hall.
+- **Labels**: the overlay score where it is read on half of the probes (`seg_labels.py`; for the
+  new games from `seg_extract.py --no-det`, which skips the people), else the official log
+  (`segment_clock.py --labels`, log time minus overlay change -0.5 s median, accurate to under 3 s).
+  The log labels of the three l02 games and the three b04 games are now in
+  `ml/data/segment_labels/`.
+- **No fixed camera**: every labelled game is filmed by a panning camera (`CameraMotion.moving`
+  on every segment except two half-times). Eight l01 to l03 games with an overlay were probed for a
+  still camera (phase correlation over one minute); the two Leimental games that stood still for
+  the probed minute pan 80 degrees per segment (an automatic camera that rests during stoppages). The l03/l04 games that look fixed have
+  neither an overlay, nor a readable hall board, nor an official log, so they have no labels:
+  **fixed-camera recall is still unmeasured**.
+
+### Research path against product path, same 73 goals
+Leave-one-game-out templates, recall at 1 / 2 / 4 candidates per minute, peak - goal at 2 per
+minute (median, IQR), window AUC, number of candidates at 2 per minute; test = the 9 games not
+used to design the lull.
+
+| Signals, template | recall, all 73 goals | peak - goal | AUC | candidates | test (56 goals) | test AUC |
+|---|---|---|---|---|---|---|
+| research signals, research template (YOLOX-m 2 Hz, phase correlation) | 0.59 / 0.88 / 0.95 | +1.6 s (2.9) | 0.863 | 210 | 0.54 / 0.84 / 0.93 | 0.860 |
+| **product signals, research template** | **0.63 / 0.88 / 0.95** | +1.5 s (2.3) | 0.856 | 210 | 0.57 / 0.84 / 0.93 | 0.844 |
+| product signals, product template | 0.67 / 0.89 / 0.95 | +1.3 s (2.4) | 0.861 | 210 | 0.61 / 0.86 / 0.93 | 0.849 |
+| product signals, research template, no-play mask | 0.62 / 0.85 / 0.95 | +1.4 s (2.3) | 0.856 | 198 | 0.55 / 0.80 / 0.93 | 0.844 |
+| product pan + research people | 0.60 / 0.88 / 0.95 | +1.8 s (2.8) | 0.868 | 210 | 0.55 / 0.84 / 0.93 | 0.862 |
+| research pan + product people | 0.64 / 0.88 / 0.95 | +1.8 s (2.8) | 0.854 | 210 | 0.61 / 0.84 / 0.93 | 0.848 |
+| product signals, code before this section (planar canvas pan, cuts kept), template 2026-11-05.1 | 0.60 / 0.85 / 0.95 | +1.6 s (2.2) | 0.871 | | 0.54 / 0.80 / 0.93 | 0.859 |
+
+**The product path is not worse than the research path**: same recall at 2 and 4 per minute,
+more at 1 per minute, a tighter timing (IQR 2.3 s against 2.9 s), AUC 0.01 lower. YOLOX-s on the
+compressed 25 fps proxy finds the people as well as YOLOX-m on the source (swapping the people in
+changes nothing at 2 per minute), and people at 4 Hz instead of 2 Hz add nothing (on the 25
+segments observed with every 6th frame: 0.65 / 0.91 / 0.96 against 0.65 / 0.89 / 0.94). What did hurt was
+the camera track, fixed in `goalcandidates` (the rows "code before"): the planar canvas x of the
+frame centre stretches a degree of pan by 1 / cos^2 of the azimuth (about 3x where club cameras
+look at the goals, unbounded near 90 degrees), and a cut or a misregistered frame became a pan of
+thousands of px/s. The pan is now the azimuth of the optical axis times the reference focal length
+(people on the same cylinder), and one-frame jumps are dropped (`drop_jumps`): +0.03 at 1 and 2 per
+minute on the product path (TV Möhlin 0.67 -> 1.00 at 2 per minute). A template learned from the
+product signals (leave-one-game-out) is not better on all 23 games (table below), so the shipped
+template stays learned on the research pass; it was regenerated with the current code
+(2026-11-05.2: the dropped jumps changed the profile by up to 0.22, the same evaluation as before,
+0.59 / 0.88 / 0.95, product path 0.63 / 0.88 / 0.95).
+
+### Every game, product path as shipped (no-play mask)
+Recall @1 / 2 / 4 | peak - goal (IQR) | AUC. "Research template" = learned on the research set
+without the game (for the new games: the shipped template's data). The research path exists only
+for the research set.
+
+| Game | Labels | Goals / min | Research path | Product, research template | Product, product template (LOGO) |
+|---|---|---|---|---|---|
+| Kreuzlingen 2022-05-29 | overlay | 6 / 6 | 0.67 / 0.67 / 0.83, +1.6 s, 0.89 | 0.67 / 0.67 / 0.83, +2.3 s, 0.92 | 0.67 / 0.67 / 0.83, +2.0 s, 0.94 |
+| BSV Stans 2022-11-05 | overlay | 5 / 9 | 0.60 / 1.00 / 1.00, +1.1 s, 0.87 | 0.60 / 0.80 / 1.00, +1.5 s, 0.77 | 0.60 / 0.80 / 1.00, +1.4 s, 0.77 |
+| Chênois 2023-05-13 | overlay | 9 / 9 | 0.67 / 1.00 / 1.00, +1.9 s, 0.93 | 0.56 / 1.00 / 1.00, +1.9 s, 0.88 | 0.67 / 1.00 / 1.00, +1.7 s, 0.90 |
+| Emmen 2022-11-17 | overlay | 11 / 12 | 0.45 / 0.73 / 1.00, +2.9 s, 0.85 | 0.64 / 0.82 / 1.00, -0.5 s, 0.82 | 0.64 / 0.82 / 1.00, -0.6 s, 0.82 |
+| Emmen 2023-09-03 (dev) | overlay | 5 / 12 | 1.00 / 1.00 / 1.00, -1.1 s, 0.93 | 1.00 / 1.00 / 1.00, +0.5 s, 0.96 | 1.00 / 1.00 / 1.00, -0.5 s, 0.96 |
+| Fortitudo Gossau 2023-09-23 (dev) | overlay | 6 / 12 | 0.67 / 1.00 / 1.00, +0.7 s, 0.83 | 0.83 / 1.00 / 1.00, +0.4 s, 0.85 | 0.83 / 1.00 / 1.00, +0.5 s, 0.85 |
+| GC Amicitia 2023-03-15 | overlay | 6 / 6 | 0.67 / 0.83 / 1.00, -0.3 s, 0.88 | 0.50 / 0.83 / 0.83, +0.3 s, 0.87 | 0.67 / 0.83 / 0.83, +0.3 s, 0.90 |
+| HC Arbon 2023-12-10 (dev) | overlay | 6 / 9 | 0.67 / 1.00 / 1.00, +2.7 s, 0.97 | 0.67 / 1.00 / 1.00, +2.1 s, 0.97 | 0.83 / 1.00 / 1.00, +2.1 s, 0.97 |
+| HSG Baden-Endingen 2023-11-19 | overlay | 5 / 12 | 0.40 / 0.60 / 0.60, -0.7 s, 0.75 | 0.00 / 0.60 / 0.80, +5.1 s, 0.74 | 0.00 / 0.60 / 0.80, +5.0 s, 0.75 |
+| STV Baden 2023-04-05 | overlay | 4 / 6 | 0.00 / 0.75 / 0.75, +1.3 s, 0.92 | 0.50 / 0.50 / 0.75, +2.5 s, 0.86 | 0.50 / 0.75 / 0.75, +2.1 s, 0.88 |
+| TV Birsfelden 2023-03-25 | overlay | 4 / 6 | 0.75 / 1.00 / 1.00, +3.4 s, 0.82 | 1.00 / 1.00 / 1.00, +4.3 s, 0.88 | 1.00 / 1.00 / 1.00, +4.6 s, 0.91 |
+| TV Möhlin 2023-02-18 | overlay | 6 / 6 | 0.50 / 1.00 / 1.00, +2.5 s, 0.88 | 0.50 / 0.83 / 1.00, +1.1 s, 0.91 | 0.50 / 0.83 / 1.00, +1.1 s, 0.91 |
+| *new:* Stäfa 2023-12-02 (b04) | log | 6 / 9 | | 0.83 / 1.00 / 1.00, +1.4 s, 0.94 | 0.83 / 1.00 / 1.00, +1.2 s, 0.95 |
+| TV Birsfelden 2023-09-09 (b04) | log | 2 / 3 | | 1.00 / 1.00 / 1.00, +1.8 s, 1.00 | 1.00 / 1.00 / 1.00, +0.9 s, 1.00 |
+| AT HLA Bregenz - Bärnbach 2021 (l01) | overlay | 9 / 12 | | 0.56 / 1.00 / 1.00, +2.4 s, 0.82 | 0.67 / 1.00 / 1.00, +2.3 s, 0.80 |
+| Cup RTV Basel - Kadetten 2024-04-27 (l01) | overlay | 12 / 9 | | 0.58 / 0.92 / 1.00, +3.0 s, 0.86 | 0.58 / 0.83 / 1.00, +3.0 s, 0.88 |
+| Cup Red Dragons Uster - Seen Tigers / Pfadi 2024 (l01) | overlay | 8 / 15 | | 0.62 / 1.00 / 1.00, +1.2 s, 0.87 | 0.62 / 1.00 / 1.00, +1.7 s, 0.88 |
+| Cup SG W/H - RTV Basel 2024-10-19 (l01) | overlay | 13 / 12 | | 0.54 / 0.92 / 0.92, +1.9 s, 0.87 | 0.54 / 0.92 / 0.92, +1.3 s, 0.85 |
+| Women 1. Liga ATV/KV Basel - Yellow Winterthur 2 2024-11-02 (l02) | log | 14 / 12 | | 0.50 / 0.71 / 0.86, +1.3 s, 0.73 | 0.50 / 0.71 / 0.86, +1.3 s, 0.73 |
+| Women Cup Brühl - LK Zug 2024-04-27 (l02) | log | 7 / 9 | | 0.43 / 0.71 / 1.00, +2.7 s, 0.78 | 0.43 / 0.71 / 1.00, +2.9 s, 0.76 |
+| Women Cup HSG Leimental - Rotweiss Thun 2024-10-16 (l02) | log | 11 / 12 | | 0.55 / 0.64 / 0.82, +2.5 s, 0.84 | 0.55 / 0.64 / 0.82, +2.5 s, 0.86 |
+| Women SPL2 HSG Leimental - Aargau Ost 2024-11-02 (l03) | overlay | 10 / 12 | | 0.40 / 0.80 / 0.90, +1.5 s, 0.69 | 0.40 / 0.80 / 0.90, +1.7 s, 0.71 |
+| Women SPL2 HSG Leimental - LK Zug 2 2024-11-17 (l03) | overlay | 13 / 12 | | 0.54 / 0.77 / 1.00, +1.7 s, 0.81 | 0.54 / 0.77 / 0.92, +1.0 s, 0.79 |
+
+| Set (product path, no-play mask) | Segments | Goals / min | Research template | Product template (LOGO) | Shipped template 2026-11-05.2 |
+|---|---|---|---|---|---|
+| research set (12 games) | 35 | 73 / 105 | 0.62 / 0.85 / 0.95, +1.4 s (2.3), 0.856 | 0.66 / 0.86 / 0.95, +1.3 s (2.3), 0.861 | 0.62 / 0.85 / 0.95, +1.5 s (2.2), 0.861 |
+| **new games (11 games, 9 more halls)** | 39 | 105 / 117 | **0.55 / 0.84 / 0.94**, +1.9 s (1.8), 0.812 | 0.56 / 0.83 / 0.93, +1.7 s (1.9), 0.815 | 0.55 / 0.84 / 0.94, +1.9 s (1.8), 0.812 |
+| all (panning cameras) | 74 | 178 / 222 | 0.58 / 0.84 / 0.94, +1.9 s (1.8), 0.832 | 0.60 / 0.84 / 0.94, +1.6 s (2.0), 0.836 | 0.58 / 0.84 / 0.94, +1.9 s (1.8), 0.834 |
+| fixed camera | 0 | | not measured (see Footage) | | |
+
+- **The template transfers to other halls and producers**: 0.84 at 2 per minute on the 11 new
+  games, as on the research set; recall at 1 per minute and the AUC are lower (0.55, 0.81). The
+  goal rate is higher there (0.9 per minute against 0.7), so 2 candidates per minute leave less
+  room. The weakest are the women's games with the most goals per minute (ATV/KV Basel, Leimental
+  - Aargau Ost: 1.2 and 0.8 goals per minute, 0.71 and 0.80 at 2 per minute), where 4 per minute
+  is the sensible default.
+- **Timing**: the peak lies a median 1.9 s after the goal on all games (IQR 1.8 s), so the clip
+  of -10 s to +4 s around the peak and the goal estimate (peak - 1.5 s) hold.
+
+### No play: half-time, time-outs, stoppages
+Before, only an operated camera that stood still for 2.5 minutes counted as no play (`parked`),
+which misses time-outs and every stoppage and never fires on a fixed camera. New
+(`goalcandidates.bunched`): the people bunch together. Per detection frame the 10 to 90 % range of
+the kept people's x in body heights (`spread`, at least 3 people); its median over a centred 40 s
+window below 3.5 body heights is no play. In play the median per segment is 5 to 7.5, also when
+the camera follows one half; a time-out huddle, the players around an injured player or the
+referees, the line-ups and the post-game handshakes are 2 to 3.5. Half-time warm-ups spread over
+the whole court (8 to 10) and are left to `parked`. No candidates in either, and the quota counts
+minutes of play only (`pick`).
+
+Break windows: eyeballed on the 1 Hz thumbnails of the research caches and of the new l03 games
+(`product_path.BREAKS`, 31.3 min: 10 windows of half-time or before and after the game, 5 team
+time-outs, 4 stoppages with the clock stopped; 7 of them were first found by the rule and then
+confirmed on the thumbnails, so its coverage is optimistic). 86 segments with a product pass:
+
+| Rule | Break minutes flagged (of 31.3) | Other minutes flagged (of 226.7) | Goals within -3..+8 s of a flagged point | Candidates at 2 / min in the break windows |
+|---|---|---|---|---|
+| none | | | | 60 |
+| parked camera (before) | 15.0 | 0.00 | 0 | 30 |
+| bunched people | 12.0 | 1.93 | 0 | |
+| **parked or bunched (shipped)** | **26.5** | 1.93 | **0** | **9** |
+
+The 1.9 "other" minutes flagged: 80 s at the start of Stäfa s0 (no thumbnails, probably before
+the throw-off), 28 s of a 7 m throw sequence with the clock stopped in BSV Stans s1 and a 7 s slow
+attack (Red Dragons s1); no goal lies near any of them. Thresholds 3.0 to 3.5 body heights and
+windows of 30 to 60 s behave alike (40 s and 3.5 cover the most break time with no goal lost). On
+the research set the mask removes 12 of 210 candidates at 2 per minute and costs 2 of 73 goals
+(0.88 -> 0.85): the quota per minute of play also takes slots from blocks that hold a break. A
+7 m throw is a stoppage with the players lined up: no penalty goal came near a flagged point in
+these 178 goals, but it is the case to watch.
+
+```bash
+S=<scratchpad>; B=$S/gc_bench; G=$S/goals_raw
+# product pass per segment (videos deleted after use)
+nice -n 10 uv run --project packages/vision python ml/goals/product_path.py observe $B/obs SEG.mp4 [...] --cheap
+# overlay labels of new games without the people pass, official-log labels
+nice -n 10 uv run --project packages/vision python ml/goals/seg_extract.py $B/cache_l SEG.mp4 --no-det
+uv run --project packages/vision python ml/goals/seg_labels.py $B/cache_l $B/labels_l.json
+uv run --project packages/vision python ml/data/segment_clock.py --labels --library $S/library
+uv run --project packages/vision python ml/goals/product_path.py eval $G/cache $G/labels.json \
+  --obs $B/obs $B/obs_l --more-labels $B/labels_l.json
 ```
 
 ## Shots: candidates for every shot (goal, save, miss)
