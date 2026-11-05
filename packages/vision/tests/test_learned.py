@@ -284,10 +284,11 @@ def test_lost_camera_motion_fails_with_its_reason() -> None:
     with pytest.raises(CalibrationError, match="camera motion could not be followed") as lost_exc:
         observe.auto_calibrate(obs, np.zeros((720, 1280, 3), np.uint8))
     assert lost_exc.value.reason == "camera_motion"
-    zoom = replace(base, moving=True, stats={"focal_px": 1100.0, "zoom_ratio": 4.0})
-    with pytest.raises(CalibrationError, match=r"zoom x4\.0"):
+    zoom = replace(base, moving=True, stats={"focal_px": 1100.0, "zoom_ratio": 7.0})
+    with pytest.raises(CalibrationError, match=r"zoom x7\.0"):
         observe.check_motion(zoom)
-    observe.check_motion(replace(base, moving=True, stats={"focal_px": 1100.0, "zoom_ratio": 1.2}))
+    # an amateur zooming in by three still has a court (2. Liga, 2026-11-05)
+    observe.check_motion(replace(base, moving=True, stats={"focal_px": 1100.0, "zoom_ratio": 3.2}))
     observe.check_motion(base)  # a fixed camera has no motion to lose
 
 
@@ -317,7 +318,7 @@ def test_a_slightly_wrong_camera_motion_still_shows_the_floor(
     camera then gets the loose tolerance when it explains enough; a fixed one never needs it."""
     from dataclasses import replace
 
-    obs = _fixed_camera_observations(1280.0, np.array([20.0, -8.0, 6.0]))
+    obs = _fixed_camera_observations(1280.0, np.array([8.0, -10.0, 7.0]))
     real = topview.orientation_from_normals
     tolerances: list[float] = []
 

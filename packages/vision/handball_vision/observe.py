@@ -425,7 +425,7 @@ def auto_calibrate(
 
 
 MAX_FOCAL_WIDTHS = 3.0  # a focal length beyond 3 frame widths (a 23 degree view) is a lost track
-MAX_ZOOM = 3.0  # zoom range within the video
+MAX_ZOOM = 6.0  # zoom range within the video (amateurs zoom x3 and the court is still found)
 
 
 def check_motion(motion: CameraMotion) -> None:
