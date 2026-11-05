@@ -64,6 +64,9 @@ configured proxy; blocked hosts were not retried.
    and scorer, plus 7 m and suspensions. Together with the dhbdata PDFs (3. Liga, JBLH), the HLA Sportradar
    PDFs and the handball.ch matchcentre, this covers report import for every level where the coach can find
    the link. Fetch only on request, one game at a time, with a fixed host list as today. Do not crawl.
+   Done 2026-11-05 (providers `nuliga` and `hla`, see `docs/integrations.md`). The HLA Sportradar PDF
+   turned out to have no timed log of the goals (only result, half-time, missed 7 m with time and
+   player totals), so for HLA games the ÖHB nuLiga report is the better link.
 2. **Schedule prefill in DE, without a contract:** have the coach import the team's calendar exported from
    handball.net (existing `ics` adapter) instead of fetching it from our servers. In nuLiga associations the
    coach can instead paste the nuLiga group link, read once on request under the same rules as point 1.
@@ -105,5 +108,7 @@ configured proxy; blocked hosts were not retried.
   requests through the proxy (2026-11-05). For handball.net, one earlier request with a descriptive
   (non-browser) user agent returned 200 HTML that was not inspected. The plain `curl` request got the
   Cloudflare 403, and the host was then treated as blocked.
-- Responses were not stored in the repo. Sample IDs used: nuLiga BHV group 495716 and game 8390512, dhbdata
+- Responses were not stored in the repo, apart from the test fixtures of the report import
+  (`apps/api/tests/fixtures/official_report/`: nuLiga BHV game 8390512, ÖHB games 81811 and 92532,
+  HLA 70984286), with every person's name replaced by a fake one. Sample IDs used: nuLiga BHV group 495716 and game 8390512, dhbdata
   83388 and 84679, ÖHB game 92478, HLA 70984286.

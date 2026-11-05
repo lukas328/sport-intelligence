@@ -239,3 +239,18 @@ to 3, Switzerland via handball.ch). Errors are problem codes; handball.ch down g
 - New notification kinds (in-app and push, need web texts): `join_request`, `join_approved`,
   `access_request`, `access_approved`, `official_suggestions` (params `team_id`, `count`),
   `official_report` (params `match_id`).
+
+Official report import from nuLiga and the HLA (2026-11-05, backlog item 6): `POST
+/v1/orgs/{org}/matches/{id}/official-report` also takes
+- nuLiga game report links (German associations still on nuLiga: BHV, HHV, HVNB, HVS, HVSA, THV, HVMV,
+  MHV; Austria: ÖHB): the page `https://<association>-handball.liga.nu/cgi-bin/WebObjects/
+  nuLigaHBDE.woa/wa/groupMeetingReport?meeting=…&championship=…&group=…` or the PDF
+  `…/nuLigaDokumentHBAT.woa/wa/nuDokument?dokument=meetingReportHB&meeting=…` (the link oehb.at
+  shows). Result `provider` "nuliga", `game_id` = the nuLiga meeting id. Same events as the other
+  sources (goals with scorer and number, 7 m, 2 minutes, warnings, disqualifications, time-outs).
+- HLA report PDFs `https://infographics.sportradar.com/hla/pageSnapshot/pdf/de/<id>`, or `{"url":
+  "<id>", "provider": "hla"}` (the request enum gained "hla"; nuLiga has no plain-id form). Result
+  `provider` "hla". This report has no timed goals: only the result, half-time and the missed 7 m
+  are imported, and `warnings[0]` says so and points to the ÖHB nuLiga report. Suggested UI: show
+  the warnings as they come; the input hint can read "Link zum Spielbericht (handball.ch, DHB,
+  nuLiga, HLA)".

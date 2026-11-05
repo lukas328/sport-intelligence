@@ -143,13 +143,14 @@ class KickoffIn(ApiModel):
 
 
 class OfficialReportIn(ApiModel):
-    # handball.ch match centre or DHB press report link; a plain game id needs the provider
+    # handball.ch match centre, DHB press report, nuLiga game report (page or PDF) or HLA report
+    # link; a plain game id needs the provider (nuLiga: the link, it names the association)
     url: str = Field(min_length=1, max_length=500)
-    provider: Literal["handball_ch", "dhb"] | None = None
+    provider: Literal["handball_ch", "dhb", "hla"] | None = None
 
 
 class OfficialReportResult(ApiModel):
-    provider: str
+    provider: str  # handball_ch, dhb, nuliga, hla
     game_id: int
     source_url: str
     home: str | None

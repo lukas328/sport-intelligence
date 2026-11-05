@@ -2071,8 +2071,9 @@ export interface paths {
         put?: never;
         /**
          * Import Official Report
-         * @description Official match report (handball.ch match centre or DHB press report) as events: goals with
-         *     scorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous
+         * @description Official match report (handball.ch match centre, DHB press report, nuLiga game report of the
+         *     German associations on nuLiga and Austria, HLA report) as events: goals with scorer and shirt
+         *     number, 7-metres, suspensions, time-outs. A re-import replaces the previous
          *     one; automatic goals from the video within 20 s are merged with the official goal.
          */
         post: operations["import_official_report_v1_orgs__org_id__matches__match_id__official_report_post"];
@@ -6986,7 +6987,7 @@ export interface components {
         /** OfficialReportIn */
         OfficialReportIn: {
             /** Provider */
-            provider?: ("handball_ch" | "dhb") | null;
+            provider?: ("handball_ch" | "dhb" | "hla") | null;
             /** Url */
             url: string;
         };
