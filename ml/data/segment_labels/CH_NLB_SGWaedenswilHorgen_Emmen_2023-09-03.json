@@ -15,12 +15,12 @@
    "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s0.mp4",
    "start_s": 1050.7,
    "clock_source": "overlay",
-   "readings": 37,
+   "readings": 89,
    "half": 1,
    "half_certain": true,
    "match_s": [
     24.0,
-    180.0
+    178.0
    ],
    "entries": 4,
    "skipped_at_stopped_start": 0
@@ -29,12 +29,12 @@
    "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s1.mp4",
    "start_s": 2101.4,
    "clock_source": "overlay",
-   "readings": 37,
+   "readings": 89,
    "half": 1,
    "half_certain": true,
    "match_s": [
     907.0,
-    981.0
+    980.0
    ],
    "entries": 4,
    "skipped_at_stopped_start": 0
@@ -52,13 +52,13 @@
   {
    "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s3.mp4",
    "start_s": 4903.26,
-   "clock_source": "hall_board",
-   "readings": 88,
+   "clock_source": "overlay",
+   "readings": 85,
    "half": 2,
    "half_certain": true,
    "match_s": [
     2267.0,
-    2390.0
+    2388.0
    ],
    "entries": 1,
    "skipped_at_stopped_start": 4
@@ -66,8 +66,8 @@
   {
    "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s4.mp4",
    "start_s": 5953.96,
-   "clock_source": "hall_board",
-   "readings": 91,
+   "clock_source": "overlay",
+   "readings": 89,
    "half": 2,
    "half_certain": true,
    "match_s": [
@@ -100,9 +100,9 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s0.mp4",
    "segment_index": 0,
-   "segment_ms": 64000,
-   "video_ms": 1114700,
-   "anchor_gap_s": 1.0,
+   "segment_ms": 64733,
+   "video_ms": 1115433,
+   "anchor_gap_s": 0.0,
    "half_certain": true
   },
   {
@@ -119,9 +119,9 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s0.mp4",
    "segment_index": 0,
-   "segment_ms": 106000,
-   "video_ms": 1156700,
-   "anchor_gap_s": 2.0,
+   "segment_ms": 106733,
+   "video_ms": 1157433,
+   "anchor_gap_s": 0.0,
    "half_certain": true
   },
   {
@@ -138,9 +138,9 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s0.mp4",
    "segment_index": 0,
-   "segment_ms": 112000,
-   "video_ms": 1162700,
-   "anchor_gap_s": 2.0,
+   "segment_ms": 112733,
+   "video_ms": 1163433,
+   "anchor_gap_s": 0.0,
    "half_certain": true
   },
   {
@@ -159,7 +159,7 @@
    "segment_index": 0,
    "segment_ms": 169000,
    "video_ms": 1219700,
-   "anchor_gap_s": 1.0,
+   "anchor_gap_s": 0.0,
    "half_certain": true
   },
   {
@@ -176,8 +176,8 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s1.mp4",
    "segment_index": 1,
-   "segment_ms": 20000,
-   "video_ms": 2121400,
+   "segment_ms": 20500,
+   "video_ms": 2121900,
    "anchor_gap_s": 0.0,
    "half_certain": true
   },
@@ -195,9 +195,9 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s1.mp4",
    "segment_index": 1,
-   "segment_ms": 26000,
-   "video_ms": 2127400,
-   "anchor_gap_s": 1.0,
+   "segment_ms": 26500,
+   "video_ms": 2127900,
+   "anchor_gap_s": 0.0,
    "half_certain": true
   },
   {
@@ -214,9 +214,9 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s1.mp4",
    "segment_index": 1,
-   "segment_ms": 35000,
-   "video_ms": 2136400,
-   "anchor_gap_s": 0.0,
+   "segment_ms": 35500,
+   "video_ms": 2136900,
+   "anchor_gap_s": 1.0,
    "half_certain": true
   },
   {
@@ -252,8 +252,8 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s3.mp4",
    "segment_index": 3,
-   "segment_ms": 120000,
-   "video_ms": 5023260,
+   "segment_ms": 119233,
+   "video_ms": 5022493,
    "anchor_gap_s": 0.0,
    "half_certain": true
   },
@@ -271,8 +271,8 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s4.mp4",
    "segment_index": 4,
-   "segment_ms": 20000,
-   "video_ms": 5973960,
+   "segment_ms": 20500,
+   "video_ms": 5974460,
    "anchor_gap_s": 0.0,
    "half_certain": true
   },
@@ -294,8 +294,8 @@
    },
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s4.mp4",
    "segment_index": 4,
-   "segment_ms": 41000,
-   "video_ms": 5994960,
+   "segment_ms": 41500,
+   "video_ms": 5995460,
    "anchor_gap_s": 1.0,
    "half_certain": true
   },
@@ -313,8 +313,8 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s4.mp4",
    "segment_index": 4,
-   "segment_ms": 44000,
-   "video_ms": 5997960,
+   "segment_ms": 44500,
+   "video_ms": 5998460,
    "anchor_gap_s": 0.0,
    "half_certain": true
   },
@@ -332,8 +332,8 @@
    ],
    "segment": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s4.mp4",
    "segment_index": 4,
-   "segment_ms": 75000,
-   "video_ms": 6028960,
+   "segment_ms": 75500,
+   "video_ms": 6029460,
    "anchor_gap_s": 0.0,
    "half_certain": true
   }
