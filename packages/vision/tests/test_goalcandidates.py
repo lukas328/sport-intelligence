@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import json
 
 import numpy as np
@@ -52,7 +53,7 @@ def test_pick_rates_are_prefixes_with_suppression_and_edges() -> None:
     got = gc.pick(t, sc)
     times = [c.t for c in got]
     assert all(2.0 <= x <= 358.0 for x in times)
-    assert all(b - a > gc.NMS_S for a, b in zip(times, times[1:], strict=False))
+    assert all(b - a > gc.NMS_S for a, b in itertools.pairwise(times))
     by_rate = {r: [c for c in got if c.rate <= r] for r in gc.RATES}
     assert [len(by_rate[r]) for r in gc.RATES] == [6, 12, 24]  # two blocks of 3 minutes
     # within a block, a higher rate only adds candidates with lower scores
@@ -146,7 +147,7 @@ def test_moving_camera_inputs_are_in_reference_pixels() -> None:
             people.append(Detection(u - 20, v - 100, u + 20, v, 0.9))
         frames.append(observe.FrameObservation(i, people, [None] * 3, []))
     obs = observe.Observations(motion, frames, {}, FPS, n)
-    cam_t, cam_x, pt, px, py, ph, duration = gc.inputs_from_observations(obs)
+    _cam_t, cam_x, pt, px, _py, ph, duration = gc.inputs_from_observations(obs)
     assert duration == pytest.approx(10.0)
     assert len(np.unique(pt)) == 20  # 2 Hz
     for j in range(3):
@@ -157,7 +158,9 @@ def test_moving_camera_inputs_are_in_reference_pixels() -> None:
     assert np.median(speed) == pytest.approx(1500 * np.radians(0.05) * FPS, rel=0.02)
 
 
-def _synthetic_game(goals: list[float], minutes: float = 6.0, seed: int = 0) -> observe.Observations:
+def _synthetic_game(
+    goals: list[float], minutes: float = 6.0, seed: int = 0
+) -> observe.Observations:
     """Fixed camera, 12 players attacking back and forth; after each goal everyone runs to the
     other half, then walks for 25 s before the play picks up again."""
     rng = np.random.default_rng(seed)
@@ -166,7 +169,9 @@ def _synthetic_game(goals: list[float], minutes: float = 6.0, seed: int = 0) -> 
     centre = np.zeros(n)
     speed = np.ones(n)
     side, last = 1.0, 0.0
-    regular = [x for x in np.arange(17, minutes * 60, 23) if all(not g - 8 < x < g + 30 for g in goals)]
+    regular = [
+        x for x in np.arange(17, minutes * 60, 23) if all(not g - 8 < x < g + 30 for g in goals)
+    ]
     switches = sorted([*regular, *goals])
     for s in switches:  # possession changes: the play moves to the other half
         m = (t >= last) & (t < s)

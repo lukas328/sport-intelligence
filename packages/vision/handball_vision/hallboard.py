@@ -213,9 +213,16 @@ def _row_numbers(
     return (min(left)[1] if left else None, min(right)[1] if right else None)
 
 
+def clock_fields(tokens: Sequence[Token]) -> list[tuple[Token, int]]:
+    """(field, seconds) of every field that may be a clock: `mm:ss` that is no certain score
+    (`_pair`: team codes or other letters, spaces around the colon, one digit after it). Tokens
+    are taken as they are (`split_token` them first)."""
+    return [(tk, c) for tk in tokens if (c := _clock_s(tk.text)) is not None and _pair(tk) is None]
+
+
 def stacked_pairs(tokens: Sequence[Token]) -> list[tuple[Token, Token]]:
     """(upper, lower) pairs of bare `mm:ss` fields one directly above the other."""
-    clocks = [tk for tk in tokens if _clock_s(tk.text) is not None and _pair(tk) is None]
+    clocks = [tk for tk, _ in clock_fields(tokens)]
     out = []
     for a in clocks:
         for b in clocks:
@@ -251,7 +258,7 @@ def parse_board(
     clock nor score (either field may be the clock), only a reading that says a board is there.
     A field with letters ("16:00 Uhr" on a pre-match graphic) is never the clock."""
     toks = [s for tk in tokens for s in split_token(tk)]
-    clocks = [(tk, c) for tk in toks if (c := _clock_s(tk.text)) is not None and _pair(tk) is None]
+    clocks = clock_fields(toks)
     if not clocks:
         return None
     # a score field with team codes stacked with a clock: the nearest line, then the field most
@@ -305,7 +312,7 @@ class StackedVotes:
 
     def add(self, t_ms: int, tokens: Sequence[Token]) -> None:
         toks = [s for tk in tokens for s in split_token(tk)]
-        clocks = [tk for tk in toks if _clock_s(tk.text) is not None and _pair(tk) is None]
+        clocks = [tk for tk, _ in clock_fields(toks)]
         for tk in toks:
             if _pair(tk) is not None:
                 for c in clocks:
@@ -845,6 +852,11 @@ class HallBoardReader:
         self._stacked = self._votes.result()
 
     @property
+    def stacked(self) -> Stacked | None:
+        """Where the score field sits in a stacked board, as voted so far (`StackedVotes`)."""
+        return self._stacked
+
+    @property
     def readings(self) -> list[BoardReading]:
         if self._readings is None:
             stacked = self._stacked
@@ -869,7 +881,7 @@ class HallBoardReader:
                 "probes": self.stats.probes,
                 "found": self.stats.found,
             },
-            "stacked": self._stacked,
+            "stacked": self.stacked,
             "goals": goals_from_board(readings, sequence),
             "board_clock": [[r.t_ms, r.clock_s] for r in readings if r.clock_s is not None][:2000],
         }

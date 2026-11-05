@@ -31,9 +31,9 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages/vision"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from handball_vision import goalcandidates as gc  # noqa: E402
-
 import seg_eval as se  # noqa: E402
+
+from handball_vision import goalcandidates as gc  # noqa: E402
 
 CHANNELS = ("pan", "cx_v", "vx", "speed")
 SIGN_CHANNELS = ("pan", "cx_v", "vx")
@@ -95,8 +95,9 @@ def template_dict(prof: np.ndarray, version: str, extra: dict[str, Any]) -> dict
     }
 
 
-def evaluate(sigs: dict[str, dict], segs: dict, refs: dict, use: list[str], version: str
-             ) -> tuple[dict[str, Any], dict[str, list]]:
+def evaluate(
+    sigs: dict[str, dict], segs: dict, refs: dict, use: list[str], version: str
+) -> tuple[dict[str, Any], dict[str, list]]:
     """Leave-one-game-out: every game is scored with a template that none of its goals built."""
     games = sorted({segs[k]["lab"]["game"] for k in use})
     ex = {g: [] for g in games}
@@ -113,9 +114,12 @@ def evaluate(sigs: dict[str, dict], segs: dict, refs: dict, use: list[str], vers
     test = [k for k in use if segs[k]["lab"]["game"] not in se.DEV_GAMES]
     for name, subset in (("all", use), ("test", test)):
         n_goals = sum(len(refs[k]) for k in subset)
-        row: dict[str, Any] = {"goals": n_goals, "segments": len(subset), "games": len(
-            {segs[k]["lab"]["game"] for k in subset}),
-            "minutes": round(sum(segs[k]["lab"]["duration_s"] for k in subset) / 60, 1)}
+        row: dict[str, Any] = {
+            "goals": n_goals,
+            "segments": len(subset),
+            "games": len({segs[k]["lab"]["game"] for k in subset}),
+            "minutes": round(sum(segs[k]["lab"]["duration_s"] for k in subset) / 60, 1),
+        }
         for r in gc.RATES:
             hits, errs = 0, []
             for k in subset:
@@ -126,7 +130,8 @@ def evaluate(sigs: dict[str, dict], segs: dict, refs: dict, use: list[str], vers
             if r == gc.DEFAULT_RATE and errs:
                 row["peak_minus_goal_s"] = {
                     "median": round(float(np.median(errs)), 1),
-                    "iqr": round(float(np.percentile(errs, 75) - np.percentile(errs, 25)), 1)}
+                    "iqr": round(float(np.percentile(errs, 75) - np.percentile(errs, 25)), 1),
+                }
         sx = {k: series[k] for k in subset}
         segs_t = {k: {"x": {"t": sigs[k]["t"]}} for k in subset}
         row["window_auc"] = round(se.window_auc(sx, segs_t, refs), 3)
@@ -140,8 +145,11 @@ def main() -> None:
     ap.add_argument("labels", type=Path)
     ap.add_argument("--version", default=None, help="template version (default: today + .1)")
     ap.add_argument("--out", type=Path, default=OUT)
-    ap.add_argument("--check", action="store_true",
-                    help="only compare the regenerated profile with the stored one")
+    ap.add_argument(
+        "--check",
+        action="store_true",
+        help="only compare the regenerated profile with the stored one",
+    )
     a = ap.parse_args()
     labels = json.loads(a.labels.read_text())
     delay, _ = se.log_delay(labels)

@@ -82,13 +82,18 @@ LABELS = REPO / "ml" / "data" / "segment_labels"
 SIDECAR = "clocks.json"
 
 MAX_WIDTH = 1280  # the ingest's segments are 1280 wide; larger test videos are scaled to it
-OVERLAY_EVERY_S = 5.0
+OVERLAY_EVERY_S = 2.0
 BOARD_EVERY_S = 2.0
 BOARD_FULL_EVERY_S = 10.0  # full-frame text detection while the board is out of view
 BOARD_PROBES = 6
 BOARD_GIVE_UP_S = 60.0  # under two board readings in the first minute: give up
 MAX_CPU_S = 90.0  # stop reading (keep what was read) beyond this
 SEGMENT_S = 180.0
+FEED_MS = 250  # frames handed to the board reader; it reads those due and probes in between
+PROBE_EVERY_S = 0.5  # template probes for a locked board that is out of view
+# version of the clock reading: clock data of an older reader is read again by --fill and
+# replaced on merge (1: `parse_board` per frame without layout; 2: `HallBoardReader`, layout voted)
+CLOCK_READER = 2
 
 Sample = tuple[int, float]
 
@@ -147,103 +152,85 @@ def duration_ms(path: Path) -> int:
         return round((c.duration or 0) / 1000)
 
 
-# --- clock text (PP-OCR) --------------------------------------------------------------------
+# --- clock text (PP-OCR, `hallboard`) ------------------------------------------------------
 
 Window = tuple[int, int, int, int]  # x0, y0, x1, y1
 
 
-class ClockReader:
-    """PP-OCR text detection + recognition on a frame or a window of it; the match clock is the
-    `mm:ss` token `hallboard.parse_board` picks (the most confident, tallest)."""
+def ocr_reader(models: Path, threads: int = 2) -> Any:
+    """The PP-OCR text detector and recogniser of `hallboard` (data/models/ch_PP-OCRv4_*)."""
+    from handball_vision.numbers import NumberReader
 
-    def __init__(self, models: Path, threads: int = 2) -> None:
-        from handball_vision.numbers import NumberReader
+    return NumberReader(
+        models / "ch_PP-OCRv4_det_infer.onnx",
+        models / "ch_PP-OCRv4_rec_infer.onnx",
+        threads=threads,
+    )
 
-        self.ocr = NumberReader(
-            models / "ch_PP-OCRv4_det_infer.onnx",
-            models / "ch_PP-OCRv4_rec_infer.onnx",
-            threads=threads,
-        )
-        self.box: tuple[float, float, float, float] | None = None  # last clock token (frame px)
-        self.text_len = 0  # characters of the last clock token
-        self.full_calls = 0
-        self.window_calls = 0
-        self.box_calls = 0
 
-    def read_box(self, frame: Any, t_ms: int) -> Sample | None:
-        """Recognition only (no detection, a few ms) on the last clock token's box: hits as long
-        as the clock has not moved (an overlay, a fixed camera, a still pan)."""
-        from handball_vision.hallboard import CLOCK
+def clock_values(ocr: Any, frame: Any, win: Window | None = None) -> frozenset[int]:
+    """Values of the fields in `win` of the frame (None: all of it) that may be a clock
+    (`hallboard.clock_fields`: `mm:ss`, no certain score)."""
+    from handball_vision.hallboard import clock_fields, read_tokens
 
-        if self.box is None:
-            return None
-        h, w = frame.shape[:2]
-        x1, y1, x2, y2 = self.box
-        px, py = 0.15 * (x2 - x1) + 2, 0.25 * (y2 - y1) + 2
-        crop = frame[int(max(0, y1 - py)) : int(min(h, y2 + py)),
-                     int(max(0, x1 - px)) : int(min(w, x2 + px))]
-        if crop.size == 0:
-            return None
-        self.box_calls += 1
-        text, score = self.ocr.recognise([crop])[0]
-        text = text.strip()
-        m = CLOCK.fullmatch(text)
-        # same length as before: a token cut by the frame or a pan ("5:41" of "15:41") is no read
-        if score < 0.8 or m is None or len(text) != self.text_len:
-            return None
-        mm, ss = int(m.group(1)), int(m.group(2))
-        return (t_ms, float(mm * 60 + ss)) if ss < 60 and mm <= 70 else None
+    tokens, _ = read_tokens(ocr, frame, win)
+    return frozenset(c for _, c in clock_fields(tokens))
 
-    def read(self, frame: Any, t_ms: int, win: Window | None = None) -> Sample | None:
-        """The last clock box first, then text detection in `win` (None: the full frame)."""
-        return self.read_box(frame, t_ms) or self.read_at(frame, t_ms, win)
 
-    def read_at(self, frame: Any, t_ms: int, win: Window | None = None) -> Sample | None:
-        import numpy as np
-        from handball_vision.hallboard import CLOCK, Token, parse_board
+def board_clock(reader: Any) -> list[Sample]:
+    """Clock readings of a `hallboard.HallBoardReader`: each sample parsed with the layout voted
+    over all samples (`parse_board` with `stacked`), samples whose clock the layout leaves open
+    left out."""
+    return [(r.t_ms, float(r.clock_s)) for r in reader.readings if r.clock_s is not None]
 
-        h, w = frame.shape[:2]
-        x0, y0, x1, y1 = win or (0, 0, w, h)
-        img = frame[y0:y1, x0:x1]
-        if img.size == 0:
-            return None
-        if win is None:
-            self.full_calls += 1
-        else:
-            self.window_calls += 1
-        crops, kept = [], []
-        for b in self.ocr.detect(img):
-            bx1, by1 = np.asarray(b).min(axis=0)
-            bx2, by2 = np.asarray(b).max(axis=0)
-            if by2 - by1 < 8:
-                continue
-            crops.append(
-                img[max(0, int(by1) - 2) : int(by2) + 2, max(0, int(bx1) - 2) : int(bx2) + 2]
-            )
-            kept.append((float(bx1) + x0, float(by1) + y0, float(bx2) + x0, float(by2) + y0))
-        tokens = [
-            Token(t, *bx, s)
-            for (t, s), bx in zip(self.ocr.recognise(crops), kept, strict=True)
-            if s >= 0.6
-        ]
-        r = parse_board(tokens, t_ms)
-        if r is None or r.clock_s is None:
-            return None
-        best = max(
-            (tk for tk in tokens if CLOCK.match(tk.text.strip())), key=lambda tk: tk.score * tk.h
-        )
-        self.box = (best.x1, best.y1, best.x2, best.y2)
-        self.text_len = len(best.text.strip())
-        return t_ms, float(r.clock_s)
 
-    def window_around_box(self, frame: Any) -> Window | None:
-        if self.box is None:
-            return None
-        h, w = frame.shape[:2]
-        x1, y1, x2, y2 = self.box
-        px, py = max(4 * (x2 - x1), 160), max(3 * (y2 - y1), 80)
-        return (int(max(0, x1 - px)), int(max(0, y1 - py)),
-                int(min(w, x2 + px)), int(min(h, y2 + py)))
+def _crop(frame: Any, win: Window | None) -> Any:
+    if win is None:
+        return frame
+    x0, y0, x1, y1 = win
+    return frame[y0:y1, x0:x1]
+
+
+def _blank(frame: Any, hide: Window | None) -> Any:
+    if hide is not None:
+        x0, y0, x1, y1 = hide
+        frame[y0:y1, x0:x1] = 0
+    return frame
+
+
+def read_clock(
+    path: Path,
+    ocr: Any,
+    every_s: float,
+    budget_s: float,
+    win: Window | None = None,
+    hide: Window | None = None,
+    full_every_s: float = BOARD_FULL_EVERY_S,
+    give_up: bool = False,
+) -> tuple[list[Sample], Any]:
+    """(clock readings, reader): `hallboard.HallBoardReader` over the segment, on `win` of each
+    frame (None: the whole frame; `hide` blanked). It reads every `every_s`: text detection until
+    a clock is in view, then the board locked by template matching and only a window around it
+    read (recognition alone while it stands still); between reads it probes for a lost board.
+    Frames go to it every FEED_MS. `give_up`: stop when under two readings came in the first
+    BOARD_GIVE_UP_S, or the readings after twice that are still no match clock."""
+    from handball_vision.hallboard import HallBoardReader
+
+    reader = HallBoardReader(
+        ocr, fps=1000.0, every_s=every_s, full_every_s=full_every_s, probe_every_s=PROBE_EVERY_S
+    )
+    checked = 0
+    for t, frame in frames(path, FEED_MS):
+        reader.add(t, _crop(_blank(frame, hide), win))  # fps 1000: the frame index is its ms
+        if cpu_s() > budget_s:
+            break
+        if give_up and len(reader.samples) != checked:
+            checked = len(reader.samples)
+            if t > 2 * BOARD_GIVE_UP_S * 1000 and not plausible(clean(board_clock(reader))):
+                break  # two minutes of readings and still no match clock
+        if give_up and len(reader.samples) < 2 and t > BOARD_GIVE_UP_S * 1000:
+            break
+    return board_clock(reader), reader
 
 
 # --- overlay --------------------------------------------------------------------------------
@@ -271,66 +258,16 @@ def overlay_windows(keys: Sequence[tuple[int, Any]]) -> list[Window]:
 
 
 def find_overlay_clock(
-    reader: ClockReader, keys: Sequence[tuple[int, Any]], probes: int = BOARD_PROBES
+    ocr: Any, keys: Sequence[tuple[int, Any]], probes: int = BOARD_PROBES
 ) -> Window | None:
-    """The overlay window that shows a running clock on the probe key frames (two different
-    clock values), or None."""
+    """The overlay window whose clock fields change between the probe key frames (a running
+    clock), or None."""
     picks = _spread(keys, probes)
     for win in overlay_windows(keys):
-        seen = {got[1] for t, f in picks if (got := reader.read_at(f, t, win))}
+        seen = {v for _, f in picks if (v := clock_values(ocr, f, win))}
         if len(seen) >= 2:
             return win
     return None
-
-
-def read_overlay(
-    path: Path, reader: ClockReader, win: Window, every_s: float, budget_s: float
-) -> list[Sample]:
-    out: list[Sample] = []
-    reader.box = None
-    for t, frame in frames(path, round(every_s * 1000)):
-        got = reader.read(frame, t, win)
-        if got:
-            out.append(got)
-        if cpu_s() > budget_s:
-            break
-    return out
-
-
-# --- hall board -----------------------------------------------------------------------------
-
-
-def _blank(frame: Any, hide: Window | None) -> Any:
-    if hide is not None:
-        x0, y0, x1, y1 = hide
-        frame[y0:y1, x0:x1] = 0
-    return frame
-
-
-def read_board(
-    path: Path, reader: ClockReader, every_s: float, budget_s: float, hide: Window | None = None
-) -> list[Sample]:
-    """Every `every_s`: the window around the board's last position while it is in view, the
-    full frame at most every BOARD_FULL_EVERY_S while it is not. `hide`: the box of an overlay
-    clock that was no match clock (frozen), blanked so it does not compete with the board's."""
-    out: list[Sample] = []
-    last_full = -(10**9)
-    for t, frame in frames(path, round(every_s * 1000)):
-        frame = _blank(frame, hide)
-        win = reader.window_around_box(frame)
-        got = reader.read(frame, t, win) if win else None
-        if got is None:
-            reader.box = None
-            if t - last_full >= BOARD_FULL_EVERY_S * 1000:
-                last_full = t
-                got = reader.read_at(frame, t)
-        if got:
-            out.append(got)
-        if cpu_s() > budget_s or (len(out) < 2 and t > BOARD_GIVE_UP_S * 1000):
-            break
-        if t > 2 * BOARD_GIVE_UP_S * 1000 and not plausible(clean(out)):
-            break  # two minutes of readings and still no match clock
-    return out
 
 
 # --- one segment ----------------------------------------------------------------------------
@@ -394,15 +331,17 @@ def read_segment_clock(
     max_cpu_s: float = MAX_CPU_S,
 ) -> dict[str, Any]:
     """{"source": "overlay" | "hall_board" | None, "samples": [[segment_ms, clock_s], ...],
-    "duration_ms", "cpu_s", "wall_s"}. Samples are the clock as shown (a second half may restart
-    at 0 or continue at 30:00), misreads dropped."""
+    "reader": CLOCK_READER, "stacked", "duration_ms", "cpu_s", "wall_s"}. Samples are the clock as
+    shown (a second half may restart at 0 or continue at 30:00), misreads dropped."""
     import cv2
 
     cv2.setNumThreads(2)
     path = Path(path)
     c0, w0 = cpu_s(), time.time()
     budget = c0 + max_cpu_s
-    result: dict[str, Any] = {"source": None, "samples": [], "duration_ms": duration_ms(path)}
+    result: dict[str, Any] = {
+        "source": None, "samples": [], "reader": CLOCK_READER, "duration_ms": duration_ms(path)
+    }
     keys = _spread(list(frames(path, 0, skip="NONKEY")), 48)
     if len(keys) < 12:  # long GOP: spread frames by seeking instead
         from handball_vision.pipeline import sample_frames
@@ -411,26 +350,31 @@ def read_segment_clock(
         keys = [
             (round(dur * (k + 0.5) / n), _fit(f)) for k, f in enumerate(sample_frames(path, n))
         ]
-    reader = ClockReader(models)
-    win = find_overlay_clock(reader, keys)
+    ocr = ocr_reader(models)
+    readers: list[Any] = []
+    win = find_overlay_clock(ocr, keys)
     hide: Window | None = None
     if win is not None:
-        samples = clean(read_overlay(path, reader, win, overlay_every_s, budget))
+        got, reader = read_clock(path, ocr, overlay_every_s, budget, win, full_every_s=0)
+        readers.append(reader)
+        samples = clean(got)
         if plausible(samples):
             result |= {"source": "overlay", "samples": [list(s) for s in samples]}
-        elif reader.box is not None:  # a frozen overlay clock: hide it from the board reader
-            x1, y1, x2, y2 = reader.box
-            hide = (int(x1) - 4, int(y1) - 4, int(x2) + 5, int(y2) + 5)
-            hide = (max(0, hide[0]), max(0, hide[1]), hide[2], hide[3])
+            result["stacked"] = reader.stacked
+        else:  # a frozen overlay clock: hide it from the board reader
+            hide = win
     if result["source"] is None and keys and cpu_s() < budget:
-        reader.box = None
-        probes = [(t, _blank(f.copy(), hide)) for t, f in _spread(keys, BOARD_PROBES)]
-        if any(reader.read_at(f, t) for t, f in probes):
-            samples = clean(read_board(path, reader, board_every_s, budget, hide))
+        probes = [_blank(f.copy(), hide) for _, f in _spread(keys, BOARD_PROBES)]
+        if any(clock_values(ocr, f) for f in probes):
+            got, reader = read_clock(path, ocr, board_every_s, budget, hide=hide, give_up=True)
+            readers.append(reader)
+            samples = clean(got)
             if plausible(samples):
                 result |= {"source": "hall_board", "samples": [list(s) for s in samples]}
+                result["stacked"] = reader.stacked
     result["ocr_calls"] = {
-        "box": reader.box_calls, "window": reader.window_calls, "full": reader.full_calls
+        k: sum(getattr(r.stats, k) for r in readers)
+        for k in ("full", "window", "boxes", "probes", "found")
     }
     result["cpu_s"] = round(cpu_s() - c0, 1)
     result["wall_s"] = round(time.time() - w0, 1)
