@@ -232,7 +232,7 @@ def _synthetic_game(
     centre = np.interp(t, np.arange(len(centre)) * gc.DT, centre)
     for g in goals:
         speed[(t > g + 3) & (t < g + 28)] = 0.15
-    base = rng.uniform(-150, 150, size=12)
+    base = rng.uniform(-300, 300, size=12)  # spread over about 5 body heights, as in play
     phase = rng.uniform(0, 2 * np.pi, size=12)
     frames = []
     for i in range(0, n, 3):
@@ -358,6 +358,50 @@ def test_no_play_while_a_moving_camera_is_parked() -> None:
     short[(t >= 180) & (t < 300)] = rng.normal(0, 5, 1200)
     short[(t >= 300) & (t < 420)] = 120 * np.sin(2 * np.pi * t[(t >= 300) & (t < 420)] / 25)
     assert not gc.no_play({"t": t, "pan": short}, moving=True).any()
+
+
+def test_no_play_while_people_bunch() -> None:
+    """A time-out: everybody gathers in one spot for a minute (a fixed camera, so only the people
+    tell). Spread out over 5 to 6 body heights in play, within 1.5 during the time-out; a moment
+    with fewer than 3 people in view is no evidence either way."""
+    rng = np.random.default_rng(5)
+    pt, px = [], []
+    for f in np.arange(0, 300, 0.5):
+        timeout = 120 <= f < 180
+        n = 1 if 240 <= f < 260 else 14  # a close-up: one person in view
+        width = 135.0 if timeout else 720.0  # body height 90 px
+        pt.append(np.full(n, f))
+        px.append(400 + rng.uniform(0, width, n) + (0 if timeout else 80 * np.sin(f / 7)))
+    t_p, x_p = np.concatenate(pt), np.concatenate(px)
+    y_p = 500 + rng.normal(0, 20, len(t_p))
+    s = gc.signals(
+        np.arange(0, 300, 1 / FPS),
+        np.zeros(300 * 25),
+        t_p,
+        x_p,
+        y_p,
+        np.full(len(t_p), 90.0),
+        300.0,
+    )
+    t = s["t"]
+    assert np.median(s["spread"][(t > 20) & (t < 100)]) == pytest.approx(5.6, abs=0.5)
+    assert np.all(s["spread"][(t > 130) & (t < 170)] < 1.5)
+    idle = gc.no_play(s, moving=False)
+    assert idle[(t > 135) & (t < 165)].all()
+    assert not idle[(t < 110) | (t > 190)].any()  # the close-up at 240 to 260 s included
+    runs = gc.intervals(t, idle)
+    assert len(runs) == 1 and 115 <= runs[0][0] <= 140 and 160 <= runs[0][1] <= 185
+    assert not gc.bunched({"t": t, "pan": np.zeros(len(t))}).any()  # no people channel
+    nobody = {**s, "spread": np.full(len(t), np.nan)}
+    assert not gc.no_play(nobody, moving=False).any()
+
+
+def test_running_nanmedian() -> None:
+    x = np.r_[np.full(100, 2.0), np.full(100, np.nan), np.full(100, 6.0)]
+    med = gc.running_nanmedian(x, 4.0)  # 40 samples
+    assert med[:80].tolist() == [2.0] * 80 and med[-80:].tolist() == [6.0] * 80
+    assert np.isnan(med[130:170]).all()
+    assert len(gc.running_nanmedian(np.zeros(0), 4.0)) == 0
 
 
 def test_pick_skips_no_play_and_scales_the_quota() -> None:

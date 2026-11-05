@@ -12,6 +12,8 @@ scale grows by 1 / cos^2 of the azimuth towards the goals:
   without one-frame jumps (cuts, misregistered frames, `drop_jumps`);
 - `cx_v`: speed of the people's median x in the image (canvas velocity minus the camera's): the
   play running towards one half while the camera lags or swings;
+- `spread`: 10 to 90 % range of the people's x in body heights (NaN with fewer than
+  `SPREAD_MIN_PEOPLE`), for `no_play`;
 - `vx`, `speed`: people matched mutual-nearest between detection frames 0.5 s apart on the canvas;
   their mean x velocity in the image and their mean speed in body heights per second (activity).
 People are sampled at 2 Hz as in the training data; benches, spectators and the officials' table
@@ -23,8 +25,11 @@ the post-goal lull (busy around t, quiet 8 to 24 s later), each as a rolling rob
 Channels and scores are normalised over a rolling window of 3 minutes, the segment length the
 template was learned on, so the camera operator's style and the zoom may change during a game.
 
-No play (`no_play`): an operated camera that stands still for 2.5 minutes is parked: half-time,
-before and after the game. No candidates there, and the quota counts minutes of play only.
+No play (`no_play`): an operated camera that stands still for 2.5 minutes is parked (half-time,
+before and after the game), and people bunched together for 40 s do not play (time-outs, the
+huddle around an injured player, a stoppage, the line-ups before the game): the median spread of
+the people on court (`spread`, 10 to 90 % of their x in body heights) below 3.5 body heights,
+against 5 to 7.5 in play. No candidates there, and the quota counts minutes of play only.
 
 Candidates (`pick`): a fixed number per minute of play, not a score threshold (score scales vary
 per game): per 3-minute block the best peaks with 8 s non-maximum suppression, none in the first
@@ -80,6 +85,10 @@ MATCH_HEIGHTS = 1.2  # nearest-neighbour match within this many body heights
 STILL_PX_S = 40.0  # camera speed below this is "still" (reference px/s)
 STILL_WINDOW_S = 150.0  # centred window
 STILL_SHARE = 0.97  # share of the window the camera must be still
+# no play: people bunched (time-out huddle, stoppage), whatever the camera
+BUNCHED_WINDOW_S = 40.0  # centred window of the median spread
+BUNCHED_SPREAD = 3.5  # median spread below this many body heights (5 to 7.5 in play)
+SPREAD_MIN_PEOPLE = 3
 
 
 @dataclass(frozen=True)
@@ -326,6 +335,23 @@ def people_motion(
     return frames, med, vx, sp
 
 
+def people_spread(pt: F64, px: F64, ph: F64, keep: NDArray[np.bool_]) -> tuple[F64, F64]:
+    """Per detection frame with at least `SPREAD_MIN_PEOPLE` kept people: the 10 to 90 % range of
+    their canvas x in median body heights."""
+    sel = keep & (ph > 0)
+    frames, inv = np.unique(pt[sel], return_inverse=True)
+    out = np.full(len(frames), np.nan)
+    order = np.argsort(inv, kind="stable")
+    bounds = np.searchsorted(inv[order], np.arange(len(frames) + 1))
+    xs, hs = px[sel][order], ph[sel][order]
+    for k in range(len(frames)):
+        a, b = bounds[k], bounds[k + 1]
+        if b - a >= SPREAD_MIN_PEOPLE:
+            lo, hi = np.percentile(xs[a:b], [10, 90])
+            out[k] = (hi - lo) / float(np.median(hs[a:b]))
+    return np.asarray(frames, dtype=np.float64), out
+
+
 def signals(
     cam_t: F64, cam_x: F64, pt: F64, px: F64, py: F64, ph: F64, duration_s: float | None = None
 ) -> dict[str, F64]:
@@ -348,12 +374,16 @@ def signals(
     keep = (ph >= MIN_BOX_PX) & ~static_mask(pt, px, py)
     frames, med, vx, sp = people_motion(pt, px, py, ph, keep)
     cx = _interp(tg, frames, med, 1.0)
+    sf, sv = people_spread(pt, px, ph, keep)
+    ok_sp = np.isfinite(sv)
+    spread = np.interp(tg, sf[ok_sp], sv[ok_sp]) if ok_sp.sum() >= 2 else np.full(n, np.nan)
     out: dict[str, F64] = {
         "t": tg,
         "pan": np.asarray(pan, dtype=np.float64),
         "cx_v": np.asarray(np.gradient(cx, DT) - pan if n > 1 else np.zeros(n), dtype=np.float64),
         "vx": _interp(tg, frames, vx, 1.0) - pan,
         "speed": _interp(tg, frames, sp, 1.0),
+        "spread": np.asarray(spread, dtype=np.float64),
     }
     return out
 
@@ -465,18 +495,50 @@ def running_mean(x: F64, win_s: float) -> F64:
     return np.asarray((c[hi] - c[lo]) / np.maximum(hi - lo, 1), dtype=np.float64)
 
 
-def no_play(s: dict[str, F64], moving: bool) -> NDArray[np.bool_]:
-    """True where nobody plays as far as the camera tells: an operated camera that stands still
-    (below `STILL_PX_S`) for `STILL_SHARE` of a centred `STILL_WINDOW_S` window. During play the
-    operator follows the ball across the court at least every two minutes; at half-time and
-    before or after the game the camera is parked. Time-outs (60 s) are too short to tell from a
-    long attack filmed by a parked camera (one operator left the camera still for two minutes
-    over a time-out and the attack after it), and a fixed camera is always still: never flagged."""
+def running_nanmedian(x: F64, win_s: float, step: int = 5) -> F64:
+    """Median of the finite values in a window of `win_s` centred on every `step`-th sample (held
+    in between; NaN where the window has none)."""
+    n = len(x)
+    if n == 0:
+        return np.zeros(0)
+    xs = x[::step]
+    h = max(1, round(win_s / DT / step)) // 2
+    w = np.lib.stride_tricks.sliding_window_view(np.pad(xs, h, constant_values=np.nan), 2 * h + 1)
+    have = np.isfinite(w).any(axis=1)
+    med = np.full(len(xs), np.nan)
+    if have.any():
+        med[have] = np.nanmedian(w[have], axis=1)
+    return np.asarray(np.repeat(med, step)[:n], dtype=np.float64)
+
+
+def parked(s: dict[str, F64], moving: bool) -> NDArray[np.bool_]:
+    """An operated camera that stands still (below `STILL_PX_S`) for `STILL_SHARE` of a centred
+    `STILL_WINDOW_S` window: during play the operator follows the ball across the court at least
+    every two minutes; at half-time and before or after the game the camera is parked. A fixed
+    camera is always still: never flagged."""
     n = len(s["t"])
     if not moving or n == 0:
         return np.zeros(n, bool)
     still = (np.abs(s["pan"]) < STILL_PX_S).astype(np.float64)
     return np.asarray(running_mean(still, STILL_WINDOW_S) >= STILL_SHARE, dtype=bool)
+
+
+def bunched(s: dict[str, F64]) -> NDArray[np.bool_]:
+    """People bunched together: the median `spread` over a centred `BUNCHED_WINDOW_S` window below
+    `BUNCHED_SPREAD` body heights. A time-out huddle, a stoppage around an injured player or the
+    referees, the line-ups; in play the people on court spread over 5 to 7.5 body heights (the
+    median per segment of the labelled games), also when the camera follows only one half."""
+    n = len(s["t"])
+    if "spread" not in s or n == 0:
+        return np.zeros(n, bool)
+    med = running_nanmedian(s["spread"], BUNCHED_WINDOW_S)
+    return np.asarray(np.isfinite(med) & (med < BUNCHED_SPREAD), dtype=bool)
+
+
+def no_play(s: dict[str, F64], moving: bool) -> NDArray[np.bool_]:
+    """True where nobody plays: a parked operated camera (`parked`) or people bunched together
+    (`bunched`)."""
+    return parked(s, moving) | bunched(s)
 
 
 def intervals(t: F64, mask: NDArray[np.bool_]) -> list[tuple[float, float]]:
