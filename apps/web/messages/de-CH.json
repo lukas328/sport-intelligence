@@ -1413,7 +1413,7 @@
     "prev": "Zurück",
     "next": "Weiter",
     "overview": "Szenen der Spieler",
-    "overviewIntro": "Pro Spieler bis zu 5 Szenen, gemischt positiv und zum Lernen. Kommentare sehen die Spieler nach ihrer Selbsteinschätzung.",
+    "overviewIntro": "Pro Spieler bis zu 5 Szenen; Notizen sehen die Spieler nach ihrer Selbsteinschätzung.",
     "generate": "Szenen neu erstellen",
     "generated": "{n, plural, =0 {Keine Szenen erstellt} one {Szenen für # Spieler erstellt} other {Szenen für # Spieler erstellt}}",
     "selfAssessment": "Selbsteinschätzung",
@@ -1454,13 +1454,19 @@
     "youth_suspension": "Lernmoment: Zweikampf",
     "youth_foul": "Lernmoment: Zweikampf",
     "youth_coach_choice": "Vom Trainer ausgewählt",
-    "summary": "{players} Spieler, {scenes} Szenen, {waiting, plural, =0 {alle Selbsteinschätzungen da} one {# Selbsteinschätzung offen} other {# Selbsteinschätzungen offen}}.",
+    "summary": "{players} Spieler, {waiting, plural, =0 {alle Selbsteinschätzungen da} one {# Selbsteinschätzung offen} other {# Selbsteinschätzungen offen}}.",
     "noAssessmentLong": "Selbsteinschätzung offen",
     "play": "{what} bei {time} abspielen",
     "positive": "positiv",
     "toLearn": "zum Lernen",
     "addNote": "Notiz",
-    "editNote": "Notiz ändern"
+    "editNote": "Notiz ändern",
+    "progress": "Notizen {done} von {total}",
+    "nextUp": "weiter mit",
+    "notesOf": "{n}/{m} Notizen",
+    "selfShort": "selbst",
+    "feedbackLink": "Feedback geben",
+    "feedbackHere": "Szenen der Spieler mit Notizen gibst du im Video-Tab, neben dem Player."
   },
   "scouting": {
     "title": "Vorbereitungsbericht",
@@ -1604,7 +1610,7 @@
     "save": "Speichern"
   },
   "highlights": {
-    "title": "Highlights",
+    "title": "Reels",
     "intro": "Nach jeder Analyse entstehen automatisch ein Team-Reel (16:9 und 9:16) und persönliche Reels. Nur Szenen mit genügend Sicherheit; Spieler ohne Einwilligung erscheinen nicht. Keine Musik.",
     "format": "Format",
     "landscape": "Querformat 16:9",
@@ -2311,6 +2317,7 @@
     "laneNotes": "Notizen",
     "change": "Ändern",
     "kickoff_fromClip": "aus dem Video gelesen",
-    "laneEvents": "Ereignisse"
+    "laneEvents": "Ereignisse",
+    "feedback": "Feedback"
   }
 }

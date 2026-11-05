@@ -1413,7 +1413,7 @@
     "prev": "Back",
     "next": "Next",
     "overview": "Players' scenes",
-    "overviewIntro": "Up to 5 scenes per player, positive and to learn from. Players see comments after their self-assessment.",
+    "overviewIntro": "Up to 5 scenes per player; players see the notes after their own assessment.",
     "generate": "Rebuild scenes",
     "generated": "{n, plural, =0 {No scenes created} one {Scenes created for # player} other {Scenes created for # players}}",
     "selfAssessment": "Self-assessment",
@@ -1454,13 +1454,19 @@
     "youth_suspension": "Learning moment: duels",
     "youth_foul": "Learning moment: duels",
     "youth_coach_choice": "Picked by the coach",
-    "summary": "{players} players, {scenes} scenes, {waiting, plural, =0 {all self-assessments in} one {# self-assessment open} other {# self-assessments open}}.",
+    "summary": "{players} players, {waiting, plural, =0 {all self-assessments in} one {# self-assessment open} other {# self-assessments open}}.",
     "noAssessmentLong": "Self-assessment open",
     "play": "Play {what} at {time}",
     "positive": "positive",
     "toLearn": "to learn from",
     "addNote": "Note",
-    "editNote": "Edit note"
+    "editNote": "Edit note",
+    "progress": "Notes {done} of {total}",
+    "nextUp": "next",
+    "notesOf": "{n}/{m} notes",
+    "selfShort": "self",
+    "feedbackLink": "Give feedback",
+    "feedbackHere": "You give notes on the players' scenes in the Video tab, next to the player."
   },
   "scouting": {
     "title": "Preparation report",
@@ -1604,7 +1610,7 @@
     "save": "Save"
   },
   "highlights": {
-    "title": "Highlights",
+    "title": "Reels",
     "intro": "After every analysis a team reel (16:9 and 9:16) and personal reels are created automatically. Only confident scenes; players without consent do not appear. No music.",
     "format": "Format",
     "landscape": "Landscape 16:9",
@@ -2311,6 +2317,7 @@
     "laneNotes": "Notes",
     "change": "Change",
     "kickoff_fromClip": "read from the video",
-    "laneEvents": "Events"
+    "laneEvents": "Events",
+    "feedback": "Feedback"
   }
 }

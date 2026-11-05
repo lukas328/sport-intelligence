@@ -36,6 +36,7 @@ import { OfficialGoalsPanel, useOfficialGoals } from "./official-goals";
 import { OfficialReportImport } from "./official-report";
 import { WorkRail, type Pane } from "./work-rail";
 import { useGameTime } from "./game-time";
+import { TeamFeedView } from "./feed-views";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
@@ -52,6 +53,7 @@ export function Workspace({
   oppName,
   names,
   setup,
+  requestPane = null,
   handle,
 }: {
   orgId: string;
@@ -63,6 +65,8 @@ export function Workspace({
   names: Record<string, string>;
   /** the video's own setup (more cameras, quality): shown with the court, not under every step */
   setup?: React.ReactNode;
+  /** a pane to open from outside; a new object each time */
+  requestPane?: { pane: Pane } | null;
   handle?: Ref<PlayerHandle | null>;
 }) {
   const t = useTranslations();
@@ -300,7 +304,16 @@ export function Workspace({
     unassigned: a?.status === "ready" && a.tracks.length > 0 ? ownTracks(a.tracks).filter((tr) => !tr.player_id).length : null,
   });
   const loaded = !analysis.isLoading && !candidates.isLoading && !(hasReport && official.isLoading);
-  const tools: Pane[] = [...(staff ? (["events"] as const) : (["court"] as const)), ...(a?.status === "ready" ? (["formations"] as const) : []), "notes"];
+  const tools: Pane[] = [
+    ...(staff ? (["events"] as const) : (["court"] as const)),
+    ...(a?.status === "ready" ? (["formations"] as const) : []),
+    "notes",
+    ...(staff ? (["feedback"] as const) : []),
+  ];
+  // another tab asks for a pane (e.g. "Feedback geben" from the scenes tab)
+  useEffect(() => {
+    if (requestPane) setPane(requestPane.pane);
+  }, [requestPane]);
   const chosen: Pane = pane ?? (staff ? (firstOpen(stepList) ?? "notes") : "notes");
   // the first open step is shown once the lists are in; from then on the coach decides
   useEffect(() => {
@@ -585,6 +598,10 @@ export function Workspace({
           </div>
         )}
         {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
+        {shown === "feedback" && staff && (
+          // beside the player: watch a scene and write the note without leaving the list
+          <TeamFeedView orgId={orgId} matchId={match.id} onPlay={jump} kickoff={match.kickoff_ms} periodS={match.period_s} compact />
+        )}
         {shown === "notes" && (
           <div className="flex min-h-0 flex-1 flex-col gap-4">
         <Segmented<Tab>

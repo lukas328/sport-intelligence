@@ -1413,7 +1413,7 @@
     "prev": "Retour",
     "next": "Suivant",
     "overview": "Scènes des joueur·euse·s",
-    "overviewIntro": "Jusqu'à 5 scènes par joueur·euse, positives et pour apprendre. Les commentaires sont visibles après l'auto-évaluation.",
+    "overviewIntro": "Jusqu'à 5 scènes par joueur ; les joueurs voient les notes après leur auto-évaluation.",
     "generate": "Recréer les scènes",
     "generated": "{n, plural, =0 {Aucune scène créée} one {Scènes créées pour # joueur·euse} other {Scènes créées pour # joueur·euse·s}}",
     "selfAssessment": "Auto-évaluation",
@@ -1454,13 +1454,19 @@
     "youth_suspension": "Moment d'apprentissage : duels",
     "youth_foul": "Moment d'apprentissage : duels",
     "youth_coach_choice": "Choisi par l'entraîneur·e",
-    "summary": "{players} joueurs, {scenes} scènes, {waiting, plural, =0 {toutes les auto-évaluations reçues} one {# auto-évaluation en attente} other {# auto-évaluations en attente}}.",
+    "summary": "{players} joueurs, {waiting, plural, =0 {toutes les auto-évaluations reçues} one {# auto-évaluation en attente} other {# auto-évaluations en attente}}.",
     "noAssessmentLong": "Auto-évaluation en attente",
     "play": "Lire {what} à {time}",
     "positive": "positif",
     "toLearn": "pour apprendre",
     "addNote": "Note",
-    "editNote": "Modifier la note"
+    "editNote": "Modifier la note",
+    "progress": "Notes {done} sur {total}",
+    "nextUp": "ensuite",
+    "notesOf": "{n}/{m} notes",
+    "selfShort": "auto",
+    "feedbackLink": "Donner un retour",
+    "feedbackHere": "Les notes sur les scènes des joueurs se donnent dans l'onglet Vidéo, à côté du lecteur."
   },
   "scouting": {
     "title": "Rapport de préparation",
@@ -1604,7 +1610,7 @@
     "save": "Enregistrer"
   },
   "highlights": {
-    "title": "Highlights",
+    "title": "Reels",
     "intro": "Après chaque analyse, un reel d'équipe (16:9 et 9:16) et des reels personnels sont créés automatiquement. Seulement des scènes sûres ; les joueur·euse·s sans consentement n'apparaissent pas. Pas de musique.",
     "format": "Format",
     "landscape": "Paysage 16:9",
@@ -2311,6 +2317,7 @@
     "laneNotes": "Notes",
     "change": "Modifier",
     "kickoff_fromClip": "lu dans la vidéo",
-    "laneEvents": "Événements"
+    "laneEvents": "Événements",
+    "feedback": "Retours"
   }
 }

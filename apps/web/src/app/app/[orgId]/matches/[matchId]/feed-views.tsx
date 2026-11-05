@@ -18,12 +18,15 @@ export function TeamFeedView({
   onPlay,
   kickoff,
   periodS,
+  compact = false,
 }: {
   orgId: string;
   matchId: string;
   onPlay?: ((ms: number) => void) | undefined;
   kickoff?: Record<string, number> | null;
   periodS: number;
+  /** beside the player in the workspace: one column */
+  compact?: boolean;
 }) {
   const t = useTranslations("feed");
   const { at } = useGameTime(kickoff, periodS);
@@ -47,19 +50,42 @@ export function TeamFeedView({
       api.PATCH("/v1/orgs/{org_id}/feed-items/{item_id}", { params: { path: { org_id: orgId, item_id: id } }, body: { coach_comment: text || null } }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: key }),
   });
-  const players = q.data ?? [];
+  // squad order, as on the match sheet
+  const players = [...(q.data ?? [])].sort((a, b) => (a.number ?? 99) - (b.number ?? 99));
   const scenes = players.reduce((n, p) => n + p.items.length, 0);
   const waiting = players.filter((p) => !p.self_assessment).length;
+  const noted = (p: (typeof players)[number]) => p.items.filter((s) => s.coach_comment).length;
+  const done = players.reduce((n, p) => n + noted(p), 0);
+  // the coach's queue: the next player without a note carries the signal
+  const next = players.find((p) => p.items.length > 0 && noted(p) === 0);
   return (
     <section className="space-y-5" aria-labelledby="feed-overview">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-foreground/15 pb-3">
         <div className="space-y-1">
-          <h2 id="feed-overview" className="font-display text-2xl">
+          <h2 id="feed-overview" className={compact ? "sr-only" : "font-display text-2xl"}>
             {t("overview")}
           </h2>
-          <p className="text-sm">
-            {players.length > 0 ? t("summary", { players: players.length, scenes, waiting }) : null}{" "}
-            <span className="text-muted">{t("overviewIntro")}</span>
+          {players.length > 0 && (
+            <p className="font-score text-lg tabular-nums" data-testid="feed-progress">
+              {t("progress", { done, total: scenes })}
+              {next && (
+                <>
+                  {" · "}
+                  {t("nextUp")}{" "}
+                  <span className="underline decoration-resin decoration-[5px] underline-offset-[5px]">{next.name}</span>
+                </>
+              )}
+            </p>
+          )}
+          <p className="text-sm text-muted">
+            {players.length > 0 && `${t("summary", { players: players.length, waiting })} `}
+            {t("overviewIntro")}{" "}
+            <span className="whitespace-nowrap">
+              <span aria-hidden className="mr-1 inline-block size-2 rounded-full bg-foreground align-middle" />
+              {t("positive")}
+              <span aria-hidden className="mr-1 ml-3 inline-block size-2 rounded-full ring-[1.5px] ring-inset ring-foreground align-middle" />
+              {t("toLearn")}
+            </span>
           </p>
         </div>
         <Button variant="secondary" size="sm" loading={generate.isPending} onClick={() => generate.mutate()}>
@@ -73,23 +99,21 @@ export function TeamFeedView({
       )}
       {q.data && q.data.length === 0 && <EmptyState title={t("noFeed")} />}
       {/* one block per player, like a match sheet: who, how they rated themselves, their scenes */}
-      <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
+      <div className={cn("grid gap-x-12 gap-y-8", !compact && "lg:grid-cols-2")}>
         {players.map((p) => (
           <div key={p.player_id} className="space-y-1" data-testid="feed-player">
             <div className="flex flex-wrap items-baseline justify-between gap-x-3 border-b-2 border-foreground pb-1">
               <h3 className="font-semibold">
                 {p.number != null && <span className="mr-1.5 font-score text-accent tabular-nums">{p.number}</span>}
-                {p.name}
+                <span className={cn(p === next && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{p.name}</span>
               </h3>
-              <p className="text-sm">
-                {p.self_assessment ? (
-                  <span>
-                    {t("selfAssessment")}: <span className="font-score tabular-nums">{p.self_assessment.rating}/5</span>
-                    {p.self_assessment.text && <span className="text-muted">{` · ${p.self_assessment.text}`}</span>}
+              <p className="text-sm text-muted">
+                {p.self_assessment && (
+                  <span className="mr-3">
+                    {t("selfShort")} <span className="font-score text-foreground tabular-nums">{p.self_assessment.rating}/5</span>
                   </span>
-                ) : (
-                  <span className="text-muted">{t("noAssessmentLong")}</span>
                 )}
+                <span className="font-score tabular-nums">{t("notesOf", { n: noted(p), m: p.items.length })}</span>
               </p>
             </div>
             <ol>
@@ -137,7 +161,7 @@ function Scene({
   const t = useTranslations("feed");
   const [editing, setEditing] = useState(false);
   return (
-    <li className="border-b border-border/70 py-1.5 text-sm">
+    <li className="group border-b border-border/70 py-1.5 text-sm">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         {onPlay ? (
           <Button variant="quiet" size="sm" className="font-score tabular-nums" aria-label={t("play", { what: label, time })} onClick={onPlay}>
@@ -148,13 +172,14 @@ function Scene({
           <span className="px-2 font-score tabular-nums">{time}</span>
         )}
         <span className="flex min-w-0 flex-1 items-center gap-2">
-          <span aria-hidden className={cn("size-2 shrink-0 rounded-full", positive ? "bg-ok" : "bg-foreground/40")} />
+          {/* filled: positive, ring: to learn from (not colour alone) */}
+          <span aria-hidden className={cn("size-2 shrink-0 rounded-full", positive ? "bg-foreground" : "ring-[1.5px] ring-inset ring-foreground")} />
           <span>{label}</span>
           <span className="sr-only">{positive ? t("positive") : t("toLearn")}</span>
           {seen && <span className="text-xs text-muted">{t("seen")}</span>}
         </span>
         {!editing && (
-          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+          <Button variant="ghost" size="sm" className={cn(!note && "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100")} onClick={() => setEditing(true)}>
             {note ? t("editNote") : t("addNote")}
           </Button>
         )}

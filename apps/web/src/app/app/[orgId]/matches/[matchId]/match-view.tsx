@@ -98,6 +98,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }, [orgId, initial.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [view, setView] = useState<View>("video");
+  const [askPane, setAskPane] = useState<{ pane: "feedback" } | null>(null);
   const [sub, setSub] = useState<Sub>("overview");
   const player = useRef<PlayerHandle | null>(null);
   // deep links (?t=ms), e.g. from a play drawn on a video moment
@@ -391,7 +392,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       <div hidden={view !== "video"} className="space-y-6">
         {main ? (
-          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} />
+          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} />
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
@@ -484,8 +485,18 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       {view === "scenes" && (
         <div className="animate-fade space-y-8">
           {/* the coach's job here first: feedback per player; then the reels to share */}
-          {staff && <TeamFeedView orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} kickoff={match.kickoff_ms} periodS={match.period_s} />}
           <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />
+          {staff && main && (
+            // feedback on the players' scenes happens beside the player in the video tab
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-foreground/15 pt-3 text-sm">
+              <span className="font-semibold">{t("feed.overview")}</span>
+              <span className="text-muted">{t("feed.feedbackHere")}</span>
+              <Button size="sm" variant="secondary" onClick={() => (setView("video"), setAskPane({ pane: "feedback" }))} data-testid="open-feedback">
+                {t("feed.feedbackLink")}
+              </Button>
+            </div>
+          )}
+          {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
           {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
         </div>
       )}
