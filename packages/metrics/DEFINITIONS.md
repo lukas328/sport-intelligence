@@ -6,6 +6,7 @@ normalised so the attacked goal is at x = 40 (`packages/court`).
 
 | Metric | Definition |
 |---|---|
+| Goals (one source each) | With an imported official report (`source = official_report`) its goals are the match's goals: a goal of another source on the same side within 20 s of match clock of an official goal is that goal (nearest pairs, one per source and official goal) and does not count again; the official goal takes over its position, zones and scorer. Automatic goals (heuristic, model, overlay, confirmed candidate) without an official counterpart count only with `attributes.review = confirmed`. Same rules as `official_report.apply` at import time (`stats.one_source_per_goal`). |
 | Shots | Shots with outcome goal, save, miss or post. **Blocked shots are excluded** and reported separately (`shots_blocked`). |
 | Shooting % | goals / shots (as above). |
 | Saves (team) | Opponent shots with outcome `save`. |
@@ -14,14 +15,15 @@ normalised so the attacked goal is at x = 40 (`packages/court`).
 | Turnover rate | turnovers / possessions. |
 | Turnovers by type | bad_pass, catch_error, steps, double_dribble, offensive_foul, line_violation, passive_play, other. |
 | 7 m | `seven_m_awarded` from events of that type; 7 m shots and goals from shots with `shot_type = penalty`. |
+| Shot zones | `zones.json` (version 2) via `zone_of`: 7 m, fast break, **empty goal** (`shot_type = empty_net`, any distance; also for rows stored before the split), else from the position, **long range** beyond 15 m. Up to metrics 0.2 empty-goal shots were part of long range ("Fernwurf / leeres Tor"). |
 | Fast break goals | Goals with zone `fast_break` (shot within 6 s after gaining possession, `zones.json`). |
 | Situation | From active 2-minute suspensions (and red cards, counted as 2 minutes): `equal`, `powerplay` (more players), `shorthanded`. Efficiency per situation = goals / shots. 7 against 6 (empty net) is tagged on events (`attributes.empty_net`). |
 | Score timeline | Score after every goal by match clock. |
 | Best run | Longest series of goals by one team without a goal of the other team (BRIEF "Tor-Läufe"). |
 | Longest own drought | Longest match-clock period without an own goal, from throw-off or the previous own goal. |
-| xG | Sum of expected goals over non-blocked shots. v1 is a logistic prior (`xg.py`, version `prior-1`): distance to goal, angle, shot type; 7 m fixed at 0.75. **An estimate**, labelled so in the UI, refitted on own data later. |
+| xG | Sum of expected goals over non-blocked shots **with the inputs known** (a position; 7 m always). Shots without a position (official report, overlay goals) have no xG (`expected_goal` returns None). `xg_shots` = shots with xG, `xg_coverage` = xg_shots / shots (null without shots): show xG only with enough coverage. v1 is a logistic prior (`xg.py`, version `prior-1`): distance to goal, angle, shot type; 7 m fixed at 0.75. **An estimate**, labelled so in the UI, refitted on own data later. |
 | Player rows | Per player (roster id) or jersey number for opponents: goals, shots, misses, posts, saved, blocked, turnovers by type, suspensions, assists, 7 m, xG; goalkeeper saves via `attributes.goalkeeper_id`. |
-| Goalkeepers | Per keeper (`attributes.goalkeeper_id`, else `goalkeeper_number`, else "unknown"): shots on target faced (goal + save), saves, save %, by goal zone, by shot zone, 7 m. **xG against** = sum of xG of those shots; **GSAx** (goals saved above expected) = xG against minus goals against. Misses and posts are not on target and are left out. |
+| Goalkeepers | Per keeper (`attributes.goalkeeper_id`, else `goalkeeper_number`, else "unknown"): shots on target faced (goal + save), saves, save %, by goal zone, by shot zone, 7 m. **xG against** = sum of xG of those shots; **GSAx** (goals saved above expected) = xG against minus goals against, both over the shots with xG (`xg_coverage` = those / faced). Misses and posts are not on target and are left out. |
 | Plus-minus | Needs on-court intervals (tracking identity); not yet computed. |
 
 ## Physical (from tracking, estimates)

@@ -1,0 +1,297 @@
+{
+ "game": [
+  {
+   "homeTeamName": "HSG Leimental",
+   "awayTeamName": "HC Arbon",
+   "homeTeamScore": 25,
+   "awayTeamScore": 28,
+   "homeTeamScoreInterval": 12,
+   "awayTeamScoreInterval": 19,
+   "gameDateTime": "2024-09-21T18:00:00",
+   "leagueName": "Frauen SPL2"
+  }
+ ],
+ "gameLog": [
+  {
+   "actionText": "Wurf Parade",
+   "homeTeamActionLCID": "bParade",
+   "awayTeamActionLCID": "bFeldParade",
+   "homeTeamPlayerStaffName": "EXEMPEL Aida",
+   "homeTeamPlayerStaffNrDesc": "1",
+   "awayTeamPlayerStaffName": "MODELL Ilaria",
+   "awayTeamPlayerStaffNrDesc": "6",
+   "result": "0:0",
+   "timeInt": 42,
+   "timeString": "00:42"
+  },
+  {
+   "actionText": "Techn. Fehler",
+   "homeTeamActionLCID": "bTF",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "BEISPIEL Sara",
+   "homeTeamPlayerStaffNrDesc": "9",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "0:0",
+   "timeInt": 57,
+   "timeString": "00:57"
+  },
+  {
+   "actionText": "Techn. Fehler",
+   "homeTeamActionLCID": "",
+   "awayTeamActionLCID": "bTF",
+   "homeTeamPlayerStaffName": "",
+   "homeTeamPlayerStaffNrDesc": "",
+   "awayTeamPlayerStaffName": "ÖRNEK Zerin",
+   "awayTeamPlayerStaffNrDesc": "5",
+   "result": "0:0",
+   "timeInt": 68,
+   "timeString": "01:08"
+  },
+  {
+   "actionText": "Tor",
+   "homeTeamActionLCID": "bFeldTor",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "PROBSTER Seraina",
+   "homeTeamPlayerStaffNrDesc": "32",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "1:0",
+   "timeInt": 93,
+   "timeString": "01:33"
+  },
+  {
+   "actionText": "Wurf Parade",
+   "homeTeamActionLCID": "bParade",
+   "awayTeamActionLCID": "bFeldParade",
+   "homeTeamPlayerStaffName": "EXEMPEL Aida",
+   "homeTeamPlayerStaffNrDesc": "1",
+   "awayTeamPlayerStaffName": "ÖRNEK Zerin",
+   "awayTeamPlayerStaffNrDesc": "5",
+   "result": "1:0",
+   "timeInt": 126,
+   "timeString": "02:06"
+  },
+  {
+   "actionText": "Wurf Fehler",
+   "homeTeamActionLCID": "bFeldFehler",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "ZUFALL Lisa",
+   "homeTeamPlayerStaffNrDesc": "7",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "1:0",
+   "timeInt": 144,
+   "timeString": "02:24"
+  },
+  {
+   "actionText": "Tor",
+   "homeTeamActionLCID": "",
+   "awayTeamActionLCID": "bFeldTor",
+   "homeTeamPlayerStaffName": "",
+   "homeTeamPlayerStaffNrDesc": "",
+   "awayTeamPlayerStaffName": "MUSTERMANN Amy",
+   "awayTeamPlayerStaffNrDesc": "7",
+   "result": "1:1",
+   "timeInt": 179,
+   "timeString": "02:59"
+  },
+  {
+   "actionText": "Tor",
+   "homeTeamActionLCID": "bFeldTor",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "ZUFALL Lisa",
+   "homeTeamPlayerStaffNrDesc": "7",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "2:1",
+   "timeInt": 210,
+   "timeString": "03:30"
+  },
+  {
+   "actionText": "7m Tor",
+   "homeTeamActionLCID": "",
+   "awayTeamActionLCID": "b7mTor",
+   "homeTeamPlayerStaffName": "",
+   "homeTeamPlayerStaffNrDesc": "",
+   "awayTeamPlayerStaffName": "ÖRNEK Zerin",
+   "awayTeamPlayerStaffNrDesc": "5",
+   "result": "2:2",
+   "timeInt": 242,
+   "timeString": "04:02"
+  },
+  {
+   "actionText": "Wurf Parade",
+   "homeTeamActionLCID": "bFeldParade",
+   "awayTeamActionLCID": "bParade",
+   "homeTeamPlayerStaffName": "SAMPLER Denise",
+   "homeTeamPlayerStaffNrDesc": "33",
+   "awayTeamPlayerStaffName": "MÄRKLI Jenny",
+   "awayTeamPlayerStaffNrDesc": "23",
+   "result": "2:2",
+   "timeInt": 274,
+   "timeString": "04:34"
+  },
+  {
+   "actionText": "Tor",
+   "homeTeamActionLCID": "",
+   "awayTeamActionLCID": "bFeldTor",
+   "homeTeamPlayerStaffName": "",
+   "homeTeamPlayerStaffNrDesc": "",
+   "awayTeamPlayerStaffName": "DUMMLER Sophie",
+   "awayTeamPlayerStaffNrDesc": "11",
+   "result": "2:3",
+   "timeInt": 293,
+   "timeString": "04:53"
+  },
+  {
+   "actionText": "Team Time-Out",
+   "homeTeamActionLCID": "bTO",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "",
+   "homeTeamPlayerStaffNrDesc": "",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "4:8",
+   "timeInt": 761,
+   "timeString": "12:41"
+  },
+  {
+   "actionText": "Zeitstrafe",
+   "homeTeamActionLCID": "b2Min",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "MUSTERLI Olivia",
+   "homeTeamPlayerStaffNrDesc": "6",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "9:15",
+   "timeInt": 1505,
+   "timeString": "25:05"
+  },
+  {
+   "actionText": "Tor",
+   "homeTeamActionLCID": "bFeldTor",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "ZUFALL Lisa",
+   "homeTeamPlayerStaffNrDesc": "7",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "12:18",
+   "timeInt": 1728,
+   "timeString": "28:48"
+  },
+  {
+   "actionText": "Tor",
+   "homeTeamActionLCID": "",
+   "awayTeamActionLCID": "bFeldTor",
+   "homeTeamPlayerStaffName": "",
+   "homeTeamPlayerStaffNrDesc": "",
+   "awayTeamPlayerStaffName": "FIKTÉLY Beatrix",
+   "awayTeamPlayerStaffNrDesc": "56",
+   "result": "12:19",
+   "timeInt": 1739,
+   "timeString": "28:59"
+  },
+  {
+   "actionText": "Techn. Fehler",
+   "homeTeamActionLCID": "bTF",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "SAMPLER Denise",
+   "homeTeamPlayerStaffNrDesc": "33",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "12:19",
+   "timeInt": 1776,
+   "timeString": "29:36"
+  },
+  {
+   "actionText": "Wurf Parade",
+   "homeTeamActionLCID": "bParade",
+   "awayTeamActionLCID": "bFeldParade",
+   "homeTeamPlayerStaffName": "EXEMPEL Aida",
+   "homeTeamPlayerStaffNrDesc": "1",
+   "awayTeamPlayerStaffName": "ÖRNEK Zerin",
+   "awayTeamPlayerStaffNrDesc": "5",
+   "result": "12:19",
+   "timeInt": 1781,
+   "timeString": "29:41"
+  },
+  {
+   "actionText": "Wurf Fehler",
+   "homeTeamActionLCID": "bFeldFehler",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "ZUFALL Lisa",
+   "homeTeamPlayerStaffNrDesc": "7",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "12:19",
+   "timeInt": 1798,
+   "timeString": "29:58"
+  },
+  {
+   "actionText": "Tor",
+   "homeTeamActionLCID": "bFeldTor",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "SAMPLER Denise",
+   "homeTeamPlayerStaffNrDesc": "33",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "13:19",
+   "timeInt": 1846,
+   "timeString": "30:46"
+  },
+  {
+   "actionText": "Techn. Fehler",
+   "homeTeamActionLCID": "",
+   "awayTeamActionLCID": "bTF",
+   "homeTeamPlayerStaffName": "",
+   "homeTeamPlayerStaffNrDesc": "",
+   "awayTeamPlayerStaffName": "MODELL Ilaria",
+   "awayTeamPlayerStaffNrDesc": "6",
+   "result": "13:19",
+   "timeInt": 1881,
+   "timeString": "31:21"
+  },
+  {
+   "actionText": "Techn. Fehler",
+   "homeTeamActionLCID": "bTF",
+   "awayTeamActionLCID": "",
+   "homeTeamPlayerStaffName": "TESTER Ronja",
+   "homeTeamPlayerStaffNrDesc": "40",
+   "awayTeamPlayerStaffName": "",
+   "awayTeamPlayerStaffNrDesc": "",
+   "result": "13:19",
+   "timeInt": 1886,
+   "timeString": "31:26"
+  },
+  {
+   "actionText": "Wurf Parade",
+   "homeTeamActionLCID": "bParade",
+   "awayTeamActionLCID": "bFeldParade",
+   "homeTeamPlayerStaffName": "TESTER Ronja",
+   "homeTeamPlayerStaffNrDesc": "40",
+   "awayTeamPlayerStaffName": "FIKTÉLY Beatrix",
+   "awayTeamPlayerStaffNrDesc": "56",
+   "result": "13:19",
+   "timeInt": 1894,
+   "timeString": "31:34"
+  }
+ ],
+ "gamePlayerStats": [
+  {
+   "dressNr": 40,
+   "isHome": 1,
+   "function": "goalkeeper"
+  },
+  {
+   "dressNr": 1,
+   "isHome": 1,
+   "function": "goalkeeper"
+  },
+  {
+   "dressNr": 23,
+   "isHome": 0,
+   "function": "goalkeeper"
+  }
+ ]
+}

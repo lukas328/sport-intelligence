@@ -59,9 +59,9 @@ test("match: create, upload with pause and resume, processing, player, comment, 
 
   // play: the HLS stream loads and time advances
   const video = page.getByTestId("video");
-  await page.getByRole("button", { name: "Abspielen" }).click();
+  await page.getByTestId("player").getByRole("button", { name: "Abspielen" }).click();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime), { timeout: 20_000 }).toBeGreaterThan(1);
-  await page.getByRole("button", { name: "Pause" }).click();
+  await page.getByTestId("player").getByRole("button", { name: "Pause" }).click();
 
   // keyboard: frame step and 5 s jumps
   await page.getByTestId("player").focus();
@@ -80,13 +80,15 @@ test("match: create, upload with pause and resume, processing, player, comment, 
     await video.evaluate((v: HTMLVideoElement, t: number) => (v.currentTime = t), s);
     await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => Math.round(v.currentTime))).toBe(s);
   };
+  // the clip form (the event list may hold buttons with the same time)
+  const clipForm = page.getByRole("form", { name: "Clip speichern" });
   await seekTo(2);
-  await page.getByRole("button", { name: "Start setzen (I)" }).click();
-  await expect(page.getByRole("button", { name: "0:02" })).toBeVisible();
+  await clipForm.getByRole("button", { name: "Start setzen (I)" }).click();
+  await expect(clipForm.getByRole("button", { name: "0:02" })).toBeVisible();
   await seekTo(6);
   await page.getByTestId("player").focus();
   await page.keyboard.press("o"); // keyboard shortcut for the end mark
-  await expect(page.getByRole("button", { name: "0:06" })).toBeVisible();
+  await expect(clipForm.getByRole("button", { name: "0:06" })).toBeVisible();
   await page.getByLabel("Titel").fill("Gegenstoss");
   await page.getByRole("button", { name: "Clip speichern" }).click();
   await expect(page.getByTestId("clips")).toContainText("Gegenstoss");

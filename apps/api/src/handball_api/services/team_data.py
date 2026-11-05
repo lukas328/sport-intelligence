@@ -16,10 +16,10 @@ from handball_api.models import (
     Player,
     RosterEntry,
     Team,
-    VideoAsset,
 )
 from handball_api.services.context import Ctx
 from handball_api.services.events import _to_metric
+from handball_api.services.matches import duration_ms, in_video, timeline_videos
 from handball_metrics.model import Event as MEvent
 from handball_metrics.query import MatchInfo, Row
 
@@ -75,11 +75,8 @@ async def load(ctx: Ctx, team: Team) -> TeamData:
         for p in (await ctx.db.scalars(select(Play).where(Play.team_id == team.id))).all()
     }
     formations: dict[uuid.UUID, tuple[tuple[int, int, str], ...]] = {}
-    for v in (
-        await ctx.db.scalars(
-            select(VideoAsset).where(VideoAsset.match_id.in_(ids), VideoAsset.role == "main")
-        )
-    ).all():
+    timeline = await timeline_videos(ctx, ids, ready=False)
+    for v in timeline.values():
         segs = [
             (int(s["start_ms"]), int(s["end_ms"]), str(s["formation"]))
             for s in (v.analysis or {}).get("formations") or []
@@ -118,7 +115,10 @@ async def load(ctx: Ctx, team: Team) -> TeamData:
             attrs = {**me.attributes, "position": positions.get(e.player_id)}
             me = _anonymous(me, num, attrs)
         rows.append(Row(me, infos[e.match_id]))
-        video[str(e.id)] = e.t_ms
+        # a clip only for a moment the video shows (official report events of a clip from
+        # mid-half lie before or after it)
+        length = duration_ms(timeline.get(e.match_id))
+        video[str(e.id)] = e.t_ms if in_video(e.t_ms, length) else None
     return TeamData(team, list(infos.values()), rows, video, plays)
 
 

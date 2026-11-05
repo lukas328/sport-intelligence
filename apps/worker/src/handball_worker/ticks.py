@@ -1,6 +1,7 @@
 """Periodic work driven by the worker: an hourly tick that re-schedules itself (RQ scheduler).
 
-Today: preparation reports 72 h before matches (4.6) and invoice dunning (4.10). The API
+Today: preparation reports 72 h before matches (4.6), invoice dunning (4.10) and the sync with
+the official league data (docs/plans/federation-onboarding.md). The API
 decides what is due; the worker only knocks.
 """
 
@@ -41,6 +42,10 @@ def scouting_tick(client: httpx.Client | None = None, reschedule: bool = True) -
         ops = http.post(f"{base}/internal/ops/tick", headers=headers)
         ops.raise_for_status()
         log.info("ops_tick", retention=ops.json().get("retention"))
+        # official league data: each linked team once a day, reports after the games
+        off = http.post(f"{base}/internal/official/sync", headers=headers)
+        off.raise_for_status()
+        log.info("official_sync_tick", **off.json())
     except httpx.HTTPError as exc:
         log.warning("scouting_tick_failed", error=str(exc))
     finally:

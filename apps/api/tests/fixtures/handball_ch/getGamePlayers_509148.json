@@ -1,0 +1,346 @@
+{
+ "operation": "getGamePlayers",
+ "variables": {
+  "gameId": 509148,
+  "isLive": false
+ },
+ "response": {
+  "data": {
+   "gamePlayerStats": [
+    {
+     "playerId": 279226,
+     "teamId": 40742,
+     "dressNr": 2,
+     "playerName": "MUSTER Cedric",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 290127,
+     "teamId": 40742,
+     "dressNr": 14,
+     "playerName": "MUSTER Simon",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 9
+    },
+    {
+     "playerId": 291783,
+     "teamId": 41503,
+     "dressNr": 21,
+     "playerName": "PROBST Reto",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 1
+    },
+    {
+     "playerId": 294033,
+     "teamId": 41503,
+     "dressNr": 15,
+     "playerName": "PROBST Urs",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 297454,
+     "teamId": 40742,
+     "dressNr": 1,
+     "playerName": "MUSTER Elias",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 297455,
+     "teamId": 40742,
+     "dressNr": 18,
+     "playerName": "MUSTER Remo",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 1
+    },
+    {
+     "playerId": 297615,
+     "teamId": 40742,
+     "dressNr": 7,
+     "playerName": "MUSTER Levin",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 10
+    },
+    {
+     "playerId": 298519,
+     "teamId": 41503,
+     "dressNr": 1,
+     "playerName": "PROBST Beat",
+     "isHome": 0,
+     "function": "goalkeeper",
+     "totalScore": 0
+    },
+    {
+     "playerId": 300956,
+     "teamId": 40742,
+     "dressNr": 52,
+     "playerName": "MUSTER Nico",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 4
+    },
+    {
+     "playerId": 302124,
+     "teamId": 40742,
+     "dressNr": 6,
+     "playerName": "MUSTER Jan",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 302140,
+     "teamId": 40742,
+     "dressNr": 50,
+     "playerName": "MUSTER Matteo",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 1
+    },
+    {
+     "playerId": 302319,
+     "teamId": 41503,
+     "dressNr": 9,
+     "playerName": "PROBST Kevin",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 302615,
+     "teamId": 41503,
+     "dressNr": 10,
+     "playerName": "PROBST Sandro",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 3
+    },
+    {
+     "playerId": 304075,
+     "teamId": 41503,
+     "dressNr": 64,
+     "playerName": "TESTMANN Luca",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 3
+    },
+    {
+     "playerId": 305451,
+     "teamId": 41503,
+     "dressNr": 6,
+     "playerName": "TESTMANN Noah",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 308514,
+     "teamId": 40742,
+     "dressNr": 19,
+     "playerName": "MUSTER Jonas",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 310185,
+     "teamId": 41503,
+     "dressNr": 12,
+     "playerName": "TESTMANN Leon",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 312228,
+     "teamId": 40742,
+     "dressNr": 11,
+     "playerName": "MUSTER Lars",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 312230,
+     "teamId": 40742,
+     "dressNr": 27,
+     "playerName": "MUSTER Andrin",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 2
+    },
+    {
+     "playerId": 313166,
+     "teamId": 41503,
+     "dressNr": 25,
+     "playerName": "TESTMANN Elias",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 4
+    },
+    {
+     "playerId": 313270,
+     "teamId": 41503,
+     "dressNr": 22,
+     "playerName": "TESTMANN Jonas",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 317417,
+     "teamId": 41503,
+     "dressNr": 3,
+     "playerName": "TESTMANN Nico",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 5
+    },
+    {
+     "playerId": 317425,
+     "teamId": 41503,
+     "dressNr": 27,
+     "playerName": "TESTMANN Tim",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 5
+    },
+    {
+     "playerId": 321695,
+     "teamId": 41503,
+     "dressNr": 23,
+     "playerName": "TESTMANN Jan",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 2
+    },
+    {
+     "playerId": 321697,
+     "teamId": 41503,
+     "dressNr": 91,
+     "playerName": "TESTMANN Fabio",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 3
+    },
+    {
+     "playerId": 322246,
+     "teamId": 40742,
+     "dressNr": 75,
+     "playerName": "MUSTER Dario",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 328729,
+     "teamId": 41503,
+     "dressNr": 8,
+     "playerName": "TESTMANN Simon",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 2
+    },
+    {
+     "playerId": 329985,
+     "teamId": 40742,
+     "dressNr": 55,
+     "playerName": "MUSTER Luca",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 339405,
+     "teamId": 40742,
+     "dressNr": 15,
+     "playerName": "MUSTER Silvan",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 1
+    },
+    {
+     "playerId": 360142,
+     "teamId": 40742,
+     "dressNr": 16,
+     "playerName": "MUSTER Leon",
+     "isHome": 1,
+     "function": "goalkeeper",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000001,
+     "teamId": 40742,
+     "dressNr": 1,
+     "playerName": "BEISPIEL Simon",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000002,
+     "teamId": 40742,
+     "dressNr": 2,
+     "playerName": "BEISPIEL Levin",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000003,
+     "teamId": 40742,
+     "dressNr": 3,
+     "playerName": "BEISPIEL Matteo",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000004,
+     "teamId": 40742,
+     "dressNr": 4,
+     "playerName": "BEISPIEL Lars",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000001,
+     "teamId": 41503,
+     "dressNr": 1,
+     "playerName": "BEISPIEL Simon",
+     "isHome": 0,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000002,
+     "teamId": 41503,
+     "dressNr": 2,
+     "playerName": "BEISPIEL Levin",
+     "isHome": 0,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000003,
+     "teamId": 41503,
+     "dressNr": 3,
+     "playerName": "BEISPIEL Matteo",
+     "isHome": 0,
+     "function": "teamofficial",
+     "totalScore": 0
+    }
+   ]
+  }
+ }
+}

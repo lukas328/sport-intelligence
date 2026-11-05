@@ -54,6 +54,7 @@ SOURCES = (
     "goal_cam",
     "user_correction",
     "paper_report",
+    "official_report",
 )
 
 

@@ -8,8 +8,13 @@ export type GoalZone = (typeof GOAL_ZONES)[number];
 export const ZONE_LABELS: Record<string, string> = spec.labels["de-CH"];
 
 /** Zone of a shot from its normalised position (attacked goal at x = 40). Mirrors zones.py. */
-export function shotZone(x: number, y: number, opts: { penalty?: boolean; fastBreak?: boolean } = {}): string {
+export function shotZone(
+  x: number,
+  y: number,
+  opts: { penalty?: boolean; fastBreak?: boolean; emptyGoal?: boolean } = {},
+): string {
   if (opts.penalty) return "penalty";
+  if (opts.emptyGoal) return "empty_goal";
   if (opts.fastBreak) return "fast_break";
   const d = distanceToAttackedGoal([x, y]);
   if (d > spec.long_range_m) return "long_range";

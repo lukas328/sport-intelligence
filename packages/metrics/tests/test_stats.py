@@ -12,6 +12,12 @@ def shot(i: int, side: Side, outcome: str, clock: float, **kw: object) -> Event:
     return Event(id=f"s{i}", type=EventType.SHOT, side=side, outcome=outcome, clock_s=clock, **kw)  # type: ignore[arg-type]
 
 
+def xg(x: float, y: float, shot_type: str | None = None) -> float:
+    v = expected_goal(x, y, shot_type)
+    assert v is not None
+    return v
+
+
 def test_shooting_and_save_percentages() -> None:
     ev = [
         shot(1, OWN, "goal", 60, player_id="a", x=34.5, y=10.0),
@@ -108,15 +114,19 @@ def test_zone_and_quality() -> None:
     assert zone_of(Event(id="x", type=EventType.SHOT, side=OWN, shot_type="penalty")) == "penalty"
     assert zone_of(Event(id="x", type=EventType.SHOT, side=OWN)) is None
     s = compute_match_stats([shot(1, OWN, "goal", 1, confidence=0.4, source="heuristic")])
-    assert s["quality"] == {"events": 1, "low_confidence": 1, "sources": {"heuristic": 1}}
+    assert s["quality"] == {
+        "events": 1,
+        "attempts_known": False,
+        "low_confidence": 1,
+        "sources": {"heuristic": 1},
+    }
 
 
 def test_xg_prior() -> None:
     assert expected_goal(33, 10, "penalty") == 0.75
-    assert expected_goal(None, None) == 0.5
-    assert expected_goal(34.5, 10) > expected_goal(29, 10) > expected_goal(20, 10)
-    assert expected_goal(30, 12, "fast_break") > expected_goal(30, 12)
-    assert 0.3 < expected_goal(38, 18.5) < 0.55
+    assert xg(34.5, 10) > xg(29, 10) > xg(20, 10)
+    assert xg(30, 12, "fast_break") > xg(30, 12)
+    assert 0.3 < xg(38, 18.5) < 0.55
 
 
 def test_events_without_clock() -> None:
@@ -147,9 +157,76 @@ def test_goalkeepers() -> None:
     assert k["seven_m"] == {"faced": 1, "saves": 1}
     assert k["goal_zones"]["TL"] == {"faced": 2, "saves": 1}
     assert k["shot_zones"]["penalty"] == {"faced": 1, "saves": 1}
-    xg = 2 * expected_goal(31.0, 10.0) + 0.75
-    assert k["xg_against"] == pytest.approx(xg, abs=0.01)
-    assert k["gsax"] == pytest.approx(xg - 1, abs=0.01)
+    xg_against = 2 * xg(31.0, 10.0) + 0.75
+    assert k["xg_against"] == pytest.approx(xg_against, abs=0.01)
+    assert k["gsax"] == pytest.approx(xg_against - 1, abs=0.01)
     assert gk["own:n:12"]["number"] == 12
     assert gk["own:unknown"]["goals_against"] == 1
     assert gk["opponent:n:1"]["side"] == "opponent"
+
+
+def test_goals_only_have_no_shooting_ratios() -> None:
+    """Goals read from a score overlay: no misses or saves recorded, so no shooting or save
+    percentage (it would read 100 % and 0 %), but goals per attack work."""
+    ev = [shot(i, OWN if i % 2 else OPP, "goal", 60 * i, source="scoreboard_ocr") for i in range(5)]
+    st = compute_match_stats(ev, {"own": 4, "opponent": 5})
+    assert st["own"]["goals"] == 2 and st["opponent"]["goals"] == 3
+    assert st["own"]["shooting_pct"] is None and st["opponent"]["save_pct"] is None
+    assert st["own"]["attack_efficiency"] == 0.5
+
+
+def test_xg_only_covers_shots_with_inputs() -> None:
+    """Goals without a shot position (official report, score overlay) have no xG: they stay out
+    of the sum, and the coverage says how many shots the xG figure covers."""
+    ev = [
+        shot(1, OWN, "goal", 60, x=34.5, y=10.0),
+        shot(2, OWN, "save", 120, x=29.0, y=10.0),
+        shot(3, OWN, "goal", 180, shot_type="penalty"),
+        shot(4, OWN, "goal", 240, source="official_report"),
+        shot(5, OWN, "miss", 300),
+        shot(6, OWN, "blocked", 320, x=29.0, y=10.0),  # not a shot on target
+    ]
+    own = compute_match_stats(ev)["own"]
+    assert own["xg"] == pytest.approx(xg(34.5, 10.0) + xg(29.0, 10.0) + 0.75, abs=0.01)
+    assert own["xg_shots"] == 3
+    assert own["xg_coverage"] == pytest.approx(3 / 5, abs=1e-4)
+    assert expected_goal(None, None) is None
+    assert compute_match_stats([])["own"]["xg_coverage"] is None
+
+
+def test_goal_counted_once_from_report_and_tagging() -> None:
+    """A goal in the official report and also tagged (or read from the overlay) is one goal:
+    the official goal counts and takes over the tagged shot position."""
+    ev = [
+        shot(1, OWN, "goal", 300, source="official_report", number=7),
+        shot(2, OWN, "goal", 600, source="official_report", number=9),
+        shot(3, OPP, "goal", 900, source="official_report"),
+        # tagged by the coach after the import, a few seconds off the minute of the report
+        shot(4, OWN, "goal", 305, source="user_correction", x=34.5, y=10.0, player_id="p7"),
+        shot(5, OWN, "goal", 590, source="scoreboard_ocr"),
+        # an overlay goal the report does not have: a misreading unless the coach confirmed it
+        shot(6, OPP, "goal", 1500, source="scoreboard_ocr"),
+        shot(7, OPP, "goal", 1800, source="scoreboard_ocr", attributes={"review": "confirmed"}),
+        # a goal tagged far from every official goal: a person entered it, it counts
+        shot(8, OWN, "goal", 2400, source="user_correction"),
+        shot(9, OWN, "miss", 700, source="user_correction", x=29.0, y=10.0),
+    ]
+    s = compute_match_stats(ev)
+    assert s["own"]["goals"] == 3
+    assert s["opponent"]["goals"] == 2
+    assert s["timeline"]["final"] == {"own": 3, "opp": 2}
+    assert s["own"]["zones"]["circle_centre"] == {"shots": 1, "goals": 1}  # position taken over
+    assert s["players"]["p:p7"]["goals"] == 1
+    assert "#7" not in str(s["players"].keys())
+
+
+def test_long_range_and_empty_goal_are_separate_zones() -> None:
+    far = {"x": 20.0, "y": 10.0}
+    assert zone_of(Event(id="a", type=EventType.SHOT, side=OWN, **far)) == "long_range"  # type: ignore[arg-type]
+    empty = Event(id="b", type=EventType.SHOT, side=OWN, shot_type="empty_net", **far)  # type: ignore[arg-type]
+    assert zone_of(empty) == "empty_goal"
+    # stored before the split: an empty-goal shot kept the merged zone
+    old = Event(
+        id="c", type=EventType.SHOT, side=OWN, shot_type="empty_net", shot_zone="long_range"
+    )
+    assert zone_of(old) == "empty_goal"

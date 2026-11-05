@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import pytest
 
 from handball_api.core.text import numbers_ok
@@ -138,3 +140,47 @@ async def test_youth_season_has_no_ranking(make_api: Callable[[], Api]) -> None:
     ).json()
     assert season["ranked"] is False
     assert [p["player_id"] for p in season["players"]] == [a["player_id"], b["player_id"]]
+
+
+async def test_season_counts_every_played_match_and_each_goal_once(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    # played, the result is known, nothing tagged
+    played = (await new_match(api, ids, kickoff_at="2026-09-05T18:00:00+02:00"))["id"]
+    r = await api.patch(
+        f"/v1/orgs/{org}/matches/{played}", json={"score_own": 27, "score_opponent": 25}
+    )
+    assert r.status_code == 200, r.text
+    # tagged by the coach and the same three goals in the imported official report
+    both = await tagged_match(api, ids, 3, 1, kickoff_at="2026-09-12T18:00:00+02:00", is_home=False)
+    url = f"/v1/orgs/{org}/matches/{both}/events"
+    for clock in (8, 68, 128):
+        body = {"type": "shot", "side": "own", "outcome": "goal", "clock_s": clock}
+        assert (await api.post(url, json=body)).status_code == 201
+    await owner_conn.execute(
+        "UPDATE events SET source = 'official_report' WHERE match_id = $1 AND x IS NULL",
+        uuid.UUID(both),
+    )
+    await new_match(api, ids)  # not played yet: no result, no events
+
+    season = (
+        await api.get(f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/stats")
+    ).json()
+    rows = {m["match_id"]: m for m in season["matches"]}
+    assert season["totals"]["matches"] == 2
+    assert rows[played]["goals"] == 27 and rows[played]["tagged"] is False
+    assert rows[both]["goals"] == 3 and rows[both]["score_opponent"] == 6
+    assert season["totals"]["goals"] == 30
+    # shooting and xG only from the tagged match; the official goals took over the positions
+    assert season["totals"]["tagged_matches"] == 1
+    assert season["totals"]["shooting_pct"] == 0.75
+    assert season["totals"]["xg_coverage"] == 1.0
+    assert rows[both]["xg_coverage"] == 1.0
+
+    opp_id = (await api.get(f"/v1/orgs/{org}/matches/{both}")).json()["opponent"]["id"]
+    prof = (await api.get(f"/v1/orgs/{org}/opponents/{opp_id}/profile")).json()
+    home = {m["match_id"]: m["is_home"] for m in prof["matches"]}
+    assert home[both] is False and home[played] is True

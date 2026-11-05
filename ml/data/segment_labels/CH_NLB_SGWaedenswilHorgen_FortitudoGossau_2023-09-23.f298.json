@@ -1,0 +1,490 @@
+{
+ "name": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+ "official": "ml/data/official/CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298.json",
+ "game_id": 453441,
+ "result": "27:22",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 60.0,
+  "duration_s": 6000.016667,
+  "batch": "batch_03"
+ },
+ "segments": [
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0.mp4",
+   "start_s": 900.0,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    566.0,
+    745.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "start_s": 1800.01,
+   "clock_source": "overlay",
+   "readings": 87,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    1299.0,
+    1476.0
+   ],
+   "entries": 7,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s2.mp4",
+   "start_s": 3000.01,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s3.mp4",
+   "start_s": 4200.01,
+   "clock_source": "overlay",
+   "readings": 85,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2536.0,
+    2684.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "start_s": 5100.01,
+   "clock_source": "overlay",
+   "readings": 87,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    3060.0,
+    3239.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "shot_missed": 3,
+  "penalty_goal": 2,
+  "shot_saved": 5,
+  "turnover": 4,
+  "goal": 6
+ },
+ "entries": [
+  {
+   "match_s": 635,
+   "time": "10:35",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 55,
+   "name": "BUOB Björn",
+   "score": [
+    3,
+    3
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 69000,
+   "video_ms": 969000,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 649,
+   "time": "10:49",
+   "action": "7m Tor",
+   "kind": "penalty_goal",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    4,
+    3
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 83000,
+   "video_ms": 983000,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 704,
+   "time": "11:44",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 77,
+   "name": "LOCHER Simon",
+   "score": [
+    4,
+    3
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "STEINER Jonas"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 138000,
+   "video_ms": 1038000,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 712,
+   "time": "11:52",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 23,
+   "name": "WÜNSCH Tim",
+   "score": [
+    4,
+    3
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 146000,
+   "video_ms": 1046000,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 743,
+   "time": "12:23",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 69,
+   "name": "BRÜLISAUER Jan",
+   "score": [
+    4,
+    3
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 177000,
+   "video_ms": 1077000,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1309,
+   "time": "21:49",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 6,
+   "name": "GANTNER Simon",
+   "score": [
+    10,
+    6
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 10000,
+   "video_ms": 1810010,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1356,
+   "time": "22:36",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "away",
+   "number": 71,
+   "name": "PINTARELLI Cedric",
+   "score": [
+    10,
+    6
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 57000,
+   "video_ms": 1857010,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1364,
+   "time": "22:44",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    10,
+    6
+   ],
+   "goalkeeper": {
+    "number": 1,
+    "name": "HOTTINGER Noé"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 65000,
+   "video_ms": 1865010,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1374,
+   "time": "22:54",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 93,
+   "name": "RUTZ Jerome",
+   "score": [
+    10,
+    7
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 75000,
+   "video_ms": 1875010,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1420,
+   "time": "23:40",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 18,
+   "name": "SCHULER Yanick",
+   "score": [
+    11,
+    7
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 121000,
+   "video_ms": 1921010,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1454,
+   "time": "24:14",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 7,
+   "name": "INAUEN Noah",
+   "score": [
+    11,
+    8
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 155000,
+   "video_ms": 1955010,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1474,
+   "time": "24:34",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 8,
+   "name": "CLAVIEN Julien",
+   "score": [
+    12,
+    8
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 175000,
+   "video_ms": 1975010,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2542,
+   "time": "42:22",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 10,
+   "name": "BISCHOFBERGER Jan",
+   "score": [
+    19,
+    16
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 5750,
+   "video_ms": 4205760,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2567,
+   "time": "42:47",
+   "action": "7m Tor",
+   "kind": "penalty_goal",
+   "team": "home",
+   "number": 6,
+   "name": "GANTNER Simon",
+   "score": [
+    20,
+    16
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 60750,
+   "video_ms": 4260760,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2652,
+   "time": "44:12",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 15,
+   "name": "HARDER Yannick",
+   "score": [
+    20,
+    16
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 145750,
+   "video_ms": 4345760,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3082,
+   "time": "51:22",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 11,
+   "name": "SCHILLER Niklas",
+   "score": [
+    23,
+    20
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "STEINER Jonas"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 21250,
+   "video_ms": 5121260,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3109,
+   "time": "51:49",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 29,
+   "name": "WOLFER Nico",
+   "score": [
+    23,
+    20
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 48250,
+   "video_ms": 5148260,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3181,
+   "time": "53:01",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 15,
+   "name": "HARDER Yannick",
+   "score": [
+    23,
+    20
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "STEINER Jonas"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 120250,
+   "video_ms": 5220260,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3223,
+   "time": "53:43",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 51,
+   "name": "KARLEN Adrian",
+   "score": [
+    23,
+    20
+   ],
+   "goalkeeper": {
+    "number": 1,
+    "name": "HOTTINGER Noé"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 162250,
+   "video_ms": 5262260,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3236,
+   "time": "53:56",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 19,
+   "name": "BAMERT Simon",
+   "score": [
+    23,
+    21
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 175250,
+   "video_ms": 5275260,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  }
+ ]
+}

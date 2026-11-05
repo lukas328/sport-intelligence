@@ -388,6 +388,23 @@ export interface paths {
         patch: operations["update_me_v1_me_patch"];
         trace?: never;
     };
+    "/v1/me/access-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Access Requests */
+        get: operations["my_access_requests_v1_me_access_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me/delete": {
         parameters: {
             query?: never;
@@ -477,6 +494,40 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Join Requests */
+        get: operations["my_join_requests_v1_me_join_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/join-requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Withdraw Join Request */
+        delete: operations["withdraw_join_request_v1_me_join_requests__request_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -635,6 +686,47 @@ export interface paths {
         get: operations["signed_media_v1_media__video_id___token___path__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/official/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Teams
+         * @description Registered teams of the current season of clubs matching the name or town.
+         */
+        get: operations["search_teams_v1_official_teams_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/official/teams/{official_id}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim Team
+         * @description Take over a registered team: 201 claimed (club and team created or linked, prefilled),
+         *     202 access requested (the club or team is already in the app), 200 already a member.
+         */
+        post: operations["claim_team_v1_official_teams__official_id__claim_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -835,6 +927,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/ops/organizations/{org_id}/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Operator Verification */
+        post: operations["operator_verification_v1_ops_organizations__org_id__verification_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/ops/overview": {
         parameters: {
             query?: never;
@@ -923,6 +1032,57 @@ export interface paths {
         head?: never;
         /** Update Org */
         patch: operations["update_org_v1_orgs__org_id__patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/access-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Access Requests */
+        get: operations["list_access_requests_v1_orgs__org_id__access_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/access-requests/{request_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Access Request */
+        post: operations["approve_access_request_v1_orgs__org_id__access_requests__request_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/access-requests/{request_id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline Access Request */
+        post: operations["decline_access_request_v1_orgs__org_id__access_requests__request_id__decline_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/orgs/{org_id}/annotations/{annotation_id}": {
@@ -1724,6 +1884,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Goal Candidates
+         * @description Moments of the video that are probably goals (kind=shot: shots of any outcome; video
+         *     analysis, a fixed number per minute), with the coach's reviews, the shots already stored that
+         *     cover them and, for shots, the official report's suggestion.
+         */
+        get: operations["list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Review Goal Candidate
+         * @description Confirm a candidate (a shot of the given side and outcome; a report entry is pinned to
+         *     the video instead of a second event), reject it (kept as a hard negative for training) or
+         *     undo the review (null).
+         */
+        put: operations["review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
         parameters: {
             query?: never;
@@ -1856,6 +2060,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Official Report
+         * @description Official match report (handball.ch match centre, DHB press report, nuLiga game report of the
+         *     German associations on nuLiga and Austria, HLA report) as events: goals with scorer and shirt
+         *     number, 7-metres, suspensions, time-outs. A re-import replaces the previous
+         *     one; automatic goals from the video within 20 s are merged with the official goal.
+         */
+        post: operations["import_official_report_v1_orgs__org_id__matches__match_id__official_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/comparison": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Official Goal Comparison
+         * @description Official goals next to the goals the video analysis found (same side, at most 20 s of
+         *     match clock apart), and video goals without an official one, with the coach's checks.
+         */
+        get: operations["official_goal_comparison_v1_orgs__org_id__matches__match_id__official_report_comparison_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Review Official Goal
+         * @description Confirm or dismiss a row of the comparison (null undoes it).
+         */
+        put: operations["review_official_goal_v1_orgs__org_id__matches__match_id__official_report_review_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/parts": {
         parameters: {
             query?: never;
@@ -1889,6 +2157,26 @@ export interface paths {
          * @description Distance, speed bands, sprints and heatmap per player (estimated from video tracking).
          */
         get: operations["match_physical_v1_orgs__org_id__matches__match_id__physical_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/possessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Match Possessions
+         * @description Possession phases (estimated from video tracking or imported) with a summary per side.
+         */
+        get: operations["match_possessions_v1_orgs__org_id__matches__match_id__possessions_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1955,6 +2243,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/shot-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Shot Candidates
+         * @description The shot candidates (goal-candidates?kind=shot) with the official report's shots on the
+         *     video.
+         */
+        get: operations["list_shot_candidates_v1_orgs__org_id__matches__match_id__shot_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/stats": {
         parameters: {
             query?: never;
@@ -1962,7 +2271,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Match Stats */
+        /**
+         * Match Stats
+         * @description Match statistics (packages/metrics). Each goal counts once: with an imported official report,
+         *     a tagged or video goal of the same side within 20 s of an official goal is that goal.
+         *     `own`/`opponent`: `xg` covers only shots on target with a known position (and penalties),
+         *     `xg_shots` counts them and `xg_coverage` = xg_shots / shots (null without shots); players have
+         *     `xg_shots`, goalkeepers `xg_shots` and `xg_coverage`. Shot zones include `empty_goal`
+         *     (shots on the empty goal, from any distance) apart from `long_range` (over 15 m).
+         */
         get: operations["match_stats_v1_orgs__org_id__matches__match_id__stats_get"];
         put?: never;
         post?: never;
@@ -2379,7 +2696,8 @@ export interface paths {
         };
         /**
          * Opponent Profile
-         * @description Scouting profile from all tagged matches against this opponent.
+         * @description Scouting profile from all tagged matches against this opponent. `matches` rows carry
+         *     `is_home` (our home game); `totals` carry `xg_shots` and `xg_coverage` like the season stats.
          */
         get: operations["opponent_profile_v1_orgs__org_id__opponents__opponent_id__profile_get"];
         put?: never;
@@ -3119,6 +3437,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Join Requests */
+        get: operations["list_join_requests_v1_orgs__org_id__teams__team_id__join_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/join-requests/{request_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Join Request */
+        post: operations["approve_join_request_v1_orgs__org_id__teams__team_id__join_requests__request_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/join-requests/{request_id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline Join Request */
+        post: operations["decline_join_request_v1_orgs__org_id__teams__team_id__join_requests__request_id__decline_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/mark-keys": {
         parameters: {
             query?: never;
@@ -3246,6 +3615,101 @@ export interface paths {
         head?: never;
         /** Update Team Member */
         patch: operations["update_team_member_v1_orgs__org_id__teams__team_id__members__user_id__patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/official": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Team Official
+         * @description Link to the official data, the standing of the group and the open suggestions.
+         */
+        get: operations["team_official_v1_orgs__org_id__teams__team_id__official_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Team Official Preferences
+         * @description Organisers: show the official statistics in roster suggestions or not (roster_stats).
+         */
+        patch: operations["team_official_preferences_v1_orgs__org_id__teams__team_id__official_patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/official/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Suggestions */
+        get: operations["list_suggestions_v1_orgs__org_id__teams__team_id__official_suggestions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/official/suggestions/{suggestion_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Suggestion */
+        post: operations["accept_suggestion_v1_orgs__org_id__teams__team_id__official_suggestions__suggestion_id__accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/official/suggestions/{suggestion_id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss Suggestion */
+        post: operations["dismiss_suggestion_v1_orgs__org_id__teams__team_id__official_suggestions__suggestion_id__dismiss_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/official/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sync Team
+         * @description Sync now (otherwise daily): changes come in as suggestions.
+         */
+        post: operations["sync_team_v1_orgs__org_id__teams__team_id__official_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/orgs/{org_id}/teams/{team_id}/paper-photos": {
@@ -3499,7 +3963,11 @@ export interface paths {
         };
         /**
          * Season Stats
-         * @description Per-match key numbers, totals and player totals for a season.
+         * @description Per-match key numbers, totals and player totals for a season. Every played match counts (a
+         *     result stored or events): rows have `tagged`, `goals`/`goals_against` from the events (from the
+         *     result when untagged) and `xg_coverage`; totals have `matches`, `tagged_matches`, `xg`,
+         *     `xg_shots` and `xg_coverage` = shots with xG / shots on target (null without shots), and
+         *     shooting/save percentages only from matches with recorded misses or saves.
          */
         get: operations["season_stats_v1_orgs__org_id__teams__team_id__seasons__season_id__stats_get"];
         put?: never;
@@ -3587,6 +4055,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Verification
+         * @description State of the club's verification; the automatic ways (mail domain, federation licence)
+         *     are checked on every call.
+         */
+        get: operations["verification_v1_orgs__org_id__verification_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/verification/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm Verification
+         * @description A second person with a club role (club admin or coach) confirms the club.
+         */
+        post: operations["confirm_verification_v1_orgs__org_id__verification_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/videos/{video_id}": {
         parameters: {
             query?: never;
@@ -3633,6 +4142,26 @@ export interface paths {
         put?: never;
         /** Calibrate */
         post: operations["calibrate_v1_orgs__org_id__videos__video_id__calibration_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm Calibration
+         * @description The automatic court fits: keep it as confirmed (no re-run).
+         */
+        post: operations["confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3893,6 +4422,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/teams/{team_id}/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Join */
+        post: operations["request_join_v1_teams__team_id__join_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3904,6 +4450,43 @@ export interface components {
              * Format: uuid
              */
             organization_id: string;
+        };
+        /** AccessApproveIn */
+        AccessApproveIn: {
+            /** @default member */
+            org_role?: components["schemas"]["OrgRole"];
+            /** @default coach */
+            team_role?: components["schemas"]["TeamRole"];
+        };
+        /** AccessRequestOut */
+        AccessRequestOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Email */
+            email: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Message */
+            message: string | null;
+            /** Name */
+            name: string;
+            /** Official Team Id */
+            official_team_id: number | null;
+            /** Status */
+            status: string;
+            /** Team Id */
+            team_id: string | null;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
         };
         /** AccountDelete */
         AccountDelete: {
@@ -3932,6 +4515,13 @@ export interface components {
             calibration: components["schemas"]["CalibrationOut"] | null;
             /** Calibration Error */
             calibration_error?: string | null;
+            /**
+             * Calibration Info
+             * @description automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id); hall_tried lists earlier videos that did not fit
+             */
+            calibration_info?: {
+                [key: string]: unknown;
+            } | null;
             /** Camera */
             camera?: ("fixed" | "moving") | null;
             /** Chunk Ms */
@@ -3953,6 +4543,7 @@ export interface components {
             formations?: components["schemas"]["FormationSegment"][];
             /** Fps */
             fps: number | null;
+            hall?: components["schemas"]["HallOut"] | null;
             /**
              * Needs Calibration
              * @default false
@@ -4314,11 +4905,36 @@ export interface components {
                 number,
                 number
             ];
+            /**
+             * Height M
+             * @description above the floor, e.g. 2 for the crossbar
+             * @default 0
+             */
+            height_m?: number;
             /** Image */
             image: [
                 number,
                 number
             ];
+        };
+        /**
+         * CandidateGoal
+         * @description A shot already stored that covers a candidate (same moment).
+         */
+        CandidateGoal: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Outcome */
+            outcome?: string | null;
+            /** Side */
+            side: string;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
         };
         /** Chart */
         Chart: {
@@ -4346,6 +4962,48 @@ export interface components {
              */
             goalkeeper_seats?: number;
             plan: components["schemas"]["Plan"];
+        };
+        /** ClaimIn */
+        ClaimIn: {
+            /**
+             * Club Id
+             * @description Official club id of the search hit (club.id)
+             */
+            club_id: number;
+            /**
+             * Message
+             * @description For an access request
+             */
+            message?: string | null;
+            /**
+             * Org Id
+             * @description Link this existing club of yours instead of creating one
+             */
+            org_id?: string | null;
+            /** Team Name */
+            team_name?: string | null;
+        };
+        /** ClaimOut */
+        ClaimOut: {
+            /** Access Request Id */
+            access_request_id?: string | null;
+            /**
+             * Created Organization
+             * @default false
+             */
+            created_organization?: boolean;
+            /** Organization Id */
+            organization_id?: string | null;
+            prefill?: components["schemas"]["PrefillOut"] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "claimed" | "access_requested" | "already_member";
+            /** Team Id */
+            team_id?: string | null;
+            /** Verification */
+            verification?: string | null;
         };
         /** Clip */
         Clip: {
@@ -5069,10 +5727,183 @@ export interface components {
             /** Tokens */
             tokens: components["schemas"]["handball_api__schemas__tactics__TokenIn"][];
         };
+        /** GoalCandidateCounts */
+        GoalCandidateCounts: {
+            /** Confirmed */
+            confirmed: number;
+            /** Known */
+            known: number;
+            /** Open */
+            open: number;
+            /** Open By Rate */
+            open_by_rate: {
+                [key: string]: number;
+            };
+            /** Rejected */
+            rejected: number;
+            /**
+             * Suggested
+             * @default 0
+             */
+            suggested?: number;
+            /** Total */
+            total: number;
+        };
+        /** GoalCandidateList */
+        GoalCandidateList: {
+            /** Candidates */
+            candidates: components["schemas"]["GoalCandidateRow"][];
+            counts: components["schemas"]["GoalCandidateCounts"];
+            /** Default Rate */
+            default_rate: number;
+            /**
+             * Kind
+             * @default goal
+             * @enum {string}
+             */
+            kind?: "goal" | "shot";
+            official?: components["schemas"]["OfficialShots"] | null;
+            /** Rates */
+            rates: number[];
+            /** Template */
+            template: string | null;
+        };
+        /** GoalCandidateReviewIn */
+        GoalCandidateReviewIn: {
+            /** Number */
+            number?: number | null;
+            /** Official Event Id */
+            official_event_id?: string | null;
+            /** Outcome */
+            outcome?: ("goal" | "save" | "miss" | "post" | "blocked") | null;
+            /** Player Id */
+            player_id?: string | null;
+            /** Side */
+            side?: ("own" | "opponent") | null;
+            /** Status */
+            status: ("confirmed" | "rejected") | null;
+        };
+        /**
+         * GoalCandidateRow
+         * @description A moment of the video that is probably a goal or a shot (analysis), with the coach's
+         *     review.
+         */
+        GoalCandidateRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** End Ms */
+            end_ms: number;
+            /** Event Id */
+            event_id: string | null;
+            /** Goal Ms */
+            goal_ms: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "goal" | "shot";
+            known: components["schemas"]["CandidateGoal"] | null;
+            /** Outcome */
+            outcome: ("goal" | "save" | "miss" | "post" | "blocked") | null;
+            /** Period */
+            period: number | null;
+            /** Rate */
+            rate: number;
+            /** Score */
+            score: number;
+            /** Side */
+            side: ("own" | "opponent") | null;
+            /** Start Ms */
+            start_ms: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "confirmed" | "rejected";
+            /** Suggested Side */
+            suggested_side: ("own" | "opponent") | null;
+            suggestion?: components["schemas"]["OfficialShot"] | null;
+            /** T Ms */
+            t_ms: number;
+            /**
+             * Video Asset Id
+             * Format: uuid
+             */
+            video_asset_id: string;
+        };
+        /** GoalComparison */
+        GoalComparison: {
+            /** Away */
+            away: string | null;
+            counts: components["schemas"]["GoalComparisonCounts"];
+            /** Extra */
+            extra: components["schemas"]["VideoGoalRow"][];
+            /** Goals */
+            goals: components["schemas"]["OfficialGoalRow"][];
+            /** Home */
+            home: string | null;
+            /** Imported */
+            imported: boolean;
+            /** Provider */
+            provider: string | null;
+            /** Source Url */
+            source_url: string | null;
+            /** Window S */
+            window_s: number;
+        };
+        /** GoalComparisonCounts */
+        GoalComparisonCounts: {
+            /** Extra */
+            extra: number;
+            /** Found */
+            found: number;
+            /** Missing */
+            missing: number;
+            /** Official */
+            official: number;
+            /** Open */
+            open: number;
+            /** Outside */
+            outside: number;
+        };
+        /** GoalReviewIn */
+        GoalReviewIn: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Status */
+            status: ("confirmed" | "dismissed") | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HallOut */
+        HallOut: {
+            /**
+             * Calibrated Videos
+             * @description earlier videos of this hall with a court a person clicked or confirmed: the analysis carries their court over when the camera stood at the same place
+             * @default 0
+             */
+            calibrated_videos?: number;
+            /**
+             * Name
+             * @description the match's hall (venue), or a suggestion
+             */
+            name: string | null;
+            /**
+             * Source
+             * @description official game data, the match as entered, or the team's usual home hall (a home game without a venue)
+             */
+            source?: ("official" | "match" | "home_matches") | null;
         };
         /**
          * Hand
@@ -5291,16 +6122,93 @@ export interface components {
          * @enum {string}
          */
         JobStatus: "queued" | "running" | "succeeded" | "failed" | "cancelled";
+        /** JoinApproveIn */
+        JoinApproveIn: {
+            /**
+             * New Entry
+             * @default false
+             */
+            new_entry?: boolean;
+            /** Player Id */
+            player_id?: string | null;
+            /** Suggestion Id */
+            suggestion_id?: string | null;
+        };
         /** JoinIn */
         JoinIn: {
             /** Token */
             token: string;
         };
+        /** JoinRequestIn */
+        JoinRequestIn: {
+            /** First Name */
+            first_name: string;
+            /** Jersey Number */
+            jersey_number?: number | null;
+            /** Last Name */
+            last_name: string;
+            /** Message */
+            message?: string | null;
+            /**
+             * Role
+             * @default player
+             * @enum {string}
+             */
+            role?: "player" | "goalkeeper";
+        };
+        /** JoinRequestOut */
+        JoinRequestOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Email */
+            email: string;
+            /** First Name */
+            first_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Jersey Number */
+            jersey_number: number | null;
+            /** Last Name */
+            last_name: string;
+            /** Message */
+            message: string | null;
+            /** Player Id */
+            player_id?: string | null;
+            /** Role */
+            role: string;
+            /** Status */
+            status: string;
+            suggested?: components["schemas"]["MatchCandidate"] | null;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
         /** KickoffIn */
         KickoffIn: {
+            /**
+             * Clock S
+             * @description match clock (s) shown at t_ms; default: the half's throw-off. A video that starts after the throw-off (a clip from mid-half) gets its clock this way.
+             */
+            clock_s?: number | null;
             /** Period */
             period: number;
-            /** T Ms */
+            /**
+             * T Ms
+             * @description a time in the video
+             */
             t_ms: number;
         };
         /** LinkImport */
@@ -5468,6 +6376,25 @@ export interface components {
             /** Marks */
             marks: components["schemas"]["MarkIn"][];
         };
+        /** MatchCandidate */
+        MatchCandidate: {
+            /** First Name */
+            first_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Jersey Number */
+            jersey_number: number | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "player" | "suggestion";
+            /** Last Name */
+            last_name: string;
+        };
         /** MatchCreate */
         MatchCreate: {
             /** Competition */
@@ -5517,6 +6444,11 @@ export interface components {
              * @default #f59e0b
              */
             kit_own_gk?: string;
+            /**
+             * Kit Referee
+             * @description referee shirt colour when known; left out of the analysis when it is close to a team's kit
+             */
+            kit_referee?: string | null;
             /** Opponent Id */
             opponent_id?: string | null;
             /** Opponent Name */
@@ -5584,6 +6516,11 @@ export interface components {
             kit_own: string;
             /** Kit Own Gk */
             kit_own_gk: string;
+            /**
+             * Kit Referee
+             * @description null: unknown
+             */
+            kit_referee?: string | null;
             /**
              * Kit Warnings
              * @description kit pairs with similar colours, e.g. own/opponent
@@ -5696,6 +6633,11 @@ export interface components {
             kit_own?: string | null;
             /** Kit Own Gk */
             kit_own_gk?: string | null;
+            /**
+             * Kit Referee
+             * @description null clears it (unknown)
+             */
+            kit_referee?: string | null;
             /** Period S */
             period_s?: number | null;
             /** Periods */
@@ -5872,6 +6814,57 @@ export interface components {
             /** Validated */
             validated: boolean;
         };
+        /** MyAccessRequestOut */
+        MyAccessRequestOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /** Organization Name */
+            organization_name: string;
+            /** Status */
+            status: string;
+        };
+        /** MyJoinRequestOut */
+        MyJoinRequestOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /** Organization Name */
+            organization_name: string;
+            /** Status */
+            status: string;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Team Name */
+            team_name: string;
+        };
         /** MyProfile */
         MyProfile: {
             /** Blocked */
@@ -5951,10 +6944,260 @@ export interface components {
             /** Ids */
             ids?: string[];
         };
+        /** OfficialClubOut */
+        OfficialClubOut: {
+            /** City */
+            city: string | null;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /** OfficialGoalRow */
+        OfficialGoalRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Estimated */
+            estimated: boolean;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Penalty */
+            penalty: boolean;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Review */
+            review: ("confirmed" | "dismissed") | null;
+            /** Score */
+            score: number[] | null;
+            /** Side */
+            side: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "found" | "missing" | "outside";
+            /** T Ms */
+            t_ms: number | null;
+            video: components["schemas"]["VideoReading"] | null;
+        };
+        /** OfficialLinkOut */
+        OfficialLinkOut: {
+            /** Group Name */
+            group_name?: string | null;
+            /** League */
+            league?: string | null;
+            /** Linked */
+            linked: boolean;
+            /** Official Club Id */
+            official_club_id?: number | null;
+            /** Official Group Id */
+            official_group_id?: number | null;
+            /** Official Season Id */
+            official_season_id?: number | null;
+            /** Official Team Id */
+            official_team_id?: number | null;
+            /**
+             * Open Suggestions
+             * @default 0
+             */
+            open_suggestions?: number;
+            /** Provider */
+            provider?: string | null;
+            /**
+             * Roster Stats
+             * @default false
+             */
+            roster_stats?: boolean;
+            /** Standing */
+            standing?: {
+                [key: string]: unknown;
+            }[];
+            /** Synced At */
+            synced_at?: string | null;
+        };
+        /** OfficialPreferencesIn */
+        OfficialPreferencesIn: {
+            /** Roster Stats */
+            roster_stats: boolean;
+        };
+        /** OfficialReportIn */
+        OfficialReportIn: {
+            /** Provider */
+            provider?: ("handball_ch" | "dhb" | "hla") | null;
+            /** Url */
+            url: string;
+        };
+        /** OfficialReportResult */
+        OfficialReportResult: {
+            /** Away */
+            away: string | null;
+            /** Created */
+            created: number;
+            /** Final */
+            final: number[] | null;
+            /** Game Id */
+            game_id: number;
+            /** Home */
+            home: string | null;
+            /** Kept Manual Goals */
+            kept_manual_goals: number;
+            /** Matched Video Goals */
+            matched_video_goals: number;
+            /** Provider */
+            provider: string;
+            /** Replaced */
+            replaced: number;
+            /** Skipped */
+            skipped: number;
+            /** Source Url */
+            source_url: string;
+            /** Unmatched Video Goals */
+            unmatched_video_goals: number;
+            /** Warnings */
+            warnings: string[];
+        };
+        /**
+         * OfficialShot
+         * @description A shot of the official report and where it lies on the video.
+         */
+        OfficialShot: {
+            /** Clock S */
+            clock_s: number | null;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Outcome */
+            outcome: string | null;
+            /** Penalty */
+            penalty: boolean;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Side */
+            side: string;
+            /** T Ms */
+            t_ms: number | null;
+            /** Uncertainty Ms */
+            uncertainty_ms: number | null;
+        };
+        /** OfficialShotCounts */
+        OfficialShotCounts: {
+            /** Confirmed */
+            confirmed: number;
+            /** Missing */
+            missing: number;
+            /** Outside */
+            outside: number;
+            /** Suggested */
+            suggested: number;
+            /** Total */
+            total: number;
+        };
+        /** OfficialShotRow */
+        OfficialShotRow: {
+            /** Candidate Id */
+            candidate_id: string | null;
+            /** Clock S */
+            clock_s: number | null;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Outcome */
+            outcome: string | null;
+            /** Penalty */
+            penalty: boolean;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Side */
+            side: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "confirmed" | "suggested" | "missing" | "outside";
+            /** T Ms */
+            t_ms: number | null;
+            /** Uncertainty Ms */
+            uncertainty_ms: number | null;
+        };
+        /** OfficialShots */
+        OfficialShots: {
+            counts: components["schemas"]["OfficialShotCounts"];
+            /** Shots */
+            shots: components["schemas"]["OfficialShotRow"][];
+        };
+        /** OfficialTeamHit */
+        OfficialTeamHit: {
+            club: components["schemas"]["OfficialClubOut"];
+            /** Group Name */
+            group_name: string | null;
+            /** League */
+            league: string | null;
+            /** League Short */
+            league_short: string | null;
+            /** Name */
+            name: string;
+            /** Official Id */
+            official_id: number;
+            /** Organization Id */
+            organization_id?: string | null;
+            /**
+             * Provider
+             * @default handball_ch
+             * @constant
+             */
+            provider?: "handball_ch";
+            /** Registered Club Id */
+            registered_club_id: number;
+            /** Season Id */
+            season_id: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "available" | "claimed" | "member";
+            /** Team Id */
+            team_id?: string | null;
+        };
         /** OffsetIn */
         OffsetIn: {
             /** Offset Ms */
             offset_ms: number;
+        };
+        /** OperatorVerifyIn */
+        OperatorVerifyIn: {
+            /** Verified */
+            verified: boolean;
         };
         /** OpponentCreate */
         OpponentCreate: {
@@ -6070,6 +7313,8 @@ export interface components {
             my_role: components["schemas"]["OrgRole"];
             /** Name */
             name: string;
+            /** Official Club Id */
+            official_club_id?: number | null;
             plan: components["schemas"]["Plan"];
             /** Primary Color */
             primary_color: string;
@@ -6077,6 +7322,11 @@ export interface components {
             secondary_color: string;
             /** Two Factor Required */
             two_factor_required: boolean;
+            /**
+             * Verification
+             * @default none
+             */
+            verification?: string;
         };
         /**
          * OrgRole
@@ -6502,6 +7752,39 @@ export interface components {
          * @enum {string}
          */
         Position: "LA" | "RL" | "RM" | "RR" | "RA" | "KM" | "TW";
+        /** PrefillOut */
+        PrefillOut: {
+            /**
+             * Matches Created
+             * @default 0
+             */
+            matches_created?: number;
+            /**
+             * Matches Held Back
+             * @default 0
+             */
+            matches_held_back?: number;
+            /**
+             * Other Suggestions
+             * @default 0
+             */
+            other_suggestions?: number;
+            /**
+             * Report Suggestions
+             * @default 0
+             */
+            report_suggestions?: number;
+            /**
+             * Results
+             * @default 0
+             */
+            results?: number;
+            /**
+             * Roster Suggestions
+             * @default 0
+             */
+            roster_suggestions?: number;
+        };
         /** PresentationDetail */
         PresentationDetail: {
             /** Can Edit */
@@ -7285,6 +8568,56 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** SuggestionAcceptIn */
+        SuggestionAcceptIn: {
+            /** Jersey Number */
+            jersey_number?: number | null;
+        };
+        /** SuggestionOut */
+        SuggestionOut: {
+            /** Blocked */
+            blocked?: "plan_limit" | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "roster_add" | "roster_number" | "roster_left" | "match_new" | "match_moved" | "report" | "season_new";
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            /** Resolved At */
+            resolved_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "accepted" | "dismissed";
+        };
+        /** SuggestionResultOut */
+        SuggestionResultOut: {
+            /** Match Id */
+            match_id?: string | null;
+            /** Player Id */
+            player_id?: string | null;
+            /** Report */
+            report?: {
+                [key: string]: unknown;
+            } | null;
+            /** Season Id */
+            season_id?: string | null;
+            suggestion: components["schemas"]["SuggestionOut"];
+        };
         /** SupportConfig */
         SupportConfig: {
             /** Chat */
@@ -7427,6 +8760,8 @@ export interface components {
             my_role: components["schemas"]["TeamRole"] | null;
             /** Name */
             name: string;
+            /** Official Team Id */
+            official_team_id?: number | null;
             settings: components["schemas"]["TeamSettings"];
         };
         /**
@@ -7658,6 +8993,61 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** VerificationOut */
+        VerificationOut: {
+            /** Club Domains */
+            club_domains: string[];
+            /** Methods */
+            methods: string[];
+            /** Official Club Id */
+            official_club_id: number | null;
+            /** Official Provider */
+            official_provider: string | null;
+            /**
+             * Verification
+             * @enum {string}
+             */
+            verification: "none" | "unverified" | "verified";
+            /** Verified At */
+            verified_at: string | null;
+            /** Verified Via */
+            verified_via: string | null;
+        };
+        /**
+         * VideoGoalRow
+         * @description An automatic goal from the video with no official counterpart.
+         */
+        VideoGoalRow: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Confidence */
+            confidence: number;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string | null;
+            /** Number */
+            number: number | null;
+            /** Official Time */
+            official_time: string | null;
+            /** Period */
+            period: number;
+            /** Player Id */
+            player_id: string | null;
+            /** Review */
+            review: ("confirmed" | "dismissed") | null;
+            /** Score */
+            score: number[] | null;
+            /** Side */
+            side: string;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
+        };
         /** VideoOut */
         VideoOut: {
             /** Codec */
@@ -7701,6 +9091,22 @@ export interface components {
             time_offset_ms: number;
             /** Width */
             width: number | null;
+        };
+        /**
+         * VideoReading
+         * @description What the video analysis read for an official goal.
+         */
+        VideoReading: {
+            /** Clock S */
+            clock_s: number | null;
+            /** Confidence */
+            confidence: number | null;
+            /** Event Id */
+            event_id: string | null;
+            /** Source */
+            source: string;
+            /** T Ms */
+            t_ms: number | null;
         };
         /**
          * VideoRole
@@ -7766,6 +9172,41 @@ export interface components {
             offset_ms?: number | null;
             /** Source */
             source?: ("audio" | "user_correction") | null;
+        };
+        /** SyncOut */
+        handball_api__schemas__official__SyncOut: {
+            /**
+             * Matches Created
+             * @default 0
+             */
+            matches_created?: number;
+            /**
+             * Matches Held Back
+             * @default 0
+             */
+            matches_held_back?: number;
+            /**
+             * Other Suggestions
+             * @default 0
+             */
+            other_suggestions?: number;
+            /**
+             * Report Suggestions
+             * @default 0
+             */
+            report_suggestions?: number;
+            /**
+             * Results
+             * @default 0
+             */
+            results?: number;
+            /**
+             * Roster Suggestions
+             * @default 0
+             */
+            roster_suggestions?: number;
+            /** Synced At */
+            synced_at?: string | null;
         };
         /** TokenIn */
         handball_api__schemas__tactics__TokenIn: {
@@ -8464,6 +9905,26 @@ export interface operations {
             };
         };
     };
+    my_access_requests_v1_me_access_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyAccessRequestOut"][];
+                };
+            };
+        };
+    };
     delete_account_v1_me_delete_post: {
         parameters: {
             query?: never;
@@ -8591,6 +10052,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    my_join_requests_v1_me_join_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyJoinRequestOut"][];
+                };
+            };
+        };
+    };
+    withdraw_join_request_v1_me_join_requests__request_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -8831,6 +10341,90 @@ export interface operations {
                 content: {
                     "application/vnd.apple.mpegurl": unknown;
                     "video/mp4": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_teams_v1_official_teams_get: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialTeamHit"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    claim_team_v1_official_teams__official_id__claim_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                official_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimIn"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimOut"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimOut"];
+                };
+            };
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimOut"];
                 };
             };
             /** @description Validation Error */
@@ -9206,6 +10800,41 @@ export interface operations {
             };
         };
     };
+    operator_verification_v1_ops_organizations__org_id__verification_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperatorVerifyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerificationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     overview_v1_ops_overview_get: {
         parameters: {
             query?: never;
@@ -9393,6 +11022,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_access_requests_v1_orgs__org_id__access_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessRequestOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_access_request_v1_orgs__org_id__access_requests__request_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AccessApproveIn"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decline_access_request_v1_orgs__org_id__access_requests__request_id__decline_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessRequestOut"];
                 };
             };
             /** @description Validation Error */
@@ -11210,6 +12938,77 @@ export interface operations {
             };
         };
     };
+    list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get: {
+        parameters: {
+            query?: {
+                kind?: "goal" | "shot";
+            };
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalCandidateList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                candidate_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalCandidateReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalCandidateRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_reels_v1_orgs__org_id__matches__match_id__highlights_get: {
         parameters: {
             query?: never;
@@ -11484,6 +13283,108 @@ export interface operations {
             };
         };
     };
+    import_official_report_v1_orgs__org_id__matches__match_id__official_report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfficialReportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialReportResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    official_goal_comparison_v1_orgs__org_id__matches__match_id__official_report_comparison_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalComparison"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_official_goal_v1_orgs__org_id__matches__match_id__official_report_review_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     parts_v1_orgs__org_id__matches__match_id__parts_get: {
         parameters: {
             query?: never;
@@ -11553,6 +13454,40 @@ export interface operations {
         };
     };
     match_physical_v1_orgs__org_id__matches__match_id__physical_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    match_possessions_v1_orgs__org_id__matches__match_id__possessions_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -11707,6 +13642,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlayerFeed"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_shot_candidates_v1_orgs__org_id__matches__match_id__shot_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalCandidateList"];
                 };
             };
             /** @description Validation Error */
@@ -14532,6 +16499,108 @@ export interface operations {
             };
         };
     };
+    list_join_requests_v1_orgs__org_id__teams__team_id__join_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequestOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_join_request_v1_orgs__org_id__teams__team_id__join_requests__request_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                request_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["JoinApproveIn"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decline_join_request_v1_orgs__org_id__teams__team_id__join_requests__request_id__decline_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                request_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     keys_v1_orgs__org_id__teams__team_id__mark_keys_get: {
         parameters: {
             query?: never;
@@ -14900,6 +16969,211 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TeamMemberOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    team_official_v1_orgs__org_id__teams__team_id__official_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialLinkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    team_official_preferences_v1_orgs__org_id__teams__team_id__official_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfficialPreferencesIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialLinkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_suggestions_v1_orgs__org_id__teams__team_id__official_suggestions_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                kind?: string | null;
+            };
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestionOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    accept_suggestion_v1_orgs__org_id__teams__team_id__official_suggestions__suggestion_id__accept_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                suggestion_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SuggestionAcceptIn"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestionResultOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_suggestion_v1_orgs__org_id__teams__team_id__official_suggestions__suggestion_id__dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                suggestion_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_team_v1_orgs__org_id__teams__team_id__official_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["handball_api__schemas__official__SyncOut"];
                 };
             };
             /** @description Validation Error */
@@ -15959,6 +18233,68 @@ export interface operations {
             };
         };
     };
+    verification_v1_orgs__org_id__verification_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerificationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_verification_v1_orgs__org_id__verification_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerificationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     delete_video_v1_orgs__org_id__videos__video_id__delete: {
         parameters: {
             query?: never;
@@ -16075,6 +18411,40 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16580,6 +18950,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SupportConfig"];
+                };
+            };
+        };
+    };
+    request_join_v1_teams__team_id__join_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinRequestIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyJoinRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

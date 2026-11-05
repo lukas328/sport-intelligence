@@ -457,6 +457,25 @@ class _Poses:
         self.placed.add(seg)
 
 
+STEP_PAIRS = 64
+
+
+Compact = tuple[NDArray[np.float32], NDArray[np.float32]]
+
+
+def _compact(corr: Corr | None, n: int = STEP_PAIRS) -> Compact | None:
+    """A frame-to-frame match reduced to `n` evenly spread pairs in float32: a full match takes
+    about 8 KB, which over a 90-minute game (160 000 frames) would be more than a gigabyte. Four
+    parameters need far fewer pairs."""
+    if corr is None:
+        return None
+    s, d = corr
+    if len(s) > n:
+        idx = np.linspace(0, len(s) - 1, n).astype(int)
+        s, d = s[idx], d[idx]
+    return s.astype(np.float32), d.astype(np.float32)
+
+
 def _centred(width: int, height: int) -> F64:
     return np.array([[1, 0, -width / 2], [0, 1, -height / 2], [0, 0, 1.0]])
 
@@ -471,8 +490,10 @@ class MotionEstimator:
         keep_every: int = 0,
         max_keyframes: int = 900,
         focal: float | None = None,
+        max_samples: int = 60,
     ) -> None:
         self.work_width = work_width
+        self.max_samples = max_samples
         self.keyframe_every = keyframe_every
         self.keep_every = keep_every
         self.max_keyframes = max_keyframes
@@ -480,7 +501,7 @@ class MotionEstimator:
         self.orb = cv2.ORB.create(nfeatures=1000, fastThreshold=10)
         self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
         self.keyframes: list[_Keyframe] = []
-        self.steps: list[Corr | None] = []  # cur -> prev
+        self.steps: list[Compact | None] = []  # cur -> prev
         self.anchors: list[tuple[int, int, Corr]] = []  # (i, j, pairs i -> j)
         self.wide: list[tuple[int, int, Corr]] = []  # 8 to 30 degrees apart, for the focal length
         self.samples: list[tuple[int, U8]] = []
@@ -595,8 +616,11 @@ class MotionEstimator:
         self.n += 1
         if self.keep_every and i % self.keep_every == 0:
             self.samples.append((i, frame.copy()))
+            if len(self.samples) > self.max_samples:  # unknown length: thin out, stay bounded
+                self.samples = self.samples[::2]
+                self.keep_every *= 2
         corr = self._klt(grey) if i else None
-        self.steps.append(corr)
+        self.steps.append(_compact(corr))  # replayed in `finish`; full matches only online
         self.poses.step(corr)
         if i % self.keyframe_every == 0 or corr is None:
             self._keyframe(i, grey)
@@ -622,8 +646,8 @@ class MotionEstimator:
         by_frame: dict[int, list[tuple[int, Corr]]] = {}
         for i, j, c in self.anchors:
             by_frame.setdefault(i, []).append((j, c))
-        for i, corr in enumerate(self.steps):
-            poses.step(corr)
+        for i, step in enumerate(self.steps):
+            poses.step(None if step is None else (step[0].astype(float), step[1].astype(float)))
             for j, ca in by_frame.get(i, []):
                 poses.anchor(i, j, ca)
         stats = {

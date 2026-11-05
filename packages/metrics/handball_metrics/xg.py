@@ -6,6 +6,9 @@ Coefficients are set so the model reproduces typical conversion rates reported f
 (7 m roughly 75 %, wing roughly 50 %, 6 m centre roughly 65 %, 9 m backcourt roughly 35 %, fast
 break roughly 80 %, empty net long shots very high). They are a prior, not a fitted model; the
 `version` is stored with every figure so later models can be compared.
+
+A shot needs its position (penalties excepted): goals without one (official report, score
+overlay) have no xG, and sums cover only the shots that have it (see `xg_coverage` in stats).
 """
 
 from __future__ import annotations
@@ -22,12 +25,12 @@ PENALTY = 0.75
 
 def expected_goal(
     x: float | None, y: float | None, shot_type: str | None = None, *, defenders_close: int = 0
-) -> float:
+) -> float | None:
+    """Goal probability of a shot, None when its position is unknown (no estimate)."""
     if shot_type == "penalty":
         return PENALTY
     if x is None or y is None:
-        # unknown position: average conversion of open play
-        return 0.5
+        return None
     d = distance_to_attacked_goal(x, y)
     angle = abs(math.atan2(y - 10.0, max(0.1, 40.0 - x)))  # 0 = central, pi/2 = from the goal line
     logit = (
