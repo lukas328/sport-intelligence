@@ -35,7 +35,7 @@ from handball_api.models import (
 from handball_api.models.enums import ConsentKind, ReelFormat, ReelStatus, VideoRole, VideoStatus
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.feed import _close_events, _importance
+from handball_api.services.feed import _close_events, _importance, in_video, video_duration_ms
 from handball_api.services.matches import get_match, opponent_of
 from handball_api.services.policies import Action, can
 from handball_api.services.roster import consented
@@ -44,7 +44,7 @@ from handball_api.services.videos import media_prefix
 MIN_CONFIDENCE = 0.6
 PRE_MS, POST_MS = 6000, 2500
 TEAM_MIN_S, TEAM_MAX_S = 60, 120
-FUNC = "handball_worker.export.run_highlight_reel"
+FUNC = "handball_worker.reels.run_highlight_reel"
 WEIGHT = {"goal": 3.0, "save": 2.5, "steal": 2.0, "block": 2.0, "assist": 2.2}
 
 
@@ -137,7 +137,8 @@ async def build(
             )
         ).all()
     )
-    scenes = rank(events, match, player_id)
+    duration = await video_duration_ms(ctx, match)
+    scenes = rank([e for e in events if in_video(e, duration)], match, player_id)
     featured = {s.player_id for s in scenes if s.player_id}
     allowed = await consented(ctx, list(featured), ConsentKind.HIGHLIGHTS_INTERNAL)
     excluded = sorted(str(p) for p in featured - allowed)
@@ -218,7 +219,9 @@ async def build(
                 "clips": [
                     {
                         "in_ms": max(0, (s.event.t_ms or 0) - PRE_MS),
-                        "out_ms": (s.event.t_ms or 0) + POST_MS,
+                        "out_ms": (s.event.t_ms or 0) + POST_MS
+                        if duration is None
+                        else min(duration, (s.event.t_ms or 0) + POST_MS),
                         "label": names.get(s.player_id, "") if s.player_id else "",
                         "spotlight_track": spot.get(s.player_id) if s.player_id else None,
                     }
