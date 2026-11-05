@@ -6,12 +6,11 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, Request, Response, status
+from fastapi import APIRouter, Query, Response, status
 
 from handball_api.core.db import enable_system_access
-from handball_api.core.errors import ProblemError
 from handball_api.models import JoinRequest, OfficialSuggestion, OrgAccessRequest
-from handball_api.routers.deps import AuthedDep, OrgDep
+from handball_api.routers.deps import AuthedDep, OrgDep, per_user
 from handball_api.routers.ops import OperatorDep
 from handball_api.schemas.official import (
     AccessApproveIn,
@@ -41,14 +40,7 @@ router = APIRouter(prefix="/v1", tags=["official"])
 SEARCH_LIMIT = (30, 60)  # per user and minute: the search may reach handball.ch
 JOIN_LIMIT = (10, 3600)
 SYNC_LIMIT = (6, 3600)  # sync now: each one asks handball.ch again
-
-
-def per_user(scope: str, limit: tuple[int, int]) -> Any:
-    async def _dep(request: Request, auth: AuthedDep) -> None:
-        if not await request.app.state.rate_limiter.hit(f"{scope}:{auth.user.id}", *limit):
-            raise ProblemError(429, "rate-limited", "Too many requests, try again later")
-
-    return Depends(_dep)
+CLAIM_LIMIT = (10, 3600)  # may ask handball.ch, and an access request notifies the club admins
 
 
 # ---- search and claim (signed in, no club needed) ----------------------------------------------
@@ -71,6 +63,7 @@ async def search_teams(
     response_model=ClaimOut,
     status_code=status.HTTP_201_CREATED,
     responses={202: {"model": ClaimOut}, 200: {"model": ClaimOut}},
+    dependencies=[per_user("official-claim", CLAIM_LIMIT)],
 )
 async def claim_team(
     official_id: int, data: ClaimIn, auth: AuthedDep, response: Response
