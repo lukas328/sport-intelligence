@@ -24,8 +24,9 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
       <AreaOrPageHeader title={t("title")} />
       {wanted.length > 0 && <h2 className="text-xl font-bold">{t("suggested")}</h2>}
       <p className="max-w-2xl text-sm text-muted">{t("hint")}</p>
-      <nav aria-label={t("title")} className="flex flex-wrap gap-1">
-        <Link href={`/app/${orgId}/drills`} className={cn("rounded-md px-3.5 py-1.5 text-[0.8125rem] font-medium", !wanted.length ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}>
+      {/* one scrolling row of underline links (twelve pills filled the first phone screen) */}
+      <nav aria-label={t("title")} className="scrollbar-none -mx-1 flex gap-x-4 overflow-x-auto border-b border-foreground/15 px-1 sm:flex-wrap">
+        <Link href={`/app/${orgId}/drills`} className={cn("-mb-px min-h-10 shrink-0 whitespace-nowrap border-b-2 pt-2 text-sm font-semibold", !wanted.length ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}>
           {t("all")}
         </Link>
         {FOCI.map((f) => (
@@ -33,7 +34,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
             key={f}
             href={`/app/${orgId}/drills?focus=${f}`}
             aria-current={wanted.length === 1 && wanted[0] === f ? "page" : undefined}
-            className={cn("rounded-md px-3.5 py-1.5 text-[0.8125rem] font-medium", wanted.length === 1 && wanted[0] === f ? "bg-foreground text-background" : "bg-raised ring-1 ring-inset ring-border hover:bg-surface")}
+            className={cn("-mb-px min-h-10 shrink-0 whitespace-nowrap border-b-2 pt-2 text-sm font-semibold", wanted.length === 1 && wanted[0] === f ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
           >
             {t(`focus_${f}`)}
           </Link>

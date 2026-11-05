@@ -39,7 +39,8 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
   calendar import moved here from Training.
 - [x] P1 Aufgaben (the date field follows the browser language; the US format came from the en-US test browser): date field in US format; "Art" defaults to an empty playlist list with a
   disabled button and no reason -> de-CH date, the first kind with content, a reason line.
-- [ ] P1 Übungen: no "Neue Übung"; twelve filter pills push the list below the fold on phones.
+- [x] P1 Übungen: twelve filter pills push the list below the fold on phones -> one scrolling row of
+  underline links. "Neue Übung" needs an API (the drills are a fixed library): moved to Later.
 - [x] P1 Spielzüge (search stays for staff: it searches the templates; the court colour is the identity's court token): search and filters shown with zero plays; templates in dashed tiles; green court.
 - [x] P2 Training: "Kalender abonnieren" and ICS import fill the planning page; empty state without
   action.
@@ -68,5 +69,6 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 
 ## Later (features)
 
+- Own drills ("Neue Übung"): needs a drills API; the library is static today.
 - Player status (verletzt, abwesend) on the squad; attendance on units and dates; assignment
   progress ("8 von 14 erledigt"); recurring training slots; a team consent table for staff.
