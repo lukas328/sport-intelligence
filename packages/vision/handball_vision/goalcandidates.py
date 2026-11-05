@@ -5,8 +5,11 @@ Everything comes from the observation pass (`observe.observe`): the camera motio
 detections. Nothing is decoded a second time and no court calibration is needed.
 
 Signals on a 10 Hz grid of video time (`signals`), in "reference pixels" (a 1280 px wide frame at
-the median zoom, the units the template was learned in):
-- `pan`: horizontal camera speed (canvas x of the frame centre per second; 0 for a fixed camera);
+the median zoom, the units the template was learned in). Camera and people live on a cylinder
+around the camera (azimuth times the reference focal length), not on the planar canvas, whose
+scale grows by 1 / cos^2 of the azimuth towards the goals:
+- `pan`: horizontal camera speed (azimuth of the optical axis per second; 0 for a fixed camera),
+  with one-frame jumps (cuts, misregistered frames) removed by a running median of 3 frame steps;
 - `cx_v`: speed of the people's median x in the image (canvas velocity minus the camera's): the
   play running towards one half while the camera lags or swings;
 - `vx`, `speed`: people matched mutual-nearest between detection frames 0.5 s apart on the canvas;
@@ -20,9 +23,12 @@ the post-goal lull (busy around t, quiet 8 to 24 s later), each as a rolling rob
 Channels and scores are normalised over a rolling window of 3 minutes, the segment length the
 template was learned on, so the camera operator's style and the zoom may change during a game.
 
-Candidates (`pick`): a fixed number per minute, not a score threshold (score scales vary per game):
-per 3-minute block the best peaks with 8 s non-maximum suppression, none in the first and last
-2 s. Every candidate carries the lowest rate (1, 2 or 4 per minute) at which it is proposed, so
+No play (`no_play`): an operated camera that stands still for two minutes is parked: half-time,
+before and after the game. No candidates there, and the quota counts minutes of play only.
+
+Candidates (`pick`): a fixed number per minute of play, not a score threshold (score scales vary
+per game): per 3-minute block the best peaks with 8 s non-maximum suppression, none in the first
+and last 2 s. Every candidate carries the lowest rate (1, 2 or 4 per minute) at which it is proposed, so
 the coach can ask for more without a re-run; the clip runs from 10 s before to 4 s after the peak,
 which lies a median 1.5 s after the goal.
 """
