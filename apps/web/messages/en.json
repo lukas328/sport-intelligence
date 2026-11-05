@@ -428,7 +428,10 @@
     "cardSaves": "{value} saves",
     "cardDemo": "Demo data",
     "withoutVideo": "{n} of {total} without video",
-    "allDemo": "All demo matches"
+    "allDemo": "All demo matches",
+    "uploadVideo": "Upload video",
+    "noneUpcoming": "No match scheduled.",
+    "scheduleOne": "Schedule a match"
   },
   "upload": {
     "title": "Upload video",
@@ -1087,7 +1090,7 @@
     "fewestTurnovers": "Fewest turnovers",
     "against": "against {opponent}",
     "scorers": "Scorers",
-    "goalsOfShots": "{goals} goals from {shots} shots",
+    "goalsOfShots": "{goals, plural, one {# goal} other {# goals}} from {shots} shots",
     "inMatches": "{n, plural, =1 {1 match} other {# matches}}",
     "allMatches": "All matches in detail",
     "unknownPlayer": "Unassigned",
@@ -1508,7 +1511,7 @@
     "basis": "Based on {matches} matches against this opponent, {tagged} with events. Created {date}.",
     "observationsHint": "Observations from the data, not instructions. Each with sample size and clips.",
     "noObservations": "Not enough data for observations.",
-    "goalsShots": "{goals} goals from {shots} shots ({pct})",
+    "goalsShots": "{goals, plural, one {# goal} other {# goals}} from {shots} shots ({pct})",
     "noShooters": "No shots with jersey numbers recorded.",
     "noDefense": "No defence data yet.",
     "clipN": "Clip {n}",

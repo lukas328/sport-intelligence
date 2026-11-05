@@ -102,7 +102,20 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
       />
       {canWrite && <div className="-mt-6">{extra}</div>}
       {notice}
-      {upcoming.length > 0 && <MatchList title={t("matches.upcoming")} orgId={orgId} matches={upcoming} />}
+      {upcoming.length > 0 ? (
+        <MatchList title={t("matches.upcoming")} orgId={orgId} matches={upcoming} />
+      ) : (
+        // nothing scheduled is worth a line, with the way to change it
+        <p className="flex flex-wrap items-baseline gap-x-3 border-t-2 border-foreground pt-3">
+          <span className="text-2xl font-display">{t("matches.upcoming")}</span>
+          <span className="text-muted">{t("matches.noneUpcoming")}</span>
+          {canWrite && (
+            <Link href={`/app/${orgId}/teams/${teamId}/matches?new=1`} className="font-medium text-accent hover:underline" onClick={() => setOpen(true)}>
+              {t("matches.scheduleOne")}
+            </Link>
+          )}
+        </p>
+      )}
       {played.length > 0 && <MatchList title={t("matches.played")} orgId={orgId} matches={played} countMissing={canWrite} />}
     </div>
   );
@@ -152,16 +165,18 @@ export function MatchRow({ orgId, m, demoTag = true, signal = false }: { orgId: 
         <span className="mt-1 block font-score text-[1.6rem]">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</span>
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-[1.125rem] font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
+        {/* the opponent is what a coach scans for: it wraps, it is never cut */}
+        <span className="block text-[1.125rem] leading-tight font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
         <span className="mt-0.5 block text-sm text-muted">
-          {[m.kind !== "training" ? (m.is_home ? t("matches.homeShort") : t("matches.awayShort")) : null, m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" }), quiet || null]
+          {[m.kind !== "training" ? (m.is_home ? t("matches.homeShort") : t("matches.awayShort")) : null, format.dateTime(date, { hour: "2-digit", minute: "2-digit" }), quiet || null]
             .filter(Boolean)
             .join(" · ")}
+          {m.competition && <span className="max-sm:hidden">{` · ${m.competition}`}</span>}
           {exception && (
-            <>
-              {" · "}
-              <span className={cn("text-foreground", signal && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{t(state.label)}</span>
-            </>
+            // the marked one says what to do: the match page opens on the upload
+            <span className={cn("block text-foreground", signal && "w-fit underline decoration-resin decoration-[5px] underline-offset-[5px]")}>
+              {signal ? t("matches.uploadVideo") : t(state.label)}
+            </span>
           )}
         </span>
       </span>

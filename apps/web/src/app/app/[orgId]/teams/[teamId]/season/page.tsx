@@ -286,7 +286,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             <caption className="sr-only">{t("matches")}</caption>
             <thead>
               <tr>
-                <th scope="col" className="sticky left-0 bg-raised text-left">{t("match")}</th>
+                <th scope="col" className="sticky left-0 bg-background shadow-[inset_-1px_0_0_var(--border)] text-left">{t("match")}</th>
                 <th scope="col">{t("result")}</th>
                 <th scope="col">{t("shootingPct")}</th>
                 <th scope="col">{t("savePct")}</th>
@@ -299,7 +299,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             <tbody>
               {data.matches.map((m) => (
                 <tr key={m.match_id}>
-                  <th scope="row" className="sticky left-0 bg-raised text-left font-medium">
+                  <th scope="row" className="sticky left-0 bg-background shadow-[inset_-1px_0_0_var(--border)] text-left font-medium">
                     <Link href={`/app/${orgId}/matches/${m.match_id}`} className="hover:text-accent hover:underline">
                       <span className="text-muted tabular-nums">{format.dateTime(new Date(m.kickoff_at), { dateStyle: "short" })}</span> {m.is_home ? "" : "@ "}
                       {m.opponent}

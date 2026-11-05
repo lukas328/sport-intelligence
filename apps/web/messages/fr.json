@@ -428,7 +428,10 @@
     "cardSaves": "{value} arrêts",
     "cardDemo": "Données de démo",
     "withoutVideo": "{n} sur {total} sans vidéo",
-    "allDemo": "Tous des matchs de démo"
+    "allDemo": "Tous des matchs de démo",
+    "uploadVideo": "Téléverser la vidéo",
+    "noneUpcoming": "Aucun match programmé.",
+    "scheduleOne": "Programmer un match"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -1087,7 +1090,7 @@
     "fewestTurnovers": "Le moins de pertes de balle",
     "against": "contre {opponent}",
     "scorers": "Buteurs",
-    "goalsOfShots": "{goals} buts sur {shots} tirs",
+    "goalsOfShots": "{goals, plural, one {# but} other {# buts}} sur {shots} tirs",
     "inMatches": "{n, plural, =1 {1 match} other {# matchs}}",
     "allMatches": "Tous les matchs en détail",
     "unknownPlayer": "Non attribué",
@@ -1508,7 +1511,7 @@
     "basis": "Basé sur {matches} matchs contre cet adversaire, dont {tagged} avec événements. Créé le {date}.",
     "observationsHint": "Des observations tirées des données, pas des consignes. Chacune avec échantillon et clips.",
     "noObservations": "Pas assez de données pour des observations.",
-    "goalsShots": "{goals} buts sur {shots} tirs ({pct})",
+    "goalsShots": "{goals, plural, one {# but} other {# buts}} sur {shots} tirs ({pct})",
     "noShooters": "Aucun tir avec numéro de maillot saisi.",
     "noDefense": "Pas encore de données sur la défense.",
     "clipN": "Clip {n}",

@@ -114,6 +114,13 @@ reels never render (the test patches the same wrong path).
   demo said once; S/U/N squares aligned; season form squares stay square, "Das letzte Spiel.";
   `.sheet` tables open under a rule everywhere.
 
+- P2 review: overview and season ready, fixtures ready on desktop but names cut on phones and the
+  signal on a status. P3 (last round): names wrap and are never cut, the meta line stays short on
+  phones (no competition), the marked row says "Video hochladen", an "Kommend" line with "Spiel
+  ansetzen" when nothing is scheduled, the season table's sticky column on the page background
+  with a hairline, "1 Tor" in the singular, insight rows on the overview with an arrow. Slice
+  closed.
+
 Data/API (season): the season counts only matches with events (1 instead of 5 with a result) and
 adds goals from the report and from tagging (31 against 26:18 on the match page, which counts each
 goal once). Season figures should use one source per match, like the match statistics.

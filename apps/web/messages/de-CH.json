@@ -428,7 +428,10 @@
     "cardSaves": "{value} Paraden",
     "cardDemo": "Demo-Daten",
     "withoutVideo": "{n} von {total} ohne Video",
-    "allDemo": "Alles Demo-Spiele"
+    "allDemo": "Alles Demo-Spiele",
+    "uploadVideo": "Video hochladen",
+    "noneUpcoming": "Kein Spiel angesetzt.",
+    "scheduleOne": "Spiel ansetzen"
   },
   "upload": {
     "title": "Video hochladen",
@@ -1087,7 +1090,7 @@
     "fewestTurnovers": "Wenigste Ballverluste",
     "against": "gegen {opponent}",
     "scorers": "Torschützen",
-    "goalsOfShots": "{goals} Tore aus {shots} Würfen",
+    "goalsOfShots": "{goals, plural, one {# Tor} other {# Tore}} aus {shots} Würfen",
     "inMatches": "{n, plural, =1 {1 Spiel} other {# Spiele}}",
     "allMatches": "Alle Spiele im Detail",
     "unknownPlayer": "Nicht zugeordnet",
@@ -1508,7 +1511,7 @@
     "basis": "Basis: {matches} Spiele gegen diesen Gegner, davon {tagged} mit Ereignissen. Erstellt am {date}.",
     "observationsHint": "Beobachtungen aus den Daten, keine Anweisungen. Jede mit Stichprobe und Clips.",
     "noObservations": "Zu wenig Daten für Beobachtungen.",
-    "goalsShots": "{goals} Tore aus {shots} Würfen ({pct})",
+    "goalsShots": "{goals, plural, one {# Tor} other {# Tore}} aus {shots} Würfen ({pct})",
     "noShooters": "Keine Würfe mit Rückennummer erfasst.",
     "noDefense": "Noch keine Daten zur Abwehr.",
     "clipN": "Clip {n}",

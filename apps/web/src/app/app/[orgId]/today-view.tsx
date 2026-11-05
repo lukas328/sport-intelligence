@@ -334,6 +334,7 @@ function TopInsights({ orgId, m }: { orgId: string; m: Match }) {
               <span className="sr-only">{t(`insights.${i.kind}`)}: </span>
               {text(i)}
             </span>
+            <ArrowRight aria-hidden className="mt-1 ml-auto size-4 shrink-0 text-muted" />
           </Link>
         </li>
       ))}
