@@ -57,6 +57,10 @@ MIN_DURATION_S = 30.0
 STATIC_WIN_S, STATIC_RX, STATIC_RY, STATIC_SHARE = 15.0, 25.0, 15.0, 0.6
 MIN_BOX_PX = 18.0  # reference px
 MATCH_HEIGHTS = 1.2  # nearest-neighbour match within this many body heights
+# no play (half-time, before and after the game): an operated camera standing still for minutes
+STILL_PX_S = 40.0  # camera speed below this is "still" (reference px/s)
+STILL_WINDOW_S = 120.0  # centred window
+STILL_SHARE = 0.97  # share of the window the camera must be still
 
 
 @dataclass(frozen=True)
@@ -127,6 +131,14 @@ def smooth(x: F64, sec: float) -> F64:
     w /= w.sum()
     xp = np.pad(x, (k, k), mode="edge")
     return np.asarray(np.convolve(xp, w, mode="same")[k:-k], dtype=np.float64)
+
+
+def median3(x: F64) -> F64:
+    """Running median of 3 (edges repeated): removes one-sample spikes, keeps steps and ramps."""
+    if len(x) < 3:
+        return x
+    p = np.pad(x, 1, mode="edge")
+    return np.asarray(np.median(np.stack([p[:-2], p[1:-1], p[2:]]), axis=0), dtype=np.float64)
 
 
 def bin_mean(t: F64, x: F64, n: int) -> F64:
@@ -276,9 +288,8 @@ def signals(
     if ok.sum() >= 2:
         cx_cam = np.interp(cam_t, cam_t[ok], cam_x[ok])
         dt = np.diff(cam_t, prepend=cam_t[0] - (cam_t[1] - cam_t[0] if len(cam_t) > 1 else DT))
-        pan = smooth(
-            bin_mean(cam_t, np.diff(cx_cam, prepend=cx_cam[0]) / np.maximum(dt, 1e-3), n), 0.3
-        )
+        step = median3(np.diff(cx_cam, prepend=cx_cam[0]))  # a cut jumps for one frame only
+        pan = smooth(bin_mean(cam_t, step / np.maximum(dt, 1e-3), n), 0.3)
     else:
         pan = np.zeros(n)
     keep = (ph >= MIN_BOX_PX) & ~static_mask(pt, px, py)
@@ -374,20 +385,64 @@ def score(s: dict[str, F64], tmpl: Template) -> F64:
     return rolling_rz(template_series(ch, tmpl)) + rolling_rz(lull_series(s, tmpl))
 
 
+# --- play ----------------------------------------------------------------------------------------
+
+
+def running_mean(x: F64, win_s: float) -> F64:
+    """Mean over a centred window of `win_s`, clipped at the ends."""
+    n = len(x)
+    m = min(n, max(1, round(win_s / DT)))
+    c = np.r_[0.0, np.cumsum(x)]
+    i = np.arange(n)
+    lo = np.clip(i - m // 2, 0, n)
+    hi = np.clip(i - m // 2 + m, 0, n)
+    return np.asarray((c[hi] - c[lo]) / np.maximum(hi - lo, 1), dtype=np.float64)
+
+
+def no_play(s: dict[str, F64], moving: bool) -> NDArray[np.bool_]:
+    """True where nobody plays as far as the camera tells: an operated camera that stands still
+    (below `STILL_PX_S`) for `STILL_SHARE` of a centred `STILL_WINDOW_S` window. During play the
+    operator follows the ball across the court at least every minute or two; at half-time and
+    before or after the game the camera is parked. Time-outs (60 s) are too short to tell from a
+    long attack filmed by a parked camera, and a fixed camera is always still: never flagged."""
+    n = len(s["t"])
+    if not moving or n == 0:
+        return np.zeros(n, bool)
+    still = (np.abs(s["pan"]) < STILL_PX_S).astype(np.float64)
+    return np.asarray(running_mean(still, STILL_WINDOW_S) >= STILL_SHARE, dtype=bool)
+
+
+def intervals(t: F64, mask: NDArray[np.bool_]) -> list[tuple[float, float]]:
+    """[start, end) times of the runs of True."""
+    if not mask.any():
+        return []
+    d = np.diff(np.r_[0, mask.astype(np.int8), 0])
+    starts, ends = np.nonzero(d == 1)[0], np.nonzero(d == -1)[0]
+    return [(float(t[a]), float(t[b - 1]) + DT) for a, b in zip(starts, ends, strict=True)]
+
+
 # --- candidates ----------------------------------------------------------------------------------
 
 
 def pick(
-    t: F64, sc: F64, rates: tuple[int, ...] = RATES, block_s: float = BLOCK_S, step: int = 2
+    t: F64,
+    sc: F64,
+    rates: tuple[int, ...] = RATES,
+    block_s: float = BLOCK_S,
+    step: int = 2,
+    play: NDArray[np.bool_] | None = None,
 ) -> list[Candidate]:
-    """The best peaks per block: `max(rates)` per minute of each block, greedy in score order
-    with `NMS_S` suppression (also against the blocks before), none within `EDGE_S` of the ends.
-    The candidates of a lower rate are the first ones of a higher rate."""
+    """The best peaks per block: `max(rates)` per minute of play in each block, greedy in score
+    order with `NMS_S` suppression (also against the blocks before), none within `EDGE_S` of the
+    ends and none outside `play` (default: everywhere). The candidates of a lower rate are the
+    first ones of a higher rate."""
     if len(t) == 0:
         return []
     end = float(t[-1])
     ts, ss = t[::step], sc[::step]
     valid = (ts >= t[0] + EDGE_S) & (ts <= end - EDGE_S)
+    playing = np.ones(len(t), bool) if play is None else np.asarray(play, bool)
+    valid &= playing[::step]
     out: list[Candidate] = []
     top = max(rates)
     start = 0.0
@@ -395,7 +450,7 @@ def pick(
         stop = min(end, start + block_s)
         if end - stop < 0.25 * block_s:  # a short rest joins the last block
             stop = end
-        minutes = (stop - start) / 60
+        minutes = float(playing[(t >= start) & (t < stop)].sum()) * DT / 60
         quota = {r: round(r * minutes) for r in rates}
         inside = np.nonzero(valid & (ts >= start) & (ts < stop + (1e-9 if stop == end else 0)))[0]
         got: list[Candidate] = []
@@ -411,37 +466,59 @@ def pick(
     return sorted(out, key=lambda c: c.t)
 
 
-def candidates(s: dict[str, F64], tmpl: Template | None = None) -> list[Candidate]:
+def candidates(
+    s: dict[str, F64], tmpl: Template | None = None, moving: bool = True
+) -> list[Candidate]:
     tmpl = tmpl or load_template()
-    return pick(s["t"], score(s, tmpl))
+    return pick(s["t"], score(s, tmpl), play=~no_play(s, moving))
 
 
 # --- from the observation pass -------------------------------------------------------------------
 
 
-def _camera_x(motion: Any, n_frames: int) -> tuple[F64, float]:
-    """Canvas x of every frame's centre and the scale canvas px -> reference px."""
+def _reference_focal(motion: Any) -> float:
+    """Focal length of the reference frame (`REF_WIDTH` wide, at the median zoom) in px."""
     fw = float(motion.frame_size[0]) or REF_WIDTH
-    if not motion.moving:
-        return np.zeros(n_frames), REF_WIDTH / fw
     focal = float(np.median(motion.focals)) if motion.focals else fw
-    unit = (focal / max(float(motion.canvas_f), 1e-6)) * (REF_WIDTH / fw)
+    return focal * REF_WIDTH / fw
+
+
+def _camera_x(motion: Any, n_frames: int) -> F64:
+    """Pan of every frame's optical axis in reference px: its azimuth on the canvas times the
+    reference focal length (NaN for frames without camera pose; 0 for a fixed camera).
+
+    An angle, not the planar canvas x: on the planar canvas a degree of pan is stretched by
+    1 / cos^2 of the azimuth (about 3x at 55 degrees, where club cameras look at the goals) and
+    explodes near 90 degrees."""
+    if not motion.moving:
+        return np.zeros(n_frames)
     rots = motion.rotations
     out = np.full(n_frames, np.nan)
     have = [i for i in range(min(n_frames, len(rots))) if rots[i] is not None]
     if have:
         axes = np.stack([np.asarray(rots[i], np.float64)[2] for i in have])  # optical axes (world)
         cam = axes @ np.asarray(motion.ref_r, np.float64).T  # in canvas camera coordinates
-        z = np.where(cam[:, 2] > 1e-3, cam[:, 2], np.nan)
-        out[have] = (motion.canvas_f * cam[:, 0] / z + motion.canvas_c[0]) * unit
-    return out, unit
+        out[have] = np.arctan2(cam[:, 0], cam[:, 2]) * _reference_focal(motion)
+    return out
+
+
+def _canvas_to_reference(motion: Any, pts: F64) -> F64:
+    """Canvas px -> reference px on the same cylinder as `_camera_x` (x: azimuth, y: elevation,
+    both times the reference focal length); a fixed camera's frame is only scaled."""
+    if not motion.moving:
+        return np.asarray(pts * (REF_WIDTH / (float(motion.frame_size[0]) or REF_WIDTH)))
+    f = max(float(motion.canvas_f), 1e-6)
+    u = pts[:, 0] - motion.canvas_c[0]
+    v = pts[:, 1] - motion.canvas_c[1]
+    fref = _reference_focal(motion)
+    return np.column_stack([np.arctan2(u, f) * fref, v / np.hypot(u, f) * fref])
 
 
 def inputs_from_observations(obs: Any) -> tuple[F64, F64, F64, F64, F64, F64, float]:
     """Camera track and 2 Hz people samples of an `observe.Observations`, in reference px."""
     fps = float(obs.fps) or 25.0
     n_frames = max(int(obs.total), (obs.frames[-1].index + 1) if obs.frames else 0)
-    cam_x, unit = _camera_x(obs.motion, n_frames)
+    cam_x = _camera_x(obs.motion, n_frames)
     cam_t = np.arange(n_frames) / fps
     motion = obs.motion
     ts, xs, ys, hs = [], [], [], []
@@ -462,12 +539,12 @@ def inputs_from_observations(obs: Any) -> tuple[F64, F64, F64, F64, F64, F64, fl
             )
             @ np.asarray(h, np.float64).T
         )
-        pts = pts[:, :2] / pts[:, 2:3]
+        pts = _canvas_to_reference(motion, pts[:, :2] / pts[:, 2:3])
         feet, heads = pts[: len(boxes)], pts[len(boxes) :]
         ts.append(np.full(len(boxes), t))
-        xs.append(feet[:, 0] * unit)
-        ys.append(feet[:, 1] * unit)
-        hs.append(np.hypot(*(feet - heads).T) * unit)
+        xs.append(feet[:, 0])
+        ys.append(feet[:, 1])
+        hs.append(np.hypot(*(feet - heads).T))
 
     def cat(v: list[F64]) -> F64:
         return np.asarray(np.concatenate(v) if v else np.zeros(0), dtype=np.float64)
@@ -484,12 +561,15 @@ def from_observations(obs: Any, tmpl: Template | None = None) -> dict[str, Any] 
     if duration < MIN_DURATION_S or len(np.unique(pt)) < 20:
         return None
     s = signals(cam_t, cam_x, pt, px, py, ph, duration)
-    found = pick(s["t"], score(s, tmpl))
+    idle = no_play(s, bool(obs.motion.moving))
+    found = pick(s["t"], score(s, tmpl), play=~idle)
     return {
         "template": tmpl.version,
         "default_rate": DEFAULT_RATE,
         "rates": list(RATES),
         "duration_s": round(duration, 1),
+        "play_s": round(float((~idle).sum()) * DT, 1),
+        "no_play_ms": [[round(a * 1000), round(b * 1000)] for a, b in intervals(s["t"], idle)],
         "clip_s": [-CLIP_BEFORE_S, CLIP_AFTER_S],
         "candidates": [c.to_dict(duration) for c in found],
         "elapsed_s": round(time.perf_counter() - t0, 2),

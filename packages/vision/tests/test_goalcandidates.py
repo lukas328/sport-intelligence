@@ -210,6 +210,7 @@ def test_goal_candidates_from_observations() -> None:
     assert out["template"] == gc.load_template().version
     assert out["default_rate"] == 2 and out["rates"] == [1, 2, 4]
     assert out["duration_s"] == pytest.approx(360.0)
+    assert out["play_s"] == pytest.approx(360.0) and out["no_play_ms"] == []  # fixed camera
     cands = out["candidates"]
     assert len([c for c in cands if c["rate"] <= 2]) == 12
     for c in cands:
@@ -225,3 +226,80 @@ def test_too_little_to_go_on() -> None:
     assert gc.from_observations(obs) is None
     empty = observe.Observations(CameraMotion.fixed((1280, 720), 2000), [], {}, FPS, 2000)
     assert gc.from_observations(empty) is None
+
+
+def _yaw_motion(yaws_deg: NDArray[np.float64], f: float = 1500.0) -> CameraMotion:
+    rots: list[NDArray[np.float64] | None] = []
+    for d in yaws_deg:
+        a = np.radians(d)
+        rots.append(
+            np.array(
+                [[np.cos(a), 0, -np.sin(a)], [0, 1, 0], [np.sin(a), 0, np.cos(a)]], dtype=np.float64
+            )
+        )
+    return CameraMotion(
+        (1280, 720),
+        True,
+        rots,
+        [f] * len(rots),
+        ref_r=np.eye(3),
+        canvas_f=f / 2,
+        canvas_c=(2000.0, 400.0),
+        canvas_size=(4000, 800),
+    )
+
+
+def test_wide_pans_keep_their_speed() -> None:
+    """A steady pan from one goal to the other (-60 to +60 degrees) has the same speed at the
+    ends as in the middle: the camera track is an angle, not the planar canvas x, which is
+    stretched by 1 / cos^2 (4x at 60 degrees)."""
+    n = 1200
+    motion = _yaw_motion(np.linspace(-60, 60, n))
+    cam_x = gc._camera_x(motion, n)
+    speed = np.diff(cam_x) * FPS
+    expected = 1500 * np.radians(120 / (n - 1)) * FPS
+    assert speed == pytest.approx(np.full(n - 1, expected), rel=1e-6)
+    # people standing in the hall stay put on the same cylinder while the camera turns
+    pts = np.array([[2000.0 + 750 * np.tan(np.radians(a)), 500.0] for a in (-50, 0, 50)])
+    ref = gc._canvas_to_reference(motion, pts)
+    assert ref[:, 0] == pytest.approx(1500 * np.radians([-50, 0, 50]))
+
+
+def test_a_cut_is_no_pan() -> None:
+    """A cut moves the camera track by a large step in one frame; the median of 3 frame steps
+    keeps it out of the pan, while a real pan (many frames) stays."""
+    n = 1500
+    t = np.arange(n) / FPS
+    cam_x = np.where(t < 20, 0.0, 2000.0)  # cut at 20 s
+    cam_x = cam_x + np.clip((t - 40) * 200, 0, 1000)  # pan at 200 px/s from 40 to 45 s
+    pt = np.repeat(np.arange(0, 60, 0.5), 3)
+    px = np.tile([100.0, 600.0, 1100.0], len(pt) // 3) + 30 * np.sin(pt)
+    s = gc.signals(t, cam_x, pt, px, np.full(len(pt), 500.0), np.full(len(pt), 90.0), 60.0)
+    tg = s["t"]
+    assert np.abs(s["pan"][(tg > 18) & (tg < 22)]).max() < 1.0
+    assert s["pan"][(tg > 41) & (tg < 44)] == pytest.approx(200.0, rel=0.02)
+
+
+def test_no_play_while_a_moving_camera_is_parked() -> None:
+    t = np.arange(0, 540, gc.DT)  # 9 minutes: play, 3 minutes parked, play
+    rng = np.random.default_rng(2)
+    pan = 120 * np.sin(2 * np.pi * t / 25) + rng.normal(0, 5, len(t))
+    parked = (t >= 180) & (t < 360)
+    pan[parked] = rng.normal(0, 5, parked.sum())
+    s = {"t": t, "pan": pan}
+    idle = gc.no_play(s, moving=True)
+    assert idle[(t > 245) & (t < 295)].all()
+    assert not idle[(t < 175) | (t > 365)].any()
+    assert not gc.no_play(s, moving=False).any()  # a fixed camera is always still
+    runs = gc.intervals(t, idle)
+    assert len(runs) == 1 and 180 <= runs[0][0] < 245 and 295 < runs[0][1] <= 360
+
+
+def test_pick_skips_no_play_and_scales_the_quota() -> None:
+    t = np.arange(0, 360, gc.DT)
+    sc = gc.smooth(np.random.default_rng(4).normal(size=len(t)), 1.0)
+    play = ~((t >= 60) & (t < 300))  # 2 minutes of play
+    got = gc.pick(t, sc, play=play)
+    assert all(not 60 <= c.t < 300 for c in got)
+    # block 1: 1 minute of play, block 2: 1 minute
+    assert [len([c for c in got if c.rate <= r]) for r in gc.RATES] == [2, 4, 8]
