@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  gameTime,
   goalRows,
   isOpen,
   jumpTarget,
@@ -119,5 +120,12 @@ describe("official goals compared with the video", () => {
     expect(after.counts.open).toBe(1);
     expect(withReview(after, "c", null).counts.open).toBe(2);
     expect(cmp.extra[0]!.review).toBeNull(); // unchanged
+  });
+
+  it("shows the game time like the event list", () => {
+    expect(gameTime({ clockS: 179, time: "02:59" })).toBe("2:59");
+    expect(gameTime({ clockS: 1846, time: "30:46" })).toBe("30:46");
+    expect(gameTime({ clockS: null, time: "04:02" })).toBe("4:02");
+    expect(gameTime({ clockS: null, time: null })).toBeNull();
   });
 });

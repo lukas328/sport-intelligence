@@ -9,9 +9,12 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
+import { KitFields } from "@/components/domain/kit-fields";
 import { useCountUp } from "@/components/domain/match-score";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB } from "@/lib/color";
+import type { Kits } from "@/lib/kit";
+import { playerLabel } from "@/lib/player-name";
 import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
 import { EmptyState, Skeleton } from "@/components/ui/card";
@@ -109,7 +112,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const stats = useStats(orgId, initial.id);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(
-    () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.jersey_number != null ? `#${r.jersey_number} ` : ""}${r.first_name} ${r.last_name}`])),
+    () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
     [roster.data],
   );
 
@@ -577,6 +580,14 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
   const oppName = useOpponentName();
   const qc = useQueryClient();
   const [custom, setCustom] = useState(match.format === "custom");
+  const saved: Kits = {
+    own: match.kit_own,
+    own_gk: match.kit_own_gk,
+    opponent: match.kit_opponent,
+    opponent_gk: match.kit_opponent_gk,
+    referee: match.kit_referee ?? null,
+  };
+  const [kits, setKits] = useState(saved);
   async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -590,6 +601,8 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
         halftime_own: n("ht_own"),
         halftime_opponent: n("ht_opp"),
         ...(format === "custom" ? { format: "custom" as const, period_s: Number(f.get("minutes")) * 60, periods: Number(f.get("periods")) } : { format: format as "mini" }),
+        // only the kits that changed: null clears the referee kit
+        ...Object.fromEntries((Object.keys(kits) as (keyof Kits)[]).filter((k) => kits[k] !== saved[k]).map((k) => [`kit_${k}`, kits[k]])),
       },
     });
     await qc.invalidateQueries({ queryKey: ["match", match.id] });
@@ -624,6 +637,10 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
           </>
         )}
       </div>
+      <fieldset>
+        <legend className="mb-2 text-sm font-semibold">{t("matches.kits")}</legend>
+        <KitFields kits={kits} onChange={setKits} />
+      </fieldset>
       <Button type="submit">{t("common.save")}</Button>
     </form>
   );

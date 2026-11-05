@@ -12,6 +12,7 @@ import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
 import {
+  gameTime,
   goalRows,
   jumpTarget,
   nextReview,
@@ -21,6 +22,7 @@ import {
   type GoalRow,
   type Review,
 } from "@/lib/official-goals";
+import { playerLabel, reportName } from "@/lib/player-name";
 import { cn } from "@/lib/utils";
 
 const TONE: Record<GoalRow["kind"], Tone> = {
@@ -105,9 +107,9 @@ export function OfficialGoalsPanel({
   const team = (side: string) => (side === "own" ? ownName : oppName);
   const score = (s: number[] | null) =>
     s && s.length === 2 ? (isHome ? `${s[0]}:${s[1]}` : `${s[1]}:${s[0]}`) : null;
+  // the roster name, else the report's name in the same form ("#7 Lisa Zimmerli")
   const who = (r: GoalRow) =>
-    (r.playerId && names[r.playerId]) ||
-    [r.number != null ? `#${r.number}` : null, r.name].filter(Boolean).join(" ");
+    (r.playerId && names[r.playerId]) || playerLabel(r.number, reportName(r.name));
 
   return (
     <Card className="space-y-4" data-testid="official-goals">
@@ -158,7 +160,8 @@ export function OfficialGoalsPanel({
         >
           {rows.map((r) => {
             const target = jumpTarget(r);
-            const label = [r.time, team(r.side), who(r)].filter(Boolean).join(", ");
+            const time = gameTime(r);
+            const label = [time, team(r.side), who(r)].filter(Boolean).join(", ");
             const away = r.kind === "outside";
             return (
               <li
@@ -185,7 +188,7 @@ export function OfficialGoalsPanel({
                 )}
                 <span className="w-12 font-mono text-xs tabular-nums">
                   <span className="sr-only">{t("gameTime")} </span>
-                  {r.time ?? "-"}
+                  {time ?? "-"}
                 </span>
                 <span
                   className={cn(

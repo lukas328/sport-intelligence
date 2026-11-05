@@ -1,4 +1,5 @@
 import type { Schemas } from "@handball/api-client";
+import { formatClock } from "./format";
 
 /** Official goals compared with the goals the video analysis found (official-report/comparison). */
 export type GoalComparison = Schemas["GoalComparison"];
@@ -83,6 +84,14 @@ export function goalRows(
   );
   if (filter === "open") return rows.filter(isOpen);
   return outside ? rows : rows.filter((r) => r.kind !== "outside");
+}
+
+/** The game time as the event list and the goal candidates show it ("2:59"): from the match
+ * clock, else from the report's "MM:SS". */
+export function gameTime(r: Pick<GoalRow, "clockS" | "time">): string | null {
+  if (r.clockS != null) return formatClock(r.clockS * 1000);
+  const m = r.time ? /^(\d+):(\d{2})$/.exec(r.time.trim()) : null;
+  return m ? formatClock((Number(m[1]) * 60 + Number(m[2])) * 1000) : r.time;
 }
 
 export function isOpen(r: GoalRow): boolean {
