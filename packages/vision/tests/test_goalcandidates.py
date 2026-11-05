@@ -266,18 +266,23 @@ def test_wide_pans_keep_their_speed() -> None:
 
 
 def test_a_cut_is_no_pan() -> None:
-    """A cut moves the camera track by a large step in one frame; the median of 3 frame steps
-    keeps it out of the pan, while a real pan (many frames) stays."""
+    """A cut moves the camera track by a large step in one frame: it is no pan. A real pan
+    stays, also when the stream repeats frames (steps of 0, 0, 3x)."""
     n = 1500
     t = np.arange(n) / FPS
     cam_x = np.where(t < 20, 0.0, 2000.0)  # cut at 20 s
-    cam_x = cam_x + np.clip((t - 40) * 200, 0, 1000)  # pan at 200 px/s from 40 to 45 s
+    pan = np.clip((t - 40) * 200, 0, 1000)  # 200 px/s from 40 to 45 s
+    cam_x = cam_x + pan[np.arange(n) // 3 * 3]  # every frame shown three times
     pt = np.repeat(np.arange(0, 60, 0.5), 3)
     px = np.tile([100.0, 600.0, 1100.0], len(pt) // 3) + 30 * np.sin(pt)
     s = gc.signals(t, cam_x, pt, px, np.full(len(pt), 500.0), np.full(len(pt), 90.0), 60.0)
     tg = s["t"]
     assert np.abs(s["pan"][(tg > 18) & (tg < 22)]).max() < 1.0
-    assert s["pan"][(tg > 41) & (tg < 44)] == pytest.approx(200.0, rel=0.02)
+    assert np.mean(s["pan"][(tg > 41) & (tg < 44)]) == pytest.approx(200.0, rel=0.03)
+    steps = np.r_[np.zeros(10), 5.0, np.zeros(10)]
+    assert gc.drop_jumps(steps).tolist() == steps.tolist()  # small: kept
+    steps[10] = 300.0
+    assert not gc.drop_jumps(steps).any()
 
 
 def test_no_play_while_a_moving_camera_is_parked() -> None:

@@ -9,7 +9,7 @@ the median zoom, the units the template was learned in). Camera and people live 
 around the camera (azimuth times the reference focal length), not on the planar canvas, whose
 scale grows by 1 / cos^2 of the azimuth towards the goals:
 - `pan`: horizontal camera speed (azimuth of the optical axis per second; 0 for a fixed camera),
-  with one-frame jumps (cuts, misregistered frames) removed by a running median of 3 frame steps;
+  without one-frame jumps (cuts, misregistered frames, `drop_jumps`);
 - `cx_v`: speed of the people's median x in the image (canvas velocity minus the camera's): the
   play running towards one half while the camera lags or swings;
 - `vx`, `speed`: people matched mutual-nearest between detection frames 0.5 s apart on the canvas;
@@ -62,6 +62,7 @@ MIN_DURATION_S = 30.0
 # static people (bench, spectators, table): canvas spot occupied in `STATIC_SHARE` of the frames
 STATIC_WIN_S, STATIC_RX, STATIC_RY, STATIC_SHARE = 15.0, 25.0, 15.0, 0.6
 MIN_BOX_PX = 18.0  # reference px
+JUMP_K, JUMP_HALF, JUMP_PX = 6.0, 4, 30.0  # camera jumps (cuts): see `drop_jumps`
 MATCH_HEIGHTS = 1.2  # nearest-neighbour match within this many body heights
 # no play (half-time, before and after the game): an operated camera standing still for minutes
 STILL_PX_S = 40.0  # camera speed below this is "still" (reference px/s)
@@ -139,12 +140,19 @@ def smooth(x: F64, sec: float) -> F64:
     return np.asarray(np.convolve(xp, w, mode="same")[k:-k], dtype=np.float64)
 
 
-def median3(x: F64) -> F64:
-    """Running median of 3 (edges repeated): removes one-sample spikes, keeps steps and ramps."""
-    if len(x) < 3:
-        return x
-    p = np.pad(x, 1, mode="edge")
-    return np.asarray(np.median(np.stack([p[:-2], p[1:-1], p[2:]]), axis=0), dtype=np.float64)
+def drop_jumps(step: F64) -> F64:
+    """Camera steps (px per frame) with the jumps set to 0: a step larger than `JUMP_K` times the
+    mean step of its `JUMP_HALF` neighbours on either side plus `JUMP_PX` (a cut, a frame placed
+    wrongly). A pan lasts many frames and stays, also when the stream repeats frames (steps like
+    0, 0, 3x: a running median would erase those)."""
+    a = np.abs(step)
+    n = len(a)
+    c = np.r_[0.0, np.cumsum(a)]
+    i = np.arange(n)
+    lo = np.clip(i - JUMP_HALF, 0, n)
+    hi = np.clip(i + JUMP_HALF + 1, 0, n)
+    around = (c[hi] - c[lo] - a) / np.maximum(hi - lo - 1, 1)
+    return np.asarray(np.where(a > JUMP_K * around + JUMP_PX, 0.0, step), dtype=np.float64)
 
 
 def bin_mean(t: F64, x: F64, n: int) -> F64:
@@ -294,7 +302,7 @@ def signals(
     if ok.sum() >= 2:
         cx_cam = np.interp(cam_t, cam_t[ok], cam_x[ok])
         dt = np.diff(cam_t, prepend=cam_t[0] - (cam_t[1] - cam_t[0] if len(cam_t) > 1 else DT))
-        step = median3(np.diff(cx_cam, prepend=cx_cam[0]))  # a cut jumps for one frame only
+        step = drop_jumps(np.diff(cx_cam, prepend=cx_cam[0]))  # a cut jumps in one frame
         pan = smooth(bin_mean(cam_t, step / np.maximum(dt, 1e-3), n), 0.3)
     else:
         pan = np.zeros(n)

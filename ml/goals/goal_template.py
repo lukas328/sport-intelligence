@@ -95,21 +95,44 @@ def template_dict(prof: np.ndarray, version: str, extra: dict[str, Any]) -> dict
     }
 
 
+def product_signals(obs_dir: Path, stem: str) -> dict[str, np.ndarray] | None:
+    """Product signals of a segment from its stored observation pass (`product_path.py observe`:
+    the worker's proxy, rotation-model camera motion, YOLOX-s), or None when it was not run."""
+    from handball_vision import observe
+    from handball_vision.motion import CameraMotion
+
+    f = obs_dir / f"{stem}.obs.npz"
+    if not f.exists():
+        return None
+    obs = observe.load_observations(f, CameraMotion.load(obs_dir / f"{stem}.motion.npz"))
+    return gc.signals(*gc.inputs_from_observations(obs))
+
+
 def evaluate(
-    sigs: dict[str, dict], segs: dict, refs: dict, use: list[str], version: str
+    sigs: dict[str, dict],
+    segs: dict,
+    refs: dict,
+    use: list[str],
+    version: str,
+    scored: dict[str, dict] | None = None,
 ) -> tuple[dict[str, Any], dict[str, list]]:
-    """Leave-one-game-out: every game is scored with a template that none of its goals built."""
-    games = sorted({segs[k]["lab"]["game"] for k in use})
+    """Leave-one-game-out: every game is scored with a template that none of its goals built.
+    The templates come from `sigs`; `scored` (default `sigs`) are the signals they score, e.g.
+    the product path's for templates learned on the research pass."""
+    scored = scored or sigs
+    use = [k for k in use if k in scored]
+    games = sorted({segs[k]["lab"]["game"] for k in sigs})
     ex = {g: [] for g in games}
-    for k in use:
+    for k in sigs:
         ex[segs[k]["lab"]["game"]] += profile(sigs[k], refs[k])
     cands: dict[str, list] = {}
     series: dict[str, np.ndarray] = {}
     for k in use:
         others = [e for g, v in ex.items() if g != segs[k]["lab"]["game"] for e in v]
         tmpl = gc.Template.from_dict(template_dict(np.mean(others, axis=0), version, {}))
-        series[k] = gc.score(sigs[k], tmpl)
-        cands[k] = gc.pick(sigs[k]["t"], series[k])
+        series[k] = gc.score(scored[k], tmpl)
+        cands[k] = gc.pick(scored[k]["t"], series[k])
+    sigs = scored
     rows: dict[str, Any] = {}
     test = [k for k in use if segs[k]["lab"]["game"] not in se.DEV_GAMES]
     for name, subset in (("all", use), ("test", test)):
@@ -146,6 +169,12 @@ def main() -> None:
     ap.add_argument("--version", default=None, help="template version (default: today + .1)")
     ap.add_argument("--out", type=Path, default=OUT)
     ap.add_argument(
+        "--product",
+        type=Path,
+        help="observation passes of the segments (product_path.py observe): also evaluate on the "
+        "product path",
+    )
+    ap.add_argument(
         "--check",
         action="store_true",
         help="only compare the regenerated profile with the stored one",
@@ -177,6 +206,12 @@ def main() -> None:
     rows, _ = evaluate(sigs, segs, refs, use, version)
     for name, row in rows.items():
         print(f"{name}: {row}")
+    product_rows = None
+    if a.product:
+        prod = {k: s for k in use if (s := product_signals(a.product, k)) is not None}
+        product_rows, _ = evaluate(sigs, segs, refs, use, version, scored=prod)
+        for name, row in product_rows.items():
+            print(f"product path, {name}: {row}")
     extra = {
         "created": dt.date.today().isoformat(),
         "trained_on": {
@@ -191,6 +226,12 @@ def main() -> None:
         },
         "evaluation_leave_one_game_out": rows,
     }
+    if product_rows is not None:
+        extra["evaluation_product_path_leave_one_game_out"] = {
+            **product_rows,
+            "path": "worker proxy (1280 px, 25 fps), observe.observe camera motion, YOLOX-s every "
+            "3rd frame, people at 2 Hz (ml/goals/product_path.py)",
+        }
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(template_dict(prof, version, extra), indent=1) + "\n")
     print(f"wrote {a.out} ({a.out.stat().st_size} bytes), version {version}, {len(allp)} goals")
