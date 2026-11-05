@@ -69,7 +69,7 @@ def test_clock_map_counts_from_the_nearer_anchor() -> None:
     # an overlay run is exact
     cm = match_clock.build(match, {"scoreboard": OVERLAY}, [])  # type: ignore[arg-type]
     assert cm.video_ms(1, 126.0) == (66_000, 0)
-    assert cm.video_ms(1, 42.0) == (-18_000, 0)  # before the run: throw-off and run start agree
+    assert cm.video_ms(1, 42.0) == (-18_000, None)  # before the run: stops unknown
 
 
 async def test_shot_candidates_with_the_official_report(
@@ -168,6 +168,13 @@ async def test_shot_candidates_with_the_official_report(
     data = (await api.get(shot_url)).json()
     row = next(o for o in data["official"]["shots"] if o["event_id"] == entry["id"])
     assert (row["status"], row["candidate_id"], row["t_ms"]) == ("confirmed", save["id"], 67_500)
+    # a re-import of the report keeps the confirmed video time; the candidate follows the entry
+    assert (await api.post(f"{base}/official-report", json={"url": CH_URL})).status_code == 200
+    again = next(e for e in (await api.get(f"{base}/events")).json() if e["clock_s"] == 126)
+    assert again["t_ms"] == 67_500 and again["attributes"]["video"]["candidate_id"] == save["id"]
+    rows = (await api.get(shot_url)).json()["candidates"]
+    assert rows[0]["event_id"] == again["id"] and rows[0]["status"] == "confirmed"
+    entry = {**entry, "id": again["id"]}
 
     # another side or outcome than the report entry it pins is refused
     review = f"{url}/{miss['id']}/review"
@@ -241,3 +248,40 @@ async def test_shot_candidates_with_the_official_report(
         (400_000, "confirmed"),
     ]
     assert (await api.get(url)).json()["candidates"] == []
+
+
+async def test_shots_confirmed_before_the_report_are_taken_over(
+    make_api: Callable[[], Api],
+    recorded: list[tuple[str, int]],  # noqa: F811
+) -> None:
+    """The coach confirmed a save on the video; the report imported later has it with the player:
+    the report entry takes the video time and the candidate's own event goes (one save)."""
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids, opponent_name="HC Arbon")
+    base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
+    await upload(api, ids, m["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    payload = {"tracks": [], "needs_calibration": True, "scoreboard": OVERLAY}
+    await _finish(api, jobs.jobs[-1][2], {**payload, "goal_candidates": FOUND})
+    rows = (await api.get(f"{base}/shot-candidates")).json()["candidates"]
+    first = rows[0]
+    r = await api.put(
+        f"{base}/goal-candidates/{first['id']}/review",
+        json={"status": "confirmed", "side": "opponent", "outcome": "save"},
+    )
+    own = r.json()["event_id"]
+    assert (await api.post(f"{base}/official-report", json={"url": CH_URL})).status_code == 200
+    events = (await api.get(f"{base}/events")).json()
+    assert own not in {e["id"] for e in events}
+    saves = [e for e in events if e["outcome"] == "save" and e["clock_s"] == 126]
+    assert len(saves) == 1 and saves[0]["source"] == "official_report"
+    assert saves[0]["t_ms"] == 67_500 and saves[0]["number"] == 5
+    assert saves[0]["attributes"]["video"]["candidate_id"] == first["id"]
+    # the other entries get their time from the overlay clock (1:00 at 0 s of the clip)
+    miss = next(e for e in events if e["outcome"] == "miss" and e["clock_s"] == 144)
+    assert miss["t_ms"] == 84_000
+    data = (await api.get(f"{base}/shot-candidates")).json()
+    assert data["candidates"][0]["event_id"] == saves[0]["id"]
+    assert data["candidates"][1]["suggestion"]["event_id"] == miss["id"]

@@ -1,0 +1,655 @@
+{
+ "name": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+ "official": "ml/data/official/CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19.json",
+ "game_id": 488469,
+ "result": "25:32",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 60.0,
+  "duration_s": 7305.674,
+  "batch": "batch_l01"
+ },
+ "segments": [
+  {
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s0.mp4",
+   "start_s": 1095.85,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "start_s": 2191.7,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    112.0,
+    290.0
+   ],
+   "entries": 7,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "start_s": 3652.84,
+   "clock_source": "overlay",
+   "readings": 87,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    1370.0,
+    1534.0
+   ],
+   "entries": 11,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "start_s": 5113.97,
+   "clock_source": "overlay",
+   "readings": 87,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    1921.0,
+    2098.0
+   ],
+   "entries": 7,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s4.mp4",
+   "start_s": 6209.82,
+   "clock_source": "overlay",
+   "readings": 90,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2887.0,
+    3067.0
+   ],
+   "entries": 4,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "goal": 13,
+  "shot_missed": 4,
+  "turnover": 4,
+  "shot_saved": 3,
+  "empty_goal": 2,
+  "goalkeeper_in": 2,
+  "other": 1
+ },
+ "entries": [
+  {
+   "match_s": 127,
+   "time": "02:07",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 8,
+   "name": "BABIC Ante",
+   "score": [
+    1,
+    2
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 16000,
+   "video_ms": 2207700,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 141,
+   "time": "02:21",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 9,
+   "name": "ZOLLINGER Malik",
+   "score": [
+    1,
+    2
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 30000,
+   "video_ms": 2221700,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 149,
+   "time": "02:29",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 8,
+   "name": "BABIC Ante",
+   "score": [
+    1,
+    3
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 38000,
+   "video_ms": 2229700,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 205,
+   "time": "03:25",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 9,
+   "name": "ZOLLINGER Malik",
+   "score": [
+    1,
+    3
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 94000,
+   "video_ms": 2285700,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 236,
+   "time": "03:56",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 14,
+   "name": "VOSKAMP Jannis",
+   "score": [
+    1,
+    4
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 125000,
+   "video_ms": 2316700,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 252,
+   "time": "04:12",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 23,
+   "name": "WÜNSCH Tim",
+   "score": [
+    1,
+    4
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 141000,
+   "video_ms": 2332700,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 290,
+   "time": "04:50",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "away",
+   "number": 18,
+   "name": "HEINIS Robin",
+   "score": [
+    1,
+    4
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 179000,
+   "video_ms": 2370700,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1383,
+   "time": "23:03",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 13,
+   "name": "GANTNER Pascal",
+   "score": [
+    11,
+    15
+   ],
+   "goalkeeper": {
+    "number": 1,
+    "name": "KÜHNER Yasin"
+   },
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 13250,
+   "video_ms": 3666090,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1392,
+   "time": "23:12",
+   "action": "Empty Goal",
+   "kind": "empty_goal",
+   "team": "away",
+   "number": 1,
+   "name": "KÜHNER Yasin",
+   "score": [
+    11,
+    15
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 22250,
+   "video_ms": 3675090,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1415,
+   "time": "23:35",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 24,
+   "name": "SPENDE Aleksander",
+   "score": [
+    11,
+    16
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 45250,
+   "video_ms": 3698090,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1416,
+   "time": "23:36",
+   "action": "Goalie in",
+   "kind": "goalkeeper_in",
+   "team": "away",
+   "number": 1,
+   "name": "KÜHNER Yasin",
+   "score": [
+    11,
+    16
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 46250,
+   "video_ms": 3699090,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1423,
+   "time": "23:43",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    11,
+    16
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 53250,
+   "video_ms": 3706090,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1427,
+   "time": "23:47",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 5,
+   "name": "BERGER Basil",
+   "score": [
+    11,
+    17
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 57250,
+   "video_ms": 3710090,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1464,
+   "time": "24:24",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 23,
+   "name": "WÜNSCH Tim",
+   "score": [
+    12,
+    17
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 94250,
+   "video_ms": 3747090,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1472,
+   "time": "24:32",
+   "action": "Empty Goal",
+   "kind": "empty_goal",
+   "team": "away",
+   "number": 1,
+   "name": "KÜHNER Yasin",
+   "score": [
+    12,
+    17
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 102250,
+   "video_ms": 3755090,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1491,
+   "time": "24:51",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 60,
+   "name": "HILDEBRANDT Michel",
+   "score": [
+    12,
+    18
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 121250,
+   "video_ms": 3774090,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1493,
+   "time": "24:53",
+   "action": "Goalie in",
+   "kind": "goalkeeper_in",
+   "team": "away",
+   "number": 1,
+   "name": "KÜHNER Yasin",
+   "score": [
+    12,
+    18
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 123250,
+   "video_ms": 3776090,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1519,
+   "time": "25:19",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 23,
+   "name": "WÜNSCH Tim",
+   "score": [
+    12,
+    18
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 149250,
+   "video_ms": 3802090,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1930,
+   "time": "32:10",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 7,
+   "name": "BIFFIGER Francesco",
+   "score": [
+    16,
+    19
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 9750,
+   "video_ms": 5123720,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1944,
+   "time": "32:24",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 9,
+   "name": "IMARE Edson",
+   "score": [
+    16,
+    19
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "STEINER Jonas"
+   },
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 23750,
+   "video_ms": 5137720,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1952,
+   "time": "32:32",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 13,
+   "name": "GANTNER Pascal",
+   "score": [
+    17,
+    19
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 31750,
+   "video_ms": 5145720,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1988,
+   "time": "33:08",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 31,
+   "name": "MEISTER Elia",
+   "score": [
+    17,
+    20
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 67750,
+   "video_ms": 5181720,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2037,
+   "time": "33:57",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    17,
+    20
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 116750,
+   "video_ms": 5230720,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2051,
+   "time": "34:11",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 31,
+   "name": "MEISTER Elia",
+   "score": [
+    17,
+    21
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 130750,
+   "video_ms": 5244720,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2088,
+   "time": "34:48",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 23,
+   "name": "WÜNSCH Tim",
+   "score": [
+    17,
+    21
+   ],
+   "goalkeeper": {
+    "number": 1,
+    "name": "KÜHNER Yasin"
+   },
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 167750,
+   "video_ms": 5281720,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2950,
+   "time": "49:10",
+   "action": "7m Fehler",
+   "kind": "other",
+   "team": "home",
+   "number": 14,
+   "name": "KÄLIN David",
+   "score": [
+    22,
+    27
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 63000,
+   "video_ms": 6272820,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2981,
+   "time": "49:41",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "away",
+   "number": 31,
+   "name": "MEISTER Elia",
+   "score": [
+    22,
+    27
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 94000,
+   "video_ms": 6303820,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2999,
+   "time": "49:59",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    23,
+    27
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 112000,
+   "video_ms": 6321820,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3005,
+   "time": "50:05",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 31,
+   "name": "MEISTER Elia",
+   "score": [
+    23,
+    28
+   ],
+   "segment": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 118000,
+   "video_ms": 6327820,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  }
+ ]
+}

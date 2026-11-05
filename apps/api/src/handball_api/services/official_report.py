@@ -22,6 +22,12 @@ Only these fixed hosts are contacted; the given URL only names the game.
     counted twice. Automatic goals without an official counterpart are kept when read from the
     overlay or confirmed by the coach (they show where the video and the report disagree) and
     dropped when only estimated (heuristic);
+  * the other shots (saves, misses) the same way against the shots the coach confirmed on a
+    shot candidate (same side and outcome): the official entry takes over the video time and the
+    candidate now points to it; an entry confirmed on the video before a re-import keeps it;
+  * entries without a video time from the video get theirs from the match clock
+    (match_clock: the overlay clock of the analysis, entries with a known video time, the
+    throw-offs), not counted linearly from the throw-off of the half;
   * suspensions, time-outs and the other entries are added as they are.
 
 `comparison` lists the official goals next to what the video found (the import's video data, or an
@@ -46,8 +52,8 @@ import httpx
 from sqlalchemy import delete, select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import Event, Match, Opponent, RosterEntry
-from handball_api.services import audit
+from handball_api.models import Event, GoalCandidate, Match, Opponent, RosterEntry
+from handball_api.services import audit, match_clock
 from handball_api.services.auto_events import CANDIDATE, OFFICIAL, OVERLAY
 from handball_api.services.context import Ctx
 from handball_api.services.events import video_from_clock
@@ -449,6 +455,18 @@ class _Seen:
     source: str
     confidence: float
     event: Event | None = None
+    outcome: str = "goal"
+    candidate_id: str | None = None  # the video candidate it was confirmed on
+
+
+def _candidate_of(e: Event) -> str | None:
+    """The candidate an event was confirmed on: its own event, or a report entry it pinned."""
+    attrs = e.attributes or {}
+    v = attrs.get("video")
+    if isinstance(v, dict) and v.get("candidate_id"):
+        return str(v["candidate_id"])
+    c = attrs.get("goal_candidate")
+    return str(c) if c else None
 
 
 def _period(e: OfficialEntry, period_s: int, half_time: tuple[int, int] | None) -> int:
@@ -466,9 +484,26 @@ def _words(name: str | None) -> set[str]:
     return {w for w in re.split(r"[^\w]+", (name or "").casefold()) if len(w) >= 4}
 
 
-def _nearest(cands: list[Any], side: str, clock: float) -> Any | None:
-    best = [c for c in cands if c.side == side and abs(c.clock_s - clock) <= MATCH_WINDOW_S]
+def _nearest(cands: list[Any], side: str, clock: float, outcome: str = "goal") -> Any | None:
+    best = [
+        c
+        for c in cands
+        if c.side == side
+        and getattr(c, "outcome", "goal") == outcome
+        and abs(c.clock_s - clock) <= MATCH_WINDOW_S
+    ]
     return min(best, key=lambda c: abs(c.clock_s - clock)) if best else None
+
+
+async def _analysis(ctx: Ctx, match: Match) -> dict[str, Any] | None:
+    """The analysis of the match's timeline video (its overlay clock maps the report)."""
+    video = await timeline_video(ctx, match.id)
+    return video.analysis if video is not None else None
+
+
+def _clock_time(cm: match_clock.ClockMap, match: Match, period: int, clock: float) -> int | None:
+    t, _ = cm.video_ms(period, clock) if period in (1, 2) else (None, None)
+    return t if t is not None else video_from_clock(match, period, clock)
 
 
 async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any]:
@@ -495,6 +530,8 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
                     y=p.y,
                     source=str(v.get("source", OVERLAY)),
                     confidence=float(v.get("confidence", 0.9)),
+                    outcome=p.outcome or "goal",
+                    candidate_id=_candidate_of(p),
                 )
             )
     await ctx.db.execute(delete(Event).where(Event.match_id == match.id, Event.source == SOURCE))
@@ -507,10 +544,48 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
     ).all()
     auto = [g for g in goals if g.source in AUTO_GOALS]
     seen += [
-        _Seen(g.side, float(g.clock_s), g.t_ms, g.x, g.y, g.source, g.confidence, g)
+        _Seen(
+            g.side,
+            float(g.clock_s),
+            g.t_ms,
+            g.x,
+            g.y,
+            g.source,
+            g.confidence,
+            g,
+            candidate_id=_candidate_of(g),
+        )
         for g in auto
         if g.clock_s is not None
     ]
+    # saves and misses the coach confirmed on a shot candidate: matched like automatic goals
+    confirmed_shots = (
+        await ctx.db.scalars(
+            select(Event).where(
+                Event.match_id == match.id,
+                Event.type == "shot",
+                Event.outcome != "goal",
+                Event.source == CANDIDATE,
+                Event.clock_s.is_not(None),
+            )
+        )
+    ).all()
+    seen += [
+        _Seen(
+            g.side,
+            float(g.clock_s or 0.0),
+            g.t_ms,
+            g.x,
+            g.y,
+            g.source,
+            g.confidence,
+            g,
+            outcome=g.outcome or "miss",
+            candidate_id=_candidate_of(g),
+        )
+        for g in confirmed_shots
+    ]
+    clock_map = match_clock.build(match, await _analysis(ctx, match), [])
     manual = [
         _Seen(g.side, float(g.clock_s), g.t_ms, g.x, g.y, g.source, g.confidence, g)
         for g in goals
@@ -534,6 +609,7 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
     created, matched, kept_manual, skipped = 0, 0, 0, 0
     unknown_numbers: set[int] = set()
     used: set[int] = set()  # ids of matched candidates
+    relink: list[tuple[str, Event]] = []  # video candidate -> the new official event
     for e in report.entries:
         spec = _EVENTS.get(e.kind)
         if spec is None or e.team is None:
@@ -547,7 +623,23 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
             attrs["name"] = e.name[:80]
         if e.score:
             attrs["score"] = list(e.score if own_team == "home" else e.score[::-1])
-        t_ms, x, y = video_from_clock(match, period, clock), None, None
+        t_ms, x, y = _clock_time(clock_map, match, period, clock), None, None
+        pinned: _Seen | None = None
+        if spec.get("type") == "shot" and spec.get("outcome") != "goal":
+            pinned = _nearest(
+                [c for c in seen if id(c) not in used], side, clock, str(spec["outcome"])
+            )
+            if pinned is not None:
+                used.add(id(pinned))
+                if pinned.t_ms is not None:
+                    t_ms = int(pinned.t_ms)
+                attrs["video"] = {
+                    "source": pinned.source,
+                    "clock_s": pinned.clock_s,
+                    "t_ms": pinned.t_ms,
+                    "confidence": round(pinned.confidence, 3),
+                    **({"candidate_id": pinned.candidate_id} if pinned.candidate_id else {}),
+                }
         if spec.get("outcome") == "goal":
             free = [c for c in manual if id(c) not in used]
             hit = _nearest(free, side, clock)
@@ -567,7 +659,9 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
                     "clock_s": vid.clock_s,
                     "t_ms": vid.t_ms,
                     "confidence": round(vid.confidence, 3),
+                    **({"candidate_id": vid.candidate_id} if vid.candidate_id else {}),
                 }
+                pinned = vid
             if (side, clock) in reviewed:
                 attrs["review"] = reviewed[(side, clock)]
         if spec.get("outcome") == "save" and e.goalkeeper_number is not None:
@@ -578,27 +672,28 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
         player = roster.get(e.number) if side == "own" and e.number is not None else None
         if side == "own" and e.number is not None and player is None:
             unknown_numbers.add(e.number)
-        ctx.db.add(
-            Event(
-                organization_id=match.organization_id,
-                match_id=match.id,
-                type=spec["type"],
-                side=side,
-                period=period,
-                clock_s=clock,
-                t_ms=t_ms,
-                number=e.number,
-                player_id=player,
-                outcome=spec.get("outcome"),
-                shot_type=spec.get("shot_type"),
-                shot_zone="penalty" if spec.get("shot_type") == "penalty" else None,
-                x=x,
-                y=y,
-                source=SOURCE,
-                confidence=1.0,
-                attributes=attrs,
-            )
+        new = Event(
+            organization_id=match.organization_id,
+            match_id=match.id,
+            type=spec["type"],
+            side=side,
+            period=period,
+            clock_s=clock,
+            t_ms=t_ms,
+            number=e.number,
+            player_id=player,
+            outcome=spec.get("outcome"),
+            shot_type=spec.get("shot_type"),
+            shot_zone="penalty" if spec.get("shot_type") == "penalty" else None,
+            x=x,
+            y=y,
+            source=SOURCE,
+            confidence=1.0,
+            attributes=attrs,
         )
+        ctx.db.add(new)
+        if pinned is not None and pinned.candidate_id:
+            relink.append((pinned.candidate_id, new))
         created += 1
 
     # automatic goals: the matched ones are now official goals; estimates without a counterpart
@@ -611,6 +706,15 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
             await ctx.db.delete(g)
         else:
             unmatched_video += 1
+    for g in confirmed_shots:  # the official entry took over: one shot, not two
+        if id(g) in taken:
+            await ctx.db.delete(g)
+    await ctx.db.flush()
+    for cand_id, ev in relink:  # the candidate now points to the official entry
+        with contextlib.suppress(ValueError):
+            c = await ctx.db.get(GoalCandidate, uuid.UUID(cand_id))
+            if c is not None and c.match_id == match.id and c.status == "confirmed":
+                c.event_id = ev.id
 
     warnings: list[str] = []
     final = report.final
