@@ -744,7 +744,11 @@
     "tt_offensive_foul": "Stürmerfoul",
     "tt_line_violation": "Kreisübertritt",
     "tt_passive_play": "Zeitspiel",
-    "tt_other": "Andere"
+    "tt_other": "Andere",
+    "moreEvents": "Strafen und Unterbrechungen",
+    "whereTitle": "Wurfposition und Torecke",
+    "whereSet": "gesetzt",
+    "setupTitle": "Torhüter und Import"
   },
   "paper": {
     "title": "Papier-Matchreport importieren",

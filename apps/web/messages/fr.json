@@ -744,7 +744,11 @@
     "tt_offensive_foul": "Faute offensive",
     "tt_line_violation": "Pied dans la zone",
     "tt_passive_play": "Jeu passif",
-    "tt_other": "Autre"
+    "tt_other": "Autre",
+    "moreEvents": "Sanctions et interruptions",
+    "whereTitle": "Position du tir et coin du but",
+    "whereSet": "défini",
+    "setupTitle": "Gardiens et import"
   },
   "paper": {
     "title": "Importer une feuille de match papier",

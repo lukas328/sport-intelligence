@@ -154,15 +154,6 @@ export function Tagger({
     create.mutate({ ...base("turnover"), turnover_type: turnoverType, x: pos?.x ?? null, y: pos?.y ?? null });
   }
 
-  async function kickoff(period: number) {
-    const ms = Math.round(getTime());
-    const { error } = await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period, t_ms: ms } });
-    if (error) return setFailure(errorKey(error));
-    setFailure(null);
-    setNotice(t("kickoffSet", { period, time: formatClock(ms) }));
-    refresh();
-  }
-
   async function importFeed(e: ChangeEvent<HTMLInputElement>) {
     const input = e.currentTarget;
     const file = input.files?.[0];
@@ -198,16 +189,23 @@ export function Tagger({
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const kicked = match.kickoff_ms ?? {};
+  const keyOf = Object.fromEntries(Object.entries(HOTKEYS).map(([k, v]) => [v, k.toUpperCase()]));
+  const field = "min-h-10 w-full rounded-md bg-raised px-2 ring-1 ring-inset ring-border";
+  const sectionTitle = "font-score text-[0.8125rem] uppercase tracking-wide text-muted";
+  // laid out like a match sheet: who, what (one key each), details, then the rarer events
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto text-sm" data-testid="tagger">
-      <div className="flex gap-1" role="group" aria-label={t("side")}>
+    <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto text-sm" data-testid="tagger">
+      <div className="flex gap-5 border-b border-foreground/15" role="group" aria-label={t("side")}>
         {(["own", "opponent"] as const).map((s) => (
           <button
             key={s}
+            type="button"
             aria-pressed={side === s}
             onClick={() => setSide(s)}
-            className={cn("flex-1 rounded border px-2 py-1.5", side === s ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+            className={cn(
+              "-mb-px min-h-11 border-b-[3px] font-display text-lg outline-none focus-visible:ring-2 focus-visible:ring-accent",
+              side === s ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground",
+            )}
           >
             {s === "own" ? teamName : oppName(match)}
           </button>
@@ -217,7 +215,7 @@ export function Tagger({
       {side === "own" ? (
         <label className="flex flex-col gap-1">
           <span className="font-medium">{t("player")}</span>
-          <select value={player} onChange={(e) => setPlayer(e.target.value)} className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2">
+          <select value={player} onChange={(e) => setPlayer(e.target.value)} className={field}>
             <option value="">{t("noPlayer")}</option>
             {(roster.data ?? [])
               .filter((r) => r.active)
@@ -233,120 +231,67 @@ export function Tagger({
       ) : (
         <label className="flex flex-col gap-1">
           <span className="font-medium">{t("opponentNumber")}</span>
-          <input
-            type="number"
-            min={0}
-            max={99}
-            value={oppNumber}
-            onChange={(e) => setOppNumber(e.target.value)}
-            className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
-          />
+          <input type="number" min={0} max={99} value={oppNumber} onChange={(e) => setOppNumber(e.target.value)} className={field} />
         </label>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <section className="space-y-2" aria-labelledby="tag-what">
+        <h3 id="tag-what" className={sectionTitle}>{t("tagTitle")}</h3>
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3" role="group" aria-label={t("tagTitle")}>
+          {[...OUTCOMES, "turnover" as const].map((o) => (
+            <Button
+              key={o}
+              variant="secondary"
+              className="justify-start gap-2 px-2.5"
+              disabled={create.isPending}
+              aria-keyshortcuts={keyOf[o]}
+              onClick={() => (o === "turnover" ? turnover() : shot(o))}
+            >
+              {keyOf[o] && (
+                <kbd aria-hidden className="w-3 font-score text-muted">
+                  {keyOf[o]}
+                </kbd>
+              )}
+              {t(o)}
+            </Button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+          <label className="flex min-h-8 items-center gap-1.5">
+            <input type="checkbox" checked={penalty} onChange={(e) => (setPenalty(e.target.checked), e.target.checked && setFastBreak(false))} />
+            {t("penaltyShot")}
+          </label>
+          <label className="flex min-h-8 items-center gap-1.5">
+            <input type="checkbox" checked={fastBreak} onChange={(e) => (setFastBreak(e.target.checked), e.target.checked && setPenalty(false))} />
+            {t("fastBreak")}
+          </label>
+        </div>
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium">{tk("ownKeeper")}</span>
-          <select
-            value={keepers.own}
-            onChange={(e) => updateKeepers({ ...keepers, own: e.target.value })}
-            className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
-          >
-            <option value="">-</option>
-            {(roster.data ?? [])
-              .filter((r) => r.active)
-              .sort((a, b) => Number(b.main_position === "TW") - Number(a.main_position === "TW") || (a.jersey_number ?? 999) - (b.jersey_number ?? 999))
-              .map((r) => (
-                <option key={r.player_id} value={r.player_id}>
-                  {r.jersey_number != null ? `#${r.jersey_number} ` : ""}
-                  {r.first_name} {r.last_name}
-                </option>
-              ))}
+          <span className="text-[0.8125rem] font-medium">{t("turnoverType")}</span>
+          <select value={turnoverType} onChange={(e) => setTurnoverType(e.target.value as (typeof TURNOVERS)[number])} className={field}>
+            {TURNOVERS.map((k) => (
+              <option key={k} value={k}>
+                {t(`tt_${k}`)}
+              </option>
+            ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium">{tk("oppKeeper")}</span>
-          <input
-            type="number"
-            min={0}
-            max={99}
-            value={keepers.opp}
-            onChange={(e) => updateKeepers({ ...keepers, opp: e.target.value })}
-            className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
-          />
-        </label>
-      </div>
+      </section>
 
-      <div className="flex flex-wrap gap-3">
-        <label className="flex items-center gap-1.5">
-          <input type="checkbox" checked={penalty} onChange={(e) => (setPenalty(e.target.checked), e.target.checked && setFastBreak(false))} />
-          {t("penaltyShot")}
-        </label>
-        <label className="flex items-center gap-1.5">
-          <input type="checkbox" checked={fastBreak} onChange={(e) => (setFastBreak(e.target.checked), e.target.checked && setPenalty(false))} />
-          {t("fastBreak")}
-        </label>
-      </div>
-
-      <div className="grid grid-cols-3 gap-1" role="group" aria-label={t("tagTitle")}>
-        {OUTCOMES.map((o) => (
-          <Button key={o} variant={o === "goal" ? "primary" : "secondary"} className="px-2" disabled={create.isPending} onClick={() => shot(o)}>
-            {t(o)}
+      <section className="space-y-2" aria-labelledby="tag-more">
+        <h3 id="tag-more" className={sectionTitle}>{t("moreEvents")}</h3>
+        <div className="flex flex-wrap gap-1.5">
+          <Button variant="secondary" className="px-2.5" onClick={() => create.mutate(base("suspension_2min"))}>
+            {t("suspension")}
           </Button>
-        ))}
-        <Button variant="secondary" className="px-2" disabled={create.isPending} onClick={turnover}>
-          {t("turnover")}
-        </Button>
-      </div>
-      <label className="flex flex-col gap-1">
-        <span className="font-medium">{t("turnoverType")}</span>
-        <select
-          value={turnoverType}
-          onChange={(e) => setTurnoverType(e.target.value as (typeof TURNOVERS)[number])}
-          className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
-        >
-          {TURNOVERS.map((k) => (
-            <option key={k} value={k}>
-              {t(`tt_${k}`)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <div className="grid grid-cols-3 gap-1">
-        <Button variant="ghost" className="px-2" onClick={() => create.mutate(base("suspension_2min"))}>
-          {t("suspension")}
-        </Button>
-        <Button variant="ghost" className="px-2" onClick={() => create.mutate(base("seven_meter_awarded"))}>
-          {t("sevenM")}
-        </Button>
-        <Button variant="ghost" className="px-2" onClick={() => create.mutate(base("timeout"))}>
-          {t("timeout")}
-        </Button>
-      </div>
-      <p className="text-xs text-muted">{t("hotkeys")}</p>
-
-      <div className="space-y-1">
-        <p className="font-medium">{t("position")}</p>
-        <CourtHalf label={t("position")} onPick={(x, y) => setPos({ x, y })}>
-          {pos && <ShotDot x={pos.x} y={pos.y} outcome="goal" />}
-        </CourtHalf>
-      </div>
-      <div className="space-y-1">
-        <p className="font-medium">{t("goalZone")}</p>
-        <GoalGrid mode="pick" selected={zone} onCell={(z) => setZone((cur) => (cur === z ? null : z))} />
-      </div>
-
-      <div className="flex flex-wrap gap-1">
-        {[1, 2].map((p) => (
-          <Button key={p} variant="secondary" className="px-2 text-xs" onClick={() => void kickoff(p)}>
-            {kicked[String(p)] != null ? t("kickoffSet", { period: p, time: formatClock(kicked[String(p)]!) }) : t("kickoff", { period: p })}
+          <Button variant="secondary" className="px-2.5" onClick={() => create.mutate(base("seven_meter_awarded"))}>
+            {t("sevenM")}
           </Button>
-        ))}
-      </div>
-      <label className="flex flex-col gap-1">
-        <span className="font-medium">{t("import")}</span>
-        <input type="file" accept=".csv,.json,text/csv,application/json" onChange={importFeed} className="text-xs" />
-      </label>
+          <Button variant="secondary" className="px-2.5" onClick={() => create.mutate(base("timeout"))}>
+            {t("timeout")}
+          </Button>
+        </div>
+      </section>
 
       <div aria-live="polite">
         {failure && <Alert className="py-2">{te(failure)}</Alert>}
@@ -356,6 +301,56 @@ export function Tagger({
           </Alert>
         )}
       </div>
+
+      <details className="group border-t border-foreground/15 pt-3">
+        <summary className="cursor-pointer list-none font-medium [&::-webkit-details-marker]:hidden">
+          {t("whereTitle")}
+          {(pos || zone) && <span className="ml-2 text-muted">{t("whereSet")}</span>}
+        </summary>
+        <div className="mt-3 space-y-3">
+          <div className="space-y-1">
+            <p className="text-[0.8125rem] font-medium">{t("position")}</p>
+            <CourtHalf label={t("position")} onPick={(x, y) => setPos({ x, y })}>
+              {pos && <ShotDot x={pos.x} y={pos.y} outcome="goal" />}
+            </CourtHalf>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[0.8125rem] font-medium">{t("goalZone")}</p>
+            <GoalGrid mode="pick" selected={zone} onCell={(z) => setZone((cur) => (cur === z ? null : z))} />
+          </div>
+        </div>
+      </details>
+
+      <details className="group border-t border-foreground/15 pt-3">
+        <summary className="cursor-pointer list-none font-medium [&::-webkit-details-marker]:hidden">{t("setupTitle")}</summary>
+        <div className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.8125rem] font-medium">{tk("ownKeeper")}</span>
+              <select value={keepers.own} onChange={(e) => updateKeepers({ ...keepers, own: e.target.value })} className={field}>
+                <option value="">-</option>
+                {(roster.data ?? [])
+                  .filter((r) => r.active)
+                  .sort((a, b) => Number(b.main_position === "TW") - Number(a.main_position === "TW") || (a.jersey_number ?? 999) - (b.jersey_number ?? 999))
+                  .map((r) => (
+                    <option key={r.player_id} value={r.player_id}>
+                      {r.jersey_number != null ? `#${r.jersey_number} ` : ""}
+                      {r.first_name} {r.last_name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.8125rem] font-medium">{tk("oppKeeper")}</span>
+              <input type="number" min={0} max={99} value={keepers.opp} onChange={(e) => updateKeepers({ ...keepers, opp: e.target.value })} className={field} />
+            </label>
+          </div>
+          <label className="flex flex-col gap-1">
+            <span className="text-[0.8125rem] font-medium">{t("import")}</span>
+            <input type="file" accept=".csv,.json,text/csv,application/json" onChange={importFeed} className="text-xs" />
+          </label>
+        </div>
+      </details>
     </div>
   );
 }

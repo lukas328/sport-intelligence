@@ -744,7 +744,11 @@
     "tt_offensive_foul": "Offensive foul",
     "tt_line_violation": "Line violation",
     "tt_passive_play": "Passive play",
-    "tt_other": "Other"
+    "tt_other": "Other",
+    "moreEvents": "Penalties and breaks",
+    "whereTitle": "Shot position and goal corner",
+    "whereSet": "set",
+    "setupTitle": "Goalkeepers and import"
   },
   "paper": {
     "title": "Import paper match report",

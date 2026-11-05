@@ -111,9 +111,11 @@ test("match: create, upload with pause and resume, processing, player, comment, 
 
   // event tagging: kickoff at 0:00, a goal by hotkey at the current video time
   await seekTo(0);
+  // the throw-off is its own work step; events are tagged beside the video
+  await page.getByTestId("step-kickoff").click();
+  await page.getByTestId("kickoff-1").click();
+  await expect(page.getByText(/Anwurf 1. Halbzeit bei 0:00/).first()).toBeVisible();
   await page.getByRole("tab", { name: "Ereignisse" }).click();
-  await page.getByRole("button", { name: "Anpfiff 1. HZ hier" }).click();
-  await expect(page.getByText(/Anpfiff 1. HZ bei 0:00/).first()).toBeVisible();
   await seekTo(8);
   await page.getByRole("tab", { name: "Ereignisse" }).focus();
   await page.keyboard.press("g");
