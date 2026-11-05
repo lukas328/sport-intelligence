@@ -286,18 +286,23 @@ def test_a_cut_is_no_pan() -> None:
 
 
 def test_no_play_while_a_moving_camera_is_parked() -> None:
-    t = np.arange(0, 540, gc.DT)  # 9 minutes: play, 3 minutes parked, play
+    t = np.arange(0, 600, gc.DT)  # 10 minutes: play, 4 minutes parked, play
     rng = np.random.default_rng(2)
     pan = 120 * np.sin(2 * np.pi * t / 25) + rng.normal(0, 5, len(t))
-    parked = (t >= 180) & (t < 360)
+    parked = (t >= 180) & (t < 420)
     pan[parked] = rng.normal(0, 5, parked.sum())
     s = {"t": t, "pan": pan}
     idle = gc.no_play(s, moving=True)
-    assert idle[(t > 245) & (t < 295)].all()
-    assert not idle[(t < 175) | (t > 365)].any()
+    assert idle[(t > 260) & (t < 340)].all()
+    assert not idle[(t < 175) | (t > 425)].any()
     assert not gc.no_play(s, moving=False).any()  # a fixed camera is always still
     runs = gc.intervals(t, idle)
-    assert len(runs) == 1 and 180 <= runs[0][0] < 245 and 295 < runs[0][1] <= 360
+    assert len(runs) == 1 and 180 <= runs[0][0] < 260 and 340 < runs[0][1] <= 420
+    # a parked camera for less than the window (a time-out and the attack after it) is play
+    short = pan.copy()
+    short[(t >= 180) & (t < 300)] = rng.normal(0, 5, 1200)
+    short[(t >= 300) & (t < 420)] = 120 * np.sin(2 * np.pi * t[(t >= 300) & (t < 420)] / 25)
+    assert not gc.no_play({"t": t, "pan": short}, moving=True).any()
 
 
 def test_pick_skips_no_play_and_scales_the_quota() -> None:

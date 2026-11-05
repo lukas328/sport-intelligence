@@ -23,7 +23,7 @@ the post-goal lull (busy around t, quiet 8 to 24 s later), each as a rolling rob
 Channels and scores are normalised over a rolling window of 3 minutes, the segment length the
 template was learned on, so the camera operator's style and the zoom may change during a game.
 
-No play (`no_play`): an operated camera that stands still for two minutes is parked: half-time,
+No play (`no_play`): an operated camera that stands still for 2.5 minutes is parked: half-time,
 before and after the game. No candidates there, and the quota counts minutes of play only.
 
 Candidates (`pick`): a fixed number per minute of play, not a score threshold (score scales vary
@@ -66,7 +66,7 @@ JUMP_K, JUMP_HALF, JUMP_PX = 6.0, 4, 30.0  # camera jumps (cuts): see `drop_jump
 MATCH_HEIGHTS = 1.2  # nearest-neighbour match within this many body heights
 # no play (half-time, before and after the game): an operated camera standing still for minutes
 STILL_PX_S = 40.0  # camera speed below this is "still" (reference px/s)
-STILL_WINDOW_S = 120.0  # centred window
+STILL_WINDOW_S = 150.0  # centred window
 STILL_SHARE = 0.97  # share of the window the camera must be still
 
 
@@ -403,22 +403,20 @@ def score(s: dict[str, F64], tmpl: Template) -> F64:
 
 
 def running_mean(x: F64, win_s: float) -> F64:
-    """Mean over a centred window of `win_s`, clipped at the ends."""
-    n = len(x)
-    m = min(n, max(1, round(win_s / DT)))
+    """Mean over a window of `win_s` centred on each sample, kept at full length at the ends
+    (`_window_bounds`)."""
+    lo, hi = _window_bounds(len(x), win_s)
     c = np.r_[0.0, np.cumsum(x)]
-    i = np.arange(n)
-    lo = np.clip(i - m // 2, 0, n)
-    hi = np.clip(i - m // 2 + m, 0, n)
     return np.asarray((c[hi] - c[lo]) / np.maximum(hi - lo, 1), dtype=np.float64)
 
 
 def no_play(s: dict[str, F64], moving: bool) -> NDArray[np.bool_]:
     """True where nobody plays as far as the camera tells: an operated camera that stands still
     (below `STILL_PX_S`) for `STILL_SHARE` of a centred `STILL_WINDOW_S` window. During play the
-    operator follows the ball across the court at least every minute or two; at half-time and
+    operator follows the ball across the court at least every two minutes; at half-time and
     before or after the game the camera is parked. Time-outs (60 s) are too short to tell from a
-    long attack filmed by a parked camera, and a fixed camera is always still: never flagged."""
+    long attack filmed by a parked camera (one operator left the camera still for two minutes
+    over a time-out and the attack after it), and a fixed camera is always still: never flagged."""
     n = len(s["t"])
     if not moving or n == 0:
         return np.zeros(n, bool)
