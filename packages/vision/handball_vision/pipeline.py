@@ -672,10 +672,10 @@ def _split_at_switches(
     points: list[TrackPoint],
     team_out: dict[int, dict[str, Any]],
     reads: dict[int, list[Reading]],
-    looks: dict[int, list[tuple[int, NDArray[np.float64]]]],
-) -> tuple[list[TrackPoint], dict[int, list[Reading]], dict[int, list[tuple[int, Any]]]]:
+    framed_items: Sequence[dict[int, list[tuple[int, Any]]]] = (),
+) -> tuple[list[TrackPoint], dict[int, list[Reading]], list[dict[int, list[tuple[int, Any]]]]]:
     """Cut tracks where the shirt numbers say the tracker swapped players; each part becomes its
-    own track (same team entry) with its own readings."""
+    own track (same team entry) with its own readings and (frame, item) looks."""
     next_id = max([p.track_id for p in points], default=0) + 1
     cuts: dict[int, list[tuple[int, int]]] = {}  # track -> [(from_frame, new id)]
     out_reads: dict[int, list[Reading]] = defaultdict(list)
@@ -697,25 +697,28 @@ def _split_at_switches(
                 if r.frame >= f:
                     tid = nid
             out_reads[tid].append(r)
-    out_looks: dict[int, list[tuple[int, Any]]] = defaultdict(list)
-    for t, vs in looks.items():
-        for f0, v in vs:
-            tid = t
-            for f, nid in cuts.get(t, []):
-                if f0 >= f:
-                    tid = nid
-            out_looks[tid].append((f0, v))
-    if not cuts:
-        return points, out_reads, out_looks
 
-    def owner(p: TrackPoint) -> int:
-        tid = p.track_id
-        for f, nid in cuts.get(p.track_id, []):
-            if p.frame >= f:
+    def owner(t: int, frame: int) -> int:
+        tid = t
+        for f, nid in cuts.get(t, []):
+            if frame >= f:
                 tid = nid
         return tid
 
-    return [replace(p, track_id=owner(p)) for p in points], out_reads, out_looks
+    out_items: list[dict[int, list[tuple[int, Any]]]] = []
+    for items in framed_items:
+        moved: dict[int, list[tuple[int, Any]]] = defaultdict(list)
+        for t, vs in items.items():
+            for f0, v in vs:
+                moved[owner(t, f0)].append((f0, v))
+        out_items.append(moved)
+    if not cuts:
+        return points, out_reads, out_items
+    return (
+        [replace(p, track_id=owner(p.track_id, p.frame)) for p in points],
+        out_reads,
+        out_items,
+    )
 
 
 MIN_ANCHOR_READINGS = 4
@@ -727,6 +730,7 @@ def identify_by_appearance(
     looks: Mapping[int, Sequence[NDArray[np.float64] | tuple[int, NDArray[np.float64]]]],
     fps: float,
     reads: Mapping[int, list[Reading]] | None = None,
+    roles: Mapping[int, Sequence[tuple[int, NDArray[np.float64]]]] | None = None,
 ) -> int:
     """Numbers for tracks nobody read a number on, by appearance (reid.py): the numbered tracks of
     this match teach what each player looks like. `looks` is keyed by the final track ids, as
@@ -785,6 +789,7 @@ def merge_by_number(
     max_overlap_s: float = 1.0,
     looks: dict[int, list[tuple[int, Any]]] | None = None,
     rosters: dict[str, set[int]] | None = None,
+    roles: dict[int, list[tuple[int, Any]]] | None = None,
 ) -> tuple[list[TrackPoint], int]:
     """Number per track by vote, then one track per player: fragments of the same team with the
     same number that do not overlap in time are joined (the number is the identity the tracker
@@ -792,14 +797,16 @@ def merge_by_number(
     with the weaker vote loses its number. Returns the points and the number of joined fragments.
 
     `rosters` ("home"/"away" -> shirt numbers) restricts each team's votes to its roster (see
-    `vote`); a team without roster is voted freely. `reads` and `looks` are updated in place to
-    the new track ids (cut at switches, joined by number)."""
-    points, split_reads, moved = _split_at_switches(points, team_out, reads, looks or {})
+    `vote`); a team without roster is voted freely. `reads`, `looks` and `roles` (per-track
+    (frame, role probabilities)) are updated in place to the new track ids (cut at switches,
+    joined by number)."""
+    framed = [d for d in (looks, roles) if d is not None]
+    points, split_reads, moved = _split_at_switches(points, team_out, reads, framed)
     reads.clear()
     reads.update(split_reads)
-    if looks is not None:
-        looks.clear()
-        looks.update(moved)
+    for d, m in zip(framed, moved, strict=True):
+        d.clear()
+        d.update(m)
     span: dict[int, tuple[int, int]] = {}
     for p in points:
         a, b = span.get(p.track_id, (p.frame, p.frame))
@@ -850,8 +857,9 @@ def merge_by_number(
     if not rename:
         return points, 0
     for old, new in rename.items():
-        if looks is not None and old in looks:
-            looks.setdefault(new, []).extend(looks.pop(old))
+        for d in framed:
+            if old in d:
+                d.setdefault(new, []).extend(d.pop(old))
         if old in reads:
             reads.setdefault(new, []).extend(reads.pop(old))
         keep, gone = team_out[new], team_out.pop(old)
