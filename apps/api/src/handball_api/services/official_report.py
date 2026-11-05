@@ -44,6 +44,7 @@ import re
 import tempfile
 import uuid
 from dataclasses import dataclass, field
+from dataclasses import replace as dc_replace
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -52,8 +53,9 @@ import httpx
 from sqlalchemy import delete, select
 
 from handball_api.core.errors import ProblemError
+from handball_api.integrations import handball_ch
 from handball_api.models import Event, GoalCandidate, Match, Opponent, RosterEntry
-from handball_api.services import audit, match_clock
+from handball_api.services import audit, match_clock, org_verification
 from handball_api.services.auto_events import CANDIDATE, OFFICIAL, OVERLAY
 from handball_api.services.context import Ctx
 from handball_api.services.events import video_from_clock
@@ -74,16 +76,8 @@ PDFTOTEXT_TIMEOUT_S = 20.0
 HANDBALL_CH = "handball_ch"
 DHB = "dhb"
 PROVIDERS = (HANDBALL_CH, DHB)
-CH_API = "https://www.handball.ch/Umbraco/Api/MatchCenter/Query"
-CH_PAGE = "https://www.handball.ch/de/matchcenter/spiele/{}"
+CH_PAGE = handball_ch.GAME_PAGE
 DHB_PDF = "https://dhbdata.fmp.sportradar.com/match/{}/pressReport.pdf"
-CH_QUERY = """query getReport($gameId: Int, $isLive: Boolean) {
-  game(gameId: $gameId) { homeTeamName awayTeamName homeTeamScore awayTeamScore
-    homeTeamScoreInterval awayTeamScoreInterval gameDateTime leagueName }
-  gameLog(gameId: $gameId, isLive: $isLive) { actionText homeTeamActionLCID awayTeamActionLCID
-    homeTeamPlayerStaffName homeTeamPlayerStaffNrDesc awayTeamPlayerStaffName
-    awayTeamPlayerStaffNrDesc result timeInt timeString }
-  gamePlayerStats(gameId: $gameId, isLive: $isLive) { dressNr isHome function } }"""
 
 
 @dataclass(frozen=True)
@@ -254,20 +248,22 @@ def parse_handball_ch(game_id: int, data: dict[str, Any]) -> OfficialReport:
 
 async def fetch_handball_ch(game_id: int) -> dict[str, Any]:
     """Raw GraphQL data of a handball.ch game (replaced by recorded data in tests)."""
-    body = {"query": CH_QUERY, "variables": {"gameId": game_id, "isLive": False}}
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT, headers=HEADERS) as client:
-            r = await client.post(CH_API, json=body)
-            r.raise_for_status()
-            payload = r.json()
-    except (httpx.HTTPError, ValueError) as exc:
+        return await handball_ch.report(game_id)
+    except handball_ch.UpstreamUnavailableError as exc:
         raise ProblemError(
             502, "report-unavailable", "handball.ch did not answer, try again later"
         ) from exc
-    data = payload.get("data") if isinstance(payload, dict) else None
-    if not isinstance(data, dict):
-        raise ProblemError(502, "report-unavailable", "handball.ch answered without data")
-    return data
+
+
+def without_opponent_names(report: OfficialReport, is_home: bool) -> OfficialReport:
+    """Numbers only for the other team (clubs not verified yet see no names of other teams'
+    players, services/org_verification.py)."""
+    opponent = "away" if is_home else "home"
+    return dc_replace(
+        report,
+        entries=[dc_replace(e, name=None) if e.team == opponent else e for e in report.entries],
+    )
 
 
 # ---- DHB press report ----------------------------------------------------------------------
@@ -787,6 +783,8 @@ async def import_report(
     """Checks the rights before anything is fetched."""
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
     report = await fetch(source, provider)
+    if await org_verification.is_unverified(ctx, match.organization_id):
+        report = without_opponent_names(report, match.is_home)
     return await apply(ctx, match, report)
 
 

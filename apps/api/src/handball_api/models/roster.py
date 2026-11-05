@@ -53,7 +53,10 @@ class RosterEntry(Base, EntityMixin, TenantMixin):
             postgresql_where=text("active"),
         ),
         UniqueConstraint(
-            "season_id", "official_provider", "official_player_id", name="uq_roster_entries_official"
+            "season_id",
+            "official_provider",
+            "official_player_id",
+            name="uq_roster_entries_official",
         ),
     )
 

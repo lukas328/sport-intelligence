@@ -230,6 +230,21 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
     return asset
 
 
+def job_budget_s(
+    kind: str, duration_s: float | None = None, size_bytes: int | None = None
+) -> int:
+    """How long a video job may run before the worker stops it (and before the alerting calls it
+    stuck). Six hours covered the five-minute test clips; a full game of 120 minutes takes about
+    2.2 x real time to analyse on a CPU worker (docs/perf/real-videos.md), the ingest of a file of
+    many GB on a slow disk about real time per GB of 10 minutes."""
+    base = 6 * 3600
+    if kind == "analysis" and duration_s:
+        return max(base, int(3 * duration_s) + 3600)
+    if kind == "ingest" and size_bytes:
+        return max(base, int(size_bytes / 1024**3 * 900) + 3600)
+    return base
+
+
 async def _new_job(ctx: Ctx, asset: VideoAsset, kind: str) -> ProcessingJob:
     job = ProcessingJob(
         organization_id=asset.organization_id,
@@ -265,7 +280,13 @@ async def start_ingest(ctx: Ctx, asset: VideoAsset) -> ProcessingJob:
     match = await ctx.db.get(Match, asset.match_id)
     if match is not None and match.status != MatchStatus.READY:
         match.status = MatchStatus.PROCESSING
-    ctx.require_jobs().enqueue("pipeline", INGEST_FUNC, str(job.id), _job_payload(ctx, asset, job))
+    ctx.require_jobs().enqueue(
+        "pipeline",
+        INGEST_FUNC,
+        str(job.id),
+        _job_payload(ctx, asset, job),
+        timeout_s=job_budget_s("ingest", size_bytes=asset.size_bytes),
+    )
     return job
 
 
@@ -582,7 +603,13 @@ async def start_analysis(
     rosters = await _rosters(ctx, match)
     if rosters:
         payload["rosters"] = rosters
-    ctx.require_jobs().enqueue("gpu", ANALYSIS_FUNC, str(job.id), payload)
+    ctx.require_jobs().enqueue(
+        "gpu",
+        ANALYSIS_FUNC,
+        str(job.id),
+        payload,
+        timeout_s=job_budget_s("analysis", duration_s=asset.duration_s),
+    )
     return job
 
 

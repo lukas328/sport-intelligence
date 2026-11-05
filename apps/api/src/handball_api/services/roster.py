@@ -22,7 +22,7 @@ from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.csv_import import parse_roster_csv
 from handball_api.services.orgs import get_season, get_team
-from handball_api.services.policies import Action
+from handball_api.services.policies import Action, can
 
 PLAYER_FIELDS = (
     "first_name",
@@ -70,8 +70,9 @@ def _out(entry: RosterEntry, player: Player, consented: bool) -> RosterEntryOut:
 async def list_roster(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> list[RosterEntryOut]:
     await get_team(ctx, team_id, Action.ROSTER_READ)
     await get_season(ctx, team_id, season_id)
-    rows = list(
-        await ctx.db.execute(
+    rows = [
+        (e, p)
+        for e, p in await ctx.db.execute(
             select(RosterEntry, Player)
             .join(Player, Player.id == RosterEntry.player_id)
             .where(RosterEntry.season_id == season_id)
@@ -81,9 +82,32 @@ async def list_roster(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> lis
                 Player.last_name,
             )
         )
-    )
+    ]
+    if not can(ctx.require_actor(), Action.ROSTER_WRITE, team_id):
+        rows = await _without_official_only(ctx, rows)
     consented = await _consented_players(ctx, [p.id for _, p in rows])
     return [_out(e, p, p.id in consented) for e, p in rows]
+
+
+async def _without_official_only(
+    ctx: Ctx, rows: list[tuple[RosterEntry, Player]]
+) -> list[tuple[RosterEntry, Player]]:
+    """Entries taken over from the official data stay with the organisers until the person has
+    joined (an account) or a consent is recorded (docs/plans/federation-onboarding.md)."""
+    pending = [p.id for e, p in rows if e.official_player_id is not None and p.user_id is None]
+    if not pending:
+        return rows
+    known = set(
+        (
+            await ctx.db.scalars(
+                select(Consent.player_id).where(
+                    Consent.player_id.in_(pending), Consent.revoked_at.is_(None)
+                )
+            )
+        ).all()
+    )
+    hidden = set(pending) - known
+    return [(e, p) for e, p in rows if p.id not in hidden]
 
 
 async def _check_number_free(

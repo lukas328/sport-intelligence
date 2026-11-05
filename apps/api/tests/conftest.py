@@ -121,8 +121,8 @@ def test_db() -> Iterator[str]:
 
 
 TABLES = (
-    "audit_logs, consents, invitations, roster_entries, players, memberships, seasons, teams, "
-    "org_memberships, organizations, auth_tokens, auth_sessions, users"
+    "audit_logs, official_cache, consents, invitations, roster_entries, players, memberships, "
+    "seasons, teams, org_memberships, organizations, auth_tokens, auth_sessions, users"
 )
 
 

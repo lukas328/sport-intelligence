@@ -75,6 +75,7 @@ Q_REPORT = """query getReport($gameId: Int, $isLive: Boolean) {
     awayTeamPlayerStaffNrDesc result timeInt timeString }
   gamePlayerStats(gameId: $gameId, isLive: $isLive) { dressNr isHome function } }"""
 
+FRESH = timedelta(0)
 WEEK = timedelta(days=7)
 DAY = timedelta(days=1)
 HOURS_6 = timedelta(hours=6)
@@ -163,21 +164,19 @@ async def query(
     db: AsyncSession | None = None,
     max_age: timedelta | None = DAY,
 ) -> dict[str, Any]:
-    """POST a query; with `db` the answer is cached (max_age None = keep forever). A stale cache
-    entry is still used when handball.ch does not answer."""
+    """POST a query; with `db` the answer is cached (max_age None = keep forever, FRESH = always
+    ask). A stale cache entry is still used when handball.ch does not answer, except for FRESH."""
     variables = variables or {}
     key = cache_key(q, variables)
     hit: OfficialCache | None = None
     if db is not None:
         hit = await db.get(OfficialCache, key)
-        if hit is not None and (
-            max_age is None or datetime.now(UTC) - hit.fetched_at < max_age
-        ):
+        if hit is not None and (max_age is None or datetime.now(UTC) - hit.fetched_at < max_age):
             return dict(hit.data)
     try:
         data = await _post(q, variables)
     except UpstreamUnavailableError:
-        if hit is not None:
+        if hit is not None and max_age != FRESH:
             return dict(hit.data)
         raise
     if db is not None:
@@ -419,8 +418,10 @@ async def standing(
     rows = (await query(Q_STANDING, {"groupId": group_id}, db=db, max_age=max_age)).get(
         "standing"
     ) or []
-    keys = ("teamId", "clubId", "name", "rank", "games", "won", "drawn", "lost")
-    keys += ("goalsFor", "goalsAgainst", "goalDifference", "points")
+    keys = (
+        *("teamId", "clubId", "name", "rank", "games", "won", "drawn", "lost"),
+        *("goalsFor", "goalsAgainst", "goalDifference", "points"),
+    )
     return sorted(
         [{k: r.get(k) for k in keys} for r in rows], key=lambda r: int(r.get("rank") or 0)
     )
@@ -441,7 +442,8 @@ async def game_players(db: AsyncSession | None, game_id: int) -> list[GameAppear
             goals=int(p.get("totalScore") or 0),
         )
         for p in rows
-        if p.get("playerId") and p.get("function") != "official"
+        # team officials carry placeholder ids shared across teams: players only
+        if p.get("playerId") and p.get("function") in ("player", "goalkeeper")
     ]
 
 
