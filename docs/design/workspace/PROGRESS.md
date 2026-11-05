@@ -104,6 +104,20 @@ from mid-half has negative or too large video times; such events should be skipp
 queues `handball_worker.export.run_highlight_reel`, which lives in `handball_worker.reels`, so
 reels never render (the test patches the same wrong path).
 
+## Slice 4: entry pages (Spielplan, Übersicht, Saison)
+
+- P1: fixture list on rules with S/U/N squares and the score in ink. Review: fixtures hairlines 5
+  but no signal and nothing to do; overview's yellow mark contradicted the match page (same
+  insights, other order and marks); onboarding was the loudest button; season phone layout broke.
+- P2: overview insights in the match page's order and marks, quiet onboarding, verbs for empty
+  next steps, no filler state line; fixtures count the matches without video and mark the newest;
+  demo said once; S/U/N squares aligned; season form squares stay square, "Das letzte Spiel.";
+  `.sheet` tables open under a rule everywhere.
+
+Data/API (season): the season counts only matches with events (1 instead of 5 with a result) and
+adds goals from the report and from tagging (31 against 26:18 on the match page, which counts each
+goal once). Season figures should use one source per match, like the match statistics.
+
 ## Open
 
 - Data/API (for the analysis session): an insight files the goalkeeper with a 44 % save rate as a
