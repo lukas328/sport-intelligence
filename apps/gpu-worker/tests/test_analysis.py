@@ -633,7 +633,7 @@ def test_an_earlier_court_of_the_hall_comes_before_the_automatic_one(
 
     def auto(obs: Any, hall: Any) -> Any:
         seen["auto"] = True
-        raise CalibrationError("the camera sees the floor too flatly")
+        raise CalibrationError("the camera sees the floor too flatly", "flat_view")
 
     def track(obs: Any, calib: Any, *args: Any, **kw: Any) -> Any:
         seen["calib"] = calib
@@ -680,6 +680,7 @@ def test_an_earlier_court_of_the_hall_comes_before_the_automatic_one(
         res = call()
         assert res["needs_calibration"] is True and seen["auto"] is True
         assert res["calibration_info"] == {
-            "hall_tried": [{"video_id": "v1", "error": "not the same hall or camera position"}]
+            "reason": "flat_view",
+            "hall_tried": [{"video_id": "v1", "error": "not the same hall or camera position"}],
         }
     assert seen["refs"] == refs

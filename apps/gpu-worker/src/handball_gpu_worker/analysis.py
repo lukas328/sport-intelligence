@@ -621,7 +621,11 @@ def _run_learned(
                 **view,
                 "needs_calibration": True,
                 "calibration_error": str(exc),
-                "calibration_info": {"hall_tried": tried} if tried else None,
+                # why: camera_motion, no_floor, flat_view, few_people or court (ADR 025)
+                "calibration_info": {
+                    "reason": getattr(exc, "reason", "court"),
+                    **({"hall_tried": tried} if tried else {}),
+                },
                 "calibration": None,
                 "tracks": [],
                 "fps": obs.fps,

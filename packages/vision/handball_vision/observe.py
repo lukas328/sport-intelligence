@@ -59,6 +59,34 @@ class Observations:
     total: int
     timings_s: dict[str, float] = field(default_factory=dict)
     detector_source: str = "model"
+    # frame pixels whose edges stay put while a moving camera turns: score bug, logo, "LIVE"
+    static: U8 | None = None
+
+
+def static_edges(frames: list[U8], min_share: float = 0.6) -> U8 | None:
+    """Edges at the same frame pixels in most of the frames (stream overlays: score, clock,
+    logo). With a panning camera the hall's lines move through the frame, an overlay does not;
+    its letters and frames otherwise count as floor markings. None with fewer than 8 frames."""
+    if len(frames) < 8:
+        return None
+    acc = np.zeros(frames[0].shape[:2], np.float32)
+    for f in frames:
+        grey = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY) if f.ndim == 3 else f
+        acc += cv2.Canny(grey, 60, 160) > 0
+    static = ((acc / len(frames)) >= min_share).astype(np.uint8) * 255
+    return np.asarray(cv2.dilate(static, np.ones((9, 9), np.uint8)), dtype=np.uint8)
+
+
+def drop_static(seg: F64, static: U8) -> F64:
+    """Segments (frame px) with at most one of their ends and middle on `static` pixels."""
+    if len(seg) == 0:
+        return seg
+    hh, ww = static.shape[:2]
+    pts = np.stack([seg[:, :2], (seg[:, :2] + seg[:, 2:]) / 2, seg[:, 2:]], axis=1)
+    xi = np.clip(pts[..., 0].round().astype(int), 0, ww - 1)
+    yi = np.clip(pts[..., 1].round().astype(int), 0, hh - 1)
+    on = (static[yi, xi] > 0).sum(axis=1)
+    return np.asarray(seg[on < 2], dtype=np.float64)
 
 
 def _torso_sample(frame: U8, d: Detection) -> NDArray[np.float64] | None:
@@ -148,7 +176,10 @@ def observe(
     if len(motion.samples) > 30:
         step = len(motion.samples) / 30
         motion.samples = [motion.samples[int(k * step)] for k in range(30)]
-    return Observations(motion, frames, segments, fps, n, dict(timings), detector.source)
+    static = static_edges([f for _, f in motion.samples]) if motion.moving else None
+    return Observations(
+        motion, frames, segments, fps, n, dict(timings), detector.source, static=static
+    )
 
 
 def read_numbers(reader: Any, frame: U8, people: list[Detection]) -> dict[int, tuple[int, float]]:
@@ -216,6 +247,7 @@ def save_observations(obs: Observations, path: Path) -> None:
         embs=np.array(embs, np.float16).reshape(len(embs), -1) if embs else np.zeros((0, 0)),
         role_idx=np.array(role_idx, np.int32).reshape(-1, 2),
         role_p=np.array(role_p, np.float16).reshape(-1, 3),
+        static=obs.static if obs.static is not None else np.zeros((0, 0), np.uint8),
     )
 
 
@@ -256,8 +288,16 @@ def load_observations(path: Path, motion: CameraMotion, source: str = "model") -
     for i in np.unique(z["seg_idx"]):
         segments[int(i)] = np.asarray(z["segs"][z["seg_idx"] == i], dtype=np.float64)
     fps, total = z["meta"]
+    static = np.asarray(z["static"]) if "static" in z.files and z["static"].size else None
     return Observations(
-        motion, [by[k] for k in sorted(by)], dict(segments), float(fps), int(total), {}, source
+        motion,
+        [by[k] for k in sorted(by)],
+        dict(segments),
+        float(fps),
+        int(total),
+        {},
+        source,
+        static=static,
     )
 
 
@@ -311,7 +351,7 @@ def _fixed_focals(obs: Observations, max_candidates: int = 3) -> list[float]:
         else np.zeros((0, 4))
     )
     if len(segs) < 30:
-        raise CalibrationError("too few floor lines to estimate the camera")
+        raise CalibrationError("too few floor lines to estimate the camera", "no_floor")
     grid = np.geomspace(0.45, 2.5, 20) * w
     shares = []
     for f in grid:
@@ -337,12 +377,10 @@ def _fixed_focals(obs: Observations, max_candidates: int = 3) -> list[float]:
     return out or [float(grid[int(np.argmax(share))])]
 
 
-MIN_FLOOR_FIT = 0.35  # share of the marking length along two floor directions
+MIN_FLOOR_FIT = 0.35  # share of the marking length along two floor directions (within 1 degree)
+LOOSE_TOL_DEG = 2.0  # moving cameras whose motion is a little off: lines within 2 degrees ...
+LOOSE_MIN_FIT = 0.45  # ... must then explain more of the marking length
 MIN_VIEW_DEG = 10.0  # players' median angle below the horizon (flatter views are not trusted)
-
-
-class FlatViewError(CalibrationError):
-    """The floor or the players are seen too flatly (or not at all) for an automatic court."""
 
 
 def auto_calibrate(
@@ -374,7 +412,7 @@ def auto_calibrate(
     if best is None:
         # the reason of the focal length that got furthest (a court that did not fit says more
         # than a flat view under a focal length that was wrong anyway)
-        court = [e for e in errors if not isinstance(e, FlatViewError)]
+        court = [e for e in errors if e.reason not in ("flat_view", "no_floor")]
         raise (court or errors)[0]
     f, calib, info = best
     motion.focals = [f] * len(motion.focals)
@@ -400,7 +438,8 @@ def check_motion(motion: CameraMotion) -> None:
             "the camera motion could not be followed (focal length "
             f"{focal / w:.1f} frame widths, zoom x{zoom:.1f}: cuts between cameras, replays or a "
             "strong zoom), so the hall image is not reliable: a video from one camera without "
-            "replays (or a fixed camera) gives positions"
+            "replays (or a fixed camera) gives positions",
+            "camera_motion",
         )
 
 
@@ -410,9 +449,12 @@ def _calibrate(
     """The court for the camera as `obs.motion` describes it (focal length known)."""
     motion = obs.motion
     kc = _canvas_intrinsics(motion)
+    # overlays only stand out from the hall when the camera turned enough
+    static = obs.static if motion.moving and motion.stats.get("pan_deg", 0.0) >= 15 else None
     ras, rbs, ms, ls = [], [], [], []
-    for idx, seg in obs.segments.items():
+    for idx, raw in obs.segments.items():
         rot = _to_canvas_rot(motion, idx)
+        seg = drop_static(raw, static) if static is not None else raw
         if rot is None or len(seg) == 0:
             continue
         k = _frame_k(motion, idx)
@@ -423,15 +465,24 @@ def _calibrate(
         ms.append(m)
         ls.append(length)
     if not ms:
-        raise CalibrationError("no floor markings found")
+        raise CalibrationError("no floor markings found", "no_floor")
     ra, rb, m, length = np.vstack(ras), np.vstack(rbs), np.vstack(ms), np.concatenate(ls)
     alpha, beta, yaw, fit = topview.orientation_from_normals(m, length)
+    tol_deg = 1.0
+    if fit < MIN_FLOOR_FIT and motion.moving:
+        # a zooming wide-angle stream camera: its motion is a degree or two off between frames
+        # (the panorama shows ghosts), the lines of one frame still agree (fit 0.5 to 0.6)
+        loose = topview.orientation_from_normals(m, length, LOOSE_TOL_DEG)
+        if loose[3] >= LOOSE_MIN_FIT:
+            alpha, beta, yaw, fit = loose
+            tol_deg = LOOSE_TOL_DEG
     if fit < MIN_FLOOR_FIT:
-        raise FlatViewError(
+        raise CalibrationError(
             "the hall's markings do not show a clear floor (only "
             f"{fit:.0%} of the line length runs along two floor directions, "
-            f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, or a very low "
-            "camera): click the court points"
+            f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, a very low "
+            "camera or a camera motion that was not followed well): click the court points",
+            "no_floor",
         )
     up = topview._up(alpha, beta)
     feet, heads = people_on_canvas(obs)
@@ -439,21 +490,24 @@ def _calibrate(
     fr = topview._rays(kc, feet)
     view_deg = topview.view_depression_deg(up, height, fr)
     if view_deg < min_view_deg:
-        raise FlatViewError(
+        raise CalibrationError(
             "the camera sees the floor too flatly for an automatic court (players at a median "
             f"{view_deg:.0f} degrees below the horizon, at least {min_view_deg:.0f} needed; "
-            f"camera about {height:.1f} m above the floor): click the court points"
+            f"camera about {height:.1f} m above the floor): click the court points",
+            "flat_view",
         )
-    a, b = topview.segments_on_floor(ra, rb, up, height, yaw)
+    a, b = topview.segments_on_floor(ra, rb, up, height, yaw, tol_deg=2.0 * tol_deg)
     if len(a) < 50:
-        raise CalibrationError("too few markings on the floor")
+        raise CalibrationError("too few markings on the floor", "no_floor")
     d1, d2 = topview.floor_basis(up, yaw)
     floor_to_cam = np.column_stack([d1, d2, -height * up])
     dn = fr @ up
     ok = dn < -1e-3
     pts = fr[ok] * (-height / dn[ok])[:, None]
     feet_m = np.column_stack([pts @ d1, pts @ d2])
-    base = {"floor_fit": round(fit, 3), "view_deg": round(view_deg, 1)}
+    base: dict[str, Any] = {"floor_fit": round(fit, 3), "view_deg": round(view_deg, 1)}
+    if tol_deg != 1.0:
+        base["floor_tolerance_deg"] = tol_deg
 
     def court(tv: topview.TopView, view: str) -> tuple[Calibration, dict[str, Any]]:
         info = {**base, "court_view": view}

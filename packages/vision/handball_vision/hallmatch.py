@@ -93,9 +93,19 @@ def _inside(poly: F64, pts: F64) -> NDArray[np.bool_]:
     )
 
 
-def register(reference: U8, reference_court: F64, image: U8, ransac_px: float = 4.0) -> HallMatch:
-    """The court of `image` from `reference` (an earlier hall image of the same hall) and its
-    court homography `reference_court` (court metres -> reference pixels)."""
+@dataclass(frozen=True)
+class FloorMatch:
+    homography: F64  # reference hall image px -> new hall image px (valid on the floor)
+    inliers: int
+    floor_inliers: int
+    matches: int
+    method: str
+    error_px: float
+
+
+def match_floor(reference: U8, image: U8, floor_polygon: F64, ransac_px: float = 4.0) -> FloorMatch:
+    """The homography that carries the floor of `reference` (inside `floor_polygon`, reference
+    pixels) onto `image`; CalibrationError when the two images do not show the same floor."""
     ref_s, s_ref = _scaled(reference)
     img_s, s_img = _scaled(image)
     p_ref, d_ref = _features(ref_s)
@@ -108,9 +118,7 @@ def register(reference: U8, reference_court: F64, image: U8, ransac_px: float = 
         raise CalibrationError(f"not the same hall or camera position ({len(good)} matches)")
     a = p_ref[[m.queryIdx for m in good]]
     b = p_img[[m.trainIdx for m in good]]
-    scale_ref = np.diag([s_ref, s_ref, 1.0])
-    court_ref_s = scale_ref @ reference_court
-    floor = _inside(_floor_polygon(court_ref_s), a)
+    floor = _inside(floor_polygon * s_ref, a)
 
     def fit(sel: NDArray[np.bool_]) -> tuple[F64 | None, NDArray[np.bool_]]:
         if sel.sum() < 4:
@@ -139,20 +147,33 @@ def register(reference: U8, reference_court: F64, image: U8, ransac_px: float = 
                 "not the same hall or camera position "
                 f"({int(ok.sum())} of {n_floor} floor matches agree)"
             )
-    scale_img = np.diag([s_img, s_img, 1.0])
-    court = np.linalg.inv(scale_img) @ h @ court_ref_s
+    floor_ok = ok & floor
+    err_px = np.linalg.norm(geometry.apply(h, a[floor_ok]) - b[floor_ok], axis=1) / s_img
+    full = np.diag([1 / s_img, 1 / s_img, 1.0]) @ h @ np.diag([s_ref, s_ref, 1.0])
+    return FloorMatch(
+        full / full[2, 2],
+        int(ok.sum()),
+        int(floor_ok.sum()),
+        len(good),
+        method,
+        float(np.median(err_px)) if len(err_px) else 0.0,
+    )
+
+
+def register(reference: U8, reference_court: F64, image: U8, ransac_px: float = 4.0) -> HallMatch:
+    """The court of `image` from `reference` (an earlier hall image of the same hall) and its
+    court homography `reference_court` (court metres -> reference pixels)."""
+    fm = match_floor(reference, image, _floor_polygon(reference_court), ransac_px)
+    court = fm.homography @ reference_court
     court = court / court[2, 2]
     size = (int(image.shape[1]), int(image.shape[0]))
     if not plausible(court, size):
         raise CalibrationError("the earlier court does not fit this hall image")
-    floor_ok = ok & floor
-    err_px = np.linalg.norm(geometry.apply(h, a[floor_ok]) - b[floor_ok], axis=1) / s_img
-    error = float(np.median(err_px)) if len(err_px) else 0.0
     calib = Calibration(
         court,
-        confidence=float(min(1.0, floor_ok.sum() / 60)),
-        reprojection_px=error,
+        confidence=float(min(1.0, fm.floor_inliers / 60)),
+        reprojection_px=fm.error_px,
         source="heuristic",
         image_size=size,
     )
-    return HallMatch(calib, int(ok.sum()), int(floor_ok.sum()), len(good), method, error)
+    return HallMatch(calib, fm.inliers, fm.floor_inliers, fm.matches, fm.method, fm.error_px)

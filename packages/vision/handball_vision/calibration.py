@@ -35,7 +35,14 @@ F64 = NDArray[np.float64]
 
 
 class CalibrationError(Exception):
-    pass
+    """Why no court was found. `reason` sorts the cause for the user (ADR 025 addendum 2):
+    "camera_motion" (the panorama is not reliable), "no_floor" (the markings show no floor),
+    "flat_view" (the floor is seen too flatly), "few_people" (nobody to scale the floor by),
+    "court" (no court that fits the lines, players and goals)."""
+
+    def __init__(self, message: str, reason: str = "court") -> None:
+        super().__init__(message)
+        self.reason = reason
 
 
 @dataclass(frozen=True)
