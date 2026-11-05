@@ -411,6 +411,8 @@ export function Workspace({
           }
           onTime={onTime}
           onKey={onKey}
+          // the controls read the match clock once the video sits on it (main camera only)
+          clock={spansFor && !offset ? gameAt : undefined}
           overlay={
             drawing ? (
               <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} />

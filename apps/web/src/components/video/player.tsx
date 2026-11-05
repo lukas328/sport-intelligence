@@ -50,12 +50,14 @@ interface Props {
   onKey?: (key: string) => boolean; // return true when handled
   overlay?: ReactNode;
   autoPlay?: boolean;
+  /** how times read in the controls, e.g. the match clock ("1. HZ 12:55"); video time by default */
+  clock?: (ms: number) => string;
 }
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
 
 export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
-  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay },
+  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock },
   ref,
 ) {
   const t = useTranslations("player");
@@ -275,7 +277,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               if (videoRef.current) videoRef.current.currentTime = Number(e.target.value);
             }}
             aria-label={t("seek")}
-            aria-valuetext={formatClock(time)}
+            aria-valuetext={clock ? clock(time) : formatClock(time)}
             className="absolute inset-x-0 top-1 w-full accent-[var(--accent)]"
           />
           {win && (
@@ -309,7 +311,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
                 backgroundPosition: `-${thumb.x}px -${thumb.y}px`,
               }}
             >
-              <span className="absolute bottom-0 left-0 bg-black/60 px-1 text-xs">{formatClock(hover.t * 1000)}</span>
+              <span className="absolute bottom-0 left-0 bg-black/60 px-1 text-xs">{clock ? clock(hover.t * 1000) : formatClock(hover.t * 1000)}</span>
             </div>
           )}
         </div>
@@ -332,7 +334,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             <StepForward className="size-4" />
           </CtlButton>
           <span className="px-2 tabular-nums" data-testid="clock">
-            {formatClock(time)} / {formatClock(duration * 1000)}
+            {clock ? clock(time) : `${formatClock(time)} / ${formatClock(duration * 1000)}`}
           </span>
           <span className="flex-1" />
           <label className="flex items-center gap-1">
