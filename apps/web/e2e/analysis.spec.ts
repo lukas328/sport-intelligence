@@ -51,8 +51,10 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
 
   // goalkeeper module: the sheet's keeper with saves and goals against by zone
   await page.getByRole("tab", { name: "Torhüter" }).click();
-  const keeper = page.getByTestId("keeper-card").filter({ hasText: "Mia Tor" });
-  await expect(keeper).toContainText("Paraden");
+  // one row per goalkeeper in a match-sheet table
+  const keepers = page.getByTestId("keeper-table");
+  await expect(keepers).toContainText("Paraden");
+  const keeper = keepers.getByRole("row", { name: /Mia Tor/ });
   await expect(keeper.getByText("6", { exact: true })).toBeVisible();
   await expectAccessible(page);
 

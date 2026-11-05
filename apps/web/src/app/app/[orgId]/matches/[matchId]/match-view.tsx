@@ -247,7 +247,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                       [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
                       [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
                       [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
-                      ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
+                      [t("stats.xg"), stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
                     ]
                 )
                   // a row of dashes says nothing on the stage
@@ -439,6 +439,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                         onPlay={onPlay}
                         onPhysical={() => setSub("physical")}
                         staff={false}
+                        compact
                       />
                     )}
                   </div>

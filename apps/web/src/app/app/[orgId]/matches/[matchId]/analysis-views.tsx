@@ -99,9 +99,11 @@ const pct = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Mat
 
 /** A number that opens the events behind it. */
 function N({ value, onClick, label }: { value: string | number; onClick?: () => void; label: string }) {
-  if (!onClick || value === 0 || value === "0") return <span className="tabular-nums">{value}</span>;
+  // zeros stay quiet; figures in ink (red means goal against or error), a dotted line says "opens the scenes"
+  if (value === 0 || value === "0") return <span className="tabular-nums text-muted">{value}</span>;
+  if (!onClick) return <span className="tabular-nums">{value}</span>;
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums font-medium text-accent hover:underline decoration-dotted underline-offset-4 hover:decoration-solid">
+    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums font-semibold underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-accent hover:decoration-solid">
       {value}
     </button>
   );
@@ -192,7 +194,14 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           </p>
         )}
       </div>
-      <InsightsCard orgId={orgId} matchId={match.id} names={names} staff={staff} onEvidence={open} />
+      <InsightsCard
+        orgId={orgId}
+        matchId={match.id}
+        names={names}
+        staff={staff}
+        onEvidence={open}
+        won={match.score_own != null && match.score_opponent != null && match.score_own > match.score_opponent}
+      />
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
         <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>
@@ -354,8 +363,11 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
   const opp = Object.values(stats.players).filter((p) => p.side === "opponent" && p.number != null);
   opp.sort((a, b) => b.goals - a.goals);
   const sheet = ((match.report_extra as { names?: Record<string, string> } | null)?.names ?? {}) as Record<string, string>;
+  // the number has its own column: the name goes without it
   const nameOf = (p: PlayerRow) =>
-    (p.player_id && names[p.player_id]) || (p.side === "own" && p.number != null && sheet[String(p.number)]) || `#${p.number ?? "?"}`;
+    ((p.player_id && names[p.player_id]) || "").replace(/^#\d+\s+/, "") ||
+    (p.side === "own" && p.number != null && sheet[String(p.number)]) ||
+    `#${p.number ?? "?"}`;
   const base = (p: PlayerRow): EventFilter => (p.player_id ? { player_id: p.player_id } : { side: p.side, number: p.number ?? undefined });
   const cols: { key: keyof PlayerRow; label: string; filter?: EventFilter }[] = [
     { key: "goals", label: t("goals"), filter: { type: "shot", outcome: "goal" } },
@@ -454,9 +466,9 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
   return (
     <div className="space-y-10">
       <div className="flex flex-wrap gap-3">
-        <div className="flex gap-1" role="group" aria-label={t("filterTeam")}>
+        <div className="flex gap-4" role="group" aria-label={t("filterTeam")}>
           {(["own", "opponent"] as const).map((s) => (
-            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded-md px-3 py-1 text-sm", side === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
+            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("min-h-9 border-b-2 px-1 text-sm font-semibold", side === s ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}>
               {s === "own" ? teamName : oppName(match)}
             </button>
           ))}
@@ -476,11 +488,16 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
       <div className="grid gap-10 lg:grid-cols-[3fr_2fr] lg:gap-x-12">
         <Sheet className="space-y-2">
           <h2 className="font-semibold">{t("map")}</h2>
+          {/* no shot with a position: a sentence, not an empty court */}
+          {placed.length === 0 && !shots.isLoading ? (
+            <p className="text-sm text-muted">{t("noPositions")}</p>
+          ) : (
           <CourtHalf label={t("map")}>
             {placed.map((e) => (
               <ShotDot key={e.id} x={e.x!} y={e.y!} outcome={e.outcome ?? "miss"} title={`${t(`outcome_${(e.outcome ?? "miss") as "goal"}`)}${e.player_id && names[e.player_id] ? ` · ${names[e.player_id]}` : ""}`} />
             ))}
           </CourtHalf>
+          )}
           {list.length - placed.length > 0 && <p className="text-xs text-muted">{t("noPosition", { count: list.length - placed.length })}</p>}
         </Sheet>
         <Sheet className="space-y-2">

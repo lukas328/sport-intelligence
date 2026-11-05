@@ -710,7 +710,8 @@
     "outcome_post": "Pfosten",
     "outcome_blocked": "Geblockt",
     "zones": "Wurfzonen",
-    "noPosition": "{count} Würfe ohne Position"
+    "noPosition": "{count} Würfe ohne Position",
+    "noPositions": "Für diese Würfe ist keine Wurfposition erfasst. Beim Erfassen im Tab Ereignisse auf das Feld tippen, dann erscheint hier das Wurfbild."
   },
   "events": {
     "title": "Ereignisse",
@@ -828,14 +829,15 @@
     "gsax": "GSAx",
     "gsaxHint": "Tore verhindert über Erwartung: xG gegen minus Gegentore. Positiv heisst, mehr gehalten als erwartet. Geschätzt.",
     "sevenM": "7 m gehalten",
-    "unknown": "Ohne Zuordnung",
+    "unknown": "Torhüter",
     "number": "Nr. {number}",
     "byShotZone": "Nach Wurfzone",
     "byGoalZone": "Nach Torzone",
     "none": "Noch keine Würfe aufs Tor erfasst.",
     "assignHint": "Wähle beim Erfassen die Torhüterin oder den Torhüter, damit Paraden zugeordnet werden.",
     "ownKeeper": "Eigene Torhüter/in",
-    "oppKeeper": "Gegner-Torhüter Nr."
+    "oppKeeper": "Gegner-Torhüter Nr.",
+    "keeper": "Torhüter"
   },
   "physical": {
     "title": "Laufleistung",
@@ -1012,7 +1014,8 @@
     "trainOpen": "Zum Training",
     "whoKeeper": "Euer Torhüter",
     "whoPlayer": "Ein nicht zugeordneter Spieler",
-    "hintAlone": "Automatisch aus den erfassten Ereignissen dieses Spiels. Mit weiteren Spielen der Saison kommt der Vergleich dazu."
+    "hintAlone": "Automatisch aus den erfassten Ereignissen dieses Spiels. Mit weiteren Spielen der Saison kommt der Vergleich dazu.",
+    "showAll": "Alle {n} zeigen"
   },
   "zones": {
     "wing_left": "Aussen links",
@@ -2224,7 +2227,10 @@
     "fastBreak": "Gegenstoss",
     "noneFiltered": "Keine Angriffe in dieser Auswahl.",
     "showAll": "Alle {n} zeigen",
-    "showLess": "Weniger zeigen"
+    "showLess": "Weniger zeigen",
+    "compactTitle": "Aus dem Video:",
+    "compactLine": "Ballbesitz {own} % zu {opp} %, {n} Angriffe, geschätzt.",
+    "compactOpen": "Angriffe zeigen"
   },
   "workflow": {
     "rail": "Arbeitsschritte",

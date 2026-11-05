@@ -24,6 +24,7 @@ export function VideoOverview({
   ownName,
   oppName,
   durationMs,
+  compact = false,
   kickoff,
   periodS,
   onPlay,
@@ -36,6 +37,8 @@ export function VideoOverview({
   ownName: string;
   oppName: string;
   durationMs: number | null;
+  /** under the event statistics: one line, the details folded */
+  compact?: boolean;
   kickoff?: Record<string, number> | null;
   periodS: number;
   onPlay?: (ms: number) => void;
@@ -57,7 +60,7 @@ export function VideoOverview({
   const end = Math.max(durationMs ?? 0, ...phases.map((p) => p.end_ms), 1);
   const own = data?.summary.own;
   const opp = data?.summary.opponent;
-  return (
+  const full = (
     <div className="space-y-10" data-testid="video-overview">
       <Sheet className="space-y-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -136,7 +139,7 @@ export function VideoOverview({
                             <span className="tabular-nums text-muted">
                               <span className="font-score text-foreground">{at(p.start_ms)}</span> · {Math.round((p.end_ms - p.start_ms) / 1000)} s
                             </span>
-                            {p.phase === "fast_break" && <span className="text-xs font-semibold underline decoration-resin decoration-[3px] underline-offset-4">{t("fastBreak")}</span>}
+                            {p.phase === "fast_break" && <span className="text-xs text-muted">{t("fastBreak")}</span>}
                           </button>
                         </li>
                       ))}
@@ -172,5 +175,22 @@ export function VideoOverview({
         </Sheet>
       )}
     </div>
+  );
+  if (!compact) return full;
+  // under the match statistics a clip's possession is a footnote, not a headline: one line, the
+  // rest folded
+  return (
+    <details className="group border-t border-foreground/15 pt-3">
+      <summary className="cursor-pointer list-none text-sm [&::-webkit-details-marker]:hidden">
+        <span className="font-semibold">{t("compactTitle")}</span>{" "}
+        <span className="text-muted">
+          {phases.length > 0
+            ? t("compactLine", { own: Math.round((own?.share ?? 0) * 100), opp: Math.round((opp?.share ?? 0) * 100), n: phases.length })
+            : t("noPossessions")}
+        </span>{" "}
+        <span className="text-accent group-open:hidden">{t("compactOpen")}</span>
+      </summary>
+      <div className="mt-6">{full}</div>
+    </details>
   );
 }

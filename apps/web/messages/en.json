@@ -710,7 +710,8 @@
     "outcome_post": "Post",
     "outcome_blocked": "Blocked",
     "zones": "Shot zones",
-    "noPosition": "{count} shots without position"
+    "noPosition": "{count} shots without position",
+    "noPositions": "No shot position is recorded for these shots. Tap the court when tagging in the Events tab and the shot map appears here."
   },
   "events": {
     "title": "Events",
@@ -828,14 +829,15 @@
     "gsax": "GSAx",
     "gsaxHint": "Goals saved above expected: xG against minus goals against. Positive means more saves than expected. Estimated.",
     "sevenM": "7 m saved",
-    "unknown": "Not assigned",
+    "unknown": "Goalkeeper",
     "number": "No. {number}",
     "byShotZone": "By shot zone",
     "byGoalZone": "By goal zone",
     "none": "No shots on target recorded yet.",
     "assignHint": "Pick the goalkeeper while tagging so saves are credited.",
     "ownKeeper": "Our goalkeeper",
-    "oppKeeper": "Opponent goalkeeper no."
+    "oppKeeper": "Opponent goalkeeper no.",
+    "keeper": "Goalkeeper"
   },
   "physical": {
     "title": "Physical",
@@ -1012,7 +1014,8 @@
     "trainOpen": "Go to training",
     "whoKeeper": "Your goalkeeper",
     "whoPlayer": "An unassigned player",
-    "hintAlone": "Automatically from the recorded events of this match. With more matches of the season, the comparison is added."
+    "hintAlone": "Automatically from the recorded events of this match. With more matches of the season, the comparison is added.",
+    "showAll": "Show all {n}"
   },
   "zones": {
     "wing_left": "Left wing",
@@ -2224,7 +2227,10 @@
     "fastBreak": "Fast break",
     "noneFiltered": "No attacks in this selection.",
     "showAll": "Show all {n}",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "compactTitle": "From the video:",
+    "compactLine": "possession {own} % to {opp} %, {n} attacks, estimated.",
+    "compactOpen": "Show attacks"
   },
   "workflow": {
     "rail": "Work steps",

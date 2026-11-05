@@ -710,7 +710,8 @@
     "outcome_post": "Poteau",
     "outcome_blocked": "Contré",
     "zones": "Zones de tir",
-    "noPosition": "{count} tirs sans position"
+    "noPosition": "{count} tirs sans position",
+    "noPositions": "Aucune position de tir n'est saisie pour ces tirs. Touche le terrain en saisissant dans l'onglet Événements et la carte des tirs apparaît ici."
   },
   "events": {
     "title": "Événements",
@@ -828,14 +829,15 @@
     "gsax": "GSAx",
     "gsaxHint": "Buts évités au-delà de l'attendu : xG contre moins buts encaissés. Positif signifie plus d'arrêts qu'attendu. Estimation.",
     "sevenM": "7 m arrêtés",
-    "unknown": "Non attribué",
+    "unknown": "Gardien",
     "number": "N° {number}",
     "byShotZone": "Par zone de tir",
     "byGoalZone": "Par zone du but",
     "none": "Aucun tir cadré saisi.",
     "assignHint": "Choisis le gardien lors de la saisie pour attribuer les arrêts.",
     "ownKeeper": "Notre gardien",
-    "oppKeeper": "Gardien adverse n°"
+    "oppKeeper": "Gardien adverse n°",
+    "keeper": "Gardien"
   },
   "physical": {
     "title": "Physique",
@@ -1012,7 +1014,8 @@
     "trainOpen": "Vers l'entraînement",
     "whoKeeper": "Votre gardien",
     "whoPlayer": "Un joueur non attribué",
-    "hintAlone": "Automatiquement à partir des événements saisis de ce match. Avec d'autres matchs de la saison, la comparaison s'ajoute."
+    "hintAlone": "Automatiquement à partir des événements saisis de ce match. Avec d'autres matchs de la saison, la comparaison s'ajoute.",
+    "showAll": "Afficher les {n}"
   },
   "zones": {
     "wing_left": "Ailier gauche",
@@ -2224,7 +2227,10 @@
     "fastBreak": "Contre-attaque",
     "noneFiltered": "Aucune attaque dans cette sélection.",
     "showAll": "Tout afficher ({n})",
-    "showLess": "Afficher moins"
+    "showLess": "Afficher moins",
+    "compactTitle": "Selon la vidéo :",
+    "compactLine": "possession {own} % contre {opp} %, {n} attaques, estimé.",
+    "compactOpen": "Afficher les attaques"
   },
   "workflow": {
     "rail": "Étapes de travail",

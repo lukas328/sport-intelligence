@@ -55,14 +55,18 @@ export function InsightsCard({
   names,
   staff,
   onEvidence,
+  won = false,
 }: {
   orgId: string;
   matchId: string;
   names: Record<string, string>;
   staff: boolean;
   onEvidence: (title: string, filter: EventFilter) => void;
+  /** a win opens with what worked */
+  won?: boolean;
 }) {
   const t = useTranslations("insights");
+  const [all, setAll] = useState(false);
   const qc = useQueryClient();
   const [problem, setProblem] = useState<string | null>(null);
   const text = useInsightText(names);
@@ -81,8 +85,12 @@ export function InsightsCard({
   });
   const data = q.data;
   if (!data) return null;
+  // the three that matter, a win opening with what worked; the rest on request
+  const rank = (k: string) => (k === "strength" ? (won ? 0 : 1) : k === "weakness" ? (won ? 1 : 0) : 2);
+  const ordered = [...data.insights].sort((a, b) => rank(a.kind) - rank(b.kind));
+  const shown = all ? ordered : ordered.slice(0, 3);
   // one signal per screen: only the first weakness carries it
-  const firstWeak = data.insights.findIndex((i) => i.kind === "weakness");
+  const firstWeak = shown.findIndex((i) => i.kind === "weakness");
 
   return (
     <Sheet className="space-y-3" data-testid="insights">
@@ -94,7 +102,7 @@ export function InsightsCard({
         <p className="text-sm text-muted">{t("none")}</p>
       ) : (
         <ul className="divide-y divide-border/70">
-          {data.insights.map((i, n) => (
+          {shown.map((i, n) => (
             <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
               <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
                 <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? (n === firstWeak ? "size-2.5 rounded-[2px] bg-signal ring-1 ring-foreground/30" : "size-2.5 rounded-[2px] bg-foreground/45") : "size-2.5 rounded-[2px] bg-muted"} />
@@ -115,6 +123,11 @@ export function InsightsCard({
             </li>
           ))}
         </ul>
+      )}
+      {ordered.length > shown.length && (
+        <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setAll(true)}>
+          {t("showAll", { n: ordered.length })}
+        </button>
       )}
       {data.summary && (
         <div className="space-y-1 rounded-md bg-surface p-4 text-sm" data-testid="summary">
