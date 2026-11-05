@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Keyboard, Maximize2, X } from "lucide-react";
+import { Crosshair, Keyboard, Maximize2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
@@ -233,7 +233,10 @@ export function Workspace({
     void qc.invalidateQueries({ queryKey: ["clips", match.id] });
   }
 
+  const paneId = `ws-${match.id}`;
   const spot = useSpotlight(analysis.data ?? null);
+  const [spotOpen, setSpotOpen] = useState(false);
+  const spotShown = spotOpen || spot.track != null || spot.picking;
   const multi = useMultiAngle(cams, video.id);
   const pickCam = multi.pick;
   const mainVideo = useCallback(() => raw.current?.video() ?? null, []);
@@ -339,7 +342,6 @@ export function Workspace({
     [staff, startDrawing],
   );
 
-  const paneId = `ws-${match.id}`;
   const seekPaused = (ms: number) => {
     player.current.pause();
     player.current.seek(ms);
@@ -374,8 +376,16 @@ export function Workspace({
       )}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}
-      <div className="min-w-0 space-y-3 lg:sticky lg:top-4">
-        <div className={cn("relative", multi.mode === "side" && multi.secondary && !offset && "grid gap-2 md:grid-cols-2")}>
+      {/* phones: the column dissolves into the grid, so the player can stay at the top while the
+          list below it scrolls */}
+      <div className="min-w-0 max-lg:contents lg:sticky lg:top-4 lg:space-y-3">
+        <div
+          className={cn(
+            "relative max-lg:sticky max-lg:z-20 max-lg:self-start",
+            reviewing ? "max-lg:top-0" : "max-lg:top-14",
+            multi.mode === "side" && multi.secondary && !offset && "grid gap-2 md:grid-cols-2",
+          )}
+        >
         <VideoPlayer
           ref={raw}
           src={`${media}/hls/master.m3u8`}
@@ -429,12 +439,18 @@ export function Workspace({
         )}
         </div>
         {cams.length > 1 && !offset && <MultiAngleControls cams={cams} state={multi} />}
-        {spot.ready && !offset && !reviewing && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
-        <div className={cn("flex flex-wrap items-center gap-2", reviewing && "hidden")}>
+        {/* quiet tools under the picture; the spotlight unfolds on demand */}
+        <div className={cn("flex flex-wrap items-center gap-1", reviewing && "hidden")}>
+          {spot.ready && !offset && (
+            <Button variant={spotShown ? "secondary" : "quiet"} size="sm" aria-expanded={spotShown} aria-controls={`${paneId}-spot`} onClick={() => setSpotOpen((v) => !v)}>
+              <Crosshair aria-hidden />
+              {t("spotlight.title")}
+            </Button>
+          )}
           {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
             <Button
-              variant="secondary"
+              variant="quiet"
               size="sm"
               title={t("tactics.fromVideoHint")}
               onClick={async () => {
@@ -461,6 +477,11 @@ export function Workspace({
             <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-md bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
           </details>
         </div>
+        {spot.ready && !offset && !reviewing && spotShown && (
+          <div id={`${paneId}-spot`}>
+            <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />
+          </div>
+        )}
         <MatchTimeline
           spans={spansFor}
           periodS={match.period_s}
