@@ -112,7 +112,8 @@ function MatchList({ title, orgId, matches }: { title: string; orgId: string; ma
   return (
     <section className="space-y-3">
       <h2 className="text-2xl">{title}</h2>
-      <ul className="overflow-hidden rounded-lg border border-foreground/20 bg-raised" data-testid="match-list">
+      {/* a fixture list on the hall's notice board: rules, no card */}
+      <ul className="border-t-2 border-foreground" data-testid="match-list">
         {matches.map((m, i) => (
           <li key={m.id} className={cn(i > 0 && "border-t border-foreground/10")}>
             <MatchRow orgId={orgId} m={m} />
@@ -150,10 +151,23 @@ export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
         </span>
       </span>
       {result ? (
-        <span className="font-score text-[1.75rem] leading-none whitespace-nowrap sm:text-[2rem]">
-          <span className={result === "lost" ? "" : "text-accent"}>{m.score_own}</span>
-          <span className="px-0.5 text-muted">:</span>
-          <span className={result === "lost" ? "text-error" : "text-muted"}>{m.score_opponent}</span>
+        // the result like the season's form guide: a square with the letter, then the score in ink,
+        // the own goals first and the winner's figure bold
+        <span className="flex items-center gap-3 whitespace-nowrap">
+          <span
+            aria-hidden
+            className={cn(
+              "grid size-8 place-items-center rounded-[4px] font-score text-lg text-background",
+              result === "won" ? "bg-ok" : result === "lost" ? "bg-error" : "bg-muted",
+            )}
+          >
+            {t(`matches.${result}`).charAt(0)}
+          </span>
+          <span className="font-score text-[1.75rem] leading-none tabular-nums sm:text-[2rem]">
+            <span className={result === "lost" ? "text-muted" : ""}>{m.score_own}</span>
+            <span className="px-0.5 text-muted">:</span>
+            <span className={result === "won" ? "text-muted" : ""}>{m.score_opponent}</span>
+          </span>
           <span className="sr-only"> {t(`matches.${result}`)}</span>
         </span>
       ) : (
