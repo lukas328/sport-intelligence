@@ -104,8 +104,11 @@ SEGMENT_S = 180.0
 FEED_MS = 250  # frames handed to the board reader; it reads those due and probes in between
 PROBE_EVERY_S = 1.0  # template probes for a locked board that is out of view
 # version of the clock reading: clock data of an older reader is read again by --fill and
-# replaced on merge (1: `parse_board` per frame without layout; 2: `HallBoardReader`, layout voted)
-CLOCK_READER = 2
+# replaced on merge. 1: `parse_board` per frame without layout (took penalty timers, the score
+# and "16:00 Uhr" for the clock); 2: `HallBoardReader`, layout voted (an interim version that still
+# took a standing half-time score "Pausenstand 11 : 17" for a clock); 3: a standing field needs a
+# score beside it (`with_score`)
+CLOCK_READER = 3
 
 Sample = tuple[int, float]
 
