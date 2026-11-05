@@ -6,6 +6,7 @@ import csv
 import io
 from collections import Counter
 from collections.abc import Callable
+from typing import Any
 
 import asyncpg
 import pytest
@@ -13,9 +14,10 @@ from defusedxml import ElementTree as SafeET
 from openpyxl import load_workbook
 
 from .assistant_eval import MATCHES
-from .conftest import Api
+from .conftest import Api, setup_club
 from .test_assistant import seed
 from .test_matches import new_match
+from .test_official_report import recorded, reported_clip  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("clean_db")
 
@@ -189,3 +191,23 @@ async def test_sportscode_round_trip_and_csv(
     own_shot = next(row for row in rows[1:] if row[3] == "shot" and row[4] == "own")
     assert own_shot[9]  # jersey number from the roster, no names
     assert "P7" not in r.text
+
+
+async def test_sportscode_export_has_only_moments_of_the_video(
+    make_api: Callable[[], Api], recorded: Any
+) -> None:
+    """A clip of five minutes from mid-half with the whole game's official report: the export
+    used to write the report's events before the video with a negative end and the ones after it
+    past the end of the file (Sportscode shows them as broken instances, our own import drops
+    them)."""
+    api = make_api()
+    ids = await setup_club(api)
+    m, _ = await reported_clip(api, ids)
+    base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
+    events = (await api.get(f"{base}/events")).json()
+    inside = [e for e in events if e["t_ms"] is not None and 0 <= e["t_ms"] <= 300_000]
+    assert 0 < len(inside) < len(events)
+    found = instances((await api.get(f"{base}/export/sportscode")).content)
+    assert sum(found.values()) == len(inside)
+    for start, end, _code, _labels in found:
+        assert 0 <= float(start) < float(end) <= 300.0, (start, end)

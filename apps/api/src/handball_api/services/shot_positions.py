@@ -17,8 +17,8 @@ from sqlalchemy import select
 
 from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import Event, Match, Track, VideoAsset
-from handball_api.models.enums import VideoRole
 from handball_api.services.context import Ctx
+from handball_api.services.matches import timeline_video
 
 WINDOW_MS = 10_000
 LENGTH, WIDTH = 40.0, 20.0
@@ -64,9 +64,7 @@ async def fill(ctx: Ctx, match: Match) -> int:
     ).all()
     if not goals:
         return 0
-    asset = await ctx.db.scalar(
-        select(VideoAsset).where(VideoAsset.match_id == match.id, VideoAsset.role == VideoRole.MAIN)
-    )
+    asset = await timeline_video(ctx, match.id)
     if asset is None or not (asset.analysis or {}).get("chunks"):
         return 0
     tracks = (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()

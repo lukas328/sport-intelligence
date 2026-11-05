@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, File, Query, Response, UploadFile
 
@@ -85,7 +85,7 @@ async def match_stats(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
 
 @router.put("/matches/{match_id}/kickoff", status_code=204)
 async def set_kickoff(match_id: uuid.UUID, data: KickoffIn, scope: OrgDep) -> None:
-    await service.set_kickoff(scope.ctx, match_id, data.period, data.t_ms)
+    await service.set_kickoff(scope.ctx, match_id, data.period, data.t_ms, data.clock_s)
 
 
 @router.post("/matches/{match_id}/events/import", response_model=FeedImportResult)
@@ -123,10 +123,20 @@ async def review_official_goal(match_id: uuid.UUID, data: GoalReviewIn, scope: O
 
 
 @router.get("/matches/{match_id}/goal-candidates", response_model=GoalCandidateList)
-async def list_goal_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
-    """Moments of the video that are probably goals (video analysis, a fixed number per minute),
-    with the coach's reviews and the goals already stored that cover them."""
-    return await goal_candidates.listing(scope.ctx, match_id)
+async def list_goal_candidates(
+    match_id: uuid.UUID, scope: OrgDep, kind: Literal["goal", "shot"] = "goal"
+) -> dict[str, Any]:
+    """Moments of the video that are probably goals (kind=shot: shots of any outcome; video
+    analysis, a fixed number per minute), with the coach's reviews, the shots already stored that
+    cover them and, for shots, the official report's suggestion."""
+    return await goal_candidates.listing(scope.ctx, match_id, kind)
+
+
+@router.get("/matches/{match_id}/shot-candidates", response_model=GoalCandidateList)
+async def list_shot_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """The shot candidates (goal-candidates?kind=shot) with the official report's shots on the
+    video."""
+    return await goal_candidates.listing(scope.ctx, match_id, "shot")
 
 
 @router.put(
@@ -135,9 +145,20 @@ async def list_goal_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, 
 async def review_goal_candidate(
     match_id: uuid.UUID, candidate_id: uuid.UUID, data: GoalCandidateReviewIn, scope: OrgDep
 ) -> dict[str, Any]:
-    """Confirm a candidate (a goal of the given side), reject it (kept as a hard negative for
-    training) or undo the review (null)."""
-    return await goal_candidates.review(scope.ctx, match_id, candidate_id, data.status, data.side)
+    """Confirm a candidate (a shot of the given side and outcome; a report entry is pinned to
+    the video instead of a second event), reject it (kept as a hard negative for training) or
+    undo the review (null)."""
+    return await goal_candidates.review(
+        scope.ctx,
+        match_id,
+        candidate_id,
+        data.status,
+        data.side,
+        data.outcome,
+        data.official_event_id,
+        data.number,
+        data.player_id,
+    )
 
 
 @router.post(

@@ -20,13 +20,11 @@ from handball_api.models import (
     Player,
     RosterEntry,
     Team,
-    VideoAsset,
 )
-from handball_api.models.enums import VideoRole
 from handball_api.services import billing, report_pdf
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match, opponent_of
+from handball_api.services.matches import get_match, opponent_of, timeline_video
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, visible_team_ids
 from handball_metrics.insights import VERSION, match_insights
@@ -326,9 +324,7 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
                 d["goals"] += p["goals"]
                 d["shots"] += p["shots"]
                 d["matches"] += 1
-        main = await ctx.db.scalar(
-            select(VideoAsset).where(VideoAsset.match_id == m.id, VideoAsset.role == VideoRole.MAIN)
-        )
+        main = await timeline_video(ctx, m.id)
         for seg in ((main.analysis or {}).get("formations") or []) if main else []:
             if seg.get("team") == "away":
                 f = str(seg["formation"])

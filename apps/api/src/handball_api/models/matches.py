@@ -335,11 +335,16 @@ class Possession(Base, EntityMixin, TenantMixin):
 
 
 class GoalCandidate(Base, EntityMixin, TenantMixin):
-    """A moment of the video that is probably a goal (handball_vision.goalcandidates): the coach
-    confirms it (a goal event of the chosen side) or rejects it. Reviewed candidates survive a
-    re-analysis; rejected ones are kept as hard negatives for training."""
+    """A moment of the video that is probably a goal (kind "goal") or a shot (kind "shot",
+    handball_vision.goalcandidates): the coach confirms it (a shot event of the chosen side and
+    outcome) or rejects it. Reviewed candidates survive a re-analysis; rejected ones are kept as
+    hard negatives for training."""
 
     __tablename__ = "goal_candidates"
+
+    kind: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="goal", server_default="goal"
+    )
 
     match_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
@@ -348,7 +353,7 @@ class GoalCandidate(Base, EntityMixin, TenantMixin):
         ForeignKey("video_assets.id", ondelete="CASCADE"), index=True, nullable=False
     )
     t_ms: Mapped[int] = mapped_column(Integer, nullable=False)  # score peak
-    goal_ms: Mapped[int] = mapped_column(Integer, nullable=False)  # estimated goal time
+    goal_ms: Mapped[int] = mapped_column(Integer, nullable=False)  # estimated goal / shot time
     start_ms: Mapped[int] = mapped_column(Integer, nullable=False)  # clip
     end_ms: Mapped[int] = mapped_column(Integer, nullable=False)
     score: Mapped[float] = mapped_column(Float, nullable=False)
@@ -356,7 +361,8 @@ class GoalCandidate(Base, EntityMixin, TenantMixin):
     rank: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)
     suggested_side: Mapped[str | None] = mapped_column(String(10))  # own, opponent
     status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
-    side: Mapped[str | None] = mapped_column(String(10))  # confirmed goal of this side
+    side: Mapped[str | None] = mapped_column(String(10))  # confirmed shot of this side
+    outcome: Mapped[str | None] = mapped_column(String(10))  # confirmed: goal, save, miss, ...
     event_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("events.id", ondelete="SET NULL"))
     reviewed_by_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")

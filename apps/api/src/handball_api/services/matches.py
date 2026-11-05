@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 from sqlalchemy import delete, func, select
 
@@ -16,7 +17,7 @@ from handball_api.models import (
     Season,
     VideoAsset,
 )
-from handball_api.models.enums import MatchFormatKey
+from handball_api.models.enums import MatchFormatKey, VideoRole, VideoStatus
 from handball_api.schemas.matches import (
     JobOut,
     MatchCreate,
@@ -240,6 +241,68 @@ async def get_match(ctx: Ctx, match_id: uuid.UUID, action: Action = Action.MATCH
         raise ProblemError(404, "not-found", "Match not found")
     authorize(actor, action, match.team_id, two_factor=ctx.two_factor)
     return match
+
+
+# ---- the match timeline -----------------------------------------------------------------------
+# Event and clip times (t_ms) are times in ONE video: the first main video of the match (upload
+# order, failed uploads left out), the one the match workspace plays. A match can have several
+# main files (two halves, a recording split by the camera); the others have their own tracks but
+# do not move the match's events. Events aligned from the match clock or an official report can
+# lie before the video (clip starts mid-half: negative times) or after its end.
+
+
+def _timeline_query(match_ids: list[uuid.UUID]) -> Any:
+    return (
+        select(VideoAsset)
+        .where(
+            VideoAsset.match_id.in_(match_ids),
+            VideoAsset.role == VideoRole.MAIN,
+            VideoAsset.status != VideoStatus.FAILED,
+        )
+        .order_by(VideoAsset.match_id, VideoAsset.created_at, VideoAsset.id)
+    )
+
+
+async def timeline_video(ctx: Ctx, match_id: uuid.UUID, ready: bool = False) -> VideoAsset | None:
+    """The main video the match's event times refer to; with `ready`, only once it plays."""
+    v: VideoAsset | None = await ctx.db.scalar(_timeline_query([match_id]).limit(1))
+    if v is not None and ready and v.status != VideoStatus.READY:
+        return None
+    return v
+
+
+async def timeline_videos(
+    ctx: Ctx, match_ids: list[uuid.UUID] | set[uuid.UUID], ready: bool = True
+) -> dict[uuid.UUID, VideoAsset]:
+    """timeline_video for several matches in one query."""
+    if not match_ids:
+        return {}
+    first: dict[uuid.UUID, VideoAsset] = {}
+    for v in (await ctx.db.scalars(_timeline_query(list(match_ids)))).all():
+        first.setdefault(v.match_id, v)
+    return {m: v for m, v in first.items() if not ready or v.status == VideoStatus.READY}
+
+
+def duration_ms(video: VideoAsset | None) -> int | None:
+    return round(video.duration_s * 1000) if video is not None and video.duration_s else None
+
+
+async def video_duration_ms(ctx: Ctx, match: Match) -> int | None:
+    """Length of the match's timeline video, None while unknown."""
+    return duration_ms(await timeline_video(ctx, match.id))
+
+
+def in_video(t_ms: int | None, duration: int | None) -> bool:
+    """The time lies inside the video (unknown length: any time from 0)."""
+    if t_ms is None or t_ms < 0:
+        return False
+    return duration is None or t_ms <= duration
+
+
+def clip_window(t_ms: int, pre_ms: int, post_ms: int, duration: int | None) -> tuple[int, int]:
+    """Clip around a time inside the video, cut at its start and end."""
+    end = t_ms + post_ms if duration is None else min(duration, t_ms + post_ms)
+    return max(0, t_ms - pre_ms), max(end, t_ms + 1)
 
 
 async def opponent_of(ctx: Ctx, match: Match) -> Opponent | None:

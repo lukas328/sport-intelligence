@@ -31,6 +31,14 @@ per game): per 3-minute block the best peaks with 8 s non-maximum suppression, n
 and last 2 s. Every candidate carries the lowest rate (1, 2 or 4 per minute) at which it is proposed, so
 the coach can ask for more without a re-run; the clip runs from 10 s before to 4 s after the peak,
 which lies a median 1.5 s after the goal.
+
+Shot candidates (`shot_score`, `from_observations`'s "shots"): the same channels and selection
+for every shot (goal, save, miss, block). Saves and misses end an attack just like goals, so the
+same transition is in the picture; only the lull after it is goal-specific. The score adds a
+matched filter whose profile is learned from the shots of the official game logs
+(`data/shot_template.json`, ml/goals/shot_template.py) to the goal score, with the weights stored
+in the asset; more candidates per minute (2, 4, 6; default 4), since there are about twice as many
+shots as goals; the clip runs from 8 s before to 4 s after the peak.
 """
 
 from __future__ import annotations
@@ -48,6 +56,7 @@ from numpy.typing import NDArray
 F64 = NDArray[np.float64]
 
 TEMPLATE_PATH = Path(__file__).resolve().parent / "data" / "goal_template.json"
+SHOT_TEMPLATE_PATH = Path(__file__).resolve().parent / "data" / "shot_template.json"
 DT = 0.1  # grid step (s)
 PEOPLE_DT = 0.5  # people sampled at 2 Hz (as in the training data)
 REF_WIDTH = 1280.0  # reference pixels: a frame this wide
@@ -58,6 +67,9 @@ RATES = (1, 2, 4)  # candidates per minute
 DEFAULT_RATE = 2
 CLIP_BEFORE_S, CLIP_AFTER_S = 10.0, 4.0
 GOAL_OFFSET_S = 1.5  # median peak - goal on the labelled games
+SHOT_RATES = (2, 4, 6)  # shot candidates per minute
+SHOT_DEFAULT_RATE = 4
+SHOT_CLIP_BEFORE_S, SHOT_CLIP_AFTER_S = 8.0, 4.0
 MIN_DURATION_S = 30.0
 # static people (bench, spectators, table): canvas spot occupied in `STATIC_SHARE` of the frames
 STATIC_WIN_S, STATIC_RX, STATIC_RY, STATIC_SHARE = 15.0, 25.0, 15.0, 0.6
@@ -108,18 +120,45 @@ def load_template(path: Path = TEMPLATE_PATH) -> Template:
 
 
 @dataclass(frozen=True)
+class ShotModel:
+    """The shot template with how the shot score combines it with the goal score."""
+
+    template: Template
+    weights: dict[str, float]  # "shot" (template cosine), "goal" (goal template), "lull"
+    offset_s: float  # median peak - shot
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> ShotModel:
+        w = {k: float(v) for k, v in d["weights"].items()}
+        if set(w) - {"shot", "goal", "lull"}:
+            raise ValueError(f"shot template: unknown weights {sorted(w)}")
+        return cls(Template.from_dict(d), w, float(d["selection"]["shot_offset_s"]))
+
+
+@lru_cache(maxsize=4)
+def load_shot_model(path: Path = SHOT_TEMPLATE_PATH) -> ShotModel:
+    return ShotModel.from_dict(json.loads(Path(path).read_text()))
+
+
+@dataclass(frozen=True)
 class Candidate:
     t: float  # peak (s of video)
     score: float
     rate: int  # lowest candidates-per-minute rate that proposes it
     rank: int  # position in its block (0 = best)
 
-    def to_dict(self, duration_s: float) -> dict[str, Any]:
+    def to_dict(
+        self,
+        duration_s: float,
+        offset_s: float = GOAL_OFFSET_S,
+        clip_s: tuple[float, float] = (CLIP_BEFORE_S, CLIP_AFTER_S),
+    ) -> dict[str, Any]:
+        """`goal_ms` is the estimated moment (the goal, for shot candidates the shot)."""
         return {
             "t_ms": round(self.t * 1000),
-            "goal_ms": round(max(0.0, self.t - GOAL_OFFSET_S) * 1000),
-            "start_ms": round(max(0.0, self.t - CLIP_BEFORE_S) * 1000),
-            "end_ms": round(min(duration_s, self.t + CLIP_AFTER_S) * 1000),
+            "goal_ms": round(max(0.0, self.t - offset_s) * 1000),
+            "start_ms": round(max(0.0, self.t - clip_s[0]) * 1000),
+            "end_ms": round(min(duration_s, self.t + clip_s[1]) * 1000),
             "score": round(float(self.score), 3),
             "rate": self.rate,
             "rank": self.rank,
@@ -399,6 +438,22 @@ def score(s: dict[str, F64], tmpl: Template) -> F64:
     return rolling_rz(template_series(ch, tmpl)) + rolling_rz(lull_series(s, tmpl))
 
 
+def shot_score(s: dict[str, F64], model: ShotModel, tmpl: Template) -> F64:
+    """Weighted sum of the rolling z-scores of the shot template's cosine, the goal template's
+    cosine and the lull (`tmpl` is the goal template)."""
+    out = np.zeros(len(s["t"]))
+    w = model.weights
+    if w.get("shot"):
+        ch = channels(s, model.template.channels)
+        out += w["shot"] * rolling_rz(template_series(ch, model.template))
+    if w.get("goal"):
+        ch = channels(s, tmpl.channels)
+        out += w["goal"] * rolling_rz(template_series(ch, tmpl))
+    if w.get("lull"):
+        out += w["lull"] * rolling_rz(lull_series(s, tmpl))
+    return np.asarray(out, dtype=np.float64)
+
+
 # --- play ----------------------------------------------------------------------------------------
 
 
@@ -564,9 +619,32 @@ def inputs_from_observations(obs: Any) -> tuple[F64, F64, F64, F64, F64, F64, fl
     return cam_t, cam_x, cat(ts), cat(xs), cat(ys), cat(hs), n_frames / fps
 
 
-def from_observations(obs: Any, tmpl: Template | None = None) -> dict[str, Any] | None:
-    """Goal candidates for the analysis payload, or None when the video is too short or the
-    detector saw (almost) nobody."""
+def shot_candidates(
+    s: dict[str, F64],
+    play: NDArray[np.bool_],
+    duration: float,
+    tmpl: Template,
+    model: ShotModel | None = None,
+) -> dict[str, Any]:
+    """The "shots" part of the payload: candidates for every shot, same signals and no-play
+    mask as the goal candidates."""
+    model = model or load_shot_model()
+    found = pick(s["t"], shot_score(s, model, tmpl), rates=SHOT_RATES, play=play)
+    clip = (SHOT_CLIP_BEFORE_S, SHOT_CLIP_AFTER_S)
+    return {
+        "template": model.template.version,
+        "default_rate": SHOT_DEFAULT_RATE,
+        "rates": list(SHOT_RATES),
+        "clip_s": [-clip[0], clip[1]],
+        "candidates": [c.to_dict(duration, model.offset_s, clip) for c in found],
+    }
+
+
+def from_observations(
+    obs: Any, tmpl: Template | None = None, shots: ShotModel | None = None
+) -> dict[str, Any] | None:
+    """Goal candidates (and shot candidates under "shots") for the analysis payload, or None
+    when the video is too short or the detector saw (almost) nobody."""
     t0 = time.perf_counter()
     tmpl = tmpl or load_template()
     cam_t, cam_x, pt, px, py, ph, duration = inputs_from_observations(obs)
@@ -584,5 +662,6 @@ def from_observations(obs: Any, tmpl: Template | None = None) -> dict[str, Any] 
         "no_play_ms": [[round(a * 1000), round(b * 1000)] for a, b in intervals(s["t"], idle)],
         "clip_s": [-CLIP_BEFORE_S, CLIP_AFTER_S],
         "candidates": [c.to_dict(duration) for c in found],
+        "shots": shot_candidates(s, ~idle, duration, tmpl, shots),
         "elapsed_s": round(time.perf_counter() - t0, 2),
     }

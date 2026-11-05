@@ -12,6 +12,7 @@ import pytest
 from .conftest import Api, setup_club
 from .test_assistant import seed
 from .test_matches import new_match
+from .test_official_report import recorded, reported_clip  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("clean_db")
 
@@ -248,3 +249,28 @@ async def test_focus_from_insight_with_followup(
     assert f["trend"] in ("better", "worse", "same")
     closed = (await api.post(f"/v1/orgs/{org}/focus/{plan['id']}/close")).json()
     assert closed["closed_at"]
+
+
+async def test_focus_playlist_skips_events_outside_the_video(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection, recorded: Any
+) -> None:
+    """A clip of five minutes from mid-half with the whole game's official report: the events
+    before the video (negative time) and after it have no scene; a focus playlist used to cut a
+    clip ending before 0 s and failed with a server error."""
+    api = make_api()
+    ids = await setup_club(api)
+    m, _ = await reported_clip(api, ids)
+    base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
+    insights = (await api.get(f"{base}/insights")).json()["insights"]
+    assert insights
+    plans = 0
+    for item in insights:
+        body = {"insight_key": item["key"], "params": item["params"], "playlist": True}
+        r = await api.post(f"{base}/focus", json=body)
+        assert r.status_code in (201, 422), (item["key"], r.status_code, r.text)
+        plans += r.status_code == 201
+    assert plans
+    windows = await owner_conn.fetch(
+        "SELECT start_ms, end_ms FROM clips WHERE match_id = $1::uuid", m["id"]
+    )
+    assert all(0 <= w["start_ms"] < w["end_ms"] <= 300_000 for w in windows), windows

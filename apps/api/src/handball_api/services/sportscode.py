@@ -25,7 +25,7 @@ from handball_api.models.enums import ClipSource
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.events import _to_metric
-from handball_api.services.matches import get_match
+from handball_api.services.matches import clip_window, get_match, in_video, video_duration_ms
 from handball_api.services.policies import Action
 from handball_metrics.stats import zone_of
 
@@ -71,8 +71,11 @@ async def _instances(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
             select(Event).where(Event.match_id == match.id, Event.t_ms.is_not(None))
         )
     ).all()
+    duration = await video_duration_ms(ctx, match)
     for e in events:
         assert e.t_ms is not None
+        if not in_video(e.t_ms, duration):
+            continue  # before or after the video (official report, match clock): no instance
         labels: list[tuple[str | None, str]] = []
         number = (
             e.number if e.number is not None else numbers.get(e.player_id) if e.player_id else None
@@ -84,10 +87,13 @@ async def _instances(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
         if number is not None:
             labels.append(("Number", str(number)))
         labels.append(("Period", str(e.period)))
+        start, end = clip_window(e.t_ms, PRE_MS, POST_MS, duration)
+        if e.t_end_ms and e.t_end_ms > e.t_ms:
+            end = e.t_end_ms if duration is None else max(e.t_ms + 1, min(duration, e.t_end_ms))
         out.append(
             {
-                "start": max(0, e.t_ms - PRE_MS),
-                "end": e.t_end_ms if e.t_end_ms and e.t_end_ms > e.t_ms else e.t_ms + POST_MS,
+                "start": start,
+                "end": end,
                 "code": _code(e),
                 "labels": labels,
             }

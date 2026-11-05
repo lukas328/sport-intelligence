@@ -27,12 +27,18 @@ from handball_api.models import (
     RosterEntry,
     SelfAssessment,
     Team,
-    VideoAsset,
 )
-from handball_api.models.enums import ClipSource, ConsentKind, VideoRole, VideoStatus
+from handball_api.models.enums import ClipSource, ConsentKind
 from handball_api.services import audit, training
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match, opponent_of
+from handball_api.services.matches import (
+    clip_window,
+    get_match,
+    opponent_of,
+    timeline_video,
+    video_duration_ms,
+)
+from handball_api.services.matches import in_video as in_video_at
 from handball_api.services.policies import Action
 from handball_api.services.roster import consented
 
@@ -136,22 +142,10 @@ def select_scenes(scenes: list[Scene], youth: bool, n: int = SCENES) -> list[Sce
     return chosen
 
 
-async def video_duration_ms(ctx: Ctx, match: Match) -> int | None:
-    """Length of the match's main video, None while unknown."""
-    d = await ctx.db.scalar(
-        select(VideoAsset.duration_s).where(
-            VideoAsset.match_id == match.id, VideoAsset.role == VideoRole.MAIN
-        )
-    )
-    return round(d * 1000) if d else None
-
-
 def in_video(e: Event, duration_ms: int | None) -> bool:
     """The event lies inside the video. Events from the match clock or an official report can lie
     before or after it when the video covers only part of the game (negative or too large times)."""
-    if e.t_ms is None or e.t_ms < 0:
-        return False
-    return duration_ms is None or e.t_ms <= duration_ms
+    return in_video_at(e.t_ms, duration_ms)
 
 
 async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
@@ -246,13 +240,12 @@ async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
 
 async def _clip_for(ctx: Ctx, match: Match, e: Event) -> Clip:
     assert e.t_ms is not None and e.t_ms >= 0
-    duration = await video_duration_ms(ctx, match)
-    end = e.t_ms + POST_MS if duration is None else min(duration, e.t_ms + POST_MS)
+    start, end = clip_window(e.t_ms, PRE_MS, POST_MS, await video_duration_ms(ctx, match))
     clip = Clip(
         organization_id=match.organization_id,
         match_id=match.id,
-        start_ms=max(0, e.t_ms - PRE_MS),
-        end_ms=max(end, e.t_ms + 1),
+        start_ms=start,
+        end_ms=end,
         source=ClipSource.EVENT,
         source_ref=e.id,
     )
@@ -355,13 +348,8 @@ async def player_feed(
     now = datetime.now(UTC)
     for f, _ in items:
         f.seen_at = f.seen_at or now
-    video_id = await ctx.db.scalar(
-        select(VideoAsset.id).where(
-            VideoAsset.match_id == match_id,
-            VideoAsset.role == VideoRole.MAIN,
-            VideoAsset.status == VideoStatus.READY,
-        )
-    )
+    video = await timeline_video(ctx, match_id, ready=True)
+    video_id = video.id if video is not None else None
     return {
         "match_id": match_id,
         "player_id": pid,

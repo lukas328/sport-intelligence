@@ -144,6 +144,52 @@ async def test_broken_pdf_is_unreadable() -> None:
 # ---- import into a match ---------------------------------------------------------------------
 
 
+async def ingest(api: Api, job_id: str, prefix: str, duration_s: float | None) -> None:
+    """The ingest job of a video finished (worker callback), with the video's length."""
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    r = await api.http.post(
+        f"/internal/jobs/{job_id}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {
+                "proxy_key": prefix + "proxy.mp4",
+                "hls_prefix": prefix + "hls/",
+                "duration_s": duration_s,
+            },
+        },
+    )
+    assert r.status_code == 200, r.text
+
+
+async def reported_clip(api: Api, ids: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    """Real club footage: the official report of the whole game (handball.ch, 22 events) and a
+    video of five minutes that starts at 21:00 of the first half (throw-off at -21 min in video
+    time). Most report events lie before (negative time) or after the video. Needs `recorded`."""
+    from handball_api.core.jobs import MemoryJobQueue
+
+    from .test_matches import upload
+
+    m = await new_match(api, ids, opponent_name="HC Arbon")
+    base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
+    assert (await api.post(f"{base}/official-report", json={"url": CH_URL})).status_code == 200
+    video = await upload(api, ids, m["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], 300.0)
+    # the clock shows 21:00 at the start of the video; the second half starts after it
+    for body in ({"period": 1, "t_ms": 0, "clock_s": 1260}, {"period": 2, "t_ms": 1_500_000}):
+        r = await api.put(f"{base}/kickoff", json=body)
+        assert r.status_code == 204, r.text
+    match = (await api.get(base)).json()
+    assert match["kickoff_ms"] == {"1": -1_260_000, "2": 1_500_000}
+    events = (await api.get(f"{base}/events")).json()
+    times = [e["t_ms"] for e in events]
+    assert any(t < 0 for t in times) and any(t > 300_000 for t in times)
+    assert any(0 <= t <= 300_000 for t in times)
+    return m, str(video["id"])
+
+
 async def _roster(api: Api, ids: dict[str, Any], numbers: dict[int, str]) -> dict[int, str]:
     url = f"/v1/orgs/{ids['org']}/teams/{ids['team']}/seasons/{ids['season']}/roster"
     out = {}

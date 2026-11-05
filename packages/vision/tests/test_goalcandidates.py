@@ -32,6 +32,44 @@ def test_template_asset_is_versioned_and_consistent() -> None:
         gc.Template.from_dict({**raw, "profile": raw["profile"][:-1]})
 
 
+def test_shot_template_asset_is_versioned_and_consistent() -> None:
+    model = gc.load_shot_model()
+    raw = json.loads(gc.SHOT_TEMPLATE_PATH.read_text())
+    assert model.template.version == raw["version"] and raw["name"] == "shot_candidates"
+    assert model.template.channels == gc.load_template().channels
+    assert model.template.profile.shape == (50, 4) and np.isfinite(model.template.profile).all()
+    assert set(model.weights) <= {"shot", "goal", "lull"} and any(model.weights.values())
+    sel = raw["selection"]
+    assert sel["default_rate"] == gc.SHOT_DEFAULT_RATE and sel["rates_per_min"] == [2, 4, 6]
+    assert 0.0 <= model.offset_s <= 4.0
+    # the evaluation that came with it: most shots at the default rate, far above chance
+    ev = raw["evaluation_leave_one_game_out"]["shots"]
+    assert ev[f"recall@{gc.SHOT_DEFAULT_RATE}"] >= 0.8
+    with pytest.raises(ValueError):
+        gc.ShotModel.from_dict({**raw, "weights": {"ball": 1.0}})
+
+
+def test_shot_score_is_the_weighted_sum_of_its_parts() -> None:
+    t = np.arange(0, 120, gc.DT)
+    rng = np.random.default_rng(3)
+    s = {
+        "t": t,
+        **{c: gc.smooth(rng.normal(size=len(t)), 0.5) for c in ("pan", "cx_v", "vx")},
+        "speed": np.abs(gc.smooth(rng.normal(size=len(t)), 0.5)) + 0.5,
+    }
+    goal = gc.load_template()
+    model = gc.load_shot_model()
+    only_goal = gc.ShotModel(model.template, {"goal": 1.0, "lull": 1.0}, 1.5)
+    np.testing.assert_allclose(gc.shot_score(s, only_goal, goal), gc.score(s, goal), atol=1e-9)
+    both = gc.ShotModel(model.template, {"shot": 2.0, "goal": 1.0, "lull": 1.0}, 1.5)
+    shot_only = gc.ShotModel(model.template, {"shot": 1.0}, 1.5)
+    np.testing.assert_allclose(
+        gc.shot_score(s, both, goal),
+        gc.score(s, goal) + 2 * gc.shot_score(s, shot_only, goal),
+        atol=1e-9,
+    )
+
+
 def test_rolling_statistics_on_a_short_video_are_global() -> None:
     rng = np.random.default_rng(1)
     x = rng.normal(3, 2, size=(900, 2))  # 90 s, shorter than the window
@@ -64,6 +102,11 @@ def test_pick_rates_are_prefixes_with_suppression_and_edges() -> None:
         rest = [c.score for c in inb if c.rate > 1]
         assert min(low) >= max(rest)
         assert sorted(c.rank for c in inb) == list(range(12))
+
+
+def test_shot_candidate_clip_and_time() -> None:
+    d = gc.Candidate(20.0, 0.5, 4, 1).to_dict(30.0, 2.0, (8.0, 4.0))
+    assert (d["t_ms"], d["goal_ms"], d["start_ms"], d["end_ms"]) == (20_000, 18_000, 12_000, 24_000)
 
 
 def test_candidate_clip_and_goal_time() -> None:
@@ -219,6 +262,18 @@ def test_goal_candidates_from_observations() -> None:
     for g in goals:  # each goal is proposed at the default rate (the drawn run starts early)
         near = [c for c in cands if c["rate"] <= 2 and abs(c["t_ms"] - g * 1000) <= 8000]
         assert near, g
+    shots = out["shots"]
+    model = gc.load_shot_model()
+    assert shots["template"] == model.template.version
+    assert shots["default_rate"] == 4 and shots["rates"] == [2, 4, 6]
+    assert shots["clip_s"] == [-8.0, 4.0]
+    sc = shots["candidates"]
+    assert len([c for c in sc if c["rate"] <= 4]) == 24  # 4 per minute of play
+    for c in sc:
+        assert c["goal_ms"] == round(c["t_ms"] - model.offset_s * 1000)
+        assert c["start_ms"] == max(0, c["t_ms"] - 8000)
+    for g in goals:  # goals are shots
+        assert [c for c in sc if c["rate"] <= 4 and abs(c["t_ms"] - g * 1000) <= 8000], g
 
 
 def test_too_little_to_go_on() -> None:

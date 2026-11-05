@@ -1,12 +1,12 @@
 {
- "generated": "2026-11-05T12:15:54",
+ "generated": "2026-11-05T13:16:12",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
   "swiss": 179,
   "swiss_matched": 140,
   "with_log": 63,
-  "in_ingest": 37,
+  "in_ingest": 38,
   "local": 20,
   "local_matched": 14,
   "local_with_log": 3
@@ -495,7 +495,16 @@
    "log_goals": 0,
    "players": 30,
    "file": "ml/data/official/CH_NLB_SGWaedenswilHorgen_Staefa_2023-04-22.json",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6823.874,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-b04",
+    "source": "ingest"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_Chenois_2023-05-13",

@@ -88,6 +88,7 @@ async def test_goal_candidates_review_flow(make_api: Callable[[], Api], owner_co
         "source": "user_correction",
         "side": "opponent",
         "t_ms": 201_000,
+        "outcome": "goal",
     }
     assert data["counts"] == {
         "total": 4,
@@ -96,7 +97,10 @@ async def test_goal_candidates_review_flow(make_api: Callable[[], Api], owner_co
         "confirmed": 0,
         "rejected": 0,
         "known": 1,
+        "suggested": 0,
     }
+    assert data["kind"] == "goal" and data["official"] is None
+    assert all(r["kind"] == "goal" and r["suggestion"] is None for r in rows)
     stats = (await api.get(f"{base}/stats")).json()
     assert stats["own"]["goals"] == 1  # the goal estimated from the throw-off
 

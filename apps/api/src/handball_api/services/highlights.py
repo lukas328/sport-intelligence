@@ -30,13 +30,12 @@ from handball_api.models import (
     RosterEntry,
     Team,
     Track,
-    VideoAsset,
 )
-from handball_api.models.enums import ConsentKind, ReelFormat, ReelStatus, VideoRole, VideoStatus
+from handball_api.models.enums import ConsentKind, ReelFormat, ReelStatus
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.feed import _close_events, _importance, in_video, video_duration_ms
-from handball_api.services.matches import get_match, opponent_of
+from handball_api.services.feed import _close_events, _importance, in_video
+from handball_api.services.matches import duration_ms, get_match, opponent_of, timeline_video
 from handball_api.services.policies import Action, can
 from handball_api.services.roster import consented
 from handball_api.services.videos import media_prefix
@@ -121,13 +120,7 @@ async def build(
     ctx: Ctx, match: Match, fmt: ReelFormat, player_id: uuid.UUID | None = None
 ) -> HighlightReel | None:
     """Selects the scenes, records the consent check and queues the rendering."""
-    video = await ctx.db.scalar(
-        select(VideoAsset).where(
-            VideoAsset.match_id == match.id,
-            VideoAsset.role == VideoRole.MAIN,
-            VideoAsset.status == VideoStatus.READY,
-        )
-    )
+    video = await timeline_video(ctx, match.id, ready=True)
     if video is None or not video.proxy_key:
         return None
     events = list(
@@ -137,7 +130,7 @@ async def build(
             )
         ).all()
     )
-    duration = await video_duration_ms(ctx, match)
+    duration = duration_ms(video)
     scenes = rank([e for e in events if in_video(e, duration)], match, player_id)
     featured = {s.player_id for s in scenes if s.player_id}
     allowed = await consented(ctx, list(featured), ConsentKind.HIGHLIGHTS_INTERNAL)
