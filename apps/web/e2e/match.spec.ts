@@ -49,10 +49,10 @@ test("match: create, upload with pause and resume, processing, player, comment, 
 
   // processing runs in the worker; progress arrives via SSE
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
-  await expect(page.getByText("Videoqualität:")).toBeVisible();
   // stages 2 to 5 run in the GPU worker (CPU locally): calibration, detection, tracking, teams;
   // the court is the first work step beside the player
   await page.getByTestId("step-court").click();
+  await expect(page.getByText("Videoqualität:")).toBeVisible();
   await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByTestId("analysis-panel")).toContainText("Personen verfolgt");
   await expect(page.getByTestId("analysis-panel")).toContainText("Kalibrierung: automatisch");

@@ -62,7 +62,10 @@ export function KickoffPanel({
           return (
             <li key={p} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
               <span className="w-24 font-semibold">{t("period", { n: p })}</span>
-              {at != null ? (
+              {at != null && at < 0 ? (
+                // the video starts later in the half (mark read from the score overlay)
+                <span className="text-sm text-muted">{t("startsAt", { time: formatClock(-at) })}</span>
+              ) : at != null ? (
                 <Button variant="secondary" size="sm" className="tabular-nums" aria-label={t("jumpKickoff", { time: formatClock(at) })} onClick={() => onSeek(at)}>
                   <Play aria-hidden className="size-3 fill-current" />
                   {formatClock(at)}

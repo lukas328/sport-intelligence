@@ -843,14 +843,16 @@
     "hideShort": "Kurze Spuren ausblenden"
   },
   "identity": {
-    "title": "Spuren zuordnen",
-    "hint": "Spuren des eigenen Teams einer Person aus dem Kader zuordnen. Zuordnungen bleiben bei einer neuen Analyse erhalten.",
-    "track": "Spur {n}",
+    "title": "Spieler zuordnen",
+    "hint": "Personen des eigenen Teams einem Spieler aus dem Kader zuordnen. Zuordnungen bleiben bei einer neuen Analyse erhalten.",
+    "track": "Person {n}",
     "none": "nicht zugeordnet",
     "saved": "Zuordnung gespeichert.",
     "auto": "automatisch erkannt",
     "manual": "manuell",
-    "seek": "Spur im Video zeigen"
+    "seek": "Person im Video zeigen",
+    "openCount": "{n, plural, one {# Person ohne Namen} other {# Personen ohne Namen}}, die erste bei {first}.",
+    "allDone": "Alle Personen des eigenen Teams haben einen Namen."
   },
   "camera": {
     "label": "Kamera",
@@ -1749,10 +1751,13 @@
     "reject": "Verwerfen",
     "undo": "Rückgängig",
     "knownHint": "{n, plural, one {# Kandidat ist} other {# Kandidaten sind}} schon als Tor erfasst (Einblendung, Matchbericht oder von Hand) und unter «Alle» zu sehen.",
-    "summary": "{open} offen · {confirmed} bestätigt · {rejected} verworfen",
+    "summary": "{open} offen · {confirmed} bestätigt · {rejected} verworfen · {known} schon erfasst",
     "question": "Tor?",
     "noGoal": "Kein Tor",
-    "focusHint": "Der Clip läuft, sobald ein Kandidat dran ist. 1 oder 2 bestätigt, X verwirft, U nimmt zurück, Enter spielt nochmals, Esc schliesst."
+    "focusHint": "Der Clip läuft, sobald ein Kandidat dran ist. 1 oder 2 bestätigt, X verwirft, U nimmt zurück, Enter spielt nochmals, Esc schliesst.",
+    "said": "{time}: {what}.",
+    "saidUndo": "{time} wieder offen.",
+    "undoHint": "U nimmt zurück."
   },
   "matrix": {
     "nav": "Matrix",
@@ -2210,7 +2215,7 @@
     "goals_open": "{n} offen",
     "goals_done": "geprüft",
     "goals_waiting": "nichts zu prüfen",
-    "players_open": "{n, plural, one {# Spur offen} other {# Spuren offen}}",
+    "players_open": "{n, plural, one {# Person offen} other {# Personen offen}}",
     "players_done": "zugeordnet",
     "players_waiting": "Spuren gibt es nach der Analyse.",
     "kickoffHint": "Spul im Video zum Anwurf der Halbzeit und setze ihn dort. Damit liegen offizielle Tore, Torkandidaten und Ereignisse auf der Spielzeit.",
@@ -2221,8 +2226,8 @@
     "jumpKickoff": "Zum Anwurf bei {time}",
     "kickoffSaved": "Anwurf {n}. Halbzeit bei {time} gesetzt.",
     "goalLists": "Tore aus",
-    "listCandidates": "Torkandidaten",
-    "listReport": "Matchbericht",
+    "listCandidates": "Torkandidaten · {n} offen",
+    "listReport": "Matchbericht · {n} offen",
     "goalsNone": "Die Analyse hat keine Torkandidaten vorgeschlagen.",
     "noReport": "Mit dem offiziellen Matchbericht siehst du, welche Tore im Video fehlen.",
     "timeline": "Spielzeit",
@@ -2237,6 +2242,11 @@
     "laneCandidates": "Kandidaten",
     "reviewOpen": "Im Vollbild prüfen",
     "reviewClose": "Schliessen",
-    "reviewLeft": "{n} offen"
+    "reviewLeft": "{n} offen",
+    "startsAt": "Video beginnt bei {time} der Halbzeit",
+    "zoom": "Ausschnitt der Spielzeit",
+    "zoom_moment": "Moment",
+    "zoom_game": "Spiel",
+    "legendSides": "oben wir, unten Gegner"
   }
 }

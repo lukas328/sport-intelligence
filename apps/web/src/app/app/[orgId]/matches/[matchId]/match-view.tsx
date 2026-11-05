@@ -192,6 +192,24 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }
 
   const base = `/app/${orgId}/matches/${match.id}`;
+  // the main video is there: more cameras (goal cameras, a second angle) and the quality of the
+  // recording belong to the court step of the workspace, not under every step
+  const setup = main ? (
+    <>
+      {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
+      {staff && match.source !== "paper_report" && (
+        <details id="upload" className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <Plus aria-hidden className="size-4" />
+            {t("upload.addCamera")}
+          </summary>
+          <div className="pt-3">
+            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+          </div>
+        </details>
+      )}
+    </>
+  ) : null;
   return (
     <div className="space-y-8">
       <Stage
@@ -211,9 +229,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               </thead>
               <tbody>
                 {(stats.data.quality.attempts_known === false
-                  ? // only goals are known (score overlay): goals, attacks and goals per attack
+                  ? // only goals are known (score overlay): attacks and goals per attack; the score says the goals
                     [
-                      [t("stats.goals"), stats.data.own.goals, stats.data.opponent.goals],
                       [t("stats.possessions"), stats.data.own.possessions ?? "-", stats.data.opponent.possessions ?? "-"],
                       [t("stats.efficiency"), pctLabel(stats.data.own.attack_efficiency), pctLabel(stats.data.opponent.attack_efficiency)],
                     ]
@@ -360,30 +377,17 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       <div hidden={view !== "video"} className="space-y-6">
         {main ? (
-          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} />
+          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} />
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
-        {staff && match.source !== "paper_report" && (
+        {staff && match.source !== "paper_report" && !main && (
           <div id="upload" className="scroll-mt-24">
-            {main ? (
-              // the main video is there: more cameras (goal cameras, a second angle) on demand
-              <details className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
-                <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
-                  <Plus aria-hidden className="size-4" />
-                  {t("upload.addCamera")}
-                </summary>
-                <div className="pt-3">
-                  <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
-                </div>
-              </details>
-            ) : (
-              <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
-            )}
+            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </div>
         )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
-        {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
+        {!main && match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
       </div>
 
       {view === "analysis" && (
@@ -518,16 +522,17 @@ function QualityReport({ video }: { video: Video }) {
     overall: "ok" | "warn" | "fail";
     checks: { id: string; level: string; value: number | null; tip: string | null }[];
   };
-  const tone = { ok: "text-ok", warn: "text-warn", fail: "text-error" }[report.overall];
+  // quiet unless the recording fails: the signal colour belongs to the open work step
+  const tone = report.overall === "fail" ? "text-error" : "";
   return (
-    <details className="group rounded-lg bg-raised px-5 py-4 border border-border">
+    <details className="group">
       <summary className="flex cursor-pointer list-none items-center gap-2 text-sm [&::-webkit-details-marker]:hidden">
         <span className="font-medium">{t("title")}:</span>
         <span className={cn("font-medium", tone)}>{t(`overall_${report.overall}`)}</span>
         <span className="text-xs text-muted">({t("heuristic")})</span>
         <ChevronDown aria-hidden className="ml-auto size-4 text-muted transition-transform group-open:rotate-180" />
       </summary>
-      <ul className="mt-4 divide-y divide-border/70 text-sm">
+      <ul className="mt-3 divide-y divide-border/70 text-sm">
         {report.checks.map((c) => (
           <li key={c.id} className="flex flex-wrap gap-x-4 gap-y-1 py-2">
             <span className="w-44 shrink-0 text-muted">{t(`check_${c.id}` as "check_fps")}</span>

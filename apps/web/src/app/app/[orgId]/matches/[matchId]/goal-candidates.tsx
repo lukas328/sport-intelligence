@@ -13,7 +13,6 @@ import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
 import {
   focusAfter,
-  isOpen,
   keyAction,
   moveFocus,
   visibleRows,
@@ -76,6 +75,7 @@ export function GoalCandidatesPanel({
   // the row to focus next, by id: the list changes only once the optimistic update is in
   const refocus = useRef<string | null>(null);
   const lastDecided = useRef<string | null>(null);
+  const [said, setSaid] = useState<string | null>(null);
   const q = useGoalCandidates(orgId, matchId);
   const reviewKey = ["review", ...key];
   const review = useMutation({
@@ -162,6 +162,11 @@ export function GoalCandidatesPanel({
     setFocus(Math.max(0, next));
     refocus.current = next < 0 ? null : (leaves ? rows.filter((r) => r.id !== c.id)[next]?.id : rows[next]?.id) ?? null;
     if (status !== null) lastDecided.current = c.id;
+    setSaid(
+      status === null
+        ? t("saidUndo", { time: game(c) })
+        : t("said", { time: game(c), what: status === "confirmed" ? t("goalFor", { team: team(side) ?? "" }) : t("rejected") }),
+    );
     review.mutate({ id: c.id, status, side });
   };
   // the decided row has left the open list: U takes back the last decision and goes there
@@ -170,9 +175,13 @@ export function GoalCandidatesPanel({
     if (!id) return;
     lastDecided.current = null;
     refocus.current = id;
+    setSaid(null);
     review.mutate({ id, status: null, side: null });
   }
   undoRef.current = undoLast;
+  // the match clock, as the coach says it ("1. HZ 12:55"); video time only without a throw-off
+  const game = (c: Candidate) =>
+    c.clock_s != null ? tr("events.at", { period: c.period ?? 1, clock: formatClock(c.clock_s * 1000) }) : formatClock(c.goal_ms);
   const confirmed = (c: Candidate, side: CandidateSide) =>
     c.status === "confirmed" && c.side === side;
 
@@ -211,7 +220,7 @@ export function GoalCandidatesPanel({
       <div className="space-y-1">
         <h2 id={`gc-title-${matchId}`} className="sr-only">{t("title")}</h2>
         <p className="text-sm" data-testid="goal-candidates-counts">
-          {t("summary", { open: openAt(current), confirmed: list.counts.confirmed, rejected: list.counts.rejected })}
+          {t("summary", { open: openAt(current), confirmed: list.counts.confirmed, rejected: list.counts.rejected, known: list.counts.known })}
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -236,7 +245,7 @@ export function GoalCandidatesPanel({
         </div>
       </div>
       {/* keys only help with a keyboard; the list still points at the text (aria-describedby) */}
-      <p className="text-xs text-muted pointer-coarse:hidden" id={`gc-keys-${matchId}`}>
+      <p className="sr-only" id={`gc-keys-${matchId}`}>
         {t.rich("keys", {
           own: ownName,
           opp: oppName,
@@ -252,7 +261,7 @@ export function GoalCandidatesPanel({
           <p className="flex items-baseline gap-3">
             <span className="font-display text-4xl leading-none">{t("question")}</span>
             <span className="text-sm text-muted tabular-nums">
-              {activeRow.clock_s != null ? t("clock", { clock: formatClock(activeRow.clock_s * 1000) }) : formatClock(activeRow.goal_ms)}
+              {game(activeRow)}
               {activeRow.suggested_side && ` · ${t("suggested", { team: team(activeRow.suggested_side) ?? "" })}`}
             </span>
           </p>
@@ -289,12 +298,10 @@ export function GoalCandidatesPanel({
           aria-describedby={`gc-keys-${matchId}`}
         >
           {rows.map((c, i) => {
-            const time = formatClock(c.goal_ms);
-            const clock = c.clock_s != null ? formatClock(c.clock_s * 1000) : null;
+            const time = game(c);
             const suggested = team(c.suggested_side);
             const label = [
               time,
-              clock ? t("clock", { clock }) : null,
               suggested ? t("suggested", { team: suggested }) : null,
             ]
               .filter(Boolean)
@@ -318,7 +325,7 @@ export function GoalCandidatesPanel({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="w-[5.5rem] tabular-nums"
+                  className="font-score tabular-nums"
                   tabIndex={i === active ? undefined : -1}
                   aria-label={t("play", { time })}
                   aria-keyshortcuts="Enter"
@@ -327,10 +334,6 @@ export function GoalCandidatesPanel({
                   <Play aria-hidden className="size-3 fill-current" />
                   {time}
                 </Button>
-                <span className="w-12 font-mono text-xs tabular-nums">
-                  <span className="sr-only">{t("gameTime")} </span>
-                  {clock ?? "-"}
-                </span>
                 <span
                   className={cn(
                     "min-w-0 flex-1",
@@ -368,6 +371,7 @@ export function GoalCandidatesPanel({
                         className={cn(on && "bg-ok/12 text-ok ring-ok/50 hover:bg-ok/12")}
                         onClick={() => decide(c, i, on ? null : "confirmed", on ? null : side)}
                       >
+                        {i === active && <kbd className="font-sans text-xs text-muted pointer-coarse:hidden">{k + 1}</kbd>}
                         {t("goalFor", { team: team(side) ?? "" })}
                       </Button>
                     );
@@ -404,9 +408,14 @@ export function GoalCandidatesPanel({
           })}
         </ul>
       )}
-      {list.candidates.some((c) => !isOpen(c) && c.status === "open") && filter === "open" && (
-        <p className="text-xs text-muted">{t("knownHint", { n: list.counts.known })}</p>
-      )}
+      {/* what the last key did, and how to take it back */}
+      <p className="min-h-5 text-sm" aria-live="polite" data-testid="goal-candidates-said">
+        {said && (
+          <>
+            {said} {lastDecided.current && <span className="text-muted">{t("undoHint")}</span>}
+          </>
+        )}
+      </p>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
     </section>
   );

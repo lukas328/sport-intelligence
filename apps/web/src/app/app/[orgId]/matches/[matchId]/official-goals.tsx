@@ -10,7 +10,6 @@ import { Alert } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/tabs";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
-import { formatClock } from "@/lib/format";
 import {
   gameTime,
   goalRows,
@@ -169,33 +168,32 @@ export function OfficialGoalsPanel({
             const time = gameTime(r);
             const label = [time, team(r.side), who(r)].filter(Boolean).join(", ");
             const away = r.kind === "outside";
+            // the match clock as the coach says it ("1. HZ 13:21")
+            const clockLabel = time ? tr("events.at", { period: r.period, clock: time }) : "-";
             return (
               <li
                 key={r.id}
                 // phone: time and checks on top, the goal below; wider: one line
-                className="grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-2 sm:flex sm:flex-wrap"
+                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-2 sm:flex sm:flex-wrap"
                 data-testid="official-goal-row"
               >
                 {target != null ? (
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-[5.5rem] tabular-nums"
-                    aria-label={t("jump", { time: formatClock(r.tMs!), goal: label })}
+                    className="font-score tabular-nums"
+                    aria-label={t("jump", { time: clockLabel, goal: label })}
                     onClick={() => onPlay(target)}
                   >
                     <Play aria-hidden className="size-3 fill-current" />
-                    {formatClock(r.tMs!)}
+                    {clockLabel}
                   </Button>
                 ) : (
-                  <span className="inline-flex w-[5.5rem] text-xs text-muted">
-                    {away ? t("outside") : t("noTime")}
+                  <span className="inline-flex items-baseline gap-2 text-sm">
+                    <span className="font-score tabular-nums">{clockLabel}</span>
+                    <span className="text-xs text-muted">{away ? t("outside") : t("noTime")}</span>
                   </span>
                 )}
-                <span className="w-12 font-mono text-xs tabular-nums">
-                  <span className="sr-only">{t("gameTime")} </span>
-                  {time ?? "-"}
-                </span>
                 <span
                   className={cn(
                     "col-span-full row-start-2 min-w-0 sm:min-w-48 sm:flex-1",
@@ -207,7 +205,7 @@ export function OfficialGoalsPanel({
                   {who(r) && <span className="text-muted">{` · ${who(r)}`}</span>}
                   {r.penalty && <span className="text-muted">{` · ${t("penalty")}`}</span>}
                   {score(r.score) && (
-                    <span className="ml-1.5 font-mono text-xs tabular-nums text-muted">
+                    <span className="ml-1.5 font-score text-xs tabular-nums text-muted">
                       {score(r.score)}
                     </span>
                   )}
@@ -225,7 +223,7 @@ export function OfficialGoalsPanel({
                   <span
                     role="group"
                     aria-label={label}
-                    className="col-start-4 row-start-1 flex gap-1 justify-self-end"
+                    className="col-start-3 row-start-1 flex gap-1 justify-self-end"
                   >
                     {(["confirmed", "dismissed"] as const).map((s) => {
                       const Icon = s === "confirmed" ? Check : X;

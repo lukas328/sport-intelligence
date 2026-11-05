@@ -843,14 +843,16 @@
     "hideShort": "Masquer les traces courtes"
   },
   "identity": {
-    "title": "Attribuer les traces",
-    "hint": "Attribue les traces de ton équipe à un joueur de l'effectif. Les attributions sont conservées lors d'une nouvelle analyse.",
-    "track": "Trace {n}",
+    "title": "Attribuer les joueurs",
+    "hint": "Attribue les personnes de ta propre équipe à un joueur de l'effectif. Les attributions restent lors d'une nouvelle analyse.",
+    "track": "Personne {n}",
     "none": "non attribuée",
     "saved": "Attribution enregistrée.",
     "auto": "détecté automatiquement",
     "manual": "manuel",
-    "seek": "Montrer la trace dans la vidéo"
+    "seek": "Montrer la personne dans la vidéo",
+    "openCount": "{n, plural, one {# personne sans nom} other {# personnes sans nom}}, la première à {first}.",
+    "allDone": "Toutes les personnes de l'équipe ont un nom."
   },
   "camera": {
     "label": "Caméra",
@@ -1749,10 +1751,13 @@
     "reject": "Écarter",
     "undo": "Annuler",
     "knownHint": "{n, plural, one {# but potentiel est déjà un but (incrustation, rapport de match ou saisie manuelle) et figure sous « Tous ».} other {# buts potentiels sont déjà des buts (incrustation, rapport de match ou saisie manuelle) et figurent sous « Tous ».}}",
-    "summary": "{open} à vérifier · {confirmed} confirmés · {rejected} écartés",
+    "summary": "{open} à vérifier · {confirmed} confirmés · {rejected} écartés · {known} déjà saisis",
     "question": "But ?",
     "noGoal": "Pas de but",
-    "focusHint": "Le clip démarre dès qu'un but possible est actif. 1 ou 2 confirme, X écarte, U annule, Entrée rejoue, Échap ferme."
+    "focusHint": "Le clip démarre dès qu'un but possible est actif. 1 ou 2 confirme, X écarte, U annule, Entrée rejoue, Échap ferme.",
+    "said": "{time} : {what}.",
+    "saidUndo": "{time} de nouveau à vérifier.",
+    "undoHint": "U annule."
   },
   "matrix": {
     "nav": "Matrice",
@@ -2210,7 +2215,7 @@
     "goals_open": "{n} à vérifier",
     "goals_done": "vérifiés",
     "goals_waiting": "rien à vérifier",
-    "players_open": "{n, plural, one {# trace ouverte} other {# traces ouvertes}}",
+    "players_open": "{n, plural, one {# personne ouverte} other {# personnes ouvertes}}",
     "players_done": "attribuées",
     "players_waiting": "Les traces apparaissent après l'analyse.",
     "kickoffHint": "Amène la vidéo à l'engagement de la mi-temps et définis-le là. Les buts officiels, les buts possibles et les événements suivent alors le temps de jeu.",
@@ -2221,8 +2226,8 @@
     "jumpKickoff": "Aller à l'engagement à {time}",
     "kickoffSaved": "Engagement de la {n}e mi-temps défini à {time}.",
     "goalLists": "Buts selon",
-    "listCandidates": "Buts possibles",
-    "listReport": "Feuille de match",
+    "listCandidates": "Buts possibles · {n}",
+    "listReport": "Feuille de match · {n}",
     "goalsNone": "L'analyse n'a proposé aucun but possible.",
     "noReport": "Avec la feuille de match officielle, tu vois quels buts manquent dans la vidéo.",
     "timeline": "Temps de jeu",
@@ -2237,6 +2242,11 @@
     "laneCandidates": "Buts possibles",
     "reviewOpen": "Vérifier en plein écran",
     "reviewClose": "Fermer",
-    "reviewLeft": "{n} à vérifier"
+    "reviewLeft": "{n} à vérifier",
+    "startsAt": "La vidéo commence à {time} de la mi-temps",
+    "zoom": "Partie du match",
+    "zoom_moment": "Moment",
+    "zoom_game": "Match",
+    "legendSides": "nous en haut, adversaire en bas"
   }
 }

@@ -843,14 +843,16 @@
     "hideShort": "Hide short tracks"
   },
   "identity": {
-    "title": "Assign tracks",
-    "hint": "Assign tracks of your team to a roster player. Assignments are kept when the analysis runs again.",
-    "track": "Track {n}",
+    "title": "Assign players",
+    "hint": "Assign people of the own team to a player of the squad. Assignments stay when the video is analysed again.",
+    "track": "Person {n}",
     "none": "not assigned",
     "saved": "Assignment saved.",
     "auto": "detected automatically",
     "manual": "manual",
-    "seek": "Show track in video"
+    "seek": "Show person in the video",
+    "openCount": "{n, plural, one {# person without a name} other {# people without a name}}, the first at {first}.",
+    "allDone": "Everyone of the own team has a name."
   },
   "camera": {
     "label": "Camera",
@@ -1749,10 +1751,13 @@
     "reject": "Reject",
     "undo": "Undo",
     "knownHint": "{n, plural, one {# candidate is} other {# candidates are}} already a goal (score overlay, match report or entered by hand) and shown under \"All\".",
-    "summary": "{open} open · {confirmed} confirmed · {rejected} rejected",
+    "summary": "{open} open · {confirmed} confirmed · {rejected} rejected · {known} already recorded",
     "question": "Goal?",
     "noGoal": "No goal",
-    "focusHint": "The clip plays as soon as a candidate is up. 1 or 2 confirms, X rejects, U undoes, Enter plays again, Esc closes."
+    "focusHint": "The clip plays as soon as a candidate is up. 1 or 2 confirms, X rejects, U undoes, Enter plays again, Esc closes.",
+    "said": "{time}: {what}.",
+    "saidUndo": "{time} open again.",
+    "undoHint": "U takes it back."
   },
   "matrix": {
     "nav": "Matrix",
@@ -2210,7 +2215,7 @@
     "goals_open": "{n} open",
     "goals_done": "checked",
     "goals_waiting": "nothing to check",
-    "players_open": "{n, plural, one {# track open} other {# tracks open}}",
+    "players_open": "{n, plural, one {# person open} other {# people open}}",
     "players_done": "assigned",
     "players_waiting": "Tracks appear after the analysis.",
     "kickoffHint": "Move the video to the throw-off of the half and set it there. Official goals, goal candidates and events then line up with the match clock.",
@@ -2221,8 +2226,8 @@
     "jumpKickoff": "Go to the throw-off at {time}",
     "kickoffSaved": "Throw-off of half {n} set at {time}.",
     "goalLists": "Goals from",
-    "listCandidates": "Goal candidates",
-    "listReport": "Match report",
+    "listCandidates": "Goal candidates · {n} open",
+    "listReport": "Match report · {n} open",
     "goalsNone": "The analysis proposed no goal candidates.",
     "noReport": "With the official match report you see which goals are missing in the video.",
     "timeline": "Match time",
@@ -2237,6 +2242,11 @@
     "laneCandidates": "Candidates",
     "reviewOpen": "Review full screen",
     "reviewClose": "Close",
-    "reviewLeft": "{n} open"
+    "reviewLeft": "{n} open",
+    "startsAt": "Video starts at {time} of the half",
+    "zoom": "Part of the match",
+    "zoom_moment": "Moment",
+    "zoom_game": "Match",
+    "legendSides": "us above, opponent below"
   }
 }
