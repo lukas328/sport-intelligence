@@ -229,17 +229,6 @@ export function GoalCandidatesPanel({
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3" data-testid="goal-candidates" aria-labelledby={`gc-title-${matchId}`}>
       <h2 id={`gc-title-${matchId}`} className="sr-only">{t("title")}</h2>
-      <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm" data-testid="goal-candidates-counts">
-        <span>{t("summary", { open: openAt(current), confirmed: list.counts.confirmed, rejected: list.counts.rejected, known: list.counts.known })}</span>
-        <button
-          type="button"
-          className="font-medium text-accent underline-offset-2 hover:underline"
-          aria-pressed={filter === "all"}
-          onClick={() => setFilter(filter === "all" ? "open" : "all")}
-        >
-          {filter === "all" ? t("showOpen") : t("showAll", { n: visibleRows(list, current, "all").length })}
-        </button>
-      </p>
       {/* keys only help with a keyboard; the list points at the text (aria-describedby) */}
       <p className="sr-only" id={`gc-keys-${matchId}`}>
         {t.rich("keys", { own: ownName, opp: oppName, k: (chunks) => <kbd>{chunks}</kbd> })}
@@ -274,8 +263,8 @@ export function GoalCandidatesPanel({
               <kbd aria-hidden className="font-score opacity-70">X</kbd>
               {t("noGoal")}
             </Button>
-            <Button size={big} variant="quiet" className="justify-start px-3" aria-keyshortcuts="Enter" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
-              <Play aria-hidden className="size-3 fill-current" />
+            <Button size={big} variant="quiet" className="justify-start px-3" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
+              <kbd aria-hidden className="font-score opacity-70">R</kbd>
               {t("replay")}
             </Button>
           </div>
@@ -284,7 +273,7 @@ export function GoalCandidatesPanel({
 
       {/* what the last key did, and how to take it back */}
       <p className="flex min-h-8 flex-wrap items-center gap-x-3 text-sm" aria-live="polite" data-testid="goal-candidates-said">
-        {said}
+        {said ?? <span className="text-muted">{t("undoIdle")}</span>}
         {said && lastDecided.current && (
           <Button variant="ghost" size="sm" className="-my-1" aria-keyshortcuts="U" onClick={undoLast}>
             <RotateCcw aria-hidden />
@@ -294,6 +283,17 @@ export function GoalCandidatesPanel({
         )}
       </p>
 
+      <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm" data-testid="goal-candidates-counts">
+        <span>{t("summary", { open: openAt(current), confirmed: list.counts.confirmed, rejected: list.counts.rejected, known: list.counts.known })}</span>
+        <button
+          type="button"
+          className="font-medium text-accent underline-offset-2 hover:underline"
+          aria-pressed={filter === "all"}
+          onClick={() => setFilter(filter === "all" ? "open" : "all")}
+        >
+          {filter === "all" ? t("showOpen") : t("showAll", { n: visibleRows(list, current, "all").length })}
+        </button>
+      </p>
       {rows.length === 0 ? (
         <p className="text-sm text-muted">{filter === "open" ? t("nothingOpen") : t("none")}</p>
       ) : (

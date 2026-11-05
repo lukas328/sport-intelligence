@@ -24,6 +24,7 @@ export function MatchTimeline({
   candidates,
   rate,
   activeId = null,
+  events = null,
   notes = [],
   onSetKickoff,
 }: {
@@ -36,6 +37,8 @@ export function MatchTimeline({
   rate: number;
   /** the candidate that is up: the one signal mark on the axis */
   activeId?: string | null;
+  /** tagged and corrected events (the report's goals have their own lane) */
+  events?: { id: string; type: string; side: string; clock_s: number | null; outcome?: string | null; source: string }[] | null;
   /** comments, clips and drawings (video ms) */
   notes?: number[];
   onSetKickoff?: () => void;
@@ -66,6 +69,7 @@ export function MatchTimeline({
   const goals = (official?.imported ? official.goals : []).filter((g) => g.clock_s != null);
   const inVideo = goals.filter((g) => inside(g.clock_s!, spans)).length;
   const cands = (candidates?.candidates ?? []).filter((c) => c.clock_s != null && c.rate <= rate);
+  const tagged = (events ?? []).filter((e) => e.clock_s != null && e.source !== "official_report");
   const noteClocks = notes.map((ms) => clockAt(kickoff, periodS, ms)).filter((c): c is number => c != null && c >= 0);
   const clip = spans.map((s) => `${formatClock(s.from * 1000)} ${t("to")} ${formatClock(s.to * 1000)}`).join(", ");
   const ticks = zoom === "game" ? [0, 0.25, 0.5, 0.75, 1].map((f) => total * f) : [0, 0.25, 0.5, 0.75, 1].map((f) => lo + (hi - lo) * f);
@@ -147,13 +151,32 @@ export function MatchTimeline({
                       "absolute size-3 -translate-x-1/2 rounded-full",
                       side === "opponent" ? "bottom-1" : side === "own" ? "top-1" : "top-1/2 -translate-y-1/2",
                       // filled: a goal (confirmed here or already recorded); ring: still a proposal
-                      c.status === "confirmed" || c.known ? "bg-foreground" : c.status === "rejected" ? "size-1.5 bg-foreground/25" : "border-2 border-foreground bg-background",
+                      c.status === "confirmed" ? "bg-foreground" : c.known ? "rounded-none bg-foreground/70" : c.status === "rejected" ? "size-1.5 bg-foreground/25" : "border-2 border-foreground bg-background",
                       c.id === activeId && "ring-[3px] ring-signal",
                     )}
                     style={{ left: x(c.clock_s!) }}
                   />
                 );
               }),
+            true,
+          )}
+        {tagged.length > 0 &&
+          lane(
+            t("laneEvents"),
+            tagged
+              .filter((e) => seen(e.clock_s!))
+              .map((e) => (
+                <span
+                  key={e.id}
+                  className={cn(
+                    "absolute w-0.5 -translate-x-1/2",
+                    e.side === "own" ? "top-1" : "bottom-1",
+                    // goals as full ticks, everything else short
+                    e.type === "shot" && e.outcome === "goal" ? "h-[calc(50%-4px)] bg-foreground" : "h-2 bg-foreground/50",
+                  )}
+                  style={{ left: x(e.clock_s!) }}
+                />
+              )),
             true,
           )}
         {noteClocks.length > 0 &&

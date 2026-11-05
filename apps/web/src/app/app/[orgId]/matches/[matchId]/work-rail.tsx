@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 import type { Step, StepId } from "@/lib/match-workflow";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +32,15 @@ export function WorkRail({
   // shown (then the signal sits on the item to act on, e.g. the candidate on the timeline)
   const firstOpenStep = steps.find((s) => s.state === "open")?.id;
   const signal = firstOpenStep === value ? undefined : firstOpenStep;
+  // the open tab stays in view in the scrolling row on phones
+  // (sideways only: the page itself must not jump)
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = refs.current[all.indexOf(value)];
+    const b = box.current;
+    if (!el || !b) return;
+    if (el.offsetLeft < b.scrollLeft || el.offsetLeft + el.offsetWidth > b.scrollLeft + b.clientWidth) b.scrollLeft = Math.max(0, el.offsetLeft - 16);
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
   function onKey(e: KeyboardEvent, i: number) {
     const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     const to = e.key === "Home" ? 0 : e.key === "End" ? all.length - 1 : d ? (i + d + all.length) % all.length : -1;
@@ -65,7 +74,7 @@ export function WorkRail({
     </button>
   );
   return (
-    <div className="scrollbar-none -mx-1 overflow-x-auto px-1">
+    <div ref={box} className="scrollbar-none relative -mx-1 overflow-x-auto px-1">
       <div role="tablist" aria-label={t("rail")} className="flex min-w-max items-stretch gap-1 border-b border-foreground/15 sm:gap-3">
         {steps.map((s, i) => {
           const sub = t(`${s.id}_${s.reason ?? (s.state === "open" ? "open" : s.state)}`, { n: s.count ?? 0 });

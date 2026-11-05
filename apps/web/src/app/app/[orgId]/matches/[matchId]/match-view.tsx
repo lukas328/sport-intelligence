@@ -216,6 +216,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         compact
         aside={
           stats.data && hasEvents ? (
+            // phones, video view: the score is enough; the figures sit in the analysis
+            <div className={cn(view === "video" && "max-sm:hidden")}>
             <table className="text-[0.9375rem]">
               <caption className="sr-only">{t("stats.comparison")}</caption>
               <thead>
@@ -252,6 +254,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 ))}
               </tbody>
             </table>
+            </div>
           ) : undefined
         }
       >
@@ -288,8 +291,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         )}
       </Stage>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-foreground/15">
+        <div className="flex items-end justify-between gap-3 border-b border-foreground/15">
           <Segmented<View>
+            className="min-w-0"
             variant="underline"
             label={t("tabs.video")}
             value={view}

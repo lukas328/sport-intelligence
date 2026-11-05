@@ -247,7 +247,8 @@ export function Workspace({
   const mainVideo = useCallback(() => raw.current?.video() ?? null, []);
   const events = useQuery({
     queryKey: ["events", match.id],
-    enabled: multi.auto && cams.length > 1,
+    // the auto camera and the events lane of the timeline
+    enabled: (multi.auto && cams.length > 1) || staff,
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/events", { params: { path: { org_id: orgId, match_id: match.id } } })).data ?? [],
   });
   // best camera around events (4.5): the goal camera takes over shortly before a shot on goal
@@ -508,6 +509,7 @@ export function Workspace({
           candidates={staff ? candidates.data : null}
           rate={rate}
           activeId={shown === "goals" ? activeCandidate : null}
+          events={staff ? events.data : null}
           notes={[...(comments.data ?? []).map((c) => c.t_ms), ...(clips.data ?? []).map((c) => c.start_ms), ...(annotations.data ?? []).map((x) => x.t_ms)]}
           onSetKickoff={staff ? () => setPane("kickoff") : undefined}
         />
@@ -539,6 +541,7 @@ export function Workspace({
           <div className="flex min-h-0 flex-1 flex-col gap-4">
             {hasReport && openCandidates && !reviewing && (
               <Segmented<"candidates" | "report">
+                className="max-lg:order-last"
                 label={t("workflow.goalLists")}
                 size="sm"
                 value={list}
@@ -550,7 +553,7 @@ export function Workspace({
               />
             )}
             {list === "candidates" && openCandidates && !reviewing && openNow > 0 && (
-              <Button variant="secondary" className="self-start" onClick={() => (setGoalList("candidates"), setReviewing(true))} data-testid="review-open">
+              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setGoalList("candidates"), setReviewing(true))} data-testid="review-open">
                 <Maximize2 aria-hidden />
                 {t("workflow.reviewOpen")}
               </Button>
@@ -793,7 +796,7 @@ function AnalysisPanel({
       )}
       {canMark && (
         <Button
-          variant={analysis.needs_calibration ? "primary" : unconfirmed ? "secondary" : "quiet"}
+          variant={analysis.needs_calibration ? "primary" : "secondary"}
           size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
           onClick={() => setMarking(true)}
           data-testid="mark-court"
@@ -909,11 +912,14 @@ function IdentityPanel({
         <ul className="mt-3 divide-y divide-border/70 text-sm">
           {shown.map((tr) => (
             <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5">
-              <Button variant="quiet" size="sm" className="w-44 justify-start" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}, ${at(tr.first_ms)}`}>
+              <Button variant="quiet" size="sm" className="min-w-0 justify-start" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}, ${at(tr.first_ms)}`}>
                 <Play aria-hidden className="size-3 fill-current" />
                 <span className="font-score tabular-nums">{at(tr.first_ms)}</span>
                 {/* a shirt number the analysis read helps to recognise the person; the track id does not */}
-                <span className="text-muted">{tr.number != null ? t("shirt", { n: tr.number }) : t("unknown")}</span>
+                <span className="text-muted">
+                  {tr.number != null ? t("shirt", { n: tr.number }) : t("track", { n: tr.track_no })}
+                  {` · ${t("onScreen", { s: Math.round((tr.last_ms - tr.first_ms) / 1000) })}`}
+                </span>
               </Button>
               <label className="sr-only" htmlFor={`track-${tr.track_no}`}>
                 {t("track", { n: tr.track_no })}

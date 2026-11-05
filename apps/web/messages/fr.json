@@ -863,7 +863,8 @@
     "allDone": "Toutes les personnes de l'équipe ont un nom.",
     "shirt": "N° {n}",
     "unknown": "inconnu",
-    "showAll": "Afficher les {n}"
+    "showAll": "Afficher les {n}",
+    "onScreen": "{s} s à l'image"
   },
   "camera": {
     "label": "Caméra",
@@ -1774,7 +1775,8 @@
     "position": "{pos} sur {n}",
     "replay": "Revoir",
     "rateMore": "Plus ou moins de propositions",
-    "rateHint": "Plus de propositions par minute de jeu trouvent plus de buts, mais la vérification prend plus de temps."
+    "rateHint": "Plus de propositions par minute de jeu trouvent plus de buts, mais la vérification prend plus de temps.",
+    "undoIdle": "U annule la dernière décision."
   },
   "matrix": {
     "nav": "Matrice",
@@ -2267,6 +2269,7 @@
     "legendSides": "nous en haut, adversaire en bas",
     "laneNotes": "Notes",
     "change": "Modifier",
-    "kickoff_fromClip": "lu dans la vidéo"
+    "kickoff_fromClip": "lu dans la vidéo",
+    "laneEvents": "Événements"
   }
 }

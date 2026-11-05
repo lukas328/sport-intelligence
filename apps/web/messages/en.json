@@ -863,7 +863,8 @@
     "allDone": "Everyone of the own team has a name.",
     "shirt": "No. {n}",
     "unknown": "unknown",
-    "showAll": "Show all {n}"
+    "showAll": "Show all {n}",
+    "onScreen": "{s} s on screen"
   },
   "camera": {
     "label": "Camera",
@@ -1774,7 +1775,8 @@
     "position": "{pos} of {n}",
     "replay": "Again",
     "rateMore": "More or fewer proposals",
-    "rateHint": "More proposals per minute of play find more goals but take longer to review."
+    "rateHint": "More proposals per minute of play find more goals but take longer to review.",
+    "undoIdle": "U takes back the last decision."
   },
   "matrix": {
     "nav": "Matrix",
@@ -2267,6 +2269,7 @@
     "legendSides": "us above, opponent below",
     "laneNotes": "Notes",
     "change": "Change",
-    "kickoff_fromClip": "read from the video"
+    "kickoff_fromClip": "read from the video",
+    "laneEvents": "Events"
   }
 }

@@ -20,6 +20,7 @@ const KEYS: Record<string, KeyAction> = {
   u: "undo",
   Backspace: "undo",
   Enter: "play",
+  r: "play",
   " ": "play",
   ArrowDown: "next",
   ArrowUp: "prev",
