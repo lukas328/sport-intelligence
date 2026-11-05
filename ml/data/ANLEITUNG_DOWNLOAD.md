@@ -1,57 +1,57 @@
-# Anleitung: nächste Spiele herunterladen und in den Drive-Ordner legen
+# Anleitung: Spiele vom eigenen Computer nach Kaggle bringen
 
-Diese Anleitung ist für Claude Code auf dem Computer von Lukas (Windows, PowerShell). Ziel: die
-Spiele aus `ml/data/videos_next.csv` als ganze Videos in den geteilten Google-Drive-Ordner legen.
-Den Rest (Schneiden, Spieluhr lesen, Labels aus den offiziellen Logs, Upload nach Kaggle) macht
-die Pipeline in der Cloud automatisch.
+Für Claude Code auf dem Computer von Lukas (Windows). Die Spiele liegen schon auf dem Computer
+(etwa 230). Ziel: daraus Trainings-Segmente schneiden und direkt als private Kaggle-Datasets
+hochladen. Google Drive braucht es dafür nicht mehr (Drive sperrt Downloads nach zu vielen Zugriffen).
 
-## Was schon vorbereitet ist
-- `ml/data/videos_next.csv`: 60 Schweizer Spiele ab Saison 2023/24 mit vollem offiziellem
-  Spielprotokoll (handball.ch), die noch nicht verarbeitet sind, meiste Tore zuerst.
-  Format `url;start;end;name` (Strichpunkt).
-- `ml/data/download_games.ps1`: lädt jedes Spiel als ganzes Video (720p, mp4) plus
-  `<name>.info.json` und benennt die Dateien exakt nach der Spalte `name`.
-- Drive-Ordner: https://drive.google.com/drive/folders/1-KG572KNR-KK4NL4qMaVplL9KFlSm_AY
+Den Rest macht die Cloud-Seite: Spieluhr pro Segment lesen, Labels aus den offiziellen
+Spielprotokollen (handball.ch), Training auf der Kaggle-GPU. Von Hand labeln ist nicht nötig.
 
-Es ist reines Rohmaterial: keine Labels von Hand nötig. Die Labels kommen aus den offiziellen
-Protokollen, darum ist der Dateiname wichtig.
+## Was vorbereitet ist (Branch `vision/real-footage`)
+- `ml/data/local_ingest.py`: schneidet pro Spiel fünf 3-Minuten-Segmente (bei 15/30/50/70/85 %
+  der Spielzeit, 1280 breit), genau wie die Cloud-Pipeline, und lädt je 20 Spiele als ein privates
+  Kaggle-Dataset `handball-segs-l01`, `-l02`, ... hoch. Die ganzen Videos bleiben auf dem Computer.
+  Upload pro Spiel etwa 50 bis 100 MB, für 230 Spiele also etwa 15 bis 20 GB.
+  Unterbrechen ist kein Problem: gleicher Befehl nochmals, es macht dort weiter.
+- `ml/data/videos_next.csv` und `ml/data/download_games.ps1`: für später, um weitere Spiele mit
+  offiziellem Protokoll herunterzuladen (Teil B).
 
-## Schritte
-1. Repo aktualisieren: `git fetch origin vision/real-footage` und `git checkout vision/real-footage`
-   (oder `git pull`), dann in den Ordner `ml/data` wechseln.
-2. Werkzeuge prüfen, falls nötig installieren:
-   `winget install yt-dlp.yt-dlp` und `winget install Gyan.FFmpeg`, danach ein neues PowerShell-
-   Fenster. `yt-dlp -U` holt die neueste Version (YouTube ändert oft etwas).
-3. Zielordner: den Drive-Ordner über "Google Drive für Desktop" als lokalen Ordner verwenden
-   (z.B. `G:\Meine Ablage\...` oder eine Verknüpfung zum geteilten Ordner). Prüfen, dass dort
-   genug Platz ist: etwa 1 bis 2 GB pro Spiel, 60 Spiele also 60 bis 120 GB.
-   Wenn der Platz nicht reicht: mit `-Max 15` in Etappen arbeiten.
-4. Zuerst ein Test mit 2 Spielen:
-   `.\download_games.ps1 -Csv videos_next.csv -Out "<Drive-Ordner>" -Max 2`
-   Prüfen: im Ordner liegen `<name>.mp4` und `<name>.info.json`, das Video läuft, Dauer etwa
-   60 bis 120 Minuten.
-5. Dann alle: dasselbe ohne `-Max`. Das Skript überspringt, was schon da ist, und kann jederzeit
-   neu gestartet werden.
-6. Falls YouTube "confirm you are not a bot" meldet (VPN, Firmennetz): über einen Handy-Hotspot
-   laufen lassen, oder `-Browser chrome` (bzw. `edge`, `firefox`) anhängen, dann nutzt yt-dlp die
-   angemeldete YouTube-Sitzung (langsamer, mit Pausen). Keine anderen Umgehungen.
+## Teil A: die Spiele auf dem Computer hochladen
+1. Repo holen bzw. aktualisieren: `git fetch origin vision/real-footage`, `git checkout
+   vision/real-footage`, `git pull`.
+2. Werkzeuge prüfen:
+   - Python 3.10 oder neuer (`python --version`)
+   - ffmpeg und ffprobe (`ffmpeg -version`; sonst `winget install Gyan.FFmpeg`, dann neues Fenster)
+   - Kaggle CLI: `pip install kaggle`
+3. Kaggle-Zugang: Lukas erstellt auf kaggle.com unter Settings, API, "Create New Token" eine
+   `kaggle.json` und legt sie nach `%USERPROFILE%\.kaggle\kaggle.json`. Den Schlüssel nirgends
+   anzeigen, in kein Repo und in keinen Chat kopieren. Test: `kaggle datasets list -m` zeigt
+   u.a. `handball-segs-b01`.
+4. Testlauf ohne Upload, mit 2 Spielen (Pfade anpassen; WORKDIR ist ein beliebiger Arbeitsordner
+   mit ein paar GB Platz):
+   `python ml/data/local_ingest.py "D:\Handball\Videos" "D:\Handball\ingest" --user lukasde1000 --max-games 2 --dry-run`
+   Prüfen: in `D:\Handball\ingest\batch_l01` liegen `<Spielname>_s0.mp4` bis `_s4.mp4`, die
+   Segmente laufen und zeigen Spielszenen. Danach den Arbeitsordner löschen.
+5. Echter Lauf:
+   `python ml/data/local_ingest.py "D:\Handball\Videos" "D:\Handball\ingest" --user lukasde1000`
+   Dauer: grob 1 bis 3 Minuten pro Spiel (Schneiden), plus Upload. Ausgabe am Schluss:
+   wie viele Spiele, welche fehlgeschlagen sind.
+6. Melden: Anzahl Spiele, Namen der hochgeladenen Datasets (`handball-segs-lNN`) und die Liste
+   der fehlgeschlagenen Spiele. Den Ordner `D:\Handball\ingest\uploaded` behalten (Index pro
+   Dataset).
 
-## Regeln
-- Dateinamen nicht ändern, keine Zusätze wie `.f298` oder `(1)`. Nur `<name>.mp4` und
-  `<name>.info.json`.
-- Keine Teilstücke hochladen: das Skript lädt zuerst in einen Temp-Ordner und verschiebt erst
-  fertige Videos.
-- Spiele, die nicht klappen (privat, gelöscht), einfach auslassen; das Skript listet sie am Ende.
+Wichtig zu den Dateinamen: Der Spielname ist der Dateiname ohne Endung. Wenn die Dateien so
+heissen wie in `videos.csv` (Spalte `name`, z.B. `CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03`),
+findet die Cloud-Seite die offiziellen Daten automatisch. Dateien nicht umbenennen, ausser um sie
+an diese Namen anzugleichen. Liegt neben einem Video eine `<Name>.info.json`, wird sie mitgenommen.
+Kurze Dateien (unter 15 Minuten, z.B. schon geschnittene Stücke) werden als ein einzelnes Segment
+übernommen.
 
-## Ausserdem: vier gesperrte Videos
-Google Drive sperrt den Download dieser vier Dateien ("too many users have downloaded"). Im
-Drive-Ordner bei jeder "Kopie erstellen", die Kopie exakt auf den alten Namen umbenennen (ohne
-"Kopie von"), dann das Original löschen:
-- `CH_NLB_SGWaedenswilHorgen_Staefa_2023-04-22.mp4`
-- `CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02.mp4`
-- `CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09.mp4`
-- `CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14.mp4`
-
-## Am Schluss melden
-Wie viele Spiele hochgeladen sind und welche nicht geklappt haben. Die Cloud-Pipeline holt neue
-Dateien alle 10 Minuten ab.
+## Teil B: später weitere Spiele herunterladen
+`ml/data/videos_next.csv` listet 60 Schweizer Spiele ab 2023/24 mit vollem offiziellem Protokoll.
+Was davon noch nicht auf dem Computer ist:
+1. `winget install yt-dlp.yt-dlp` (und `yt-dlp -U` für die neueste Version).
+2. In `ml/data`: `.\download_games.ps1 -Csv videos_next.csv -Out "D:\Handball\Videos"`
+   (zuerst mit `-Max 2` testen). Bei "confirm you are not a bot": Handy-Hotspot oder
+   `-Browser chrome`. Keine anderen Umgehungen.
+3. Danach Teil A, Schritt 5 nochmals ausführen: es verarbeitet nur die neuen Spiele.
