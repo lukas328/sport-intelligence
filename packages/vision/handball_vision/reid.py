@@ -86,6 +86,37 @@ class Fragment:
     end_xy: tuple[float, float]
     vectors: F64  # (n, d) appearance vectors of this fragment
     number: int | None = None
+    frames: NDArray[np.int64] | None = None  # video frame of each vector (same order)
+    readings: tuple[tuple[int, int], ...] = ()  # (frame, number): confident shirt-number readings
+
+
+ANCHOR_WINDOW_S = 2.0  # vectors this close to a reading of the number show its owner
+MIN_READ_VECTORS = 2
+
+
+def anchor_vectors(f: Fragment, fps: float, window_s: float = ANCHOR_WINDOW_S) -> F64:
+    """The vectors of a numbered fragment that show the number's owner: those within `window_s`
+    of a reading of that number. A track often carries two people (crowds, the bench, a player
+    passing the referee), and the reading says who is in the box at that moment; the other
+    vectors would teach a mixture. Without frames or readings: all vectors."""
+    if f.number is None or f.frames is None or not f.readings:
+        return f.vectors
+    at = np.array([fr for fr, n in f.readings if n == f.number], np.float64)
+    if not len(at):
+        return f.vectors[:0]
+    gap = np.abs(np.asarray(f.frames, np.float64)[:, None] - at[None, :]).min(axis=1)
+    return np.asarray(f.vectors[gap <= window_s * fps], np.float64)
+
+
+def contradicts(f: Fragment, number: int) -> bool:
+    """Whether the fragment's own readings speak against `number`: at least two confident
+    readings and none of them is the number or a known misreading of it (numbers.CONFUSIONS)."""
+    from handball_vision.numbers import _misread_of
+
+    read = [n for _, n in f.readings]
+    if len(read) < 2:
+        return False
+    return not any(n == number or _misread_of(str(n), str(number)) for n in read)
 
 
 def fit_projection(
@@ -171,24 +202,35 @@ def assign(
             for f in fragments
             if f.team.removesuffix("_gk") == team
             and len(f.vectors)
-            and consistency(f.vectors) >= MIN_CANDIDATE_CONSISTENCY
+            and (
+                consistency(f.vectors) >= MIN_CANDIDATE_CONSISTENCY
+                # a numbered track that switched people still teaches with its read stretches
+                or (f.number is not None and f.frames is not None and bool(f.readings))
+            )
         ]
         timeline: dict[int, list[Fragment]] = defaultdict(list)
+        teach: dict[int, F64] = {}  # id(fragment) -> the vectors it teaches with
         for f in mine:
-            if (
-                f.number is not None
-                and len(f.vectors) >= MIN_ANCHOR_VECTORS
-                and consistency(f.vectors) >= MIN_ANCHOR_CONSISTENCY
-            ):
+            if f.number is None:
+                continue
+            if f.frames is not None and f.readings:
+                vecs = anchor_vectors(f, fps)
+                good = len(vecs) >= MIN_READ_VECTORS
+            else:
+                vecs = f.vectors
+                good = (
+                    len(vecs) >= MIN_ANCHOR_VECTORS and consistency(vecs) >= MIN_ANCHOR_CONSISTENCY
+                )
+            if good:
                 timeline[f.number].append(f)
-        teachers = {id(f) for fs in timeline.values() for f in fs}
+                teach[id(f)] = vecs
         project = fit_projection(
-            {n: np.concatenate([g.vectors for g in fs]) for n, fs in timeline.items()}
+            {n: np.concatenate([teach[id(g)] for g in fs]) for n, fs in timeline.items()}
         )
         if project is None:
             continue
-        desc = {id(f): _unit(project(f.vectors).mean(axis=0)) for f in mine}
-        open_ = [f for f in mine if id(f) not in teachers]
+        desc = {id(f): _unit(project(teach.get(id(f), f.vectors)).mean(axis=0)) for f in mine}
+        open_ = [f for f in mine if id(f) not in teach]
         while open_:
             centres = {
                 n: _unit(np.mean([desc[id(g)] for g in fs], axis=0)) for n, fs in timeline.items()
@@ -198,7 +240,7 @@ def assign(
                 ranked = sorted(
                     (1.0 - float(desc[id(f)] @ c), n)
                     for n, c in centres.items()
-                    if fits(f, timeline[n], fps)
+                    if fits(f, timeline[n], fps) and not contradicts(f, n)
                 )
                 if not ranked:
                     continue

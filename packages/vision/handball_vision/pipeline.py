@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Literal
@@ -41,7 +41,7 @@ from handball_vision.detection import (
 from handball_vision.events import EventResult, assign_goalkeepers, refine_teams
 from handball_vision.events import detect as detect_events
 from handball_vision.motion import CameraMotion, estimate_motion
-from handball_vision.numbers import Reading, split_points, vote
+from handball_vision.numbers import MIN_CONFIDENCE, Reading, split_points, vote
 from handball_vision.physical import physical
 from handball_vision.reid import Fragment, assign
 from handball_vision.teams import TeamAssigner, relabel_by_clusters
@@ -435,7 +435,7 @@ def _finish(
         }
         if looks:
             extra["identified_by_appearance"] = identify_by_appearance(
-                points, team_out, {t: [v for _, v in vs] for t, vs in looks.items()}, fps
+                points, team_out, looks, fps, reads
             )
         timings["numbers_vote"] += time.perf_counter() - t0
     return AnalysisResult(
@@ -604,11 +604,15 @@ MIN_ANCHOR_READINGS = 4
 def identify_by_appearance(
     points: list[TrackPoint],
     team_out: dict[int, dict[str, Any]],
-    looks: dict[int, list[NDArray[np.float64]]],
+    looks: Mapping[int, Sequence[NDArray[np.float64] | tuple[int, NDArray[np.float64]]]],
     fps: float,
+    reads: Mapping[int, list[Reading]] | None = None,
 ) -> int:
     """Numbers for tracks nobody read a number on, by appearance (reid.py): the numbered tracks of
-    this match teach what each player looks like. `looks` is keyed by the final track ids."""
+    this match teach what each player looks like. `looks` is keyed by the final track ids, as
+    vectors or (frame, vector); with frames and the tracks' `reads` a numbered track teaches only
+    with the vectors next to readings of its number (reid.anchor_vectors), and a track whose own
+    readings say otherwise is not given the number (reid.contradicts)."""
     span: dict[int, list[TrackPoint]] = defaultdict(list)
     for p in points:
         span[p.track_id].append(p)
@@ -621,6 +625,13 @@ def identify_by_appearance(
         # only well-read numbers teach; a number read a few times may be a misreading (24 for
         # 14) and is checked against the anchors like a track without number
         anchor = int(info.get("number_readings", 0)) >= MIN_ANCHOR_READINGS
+        items = looks[tid]
+        framed = all(isinstance(v, tuple) for v in items)
+        vectors = np.stack([v[1] if isinstance(v, tuple) else v for v in items])
+        frames = np.array([v[0] for v in items if isinstance(v, tuple)], np.int64)
+        readings = tuple(
+            (r.frame, r.number) for r in (reads or {}).get(tid, []) if r.confidence >= MIN_CONFIDENCE
+        )
         frags.append(
             Fragment(
                 tid,
@@ -629,8 +640,10 @@ def identify_by_appearance(
                 ps[-1].frame,
                 (ps[0].x, ps[0].y),
                 (ps[-1].x, ps[-1].y),
-                np.stack(looks[tid]),
+                vectors,
                 info.get("number") if anchor else None,
+                frames if framed and reads is not None else None,
+                readings,
             )
         )
     found = assign(frags, fps)
@@ -657,8 +670,11 @@ def merge_by_number(
     with the weaker vote loses its number. Returns the points and the number of joined fragments.
 
     `rosters` ("home"/"away" -> shirt numbers) restricts each team's votes to its roster (see
-    `vote`); a team without roster is voted freely."""
-    points, reads, moved = _split_at_switches(points, team_out, reads, looks or {})
+    `vote`); a team without roster is voted freely. `reads` and `looks` are updated in place to
+    the new track ids (cut at switches, joined by number)."""
+    points, split_reads, moved = _split_at_switches(points, team_out, reads, looks or {})
+    reads.clear()
+    reads.update(split_reads)
     if looks is not None:
         looks.clear()
         looks.update(moved)
@@ -714,6 +730,8 @@ def merge_by_number(
     for old, new in rename.items():
         if looks is not None and old in looks:
             looks.setdefault(new, []).extend(looks.pop(old))
+        if old in reads:
+            reads.setdefault(new, []).extend(reads.pop(old))
         keep, gone = team_out[new], team_out.pop(old)
         if span[old][1] - span[old][0] > span[new][1] - span[new][0]:
             keep["label"] = gone["label"]  # the longer fragment knows the role better
