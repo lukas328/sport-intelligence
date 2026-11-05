@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Play, RotateCcw, X } from "lucide-react";
+import { Play, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,7 @@ export function GoalCandidatesPanel({
   ownName,
   oppName,
   onClip,
+  onActive,
   focusMode = false,
 }: {
   orgId: string;
@@ -59,6 +60,8 @@ export function GoalCandidatesPanel({
   ownName: string;
   oppName: string;
   onClip: (fromMs: number, toMs: number) => void;
+  /** the candidate that is up, for the timeline's signal ring */
+  onActive?: (id: string | null) => void;
   /** review mode: the active candidate large, its clip plays as soon as it is active */
   focusMode?: boolean;
 }) {
@@ -129,6 +132,9 @@ export function GoalCandidatesPanel({
     rowRefs.current[i]?.focus(); // the row's onFocus moves the active index
   });
   const activeRow = rows[Math.min(focus, rows.length - 1)];
+  useEffect(() => {
+    onActive?.(activeRow?.status === "open" ? activeRow.id : null);
+  }, [activeRow?.id, activeRow?.status]); // eslint-disable-line react-hooks/exhaustive-deps
   // review mode: each candidate's clip plays when it becomes the active one
   useEffect(() => {
     if (focusMode && activeRow) onClip(activeRow.start_ms, activeRow.end_ms);
@@ -215,84 +221,83 @@ export function GoalCandidatesPanel({
   const openAt = (r: number) => list.counts.open_by_rate[String(r)] ?? 0;
   const active = Math.min(focus, rows.length - 1);
 
+  const openRows = visibleRows(list, current, "open");
+  const pos = activeRow ? openRows.findIndex((r) => r.id === activeRow.id) + 1 : 0;
+  const deciding = activeRow && activeRow.status === "open" && activeRow.known == null ? activeRow : null;
+  const big = focusMode ? "lg" : "md";
+
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3" data-testid="goal-candidates" aria-labelledby={`gc-title-${matchId}`}>
-      <div className="space-y-1">
-        <h2 id={`gc-title-${matchId}`} className="sr-only">{t("title")}</h2>
-        <p className="text-sm" data-testid="goal-candidates-counts">
-          {t("summary", { open: openAt(current), confirmed: list.counts.confirmed, rejected: list.counts.rejected, known: list.counts.known })}
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Segmented<CandidateFilter>
-            label={t("filter")}
-            size="sm"
-            value={filter}
-            onChange={setFilter}
-            items={[
-              { value: "open", label: t("open", { n: openAt(current) }) },
-              { value: "all", label: t("all", { n: visibleRows(list, current, "all").length }) },
-            ]}
-          />
-          <Segmented<string>
-            label={t("rate")}
-            size="sm"
-            value={String(current)}
-            onChange={(v) => setRate(Number(v))}
-            items={list.rates.map((r) => ({ value: String(r), label: t("perMinute", { n: r }) }))}
-          />
-        </div>
-      </div>
-      {/* keys only help with a keyboard; the list still points at the text (aria-describedby) */}
-      <p className="sr-only" id={`gc-keys-${matchId}`}>
-        {t.rich("keys", {
-          own: ownName,
-          opp: oppName,
-          k: (chunks) => (
-            <kbd className="rounded-sm px-1 py-px font-sans text-[0.75rem] text-foreground ring-1 ring-border">
-              {chunks}
-            </kbd>
-          ),
-        })}
+      <h2 id={`gc-title-${matchId}`} className="sr-only">{t("title")}</h2>
+      <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm" data-testid="goal-candidates-counts">
+        <span>{t("summary", { open: openAt(current), confirmed: list.counts.confirmed, rejected: list.counts.rejected, known: list.counts.known })}</span>
+        <button
+          type="button"
+          className="font-medium text-accent underline-offset-2 hover:underline"
+          aria-pressed={filter === "all"}
+          onClick={() => setFilter(filter === "all" ? "open" : "all")}
+        >
+          {filter === "all" ? t("showOpen") : t("showAll", { n: visibleRows(list, current, "all").length })}
+        </button>
       </p>
-      {focusMode && activeRow && (
-        <div className="space-y-3 border-y border-foreground/15 py-4" data-testid="goal-candidate-focus">
-          <p className="flex items-baseline gap-3">
-            <span className="font-display text-4xl leading-none">{t("question")}</span>
-            <span className="text-sm text-muted tabular-nums">
-              {game(activeRow)}
-              {activeRow.suggested_side && ` · ${t("suggested", { team: team(activeRow.suggested_side) ?? "" })}`}
+      {/* keys only help with a keyboard; the list points at the text (aria-describedby) */}
+      <p className="sr-only" id={`gc-keys-${matchId}`}>
+        {t.rich("keys", { own: ownName, opp: oppName, k: (chunks) => <kbd>{chunks}</kbd> })}
+      </p>
+
+      {/* the one question first: the current candidate and its three answers */}
+      {deciding && (
+        <div className="space-y-3 border-y border-foreground/15 py-3" data-testid="goal-candidate-focus">
+          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className={cn("font-display leading-none", focusMode ? "text-4xl" : "text-3xl")}>{t("question")}</span>
+            <span className="font-score text-lg tabular-nums">{game(deciding)}</span>
+            <span className="text-sm text-muted">
+              {deciding.suggested_side ? t("suggested", { team: team(deciding.suggested_side) ?? "" }) : t("noSuggestion")}
             </span>
+            {pos > 0 && <span className="ml-auto font-score text-sm text-muted tabular-nums">{t("position", { pos, n: openRows.length })}</span>}
           </p>
           <div className="grid grid-cols-2 gap-2">
             {(["own", "opponent"] as const).map((side, k) => (
               <Button
                 key={side}
-                size="lg"
-                variant={k === 0 ? "primary" : "secondary"}
-                disabled={activeRow.known != null}
-                className="h-auto min-w-0 px-3 py-2 text-left whitespace-normal"
-                onClick={() => decide(activeRow, Math.min(focus, rows.length - 1), "confirmed", side)}
+                size={big}
+                variant={deciding.suggested_side === side || (!deciding.suggested_side && k === 0) ? "primary" : "secondary"}
+                className="h-auto min-w-0 justify-start px-3 py-2 text-left whitespace-normal"
+                aria-keyshortcuts={String(k + 1)}
+                onClick={() => decide(deciding, active, "confirmed", side)}
               >
+                <kbd aria-hidden className="font-score opacity-70">{k + 1}</kbd>
                 {t("goalFor", { team: team(side) ?? "" })}
-                <kbd className="font-sans opacity-70">{k + 1}</kbd>
               </Button>
             ))}
-            <Button size="lg" variant="secondary" className="col-span-2" onClick={() => decide(activeRow, Math.min(focus, rows.length - 1), "rejected", null)}>
+            <Button size={big} variant="secondary" className="justify-start px-3" aria-keyshortcuts="X" onClick={() => decide(deciding, active, "rejected", null)}>
+              <kbd aria-hidden className="font-score opacity-70">X</kbd>
               {t("noGoal")}
-              <kbd className="font-sans opacity-70">X</kbd>
+            </Button>
+            <Button size={big} variant="quiet" className="justify-start px-3" aria-keyshortcuts="Enter" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
+              <Play aria-hidden className="size-3 fill-current" />
+              {t("replay")}
             </Button>
           </div>
-          <p className="text-xs text-muted">{t("focusHint")}</p>
         </div>
       )}
+
+      {/* what the last key did, and how to take it back */}
+      <p className="flex min-h-8 flex-wrap items-center gap-x-3 text-sm" aria-live="polite" data-testid="goal-candidates-said">
+        {said}
+        {said && lastDecided.current && (
+          <Button variant="ghost" size="sm" className="-my-1" aria-keyshortcuts="U" onClick={undoLast}>
+            <RotateCcw aria-hidden />
+            {t("undo")}
+            <kbd aria-hidden className="font-score text-muted">U</kbd>
+          </Button>
+        )}
+      </p>
+
       {rows.length === 0 ? (
         <p className="text-sm text-muted">{filter === "open" ? t("nothingOpen") : t("none")}</p>
       ) : (
         <ul
-          // rows reach the scroll box's edges (focus ring drawn inside); the lines between them
-          // stay in line with the card's content
           className="-mx-1.5 max-h-[28rem] min-h-0 flex-1 overflow-auto text-sm lg:max-h-none"
           aria-label={t("title")}
           aria-describedby={`gc-keys-${matchId}`}
@@ -300,15 +305,8 @@ export function GoalCandidatesPanel({
           {rows.map((c, i) => {
             const time = game(c);
             const suggested = team(c.suggested_side);
-            const label = [
-              time,
-              suggested ? t("suggested", { team: suggested }) : null,
-            ]
-              .filter(Boolean)
-              .join(", ");
-            const known = c.known
-              ? t(KNOWN_SOURCE[c.known.source] ?? "knownTagged", { team: team(c.known.side) ?? "" })
-              : null;
+            const label = [time, suggested ? t("suggested", { team: suggested }) : null].filter(Boolean).join(", ");
+            const known = c.known ? t(KNOWN_SOURCE[c.known.source] ?? "knownTagged", { team: team(c.known.side) ?? "" }) : null;
             return (
               <li
                 key={c.id}
@@ -317,105 +315,69 @@ export function GoalCandidatesPanel({
                 }}
                 tabIndex={i === active ? 0 : -1}
                 aria-label={t("row", { label })}
+                aria-current={i === active || undefined}
                 onKeyDown={(e) => onRowKey(e, c, i)}
                 onFocus={() => setFocus(i)}
-                className="relative flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-sm px-1.5 py-2 outline-none after:absolute after:inset-x-1.5 after:bottom-0 after:h-px after:bg-border/70 last:after:hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
+                className={cn(
+                  "relative flex flex-wrap items-center gap-x-3 gap-y-1 rounded-sm px-1.5 py-1.5 outline-none after:absolute after:inset-x-1.5 after:bottom-0 after:h-px after:bg-border/70 last:after:hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
+                  i === active && "bg-surface",
+                )}
                 data-testid="goal-candidate-row"
               >
                 <Button
-                  variant="secondary"
+                  variant="quiet"
                   size="sm"
                   className="font-score tabular-nums"
                   tabIndex={i === active ? undefined : -1}
                   aria-label={t("play", { time })}
-                  aria-keyshortcuts="Enter"
-                  onClick={() => onClip(c.start_ms, c.end_ms)}
+                  onClick={() => (setFocus(i), onClip(c.start_ms, c.end_ms))}
                 >
                   <Play aria-hidden className="size-3 fill-current" />
                   {time}
                 </Button>
-                <span
-                  className={cn(
-                    "min-w-0 flex-1",
-                    c.status === "rejected" && "line-through decoration-muted",
-                  )}
-                >
+                <span className={cn("min-w-0 flex-1", c.status === "rejected" && "text-muted line-through")}>
                   {c.status === "confirmed" ? (
-                    <span className="font-medium">
-                      {t("goalFor", { team: team(c.side) ?? "" })}
-                    </span>
-                  ) : suggested ? (
-                    <span className="text-muted">{t("suggested", { team: suggested })}</span>
+                    <span className="font-medium">{t("goalFor", { team: team(c.side) ?? "" })}</span>
+                  ) : c.status === "rejected" ? (
+                    t("rejected")
+                  ) : known ? (
+                    <span className="text-muted">{known}</span>
                   ) : (
-                    <span className="text-muted">{t("noSuggestion")}</span>
+                    <span className="text-muted">{suggested ? t("suggested", { team: suggested }) : t("noSuggestion")}</span>
                   )}
                 </span>
-                <span className="flex flex-wrap items-center gap-1.5">
-                  {c.rate > 2 && <Badge>{t("extraRate")}</Badge>}
-                  {known && <Badge tone="accent">{known}</Badge>}
-                  {c.status === "confirmed" && <Badge tone="ok">{t("confirmed")}</Badge>}
-                  {c.status === "rejected" && <Badge tone="neutral">{t("rejected")}</Badge>}
-                </span>
-                <span role="group" aria-label={label} className="flex flex-wrap gap-1">
-                  {(["own", "opponent"] as const).map((side, k) => {
-                    const on = confirmed(c, side);
-                    return (
-                      <Button
-                        key={side}
-                        variant="secondary"
-                        size="sm"
-                        tabIndex={i === active ? undefined : -1}
-                        disabled={c.known != null}
-                        aria-pressed={on}
-                        aria-keyshortcuts={String(k + 1)}
-                        className={cn(on && "bg-ok/12 text-ok ring-ok/50 hover:bg-ok/12")}
-                        onClick={() => decide(c, i, on ? null : "confirmed", on ? null : side)}
-                      >
-                        {i === active && <kbd className="font-sans text-xs text-muted pointer-coarse:hidden">{k + 1}</kbd>}
-                        {t("goalFor", { team: team(side) ?? "" })}
-                      </Button>
-                    );
-                  })}
+                {c.rate > 2 && <Badge>{t("extraRate")}</Badge>}
+                {c.status !== "open" && (
                   <Button
-                    variant={c.status === "rejected" ? "secondary" : "quiet"}
+                    variant="quiet"
                     size="icon-sm"
                     tabIndex={i === active ? undefined : -1}
-                    aria-pressed={c.status === "rejected"}
-                    aria-keyshortcuts="X"
-                    aria-label={t("reject")}
-                    title={t("reject")}
-                    className={cn(c.status === "rejected" && "text-error")}
-                    onClick={() => decide(c, i, c.status === "rejected" ? null : "rejected", null)}
+                    aria-label={`${t("undo")}: ${label}`}
+                    title={t("undo")}
+                    onClick={() => decide(c, i, null, null)}
                   >
-                    <X aria-hidden />
+                    <RotateCcw aria-hidden />
                   </Button>
-                  {c.status !== "open" && (
-                    <Button
-                      variant="quiet"
-                      size="icon-sm"
-                      tabIndex={i === active ? undefined : -1}
-                      aria-keyshortcuts="U"
-                      aria-label={t("undo")}
-                      title={t("undo")}
-                      onClick={() => decide(c, i, null, null)}
-                    >
-                      <RotateCcw aria-hidden />
-                    </Button>
-                  )}
-                </span>
+                )}
               </li>
             );
           })}
         </ul>
       )}
-      {/* what the last key did, and how to take it back */}
-      <p className="min-h-5 text-sm" aria-live="polite" data-testid="goal-candidates-said">
-        {said && (
-          <>
-            {said} {lastDecided.current && <span className="text-muted">{t("undoHint")}</span>}
-          </>
-        )}
-      </p>
+      {focusMode && <p className="text-xs text-muted">{t("focusHint")}</p>}
+      <details className="text-sm">
+        <summary className="cursor-pointer text-muted hover:text-foreground">{t("rateMore")}</summary>
+        <div className="pt-2">
+          <Segmented<string>
+            label={t("rate")}
+            size="sm"
+            value={String(current)}
+            onChange={(v) => setRate(Number(v))}
+            items={list.rates.map((r) => ({ value: String(r), label: t("perMinute", { n: r }) }))}
+          />
+          <p className="mt-1 text-xs text-muted">{t("rateHint")}</p>
+        </div>
+      </details>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
     </section>
   );

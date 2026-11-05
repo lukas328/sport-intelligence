@@ -89,7 +89,9 @@ export function steps(i: StepInput): Step[] {
   const missing = kickoffMissing(i.kickoff, i.periodS, i.durationMs);
   const kickoff: Step = missing.length
     ? { id: "kickoff", state: "open", reason: `period${missing[0]}` }
-    : { id: "kickoff", state: "done" };
+    : (i.kickoff?.["1"] ?? 0) < 0
+      ? { id: "kickoff", state: "done", reason: "fromClip" } // the video starts later in the half
+      : { id: "kickoff", state: "done" };
   const open = (i.candidatesOpen ?? 0) + (i.officialOpen ?? 0);
   const goals: Step =
     i.candidatesOpen == null && i.officialOpen == null

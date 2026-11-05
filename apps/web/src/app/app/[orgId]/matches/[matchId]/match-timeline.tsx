@@ -23,6 +23,8 @@ export function MatchTimeline({
   official,
   candidates,
   rate,
+  activeId = null,
+  notes = [],
   onSetKickoff,
 }: {
   spans: Span[] | null;
@@ -32,6 +34,10 @@ export function MatchTimeline({
   official: GoalComparison | null | undefined;
   candidates: CandidateList | null | undefined;
   rate: number;
+  /** the candidate that is up: the one signal mark on the axis */
+  activeId?: string | null;
+  /** comments, clips and drawings (video ms) */
+  notes?: number[];
   onSetKickoff?: () => void;
 }) {
   const t = useTranslations("workflow");
@@ -60,12 +66,13 @@ export function MatchTimeline({
   const goals = (official?.imported ? official.goals : []).filter((g) => g.clock_s != null);
   const inVideo = goals.filter((g) => inside(g.clock_s!, spans)).length;
   const cands = (candidates?.candidates ?? []).filter((c) => c.clock_s != null && c.rate <= rate);
+  const noteClocks = notes.map((ms) => clockAt(kickoff, periodS, ms)).filter((c): c is number => c != null && c >= 0);
   const clip = spans.map((s) => `${formatClock(s.from * 1000)} ${t("to")} ${formatClock(s.to * 1000)}`).join(", ");
   const ticks = zoom === "game" ? [0, 0.25, 0.5, 0.75, 1].map((f) => total * f) : [0, 0.25, 0.5, 0.75, 1].map((f) => lo + (hi - lo) * f);
   const lane = (label: string, children: React.ReactNode, sided = false) => (
     <>
       <span className="font-score text-[0.8125rem] uppercase tracking-wide text-muted">{label}</span>
-      <div className="relative h-6 border-b border-foreground/15">
+      <div className={cn("relative border-b border-foreground/15", sided ? "h-9" : "h-6")}>
         {spans.map((s) => (
           <span key={s.from} className="absolute inset-y-0 bg-accent/8" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
         ))}
@@ -83,7 +90,8 @@ export function MatchTimeline({
           {t("coverage", { clip })}
           {goals.length > 0 && ` ${t("coverageGoals", { inside: inVideo, total: goals.length })}`}
         </span>
-        <span role="group" aria-label={t("zoom")} className="ml-auto flex gap-3">
+        {(goals.length > 0 || cands.length > 0) && <span className="text-[0.8125rem] text-muted">{t("legendSides")}</span>}
+        <span role="group" aria-label={t("zoom")} className="ml-auto flex gap-3 pr-1">
           {(["moment", "game"] as const).map((z) => (
             <button
               key={z}
@@ -117,7 +125,7 @@ export function MatchTimeline({
                   key={g.event_id}
                   className={cn(
                     "absolute h-[calc(50%-3px)] w-[3px] -translate-x-1/2",
-                    g.side === "own" ? "top-0.5" : "bottom-0.5",
+                    g.side === "own" ? "top-1" : "bottom-1",
                     !inside(g.clock_s!, spans) ? "bg-foreground/20" : g.status === "found" ? "bg-foreground" : "bg-background ring-1 ring-inset ring-foreground",
                   )}
                   style={{ left: x(g.clock_s!) }}
@@ -131,14 +139,16 @@ export function MatchTimeline({
             cands
               .filter((c) => seen(c.clock_s!))
               .map((c) => {
-                const side = c.side ?? c.suggested_side;
+                const side = c.side ?? c.known?.side ?? c.suggested_side;
                 return (
                   <span
                     key={c.id}
                     className={cn(
-                      "absolute size-2.5 -translate-x-1/2 rounded-full",
-                      side === "opponent" ? "bottom-[1px]" : side === "own" ? "top-[1px]" : "top-1/2 -translate-y-1/2",
-                      c.status === "confirmed" ? "bg-foreground" : c.status === "rejected" ? "size-1.5 bg-foreground/25" : "border-2 border-foreground bg-background",
+                      "absolute size-3 -translate-x-1/2 rounded-full",
+                      side === "opponent" ? "bottom-1" : side === "own" ? "top-1" : "top-1/2 -translate-y-1/2",
+                      // filled: a goal (confirmed here or already recorded); ring: still a proposal
+                      c.status === "confirmed" || c.known ? "bg-foreground" : c.status === "rejected" ? "size-1.5 bg-foreground/25" : "border-2 border-foreground bg-background",
+                      c.id === activeId && "ring-[3px] ring-signal",
                     )}
                     style={{ left: x(c.clock_s!) }}
                   />
@@ -146,7 +156,14 @@ export function MatchTimeline({
               }),
             true,
           )}
-        <span className="pt-1 text-[0.75rem] text-muted">{t("legendSides")}</span>
+        {noteClocks.length > 0 &&
+          lane(
+            t("laneNotes"),
+            noteClocks.filter(seen).map((c, i) => (
+              <span key={i} className="absolute inset-y-1.5 w-0.5 -translate-x-1/2 bg-foreground/60" style={{ left: x(c) }} />
+            )),
+          )}
+        <span />
         <div className="relative h-5 pt-1 font-score text-xs text-muted tabular-nums">
           {ticks.map((s, i) => (
             <span key={i} className={cn("absolute", i === 0 ? "" : i === ticks.length - 1 ? "-translate-x-full" : "-translate-x-1/2")} style={{ left: `${(i / (ticks.length - 1)) * 100}%` }}>

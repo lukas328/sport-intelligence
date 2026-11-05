@@ -35,6 +35,7 @@ export function KickoffPanel({
   const qc = useQueryClient();
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
+  const [editing, setEditing] = useState<number | null>(null);
   const missing = kickoffMissing(kickoff, periodS, durationMs);
   async function set(period: number) {
     const ms = Math.round(getTime());
@@ -76,9 +77,17 @@ export function KickoffPanel({
                   {t(p === 2 && kickoff?.["1"] != null && !missing.includes(2) ? "notNeeded" : "notSet")}
                 </span>
               )}
-              <Button variant={missing[0] === p ? "primary" : "secondary"} size="sm" className="ml-auto" onClick={() => void set(p)} data-testid={`kickoff-${p}`}>
-                {t("setHere")}
-              </Button>
+              {/* nothing to set where the half is not in the video; a mark read from the overlay
+                  only changes on request */}
+              {(at == null ? !(p === 2 && kickoff?.["1"] != null && !missing.includes(2)) : at >= 0 || editing === p) ? (
+                <Button variant={missing[0] === p ? "primary" : "secondary"} size="sm" className="ml-auto" onClick={() => void set(p)} data-testid={`kickoff-${p}`}>
+                  {t("setHere")}
+                </Button>
+              ) : at != null && at < 0 ? (
+                <Button variant="quiet" size="sm" className="ml-auto" onClick={() => setEditing(p)}>
+                  {t("change")}
+                </Button>
+              ) : null}
             </li>
           );
         })}

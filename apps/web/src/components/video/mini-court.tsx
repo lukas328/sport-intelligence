@@ -65,9 +65,11 @@ export function MiniCourt({
       const sy = h / (COURT.width + 2 * pad);
       const X = (x: number) => (x + pad) * sx;
       const Y = (y: number) => h - (y + pad) * sy;
-      ctx.fillStyle = "#e6f0e8";
+      // the court tokens follow the theme (a light court glares in dark mode)
+      const css = getComputedStyle(canvas);
+      ctx.fillStyle = css.getPropertyValue("--court").trim() || "#e6f0e8";
       ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = "#1f2937";
+      ctx.strokeStyle = css.getPropertyValue("--court-line").trim() || "#1f2937";
       ctx.lineWidth = 1;
       for (const [name, pts] of Object.entries(COURT.lines)) {
         ctx.setLineDash(COURT.dashedLines.includes(name) ? [3, 3] : []);

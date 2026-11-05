@@ -553,7 +553,8 @@
     "placeholder": "Commentaire à {time}",
     "add": "Commenter",
     "empty": "Pas encore de commentaire.",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "emptyHint": "Mets la vidéo en pause et écris ce que tu vois. Entrée enregistre la note à {time}."
   },
   "draw": {
     "title": "Dessiner",
@@ -629,7 +630,10 @@
     "needsCalibrationStaff": "Le terrain n'a pas été reconnu automatiquement. Un entraîneur doit le marquer sur l'image de la salle.",
     "checkCourt": "Caméra mobile : vérifie le terrain reconnu automatiquement sur l'image de la salle.",
     "markCourt": "Marquer le terrain",
-    "checkCourtButton": "Vérifier le terrain"
+    "checkCourtButton": "Vérifier le terrain",
+    "courtOk": "Le terrain est bon. Les positions et les courses sont estimées à partir de la vidéo.",
+    "realign": "Réaligner le terrain",
+    "technical": "Détails techniques"
   },
   "tabs": {
     "video": "Vidéo",
@@ -856,7 +860,10 @@
     "manual": "manuel",
     "seek": "Montrer la personne dans la vidéo",
     "openCount": "{n, plural, one {# personne sans nom} other {# personnes sans nom}}, la première à {first}.",
-    "allDone": "Toutes les personnes de l'équipe ont un nom."
+    "allDone": "Toutes les personnes de l'équipe ont un nom.",
+    "shirt": "N° {n}",
+    "unknown": "inconnu",
+    "showAll": "Afficher les {n}"
   },
   "camera": {
     "label": "Caméra",
@@ -1761,7 +1768,13 @@
     "focusHint": "Le clip démarre dès qu'un but possible est actif. 1 ou 2 confirme, X écarte, U annule, Entrée rejoue, Échap ferme.",
     "said": "{time} : {what}.",
     "saidUndo": "{time} de nouveau à vérifier.",
-    "undoHint": "U annule."
+    "undoHint": "U annule.",
+    "showAll": "Tout afficher ({n})",
+    "showOpen": "Seulement à vérifier",
+    "position": "{pos} sur {n}",
+    "replay": "Revoir",
+    "rateMore": "Plus ou moins de propositions",
+    "rateHint": "Plus de propositions par minute de jeu trouvent plus de buts, mais la vérification prend plus de temps."
   },
   "matrix": {
     "nav": "Matrice",
@@ -2251,6 +2264,9 @@
     "zoom": "Partie du match",
     "zoom_moment": "Moment",
     "zoom_game": "Match",
-    "legendSides": "nous en haut, adversaire en bas"
+    "legendSides": "nous en haut, adversaire en bas",
+    "laneNotes": "Notes",
+    "change": "Modifier",
+    "kickoff_fromClip": "lu dans la vidéo"
   }
 }

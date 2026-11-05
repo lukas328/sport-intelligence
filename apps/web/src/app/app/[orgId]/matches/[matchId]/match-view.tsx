@@ -618,7 +618,8 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
 }
 
 /** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
-const pctLabel = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
+// a share above 100 % means the sources disagree (e.g. goals from a report, attacks from a clip)
+const pctLabel = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Math.round(v * 100)} %`);
 
 function ScoreRows({ home, away, hs, as, ownHome, halftime, halftimeLabel }: { home: string; away: string; hs: number | null; as: number | null; ownHome: boolean; halftime: string | null; halftimeLabel: string }) {
   const [h, a] = useCountUp(hs ?? 0, as ?? 0);

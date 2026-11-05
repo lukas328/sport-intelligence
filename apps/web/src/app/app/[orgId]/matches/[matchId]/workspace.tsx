@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Crosshair, Keyboard, Maximize2, X } from "lucide-react";
+import { Crosshair, Keyboard, Maximize2, Play, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
@@ -109,6 +109,7 @@ export function Workspace({
   const [goalList, setGoalList] = useState<"candidates" | "report" | null>(null);
   // review mode: the workspace full screen, one goal candidate after the other
   const [reviewing, setReviewing] = useState(false);
+  const [activeCandidate, setActiveCandidate] = useState<string | null>(null);
   useEffect(() => {
     if (!reviewing) return;
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setReviewing(false);
@@ -506,6 +507,8 @@ export function Workspace({
           official={hasReport ? official.data : null}
           candidates={staff ? candidates.data : null}
           rate={rate}
+          activeId={shown === "goals" ? activeCandidate : null}
+          notes={[...(comments.data ?? []).map((c) => c.t_ms), ...(clips.data ?? []).map((c) => c.start_ms), ...(annotations.data ?? []).map((x) => x.t_ms)]}
           onSetKickoff={staff ? () => setPane("kickoff") : undefined}
         />
         </div>
@@ -555,7 +558,7 @@ export function Workspace({
             {list === "report" && hasReport && !reviewing ? (
               <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} isHome={match.is_home} names={names} covers={spansFor} onPlay={jump} />
             ) : openCandidates ? (
-              <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} onClip={playClip} focusMode={reviewing} />
+              <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} onClip={playClip} onActive={setActiveCandidate} focusMode={reviewing} />
             ) : (
               <p className="text-sm text-muted">{t("workflow.goalsNone")}</p>
             )}
@@ -592,7 +595,7 @@ export function Workspace({
         {tab === "comments" && (
           <div role="tabpanel" className="flex min-h-0 flex-1 flex-col gap-2">
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
-              {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.empty")}</li>}
+              {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.emptyHint", { time: gameAt(now) })}</li>}
               {(comments.data ?? []).map((c) => (
                 <li key={c.id} className="rounded-md bg-surface px-3 py-2">
                   <button className="rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
@@ -772,15 +775,8 @@ function AnalysisPanel({
   const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
   return (
     <section className="space-y-3" data-testid="analysis-panel">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-semibold">{t("title")}</h2>
-        {analysis.detector === "heuristic" && (
-          <span className="rounded-md bg-surface px-2 py-0.5 text-xs" title={t("heuristicHint")}>
-            {t("heuristic")}
-          </span>
-        )}
-      </div>
-      {analysis.status === "running" && <p className="text-sm text-muted">{t("running")}</p>}
+      <h2 className="sr-only">{t("title")}</h2>
+      {analysis.status === "running" && <p className="text-sm">{t("running")}</p>}
       {analysis.status === "failed" && (
         <Alert>
           <span className="block font-medium">{t(`failure_${analysis.error_code ?? "generic"}` as "failure_generic")}</span>
@@ -788,26 +784,21 @@ function AnalysisPanel({
           <span className="block text-xs">{t("failureCredit")}</span>
         </Alert>
       )}
-      {analysis.auto_events && (
-        <p className="text-sm text-muted" data-testid="auto-events">
-          {(analysis.auto_events.missing as string[] | undefined)?.includes("goalkeepers")
-            ? t("autoNoGoalkeepers")
-            : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
-          {t("autoLimits")}
-          {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
-            <span className="block" data-testid="overlay-goals">
-              {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}
-            </span>
-          )}
-        </p>
-      )}
       {analysis.status === "ready" && analysis.needs_calibration && (
         <Alert kind="info">{t(canMark ? "needsCalibration" : "needsCalibrationStaff")}</Alert>
       )}
-      {analysis.status === "ready" && !analysis.needs_calibration && unconfirmed && <p className="text-sm text-muted">{t("checkCourt")}</p>}
+      {/* one sentence: does the court fit */}
+      {analysis.status === "ready" && !analysis.needs_calibration && (
+        <p className="text-[0.9375rem]">{unconfirmed ? t("checkCourt") : t("courtOk")}</p>
+      )}
       {canMark && (
-        <Button variant={analysis.needs_calibration ? "primary" : "secondary"} onClick={() => setMarking(true)} data-testid="mark-court">
-          {t(analysis.needs_calibration ? "markCourt" : "checkCourtButton")}
+        <Button
+          variant={analysis.needs_calibration ? "primary" : unconfirmed ? "secondary" : "quiet"}
+          size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
+          onClick={() => setMarking(true)}
+          data-testid="mark-court"
+        >
+          {t(analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
         </Button>
       )}
       {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} onClose={() => setMarking(false)} />}
@@ -825,18 +816,38 @@ function AnalysisPanel({
       <div className="flex flex-wrap gap-3 text-xs text-muted">
         {(["home", "away", "referee"] as const).map((k) => (
           <span key={k} className="flex items-center gap-1">
-            <span aria-hidden className="inline-block size-3 rounded-full border border-neutral-700" style={{ background: colours[k] }} />
+            <span aria-hidden className="inline-block size-3 rounded-full ring-1 ring-foreground/50" style={{ background: colours[k] }} />
             {t(k)}
           </span>
         ))}
-        {analysis.calibration && (
-          <span>
-            {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
-            {t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
-          </span>
-        )}
-        {analysis.tracks.length > 0 && <span>{t("tracks", { count: analysis.tracks.length })}</span>}
       </div>
+      {/* what the analysis did, for those who want to know; not a coach's task */}
+      <details className="text-xs text-muted">
+        <summary className="cursor-pointer hover:text-foreground">{t("technical")}</summary>
+        <div className="mt-2 space-y-1.5">
+          {analysis.detector === "heuristic" && <p title={t("heuristicHint")}>{t("heuristic")}</p>}
+          {analysis.auto_events && (
+            <p data-testid="auto-events">
+              {(analysis.auto_events.missing as string[] | undefined)?.includes("goalkeepers")
+                ? t("autoNoGoalkeepers")
+                : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
+              {t("autoLimits")}
+              {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
+                <span className="block" data-testid="overlay-goals">
+                  {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}
+                </span>
+              )}
+            </p>
+          )}
+          {analysis.calibration && (
+            <p>
+              {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
+              {t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
+            </p>
+          )}
+          {analysis.tracks.length > 0 && <p>{t("tracks", { count: analysis.tracks.length })}</p>}
+        </div>
+      </details>
     </section>
   );
 }
@@ -870,9 +881,12 @@ function IdentityPanel({
   const qc = useQueryClient();
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const [notice, setNotice] = useState<string | null>(null);
+  const [all, setAll] = useState(false);
   // in the order they appear, so the coach goes through the video once
   const own = [...ownTracks(tracks)].sort((a, b) => a.first_ms - b.first_ms);
   const open = own.filter((tr) => !tr.player_id);
+  // the next open people first; the whole list on request
+  const shown = all ? own : [...open.slice(0, 8), ...own.filter((tr) => tr.player_id)].sort((a, b) => a.first_ms - b.first_ms);
   if (own.length === 0) return null;
   async function assign(trackNo: number, playerId: string) {
     const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
@@ -893,12 +907,14 @@ function IdentityPanel({
         </p>
         <p className="mt-1 text-xs text-muted">{t("hint")}</p>
         <ul className="mt-3 divide-y divide-border/70 text-sm">
-          {own.map((tr) => (
+          {shown.map((tr) => (
             <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5">
-              <button className="flex w-40 items-baseline gap-2 rounded-sm px-1 py-1 text-left hover:bg-surface" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}, ${at(tr.first_ms)}`}>
-                <span className="font-semibold">{t("track", { n: tr.track_no })}</span>
-                <span className="font-score text-sm text-muted tabular-nums">{at(tr.first_ms)}</span>
-              </button>
+              <Button variant="quiet" size="sm" className="w-44 justify-start" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}, ${at(tr.first_ms)}`}>
+                <Play aria-hidden className="size-3 fill-current" />
+                <span className="font-score tabular-nums">{at(tr.first_ms)}</span>
+                {/* a shirt number the analysis read helps to recognise the person; the track id does not */}
+                <span className="text-muted">{tr.number != null ? t("shirt", { n: tr.number }) : t("unknown")}</span>
+              </Button>
               <label className="sr-only" htmlFor={`track-${tr.track_no}`}>
                 {t("track", { n: tr.track_no })}
               </label>
@@ -922,6 +938,11 @@ function IdentityPanel({
             </li>
           ))}
         </ul>
+        {own.length > shown.length && (
+          <Button variant="ghost" size="sm" className="mt-1" onClick={() => setAll(true)}>
+            {t("showAll", { n: own.length })}
+          </Button>
+        )}
         {notice && (
           <p className="mt-2 text-xs text-ok" aria-live="polite">
             {notice}

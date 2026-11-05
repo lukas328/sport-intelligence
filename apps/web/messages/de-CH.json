@@ -553,7 +553,8 @@
     "placeholder": "Kommentar bei {time}",
     "add": "Kommentieren",
     "empty": "Noch keine Kommentare.",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "emptyHint": "Halte das Video an und schreib, was du siehst. Enter speichert die Notiz bei {time}."
   },
   "draw": {
     "title": "Zeichnen",
@@ -629,7 +630,10 @@
     "needsCalibrationStaff": "Das Spielfeld wurde nicht automatisch erkannt. Ein Trainer muss es im Hallenbild markieren.",
     "checkCourt": "Bewegte Kamera: das automatisch erkannte Spielfeld bitte im Hallenbild prüfen.",
     "markCourt": "Spielfeld markieren",
-    "checkCourtButton": "Spielfeld prüfen"
+    "checkCourtButton": "Spielfeld prüfen",
+    "courtOk": "Das Spielfeld passt. Positionen und Laufwege sind aus dem Video geschätzt.",
+    "realign": "Spielfeld neu ausrichten",
+    "technical": "Technische Angaben"
   },
   "tabs": {
     "video": "Video",
@@ -856,7 +860,10 @@
     "manual": "manuell",
     "seek": "Person im Video zeigen",
     "openCount": "{n, plural, one {# Person ohne Namen} other {# Personen ohne Namen}}, die erste bei {first}.",
-    "allDone": "Alle Personen des eigenen Teams haben einen Namen."
+    "allDone": "Alle Personen des eigenen Teams haben einen Namen.",
+    "shirt": "Nr. {n}",
+    "unknown": "unbekannt",
+    "showAll": "Alle {n} zeigen"
   },
   "camera": {
     "label": "Kamera",
@@ -1761,7 +1768,13 @@
     "focusHint": "Der Clip läuft, sobald ein Kandidat dran ist. 1 oder 2 bestätigt, X verwirft, U nimmt zurück, Enter spielt nochmals, Esc schliesst.",
     "said": "{time}: {what}.",
     "saidUndo": "{time} wieder offen.",
-    "undoHint": "U nimmt zurück."
+    "undoHint": "U nimmt zurück.",
+    "showAll": "Alle zeigen ({n})",
+    "showOpen": "Nur offene",
+    "position": "{pos} von {n}",
+    "replay": "Nochmals",
+    "rateMore": "Mehr oder weniger Vorschläge",
+    "rateHint": "Mehr Vorschläge pro Spielminute finden mehr Tore, kosten aber mehr Zeit beim Prüfen."
   },
   "matrix": {
     "nav": "Matrix",
@@ -2251,6 +2264,9 @@
     "zoom": "Ausschnitt der Spielzeit",
     "zoom_moment": "Moment",
     "zoom_game": "Spiel",
-    "legendSides": "oben wir, unten Gegner"
+    "legendSides": "oben wir, unten Gegner",
+    "laneNotes": "Notizen",
+    "change": "Ändern",
+    "kickoff_fromClip": "aus dem Video gelesen"
   }
 }

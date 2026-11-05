@@ -553,7 +553,8 @@
     "placeholder": "Comment at {time}",
     "add": "Comment",
     "empty": "No comments yet.",
-    "delete": "Delete"
+    "delete": "Delete",
+    "emptyHint": "Pause the video and write what you see. Enter saves the note at {time}."
   },
   "draw": {
     "title": "Draw",
@@ -629,7 +630,10 @@
     "needsCalibrationStaff": "The court was not found automatically. A coach has to mark it on the hall image.",
     "checkCourt": "Moving camera: please check the automatically detected court on the hall image.",
     "markCourt": "Mark the court",
-    "checkCourtButton": "Check the court"
+    "checkCourtButton": "Check the court",
+    "courtOk": "The court fits. Positions and runs are estimated from the video.",
+    "realign": "Realign the court",
+    "technical": "Technical details"
   },
   "tabs": {
     "video": "Video",
@@ -856,7 +860,10 @@
     "manual": "manual",
     "seek": "Show person in the video",
     "openCount": "{n, plural, one {# person without a name} other {# people without a name}}, the first at {first}.",
-    "allDone": "Everyone of the own team has a name."
+    "allDone": "Everyone of the own team has a name.",
+    "shirt": "No. {n}",
+    "unknown": "unknown",
+    "showAll": "Show all {n}"
   },
   "camera": {
     "label": "Camera",
@@ -1761,7 +1768,13 @@
     "focusHint": "The clip plays as soon as a candidate is up. 1 or 2 confirms, X rejects, U undoes, Enter plays again, Esc closes.",
     "said": "{time}: {what}.",
     "saidUndo": "{time} open again.",
-    "undoHint": "U takes it back."
+    "undoHint": "U takes it back.",
+    "showAll": "Show all ({n})",
+    "showOpen": "Open only",
+    "position": "{pos} of {n}",
+    "replay": "Again",
+    "rateMore": "More or fewer proposals",
+    "rateHint": "More proposals per minute of play find more goals but take longer to review."
   },
   "matrix": {
     "nav": "Matrix",
@@ -2251,6 +2264,9 @@
     "zoom": "Part of the match",
     "zoom_moment": "Moment",
     "zoom_game": "Match",
-    "legendSides": "us above, opponent below"
+    "legendSides": "us above, opponent below",
+    "laneNotes": "Notes",
+    "change": "Change",
+    "kickoff_fromClip": "read from the video"
   }
 }

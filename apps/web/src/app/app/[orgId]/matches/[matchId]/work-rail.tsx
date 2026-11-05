@@ -28,8 +28,10 @@ export function WorkRail({
   const t = useTranslations("workflow");
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const all: Pane[] = [...steps.map((s) => s.id), ...tools];
-  // the one thing on screen that asks for attention: the first open step
-  const signal = steps.find((s) => s.state === "open")?.id;
+  // the one thing on screen that asks for attention: the first open step, unless it is the one
+  // shown (then the signal sits on the item to act on, e.g. the candidate on the timeline)
+  const firstOpenStep = steps.find((s) => s.state === "open")?.id;
+  const signal = firstOpenStep === value ? undefined : firstOpenStep;
   function onKey(e: KeyboardEvent, i: number) {
     const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     const to = e.key === "Home" ? 0 : e.key === "End" ? all.length - 1 : d ? (i + d + all.length) % all.length : -1;
@@ -66,7 +68,7 @@ export function WorkRail({
     <div className="scrollbar-none -mx-1 overflow-x-auto px-1">
       <div role="tablist" aria-label={t("rail")} className="flex min-w-max items-stretch gap-1 border-b border-foreground/15 sm:gap-3">
         {steps.map((s, i) => {
-          const sub = t(`${s.id}_${s.state === "open" ? (s.reason ?? "open") : s.state}`, { n: s.count ?? 0 });
+          const sub = t(`${s.id}_${s.reason ?? (s.state === "open" ? "open" : s.state)}`, { n: s.count ?? 0 });
           return tab(
             s.id,
             i,
@@ -75,7 +77,7 @@ export function WorkRail({
                 aria-hidden
                 className={cn(
                   "grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold",
-                  s.state === "done" ? "bg-surface text-ok" : value === s.id ? "bg-foreground text-background" : "ring-[1.5px] ring-inset ring-current",
+                  s.state === "done" ? "bg-surface text-foreground" : value === s.id ? "bg-foreground text-background" : "ring-[1.5px] ring-inset ring-current",
                 )}
               >
                 {s.state === "done" ? <Check className="size-3.5" strokeWidth={3} /> : i + 1}

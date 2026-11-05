@@ -96,3 +96,8 @@ describe("clockAt", () => {
     expect(clockAt({ "1": 0, "2": 2_400_000 }, HALF, 2_460_000)).toBe(HALF + 60);
   });
 });
+
+describe("throw-off read from a clip", () => {
+  it("is done and says so when the video starts later in the half", () =>
+    expect(steps({ ...base, kickoff: { "1": -760_000 } })[1]).toEqual({ id: "kickoff", state: "done", reason: "fromClip" }));
+});
