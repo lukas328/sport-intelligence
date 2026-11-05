@@ -207,3 +207,92 @@ def relabel_by_clusters(
         nearest = min(dists, key=dists.__getitem__)
         names[j] = "referee" if dists[nearest] > 25 else names[nearest]
     return {t: names[int(lb)] for t, lb in zip(tids, labels, strict=True)}
+
+
+# ---- the team of single looks (ADR 027 addendum: per-reading team colour) -------------------
+
+MIN_TEAM_GAP = 20.0  # team centres closer than this (feature units) cannot tell single looks apart
+SIDE_RATIO = 0.6  # a look belongs to a team when clearly nearer it than to the other
+
+
+def _feature(lab: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
+    """Lab with lightness weighted down (the same weighting as `relabel_by_clusters`)."""
+    v = np.asarray(lab, dtype=np.float64)
+    return np.array([0.6 * v[0], v[1], v[2]])
+
+
+def team_centres(team_out: dict[int, dict[str, Any]]) -> dict[str, NDArray[np.float64]]:
+    """This match's home and away torso colours: the median of the field tracks of each team,
+    only when the two are far enough apart to tell single looks apart."""
+    labs: dict[str, list[list[float]]] = defaultdict(list)
+    for v in team_out.values():
+        if v.get("label") in ("home", "away") and "lab" in v:
+            labs[str(v["label"])].append(list(v["lab"]))
+    if len(labs.get("home", [])) < 2 or len(labs.get("away", [])) < 2:
+        return {}
+    centres = {k: np.median(np.asarray(v), axis=0) for k, v in labs.items()}
+    if np.linalg.norm(_feature(centres["home"]) - _feature(centres["away"])) < MIN_TEAM_GAP:
+        return {}
+    return centres
+
+
+def side_of(
+    colour: NDArray[np.float64] | None,
+    centres: dict[str, NDArray[np.float64]],
+    ratio: float = SIDE_RATIO,
+) -> str | None:
+    """"home" or "away" for one torso colour when it is clearly nearer that team's centre
+    (`team_centres`), else None (referees, other kits, shadows, unsure)."""
+    if colour is None or "home" not in centres or "away" not in centres:
+        return None
+    f = _feature(colour)
+    dh = float(np.linalg.norm(f - _feature(centres["home"])))
+    da = float(np.linalg.norm(f - _feature(centres["away"])))
+    if dh < ratio * da:
+        return "home"
+    if da < ratio * dh:
+        return "away"
+    return None
+
+
+def colour_runs(
+    frames: list[int], sides: list[str | None], fps: float, min_run_s: float = 1.0
+) -> list[tuple[int, int, str]]:
+    """A track's stretches of one team colour: (first frame, last frame, side), in time order.
+    Looks without a side are skipped; each look takes the majority of the looks within half a
+    second (single looks flicker in crowds), and stretches shorter than `min_run_s` go to the
+    longer neighbour."""
+    known = sorted((f, s) for f, s in zip(frames, sides, strict=True) if s is not None)
+    if not known:
+        return []
+    fr = np.array([f for f, _ in known], np.int64)
+    home = np.array([s == "home" for _, s in known], np.int64)
+    half = 0.5 * fps
+    lo = np.searchsorted(fr, fr - half, side="left")
+    hi = np.searchsorted(fr, fr + half, side="right")
+    csum = np.concatenate([[0], np.cumsum(home)])
+    share = (csum[hi] - csum[lo]) / (hi - lo)
+    smooth = ["home" if s > 0.5 else "away" if s < 0.5 else known[k][1] for k, s in enumerate(share)]
+    runs: list[list[Any]] = []  # [first, last, side]
+    for f, s in zip(fr.tolist(), smooth, strict=True):
+        if runs and runs[-1][2] == s:
+            runs[-1][1] = f
+        else:
+            runs.append([f, f, s])
+    min_len = min_run_s * fps
+    while len(runs) > 1:
+        k = min(range(len(runs)), key=lambda i: runs[i][1] - runs[i][0])
+        if runs[k][1] - runs[k][0] >= min_len:
+            break
+        nb = [i for i in (k - 1, k + 1) if 0 <= i < len(runs)]
+        to = max(nb, key=lambda i: runs[i][1] - runs[i][0])
+        runs[to][0], runs[to][1] = min(runs[to][0], runs[k][0]), max(runs[to][1], runs[k][1])
+        del runs[k]
+        merged: list[list[Any]] = []
+        for r in runs:
+            if merged and merged[-1][2] == r[2]:
+                merged[-1][1] = r[1]
+            else:
+                merged.append(r)
+        runs = merged
+    return [(int(a), int(b), str(s)) for a, b, s in runs]
