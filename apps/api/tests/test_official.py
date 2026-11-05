@@ -242,7 +242,8 @@ async def test_claim_creates_club_and_team_and_prefills(
 
     matches = (await api.get(base(c) + "/matches")).json()
     assert len(matches) == GAMES
-    m = next(x for x in matches if x["opponent_name"] == "Grün-Weiss Effretikon 1")
+    m = next(x for x in matches if x["kickoff_at"].startswith("2026-09-27"))
+    assert m["opponent_name"] == "Grün-Weiss Effretikon 1"
     assert m["is_home"] is True and (m["score_own"], m["score_opponent"]) == (26, 19)
     assert m["kickoff_at"].startswith("2026-09-27T15:00:00")
     away = [x for x in matches if x["opponent_name"] == "SG Horgen/Wädenswil 1"]
