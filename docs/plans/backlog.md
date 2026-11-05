@@ -8,7 +8,9 @@ macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
 | Thema | Stand |
 |---|---|
 | Würfe als Vorschläge (wie Torkandidaten) | Messung und Einbau laufen |
-| Mannschaft aus handball.ch übernehmen (Phase 1 bis 3) | Backend im Bau |
+| Mannschaft aus handball.ch übernehmen (Phase 1 bis 3) | Backend fertig (64bade8, fab3011), UI-Sitzung baut die Screens |
+| 1. Kalibrierung für Stream-Kameras | läuft (messen, dann verbessern, Klick-Kalibrierung pro Halle) |
+| 6. Spielberichte per Link aus nuLiga (DE, AT) und HLA-PDF | läuft |
 | Backend-Prüfung auf Fehler bei echtem Material (Teil-Videos, ganze Spiele, Rechte) | läuft, erste Fixes gepusht |
 | Torkandidaten im Produktpfad messen | läuft |
 | Uploads von Lukas verarbeiten, schneller machen | läuft |
@@ -34,6 +36,18 @@ macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
    (`docs/plans/data-sources-de.md`).
 7. **Spielzüge.** Angriffe gibt es schon als Phasen; erkennen, welche Auslösung gespielt wurde
    (Muster in den Spuren), Verknüpfung mit dem Taktikboard. Braucht 1 und 4.
+
+## Reihenfolge der Starts
+2 (ganzes Spiel) sobald die Upload-Verarbeitung fertig ist; 3 (Torzone) nach den Würfen;
+4 (Ball Runde 6) nach der Auswertung von Runde 5 als Auftrag in `ml/gpu/JOBS.md`; 5 (Nummern) wenn
+genug hochgeladene Spiele mit Matchblatt verarbeitet sind; 7 (Spielzüge) nach 1 und 4.
+Kleine Lücke aus dem Onboarding: Namen offizieller Kader-Einträge ohne Einwilligung auch in
+Ereignis- und Statistik-Ansichten verbergen (mit 5).
+
+## Entscheide von Lukas (offen)
+- Zählen übernommene offizielle Spiele zur Spiel-Limite des Gratis-Plans?
+- Vereins-Bestätigung durch eine zweite Person: Vereins-Domain verlangen oder Prüfung durch uns?
+- Kader-Vorschlag nur Name, Nummer, Einsätze, oder auch Statistik?
 
 ## Später / wartet
 - Datenanfragen DHB und BHV (Entwürfe in `docs/plans/outreach-data-de.md`), Partnerschaft SHV.
