@@ -359,7 +359,8 @@
     "method_magic_link": "Sign-in link",
     "method_google": "Google",
     "method_apple": "Apple",
-    "method_password_reset": "Password reset"
+    "method_password_reset": "Password reset",
+    "sessionsAll": "Show all {n} devices"
   },
   "team": {
     "roster": "Roster",
@@ -1227,7 +1228,8 @@
     "needs2fa": "Payments need two-factor sign-in.",
     "failed": "That did not work. Please try again.",
     "status_invoice_open": "invoice open",
-    "status_invoice_paid": "paid by invoice"
+    "status_invoice_paid": "paid by invoice",
+    "current": "Current plan"
   },
   "share": {
     "button": "Share",

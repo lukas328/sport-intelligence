@@ -359,7 +359,8 @@
     "method_magic_link": "Lien de connexion",
     "method_google": "Google",
     "method_apple": "Apple",
-    "method_password_reset": "Mot de passe réinitialisé"
+    "method_password_reset": "Mot de passe réinitialisé",
+    "sessionsAll": "Afficher les {n} appareils"
   },
   "team": {
     "roster": "Effectif",
@@ -1227,7 +1228,8 @@
     "needs2fa": "Les paiements nécessitent la connexion à deux facteurs.",
     "failed": "Cela n'a pas fonctionné. Réessaie.",
     "status_invoice_open": "facture ouverte",
-    "status_invoice_paid": "payé sur facture"
+    "status_invoice_paid": "payé sur facture",
+    "current": "Offre actuelle"
   },
   "share": {
     "button": "Partager",

@@ -60,7 +60,7 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 
 ## Batch 5: account, opponent, scouting
 
-- [ ] P1 Einstellungen: ~150 device sessions make the page 11 500 px long; a full red bar for
+- [x] P1 Einstellungen: ~150 device sessions make the page 11 500 px long; a full red bar for
   "Teams 2 / 1" while limits are off; plan cards inside the plan card.
 - [ ] P1 Profil, Einwilligungen: a coach gets an empty state about "deinen Kindern"; no team
   consent overview before filming.

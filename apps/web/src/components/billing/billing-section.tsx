@@ -35,7 +35,8 @@ interface Billing {
   goalkeeper_addon_chf: number;
 }
 
-function Meter({ label, used, limit, unit = "" }: { label: string; used: number; limit: number | null; unit?: string }) {
+/** Usage against the plan; red only when a limit is enforced and reached (limits off: ink). */
+function Meter({ label, used, limit, unit = "", enforced }: { label: string; used: number; limit: number | null; unit?: string; enforced: boolean }) {
   const share = limit ? Math.min(1, used / limit) : 0;
   return (
     <div className="space-y-1 text-sm">
@@ -47,7 +48,7 @@ function Meter({ label, used, limit, unit = "" }: { label: string; used: number;
         </span>
       </div>
       <div className="h-2 overflow-hidden rounded bg-surface" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={limit ?? 0} aria-valuenow={used}>
-        <div className={cn("h-full", share >= 0.9 ? "bg-error" : "bg-accent")} style={{ width: `${share * 100}%` }} />
+        <div className={cn("h-full", enforced && share >= 1 ? "bg-error" : "bg-foreground/70")} style={{ width: `${share * 100}%` }} />
       </div>
     </div>
   );
@@ -96,27 +97,33 @@ export function BillingSection({ orgId }: { orgId: string }) {
         </div>
         {!b.enforced && <p className="text-sm text-muted">{t("notEnforced")}</p>}
         <div className="grid gap-3 sm:grid-cols-2">
-          <Meter label={t("teams")} used={b.usage.teams} limit={b.limits.teams} />
-          <Meter label={t("matches")} used={b.usage.max_matches_per_season} limit={b.limits.matches_per_season} />
-          <Meter label={t("storage")} used={gb(b.usage.storage_bytes)} limit={b.limits.storage_gb} unit=" GB" />
-          <Meter label={t("gpu")} used={b.usage.gpu_minutes} limit={b.limits.gpu_minutes_month} unit=" min" />
+          <Meter enforced={b.enforced} label={t("teams")} used={b.usage.teams} limit={b.limits.teams} />
+          <Meter enforced={b.enforced} label={t("matches")} used={b.usage.max_matches_per_season} limit={b.limits.matches_per_season} />
+          <Meter enforced={b.enforced} label={t("storage")} used={gb(b.usage.storage_bytes)} limit={b.limits.storage_gb} unit=" GB" />
+          <Meter enforced={b.enforced} label={t("gpu")} used={b.usage.gpu_minutes} limit={b.limits.gpu_minutes_month} unit=" min" />
         </div>
-        <ul className="grid gap-3 md:grid-cols-3" data-testid="plans">
+        {/* the plans as rows of one sheet, not cards inside the card */}
+        <ul className="divide-y divide-foreground/10 border-t-2 border-foreground" data-testid="plans">
           {b.plans.map((p) => (
-            <li key={p.plan} className={cn("space-y-2 rounded-lg border p-3", p.plan === b.plan ? "border-accent" : "border-border")}>
-              <p className="font-semibold">{t(`plan_${p.plan}`)}</p>
-              <p className="text-2xl font-bold tabular-nums">
-                {p.price_chf_month ? t("price", { price: p.price_chf_month }) : t("free")}
-              </p>
-              <ul className="space-y-0.5 text-sm text-muted">
-                <li>{t("teamsN", { count: p.teams })}</li>
-                <li>{p.matches_per_season == null ? t("matchesUnlimited") : t("matchesN", { count: p.matches_per_season })}</li>
-                <li>{t("storageN", { gb: p.storage_gb })}</li>
-                <li>{p.features.includes("tracking") ? t("withAnalysis") : t("withoutAnalysis")}</li>
-                {p.trial_days > 0 && <li>{t("trial", { days: p.trial_days })}</li>}
-              </ul>
+            <li key={p.plan} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
+              <span className="w-28 shrink-0">
+                <span className="block font-semibold">{t(`plan_${p.plan}`)}</span>
+                {p.plan === b.plan && <span className="block text-[0.8125rem] font-semibold text-muted">{t("current")}</span>}
+              </span>
+              <span className="w-40 shrink-0 font-semibold tabular-nums">{p.price_chf_month ? t("price", { price: p.price_chf_month }) : t("free")}</span>
+              <span className="min-w-48 flex-1 text-sm text-muted">
+                {[
+                  t("teamsN", { count: p.teams }),
+                  p.matches_per_season == null ? t("matchesUnlimited") : t("matchesN", { count: p.matches_per_season }),
+                  t("storageN", { gb: p.storage_gb }),
+                  p.features.includes("tracking") ? t("withAnalysis") : t("withoutAnalysis"),
+                  p.trial_days > 0 ? t("trial", { days: p.trial_days }) : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
               {p.plan !== "free" && p.plan !== b.plan && (
-                <Button className="w-full" disabled={!b.checkout_available} onClick={() => void go("/v1/orgs/{org_id}/billing/checkout", p.plan)}>
+                <Button variant="secondary" size="sm" disabled={!b.checkout_available} onClick={() => void go("/v1/orgs/{org_id}/billing/checkout", p.plan)}>
                   {t("choose", { plan: t(`plan_${p.plan}`) })}
                 </Button>
               )}

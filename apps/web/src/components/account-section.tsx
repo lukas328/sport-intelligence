@@ -27,6 +27,8 @@ export function AccountSection({ me }: { me: Me }) {
   const [pwDone, setPwDone] = useState(false);
   const [resent, setResent] = useState(false);
   const [hasPassword, setHasPassword] = useState(me.has_password);
+  // a long list of old sign-ins made the page thousands of pixels long: this device and the latest few
+  const [allSessions, setAllSessions] = useState(false);
   const sessions = useQuery({
     queryKey: ["sessions"],
     queryFn: async () => (await api.GET("/v1/me/sessions")).data ?? [],
@@ -119,7 +121,10 @@ export function AccountSection({ me }: { me: Me }) {
       <Card className="space-y-3">
         <h3 className="font-semibold">{t("account.sessionsTitle")}</h3>
         <ul className="divide-y divide-border/70 text-sm" data-testid="sessions">
-          {(sessions.data ?? []).map((s) => (
+          {[...(sessions.data ?? [])]
+            .sort((a, b) => Number(b.current) - Number(a.current))
+            .slice(0, allSessions ? undefined : 5)
+            .map((s) => (
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
               <span>
                 <span className="font-medium">{deviceName(s.user_agent, t("account.unknownDevice"))}</span>{" "}
@@ -140,6 +145,11 @@ export function AccountSection({ me }: { me: Me }) {
             </li>
           ))}
         </ul>
+        {!allSessions && (sessions.data ?? []).length > 5 && (
+          <button type="button" className="min-h-8 text-sm font-medium underline underline-offset-4" onClick={() => setAllSessions(true)}>
+            {t("account.sessionsAll", { n: (sessions.data ?? []).length })}
+          </button>
+        )}
         {others > 0 && (
           <Button variant="secondary" onClick={() => revokeOthers.mutate()} loading={revokeOthers.isPending}>
             {t("account.signOutOthers")}

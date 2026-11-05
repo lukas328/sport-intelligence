@@ -359,7 +359,8 @@
     "method_magic_link": "Anmeldelink",
     "method_google": "Google",
     "method_apple": "Apple",
-    "method_password_reset": "Passwort zurückgesetzt"
+    "method_password_reset": "Passwort zurückgesetzt",
+    "sessionsAll": "Alle {n} Geräte anzeigen"
   },
   "team": {
     "roster": "Kader",
@@ -1227,7 +1228,8 @@
     "needs2fa": "Für Zahlungen braucht es die Zwei-Faktor-Anmeldung.",
     "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
     "status_invoice_open": "Rechnung offen",
-    "status_invoice_paid": "per Rechnung bezahlt"
+    "status_invoice_paid": "per Rechnung bezahlt",
+    "current": "Aktueller Plan"
   },
   "share": {
     "button": "Teilen",
