@@ -1,0 +1,742 @@
+{
+ "source": "https://www.youtube.com/watch?v=K0UAcSq8moc",
+ "title": "HB Mülheim-Urmitz vs Südpfalz Tiger 39-24 (Regionalliga Südwest 26/27)",
+ "note": "goals with video timestamps from the video description (HB Mülheim-Urmitz channel)",
+ "halves": [
+  {
+   "video_s": 53,
+   "text": "Hälfte 1: [0:53]"
+  },
+  {
+   "video_s": 1728,
+   "text": "Hälfte 1: [28:48]"
+  },
+  {
+   "video_s": 1750,
+   "text": "Hälfte 2: [29:10]"
+  },
+  {
+   "video_s": 3584,
+   "text": "Hälfte 2: [59:44]"
+  }
+ ],
+ "goals": [
+  {
+   "video_s": 108,
+   "score": [
+    1,
+    0
+   ],
+   "player": "Jonas Brüggemann",
+   "match_minute": 2,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 138,
+   "score": [
+    1,
+    1
+   ],
+   "player": "Joshua Lohmann",
+   "match_minute": 2,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 195,
+   "score": [
+    1,
+    2
+   ],
+   "player": "Andre Hilsendegen",
+   "match_minute": 3,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 289,
+   "score": [
+    2,
+    2
+   ],
+   "player": "Jonas Brüggemann",
+   "match_minute": 5,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 357,
+   "score": [
+    3,
+    2
+   ],
+   "player": "Kai Lißmann",
+   "match_minute": 5,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 476,
+   "score": [
+    4,
+    2
+   ],
+   "player": "Tim Hemmerle",
+   "match_minute": 9,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 503,
+   "score": [
+    4,
+    3
+   ],
+   "player": "Dennis Würges",
+   "match_minute": 9,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 542,
+   "score": [
+    5,
+    3
+   ],
+   "player": "Alexander Backes",
+   "match_minute": 10,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 633,
+   "score": [
+    6,
+    3
+   ],
+   "player": "Jonas Brüggemann",
+   "match_minute": 12,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 689,
+   "score": [
+    6,
+    4
+   ],
+   "player": "Andre Hilsendegen",
+   "match_minute": 13,
+   "penalty": true,
+   "team": "away"
+  },
+  {
+   "video_s": 843,
+   "score": [
+    7,
+    4
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 15,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 868,
+   "score": [
+    8,
+    4
+   ],
+   "player": "Tim Hemmerle",
+   "match_minute": 16,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 902,
+   "score": [
+    8,
+    5
+   ],
+   "player": "Marc Wendler",
+   "match_minute": 17,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 1142,
+   "score": [
+    9,
+    5
+   ],
+   "player": "Luc Nohner",
+   "match_minute": 20,
+   "penalty": true,
+   "team": "home"
+  },
+  {
+   "video_s": 1170,
+   "score": [
+    9,
+    6
+   ],
+   "player": "Jan Gerbershagen",
+   "match_minute": 21,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 1205,
+   "score": [
+    10,
+    6
+   ],
+   "player": "Kai Lißmann",
+   "match_minute": 22,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1312,
+   "score": [
+    10,
+    7
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 24,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 1323,
+   "score": [
+    11,
+    7
+   ],
+   "player": "Leon Schmitz",
+   "match_minute": 24,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1349,
+   "score": [
+    11,
+    8
+   ],
+   "player": "André Hilsendegen",
+   "match_minute": 24,
+   "penalty": true,
+   "team": "away"
+  },
+  {
+   "video_s": 1489,
+   "score": [
+    12,
+    8
+   ],
+   "player": "Tim Hemmerle",
+   "match_minute": 27,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1546,
+   "score": [
+    13,
+    8
+   ],
+   "player": "Alexander Backes",
+   "match_minute": 27,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1624,
+   "score": [
+    14,
+    8
+   ],
+   "player": "Tim Hemmerle",
+   "match_minute": 29,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1646,
+   "score": [
+    14,
+    9
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 29,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 1692,
+   "score": [
+    14,
+    10
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 30,
+   "penalty": true,
+   "team": "away"
+  },
+  {
+   "video_s": 1715,
+   "score": [
+    15,
+    10
+   ],
+   "player": "Philipp Schwenzer",
+   "match_minute": 30,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1800,
+   "score": [
+    16,
+    10
+   ],
+   "player": "Alexander Backes",
+   "match_minute": 32,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1841,
+   "score": [
+    16,
+    11
+   ],
+   "player": "Jan Gerbershagen",
+   "match_minute": 32,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 1878,
+   "score": [
+    16,
+    12
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 33,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 1914,
+   "score": [
+    17,
+    12
+   ],
+   "player": "Kai Lißmann",
+   "match_minute": 33,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 1927,
+   "score": [
+    17,
+    13
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 34,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 1939,
+   "score": [
+    18,
+    13
+   ],
+   "player": "Jonas Brüggemann",
+   "match_minute": 34,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2017,
+   "score": [
+    19,
+    13
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 35,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2082,
+   "score": [
+    20,
+    13
+   ],
+   "player": "Alexander Backes",
+   "match_minute": 36,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2158,
+   "score": [
+    21,
+    13
+   ],
+   "player": "Alexander Backes",
+   "match_minute": 38,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2220,
+   "score": [
+    21,
+    14
+   ],
+   "player": "Joshua Lohmann",
+   "match_minute": 39,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 2243,
+   "score": [
+    22,
+    14
+   ],
+   "player": "Kai Lißmann",
+   "match_minute": 39,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2306,
+   "score": [
+    22,
+    15
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 40,
+   "penalty": true,
+   "team": "away"
+  },
+  {
+   "video_s": 2333,
+   "score": [
+    23,
+    15
+   ],
+   "player": "Kai Lißmann",
+   "match_minute": 40,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2350,
+   "score": [
+    23,
+    16
+   ],
+   "player": "Max Butz",
+   "match_minute": 40,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 2381,
+   "score": [
+    24,
+    16
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 41,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2494,
+   "score": [
+    25,
+    16
+   ],
+   "player": "Kai Lißmann",
+   "match_minute": 43,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2528,
+   "score": [
+    26,
+    16
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 44,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2584,
+   "score": [
+    26,
+    17
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 44,
+   "penalty": true,
+   "team": "away"
+  },
+  {
+   "video_s": 2610,
+   "score": [
+    27,
+    17
+   ],
+   "player": "Luc Nohner",
+   "match_minute": 45,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2652,
+   "score": [
+    27,
+    18
+   ],
+   "player": "Moritz Schöllhorn",
+   "match_minute": 46,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 2794,
+   "score": [
+    28,
+    18
+   ],
+   "player": "Luc Nohner",
+   "match_minute": 48,
+   "penalty": true,
+   "team": "home"
+  },
+  {
+   "video_s": 2843,
+   "score": [
+    28,
+    19
+   ],
+   "player": "Jan Gerbershagen",
+   "match_minute": 48,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 2903,
+   "score": [
+    28,
+    20
+   ],
+   "player": "Sebastian Klüh",
+   "match_minute": 49,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 2921,
+   "score": [
+    29,
+    20
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 50,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 2907,
+   "score": [
+    30,
+    20
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 51,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 3034,
+   "score": [
+    31,
+    20
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 52,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 3069,
+   "score": [
+    32,
+    20
+   ],
+   "player": "Moritz Lüdtke",
+   "match_minute": 52,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 3111,
+   "score": [
+    33,
+    20
+   ],
+   "player": "Luc Nohner",
+   "match_minute": 53,
+   "penalty": true,
+   "team": "home"
+  },
+  {
+   "video_s": 3134,
+   "score": [
+    33,
+    21
+   ],
+   "player": "André Hilsendegen",
+   "match_minute": 53,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 3164,
+   "score": [
+    34,
+    21
+   ],
+   "player": "Luc Nohner",
+   "match_minute": 54,
+   "penalty": true,
+   "team": "home"
+  },
+  {
+   "video_s": 3212,
+   "score": [
+    34,
+    22
+   ],
+   "player": "Dennis Würges",
+   "match_minute": 54,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 3222,
+   "score": [
+    35,
+    22
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 55,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 3316,
+   "score": [
+    36,
+    22
+   ],
+   "player": "Moritz Lüdtke",
+   "match_minute": 56,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 3345,
+   "score": [
+    36,
+    23
+   ],
+   "player": "Sebastian Klüh",
+   "match_minute": 57,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 3354,
+   "score": [
+    37,
+    23
+   ],
+   "player": "Luc Nohner",
+   "match_minute": 57,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 3460,
+   "score": [
+    37,
+    24
+   ],
+   "player": "Justin Kehl",
+   "match_minute": 59,
+   "penalty": false,
+   "team": "away"
+  },
+  {
+   "video_s": 3523,
+   "score": [
+    38,
+    24
+   ],
+   "player": "Peter Mittmann",
+   "match_minute": 60,
+   "penalty": false,
+   "team": "home"
+  },
+  {
+   "video_s": 3545,
+   "score": [
+    39,
+    24
+   ],
+   "player": "Leon Schmitz",
+   "match_minute": 60,
+   "penalty": false,
+   "team": "home"
+  }
+ ],
+ "missed_7m": [
+  {
+   "video_s": 1404,
+   "text": "7-Meter  ST: André Hilsendegen (25 min) [23:24]"
+  }
+ ],
+ "disallowed": [
+  {
+   "video_s": 1007,
+   "score": "8-6",
+   "player": "Moritz Schöllhorn"
+  },
+  {
+   "video_s": 1558,
+   "score": "13-9",
+   "player": "Moritz Schöllhorn"
+  },
+  {
+   "video_s": 2867,
+   "score": "29-19",
+   "player": "Kai Lißmann"
+  }
+ ],
+ "description": "Das ganze Spiel zwischen Mülheim-Urmitz und den Südpfalz Tigern\n\n*HB Mülheim-Urmitz:*\nLeon Krechel *[Nr. 31 • TW]* • Yannik Stromberg *[32 • TW]* • Alexander Klapthor *[85 • TW]* • Jan Hommen *(2)* • Lukas Helf *(4)* • Luc Nohner *(5)* • Leon Schmitz *(6)* • Moritz Lüdke *(18)* • Tim Hemmerle *(19)* • Alexander Backes *(21)* • Kai Lißmann *(23)* • Jonas Brüggemann *(24)* • Philipp Schwenzer *(25)* • Peter Mittmann *(37)*\n\n*Offizielle:*\n• Josef Nickenich • Frank Knipp • Christoph Raeder • Michael Haering • Tobias Beisicht\n_______\n*Südpfalz Tiger:*\nMaximilian Geiger *[Nr. 12 • TW]* • Maximilian Stadel *[18 • TW]* • Mika Schwenken *[75 • TW]* • Moritz Schöllhorn *(4)* • Andre Hilsendegen *(6)* • Finn Stefani *(7)* • Julian Hesse *(8) • Sebastian Klüh *(10)* • Justin Kehl *(11)* • Jan Gerbershagen *(14)* • Joshua Lohmann *(15)* • Marc Wendler *(20)* • Dennis Würges *(35)* • Max Butz *(41)*\n\n*Offizielle:*\n• Peter Horn • Jochen Werling • Stephen Kramer • Benjamin Benz\n\n*Schiri 1:* Maximilian Albes\n*Schiri 2:* Carsten Müller\n*Technischer Delegierter:* Herbert Volk\n*Zeitnehmer/Sekretär:* Udo Stromberg • Carsten Schmitz *[Beide HB Mülheim-Urmitz]*\n\n*Tore:*\n*🕰️ Hälfte 1: [0:53]*\n*1-0* Jonas Brüggemann (2 min) *[1:48]*\n1-1 Joshua Lohmann (2 min) *[2:18]*\n1-2 Andre Hilsendegen (3 min) *[3:15]*\n*Gelb 🟨 für Sebastian Klüh (ST) [4:21]*\n*2-2* Jonas Brüggemann (5 min) *[4:49]*\n*3-2* Kai Lißmann (5 min) *[5:57]*\n4-2 Tim Hemmerle (9 min) *[7:56]*\n*4-3* Dennis Würges (9 min) *[8:23]*\n*5-3* Alexander Backes (10 min) *[9:02]*\n*6-3* Jonas Brüggemann (12 min) *[10:33]*\n6-4 Andre Hilsendegen (13 min (🤾)) *[11:29]*\n*7-4* Peter Mittmann (15 min) *[14:03]*\n*8-4* Tim Hemmerle (16 min) *[14:28]*\n8-5 Marc Wendler (17 min) *[15:02]*\n⭕ _-8-6 Moritz Schöllhorn (18 min)- *[Irregulär]*_ *[16:47]*\n*9-5* Luc Nohner (20 min (🤾)) *[19:02]*\n9-6 Jan Gerbershagen (21 min) *[19:30]*\n*10-6* Kai Lißmann (22 min) *[20:05]*\n10-7 Moritz Schöllhorn (24 min) *[21:52]*\n*11-7* Leon Schmitz (24 min) *[22:03]*\n11-8 André Hilsendegen (24 min (🤾)) *[22:29]*\n*Gelb 🟨 für Philipp Schwenzer (HB) [23:03]*\n❌ *7-Meter 🤾 ST:* André Hilsendegen (25 min) *[23:24]*\n*12-8* Tim Hemmerle (27 min) *[24:49]*\n*13-8* Alexander Backes (27 min) *[25:46]*\n⭕ _-13-9 Moritz Schöllhorn (28 min)- *[Irregulär]*_ *[25:58]*\n*14-8* Tim Hemmerle (29 min) *[27:04]*\n14-9 Moritz Schöllhorn (29 min) *[27:26]*\n14-10 Moritz Schöllhorn (30 min (🤾)) *[28:12]*\n*15-10* Philipp Schwenzer (30 min) *[28:35]*\n*🕰️ Hälfte 1: [28:48]*\n*🕰️ Hälfte 2: [29:10]*\n*16-10* Alexander Backes (32 min) *[30:00]*\n16-11 Jan Gerbershagen (32 min) *[30:41]*\n16-12 Moritz Schöllhorn (33 min) *[31:18]*\n*17-12* Kai Lißmann (33 min) *[31:54]*\n17-13 Moritz Schöllhorn (34 min) *[32:07]*\n*18-13* Jonas Brüggemann (34 min) *[32:19]*\n*19-13* Peter Mittmann (35 min) *[33:37]*\n*20-13* Alexander Backes (36 min) *[34:42]*\n*21-13* Alexander Backes (38 min) *[35:58]*\n21-14 Joshua Lohmann (39 min) *[37:00]*\n*22-14* Kai Lißmann (39 min) *[37:23]*\n22-15 Moritz Schöllhorn (40 min (🤾)) *[38:26]*\n*23-15* Kai Lißmann (40 min) *[38:53]*\n23-16 Max Butz (40 min) *[39:10]*\n*24-16* Peter Mittmann (41 min) *[39:41]*\n*25-16* Kai Lißmann (43 min) *[41:34]*\n*26-16* Peter Mittmann (44 min) *[42:08]*\n26-17 Moritz Schöllhorn (44 min (🤾)) *[43:04]*\n*27-17* Luc Nohner (45 min) *[43:30]*\n27-18 Moritz Schöllhorn (46 min) *[44:12]*\n*28-18* Luc Nohner (48 min (🤾)) *[46:34]*\n28-19 Jan Gerbershagen (48 min) *[47:23]*\n⭕ _-29-19 Kai Lißmann (49 min)- *[Irregulär]*_ *[47:47]*\n28-20 Sebastian Klüh (49 min) *[48:23]*\n*29-20* Peter Mittmann (50 min) *[48:41]*\n*30-20* Peter Mittmann (51 min) *[48:27]*\n*31-20* Peter Mittmann (52 min) *[50:34]*\n*32-20* Moritz Lüdtke (52 min) *[51:09]*\n*33-20* Luc Nohner (53 min (🤾)) *[51:51]*\n33-21 André Hilsendegen (53 min) *[52:14]*\n*34-21* Luc Nohner (54 min (🤾)) *[52:44]*\n34-22 Dennis Würges (54 min) *[53:32]*\n*35-22* Peter Mittmann (55 min) *[53:42]*\n*36-22* Moritz Lüdtke (56 min) *[55:16]*\n36-23 Sebastian Klüh (57 min) *[55:45]*\n*37-23* Luc Nohner (57 min) *[55:54]*\n37-24 Justin Kehl (59 min) *[57:40]*\n*38-24* Peter Mittmann (60 min) *[58:43]*\n*39-24* Leon Schmitz (60 min) *[59:05]*\n*🕰️ Hälfte 2: [59:44]*"
+}

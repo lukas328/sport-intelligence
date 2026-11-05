@@ -24,9 +24,8 @@ from handball_api.models import (
     Tag,
     TagSet,
     Team,
-    VideoAsset,
 )
-from handball_api.models.enums import VideoRole, VideoStatus
+from handball_api.models.enums import VideoStatus
 from handball_api.schemas.tags import (
     SavedFilterIn,
     SearchFilter,
@@ -39,7 +38,13 @@ from handball_api.schemas.tags import (
 )
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match
+from handball_api.services.matches import (
+    clip_window,
+    duration_ms,
+    get_match,
+    in_video,
+    timeline_videos,
+)
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 
@@ -303,17 +308,8 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
             )
         ).all()
     }
-    videos = dict(
-        (
-            await ctx.db.execute(
-                select(VideoAsset.match_id, VideoAsset.id).where(
-                    VideoAsset.match_id.in_(used),
-                    VideoAsset.role == VideoRole.MAIN,
-                    VideoAsset.status == VideoStatus.READY,
-                )
-            )
-        ).all()
-    )
+    timeline = await timeline_videos(ctx, used, ready=False)
+    videos = {mid: v.id for mid, v in timeline.items() if v.status == VideoStatus.READY}
 
     def label(match_id: uuid.UUID) -> str:
         m, name = meta[match_id]
@@ -321,7 +317,13 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
 
     hits: list[SearchHit] = []
     for e in events:
-        start = max(0, e.t_ms - EVENT_PRE_MS) if e.t_ms is not None else None
+        # an event before or after the video (official report on a clip) has no moment to show
+        length = duration_ms(timeline.get(e.match_id))
+        window = (
+            clip_window(e.t_ms, EVENT_PRE_MS, EVENT_POST_MS, length)
+            if in_video(e.t_ms, length) and e.t_ms is not None
+            else None
+        )
         hits.append(
             SearchHit(
                 kind="event",
@@ -330,8 +332,8 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
                 match_label=label(e.match_id),
                 kickoff_at=meta[e.match_id][0].kickoff_at,
                 video_id=videos.get(e.match_id),
-                start_ms=start,
-                end_ms=e.t_ms + EVENT_POST_MS if e.t_ms is not None else None,
+                start_ms=window[0] if window else None,
+                end_ms=window[1] if window else None,
                 t_ms=e.t_ms,
                 type=e.type,
                 side=e.side,

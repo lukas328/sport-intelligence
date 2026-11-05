@@ -15,6 +15,98 @@
         "title": "AcceptedOut",
         "type": "object"
       },
+      "AccessApproveIn": {
+        "properties": {
+          "org_role": {
+            "$ref": "#/components/schemas/OrgRole",
+            "default": "member"
+          },
+          "team_role": {
+            "$ref": "#/components/schemas/TeamRole",
+            "default": "coach"
+          }
+        },
+        "title": "AccessApproveIn",
+        "type": "object"
+      },
+      "AccessRequestOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "official_team_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Team Id"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "name",
+          "email",
+          "team_id",
+          "official_team_id",
+          "message",
+          "status",
+          "created_at"
+        ],
+        "title": "AccessRequestOut",
+        "type": "object"
+      },
       "AccountDelete": {
         "properties": {
           "confirm_email": {
@@ -90,6 +182,19 @@
               }
             ],
             "title": "Calibration Error"
+          },
+          "calibration_info": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id); hall_tried lists earlier videos that did not fit",
+            "title": "Calibration Info"
           },
           "camera": {
             "anyOf": [
@@ -190,6 +295,16 @@
               }
             ],
             "title": "Fps"
+          },
+          "hall": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HallOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "needs_calibration": {
             "default": false,
@@ -1224,6 +1339,14 @@
             "title": "Court",
             "type": "array"
           },
+          "height_m": {
+            "default": 0.0,
+            "description": "above the floor, e.g. 2 for the crossbar",
+            "maximum": 2.5,
+            "minimum": 0.0,
+            "title": "Height M",
+            "type": "number"
+          },
           "image": {
             "maxItems": 2,
             "minItems": 2,
@@ -1244,6 +1367,54 @@
           "court"
         ],
         "title": "CalibrationPoint",
+        "type": "object"
+      },
+      "CandidateGoal": {
+        "description": "A shot already stored that covers a candidate (same moment).",
+        "properties": {
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "side": {
+            "title": "Side",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          }
+        },
+        "required": [
+          "event_id",
+          "source",
+          "side",
+          "t_ms"
+        ],
+        "title": "CandidateGoal",
         "type": "object"
       },
       "Chart": {
@@ -1322,6 +1493,139 @@
           "plan"
         ],
         "title": "CheckoutIn",
+        "type": "object"
+      },
+      "ClaimIn": {
+        "properties": {
+          "club_id": {
+            "description": "Official club id of the search hit (club.id)",
+            "title": "Club Id",
+            "type": "integer"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "For an access request",
+            "title": "Message"
+          },
+          "org_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Link this existing club of yours instead of creating one",
+            "title": "Org Id"
+          },
+          "team_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Name"
+          }
+        },
+        "required": [
+          "club_id"
+        ],
+        "title": "ClaimIn",
+        "type": "object"
+      },
+      "ClaimOut": {
+        "properties": {
+          "access_request_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Request Id"
+          },
+          "created_organization": {
+            "default": false,
+            "title": "Created Organization",
+            "type": "boolean"
+          },
+          "organization_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Id"
+          },
+          "prefill": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrefillOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "claimed",
+              "access_requested",
+              "already_member"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
+          "verification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verification"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ClaimOut",
         "type": "object"
       },
       "Clip": {
@@ -3604,6 +3908,543 @@
         "title": "FrameIn",
         "type": "object"
       },
+      "GoalCandidateCounts": {
+        "properties": {
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "integer"
+          },
+          "known": {
+            "title": "Known",
+            "type": "integer"
+          },
+          "open": {
+            "title": "Open",
+            "type": "integer"
+          },
+          "open_by_rate": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Open By Rate",
+            "type": "object"
+          },
+          "rejected": {
+            "title": "Rejected",
+            "type": "integer"
+          },
+          "suggested": {
+            "default": 0,
+            "title": "Suggested",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "open",
+          "open_by_rate",
+          "confirmed",
+          "rejected",
+          "known"
+        ],
+        "title": "GoalCandidateCounts",
+        "type": "object"
+      },
+      "GoalCandidateList": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/GoalCandidateRow"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/GoalCandidateCounts"
+          },
+          "default_rate": {
+            "title": "Default Rate",
+            "type": "integer"
+          },
+          "kind": {
+            "default": "goal",
+            "enum": [
+              "goal",
+              "shot"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "official": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OfficialShots"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rates": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Rates",
+            "type": "array"
+          },
+          "template": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template"
+          }
+        },
+        "required": [
+          "template",
+          "rates",
+          "default_rate",
+          "counts",
+          "candidates"
+        ],
+        "title": "GoalCandidateList",
+        "type": "object"
+      },
+      "GoalCandidateReviewIn": {
+        "properties": {
+          "number": {
+            "anyOf": [
+              {
+                "maximum": 99.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "official_event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Event Id"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "goal",
+                  "save",
+                  "miss",
+                  "post",
+                  "blocked"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "side": {
+            "anyOf": [
+              {
+                "enum": [
+                  "own",
+                  "opponent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "confirmed",
+                  "rejected"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "GoalCandidateReviewIn",
+        "type": "object"
+      },
+      "GoalCandidateRow": {
+        "description": "A moment of the video that is probably a goal or a shot (analysis), with the coach's\nreview.",
+        "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "end_ms": {
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "goal_ms": {
+            "title": "Goal Ms",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "goal",
+              "shot"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "known": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CandidateGoal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "goal",
+                  "save",
+                  "miss",
+                  "post",
+                  "blocked"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "rate": {
+            "title": "Rate",
+            "type": "integer"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "side": {
+            "anyOf": [
+              {
+                "enum": [
+                  "own",
+                  "opponent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side"
+          },
+          "start_ms": {
+            "title": "Start Ms",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "confirmed",
+              "rejected"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "suggested_side": {
+            "anyOf": [
+              {
+                "enum": [
+                  "own",
+                  "opponent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Side"
+          },
+          "suggestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OfficialShot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "t_ms": {
+            "title": "T Ms",
+            "type": "integer"
+          },
+          "video_asset_id": {
+            "format": "uuid",
+            "title": "Video Asset Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "video_asset_id",
+          "t_ms",
+          "goal_ms",
+          "start_ms",
+          "end_ms",
+          "score",
+          "rate",
+          "suggested_side",
+          "status",
+          "side",
+          "outcome",
+          "event_id",
+          "period",
+          "clock_s",
+          "known"
+        ],
+        "title": "GoalCandidateRow",
+        "type": "object"
+      },
+      "GoalComparison": {
+        "properties": {
+          "away": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/GoalComparisonCounts"
+          },
+          "extra": {
+            "items": {
+              "$ref": "#/components/schemas/VideoGoalRow"
+            },
+            "title": "Extra",
+            "type": "array"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/OfficialGoalRow"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "home": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home"
+          },
+          "imported": {
+            "title": "Imported",
+            "type": "boolean"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "window_s": {
+            "title": "Window S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "imported",
+          "provider",
+          "source_url",
+          "home",
+          "away",
+          "window_s",
+          "counts",
+          "goals",
+          "extra"
+        ],
+        "title": "GoalComparison",
+        "type": "object"
+      },
+      "GoalComparisonCounts": {
+        "properties": {
+          "extra": {
+            "title": "Extra",
+            "type": "integer"
+          },
+          "found": {
+            "title": "Found",
+            "type": "integer"
+          },
+          "missing": {
+            "title": "Missing",
+            "type": "integer"
+          },
+          "official": {
+            "title": "Official",
+            "type": "integer"
+          },
+          "open": {
+            "title": "Open",
+            "type": "integer"
+          },
+          "outside": {
+            "title": "Outside",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "official",
+          "found",
+          "missing",
+          "outside",
+          "extra",
+          "open"
+        ],
+        "title": "GoalComparisonCounts",
+        "type": "object"
+      },
+      "GoalReviewIn": {
+        "properties": {
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "confirmed",
+                  "dismissed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "event_id",
+          "status"
+        ],
+        "title": "GoalReviewIn",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3615,6 +4456,50 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HallOut": {
+        "properties": {
+          "calibrated_videos": {
+            "default": 0,
+            "description": "earlier videos of this hall with a court a person clicked or confirmed: the analysis carries their court over when the camera stood at the same place",
+            "title": "Calibrated Videos",
+            "type": "integer"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the match's hall (venue), or a suggestion",
+            "title": "Name"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "official",
+                  "match",
+                  "home_matches"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "official game data, the match as entered, or the team's usual home hall (a home game without a venue)",
+            "title": "Source"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "HallOut",
         "type": "object"
       },
       "Hand": {
@@ -4264,6 +5149,41 @@
         "title": "JobStatus",
         "type": "string"
       },
+      "JoinApproveIn": {
+        "properties": {
+          "new_entry": {
+            "default": false,
+            "title": "New Entry",
+            "type": "boolean"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "suggestion_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion Id"
+          }
+        },
+        "title": "JoinApproveIn",
+        "type": "object"
+      },
       "JoinIn": {
         "properties": {
           "token": {
@@ -4279,8 +5199,181 @@
         "title": "JoinIn",
         "type": "object"
       },
+      "JoinRequestIn": {
+        "properties": {
+          "first_name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "First Name",
+            "type": "string"
+          },
+          "jersey_number": {
+            "anyOf": [
+              {
+                "maximum": 99.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jersey Number"
+          },
+          "last_name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Last Name",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "role": {
+            "default": "player",
+            "enum": [
+              "player",
+              "goalkeeper"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name"
+        ],
+        "title": "JoinRequestIn",
+        "type": "object"
+      },
+      "JoinRequestOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "jersey_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jersey Number"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "suggested": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchCandidate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "user_id",
+          "email",
+          "first_name",
+          "last_name",
+          "jersey_number",
+          "role",
+          "message",
+          "status",
+          "created_at"
+        ],
+        "title": "JoinRequestOut",
+        "type": "object"
+      },
       "KickoffIn": {
         "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "maximum": 14400.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "match clock (s) shown at t_ms; default: the half's throw-off. A video that starts after the throw-off (a clip from mid-half) gets its clock this way.",
+            "title": "Clock S"
+          },
           "period": {
             "maximum": 4.0,
             "minimum": 1.0,
@@ -4288,6 +5381,7 @@
             "type": "integer"
           },
           "t_ms": {
+            "description": "a time in the video",
             "minimum": 0.0,
             "title": "T Ms",
             "type": "integer"
@@ -4740,6 +5834,51 @@
         "title": "MarksIn",
         "type": "object"
       },
+      "MatchCandidate": {
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "jersey_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jersey Number"
+          },
+          "kind": {
+            "enum": [
+              "player",
+              "suggestion"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "first_name",
+          "last_name",
+          "jersey_number"
+        ],
+        "title": "MatchCandidate",
+        "type": "object"
+      },
       "MatchCreate": {
         "properties": {
           "competition": {
@@ -4811,6 +5950,18 @@
             "default": "#f59e0b",
             "title": "Kit Own Gk",
             "type": "string"
+          },
+          "kit_referee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "referee shirt colour when known; left out of the analysis when it is close to a team's kit",
+            "title": "Kit Referee"
           },
           "opponent_id": {
             "anyOf": [
@@ -5029,6 +6180,18 @@
           "kit_own_gk": {
             "title": "Kit Own Gk",
             "type": "string"
+          },
+          "kit_referee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null: unknown",
+            "title": "Kit Referee"
           },
           "kit_warnings": {
             "description": "kit pairs with similar colours, e.g. own/opponent",
@@ -5418,6 +6581,18 @@
               }
             ],
             "title": "Kit Own Gk"
+          },
+          "kit_referee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null clears it (unknown)",
+            "title": "Kit Referee"
           },
           "period_s": {
             "anyOf": [
@@ -5906,6 +7081,89 @@
         "title": "MessageOut",
         "type": "object"
       },
+      "MyAccessRequestOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "organization_id": {
+            "format": "uuid",
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "organization_name": {
+            "title": "Organization Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "organization_name",
+          "status",
+          "created_at"
+        ],
+        "title": "MyAccessRequestOut",
+        "type": "object"
+      },
+      "MyJoinRequestOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "organization_id": {
+            "format": "uuid",
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "organization_name": {
+            "title": "Organization Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "team_name": {
+            "title": "Team Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "team_name",
+          "organization_id",
+          "organization_name",
+          "status",
+          "created_at"
+        ],
+        "title": "MyJoinRequestOut",
+        "type": "object"
+      },
       "MyProfile": {
         "properties": {
           "blocked": {
@@ -6111,6 +7369,897 @@
         "title": "NotificationsRead",
         "type": "object"
       },
+      "OfficialClubOut": {
+        "properties": {
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city"
+        ],
+        "title": "OfficialClubOut",
+        "type": "object"
+      },
+      "OfficialGoalRow": {
+        "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "estimated": {
+            "title": "Estimated",
+            "type": "boolean"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "official_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Time"
+          },
+          "penalty": {
+            "title": "Penalty",
+            "type": "boolean"
+          },
+          "period": {
+            "title": "Period",
+            "type": "integer"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "enum": [
+                  "confirmed",
+                  "dismissed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "side": {
+            "title": "Side",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "found",
+              "missing",
+              "outside"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          },
+          "video": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VideoReading"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "event_id",
+          "side",
+          "period",
+          "clock_s",
+          "official_time",
+          "t_ms",
+          "estimated",
+          "number",
+          "player_id",
+          "name",
+          "score",
+          "penalty",
+          "status",
+          "video",
+          "review"
+        ],
+        "title": "OfficialGoalRow",
+        "type": "object"
+      },
+      "OfficialLinkOut": {
+        "properties": {
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "league": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "League"
+          },
+          "linked": {
+            "title": "Linked",
+            "type": "boolean"
+          },
+          "official_club_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Club Id"
+          },
+          "official_group_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Group Id"
+          },
+          "official_season_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Season Id"
+          },
+          "official_team_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Team Id"
+          },
+          "open_suggestions": {
+            "default": 0,
+            "title": "Open Suggestions",
+            "type": "integer"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "roster_stats": {
+            "default": false,
+            "title": "Roster Stats",
+            "type": "boolean"
+          },
+          "standing": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Standing",
+            "type": "array"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Synced At"
+          }
+        },
+        "required": [
+          "linked"
+        ],
+        "title": "OfficialLinkOut",
+        "type": "object"
+      },
+      "OfficialPreferencesIn": {
+        "properties": {
+          "roster_stats": {
+            "title": "Roster Stats",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "roster_stats"
+        ],
+        "title": "OfficialPreferencesIn",
+        "type": "object"
+      },
+      "OfficialReportIn": {
+        "properties": {
+          "provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "handball_ch",
+                  "dhb",
+                  "hla"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "OfficialReportIn",
+        "type": "object"
+      },
+      "OfficialReportResult": {
+        "properties": {
+          "away": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away"
+          },
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "final": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final"
+          },
+          "game_id": {
+            "title": "Game Id",
+            "type": "integer"
+          },
+          "home": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home"
+          },
+          "kept_manual_goals": {
+            "title": "Kept Manual Goals",
+            "type": "integer"
+          },
+          "matched_video_goals": {
+            "title": "Matched Video Goals",
+            "type": "integer"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "replaced": {
+            "title": "Replaced",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "unmatched_video_goals": {
+            "title": "Unmatched Video Goals",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "provider",
+          "game_id",
+          "source_url",
+          "home",
+          "away",
+          "final",
+          "created",
+          "replaced",
+          "matched_video_goals",
+          "unmatched_video_goals",
+          "kept_manual_goals",
+          "skipped",
+          "warnings"
+        ],
+        "title": "OfficialReportResult",
+        "type": "object"
+      },
+      "OfficialShot": {
+        "description": "A shot of the official report and where it lies on the video.",
+        "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "official_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Time"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "penalty": {
+            "title": "Penalty",
+            "type": "boolean"
+          },
+          "period": {
+            "title": "Period",
+            "type": "integer"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "side": {
+            "title": "Side",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          },
+          "uncertainty_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncertainty Ms"
+          }
+        },
+        "required": [
+          "event_id",
+          "side",
+          "outcome",
+          "penalty",
+          "number",
+          "player_id",
+          "name",
+          "period",
+          "clock_s",
+          "official_time",
+          "t_ms",
+          "uncertainty_ms"
+        ],
+        "title": "OfficialShot",
+        "type": "object"
+      },
+      "OfficialShotCounts": {
+        "properties": {
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "integer"
+          },
+          "missing": {
+            "title": "Missing",
+            "type": "integer"
+          },
+          "outside": {
+            "title": "Outside",
+            "type": "integer"
+          },
+          "suggested": {
+            "title": "Suggested",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "confirmed",
+          "suggested",
+          "missing",
+          "outside"
+        ],
+        "title": "OfficialShotCounts",
+        "type": "object"
+      },
+      "OfficialShotRow": {
+        "properties": {
+          "candidate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Id"
+          },
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "official_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Time"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "penalty": {
+            "title": "Penalty",
+            "type": "boolean"
+          },
+          "period": {
+            "title": "Period",
+            "type": "integer"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "side": {
+            "title": "Side",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "suggested",
+              "missing",
+              "outside"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          },
+          "uncertainty_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncertainty Ms"
+          }
+        },
+        "required": [
+          "event_id",
+          "side",
+          "outcome",
+          "penalty",
+          "number",
+          "player_id",
+          "name",
+          "period",
+          "clock_s",
+          "official_time",
+          "t_ms",
+          "uncertainty_ms",
+          "status",
+          "candidate_id"
+        ],
+        "title": "OfficialShotRow",
+        "type": "object"
+      },
+      "OfficialShots": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/OfficialShotCounts"
+          },
+          "shots": {
+            "items": {
+              "$ref": "#/components/schemas/OfficialShotRow"
+            },
+            "title": "Shots",
+            "type": "array"
+          }
+        },
+        "required": [
+          "counts",
+          "shots"
+        ],
+        "title": "OfficialShots",
+        "type": "object"
+      },
+      "OfficialTeamHit": {
+        "properties": {
+          "club": {
+            "$ref": "#/components/schemas/OfficialClubOut"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "league": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "League"
+          },
+          "league_short": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "League Short"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "official_id": {
+            "title": "Official Id",
+            "type": "integer"
+          },
+          "organization_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Id"
+          },
+          "provider": {
+            "const": "handball_ch",
+            "default": "handball_ch",
+            "title": "Provider",
+            "type": "string"
+          },
+          "registered_club_id": {
+            "title": "Registered Club Id",
+            "type": "integer"
+          },
+          "season_id": {
+            "title": "Season Id",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "available",
+              "claimed",
+              "member"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          }
+        },
+        "required": [
+          "official_id",
+          "name",
+          "league",
+          "league_short",
+          "group_name",
+          "season_id",
+          "club",
+          "registered_club_id",
+          "status"
+        ],
+        "title": "OfficialTeamHit",
+        "type": "object"
+      },
       "OffsetIn": {
         "properties": {
           "offset_ms": {
@@ -6122,6 +8271,19 @@
           "offset_ms"
         ],
         "title": "OffsetIn",
+        "type": "object"
+      },
+      "OperatorVerifyIn": {
+        "properties": {
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verified"
+        ],
+        "title": "OperatorVerifyIn",
         "type": "object"
       },
       "OpponentCreate": {
@@ -6464,6 +8626,17 @@
             "title": "Name",
             "type": "string"
           },
+          "official_club_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Club Id"
+          },
           "plan": {
             "$ref": "#/components/schemas/Plan"
           },
@@ -6478,6 +8651,11 @@
           "two_factor_required": {
             "title": "Two Factor Required",
             "type": "boolean"
+          },
+          "verification": {
+            "default": "none",
+            "title": "Verification",
+            "type": "string"
           }
         },
         "required": [
@@ -7662,6 +9840,42 @@
         ],
         "title": "Position",
         "type": "string"
+      },
+      "PrefillOut": {
+        "properties": {
+          "matches_created": {
+            "default": 0,
+            "title": "Matches Created",
+            "type": "integer"
+          },
+          "matches_held_back": {
+            "default": 0,
+            "title": "Matches Held Back",
+            "type": "integer"
+          },
+          "other_suggestions": {
+            "default": 0,
+            "title": "Other Suggestions",
+            "type": "integer"
+          },
+          "report_suggestions": {
+            "default": 0,
+            "title": "Report Suggestions",
+            "type": "integer"
+          },
+          "results": {
+            "default": 0,
+            "title": "Results",
+            "type": "integer"
+          },
+          "roster_suggestions": {
+            "default": 0,
+            "title": "Roster Suggestions",
+            "type": "integer"
+          }
+        },
+        "title": "PrefillOut",
+        "type": "object"
       },
       "PresentationDetail": {
         "properties": {
@@ -9785,6 +11999,160 @@
         "title": "SubjectTeam",
         "type": "object"
       },
+      "SuggestionAcceptIn": {
+        "properties": {
+          "jersey_number": {
+            "anyOf": [
+              {
+                "maximum": 99.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jersey Number"
+          }
+        },
+        "title": "SuggestionAcceptIn",
+        "type": "object"
+      },
+      "SuggestionOut": {
+        "properties": {
+          "blocked": {
+            "anyOf": [
+              {
+                "const": "plan_limit",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "roster_add",
+              "roster_number",
+              "roster_left",
+              "match_new",
+              "match_moved",
+              "report",
+              "season_new"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "accepted",
+              "dismissed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "payload",
+          "created_at",
+          "resolved_at"
+        ],
+        "title": "SuggestionOut",
+        "type": "object"
+      },
+      "SuggestionResultOut": {
+        "properties": {
+          "match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "report": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Report"
+          },
+          "season_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season Id"
+          },
+          "suggestion": {
+            "$ref": "#/components/schemas/SuggestionOut"
+          }
+        },
+        "required": [
+          "suggestion"
+        ],
+        "title": "SuggestionResultOut",
+        "type": "object"
+      },
       "SupportConfig": {
         "properties": {
           "chat": {
@@ -10197,6 +12565,17 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "official_team_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Team Id"
           },
           "settings": {
             "$ref": "#/components/schemas/TeamSettings"
@@ -10957,6 +13336,228 @@
         "title": "ValidationError",
         "type": "object"
       },
+      "VerificationOut": {
+        "properties": {
+          "club_domains": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Club Domains",
+            "type": "array"
+          },
+          "methods": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Methods",
+            "type": "array"
+          },
+          "official_club_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Club Id"
+          },
+          "official_provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Provider"
+          },
+          "verification": {
+            "enum": [
+              "none",
+              "unverified",
+              "verified"
+            ],
+            "title": "Verification",
+            "type": "string"
+          },
+          "verified_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified At"
+          },
+          "verified_via": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Via"
+          }
+        },
+        "required": [
+          "verification",
+          "verified_via",
+          "verified_at",
+          "official_provider",
+          "official_club_id",
+          "club_domains",
+          "methods"
+        ],
+        "title": "VerificationOut",
+        "type": "object"
+      },
+      "VideoGoalRow": {
+        "description": "An automatic goal from the video with no official counterpart.",
+        "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "official_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Time"
+          },
+          "period": {
+            "title": "Period",
+            "type": "integer"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "enum": [
+                  "confirmed",
+                  "dismissed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "side": {
+            "title": "Side",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          }
+        },
+        "required": [
+          "event_id",
+          "side",
+          "period",
+          "clock_s",
+          "official_time",
+          "t_ms",
+          "source",
+          "confidence",
+          "number",
+          "player_id",
+          "name",
+          "score",
+          "review"
+        ],
+        "title": "VideoGoalRow",
+        "type": "object"
+      },
       "VideoOut": {
         "properties": {
           "codec": {
@@ -11109,6 +13710,69 @@
           "created_at"
         ],
         "title": "VideoOut",
+        "type": "object"
+      },
+      "VideoReading": {
+        "description": "What the video analysis read for an official goal.",
+        "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Ms"
+          }
+        },
+        "required": [
+          "source",
+          "t_ms",
+          "clock_s",
+          "confidence",
+          "event_id"
+        ],
+        "title": "VideoReading",
         "type": "object"
       },
       "VideoRole": {
@@ -11338,6 +14002,54 @@
               }
             ],
             "title": "Source"
+          }
+        },
+        "title": "SyncOut",
+        "type": "object"
+      },
+      "handball_api__schemas__official__SyncOut": {
+        "properties": {
+          "matches_created": {
+            "default": 0,
+            "title": "Matches Created",
+            "type": "integer"
+          },
+          "matches_held_back": {
+            "default": 0,
+            "title": "Matches Held Back",
+            "type": "integer"
+          },
+          "other_suggestions": {
+            "default": 0,
+            "title": "Other Suggestions",
+            "type": "integer"
+          },
+          "report_suggestions": {
+            "default": 0,
+            "title": "Report Suggestions",
+            "type": "integer"
+          },
+          "results": {
+            "default": 0,
+            "title": "Results",
+            "type": "integer"
+          },
+          "roster_suggestions": {
+            "default": 0,
+            "title": "Roster Suggestions",
+            "type": "integer"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Synced At"
           }
         },
         "title": "SyncOut",
@@ -12254,6 +14966,32 @@
         ]
       }
     },
+    "/v1/me/access-requests": {
+      "get": {
+        "operationId": "my_access_requests_v1_me_access_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MyAccessRequestOut"
+                  },
+                  "title": "Response My Access Requests V1 Me Access Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Access Requests",
+        "tags": [
+          "official",
+          "organizations"
+        ]
+      }
+    },
     "/v1/me/delete": {
       "post": {
         "description": "Delete the own account (password and e-mail confirmation).",
@@ -12394,6 +15132,69 @@
         "summary": "Export",
         "tags": [
           "privacy"
+        ]
+      }
+    },
+    "/v1/me/join-requests": {
+      "get": {
+        "operationId": "my_join_requests_v1_me_join_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MyJoinRequestOut"
+                  },
+                  "title": "Response My Join Requests V1 Me Join Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Join Requests",
+        "tags": [
+          "official",
+          "join-requests"
+        ]
+      }
+    },
+    "/v1/me/join-requests/{request_id}": {
+      "delete": {
+        "operationId": "withdraw_join_request_v1_me_join_requests__request_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Withdraw Join Request",
+        "tags": [
+          "official",
+          "join-requests"
         ]
       }
     },
@@ -12708,6 +15509,128 @@
         "summary": "Signed Media",
         "tags": [
           "videos"
+        ]
+      }
+    },
+    "/v1/official/teams": {
+      "get": {
+        "description": "Registered teams of the current season of clubs matching the name or town.",
+        "operationId": "search_teams_v1_official_teams_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 80,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OfficialTeamHit"
+                  },
+                  "title": "Response Search Teams V1 Official Teams Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search Teams",
+        "tags": [
+          "official"
+        ]
+      }
+    },
+    "/v1/official/teams/{official_id}/claim": {
+      "post": {
+        "description": "Take over a registered team: 201 claimed (club and team created or linked, prefilled),\n202 access requested (the club or team is already in the app), 200 already a member.",
+        "operationId": "claim_team_v1_official_teams__official_id__claim_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "official_id",
+            "required": true,
+            "schema": {
+              "title": "Official Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimOut"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimOut"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Claim Team",
+        "tags": [
+          "official"
         ]
       }
     },
@@ -13215,6 +16138,60 @@
         ]
       }
     },
+    "/v1/ops/organizations/{org_id}/verification": {
+      "post": {
+        "operationId": "operator_verification_v1_ops_organizations__org_id__verification_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperatorVerifyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Operator Verification",
+        "tags": [
+          "official",
+          "ops"
+        ]
+      }
+    },
     "/v1/ops/overview": {
       "get": {
         "operationId": "overview_v1_ops_overview_get",
@@ -13460,6 +16437,179 @@
         },
         "summary": "Update Org",
         "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/access-requests": {
+      "get": {
+        "operationId": "list_access_requests_v1_orgs__org_id__access_requests_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AccessRequestOut"
+                  },
+                  "title": "Response List Access Requests V1 Orgs  Org Id  Access Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Access Requests",
+        "tags": [
+          "official",
+          "organizations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/access-requests/{request_id}/approve": {
+      "post": {
+        "operationId": "approve_access_request_v1_orgs__org_id__access_requests__request_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/AccessApproveIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Access Request",
+        "tags": [
+          "official",
+          "organizations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/access-requests/{request_id}/decline": {
+      "post": {
+        "operationId": "decline_access_request_v1_orgs__org_id__access_requests__request_id__decline_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decline Access Request",
+        "tags": [
+          "official",
           "organizations"
         ]
       }
@@ -16565,6 +19715,148 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates": {
+      "get": {
+        "description": "Moments of the video that are probably goals (kind=shot: shots of any outcome; video\nanalysis, a fixed number per minute), with the coach's reviews, the shots already stored that\ncover them and, for shots, the official report's suggestion.",
+        "operationId": "list_goal_candidates_v1_orgs__org_id__matches__match_id__goal_candidates_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "default": "goal",
+              "enum": [
+                "goal",
+                "shot"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalCandidateList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Goal Candidates",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review": {
+      "put": {
+        "description": "Confirm a candidate (a shot of the given side and outcome; a report entry is pinned to\nthe video instead of a second event), reject it (kept as a hard negative for training) or\nundo the review (null).",
+        "operationId": "review_goal_candidate_v1_orgs__org_id__matches__match_id__goal_candidates__candidate_id__review_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Candidate Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCandidateReviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalCandidateRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Goal Candidate",
+        "tags": [
+          "events"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
       "get": {
         "description": "Team reels and player reels the caller may see (created after every analysis).",
@@ -17039,6 +20331,181 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
+      "post": {
+        "description": "Official match report (handball.ch match centre, DHB press report, nuLiga game report of the\nGerman associations on nuLiga and Austria, HLA report) as events: goals with scorer and shirt\nnumber, 7-metres, suspensions, time-outs. A re-import replaces the previous\none; automatic goals from the video within 20 s are merged with the official goal.",
+        "operationId": "import_official_report_v1_orgs__org_id__matches__match_id__official_report_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficialReportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialReportResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Official Report",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/comparison": {
+      "get": {
+        "description": "Official goals next to the goals the video analysis found (same side, at most 20 s of\nmatch clock apart), and video goals without an official one, with the coach's checks.",
+        "operationId": "official_goal_comparison_v1_orgs__org_id__matches__match_id__official_report_comparison_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalComparison"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Official Goal Comparison",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/official-report/review": {
+      "put": {
+        "description": "Confirm or dismiss a row of the comparison (null undoes it).",
+        "operationId": "review_official_goal_v1_orgs__org_id__matches__match_id__official_report_review_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalReviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Official Goal",
+        "tags": [
+          "events"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/parts": {
       "get": {
         "description": "Main-camera files in order (camera clock), with the gap before each file.",
@@ -17213,6 +20680,63 @@
           }
         },
         "summary": "Match Physical",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/possessions": {
+      "get": {
+        "description": "Possession phases (estimated from video tracking or imported) with a summary per side.",
+        "operationId": "match_possessions_v1_orgs__org_id__matches__match_id__possessions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Match Possessions V1 Orgs  Org Id  Matches  Match Id  Possessions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Match Possessions",
         "tags": [
           "matches",
           "analysis"
@@ -17449,8 +20973,63 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/shot-candidates": {
+      "get": {
+        "description": "The shot candidates (goal-candidates?kind=shot) with the official report's shots on the\nvideo.",
+        "operationId": "list_shot_candidates_v1_orgs__org_id__matches__match_id__shot_candidates_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalCandidateList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Shot Candidates",
+        "tags": [
+          "events"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/stats": {
       "get": {
+        "description": "Match statistics (packages/metrics). Each goal counts once: with an imported official report,\na tagged or video goal of the same side within 20 s of an official goal is that goal.\n`own`/`opponent`: `xg` covers only shots on target with a known position (and penalties),\n`xg_shots` counts them and `xg_coverage` = xg_shots / shots (null without shots); players have\n`xg_shots`, goalkeepers `xg_shots` and `xg_coverage`. Shot zones include `empty_goal`\n(shots on the empty goal, from any distance) apart from `long_range` (over 15 m).",
         "operationId": "match_stats_v1_orgs__org_id__matches__match_id__stats_get",
         "parameters": [
           {
@@ -18794,7 +22373,7 @@
     },
     "/v1/orgs/{org_id}/opponents/{opponent_id}/profile": {
       "get": {
-        "description": "Scouting profile from all tagged matches against this opponent.",
+        "description": "Scouting profile from all tagged matches against this opponent. `matches` rows carry\n`is_home` (our home game); `totals` carry `xg_shots` and `xg_coverage` like the season stats.",
         "operationId": "opponent_profile_v1_orgs__org_id__opponents__opponent_id__profile_get",
         "parameters": [
           {
@@ -22102,6 +25681,209 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/join-requests": {
+      "get": {
+        "operationId": "list_join_requests_v1_orgs__org_id__teams__team_id__join_requests_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/JoinRequestOut"
+                  },
+                  "title": "Response List Join Requests V1 Orgs  Org Id  Teams  Team Id  Join Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Join Requests",
+        "tags": [
+          "official",
+          "join-requests"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/join-requests/{request_id}/approve": {
+      "post": {
+        "operationId": "approve_join_request_v1_orgs__org_id__teams__team_id__join_requests__request_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/JoinApproveIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Join Request",
+        "tags": [
+          "official",
+          "join-requests"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/join-requests/{request_id}/decline": {
+      "post": {
+        "operationId": "decline_join_request_v1_orgs__org_id__teams__team_id__join_requests__request_id__decline_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decline Join Request",
+        "tags": [
+          "official",
+          "join-requests"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/mark-keys": {
       "get": {
         "description": "The team's 4 to 8 buttons; goal_own and goal_opp make the automatic sync possible.",
@@ -22800,6 +26582,411 @@
         "tags": [
           "teams",
           "members"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/official": {
+      "get": {
+        "description": "Link to the official data, the standing of the group and the open suggestions.",
+        "operationId": "team_official_v1_orgs__org_id__teams__team_id__official_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialLinkOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Team Official",
+        "tags": [
+          "official"
+        ]
+      },
+      "patch": {
+        "description": "Organisers: show the official statistics in roster suggestions or not (roster_stats).",
+        "operationId": "team_official_preferences_v1_orgs__org_id__teams__team_id__official_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficialPreferencesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialLinkOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Team Official Preferences",
+        "tags": [
+          "official"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/official/suggestions": {
+      "get": {
+        "operationId": "list_suggestions_v1_orgs__org_id__teams__team_id__official_suggestions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(open|accepted|dismissed)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "open",
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 20,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SuggestionOut"
+                  },
+                  "title": "Response List Suggestions V1 Orgs  Org Id  Teams  Team Id  Official Suggestions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Suggestions",
+        "tags": [
+          "official"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/official/suggestions/{suggestion_id}/accept": {
+      "post": {
+        "operationId": "accept_suggestion_v1_orgs__org_id__teams__team_id__official_suggestions__suggestion_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SuggestionAcceptIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestionResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Accept Suggestion",
+        "tags": [
+          "official"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/official/suggestions/{suggestion_id}/dismiss": {
+      "post": {
+        "operationId": "dismiss_suggestion_v1_orgs__org_id__teams__team_id__official_suggestions__suggestion_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss Suggestion",
+        "tags": [
+          "official"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/official/sync": {
+      "post": {
+        "description": "Sync now (otherwise daily): changes come in as suggestions.",
+        "operationId": "sync_team_v1_orgs__org_id__teams__team_id__official_sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/handball_api__schemas__official__SyncOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sync Team",
+        "tags": [
+          "official"
         ]
       }
     },
@@ -24251,7 +28438,7 @@
     },
     "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats": {
       "get": {
-        "description": "Per-match key numbers, totals and player totals for a season.",
+        "description": "Per-match key numbers, totals and player totals for a season. Every played match counts (a\nresult stored or events): rows have `tagged`, `goals`/`goals_against` from the events (from the\nresult when untagged) and `xg_coverage`; totals have `matches`, `tagged_matches`, `xg`,\n`xg_shots` and `xg_coverage` = shots with xG / shots on target (null without shots), and\nshooting/save percentages only from matches with recorded misses or saves.",
         "operationId": "season_stats_v1_orgs__org_id__teams__team_id__seasons__season_id__stats_get",
         "parameters": [
           {
@@ -24773,6 +28960,96 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/verification": {
+      "get": {
+        "description": "State of the club's verification; the automatic ways (mail domain, federation licence)\nare checked on every call.",
+        "operationId": "verification_v1_orgs__org_id__verification_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verification",
+        "tags": [
+          "official",
+          "organizations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/verification/confirm": {
+      "post": {
+        "description": "A second person with a club role (club admin or coach) confirms the club.",
+        "operationId": "confirm_verification_v1_orgs__org_id__verification_confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Verification",
+        "tags": [
+          "official",
+          "organizations"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/videos/{video_id}": {
       "delete": {
         "operationId": "delete_video_v1_orgs__org_id__videos__video_id__delete",
@@ -24998,6 +29275,65 @@
           }
         },
         "summary": "Calibrate",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm": {
+      "post": {
+        "description": "The automatic court fits: keep it as confirmed (no re-run).",
+        "operationId": "confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Confirm Calibration V1 Orgs  Org Id  Videos  Video Id  Calibration Confirm Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Calibration",
         "tags": [
           "matches",
           "analysis"
@@ -25801,6 +30137,60 @@
         "summary": "Config",
         "tags": [
           "support"
+        ]
+      }
+    },
+    "/v1/teams/{team_id}/join-requests": {
+      "post": {
+        "operationId": "request_join_v1_teams__team_id__join_requests_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinRequestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyJoinRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request Join",
+        "tags": [
+          "official",
+          "join-requests"
         ]
       }
     }

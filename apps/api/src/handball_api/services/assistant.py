@@ -70,6 +70,7 @@ ZONES = [
     "penalty",
     "fast_break",
     "long_range",
+    "empty_goal",
 ]
 FORMATIONS = ["6-0", "5-1", "4-2", "3-2-1", "3-3", "open"]
 LANG = {

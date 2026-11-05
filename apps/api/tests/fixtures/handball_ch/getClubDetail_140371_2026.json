@@ -1,0 +1,283 @@
+{
+ "operation": "getClubDetail",
+ "variables": {
+  "clubId": 140371,
+  "seasonId": 2026
+ },
+ "response": {
+  "data": {
+   "clubDetail": [
+    {
+     "clubId": 140371,
+     "name": "TV Thalwil",
+     "city": "Thalwil",
+     "canton": "ZH",
+     "website": "https://www.tvt-handball.ch/",
+     "email": "",
+     "teams": [
+      {
+       "teamId": 40742,
+       "clubId": 140371,
+       "currentGroupId": 17627,
+       "currentGroupName": "Hauptrunde - M2-02",
+       "seasonId": 2026,
+       "name": "TV Thalwil",
+       "shortName": "THA",
+       "leagueId": 1140,
+       "leagueName": "Männer 2. Liga",
+       "leagueShortName": "M2",
+       "sortOrder": 1
+      },
+      {
+       "teamId": 41042,
+       "clubId": 140371,
+       "currentGroupId": 17514,
+       "currentGroupName": "Hauptrunde - M4-04",
+       "seasonId": 2026,
+       "name": "TV Thalwil 2",
+       "shortName": "THA",
+       "leagueId": 1160,
+       "leagueName": "Männer 4. Liga",
+       "leagueShortName": "M4",
+       "sortOrder": 2
+      },
+      {
+       "teamId": 41039,
+       "clubId": 140371,
+       "currentGroupId": 17549,
+       "currentGroupName": "Hauptrunde - F2-02",
+       "seasonId": 2026,
+       "name": "SG Zürisee",
+       "shortName": "THA",
+       "leagueId": 2140,
+       "leagueName": "Frauen 2. Liga",
+       "leagueShortName": "F2",
+       "sortOrder": 3
+      },
+      {
+       "teamId": 41357,
+       "clubId": 140577,
+       "currentGroupId": 17814,
+       "currentGroupName": "Hauptrunde - F3-03",
+       "seasonId": 2026,
+       "name": "SG Zürisee",
+       "shortName": "WAD",
+       "leagueId": 2152,
+       "leagueName": "Frauen 3. Liga",
+       "leagueShortName": "F3",
+       "sortOrder": 4
+      },
+      {
+       "teamId": 41161,
+       "clubId": 140577,
+       "currentGroupId": 17537,
+       "currentGroupName": "Qualifikationsrunde - MU19I-01",
+       "seasonId": 2026,
+       "name": "SG THW Handball",
+       "shortName": "WAD",
+       "leagueId": 3232,
+       "leagueName": "Junioren U19 Inter",
+       "leagueShortName": "MU19I",
+       "sortOrder": 5
+      },
+      {
+       "teamId": 41162,
+       "clubId": 140771,
+       "currentGroupId": 17534,
+       "currentGroupName": "Hauptrunde - MU17E-01",
+       "seasonId": 2026,
+       "name": "SG Horgen/Wädenswil",
+       "shortName": "HCH",
+       "leagueId": 3320,
+       "leagueName": "Junioren U17 Elite",
+       "leagueShortName": "MU17E",
+       "sortOrder": 6
+      },
+      {
+       "teamId": 41064,
+       "clubId": 140371,
+       "currentGroupId": 17870,
+       "currentGroupName": "Qualifikationsrunde - MU17P-03",
+       "seasonId": 2026,
+       "name": "SG THW Handball",
+       "shortName": "THA",
+       "leagueId": 3360,
+       "leagueName": "Junioren U17 Promotion",
+       "leagueShortName": "MU17P",
+       "sortOrder": 7
+      },
+      {
+       "teamId": 41163,
+       "clubId": 140577,
+       "currentGroupId": 17535,
+       "currentGroupName": "Hauptrunde - MU15E-01",
+       "seasonId": 2026,
+       "name": "SG Wädenswil/Horgen",
+       "shortName": "WAD",
+       "leagueId": 3420,
+       "leagueName": "Junioren U15 Elite",
+       "leagueShortName": "MU15E",
+       "sortOrder": 8
+      },
+      {
+       "teamId": 41160,
+       "clubId": 140577,
+       "currentGroupId": 17771,
+       "currentGroupName": "Qualifikationsrunde - MU15P S1-04",
+       "seasonId": 2026,
+       "name": "SG THW Handball",
+       "shortName": "WAD",
+       "leagueId": 3465,
+       "leagueName": "Junioren U15 Promotion S1",
+       "leagueShortName": "MU15P S1",
+       "sortOrder": 9
+      },
+      {
+       "teamId": 41483,
+       "clubId": 140371,
+       "currentGroupId": 17719,
+       "currentGroupName": "Qualifikationsrunde - MU15P S2-03",
+       "seasonId": 2026,
+       "name": "SG TV Thalwil °",
+       "shortName": "THA",
+       "leagueId": 3466,
+       "leagueName": "Junioren U15 Promotion S2",
+       "leagueShortName": "MU15P S2",
+       "sortOrder": 10
+      },
+      {
+       "teamId": 41164,
+       "clubId": 140771,
+       "currentGroupId": 17536,
+       "currentGroupName": "Hauptrunde - MU13E-01",
+       "seasonId": 2026,
+       "name": "SG Horgen/Wädenswil",
+       "shortName": "HCH",
+       "leagueId": 3620,
+       "leagueName": "Junioren U13 Elite",
+       "leagueShortName": "MU13E",
+       "sortOrder": 11
+      },
+      {
+       "teamId": 41804,
+       "clubId": 140577,
+       "currentGroupId": 17545,
+       "currentGroupName": "Qualifikationsrunde - MU13I-01",
+       "seasonId": 2026,
+       "name": "SG THW Handball",
+       "shortName": "WAD",
+       "leagueId": 3632,
+       "leagueName": "Junioren U13 Inter",
+       "leagueShortName": "MU13I",
+       "sortOrder": 12
+      },
+      {
+       "teamId": 41302,
+       "clubId": 140371,
+       "currentGroupId": 17748,
+       "currentGroupName": "Qualifikationsrunde - MU13P S2-07",
+       "seasonId": 2026,
+       "name": "TV Thalwil",
+       "shortName": "THA",
+       "leagueId": 3662,
+       "leagueName": "Junioren U13 Promotion S2",
+       "leagueShortName": "MU13P S2",
+       "sortOrder": 13
+      },
+      {
+       "teamId": 41339,
+       "clubId": 140771,
+       "currentGroupId": 17570,
+       "currentGroupName": "Qualifikationsrunde - FU18I-01",
+       "seasonId": 2026,
+       "name": "SG Zürisee",
+       "shortName": "HCH",
+       "leagueId": 4277,
+       "leagueName": "Juniorinnen U18 Inter",
+       "leagueShortName": "FU18I",
+       "sortOrder": 14
+      },
+      {
+       "teamId": 41493,
+       "clubId": 140371,
+       "currentGroupId": 17575,
+       "currentGroupName": "Qualifikationsrunde - FU16I-02",
+       "seasonId": 2026,
+       "name": "SG Zürisee",
+       "shortName": "THA",
+       "leagueId": 4379,
+       "leagueName": "Juniorinnen U16 Inter",
+       "leagueShortName": "FU16I",
+       "sortOrder": 15
+      },
+      {
+       "teamId": 41489,
+       "clubId": 340676,
+       "currentGroupId": 17834,
+       "currentGroupName": "Qualifikationsrunde - FU16P-04",
+       "seasonId": 2026,
+       "name": "SG Lachen Zürisee °",
+       "shortName": "HCL",
+       "leagueId": 4385,
+       "leagueName": "Juniorinnen U16 Promotion",
+       "leagueShortName": "FU16P",
+       "sortOrder": 16
+      },
+      {
+       "teamId": 41040,
+       "clubId": 140371,
+       "currentGroupId": 17837,
+       "currentGroupName": "Qualifikationsrunde - FU14I-01",
+       "seasonId": 2026,
+       "name": "SG Zürisee ",
+       "shortName": "THA",
+       "leagueId": 4532,
+       "leagueName": "Juniorinnen U14 Inter",
+       "leagueShortName": "FU14I",
+       "sortOrder": 17
+      },
+      {
+       "teamId": 41338,
+       "clubId": 140577,
+       "currentGroupId": 17842,
+       "currentGroupName": "Qualifikationsrunde - FU14P-03",
+       "seasonId": 2026,
+       "name": "SG Zürisee",
+       "shortName": "WAD",
+       "leagueId": 4545,
+       "leagueName": "Juniorinnen U14 Promotion",
+       "leagueShortName": "FU14P",
+       "sortOrder": 18
+      },
+      {
+       "teamId": 41282,
+       "clubId": 140577,
+       "currentGroupId": 17938,
+       "currentGroupName": "Runde 4 - U13T-04",
+       "seasonId": 2026,
+       "name": "SG Zürisee F",
+       "shortName": "WAD",
+       "leagueId": 4690,
+       "leagueName": "Mixed U13-Spieltage",
+       "leagueShortName": "U13T",
+       "sortOrder": 19
+      },
+      {
+       "teamId": 41070,
+       "clubId": 140371,
+       "currentGroupId": 17938,
+       "currentGroupName": "Runde 4 - U13T-04",
+       "seasonId": 2026,
+       "name": "TV Thalwil",
+       "shortName": "THA",
+       "leagueId": 4690,
+       "leagueName": "Mixed U13-Spieltage",
+       "leagueShortName": "U13T",
+       "sortOrder": 20
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

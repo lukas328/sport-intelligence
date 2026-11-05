@@ -59,8 +59,8 @@ from handball_api.schemas.matches import (
     VideoUpdate,
 )
 from handball_api.services import auth as auth_service
+from handball_api.services import events, media, videos
 from handball_api.services import matches as service
-from handball_api.services import media, videos
 from handball_api.services import orgs as org_service
 from handball_api.services.context import Ctx
 
@@ -242,6 +242,12 @@ async def set_track_identity(
     )
 
 
+@router.get("/matches/{match_id}/possessions", response_model=dict[str, Any], tags=["analysis"])
+async def match_possessions(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
+    """Possession phases (estimated from video tracking or imported) with a summary per side."""
+    return await events.match_possessions(scope.ctx, match_id)
+
+
 @router.get("/matches/{match_id}/physical", response_model=dict[str, Any], tags=["analysis"])
 async def match_physical(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
     """Distance, speed bands, sprints and heatmap per player (estimated from video tracking)."""
@@ -250,9 +256,19 @@ async def match_physical(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object
 
 @router.post("/videos/{video_id}/calibration", status_code=202, tags=["analysis"])
 async def calibrate(video_id: uuid.UUID, data: CalibrationIn, scope: OrgDep) -> dict[str, str]:
-    points = [{"image": list(p.image), "court": list(p.court)} for p in data.points]
+    points = [
+        {"image": list(p.image), "court": list(p.court), "height_m": p.height_m}
+        for p in data.points
+    ]
     job = await videos.calibrate_manually(scope.ctx, video_id, points, data.space, data.frame_ms)
     return {"job_id": str(job.id)}
+
+
+@router.post("/videos/{video_id}/calibration/confirm", tags=["analysis"])
+async def confirm_calibration(video_id: uuid.UUID, scope: OrgDep) -> dict[str, str]:
+    """The automatic court fits: keep it as confirmed (no re-run)."""
+    cal = await videos.confirm_calibration(scope.ctx, video_id)
+    return {"calibration_id": str(cal.id), "source": cal.source}
 
 
 @router.get(

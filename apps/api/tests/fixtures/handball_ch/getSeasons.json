@@ -1,0 +1,192 @@
+{
+ "operation": "getSeasons",
+ "variables": {},
+ "response": {
+  "data": {
+   "season": [
+    {
+     "objectId": 2001,
+     "name": "2001/02",
+     "dateFrom": "2001-07-01T00:00:00",
+     "dateTo": "2002-06-30T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2002,
+     "name": "2002/03",
+     "dateFrom": "2002-07-01T00:00:00",
+     "dateTo": "2003-06-30T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2003,
+     "name": "2003/04",
+     "dateFrom": "2003-07-01T00:00:00",
+     "dateTo": "2004-06-30T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2004,
+     "name": "2004/05",
+     "dateFrom": "2004-07-01T00:00:00",
+     "dateTo": "2005-06-30T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2005,
+     "name": "2005/06",
+     "dateFrom": "2005-07-01T00:00:00",
+     "dateTo": "2006-06-30T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2006,
+     "name": "2006/07",
+     "dateFrom": "2006-07-01T00:00:00",
+     "dateTo": "2007-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2007,
+     "name": "2007/08",
+     "dateFrom": "2007-06-01T00:00:00",
+     "dateTo": "2008-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2008,
+     "name": "2008/09",
+     "dateFrom": "2008-06-01T00:00:00",
+     "dateTo": "2009-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2009,
+     "name": "2009/10",
+     "dateFrom": "2009-01-06T00:00:00",
+     "dateTo": "2010-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2010,
+     "name": "2010/11",
+     "dateFrom": "2010-06-01T00:00:00",
+     "dateTo": "2011-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2011,
+     "name": "2011/12",
+     "dateFrom": "2011-06-01T00:00:00",
+     "dateTo": "2012-06-01T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2012,
+     "name": "2012/13",
+     "dateFrom": "2012-06-01T00:00:00",
+     "dateTo": "2013-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2013,
+     "name": "2013/14",
+     "dateFrom": "2013-06-01T00:00:00",
+     "dateTo": "2014-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2014,
+     "name": "2014/15",
+     "dateFrom": "2014-06-01T00:00:00",
+     "dateTo": "2015-05-31T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2015,
+     "name": "2015/16",
+     "dateFrom": "2015-06-01T00:00:00",
+     "dateTo": "2016-05-31T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2016,
+     "name": "2016/17",
+     "dateFrom": "2016-06-01T00:00:00",
+     "dateTo": "2017-05-31T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2017,
+     "name": "2017/18",
+     "dateFrom": "2017-06-01T00:00:00",
+     "dateTo": "2018-05-31T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2018,
+     "name": "2018/19",
+     "dateFrom": "2018-06-01T00:00:00",
+     "dateTo": "2019-05-31T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2019,
+     "name": "2019/20",
+     "dateFrom": "2019-06-01T00:00:00",
+     "dateTo": "2020-05-31T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2020,
+     "name": "2020/21",
+     "dateFrom": "2020-06-01T00:00:00",
+     "dateTo": "2021-06-18T16:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2021,
+     "name": "2021/22",
+     "dateFrom": "2021-06-18T17:00:00",
+     "dateTo": "2022-06-08T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2022,
+     "name": "2022/23",
+     "dateFrom": "2022-06-08T00:00:00",
+     "dateTo": "2023-06-11T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2023,
+     "name": "2023/24",
+     "dateFrom": "2023-06-12T00:00:00",
+     "dateTo": "2024-06-10T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2024,
+     "name": "2024/25",
+     "dateFrom": "2024-06-11T00:00:00",
+     "dateTo": "2025-06-15T23:59:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2025,
+     "name": "2025/26",
+     "dateFrom": "2025-06-16T00:00:00",
+     "dateTo": "2026-06-15T00:00:00",
+     "isActual": false
+    },
+    {
+     "objectId": 2026,
+     "name": "2026/27",
+     "dateFrom": "2026-06-15T00:00:00",
+     "dateTo": "2027-06-15T00:00:00",
+     "isActual": true
+    }
+   ]
+  }
+ }
+}

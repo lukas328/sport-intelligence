@@ -25,6 +25,7 @@ class Action(StrEnum):
     TEAM_DELETE = "team.delete"
     INVITE_ORG = "invite.org"
     AUDIT_READ = "audit.read"
+    ORG_ACCESS_MANAGE = "org.access.manage"
     # team level
     TEAM_READ = "team.read"
     TEAM_UPDATE = "team.update"
@@ -51,6 +52,8 @@ class Action(StrEnum):
     ASSIGNMENT_WRITE = "assignment.write"
     ASSISTANT_USE = "assistant.use"
     TRAINING_WRITE = "training.write"
+    OFFICIAL_MANAGE = "official.manage"
+    JOIN_REQUESTS_MANAGE = "join_requests.manage"
 
 
 ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
@@ -61,6 +64,8 @@ ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
     Action.TEAM_DELETE: frozenset({OrgRole.ORG_ADMIN}),
     Action.INVITE_ORG: frozenset({OrgRole.ORG_ADMIN}),
     Action.AUDIT_READ: frozenset({OrgRole.ORG_ADMIN}),
+    # access requests to a club claimed from the official data
+    Action.ORG_ACCESS_MANAGE: frozenset({OrgRole.ORG_ADMIN}),
 }
 
 _STAFF = frozenset({TeamRole.COACH, TeamRole.ANALYST})
@@ -101,6 +106,10 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.ASSISTANT_USE: _VIDEO_WORK,
     # sessions, attendance and the calendar feed (5.7); athletic coaches plan sessions too
     Action.TRAINING_WRITE: _VIDEO_WORK | _MANAGER,
+    # official data: sync and suggestions (roster suggestions carry names from the official
+    # data, visible only to whoever organises the team); join requests like invitations
+    Action.OFFICIAL_MANAGE: _ORGANISE,
+    Action.JOIN_REQUESTS_MANAGE: _ORGANISE,
 }
 
 # Actions that change rights, billing or the organisation.

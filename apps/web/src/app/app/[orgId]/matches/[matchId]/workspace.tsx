@@ -118,7 +118,7 @@ export function Workspace({
         .data ?? null,
   });
   const kitColours = useMemo(
-    () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: "#111827" }),
+    () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: match.kit_referee ?? "#111827" }),
     [match],
   );
   const getTime = useCallback(() => player.current.time() ?? 0, []);
@@ -623,6 +623,11 @@ function AnalysisPanel({
             ? t("autoNoGoalkeepers")
             : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
           {t("autoLimits")}
+          {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
+            <span className="block" data-testid="overlay-goals">
+              {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}
+            </span>
+          )}
         </p>
       )}
       {analysis.status === "ready" && analysis.needs_calibration && (

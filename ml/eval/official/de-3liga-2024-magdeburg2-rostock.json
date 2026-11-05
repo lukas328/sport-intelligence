@@ -1,0 +1,603 @@
+{
+ "source": "https://dhbdata.fmp.sportradar.com/match/76839/pressReport.pdf",
+ "match_id": 76839,
+ "competition": "3. Liga Männer",
+ "home": "SC Magdeburg II",
+ "away": "HC Empor Rostock",
+ "date": "04.02.2024",
+ "final": [
+  26,
+  26
+ ],
+ "half_time": [
+  13,
+  13
+ ],
+ "log": [
+  {
+   "timeInt": 87,
+   "timeString": "01:27",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 4,
+   "name": "Robin Pfeil",
+   "result": "1:0"
+  },
+  {
+   "timeInt": 99,
+   "timeString": "01:39",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 13,
+   "name": "Martin Kaergaard Pedersen",
+   "result": "1:1"
+  },
+  {
+   "timeInt": 149,
+   "timeString": "02:29",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Alexander Möller",
+   "result": "2:1"
+  },
+  {
+   "timeInt": 224,
+   "timeString": "03:44",
+   "actionText": "7m Fehlwurf",
+   "team": "home",
+   "number": 4,
+   "name": "Robin Pfeil",
+   "result": null
+  },
+  {
+   "timeInt": 271,
+   "timeString": "04:31",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 13,
+   "name": "Martin Kaergaard Pedersen",
+   "result": "2:2"
+  },
+  {
+   "timeInt": 281,
+   "timeString": "04:41",
+   "actionText": "Verwarnung",
+   "team": "away",
+   "number": 13,
+   "name": "Martin Kaergaard Pedersen",
+   "result": null
+  },
+  {
+   "timeInt": 306,
+   "timeString": "05:06",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 32,
+   "name": "Julius Drachau",
+   "result": "3:2"
+  },
+  {
+   "timeInt": 322,
+   "timeString": "05:22",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 26,
+   "name": "Alexander Schütze",
+   "result": null
+  },
+  {
+   "timeInt": 345,
+   "timeString": "05:45",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 32,
+   "name": "Julius Drachau",
+   "result": "4:2"
+  },
+  {
+   "timeInt": 457,
+   "timeString": "07:37",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 60,
+   "name": "Marc Pechstein",
+   "result": "4:3"
+  },
+  {
+   "timeInt": 484,
+   "timeString": "08:04",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 4,
+   "name": "Robin Pfeil",
+   "result": "5:3"
+  },
+  {
+   "timeInt": 562,
+   "timeString": "09:22",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 2,
+   "name": "Matheus Costa Dias",
+   "result": "5:4"
+  },
+  {
+   "timeInt": 597,
+   "timeString": "09:57",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 2,
+   "name": "Matheus Costa Dias",
+   "result": "5:5"
+  },
+  {
+   "timeInt": 613,
+   "timeString": "10:13",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 32,
+   "name": "Julius Drachau",
+   "result": "6:5"
+  },
+  {
+   "timeInt": 642,
+   "timeString": "10:42",
+   "actionText": "Verwarnung",
+   "team": "home",
+   "number": 33,
+   "name": "Georg Löwen",
+   "result": null
+  },
+  {
+   "timeInt": 675,
+   "timeString": "11:15",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Alexander Möller",
+   "result": "7:5"
+  },
+  {
+   "timeInt": 711,
+   "timeString": "11:51",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 26,
+   "name": "Alexander Schütze",
+   "result": "7:6"
+  },
+  {
+   "timeInt": 786,
+   "timeString": "13:06",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 13,
+   "name": "Martin Kaergaard Pedersen",
+   "result": "7:7"
+  },
+  {
+   "timeInt": 901,
+   "timeString": "15:01",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 15,
+   "name": "Leon Kirschberger",
+   "result": "8:7"
+  },
+  {
+   "timeInt": 916,
+   "timeString": "15:16",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 60,
+   "name": "Marc Pechstein",
+   "result": "8:8"
+  },
+  {
+   "timeInt": 949,
+   "timeString": "15:49",
+   "actionText": "Team Time-Out",
+   "team": "away",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 1065,
+   "timeString": "17:45",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 14,
+   "name": "Leon Hein",
+   "result": "9:8"
+  },
+  {
+   "timeInt": 1101,
+   "timeString": "18:21",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 60,
+   "name": "Marc Pechstein",
+   "result": "9:9"
+  },
+  {
+   "timeInt": 1111,
+   "timeString": "18:31",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 2,
+   "name": "Luca Krist",
+   "result": "10:9"
+  },
+  {
+   "timeInt": 1173,
+   "timeString": "19:33",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 9,
+   "name": "David Mamporia",
+   "result": "10:10"
+  },
+  {
+   "timeInt": 1218,
+   "timeString": "20:18",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 13,
+   "name": "Martin Kaergaard Pedersen",
+   "result": "10:11"
+  },
+  {
+   "timeInt": 1361,
+   "timeString": "22:41",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 15,
+   "name": "Leon Kirschberger",
+   "result": "11:11"
+  },
+  {
+   "timeInt": 1368,
+   "timeString": "22:48",
+   "actionText": "Team Time-Out",
+   "team": "home",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 1509,
+   "timeString": "25:09",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 23,
+   "name": "Jesper Schmidt",
+   "result": "11:12"
+  },
+  {
+   "timeInt": 1520,
+   "timeString": "25:20",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 2,
+   "name": "Luca Krist",
+   "result": "12:12"
+  },
+  {
+   "timeInt": 1649,
+   "timeString": "27:29",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 77,
+   "name": "Michl Reichardt",
+   "result": null
+  },
+  {
+   "timeInt": 1690,
+   "timeString": "28:10",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 7,
+   "name": "Romas Aukstikalnis",
+   "result": "12:13"
+  },
+  {
+   "timeInt": 1800,
+   "timeString": "30:00",
+   "actionText": "7m Tor",
+   "team": "home",
+   "number": 30,
+   "name": "Pablo Lange",
+   "result": "13:13"
+  },
+  {
+   "timeInt": 1836,
+   "timeString": "30:36",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 32,
+   "name": "Julius Drachau",
+   "result": "14:13"
+  },
+  {
+   "timeInt": 1854,
+   "timeString": "30:54",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 15,
+   "name": "Leon Kirschberger",
+   "result": "15:13"
+  },
+  {
+   "timeInt": 1925,
+   "timeString": "32:05",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 60,
+   "name": "Marc Pechstein",
+   "result": "15:14"
+  },
+  {
+   "timeInt": 2022,
+   "timeString": "33:42",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Alexander Möller",
+   "result": "16:14"
+  },
+  {
+   "timeInt": 2079,
+   "timeString": "34:39",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 2,
+   "name": "Matheus Costa Dias",
+   "result": null
+  },
+  {
+   "timeInt": 2085,
+   "timeString": "34:45",
+   "actionText": "7m Fehlwurf",
+   "team": "home",
+   "number": 30,
+   "name": "Pablo Lange",
+   "result": null
+  },
+  {
+   "timeInt": 2134,
+   "timeString": "35:34",
+   "actionText": "7m Tor",
+   "team": "away",
+   "number": 23,
+   "name": "Jesper Schmidt",
+   "result": "16:15"
+  },
+  {
+   "timeInt": 2197,
+   "timeString": "36:37",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 11,
+   "name": "Fritz-Leon Haake",
+   "result": "17:15"
+  },
+  {
+   "timeInt": 2238,
+   "timeString": "37:18",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 60,
+   "name": "Marc Pechstein",
+   "result": "17:16"
+  },
+  {
+   "timeInt": 2278,
+   "timeString": "37:58",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Alexander Möller",
+   "result": "18:16"
+  },
+  {
+   "timeInt": 2312,
+   "timeString": "38:32",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 13,
+   "name": "Martin Kaergaard Pedersen",
+   "result": "18:17"
+  },
+  {
+   "timeInt": 2393,
+   "timeString": "39:53",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Alexander Möller",
+   "result": "19:17"
+  },
+  {
+   "timeInt": 2591,
+   "timeString": "43:11",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 30,
+   "name": "Pablo Lange",
+   "result": "20:17"
+  },
+  {
+   "timeInt": 2592,
+   "timeString": "43:12",
+   "actionText": "Team Time-Out",
+   "team": "away",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 2640,
+   "timeString": "44:00",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 43,
+   "name": "Kay Funke",
+   "result": "20:18"
+  },
+  {
+   "timeInt": 2675,
+   "timeString": "44:35",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 14,
+   "name": "Leon Hein",
+   "result": "21:18"
+  },
+  {
+   "timeInt": 2754,
+   "timeString": "45:54",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 43,
+   "name": "Kay Funke",
+   "result": "21:19"
+  },
+  {
+   "timeInt": 2801,
+   "timeString": "46:41",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 14,
+   "name": "Leon Hein",
+   "result": "22:19"
+  },
+  {
+   "timeInt": 2834,
+   "timeString": "47:14",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 87,
+   "name": "Richard Lößner",
+   "result": "22:20"
+  },
+  {
+   "timeInt": 2906,
+   "timeString": "48:26",
+   "actionText": "Team Time-Out",
+   "team": "away",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 2930,
+   "timeString": "48:50",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 7,
+   "name": "Romas Aukstikalnis",
+   "result": "22:21"
+  },
+  {
+   "timeInt": 3000,
+   "timeString": "50:00",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 87,
+   "name": "Richard Lößner",
+   "result": "22:22"
+  },
+  {
+   "timeInt": 3056,
+   "timeString": "50:56",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 60,
+   "name": "Marc Pechstein",
+   "result": "22:23"
+  },
+  {
+   "timeInt": 3072,
+   "timeString": "51:12",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 14,
+   "name": "Leon Hein",
+   "result": "23:23"
+  },
+  {
+   "timeInt": 3113,
+   "timeString": "51:53",
+   "actionText": "Team Time-Out",
+   "team": "home",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 3189,
+   "timeString": "53:09",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 87,
+   "name": "Richard Lößner",
+   "result": "23:24"
+  },
+  {
+   "timeInt": 3307,
+   "timeString": "55:07",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 11,
+   "name": "Fritz-Leon Haake",
+   "result": "24:24"
+  },
+  {
+   "timeInt": 3385,
+   "timeString": "56:25",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 7,
+   "name": "Romas Aukstikalnis",
+   "result": "24:25"
+  },
+  {
+   "timeInt": 3427,
+   "timeString": "57:07",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 30,
+   "name": "Pablo Lange",
+   "result": "25:25"
+  },
+  {
+   "timeInt": 3469,
+   "timeString": "57:49",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 60,
+   "name": "Marc Pechstein",
+   "result": "25:26"
+  },
+  {
+   "timeInt": 3480,
+   "timeString": "58:00",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 32,
+   "name": "Julius Drachau",
+   "result": "26:26"
+  },
+  {
+   "timeInt": 3587,
+   "timeString": "59:47",
+   "actionText": "Team Time-Out",
+   "team": "home",
+   "number": null,
+   "name": null,
+   "result": null
+  }
+ ]
+}

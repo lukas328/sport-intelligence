@@ -145,6 +145,34 @@ async def test_kickoff_maps_clock_and_video(make_api: Callable[[], Api]) -> None
     assert match["kickoff_ms"] == {"1": 30_000, "2": 2_000_000}
 
 
+async def test_kickoff_of_a_video_that_starts_mid_half(make_api: Callable[[], Api]) -> None:
+    """A club video without overlay that starts after the throw-off: the coach stops at any
+    moment and gives the clock shown there. The throw-off lies before the video (negative time);
+    before, only a throw-off inside the video could be set, so such a video had no match clock."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, m = ids["org"], (await new_match(api, ids))["id"]
+    kickoff = f"/v1/orgs/{org}/matches/{m}/kickoff"
+    # 12 s into the video the clock shows 21:00 of the first half
+    r = await api.put(kickoff, json={"period": 1, "t_ms": 12_000, "clock_s": 1260})
+    assert r.status_code == 204, r.text
+    r = await api.put(kickoff, json={"period": 2, "t_ms": 1_000_000, "clock_s": 1830.5})
+    assert r.status_code == 204, r.text
+    match = (await api.get(f"/v1/orgs/{org}/matches/{m}")).json()
+    assert match["kickoff_ms"] == {"1": -1_248_000, "2": 969_500}
+    e = await api.post(
+        f"/v1/orgs/{org}/matches/{m}/events",
+        json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": 72_000},
+    )
+    assert (e.json()["period"], e.json()["clock_s"]) == (1, 1320.0)
+    # a clock time of another half is refused
+    for body in (
+        {"period": 1, "t_ms": 0, "clock_s": 1900},
+        {"period": 2, "t_ms": 0, "clock_s": 100},
+    ):
+        assert (await api.put(kickoff, json=body)).status_code == 422
+
+
 async def test_feed_import(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)
