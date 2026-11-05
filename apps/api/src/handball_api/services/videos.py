@@ -31,7 +31,7 @@ from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoSt
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
 from handball_api.services import audit, auto_events, billing, feed, segments, training
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match, timeline_video
+from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
 from handball_api.services.segments import parse_recorded
 from handball_api.services.support import failure_code
@@ -482,7 +482,7 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 await start_analysis(ctx, asset, match)
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
-            on_timeline = await _apply_analysis_result(ctx, asset, job, data.result)
+            await _apply_analysis_result(ctx, asset, job, data.result)
             await training.notify(
                 ctx,
                 match.organization_id,
@@ -491,11 +491,10 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 {"match_id": str(match.id)},
                 f"/app/{match.organization_id}/matches/{match.id}",
             )
-            if on_timeline:
-                await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
-                from handball_api.services import highlights  # imports this module (media paths)
+            await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
+            from handball_api.services import highlights  # imports this module (media paths)
 
-                await highlights.auto(ctx, match)  # reels right after the analysis (4.3)
+            await highlights.auto(ctx, match)  # reels right after the analysis (4.3)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "sync" and data.result:
             _apply_sync_result(asset, data.result)
     await ctx.db.flush()
@@ -605,14 +604,7 @@ async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
 
 async def _apply_analysis_result(
     ctx: Ctx, asset: VideoAsset, job: ProcessingJob, r: dict[str, object]
-) -> bool:
-    """Stores the results; True when they are the match's (the video is its timeline video).
-
-    Tracks and the court belong to the video. Events, possessions, the match clock and goal
-    candidates are the match's: only the timeline video sets them (a second file of the match, e.g.
-    the second half, must not replace the first file's events with times in another video)."""
-    timeline = await timeline_video(ctx, asset.match_id)
-    on_timeline = asset.role == VideoRole.MAIN and timeline is not None and timeline.id == asset.id
+) -> None:
     cal = r.get("calibration")
     if isinstance(cal, dict):
         prev_points = (
@@ -718,7 +710,7 @@ async def _apply_analysis_result(
     if isinstance(auto, dict) or overlay:
         auto = auto if isinstance(auto, dict) else {}
         match = await ctx.db.get(Match, asset.match_id)
-        if match is not None and on_timeline:
+        if match is not None and asset.role == VideoRole.MAIN:
             counts = await auto_events.apply(ctx, match, auto or None, overlay)
             # courtside marks with device time follow the new goals (5.3)
             from handball_api.services import marks
@@ -745,7 +737,7 @@ async def _apply_analysis_result(
                     ],
                 },
             }
-    if "goal_candidates" in r and on_timeline:
+    if "goal_candidates" in r and asset.role == VideoRole.MAIN:
         # moments that are probably goals, for the coach to confirm (needs no court, so also
         # when the analysis waits for court points); after the automatic events: their
         # possessions suggest the side
@@ -758,7 +750,6 @@ async def _apply_analysis_result(
                 ctx, owner, asset, found if isinstance(found, dict) else None, job.pipeline_version
             )
             asset.analysis = {**asset.analysis, "goal_candidates": counts}
-    return on_timeline
 
 
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:

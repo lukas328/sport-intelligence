@@ -1,0 +1,310 @@
+{
+ "operation": "getGamePlayers",
+ "variables": {
+  "gameId": 509192,
+  "isLive": false
+ },
+ "response": {
+  "data": {
+   "gamePlayerStats": [
+    {
+     "playerId": 266236,
+     "teamId": 41343,
+     "dressNr": 14,
+     "playerName": "PROBST Matteo",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 274104,
+     "teamId": 41343,
+     "dressNr": 57,
+     "playerName": "PROBST Lars",
+     "isHome": 0,
+     "function": "goalkeeper",
+     "totalScore": 0
+    },
+    {
+     "playerId": 279226,
+     "teamId": 40742,
+     "dressNr": 2,
+     "playerName": "MUSTER Cedric",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 284596,
+     "teamId": 41343,
+     "dressNr": 18,
+     "playerName": "PROBST Robin",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 287369,
+     "teamId": 41343,
+     "dressNr": 4,
+     "playerName": "PROBST Dario",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 3
+    },
+    {
+     "playerId": 290127,
+     "teamId": 40742,
+     "dressNr": 14,
+     "playerName": "MUSTER Simon",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 1
+    },
+    {
+     "playerId": 293867,
+     "teamId": 41343,
+     "dressNr": 2,
+     "playerName": "PROBST Gian",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 2
+    },
+    {
+     "playerId": 297454,
+     "teamId": 40742,
+     "dressNr": 1,
+     "playerName": "MUSTER Elias",
+     "isHome": 1,
+     "function": "goalkeeper",
+     "totalScore": 0
+    },
+    {
+     "playerId": 297455,
+     "teamId": 40742,
+     "dressNr": 18,
+     "playerName": "MUSTER Remo",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 6
+    },
+    {
+     "playerId": 297615,
+     "teamId": 40742,
+     "dressNr": 7,
+     "playerName": "MUSTER Levin",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 6
+    },
+    {
+     "playerId": 298655,
+     "teamId": 41343,
+     "dressNr": 9,
+     "playerName": "PROBST Joel",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 4
+    },
+    {
+     "playerId": 300956,
+     "teamId": 40742,
+     "dressNr": 52,
+     "playerName": "MUSTER Nico",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 3
+    },
+    {
+     "playerId": 302140,
+     "teamId": 40742,
+     "dressNr": 50,
+     "playerName": "MUSTER Matteo",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 1
+    },
+    {
+     "playerId": 302359,
+     "teamId": 41343,
+     "dressNr": 6,
+     "playerName": "PROBST Yves",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 2
+    },
+    {
+     "playerId": 302481,
+     "teamId": 41343,
+     "dressNr": 24,
+     "playerName": "PROBST Remo",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 302485,
+     "teamId": 41343,
+     "dressNr": 11,
+     "playerName": "PROBST Silvan",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 2
+    },
+    {
+     "playerId": 303609,
+     "teamId": 41343,
+     "dressNr": 7,
+     "playerName": "PROBST Cedric",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 2
+    },
+    {
+     "playerId": 304150,
+     "teamId": 41343,
+     "dressNr": 42,
+     "playerName": "PROBST Pascal",
+     "isHome": 0,
+     "function": "goalkeeper",
+     "totalScore": 0
+    },
+    {
+     "playerId": 306454,
+     "teamId": 40742,
+     "dressNr": 24,
+     "playerName": "MUSTER Robin",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 6
+    },
+    {
+     "playerId": 307456,
+     "teamId": 41343,
+     "dressNr": 44,
+     "playerName": "PROBST Andrin",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 308514,
+     "teamId": 40742,
+     "dressNr": 19,
+     "playerName": "MUSTER Jonas",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 312228,
+     "teamId": 40742,
+     "dressNr": 11,
+     "playerName": "MUSTER Lars",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 312230,
+     "teamId": 40742,
+     "dressNr": 27,
+     "playerName": "MUSTER Andrin",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 3
+    },
+    {
+     "playerId": 319964,
+     "teamId": 41343,
+     "dressNr": 10,
+     "playerName": "PROBST Flavio",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 3
+    },
+    {
+     "playerId": 321280,
+     "teamId": 40742,
+     "dressNr": 3,
+     "playerName": "MUSTER Tim",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 322246,
+     "teamId": 40742,
+     "dressNr": 75,
+     "playerName": "MUSTER Dario",
+     "isHome": 1,
+     "function": "player",
+     "totalScore": 0
+    },
+    {
+     "playerId": 360142,
+     "teamId": 40742,
+     "dressNr": 16,
+     "playerName": "MUSTER Leon",
+     "isHome": 1,
+     "function": "goalkeeper",
+     "totalScore": 0
+    },
+    {
+     "playerId": 365378,
+     "teamId": 41343,
+     "dressNr": 98,
+     "playerName": "PROBST Marc",
+     "isHome": 0,
+     "function": "player",
+     "totalScore": 1
+    },
+    {
+     "playerId": 10000001,
+     "teamId": 40742,
+     "dressNr": 1,
+     "playerName": "BEISPIEL Simon",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000002,
+     "teamId": 40742,
+     "dressNr": 2,
+     "playerName": "BEISPIEL Levin",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000003,
+     "teamId": 40742,
+     "dressNr": 3,
+     "playerName": "BEISPIEL Matteo",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000004,
+     "teamId": 40742,
+     "dressNr": 4,
+     "playerName": "BEISPIEL Lars",
+     "isHome": 1,
+     "function": "teamofficial",
+     "totalScore": 0
+    },
+    {
+     "playerId": 10000001,
+     "teamId": 41343,
+     "dressNr": 1,
+     "playerName": "BEISPIEL Simon",
+     "isHome": 0,
+     "function": "teamofficial",
+     "totalScore": 0
+    }
+   ]
+  }
+ }
+}
