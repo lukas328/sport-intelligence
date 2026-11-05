@@ -2276,7 +2276,7 @@
     "players": "Attribuer les joueurs",
     "events": "Événements",
     "formations": "Systèmes défensifs",
-    "notes": "Notes",
+    "notes": "Commentaires",
     "court_done": "confirmé",
     "court_mark": "à marquer dans l'image",
     "court_check": "à vérifier",
@@ -2321,10 +2321,11 @@
     "zoom_moment": "Moment",
     "zoom_game": "Match",
     "legendSides": "nous en haut, adversaire en bas",
-    "laneNotes": "Notes",
+    "laneNotes": "Commentaires",
     "change": "Modifier",
     "kickoff_fromClip": "lu dans la vidéo",
     "laneEvents": "Événements",
-    "feedback": "Retours"
+    "feedback": "Retours",
+    "legendSidesNamed": "{own} en haut, {opp} en bas"
   }
 }

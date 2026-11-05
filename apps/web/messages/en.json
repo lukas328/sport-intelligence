@@ -2276,7 +2276,7 @@
     "players": "Assign players",
     "events": "Events",
     "formations": "Defence systems",
-    "notes": "Notes",
+    "notes": "Comments",
     "court_done": "confirmed",
     "court_mark": "mark in the picture",
     "court_check": "please check",
@@ -2321,10 +2321,11 @@
     "zoom_moment": "Moment",
     "zoom_game": "Match",
     "legendSides": "us above, opponent below",
-    "laneNotes": "Notes",
+    "laneNotes": "Comments",
     "change": "Change",
     "kickoff_fromClip": "read from the video",
     "laneEvents": "Events",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "legendSidesNamed": "{own} above, {opp} below"
   }
 }

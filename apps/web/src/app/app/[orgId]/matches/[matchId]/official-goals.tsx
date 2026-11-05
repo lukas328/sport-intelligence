@@ -115,7 +115,10 @@ export function OfficialGoalsPanel({
   const every = goalRows(cmp, "all", true, covers);
   const outside = every.filter((r) => r.kind === "outside").length;
   const missing = every.filter((r) => r.kind === "missing").length;
-  const open = goalRows(cmp, "open", false, covers).length;
+  const openRows = goalRows(cmp, "open", false, covers);
+  const open = openRows.length;
+  // the one mark of the list: the first goal still to check
+  const firstOpen = openRows.find((r) => jumpTarget(r) != null)?.id;
   const inVideo = cmp.counts.official - outside;
   const team = (side: string) => (side === "own" ? ownName : oppName);
   const score = (s: number[] | null) =>
@@ -186,7 +189,7 @@ export function OfficialGoalsPanel({
                     onClick={() => onPlay(target)}
                   >
                     <Play aria-hidden className="size-3 fill-current" />
-                    {clockLabel}
+                    <span className={cn(r.id === firstOpen && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{clockLabel}</span>
                   </Button>
                 ) : (
                   <span className="inline-flex items-baseline gap-2 text-sm">

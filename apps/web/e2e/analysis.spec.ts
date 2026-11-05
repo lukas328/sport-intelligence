@@ -41,7 +41,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await table.getByRole("button", { name: "Tore Damen 1" }).click();
   await expect(page.getByTestId("event-list").getByRole("listitem")).toHaveCount(5);
 
-  await page.getByRole("tab", { name: "Matchreport" }).click();
+  await page.getByRole("tab", { name: "Matchbericht", exact: true }).click();
   await expect(page.getByText("Anna Muster").first()).toBeVisible();
   await expectAccessible(page);
 

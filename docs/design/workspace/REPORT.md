@@ -56,7 +56,9 @@ Screenshots: `screens/` (before and after, local stack with test data).
 - Fill and ring mean confirmed and proposed; words, not marks, for positive and to-learn.
 - Ink for figures, red only for goals against and errors; a dotted underline means "opens scenes".
 - Hairlines and rules, no cards; underline tabs at the second level.
-- Match clock as the coach says it.
+- Match clock as the coach says it, also on axes.
+- Team names, not "Wir / Gegner"; "Matchbericht", "Kommentare" (time-pinned) and "Notizen"
+  (feedback on a player's scene) each mean one thing.
 
 ## Checks
 

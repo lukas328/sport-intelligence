@@ -643,7 +643,7 @@
   "tabs": {
     "video": "Video",
     "overview": "Übersicht",
-    "report": "Matchreport",
+    "report": "Matchbericht",
     "shots": "Würfe",
     "keepers": "Torhüter",
     "physical": "Laufleistung",
@@ -2276,7 +2276,7 @@
     "players": "Spieler zuordnen",
     "events": "Ereignisse",
     "formations": "Abwehrsysteme",
-    "notes": "Notizen",
+    "notes": "Kommentare",
     "court_done": "bestätigt",
     "court_mark": "im Bild markieren",
     "court_check": "bitte prüfen",
@@ -2321,10 +2321,11 @@
     "zoom_moment": "Moment",
     "zoom_game": "Spiel",
     "legendSides": "oben wir, unten Gegner",
-    "laneNotes": "Notizen",
+    "laneNotes": "Kommentare",
     "change": "Ändern",
     "kickoff_fromClip": "aus dem Video gelesen",
     "laneEvents": "Ereignisse",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "legendSidesNamed": "oben {own}, unten {opp}"
   }
 }

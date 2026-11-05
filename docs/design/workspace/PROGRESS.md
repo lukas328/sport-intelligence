@@ -125,6 +125,17 @@ Data/API (season): the season counts only matches with events (1 instead of 5 wi
 adds goals from the report and from tagging (31 against 26:18 on the match page, which counts each
 goal once). Season figures should use one source per match, like the match statistics.
 
+## Consistency pass across the slices
+
+A last fresh-eyes review over all three tabs looked for seams between the slices. Fixed: one
+signal form (the marker stroke, also in the step row; it was a filled chip there), a signal on the
+first open report goal in the goals step, no pink row in physical load and the heatmap in ink,
+clip marks on the scrubber as ticks (squares mean recorded goals on the timeline), team names
+instead of "Wir / Gegner" on the stage and in the timeline legend, "Matchbericht" everywhere
+(the sub-tab said "Matchreport"), the comment tool called "Kommentare" (so "Notizen" means only
+feedback notes), quiet secondary buttons for the same kind of action, the goal step's list switch
+as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
+
 ## Open
 
 - Data/API (for the analysis session): an insight files the goalkeeper with a 44 % save rate as a

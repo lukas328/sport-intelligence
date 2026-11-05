@@ -94,7 +94,7 @@ export function WorkRail({
               </span>
               <span className="flex flex-col">
                 <span className="font-semibold text-foreground">{t(s.id)}</span>
-                <span className={cn("text-[0.8125rem]", s.id === signal ? "self-start rounded-xs bg-signal px-1 font-semibold text-signal-ink" : "text-muted")}>
+                <span className={cn("text-[0.8125rem]", s.id === signal ? "self-start font-semibold text-foreground underline decoration-resin decoration-[5px] underline-offset-[5px]" : "text-muted")}>
                   {sub}
                 </span>
               </span>

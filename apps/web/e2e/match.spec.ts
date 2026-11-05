@@ -72,7 +72,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(t0 + 4);
 
   // comment at the current time (notes beside the player)
-  await page.getByRole("tab", { name: "Notizen", exact: true }).click();
+  await page.getByRole("tab", { name: "Kommentare", exact: true }).click();
   await page.getByPlaceholder(/Kommentar bei/).fill("Rückzug zu langsam");
   await page.getByRole("button", { name: "Kommentieren" }).click();
   await expect(page.getByTestId("comments")).toContainText("Rückzug zu langsam");

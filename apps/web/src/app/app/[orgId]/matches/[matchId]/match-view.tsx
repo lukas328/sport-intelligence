@@ -233,8 +233,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                   <th scope="col" className="sr-only">
                     {t("stats.comparison")}
                   </th>
-                  <th scope="col" className="px-3 pb-1 text-right font-semibold">{t("stats.own")}</th>
-                  <th scope="col" className="pb-1 pl-3 text-right font-semibold opacity-80">{t("stats.opponent")}</th>
+                  <th scope="col" className="max-w-28 truncate px-3 pb-1 text-right font-semibold">{teamName}</th>
+                  <th scope="col" className="max-w-28 truncate pb-1 pl-3 text-right font-semibold opacity-80">{oppName(match)}</th>
                 </tr>
               </thead>
               <tbody>

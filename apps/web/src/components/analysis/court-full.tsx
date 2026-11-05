@@ -24,7 +24,7 @@ export function CourtHeatmap({ grid, label }: { grid?: number[][]; label: string
                 y={PAD + COURT.width - ((r + 1) * COURT.width) / rows}
                 width={COURT.length / cols}
                 height={COURT.width / rows}
-                fill="var(--error)"
+                fill="var(--foreground)"
                 opacity={0.12 + 0.68 * (v / max)}
               >
                 <title>{`${Math.round(v * 100)} %`}</title>

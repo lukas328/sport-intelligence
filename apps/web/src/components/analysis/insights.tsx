@@ -139,7 +139,7 @@ export function InsightsCard({
         </div>
       )}
       {staff && data.insights.length > 0 && !data.summary && (
-        <Button variant="secondary" disabled={summarise.isPending} onClick={() => summarise.mutate()}>
+        <Button variant="secondary" size="sm" disabled={summarise.isPending} onClick={() => summarise.mutate()}>
           {t("summarise")}
         </Button>
       )}

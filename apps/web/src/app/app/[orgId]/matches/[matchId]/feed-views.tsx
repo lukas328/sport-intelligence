@@ -226,7 +226,7 @@ export function FeedbackSummary({ orgId, matchId, onOpen }: { orgId: string; mat
             </>
           )}
         </p>
-        <Button size="sm" className="ml-auto" onClick={onOpen} data-testid="open-feedback">
+        <Button size="sm" variant="secondary" className="ml-auto" onClick={onOpen} data-testid="open-feedback">
           {next ? t("continueWith", { name: next.name.split(" ")[0] ?? next.name }) : t("feedbackLink")}
         </Button>
       </div>

@@ -24,6 +24,8 @@ export function MatchTimeline({
   candidates,
   rate,
   activeId = null,
+  ownName,
+  oppName,
   events = null,
   notes = [],
   onSetKickoff,
@@ -35,6 +37,8 @@ export function MatchTimeline({
   official: GoalComparison | null | undefined;
   candidates: CandidateList | null | undefined;
   rate: number;
+  ownName: string;
+  oppName: string;
   /** the candidate that is up: the one signal mark on the axis */
   activeId?: string | null;
   /** tagged and corrected events (the report's goals have their own lane) */
@@ -44,6 +48,7 @@ export function MatchTimeline({
   onSetKickoff?: () => void;
 }) {
   const t = useTranslations("workflow");
+  const tz = useTranslations("events");
   const total = periodS * 2;
   const short = spans != null && covered(spans) < total * 0.25;
   const [picked, setZoom] = useState<Zoom | null>(null);
@@ -94,7 +99,7 @@ export function MatchTimeline({
           {t("coverage", { clip })}
           {goals.length > 0 && ` ${t("coverageGoals", { inside: inVideo, total: goals.length })}`}
         </span>
-        {(goals.length > 0 || cands.length > 0) && <span className="text-[0.8125rem] text-muted">{t("legendSides")}</span>}
+        {(goals.length > 0 || cands.length > 0) && <span className="text-[0.8125rem] text-muted">{t("legendSidesNamed", { own: ownName, opp: oppName })}</span>}
         <span role="group" aria-label={t("zoom")} className="ml-auto flex gap-3 pr-1">
           {(["moment", "game"] as const).map((z) => (
             <button
@@ -190,7 +195,7 @@ export function MatchTimeline({
         <div className="relative h-5 pt-1 font-score text-xs text-muted tabular-nums">
           {ticks.map((s, i) => (
             <span key={i} className={cn("absolute", i === 0 ? "" : i === ticks.length - 1 ? "-translate-x-full" : "-translate-x-1/2")} style={{ left: `${(i / (ticks.length - 1)) * 100}%` }}>
-              {zoom === "game" ? (s === total / 2 ? `${Math.round(s / 60)}' ${t("halftime")}` : `${Math.round(s / 60)}'`) : formatClock(s * 1000)}
+              {zoom === "game" ? (s === total / 2 ? `${Math.round(s / 60)}' ${t("halftime")}` : `${Math.round(s / 60)}'`) : tz("at", { period: Math.min(2, Math.floor(s / periodS) + 1), clock: formatClock(s * 1000) })}
             </span>
           ))}
         </div>

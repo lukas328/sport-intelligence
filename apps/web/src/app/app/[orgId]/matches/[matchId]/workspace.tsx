@@ -524,6 +524,8 @@ export function Workspace({
           candidates={staff ? candidates.data : null}
           rate={rate}
           activeId={shown === "goals" ? activeCandidate : null}
+          ownName={teamName}
+          oppName={oppName}
           events={staff ? events.data : null}
           notes={[...(comments.data ?? []).map((c) => c.t_ms), ...(clips.data ?? []).map((c) => c.start_ms), ...(annotations.data ?? []).map((x) => x.t_ms)]}
           onSetKickoff={staff ? () => setPane("kickoff") : undefined}
@@ -556,8 +558,9 @@ export function Workspace({
           <div className="flex min-h-0 flex-1 flex-col gap-4">
             {hasReport && openCandidates && !reviewing && (
               <Segmented<"candidates" | "report">
-                className="max-lg:order-last"
+                className="border-b border-foreground/15 max-lg:order-last"
                 label={t("workflow.goalLists")}
+                variant="underline"
                 size="sm"
                 value={list}
                 onChange={setGoalList}

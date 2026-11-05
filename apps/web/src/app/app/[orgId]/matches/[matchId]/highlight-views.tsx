@@ -61,7 +61,7 @@ export function HighlightsView({
       {staff && (
         // a new reel is an occasional job: folded, not a form on top of the reels
         <details className="text-sm">
-        <summary className="cursor-pointer font-medium text-accent">{t("newReel")}</summary>
+        <summary className="cursor-pointer font-medium">{t("newReel")}</summary>
         <div className="flex flex-wrap items-end gap-3 pt-3">
           <Select label={t("format")} value={format} onChange={(e) => setFormat(e.target.value as "16x9")}>
             <option value="16x9">{t("landscape")}</option>
