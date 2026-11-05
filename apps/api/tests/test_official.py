@@ -1023,3 +1023,39 @@ def test_public_mail_providers_prove_no_club_role() -> None:
     assert club_domains(["bluemail.ch", "GMX.at", "hotmail.de", "tvt-handball.ch"]) == [
         "tvt-handball.ch"
     ]
+
+
+def test_long_suggestion_keys_are_found_again() -> None:
+    """A moved game's key carries the venue; one longer than the column is stored cut, and the
+    next sync must find it instead of inserting it again (unique key)."""
+    import uuid
+    from types import SimpleNamespace
+
+    from handball_api.services.official import _Suggester
+
+    added: list[Any] = []
+    ctx: Any = SimpleNamespace(db=SimpleNamespace(add=added.append))
+    team: Any = SimpleNamespace(organization_id=uuid.uuid4(), id=uuid.uuid4())
+    key = "game:484345:2026-11-05T18:00:00+00:00:" + "Sportzentrum Krauer Dreifachhalle " * 3
+    first = _Suggester(ctx, team, {})
+    first("match_moved", key, {"n": 1})
+    assert len(added) == 1 and len(added[0].official_key) == 80
+    # the next sync loads the stored suggestions by their stored key
+    added[0].status = "open"
+    again = _Suggester(ctx, team, {("match_moved", added[0].official_key): added[0]})
+    again("match_moved", key, {"n": 2})
+    assert len(added) == 1 and added[0].payload == {"n": 2}
+
+
+async def test_claims_are_rate_limited_per_user(make_api: Callable[[], Api], hch: Recorded) -> None:
+    """A claim may ask handball.ch and an access request notifies the club admins."""
+
+    class Spent:
+        async def hit(self, key: str, limit: int, window: int) -> bool:
+            return not key.startswith("official-claim:")
+
+    api = await coach(make_api)
+    api.app.state.rate_limiter = Spent()
+    r = await api.post(f"/v1/official/teams/{TEAM}/claim", json={"club_id": CLUB})
+    assert r.status_code == 429, r.text
+    assert hch.calls == []  # handball.ch not asked

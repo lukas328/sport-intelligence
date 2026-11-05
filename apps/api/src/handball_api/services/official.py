@@ -403,6 +403,7 @@ class _Suggester:
     def __call__(self, kind: str, key: str, payload: dict[str, Any]) -> None:
         """One suggestion per team, kind and key: an open one gets the newest data, a decided
         one is not proposed again."""
+        key = key[:80]  # as stored (official_key), so that a known one is found again
         s = self.known.get((kind, key))
         if s is not None:
             if s.status == "open":
@@ -414,7 +415,7 @@ class _Suggester:
             organization_id=self.team.organization_id,
             team_id=self.team.id,
             kind=kind,
-            official_key=key[:80],
+            official_key=key,
             payload=payload,
         )
         self.ctx.db.add(s)
