@@ -147,7 +147,9 @@ def test_colour_views_keep_colours_with_enough_floor_lines() -> None:
     _, r = _camera(25.0)
     centre = np.array([20.0, -8.0, 7.0])
     rng = np.random.default_rng(1)
-    ends_a, ends_b, colours = [], [], []
+    ends_a: list[np.ndarray] = []
+    ends_b: list[np.ndarray] = []
+    colours = []
     for i in range(400):
         x0, y0 = rng.uniform(0, 40), rng.uniform(0, 20)
         d = np.array([1.0, 0, 0]) if i % 2 else np.array([0, 1.0, 0])
@@ -187,7 +189,7 @@ def _low_camera_observations(height_m: float) -> observe.Observations:
 
     def px(p: np.ndarray) -> np.ndarray:
         q = k @ (rot @ (p - centre))
-        return q[:2] / q[2]
+        return np.asarray(q[:2] / q[2])
 
     rng = np.random.default_rng(2)
     segs = []

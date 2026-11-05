@@ -427,7 +427,7 @@ def test_rosters_reach_the_number_vote(
     monkeypatch.setattr(analysis, "_cached_overlay", lambda *a: None)
     monkeypatch.setattr(analysis, "_points_calibration", lambda *a: object())
     monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
-    monkeypatch.setattr(analysis.learned, "track", track)
+    monkeypatch.setattr("handball_vision.observe.track", track)
     rep, _ = reporter()
     with pytest.raises(StopError):
         analysis.run_analysis(

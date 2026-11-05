@@ -51,3 +51,67 @@ recall; the track average and the constraints carry the rest.
   the nearest team instead of "referee". A fourth class or a tighter court filter would remove them.
 - The model is our own (Roboflow data CC BY 4.0, attribution in `ml/roles/README.md`); it still has
   to be hosted for the worker images (it is not in the repository).
+
+## Addendum 2026-11-05: bench, staff and spectators at the court edge
+### Context
+`detection.filter_on_court` keeps feet within 1.5 m of the lines. On the real clips that still
+includes the bench row (seated feet are 0.4 to 1.2 m beyond the sideline), coaches standing at
+the bench and spectators sitting right at the court edge. They were tracked as players: on
+Horgen vs Möhlin 21 % of all tracked detections were bench people labelled home or away, the
+bench gave a home player the number 12 (a substitute in a black warm-up shirt) and made the home
+team look far from its own goal, so the position rule gave both goalkeepers to the wrong team.
+The tracker also hands bench tracks to players who pass the bench and back, so whole tracks
+cannot be judged at once.
+
+### Decision
+`handball_vision.bench` cuts *stretches* of tracks, from court positions:
+
+1. off court: the median foot point over 8 s lies beyond a **sideline** by at least 0.15 m or
+   25 image pixels across the line at that spot (on the far side calibration errors of 10 to
+   20 px put wings standing on the line 0.5 to 1 m outside); goal lines never count
+   (goalkeepers, goal-line referees);
+2. still: 90 % of that window within 2 m of its median (referees and players keep moving);
+3. at least 6 s; gaps in the observations do not break a stretch while the person stays at the
+   same spot; a stretch takes in the neighbouring looks within 2 m (standing up moves the foot
+   point just inside the margin).
+
+`pipeline._finish` applies it right after stitching, before colours, roles, goalkeepers,
+formations, numbers and appearance learn anything. Bench stretches leave the tracks; the pieces
+before and after become tracks of their own (a piece with fewer than 5 looks, or off court and
+not moving like a referee, goes with the bench). Every look moves with its point: colour samples
+now carry their frame (`TeamAssigner.add_sample`), role samples too. Downstream steps
+(possession, events, formations, physical metrics, chunks, summary) only see the remaining
+points, so nothing downstream needed a new label. What was removed is listed in
+`extra["bench"]` (count, whole tracks, pieces, per stretch the track, time span and position).
+
+Not done, from the measurements:
+- an image-space fallback (outer band, still, seated box): tracks only exist after a court
+  calibration (the pipeline fails fast or asks for points otherwise), and on the calibrated clips
+  such a whole-track rule found 12 of 19, 2 of 10 and 5 of 16 of the tracks the court rule cuts;
+- a fourth appearance class: the remaining misses are few (below) and mostly coaches standing
+  or walking at the bench; not worth a model yet.
+
+### Results (5-minute clips, every tracked detection on one frame per 10 s checked by eye, plus
+every removed stretch on a contact sheet)
+| Clip | Removed detections | Precision | Recall | Players removed |
+|---|---|---|---|---|
+| Horgen vs Möhlin 2017 (bench near side) | 76 of 379 sampled | 98.7 % (75/76) | 91 % (75/82) | 1 look (tracker swap) |
+| Leimental vs Arbon 2024 (spectators near side) | 25 of 319 sampled | 100 % (25/25) | 89 % (25/28) | 0 |
+| Horgen vs Stäfa 2017 (spectators behind the railing) | 17 stretches | 16 bench, 1 unclear | not counted | 0 tracks |
+
+The one player look is a single point where a bench track briefly jumped to a player; the misses
+are coaches standing at the bench, short stays and spectators during a goal celebration.
+Effect without vs with the filter: Möhlin 8258 detections (21 %) gone, 3 mixed tracks change to
+the team they show most of the time, both goalkeeper tracks to the team that defends that goal
+(checked on the defence line), the bench number home 12 disappears, the home team's observed time
+drops from 2039 to 1422 s and its distance from 2105 to 1889 m; Leimental 2859 detections of
+spectators labelled away, away time 1718 to 1426 s, no other label changes; Stäfa 1307 detections
+(spectators labelled home and referee) and a number 16 read on a spectator track. Possession could
+not be compared (the cached clips have no ball observations).
+
+### Consequences
+- A substitute who walks onto the court starts a new track at that moment; merging by number
+  joins the pieces again when the number is read.
+- A far-side bench in the middle of the court stays: the 25 px margin is several metres there,
+  beyond the 1.5 m court filter; it is usually filtered out by that filter already (Leimental).
+- A team time-out at the bench is cut like the bench; play resumes in new tracks.
