@@ -17,6 +17,9 @@ import modal
 from common import REPO, base_image, kaggle_download, kaggle_publish, kaggle_secret
 
 app = modal.App("handball-owl")
+# Results are also kept on this volume, so a failed Kaggle upload after hours of GPU loses nothing:
+# modal volume get handball-gpu-out <slug> .
+out_vol = modal.Volume.from_name("handball-gpu-out", create_if_missing=True)
 image = base_image.add_local_python_source("common").add_local_file(
     str(REPO / "ml/ball/kaggle/owl_gpu.py"), "/root/owl_gpu.py"
 )
@@ -27,20 +30,25 @@ def _run(datasets: str, budget_h: float, bench: bool, slug: str) -> str:
     import subprocess
     from pathlib import Path
 
-    inp, out = Path("/tmp/in"), Path("/tmp/out")
+    inp, out = Path("/tmp/in"), Path("/vol") / slug
     names = [d for d in datasets.split(",") if d] + (["handball-ball-bench"] if bench else [])
     kaggle_download(names, inp)
     env = {**os.environ, "OWL_INPUT": str(inp), "OWL_OUT": str(out), "OWL_BUDGET_H": str(budget_h)}
-    subprocess.run(["python", "/root/owl_gpu.py"], check=True, env=env)
+    try:
+        subprocess.run(["python", "/root/owl_gpu.py"], check=True, env=env)
+    finally:
+        out_vol.commit()
     return kaggle_publish(out, slug)
 
 
-@app.function(gpu="T4", image=image, secrets=[kaggle_secret], timeout=24 * 3600)
+@app.function(gpu="T4", image=image, secrets=[kaggle_secret], timeout=24 * 3600,
+              volumes={"/vol": out_vol})
 def run_t4(datasets: str, budget_h: float, bench: bool, slug: str) -> str:
     return _run(datasets, budget_h, bench, slug)
 
 
-@app.function(gpu="L4", image=image, secrets=[kaggle_secret], timeout=24 * 3600)
+@app.function(gpu="L4", image=image, secrets=[kaggle_secret], timeout=24 * 3600,
+              volumes={"/vol": out_vol})
 def run_l4(datasets: str, budget_h: float, bench: bool, slug: str) -> str:
     return _run(datasets, budget_h, bench, slug)
 
