@@ -861,7 +861,9 @@
     "tracksOwn": "Spuren des eigenen Teams, ab 1 Minute",
     "playersAndTracks": "Spielerinnen, Spieler und Spuren",
     "showShort": "{n} kurze Spuren zeigen (unter 1 Minute)",
-    "hideShort": "Kurze Spuren ausblenden"
+    "hideShort": "Kurze Spuren ausblenden",
+    "shortClip": "Das Video zeigt weniger als eine Halbzeit: Distanzen, Sprints und Tempo gelten nur für diesen Ausschnitt, nicht für das ganze Spiel.",
+    "estimated": "Geschätzt aus den Positionen im Video."
   },
   "identity": {
     "title": "Spieler zuordnen",

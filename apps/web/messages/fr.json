@@ -861,7 +861,9 @@
     "tracksOwn": "Traces de l'équipe, dès 1 minute",
     "playersAndTracks": "Joueuses, joueurs et traces",
     "showShort": "Afficher {n} traces courtes (moins d'1 minute)",
-    "hideShort": "Masquer les traces courtes"
+    "hideShort": "Masquer les traces courtes",
+    "shortClip": "La vidéo montre moins d'une mi-temps : distances, sprints et vitesse ne valent que pour cet extrait, pas pour tout le match.",
+    "estimated": "Estimé à partir des positions dans la vidéo."
   },
   "identity": {
     "title": "Attribuer les joueurs",

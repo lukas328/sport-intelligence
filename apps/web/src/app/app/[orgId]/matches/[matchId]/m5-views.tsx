@@ -119,9 +119,26 @@ export function usePhysical(orgId: string, matchId: string) {
 }
 
 /** Running load per player from tracking (estimates, M5). */
-export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId: string; names: Record<string, string> }) {
+export function PhysicalView({
+  orgId,
+  matchId,
+  names,
+  teamName,
+  oppName,
+  videoNote = null,
+  short: shortClip = false,
+}: {
+  orgId: string;
+  matchId: string;
+  names: Record<string, string>;
+  teamName: string;
+  oppName: string;
+  /** what the video covers ("Video: 12:40 bis 13:40.") */
+  videoNote?: string | null;
+  /** the video covers a small part of the match: the figures are for that stretch only */
+  short?: boolean;
+}) {
   const t = useTranslations("physical");
-  const ta = useTranslations("analysis");
   const q = usePhysical(orgId, matchId);
   const [sel, setSel] = useState<string | null>(null);
   const [showShort, setShowShort] = useState(false);
@@ -159,8 +176,8 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
   const short = loose.length - long.length;
   const rows = [...players, ...(showShort ? loose : long)];
   const teamRows = [
-    ownTeam && { ...ownTeam, key: "team:own", label: t("teamOwn") },
-    oppTeam && { ...oppTeam, key: "team:opp", label: t("teamOpp") },
+    ownTeam && { ...ownTeam, key: "team:own", label: teamName },
+    oppTeam && { ...oppTeam, key: "team:opp", label: oppName },
   ].filter(Boolean) as Row[];
   const all = [...teamRows, ...rows];
   const selected = all.find((r) => r.key === sel) ?? teamRows[0] ?? rows[0];
@@ -180,13 +197,16 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
   );
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">
-        <span className="mr-2 rounded-md bg-surface px-2 py-0.5 text-xs">{ta("heuristic")}</span>
-        {t("hint")}
-      </p>
+      <div className="space-y-1 text-sm">
+        {shortClip && <p className="font-medium">{t("shortClip")}</p>}
+        <p className="text-muted">
+          {videoNote && `${videoNote} `}
+          {t("estimated")} {t("hint")}
+        </p>
+      </div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-x-10">
         <div className="space-y-2">
-          <div className="sheet overflow-x-auto">
+          <div className="sheet overflow-x-auto rounded-none border-0 border-t-2 border-foreground bg-transparent">
             <table className="w-full text-sm" data-testid="physical-table">
               <caption className="sr-only">{t("title")}</caption>
               <thead>

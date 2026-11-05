@@ -417,7 +417,15 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           />
           <div key={sub} className="animate-fade">
           {sub === "physical" ? (
-            <PhysicalView orgId={orgId} matchId={match.id} names={names} />
+            <PhysicalView
+              orgId={orgId}
+              matchId={match.id}
+              names={names}
+              teamName={teamName}
+              oppName={oppName(match)}
+              videoNote={videoNote}
+              short={covers != null && covers.reduce((s, c) => s + c.to - c.from, 0) < match.period_s}
+            />
           ) : stats.data && stats.data.quality.events > 0 ? (
             (() => {
               const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };

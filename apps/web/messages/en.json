@@ -861,7 +861,9 @@
     "tracksOwn": "Own team's tracks, 1 minute and longer",
     "playersAndTracks": "Players and tracks",
     "showShort": "Show {n} short tracks (under 1 minute)",
-    "hideShort": "Hide short tracks"
+    "hideShort": "Hide short tracks",
+    "shortClip": "The video shows less than a half: distances, sprints and speed are for this stretch only, not the whole match.",
+    "estimated": "Estimated from the positions in the video."
   },
   "identity": {
     "title": "Assign players",
