@@ -6,7 +6,6 @@ import csv
 import io
 from collections import Counter
 from collections.abc import Callable
-from typing import Any
 
 import asyncpg
 import pytest
@@ -193,9 +192,8 @@ async def test_sportscode_round_trip_and_csv(
     assert "P7" not in r.text
 
 
-async def test_sportscode_export_has_only_moments_of_the_video(
-    make_api: Callable[[], Api], recorded: Any
-) -> None:
+@pytest.mark.usefixtures("recorded")
+async def test_sportscode_export_has_only_moments_of_the_video(make_api: Callable[[], Api]) -> None:
     """A clip of five minutes from mid-half with the whole game's official report: the export
     used to write the report's events before the video with a negative end and the ones after it
     past the end of the file (Sportscode shows them as broken instances, our own import drops

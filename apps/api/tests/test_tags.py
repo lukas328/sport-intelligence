@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any
 
 import pytest
 
@@ -152,15 +151,14 @@ async def test_tags_search_and_smart_playlist(make_api: Callable[[], Api]) -> No
     }
 
 
-async def test_search_hits_outside_the_video_have_no_window(
-    make_api: Callable[[], Api], recorded: Any
-) -> None:
+@pytest.mark.usefixtures("recorded")
+async def test_search_hits_outside_the_video_have_no_window(make_api: Callable[[], Api]) -> None:
     """An official report on a clip from mid-half: a hit before the video used to get the window
     0 to -1'215 s (a playlist item from it is refused), one after the video a window past its
     end. Such hits keep their time but have no window; the others are cut at the video's end."""
     api = make_api()
     ids = await setup_club(api)
-    m, video_id = await reported_clip(api, ids)
+    _, video_id = await reported_clip(api, ids)
     r = await api.post(f"/v1/orgs/{ids['org']}/teams/{ids['team']}/search", json={})
     assert r.status_code == 200, r.text
     hits = r.json()["hits"]

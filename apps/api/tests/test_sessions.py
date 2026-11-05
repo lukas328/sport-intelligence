@@ -251,8 +251,9 @@ async def test_focus_from_insight_with_followup(
     assert closed["closed_at"]
 
 
+@pytest.mark.usefixtures("recorded")
 async def test_focus_playlist_skips_events_outside_the_video(
-    make_api: Callable[[], Api], owner_conn: asyncpg.Connection, recorded: Any
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
 ) -> None:
     """A clip of five minutes from mid-half with the whole game's official report: the events
     before the video (negative time) and after it have no scene; a focus playlist used to cut a

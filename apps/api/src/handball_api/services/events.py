@@ -374,7 +374,7 @@ async def set_kickoff(
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
     if clock_s is not None:
         half_start = (period - 1) * match.period_s
-        if not half_start <= clock_s <= half_start + match.period_s + 600:
+        if not half_start <= clock_s <= half_start + match.period_s:
             raise ProblemError(422, "invalid-clock", "The clock time is not in this half")
         t_ms = round(t_ms - (clock_s - half_start) * 1000)
     match.kickoff_ms = {**(match.kickoff_ms or {}), str(period): t_ms}

@@ -9,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     SmallInteger,
     String,
     UniqueConstraint,
@@ -51,6 +52,9 @@ class RosterEntry(Base, EntityMixin, TenantMixin):
             unique=True,
             postgresql_where=text("active"),
         ),
+        UniqueConstraint(
+            "season_id", "official_provider", "official_player_id", name="uq_roster_entries_official"
+        ),
     )
 
     player_id: Mapped[uuid.UUID] = mapped_column(
@@ -64,6 +68,10 @@ class RosterEntry(Base, EntityMixin, TenantMixin):
     )
     jersey_number: Mapped[int | None] = mapped_column(SmallInteger)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # from the official player list (federation onboarding): visible to the coach only until
+    # the person joins or a consent is recorded
+    official_provider: Mapped[str | None] = mapped_column(String(20))
+    official_player_id: Mapped[int | None] = mapped_column(Integer)
 
 
 class Consent(Base, EntityMixin, TenantMixin):

@@ -234,7 +234,9 @@ async def test_clip_slide_needs_a_video(make_api: Callable[[], Api]) -> None:
         await coach.post(f"{o}/clips", json={"match_id": m["id"], "start_ms": 1000, "end_ms": 8000})
     ).json()
     pres = (
-        await coach.post(f"{o}/teams/{team}/presentations", json={"title": "T", "match_id": m["id"]})
+        await coach.post(
+            f"{o}/teams/{team}/presentations", json={"title": "T", "match_id": m["id"]}
+        )
     ).json()
     slides = f"{o}/presentations/{pres['id']}/slides"
     r = await coach.post(slides, json={"type": "clip", "clip_id": clip["id"], "content": {}})
@@ -247,9 +249,7 @@ async def test_clip_slide_needs_a_video(make_api: Callable[[], Api]) -> None:
     assert r.status_code == 201, r.text
     assert r.json()["content"]["video_id"] == video["id"]
     # a clip of another team of the club
-    other = (
-        await coach.post(f"{o}/teams", json={"name": "Damen 1", "gender": "women"})
-    ).json()
+    other = (await coach.post(f"{o}/teams", json={"name": "Damen 1", "gender": "women"})).json()
     m2 = await new_match(coach, {**ids, "team": other["id"]})
     await upload(coach, ids, m2["id"], b"v" * 100)
     foreign = (

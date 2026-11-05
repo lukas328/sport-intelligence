@@ -43,6 +43,10 @@ class Match(Base, EntityMixin, TenantMixin):
         CheckConstraint(
             "kind = 'training' OR opponent_id IS NOT NULL", name="opponent_for_matches"
         ),
+        # the same official game may be in two clubs (both teams use the app), once per team
+        UniqueConstraint(
+            "team_id", "official_provider", "official_game_id", name="uq_matches_official"
+        ),
     )
 
     team_id: Mapped[uuid.UUID] = mapped_column(
@@ -90,6 +94,10 @@ class Match(Base, EntityMixin, TenantMixin):
     format: Mapped[str] = mapped_column(String(20), nullable=False, default="adult_2x30")
     period_s: Mapped[int] = mapped_column(Integer, nullable=False, default=1800)
     periods: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=2)
+    # official game (federation onboarding): schedule sync and automatic report import
+    official_provider: Mapped[str | None] = mapped_column(String(20))
+    official_game_id: Mapped[int | None] = mapped_column(Integer)
+    official_report_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class VideoAsset(Base, EntityMixin, TenantMixin):

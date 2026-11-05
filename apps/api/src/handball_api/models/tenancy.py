@@ -4,8 +4,17 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint, func
-from sqlalchemy.dialects.postgresql import CITEXT, JSONB
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.dialects.postgresql import ARRAY, CITEXT, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from handball_api.core.db import Base, EntityMixin, TenantMixin
@@ -17,6 +26,9 @@ class Organization(Base, EntityMixin):
     """The tenant (club). RLS: visible when it is the current org or the user is a member."""
 
     __tablename__ = "organizations"
+    __table_args__ = (
+        UniqueConstraint("official_provider", "official_club_id", name="uq_organizations_official"),
+    )
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     country: Mapped[str] = mapped_column(String(2), nullable=False, default="CH")
@@ -39,6 +51,22 @@ class Organization(Base, EntityMixin):
     # end of the period paid by invoice; the plan stays active until then
     paid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     trial_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # official club (docs/plans/federation-onboarding.md): one organisation per provider + club id
+    official_provider: Mapped[str | None] = mapped_column(String(20))
+    official_club_id: Mapped[int | None] = mapped_column(Integer)
+    # mail domains of the club (website, club address) for the verification by mail domain
+    official_domains: Mapped[list[str]] = mapped_column(
+        ARRAY(String(120)), nullable=False, default=list, server_default="{}"
+    )
+    # none (no official link, as before) | unverified | verified
+    verification: Mapped[str] = mapped_column(
+        String(12), nullable=False, default="none", server_default="none"
+    )
+    verified_via: Mapped[str | None] = mapped_column(String(20))
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    claimed_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
 
 
 class StripeEvent(Base):
@@ -67,6 +95,9 @@ class OrgMembership(Base, EntityMixin, TenantMixin):
 
 class Team(Base, EntityMixin, TenantMixin):
     __tablename__ = "teams"
+    __table_args__ = (
+        UniqueConstraint("official_provider", "official_team_id", name="uq_teams_official"),
+    )
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     league: Mapped[str | None] = mapped_column(String(120))
@@ -79,6 +110,17 @@ class Team(Base, EntityMixin, TenantMixin):
     settings: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
     # calendar subscription (5.7): only the hash is stored; the link is shown once
     calendar_token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
+    # registered team in the official data (team id per season, group = league group)
+    official_provider: Mapped[str | None] = mapped_column(String(20))
+    official_team_id: Mapped[int | None] = mapped_column(Integer)
+    official_club_id: Mapped[int | None] = mapped_column(Integer)
+    official_group_id: Mapped[int | None] = mapped_column(Integer)
+    official_season_id: Mapped[int | None] = mapped_column(Integer)
+    official_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # last official standing and league names (public data, no player names)
+    official_state: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default="{}"
+    )
 
     @property
     def players_see_team_stats(self) -> bool:

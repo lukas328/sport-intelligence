@@ -139,3 +139,31 @@ async def test_reports_are_created_72h_before(make_api: Callable[[], Api]) -> No
     assert (await coach.get(f"/v1/orgs/{org}/matches/{due['id']}/scouting")).status_code == 200
     notes = (await coach.get(f"/v1/orgs/{org}/me/notifications")).json()
     assert any(n["kind"] == "scouting_ready" for n in notes["items"])
+
+
+def test_report_clips_are_moments_of_the_video() -> None:
+    """An earlier game with the official report and a clip of five minutes from mid-half: the
+    report's clips used to point at goals before or after the video (negative or too large
+    times), where the player shows nothing. Matches without a known length keep every time."""
+    import uuid
+
+    from handball_api.models import Event
+    from handball_api.services.scouting import _clips
+
+    clip_game, full_game = uuid.uuid4(), uuid.uuid4()
+    videos = {clip_game: uuid.uuid4(), full_game: uuid.uuid4()}
+    events = [
+        Event(id=uuid.uuid4(), match_id=m, t_ms=t)
+        for m, t in (
+            (clip_game, -60_000),
+            (clip_game, 120_000),
+            (clip_game, 400_000),
+            (full_game, 3_000_000),
+            (full_game, None),
+        )
+    ]
+    refs = _clips(events, videos, {clip_game: 300_000, full_game: None})
+    assert [(r["match_id"], r["t_ms"]) for r in refs] == [
+        (str(clip_game), 120_000),
+        (str(full_game), 3_000_000),
+    ]
