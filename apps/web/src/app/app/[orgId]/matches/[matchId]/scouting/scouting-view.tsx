@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Card, EmptyState } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 
 type Ref = { event_id: string; match_id: string; video_id: string | null; t_ms: number | null };
@@ -46,6 +46,11 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
       (await api.POST("/v1/orgs/{org_id}/scouting/{report_id}/presentation", { params: { path: { org_id: orgId, report_id: id } } })).data,
     onSuccess: (p) => p && router.push(`/app/${orgId}/presentations/${p.id}`),
   });
+  // the title names the opponent and the date: a report is about one match
+  const match = useQuery({
+    queryKey: ["match", matchId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}", { params: { path } })).data,
+  });
   const rep = q.data;
   const f = rep?.facts as Facts | undefined;
   const zone = (z: string | null) => (z ? (tz.has(z) ? tz(z) : z) : "-");
@@ -55,7 +60,7 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
         {refs
           .filter((r) => r.video_id && r.t_ms != null)
           .map((r, i) => (
-            <Link key={r.event_id} href={`/app/${orgId}/matches/${r.match_id}?t=${Math.max(0, (r.t_ms ?? 0) - 6000)}`} className="font-medium text-accent hover:underline">
+            <Link key={r.event_id} href={`/app/${orgId}/matches/${r.match_id}?t=${Math.max(0, (r.t_ms ?? 0) - 6000)}`} className="font-medium underline underline-offset-4">
               {t("clipN", { n: i + 1 })}
             </Link>
           ))}
@@ -66,12 +71,20 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <BackLink fallback={`/app/${orgId}/matches/${matchId}`} />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-muted">
+            {t("title")}
+            {match.data && ` · ${format.dateTime(new Date(match.data.kickoff_at), { weekday: "short", day: "numeric", month: "long", year: "numeric" })}`}
+          </p>
+          <h1 className="text-2xl font-bold sm:text-[1.75rem]">{match.data?.opponent?.name ? t("against", { name: match.data.opponent.name }) : t("title")}</h1>
+        </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" loading={create.isPending} onClick={() => create.mutate()}>
-            {rep ? t("refresh") : t("create")}
-          </Button>
+          {rep && (
+            <Button variant="secondary" loading={create.isPending} onClick={() => create.mutate()}>
+              {t("refresh")}
+            </Button>
+          )}
           {rep && (
             <>
               <a className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/pdf?lang=${locale}`}>
@@ -87,15 +100,19 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
           )}
         </div>
       </div>
-      {!rep && !q.isLoading && <EmptyState title={t("none")}>{t("autoHint")}</EmptyState>}
+      {!rep && !q.isLoading && (
+        <EmptyState title={t("none")} action={<Button loading={create.isPending} onClick={() => create.mutate()}>{t("create")}</Button>}>
+          {t("autoHint")}
+        </EmptyState>
+      )}
       {rep && f && (
         <>
           <p className="text-sm text-muted" data-testid="scouting-basis">
             {t("basis", { matches: f.glance.matches, tagged: f.glance.tagged_matches, date: format.dateTime(new Date(rep.generated_at), { dateStyle: "medium", timeStyle: "short" }) })}
           </p>
-          {f.missing.length > 0 && <p className="rounded-md bg-surface px-3 py-2 text-sm">{t("missing", { items: f.missing.map((m) => t(`missing_${m}` as "missing_video")).join(", ") })}</p>}
+          {f.missing.length > 0 && <p className="text-sm">{t("missing", { items: f.missing.map((m) => t(`missing_${m}` as "missing_video")).join(", ") })}</p>}
 
-          <Card className="space-y-2">
+          <section className="space-y-2 border-t-2 border-foreground pt-3">
             <h2 className="font-semibold">{t("observations")}</h2>
             <p className="text-xs text-muted">{t("observationsHint")}</p>
             {f.observations.length === 0 ? (
@@ -111,18 +128,18 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
                 ))}
               </ul>
             )}
-          </Card>
+          </section>
 
-          <Card className="space-y-1">
+          <section className="space-y-1 border-t-2 border-foreground pt-3">
             <h2 className="font-semibold">{t("glance")}</h2>
             <p className="text-sm">{t("record", f.glance.record)}</p>
             <p className="text-sm">
               {t("goalsPerMatch", { v: f.glance.goals_per_match ?? "-" })} · {t("shootingPct", { v: pct(f.glance.shooting_pct) })}
               {sample(f.glance.n)}
             </p>
-          </Card>
+          </section>
 
-          <Card className="space-y-2">
+          <section className="space-y-2 border-t-2 border-foreground pt-3">
             <h2 className="font-semibold">{t("shooters")}</h2>
             {f.shooters.length === 0 && <p className="text-sm text-muted">{t("noShooters")}</p>}
             <ul className="grid gap-3 sm:grid-cols-2" data-testid="shooters">
@@ -147,14 +164,14 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
                 </li>
               ))}
             </ul>
-          </Card>
+          </section>
 
-          <Card className="space-y-1">
+          <section className="space-y-1 border-t-2 border-foreground pt-3">
             <h2 className="font-semibold">{t("plays")}</h2>
             <p className="text-sm text-muted">{t("playsMissing")}</p>
-          </Card>
+          </section>
 
-          <Card className="space-y-1">
+          <section className="space-y-1 border-t-2 border-foreground pt-3">
             <h2 className="font-semibold">{t("defense")}</h2>
             {Object.keys(f.defense.formations_ms).length === 0 && f.defense.weak_zones.length === 0 && <p className="text-sm text-muted">{t("noDefense")}</p>}
             {Object.entries(f.defense.formations_ms).map(([form, ms]) => (
@@ -169,18 +186,18 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
                 {clips(w.clips)}
               </p>
             ))}
-          </Card>
+          </section>
 
-          <Card className="space-y-1">
+          <section className="space-y-1 border-t-2 border-foreground pt-3">
             <h2 className="font-semibold">{t("fastBreak")}</h2>
             <p className="text-sm">
               {t("fastBreakText", { goals: f.fast_break.goals, share: pct(f.fast_break.share) })}
               {sample(f.fast_break.n)}
               {clips(f.fast_break.clips)}
             </p>
-          </Card>
+          </section>
 
-          <Card className="space-y-1">
+          <section className="space-y-1 border-t-2 border-foreground pt-3">
             <h2 className="font-semibold">{t("numbers")}</h2>
             <p className="text-sm">
               {t("theyPP", { goals: f.numbers.they_in_powerplay.goals, periods: f.numbers.they_in_powerplay.periods })}
@@ -190,7 +207,7 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
               {t("wePP", { goals: f.numbers.we_in_powerplay.goals, periods: f.numbers.we_in_powerplay.periods })}
               {clips(f.numbers.we_in_powerplay.clips)}
             </p>
-          </Card>
+          </section>
         </>
       )}
     </div>

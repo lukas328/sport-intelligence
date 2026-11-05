@@ -197,6 +197,22 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                 {editing ? t("roster.editDone") : t("roster.editList")}
               </Button>
             )}
+            {/* before filming: who still lacks a consent, in one sentence (staff only) */}
+            {canEdit && (() => {
+              const missing = entries.filter((p) => !p.consent_complete);
+              return (
+                <p className="text-sm" data-testid="roster-consents">
+                  {missing.length === 0 ? (
+                    <span className="text-muted">{t("roster.consentsAll", { n: entries.length })}</span>
+                  ) : (
+                    <>
+                      <span className="font-semibold">{t("roster.consentsMissing", { n: missing.length, total: entries.length })}</span>{" "}
+                      <span className="text-muted">{missing.map((p) => `${p.first_name} ${p.last_name}`).join(", ")}</span>
+                    </>
+                  )}
+                </p>
+              );
+            })()}
             {GROUPS.map(([g, positions]) => {
               const members = entries.filter((p) => (g === "other" ? !ALL_POSITIONS.includes(p.main_position ?? "") : (positions as readonly string[]).includes(p.main_position ?? "")));
               if (members.length === 0) return null;
@@ -223,6 +239,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                       </span>
                     )}
                     {p.shooting_hand && <span>{t(`hands.${p.shooting_hand}`)}</span>}
+                    {canEdit && !p.consent_complete && <span className="font-semibold text-foreground">{t("roster.consentMissing")}</span>}
                     {p.has_account ? (
                       <span className="inline-flex items-center gap-1.5">
                         <span aria-hidden className="size-1.5 rounded-full bg-ok" />

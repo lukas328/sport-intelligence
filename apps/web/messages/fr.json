@@ -271,7 +271,7 @@
     "noAccount": "Pas de compte",
     "hasAccount": "Lié",
     "consentOk": "Complet",
-    "consentMissing": "Manquant",
+    "consentMissing": "Consentement manquant",
     "empty": "Aucun joueur dans l'effectif.",
     "emptyHint": "Ajoutez les joueurs un par un ou importez un fichier CSV.",
     "addTitle": "Ajouter un joueur",
@@ -296,7 +296,9 @@
     "group_pivot": "Pivot",
     "group_other": "Sans poste",
     "editList": "Modifier la liste",
-    "editDone": "Terminé"
+    "editDone": "Terminé",
+    "consentsAll": "Consentements vidéo : les {n} sont complets.",
+    "consentsMissing": "Consentement manquant pour {n} sur {total} :"
   },
   "settings": {
     "title": "Paramètres",
@@ -1524,7 +1526,7 @@
     "pdf": "PDF",
     "gkCard": "Fiche des tireurs (A6)",
     "none": "Pas encore de rapport de préparation.",
-    "autoHint": "Il est créé automatiquement 72 heures avant le match dès que des données sur l'adversaire existent.",
+    "autoHint": "Il est créé 72 heures avant le match dès que des données sur l'adversaire existent. Tu peux aussi le créer maintenant.",
     "basis": "Basé sur {matches} matchs contre cet adversaire, dont {tagged} avec événements. Créé le {date}.",
     "observationsHint": "Des observations tirées des données, pas des consignes. Chacune avec échantillon et clips.",
     "noObservations": "Pas assez de données pour des observations.",
@@ -1533,7 +1535,8 @@
     "noDefense": "Pas encore de données sur la défense.",
     "clipN": "Clip {n}",
     "sample": "n = {n}",
-    "asPresentation": "En présentation"
+    "asPresentation": "En présentation",
+    "against": "Contre {name}"
   },
   "presentations": {
     "title": "Présentations",
@@ -2013,7 +2016,7 @@
   "profile": {
     "title": "Profil public",
     "hint": "Un profil avec des scènes et des chiffres choisis, à partager par un lien. Il est facultatif et révocable à tout moment.",
-    "none": "Les profils de toi et de tes enfants apparaissent ici dès que ton compte est lié à un effectif.",
+    "none": "Aucun profil de joueur n'est lié à ton compte. Les profils publics existent pour les joueurs ; les parents voient ici les profils de leurs enfants.",
     "child": "(ton enfant)",
     "blocked_consent-missing": "Un profil public nécessite le consentement « Profil public ».",
     "blocked_youth-protection": "Les équipes de jeunes n'ont pas de profils publics.",

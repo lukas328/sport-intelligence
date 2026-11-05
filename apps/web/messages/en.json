@@ -271,7 +271,7 @@
     "noAccount": "No account",
     "hasAccount": "Linked",
     "consentOk": "Complete",
-    "consentMissing": "Missing",
+    "consentMissing": "Consent missing",
     "empty": "No players in the roster yet.",
     "emptyHint": "Add players one by one or import a CSV file.",
     "addTitle": "Add player",
@@ -296,7 +296,9 @@
     "group_pivot": "Pivot",
     "group_other": "No position",
     "editList": "Edit list",
-    "editDone": "Done"
+    "editDone": "Done",
+    "consentsAll": "Video consents: all {n} complete.",
+    "consentsMissing": "Consent missing for {n} of {total}:"
   },
   "settings": {
     "title": "Settings",
@@ -1524,7 +1526,7 @@
     "pdf": "PDF",
     "gkCard": "Shooter card (A6)",
     "none": "No preparation report yet.",
-    "autoHint": "It is created automatically 72 hours before the match once data about the opponent exists.",
+    "autoHint": "It is created 72 hours before the match once there is data on the opponent. You can also create it now.",
     "basis": "Based on {matches} matches against this opponent, {tagged} with events. Created {date}.",
     "observationsHint": "Observations from the data, not instructions. Each with sample size and clips.",
     "noObservations": "Not enough data for observations.",
@@ -1533,7 +1535,8 @@
     "noDefense": "No defence data yet.",
     "clipN": "Clip {n}",
     "sample": "n = {n}",
-    "asPresentation": "As presentation"
+    "asPresentation": "As presentation",
+    "against": "Against {name}"
   },
   "presentations": {
     "title": "Presentations",
@@ -2013,7 +2016,7 @@
   "profile": {
     "title": "Public profile",
     "hint": "A profile with chosen scenes and figures that you can share by link. It is voluntary and can be withdrawn at any time.",
-    "none": "Profiles of you and your children appear here once your account is linked to a roster.",
+    "none": "No player profile is linked to your account. Public profiles exist for players; parents see their children's profiles here.",
     "child": "(your child)",
     "blocked_consent-missing": "A public profile needs the consent \"Public profile\".",
     "blocked_youth-protection": "Youth teams have no public profiles.",

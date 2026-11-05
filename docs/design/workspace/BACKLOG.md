@@ -62,13 +62,15 @@ Worked through in batches; each batch is one or a few commits. `[x]` = done.
 
 - [x] P1 Einstellungen: ~150 device sessions make the page 11 500 px long; a full red bar for
   "Teams 2 / 1" while limits are off; plan cards inside the plan card.
-- [ ] P1 Profil, Einwilligungen: a coach gets an empty state about "deinen Kindern"; no team
+- [x] P1 Profil, Einwilligungen (the squad says whose consent is missing; a full consent table stays in Later): a coach gets an empty state about "deinen Kindern"; no team
   consent overview before filming.
-- [ ] P1 Gegner: (figures as one open row with "pro Spiel" done) KPI tiles, dead shooter numbers, games without who is home.
-- [ ] P1 Scouting: no opponent or date in the title; the empty state contradicts its button.
+- [x] P1 Gegner: shooter numbers with names from the opponent's squad, open columns, the squad editor after the figures.
+  Home or away per game needs the profile API to return it (Later).
+- [x] P1 Scouting: no opponent or date in the title; the empty state contradicts its button.
 
 ## Later (features)
 
+- Opponent profile: home or away per game (API field).
 - Own drills ("Neue Übung"): needs a drills API; the library is static today.
 - Player status (verletzt, abwesend) on the squad; attendance on units and dates; assignment
   progress ("8 von 14 erledigt"); recurring training slots; a team consent table for staff.

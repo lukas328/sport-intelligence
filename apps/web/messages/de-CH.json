@@ -271,7 +271,7 @@
     "noAccount": "Kein Konto",
     "hasAccount": "Verknüpft",
     "consentOk": "Vollständig",
-    "consentMissing": "Fehlt",
+    "consentMissing": "Einwilligung fehlt",
     "empty": "Noch keine Spieler im Kader.",
     "emptyHint": "Füg Spieler einzeln hinzu oder importiere eine CSV-Datei.",
     "addTitle": "Spieler hinzufügen",
@@ -296,7 +296,9 @@
     "group_pivot": "Kreis",
     "group_other": "Ohne Position",
     "editList": "Liste bearbeiten",
-    "editDone": "Fertig"
+    "editDone": "Fertig",
+    "consentsAll": "Einwilligungen für Video: alle {n} vollständig.",
+    "consentsMissing": "Einwilligung fehlt bei {n} von {total}:"
   },
   "settings": {
     "title": "Einstellungen",
@@ -1524,7 +1526,7 @@
     "pdf": "PDF",
     "gkCard": "Werfer-Karte (A6)",
     "none": "Noch kein Vorbereitungsbericht.",
-    "autoHint": "Er entsteht automatisch 72 Stunden vor dem Spiel, sobald Daten zum Gegner vorliegen.",
+    "autoHint": "Er entsteht 72 Stunden vor dem Spiel von selbst, sobald Daten zum Gegner vorliegen. Du kannst ihn auch jetzt erstellen.",
     "basis": "Basis: {matches} Spiele gegen diesen Gegner, davon {tagged} mit Ereignissen. Erstellt am {date}.",
     "observationsHint": "Beobachtungen aus den Daten, keine Anweisungen. Jede mit Stichprobe und Clips.",
     "noObservations": "Zu wenig Daten für Beobachtungen.",
@@ -1533,7 +1535,8 @@
     "noDefense": "Noch keine Daten zur Abwehr.",
     "clipN": "Clip {n}",
     "sample": "n = {n}",
-    "asPresentation": "Als Präsentation"
+    "asPresentation": "Als Präsentation",
+    "against": "Gegen {name}"
   },
   "presentations": {
     "title": "Präsentationen",
@@ -2013,7 +2016,7 @@
   "profile": {
     "title": "Öffentliches Profil",
     "hint": "Ein Profil mit ausgewählten Szenen und Zahlen, das du über einen Link teilen kannst. Es ist freiwillig und jederzeit widerrufbar.",
-    "none": "Hier erscheinen die Profile von dir und deinen Kindern, sobald dein Konto mit einem Kader verknüpft ist.",
+    "none": "Mit deinem Konto ist kein Spielerprofil verknüpft. Öffentliche Profile gibt es für Spielerinnen und Spieler; Eltern sehen hier die Profile ihrer Kinder.",
     "child": "(dein Kind)",
     "blocked_consent-missing": "Für ein öffentliches Profil braucht es die Einwilligung «Öffentliches Profil».",
     "blocked_youth-protection": "In Nachwuchsteams gibt es keine öffentlichen Profile.",
