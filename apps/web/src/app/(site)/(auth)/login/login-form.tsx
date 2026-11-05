@@ -9,7 +9,7 @@ import { Alert, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
-import { safeNext } from "@/lib/nav";
+import { enterApp, safeNext } from "@/lib/nav";
 
 type Mode = "password" | "magic" | "totp" | "magic-sent";
 
@@ -26,6 +26,7 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
     const form = new FormData(e.currentTarget);
     setBusy(true);
     setError(null);
+    let leaving = false;
     try {
       if (mode === "password") {
         const { data, error } = await api.POST("/v1/auth/login", {
@@ -33,22 +34,21 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
         });
         if (error) return setError(errorKey(error));
         if (data.status === "totp_required") return setMode("totp");
-        // a full load after sign-in: the session is new, and a client push plus refresh raced the
-        // server redirect of /app (the org layout rendered once without its translations)
-        window.location.assign(next);
+        leaving = true;
+        enterApp(next);
       } else if (mode === "totp") {
         const { error } = await api.POST("/v1/auth/login/totp", { body: { code: String(form.get("code")) } });
         if (error) return setError(errorKey(error));
-        // a full load after sign-in: the session is new, and a client push plus refresh raced the
-        // server redirect of /app (the org layout rendered once without its translations)
-        window.location.assign(next);
+        leaving = true;
+        enterApp(next);
       } else if (mode === "magic") {
         const { error } = await api.POST("/v1/auth/magic-link", { body: { email: String(form.get("email")) } });
         if (error) return setError(errorKey(error));
         setMode("magic-sent");
       }
     } finally {
-      setBusy(false);
+      // keep the button busy while the next page loads
+      if (!leaving) setBusy(false);
     }
   }
 

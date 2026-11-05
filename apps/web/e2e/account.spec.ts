@@ -46,3 +46,42 @@ test("login shows provider errors from the callback", async ({ page }) => {
   await page.goto("/login?error=oauth-cancelled");
   await expect(page.getByText("Die Anmeldung wurde abgebrochen.")).toBeVisible();
 });
+
+test("sign-in lands in the first club, server-rendered without errors", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  const email = uniqueEmail("signin");
+  await register(page, email);
+  await page.getByLabel("Vereinsname").fill("HC Anmeldung");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("Herren 1");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/app\/[^/]+\/teams\//);
+  const orgId = page.url().match(/\/app\/([^/?#]+)/)![1]!;
+  await page.context().clearCookies();
+
+  // the shell used to fail its server render after push + refresh to /app ("Switched to client rendering")
+  const errors: string[] = [];
+  page.on("console", (m) => {
+    if (
+      m.type() === "error" &&
+      /NextIntlClientProvider|Switched to client rendering/.test(m.text())
+    )
+      errors.push(m.text());
+  });
+  page.on("pageerror", (e) => errors.push(e.message));
+  const documents: string[] = [];
+  page.on("request", (r) => {
+    if (r.resourceType() === "document") documents.push(new URL(r.url()).pathname);
+  });
+  await page.goto("/login");
+  await page.getByLabel("E-Mail").fill(email);
+  await page.getByLabel("Passwort").fill("correct-horse-1");
+  await page.getByRole("button", { name: "Anmelden", exact: true }).click();
+  await page.waitForURL(new RegExp(`/app/${orgId}$`), { timeout: 30_000 });
+  await expect(page.getByRole("link", { name: "Team", exact: true })).toBeVisible();
+  // /app is answered by the server (first club) with one document request, not a client redirect chain
+  expect(documents.filter((d) => d === "/app")).toHaveLength(1);
+  expect(errors).toEqual([]);
+});
