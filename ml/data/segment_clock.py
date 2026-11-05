@@ -50,6 +50,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import os
 import resource
 import sys
@@ -627,7 +628,8 @@ def labels(workdir: Path, out_dir: Path, official_dir: Path = OFFICIAL) -> list[
     for name, game in sorted(all_games(workdir).items()):
         if not any((s.get("clock") or {}).get("source") for s in game.get("segments") or []):
             continue
-        official = load_json(official_dir / f"{name}.json", {})
+        # Drive names can carry a format suffix ("..._2023-09-23.f298"); the logs use the plain name
+        official = load_json(official_dir / f"{re.sub(r'[.]f[0-9]+$', '', name)}.json", {})
         if not official.get("log"):
             continue
         result = game_labels(name, game, official)

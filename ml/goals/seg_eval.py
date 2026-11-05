@@ -8,8 +8,9 @@ Scores (one series per segment on a 0.2 s grid, from `seg_cues.py`):
 - single cues: pan_rev, still_swing, pan_after, cen_rev, flow_rev, play_rev, energy_drop,
   restart_back (throw-off detector moved back to the goal);
 - `sum_*`: sum of per-segment robust z-scores (median / IQR of the segment, clipped);
-- `tmpl_*`: matched filter. Channels are z-scored per segment; the template is the mean profile
-  around reference goal + `--shift`, built leave-one-game-out (no goal of the scored game helps);
+- `tmpl_*`: matched filter. Channels are standardised per segment (mean / sd); the template is the
+  mean profile around reference goal + `--shift`, built leave-one-game-out (no goal of the scored
+  game helps); `tmpl_*+lull` adds the post-goal lull (`seg_cues.lull_after`), z-scored;
 - `bcast_*`: the Magdeburg broadcast template (pan, energy; `cues.profile_channels`, built from the
   overlay-confirmed goal clips as in `evaluate.py`), normalised with the broadcast's non-goal clips
   (`_mdnorm`) or per segment (`_segnorm`): how well the TV template transfers;
@@ -22,10 +23,14 @@ Metrics:
   count, same suppression) as the baseline, and the median candidate - goal time of the hits;
 - window AUC: the max score in the hit window of each goal against the same-length windows that
   stay 15 s away from every goal (comparable with the 9-second clip AUC of the broadcast study).
-Breakdowns per game, per camera type (fixed / panning from the pan statistics) and per overlay.
+Breakdowns per game, per camera type (fixed / panning from the pan statistics), per overlay, per
+reference source and dev / test (`DEV_GAMES` were looked at while designing the lull and restart
+cues; the other games are held out). `--edge-margin 6` leaves out goals within 6 s of a segment's
+start or end, where the windows are cut (continuous footage has no such ends).
 
 usage: uv run --project packages/vision python ml/goals/seg_eval.py CACHE_DIR LABELS.json
-       [--broadcast <scratch>/goals/cache] [--shift 2] [--out results.json]
+       [--broadcast <scratch>/goals/cache] [--shift 2] [--edge-margin 6] [--out results.json]
+       [--inspect tmpl_people_flow]
 """
 
 from __future__ import annotations
@@ -143,9 +148,9 @@ def template_series(ch: np.ndarray, tmpl: np.ndarray, sign_cols: tuple[int, ...]
 
 def seg_channels(x: dict, names: tuple[str, ...]) -> np.ndarray:
     ch = np.column_stack([x[n] for n in names]).astype(float)
-    med = np.median(ch, axis=0)
-    iqr = np.maximum(np.percentile(ch, 75, axis=0) - np.percentile(ch, 25, axis=0), 1e-6)
-    return (ch - med) / iqr
+    # mean / standard deviation per segment: an IQR blows up the camera speed of a camera that
+    # stands still half of the time
+    return (ch - ch.mean(axis=0)) / (ch.std(axis=0) + 1e-6)
 
 
 def broadcast_template(cache: Path) -> dict | None:
@@ -199,7 +204,8 @@ def all_scores(segs: dict, refs: dict, shift: float, bc: dict | None) -> dict[st
                     ex[s["lab"]["game"]].append(sc.profile_at(chs[stem], i, sign))
         for stem, s in segs.items():
             others = [e for g, v in ex.items() if g != s["lab"]["game"] for e in v]
-            out[stem][name] = template_series(chs[stem], np.mean(others, axis=0), sign) if others else np.zeros(len(chs[stem]))
+            out[stem][name] = (template_series(chs[stem], np.mean(others, axis=0), sign) if others
+                               else np.zeros(len(chs[stem])))
     # matched filter (the transition) plus the post-goal lull (goal-specific evidence)
     for stem in segs:
         o = out[stem]
@@ -305,7 +311,8 @@ def evaluate(scores: dict, segs: dict, refs: dict, subset: list[str], rng: np.ra
     minutes = sum(segs[k]["lab"]["duration_s"] for k in subset) / 60
     base = {}
     for r in RATES:
-        h = sum(random_recall(segs[k]["lab"]["duration_s"], refs[k], round(r * segs[k]["lab"]["duration_s"] / 60), rng, 50)
+        h = sum(random_recall(segs[k]["lab"]["duration_s"], refs[k],
+                              round(r * segs[k]["lab"]["duration_s"] / 60), rng, 50)
                 for k in subset if refs[k])
         base[r] = h / max(n_goals, 1)
     res["_random"] = {f"r@{r}": round(base[r], 3) for r in RATES}
@@ -349,7 +356,8 @@ def inspect(name: str, scores: dict, segs: dict, refs: dict, use: list[str], del
         expl = []
         for c in fas:
             near = [e for e in segs[k]["lab"]["log_other"] if -2 <= c - (e["t"] - delay) <= 10]
-            kind = near[-1]["kind"] if near else ("?" if segs[k]["lab"]["log_goals"] or segs[k]["lab"]["has_log"] else "no log")
+            logged = segs[k]["lab"]["log_goals"] or segs[k]["lab"]["has_log"]
+            kind = near[-1]["kind"] if near else ("?" if logged else "no log")
             expl.append(f"{c:.0f}:{kind}")
             if segs[k]["lab"]["has_log"] and segs[k]["lab"]["clock_source"]:
                 kinds[kind] = kinds.get(kind, 0) + 1
@@ -366,6 +374,8 @@ def main() -> None:
                     default=Path("/tmp/claude-0/-home-user/3dc450e2-2499-5e21-b252-1c4e366c6b5a/scratchpad/goals/cache"))
     ap.add_argument("--shift", type=float, default=2.0, help="template centre - reference goal (s)")
     ap.add_argument("--out", type=Path)
+    ap.add_argument("--edge-margin", type=float, default=0.0,
+                    help="leave out goals this close to a segment's start or end (s)")
     ap.add_argument("--inspect", help="score name: list its candidates at 2/min, misses and what the "
                     "false alarms were in the official log")
     a = ap.parse_args()
@@ -377,6 +387,9 @@ def main() -> None:
     refs, src = {}, {}
     for stem, s in segs.items():
         refs[stem], src[stem] = reference(s["lab"], delay)
+        if a.edge_margin:  # continuous footage has no segment ends: leave out goals next to them
+            dur = s["lab"]["duration_s"]
+            refs[stem] = [g for g in refs[stem] if a.edge_margin <= g <= dur - a.edge_margin]
     use = [k for k in segs if src[k] != "none"]
     print(f"{len(use)} labelled segments of {len(segs)}: "
           f"{sum(len(refs[k]) for k in use)} goals in {sum(segs[k]['lab']['duration_s'] for k in use) / 60:.1f} min")

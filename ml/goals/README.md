@@ -159,3 +159,183 @@ uv run --project packages/vision python ml/goals/extract.py $S/goals/cache_seg $
 uv run --project packages/vision python ml/goals/stream_eval.py $S/goals/cache_seg $S/goals/cache \
   $S/match/magdeburg_goals/index.json --starts 855,1709,3988,4843
 ```
+
+## Club footage: goal candidates on the ingest's 3-minute segments
+The broadcast study above worked on one TV game. This part runs on the raw club recordings of the
+ingest (`ml/data/ingest_drive.py`, 3-minute segments at 1280x720, 60 fps) and turns the cues into a
+**candidate list**: the top N moments per minute, each to be confirmed by a coach with one click.
+Recall counts, precision does not.
+
+### Data and labels
+- **Footage**: 45 segments of 13 SG Wädenswil/Horgen NLB games (batches b01, b02 and the local
+  batch_03). They all come from the same stream producer: an operated camera high on the side that
+  pans with play and zooms a little, and a score overlay at the top. **There is no fixed-camera or
+  overlay-free game with labels yet**, so the "fixed vs panning" and "overlay vs none" splits asked
+  for cannot be measured: every labelled segment is panning with an overlay. The overlay is masked
+  out of every motion signal and is used only as the label.
+- **Labels from the overlay score**: PP-OCR (the `hallboard` models) reads the overlay's score field
+  every 0.5 s (`seg_extract.py`; the field is the score-like token on the key frames that keeps its
+  value and has no leading zero, unlike the clock), cleaned by `scoreboard.goals_from_scores`.
+  This needs neither a clock nor a log and labels every segment with a running overlay. Jumps by
+  several goals (overlay hidden) are left out. 35 segments have a usable reading: **79 goals in
+  105 min**, 73 of them more than 6 s from a segment end.
+- **Labels from the official log** (`segment_clock.game_labels`, the code behind `--labels`): 4
+  games have both a log and a clock (Emmen 2023-09-03, Fortitudo Gossau, HC Arbon 2023-12-10, HSG
+  Baden-Endingen; 18 log goals). They add one segment without an overlay reading (Baden-Endingen s0,
+  1 goal) and measure the log delay.
+- **The log is not late here.** Log time minus overlay change, same score, same segment: median
+  **-0.5 s** (21 goals, range -3.0 to +0.5 s). The overlay changes about 1 s after the ball is in
+  the net (checked on a counter-attack goal frame by frame). The 5 s delay of the Magdeburg log
+  belongs to that TV production; on these club streams log, overlay and goal agree within ~1 s.
+- **Hall-board clock mapping is unreliable when the anchor is far**: log entries counted from a
+  clock reading more than 5 s away (`anchor_gap_s`) were 24 to 47 s off, one a first-half 1:0
+  goal placed into a second-half segment at 23:20. They are left out (`MAX_ANCHOR_GAP_S`).
+
+### Signals and cues (`seg_extract.py`, `seg_cues.py`)
+One heavy pass per segment, cached as a compressed npz (1.6 MB, 70 MB for all 45): about 4.5 min of
+wall time per 3-minute segment on 2 threads of the shared CPU, most of it YOLOX-m at 2 Hz.
+- **Camera**: pan per decoded frame (about 30 Hz, phase correlation on 320x180 grey with a Hanning
+  window and the overlay boxes masked; note that `cv2.phaseCorrelate` applies the window to its
+  inputs in place), compensated motion energy.
+- **Flow towards a half**: Farneback flow at 10 Hz minus the camera's median flow, so the residual
+  is the players' canvas velocity; the moving pixels' mean x-flow, their share (activity) and a
+  16-bin histogram over x.
+- **People**: YOLOX-m at 2 Hz; feet in canvas coordinates (image + accumulated pan). Benches,
+  spectators and the table are dropped as "static" (a canvas spot occupied in 60 % of the
+  detection frames of the surrounding 30 s). Median x (centroid), 10-90 % spread, play position
+  `p` (-1..1 between the segment's 3rd and 97th percentile), balance left/right of the centre.
+- **Cues** on a 10 Hz grid: `pan_rev`, `still_swing`, `pan_after` (as before); `cen_rev`,
+  `flow_rev`, `play_rev` (the same reversal on the people centroid, the residual flow, and their
+  mean with the pan); `energy_drop`; the matched filter `tmpl_*` on per-segment standardised
+  channels (leave-one-game-out, centred 2 s after the goal); `lull_after` (busy around t, quiet
+  8-24 s later); the **restart detector** `restart` (a lull of 8 s with little activity and a still
+  camera, then activity or the camera picks up; softly weighted by the play near the centre and
+  people on both sides of the centre line) and `restart_back` (moved back by the median lag of
+  27 s); `logreg` (all cues, leave-one-game-out).
+
+### Results
+Candidates: the top 1, 2 or 4 peaks per minute and segment (8 s non-maximum suppression, none in
+the first and last 2 s). A goal is found when a candidate lies 3 s before to 8 s after the overlay
+change. "Random" is the recall of the same number of random candidates: with an 11 s window, 4 per
+minute cover most of the minute, so **r@1 and r@2 are the numbers that tell cues apart**. Window
+AUC: best score in each goal's window against equally long windows 15 s away from every goal.
+Dev = the 3 games looked at while designing `lull_after`, the restart detector and its lag; test =
+the other 10 games (56 goals in 72 min), untouched while designing. Goals within 6 s of a segment
+end are left out (`--edge-margin 6`; with them: `tmpl_people_flow` 0.51 / 0.80 / 0.91,
+`tmpl_all+lull` 0.57 / 0.81 / 0.92 on all 79 goals).
+
+| Score | recall @1 / 2 / 4 per min, all (73 goals) | test (56 goals) | AUC all | AUC test | candidate - goal, median (IQR) |
+|---|---|---|---|---|---|
+| random candidates | 0.19 / 0.37 / 0.69 | 0.18 / 0.35 / 0.70 | | | |
+| `pan_rev` | 0.37 / 0.63 / 0.73 | 0.38 / 0.61 / 0.73 | 0.747 | 0.713 | -0.3 s (5.6) |
+| `still_swing` | 0.42 / 0.67 / 0.89 | 0.39 / 0.66 / 0.88 | 0.825 | 0.795 | -0.5 s (3.7) |
+| `pan_after` | 0.45 / 0.74 / 0.92 | 0.39 / 0.70 / 0.89 | 0.838 | 0.806 | -0.6 s (3.4) |
+| `cen_rev` (people centroid) | 0.34 / 0.69 / 0.85 | 0.29 / 0.61 / 0.82 | 0.746 | 0.693 | +0.2 s (4.7) |
+| `flow_rev` (residual flow) | 0.18 / 0.32 / 0.60 | 0.20 / 0.34 / 0.57 | 0.582 | 0.596 | +4.2 s (2.7) |
+| `play_rev` (pan + people + flow) | 0.49 / 0.64 / 0.80 | 0.46 / 0.61 / 0.77 | 0.774 | 0.765 | -0.7 s (3.6) |
+| `energy_drop` | 0.26 / 0.51 / 0.78 | 0.25 / 0.52 / 0.77 | 0.599 | 0.569 | +3.1 s (2.9) |
+| `lull_after` | 0.59 / 0.78 / 0.97 | 0.52 / 0.73 / 0.96 | 0.810 | 0.790 | +1.2 s (3.2) |
+| `restart_back` (throw-off) | 0.33 / 0.56 / 0.82 | 0.27 / 0.52 / 0.80 | 0.617 | 0.614 | +3.1 s (5.1) |
+| sum z(pan_rev, still_swing, cen_rev, flow_rev) | 0.41 / 0.57 / 0.81 | 0.43 / 0.55 / 0.79 | 0.772 | 0.760 | -1.1 s (5.2) |
+| `tmpl_camera` (pan, energy) | 0.42 / 0.66 / 0.88 | 0.41 / 0.64 / 0.86 | 0.743 | 0.732 | +2.8 s (3.7) |
+| **`tmpl_people_flow`** (centroid velocity, flow x, activity) | 0.53 / **0.84** / 0.94 | 0.45 / **0.79** / 0.93 | **0.862** | **0.837** | +1.4 s (**2.5**) |
+| `tmpl_all` (pan, centroid, flow x, activity, energy) | 0.53 / 0.81 / 0.93 | 0.48 / 0.75 / 0.91 | 0.854 | 0.829 | +1.8 s (3.7) |
+| `tmpl_camera` + `lull_after` | 0.62 / 0.84 / 0.90 | 0.57 / 0.80 / 0.88 | 0.840 | 0.802 | +2.3 s (3.0) |
+| `tmpl_people_flow` + `lull_after` | 0.56 / 0.84 / 0.96 | 0.48 / 0.79 / 0.95 | 0.844 | 0.831 | +1.5 s (2.2) |
+| **`tmpl_all` + `lull_after`** | **0.62** / **0.84** / **0.97** | **0.54** / 0.79 / **0.96** | 0.840 | 0.825 | +1.5 s (3.3) |
+| `logreg` (all cues, LOGO) | 0.59 / 0.84 / 0.92 | 0.54 / 0.79 / 0.89 | 0.836 | 0.816 | +1.2 s (3.8) |
+| broadcast template, broadcast normalisation | 0.34 / 0.52 / 0.71 | 0.36 / 0.55 / 0.70 | 0.711 | 0.690 | -1.6 s (5.2) |
+| broadcast template, per-segment normalisation | 0.40 / 0.59 / 0.77 | 0.41 / 0.61 / 0.79 | 0.764 | 0.746 | -1.6 s (3.4) |
+
+At about 0.7 goals per minute, 2 candidates per minute with 84 % recall means a precision of about
+30 %: a coach confirms roughly 3 candidates per goal. Template centre 0 s instead of 2 s after the
+goal gives `tmpl_people_flow` 0.58 / 0.82 / 0.89 (AUC 0.872), 4 s gives 0.51 / 0.72 / 0.90: the
+choice matters little between 0 and 2 s.
+
+Per game (`tmpl_all` + `lull_after` / `tmpl_people_flow` / `pan_after`, recall @1 / 2 / 4):
+
+| Game | goals / min | tmpl_all + lull | tmpl_people_flow | pan_after | random |
+|---|---|---|---|---|---|
+| Emmen 2023-09-03 (dev) | 5 / 12 | 1.00 / 1.00 / 1.00 | 1.00 / 1.00 / 1.00 | 0.40 / 0.80 / 1.00 | 0.21 / 0.36 / 0.72 |
+| Fortitudo Gossau 2023-09-23 (dev) | 6 / 12 | 0.83 / 1.00 / 1.00 | 0.67 / 1.00 / 1.00 | 0.83 / 0.83 / 1.00 | 0.20 / 0.40 / 0.72 |
+| HC Arbon 2023-12-10 (dev) | 6 / 9 | 0.83 / 1.00 / 1.00 | 0.83 / 1.00 / 1.00 | 0.67 / 1.00 / 1.00 | 0.18 / 0.39 / 0.75 |
+| HSG Baden-Endingen 2023-11-19 | 5 / 12 | 0.40 / 0.60 / 0.80 | 0.20 / 0.60 / 0.60 | 0.40 / 0.60 / 0.80 | 0.20 / 0.38 / 0.74 |
+| BSV Stans 2022-11-05 | 5 / 9 | 0.80 / 1.00 / 1.00 | 0.60 / 0.80 / 1.00 | 0.40 / 0.80 / 1.00 | 0.17 / 0.40 / 0.73 |
+| Chênois 2023-05-13 | 9 / 9 | 0.67 / 1.00 / 1.00 | 0.56 / 1.00 / 1.00 | 0.56 / 0.89 / 1.00 | 0.16 / 0.35 / 0.71 |
+| Emmen 2022-11-17 | 11 / 12 | 0.46 / 0.64 / 1.00 | 0.36 / 0.55 / 0.91 | 0.18 / 0.36 / 0.64 | 0.18 / 0.34 / 0.66 |
+| GC Amicitia 2023-03-15 | 6 / 6 | 0.50 / 1.00 / 1.00 | 0.50 / 1.00 / 1.00 | 0.33 / 0.50 / 0.83 | 0.21 / 0.38 / 0.73 |
+| Kreuzlingen 2022-05-29 (playoff) | 6 / 6 | 0.67 / 0.67 / 0.83 | 0.33 / 0.67 / 0.83 | 0.50 / 0.67 / 1.00 | 0.14 / 0.34 / 0.66 |
+| STV Baden 2023-04-05 | 4 / 6 | 0.00 / 0.50 / 1.00 | 0.25 / 0.50 / 1.00 | 0.25 / 0.75 / 1.00 | 0.17 / 0.29 / 0.62 |
+| TV Birsfelden 2023-03-25 | 4 / 6 | 0.50 / 0.75 / 1.00 | 0.50 / 1.00 / 1.00 | 0.50 / 1.00 / 1.00 | 0.21 / 0.40 / 0.68 |
+| TV Möhlin 2023-02-18 | 6 / 6 | 0.67 / 0.83 / 1.00 | 0.67 / 1.00 / 1.00 | 0.50 / 1.00 / 1.00 | 0.15 / 0.38 / 0.62 |
+
+### What works, what does not
+- **The people and flow template is the best single score** and needs no camera pan: 0.84 recall at
+  2 candidates per minute (0.79 on the held-out games), AUC 0.86, timing +1.4 s (IQR 2.5 s). It is the closest stand-in for a fixed camera, where the canvas velocity of the players is what
+  the image shows directly (it could not be tested on one: see Data). The camera-only template is
+  much weaker here (AUC 0.74) than on TV (0.82 with pan + energy): the club operator follows the
+  ball less consistently than a TV camera.
+- **The post-goal lull is real goal-specific evidence.** Goal-aligned averages (15 dev goals):
+  activity drops to about 0.3-0.45 of the segment median from 8 to 26 s after the goal and the
+  camera stands still from 18 to 28 s; turnovers and saves go straight on. `lull_after` alone
+  reaches 0.59 / 0.78 / 0.97 (test 0.52 / 0.73 / 0.96); added to the template it lifts recall at 1
+  per minute from 0.53 to 0.62 (test 0.48 to 0.54). It was designed on the 3 dev games and is
+  clearly weaker on the test games (AUC 0.79 against 0.88 on dev, recall @1 0.52 against 0.82), but
+  it holds there.
+- **The throw-off detector does not work as specified.** The play does not dwell at the court
+  centre: with the fast throw-off the conceding team restarts straight into its attack, and from a
+  panning camera's canvas the centre is only a rough estimate (`p` stays around 0.5 after goals,
+  `bal` does not rise). What remains is "a lull ends", which fires 20 to 34 s after the goal (median
+  27 s): moved back by the median lag it reaches AUC 0.62 and 0.56 recall at 2 per minute (random
+  0.37), far below the template. Its useful part is already in `lull_after`.
+- **Residual flow alone (`flow_rev`) and energy drop fail** (AUC 0.58, 0.60): the residual flow is
+  dominated by parallax and blur during fast pans; the template uses the flow only together with the
+  centroid and the activity.
+- **The broadcast template transfers only partly**: AUC 0.71 with the broadcast's normalisation,
+  0.76 per-segment normalised, against 0.84 to 0.86 for templates learned on club footage, and it
+  peaks 1.6 s before the overlay change instead of after it. Learning the template from the free
+  overlay labels of a few club games is clearly better than reusing the TV one.
+
+### Failure cases
+- **Goals in quick succession** (two goals within 8 s, or a goal within 8 s of a turnover peak):
+  the non-maximum suppression keeps one candidate. Seen in Emmen 2022 (58/64 s), Kreuzlingen
+  (134/140 s).
+- **A very busy camera** (Emmen 2022-11-17: pan 90th percentile 270-300 px/s against 40-190 in the
+  other games, tighter zoom): every attack looks like a swing; recall @2 0.64.
+- **Segment ends**: windows look 2 s back and 3 s ahead (24 s for the lull), so goals in the first
+  or last few seconds are missed; on continuous footage this does not arise.
+- **False alarms** (65 at 2 per minute in the 4 games with a log): 23 are next to a logged shot
+  (saved 7, missed 7) or turnover (8), the rest have no log entry at all (the log only lists
+  shots, turnovers and penalties, not every possession change). As on TV, the false alarms are
+  transitions that look like goals.
+
+### Recommendation for the product
+- **Candidates**: `tmpl_all` + `lull_after` (or `tmpl_people_flow` + `lull_after` when no pan is
+  measured), peaks with 8 s suppression. **2 candidates per minute of play** (about 80 % recall,
+  about 3 clicks per goal); **4 per minute** when the coach wants nearly everything (96 %).
+  Show each candidate as a clip from 10 s before to 4 s after the peak: the median peak is 1.5 s
+  after the goal (interquartile range 3.3 s), and a goal counts as found up to 8 s before the peak.
+- **Threshold**: rank, do not threshold. Score scales vary per game (camera operator), so a fixed
+  per-minute rate is more stable than a score threshold.
+- **Cost**: one YOLOX-m pass at 2 Hz plus 10 Hz flow is about 1.5x real time on 2 CPU threads; the
+  people detections are needed anyway for the rest of the pipeline. Without people the
+  camera-only score is much weaker (AUC 0.74).
+- **Labels to collect next**: (1) **fixed-camera and overlay-free games with official logs** and a
+  readable hall board: nothing in the ingest so far, so the fixed-camera claim is untested;
+  (2) more overlay games from other producers: the overlay score is a free, exact (about 1 s) label
+  and makes the template learnable per camera style (79 goals already beat the TV template
+  clearly); (3) the coach's one-click confirmations themselves, with the rejected candidates as
+  hard negatives (turnovers, saves), to train a small temporal classifier on the cached 10 Hz
+  channels instead of the hand-made template; (4) audio (whistle and crowd): untested, but
+  camera-independent.
+
+### Reproduce
+```bash
+S=<scratchpad>; G=$S/goals_raw
+# segments in $G/vid: kaggle datasets download -f, or links to the ingest's batch folder
+uv run --project packages/vision python ml/data/segment_clock.py --labels
+nice -n 10 uv run --project packages/vision python ml/goals/seg_extract.py $G/cache $G/vid/*.mp4
+uv run --project packages/vision python ml/goals/seg_labels.py $G/cache $G/labels.json
+uv run --project packages/vision python ml/goals/seg_eval.py $G/cache $G/labels.json --edge-margin 6 \
+  --broadcast $S/goals/cache --out $G/results.json [--inspect tmpl_people_flow]
+```
