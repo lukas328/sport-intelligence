@@ -472,6 +472,13 @@ def _calibrate(
         raise CalibrationError("no floor markings found", "no_floor")
     ra, rb, m, length = np.vstack(ras), np.vstack(rbs), np.vstack(ms), np.concatenate(ls)
     alpha, beta, yaw, fit = topview.orientation_from_normals(m, length)
+    no_floor = CalibrationError(
+        "the hall's markings do not show a clear floor (only "
+        f"{int(fit * 100)}% of the line length runs along two floor directions, "
+        f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, a very low "
+        "camera or a camera motion that was not followed well): click the court points",
+        "no_floor",
+    )
     tol_deg = 1.0
     if fit < MIN_FLOOR_FIT and motion.moving:
         # a zooming wide-angle stream camera: its motion is a degree or two off between frames
@@ -481,18 +488,14 @@ def _calibrate(
             alpha, beta, yaw, fit = loose
             tol_deg = LOOSE_TOL_DEG
     if fit < MIN_FLOOR_FIT:
-        raise CalibrationError(
-            "the hall's markings do not show a clear floor (only "
-            f"{int(fit * 100)}% of the line length runs along two floor directions, "
-            f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, a very low "
-            "camera or a camera motion that was not followed well): click the court points",
-            "no_floor",
-        )
+        raise no_floor
     up = topview._up(alpha, beta)
     feet, heads = people_on_canvas(obs)
     height = topview.camera_height_from_people(up, feet, heads, kc)
     fr = topview._rays(kc, feet)
     view_deg = topview.view_depression_deg(up, height, fr)
+    if view_deg < min_view_deg and tol_deg != 1.0:
+        raise no_floor  # the loose floor did not give a camera above the court either
     if view_deg < min_view_deg:
         raise CalibrationError(
             "the camera sees the floor too flatly for an automatic court (players at a median "
