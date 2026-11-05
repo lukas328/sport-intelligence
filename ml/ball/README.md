@@ -38,6 +38,15 @@ basketball tracking (CC BY-NC-ND), sports-ball image classification (close-ups).
 | 3-frame net, round 1 (TeamTrack) | 12 % | 23 % |
 | round 2 (+ user frames, train half; Kaggle GPU) | 20 % | 28 % |
 | round 3 (+ user ball paths, DeepSport basketball) | 33 % | 47 % |
+| round 4 (+ Roboflow still frames) | 23 % | 45 % |
+
+**Open-vocabulary detector, 24 balls of the test half (2 to 4 per hall):** OWLv2 base
+(Apache-2.0, queries "a photo of a handball", "a ball", "a small ball in the air", 480 px tiles
+upscaled to 960) puts its top box on the ball in 50 % (round 3 net on the same frames: 29 %,
+top 5: 46 % vs 50 %). Its confident boxes are reliable: 10 of 11 boxes scoring at least 0.5 are
+the ball. Too slow for the worker (about 2 min per frame on CPU), but a good teacher: its
+confident boxes, kept only where the temporal path confirms them, become training labels for the
+3-frame net (`kaggle/owl_gpu.py`, `owl_bench_local.py`).
 
 On TeamTrack's own validation the 3-frame net finds 64 % at 2 % false alarms: the gap is the domain
 (one hall vs many), not the method.
