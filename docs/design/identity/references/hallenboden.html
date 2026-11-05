@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Hallenboden</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#07284f}
+a{color:#ffd23f}a:hover{color:#fff}
+.score{position:absolute;right:56px;top:50%;transform:translateY(-50%);text-align:center}
+@media (max-width:900px){.score{position:relative;right:auto;top:auto;transform:none;text-align:left;margin-top:28px}.court{display:none}}
+</style>
+</helmet>
+<div style="min-height: 900px; display: flex; flex-wrap: wrap; background: #07284f; color: #ffffff; font-family: 'Barlow', sans-serif">
+  <nav aria-label="Hauptnavigation" style="flex: 1 1 196px; box-sizing: border-box; padding: 28px 24px; display: flex; flex-direction: column; gap: 6px; background: #051d3a">
+    <div style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 30px; line-height: 0.95; letter-spacing: 0.01em">HC<br>GRAUHOLZ</div>
+    <div style="font-size: 13px; color: #b9cbe0; margin: 8px 0 32px">Herren 1</div>
+    <a href="#" style="min-height: 44px; display: flex; align-items: center; color: #ffffff; text-decoration: none; font-weight: 500">Übersicht</a>
+    <a href="#" style="min-height: 44px; display: flex; align-items: center; color: #ffffff; text-decoration: none; font-weight: 500">Spiele</a>
+    <a href="#" aria-current="page" style="min-height: 44px; display: flex; align-items: center; color: #ffd23f; text-decoration: none; font-weight: 600">Saison</a>
+    <a href="#" style="min-height: 44px; display: flex; align-items: center; color: #ffffff; text-decoration: none; font-weight: 500">Kader</a>
+    <a href="#" style="min-height: 44px; display: flex; align-items: center; color: #ffffff; text-decoration: none; font-weight: 500">Training</a>
+  </nav>
+  <main style="flex: 999 1 560px; min-width: 0; background: #051d3a">
+    <section style="position: relative; overflow: hidden; background: #0b6bcb; min-height: 540px; box-sizing: border-box; padding: 44px 56px; display: flex; flex-direction: column; justify-content: space-between">
+      <svg class="court" aria-hidden="true" viewBox="0 0 1244 540" preserveAspectRatio="xMaxYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%">
+        <g fill="none" stroke="#ffffff">
+          <path d="M1244 58 C1010 58 900 170 900 270 C900 370 1010 482 1244 482" stroke-width="6" opacity="0.9"></path>
+          <path d="M1244 -40 C900 -40 760 120 760 270 C760 420 900 580 1244 580" stroke-width="6" stroke-dasharray="26 22" opacity="0.55"></path>
+          <path d="M836 244 V296" stroke-width="6" opacity="0.7"></path>
+        </g>
+      </svg>
+      <div style="position: relative; max-width: 640px">
+        <p style="margin: 0 0 18px; font-size: 15px; font-weight: 600; letter-spacing: 0.02em">Saison 2026/27, Spieltag 1, 01.11.26</p>
+        <h1 style="margin: 0; font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: clamp(52px, 5.8vw, 84px); line-height: 0.92; letter-spacing: 0.005em; text-transform: uppercase">Mehr getroffen, als die Chancen hergaben.</h1>
+        <p style="margin: 20px 0 0; max-width: 500px; font-size: 19px; line-height: 1.4">22 Tore aus 14.3 erwarteten. Der Sieg gegen Demo HC Beispiel war effizient, aber hinten mit 23 % Paraden knapper als nötig.</p>
+      </div>
+      <div style="position: relative; margin-top: 28px">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px">
+          <a href="#" style="min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 20px; background: #ffd23f; color: #07284f; font-weight: 600; text-decoration: none">Tore als Clips ansehen</a>
+          <a href="#" style="min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 20px; border: 2px solid #ffffff; color: #ffffff; font-weight: 600; text-decoration: none">Frag deine Daten</a>
+        </div>
+      </div>
+      <div class="score">
+        <div style="font-size: 15px; font-weight: 600">Sieg</div>
+        <div style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: clamp(104px, 10vw, 138px); line-height: 0.9; font-variant-numeric: tabular-nums">22:20</div>
+      </div>
+    </section>
+    <section aria-label="Kennzahlen" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); background: #07284f">
+      <a href="#" style="padding: 26px 32px; color: #ffffff; text-decoration: none; border-right: 2px solid #1b4877">
+        <div style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 56px; line-height: 1">71 %</div>
+        <div style="font-size: 15px; margin-top: 6px; color: #d4e0ee">Wurfquote</div>
+      </a>
+      <a href="#" style="padding: 26px 32px; color: #ffffff; text-decoration: none; border-right: 2px solid #1b4877">
+        <div style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 56px; line-height: 1; color: #ffd23f">23 %</div>
+        <div style="font-size: 15px; margin-top: 6px; color: #d4e0ee">Paradenquote, hier ansetzen</div>
+      </a>
+      <a href="#" style="padding: 26px 32px; color: #ffffff; text-decoration: none; border-right: 2px solid #1b4877">
+        <div style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 56px; line-height: 1">4</div>
+        <div style="font-size: 15px; margin-top: 6px; color: #d4e0ee">Ballverluste</div>
+      </a>
+      <a href="#" style="padding: 26px 32px; color: #ffffff; text-decoration: none">
+        <div style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 56px; line-height: 1">14.3 : 15.1</div>
+        <div style="font-size: 15px; margin-top: 6px; color: #d4e0ee">xG für und gegen uns</div>
+      </a>
+    </section>
+    <section style="padding: 32px 56px 48px; display: flex; flex-wrap: wrap; gap: 8px 48px; align-items: baseline; background: #051d3a">
+      <h2 style="margin: 0; font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 30px; text-transform: uppercase">Nächstes Spiel</h2>
+      <p style="margin: 0; font-size: 16px; color: #d4e0ee">[Noch kein Spiel angesetzt]</p>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

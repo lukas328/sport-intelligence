@@ -4,7 +4,8 @@ import { expect, test } from "@playwright/test";
 test("home page renders the court and links to status", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Video hochladen");
-  await expect(page.getByRole("img", { name: /Handballfeld/ })).toBeVisible();
+  // the court frames the stage as decoration (aria-hidden); the call to action is what counts
+  await expect(page.getByRole("link", { name: "Jetzt starten" })).toBeVisible();
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag22aa"]).analyze();
   expect(axe.violations).toEqual([]);
 });

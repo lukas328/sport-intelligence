@@ -85,7 +85,7 @@ export function MarksView({ orgId, matchId, teamId }: { orgId: string; matchId: 
               key={k.key}
               type="button"
               onClick={() => tap(k.key, label)}
-              className="min-h-24 rounded-xl border-2 px-3 text-lg font-semibold active:scale-[0.98]"
+              className="min-h-24 rounded-md border-2 px-3 text-lg font-semibold active:scale-[0.98]"
               style={{ borderColor: k.color ?? "var(--border)" }}
             >
               {label}
@@ -97,7 +97,7 @@ export function MarksView({ orgId, matchId, teamId }: { orgId: string; matchId: 
         type="button"
         disabled={half === 2}
         onClick={() => tap("halftime", t("halftime"))}
-        className="w-full rounded-xl border border-border py-3 text-sm disabled:opacity-50"
+        className="w-full rounded-md border border-border py-3 text-sm disabled:opacity-50"
       >
         {half === 2 ? t("secondHalf") : t("halftime")}
       </button>

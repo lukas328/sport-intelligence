@@ -3,39 +3,63 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /*
- * Design tokens (docs/DESIGN.md). Paper and ink instead of grey boxes: the page is a warm
- * off-white, panels are white, text is near black. One accent: the club colour, shifted per
- * theme until it is readable (lib/color.ts). Green and red only mean goal / no goal, ok / error.
+ * Design tokens (docs/DESIGN.md, "Die Halle"). Everything starts from the club colour
+ * (lib/color.ts clubStyle): the stage is the raw club colour, the sidebar its deep shade, the
+ * page a paper tinted towards it. Text is ink, one signal colour (resin yellow) marks the one
+ * thing per screen that needs attention. Green and red only mean goal / no goal, ok / error.
+ * The defaults below are the product colour (#0b6bcb) for pages outside a club.
  */
 :root {
-  --background: #f7f7f4;
-  --raised: #ffffff;
-  --surface: #f2f2ee;
-  --border: #e3e3dd;
-  --foreground: #121411;
-  --muted: #5f635b;
-  --accent: #c93a0b;
-  --accent-contrast: #ffffff;
-  --club: #c93a0b;
-  --ok: #1e7b3a;
+  --club: #0b6bcb;
+  --club-ink: #ffffff;
+  --deep: #06213f;
+  --signal: #ffd23f;
+  --signal-ink: #10151c;
+  --mark: #ffffff;
+  /* resin yellow, fixed: the warning tint must not depend on the club colour */
+  --resin: #ffd23f;
+  --accent-l: #0a66c1;
+  --accent-l-contrast: #ffffff;
+  --paper-l: #eef5fb;
+  --surface-l: #e2edf8;
+  --accent-d: #4890d8;
+  --accent-d-contrast: #000000;
+  --paper-d: #07131f;
+  --surface-d: #0d2239;
+  --raised-d: #0d1d2e;
+  --ok: #166534;
   --error: #b42318;
   --warn: #8a5300;
   --court: #e7efe4;
   --court-line: #1f2937;
-  --overlay: rgb(18 20 17 / 0.45);
+}
+
+/* light theme (also the base inside every club scope, so club values take effect) */
+:root,
+.club {
+  --background: var(--paper-l);
+  --raised: #ffffff;
+  --surface: var(--surface-l);
+  --foreground: #10151c;
+  --muted: #4a525e;
+  --border: color-mix(in srgb, #10151c 13%, var(--paper-l));
+  --accent: var(--accent-l);
+  --accent-contrast: var(--accent-l-contrast);
+  --overlay: rgb(10 14 20 / 0.5);
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #0d0e0c;
-    --raised: #161815;
-    --surface: #1f221e;
-    --border: #2b2e29;
-    --foreground: #edeee9;
-    --muted: #a2a69d;
-    --accent: #ff7a45;
-    --accent-contrast: #0d0e0c;
+  :root:not([data-theme="light"]),
+  :root:not([data-theme="light"]) .club {
+    --background: var(--paper-d);
+    --raised: var(--raised-d);
+    --surface: var(--surface-d);
+    --foreground: #eef1f5;
+    --muted: #a6aeb9;
+    --border: color-mix(in srgb, #eef1f5 14%, var(--paper-d));
+    --accent: var(--accent-d);
+    --accent-contrast: var(--accent-d-contrast);
     --ok: #5ad17e;
     --error: #ff7b6e;
     --warn: #f2b84b;
@@ -46,15 +70,16 @@
   }
 }
 
-:root[data-theme="dark"] {
-  --background: #0d0e0c;
-  --raised: #161815;
-  --surface: #1f221e;
-  --border: #2b2e29;
-  --foreground: #edeee9;
-  --muted: #a2a69d;
-  --accent: #ff7a45;
-  --accent-contrast: #0d0e0c;
+:root[data-theme="dark"],
+:root[data-theme="dark"] .club {
+  --background: var(--paper-d);
+  --raised: var(--raised-d);
+  --surface: var(--surface-d);
+  --foreground: #eef1f5;
+  --muted: #a6aeb9;
+  --border: color-mix(in srgb, #eef1f5 14%, var(--paper-d));
+  --accent: var(--accent-d);
+  --accent-contrast: var(--accent-d-contrast);
   --ok: #5ad17e;
   --error: #ff7b6e;
   --warn: #f2b84b;
@@ -64,20 +89,24 @@
   color-scheme: dark;
 }
 
-/* club scope: the accent per theme comes from lib/color.ts clubStyle() */
 .club {
-  --accent: var(--accent-l);
-  --accent-contrast: var(--accent-l-contrast);
+  background: var(--background);
+  color: var(--foreground);
 }
-:root[data-theme="dark"] .club {
-  --accent: var(--accent-d);
-  --accent-contrast: var(--accent-d-contrast);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .club {
-    --accent: var(--accent-d);
-    --accent-contrast: var(--accent-d-contrast);
-  }
+
+/* the deep surface (sidebar, phone bars): light text on the club's dark colour in every theme */
+.on-deep {
+  --background: var(--deep);
+  --raised: rgb(255 255 255 / 0.06);
+  --surface: rgb(255 255 255 / 0.09);
+  --foreground: #ffffff;
+  --muted: rgb(255 255 255 / 0.72);
+  --border: rgb(255 255 255 / 0.14);
+  --accent: var(--mark);
+  --accent-contrast: #10151c;
+  background: var(--deep);
+  color: #ffffff;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -90,10 +119,22 @@
   --color-accent: var(--accent);
   --color-accent-contrast: var(--accent-contrast);
   --color-club: var(--club);
+  --color-club-ink: var(--club-ink);
+  --color-deep: var(--deep);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-mark: var(--mark);
+  --color-resin: var(--resin);
   --color-ok: var(--ok);
   --color-error: var(--error);
   --color-warn: var(--warn);
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), var(--font-barlow), ui-sans-serif, sans-serif;
+  --font-hand: var(--font-reenie), cursive;
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 8px;
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --animate-rise: rise 220ms var(--ease-out-quint);
   --animate-fade: fade 160ms ease-out;
@@ -120,17 +161,22 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.5;
-    font-feature-settings: "ss01" off;
+    font-feature-settings: "tnum" 0;
   }
-  /* headings: slightly wide and tight, the sporting voice of the typeface */
+  /* headings: the condensed cut, like the names on a match sheet */
   h1,
-  h2,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
   h3 {
-    font-stretch: 112%;
-    letter-spacing: -0.018em;
-    line-height: 1.15;
+    font-weight: 600;
+    line-height: 1.25;
     text-wrap: balance;
   }
   p {
@@ -153,7 +199,7 @@
   input[type="file"]::file-selector-button {
     margin-right: 0.75rem;
     border: 0;
-    border-radius: 9999px;
+    border-radius: 5px;
     background: var(--surface);
     padding: 0.375rem 0.875rem;
     font: inherit;
@@ -174,7 +220,7 @@
   }
   input[type="color"]::-webkit-color-swatch {
     border: 0;
-    border-radius: 0.5rem;
+    border-radius: 3px;
   }
   table th,
   table td {
@@ -193,16 +239,68 @@
 @layer utilities {
   /* figures that are read like a scoreboard */
   .font-score {
-    font-stretch: 118%;
+    font-family: var(--font-display);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.01em;
   }
-  .font-wide {
-    font-stretch: 112%;
+  /* the condensed display cut for names, dates and short labels */
+  .font-wide,
+  .font-narrow,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 700;
   }
-  .font-narrow {
-    font-stretch: 82%;
+  /* match-sheet table: hairline grid, figures right-aligned, a firm rule under the head */
+  .sheet {
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 22%, transparent);
+    background: var(--raised);
+  }
+  .sheet table {
+    border-collapse: collapse;
+  }
+  .sheet th,
+  .sheet td {
+    padding: 0.7rem 0.9rem;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+  .sheet thead th {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid color-mix(in srgb, var(--foreground) 75%, transparent);
+  }
+  .sheet th:first-child,
+  .sheet td:first-child,
+  .sheet .text-left {
+    text-align: left;
+  }
+  .sheet tbody tr:hover {
+    background: var(--surface);
+  }
+  .sheet tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+  /* full-bleed band inside the content column (the stage): reaches the column edges */
+  .bleed {
+    margin-inline: calc(50% - 50vw);
+  }
+  @media (min-width: 1024px) {
+    .bleed {
+      margin-inline: calc(50% - (100vw - 16rem) / 2);
+    }
+  }
+  .bleed-full {
+    margin-inline: calc(50% - 50vw);
+  }
+  /* real coach notes only (never invented text) */
+  .font-hand {
+    font-family: var(--font-hand);
+    font-size: 1.6rem;
+    line-height: 1.1;
   }
   /* small label above a title or a block: sentence case, quiet */
   .eyebrow {

@@ -77,7 +77,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
       <BackLink fallback={`/app/${orgId}/feed`} />
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
       {!feed.self_assessment && (
-        <form onSubmit={submit} className="space-y-3 rounded-2xl bg-raised ring-1 ring-border/70 p-4" aria-label={t("assessTitle")}>
+        <form onSubmit={submit} className="space-y-3 rounded-lg bg-raised border border-border p-4" aria-label={t("assessTitle")}>
           <h2 className="font-semibold">{t("assessTitle")}</h2>
           <p className="text-sm text-muted">{t("assessIntro")}</p>
           <fieldset className="flex gap-2">
@@ -98,7 +98,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
           <label className="block text-sm font-medium" htmlFor="assess-text">
             {t("sentence")}
           </label>
-          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-xl bg-raised p-3 ring-1 ring-inset ring-border" />
+          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-md bg-raised p-3 ring-1 ring-inset ring-border" />
           <Button type="submit" disabled={!rating} loading={assess.isPending}>
             {t("send")}
           </Button>
@@ -106,7 +106,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
         </form>
       )}
       {feed.self_assessment && (
-        <p className="rounded-xl bg-surface px-4 py-2.5 text-sm" data-testid="my-rating">
+        <p className="rounded-md bg-surface px-4 py-2.5 text-sm" data-testid="my-rating">
           {t("yourRating", { n: feed.self_assessment.rating })}
           {feed.self_assessment.text && `: ${feed.self_assessment.text}`}
         </p>
@@ -147,7 +147,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
             ))}
           </ol>
           <h2 id="scene-title" className="flex flex-wrap items-center gap-2 text-lg font-bold">
-            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", scene.positive ? "bg-ok/15 text-ok" : "bg-surface text-muted")}>
+            <span className={cn("rounded-md px-2.5 py-0.5 text-xs font-semibold", scene.positive ? "bg-ok/15 text-ok" : "bg-surface text-muted")}>
               {t("sceneN", { n: index + 1, total: feed.items.length })}
             </span>
             {t(reasonKey(scene.reason) as "reason_goal")}
@@ -178,7 +178,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
             <p className="text-muted">{t("noVideo")}</p>
           )}
           {scene.coach_comment && (
-            <p className="rounded-xl bg-surface px-3 py-2 text-sm" data-testid="coach-comment">
+            <p className="rounded-md bg-surface px-3 py-2 text-sm" data-testid="coach-comment">
               {t("coach")}: {scene.coach_comment}
             </p>
           )}

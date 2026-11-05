@@ -1,29 +1,25 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
-import type { PlayDoc } from "@handball/tactics";
-import { ArrowRight, Plus, ScanSearch } from "lucide-react";
+import { ArrowRight, ScanSearch } from "lucide-react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { Board } from "@/components/tactics/board";
 import { cn } from "@/lib/utils";
 
-type Play = Schemas["PlayOut"];
 type Playlist = Schemas["PlaylistOut"];
 type Presentation = Schemas["PresentationOut"];
 
 const newest = <T extends { created_at: string }>(xs: T[]) => [...xs].sort((a, b) => b.created_at.localeCompare(a.created_at));
 
-/** The team's own material, newest first: the library is its content, not a menu of icons. */
-export function LibraryView({ base, orgBase, plays, playlists, presentations }: { base: string; orgBase: string; plays: Play[]; playlists: Playlist[]; presentations: Presentation[] }) {
+/** Material from the matches, newest first: scene search, playlists, presentations (plays live in Training). */
+export function LibraryView({ base, orgBase, playlists, presentations }: { base: string; orgBase: string; playlists: Playlist[]; presentations: Presentation[] }) {
   const t = useTranslations("library");
-  const tt = useTranslations("tactics");
   const format = useFormatter();
   const when = (iso: string) => format.relativeTime(new Date(iso));
   return (
     <div className="space-y-12">
-      <Link href={`${base}/search`} className="group flex items-center gap-4 rounded-2xl bg-foreground px-5 py-4 text-background transition-transform hover:-translate-y-px sm:px-6">
+      <Link href={`${base}/search`} className="group flex items-center gap-4 rounded-lg bg-foreground px-5 py-4 text-background transition-transform hover:-translate-y-px sm:px-6">
         <ScanSearch aria-hidden className="size-5 shrink-0 opacity-80" />
         <span className="min-w-0 flex-1">
           <span className="block font-semibold font-wide">{t("search")}</span>
@@ -31,36 +27,6 @@ export function LibraryView({ base, orgBase, plays, playlists, presentations }: 
         </span>
         <ArrowRight aria-hidden className="size-5 shrink-0 transition-transform group-hover:translate-x-1" />
       </Link>
-
-      <Shelf title={t("plays")} href={`${base}/plays`} newHref={`${base}/plays/new`} count={plays.length}>
-        {plays.length === 0 ? (
-          <Empty>{t("emptyPlays")}</Empty>
-        ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {newest(plays)
-              .slice(0, 4)
-              .map((p) => {
-                const doc = p.doc as unknown as PlayDoc;
-                const frame = doc.frames?.[0];
-                return (
-                  <li key={p.id}>
-                    <Link href={`${orgBase}/plays/${p.id}`} className="group block overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70 transition-shadow hover:shadow-md">
-                      <div aria-hidden className="pointer-events-none border-b border-border/70">
-                        {frame && <Board frame={frame} court={doc.court} label={p.name} />}
-                      </div>
-                      <div className="px-4 py-3">
-                        <p className="truncate font-semibold">{p.name}</p>
-                        <p className="truncate text-[0.8125rem] text-muted">
-                          {[tt(`cat_${p.category}` as "cat_attack"), (doc.frames?.length ?? 0) > 1 ? tt("frames_count", { count: doc.frames.length }) : null].filter(Boolean).join(" · ")}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-          </ul>
-        )}
-      </Shelf>
 
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
         <Shelf title={t("playlists")} href={`${base}/playlists`} count={playlists.length}>
@@ -94,7 +60,7 @@ export function LibraryView({ base, orgBase, plays, playlists, presentations }: 
   );
 }
 
-function Shelf({ title, href, newHref, count, children }: { title: string; href: string; newHref?: string; count: number; children: ReactNode }) {
+function Shelf({ title, href, count, children }: { title: string; href: string; count: number; children: ReactNode }) {
   const t = useTranslations("library");
   return (
     <section className="space-y-4">
@@ -106,12 +72,6 @@ function Shelf({ title, href, newHref, count, children }: { title: string; href:
           <span className="ml-2 text-sm font-medium text-muted tabular-nums">{count}</span>
         </h2>
         <div className="flex items-center gap-4 text-sm">
-          {newHref && (
-            <Link href={newHref} className="inline-flex items-center gap-1 font-medium text-muted hover:text-foreground">
-              <Plus aria-hidden className="size-4" />
-              {t("new")}
-            </Link>
-          )}
           <Link href={href} className="inline-flex items-center gap-1 font-medium text-accent hover:underline" aria-label={`${t("all")}: ${title}`}>
             {t("all")}
             <ArrowRight aria-hidden className="size-3.5" />

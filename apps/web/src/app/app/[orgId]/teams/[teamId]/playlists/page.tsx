@@ -24,7 +24,7 @@ export default async function PlaylistsPage({ params }: { params: Promise<{ orgI
         <ul className="grid gap-3 sm:grid-cols-2">
           {items.map((p) => (
             <li key={p.id}>
-              <Link href={`/app/${orgId}/playlists/${p.id}`} className="block rounded-2xl bg-raised ring-1 ring-border/70 p-4 hover:bg-surface">
+              <Link href={`/app/${orgId}/playlists/${p.id}`} className="block rounded-lg bg-raised border border-border p-4 hover:bg-surface">
                 <p className="font-medium">{p.title}</p>
                 <p className="text-sm text-muted">
                   {t("items", { count: p.item_count })} · {p.shared_with_players ? t("shared") : t("notShared")}

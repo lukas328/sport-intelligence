@@ -13,13 +13,13 @@ export function ClubMark({ org, className }: { org: { id: string; name: string; 
   if (org.has_logo) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={`/v1/orgs/${org.id}/logo`} alt="" className={cn("size-9 shrink-0 rounded-xl bg-raised object-contain ring-1 ring-border", className)} />
+      <img src={`/v1/orgs/${org.id}/logo`} alt="" className={cn("size-9 shrink-0 rounded-md bg-raised object-contain ring-1 ring-border", className)} />
     );
   }
   return (
     <span
       aria-hidden
-      className={cn("grid size-9 shrink-0 place-items-center rounded-xl text-[0.8125rem] font-bold font-wide", className)}
+      className={cn("grid size-9 shrink-0 place-items-center rounded-md text-[0.8125rem] font-bold font-wide ring-1 ring-inset ring-white/25", className)}
       style={{ background: org.primary_color, color: contrastText(org.primary_color) }}
     >
       {initials || "•"}

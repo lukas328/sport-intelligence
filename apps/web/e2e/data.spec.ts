@@ -39,7 +39,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expect.poll(async () => (await page.request.get(url.slice(url.indexOf("/v1/")))).text()).toContain("Abschluss Flügel");
 
   // matrix: empty team, but the page and its controls work
-  await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await follow(page, page.getByRole("link", { name: "Saison", exact: true }), /\/season$/);
   await follow(page, page.getByRole("link", { name: "Statistik-Matrix" }), /\/matrix$/);
   await expect(page.getByRole("heading", { name: "Statistik-Matrix" })).toBeVisible();

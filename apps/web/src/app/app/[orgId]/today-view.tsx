@@ -2,50 +2,50 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ArrowUp, Binoculars, Clapperboard, Dumbbell, Film, ListTodo, Radio, Sparkles, Upload } from "lucide-react";
+import { ArrowRight, ArrowUp, Check, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useMemo, useState, type ReactNode } from "react";
 import { useInsightText, type InsightsData } from "@/components/analysis/insights";
 import { useRosterNames } from "@/components/analysis/tagger";
-import { Scoreboard } from "@/components/domain/scoreboard";
+import { MatchScore } from "@/components/domain/match-score";
+import { Stage, StageTag, stageButton, stageLink } from "@/components/domain/stage";
 import { useShell } from "@/components/shell/context";
+import { IconAsk, IconScenes } from "@/components/shell/icons";
 import { OnboardingChecklist } from "@/components/support/checklist";
 import { Badge } from "@/components/ui/badge";
-import { buttonClass } from "@/components/ui/button";
-import { Card, EmptyState, Skeleton } from "@/components/ui/card";
+import { EmptyState, Skeleton } from "@/components/ui/card";
 import { control } from "@/components/ui/field";
+import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
-import { ScheduleRow, useSchedule } from "./schedule/schedule-view";
+import { matchStatement } from "@/lib/voice";
 import { targetLink } from "./assignments/my-assignments";
+import { ScheduleRow, useSchedule } from "./schedule/schedule-view";
 
 type Match = Schemas["MatchSummary"];
 
-function Greeting() {
+/** "Guten Abend, Andrea · Dienstag, 3. November": warm, one line, above the stage headline. */
+function useGreeting() {
   const t = useTranslations("today");
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { me } = useShell();
   const first = me.name.split(/\s+/)[0] ?? me.name;
   const h = now.getHours();
-  return (
-    <header className="space-y-1">
-      <p className="eyebrow">{format.dateTime(now, { weekday: "long", day: "numeric", month: "long" })}</p>
-      <h1 className="text-[1.75rem] font-bold sm:text-4xl">{t(h < 11 ? "morning" : h < 17 ? "day" : "evening", { name: first })}</h1>
-    </header>
-  );
+  return `${t(h < 11 ? "morning" : h < 17 ? "day" : "evening", { name: first })} · ${format.dateTime(now, { weekday: "long", day: "numeric", month: "long" })}`;
 }
 
+/** A workbench block: a condensed title with an optional link, content below. */
 function Block({ title, href, linkLabel, children, className }: { title: string; href?: string; linkLabel?: string; children: ReactNode; className?: string }) {
   return (
     <section className={cn("space-y-3", className)}>
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="eyebrow">{title}</h2>
+      <div className="flex items-baseline justify-between gap-3 border-b border-foreground/15 pb-2">
+        <h2 className="text-2xl">{title}</h2>
         {href && (
-          <Link href={href} className="inline-flex items-center gap-1 text-[0.8125rem] font-medium text-muted hover:text-foreground">
+          <Link href={href} className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:underline">
             {linkLabel}
             <ArrowRight aria-hidden className="size-3.5" />
           </Link>
@@ -56,26 +56,42 @@ function Block({ title, href, linkLabel, children, className }: { title: string;
   );
 }
 
+/** A row of a workbench list: label on the left, value or link on the right. */
+function Row({ label, children, href }: { label: string; children: ReactNode; href?: string }) {
+  const body = (
+    <>
+      <span className="w-24 shrink-0 text-sm font-semibold text-muted">{label}</span>
+      <span className="min-w-0 flex-1">{children}</span>
+      {href && <ArrowRight aria-hidden className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" />}
+    </>
+  );
+  return (
+    <li className="border-b border-foreground/10 last:border-0">
+      {href ? (
+        <Link href={href} className="group flex items-center gap-4 py-3.5 hover:text-accent">
+          {body}
+        </Link>
+      ) : (
+        <div className="flex items-center gap-4 py-3.5">{body}</div>
+      )}
+    </li>
+  );
+}
+
 export function TodayView({ orgId }: { orgId: string }) {
   const { mode, team, teams } = useShell();
-  return (
-    <div className="space-y-10">
-      <Greeting />
-      {teams.length === 0 ? (
-        <NoTeam orgId={orgId} />
-      ) : mode === "staff" && team ? (
-        <StaffToday orgId={orgId} teamId={team.id} />
-      ) : (
-        <MemberToday orgId={orgId} family={mode === "family"} />
-      )}
-    </div>
-  );
+  if (teams.length === 0) return <NoTeam orgId={orgId} />;
+  if (mode === "staff" && team) return <StaffToday orgId={orgId} teamId={team.id} />;
+  if (mode === "family") return <FamilyToday orgId={orgId} />;
+  return <PlayerToday orgId={orgId} />;
 }
 
 function NoTeam({ orgId }: { orgId: string }) {
   const t = useTranslations("today");
+  const greeting = useGreeting();
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <PageHeader eyebrow={greeting} title={t("teams")} />
       <OnboardingChecklist orgId={orgId} teamId={null} />
       <EmptyState title={t("noTeam")} />
     </div>
@@ -96,118 +112,188 @@ function StaffToday({ orgId, teamId }: { orgId: string; teamId: string }) {
     .filter((m) => new Date(m.kickoff_at).getTime() > now.getTime() - 3 * 3600_000 && m.score_own == null && !m.has_video)
     .sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at))[0];
   const last = list.filter((m) => m !== upcoming && new Date(m.kickoff_at) <= now).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at))[0];
+  // the stage answers the coach's first question: the match ahead when it is close, else the last one
+  const soon = upcoming && new Date(upcoming.kickoff_at).getTime() - now.getTime() < 3 * 86400_000;
   const base = `/app/${orgId}/teams/${teamId}`;
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
+      {matches.isLoading ? (
+        <Stage>
+          <Skeleton className="h-28 w-80 max-w-full bg-club-ink/15" />
+        </Stage>
+      ) : soon || (!last && upcoming) ? (
+        <NextStage orgId={orgId} m={upcoming!} />
+      ) : last ? (
+        <LastStage orgId={orgId} m={last} base={base} />
+      ) : (
+        <FirstStage base={base} />
+      )}
       <OnboardingChecklist orgId={orgId} teamId={teamId} />
-      <div className="grid gap-x-8 gap-y-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="min-w-0 space-y-10">
-          <Block title={t("today.next")} href={`${base}/matches`} linkLabel={t("shell.matches")}>
-            {matches.isLoading ? <Skeleton className="h-40" /> : upcoming ? <NextMatch orgId={orgId} m={upcoming} /> : <NoNextMatch base={base} />}
+      <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
+        <Block title={t("today.standsOut")} href={last ? `/app/${orgId}/matches/${last.id}` : undefined} linkLabel={t("today.openMatch")}>
+          {last && last.has_video && last.status === "ready" ? <TopInsights orgId={orgId} m={last} /> : <p className="text-[0.9375rem] text-muted">{t("today.notAnalysed")}</p>}
+        </Block>
+        <div className="space-y-12">
+          <Block title={t("today.upNext")}>
+            {upcoming && !soon && <MatchAhead orgId={orgId} m={upcoming} />}
+            <ul>
+              {(!upcoming || soon) && (
+                <Row label={t("today.match")} href={upcoming ? `/app/${orgId}/matches/${upcoming.id}` : `${base}/matches?new=1`}>
+                  {upcoming ? <UpcomingLine m={upcoming} /> : <span className="text-muted">{t("today.noMatchPlanned")}</span>}
+                </Row>
+              )}
+              <NextTrainingRow orgId={orgId} teamId={teamId} />
+            </ul>
           </Block>
-          {(matches.isLoading || last) && (
-            <Block title={t("today.last")}>{last ? <LastMatch orgId={orgId} m={last} /> : <Skeleton className="h-56" />}</Block>
-          )}
-        </div>
-        <aside className="space-y-10">
           <AskBox base={base} />
-          <NextTraining orgId={orgId} teamId={teamId} />
-        </aside>
+        </div>
       </div>
     </div>
   );
 }
 
-function NextMatch({ orgId, m }: { orgId: string; m: Match }) {
+/** The next match as a fixture announcement: date in scoreboard type, opponent, how many days to go. */
+function MatchAhead({ orgId, m }: { orgId: string; m: Match }) {
   const t = useTranslations();
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const when = new Date(m.kickoff_at);
+  return (
+    <Link href={`/app/${orgId}/matches/${m.id}`} className="group mb-1 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-5 border-b border-foreground/10 py-4">
+      <span className="text-center leading-none">
+        <span className="block font-display text-sm uppercase text-muted">{format.dateTime(when, { weekday: "short" })}</span>
+        <span className="mt-1 block font-score text-[2.75rem] leading-[0.9]">{format.dateTime(when, { day: "2-digit", month: "2-digit" })}</span>
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate font-display text-[1.75rem] leading-tight group-hover:text-accent">{m.opponent_name}</span>
+        <span className="block text-sm text-muted">
+          {[format.dateTime(when, { hour: "2-digit", minute: "2-digit" }), m.is_home ? t("matches.homeShort") : t("matches.awayShort"), format.relativeTime(when, now)].join(" · ")}
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+function UpcomingLine({ m }: { m: Match }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const when = new Date(m.kickoff_at);
+  return (
+    <>
+      <span className="block truncate font-semibold">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
+      <span className="block text-sm text-muted">
+        {[format.dateTime(when, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }), m.kind === "training" ? null : m.is_home ? t("matches.homeShort") : t("matches.awayShort")]
+          .filter(Boolean)
+          .join(" · ")}
+      </span>
+    </>
+  );
+}
+
+function NextStage({ orgId, m }: { orgId: string; m: Match }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
+  const greeting = useGreeting();
+  const when = new Date(m.kickoff_at);
   const days = Math.max(0, Math.round((new Date(when).setHours(0, 0, 0, 0) - new Date(now).setHours(0, 0, 0, 0)) / 86400000));
   const href = `/app/${orgId}/matches/${m.id}`;
   return (
-    <Card className="relative overflow-hidden sm:p-8">
-      <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-club" />
-      <p className="text-sm font-semibold text-accent">{t("today.inDays", { n: days })}</p>
-      <h3 className="mt-1 text-2xl font-bold sm:text-3xl">
-        <Link href={href} className="hover:underline">
-          {m.kind === "training" ? t("matches.training") : m.opponent_name}
-        </Link>
-      </h3>
-      <p className="mt-1 text-sm text-muted">
-        {[format.dateTime(when, { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }), m.kind === "training" ? null : m.is_home ? t("matches.homeShort") : t("matches.awayShort"), m.competition]
-          .filter(Boolean)
-          .join(" · ")}
+    <Stage
+      eyebrow={greeting}
+      aside={
+        <div className="text-left xl:text-center" aria-hidden>
+          <span className="block font-score text-[5rem] leading-[0.85] xl:text-[clamp(3.25rem,4.2vw,4.75rem)]">{format.dateTime(when, { hour: "2-digit", minute: "2-digit" })}</span>
+          <span className="mt-2 block text-[0.9375rem] font-semibold">{format.dateTime(when, { weekday: "long", day: "numeric", month: "long" })}</span>
+        </div>
+      }
+    >
+      <p className="mt-6 text-lg font-semibold">
+        {t("today.inDays", { n: days })} · {m.kind === "training" ? t("matches.training") : m.is_home ? t("matches.homeShort") : t("matches.awayShort")}
       </p>
-      <div className="mt-6 flex flex-wrap gap-2">
+      <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">{m.kind === "training" ? t("matches.training") : m.opponent_name}</h1>
+      {m.competition && <p className="mt-3 text-lg">{m.competition}</p>}
+      <div className="mt-7 flex flex-wrap gap-3">
         {m.kind !== "training" && (
-          <Link href={`${href}/scouting`} className={buttonClass("primary")}>
-            <Binoculars aria-hidden />
+          <Link href={`${href}/scouting`} className={stageButton("solid")}>
             {t("today.prepare")}
           </Link>
         )}
-        <Link href={`${href}/live`} className={buttonClass("secondary")}>
-          <Radio aria-hidden />
+        <Link href={`${href}/live`} className={stageButton(m.kind === "training" ? "solid" : "outline")}>
           {t("live.open")}
         </Link>
       </div>
-    </Card>
+    </Stage>
   );
 }
 
-function NoNextMatch({ base }: { base: string }) {
+function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }) {
   const t = useTranslations();
-  return (
-    <Card className="flex flex-wrap items-center justify-between gap-4">
-      <div className="min-w-0 max-w-md">
-        <p className="font-semibold">{t("today.noNext")}</p>
-        <p className="mt-1 text-sm text-muted">{t("today.noNextHint")}</p>
-      </div>
-      <Link href={`${base}/matches?new=1`} className={buttonClass("secondary")}>
-        {t("matches.newShort")}
-      </Link>
-    </Card>
-  );
-}
-
-function LastMatch({ orgId, m }: { orgId: string; m: Match }) {
-  const t = useTranslations();
-  const { team } = useShell();
   const format = useFormatter();
-  const state = matchState(m);
+  const greeting = useGreeting();
   const href = `/app/${orgId}/matches/${m.id}`;
-  const own = team?.name ?? "";
-  const [home, away] = m.is_home ? [own, m.opponent_name] : [m.opponent_name, own];
-  const [hs, as] = m.is_home ? [m.score_own, m.score_opponent] : [m.score_opponent, m.score_own];
+  const statement = matchStatement({ own: m.score_own, opp: m.score_opponent, opponent: m.opponent_name });
+  const state = matchState(m);
+  const needsVideo = !m.has_video && m.status !== "processing" && m.status !== "uploading";
+  const teamName = useShell().team?.name;
   return (
-    <Card className="space-y-6 sm:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted">{[format.dateTime(new Date(m.kickoff_at), { weekday: "short", day: "numeric", month: "long" }), m.competition].filter(Boolean).join(" · ")}</p>
-        <Badge tone={state.tone}>{t(state.label)}</Badge>
-      </div>
-      {m.kind === "training" ? (
-        <p className="text-2xl font-bold font-wide">{t("matches.training")}</p>
-      ) : (
-        <Scoreboard home={home} away={away} homeScore={hs} awayScore={as} ownSide={m.is_home ? "home" : "away"} vsLabel={t("matches.vs")} className="[&_[data-testid=score]]:text-4xl sm:[&_[data-testid=score]]:text-5xl" />
+    <Stage
+      eyebrow={greeting}
+      aside={
+        m.score_own != null && m.score_opponent != null ? (
+          <Link href={href} className="group block text-left xl:text-center">
+            <MatchScore own={m.score_own} opp={m.score_opponent} className="text-[6rem] leading-[0.85] xl:text-[clamp(3.5rem,4.6vw,5.25rem)]" />
+            <span className="mt-1 block max-w-[16rem] truncate text-[0.9375rem] font-semibold group-hover:underline xl:mx-auto">
+              {teamName ? `${teamName} – ${m.opponent_name}` : m.opponent_name}
+            </span>
+          </Link>
+        ) : undefined
+      }
+    >
+      <p className="mt-6 text-lg font-semibold">{t("today.lastMatchOn", { date: format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "long" }) })}</p>
+      <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
+        {statement ? t(statement.headline.key as "voice.won", statement.headline.params as never) : m.kind === "training" ? t("matches.training") : m.opponent_name}
+      </h1>
+      <p className="mt-3 text-lg">
+        {m.status === "processing" || m.status === "uploading" ? t("today.analysing") : needsVideo ? t("today.uploadHint") : t(state.label)}
+      </p>
+      {m.is_demo && (
+        <p className="mt-3">
+          <StageTag>{t("matches.demo")}</StageTag>
+        </p>
       )}
-      {m.has_video && m.status === "ready" ? (
-        <TopInsights orgId={orgId} m={m} />
-      ) : m.status === "processing" || m.status === "uploading" ? (
-        <p className="rounded-xl bg-surface px-4 py-3 text-sm text-muted">{t("today.analysing")}</p>
-      ) : !m.has_video ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface px-4 py-3">
-          <p className="text-sm text-muted">{t("today.uploadHint")}</p>
-          <Link href={`${href}#upload`} className={buttonClass("primary", "sm")}>
-            <Upload aria-hidden />
+      <div className="mt-7 flex flex-wrap gap-3">
+        {needsVideo ? (
+          <Link href={`${href}#upload`} className={stageButton("solid")}>
             {t("upload.title")}
           </Link>
-        </div>
-      ) : null}
-      <Link href={href} className={buttonClass("secondary")}>
-        <Clapperboard aria-hidden />
-        {t("today.openMatch")}
-      </Link>
-    </Card>
+        ) : (
+          <Link href={href} className={stageButton("solid")}>
+            {t("today.openMatch")}
+          </Link>
+        )}
+        <Link href={`${base}/assistant`} className={stageLink}>
+          <IconAsk />
+          {t("palette.ask")}
+        </Link>
+      </div>
+    </Stage>
+  );
+}
+
+function FirstStage({ base }: { base: string }) {
+  const t = useTranslations();
+  const greeting = useGreeting();
+  return (
+    <Stage eyebrow={greeting}>
+      <h1 className="mt-6 text-[2.75rem] leading-[0.95] sm:text-6xl">{t("today.firstMatch")}</h1>
+      <p className="mt-3 text-lg">{t("today.firstMatchHint")}</p>
+      <div className="mt-7">
+        <Link href={`${base}/matches?new=1`} className={stageButton("solid")}>
+          {t("matches.newShort")}
+        </Link>
+      </div>
+    </Stage>
   );
 }
 
@@ -223,22 +309,26 @@ function TopInsights({ orgId, m }: { orgId: string; m: Match }) {
   const text = useInsightText(names);
   const top = (q.data?.insights ?? []).slice(0, 3);
   if (q.isLoading) return <Skeleton className="h-24" />;
-  if (top.length === 0) return <p className="text-sm text-muted">{t("today.noInsights")}</p>;
+  if (top.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.noInsights")}</p>;
+  // the first weakness carries the signal: the one thing to take into the next training
+  const focus = top.find((i) => i.kind === "weakness")?.id;
   return (
-    <div className="space-y-2">
-      <p className="eyebrow">{t("today.insightsTitle")}</p>
-      <ul className="space-y-2">
-        {top.map((i) => (
-          <li key={i.id} className="flex items-start gap-3 text-[0.9375rem]">
-            <span aria-hidden className={cn("mt-2 size-2 shrink-0 rounded-full", i.kind === "strength" ? "bg-ok" : i.kind === "weakness" ? "bg-error" : "bg-muted")} />
+    <ul>
+      {top.map((i) => (
+        <li key={i.id} className="border-b border-foreground/10 last:border-0">
+          <Link
+            href={`/app/${orgId}/matches/${m.id}`}
+            className={cn("flex items-start gap-3 px-2 py-3 text-[0.9375rem] transition-colors", i.id === focus ? "-mx-0 rounded-md bg-signal text-signal-ink" : "hover:bg-surface")}
+          >
+            <span aria-hidden className={cn("mt-2 size-2 shrink-0 rounded-full", i.kind === "strength" ? "bg-ok" : i.kind === "weakness" ? (i.id === focus ? "bg-signal-ink" : "bg-error") : "bg-muted")} />
             <span>
               <span className="sr-only">{t(`insights.${i.kind}`)}: </span>
               {text(i)}
             </span>
-          </li>
-        ))}
-      </ul>
-    </div>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -247,9 +337,9 @@ function AskBox({ base }: { base: string }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   return (
-    <section className="space-y-3">
-      <h2 className="eyebrow flex items-center gap-1.5">
-        <Sparkles aria-hidden className="size-3.5" />
+    <section className="space-y-2">
+      <h2 className="flex items-center gap-2 text-lg">
+        <IconAsk className="size-5" />
         {t("ask")}
       </h2>
       <form
@@ -262,17 +352,17 @@ function AskBox({ base }: { base: string }) {
         <label className="sr-only" htmlFor="today-ask">
           {t("ask")}
         </label>
-        <input id="today-ask" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("askPlaceholder")} maxLength={500} className={cn(control, "min-h-12 rounded-full pr-12 pl-4")} />
-        <button type="submit" aria-label={t("ask")} disabled={q.trim().length < 3} className="absolute top-1.5 right-1.5 grid size-9 place-items-center rounded-full bg-accent text-accent-contrast disabled:opacity-40">
+        <input id="today-ask" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("askPlaceholder")} maxLength={500} className={cn(control, "min-h-12 pr-14 pl-4 text-base")} />
+        <button type="submit" aria-label={t("ask")} disabled={q.trim().length < 3} className="absolute top-1.5 right-1.5 grid size-9 place-items-center rounded-md bg-accent text-accent-contrast disabled:opacity-40">
           <ArrowUp aria-hidden className="size-4" />
         </button>
       </form>
-      <p className="text-xs text-muted">{t("askHint")}</p>
+      <p className="text-sm text-muted">{t("askHint")}</p>
     </section>
   );
 }
 
-function NextTraining({ orgId, teamId }: { orgId: string; teamId: string }) {
+function NextTrainingRow({ orgId, teamId }: { orgId: string; teamId: string }) {
   const t = useTranslations("today");
   const format = useFormatter();
   const today = new Date().toISOString().slice(0, 10);
@@ -282,35 +372,27 @@ function NextTraining({ orgId, teamId }: { orgId: string; teamId: string }) {
       (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/sessions", { params: { path: { org_id: orgId, team_id: teamId }, query: { from: today } } })).data ?? [],
   });
   const next = (q.data ?? []).filter((s) => s.on_date >= today).sort((a, b) => a.on_date.localeCompare(b.on_date))[0];
-  const href = `/app/${orgId}/teams/${teamId}/training`;
   return (
-    <Block title={t("nextTraining")} href={href} linkLabel={t("planTraining")}>
-      {q.isLoading ? (
-        <Skeleton className="h-24" />
-      ) : next ? (
-        <Link href={href} className="block rounded-2xl bg-raised p-5 ring-1 ring-border/70 transition-colors hover:bg-surface/60">
-          <p className="text-sm font-semibold text-accent">
-            {format.dateTime(new Date(next.starts_at ?? `${next.on_date}T12:00:00`), next.starts_at ? { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" } : { weekday: "long", day: "numeric", month: "long" })}
-          </p>
-          <p className="mt-1 font-semibold">{next.title || t("nextTraining")}</p>
-          <p className="mt-1 text-sm text-muted">{t("trainingLength", { minutes: next.total_minutes, drills: next.drills.length })}</p>
-        </Link>
+    <Row label={t("trainingRow")} href={`/app/${orgId}/teams/${teamId}/training`}>
+      {next ? (
+        <>
+          <span className="block truncate font-semibold">{next.title || t("nextTraining")}</span>
+          <span className="block text-sm text-muted">
+            {format.dateTime(new Date(next.starts_at ?? `${next.on_date}T12:00:00`), next.starts_at ? { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" } : { weekday: "short", day: "numeric", month: "short" })} ·{" "}
+            {t("trainingLength", { minutes: next.total_minutes, drills: next.drills.length })}
+          </span>
+        </>
       ) : (
-        <div className="flex items-center gap-3 rounded-2xl bg-surface/60 p-5 text-sm text-muted">
-          <Dumbbell aria-hidden className="size-5 shrink-0" />
-          {t("noTraining")}
-        </div>
+        <span className="text-muted">{q.isLoading ? "" : t("noTraining")}</span>
       )}
-    </Block>
+    </Row>
   );
 }
 
-/* ---------------- players and parents ---------------- */
+/* ---------------- players ---------------- */
 
-function MemberToday({ orgId, family }: { orgId: string; family: boolean }) {
-  const t = useTranslations();
-  const format = useFormatter();
-  const { items, reply } = useSchedule(orgId);
+function useMember(orgId: string) {
+  const schedule = useSchedule(orgId);
   const tasks = useQuery({
     queryKey: ["my-assignments", orgId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/me/assignments", { params: { path: { org_id: orgId } } })).data ?? [],
@@ -319,81 +401,151 @@ function MemberToday({ orgId, family }: { orgId: string; family: boolean }) {
     queryKey: ["my-feeds", orgId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/me/feeds", { params: { path: { org_id: orgId } } })).data ?? [],
   });
-  const dates = (items.data ?? []).slice(0, 3);
-  const open = (tasks.data ?? []).filter((a) => !a.done_at).slice(0, 4);
-  const scenes = (feeds.data ?? []).slice(0, 4);
-  const base = `/app/${orgId}`;
+  return { schedule, tasks, feeds };
+}
+
+function PlayerToday({ orgId }: { orgId: string }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const greeting = useGreeting();
+  const { schedule, tasks, feeds } = useMember(orgId);
+  const dates = schedule.items.data ?? [];
+  const next = dates[0];
+  const when = next ? new Date(next.starts_at ?? `${next.on_date}T12:00:00`) : null;
+  const choice = (r: "yes" | "no") =>
+    next && (
+      <button
+        type="button"
+        aria-pressed={next.response === r}
+        onClick={() => schedule.reply(next, r)}
+        className={cn(stageButton(next.response === r ? "solid" : "outline"))}
+      >
+        {r === "yes" ? <Check aria-hidden /> : <X aria-hidden />}
+        {t(`schedule.${r}`)}
+      </button>
+    );
   return (
-    <div className="grid gap-x-8 gap-y-10 lg:grid-cols-2">
-      <Block title={t("today.myDates")} href={`${base}/schedule`} linkLabel={t("today.allDates")} className="lg:col-span-2">
-        {items.isLoading ? (
+    <div className="space-y-12">
+      <Stage
+        eyebrow={greeting}
+        aside={
+          when ? (
+            <div className="text-left xl:text-center" aria-hidden>
+              <span className="block font-score text-[5rem] leading-[0.85] xl:text-[clamp(3.25rem,4.2vw,4.75rem)]">{format.dateTime(when, next?.starts_at ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "numeric" })}</span>
+              <span className="mt-2 block text-[0.9375rem] font-semibold">{format.dateTime(when, { weekday: "long", day: "numeric", month: "long" })}</span>
+            </div>
+          ) : undefined
+        }
+      >
+        <p className="mt-6 text-lg font-semibold">{t("today.yourNext")}</p>
+        <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">
+          {schedule.items.isLoading ? "" : next ? (next.kind === "match" ? t("schedule.match", { opponent: next.title ?? "" }) : next.title || t("schedule.training")) : t("today.noDates")}
+        </h1>
+        {next && <div className="mt-7 flex flex-wrap gap-3">{choice("yes")}{choice("no")}</div>}
+      </Stage>
+      <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
+        <Block title={t("today.newScenes")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
+          <Scenes orgId={orgId} feeds={feeds.data ?? []} loading={feeds.isLoading} />
+        </Block>
+        <div className="space-y-12">
+          <Block title={t("today.myTasks")} href={`/app/${orgId}/assignments`} linkLabel={t("today.allTasks")}>
+            <Tasks orgId={orgId} tasks={(tasks.data ?? []).filter((a) => !a.done_at)} />
+          </Block>
+          {dates.length > 1 && (
+            <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
+              <ul className="-mx-4 divide-y divide-foreground/10 overflow-hidden rounded-lg border border-border bg-raised sm:mx-0">
+                {dates.slice(1, 4).map((i) => (
+                  <li key={`${i.kind}-${i.id}-${i.player_id}`}>
+                    <ScheduleRow item={i} onReply={schedule.reply} />
+                  </li>
+                ))}
+              </ul>
+            </Block>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- parents: the calm workbench, no stage ---------------- */
+
+function FamilyToday({ orgId }: { orgId: string }) {
+  const t = useTranslations();
+  const greeting = useGreeting();
+  const { schedule, feeds } = useMember(orgId);
+  const dates = (schedule.items.data ?? []).slice(0, 4);
+  return (
+    <div className="space-y-12">
+      <PageHeader title={greeting.split(" · ")[0]!} eyebrow={greeting.split(" · ")[1]} />
+      <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
+        {schedule.items.isLoading ? (
           <Skeleton className="h-32" />
         ) : dates.length === 0 ? (
-          <p className="rounded-2xl bg-surface/60 p-5 text-sm text-muted">{t("schedule.none")}</p>
+          <p className="text-[0.9375rem] text-muted">{t("today.noDates")}</p>
         ) : (
-          <ul className="divide-y divide-border/70 overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70">
+          <ul className="divide-y divide-foreground/10 overflow-hidden rounded-lg border border-border bg-raised">
             {dates.map((i) => (
               <li key={`${i.kind}-${i.id}-${i.player_id}`}>
-                <ScheduleRow item={i} onReply={reply} />
+                <ScheduleRow item={i} onReply={schedule.reply} />
               </li>
             ))}
           </ul>
         )}
       </Block>
-      {!family && (
-        <Block title={t("today.myTasks")} href={`${base}/assignments`} linkLabel={t("today.allTasks")}>
-          {open.length === 0 ? (
-            <p className="flex items-center gap-3 rounded-2xl bg-surface/60 p-5 text-sm text-muted">
-              <ListTodo aria-hidden className="size-5" />
-              {t("today.nothing")}
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {open.map((a) => (
-                <li key={a.id}>
-                  <Link href={targetLink(orgId, a)} className="flex items-center gap-3 rounded-2xl bg-raised px-4 py-3 ring-1 ring-border/70 hover:bg-surface/60">
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium">{a.title}</span>
-                      <span className="block text-[0.8125rem] text-muted">
-                        {t(`assignments.kind_${a.kind as "drill"}`)}
-                        {a.due_at && ` · ${t("today.due", { date: format.dateTime(new Date(a.due_at), { day: "numeric", month: "short" }) })}`}
-                      </span>
-                    </span>
-                    <ArrowRight aria-hidden className="size-4 text-muted" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Block>
-      )}
-      <Block title={t("today.newScenes")} href={`${base}/feed`} linkLabel={t("today.allScenes")}>
-        {scenes.length === 0 ? (
-          <p className="flex items-center gap-3 rounded-2xl bg-surface/60 p-5 text-sm text-muted">
-            <Film aria-hidden className="size-5" />
-            {t("feed.none")}
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {scenes.map((f) => (
-              <li key={`${f.player_id}-${f.match_id}`}>
-                <Link href={`${base}/feed/${f.match_id}?player=${f.player_id}`} className="flex items-center gap-3 rounded-2xl bg-raised px-4 py-3 ring-1 ring-border/70 hover:bg-surface/60">
-                  <Film aria-hidden className="size-4 text-muted" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">{f.opponent ?? t("matches.training")}</span>
-                    <span className="block text-[0.8125rem] text-muted">
-                      {format.dateTime(new Date(f.kickoff_at), { day: "numeric", month: "short" })}
-                      {f.relation === "guardian" && ` · ${f.player_first_name}`}
-                    </span>
-                  </span>
-                  {!f.assessed && <Badge tone="accent">{t("feed.assessNow")}</Badge>}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+      <Block title={t("today.newScenes")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
+        <Scenes orgId={orgId} feeds={feeds.data ?? []} loading={feeds.isLoading} />
       </Block>
     </div>
   );
 }
 
+function Scenes({ orgId, feeds, loading }: { orgId: string; feeds: Schemas["FeedListItem"][]; loading: boolean }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  if (loading) return <Skeleton className="h-24" />;
+  if (feeds.length === 0) return <p className="text-[0.9375rem] text-muted">{t("feed.none")}</p>;
+  return (
+    <ul>
+      {feeds.slice(0, 4).map((f) => (
+        <li key={`${f.player_id}-${f.match_id}`} className="border-b border-foreground/10 last:border-0">
+          <Link href={`/app/${orgId}/feed/${f.match_id}?player=${f.player_id}`} className="group flex items-center gap-3 py-3.5 hover:text-accent">
+            <IconScenes className="size-5 shrink-0 text-muted" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold">{f.opponent ?? t("matches.training")}</span>
+              <span className="block text-sm text-muted">
+                {format.dateTime(new Date(f.kickoff_at), { day: "numeric", month: "short" })}
+                {f.relation === "guardian" && ` · ${f.player_first_name}`}
+              </span>
+            </span>
+            {!f.assessed && <Badge tone="accent">{t("feed.assessNow")}</Badge>}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Tasks({ orgId, tasks }: { orgId: string; tasks: Schemas["AssignmentOut"][] }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  if (tasks.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
+  return (
+    <ul>
+      {tasks.slice(0, 4).map((a) => (
+        <li key={a.id} className="border-b border-foreground/10 last:border-0">
+          <Link href={targetLink(orgId, a)} className="group flex items-center gap-3 py-3.5 hover:text-accent">
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold">{a.title}</span>
+              <span className="block text-sm text-muted">
+                {t(`assignments.kind_${a.kind as "drill"}`)}
+                {a.due_at && ` · ${t("today.due", { date: format.dateTime(new Date(a.due_at), { day: "numeric", month: "short" }) })}`}
+              </span>
+            </span>
+            <ArrowRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import deCH from "../../messages/de-CH.json";
 import en from "../../messages/en.json";
 import fr from "../../messages/fr.json";
-import { clubTheme, contrastRatio, contrastText, SURFACE } from "./color";
+import { clubTheme, contrastRatio, contrastText } from "./color";
 import { errorKey, fieldErrors, KNOWN_ERRORS } from "./errors";
 import { enterApp, safeNext } from "./nav";
 
@@ -45,18 +45,39 @@ describe("color", () => {
     expect(contrastText("#ffd700")).toBe("#000000");
     expect(contrastText("#0b3d91")).toBe("#ffffff");
   });
+  const CLUBS = ["#0b6bcb", "#c8102e", "#0f6b46", "#003366", "#111111", "#ffd100", "#ffffff", "#00a651"];
+
   it("keeps club colours readable in both themes", () => {
-    for (const hex of ["#ffd100", "#003366", "#c8102e", "#ffffff", "#000000", "#00a651"]) {
+    for (const hex of CLUBS) {
       const t = clubTheme(hex);
-      expect(contrastRatio(t.light.accent, SURFACE.light)).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio(t.dark.accent, SURFACE.dark)).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio(t.light.accent, t.light.contrast)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(t.light.accent, t.light.surface), hex).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(t.light.accent, t.light.paper), hex).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(t.dark.accent, t.dark.surface), hex).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(t.light.accent, t.light.contrast), hex).toBeGreaterThanOrEqual(4.5);
     }
-    // a readable club colour is kept as it is
-    expect(clubTheme("#c8102e").light).toEqual({ accent: "#c8102e", contrast: "#ffffff" });
-    // navy turns lighter on the dark theme instead of disappearing (1.49:1 before)
+    expect(clubTheme("#c8102e").light.accent).toBe("#c8102e");
     expect(clubTheme("#003366").dark.accent).not.toBe("#003366");
-    expect(clubTheme("not a colour").club).toBe("#c93a0b");
+    expect(clubTheme("not a colour").club).toBe("#0b6bcb");
+  });
+
+  it("puts readable text on the stage, the deep surface and the signal", () => {
+    for (const hex of CLUBS) {
+      const t = clubTheme(hex);
+      expect(contrastRatio(t.club, t.clubInk), hex).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(t.deep, "#ffffff"), hex).toBeGreaterThanOrEqual(7);
+      expect(contrastRatio(t.signal, t.signalInk), hex).toBeGreaterThanOrEqual(7);
+      // the signal must stand out from the stage it sits next to
+      expect(contrastRatio(t.signal, t.club) > 1.3 || t.signal !== "#ffd23f", hex).toBe(true);
+    }
+    // yellow clubs: dark ink on the stage, neutral deep instead of olive, signal falls back to ink
+    expect(clubTheme("#ffd100")).toMatchObject({ clubInk: "#10151c", deep: "#14171c", signal: "#10151c" });
+    // the deep surface carries the club hue
+    expect(clubTheme("#c8102e").deep).not.toBe(clubTheme("#0b6bcb").deep);
+  });
+
+  it("tints the paper towards the club colour", () => {
+    expect(clubTheme("#c8102e").light.paper).not.toBe(clubTheme("#0b6bcb").light.paper);
+    for (const hex of CLUBS) expect(contrastRatio(clubTheme(hex).light.paper, "#10151c")).toBeGreaterThanOrEqual(12);
   });
 });
 

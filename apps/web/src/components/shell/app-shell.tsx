@@ -23,8 +23,10 @@ export function AppShell({
   me,
   savedTeam,
   banner,
+  clubVars,
   children,
 }: {
+  clubVars?: Record<string, string>;
   org: ShellOrg;
   orgs: { id: string; name: string }[];
   teams: ShellTeam[];
@@ -53,6 +55,16 @@ export function AppShell({
   const active = destOf(path, mode);
   const [palette, setPalette] = useState(false);
 
+  // menus and dialogs render at the end of <body>: give the document the club's colours too
+  useEffect(() => {
+    if (!clubVars) return;
+    const root = document.documentElement;
+    for (const [k, v] of Object.entries(clubVars)) root.style.setProperty(k, v);
+    return () => {
+      for (const k of Object.keys(clubVars)) root.style.removeProperty(k);
+    };
+  }, [clubVars]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -72,7 +84,7 @@ export function AppShell({
       <ShellContext.Provider value={value}>
         <div className="flex min-h-dvh flex-col">
           <header className="flex items-center gap-3 px-3 py-2 sm:px-5">
-            <Link href={back} aria-label={t("closeTool")} className="grid size-10 place-items-center rounded-full text-muted ring-1 ring-border hover:bg-surface hover:text-foreground">
+            <Link href={back} aria-label={t("closeTool")} className="grid size-10 place-items-center rounded-md text-muted ring-1 ring-border hover:bg-surface hover:text-foreground">
               <X aria-hidden className="size-5" />
             </Link>
             <ClubMark org={org} className="size-7 rounded-lg" />
@@ -89,16 +101,16 @@ export function AppShell({
   return (
     <ShellContext.Provider value={value}>
       <>
-        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:rounded-full focus:bg-raised focus:px-4 focus:py-2 focus:shadow-lg">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:rounded-md focus:bg-raised focus:px-4 focus:py-2 focus:shadow-lg">
           {t("skip")}
         </a>
         <div className="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
-          {/* desktop sidebar */}
-          <aside className="sticky top-0 hidden h-dvh flex-col gap-6 border-r border-border/70 bg-background px-3 py-4 lg:flex">
+          {/* desktop sidebar: the club's deep colour, a dark island in every theme */}
+          <aside className="on-deep sticky top-0 hidden h-dvh flex-col gap-7 bg-deep px-3 pt-5 pb-4 lg:flex">
             <div className="space-y-3 px-1">
-              <Link href={`/app/${org.id}`} className="flex items-center gap-3 rounded-xl p-1 hover:bg-surface">
+              <Link href={`/app/${org.id}`} className="flex items-center gap-3 rounded-md p-1 hover:bg-surface">
                 <ClubMark org={org} />
-                <span className="min-w-0 truncate font-semibold font-wide">{org.name}</span>
+                <span className="min-w-0 text-[1.375rem] leading-[1.05] font-display break-words">{org.name}</span>
               </Link>
               <TeamSwitcher />
             </div>
@@ -108,30 +120,31 @@ export function AppShell({
                 const on = active === it.key;
                 const subs = on ? sectionsFor(it.key, mode, org.id, team?.id ?? null) : [];
                 const subOn = sectionOf(path);
+                const here = on && !subs.some((x) => x.key === subOn);
                 return (
                   <div key={it.key}>
                     <Link
                       href={it.href}
-                      aria-current={on && !subs.some((x) => x.key === subOn) ? "page" : undefined}
+                      aria-current={here ? "page" : undefined}
                       className={cn(
-                        "group flex items-center gap-3 rounded-xl px-3 py-2 text-[0.9375rem] font-medium transition-colors",
+                        "flex min-h-11 items-center gap-3 rounded-md px-3 text-[0.9375rem] font-medium transition-colors",
                         on ? "text-foreground" : "text-muted hover:bg-surface hover:text-foreground",
-                        on && subs.length === 0 && "bg-raised shadow-sm ring-1 ring-border/70",
+                        here && "bg-surface shadow-[inset_3px_0_0_var(--mark)]",
                       )}
                     >
-                      <Icon aria-hidden className={cn("size-[1.15rem]", on ? "text-accent" : "")} strokeWidth={on ? 2.2 : 1.8} />
+                      <Icon className="size-5 shrink-0" />
                       {t(it.key)}
                     </Link>
                     {subs.length > 0 && (
-                      <ul className="mt-0.5 mb-1 ml-[1.35rem] space-y-0.5 border-l border-border pl-3">
+                      <ul className="mt-0.5 mb-1.5 space-y-0.5">
                         {subs.map((x) => (
                           <li key={x.key}>
                             <Link
                               href={x.href}
                               aria-current={x.key === subOn ? "page" : undefined}
                               className={cn(
-                                "-ml-[0.8rem] block rounded-r-lg border-l-2 py-1.5 pr-2 pl-[0.7rem] text-sm transition-colors",
-                                x.key === subOn ? "border-accent font-semibold text-foreground" : "border-transparent text-muted hover:text-foreground",
+                                "flex min-h-9 items-center rounded-md pr-2 pl-11 text-[0.9375rem] transition-colors",
+                                x.key === subOn ? "bg-surface font-semibold text-foreground shadow-[inset_3px_0_0_var(--mark)]" : "text-muted hover:bg-surface hover:text-foreground",
                               )}
                             >
                               {t(x.key)}
@@ -149,25 +162,25 @@ export function AppShell({
               <button
                 type="button"
                 onClick={() => setPalette(true)}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted hover:bg-surface hover:text-foreground"
+                className="flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-sm text-muted hover:bg-surface hover:text-foreground"
                 data-testid="palette-open"
               >
                 <Search aria-hidden className="size-4" />
                 <span className="flex-1 text-left">{t("search")}</span>
-                <kbd className="rounded-md bg-surface px-1.5 py-0.5 font-sans text-[0.6875rem] text-muted ring-1 ring-border">⌘K</kbd>
+                <kbd className="rounded-sm px-1.5 py-0.5 font-sans text-[0.6875rem] text-muted ring-1 ring-border">⌘K</kbd>
               </button>
-              <div className="flex items-center gap-1 px-1">
+              <div className="flex items-center gap-1 border-t border-border px-1 pt-3">
                 <AccountMenu />
                 <NotificationBell orgId={org.id} />
               </div>
             </div>
           </aside>
 
-          <div className="flex min-w-0 flex-col">
+          <div className="flex min-w-0 flex-col overflow-x-clip">
             {/* phone top bar */}
-            <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-border/70 bg-background/85 px-3 py-2 backdrop-blur-xl lg:hidden">
+            <header className="on-deep sticky top-0 z-30 flex items-center gap-2 bg-deep px-3 py-2 lg:hidden">
               <Link href={`/app/${org.id}`} aria-label={org.name} className="shrink-0">
-                <ClubMark org={org} className="size-8 rounded-lg" />
+                <ClubMark org={org} className="size-8 rounded-md" />
               </Link>
               <div className="min-w-0 flex-1">
                 <TeamSwitcher compact />
@@ -176,7 +189,7 @@ export function AppShell({
                 type="button"
                 aria-label={t("search")}
                 onClick={() => setPalette(true)}
-                className="grid size-10 place-items-center rounded-full text-muted hover:bg-surface hover:text-foreground"
+                className="grid size-10 place-items-center rounded-md text-muted hover:bg-surface hover:text-foreground"
               >
                 <Search aria-hidden className="size-5" />
               </button>
@@ -195,10 +208,7 @@ export function AppShell({
         </div>
 
         {/* phone tab bar */}
-        <nav
-          aria-label={t("mainNav")}
-          className="fixed inset-x-0 bottom-0 z-30 border-t border-border/70 bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
-        >
+        <nav aria-label={t("mainNav")} className="on-deep fixed inset-x-0 bottom-0 z-30 bg-deep pb-[env(safe-area-inset-bottom)] lg:hidden">
           <ul className="mx-auto flex max-w-md">
             {items.map((it) => {
               const Icon = DEST_ICON[it.key];
@@ -208,9 +218,12 @@ export function AppShell({
                   <Link
                     href={it.href}
                     aria-current={on ? "page" : undefined}
-                    className={cn("flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[0.6875rem] font-medium", on ? "text-accent" : "text-muted")}
+                    className={cn(
+                      "flex flex-col items-center gap-1 pt-2.5 pb-2 text-xs font-medium",
+                      on ? "text-foreground shadow-[inset_0_3px_0_var(--mark)]" : "text-muted",
+                    )}
                   >
-                    <Icon aria-hidden className="size-6" strokeWidth={on ? 2.2 : 1.7} />
+                    <Icon className="size-6" />
                     {t(it.key)}
                   </Link>
                 </li>

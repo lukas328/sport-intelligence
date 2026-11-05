@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, Check, X } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { TrainingOrPageHeader } from "@/components/shell/section-nav";
+import { AreaOrPageHeader } from "@/components/shell/section-nav";
 import { EmptyState, Skeleton } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -40,7 +40,7 @@ export function ScheduleRow({ item: i, onReply }: { item: Item; onReply: (item: 
       aria-pressed={i.response === r}
       onClick={() => onReply(i, r)}
       className={cn(
-        "inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors",
+        "inline-flex min-h-10 items-center gap-1.5 rounded-md px-4 text-sm font-medium transition-colors",
         i.response === r
           ? r === "yes"
             ? "bg-ok text-white"
@@ -83,14 +83,14 @@ export function ScheduleView({ orgId }: { orgId: string }) {
   const list = items.data ?? [];
   return (
     <div className="space-y-8">
-      <TrainingOrPageHeader title={t("title")} />
+      <AreaOrPageHeader title={t("title")} />
       <p className="-mt-4 text-sm text-muted">{t("hint")}</p>
       {items.isLoading ? (
         <Skeleton className="h-40" />
       ) : list.length === 0 ? (
         <EmptyState icon={<CalendarDays />} title={t("none")} />
       ) : (
-        <ul className="divide-y divide-border/70 overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70" data-testid="schedule">
+        <ul className="divide-y divide-border/70 overflow-hidden rounded-lg bg-raised border border-border" data-testid="schedule">
           {list.map((i) => (
             <li key={`${i.kind}-${i.id}-${i.player_id}`}>
               <ScheduleRow item={i} onReply={reply} />

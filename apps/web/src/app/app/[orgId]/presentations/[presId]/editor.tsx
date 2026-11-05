@@ -127,12 +127,12 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
           <Link href={`/app/${orgId}/presentations/${presId}/present`} className="rounded-md bg-accent px-4 py-2 font-medium text-accent-contrast" data-testid="present">
             {t("present")}
           </Link>
-          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
+          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
             {t("pdf")}
           </a>
           {p.can_edit &&
             (p.export_status === "ready" ? (
-              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
+              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
                 {t("mp4Download")}
               </a>
             ) : (
@@ -162,7 +162,7 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
             onDragStart={() => setDrag(s.id)}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => drag && drag !== s.id && move(drag, i)}
-            className={cn("rounded-2xl bg-raised ring-1 ring-border/70 p-3", drag === s.id && "opacity-60")}
+            className={cn("rounded-lg bg-raised border border-border p-3", drag === s.id && "opacity-60")}
           >
             <div className="flex flex-wrap items-center gap-2">
               <span className="w-6 text-sm text-muted tabular-nums">{i + 1}</span>

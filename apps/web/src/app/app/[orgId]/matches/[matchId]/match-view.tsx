@@ -7,11 +7,13 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, ChevronDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
-import { Scoreboard } from "@/components/domain/scoreboard";
+import { useCountUp } from "@/components/domain/match-score";
+import { cardFileName, drawMatchCard } from "@/lib/match-card";
+import { DEFAULT_CLUB } from "@/lib/color";
+import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState, Skeleton } from "@/components/ui/card";
 import { useConfirm } from "@/components/ui/confirm";
 import { Dialog } from "@/components/ui/dialog";
@@ -62,6 +64,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   });
   const [live, setLive] = useState<Record<string, Partial<Job>>>({});
   const [dialog, setDialog] = useState<"edit" | "exchange" | null>(null);
+  const [justDone, setJustDone] = useState(false);
 
   // the shell follows the team of the match (navigation, palette)
   useEffect(() => {
@@ -75,6 +78,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       const ev = JSON.parse((e as MessageEvent).data) as Job & { job_id: string };
       setLive((l) => ({ ...l, [ev.job_id]: ev }));
       if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
+      // the moment the analysis is done: said on the stage, not in a toast
+      if (ev.status === "succeeded" && ev.kind !== "ingest") setJustDone(true);
     });
     return () => es.close();
   }, [orgId, initial.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -105,16 +110,54 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
   const jobs = match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job);
   const main = match.videos.find((v) => v.role === "main" && v.status === "ready");
+  // a match with events but no video (paper report, demo, marks) opens on its analysis
+  const opened = useRef(false);
+  const hasEvents = (stats.data?.own.shots ?? 0) + (stats.data?.opponent.shots ?? 0) > 0;
+  useEffect(() => {
+    if (opened.current || !stats.data) return;
+    opened.current = true;
+    if (!main && hasEvents && !new URLSearchParams(window.location.search).get("t")) setView("analysis");
+  }, [stats.data, main, hasEvents]);
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
   const ourName = teamName;
   const [home, away] = match.is_home ? [ourName, oppName(match)] : [oppName(match), ourName];
   const [hs, as] = match.is_home ? [match.score_own, match.score_opponent] : [match.score_opponent, match.score_own];
   const [hh, ah] = match.is_home ? [match.halftime_own, match.halftime_opponent] : [match.halftime_opponent, match.halftime_own];
   const kickoff = new Date(match.kickoff_at);
+  const result = match.opponent && match.score_own != null && match.score_opponent != null ? (match.score_own > match.score_opponent ? "won" : match.score_own < match.score_opponent ? "lost" : "draw") : null;
   const soon = kickoff.getTime() > Date.now() - 3 * 3600_000;
   const liveFirst = staff && match.score_own == null && !main && soon && match.source !== "paper_report";
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
   const running = jobs.filter((j) => j.status !== "succeeded");
+
+  /** Match card (4:5 PNG), drawn locally: club, team, date, score, opponent, two figures. */
+  async function downloadCard() {
+    if (match.score_own == null || match.score_opponent == null) return;
+    await document.fonts?.ready;
+    const pctOf = (v: number | null | undefined) => (v == null ? null : `${Math.round(v * 100)} %`);
+    const shots = pctOf(stats.data?.own.shooting_pct);
+    const saves = pctOf(stats.data?.own.save_pct);
+    const date = format.dateTime(kickoff, { day: "2-digit", month: "2-digit", year: "2-digit" });
+    const canvas = drawMatchCard(document.createElement("canvas"), {
+      club: shell?.org.name ?? "",
+      team: teamName,
+      date,
+      own: match.score_own,
+      opp: match.score_opponent,
+      opponent: oppName(match),
+      line: t(`voice.${result === "won" ? "won" : result === "lost" ? "lost" : "draw"}`, { opponent: oppName(match) }).replace(/\.$/, ""),
+      figures: [shots && t("matches.cardShots", { value: shots }), saves && t("matches.cardSaves", { value: saves })].filter((x): x is string => Boolean(x)),
+      colour: shell?.org.primary_color ?? DEFAULT_CLUB,
+      tag: match.is_demo ? t("matches.cardDemo") : null,
+    });
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
+    if (!blob) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = cardFileName(teamName, oppName(match), date);
+    a.click();
+    window.setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
 
   function onPlay(ms: number) {
     setView("video");
@@ -128,42 +171,75 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const base = `/app/${orgId}/matches/${match.id}`;
   return (
     <div className="space-y-8">
-      <header className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="eyebrow">
-            {[format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "long", year: "numeric" }), format.dateTime(kickoff, { timeStyle: "short" }), match.competition, match.venue]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          <div className="flex items-center gap-2">
-            {match.is_demo && (
-              <Badge tone="accent" data-testid="demo-badge">
-                {t("matches.demo")}
-              </Badge>
-            )}
-            {["uploading", "processing", "failed"].includes(match.status) && <Badge tone={match.status === "failed" ? "error" : "accent"}>{t(`matches.status_${match.status}`)}</Badge>}
-          </div>
-        </div>
-        <h1 className="sr-only">
-          {match.opponent ? `${home} ${t("matches.vs")} ${away}` : `${t("matches.training")}: ${ourName}`}
-        </h1>
+      <Stage
+        compact
+        aside={
+          stats.data && hasEvents ? (
+            <table className="text-[0.9375rem]">
+              <caption className="sr-only">{t("stats.comparison")}</caption>
+              <thead>
+                <tr className="text-sm">
+                  <th scope="col" className="sr-only">
+                    {t("stats.comparison")}
+                  </th>
+                  <th scope="col" className="px-3 pb-1 text-right font-semibold">{t("stats.own")}</th>
+                  <th scope="col" className="pb-1 pl-3 text-right font-semibold opacity-80">{t("stats.opponent")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
+                  [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
+                  [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
+                  ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
+                ].map(([label, a, b]) => (
+                  <tr key={String(label)} className="border-t border-current/20">
+                    <th scope="row" className="py-1.5 pr-4 text-left font-medium">{label}</th>
+                    <td className="px-3 py-1.5 text-right font-score text-2xl leading-none">{a}</td>
+                    <td className="py-1.5 pl-3 text-right font-score text-2xl leading-none opacity-80">{b}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : undefined
+        }
+      >
+        <p className="text-[0.9375rem] font-semibold">
+          {[format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "long", year: "numeric" }), format.dateTime(kickoff, { timeStyle: "short" }), match.competition, match.venue]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+        <h1 className="sr-only">{match.opponent ? `${home} ${t("matches.vs")} ${away}` : `${t("matches.training")}: ${ourName}`}</h1>
+        {hs != null && as != null && <span className="sr-only" data-testid="score">{`${hs}:${as}`}</span>}
         {match.opponent ? (
-          <Scoreboard
-            home={home}
-            away={away}
-            homeScore={hs}
-            awayScore={as}
-            halftime={hh != null && ah != null ? `${hh}:${ah}` : null}
-            ownSide={match.is_home ? "home" : "away"}
-            vsLabel={t("matches.vs")}
-          />
+          <ScoreRows home={home} away={away} hs={hs} as={as} ownHome={match.is_home} halftime={hh != null && ah != null ? `${hh}:${ah}` : null} halftimeLabel={t("matches.halftime")} />
         ) : (
-          <p className="text-2xl font-bold font-wide" aria-hidden>
+          <p aria-hidden className="mt-2 text-[2.25rem] leading-[0.95] font-display sm:text-5xl">
             {t("matches.training")}: {ourName}
           </p>
         )}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {(result || match.is_demo || justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-lg">
+            {result && <span className="font-semibold">{t(`matches.${result}`)}</span>}
+            {match.is_demo && (
+              <span data-testid="demo-badge">
+                <StageTag>{t("matches.demo")}</StageTag>
+              </span>
+            )}
+            {justDone && (
+              <span role="status" className="inline-flex items-center gap-1.5 font-semibold">
+                <Check aria-hidden className="size-4" />
+                {t("processing.done")}
+              </span>
+            )}
+            {["uploading", "processing", "failed"].includes(match.status) && <StageTag>{t(`matches.status_${match.status}`)}</StageTag>}
+          </div>
+        )}
+      </Stage>
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-foreground/15">
           <Segmented<View>
+            variant="underline"
             label={t("tabs.video")}
             value={view}
             onChange={setView}
@@ -173,14 +249,14 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               { value: "scenes", label: t("tabs.scenes") },
             ]}
           />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pb-2.5">
             {liveFirst && (
               <Link href={`${base}/live`} className={buttonClass("primary")} data-testid="live-link">
                 <Radio aria-hidden />
                 {t("live.open")}
               </Link>
             )}
-            {uploadFirst && (
+            {uploadFirst && view !== "video" && (
               <Button onClick={() => (setView("video"), document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" }))}>
                 <Upload aria-hidden />
                 {t("upload.title")}
@@ -195,6 +271,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 <MenuItem href={`/v1/orgs/${orgId}/matches/${match.id}/report.pdf?lang=${locale}`} external icon={<FileDown />} testId="pdf">
                   {t("matches.pdf")}
                 </MenuItem>
+                {staff && match.opponent && match.score_own != null && match.score_opponent != null && (
+                  <MenuItem icon={<ImageDown />} onSelect={() => void downloadCard()} testId="match-card">
+                    {t("matches.card")}
+                  </MenuItem>
+                )}
                 {staff && !liveFirst && (
                   <MenuItem href={`${base}/live`} icon={<Radio />} testId="live-link">
                     {t("live.open")}
@@ -242,7 +323,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             </MenuRoot>
           </div>
         </div>
-      </header>
+      </div>
 
       {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 
@@ -367,7 +448,7 @@ function QualityReport({ video }: { video: Video }) {
   };
   const tone = { ok: "text-ok", warn: "text-warn", fail: "text-error" }[report.overall];
   return (
-    <details className="group rounded-2xl bg-raised px-5 py-4 ring-1 ring-border/70">
+    <details className="group rounded-lg bg-raised px-5 py-4 border border-border">
       <summary className="flex cursor-pointer list-none items-center gap-2 text-sm [&::-webkit-details-marker]:hidden">
         <span className="font-medium">{t("title")}:</span>
         <span className={cn("font-medium", tone)}>{t(`overall_${report.overall}`)}</span>
@@ -442,5 +523,32 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
       </div>
       <Button type="submit">{t("common.save")}</Button>
     </form>
+  );
+}
+
+/** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
+const pctLabel = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
+
+function ScoreRows({ home, away, hs, as, ownHome, halftime, halftimeLabel }: { home: string; away: string; hs: number | null; as: number | null; ownHome: boolean; halftime: string | null; halftimeLabel: string }) {
+  const [h, a] = useCountUp(hs ?? 0, as ?? 0);
+  const scored = hs != null && as != null;
+  const row = (name: string, goals: number, own: boolean) => (
+    <>
+      <span className={cn("min-w-0 truncate text-[2rem] leading-[1.1] font-display sm:text-[2.75rem]", !own && "opacity-75")}>{name}</span>
+      {scored ? <span className={cn("text-right font-score text-[2.5rem] leading-[1.05] sm:text-[3.25rem]", !own && "opacity-75")}>{goals}</span> : <span />}
+    </>
+  );
+  return (
+    <div aria-hidden className="mt-3">
+      <div className="grid max-w-full grid-cols-[minmax(0,auto)_auto] items-baseline gap-x-8 sm:w-fit sm:gap-x-12">
+        {row(home, h, ownHome)}
+        {row(away, a, !ownHome)}
+      </div>
+      {halftime && (
+        <p className="pt-1 text-sm font-semibold">
+          {halftimeLabel} {halftime}
+        </p>
+      )}
+    </div>
   );
 }

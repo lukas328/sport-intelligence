@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -112,10 +111,10 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
 function MatchList({ title, orgId, matches }: { title: string; orgId: string; matches: Match[] }) {
   return (
     <section className="space-y-3">
-      <h2 className="eyebrow">{title}</h2>
-      <ul className="overflow-hidden rounded-2xl bg-raised ring-1 ring-border/70" data-testid="match-list">
+      <h2 className="text-2xl">{title}</h2>
+      <ul className="overflow-hidden rounded-lg border border-foreground/20 bg-raised" data-testid="match-list">
         {matches.map((m, i) => (
-          <li key={m.id} className={cn(i > 0 && "border-t border-border/70")}>
+          <li key={m.id} className={cn(i > 0 && "border-t border-foreground/10")}>
             <MatchRow orgId={orgId} m={m} />
           </li>
         ))}
@@ -124,42 +123,42 @@ function MatchList({ title, orgId, matches }: { title: string; orgId: string; ma
   );
 }
 
+/** One line of the fixture list: when, where, against whom, how it ended. */
 export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
   const t = useTranslations();
   const format = useFormatter();
   const date = new Date(m.kickoff_at);
   const state = matchState(m);
   const result = m.score_own == null || m.score_opponent == null ? null : m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
+  // the status only when it asks for something: running, failed, or a played match without video
+  const exception = ["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) || (state.label === "matches.noVideoYet" && m.score_own != null);
+  const quiet = [m.is_demo ? t("matches.demo") : null, exception ? t(state.label) : null].filter(Boolean).join(" · ");
   return (
-    <Link href={`/app/${orgId}/matches/${m.id}`} className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-surface/70 sm:px-5">
-      <span className="w-11 shrink-0 text-center leading-none">
-        <span className="block text-lg font-bold font-wide tabular-nums">{format.dateTime(date, { day: "numeric" })}</span>
-        <span className="mt-1 block text-[0.6875rem] font-medium uppercase tracking-wide text-muted">{format.dateTime(date, { month: "short" })}</span>
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold">
-          {m.kind === "training" ? t("matches.training") : m.opponent_name}
+    <Link href={`/app/${orgId}/matches/${m.id}`} className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-4 transition-colors hover:bg-surface sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:px-5">
+      <span className="leading-none">
+        <span className="block font-display text-sm text-muted">
+          {format.dateTime(date, { weekday: "short" })}
         </span>
-        <span className="block truncate text-[0.8125rem] text-muted">
-          {[m.kind === "training" ? null : m.is_home ? t("matches.homeShort") : t("matches.awayShort"), m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" })]
+        <span className="mt-1 block font-score text-[1.6rem]">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</span>
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-[1.125rem] font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
+        <span className="mt-0.5 block truncate text-sm text-muted">
+          {[m.kind !== "training" ? (m.is_home ? t("matches.homeShort") : t("matches.awayShort")) : null, m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" }), quiet || null]
             .filter(Boolean)
             .join(" · ")}
         </span>
       </span>
-      <span className="hidden shrink-0 sm:block">
-        {m.is_demo && <Badge className="mr-1.5">{t("matches.demo")}</Badge>}
-        <Badge tone={state.tone}>{t(state.label)}</Badge>
-      </span>
-      {result && (
-        <span className="flex shrink-0 items-center gap-2">
-          <span aria-label={t(`matches.${result}`)} className={cn("size-2 rounded-full", result === "won" ? "bg-ok" : result === "lost" ? "bg-error" : "bg-muted")} />
-          <span className="font-score text-lg">
-            {m.score_own}:{m.score_opponent}
-          </span>
+      {result ? (
+        <span className="font-score text-[1.75rem] leading-none whitespace-nowrap sm:text-[2rem]">
+          <span className={result === "lost" ? "" : "text-accent"}>{m.score_own}</span>
+          <span className="px-0.5 text-muted">:</span>
+          <span className={result === "lost" ? "text-error" : "text-muted"}>{m.score_opponent}</span>
+          <span className="sr-only"> {t(`matches.${result}`)}</span>
         </span>
+      ) : (
+        <ChevronRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />
       )}
-      <ChevronRight aria-hidden className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
 }
-

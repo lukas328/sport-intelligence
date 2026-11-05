@@ -63,7 +63,7 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
         >
           <label className="flex-1">
             <span className="sr-only">{t("email")}</span>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("email")} className="min-h-10 w-full rounded-xl bg-raised ring-1 ring-inset ring-border px-3" />
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("email")} className="min-h-10 w-full rounded-md bg-raised ring-1 ring-inset ring-border px-3" />
           </label>
           <Button type="submit" disabled={invite.isPending}>{t("send")}</Button>
         </form>

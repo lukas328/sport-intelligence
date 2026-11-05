@@ -12,9 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const STATE_STYLE: Record<OverallState, string> = {
-  ok: "border-ok text-ok",
-  degraded: "border-error text-error",
-  unreachable: "border-error text-error",
+  ok: "bg-ok",
+  degraded: "bg-error",
+  unreachable: "bg-error",
 };
 
 export default async function StatusPage() {
@@ -29,7 +29,7 @@ export default async function StatusPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
+        <h1 className="text-[2rem] sm:text-[2.5rem]">{t("title")}</h1>
         <p className="text-muted">{t("intro")}</p>
       </header>
 
@@ -37,13 +37,14 @@ export default async function StatusPage() {
         data-testid="overall-status"
         data-state={view.state}
         role="status"
-        className={cn("rounded-md border-l-4 bg-surface px-4 py-3 font-medium", STATE_STYLE[view.state])}
+        className="flex items-center gap-3 rounded-md border border-border bg-raised px-4 py-3 text-lg font-semibold"
       >
+        <span aria-hidden className={cn("size-3 rounded-full", STATE_STYLE[view.state])} />
         {t(`overall_${view.state}`)}
       </p>
 
       {view.components.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl bg-raised ring-1 ring-border/70">
+        <div className="overflow-x-auto rounded-lg bg-raised border border-border">
           <table className="w-full text-left text-sm">
             <thead className="text-xs text-muted">
               <tr>

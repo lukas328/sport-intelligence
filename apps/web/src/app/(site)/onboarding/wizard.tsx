@@ -3,6 +3,9 @@
 import type { Schemas } from "@handball/api-client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import type { CSSProperties } from "react";
+import { CourtLines } from "@/components/domain/court-lines";
+import { clubStyle } from "@/lib/color";
 import { useState, type FormEvent } from "react";
 import { InviteForm } from "@/components/people/invite-form";
 import { RosterEditor } from "@/components/roster/roster-editor";
@@ -26,6 +29,9 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
   const [error, setError] = useState<ErrorKey | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  // the club colour as it is being picked: the welcome band shows it right away
+  const [colour, setColour] = useState(existingOrg?.primary_color ?? "#0b6bcb");
+  const [name, setName] = useState(existingOrg?.name ?? "");
 
   async function createOrg(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -88,17 +94,20 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <header className="space-y-3">
-        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("onboarding.title")}</h1>
-        <p className="text-sm text-muted">{t("onboarding.progress", { step: step + 1, total: STEPS.length })}</p>
-        <ol className="flex gap-2" aria-label={t("onboarding.progress", { step: step + 1, total: STEPS.length })}>
-          {STEPS.map((s, i) => (
-            <li key={s} aria-current={i === step ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= step ? "font-semibold" : "text-muted"}`}>
-              <span aria-hidden className={`block h-1.5 rounded-full ${i <= step ? "bg-accent" : "bg-surface"}`} />
-              {t(`onboarding.${s}`)}
-            </li>
-          ))}
-        </ol>
+      <header className="club relative overflow-hidden rounded-lg bg-club px-6 pt-6 pb-5 text-club-ink transition-colors duration-300 sm:px-8 sm:pt-8" style={clubStyle(colour) as CSSProperties}>
+        <CourtLines className="absolute right-0 bottom-0 hidden aspect-square h-full sm:block" />
+        <div className="relative">
+          <p className="text-[0.9375rem] font-semibold">{t("onboarding.progress", { step: step + 1, total: STEPS.length })}</p>
+          <h1 className="mt-1 text-[2.5rem] leading-[0.95] sm:text-5xl">{name.trim() || t("onboarding.title")}</h1>
+          <ol className="mt-6 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: step + 1, total: STEPS.length })}>
+            {STEPS.map((s, i) => (
+              <li key={s} aria-current={i === step ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= step ? "font-semibold" : "opacity-75"}`}>
+                <span aria-hidden className={`block h-1 rounded-full ${i <= step ? "bg-club-ink" : "bg-club-ink/30"}`} />
+                {t(`onboarding.${s}`)}
+              </li>
+            ))}
+          </ol>
+        </div>
       </header>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
 
@@ -106,7 +115,7 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
         <Card>
           <form onSubmit={createOrg} className="space-y-4" noValidate>
             <p className="text-muted">{t("onboarding.clubIntro")}</p>
-            <Input label={t("onboarding.clubName")} name="name" required autoFocus error={fields.name} />
+            <Input label={t("onboarding.clubName")} name="name" required autoFocus error={fields.name} value={name} onChange={(e) => setName(e.target.value)} />
             <Select label={t("onboarding.country")} name="country" defaultValue="CH">
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>
@@ -115,7 +124,7 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
               ))}
             </Select>
             <div className="grid grid-cols-2 gap-3">
-              <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue="#0b6bcb" className="h-11 w-24 p-1" />
+              <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" value={colour} onChange={(e) => setColour(e.target.value)} className="h-11 w-24 p-1" />
               <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue="#ffffff" className="h-11 w-24 p-1" />
             </div>
             <Input

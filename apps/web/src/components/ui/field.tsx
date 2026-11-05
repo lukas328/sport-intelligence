@@ -2,7 +2,7 @@ import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type Selec
 import { cn } from "@/lib/utils";
 
 export const control =
-  "block w-full min-h-10 rounded-xl border-0 bg-raised px-3 py-2 text-sm text-foreground ring-1 ring-inset ring-border " +
+  "block w-full min-h-10 rounded-md border-0 bg-raised px-3 py-2 text-[0.9375rem] text-foreground ring-1 ring-inset ring-foreground/20 " +
   "placeholder:text-muted/70 transition-shadow hover:ring-muted/40 " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent " +
   "aria-[invalid=true]:ring-error disabled:opacity-60";
@@ -21,7 +21,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   const inputId = id ?? auto;
   return (
     <div className="space-y-1">
-      <label htmlFor={inputId} className="block text-[0.8125rem] font-medium">
+      <label htmlFor={inputId} className="block text-sm font-semibold">
         {label}
       </label>
       <input
@@ -59,7 +59,7 @@ export function Select({
   const selectId = id ?? auto;
   return (
     <div className="space-y-1">
-      <label htmlFor={selectId} className="block text-[0.8125rem] font-medium">
+      <label htmlFor={selectId} className="block text-sm font-semibold">
         {label}
       </label>
       <select

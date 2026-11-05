@@ -159,7 +159,7 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
                 type="button"
                 aria-pressed={spec.metrics.includes(m)}
                 onClick={() => toggleMetric(m)}
-                className="rounded-full border border-border px-3 py-1 text-sm aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-contrast"
+                className="rounded-md border border-border px-3 py-1 text-sm aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-contrast"
               >
                 {t(`m_${m}`)}
               </button>
@@ -239,7 +239,7 @@ export function MatrixView({ orgId, teamId }: { orgId: string; teamId: string })
             <ul className="flex flex-wrap gap-2">
               {open.cell.clips.map((c, i) => (
                 <li key={c.event_id}>
-                  <Link className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
+                  <Link className="inline-flex min-h-8 items-center gap-1.5 rounded-md bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
                     <Play aria-hidden className="size-3 fill-current" /> {i + 1}
                   </Link>
                 </li>

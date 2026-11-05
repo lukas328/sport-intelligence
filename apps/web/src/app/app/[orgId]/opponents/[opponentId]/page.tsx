@@ -63,7 +63,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
               [t("fastBreak"), (p.totals.fast_break_goals / n).toFixed(1)],
               [t("turnovers"), (p.totals.turnovers / n).toFixed(1)],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-2xl bg-raised px-4 py-4 ring-1 ring-border/70 sm:px-5">
+              <div key={label} className="rounded-lg bg-raised px-4 py-4 border border-border sm:px-5">
                 <dt className="text-[0.8125rem] text-muted">{label}</dt>
                 <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{value}</dd>
               </div>
@@ -132,7 +132,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
       )}
       <section aria-label={t("matches")}>
         <h2 className="mb-2 font-semibold">{t("matches")}</h2>
-        <ul className="divide-y divide-border/70 rounded-2xl bg-raised ring-1 ring-border/70">
+        <ul className="divide-y divide-border/70 rounded-lg bg-raised border border-border">
           {p.matches.map((m) => (
             <li key={m.match_id}>
               <Link href={`/app/${orgId}/matches/${m.match_id}`} className="flex justify-between gap-3 px-4 py-2 hover:bg-surface">

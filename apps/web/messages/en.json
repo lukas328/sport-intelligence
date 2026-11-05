@@ -281,7 +281,14 @@
     "csvRowError": "Row {row}: {message}",
     "csvImported": "{count, plural, one {# player imported} other {# players imported}}.",
     "csvTemplate": "Download template",
-    "none": "none"
+    "none": "none",
+    "csvChoose": "Choose file",
+    "csvNone": "No file chosen",
+    "group_goal": "Goal",
+    "group_back": "Back court",
+    "group_wing": "Wings",
+    "group_pivot": "Pivot",
+    "group_other": "No position"
   },
   "settings": {
     "title": "Settings",
@@ -406,7 +413,11 @@
     "homeAway": "Home or away",
     "homeShort": "Home",
     "importFile": "Import a file",
-    "analysed": "Analysed"
+    "analysed": "Analysed",
+    "card": "Download match card",
+    "cardShots": "{value} shooting",
+    "cardSaves": "{value} saves",
+    "cardDemo": "Demo data"
   },
   "upload": {
     "title": "Upload video",
@@ -458,7 +469,8 @@
     "videoStatus_uploaded": "Uploaded",
     "videoStatus_processing": "Processing",
     "videoStatus_ready": "Ready",
-    "videoStatus_failed": "Error"
+    "videoStatus_failed": "Error",
+    "done": "Analysis done. Stats and scenes are ready."
   },
   "quality": {
     "title": "Video quality",
@@ -992,7 +1004,7 @@
     "match": "Match",
     "result": "Result",
     "sevenM": "7 m",
-    "chartLabel": "Goals and xG per match",
+    "chartLabel": "Goal difference per match",
     "form": "Form",
     "best": "Season bests",
     "bestGoals": "Most goals",
@@ -1004,7 +1016,9 @@
     "goalsOfShots": "{goals} goals from {shots} shots",
     "inMatches": "{n, plural, =1 {1 match} other {# matches}}",
     "allMatches": "All matches in detail",
-    "unknownPlayer": "Unassigned"
+    "unknownPlayer": "Unassigned",
+    "xgNote": "xG: expected goals, estimated from shot position and situation.",
+    "formLast": "The last {n} matches, newest on the right."
   },
   "notifications": {
     "title": "Notifications",
@@ -1920,7 +1934,20 @@
     "seeAll": "All",
     "trainingLength": "{minutes} min · {drills, plural, =1 {1 drill} other {# drills}}",
     "newScenes": "New clips for you",
-    "teams": "Your teams"
+    "teams": "Your teams",
+    "firstMatch": "Add your first match.",
+    "firstMatchHint": "Then upload the video, the analysis does the rest.",
+    "standsOut": "What stands out",
+    "upNext": "Up next",
+    "match": "Match",
+    "trainingRow": "Training",
+    "noMatchPlanned": "None scheduled yet",
+    "notAnalysed": "Once a match is analysed, what stands out appears here, with links to the scenes.",
+    "forYou": "For you",
+    "noDates": "No dates in the next 30 days.",
+    "yourNext": "Your next date",
+    "openTasks": "Open assignments",
+    "lastMatchOn": "Last match, {date}"
   },
   "shell": {
     "search": "Search",
@@ -1954,7 +1981,10 @@
     "profile": "Profile",
     "roster": "Squad",
     "dates": "Dates",
-    "theme_system": "Automatic"
+    "theme_system": "Automatic",
+    "fixtures": "Fixtures",
+    "plays": "Plays",
+    "matchSections": "Match sections"
   },
   "palette": {
     "newMatch": "Add a match",
@@ -1991,5 +2021,43 @@
     "emptyPlays": "No plays yet. Start from a template or take a scene straight from the video.",
     "emptyPlaylists": "No playlists yet. You cut clips in the video with “Set start” and “Set end”.",
     "emptyPresentations": "No presentations for the next video session yet."
+  },
+  "voice": {
+    "runWins": "{n} wins in a row.",
+    "runLosses": "{n} losses in a row.",
+    "record": "{w, plural, =1 {1 win} other {# wins}}, {d, plural, =1 {1 draw} other {# draws}}, {l, plural, =1 {1 loss} other {# losses}}.",
+    "overXg": "Scored more than the chances suggested.",
+    "underXg": "The chances were there. The goals not yet.",
+    "xgEvidence": "{goals} goals from {xg} expected (estimated).",
+    "defenceHeld": "The defence held more than expected.",
+    "defenceLeaked": "Conceded more than the opponents' chances suggested.",
+    "xgaEvidence": "{against} goals conceded from {xga} expected (estimated).",
+    "moreWins": "More wins than losses.",
+    "moreLosses": "More losses than wins. There is still time.",
+    "level": "Even so far.",
+    "wonClear": "A clear win against {opponent}.",
+    "wonTight": "Tight, but won against {opponent}.",
+    "won": "Win against {opponent}.",
+    "draw": "Draw against {opponent}.",
+    "lostTight": "Narrow loss against {opponent}.",
+    "lost": "Loss against {opponent}.",
+    "lostClear": "A clear loss against {opponent}.",
+    "matchOverXg": "{goals} goals from {xg} expected (estimated): the finishing was there.",
+    "matchUnderXg": "{goals} goals from {xg} expected (estimated): there was more in it.",
+    "afterMatches": "{label}, after {n, plural, =1 {1 match} other {# matches}}",
+    "neutralSeason": "The season so far.",
+    "focus": "work on this",
+    "focusNote": "The tick shows the reference value, not a league average.",
+    "chartLater": "The trend appears from three matches. Until then the table shows each match.",
+    "lastResult": "Last match",
+    "goalsAsClips": "Watch the goals as clips",
+    "nextMatch": "Next match",
+    "noMatchYet": "No match played yet.",
+    "reference": "Reference {value}",
+    "inNumbers": "The season in numbers",
+    "lowerBetter": "lower is better",
+    "againstRef": "Goals against {value}",
+    "focusNoteMarked": "Yellow marks the value that is clearly off.",
+    "recordLabel": "Record"
   }
 }

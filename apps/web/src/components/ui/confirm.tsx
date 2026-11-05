@@ -44,7 +44,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           <D.Overlay className="fixed inset-0 z-[60] bg-[var(--overlay)] animate-fade" />
           <D.Content
             role="alertdialog"
-            className="club fixed inset-x-4 top-1/2 z-[60] mx-auto max-w-sm -translate-y-1/2 rounded-3xl bg-raised p-6 shadow-2xl ring-1 ring-border animate-rise"
+            className="club fixed inset-x-4 top-1/2 z-[60] mx-auto max-w-sm -translate-y-1/2 rounded-lg bg-raised p-6 shadow-2xl ring-1 ring-border animate-rise"
           >
             <D.Title className="text-lg font-semibold">{ask?.title}</D.Title>
             <D.Description className={ask?.body ? "mt-2 text-sm text-muted" : "sr-only"}>{ask?.body ?? ask?.title}</D.Description>

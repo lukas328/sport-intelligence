@@ -27,7 +27,7 @@ function Chip({ on, children, onClick, color }: { on: boolean; children: React.R
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-8 items-center gap-1 rounded-full border px-3 py-1 text-sm",
+        "inline-flex min-h-8 items-center gap-1 rounded-md border px-3 py-1 text-sm",
         on ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface",
       )}
     >
@@ -48,11 +48,18 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
   const tr = useTranslations();
   const format = useFormatter();
   const qc = useQueryClient();
-  const [filter, setFilter] = useState<Filter>({});
+  const params = useSearchParams();
+  // links from the season stage ("goals as clips") open the search pre-filtered
+  const [filter, setFilter] = useState<Filter>(() => {
+    const outcomes = (params.get("outcome") ?? "").split(",").filter((o): o is (typeof OUTCOMES)[number] => (OUTCOMES as readonly string[]).includes(o));
+    const types = (params.get("type") ?? "").split(",").filter((o): o is (typeof TYPES)[number] => (TYPES as readonly string[]).includes(o));
+    const side = params.get("side");
+    return { ...(outcomes.length ? { outcomes } : {}), ...(types.length ? { types } : {}), ...(side === "own" || side === "opponent" ? { sides: [side] } : {}) } as Filter;
+  });
   const [error, setError] = useState<ErrorKey | null>(null);
   const team = { org_id: orgId, team_id: teamId };
   const tp = useTranslations("presentations");
-  const target = useSearchParams().get("presentation");
+  const target = params.get("presentation");
   const [added, setAdded] = useState<string[]>([]);
   const toPresentation = useMutation({
     mutationFn: async (h: Hit) => {
@@ -220,7 +227,7 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
           {result.data ? t("count", { n: result.data.total }) : ""}
         </p>
         {result.data && hits.length === 0 && <EmptyState title={t("none")} />}
-        <ul className="divide-y divide-border/70 rounded-2xl bg-raised ring-1 ring-border/70" data-testid="search-hits">
+        <ul className="divide-y divide-border/70 rounded-lg bg-raised border border-border" data-testid="search-hits">
           {hits.map((h) => (
             <li key={`${h.kind}-${h.id}`} className="space-y-2 px-3 py-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -235,7 +242,7 @@ export function SearchView({ orgId, teamId }: { orgId: string; teamId: string })
                   </Button>
                 )}
                 {h.video_id && h.start_ms != null && (
-                  <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
+                  <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
                     {t("watch")}
                   </Link>
                 )}

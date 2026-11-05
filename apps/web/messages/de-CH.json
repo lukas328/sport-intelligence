@@ -281,7 +281,14 @@
     "csvRowError": "Zeile {row}: {message}",
     "csvImported": "{count, plural, one {# Spieler importiert} other {# Spieler importiert}}.",
     "csvTemplate": "Vorlage herunterladen",
-    "none": "keine"
+    "none": "keine",
+    "csvChoose": "Datei wählen",
+    "csvNone": "Keine Datei gewählt",
+    "group_goal": "Tor",
+    "group_back": "Rückraum",
+    "group_wing": "Flügel",
+    "group_pivot": "Kreis",
+    "group_other": "Ohne Position"
   },
   "settings": {
     "title": "Einstellungen",
@@ -406,7 +413,11 @@
     "homeAway": "Heim oder auswärts",
     "homeShort": "Heim",
     "importFile": "Datei importieren",
-    "analysed": "Analysiert"
+    "analysed": "Analysiert",
+    "card": "Matchkarte herunterladen",
+    "cardShots": "{value} Würfe",
+    "cardSaves": "{value} Paraden",
+    "cardDemo": "Demo-Daten"
   },
   "upload": {
     "title": "Video hochladen",
@@ -458,7 +469,8 @@
     "videoStatus_uploaded": "Hochgeladen",
     "videoStatus_processing": "Wird verarbeitet",
     "videoStatus_ready": "Bereit",
-    "videoStatus_failed": "Fehler"
+    "videoStatus_failed": "Fehler",
+    "done": "Analyse fertig. Statistik und Szenen stehen bereit."
   },
   "quality": {
     "title": "Videoqualität",
@@ -992,7 +1004,7 @@
     "match": "Spiel",
     "result": "Resultat",
     "sevenM": "7 m",
-    "chartLabel": "Tore und xG pro Spiel",
+    "chartLabel": "Tordifferenz pro Spiel",
     "form": "Form",
     "best": "Bestwerte der Saison",
     "bestGoals": "Meiste Tore",
@@ -1004,7 +1016,9 @@
     "goalsOfShots": "{goals} Tore aus {shots} Würfen",
     "inMatches": "{n, plural, =1 {1 Spiel} other {# Spiele}}",
     "allMatches": "Alle Spiele im Detail",
-    "unknownPlayer": "Nicht zugeordnet"
+    "unknownPlayer": "Nicht zugeordnet",
+    "xgNote": "xG: erwartete Tore, geschätzt aus Wurfposition und Situation.",
+    "formLast": "Die letzten {n} Spiele, das neueste rechts."
   },
   "notifications": {
     "title": "Mitteilungen",
@@ -1920,7 +1934,20 @@
     "seeAll": "Alle",
     "trainingLength": "{minutes} Min. · {drills, plural, =1 {1 Übung} other {# Übungen}}",
     "newScenes": "Neue Szenen für dich",
-    "teams": "Deine Teams"
+    "teams": "Deine Teams",
+    "firstMatch": "Leg dein erstes Spiel an.",
+    "firstMatchHint": "Danach Video hochladen, den Rest erledigt die Analyse.",
+    "standsOut": "Was auffällt",
+    "upNext": "Als Nächstes",
+    "match": "Spiel",
+    "trainingRow": "Training",
+    "noMatchPlanned": "Noch keins angesetzt",
+    "notAnalysed": "Sobald ein Spiel analysiert ist, steht hier, was auffällt, mit Link zu den Szenen.",
+    "forYou": "Für dich",
+    "noDates": "Keine Termine in den nächsten 30 Tagen.",
+    "yourNext": "Dein nächster Termin",
+    "openTasks": "Offene Aufgaben",
+    "lastMatchOn": "Letztes Spiel, {date}"
   },
   "shell": {
     "search": "Suchen",
@@ -1954,7 +1981,10 @@
     "profile": "Profil",
     "roster": "Kader",
     "dates": "Termine",
-    "theme_system": "Automatisch"
+    "theme_system": "Automatisch",
+    "fixtures": "Spielplan",
+    "plays": "Spielzüge",
+    "matchSections": "Bereiche der Spiele"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",
@@ -1991,5 +2021,43 @@
     "emptyPlays": "Noch keine Spielzüge. Starte mit einer Vorlage oder übernimm eine Szene direkt aus dem Video.",
     "emptyPlaylists": "Noch keine Playlists. Clips schneidest du im Video mit «Start setzen» und «Ende setzen».",
     "emptyPresentations": "Noch keine Präsentationen für die nächste Videositzung."
+  },
+  "voice": {
+    "runWins": "{n} Siege in Folge.",
+    "runLosses": "{n} Niederlagen in Folge.",
+    "record": "{w, plural, =1 {1 Sieg} other {# Siege}}, {d, plural, =1 {1 Unentschieden} other {# Unentschieden}}, {l, plural, =1 {1 Niederlage} other {# Niederlagen}}.",
+    "overXg": "Mehr getroffen, als die Chancen hergaben.",
+    "underXg": "Die Chancen waren da. Die Tore noch nicht.",
+    "xgEvidence": "{goals} Tore aus {xg} erwarteten (geschätzt).",
+    "defenceHeld": "Hinten mehr gehalten als erwartet.",
+    "defenceLeaked": "Hinten mehr kassiert, als die Chancen hergaben.",
+    "xgaEvidence": "{against} Gegentore bei {xga} erwarteten (geschätzt).",
+    "moreWins": "Mehr Siege als Niederlagen.",
+    "moreLosses": "Mehr Niederlagen als Siege. Noch ist Zeit.",
+    "level": "Ausgeglichen bis hierher.",
+    "wonClear": "Deutlich gewonnen gegen {opponent}.",
+    "wonTight": "Knapp, aber gewonnen gegen {opponent}.",
+    "won": "Sieg gegen {opponent}.",
+    "draw": "Unentschieden gegen {opponent}.",
+    "lostTight": "Knapp verloren gegen {opponent}.",
+    "lost": "Niederlage gegen {opponent}.",
+    "lostClear": "Deutlich verloren gegen {opponent}.",
+    "matchOverXg": "{goals} Tore aus {xg} erwarteten (geschätzt): Die Abschlüsse sassen.",
+    "matchUnderXg": "{goals} Tore aus {xg} erwarteten (geschätzt): Da lag mehr drin.",
+    "afterMatches": "{label}, nach {n, plural, =1 {1 Spiel} other {# Spielen}}",
+    "neutralSeason": "Die Saison bis hierher.",
+    "focus": "hier ansetzen",
+    "focusNote": "Der Strich zeigt den Richtwert, keinen Ligaschnitt.",
+    "chartLater": "Der Verlauf erscheint ab drei Spielen. Bis dahin zeigt die Tabelle jedes Spiel einzeln.",
+    "lastResult": "Letztes Spiel",
+    "goalsAsClips": "Tore als Clips ansehen",
+    "nextMatch": "Nächstes Spiel",
+    "noMatchYet": "Noch kein Spiel gespielt.",
+    "reference": "Richtwert {value}",
+    "inNumbers": "Die Saison in Zahlen",
+    "lowerBetter": "weniger ist besser",
+    "againstRef": "Gegentore {value}",
+    "focusNoteMarked": "Gelb ist der Wert, der klar daneben liegt.",
+    "recordLabel": "Bilanz"
   }
 }

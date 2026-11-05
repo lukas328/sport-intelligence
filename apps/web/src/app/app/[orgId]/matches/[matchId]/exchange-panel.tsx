@@ -55,7 +55,7 @@ export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; ma
           <form onSubmit={submit} className="space-y-2">
             <label className="block text-sm font-medium">
               {t("importLabel")}
-              <input name="file" type="file" accept=".xml,application/xml,text/xml" required className="mt-1 block text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-foreground" />
+              <input name="file" type="file" accept=".xml,application/xml,text/xml" required className="mt-1 block text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-foreground" />
             </label>
             <p className="text-xs text-muted">{t("importHint")}</p>
             <Button type="submit" disabled={busy}>

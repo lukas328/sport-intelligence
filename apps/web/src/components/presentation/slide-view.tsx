@@ -176,7 +176,7 @@ export function SlideView({
       {rows.length > 0 && (
         <dl className="grid gap-3 sm:grid-cols-3">
           {rows.map((r) => (
-            <div key={r.label} className="rounded-2xl bg-raised ring-1 ring-border/70 p-4">
+            <div key={r.label} className="rounded-lg bg-raised border border-border p-4">
               <dt className="text-sm text-muted">{r.label}</dt>
               <dd className="text-3xl font-semibold tabular-nums">{String(r.value ?? "-")}</dd>
               {r.n != null && <dd className="text-xs text-muted">n = {r.n}</dd>}

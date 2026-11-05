@@ -17,7 +17,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             <BrandWordmark name={t("app.name")} />
           </Link>
           <div className="flex items-center gap-1 text-sm">
-            <Link href="/status" className="rounded-full px-3 py-2 text-muted hover:bg-surface hover:text-foreground">
+            <Link href="/status" className="rounded-md px-3 py-2 text-muted hover:bg-surface hover:text-foreground">
               {t("nav.status")}
             </Link>
             <Link href={signedIn ? "/app" : "/login"} className={buttonClass("secondary", "sm")}>

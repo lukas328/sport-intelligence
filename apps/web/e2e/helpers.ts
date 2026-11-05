@@ -45,18 +45,31 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
 }
 
-/** Team area: "Team" in the main navigation, then a section (Kader, Saison, Bibliothek). */
-export async function openTeam(page: Page, section?: "Kader" | "Saison" | "Bibliothek") {
+/** Team area: "Team" in the main navigation, then a section (Kader, Termine). */
+export async function openTeam(page: Page, section?: "Kader" | "Termine") {
   await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
   if (!section || section === "Kader") return;
+  await follow(page, page.getByRole("link", { name: section, exact: true }), /\/schedule$/);
+}
+
+/** Matches area: "Spiele" in the main navigation, then a section (Spielplan, Saison, Bibliothek). */
+export async function openMatches(page: Page, section?: "Spielplan" | "Saison" | "Bibliothek") {
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
+  if (!section || section === "Spielplan") return;
   await follow(page, page.getByRole("link", { name: section, exact: true }), section === "Saison" ? /\/season$/ : /\/library$/);
 }
 
-/** Library entry (Playlists, Spielzüge, Präsentationen, Szenensuche). */
-export async function openLibrary(page: Page, entry: "Playlists" | "Spielzüge" | "Präsentationen" | "Szenensuche") {
-  await openTeam(page, "Bibliothek");
-  const path = { Playlists: "playlists", Spielzüge: "plays", Präsentationen: "presentations", Szenensuche: "search" }[entry];
+/** Library entry (Playlists, Präsentationen, Szenensuche); plays sit in Training. */
+export async function openLibrary(page: Page, entry: "Playlists" | "Präsentationen" | "Szenensuche") {
+  await openMatches(page, "Bibliothek");
+  const path = { Playlists: "playlists", Präsentationen: "presentations", Szenensuche: "search" }[entry];
   await follow(page, page.getByRole("link", { name: new RegExp(`^${entry}`) }), new RegExp(`/${path}$`));
+}
+
+/** Training area, then the plays. */
+export async function openPlays(page: Page) {
+  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
+  await follow(page, page.getByRole("link", { name: "Spielzüge", exact: true }), /\/plays$/);
 }
 
 /** Match page: analysis view and one of its sections. */

@@ -24,7 +24,7 @@ export function NextUp() {
   if (!next) return null;
   const when = new Date(next.kickoff_at);
   return (
-    <Link href={`/app/${org.id}/matches/${next.id}`} className="block rounded-xl px-3 py-2.5 ring-1 ring-border/70 transition-colors hover:bg-surface">
+    <Link href={`/app/${org.id}/matches/${next.id}`} className="block rounded-md px-3 py-2.5 border border-border transition-colors hover:bg-surface">
       <span className="block text-xs font-medium text-muted">{t("today.next")}</span>
       <span className="mt-0.5 block truncate text-sm font-semibold">{next.kind === "training" ? t("matches.training") : next.opponent_name}</span>
       <span className="block text-xs text-muted tabular-nums">

@@ -337,14 +337,14 @@ export function Workspace({
             </Button>
           )}
           <details className="group relative">
-            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-full px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
               <Keyboard aria-hidden className="size-4" />
               {t("player.shortcuts")}
             </summary>
-            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-xl bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
+            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-md bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
           </details>
         </div>
-        <div className="space-y-4 rounded-2xl bg-raised p-4 ring-1 ring-border/70 sm:p-5">
+        <div className="space-y-4 rounded-lg bg-raised p-4 border border-border sm:p-5">
           {analysis.data?.status === "ready" && (
             <Segmented<Deck>
               label={t("player.deck")}
@@ -402,7 +402,7 @@ export function Workspace({
         )}
       </div>
 
-      <div className="flex max-h-[44rem] min-w-0 flex-col gap-4 rounded-2xl bg-raised p-4 ring-1 ring-border/70">
+      <div className="flex max-h-[44rem] min-w-0 flex-col gap-4 rounded-lg bg-raised p-4 border border-border">
         <Segmented<Tab>
           label={t("tabs.video")}
           size="sm"
@@ -425,8 +425,8 @@ export function Workspace({
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
               {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.empty")}</li>}
               {(comments.data ?? []).map((c) => (
-                <li key={c.id} className="rounded-xl bg-surface px-3 py-2">
-                  <button className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
+                <li key={c.id} className="rounded-md bg-surface px-3 py-2">
+                  <button className="rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
                     {formatClock(c.t_ms)}
                   </button>{" "}
                   <span className="text-xs text-muted">{c.author_name}</span>
@@ -524,7 +524,7 @@ export function Workspace({
                       key={k}
                       aria-pressed={tool === k}
                       onClick={() => setTool(k)}
-                      className={cn("rounded-full border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+                      className={cn("rounded-md border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
                     >
                       {t(`draw.tool_${k}`)}
                     </button>
@@ -604,7 +604,7 @@ function AnalysisPanel({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold">{t("title")}</h2>
         {analysis.detector === "heuristic" && (
-          <span className="rounded-full bg-surface px-2 py-0.5 text-xs" title={t("heuristicHint")}>
+          <span className="rounded-md bg-surface px-2 py-0.5 text-xs" title={t("heuristicHint")}>
             {t("heuristic")}
           </span>
         )}
@@ -718,7 +718,7 @@ function IdentityPanel({
                 id={`track-${tr.track_no}`}
                 value={tr.player_id ?? ""}
                 onChange={(e) => void assign(tr.track_no, e.target.value)}
-                className="min-h-9 flex-1 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
+                className="min-h-9 flex-1 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
               >
                 <option value="">{t("none")}</option>
                 {(roster.data ?? [])
@@ -770,7 +770,7 @@ function CameraSwitch({
             key={c.id}
             aria-pressed={c.id === active.id}
             onClick={() => onSwitch(c.id)}
-            className={cn("rounded-full border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+            className={cn("rounded-md border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
           >
             {t(c.role)}
           </button>
@@ -805,7 +805,7 @@ function CameraSwitch({
               step={10}
               defaultValue={active.time_offset_ms}
               key={active.id}
-              className="min-h-9 w-28 rounded-xl bg-raised ring-1 ring-inset ring-border px-2 text-sm"
+              className="min-h-9 w-28 rounded-md bg-raised ring-1 ring-inset ring-border px-2 text-sm"
             />
           </label>
           <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">

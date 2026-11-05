@@ -215,7 +215,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       ref={boxRef}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="group relative overflow-hidden rounded-2xl bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="group relative overflow-hidden rounded-lg bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
       aria-label={t("shortcutsList")}
       data-testid="player"
     >
@@ -340,7 +340,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             <select
               value={speed}
               onChange={(e) => setRate(Number(e.target.value))}
-              className="rounded-full bg-white/10 px-2 py-1 text-xs font-semibold"
+              className="rounded-md bg-white/10 px-2 py-1 text-xs font-semibold"
               aria-label={t("speed")}
             >
               {SPEEDS.map((s) => (
@@ -372,7 +372,7 @@ function CtlButton({ label, onClick, children, className }: { label: string; onC
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={cn("inline-grid min-h-9 min-w-9 place-items-center rounded-full px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white", className)}
+      className={cn("inline-grid min-h-9 min-w-9 place-items-center rounded-md px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white", className)}
     >
       <span aria-hidden className="inline-flex items-center gap-0.5">{children}</span>
     </button>

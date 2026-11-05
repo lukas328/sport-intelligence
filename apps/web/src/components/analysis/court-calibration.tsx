@@ -126,7 +126,7 @@ export function CourtCalibration({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto rounded-xl ring-1 ring-inset ring-border bg-black">
+        <div className="min-h-0 flex-1 overflow-auto rounded-md ring-1 ring-inset ring-border bg-black">
           <div className="relative" style={fit ? { width: "100%" } : { width: pano.width }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image, not a static asset */}
             <img
@@ -218,7 +218,7 @@ export function CourtCalibration({
                 <li key={p.id}>
                   <button
                     type="button"
-                    className="rounded-full border border-border px-2 py-0.5 text-xs hover:bg-surface"
+                    className="rounded-md border border-border px-2 py-0.5 text-xs hover:bg-surface"
                     onClick={() => setPoints((ps) => ps.filter((x) => x.id !== p.id))}
                     aria-label={t("remove", { name: t(`landmarks.${p.id}` as "landmarks.cornerNearLeft") })}
                   >

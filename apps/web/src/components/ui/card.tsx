@@ -1,14 +1,21 @@
+import { forwardRef } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { CourtLines } from "@/components/domain/court-lines";
 import { cn } from "@/lib/utils";
 
 /** A white panel on the paper background. No heavy borders: a hairline and space do the work. */
 export function Card({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("rounded-2xl bg-raised p-5 ring-1 ring-border/70 sm:p-6", className)} {...props} />;
+  return <div className={cn("rounded-lg border border-border bg-raised p-5 sm:p-6", className)} {...props} />;
 }
 
+/** An open section of a match sheet: a strong rule on top instead of a panel around it. */
+export const Sheet = forwardRef<HTMLElement, ComponentProps<"section">>(function Sheet({ className, ...props }, ref) {
+  return <section ref={ref} className={cn("border-t-2 border-foreground pt-4", className)} {...props} />;
+});
+
 export function CardTitle({ children, as: Tag = "h2", className }: { children: ReactNode; as?: "h1" | "h2" | "h3"; className?: string }) {
-  return <Tag className={cn("text-base font-semibold", className)}>{children}</Tag>;
+  return <Tag className={cn("text-lg font-bold font-display", className)}>{children}</Tag>;
 }
 
 export function Alert({
@@ -25,7 +32,7 @@ export function Alert({
   return (
     <div
       role={kind === "error" ? "alert" : "status"}
-      className={cn("flex gap-3 rounded-xl bg-surface px-4 py-3 text-sm", className)}
+      className={cn("flex gap-3 rounded-md bg-surface px-4 py-3 text-sm", className)}
     >
       <Icon aria-hidden className={cn("mt-0.5 size-4 shrink-0", tone)} />
       <div className="min-w-0 flex-1">{children}</div>
@@ -48,11 +55,13 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center rounded-2xl bg-surface/60 px-6 py-12 text-center", className)}>
-      {icon && <div className="mb-4 grid size-12 place-items-center rounded-full bg-raised text-muted ring-1 ring-border [&_svg]:size-5">{icon}</div>}
-      <p className="font-semibold">{title}</p>
-      {children && <div className="mt-1.5 max-w-md text-sm text-muted">{children}</div>}
-      {action && <div className="mt-5">{action}</div>}
+    // calm, on the paper: a faint goal area at the right edge instead of a dashed box
+    <div className={cn("relative flex flex-col items-start overflow-hidden rounded-lg bg-surface/70 px-6 py-9", className)}>
+      <CourtLines className="absolute inset-y-0 right-0 hidden h-full w-auto text-foreground/25 sm:block" />
+      {icon && <div className="relative mb-4 text-muted [&_svg]:size-6">{icon}</div>}
+      <p className="relative text-xl font-bold font-display">{title}</p>
+      {children && <div className="relative mt-1 max-w-lg text-[0.9375rem] text-muted sm:max-w-[60%]">{children}</div>}
+      {action && <div className="relative mt-5">{action}</div>}
     </div>
   );
 }
@@ -78,7 +87,7 @@ export function Section({
       {(title || actions) && (
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="min-w-0">
-            {title && <h2 className="text-lg font-semibold">{title}</h2>}
+            {title && <h2 className="text-2xl">{title}</h2>}
             {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
           </div>
           {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -90,5 +99,5 @@ export function Section({
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={cn("animate-pulse rounded-xl bg-surface", className)} />;
+  return <div aria-hidden className={cn("animate-pulse rounded-md bg-surface", className)} />;
 }

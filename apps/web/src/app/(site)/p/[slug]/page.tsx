@@ -46,7 +46,7 @@ export default async function ProfilePage({ params }: Params) {
           <h2 id="stats" className="mb-2 text-lg font-semibold">{t("season")}</h2>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {Object.entries(data.stats).map(([k, v]) => (
-              <div key={k} className="rounded-2xl bg-raised ring-1 ring-border/70 p-3">
+              <div key={k} className="rounded-lg bg-raised border border-border p-3">
                 <dt className="text-sm text-muted">{t(`stat_${k}`)}</dt>
                 <dd className="text-2xl font-semibold tabular-nums">{fmt(k, v)}</dd>
               </div>

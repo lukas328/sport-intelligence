@@ -59,7 +59,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
   const a = m.answer;
   return (
     <div className="space-y-3">
-      <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-foreground px-4 py-2.5 text-background">{m.question}</p>
+      <p className="ml-auto w-fit max-w-[85%] rounded-lg rounded-br-md bg-foreground px-4 py-2.5 text-background">{m.question}</p>
       <Card className="space-y-3">
         <p>{a.text}</p>
         {a.sample_size != null && <p className="text-sm text-muted">{t("sample", { n: a.sample_size })}</p>}
@@ -72,7 +72,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
                 <li key={c.event_id}>
                   <Link
                     href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}
-                    className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20"
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-md bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20"
                   >
                     <Play aria-hidden className="size-3 fill-current" /> {c.label}
                   </Link>
@@ -103,10 +103,10 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
           {!m.validated && <p className="mt-1">{t("notValidated")}</p>}
         </details>
         <div className="flex items-center gap-2 text-sm" aria-label={t("rateLabel")}>
-          <button type="button" aria-pressed={rated === 1} className="rounded-full px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(1)}>
+          <button type="button" aria-pressed={rated === 1} className="rounded-md px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(1)}>
             {t("good")}
           </button>
-          <button type="button" aria-pressed={rated === -1} className="rounded-full px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(-1)}>
+          <button type="button" aria-pressed={rated === -1} className="rounded-md px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(-1)}>
             {t("bad")}
           </button>
         </div>
@@ -178,7 +178,7 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2">
             {examples.map((q) => (
-              <button key={q} type="button" className="rounded-full bg-raised px-4 py-2 text-left text-sm ring-1 ring-border/70 transition-colors hover:bg-surface" onClick={() => ask.mutate(q)}>
+              <button key={q} type="button" className="rounded-md bg-raised px-4 py-2 text-left text-sm border border-border transition-colors hover:bg-surface" onClick={() => ask.mutate(q)}>
                 {q}
               </button>
             ))}

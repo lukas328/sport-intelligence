@@ -131,7 +131,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
             max={20}
             value={goalkeepers}
             onChange={(e) => setGoalkeepers(Math.max(0, Math.min(20, Number(e.target.value) || 0)))}
-            className="min-h-9 w-20 rounded-xl bg-raised ring-1 ring-inset ring-border px-2"
+            className="min-h-9 w-20 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
           />
         </label>
         {!b.checkout_available && <p className="text-xs text-muted">{t("unavailable")}</p>}

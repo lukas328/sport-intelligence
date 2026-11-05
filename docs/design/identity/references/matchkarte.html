@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Matchkarte</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Sans:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 540px; height: 675px; box-sizing: border-box; overflow: hidden; padding: 36px; display: flex; flex-direction: column; justify-content: space-between; background: {{club}}; color: {{ink}}; font-family: 'Instrument Sans', sans-serif">
+  <svg aria-hidden="true" viewBox="0 0 540 675" style="position: absolute; inset: 0; width: 100%; height: 100%">
+    <g fill="none" stroke="{{ink}}">
+      <path d="M-40 675 C-40 430 120 330 270 330 C420 330 580 430 580 675" stroke-width="5" opacity="0.32"></path>
+      <path d="M-120 675 C-120 340 80 220 270 220 C460 220 660 340 660 675" stroke-width="5" stroke-dasharray="20 18" opacity="0.32"></path>
+    </g>
+  </svg>
+  <div style="position: relative">
+    <div style="font-family: 'Anton', sans-serif; font-size: 30px">HC GRAUHOLZ</div>
+    <div style="margin-top: 2px; font-size: 17px; font-weight: 600">Herren 1, 01.11.26</div>
+  </div>
+  <div style="position: relative">
+    <div style="font-family: 'Anton', sans-serif; font-size: 188px; line-height: 1">22:20</div>
+    <div style="font-family: 'Anton', sans-serif; font-size: 40px; line-height: 1.1">SIEG GEGEN<br>DEMO HC BEISPIEL</div>
+    <div style="display: flex; gap: 28px; margin-top: 20px; font-size: 18px; font-weight: 600">
+      <span>71 % Würfe</span>
+      <span>23 % Paraden</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"club":{"editor":"color","default":"#0b6bcb","options":["#0b6bcb","#c8102e","#0f6b46","#ffd100"]},"$preview":{"width":540,"height":675}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const club = this.props.club ?? '#0b6bcb';
+    const n = parseInt(club.replace('#', ''), 16);
+    const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (c) {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    });
+    const l = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    const ink = 1.05 / (l + 0.05) >= (l + 0.05) / 0.05 ? '#ffffff' : '#101317';
+    return { club: club, ink: ink };
+  }
+}
+</script>
+</body>
+</html>
