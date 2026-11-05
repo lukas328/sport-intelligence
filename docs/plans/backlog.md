@@ -57,6 +57,12 @@ Ereignis- und Statistik-Ansichten verbergen (mit 5).
   Spiele, Paraden bei Torhütern); der Trainer blendet sie in der UI ein oder aus. Umgesetzt.
   Details in `docs/plans/federation-onboarding.md` (Entscheide).
 
+## Nach dem Merge der UI-Branch
+- `apps/api/tests/test_report_pdf.py::test_insight_texts_match_the_web_app` wieder für
+  `zones.long_range` und `zones.empty_goal` einschalten: die Web-Texte sind im UI-Branch
+  `claude/exciting-franklin-g1ecgw` angepasst; die Prüfung erst nach dessen Merge in main scharf
+  stellen, sonst schlägt sie im Backend-Branch fehl.
+
 ## Später / wartet
 - Datenanfragen DHB und BHV (Entwürfe in `docs/plans/outreach-data-de.md`), Partnerschaft SHV.
 - Eigenes ReID-Modell statt MSMT (Lizenz) vor einem kommerziellen Start.
