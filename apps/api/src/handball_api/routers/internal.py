@@ -21,6 +21,7 @@ from handball_api.services import (
     highlights,
     invoices,
     monitoring,
+    official,
     presentations,
     scouting,
     support,
@@ -163,3 +164,13 @@ async def ops_tick(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "")
         "retention": await monitoring.retention(ctx),
         "abandoned_uploads": await monitoring.abandoned_uploads(ctx),
     }
+
+
+@router.post("/official/sync")
+async def official_sync(
+    ctx: CtxDep, x_internal_token: Annotated[str, Header()] = ""
+) -> dict[str, int]:
+    """Worker tick (hourly): each linked team once a day, official reports after the games."""
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    return await official.run_due(ctx)
