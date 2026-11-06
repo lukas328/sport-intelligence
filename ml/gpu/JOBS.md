@@ -14,8 +14,10 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 - Ergebnis: `lukasde1000/handball-gpu-owl-20261105-1449` (Status ready, 189 `segs/*.json` plus
   `bench_owl.json`). Auch auf dem Modal-Volume `handball-gpu-out`.
 - Abdeckung: 189 von 300 Segmenten. l01 100/100, l02 89/100, l03 0/100. Offen: 11 aus l02, alle
-  aus l03. Das Skript überspringt Fertiges nicht, ein Folgeauftrag muss die offenen Segmente
-  also selbst auswählen, sonst wird l01 nochmals gerechnet.
+  aus l03. `owl_gpu.py` überspringt nur Segmente, deren JSON schon im Ausgabeordner liegt;
+  `owl_pseudo.py` legt pro Lauf einen neuen Ordner an (`/vol/<slug>`). Ein Folgeauftrag mit den
+  gleichen Datasets rechnet l01 also nochmals, ausser er nimmt nur l03 (dann fehlen die 11 aus
+  l02) oder das Skript bekommt eine Option, um den alten Ordner weiterzuverwenden.
 - Dauer: 39609 s (11.0 h) auf einer T4, Lauf ohne `--bench`.
 - Kosten laut Modal: 7.23 USD (Stand 2026-11-06 früh, kann noch nachlaufen), statt ~6 USD geplant.
 - Auffälligkeiten: ~210 s pro Segment statt der angenommenen ~120 s (30 Bursts pro Segment), für
