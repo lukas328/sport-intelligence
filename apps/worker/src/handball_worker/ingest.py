@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
 
-import boto3
 import httpx
 import structlog
 
@@ -39,13 +38,7 @@ IMPORT_STAGES = {"download": 0.9, "upload": 0.1}
 
 
 def _s3(settings: WorkerSettings) -> Any:
-    return boto3.client(
-        "s3",
-        endpoint_url=settings.s3_endpoint_url,
-        region_name=settings.s3_region,
-        aws_access_key_id=settings.s3_access_key,
-        aws_secret_access_key=settings.s3_secret_key,
-    )
+    return settings.s3()
 
 
 def sha256_file(path: Path) -> str:

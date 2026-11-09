@@ -15,7 +15,6 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-import boto3
 import httpx
 import structlog
 from PIL import Image, ImageDraw, ImageFont
@@ -247,13 +246,7 @@ def render(
 
 def run_presentation_export(payload: dict[str, Any]) -> dict[str, Any]:
     settings = WorkerSettings()
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=settings.s3_endpoint_url,
-        region_name=settings.s3_region,
-        aws_access_key_id=settings.s3_access_key,
-        aws_secret_access_key=settings.s3_secret_key,
-    )
+    s3 = settings.s3()
     base = settings.api_internal_url.rstrip("/")
     url = f"{base}/internal/presentations/{payload['presentation_id']}/export"
     headers = {"x-internal-token": settings.internal_token}

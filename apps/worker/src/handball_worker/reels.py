@@ -14,7 +14,6 @@ import threading
 from pathlib import Path
 from typing import IO, Any
 
-import boto3
 import httpx
 import numpy as np
 import structlog
@@ -275,13 +274,7 @@ def _rows(
 
 def run_highlight_reel(payload: dict[str, Any]) -> dict[str, Any]:
     settings = WorkerSettings()
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=settings.s3_endpoint_url,
-        region_name=settings.s3_region,
-        aws_access_key_id=settings.s3_access_key,
-        aws_secret_access_key=settings.s3_secret_key,
-    )
+    s3 = settings.s3()
     url = f"{settings.api_internal_url.rstrip('/')}/internal/highlights/{payload['reel_id']}"
     headers = {"x-internal-token": settings.internal_token}
     try:
