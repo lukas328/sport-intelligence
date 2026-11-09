@@ -2222,7 +2222,9 @@
     "openTasks": "Offene Aufgaben",
     "lastMatchOn": "Letztes Spiel, {date}",
     "assessLead": "Deine Einschätzung fehlt noch",
-    "assessTask": "Spiel gegen {opponent} einschätzen"
+    "assessTask": "Spiel gegen {opponent} einschätzen",
+    "replyTask": "{n, plural, one {# Termin beantworten} other {# Termine beantworten}}",
+    "replyHint": "Dabei oder nicht: der Trainer plant damit."
   },
   "shell": {
     "search": "Suchen",

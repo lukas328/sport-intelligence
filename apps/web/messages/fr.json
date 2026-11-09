@@ -2222,7 +2222,9 @@
     "openTasks": "Tâches ouvertes",
     "lastMatchOn": "Dernier match, {date}",
     "assessLead": "Ton auto-évaluation manque encore",
-    "assessTask": "Évaluer le match contre {opponent}"
+    "assessTask": "Évaluer le match contre {opponent}",
+    "replyTask": "{n, plural, one {Répondre à # rendez-vous} other {Répondre à # rendez-vous}}",
+    "replyHint": "Présent ou non : l'entraîneur planifie avec."
   },
   "shell": {
     "search": "Rechercher",

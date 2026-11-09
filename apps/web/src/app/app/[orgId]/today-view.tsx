@@ -481,7 +481,13 @@ function PlayerToday({ orgId }: { orgId: string }) {
         </Block>
         <div className="space-y-12">
           <Block title={t("today.myTasks")} href={`/app/${orgId}/assignments`} linkLabel={t("today.allTasks")}>
-            <Tasks orgId={orgId} tasks={(tasks.data ?? []).filter((a) => !a.done_at)} assessments={pending} />
+            <Tasks
+              orgId={orgId}
+              tasks={(tasks.data ?? []).filter((a) => !a.done_at)}
+              assessments={pending}
+              // the next date is answered on the stage; the ones after it are to-dos
+              unanswered={dates.slice(1).filter((d) => d.response == null).length}
+            />
           </Block>
           {dates.length > 1 && (
             <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
@@ -558,12 +564,34 @@ function Scenes({ orgId, feeds, loading }: { orgId: string; feeds: Schemas["Feed
   );
 }
 
-function Tasks({ orgId, tasks, assessments = [] }: { orgId: string; tasks: Schemas["AssignmentOut"][]; assessments?: Schemas["FeedListItem"][] }) {
+function Tasks({
+  orgId,
+  tasks,
+  assessments = [],
+  unanswered = 0,
+}: {
+  orgId: string;
+  tasks: Schemas["AssignmentOut"][];
+  assessments?: Schemas["FeedListItem"][];
+  /** dates after the next one that still wait for a yes or no */
+  unanswered?: number;
+}) {
   const t = useTranslations();
   const format = useFormatter();
-  if (tasks.length === 0 && assessments.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
+  if (tasks.length === 0 && assessments.length === 0 && unanswered === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
   return (
     <ul>
+      {unanswered > 0 && (
+        <li className="border-b border-foreground/10 last:border-0">
+          <Link href={`/app/${orgId}/schedule`} className="group flex items-center gap-3 py-3.5 hover:text-accent">
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold">{t("today.replyTask", { n: unanswered })}</span>
+              <span className="block text-sm text-muted">{t("today.replyHint")}</span>
+            </span>
+            <ArrowRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </li>
+      )}
       {/* self-assessments are to-dos too ("Nichts offen" next to "Jetzt einschätzen" contradicted) */}
       {assessments.slice(0, 2).map((f) => (
         <li key={`a-${f.match_id}-${f.player_id}`} className="border-b border-foreground/10 last:border-0">

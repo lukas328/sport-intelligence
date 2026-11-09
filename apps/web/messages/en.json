@@ -2222,7 +2222,9 @@
     "openTasks": "Open assignments",
     "lastMatchOn": "Last match, {date}",
     "assessLead": "Your self-assessment is still missing",
-    "assessTask": "Rate your game against {opponent}"
+    "assessTask": "Rate your game against {opponent}",
+    "replyTask": "{n, plural, one {Reply to # date} other {Reply to # dates}}",
+    "replyHint": "In or out: the coach plans with it."
   },
   "shell": {
     "search": "Search",
