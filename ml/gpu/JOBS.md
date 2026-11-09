@@ -18,6 +18,12 @@ alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from
   Kaggle-Dataset); das neue Dataset enthält dann alle 300 zusammen.
 - Dauer etwa 6.5 h, Kosten etwa 4.3 USD.
 
+## Zurückgestellt (erst nach der Auswertung von Ball-Runde 6, 2026-11-09 abends)
+GPU-Budget ist knapp (Modal-Gratisguthaben 30 USD pro Monat). Die Aufträge 4 bis 10 zusammen kosten
+etwa 28 USD. Sie laufen erst, wenn Runde 6 zeigt, dass die OWL-Labels das Ballnetz verbessern, und
+dann zuerst auf Kaggle (Gratis-Kontingent) statt Modal, soweit Kaggle-Stunden übrig sind. Die
+Cloud-Sitzung verschiebt sie dann wieder nach "Offen". Bis dahin: nur Auftrag 3 ausführen.
+
 ### 4. OWLv2 l04 (100 Segmente)
 - Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l04 --gpu T4 --budget-h 10`
 - Dauer etwa 5.8 h, Kosten etwa 3.9 USD.
