@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,3 +33,23 @@ async def test_engine_lifecycle() -> None:
         db.get_engine()
     with pytest.raises(RuntimeError):
         await anext(db.get_session())
+
+
+# foreign keys whose referenced row is deleted (ON DELETE) or that are looked up: each needs an
+# index starting with the column, or the delete and the lookup read the whole table
+_UNINDEXED_FKS = """
+SELECT c.conrelid::regclass::text, a.attname
+FROM pg_constraint c
+JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = c.conkey[1]
+WHERE c.contype = 'f' AND array_length(c.conkey, 1) = 1
+  AND NOT EXISTS (
+    SELECT 1 FROM pg_index i WHERE i.indrelid = c.conrelid AND i.indkey[0] = c.conkey[1]
+  )
+"""
+
+
+async def test_foreign_keys_of_official_data_and_candidates_are_indexed(owner_conn: Any) -> None:
+    missing = {(t, c) for t, c in await owner_conn.fetch(_UNINDEXED_FKS)}
+    checked = {"goal_candidates", "join_requests", "org_access_requests", "official_suggestions"}
+    assert {(t, c) for t, c in missing if t in checked} == set()
+    assert ("organizations", "claimed_by_id") not in missing

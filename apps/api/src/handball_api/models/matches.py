@@ -371,9 +371,11 @@ class GoalCandidate(Base, EntityMixin, TenantMixin):
     status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
     side: Mapped[str | None] = mapped_column(String(10))  # confirmed shot of this side
     outcome: Mapped[str | None] = mapped_column(String(10))  # confirmed: goal, save, miss, ...
-    event_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("events.id", ondelete="SET NULL"))
+    event_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("events.id", ondelete="SET NULL"), index=True
+    )
     reviewed_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL")
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     template_version: Mapped[str | None] = mapped_column(String(20))
