@@ -79,6 +79,10 @@ button.wide { grid-column: 1 / -1; }
 button.on { background: var(--court); color: #fff; border-color: transparent; }
 kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
 .help { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; padding-left: 18px; }
+.fpbox { display: flex; flex-direction: column; gap: 6px; }
+.fprow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.fprow button { font-size: 13px; padding: 7px 6px; }
+.fprow button.on { background: var(--warn); color: #fff; }
 .toast { min-height: 18px; font-size: 13px; color: var(--good); }
 @media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
 </style>
@@ -118,6 +122,15 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px sol
       <button id="prev">← Zurück</button>
       <button id="next">Weiter →</button>
     </div>
+    <div class="fpbox" id="fpbox" hidden>
+      <div class="label">Stärkster Vorschlag (kräftigster Kreis) ist kein Ball, sondern … (freiwillig)</div>
+      <div class="fprow">
+        <button data-fp="head">Kopf <kbd>1</kbd></button>
+        <button data-fp="hand">Hand / Arm <kbd>2</kbd></button>
+        <button data-fp="foot">Fuss / Bein <kbd>3</kbd></button>
+        <button data-fp="other">Anderes <kbd>4</kbd></button>
+      </div>
+    </div>
     <label class="row"><input type="checkbox" id="autolead" checked> Anlauf beim Öffnen automatisch abspielen</label>
     <div class="toast" id="toast" role="status"></div>
     <div>
@@ -127,6 +140,7 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px sol
         <li>Beim Öffnen läuft die Sekunde davor in Zeitlupe und stoppt auf dem Bild zum Labeln (gelbe Marke). <kbd>A</kbd> wiederholt sie.</li>
         <li><kbd>M</kbd> spielt die ganze Szene (1 s davor bis 1 s danach) als Schleife. Ein Klick ins Bild stoppt sie und setzt die Markierung.</li>
         <li>Ball ganz verdeckt oder nicht im Bild: <kbd>N</kbd>. Zweifel: <kbd>U</kbd>.</li>
+        <li>Freiwillig: liegt der stärkste Vorschlag (kräftigster Kreis) nicht auf dem Ball, mit <kbd>1</kbd> bis <kbd>4</kbd> sagen, was es ist (Kopf, Hand/Arm, Fuss/Bein, Anderes). Hilft uns, einen Filter für Körperteile zu bauen.</li>
       </ul>
     </div>
   </aside>
@@ -134,7 +148,7 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px sol
 
 <script>
 const $ = (id) => document.getElementById(id);
-const state = { items: [], idx: 0, labels: {}, mark: null, hover: null, motion: null, frame: 1, db: null };
+const state = { fp: null, items: [], idx: 0, labels: {}, mark: null, hover: null, motion: null, frame: 1, db: null };
 const imgs = {}; // preloaded Image objects per src
 
 function src(item) { return "t/" + (item.k || item.id) + ".jpg"; }
@@ -166,6 +180,9 @@ function render() {
   if (m && !clipMode) { mk.hidden = false; mk.style.left = (m.x / it.w * 100) + "%"; mk.style.top = (m.y / it.h * 100) + "%"; }
   else mk.hidden = true;
   const hs = hints(it);
+  const topIsMark = hs[0] && state.mark && Math.hypot(hs[0].x - state.mark.x, hs[0].y - state.mark.y) < 14;
+  $("fpbox").hidden = !hs[0] || !!lab || topIsMark;
+  for (const b of document.querySelectorAll("[data-fp]")) b.classList.toggle("on", state.fp === b.dataset.fp);
   for (let k = 0; k < 3; k++) {
     const sk = $("suggest" + k), h = hs[k];
     if (h && !clipMode && !lab) { sk.hidden = false; sk.style.left = (h.x / it.w * 100) + "%"; sk.style.top = (h.y / it.h * 100) + "%"; sk.style.opacity = k ? 0.55 : 1; }
@@ -222,6 +239,7 @@ async function save(kind) {
   const it = cur();
   const body = { state: kind, hall: it.hall, video: it.video, frame: it.frame, gap: it.gap, scale: it.scale, w: it.w, h: it.h, at: Date.now() };
   const sg = suggestion(it); if (sg) body.owl_score = sg.score;
+  if (state.fp && sg && !(kind === "ball" && state.mark && Math.hypot(sg.x - state.mark.x, sg.y - state.mark.y) < 14)) { body.owl_fp = state.fp; body.owl_fp_x = sg.x; body.owl_fp_y = sg.y; }
   if (kind === "ball") { if (!state.mark) return; body.x = Math.round(state.mark.x * 10) / 10; body.y = Math.round(state.mark.y * 10) / 10; body.from_owl = !!state.mark.fromOwl; body.snapped = !!state.mark.snapped; }
   state.labels[it.id] = body; // optimistic
   const idx = state.idx;
@@ -233,7 +251,7 @@ async function save(kind) {
 
 function go(i) {
   state.idx = Math.max(0, Math.min(state.items.length - 1, i));
-  state.mark = null; state.hover = null; state.frame = 1;
+  state.mark = null; state.hover = null; state.frame = 1; state.fp = null;
   const it = cur(), sg = suggestion(it);
   if (it && sg && sg.score >= SUGGEST_MIN && !state.labels[it.id]) state.mark = { x: sg.x, y: sg.y, fromOwl: true };
   stopMotion(); render(); autoLead();
@@ -280,12 +298,16 @@ $("saveBall").onclick = () => save("ball");
 $("noBall").onclick = () => save("none");
 $("unsure").onclick = () => save("unsure");
 $("prev").onclick = () => go(state.idx - 1);
+const FP_KEYS = { "1": "head", "2": "hand", "3": "foot", "4": "other" };
+function setFp(k) { state.fp = state.fp === k ? null : k; render(); }
+for (const b of document.querySelectorAll("[data-fp]")) b.onclick = () => setFp(b.dataset.fp);
 $("next").onclick = () => go(state.idx + 1);
 $("motion").onclick = toggleMotion;
 document.addEventListener("keydown", (ev) => {
   if (ev.target.tagName === "INPUT") return;
   const k = ev.key.toLowerCase();
   if (k === "enter") { ev.preventDefault(); save("ball"); }
+  else if (FP_KEYS[k] && !$("fpbox").hidden) setFp(FP_KEYS[k]);
   else if (k === "n") save("none");
   else if (k === "u") save("unsure");
   else if (k === "m") toggleMotion();
