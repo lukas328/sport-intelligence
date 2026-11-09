@@ -89,9 +89,13 @@
   color-scheme: dark;
 }
 
-.club {
-  background: var(--background);
-  color: var(--foreground);
+/* in the base layer: a club scope's paper must not win over a utility on the same element
+   (bg-club on the onboarding header, bg-raised on dialogs) */
+@layer base {
+  .club {
+    background: var(--background);
+    color: var(--foreground);
+  }
 }
 
 /* the deep surface (sidebar, phone bars): light text on the club's dark colour in every theme */

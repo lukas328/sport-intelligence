@@ -107,7 +107,7 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
           <h1 className="mt-1 text-[2.5rem] leading-[0.95] sm:text-5xl">{name.trim() || t("onboarding.title")}</h1>
           <ol className="mt-6 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}>
             {STEPS.map((s, i) => (
-              <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= shownStep ? "font-semibold" : "opacity-75"}`}>
+              <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= shownStep ? "font-semibold" : "font-normal"}`}>
                 <span aria-hidden className={`block h-1 rounded-full ${i <= shownStep ? "bg-club-ink" : "bg-club-ink/30"}`} />
                 {t(`onboarding.${s}`)}
               </li>
