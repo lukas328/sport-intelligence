@@ -57,10 +57,10 @@ Auftrag 3 (altes Ergebnis als Eingabe dazu).
 - Ergebnis: `lukasde1000/handball-gpu-owl-20261105-1449` (Status ready, 189 `segs/*.json` plus
   `bench_owl.json`). Auch auf dem Modal-Volume `handball-gpu-out`.
 - Abdeckung: 189 von 300 Segmenten. l01 100/100, l02 89/100, l03 0/100. Offen: 11 aus l02, alle
-  aus l03. `owl_gpu.py` überspringt nur Segmente, deren JSON schon im Ausgabeordner liegt;
-  `owl_pseudo.py` legt pro Lauf einen neuen Ordner an (`/vol/<slug>`). Ein Folgeauftrag mit den
-  gleichen Datasets rechnet l01 also nochmals, ausser er nimmt nur l03 (dann fehlen die 11 aus
-  l02) oder das Skript bekommt eine Option, um den alten Ordner weiterzuverwenden.
+  aus l03. Für den Rest gibt es jetzt `--resume-from` (2026-11-09): übernimmt die 189 fertigen
+  Segmente, rechnet nur die 111 offenen, das neue Dataset enthält dann alle 300. Vorschlag:
+  `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`
+  (etwa 6.5 h, gut 4 USD). Lokal getestet ist nur die Übernahme-Logik, nicht ein Lauf auf Modal.
 - Dauer: 39609 s (11.0 h) auf einer T4, Lauf ohne `--bench`.
 - Kosten laut Modal: 7.23 USD (Stand 2026-11-06 früh, kann noch nachlaufen), statt ~6 USD geplant.
 - Auffälligkeiten: ~210 s pro Segment statt der angenommenen ~120 s (30 Bursts pro Segment), für
