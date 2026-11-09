@@ -39,7 +39,7 @@ Code-Prüfung vor der Übergabe. Ball Runde 6: gleichauf mit Runde 3, nicht übe
 genug hochgeladene Spiele mit Matchblatt verarbeitet sind; 7 (Spielzüge) nach 1 und 4.
 Kleine Lücke aus dem Onboarding: Namen offizieller Kader-Einträge ohne Einwilligung in Ereignis-
 und Statistik-Ansichten verbergen: erledigt (Ereignisliste, Tor-Abgleich, Wurf-Vorschläge,
-PDF-Bericht; `roster.visible_players`). Noch offen: Anwesenheitsliste (Analysten, Assistenztrainer).
+PDF-Bericht, Anwesenheitsliste für Analysten und Assistenztrainer; `roster.visible_players`).
 
 ## Entscheide von Lukas (offen)
 - keine
