@@ -162,6 +162,18 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (UI session): API wishes for the next UI features, none built in the UI yet:
+  1. Player status on the squad (verletzt, abwesend, with an optional until-date), readable by
+     staff; today a status exists only per training unit or match (`attendance`).
+  2. Assignment progress for staff ("8 von 14 erledigt"): per assignment the count of players
+     done and the list of who is open.
+  3. Recurring training slots (weekday, time, place) that create the units of a season.
+  4. A team consent overview for staff: per player the purposes consented, before filming.
+  5. Own drills: create, edit, share within the club (the library is static today).
+  6. A player's season line: per match their goals, shots, saves with links to the events.
+- 2026-11-09 (UI session): the matrix takes `season_ids` (since 95132d3); the UI now offers
+  "Saison" (this and last, one season, all). The earlier note below is outdated.
+
 - 2026-11-09: the matrix has no `season_ids` filter in the API (`handball_metrics.query.Filter`
   knows `match_ids`, `last_n_matches`, opponent, ...; an unknown field is a 422). The UI list
   mentions it; nothing to build until the filter exists. The matrix page today counts all
