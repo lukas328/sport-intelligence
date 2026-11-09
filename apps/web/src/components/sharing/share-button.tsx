@@ -39,7 +39,8 @@ export function ShareButton({ orgId, teamId, kind, targetId }: { orgId: string; 
       trigger={
         <Button variant="secondary">
           <Share2 aria-hidden />
-          {t("button")}
+          {/* phones: the icon alone, so the main tabs keep their room */}
+          <span className="max-sm:sr-only">{t("button")}</span>
         </Button>
       }
     >

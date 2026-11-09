@@ -5,6 +5,7 @@ import { expectAccessible, linkFromMail, register, uniqueEmail } from "./helpers
 test("parent consents for own child; coach sees kit warning", async ({ page, context, browser }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   await register(page, uniqueEmail("coach-family"), "Coach Junior");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Familie");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U13");

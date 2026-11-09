@@ -51,6 +51,7 @@ test("sign-in lands in the first club, server-rendered without errors", async ({
   test.skip(info.project.name !== "chromium", "runs once");
   const email = uniqueEmail("signin");
   await register(page, email);
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Anmeldung");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");

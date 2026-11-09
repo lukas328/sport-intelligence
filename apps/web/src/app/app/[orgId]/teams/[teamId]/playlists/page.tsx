@@ -18,23 +18,23 @@ export default async function PlaylistsPage({ params }: { params: Promise<{ orgI
   const items = lists.data ?? [];
   return (
     <div className="space-y-6">
+      {staff && <NewPlaylist orgId={orgId} teamId={teamId} />}
       {items.length === 0 ? (
         <EmptyState title={t("empty")}>{staff && t("emptyHint")}</EmptyState>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="divide-y divide-foreground/10 border-t-2 border-foreground">
           {items.map((p) => (
             <li key={p.id}>
-              <Link href={`/app/${orgId}/playlists/${p.id}`} className="block rounded-lg bg-raised border border-border p-4 hover:bg-surface">
-                <p className="font-medium">{p.title}</p>
-                <p className="text-sm text-muted">
+              <Link href={`/app/${orgId}/playlists/${p.id}`} className="group flex flex-wrap items-baseline gap-x-3 py-3">
+                <span className="flex-1 font-medium group-hover:underline group-hover:underline-offset-4">{p.title}</span>
+                <span className="text-sm text-muted">
                   {t("items", { count: p.item_count })} · {p.shared_with_players ? t("shared") : t("notShared")}
-                </p>
+                </span>
               </Link>
             </li>
           ))}
         </ul>
       )}
-      {staff && <NewPlaylist orgId={orgId} teamId={teamId} />}
     </div>
   );
 }

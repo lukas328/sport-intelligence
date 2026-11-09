@@ -8,6 +8,9 @@ import { AreaOrPageHeader } from "@/components/shell/section-nav";
 import { EmptyState, Skeleton } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { buttonClass } from "@/components/ui/button";
+import { useShell } from "@/components/shell/context";
 
 type Item = Schemas["ScheduleItem"];
 
@@ -81,16 +84,35 @@ export function ScheduleView({ orgId }: { orgId: string }) {
   const t = useTranslations("schedule");
   const { items, reply } = useSchedule(orgId);
   const list = items.data ?? [];
+  // staff plan the dates; players and parents reply to them
+  const { mode, team } = useShell();
+  const staff = mode === "staff";
+  const teamBase = team ? `/app/${orgId}/teams/${team.id}` : null;
   return (
     <div className="space-y-8">
       <AreaOrPageHeader title={t("title")} />
-      <p className="-mt-4 text-sm text-muted">{t("hint")}</p>
+      <p className="-mt-4 text-sm text-muted">{t(staff ? "hintStaff" : "hint")}</p>
       {items.isLoading ? (
         <Skeleton className="h-40" />
       ) : list.length === 0 ? (
-        <EmptyState icon={<CalendarDays />} title={t("none")} />
+        <EmptyState
+          icon={<CalendarDays />}
+          title={t("none")}
+          action={
+            staff && teamBase ? (
+              <span className="flex flex-wrap gap-2">
+                <Link href={`${teamBase}/training`} className={buttonClass("secondary", "sm")}>
+                  {t("planTraining")}
+                </Link>
+                <Link href={`${teamBase}/matches?new=1`} className={buttonClass("ghost", "sm")}>
+                  {t("scheduleMatch")}
+                </Link>
+              </span>
+            ) : undefined
+          }
+        />
       ) : (
-        <ul className="divide-y divide-border/70 overflow-hidden rounded-lg bg-raised border border-border" data-testid="schedule">
+        <ul className="divide-y divide-border/70 border-t-2 border-foreground" data-testid="schedule">
           {list.map((i) => (
             <li key={`${i.kind}-${i.id}-${i.player_id}`}>
               <ScheduleRow item={i} onReply={reply} />

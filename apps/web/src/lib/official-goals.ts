@@ -1,5 +1,6 @@
 import type { Schemas } from "@handball/api-client";
 import { formatClock } from "./format";
+import { inside, type Span } from "./match-workflow";
 
 /** Official goals compared with the goals the video analysis found (official-report/comparison). */
 export type GoalComparison = Schemas["GoalComparison"];
@@ -37,6 +38,7 @@ export function goalRows(
   cmp: GoalComparison,
   filter: GoalFilter = "all",
   outside = false,
+  covers: Span[] | null = null,
 ): GoalRow[] {
   const rows: GoalRow[] = [
     ...cmp.goals.map((g) => ({
@@ -74,6 +76,11 @@ export function goalRows(
       review: g.review,
     })),
   ];
+  // a goal without a video time whose match time the video does not show (e.g. the second half of
+  // a clip of the first) is outside too: there is nothing to check
+  if (covers)
+    for (const r of rows)
+      if (r.kind === "missing" && r.tMs == null && r.clockS != null && !inside(r.clockS, covers)) r.kind = "outside";
   // match clock first; rows without one (video goal before the throw-off is known) by video time
   const key = (r: GoalRow) => r.clockS ?? (r.tMs != null ? r.tMs / 1000 : Number.POSITIVE_INFINITY);
   rows.sort(

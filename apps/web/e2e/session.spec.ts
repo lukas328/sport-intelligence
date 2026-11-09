@@ -6,6 +6,7 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   test.skip(info.project.name !== "chromium", "full flow runs once");
   const email = uniqueEmail("session");
   await register(page, email, "Coach Video");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Sitzung");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 2");
@@ -43,9 +44,9 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   await expect(page.getByTestId("search-hits").getByRole("listitem").first().getByRole("button", { name: "Rückzug zu langsam" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("complementary").getByRole("button", { name: /Rückzug zu langsam/ }).click();
   await expect(page.getByTestId("search-count")).toHaveText("1 Szene");
-  const save = page.getByRole("form", { name: "Als Smart Playlist speichern" });
-  await save.getByLabel("Name der Smart Playlist").fill("Rückzug");
-  await save.getByRole("button", { name: "Als Smart Playlist speichern" }).click();
+  const save = page.getByRole("form", { name: "Suche speichern" });
+  await save.getByLabel("Name der gespeicherten Suche").fill("Rückzug");
+  await save.getByRole("button", { name: "Suche speichern" }).click();
   await expect(page.getByRole("button", { name: "Rückzug", exact: true })).toBeVisible();
   await expectAccessible(page);
 

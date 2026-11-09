@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as M from "@radix-ui/react-dropdown-menu";
 import { Bell } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,8 @@ type Note = Schemas["NotificationOut"];
 export function NotificationBell({ orgId }: { orgId: string }) {
   const t = useTranslations("notifications");
   const format = useFormatter();
+  // relative times ("vor 5 Minuten") against a clock that moves on each minute
+  const now = useNow({ updateInterval: 60_000 });
   const qc = useQueryClient();
   const key = ["notifications", orgId];
   const q = useQuery({
@@ -30,7 +32,8 @@ export function NotificationBell({ orgId }: { orgId: string }) {
   });
   const unread = q.data?.unread ?? 0;
   const items = q.data?.items ?? [];
-  const text = (n: Note) => t(n.kind as "assignment", n.params as never);
+  // a kind the web has no text for yet still shows as a notification, not as a raw key
+  const text = (n: Note) => (t.has(n.kind as "assignment") ? t(n.kind as "assignment", n.params as never) : t("other"));
   return (
     <M.Root>
       <M.Trigger
@@ -76,7 +79,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
                   <span aria-hidden className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-accent")} />
                   <span className="min-w-0">
                     {text(n)}
-                    <span className="block text-xs font-normal text-muted">{format.relativeTime(new Date(n.created_at))}</span>
+                    <span className="block text-xs font-normal text-muted">{format.relativeTime(new Date(n.created_at), now)}</span>
                   </span>
                 </Link>
               </M.Item>

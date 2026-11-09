@@ -92,6 +92,7 @@ describe("goal candidates", () => {
   it("maps keys without the tagger's and the player's letters", () => {
     expect(keyAction("1")).toBe("own");
     expect(keyAction("2")).toBe("opponent");
+    expect(keyAction("r")).toBe("play");
     expect(keyAction("X")).toBe("reject");
     expect(keyAction("Delete")).toBe("reject");
     expect(keyAction("u")).toBe("undo");

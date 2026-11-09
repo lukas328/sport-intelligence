@@ -102,20 +102,43 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
       />
       {canWrite && <div className="-mt-6">{extra}</div>}
       {notice}
-      {upcoming.length > 0 && <MatchList title={t("matches.upcoming")} orgId={orgId} matches={upcoming} />}
-      {played.length > 0 && <MatchList title={t("matches.played")} orgId={orgId} matches={played} />}
+      {upcoming.length > 0 ? (
+        <MatchList title={t("matches.upcoming")} orgId={orgId} matches={upcoming} />
+      ) : (
+        // nothing scheduled is worth a line, with the way to change it
+        <p className="flex flex-wrap items-baseline gap-x-3 border-t-2 border-foreground pt-3">
+          <span className="text-2xl font-display">{t("matches.upcoming")}</span>
+          <span className="text-muted">{t("matches.noneUpcoming")}</span>
+          {canWrite && (
+            <Link href={`/app/${orgId}/teams/${teamId}/matches?new=1`} className="font-medium text-accent hover:underline" onClick={() => setOpen(true)}>
+              {t("matches.scheduleOne")}
+            </Link>
+          )}
+        </p>
+      )}
+      {played.length > 0 && <MatchList title={t("matches.played")} orgId={orgId} matches={played} countMissing={canWrite} />}
     </div>
   );
 }
 
-function MatchList({ title, orgId, matches }: { title: string; orgId: string; matches: Match[] }) {
+function MatchList({ title, orgId, matches, countMissing = false }: { title: string; orgId: string; matches: Match[]; countMissing?: boolean }) {
+  const t = useTranslations();
+  // demo data said once, not on every row
+  const allDemo = matches.every((m) => m.is_demo);
+  // what is still open: played matches without a video; the newest of them carries the signal
+  const missing = matches.filter((m) => m.score_own != null && matchState(m).label === "matches.noVideoYet");
   return (
     <section className="space-y-3">
-      <h2 className="text-2xl">{title}</h2>
-      <ul className="overflow-hidden rounded-lg border border-foreground/20 bg-raised" data-testid="match-list">
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <h2 className="text-2xl">{title}</h2>
+        {countMissing && missing.length > 0 && <p className="text-sm text-muted">{t("matches.withoutVideo", { n: missing.length, total: matches.length })}</p>}
+        {allDemo && <p className="text-sm text-muted">{t("matches.allDemo")}</p>}
+      </div>
+      {/* a fixture list on the hall's notice board: rules, no card */}
+      <ul className="border-t-2 border-foreground" data-testid="match-list">
         {matches.map((m, i) => (
           <li key={m.id} className={cn(i > 0 && "border-t border-foreground/10")}>
-            <MatchRow orgId={orgId} m={m} />
+            <MatchRow orgId={orgId} m={m} demoTag={!allDemo} signal={countMissing && m.id === missing[0]?.id} />
           </li>
         ))}
       </ul>
@@ -124,7 +147,7 @@ function MatchList({ title, orgId, matches }: { title: string; orgId: string; ma
 }
 
 /** One line of the fixture list: when, where, against whom, how it ended. */
-export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
+export function MatchRow({ orgId, m, demoTag = true, signal = false }: { orgId: string; m: Match; demoTag?: boolean; signal?: boolean }) {
   const t = useTranslations();
   const format = useFormatter();
   const date = new Date(m.kickoff_at);
@@ -132,7 +155,7 @@ export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
   const result = m.score_own == null || m.score_opponent == null ? null : m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
   // the status only when it asks for something: running, failed, or a played match without video
   const exception = ["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) || (state.label === "matches.noVideoYet" && m.score_own != null);
-  const quiet = [m.is_demo ? t("matches.demo") : null, exception ? t(state.label) : null].filter(Boolean).join(" · ");
+  const quiet = [m.is_demo && demoTag ? t("matches.demo") : null].filter(Boolean).join(" · ");
   return (
     <Link href={`/app/${orgId}/matches/${m.id}`} className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-4 transition-colors hover:bg-surface sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:px-5">
       <span className="leading-none">
@@ -142,18 +165,40 @@ export function MatchRow({ orgId, m }: { orgId: string; m: Match }) {
         <span className="mt-1 block font-score text-[1.6rem]">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</span>
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-[1.125rem] font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
-        <span className="mt-0.5 block truncate text-sm text-muted">
-          {[m.kind !== "training" ? (m.is_home ? t("matches.homeShort") : t("matches.awayShort")) : null, m.competition, format.dateTime(date, { hour: "2-digit", minute: "2-digit" }), quiet || null]
+        {/* the opponent is what a coach scans for: it wraps, it is never cut */}
+        <span className="block text-[1.125rem] leading-tight font-semibold group-hover:text-accent">{m.kind === "training" ? t("matches.training") : m.opponent_name}</span>
+        <span className="mt-0.5 block text-sm text-muted">
+          {[m.kind !== "training" ? (m.is_home ? t("matches.homeShort") : t("matches.awayShort")) : null, format.dateTime(date, { hour: "2-digit", minute: "2-digit" }), quiet || null]
             .filter(Boolean)
             .join(" · ")}
+          {m.competition && <span className="max-sm:hidden">{` · ${m.competition}`}</span>}
+          {exception && (
+            // the marked one says what to do: the match page opens on the upload
+            <span className={cn("block text-foreground", signal && "w-fit underline decoration-resin decoration-[5px] underline-offset-[5px]")}>
+              {signal ? t("matches.uploadVideo") : t(state.label)}
+            </span>
+          )}
         </span>
       </span>
       {result ? (
-        <span className="font-score text-[1.75rem] leading-none whitespace-nowrap sm:text-[2rem]">
-          <span className={result === "lost" ? "" : "text-accent"}>{m.score_own}</span>
-          <span className="px-0.5 text-muted">:</span>
-          <span className={result === "lost" ? "text-error" : "text-muted"}>{m.score_opponent}</span>
+        // the result like the season's form guide: a square with the letter, then the score in ink,
+        // the own goals first and the winner's figure bold
+        <span className="flex items-center gap-3 whitespace-nowrap">
+          <span
+            aria-hidden
+            className={cn(
+              "grid size-8 place-items-center rounded-[4px] font-score text-lg text-background",
+              result === "won" ? "bg-ok" : result === "lost" ? "bg-error" : "bg-muted",
+            )}
+          >
+            {t(`matches.${result}`).charAt(0)}
+          </span>
+          <span className="w-[4.5rem] text-right font-score text-[1.75rem] leading-none tabular-nums sm:w-[5.25rem] sm:text-[2rem]">
+            {/* own score always in ink, the opponent's quiet: the square says who won */}
+            <span>{m.score_own}</span>
+            <span className="px-0.5 text-muted">:</span>
+            <span className="text-muted">{m.score_opponent}</span>
+          </span>
           <span className="sr-only"> {t(`matches.${result}`)}</span>
         </span>
       ) : (

@@ -129,3 +129,19 @@ describe("official goals compared with the video", () => {
     expect(gameTime({ clockS: null, time: null })).toBeNull();
   });
 });
+
+describe("goals beyond what the video covers", () => {
+  // a clip of the first half: a second-half goal has no video time yet (no second throw-off)
+  const clip = {
+    ...cmp,
+    goals: [...cmp.goals, official("s", 2400, { status: "missing", t_ms: null })],
+  };
+  it("are no gap when the video does not show their match time", () => {
+    const rows = goalRows(clip, "all", true, [{ from: 0, to: 1800 }]);
+    expect(rows.find((r) => r.id === "s")!.kind).toBe("outside");
+    expect(goalRows(clip, "open", false, [{ from: 0, to: 1800 }]).map((r) => r.id)).not.toContain("s");
+  });
+  it("stay missing without a known coverage", () => {
+    expect(goalRows(clip, "open").map((r) => r.id)).toContain("s");
+  });
+});

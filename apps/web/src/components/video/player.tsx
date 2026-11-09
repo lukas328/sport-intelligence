@@ -50,12 +50,14 @@ interface Props {
   onKey?: (key: string) => boolean; // return true when handled
   overlay?: ReactNode;
   autoPlay?: boolean;
+  /** how times read in the controls, e.g. the match clock ("1. HZ 12:55"); video time by default */
+  clock?: (ms: number) => string;
 }
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
 
 export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
-  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay },
+  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock },
   ref,
 ) {
   const t = useTranslations("player");
@@ -253,7 +255,8 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       {/* controls float over the picture; while playing they show on hover, focus or pause */}
       <div
         className={cn(
-          "absolute inset-x-0 bottom-0 space-y-1 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-3 pt-10 pb-2 text-white transition-opacity duration-200",
+          // phones: one short bar at the bottom edge, so the goal areas stay visible
+          "absolute inset-x-0 bottom-0 space-y-0.5 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2 pt-6 pb-1 text-white transition-opacity duration-200 sm:space-y-1 sm:px-3 sm:pt-10 sm:pb-2",
           playing && !hover && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
         )}
       >
@@ -275,13 +278,13 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               if (videoRef.current) videoRef.current.currentTime = Number(e.target.value);
             }}
             aria-label={t("seek")}
-            aria-valuetext={formatClock(time)}
+            aria-valuetext={clock ? clock(time) : formatClock(time)}
             className="absolute inset-x-0 top-1 w-full accent-[var(--accent)]"
           />
           {win && (
             <div
               aria-hidden
-              className="pointer-events-none absolute top-0 h-1 bg-yellow-400"
+              className="pointer-events-none absolute top-0 h-1 bg-white/80"
               style={{ left: `${pct(win.start_ms)}%`, width: `${pct(win.end_ms - win.start_ms)}%` }}
             />
           )}
@@ -291,8 +294,9 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               aria-hidden
               title={m.label}
               className={cn(
-                "pointer-events-none absolute bottom-0 h-2 w-1 -translate-x-1/2 rounded-sm",
-                m.kind === "comment" ? "bg-sky-400" : m.kind === "clip" ? "bg-yellow-400" : m.kind === "drawing" ? "bg-pink-400" : "bg-white",
+                // one ink on the scrubber, told apart by shape: a clip is wider, a drawing shorter
+                "pointer-events-none absolute bottom-0 -translate-x-1/2 rounded-[1px] bg-white",
+                m.kind === "clip" ? "h-2.5 w-0.5" : m.kind === "drawing" ? "h-1.5 w-0.5" : "h-2 w-0.5",
               )}
               style={{ left: `${pct(m.t_ms)}%` }}
             />
@@ -309,11 +313,11 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
                 backgroundPosition: `-${thumb.x}px -${thumb.y}px`,
               }}
             >
-              <span className="absolute bottom-0 left-0 bg-black/60 px-1 text-xs">{formatClock(hover.t * 1000)}</span>
+              <span className="absolute bottom-0 left-0 bg-black/60 px-1 text-xs">{clock ? clock(hover.t * 1000) : formatClock(hover.t * 1000)}</span>
             </div>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-1 text-sm">
+        <div className="flex items-center gap-0.5 text-sm sm:flex-wrap sm:gap-1">
           <CtlButton label={playing ? t("pause") : t("play")} onClick={toggle}>
             {playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}
           </CtlButton>
@@ -331,11 +335,12 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           <CtlButton label={t("frameFwd")} onClick={() => step(1)} className="hidden sm:inline-grid">
             <StepForward className="size-4" />
           </CtlButton>
-          <span className="px-2 tabular-nums" data-testid="clock">
-            {formatClock(time)} / {formatClock(duration * 1000)}
+          <span className="truncate px-1 tabular-nums sm:px-2" data-testid="clock">
+            {clock ? clock(time) : `${formatClock(time)} / ${formatClock(duration * 1000)}`}
           </span>
           <span className="flex-1" />
-          <label className="flex items-center gap-1">
+          {/* speed and sound are rare on a phone; the picture needs the room */}
+          <label className="flex items-center gap-1 max-sm:hidden">
             <span className="sr-only">{t("speed")}</span>
             <select
               value={speed}
@@ -350,7 +355,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               ))}
             </select>
           </label>
-          <CtlButton label={muted ? t("unmute") : t("mute")} onClick={() => setMuted((m) => !m)}>
+          <CtlButton label={muted ? t("unmute") : t("mute")} onClick={() => setMuted((m) => !m)} className="max-sm:hidden">
             {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
           </CtlButton>
           <CtlButton

@@ -15,6 +15,9 @@ describe("voice", () => {
     expect(xgGap(20, 21)).toBeNull();
     expect(xgGap(15, 21)).toBe("under");
     expect(xgGap(3, 0)).toBeNull();
+    // an estimate off by more than double is not a statement about the team
+    expect(xgGap(26, 3.4)).toBeNull();
+    expect(xgGap(5, 20)).toBeNull();
   });
 
   it("says nothing without data", () => {
@@ -29,6 +32,9 @@ describe("voice", () => {
     const over = seasonStatement([row(22, 20, 14.3, 20)]);
     expect(over?.headline.key).toBe("voice.overXg");
     expect(over?.evidence).toEqual({ key: "voice.xgEvidence", params: { goals: 22, xg: 14.3 } });
+    // too few shots with a position: the xG sum says nothing
+    expect(seasonStatement([row(22, 20, 14.3, 20)], 0.3)?.headline.key).not.toBe("voice.overXg");
+    expect(seasonStatement([row(22, 20, 14.3, 20)], 0.9)?.headline.key).toBe("voice.overXg");
     const held = seasonStatement([row(22, 15, 22, 21)]);
     expect(held?.headline.key).toBe("voice.defenceHeld");
     // nothing stands out in a single match: neutral title

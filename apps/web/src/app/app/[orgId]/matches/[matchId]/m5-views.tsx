@@ -5,17 +5,21 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { CourtHeatmap } from "@/components/analysis/court-full";
 import { GoalGrid } from "@/components/analysis/goal-grid";
-import { Card, EmptyState } from "@/components/ui/card";
+import { EmptyState, Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
-import type { KeeperRow, ViewProps } from "./analysis-views";
+import { Drill, N, useDrill, type KeeperRow, type ViewProps } from "./analysis-views";
 import { useOpponentName } from "@/lib/opponent";
 
 const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
 
 /** Goalkeeper module (M5): save rate overall, per goal zone and shot zone, 7 m, GSAx. */
-export function KeepersView({ match, teamName, stats, names }: ViewProps) {
+export function KeepersView({ orgId, match, teamName, stats, names, onPlay }: ViewProps) {
+  // every count opens the scenes behind it, like the other sub-tabs
+  const { drill, open, close } = useDrill();
+  const against = (k: KeeperRow) => (k.side === "own" ? "opponent" : "own") as "own" | "opponent";
   const t = useTranslations("keepers");
+  const tz = useTranslations("zones");
   const oppName = useOpponentName();
   const sheet = ((match.report_extra as { names?: Record<string, string> } | null)?.names ?? {}) as Record<string, string>;
   const rows = Object.values(stats.goalkeepers ?? {}).sort((a, b) => (a.side === b.side ? b.faced - a.faced : a.side === "own" ? -1 : 1));
@@ -24,73 +28,85 @@ export function KeepersView({ match, teamName, stats, names }: ViewProps) {
     (k.player_id && names[k.player_id]) ||
     (k.number != null && k.side === "own" && sheet[String(k.number)]) ||
     (k.number != null ? t("number", { number: k.number }) : t("unknown"));
+  // one match sheet: a row per goalkeeper, then where they were beaten, side by side
+  const teamOf = (k: KeeperRow) => (k.side === "own" ? teamName : oppName(match));
+  // the one mark of the tab: where the first (own) keeper saved least, from at least five shots
+  const weakZone = Object.entries(rows[0]?.shot_zones ?? {})
+    .filter(([, v]) => v.faced >= 5)
+    .sort((a, b) => a[1].saves / a[1].faced - b[1].saves / b[1].faced)[0]?.[0];
   return (
-    <div className="space-y-4">
-      {(["own", "opponent"] as const).map((side) => {
-        const list = rows.filter((k) => k.side === side);
-        if (list.length === 0) return null;
-        return (
-          <section key={side} className="space-y-3" aria-label={side === "own" ? t("own") : t("opponent")}>
-            <h2 className="font-semibold">
-              {side === "own" ? t("own") : t("opponent")} <span className="text-sm font-normal text-muted">({side === "own" ? teamName : oppName(match)})</span>
-            </h2>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {list.map((k) => (
-                <Card key={`${k.side}-${k.player_id ?? k.number ?? "u"}`} className="space-y-3" data-testid="keeper-card">
-                  <h3 className="font-semibold">{nameOf(k)}</h3>
-                  <dl className="grid grid-cols-3 gap-2 text-sm sm:grid-cols-6">
-                    <Stat label={t("faced")} value={k.faced} />
-                    <Stat label={t("saves")} value={k.saves} />
-                    <Stat label={t("savePct")} value={pct(k.save_pct)} />
-                    <Stat label={t("sevenM")} value={`${k.seven_m.saves}/${k.seven_m.faced}`} />
-                    <Stat label={t("xgAgainst")} value={k.xg_against.toFixed(1)} />
-                    <Stat
-                      label={t("gsax")}
-                      value={`${k.gsax > 0 ? "+" : ""}${k.gsax.toFixed(1)}`}
-                      title={t("gsaxHint")}
-                      tone={k.gsax > 0.5 ? "ok" : k.gsax < -0.5 ? "error" : undefined}
-                    />
-                  </dl>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted">{t("byGoalZone")}</p>
-                      <GoalGrid saves data={Object.fromEntries(Object.entries(k.goal_zones).map(([z, v]) => [z, { shots: v.faced, goals: v.saves }]))} />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted">{t("byShotZone")}</p>
-                      <ul className="space-y-1 text-sm">
-                        {Object.entries(k.shot_zones)
-                          .sort((a, b) => b[1].faced - a[1].faced)
-                          .map(([z, v]) => (
-                            <li key={z} className="flex items-center gap-2">
-                              <span className="w-28 truncate">{z}</span>
-                              <span className="h-2 flex-1 overflow-hidden rounded bg-surface">
-                                <span className="block h-full bg-ok" style={{ width: `${v.faced ? (v.saves / v.faced) * 100 : 0}%` }} />
-                              </span>
-                              <span className="w-14 text-right tabular-nums">
-                                {v.saves}/{v.faced}
-                              </span>
-                            </li>
-                          ))}
-                      </ul>
-                    </div>
-                  </div>
-                </Card>
+    <div className="space-y-10">
+      <Sheet className="space-y-3">
+        <h2 className="font-semibold">{t("title")}</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" data-testid="keeper-table">
+            <thead className="text-xs text-muted">
+              <tr>
+                <th scope="col" className="py-2 pr-3 text-left font-medium">{t("keeper")}</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">{t("faced")}</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">{t("saves")}</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">{t("savePct")}</th>
+                <th scope="col" className="py-2 pl-2 text-right font-medium">{t("sevenM")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((k) => (
+                <tr key={`${k.side}-${k.player_id ?? k.number ?? "u"}`} className="border-t border-border/70">
+                  <th scope="row" className="py-2 pr-3 text-left font-medium">
+                    {nameOf(k)} <span className="font-normal text-muted">{teamOf(k)}</span>
+                  </th>
+                  <td className="px-2 py-2 text-right font-score text-base tabular-nums">{k.faced}</td>
+                  <td className="px-2 py-2 text-right font-score text-base tabular-nums">
+                    <N value={k.saves} label={`${t("saves")} ${nameOf(k)}`} onClick={() => open(`${t("saves")}: ${nameOf(k)}`, { side: against(k), type: "shot", outcome: "save" })} />
+                  </td>
+                  <td className="px-2 py-2 text-right font-score text-lg tabular-nums">{pct(k.save_pct)}</td>
+                  <td className="py-2 pl-2 text-right font-score text-base tabular-nums">
+                    {k.seven_m.faced ? `${k.seven_m.saves}/${k.seven_m.faced}` : "-"}
+                  </td>
+                </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </Sheet>
+      <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
+        {rows.map((k) => (
+          <Sheet key={`z-${k.side}-${k.player_id ?? k.number ?? "u"}`} className="space-y-4">
+            <h3 className="font-semibold">
+              {nameOf(k)} <span className="font-normal text-muted">{teamOf(k)}</span>
+            </h3>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted">{t("byGoalZone")}</p>
+              <GoalGrid
+                saves
+                data={Object.fromEntries(Object.entries(k.goal_zones).map(([z, v]) => [z, { shots: v.faced, goals: v.saves }]))}
+                onCell={(z) => open(`${t("byGoalZone")}: ${nameOf(k)}`, { side: against(k), type: "shot", goal_zone: z })}
+              />
             </div>
-          </section>
-        );
-      })}
-      <p className="text-xs text-muted">{t("gsaxHint")}</p>
-    </div>
-  );
-}
-
-function Stat({ label, value, title, tone }: { label: string; value: string | number; title?: string; tone?: "ok" | "error" }) {
-  return (
-    <div title={title} className="rounded bg-surface px-2 py-1.5">
-      <dt className="text-xs text-muted">{label}</dt>
-      <dd className={cn("text-lg font-semibold tabular-nums", tone === "ok" && "text-ok", tone === "error" && "text-error")}>{value}</dd>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted">{t("byShotZone")}</p>
+              <ul className="text-sm">
+                {Object.entries(k.shot_zones)
+                  .sort((a, b) => b[1].faced - a[1].faced)
+                  .map(([z, v]) => (
+                    <li key={z} className="flex items-center gap-3 border-b border-border/70 py-1.5">
+                      <span className={cn("w-40 truncate", k === rows[0] && z === weakZone && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>
+                        {tz.has(z as "penalty") ? tz(z as "penalty") : z}
+                      </span>
+                      <span aria-hidden className="h-1.5 flex-1 bg-foreground/10">
+                        <span className="block h-full bg-foreground" style={{ width: `${v.faced ? (v.saves / v.faced) * 100 : 0}%` }} />
+                      </span>
+                      <span className="w-12 text-right font-score tabular-nums">
+                        <N value={`${v.saves}/${v.faced}`} label={`${tz.has(z as "penalty") ? tz(z as "penalty") : z}: ${nameOf(k)}`} onClick={() => open(`${tz.has(z as "penalty") ? tz(z as "penalty") : z}: ${nameOf(k)}`, { side: against(k), type: "shot", zone: z })} />
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </Sheet>
+        ))}
+      </div>
+      <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
   );
 }
@@ -119,9 +135,26 @@ export function usePhysical(orgId: string, matchId: string) {
 }
 
 /** Running load per player from tracking (estimates, M5). */
-export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId: string; names: Record<string, string> }) {
+export function PhysicalView({
+  orgId,
+  matchId,
+  names,
+  teamName,
+  oppName,
+  videoNote = null,
+  short: shortClip = false,
+}: {
+  orgId: string;
+  matchId: string;
+  names: Record<string, string>;
+  teamName: string;
+  oppName: string;
+  /** what the video covers ("Video: 12:40 bis 13:40.") */
+  videoNote?: string | null;
+  /** the video covers a small part of the match: the figures are for that stretch only */
+  short?: boolean;
+}) {
   const t = useTranslations("physical");
-  const ta = useTranslations("analysis");
   const q = usePhysical(orgId, matchId);
   const [sel, setSel] = useState<string | null>(null);
   const [showShort, setShowShort] = useState(false);
@@ -159,13 +192,13 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
   const short = loose.length - long.length;
   const rows = [...players, ...(showShort ? loose : long)];
   const teamRows = [
-    ownTeam && { ...ownTeam, key: "team:own", label: t("teamOwn") },
-    oppTeam && { ...oppTeam, key: "team:opp", label: t("teamOpp") },
+    ownTeam && { ...ownTeam, key: "team:own", label: teamName },
+    oppTeam && { ...oppTeam, key: "team:opp", label: oppName },
   ].filter(Boolean) as Row[];
   const all = [...teamRows, ...rows];
   const selected = all.find((r) => r.key === sel) ?? teamRows[0] ?? rows[0];
   const line = (r: Row, strong = false) => (
-    <tr key={r.key} className={cn("border-t border-foreground/10", selected?.key === r.key && "bg-accent/10")}>
+    <tr key={r.key} className={cn("border-t border-foreground/10", selected?.key === r.key && "bg-surface")}>
       <th scope="row" className={cn("px-3 py-1.5 text-left", strong ? "font-semibold" : "font-medium")}>
         <button className="underline decoration-dotted underline-offset-4" onClick={() => setSel(r.key)} aria-label={`${t("showHeatmap")}: ${r.label}`}>
           {r.label}
@@ -180,12 +213,15 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
   );
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">
-        <span className="mr-2 rounded-md bg-surface px-2 py-0.5 text-xs">{ta("heuristic")}</span>
-        {t("hint")}
-      </p>
+      <div className="space-y-1 text-sm">
+        {shortClip && <p className="font-medium">{t("shortClip")}</p>}
+        <p className="text-muted">
+          {videoNote && `${videoNote} `}
+          {t("hint")}
+        </p>
+      </div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-x-10">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <div className="sheet overflow-x-auto">
             <table className="w-full text-sm" data-testid="physical-table">
               <caption className="sr-only">{t("title")}</caption>
@@ -219,8 +255,8 @@ export function PhysicalView({ orgId, matchId, names }: { orgId: string; matchId
           )}
         </div>
         {selected && (
-          <section className="space-y-2 border-t-2 border-foreground pt-4">
-            <h3 className="text-lg">
+          <section className="min-w-0 space-y-2 border-t-2 border-foreground pt-4">
+            <h3 className="font-semibold">
               {t("heatmap")}: {selected.label}
             </h3>
             <CourtHeatmap grid={selected.heatmap} label={`${t("heatmap")} ${selected.label}`} />
