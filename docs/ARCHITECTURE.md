@@ -39,7 +39,8 @@ GPU time used.
 
 The worker also runs an hourly tick (RQ scheduler, `handball_worker.ticks`) that calls the API's
 internal tick endpoint; the API decides what is due (preparation reports, dunning, official data
-sync). `apps/api/tests/test_job_paths.py` checks that every function path exists.
+sync). `apps/api/tests/test_job_paths.py` checks that every function path exists and that the
+payloads the API queues fit the parameters (and payload keys) of the worker functions.
 
 | Component | Path | Tech | Role |
 |---|---|---|---|
