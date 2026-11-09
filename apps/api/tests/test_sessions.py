@@ -76,12 +76,15 @@ async def test_sessions_pdf_calendar_and_import(
     assert (await anon.get(second[second.index("/v1/calendar/") :])).status_code == 404
 
     # ICS import: known UIDs are updated, not duplicated
+    # dates a month ahead, away from the sessions created above for tomorrow
+    d1 = tomorrow + timedelta(days=30)
+    d3 = d1 + timedelta(days=2)
     ics = (
         "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Spond//EN\r\n"
-        "BEGIN:VEVENT\r\nUID:spond-1\r\nSUMMARY:Training\r\nDTSTART:20261110T180000Z\r\n"
-        "DTEND:20261110T193000Z\r\nLOCATION:Halle Süd\r\nEND:VEVENT\r\n"
-        "BEGIN:VEVENT\r\nUID:spond-2\r\nSUMMARY:Athletik\r\nDTSTART;VALUE=DATE:20261112\r\nEND:VEVENT\r\n"
-        "END:VCALENDAR\r\n"
+        f"BEGIN:VEVENT\r\nUID:spond-1\r\nSUMMARY:Training\r\nDTSTART:{d1:%Y%m%d}T180000Z\r\n"
+        f"DTEND:{d1:%Y%m%d}T193000Z\r\nLOCATION:Halle Süd\r\nEND:VEVENT\r\n"
+        f"BEGIN:VEVENT\r\nUID:spond-2\r\nSUMMARY:Athletik\r\nDTSTART;VALUE=DATE:{d3:%Y%m%d}\r\n"
+        "END:VEVENT\r\nEND:VCALENDAR\r\n"
     ).encode()
     url = f"/v1/orgs/{org}/teams/{team}/sessions/import"
     first = await api.post(url, files={"file": ("cal.ics", ics, "text/calendar")})
@@ -89,7 +92,9 @@ async def test_sessions_pdf_calendar_and_import(
     again = await api.post(url, files={"file": ("cal.ics", ics, "text/calendar")})
     assert again.json() == {"created": 0, "updated": 2}
     imported = (
-        await api.get(f"/v1/orgs/{org}/teams/{team}/sessions?from=2026-11-10&to=2026-11-12")
+        await api.get(
+            f"/v1/orgs/{org}/teams/{team}/sessions?from={d1.isoformat()}&to={d3.isoformat()}"
+        )
     ).json()
     assert {x["title"] for x in imported} == {"Training", "Athletik"}
     assert next(x for x in imported if x["title"] == "Training")["location"] == "Halle Süd"
