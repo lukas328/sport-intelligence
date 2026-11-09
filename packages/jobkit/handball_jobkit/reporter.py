@@ -9,6 +9,11 @@ import httpx
 import structlog
 
 log = structlog.get_logger("worker.reporter")
+ATTEMPTS = 3
+
+
+class ReportError(RuntimeError):
+    """A terminal job update did not reach the API."""
 
 
 class Reporter:
@@ -34,19 +39,28 @@ class Reporter:
         cur = self.weights.get(self._current or "", 0.0) * self._fraction
         return round(min(1.0, (done + cur) / sum(self.weights.values())), 4)
 
-    def _send(self, body: dict[str, Any], force: bool = False) -> None:
+    def _send(self, body: dict[str, Any], force: bool = False, terminal: bool = False) -> None:
+        """POST the update, three attempts on network errors and 5xx answers. Progress updates
+        give up quietly (the next one follows); a terminal update (succeeded / failed) raises
+        ReportError, so RQ marks the job failed instead of the API waiting for it forever."""
         now = time.monotonic()
-        if not force and now - self._last < 2:
+        if not (force or terminal) and now - self._last < 2:
             return
         self._last = now
-        for attempt in range(3):
+        error = ""
+        for attempt in range(ATTEMPTS):
             try:
                 r = self.client.post(self.url, json=body, headers=self.headers)
                 if r.status_code < 500:
                     return
+                error = f"HTTP {r.status_code}"
             except httpx.HTTPError as exc:
-                log.warning("report_failed", attempt=attempt, error=str(exc))
-            time.sleep(1 + attempt * 2)
+                error = str(exc) or type(exc).__name__
+            log.warning("report_failed", attempt=attempt, error=error, status=body.get("status"))
+            if attempt < ATTEMPTS - 1:
+                time.sleep(1 + attempt * 2)
+        if terminal:
+            raise ReportError(f"could not report {body.get('status')} to the API: {error}")
 
     def stage(self, name: str) -> None:
         if self._current:
@@ -80,7 +94,7 @@ class Reporter:
             }
         self._send(
             {"status": "succeeded", "progress": 1.0, "stages": self.stages, "result": result},
-            force=True,
+            terminal=True,
         )
 
     def fail(self, error: str) -> None:
@@ -93,5 +107,5 @@ class Reporter:
                 "stages": self.stages,
                 "error": error[:4000],
             },
-            force=True,
+            terminal=True,
         )
