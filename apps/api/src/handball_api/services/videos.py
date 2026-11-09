@@ -372,9 +372,20 @@ async def read_media(ctx: Ctx, asset_id: uuid.UUID, path: str) -> tuple[bytes, s
         if guest is None or not await feed.guardian_sees_match(ctx, guest.match_id):
             raise
         asset = guest
-    if not MEDIA_PATH.match(path) or ".." in path:
-        raise ProblemError(404, "not-found", "Not found")
-    if path == "proxy.mp4" or path.startswith("original"):
+    return await read_media_object(ctx, asset, path)
+
+
+async def read_media_object(ctx: Ctx, asset: VideoAsset, path: str) -> tuple[bytes, str]:
+    """One file of a video's player media (HLS, poster, thumbnails) and its content type, for a
+    caller that has already checked access. Originals and the analysis proxy are never served.
+    A missing object is a 404; any other storage error propagates (a 500 the alerting sees, not a
+    silent 404)."""
+    if (
+        not MEDIA_PATH.match(path)
+        or ".." in path
+        or path == "proxy.mp4"
+        or path.startswith("original")
+    ):
         raise ProblemError(404, "not-found", "Not found")
     try:
         data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
@@ -410,23 +421,12 @@ async def read_signed_media(
         raise ProblemError(404, "not-found", "Not found")
     if not hmac.compare_digest(sig, _media_sig(ctx, asset_id, int(exp_s))):
         raise ProblemError(404, "not-found", "Not found")
-    if (
-        not MEDIA_PATH.match(path)
-        or ".." in path
-        or path == "proxy.mp4"
-        or path.startswith("original")
-    ):
-        raise ProblemError(404, "not-found", "Not found")
     await enable_system_access(ctx.db, reason="signed media")
     asset = await ctx.db.get(VideoAsset, asset_id)
     await disable_system_access(ctx.db)
     if asset is None:
         raise ProblemError(404, "not-found", "Not found")
-    try:
-        data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
-    except ObjectNotFoundError as exc:
-        raise ProblemError(404, "not-found", "Not found") from exc
-    return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
+    return await read_media_object(ctx, asset, path)
 
 
 # ---- worker callbacks (internal) ------------------------------------------------------------
