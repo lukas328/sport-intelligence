@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import io
 import uuid
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from typing import Any
 
 from reportlab.lib.pagesizes import A4
@@ -28,16 +28,19 @@ from handball_api.models import (
     Season,
     Team,
     TrainingSession,
+    TrainingSlot,
 )
 from handball_api.models.enums import AttendanceStatus
 from handball_api.schemas.sessions import (
     AttendanceRecord,
     MyReply,
+    SlotGenerateIn,
     TrainingSessionIn,
+    TrainingSlotIn,
 )
 from handball_api.services import audit, roster
 from handball_api.services.context import Ctx
-from handball_api.services.orgs import get_team
+from handball_api.services.orgs import get_season, get_team
 from handball_api.services.policies import Action
 from handball_api.services.report_pdf import TEXTS, _esc, _styles
 
@@ -165,6 +168,156 @@ def _zurich() -> Any:
     from zoneinfo import ZoneInfo
 
     return ZoneInfo("Europe/Zurich")
+
+
+# ---- recurring slots ----------------------------------------------------------------------------
+
+MAX_GENERATE_DAYS = 400
+
+
+async def list_slots(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> list[TrainingSlot]:
+    team = await get_team(ctx, team_id, Action.TEAM_READ)
+    await get_season(ctx, team.id, season_id)
+    stmt = select(TrainingSlot).where(
+        TrainingSlot.team_id == team.id, TrainingSlot.season_id == season_id
+    )
+    rows = (await ctx.db.scalars(stmt)).all()
+    return sorted(rows, key=lambda x: (x.weekday, x.start_time, x.created_at))
+
+
+def _apply_slot(slot: TrainingSlot, season: Season, data: TrainingSlotIn) -> None:
+    for day in (data.valid_from, data.valid_until):
+        if day is not None and not season.starts_on <= day <= season.ends_on:
+            raise ProblemError(422, "outside-season", "The slot's dates must lie within the season")
+    slot.weekday = data.weekday
+    slot.start_time = data.start_time.replace(tzinfo=None, microsecond=0)
+    slot.duration_min = data.duration_min
+    slot.location = data.location
+    slot.title = data.title
+    slot.note = data.note
+    slot.valid_from = data.valid_from
+    slot.valid_until = data.valid_until
+
+
+async def create_slot(
+    ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID, data: TrainingSlotIn
+) -> TrainingSlot:
+    team = await get_team(ctx, team_id, Action.TRAINING_WRITE)
+    season = await get_season(ctx, team.id, season_id)
+    slot = TrainingSlot(organization_id=team.organization_id, team_id=team.id, season_id=season.id)
+    _apply_slot(slot, season, data)
+    ctx.db.add(slot)
+    await ctx.db.flush()
+    await audit.record(ctx, "training_slot.created", target_type="training_slot", target_id=slot.id)
+    return slot
+
+
+async def _slot(ctx: Ctx, slot_id: uuid.UUID, action: Action) -> tuple[TrainingSlot, Season]:
+    slot = await ctx.db.get(TrainingSlot, slot_id)
+    if slot is None:
+        raise ProblemError(404, "not-found", "Training slot not found")
+    await get_team(ctx, slot.team_id, action)
+    return slot, await get_season(ctx, slot.team_id, slot.season_id)
+
+
+async def update_slot(ctx: Ctx, slot_id: uuid.UUID, data: TrainingSlotIn) -> TrainingSlot:
+    """Changes the slot for sessions created from now on; existing sessions stay as they are."""
+    slot, season = await _slot(ctx, slot_id, Action.TRAINING_WRITE)
+    _apply_slot(slot, season, data)
+    await ctx.db.flush()
+    return slot
+
+
+async def delete_slot(ctx: Ctx, slot_id: uuid.UUID) -> None:
+    """Sessions created from the slot are kept."""
+    slot, _ = await _slot(ctx, slot_id, Action.TRAINING_WRITE)
+    await ctx.db.delete(slot)
+
+
+def slot_end(slot: TrainingSlot) -> time:
+    start = datetime.combine(date.min, slot.start_time)
+    return (start + timedelta(minutes=slot.duration_min)).time()
+
+
+async def generate_sessions(
+    ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID, data: SlotGenerateIn
+) -> tuple[list[TrainingSession], int, int]:
+    """The sessions of the slots from `start` to `end` (within the season), skipping the given
+    days. Idempotent: a day that already has a session at the slot's start time, or one created
+    from the same slot, is kept as it is. Returns the new sessions, the kept and skipped days."""
+    team = await get_team(ctx, team_id, Action.TRAINING_WRITE)
+    season = await get_season(ctx, team.id, season_id)
+    if data.start and data.end and data.start > data.end:
+        raise ProblemError(422, "invalid-range", "The range must not end before it starts")
+    start = max(data.start or season.starts_on, season.starts_on)
+    end = min(data.end or season.ends_on, season.ends_on)
+    if (end - start).days >= MAX_GENERATE_DAYS:
+        raise ProblemError(422, "range-too-long", "At most 400 days at once")
+    stmt = select(TrainingSlot).where(
+        TrainingSlot.team_id == team.id, TrainingSlot.season_id == season.id
+    )
+    if data.slot_ids is not None:
+        stmt = stmt.where(TrainingSlot.id.in_(data.slot_ids))
+    slots = sorted((await ctx.db.scalars(stmt)).all(), key=lambda x: x.start_time)
+    if data.slot_ids is not None and len(slots) != len(set(data.slot_ids)):
+        raise ProblemError(404, "not-found", "Training slot not found")
+    existing = (
+        await ctx.db.scalars(
+            select(TrainingSession).where(
+                TrainingSession.team_id == team.id,
+                TrainingSession.on_date >= start,
+                TrainingSession.on_date <= end,
+            )
+        )
+    ).all()
+    taken_times = {s.starts_at for s in existing if s.starts_at is not None}
+    taken_slots = {(s.slot_id, s.on_date) for s in existing if s.slot_id is not None}
+    skip = set(data.skip_dates)
+    zone = _zurich()
+    created: list[TrainingSession] = []
+    kept = skipped = 0
+    day = start
+    while day <= end:
+        for slot in slots:
+            if slot.weekday != day.isoweekday():
+                continue
+            if (slot.valid_from and day < slot.valid_from) or (
+                slot.valid_until and day > slot.valid_until
+            ):
+                continue
+            if day in skip:
+                skipped += 1
+                continue
+            starts = datetime.combine(day, slot.start_time, tzinfo=zone)
+            if starts in taken_times or (slot.id, day) in taken_slots:
+                kept += 1
+                continue
+            s = TrainingSession(
+                organization_id=team.organization_id,
+                team_id=team.id,
+                on_date=day,
+                starts_at=starts,
+                title=slot.title,
+                location=slot.location,
+                notes=slot.note,
+                slot_id=slot.id,
+                drills=[],
+            )
+            ctx.db.add(s)
+            created.append(s)
+            taken_times.add(starts)
+            taken_slots.add((slot.id, day))
+        day += timedelta(days=1)
+    await ctx.db.flush()
+    if created:
+        await audit.record(
+            ctx,
+            "training_slots.generated",
+            target_type="season",
+            target_id=season.id,
+            data={"created": len(created), "from": start.isoformat(), "to": end.isoformat()},
+        )
+    return created, kept, skipped
 
 
 # ---- attendance ---------------------------------------------------------------------------------
@@ -511,8 +664,18 @@ async def calendar_ics(ctx: Ctx, token: str) -> str:
             )
         )
     ).all()
+    slot_minutes = {
+        slot.id: slot.duration_min
+        for slot in (
+            await ctx.db.scalars(
+                select(TrainingSlot).where(
+                    TrainingSlot.id.in_({s.slot_id for s in sessions if s.slot_id})
+                )
+            )
+        ).all()
+    }
     for s in sessions:
-        minutes = total_minutes(s) or 90
+        minutes = total_minutes(s) or (slot_minutes.get(s.slot_id) if s.slot_id else None) or 90
         start: datetime | date = s.starts_at or s.on_date
         entries.append(
             CalendarEntry(

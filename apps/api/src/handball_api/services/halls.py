@@ -43,19 +43,24 @@ async def hall_of(ctx: Ctx, match: Match) -> tuple[str | None, HallSource | None
         return None, None
     venues = (
         await ctx.db.scalars(
-            select(Match.venue).where(
+            select(Match.venue)
+            .where(
                 Match.team_id == match.team_id,
                 Match.is_home.is_(True),
                 Match.venue.is_not(None),
                 Match.id != match.id,
             )
+            # a fixed order: the hall and its spelling must not depend on the database's row order
+            .order_by(Match.created_at, Match.id)
         )
     ).all()
     counts = Counter(fold(v) for v in venues if v)
     if not counts:
         return None, None
     best = counts.most_common(1)[0][0]
-    return next(v for v in venues if v and fold(v) == best), "home_matches"
+    # the most used spelling of that hall; on a tie the one entered first (Counter keeps order)
+    spellings = Counter(v for v in venues if v and fold(v) == best)
+    return spellings.most_common(1)[0][0], "home_matches"
 
 
 async def references(
