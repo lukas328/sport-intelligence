@@ -57,16 +57,25 @@ Ereignis- und Statistik-Ansichten verbergen (mit 5).
   Spiele, Paraden bei Torhütern); der Trainer blendet sie in der UI ein oder aus. Umgesetzt.
   Details in `docs/plans/federation-onboarding.md` (Entscheide).
 
-## Aus der Code-Prüfung (2026-11-05, offen)
-1. Indizes auf neue Fremdschlüssel (vor allem `goal_candidates.event_id`; dazu join/access requests,
-   suggestions, `organizations.claimed_by_id`) in einer neuen Migration.
-2. Stündlicher Abgleich (`run_due`): Savepoint pro Team und Spiel, damit ein Fehler nicht den ganzen
-   Lauf zurückrollt; Spiele ohne Protokoll nicht 7 Tage lang stündlich und alt-zuerst abfragen.
-3. Doppelklick auf Beitritts-/Zugangsanfragen: 409 statt 500 (Zeilensperre oder IntegrityError).
-4. `official_cache`: Aufbewahrungsregel (Spielernamen und Statistik nicht unbegrenzt).
-5. Grosse Abfragen: `team_data.load` auf Saison begrenzen, `halls.references` per DISTINCT ON.
-6. Klein: `_download` erlaubt Weiterleitung auf anderen Port; Sperre im handball.ch-Client über den
-   ganzen HTTP-Aufruf; `focus.create` liest die Videolänge pro Eintrag.
+## Aus der Code-Prüfung (2026-11-05)
+1. Erledigt (2026-11-09): Indizes auf die neuen Fremdschlüssel (`goal_candidates.event_id` und
+   `reviewed_by_id`, join/access requests, suggestions, `organizations.claimed_by_id`), Migration
+   0034; Test: keine Fremdschlüssel ohne Index in diesen Tabellen.
+2. Erledigt (2026-11-09): `run_due` mit Savepoint pro Team und Spiel (ein Fehler rollt nur dieses
+   zurück, Team erst wieder beim nächsten Tagesabgleich); Spiele ohne Protokoll werden nach 1, 2,
+   4, ... bis 24 Stunden wieder gefragt (`matches.official_report_tries`/`_retry_at`, Migration
+   0035), das jüngste Spiel zuerst.
+3. Erledigt (2026-11-09): Doppelklick auf Beitritts-/Zugangsanfragen gibt 409 (Anlegen: Savepoint
+   und IntegrityError; Entscheiden und Zurückziehen: Zeilensperre FOR UPDATE).
+4. Erledigt (2026-11-09): `official_cache` hält Antworten einen Monat, Spieler-Statistik eines
+   Spiels ein Jahr; der stündliche Abgleich löscht ältere.
+5. Erledigt (2026-11-09): `team_data.load` liest die gewünschten Saisons (Matrix: `season_ids`,
+   sonst aktuelle und letzte Saison) und nur die nötigen Spalten; `timeline_videos` ohne die
+   Analyse-JSON (Formationen per `analysis->formations`); `halls.references` per DISTINCT ON.
+6. Erledigt (2026-11-09): `_download` folgt nur Weiterleitungen auf denselben https-Host und Port;
+   der handball.ch-Client reserviert Startzeiten statt eine Sperre über den HTTP-Aufruf zu halten;
+   Videolänge einmal pro Spiel gelesen (`feed.generate`, dort lag die Abfrage pro Eintrag) und
+   die Clips von Fokus und Feed in einem Schritt gespeichert.
 7. Echte Spielernamen im Repo: `ml/data/official/*.json` (öffentliche Spielprotokolle).
    Entschieden (Lukas, 2026-11-05): bleiben vorerst im Repo, die Daten sind öffentlich online;
    Repo bleibt privat. Test-Fixtures nutzen weiter erfundene Namen.
