@@ -414,3 +414,12 @@ Fixed:
   vorgeschlagen, ohne Stelle, ausserhalb); "vorgeschlagen" opens its list.
 
 Left open: the hero and the tab row above the workspace on phones (collapse while reviewing).
+
+## Squad status, assignment progress, xG against (UI session, 2026-11-09, after PR 23)
+
+- Squad: staff set a player injured or away ("Status" in the row: kind, until-date, short note)
+  and back to fit; the row reads "Verletzt bis 16. Nov. · Knöchel". Players see only their own.
+- Assignments: hairline rows with "0 von 1 erledigt" and "Noch offen: …" by name
+  (`still_open`), or "Alle haben es erledigt.".
+- xG against only with enough positioned shots of the opponent (`xg_against_coverage`, 70 %):
+  the season table shows "-" otherwise, and the season statement says nothing about the defence.
