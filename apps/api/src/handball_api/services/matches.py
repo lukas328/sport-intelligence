@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from dataclasses import dataclass
 from typing import Any
 
 from sqlalchemy import delete, func, select
@@ -271,19 +272,47 @@ async def timeline_video(ctx: Ctx, match_id: uuid.UUID, ready: bool = False) -> 
     return v
 
 
+@dataclass(frozen=True)
+class TimelineVideo:
+    """What callers of timeline_videos need of a match's timeline video (not its analysis)."""
+
+    id: uuid.UUID
+    match_id: uuid.UUID
+    status: VideoStatus
+    duration_s: float | None
+
+
 async def timeline_videos(
     ctx: Ctx, match_ids: list[uuid.UUID] | set[uuid.UUID], ready: bool = True
-) -> dict[uuid.UUID, VideoAsset]:
-    """timeline_video for several matches in one query."""
+) -> dict[uuid.UUID, TimelineVideo]:
+    """timeline_video for several matches in one query, only the columns callers use (the
+    analysis JSON of a full game is large: video_formations reads the part that is needed)."""
     if not match_ids:
         return {}
-    first: dict[uuid.UUID, VideoAsset] = {}
-    for v in (await ctx.db.scalars(_timeline_query(list(match_ids)))).all():
-        first.setdefault(v.match_id, v)
+    first: dict[uuid.UUID, TimelineVideo] = {}
+    rows = await ctx.db.execute(
+        _timeline_query(list(match_ids)).with_only_columns(
+            VideoAsset.id, VideoAsset.match_id, VideoAsset.status, VideoAsset.duration_s
+        )
+    )
+    for vid, match_id, status, duration_s in rows.all():
+        first.setdefault(match_id, TimelineVideo(vid, match_id, status, duration_s))
     return {m: v for m, v in first.items() if not ready or v.status == VideoStatus.READY}
 
 
-def duration_ms(video: VideoAsset | None) -> int | None:
+async def video_formations(
+    ctx: Ctx, video_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, list[dict[str, Any]]]:
+    """The defence formations the analysis found per video (only that part of the analysis)."""
+    if not video_ids:
+        return {}
+    rows = await ctx.db.execute(
+        select(VideoAsset.id, VideoAsset.analysis["formations"]).where(VideoAsset.id.in_(video_ids))
+    )
+    return {vid: list(f) if isinstance(f, list) else [] for vid, f in rows.all()}
+
+
+def duration_ms(video: VideoAsset | TimelineVideo | None) -> int | None:
     return round(video.duration_s * 1000) if video is not None and video.duration_s else None
 
 

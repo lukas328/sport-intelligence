@@ -53,7 +53,7 @@ class OfficialSuggestion(Base, EntityMixin, TenantMixin):
         String(10), nullable=False, default="open", server_default="open"
     )
     resolved_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL")
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
@@ -85,19 +85,19 @@ class JoinRequest(Base, EntityMixin, TenantMixin):
     message: Mapped[str | None] = mapped_column(Text)
     # the roster entry (player) or open roster suggestion the app thinks this person is
     suggested_player_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("players.id", ondelete="SET NULL")
+        ForeignKey("players.id", ondelete="SET NULL"), index=True
     )
     suggested_suggestion_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("official_suggestions.id", ondelete="SET NULL")
+        ForeignKey("official_suggestions.id", ondelete="SET NULL"), index=True
     )
     status: Mapped[str] = mapped_column(
         String(10), nullable=False, default="pending", server_default="pending"
     )
     player_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("players.id", ondelete="SET NULL")
+        ForeignKey("players.id", ondelete="SET NULL"), index=True
     )
     decided_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL")
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
@@ -120,13 +120,15 @@ class OrgAccessRequest(Base, EntityMixin, TenantMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
-    team_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("teams.id", ondelete="SET NULL"))
+    team_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("teams.id", ondelete="SET NULL"), index=True
+    )
     official_team_id: Mapped[int | None] = mapped_column(Integer)
     message: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(
         String(10), nullable=False, default="pending", server_default="pending"
     )
     decided_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL")
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

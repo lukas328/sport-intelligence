@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import asyncio
 import copy
+import itertools
 import json
 import re
+import time
 from collections.abc import Callable, Iterator
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -181,6 +183,37 @@ async def test_client_parses_caches_and_rests_after_errors(hch: Recorded) -> Non
     with pytest.raises(ProblemError) as err:
         await official_report.fetch_handball_ch(509192)
     assert err.value.code == "report-unavailable"
+
+
+async def test_client_spaces_requests_without_waiting_for_slow_answers(hch: Recorded) -> None:
+    """Requests start MIN_INTERVAL_S apart (a reserved start time), but a slow answer does not
+    hold up the next request (no lock held during the HTTP call)."""
+    starts: list[float] = []
+    ends: list[float] = []
+
+    async def slow(request: httpx.Request) -> httpx.Response:
+        starts.append(time.monotonic())
+        await asyncio.sleep(0.3)
+        ends.append(time.monotonic())
+        return hch.handler(request)
+
+    handball_ch.set_transport(httpx.MockTransport(slow), min_interval_s=0.1)
+    began = time.monotonic()
+    seasons = await asyncio.gather(*(handball_ch.seasons(None) for _ in range(3)))
+    assert all(s == seasons[0] for s in seasons)
+    starts.sort()
+    assert all(b - a >= 0.09 for a, b in itertools.pairwise(starts))  # still spaced
+    assert starts[1] < min(ends)  # the second did not wait for the first answer
+    assert time.monotonic() - began < 0.8  # not 3 x 0.3 s one after the other
+    # after an error the requests waiting for their slot are not sent either
+    handball_ch.set_transport(httpx.MockTransport(hch.handler), min_interval_s=0.1)
+    hch.down = True
+    hch.calls.clear()
+    results = await asyncio.gather(
+        *(handball_ch.seasons(None) for _ in range(3)), return_exceptions=True
+    )
+    assert all(isinstance(r, handball_ch.UpstreamUnavailableError) for r in results)
+    assert len(hch.calls) == 1
 
 
 # ---- search ------------------------------------------------------------------------------------
@@ -707,6 +740,34 @@ async def test_join_request_matches_roster_and_coach_approves(
     assert r.status_code == 409 and r.json()["type"].endswith("already-member")
 
 
+async def test_double_clicks_on_join_and_access_requests_answer_409(
+    make_api: Callable[[], Api],
+) -> None:
+    """Two clicks at the same moment: the first wins, the second answers 409 (not 500 from the
+    unique pending request or a duplicate membership)."""
+    api = await coach(make_api)
+    c = await claim(api)
+    joiner = await coach(make_api, "luca@example.org")
+    url = f"/v1/teams/{c['team_id']}/join-requests"
+    body = {"first_name": "Luca", "last_name": "Müster", "jersey_number": 55}
+    created = await asyncio.gather(joiner.post(url, json=body), joiner.post(url, json=body))
+    assert sorted(r.status_code for r in created) == [201, 409], [r.text for r in created]
+    req = next(r.json() for r in created if r.status_code == 201)
+    approve = base(c) + f"/join-requests/{req['id']}/approve"
+    decided = await asyncio.gather(api.post(approve), api.post(approve))
+    assert sorted(r.status_code for r in decided) == [200, 409], [r.text for r in decided]
+    assert (await joiner.get(base(c))).json()["my_role"] == "player"
+
+    second = await coach(make_api, "other@example.org")
+    access = await claim(second)
+    url = f"/v1/orgs/{c['organization_id']}/access-requests/{access['access_request_id']}/approve"
+    decided = await asyncio.gather(
+        api.post(url, json={"team_role": "coach"}), api.post(url, json={"team_role": "coach"})
+    )
+    assert sorted(r.status_code for r in decided) == [200, 409], [r.text for r in decided]
+    assert (await second.get(base(c))).json()["my_role"] == "coach"
+
+
 async def test_join_request_matches_an_open_suggestion(make_api: Callable[[], Api]) -> None:
     api = await coach(make_api)
     c = await claim(api)
@@ -974,7 +1035,14 @@ async def test_daily_tick_syncs_and_imports_reports(
     c = await claim(api)
     token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
     r = await api.http.post("/internal/official/sync", headers=token)
-    assert r.json() == {"teams": 0, "suggestions": 0, "reports": 0, "stopped": 0}
+    assert r.json() == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 0,
+        "failed": 0,
+        "stopped": 0,
+        "purged": 0,
+    }
     # a day later: the daily sync finds a new player
     await owner_conn.execute("UPDATE teams SET official_synced_at = now() - interval '2 days'")
     players = hch.data("getTeamPlayers", {"teamId": TEAM})
@@ -994,7 +1062,14 @@ async def test_daily_tick_syncs_and_imports_reports(
         "UPDATE matches SET kickoff_at = now() - interval '3 hours' WHERE official_game_id = 509192"
     )
     r = await api.http.post("/internal/official/sync", headers=token)
-    assert r.json() == {"teams": 0, "suggestions": 0, "reports": 1, "stopped": 0}
+    assert r.json() == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 1,
+        "failed": 0,
+        "stopped": 0,
+        "purged": 0,
+    }
     count = await owner_conn.fetchval(
         "SELECT count(*) FROM events e JOIN matches m ON m.id = e.match_id "
         "WHERE m.official_game_id = 509192 AND e.source = 'official_report'"
@@ -1005,7 +1080,14 @@ async def test_daily_tick_syncs_and_imports_reports(
     kinds = {r["kind"] for r in await owner_conn.fetch("SELECT kind FROM notifications")}
     assert {"official_suggestions", "official_report"} <= kinds
     r = await api.http.post("/internal/official/sync", headers=token)
-    assert r.json() == {"teams": 0, "suggestions": 0, "reports": 0, "stopped": 0}
+    assert r.json() == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 0,
+        "failed": 0,
+        "stopped": 0,
+        "purged": 0,
+    }
     # when handball.ch is down the tick stops quietly
     await owner_conn.execute("UPDATE teams SET official_synced_at = now() - interval '2 days'")
     hch.down = True
@@ -1014,6 +1096,164 @@ async def test_daily_tick_syncs_and_imports_reports(
     assert (await api.http.post("/internal/official/sync")).status_code == 403
     sync = await api.post(base(c) + "/official/sync")
     assert sync.status_code == 503
+
+
+async def _tick(api: Api) -> dict[str, int]:
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    r = await api.http.post("/internal/official/sync", headers=token)
+    assert r.status_code == 200, r.text
+    out: dict[str, int] = r.json()
+    return out
+
+
+async def _ended(owner_conn: asyncpg.Connection, ago: dict[int, timedelta]) -> None:
+    """Only these games ended lately (the others a month ago, outside the report window)."""
+    await owner_conn.execute("UPDATE matches SET kickoff_at = now() - interval '30 days'")
+    for game, interval in ago.items():
+        await owner_conn.execute(
+            "UPDATE matches SET kickoff_at = now() - $2::interval WHERE official_game_id = $1",
+            game,
+            interval,
+        )
+
+
+def _report_calls(hch: Recorded) -> list[int]:
+    return [int(v["gameId"]) for op, v in hch.calls if op == "getReport"]
+
+
+async def test_tick_asks_the_latest_game_first_and_backs_off_without_a_log(
+    make_api: Callable[[], Api],
+    hch: Recorded,
+    owner_conn: asyncpg.Connection,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A game whose game log is not online yet is not asked every hour for a week, and it does
+    not keep the latest games waiting behind it."""
+    from handball_api.services import official
+
+    api = await coach(make_api)
+    await claim(api)
+    # 509181 ended two hours ago and has no game log yet; 509192 (with log) three hours ago
+    await _ended(owner_conn, {509181: timedelta(hours=2), 509192: timedelta(hours=3)})
+    monkeypatch.setattr(official, "REPORT_BATCH", 1)
+    hch.calls.clear()
+    assert (await _tick(api))["reports"] == 0
+    assert _report_calls(hch) == [509181]  # the latest game first
+    row = await owner_conn.fetchrow(
+        "SELECT official_report_tries AS tries, official_report_retry_at - now() AS wait "
+        "FROM matches WHERE official_game_id = 509181"
+    )
+    assert row["tries"] == 1 and timedelta(minutes=55) < row["wait"] <= timedelta(hours=1)
+    # the next tick: 509181 waits, 509192 gets its turn
+    assert (await _tick(api))["reports"] == 1
+    assert _report_calls(hch) == [509181, 509192]
+    assert (await _tick(api))["reports"] == 0
+    assert _report_calls(hch) == [509181, 509192]  # nobody asked: 509181 still waits
+    # an hour later it is asked again, then after two hours, ... up to a day
+    await owner_conn.execute(
+        "UPDATE matches SET official_report_retry_at = now() WHERE official_game_id = 509181"
+    )
+    await _tick(api)
+    assert _report_calls(hch) == [509181, 509192, 509181]
+    row = await owner_conn.fetchrow(
+        "SELECT official_report_tries AS tries, official_report_retry_at - now() AS wait "
+        "FROM matches WHERE official_game_id = 509181"
+    )
+    assert row["tries"] == 2 and timedelta(minutes=115) < row["wait"] <= timedelta(hours=2)
+    assert official._retry_after(3) == timedelta(hours=4)
+    assert official._retry_after(9) == official._retry_after(30) == timedelta(days=1)
+
+
+async def test_tick_keeps_going_after_an_unexpected_error(
+    make_api: Callable[[], Api],
+    hch: Recorded,
+    owner_conn: asyncpg.Connection,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Each team and each game runs in its own savepoint: one failure is rolled back alone and
+    the rest of the tick is kept."""
+    from handball_api.services import official
+
+    api = await coach(make_api)
+    await claim(api)
+    await _ended(owner_conn, {509181: timedelta(hours=2), 509192: timedelta(hours=3)})
+    await owner_conn.execute("UPDATE teams SET official_synced_at = now() - interval '2 days'")
+    real_import = official.import_report
+
+    async def import_report(ctx: Any, m: Any) -> dict[str, Any]:
+        if m.official_game_id == 509181:
+            m.venue = "half written"
+            await ctx.db.flush()
+            raise RuntimeError("unexpected")
+        return await real_import(ctx, m)
+
+    async def sync_team(ctx: Any, team: Any, *, initial: bool = False) -> dict[str, int]:
+        team.league = "half written"
+        await ctx.db.flush()
+        raise RuntimeError("unexpected")
+
+    monkeypatch.setattr(official, "import_report", import_report)
+    monkeypatch.setattr(official, "sync_team", sync_team)
+    out = await _tick(api)
+    assert out == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 1,
+        "failed": 2,
+        "stopped": 0,
+        "purged": 0,
+    }
+    # the imported report stays; the failed game and team are rolled back and tried again later
+    assert await owner_conn.fetchval(
+        "SELECT count(*) FROM events e JOIN matches m ON m.id = e.match_id "
+        "WHERE m.official_game_id = 509192 AND e.source = 'official_report'"
+    )
+    failed = await owner_conn.fetchrow(
+        "SELECT venue, official_report_tries FROM matches WHERE official_game_id = 509181"
+    )
+    assert failed["venue"] != "half written" and failed["official_report_tries"] == 1
+    team = await owner_conn.fetchrow("SELECT league, official_synced_at FROM teams")
+    assert team["league"] != "half written"
+    assert team["official_synced_at"] > datetime.now(team["official_synced_at"].tzinfo) - timedelta(
+        minutes=1
+    )
+    assert await _tick(api) == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 0,
+        "failed": 0,
+        "stopped": 0,
+        "purged": 0,
+    }
+
+
+async def test_tick_purges_cached_answers_past_their_use(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """official_cache keeps player names and statistics only as long as they are useful: a
+    played game's player stats a year, every other answer a month."""
+    api = await coach(make_api)
+    await claim(api)
+    fresh = await owner_conn.fetchval("SELECT count(*) FROM official_cache")
+    old = {
+        "getReport": "40 days",
+        "getTeamPlayers": "40 days",
+        "getGamePlayers": "400 days",
+    }
+    kept = {"getGamePlayers": "40 days", "getStanding": "20 days"}
+    for i, (operation, age) in enumerate([*old.items(), *kept.items()]):
+        await owner_conn.execute(
+            "INSERT INTO official_cache (key, provider, operation, variables, data, fetched_at) "
+            "VALUES ($1, 'handball_ch', $2, '{}', '{}', now() - $3::text::interval)",
+            f"old-{i}",
+            operation,
+            age,
+        )
+    out = await _tick(api)
+    assert out["purged"] == len(old)
+    left = await owner_conn.fetch("SELECT key FROM official_cache WHERE key LIKE 'old-%'")
+    assert sorted(r["key"] for r in left) == ["old-3", "old-4"]
+    assert await owner_conn.fetchval("SELECT count(*) FROM official_cache") == fresh + len(kept)
 
 
 def test_public_mail_providers_prove_no_club_role() -> None:

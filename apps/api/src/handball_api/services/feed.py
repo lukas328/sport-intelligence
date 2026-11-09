@@ -193,6 +193,7 @@ async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
     }
     await ctx.db.execute(delete(PlayerFeedItem).where(PlayerFeedItem.match_id == match.id))
     recipients: list[uuid.UUID] = []
+    items: list[PlayerFeedItem] = []
     players_with_feed = 0
     for p in rows:
         if p.id not in allowed:
@@ -208,9 +209,9 @@ async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
             continue
         players_with_feed += 1
         for rank, s in enumerate(chosen, start=1):
-            clip = old_clips.get(s.event.id) or await _clip_for(ctx, match, s.event)
+            clip = old_clips.get(s.event.id) or _clip_for(ctx, match, s.event, duration)
             prev = old.get((p.id, clip.id))
-            ctx.db.add(
+            items.append(
                 PlayerFeedItem(
                     organization_id=match.organization_id,
                     player_id=p.id,
@@ -225,6 +226,8 @@ async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
             )
         if p.user_id:
             recipients.append(p.user_id)
+    await ctx.db.flush()  # the new clips (one statement), then the items that point at them
+    ctx.db.add_all(items)
     await ctx.db.flush()
     if notify and recipients:
         await training.notify(
@@ -238,10 +241,13 @@ async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
     return players_with_feed
 
 
-async def _clip_for(ctx: Ctx, match: Match, e: Event) -> Clip:
+def _clip_for(ctx: Ctx, match: Match, e: Event, duration: int | None) -> Clip:
+    """A clip around the event (saved with the next flush; the caller read the video length
+    once, not per clip)."""
     assert e.t_ms is not None and e.t_ms >= 0
-    start, end = clip_window(e.t_ms, PRE_MS, POST_MS, await video_duration_ms(ctx, match))
+    start, end = clip_window(e.t_ms, PRE_MS, POST_MS, duration)
     clip = Clip(
+        id=uuid.uuid4(),
         organization_id=match.organization_id,
         match_id=match.id,
         start_ms=start,
@@ -250,7 +256,6 @@ async def _clip_for(ctx: Ctx, match: Match, e: Event) -> Clip:
         source_ref=e.id,
     )
     ctx.db.add(clip)
-    await ctx.db.flush()
     return clip
 
 
@@ -487,12 +492,16 @@ async def swap(ctx: Ctx, item_id: uuid.UUID, event_id: uuid.UUID) -> None:
     """The coach replaces a scene with another event of the same match."""
     item, match = await _item(ctx, item_id)
     e = await ctx.db.get(Event, event_id)
-    if e is None or e.match_id != match.id or not in_video(e, await video_duration_ms(ctx, match)):
+    duration = await video_duration_ms(ctx, match)
+    if e is None or e.match_id != match.id or not in_video(e, duration):
         raise ProblemError(422, "invalid-scene", "Choose an event of this match with video time")
     c = classify(e, item.player_id)
     clip = await ctx.db.scalar(
         select(Clip).where(Clip.source == ClipSource.EVENT, Clip.source_ref == e.id)
-    ) or await _clip_for(ctx, match, e)
+    )
+    if clip is None:
+        clip = _clip_for(ctx, match, e, duration)
+        await ctx.db.flush()  # the clip before the item points at it
     item.clip_id = clip.id
     item.reason = c[0] if c else "coach_choice"
     item.positive = c[1] if c else True

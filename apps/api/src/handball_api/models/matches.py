@@ -98,6 +98,11 @@ class Match(Base, EntityMixin, TenantMixin):
     official_provider: Mapped[str | None] = mapped_column(String(20))
     official_game_id: Mapped[int | None] = mapped_column(Integer)
     official_report_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # the hourly tick found no game log yet: how often it asked, and not before when again
+    official_report_tries: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, default=0, server_default="0"
+    )
+    official_report_retry_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class VideoAsset(Base, EntityMixin, TenantMixin):
@@ -371,9 +376,11 @@ class GoalCandidate(Base, EntityMixin, TenantMixin):
     status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
     side: Mapped[str | None] = mapped_column(String(10))  # confirmed shot of this side
     outcome: Mapped[str | None] = mapped_column(String(10))  # confirmed: goal, save, miss, ...
-    event_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("events.id", ondelete="SET NULL"))
+    event_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("events.id", ondelete="SET NULL"), index=True
+    )
     reviewed_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL")
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     template_version: Mapped[str | None] = mapped_column(String(20))

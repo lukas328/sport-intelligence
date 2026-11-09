@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 from collections import Counter
 from collections.abc import Callable
 
@@ -15,7 +16,7 @@ from openpyxl import load_workbook
 from .assistant_eval import MATCHES
 from .conftest import Api, setup_club
 from .test_assistant import seed
-from .test_matches import new_match
+from .test_matches import new_match, upload
 from .test_official_report import recorded, reported_clip  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("clean_db")
@@ -109,6 +110,64 @@ async def test_matrix_templates_and_exports(
     assert ws is not None
     rows = list(ws.iter_rows(values_only=True))
     assert rows[0] == ("match", "goals", "shooting_pct (%)") and rows[-1][0] == "total"
+
+
+async def test_matrix_reads_the_requested_seasons_only(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection, query_counter: list[str]
+) -> None:
+    """By default the current and the previous season, else the seasons asked for; only the
+    columns the statistics use (not every event and video analysis of all seasons)."""
+    api = make_api()
+    ids = await seed(api, owner_conn)
+    org, team = ids["org"], ids["team"]
+    url = f"/v1/orgs/{org}/teams/{team}/matrix"
+    spec = {"rows": "match", "metrics": ["goals"], "filter": {"side": "own"}}
+    everything = (await api.post(url, json=spec)).json()
+    total = everything["totals"]["cells"]["goals"]["value"]
+    goals = {r["key"]: r["cells"]["goals"]["value"] for r in everything["rows"]}
+    seasons = {}
+    for label, start, end in (
+        ("2025/26", "2025-07-01", "2026-06-30"),
+        ("2019/20", "2019-07-01", "2020-06-30"),
+    ):
+        r = await api.post(
+            f"/v1/orgs/{org}/teams/{team}/seasons",
+            json={"label": label, "starts_on": start, "ends_on": end},
+        )
+        assert r.status_code == 201, r.text
+        seasons[label] = r.json()["id"]
+    last_season, old = sorted(goals, key=lambda k: -goals[k])[:2]
+    for match, season in ((last_season, "2025/26"), (old, "2019/20")):
+        await owner_conn.execute(
+            "UPDATE matches SET season_id = $1::uuid WHERE id = $2::uuid", seasons[season], match
+        )
+    # a video with an analysis: only its formations are read
+    await upload(api, ids, last_season, b"v" * 100)
+    analysis = {
+        "formations": [{"team": "away", "start_ms": 0, "end_ms": 10**9, "formation": "6-0"}]
+    }
+    await owner_conn.execute(
+        "UPDATE video_assets SET analysis = $1::jsonb, status = 'ready' WHERE match_id = $2::uuid",
+        json.dumps({**analysis, "tracks_summary": "x" * 10_000}),
+        last_season,
+    )
+    query_counter.clear()
+    out = (await api.post(url, json=spec)).json()
+    assert out["totals"]["cells"]["goals"]["value"] == total - goals[old]
+    assert {r["key"] for r in out["rows"]} == set(goals) - {old}
+    asked = (await api.post(url, json={**spec, "season_ids": [seasons["2019/20"]]})).json()
+    assert [r["key"] for r in asked["rows"]] == [old]
+    assert asked["totals"]["cells"]["goals"]["value"] == goals[old]
+    six = {**spec, "filter": {"side": "own", "opponent_formation": "6-0"}}
+    in_six = (await api.post(url, json=six)).json()
+    assert {r["key"]: r["cells"]["goals"]["value"] for r in in_six["rows"]} == {
+        last_season: goals[last_season]
+    }
+    # only the needed columns
+    events = [q for q in query_counter if "FROM events" in q]
+    assert events and not any("events.created_by_id" in q for q in events)
+    videos = [q for q in query_counter if "FROM video_assets" in q]
+    assert videos and not any("video_assets.analysis AS" in q for q in videos)
 
 
 async def test_sportscode_round_trip_and_csv(

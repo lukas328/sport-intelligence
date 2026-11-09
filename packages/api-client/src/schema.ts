@@ -6677,6 +6677,11 @@ export interface components {
              * @description Row dimension: number, position, play, match, period, ...
              */
             rows: string;
+            /**
+             * Season Ids
+             * @description Seasons of the team to read; default the current and the previous season
+             */
+            season_ids?: string[] | null;
         };
         /** MatrixOut */
         MatrixOut: {

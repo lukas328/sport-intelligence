@@ -191,7 +191,8 @@ def add_index(
 ) -> list[str]:
     """Games of a dataset's index.json into the library (idempotent). Clock data of segments
     already in the library is kept when the segment's file and start are unchanged. A game that is
-    already in another dataset stays there (listed in the dataset's "duplicates"). Returns the
+    already in another dataset stays there (listed in the dataset's "duplicates"). Games of this
+    dataset that its new index no longer lists are removed (listed in "removed"). Returns the
     library names of the dataset's games."""
     ds = lib["datasets"].setdefault(slug, {})
     names, dups = [], []
@@ -217,6 +218,12 @@ def add_index(
             entry["has_clock"] = hc
         lib["games"][name] = entry
         names.append(name)
+    # a new version of the dataset without some games (e.g. videos below 720p taken out): drop them
+    gone = [n for n, g in lib["games"].items() if g.get("kaggle_dataset") == slug and n not in names]
+    for n in gone:
+        del lib["games"][n]
+    if gone:
+        ds["removed"] = sorted(set(ds.get("removed", [])) | set(gone))
     ds["games"] = names
     if dups:
         ds["duplicates"] = sorted(dups)

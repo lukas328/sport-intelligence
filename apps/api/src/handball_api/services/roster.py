@@ -110,6 +110,26 @@ async def _without_official_only(
     return [(e, p) for e, p in rows if p.id not in hidden]
 
 
+async def visible_players(
+    ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID
+) -> set[uuid.UUID] | None:
+    """The season's roster players whose names this actor may see, by the rule of the roster
+    list (`_without_official_only`); None when the actor organises the team and sees them all.
+    Names from the official data reach other team members only through such an entry: event
+    and statistics views ask here before they show one."""
+    if can(ctx.require_actor(), Action.ROSTER_WRITE, team_id):
+        return None
+    rows = [
+        (e, p)
+        for e, p in await ctx.db.execute(
+            select(RosterEntry, Player)
+            .join(Player, Player.id == RosterEntry.player_id)
+            .where(RosterEntry.season_id == season_id, RosterEntry.team_id == team_id)
+        )
+    ]
+    return {p.id for _, p in await _without_official_only(ctx, rows)}
+
+
 async def _check_number_free(
     ctx: Ctx, season_id: uuid.UUID, number: int | None, exclude_entry: uuid.UUID | None = None
 ) -> None:

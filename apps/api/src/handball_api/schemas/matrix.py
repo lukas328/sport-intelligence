@@ -15,6 +15,11 @@ class MatrixIn(ApiModel):
     rows: str = Field(description="Row dimension: number, position, play, match, period, ...")
     metrics: list[str] = Field(min_length=1, max_length=8)
     filter: dict[str, Any] = Field(default_factory=dict)
+    season_ids: list[uuid.UUID] | None = Field(
+        default=None,
+        max_length=20,
+        description="Seasons of the team to read; default the current and the previous season",
+    )
 
 
 class ClipRef(ApiModel):

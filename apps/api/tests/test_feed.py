@@ -76,7 +76,10 @@ pytestmark_db = pytest.mark.usefixtures("clean_db")
 
 @pytestmark_db
 async def test_feed_flow(
-    make_api: Callable[[], Api], outbox: MemoryEmailSender, owner_conn: asyncpg.Connection
+    make_api: Callable[[], Api],
+    outbox: MemoryEmailSender,
+    owner_conn: asyncpg.Connection,
+    query_counter: list[str],
 ) -> None:
     coach = make_api()
     ids = await setup_club(coach)
@@ -162,8 +165,12 @@ async def test_feed_flow(
         "UPDATE events SET t_ms = -30000 WHERE id = $1", uuid.UUID(early.json()["id"])
     )
 
+    query_counter.clear()
     gen = await coach.post(f"/v1/orgs/{org}/matches/{m['id']}/feed/generate")
     assert gen.json() == {"players": 1}  # Nina has no analysis consent
+    # the video length is read once (not per scene), the clips are saved in one statement
+    assert sum("FROM video_assets" in q for q in query_counter) == 1
+    assert sum(q.lstrip().startswith("INSERT INTO clips") for q in query_counter) == 1
     overview = (await coach.get(f"/v1/orgs/{org}/matches/{m['id']}/feed")).json()
     assert [p["name"] for p in overview] == ["Lena M"]
     scenes = overview[0]["items"]

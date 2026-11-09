@@ -142,6 +142,16 @@ def test_add_index_is_idempotent_and_keeps_clocks() -> None:
     assert lib["games"][GAME]["kaggle_dataset"] == "handball-segs-l01"
 
 
+def test_add_index_drops_games_a_new_version_no_longer_lists() -> None:
+    lib = new_library()
+    add_index(lib, "handball-segs-l01", {"a": index_entry("a"), "b": index_entry("b")}, {})
+    add_index(lib, "handball-segs-l02", {"c": index_entry("c", batch="batch_l02")}, {})
+    # new version of l01 without "b" (e.g. a video below 720p taken out)
+    assert add_index(lib, "handball-segs-l01", {"a": index_entry("a")}, {}) == ["a"]
+    assert set(lib["games"]) == {"a", "c"}  # other datasets untouched
+    assert lib["datasets"]["handball-segs-l01"]["removed"] == ["b"]
+
+
 def test_todo_skips_read_covered_and_given_up_segments() -> None:
     lib = new_library()
     add_index(lib, "handball-segs-l01", {"g": index_entry("g", 4)}, {})

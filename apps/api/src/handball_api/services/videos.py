@@ -64,7 +64,11 @@ def _key(match: Match, asset_id: uuid.UUID, filename: str) -> str:
 
 
 def media_prefix(asset: VideoAsset) -> str:
-    return f"{asset.organization_id}/{asset.match_id}/{asset.id}/"
+    return media_prefix_of(asset.organization_id, asset.match_id, asset.id)
+
+
+def media_prefix_of(org_id: uuid.UUID, match_id: uuid.UUID, video_id: uuid.UUID) -> str:
+    return f"{org_id}/{match_id}/{video_id}/"
 
 
 async def create_upload(

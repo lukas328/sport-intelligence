@@ -50,7 +50,7 @@ async def matrix(ctx: Ctx, team_id: uuid.UUID, spec: MatrixIn) -> MatrixOut:
     unknown = [m for m in spec.metrics if m not in METRICS]
     if unknown:
         raise ProblemError(422, "validation", f"Unknown metrics: {', '.join(unknown)}")
-    data = await load(ctx, team)
+    data = await load(ctx, team, spec.season_ids)
     try:
         rows = select_rows(data.rows, Filter.from_dict(spec.filter))
     except (TypeError, ValueError) as exc:

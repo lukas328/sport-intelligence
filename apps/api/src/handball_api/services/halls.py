@@ -18,6 +18,7 @@ from collections import Counter
 from typing import Any, Literal
 
 from sqlalchemy import select
+from sqlalchemy.orm import aliased
 
 from handball_api.models import CameraCalibration, Match, VideoAsset
 from handball_api.services.context import Ctx
@@ -63,42 +64,55 @@ async def references(
     """Earlier videos of the organisation in the same hall whose current court a person clicked
     or confirmed, newest first: what the worker needs to carry the court over (the hall image key
     and the court homography in that image)."""
-    from handball_api.services.videos import media_prefix
+    from handball_api.services.videos import media_prefix_of
 
     key = fold(hall)
     if not key:
         return []
-    rows = await ctx.db.execute(
-        select(CameraCalibration, VideoAsset, Match.venue)
+    # the newest court of each video is its court: one row per video from the database, with
+    # only the columns needed (the hall image size, not the whole analysis)
+    latest = (
+        select(CameraCalibration)
         .join(VideoAsset, VideoAsset.id == CameraCalibration.video_asset_id)
-        .join(Match, Match.id == VideoAsset.match_id)
         .where(
             CameraCalibration.organization_id == asset.organization_id,
             VideoAsset.id != asset.id,
-            Match.venue.is_not(None),
         )
-        .order_by(CameraCalibration.created_at.desc())
+        .distinct(CameraCalibration.video_asset_id)
+        .order_by(CameraCalibration.video_asset_id, CameraCalibration.created_at.desc())
+        .subquery()
     )
-    seen: set[Any] = set()
+    cal = aliased(CameraCalibration, latest)
+    pano = VideoAsset.analysis["panorama"]
+    rows = await ctx.db.execute(
+        select(
+            VideoAsset.id,
+            VideoAsset.match_id,
+            Match.venue,
+            cal.homography,
+            cal.image_size,
+            pano["width"],
+            pano["height"],
+        )
+        .join(VideoAsset, VideoAsset.id == cal.video_asset_id)
+        .join(Match, Match.id == VideoAsset.match_id)
+        .where(cal.source == "user_correction", Match.venue.is_not(None))
+        .order_by(cal.created_at.desc())
+    )
     out: list[dict[str, Any]] = []
-    for cal, video, venue in rows.all():
-        if video.id in seen:
+    for video_id, match_id, venue, homography, image_size, width, height in rows.all():
+        if fold(venue) != key:
             continue
-        seen.add(video.id)  # the newest court of a video is its court
-        if cal.source != "user_correction" or fold(venue) != key:
-            continue
-        pano = (video.analysis or {}).get("panorama")
         # the court must be on that video's hall image (not on a single frame of it)
-        if not isinstance(pano, dict) or [pano.get("width"), pano.get("height")] != list(
-            cal.image_size
-        ):
+        if [width, height] != list(image_size):
             continue
         out.append(
             {
-                "video_id": str(video.id),
-                "panorama_key": f"{media_prefix(video)}analysis/panorama.jpg",
-                "homography": cal.homography,
-                "image_size": list(cal.image_size),
+                "video_id": str(video_id),
+                "panorama_key": f"{media_prefix_of(asset.organization_id, match_id, video_id)}"
+                "analysis/panorama.jpg",
+                "homography": homography,
+                "image_size": list(image_size),
                 "hall": venue,
             }
         )

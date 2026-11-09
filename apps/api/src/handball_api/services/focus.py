@@ -195,10 +195,12 @@ async def create(ctx: Ctx, match_id: uuid.UUID, data: FocusIn) -> FocusPlan:
         )
         ctx.db.add(pl)
         await ctx.db.flush()
+        items: list[PlaylistItem] = []
         for pos, e in enumerate(sorted(hits, key=lambda x: x.t_ms or 0)):
             assert e.t_ms is not None
             start, end = clip_window(e.t_ms, PRE_MS, POST_MS, duration)
             clip = Clip(
+                id=uuid.uuid4(),
                 organization_id=team.organization_id,
                 match_id=match.id,
                 start_ms=start,
@@ -209,8 +211,7 @@ async def create(ctx: Ctx, match_id: uuid.UUID, data: FocusIn) -> FocusPlan:
                 created_by_id=ctx.user_id,
             )
             ctx.db.add(clip)
-            await ctx.db.flush()
-            ctx.db.add(
+            items.append(
                 PlaylistItem(
                     organization_id=team.organization_id,
                     playlist_id=pl.id,
@@ -218,6 +219,8 @@ async def create(ctx: Ctx, match_id: uuid.UUID, data: FocusIn) -> FocusPlan:
                     position=pos,
                 )
             )
+        await ctx.db.flush()  # the clips (one statement), then the items that point at them
+        ctx.db.add_all(items)
         await ctx.db.flush()
         plan.playlist_id = pl.id
         if data.assignment:
@@ -255,7 +258,8 @@ async def plans(ctx: Ctx, team_id: uuid.UUID) -> list[dict[str, Any]]:
     ).all()
     if not items:
         return []
-    data = await load(ctx, team)
+    # the seasons since the oldest plan, and the one before (its "before" matches)
+    data = await load(ctx, team, since=min(p.created_at for p in items).date())
     with_events = {r.match.id for r in data.rows}
     ordered = sorted(
         (m for m in data.matches.values() if m.id in with_events), key=lambda m: m.date

@@ -16,11 +16,17 @@ from sqlalchemy import select
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
-from handball_api.models import Event, Match, Opponent, ScoutingReport, Team, VideoAsset
+from handball_api.models import Event, Match, Opponent, ScoutingReport, Team
 from handball_api.models.enums import TeamRole
 from handball_api.services import audit, scouting_pdf, training
 from handball_api.services.context import Ctx
-from handball_api.services.matches import duration_ms, get_match, in_video, timeline_videos
+from handball_api.services.matches import (
+    duration_ms,
+    get_match,
+    in_video,
+    timeline_videos,
+    video_formations,
+)
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, can
 
@@ -287,10 +293,8 @@ async def create(ctx: Ctx, match: Match) -> ScoutingReport:
     matches, events, videos, lengths = await _data(ctx, team, opponent, match.kickoff_at)
     facts = build_facts(opponent, matches, events, videos, lengths)
     formations: Counter[str] = Counter()
-    for v in (
-        await ctx.db.scalars(select(VideoAsset).where(VideoAsset.id.in_(list(videos.values()))))
-    ).all():
-        for seg in (v.analysis or {}).get("formations") or []:
+    for segs in (await video_formations(ctx, list(videos.values()))).values():
+        for seg in segs:
             if seg.get("team") == "away":
                 formations[str(seg["formation"])] += int(seg["end_ms"]) - int(seg["start_ms"])
     facts["defense"]["formations_ms"] = dict(formations.most_common())

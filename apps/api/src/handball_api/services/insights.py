@@ -21,7 +21,7 @@ from handball_api.models import (
     RosterEntry,
     Team,
 )
-from handball_api.services import billing, report_pdf
+from handball_api.services import billing, report_pdf, roster
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match, opponent_of, timeline_video
@@ -418,7 +418,13 @@ async def match_pdf(ctx: Ctx, match_id: uuid.UUID, lang: str) -> tuple[bytes, st
             .where(RosterEntry.season_id == match.season_id)
         )
     ).all()
-    names = {str(pid): f"{first} {last}" for pid, first, last in rows}
+    # names only of players this reader may see (official entries without consent: organisers)
+    visible = await roster.visible_players(ctx, match.team_id, match.season_id)
+    names = {
+        str(pid): f"{first} {last}"
+        for pid, first, last in rows
+        if visible is None or pid in visible
+    }
     own, opp = team.name, opponent.name if opponent else ""
     home, away = (own, opp) if match.is_home else (opp, own)
     score = ht = None

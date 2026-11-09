@@ -42,7 +42,7 @@ from sqlalchemy import delete, select
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, GoalCandidate, Match, Possession, VideoAsset
 from handball_api.schemas.events import EventIn
-from handball_api.services import audit, match_clock
+from handball_api.services import audit, match_clock, roster
 from handball_api.services import events as event_service
 from handball_api.services.auto_events import (
     CANDIDATE,
@@ -214,8 +214,10 @@ def _official_time(clock_s: float | None) -> str | None:
     return f"{c // 60:02d}:{c % 60:02d}"
 
 
-def _entry(e: Event, t_ms: int | None, unc: int | None) -> dict[str, Any]:
-    attrs = e.attributes or {}
+def _entry(
+    e: Event, t_ms: int | None, unc: int | None, visible: set[uuid.UUID] | None = None
+) -> dict[str, Any]:
+    attrs = event_service.shown_attributes(e, visible)
     return {
         "event_id": e.id,
         "side": e.side,
@@ -243,6 +245,8 @@ class _Report:
         self.map = match_clock.build(match, analysis, self.official)
         self.times = {e.id: match_clock.video_time(self.map, e) for e in self.official}
         self.by_candidate: dict[uuid.UUID, Event] = {}
+        # players whose official names the reader may see (roster.visible_players)
+        self.visible: set[uuid.UUID] | None = None
 
     def window(self, e: Event) -> int:
         unc = self.times[e.id][1]
@@ -268,7 +272,7 @@ class _Report:
 
     def suggestion(self, c: GoalCandidate) -> dict[str, Any] | None:
         e = self.by_candidate.get(c.id)
-        return None if e is None else _entry(e, *self.times[e.id])
+        return None if e is None else _entry(e, *self.times[e.id], self.visible)
 
     def rows(self, cands: list[GoalCandidate], length_ms: int | None) -> dict[str, Any]:
         pinned = {c.event_id: c for c in cands if c.status == "confirmed" and c.event_id}
@@ -278,7 +282,7 @@ class _Report:
         out = []
         for e in self.official:
             t, unc = self.times[e.id]
-            row = _entry(e, t, unc)
+            row = _entry(e, t, unc, self.visible)
             cand = pinned.get(e.id) or suggested.get(e.id)
             if _pinned(e) is not None:
                 status = "confirmed"
@@ -362,6 +366,7 @@ async def _report(
     assets = await _assets(ctx, cands)
     asset = max(assets.values(), key=lambda a: a.created_at, default=None)
     rep = _Report(match, asset.analysis if asset is not None else None, shots)
+    rep.visible = await roster.visible_players(ctx, match.team_id, match.season_id)
     rep.suggest([c for c in cands if c.status == "open" and _covered(c, shots) is None])
     length = round(asset.duration_s * 1000) if asset is not None and asset.duration_s else None
     return rep, length

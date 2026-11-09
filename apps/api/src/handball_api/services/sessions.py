@@ -35,7 +35,7 @@ from handball_api.schemas.sessions import (
     MyReply,
     TrainingSessionIn,
 )
-from handball_api.services import audit
+from handball_api.services import audit, roster
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
@@ -207,10 +207,14 @@ def _where(kind: str, target_id: uuid.UUID) -> Any:
 
 
 async def attendance(ctx: Ctx, kind: str, target_id: uuid.UUID) -> list[dict[str, Any]]:
-    """The roster with reply and recorded status (staff)."""
+    """The roster with reply and recorded status (staff). Entries taken over from the official
+    data appear only as the roster list shows them (`roster.visible_players`): to the team's
+    organisers always, to the other staff (analysts, assistant coaches) once the person joined
+    or consented (docs/plans/federation-onboarding.md, Datenschutz)."""
     team, season, _ = await _target(ctx, kind, target_id)
     await get_team(ctx, team.id, Action.TRAINING_WRITE)
-    roster = (
+    visible = await roster.visible_players(ctx, team.id, season)
+    entries = (
         await ctx.db.execute(
             select(Player, RosterEntry.jersey_number)
             .join(RosterEntry, RosterEntry.player_id == Player.id)
@@ -223,7 +227,9 @@ async def attendance(ctx: Ctx, kind: str, target_id: uuid.UUID) -> list[dict[str
         for a in (await ctx.db.scalars(select(Attendance).where(_where(kind, target_id)))).all()
     }
     out = []
-    for p, number in roster:
+    for p, number in entries:
+        if visible is not None and p.id not in visible:
+            continue
         a = rows.get(p.id)
         out.append(
             {
@@ -260,15 +266,18 @@ async def record(
 ) -> list[dict[str, Any]]:
     team, season, _ = await _target(ctx, kind, target_id)
     await get_team(ctx, team.id, Action.TRAINING_WRITE)
-    allowed = set(
-        (
-            await ctx.db.scalars(
-                select(RosterEntry.player_id).where(
-                    RosterEntry.season_id == season, RosterEntry.team_id == team.id
+    # the entries this actor sees in the attendance list (official-only ones: organisers)
+    allowed = await roster.visible_players(ctx, team.id, season)
+    if allowed is None:
+        allowed = set(
+            (
+                await ctx.db.scalars(
+                    select(RosterEntry.player_id).where(
+                        RosterEntry.season_id == season, RosterEntry.team_id == team.id
+                    )
                 )
-            )
-        ).all()
-    )
+            ).all()
+        )
     for r in records:
         if r.player_id not in allowed:
             raise ProblemError(422, "not-in-roster", "The player is not in this team's roster")

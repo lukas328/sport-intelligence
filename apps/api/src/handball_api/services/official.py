@@ -27,10 +27,11 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select, text, update
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
+from handball_api.core.logging import get_logger
 from handball_api.integrations import handball_ch as ch
 from handball_api.models import (
     Match,
@@ -61,6 +62,7 @@ from handball_api.services import orgs as org_service
 from handball_api.services.context import Ctx
 from handball_api.services.policies import Action, Actor, authorize, can
 
+log = get_logger("handball_api.official")
 PROVIDER = ch.PROVIDER
 MIN_QUERY = 3
 MAX_CLUBS = 5
@@ -71,6 +73,9 @@ SYNC_BATCH = 20
 REPORT_AFTER = timedelta(minutes=90)  # a game is over and the log complete
 REPORT_WINDOW = timedelta(days=7)
 REPORT_BATCH = 20
+# a game without a game log yet: asked again after an hour, then after ever longer waits
+REPORT_RETRY = timedelta(hours=1)
+REPORT_RETRY_MAX = timedelta(days=1)
 SYSTEM_USER = uuid.UUID(int=0)
 # reason of a match_new suggestion made at the claim instead of a match: the plan's match limit
 PLAN_LIMIT = "plan_limit"
@@ -1098,7 +1103,14 @@ async def list_access_requests(ctx: Ctx) -> list[tuple[OrgAccessRequest, User]]:
 async def _access_request(ctx: Ctx, request_id: uuid.UUID) -> OrgAccessRequest:
     actor = ctx.require_actor()
     authorize(actor, Action.ORG_ACCESS_MANAGE, two_factor=ctx.two_factor)
-    req = await ctx.db.get(OrgAccessRequest, request_id)
+    # locked until the decision is saved: a second click waits and then finds it decided (409,
+    # not a 500 from a duplicate membership)
+    req = await ctx.db.scalar(
+        select(OrgAccessRequest)
+        .where(OrgAccessRequest.id == request_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
     if req is None or req.organization_id != actor.organization_id:
         raise ProblemError(404, "not-found", "Request not found")
     if req.status != "pending":
@@ -1203,85 +1215,160 @@ async def _organisers(ctx: Ctx, team_id: uuid.UUID) -> list[uuid.UUID]:
     return list(rows.all())
 
 
+def _retry_after(tries: int) -> timedelta:
+    """Wait after the n-th tick without a game log: an hour, then doubling up to a day."""
+    wait: timedelta = REPORT_RETRY * 2 ** min(max(tries - 1, 0), 10)
+    return min(wait, REPORT_RETRY_MAX)
+
+
+async def _sync_due_team(ctx: Ctx, team: Team) -> int:
+    counts = await sync_team(ctx, team)
+    new = counts["roster_suggestions"] + counts["other_suggestions"]
+    if new:
+        await training.notify(
+            ctx,
+            team.organization_id,
+            await _organisers(ctx, team.id),
+            "official_suggestions",
+            {"team_id": str(team.id), "count": new},
+            f"/app/{team.organization_id}/teams/{team.id}/official",
+        )
+    return new
+
+
+async def _import_due_report(ctx: Ctx, m: Match) -> None:
+    await import_report(ctx, m)
+    await training.notify(
+        ctx,
+        m.organization_id,
+        await training.staff_of(ctx, m.team_id),
+        "official_report",
+        {"match_id": str(m.id)},
+        f"/app/{m.organization_id}/matches/{m.id}",
+    )
+
+
+def _upstream_down(exc: ProblemError) -> bool:
+    return exc.code in ("official-unavailable", "report-unavailable")
+
+
 async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
     """Hourly worker tick: each linked team once a day (schedule, roster, standing, next season
-    as suggestions) and the official report of every linked game that ended. Stops at the first
-    sign that handball.ch is not answering (no hammering)."""
+    as suggestions) and the official report of every linked game that ended, the latest first;
+    cached handball.ch answers past their retention are deleted.
+
+    Each team and each game runs in its own savepoint: an unexpected error rolls back that team
+    (tried again the next day) or game (tried again later), not the whole tick. A game without a
+    game log yet is asked again after an hour, then after ever longer waits (up to a day). Stops
+    at the first sign that handball.ch is not answering (no hammering)."""
     now = now or _now()
+    out = Counter[str]()
+    # public answers of handball.ch (no tenant data): kept only as long as they are useful
+    out["purged"] = await ch.purge_cache(ctx.db, now)
     await enable_system_access(ctx.db, reason="official data sync")
     try:
-        teams = list(
-            (
-                await ctx.db.scalars(
-                    select(Team)
-                    .where(
-                        Team.official_team_id.is_not(None),
-                        (Team.official_synced_at.is_(None))
-                        | (Team.official_synced_at < now - SYNC_EVERY),
-                    )
-                    .order_by(Team.official_synced_at.nulls_first())
-                    .limit(SYNC_BATCH)
+        teams = [
+            (t.id, t.organization_id)
+            for t in await ctx.db.execute(
+                select(Team.id, Team.organization_id)
+                .where(
+                    Team.official_team_id.is_not(None),
+                    (Team.official_synced_at.is_(None))
+                    | (Team.official_synced_at < now - SYNC_EVERY),
                 )
-            ).all()
-        )
-        games = list(
-            (
-                await ctx.db.scalars(
-                    select(Match)
-                    .where(
-                        Match.official_game_id.is_not(None),
-                        Match.official_report_at.is_(None),
-                        Match.kickoff_at < now - REPORT_AFTER,
-                        Match.kickoff_at > now - REPORT_WINDOW,
-                    )
-                    .order_by(Match.kickoff_at)
-                    .limit(REPORT_BATCH)
+                .order_by(Team.official_synced_at.nulls_first())
+                .limit(SYNC_BATCH)
+            )
+        ]
+        games = [
+            (g.id, g.organization_id)
+            for g in await ctx.db.execute(
+                select(Match.id, Match.organization_id)
+                .where(
+                    Match.official_game_id.is_not(None),
+                    Match.official_report_at.is_(None),
+                    Match.kickoff_at < now - REPORT_AFTER,
+                    Match.kickoff_at > now - REPORT_WINDOW,
+                    Match.official_report_retry_at.is_(None)
+                    | (Match.official_report_retry_at <= now),
                 )
-            ).all()
-        )
+                .order_by(Match.kickoff_at.desc())
+                .limit(REPORT_BATCH)
+            )
+        ]
     finally:
         await disable_system_access(ctx.db)
-    out = Counter[str]()
     try:
-        for team in teams:
-            await set_tenant(ctx.db, team.organization_id)
-            ctx.actor = _system_actor(team.organization_id)
-            counts = await sync_team(ctx, team)
-            out["teams"] += 1
-            new = counts["roster_suggestions"] + counts["other_suggestions"]
-            out["suggestions"] += new
-            if new:
-                await training.notify(
-                    ctx,
-                    team.organization_id,
-                    await _organisers(ctx, team.id),
-                    "official_suggestions",
-                    {"team_id": str(team.id), "count": new},
-                    f"/app/{team.organization_id}/teams/{team.id}/official",
-                )
-        for m in games:
-            await set_tenant(ctx.db, m.organization_id)
-            ctx.actor = _system_actor(m.organization_id)
+        for team_id, org_id in teams:
+            await set_tenant(ctx.db, org_id)
+            ctx.actor = _system_actor(org_id)
             try:
-                await import_report(ctx, m)
+                async with ctx.db.begin_nested():
+                    team = await ctx.db.get(Team, team_id)
+                    if team is None:
+                        continue
+                    new = await _sync_due_team(ctx, team)
+                out["teams"] += 1
+                out["suggestions"] += new
             except ProblemError as exc:
-                if exc.code == "report-unavailable":
+                if _upstream_down(exc):
                     raise
-                continue  # no log yet: next tick
-            out["reports"] += 1
-            await training.notify(
-                ctx,
-                m.organization_id,
-                await training.staff_of(ctx, m.team_id),
-                "official_report",
-                {"match_id": str(m.id)},
-                f"/app/{m.organization_id}/matches/{m.id}",
-            )
+                log.warning("official_sync_failed", team_id=str(team_id), error=exc.code)
+                out["failed"] += 1
+                await _postpone_team(ctx, team_id, now)
+            except Exception:
+                log.exception("official_sync_failed", team_id=str(team_id))
+                out["failed"] += 1
+                await _postpone_team(ctx, team_id, now)
+        for match_id, org_id in games:
+            await set_tenant(ctx.db, org_id)
+            ctx.actor = _system_actor(org_id)
+            try:
+                async with ctx.db.begin_nested():
+                    m = await ctx.db.get(Match, match_id)
+                    if m is None:
+                        continue
+                    await _import_due_report(ctx, m)
+                out["reports"] += 1
+            except ProblemError as exc:
+                if _upstream_down(exc):
+                    raise
+                if exc.code != "report-empty":  # no game log yet: asked again later
+                    log.warning("official_report_failed", match_id=str(match_id), error=exc.code)
+                    out["failed"] += 1
+                await _postpone_report(ctx, match_id, now)
+            except Exception:
+                log.exception("official_report_failed", match_id=str(match_id))
+                out["failed"] += 1
+                await _postpone_report(ctx, match_id, now)
     except ProblemError as exc:
-        if exc.code not in ("official-unavailable", "report-unavailable"):
+        if not _upstream_down(exc):
             raise
         out["stopped"] = 1
     finally:
         ctx.actor = None
     await ctx.db.flush()
-    return {k: out[k] for k in ("teams", "suggestions", "reports", "stopped")}
+    keys = ("teams", "suggestions", "reports", "failed", "stopped", "purged")
+    return {k: out[k] for k in keys}
+
+
+async def _postpone_team(ctx: Ctx, team_id: uuid.UUID, now: datetime) -> None:
+    """A team whose sync failed is tried again with the next day's sync, not every hour."""
+    await ctx.db.execute(
+        update(Team)
+        .where(Team.id == team_id)
+        .values(official_synced_at=now)
+        .execution_options(synchronize_session=False)
+    )
+
+
+async def _postpone_report(ctx: Ctx, match_id: uuid.UUID, now: datetime) -> None:
+    tries = (
+        await ctx.db.scalar(select(Match.official_report_tries).where(Match.id == match_id)) or 0
+    ) + 1
+    await ctx.db.execute(
+        update(Match)
+        .where(Match.id == match_id)
+        .values(official_report_tries=tries, official_report_retry_at=now + _retry_after(tries))
+        .execution_options(synchronize_session=False)
+    )

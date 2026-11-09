@@ -64,9 +64,10 @@ def upload(batch_dir: Path, user: str, slug: str) -> bool:
     (batch_dir / "dataset-metadata.json").write_text(json.dumps(meta))
     res = subprocess.run(  # noqa: S603
         ["kaggle", "datasets", "create", "-p", str(batch_dir)],  # noqa: S607
-        capture_output=True, text=True,
+        # the CLI prints a progress bar; decode as UTF-8 so a Windows console codepage cannot crash this
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
-    out = (res.stdout + res.stderr).strip()
+    out = ((res.stdout or "") + (res.stderr or "")).strip()
     print(out.splitlines()[-1] if out else f"exit {res.returncode}", flush=True)
     return res.returncode == 0 and "error" not in out.lower()
 
@@ -104,6 +105,8 @@ def main() -> None:
     ap.add_argument("--seconds", type=float, default=180)
     ap.add_argument("--max-games", type=int, default=0)
     ap.add_argument("--jobs", type=int, default=1, help="segments of a game cut in parallel")
+    ap.add_argument("--min-width", type=int, default=1280,
+                    help="skip videos narrower than this (default: anything below 720p)")
     ap.add_argument("--dry-run", action="store_true", help="cut, but do not upload or delete")
     a = ap.parse_args()
     work = a.workdir
@@ -128,6 +131,12 @@ def main() -> None:
             shutil.copy(info, batch / f"{name}.info.json")
         try:
             meta = probe(src)
+            if meta["width"] < a.min_width:  # 480p and below: too coarse for detection, leave out
+                (batch / f"{name}.info.json").unlink(missing_ok=True)
+                state["games"][name] = {**meta, "skipped": f"below {a.min_width} px wide"}
+                save(work, state)
+                print(f"{name}: skipped, {meta['width']}x{meta['height']}", flush=True)
+                continue
             pieces = []
             if meta["duration_s"] < 15 * 60:  # a piece, not a whole game: keep it as one segment
                 seg = batch / f"{name}_s0.mp4"
@@ -155,7 +164,9 @@ def main() -> None:
     flush(work, state, a.user, a.dry_run)
     ok = sum(1 for g in state["games"].values() if "segments" in g)
     bad = [n for n, g in state["games"].items() if "error" in g]
-    print(f"done: {ok} games with segments, {len(bad)} failed {bad[:10]}", flush=True)
+    low = sum(1 for g in state["games"].values() if "skipped" in g)
+    print(f"done: {ok} games with segments, {low} skipped (low resolution), "
+          f"{len(bad)} failed {bad[:10]}", flush=True)
 
 
 if __name__ == "__main__":
