@@ -163,6 +163,14 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09: the matrix has no `season_ids` filter in the API (`handball_metrics.query.Filter`
+  knows `match_ids`, `last_n_matches`, opponent, ...; an unknown field is a 422). The UI list
+  mentions it; nothing to build until the filter exists. The matrix page today counts all
+  matches of the team.
+- 2026-11-09: `calibration_error` is English free text (`str(exc)`); the UI uses
+  `calibration_info.reason` instead and says each reason in de-CH, en and fr. A failed calibration
+  without `reason` falls back to "court".
+
 - 2026-11-09: **the zone check can be switched on.** The web texts now match the PDF texts
   exactly in de-CH, en and fr, including `zones.long_range` ("Fernwurf") and `zones.empty_goal`
   ("Leeres Tor"); the insight texts match too (checked against `report_pdf.TEXTS` after merging

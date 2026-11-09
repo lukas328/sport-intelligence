@@ -804,6 +804,11 @@ function AnalysisPanel({
   if (!analysis || analysis.status === "none") return null;
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
   const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
+  const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
+  const REASONS = ["camera_motion", "no_floor", "flat_view", "few_people", "court"] as const;
+  const reason = REASONS.find((r) => r === info.reason) ?? (analysis.needs_calibration && analysis.calibration_error ? "court" : null);
+  const hallName = analysis.hall?.name ?? null;
+  const fromHall = info.method === "hall";
   return (
     <section className="space-y-3" data-testid="analysis-panel">
       <h2 className="sr-only">{t("title")}</h2>
@@ -816,11 +821,23 @@ function AnalysisPanel({
         </Alert>
       )}
       {analysis.status === "ready" && analysis.needs_calibration && (
-        <Alert kind="info">{t(canMark ? "needsCalibration" : "needsCalibrationStaff")}</Alert>
+        <Alert kind="info">
+          {t(canMark ? "needsCalibration" : "needsCalibrationStaff")}
+          {/* why the automatic court failed, in the coach's words (ADR 025: a reason code) */}
+          {reason && <span className="mt-1 block text-muted">{t(`calibReason_${reason}`)}</span>}
+        </Alert>
       )}
       {/* one sentence: does the court fit */}
       {analysis.status === "ready" && !analysis.needs_calibration && (
-        <p className="text-[0.9375rem]">{unconfirmed ? t("checkCourt") : t("courtOk")}</p>
+        <p className="text-[0.9375rem]">
+          {fromHall ? t("courtFromHall", { hall: hallName ?? "" }) : unconfirmed ? t("checkCourt") : t("courtOk")}
+        </p>
+      )}
+      {/* a court marked once is carried over to the next videos of the same hall */}
+      {canMark && (analysis.needs_calibration || unconfirmed) && (
+        <p className="text-xs text-muted" data-testid="hall-hint">
+          {hallName ? t("hallOnce", { hall: hallName }) : t("hallUnknown")}
+        </p>
       )}
       {canMark && (
         <Button

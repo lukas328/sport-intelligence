@@ -121,7 +121,7 @@
     "paper-incomplete": "Date, adversaire et score final sont nécessaires.",
     "quota-reached": "Le contingent de la fédération est épuisé.",
     "already-member": "Le club appartient déjà à une fédération.",
-    "report-url-unsupported": "Ce lien n'est pas pris en charge. Utilise un lien du centre de matchs de handball.ch ou un rapport de presse DHB.",
+    "report-url-unsupported": "Ce lien n'est pas pris en charge. Utilise un lien vers la feuille de match du centre de match handball.ch, un rapport de presse DHB, une feuille de match nuLiga ou un rapport HLA.",
     "report-not-found": "Aucun match ne correspond à ce lien.",
     "report-unreadable": "Le rapport n'a pas pu être lu.",
     "report-empty": "Le rapport ne contient pas encore de déroulé du match.",
@@ -647,7 +647,15 @@
     "checkCourtButton": "Vérifier le terrain",
     "courtOk": "Le terrain est bon. Les positions et les courses sont estimées à partir de la vidéo.",
     "realign": "Réaligner le terrain",
-    "technical": "Détails techniques"
+    "technical": "Détails techniques",
+    "calibReason_camera_motion": "La caméra bouge trop (coupes, zoom, ralentis) : marque le terrain à un moment calme.",
+    "calibReason_no_floor": "Le sol de la salle n'est pas clairement visible : marque à la main les coins et les lignes du terrain.",
+    "calibReason_flat_view": "La caméra regarde le terrain de trop bas : marque-le à la main, idéalement avec des points des deux côtés.",
+    "calibReason_few_people": "Trop peu de personnes à l'image pour trouver le terrain : marque-le à un moment en plein jeu.",
+    "calibReason_court": "Le terrain trouvé ne correspond pas de façon sûre : marque-le à la main.",
+    "courtFromHall": "Terrain repris d'une vidéo précédente de la même salle ({hall}). Vérifie rapidement qu'il correspond.",
+    "hallOnce": "Une fois par salle : les prochaines vidéos de la même salle ({hall}) reprennent le terrain.",
+    "hallUnknown": "Indique le lieu du match : les prochaines vidéos de cette salle reprendront alors le terrain."
   },
   "tabs": {
     "video": "Vidéo",
@@ -1791,7 +1799,7 @@
   },
   "officialReport": {
     "label": "Importer le rapport de match officiel",
-    "hint": "Lien vers le match dans le centre de matchs de handball.ch ou vers le rapport de presse DHB (PDF). Les buts avec buteur, les 7 m, les exclusions et les temps morts deviennent des événements ; un nouvel import remplace le précédent.",
+    "hint": "Lien vers la feuille de match : centre de match handball.ch, rapport de presse DHB, nuLiga ou HLA (PDF). Les buts avec buteur, 7 mètres, exclusions et temps morts deviennent des événements ; un nouvel import remplace l'ancien.",
     "import": "Importer le rapport",
     "importing": "Import en cours…",
     "imported": "{created} événements importés, {matched} buts rapprochés de la vidéo.",

@@ -121,7 +121,7 @@
     "paper-incomplete": "Date, opponent and final score are needed.",
     "quota-reached": "The federation's quota is used up.",
     "already-member": "The club already belongs to a federation.",
-    "report-url-unsupported": "This link is not supported. Use a link from the handball.ch match centre or a DHB press report.",
+    "report-url-unsupported": "This link is not supported. Use a match report link from the handball.ch match centre, a DHB press report, a nuLiga match report or an HLA report.",
     "report-not-found": "There is no game for this link.",
     "report-unreadable": "The report could not be read.",
     "report-empty": "The report has no game log yet.",
@@ -647,7 +647,15 @@
     "checkCourtButton": "Check the court",
     "courtOk": "The court fits. Positions and runs are estimated from the video.",
     "realign": "Realign the court",
-    "technical": "Technical details"
+    "technical": "Technical details",
+    "calibReason_camera_motion": "The camera moves too much (cuts, zoom, replays): mark the court at a calm moment.",
+    "calibReason_no_floor": "The hall floor cannot be made out clearly: mark the corners and lines of the court by hand.",
+    "calibReason_flat_view": "The camera looks at the court too flatly: mark it by hand, ideally with points on both sides.",
+    "calibReason_few_people": "Too few people in the picture to find the court: mark it at a moment in the middle of play.",
+    "calibReason_court": "The court found does not fit reliably: please mark it by hand.",
+    "courtFromHall": "Court taken over from an earlier video of the same hall ({hall}). Check briefly that it fits.",
+    "hallOnce": "Mark once per hall: the next videos from the same hall ({hall}) take the court over.",
+    "hallUnknown": "Enter the venue on the match: the next videos from this hall then take the court over."
   },
   "tabs": {
     "video": "Video",
@@ -1791,7 +1799,7 @@
   },
   "officialReport": {
     "label": "Import official match report",
-    "hint": "Link to the game in the handball.ch match centre or to the DHB press report (PDF). Goals with scorer, 7 m, suspensions and time-outs become events; a new import replaces the previous one.",
+    "hint": "Link to the match report: handball.ch match centre, DHB press report, nuLiga or HLA (PDF). Goals with scorer, 7-metres, suspensions and time-outs become events; a new import replaces the old one.",
     "import": "Import report",
     "importing": "Importing…",
     "imported": "{created} events imported, {matched} goals matched with the video.",

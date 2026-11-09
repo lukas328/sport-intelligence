@@ -121,7 +121,7 @@
     "paper-incomplete": "Datum, Gegner und Endstand werden gebraucht.",
     "quota-reached": "Das Kontingent des Verbands ist ausgeschöpft.",
     "already-member": "Der Verein gehört schon zu einem Verband.",
-    "report-url-unsupported": "Dieser Link wird nicht unterstützt. Verwende einen Link aus dem handball.ch Matchcenter oder einen DHB-Pressebericht.",
+    "report-url-unsupported": "Dieser Link wird nicht unterstützt. Verwende einen Link zum Spielbericht aus dem handball.ch Matchcenter, einen DHB-Pressebericht, einen nuLiga-Spielbericht oder einen HLA-Bericht.",
     "report-not-found": "Zu diesem Link gibt es kein Spiel.",
     "report-unreadable": "Der Bericht konnte nicht gelesen werden.",
     "report-empty": "Der Bericht enthält noch keinen Spielverlauf.",
@@ -647,7 +647,15 @@
     "checkCourtButton": "Spielfeld prüfen",
     "courtOk": "Das Spielfeld passt. Positionen und Laufwege sind aus dem Video geschätzt.",
     "realign": "Spielfeld neu ausrichten",
-    "technical": "Technische Angaben"
+    "technical": "Technische Angaben",
+    "calibReason_camera_motion": "Die Kamera bewegt sich zu stark (Schnitte, Zoom, Wiederholungen): Spielfeld an einer ruhigen Stelle markieren.",
+    "calibReason_no_floor": "Der Hallenboden ist nicht klar zu erkennen: die Ecken und Linien des Spielfelds von Hand markieren.",
+    "calibReason_flat_view": "Die Kamera schaut zu flach aufs Feld: von Hand markieren, am besten mit Punkten auf beiden Seiten.",
+    "calibReason_few_people": "Zu wenige Personen im Bild, um das Spielfeld zu finden: an einer Stelle mitten im Spiel markieren.",
+    "calibReason_court": "Das gefundene Spielfeld passt nicht sicher: bitte von Hand markieren.",
+    "courtFromHall": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}). Kurz prüfen, ob es passt.",
+    "hallOnce": "Einmal pro Halle markieren: die nächsten Videos aus derselben Halle ({hall}) übernehmen das Spielfeld.",
+    "hallUnknown": "Den Spielort beim Spiel eintragen: dann übernehmen die nächsten Videos aus dieser Halle das Spielfeld."
   },
   "tabs": {
     "video": "Video",
@@ -1791,7 +1799,7 @@
   },
   "officialReport": {
     "label": "Offiziellen Matchbericht importieren",
-    "hint": "Link zum Spiel im handball.ch Matchcenter oder zum DHB-Pressebericht (PDF). Tore mit Torschütze, 7-Meter, Zeitstrafen und Time-outs werden zu Ereignissen; ein neuer Import ersetzt den alten.",
+    "hint": "Link zum Spielbericht: handball.ch Matchcenter, DHB-Pressebericht, nuLiga oder HLA (PDF). Tore mit Torschütze, 7-Meter, Zeitstrafen und Time-outs werden zu Ereignissen; ein neuer Import ersetzt den alten.",
     "import": "Bericht importieren",
     "importing": "Wird importiert…",
     "imported": "{created} Ereignisse importiert, {matched} Tore mit dem Video abgeglichen.",

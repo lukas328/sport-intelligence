@@ -12,8 +12,10 @@ import { errorKey, type ErrorKey } from "@/lib/errors";
 
 type Result = Schemas["OfficialReportResult"];
 
-/** Official match report (handball.ch match centre or DHB press report) by link: goals with scorer,
- * 7-metres, suspensions and time-outs become events; a new import replaces the previous one. */
+/** Official match report by link (handball.ch match centre, DHB press report, nuLiga game report,
+ * HLA report): goals with scorer, 7-metres, suspensions and time-outs become events; a new import
+ * replaces the previous one. The API's warnings are shown as they come (the HLA report has no
+ * timed goals and points to the ÖHB nuLiga report). */
 export function OfficialReportImport({ orgId, matchId }: { orgId: string; matchId: string }) {
   const t = useTranslations("officialReport");
   const tr = useTranslations();
