@@ -43,6 +43,7 @@ def settings() -> Settings:
         database_url="postgresql+asyncpg://x:y@127.0.0.1:1/z",
         email_backend="memory",
         rate_limit_backend="memory",
+        readiness_timeout_s=0.1,  # test_readyz_timeout waits for it
     )
 
 
