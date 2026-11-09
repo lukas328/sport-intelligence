@@ -54,6 +54,8 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   await bergtal.getByRole("button", { name: "Beitritt anfragen" }).click();
   await expect(page.getByText("Anfrage gesendet. Sobald sie bestätigt ist, bist du im Team SG Bergtal Herren.")).toBeVisible();
   expect(joined).toMatchObject({ first_name: "Lara", last_name: "Muster", jersey_number: 11, role: "player" });
+  // the coach's steps (club, team, squad, invite) are not the player's
+  await expect(page.getByText("Schritt 1 von 4")).toHaveCount(0);
 
   // an available team is taken over: what came with it, and the next step
   await page.getByTestId("official-team").filter({ hasText: "HC Seeblick Herren 1" }).getByTestId("claim").click();

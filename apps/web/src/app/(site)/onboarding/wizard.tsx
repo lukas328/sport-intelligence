@@ -38,6 +38,8 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
   // a team taken over from the official data: club and team are there, the squad is next
   const [claimed, setClaimed] = useState(false);
   const shownStep = claimed ? 2 : step;
+  // a player who asked to join a team has no club steps ahead
+  const [joined, setJoined] = useState(false);
 
   async function createOrg(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -103,8 +105,9 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
       <header className="club relative overflow-hidden rounded-lg bg-club px-6 pt-6 pb-5 text-club-ink transition-colors duration-300 sm:px-8 sm:pt-8" style={clubStyle(colour) as CSSProperties}>
         <CourtLines className="absolute right-0 bottom-0 hidden aspect-square h-full sm:block" />
         <div className="relative">
-          <p className="text-[0.9375rem] font-semibold">{t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}</p>
+          {!joined && <p className="text-[0.9375rem] font-semibold">{t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}</p>}
           <h1 className="mt-1 text-[2.5rem] leading-[0.95] sm:text-5xl">{name.trim() || t("onboarding.title")}</h1>
+          {!joined && (
           <ol className="mt-6 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}>
             {STEPS.map((s, i) => (
               <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= shownStep ? "font-semibold" : "font-normal"}`}>
@@ -113,11 +116,12 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
               </li>
             ))}
           </ol>
+          )}
         </div>
       </header>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
 
-      {step === 0 && !manual && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club) => (setName(club), setClaimed(true))} />}
+      {step === 0 && !manual && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club) => (setName(club), setClaimed(true))} onJoinSent={() => setJoined(true)} />}
 
       {step === 0 && manual && (
         <Card>

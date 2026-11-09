@@ -84,7 +84,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] Kader (phone): "Kader" three times (H1, tab, group heading); "Liste bearbeiten" alone; the
   red "Spieler hinzufügen" competes with the red numbers (the button colour waits for the club-red
   decision; heading and edit button fixed).
-- [ ] Sidebar highlight for tools (Assistent, Suche, Gegner) should follow the back link.
+- [x] Sidebar highlight for tools (Assistent, Suche, Gegner) follows the section; the official data and join requests keep Team · Kader.
 - [x] Einstellungen on phones (jump links that wrap): the section tabs have no active underline and are cut at the edge.
 - [ ] Gegner: back link "Zurück" without eyebrow; the zone "Fernwurf / leeres Tor" mixes two
   situations (analysis data, already reported).
@@ -111,7 +111,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] P2 Aufgaben and Termine empty states without a sentence on who sets them.
 - [x] P2 Einstellungen: the 2FA admin sentence shown to players.
 - [x] P3 Spielplan: "Alles Demo-Spiele"; score emphasis on the winner instead of the own team.
-- [ ] P3 Einwilligungen: guardian wording ("Du selbst") for an adult player.
+- [x] P3 Einwilligungen: guardian wording ("Du selbst") for an adult player (the tag only shows for a child).
 
 ## From the analysis session (API additions, see `docs/plans/ui-match-workspace.md` on main)
 
@@ -131,7 +131,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] Shot zone split: "Fernwurf" and "Leeres Tor" (`empty_goal`) in the web texts.
 - [ ] Search hits outside the video come with null windows ("ohne Video" already handles it).
 - [x] nuLiga/HLA report links (hint and error text); `roster_stats` toggle (in the inbox).
-- [ ] `no-video` errors on clip slides; referee kit.
+- [x] `no-video` errors on clip slides; referee kit (see "Open after PR 8").
 
 - [x] Shot candidates (`shot-candidates`): a "Würfe" tool beside the events. With a report most
   moments come with its entry: Enter takes it (player and outcome pinned to the video); otherwise

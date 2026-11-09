@@ -62,4 +62,14 @@ describe("navigation model", () => {
     expect(sectionsFor("training", "player", "o", T)).toEqual([]);
     expect(sectionsFor("today", "staff", "o", T)).toEqual([]);
   });
+
+  it("keeps the squad highlighted on the official data and the join requests, and fixtures on an opponent", () => {
+    const team = "/app/o/teams/00000000-0000-4000-8000-000000000001";
+    expect(destOf(`${team}/official`, "staff")).toBe("team");
+    expect(sectionOf(`${team}/official`)).toBe("roster");
+    expect(destOf(`${team}/join-requests`, "staff")).toBe("team");
+    expect(sectionOf(`${team}/join-requests`)).toBe("roster");
+    expect(destOf("/app/o/opponents/x", "staff")).toBe("matches");
+    expect(sectionOf("/app/o/opponents/x")).toBe("fixtures");
+  });
 });
