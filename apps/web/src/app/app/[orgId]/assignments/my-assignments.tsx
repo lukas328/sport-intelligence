@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -37,26 +37,30 @@ export function MyAssignments({ orgId }: { orgId: string }) {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("mine")}</h1>
       {q.data && q.data.length === 0 && <EmptyState title={t("none")} />}
-      <ul className="space-y-2" data-testid="my-assignments">
+      {/* hairline rows like the coach's list: the title on its own line, the two actions full width
+          under it on phones (one decision per row) */}
+      <ul className="border-t-2 border-foreground" data-testid="my-assignments">
         {(q.data ?? []).map((a) => {
           const overdue = !a.done_at && a.due_at && new Date(a.due_at).getTime() < now;
           return (
-            <li key={a.id} className={cn("flex flex-wrap items-center gap-3 rounded-lg bg-raised border border-border p-3", a.done_at && "opacity-70")}>
-              <div className="min-w-0 flex-1">
-                <p className={cn("font-medium", a.done_at && "line-through")}>{a.title}</p>
+            <li key={a.id} className={cn("space-y-3 border-b border-foreground/15 py-3.5", a.done_at && "text-muted")}>
+              <div>
+                <p className={cn("text-[1.0625rem] font-semibold", a.done_at && "line-through")}>{a.title}</p>
                 <p className="text-sm text-muted">
                   {t(`kind_${a.kind as "drill"}`)} · {a.team_name}
                   {a.due_at && ` · ${t("dueOn", { date: format.dateTime(new Date(a.due_at), { dateStyle: "medium" }) })}`}
-                  {overdue && <span className="ml-1 font-medium text-error">{t("overdue")}</span>}
+                  {overdue && <span className="ml-1 font-semibold text-foreground">{t("overdue")}</span>}
                 </p>
-                {a.note && <p className="mt-1 text-sm">{a.note}</p>}
+                {a.note && <p className="mt-1 text-sm text-foreground">{a.note}</p>}
               </div>
-              <Link href={targetLink(orgId, a)} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
-                {t("openTarget")}
-              </Link>
-              <Button variant={a.done_at ? "ghost" : "primary"} onClick={() => toggle.mutate({ id: a.id, done: !a.done_at })}>
-                {a.done_at ? t("markOpen") : t("markDone")}
-              </Button>
+              <div className="grid grid-cols-2 gap-2 sm:flex">
+                <Link href={targetLink(orgId, a)} className={buttonClass("secondary", "md")}>
+                  {t("openTarget")}
+                </Link>
+                <Button variant={a.done_at ? "ghost" : "primary"} onClick={() => toggle.mutate({ id: a.id, done: !a.done_at })}>
+                  {a.done_at ? t("markOpen") : t("markDone")}
+                </Button>
+              </div>
             </li>
           );
         })}

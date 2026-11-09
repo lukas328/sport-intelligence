@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm";
 import { Alert, EmptyState, Sheet } from "@/components/ui/card";
 import { AttendancePanel } from "@/components/team/attendance-panel";
 import { api } from "@/lib/client";
@@ -187,6 +188,30 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
     queryKey: ["sessions", teamId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/sessions", { params: { path: team } })).data ?? [],
   });
+  // who is out (injured, away): the staff plan the unit with it; names from the current squad
+  const statuses = useQuery({
+    queryKey: ["player-statuses", teamId],
+    enabled: canPlan,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/player-statuses", { params: { path: team } })).data ?? [],
+  });
+  const squad = useQuery({
+    queryKey: ["squad-names", teamId],
+    enabled: canPlan && (statuses.data?.length ?? 0) > 0,
+    queryFn: async () => {
+      const tm = (await api.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: team } })).data;
+      if (!tm?.current_season) return [];
+      return (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", { params: { path: { ...team, season_id: tm.current_season.id } } })).data ?? [];
+    },
+  });
+  const outOn = (day: string) =>
+    (statuses.data ?? [])
+      .filter((x) => x.until == null || x.until >= day)
+      .map((x) => {
+        const p = (squad.data ?? []).find((r) => r.player_id === x.player_id);
+        return p ? `${p.first_name} ${p.last_name} (${tr(`playerStatus.${x.kind}`).toLowerCase()})` : null;
+      })
+      .filter((x): x is string => x != null);
+  const confirm = useConfirm();
   const focus = useQuery({
     queryKey: ["focus", teamId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/focus", { params: { path: team } })).data ?? [],
@@ -242,13 +267,25 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
           </span>
         </div>
         {s.drills.length > 0 && <p className="text-sm">{s.drills.map((d) => d.name).join(" · ")}</p>}
+        {canPlan && s.on_date >= today && outOn(s.on_date).length > 0 && (
+          <p className="text-sm" data-testid="session-out">
+            <span className="font-semibold">{t("outOnDay", { n: outOn(s.on_date).length })}</span> <span className="text-muted">{outOn(s.on_date).join(", ")}</span>
+          </p>
+        )}
         <div className="flex flex-wrap gap-3 text-sm">
           <a className="font-medium text-accent hover:underline" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
           {canPlan && (
             <>
               <button type="button" className="font-medium text-accent hover:underline" onClick={() => setEditing(s.id)}>{t("edit")}</button>
               <button type="button" className="font-medium text-accent hover:underline" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
-              <button type="button" className="text-error underline" onClick={() => remove.mutate(s.id)}>{t("delete")}</button>
+              {/* apart from the everyday actions, and asked once: a thumb slip must not delete a unit */}
+              <button
+                type="button"
+                className="ml-auto text-muted underline underline-offset-2 hover:text-foreground"
+                onClick={async () => (await confirm({ title: t("deleteConfirm", { title: s.title || t("defaultTitle") }), confirm: t("delete"), danger: true })) && remove.mutate(s.id)}
+              >
+                {t("delete")}
+              </button>
             </>
           )}
         </div>

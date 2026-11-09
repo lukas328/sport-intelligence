@@ -55,7 +55,18 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await form.getByRole("button", { name: "Speichern" }).click();
   await expect(lea.getByTestId("player-status")).toContainText("Verletzt bis");
   await expect(lea.getByTestId("player-status")).toContainText("Knöchel");
+  await expect(page.getByTestId("roster-availability")).toHaveText("Verfügbar 0 von 1 · Lea Beispiel fällt aus");
   await expectAccessible(page);
+
+  // a unit in two days: the plan says who is out that day
+  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
+  await page.getByRole("button", { name: "Neue Einheit" }).click();
+  const unit = page.getByRole("form", { name: "Neue Einheit" });
+  await unit.getByLabel("Datum").fill(new Date(Date.now() + 2 * 86400_000).toISOString().slice(0, 10));
+  await unit.getByLabel("Titel").fill("Abwehr 6:0");
+  await unit.getByRole("button", { name: "Speichern" }).click();
+  await expect(page.getByTestId("session-out")).toHaveText("1 fällt aus: Lea Beispiel (verletzt)");
+  await page.goto(`/app/${orgId}/teams/${teamId}`);
   await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
   await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByLabel("Status").selectOption("fit");
   await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByRole("button", { name: "Speichern" }).click();

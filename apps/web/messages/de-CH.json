@@ -310,7 +310,9 @@
     "consentsAll": "Einwilligungen für Video: alle {n} vollständig.",
     "consentsMissing": "Einwilligung fehlt bei {n} von {total}:",
     "hand_left": "Wurfhand links",
-    "hand_right": "Wurfhand rechts"
+    "hand_right": "Wurfhand rechts",
+    "available": "Verfügbar {n} von {total}",
+    "out": "{n, plural, one {fällt aus} other {fallen aus}}"
   },
   "settings": {
     "title": "Einstellungen",
@@ -2024,7 +2026,9 @@
     "noFollowup": "Für diese Erkenntnis gibt es keine Kennzahl zum Verfolgen.",
     "planFirst": "Erste Einheit planen",
     "noneHint": "Eine Einheit mit Übungen gibt es als Plan fürs Handy und als PDF für die Halle.",
-    "calendarTools": "Kalender abonnieren und Termine importieren"
+    "calendarTools": "Kalender abonnieren und Termine importieren",
+    "outOnDay": "{n, plural, one {1 fällt aus:} other {# fallen aus:}}",
+    "deleteConfirm": "«{title}» löschen?"
   },
   "schedule": {
     "nav": "Meine Termine",

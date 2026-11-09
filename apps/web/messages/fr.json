@@ -310,7 +310,9 @@
     "consentsAll": "Consentements vidéo : les {n} sont complets.",
     "consentsMissing": "Consentement manquant pour {n} sur {total} :",
     "hand_left": "Gaucher",
-    "hand_right": "Droitier"
+    "hand_right": "Droitier",
+    "available": "Disponibles {n} sur {total}",
+    "out": "{n, plural, one {est absent·e} other {sont absent·es}}"
   },
   "settings": {
     "title": "Paramètres",
@@ -2024,7 +2026,9 @@
     "noFollowup": "Ce constat n'a pas de chiffre à suivre.",
     "planFirst": "Planifier la première séance",
     "noneHint": "Une séance avec exercices existe comme plan sur le téléphone et en PDF pour la salle.",
-    "calendarTools": "S'abonner au calendrier et importer des dates"
+    "calendarTools": "S'abonner au calendrier et importer des dates",
+    "outOnDay": "{n, plural, one {1 absent·e :} other {# absent·es :}}",
+    "deleteConfirm": "Supprimer « {title} » ?"
   },
   "schedule": {
     "nav": "Mes rendez-vous",
