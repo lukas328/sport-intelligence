@@ -2447,8 +2447,6 @@
   "shotCandidates": {
     "title": "Würfe prüfen",
     "keys": "In der Liste: <k>↑</k> <k>↓</k> wählen, <k>Enter</k> Eintrag aus dem Matchbericht übernehmen, <k>1</k> {own}, <k>2</k> {opp}, dann <k>G</k> Tor, <k>S</k> Parade, <k>M</k> Fehlwurf, <k>P</k> Pfosten, <k>B</k> geblockt, <k>X</k> kein Wurf, <k>R</k> nochmals, <k>U</k> rückgängig.",
-    "report": "Matchbericht: {total} Würfe, {confirmed} im Video bestätigt, {suggested} vorgeschlagen, {missing} ohne Stelle im Video.",
-    "reportOutside": "{n, plural, one {# liegt} other {# liegen}} ausserhalb des Videos.",
     "question": "Wurf?",
     "position": "{pos} von {n}",
     "fromReportLabel": "Aus dem Matchbericht übernehmen",
@@ -2483,7 +2481,12 @@
     "shotBy": "Wurf von {who}",
     "noKickoff": "Der Anwurf fehlt noch: die Spielzeiten sind aus dem Matchbericht geschätzt.",
     "setKickoff": "Anwurf setzen",
-    "positionReport": "{pos} von {n} mit Matchbericht · {more} weitere offen"
+    "positionReport": "{pos} von {n} mit Matchbericht · {more} weitere offen",
+    "reportTitle": "Matchbericht: {total} Würfe",
+    "report_confirmed": "im Video bestätigt",
+    "report_suggested": "vorgeschlagen",
+    "report_missing": "ohne Stelle im Video",
+    "report_outside": "ausserhalb des Videos"
   },
   "officialTeams": {
     "title": "Mannschaft suchen",

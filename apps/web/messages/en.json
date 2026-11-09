@@ -2447,8 +2447,6 @@
   "shotCandidates": {
     "title": "Review shots",
     "keys": "In the list: <k>↑</k> <k>↓</k> select, <k>Enter</k> take the match report entry, <k>1</k> {own}, <k>2</k> {opp}, then <k>G</k> goal, <k>S</k> save, <k>M</k> miss, <k>P</k> post, <k>B</k> blocked, <k>X</k> no shot, <k>R</k> replay, <k>U</k> undo.",
-    "report": "Match report: {total} shots, {confirmed} confirmed on video, {suggested} suggested, {missing} without a moment in the video.",
-    "reportOutside": "{n, plural, one {# lies} other {# lie}} outside the video.",
     "question": "Shot?",
     "position": "{pos} of {n}",
     "fromReportLabel": "Take from the match report",
@@ -2483,7 +2481,12 @@
     "shotBy": "shot by {who}",
     "noKickoff": "The throw-off is not set yet: the game times are estimated from the match report.",
     "setKickoff": "Set the throw-off",
-    "positionReport": "{pos} of {n} with the match report · {more} more open"
+    "positionReport": "{pos} of {n} with the match report · {more} more open",
+    "reportTitle": "Match report: {total} shots",
+    "report_confirmed": "confirmed in the video",
+    "report_suggested": "suggested",
+    "report_missing": "no moment in the video",
+    "report_outside": "outside the video"
   },
   "officialTeams": {
     "title": "Find your team",

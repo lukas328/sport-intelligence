@@ -2447,8 +2447,6 @@
   "shotCandidates": {
     "title": "Vérifier les tirs",
     "keys": "Dans la liste : <k>↑</k> <k>↓</k> choisir, <k>Enter</k> reprendre l'entrée de la feuille de match, <k>1</k> {own}, <k>2</k> {opp}, puis <k>G</k> but, <k>S</k> arrêt, <k>M</k> tir manqué, <k>P</k> poteau, <k>B</k> contré, <k>X</k> pas de tir, <k>R</k> revoir, <k>U</k> annuler.",
-    "report": "Feuille de match : {total} tirs, {confirmed} confirmés sur la vidéo, {suggested} proposés, {missing} sans moment dans la vidéo.",
-    "reportOutside": "{n, plural, one {# se situe} other {# se situent}} hors de la vidéo.",
     "question": "Tir ?",
     "position": "{pos} sur {n}",
     "fromReportLabel": "Reprendre de la feuille de match",
@@ -2483,7 +2481,12 @@
     "shotBy": "tir de {who}",
     "noKickoff": "L'engagement n'est pas encore placé : les temps de jeu sont estimés d'après la feuille de match.",
     "setKickoff": "Placer l'engagement",
-    "positionReport": "{pos} sur {n} avec la feuille de match · {more} autres ouverts"
+    "positionReport": "{pos} sur {n} avec la feuille de match · {more} autres ouverts",
+    "reportTitle": "Feuille de match : {total} tirs",
+    "report_confirmed": "confirmés dans la vidéo",
+    "report_suggested": "proposés",
+    "report_missing": "sans moment dans la vidéo",
+    "report_outside": "hors de la vidéo"
   },
   "officialTeams": {
     "title": "Chercher l'équipe",

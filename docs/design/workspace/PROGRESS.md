@@ -363,5 +363,7 @@ Fixed:
 - Shot review: one count ("1 von 1 mit Matchbericht · 2 weitere offen") instead of "1 von 1"
   next to a tab saying "Offen (3)".
 
-Left open: the hero and the tab row above the workspace on phones (collapse while reviewing);
-the dense report sentence above the shots as a row of tappable counts.
+- After PR 22: the report line above the shots is a printed row of counts (im Video bestätigt,
+  vorgeschlagen, ohne Stelle, ausserhalb); "vorgeschlagen" opens its list.
+
+Left open: the hero and the tab row above the workspace on phones (collapse while reviewing).
