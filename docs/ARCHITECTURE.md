@@ -16,30 +16,56 @@ Status: M1 (accounts, tenants, roster). This document grows with each milestone.
                                                  │  presigned URLs                 │
                                                  └──────────────► Object storage (S3)  ◄──┐
                                                                      videos, HLS,         │
-                                                                     Parquet stage outputs│
-                       worker (CPU, RQ) ── orchestrates PipelineGraph ─────────────────────┤
-                       gpu-worker (RQ, GpuBackend: local | runpod | modal | k8s) ──────────┘
+                                                                     analysis outputs     │
+                       worker (CPU, RQ: pipeline + default) ───────────────────────────────┤
+                       gpu-worker (RQ: gpu, analysis on CPU until a GPU provider is set) ──┘
+                         both report progress and results to api /internal/jobs/{id}
 ```
 
-| Component | Path | Tech | Status |
+There is no orchestrator between the API and the workers: the API enqueues each job itself, by
+function path only (it never imports worker code, ADR 001), and decides the next step when a job
+reports back. One `processing_jobs` row per job holds status, progress, stages, result and the
+GPU time used.
+
+| Job (function path) | Queue | Enqueued by the API when |
+|---|---|---|
+| `handball_worker.ingest.run_ingest` | pipeline | an upload or link import finished: probe, quality check, HLS ladder, analysis proxy, poster, thumbnails |
+| `handball_worker.ingest.run_import` | pipeline | a video link was submitted (SSRF check on every hop, `handball_jobkit.net`) |
+| `handball_gpu_worker.analysis.run_analysis` | gpu | the ingest of the main video succeeded (plan allows tracking), or the coach marked the court |
+| `handball_gpu_worker.sync.run_sync` | gpu | a second camera's ingest succeeded (audio offset to the main video) |
+| `handball_worker.export.run_presentation_export` | default | a presentation is exported as video |
+| `handball_worker.reels.run_highlight_reel` | default | a highlight reel is requested |
+| `handball_worker.push.send` | default | an in-app notification goes to devices |
+
+The worker also runs an hourly tick (RQ scheduler, `handball_worker.ticks`) that calls the API's
+internal tick endpoint; the API decides what is due (preparation reports, dunning, official data
+sync). `apps/api/tests/test_job_paths.py` checks that every function path exists.
+
+| Component | Path | Tech | Role |
 |---|---|---|---|
-| Web | `apps/web` | Next.js 15 App Router, TS strict, Tailwind 4, TanStack Query, next-intl (de-CH, en, fr) | M0: home, status page |
-| API | `apps/api` | FastAPI, Pydantic v2, SQLAlchemy 2 async, Alembic, structlog, Sentry (opt-in) | M0: health, errors, DB base |
-| Worker | `apps/worker` | RQ, pipeline graph | M0: graph + stage declaration, ping job |
-| GPU worker | `apps/gpu-worker` | RQ, `GpuBackend` | M0: local backend, cost accounting |
-| Court | `packages/court` | JSON spec → generated geometry for Python and TS | M0: lines, keypoints, normalisation |
-| Metrics | `packages/metrics` | Python (+ TS types) | M4 |
-| Tactics | `packages/tactics` | TS data format, renderer | M6 |
-| API client | `packages/api-client` | openapi-typescript + openapi-fetch | M0: generated from `/v1/openapi.json` |
-| UI | `packages/ui` | shared components | M1+ |
-| ML | `ml/` | datasets, training, eval, model cards | M3+ |
+| Web | `apps/web` | Next.js 15 App Router, TS strict, Tailwind 4, TanStack Query, next-intl (de-CH, en, fr) | web app (PWA), proxies `/v1` to the API |
+| Mobile | `apps/mobile` | Expo, expo-router, TS strict | native app: scenes, dates, recording, courtside marks, push (ADR 022) |
+| Site | `apps/site` | Next.js 15, static | marketing site and help centre |
+| API | `apps/api` | FastAPI, Pydantic v2, SQLAlchemy 2 async, Alembic, structlog, Sentry (opt-in) | REST API `/v1`, RLS tenancy, enqueues and follows the jobs |
+| Worker | `apps/worker` | RQ, ffmpeg, Pillow | ingest, link import, exports, reels, push, hourly tick |
+| GPU worker | `apps/gpu-worker` | RQ, `packages/vision` (OpenCV, ONNX Runtime) | video analysis, camera sync |
+| Vision | `packages/vision` | Python, OpenCV, ONNX Runtime | calibration, detection, tracking, teams, numbers, events |
+| Jobkit | `packages/jobkit` | Python | shared by the workers and the API: progress reporter, S3 helpers, job settings, SSRF URL check |
+| Court | `packages/court` | JSON spec, generated geometry for Python and TS | lines, keypoints, normalisation |
+| Metrics | `packages/metrics` | Python (+ TS types) | statistics and insights |
+| Tactics | `packages/tactics` | TS data format, renderer | tactics board |
+| API client | `packages/api-client` | openapi-typescript + openapi-fetch | generated from `/v1/openapi.json` |
+| Client core | `packages/client-core` | TS | logic shared by web and mobile |
+| UI | `packages/ui` | TS | placeholder for shared components (empty so far) |
+| ML | `ml/` | datasets, training, eval, model cards | |
 
 ## Principles (from BRIEF 6.5)
 - **Ports and adapters**: storage, GPU, e-mail, payment, LLM, official feed and video import sit behind
   interfaces. Domain code knows no provider.
-- **Pipeline as a graph** (`handball_worker.pipeline`): stages declare inputs/outputs; order, caching and
-  partial reprocessing are derived. A user correction only reruns downstream stages
-  (`PipelineGraph.downstream(["corrections"]) == ["metrics", "insights", "clips"]`).
+- **Jobs chained by the API**: each video step is one RQ job; the API enqueues the next one when a
+  job reports success (ingest, then analysis and camera sync). Corrections by users do not re-run
+  jobs: statistics and insights are recomputed from the events. (`handball_worker.pipeline` with
+  `PipelineGraph` is early scaffolding that nothing runs; see the backlog.)
 - **Derived statistics are never truth**: computed from events/possessions/tracks into caches keyed by
   pipeline version.
 - **Configuration over code**: thresholds, zones, plan limits, feature flags in versioned config.

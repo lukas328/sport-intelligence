@@ -48,7 +48,7 @@ typecheck: typecheck-py ## mypy strict + tsc strict
 typecheck-py:
 	uv run mypy $(PY_SRC) $(PY_TESTS)
 
-test: test-py test-js ## Run all unit tests (no running services needed)
+test: test-py test-js ## Run all unit tests (starts Postgres for the API tests)
 
 db: ## Start only Postgres (needed by the API tests)
 	docker compose up -d --wait postgres
