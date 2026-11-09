@@ -271,3 +271,19 @@ overview line for an unverified club, desktop light and dark and phone, invented
   once they belonged to Team · Kader; the team header now steps aside on these two pages.
 - The settings section reads well: ways to confirm the club with the club's mail domain, access
   requests with "Als Trainer/in aufnehmen", "Als Vereinsadmin aufnehmen" and "Ablehnen".
+
+## Autonomous round (UI session, 2026-11-09)
+
+The owner asked the session to decide on its own. Done in this round, each with tests:
+- Navigation: the official data and the join requests keep Team · Kader; an opponent keeps
+  Spiele · Spielplan.
+- Consents: no "Du selbst" on the own profile; "Dein Kind" stays for a child.
+- Onboarding: a player who asked to join no longer sees the coach's four steps.
+- Phones: the video controls sit under the picture (they covered the lower half of the frame);
+  keyboard hints are hidden for touch input; the work strip fades at its edge while more tabs
+  follow.
+- Overview: the line for an unverified club was hidden under the stage; it now sits under it.
+- Players: "Deine Szenen" on the match page (assessment first, then the scenes); dates after the
+  next one without a reply count in "Zu erledigen".
+- e2e: `player.spec.ts` (match page and overview of a player); the court from the hall with
+  "Passt" in `shots.spec.ts`.
