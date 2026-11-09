@@ -25,8 +25,8 @@ from handball_api.models import (
     VideoAsset,
 )
 from handball_api.models.enums import VideoRole
-from handball_api.schemas.events import EventIn, EventPatch
-from handball_api.services import audit
+from handball_api.schemas.events import EventIn, EventOut, EventPatch
+from handball_api.services import audit, roster
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
@@ -212,6 +212,31 @@ async def delete_event(ctx: Ctx, event_id: uuid.UUID) -> None:
     await ctx.db.delete(ev)
 
 
+def shown_attributes(e: Event, visible: set[uuid.UUID] | None) -> dict[str, Any]:
+    """The event's attributes as this actor may see them: the name an official report gave an
+    own player stays out unless the event's player is one whose name the actor may see
+    (`roster.visible_players`; None: an organiser, who sees every name)."""
+    attrs = dict(e.attributes or {})
+    if visible is not None and e.side == "own" and "name" in attrs and e.player_id not in visible:
+        del attrs["name"]
+    return attrs
+
+
+async def shown(ctx: Ctx, events: list[Event]) -> list[EventOut]:
+    """Events for the response, with `shown_attributes` (one roster lookup per match)."""
+    visible: dict[uuid.UUID, set[uuid.UUID] | None] = {}
+    out = []
+    for e in events:
+        if e.match_id not in visible:
+            match = await ctx.db.get(Match, e.match_id)
+            assert match is not None
+            visible[e.match_id] = await roster.visible_players(ctx, match.team_id, match.season_id)
+        ev = EventOut.model_validate(e)
+        ev.attributes = shown_attributes(e, visible[e.match_id])
+        out.append(ev)
+    return out
+
+
 async def list_events(
     ctx: Ctx,
     match_id: uuid.UUID,
@@ -224,7 +249,7 @@ async def list_events(
     zone: str | None = None,
     goal_zone: str | None = None,
     turnover_type: str | None = None,
-) -> list[Event]:
+) -> list[EventOut]:
     await get_match(ctx, match_id)
     q = select(Event).where(Event.match_id == match_id)
     for col, val in (
@@ -242,7 +267,7 @@ async def list_events(
     q = q.order_by(
         Event.period, Event.clock_s.nulls_last(), Event.t_ms.nulls_last(), Event.created_at
     )
-    return list((await ctx.db.scalars(q)).all())
+    return await shown(ctx, list((await ctx.db.scalars(q)).all()))
 
 
 def _to_metric(e: Event) -> MEvent:

@@ -5,7 +5,6 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, File, Query, Response, UploadFile
 
-from handball_api.models import Event
 from handball_api.routers.deps import OrgDep, per_user
 from handball_api.schemas.events import (
     EventIn,
@@ -43,7 +42,7 @@ async def list_events(
     zone: Annotated[str | None, Query(max_length=20)] = None,
     goal_zone: Annotated[str | None, Query(max_length=2)] = None,
     turnover_type: Annotated[str | None, Query(max_length=20)] = None,
-) -> list[Event]:
+) -> list[EventOut]:
     """Filtered event list: every number in the statistics links to these events and clips."""
     return await service.list_events(
         scope.ctx,
@@ -60,13 +59,15 @@ async def list_events(
 
 
 @router.post("/matches/{match_id}/events", response_model=EventOut, status_code=201)
-async def create_event(match_id: uuid.UUID, data: EventIn, scope: OrgDep) -> Event:
-    return await service.create_event(scope.ctx, match_id, data)
+async def create_event(match_id: uuid.UUID, data: EventIn, scope: OrgDep) -> EventOut:
+    event = await service.create_event(scope.ctx, match_id, data)
+    return (await service.shown(scope.ctx, [event]))[0]
 
 
 @router.patch("/events/{event_id}", response_model=EventOut)
-async def update_event(event_id: uuid.UUID, data: EventPatch, scope: OrgDep) -> Event:
-    return await service.update_event(scope.ctx, event_id, data)
+async def update_event(event_id: uuid.UUID, data: EventPatch, scope: OrgDep) -> EventOut:
+    event = await service.update_event(scope.ctx, event_id, data)
+    return (await service.shown(scope.ctx, [event]))[0]
 
 
 @router.delete("/events/{event_id}", status_code=204)

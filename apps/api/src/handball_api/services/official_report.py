@@ -67,10 +67,10 @@ from sqlalchemy import delete, select
 from handball_api.core.errors import ProblemError
 from handball_api.integrations import handball_ch
 from handball_api.models import Event, GoalCandidate, Match, Opponent, RosterEntry
-from handball_api.services import audit, match_clock, org_verification
+from handball_api.services import audit, match_clock, org_verification, roster
 from handball_api.services.auto_events import CANDIDATE, OFFICIAL, OVERLAY
 from handball_api.services.context import Ctx
-from handball_api.services.events import video_from_clock
+from handball_api.services.events import shown_attributes, video_from_clock
 from handball_api.services.matches import duration_ms, get_match, timeline_video
 from handball_api.services.policies import Action
 
@@ -1327,6 +1327,7 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     ).all()
     official = [g for g in goals if g.source == SOURCE]
     auto = [g for g in goals if g.source in AUTO_GOALS]
+    visible = await roster.visible_players(ctx, match.team_id, match.season_id)
     cands = [
         _Seen(g.side, float(g.clock_s), g.t_ms, g.x, g.y, g.source, g.confidence, g)
         for g in auto
@@ -1366,7 +1367,7 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             and not 0 <= t_ms <= length_ms
         ):
             status = "outside"
-        attrs = o.attributes or {}
+        attrs = shown_attributes(o, visible)
         rows.append(
             {
                 "event_id": o.id,
