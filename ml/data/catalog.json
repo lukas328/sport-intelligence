@@ -1,13 +1,13 @@
 {
- "generated": "2026-11-05T20:25:26",
+ "generated": "2026-11-09T08:09:24",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
   "swiss": 179,
   "swiss_matched": 153,
   "with_log": 67,
-  "in_ingest": 197,
-  "local": 176,
+  "in_ingest": 223,
+  "local": 202,
   "local_matched": 132,
   "local_with_log": 60
  },
@@ -7320,10 +7320,19 @@
    ],
    "date": "ca2015",
    "date_kind": "approx",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6545.594,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "AT_Challenge_Lauterach_HandballTirol_2021",
@@ -7337,10 +7346,19 @@
    ],
    "date": "2021",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6191.874,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "AT_Challenge_Lauterach_Traun_2021",
@@ -7354,10 +7372,19 @@
    ],
    "date": "2021",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5698.666667,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "AT_Cup_Feldkirch_Bregenz_2021",
@@ -7370,10 +7397,19 @@
    ],
    "date": "2021",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 5773.174,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "Pro_EuropeanCup_Karvina_HandballTirol_2025",
@@ -7387,10 +7423,19 @@
    ],
    "date": "2025",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 50.0,
+    "duration_s": 4551.374,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l11",
+    "source": "local"
+   }
   },
   {
    "name": "FR_N1_SudMayenne_GrandLibournais_2025",
@@ -7421,10 +7466,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6585.634,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "FR_N3_CPBRennes_SaintMalo_2026",
@@ -7438,10 +7492,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6222.674,
+    "codec": "vp9",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "FR_N3_CPBRennes_BoucleSeine_2026",
@@ -7455,10 +7518,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 5897.294,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "FR_N3_CPBRennes_Chateauneuf_2025",
@@ -7472,10 +7544,19 @@
    ],
    "date": "2025",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 58.0,
+    "duration_s": 5863.134,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "FR_N3_Hoenheim_Haguenau_2026",
@@ -7489,10 +7570,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 854,
+    "height": 480,
+    "fps": 30.0,
+    "duration_s": 6208.854,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "FR_Prenationale_Final_Mios_Biard_2026",
@@ -7506,10 +7596,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1244,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 7629.874,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "ES_HonorPlata_Burgos_Anaitasuna_2026",
@@ -7557,10 +7656,19 @@
    ],
    "date": "2025",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6830.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "ES_HonorPlata_Bordils_Zamora_2018",
@@ -7608,10 +7716,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5365.034,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "ES_1Nacional_PalmaDelRio_2026",
@@ -7624,10 +7741,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6315.694,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "ES_2Nacional_MarniB_Almoradi_2026",
@@ -7641,10 +7767,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6254.494,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "IT_SerieA2_Flavioni_Salerno_2026",
@@ -7658,10 +7793,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5794.614,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "IT_SerieA2_Malo_Crenna_2018",
@@ -7675,10 +7819,19 @@
    ],
    "date": "2018",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 4887.554,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "IT_SerieA2_Malo_SanVitoMarano_2019",
@@ -7692,10 +7845,19 @@
    ],
    "date": "2019",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 4630.694,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "IT_SerieA2_Pontinia_Fondi_2021",
@@ -7726,10 +7888,19 @@
    ],
    "date": "2020",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5900.0,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "NL_2Divisie_VZV2_SEW2_2019",
@@ -7760,10 +7931,19 @@
    ],
    "date": "2019",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 3850.594,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l11",
+    "source": "local"
+   }
   },
   {
    "name": "NL_Houten_KrasVolendam2_2022",
@@ -7776,10 +7956,19 @@
    ],
    "date": "2022",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 5865.016667,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l11",
+    "source": "local"
+   }
   },
   {
    "name": "NL_1Divisie_JongSEW_Wijhe_2024",
@@ -7793,10 +7982,19 @@
    ],
    "date": "2024",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6190.034,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l11",
+    "source": "local"
+   }
   },
   {
    "name": "NL_1Divisie_BFC2_PSV_2021",
@@ -7810,10 +8008,19 @@
    ],
    "date": "2021",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6365.014,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l11",
+    "source": "local"
+   }
   },
   {
    "name": "NL_Frauen_Final_VOC_SEW_2026",
@@ -7826,10 +8033,19 @@
    ],
    "date": "2026",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 6447.974,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l11",
+    "source": "local"
+   }
   },
   {
    "name": "DK_1Division_SISU_EBSHolbaek_2019",
@@ -7843,10 +8059,19 @@
    ],
    "date": "2019",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 634,
+    "height": 480,
+    "fps": 30.0,
+    "duration_s": 4360.814,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "DK_Herren_Arresoe_Furesoe_2018",
@@ -7859,10 +8084,19 @@
    ],
    "date": "2018",
    "date_kind": "year",
-   "info_json": false,
+   "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 3930.094,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l10",
+    "source": "local"
+   }
   },
   {
    "name": "SE_Allsvenskan_Torslanda_Amo_2018",
