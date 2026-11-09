@@ -1540,7 +1540,11 @@
     "continueWith": "Continue with {name}",
     "ratingLow": "1 poor",
     "ratingHigh": "5 very good",
-    "coachNote": "Coach's note:"
+    "coachNote": "Coach's note:",
+    "childTitle": "{name}'s scenes",
+    "assessedLine": "Your self-assessment is in, the coach's notes are open.",
+    "assessFirst": "Your self-assessment first, then you see the coach's notes.",
+    "watch": "Watch scenes"
   },
   "scouting": {
     "title": "Preparation report",

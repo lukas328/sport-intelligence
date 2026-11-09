@@ -1540,7 +1540,11 @@
     "continueWith": "Weiter mit {name}",
     "ratingLow": "1 schwach",
     "ratingHigh": "5 sehr gut",
-    "coachNote": "Notiz des Trainers:"
+    "coachNote": "Notiz des Trainers:",
+    "childTitle": "Szenen von {name}",
+    "assessedLine": "Deine Einschätzung ist abgegeben, die Notizen des Trainers sind offen.",
+    "assessFirst": "Zuerst deine Einschätzung, danach siehst du die Notizen des Trainers.",
+    "watch": "Szenen ansehen"
   },
   "scouting": {
     "title": "Vorbereitungsbericht",

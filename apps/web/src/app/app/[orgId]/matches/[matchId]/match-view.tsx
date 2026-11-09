@@ -36,7 +36,7 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
-import { FeedbackSummary, TeamFeedView } from "./feed-views";
+import { FeedbackSummary, MyScenesLine, TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
 import { VideoOverview } from "./video-overview";
@@ -392,6 +392,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 
       <div hidden={view !== "video"} className="space-y-6">
+        {/* a player's own scenes of this match, one step away */}
+        {!staff && <MyScenesLine orgId={orgId} matchId={match.id} />}
         {main ? (
           <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} />
         ) : !(staff && match.source !== "paper_report") ? (

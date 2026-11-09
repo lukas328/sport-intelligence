@@ -166,7 +166,8 @@ this round, in rough order:
   (`xg_coverage` at least 0.7, `lib/xg.ts`, also on the match stage, the analysis overview, the
   season rows and the season's xG statement).
 - Player: one next-action list (self-assessments, assignments, replies to dates); personal season
-  line linked to clips; "Meine Szenen" on the match page; read-only drills a coach assigns.
+  line linked to clips; read-only drills a coach assigns. Done: "Meine Szenen" on the match page
+  (assessment first, then the scenes; e2e `player.spec.ts`).
 - Own drills ("Neue Übung"): needs a drills API; the library is static today.
 - Player status (verletzt, abwesend) on the squad; attendance on units and dates; assignment
   progress ("8 von 14 erledigt"); recurring training slots; a team consent table for staff.

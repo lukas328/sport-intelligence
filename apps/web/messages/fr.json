@@ -1540,7 +1540,11 @@
     "continueWith": "Continuer avec {name}",
     "ratingLow": "1 faible",
     "ratingHigh": "5 très bien",
-    "coachNote": "Note de l'entraîneur :"
+    "coachNote": "Note de l'entraîneur :",
+    "childTitle": "Scènes de {name}",
+    "assessedLine": "Ton auto-évaluation est faite, les notes de l'entraîneur sont visibles.",
+    "assessFirst": "D'abord ton auto-évaluation, ensuite tu vois les notes de l'entraîneur.",
+    "watch": "Voir les scènes"
   },
   "scouting": {
     "title": "Rapport de préparation",
