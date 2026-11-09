@@ -1956,7 +1956,10 @@
     "export": "Export",
     "shirtPrefix": "N° ",
     "metricsN": "{n, plural, one {# indicateur} other {# indicateurs}}",
-    "allMatches": "tous"
+    "allMatches": "tous",
+    "seasons": "Saison",
+    "seasonsRecent": "Celle-ci et la précédente",
+    "seasonsAll": "Toutes les saisons"
   },
   "training": {
     "nav": "Entraînement",
