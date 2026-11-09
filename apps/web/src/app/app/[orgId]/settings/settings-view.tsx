@@ -9,6 +9,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { useEffect, useState, type FormEvent } from "react";
 import { AccountSection } from "@/components/account-section";
+import { AccessRequests, Verification } from "@/components/official/requests";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
 import { Alert, EmptyState } from "@/components/ui/card";
@@ -25,11 +26,14 @@ type Me = Schemas["MeOut"];
 export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: Me }) {
   const t = useTranslations();
   const isAdmin = org.my_role === "org_admin";
+  // a club taken over from the official data: its verification and access requests
+  const official = org.official_club_id != null;
   const inviteTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach").map((tm) => ({ id: tm.id, name: tm.name }));
   const people = isAdmin || inviteTeams.length > 0;
   const sections: [string, string][] = [
     ...(isAdmin ? ([["club-section", t("settings.club")], ["billing", t("billing.title")]] as [string, string][]) : []),
     ...(people ? ([["people-section", t("settings.people")]] as [string, string][]) : []),
+    ...(isAdmin && official ? ([["official-section", t("verification.section")]] as [string, string][]) : []),
     ["account-section", t("account.title")],
     ["security", t("settings.security")],
     ["privacy", t("privacy.title")],
@@ -57,6 +61,17 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
             <div id="people-section">
               <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
             </div>
+          )}
+          {isAdmin && official && (
+            <section id="official-section" aria-labelledby="official-title" className="space-y-3">
+              <h2 id="official-title" className="text-lg font-semibold">
+                {t("verification.section")}
+              </h2>
+              <div className="space-y-8 border-t border-foreground/15 pt-5">
+                <Verification orgId={org.id} />
+                <AccessRequests orgId={org.id} teams={teams.map((x) => ({ id: x.id, name: x.name }))} />
+              </div>
+            </section>
           )}
           <div id="account-section">
             <AccountSection me={me} />

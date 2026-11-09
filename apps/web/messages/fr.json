@@ -135,7 +135,12 @@
     "invalid-clock": "Ce temps de jeu n'est pas dans cette mi-temps.",
     "official-unavailable": "handball.ch ne répond pas pour le moment. Réessaie plus tard.",
     "query-too-short": "Saisis au moins trois lettres.",
-    "join-request-pending": "Ta demande pour cette équipe est déjà en cours."
+    "join-request-pending": "Ta demande pour cette équipe est déjà en cours.",
+    "second-person-required": "Une deuxième personne doit confirmer, pas celle qui a repris l'équipe.",
+    "email-unverified": "Confirme d'abord ton adresse e-mail.",
+    "org-unverified": "Le club n'est pas encore confirmé : ce sera possible ensuite.",
+    "suggestion-resolved": "Cette proposition est déjà traitée.",
+    "suggestion-stale": "Cette proposition ne correspond plus : le match ou l'entrée n'existe plus."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -2541,5 +2546,44 @@
     "numberTwice": "Numéro attribué deux fois : {numbers}. Modifie l'un d'eux ou laisse-le vide.",
     "noAppearancesHint": "Les joueurs/euses sans match ne sont pas cochés.",
     "openLine": "Voir {n, plural, one {# proposition} other {# propositions}} de handball.ch"
+  },
+  "requests": {
+    "eyebrow": "Équipe",
+    "joinTitle": "Demandes d'adhésion",
+    "joinHint": "Joueurs/euses ayant trouvé l'équipe dans les données officielles. Ils ne voient l'effectif qu'après ta confirmation.",
+    "joinNone": "Aucune demande ouverte.",
+    "wantsToJoin": "{name} souhaite rejoindre l'équipe",
+    "player": "Joueur/euse de champ",
+    "goalkeeper": "Gardien/ne",
+    "matches": "Est-ce {who} dans l'effectif ?",
+    "confirmMatch": "Oui, lier",
+    "admit": "Accepter",
+    "admitNew": "Accepter comme nouvelle personne",
+    "decline": "Refuser",
+    "approved": "{name} fait partie de l'équipe.",
+    "declined": "Demande de {name} refusée.",
+    "accessTitle": "Demandes d'accès",
+    "accessNone": "Aucune demande d'accès ouverte.",
+    "forTeam": "Pour l'équipe {team}",
+    "forNewTeam": "Pour une équipe pas encore dans l'app : elle est créée à partir des données officielles.",
+    "forClub": "Pour le club",
+    "asCoach": "Accepter comme entraîneur/e",
+    "asAdmin": "Accepter comme admin du club"
+  },
+  "verification": {
+    "section": "Données officielles",
+    "title": "Club pas encore confirmé",
+    "why": "Tant que le club n'est pas confirmé, le partage et les profils publics restent désactivés et les adversaires n'apparaissent qu'avec leur numéro dans les feuilles de match. Pour confirmer :",
+    "way_mail_domain": "Se connecter avec une adresse e-mail du club.",
+    "way_mail_domain_known": "Se connecter avec une adresse e-mail du club ({domains}).",
+    "way_second_official": "Une deuxième personne (admin ou entraîneur/e, pas toi) confirme ici.",
+    "way_federation": "Avec une licence de la fédération.",
+    "way_operator": "Via le support.",
+    "confirm": "Je confirme le club",
+    "verified": "Club confirmé ({via}, {when}).",
+    "via_mail_domain": "e-mail du club",
+    "via_second_official": "deuxième personne",
+    "via_federation": "licence fédération",
+    "via_operator": "support"
   }
 }

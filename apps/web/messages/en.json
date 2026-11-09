@@ -135,7 +135,12 @@
     "invalid-clock": "This match time is not in this half.",
     "official-unavailable": "handball.ch is not answering right now. Please try again later.",
     "query-too-short": "Enter at least three letters.",
-    "join-request-pending": "Your request for this team is already on its way."
+    "join-request-pending": "Your request for this team is already on its way.",
+    "second-person-required": "A second person must confirm, not the one who took the team over.",
+    "email-unverified": "Please confirm your e-mail address first.",
+    "org-unverified": "The club is not confirmed yet: this works after that.",
+    "suggestion-resolved": "This suggestion is already done.",
+    "suggestion-stale": "This suggestion no longer fits: the match or entry is gone."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -2541,5 +2546,44 @@
     "numberTwice": "Shirt number given twice: {numbers}. Change one or leave it empty.",
     "noAppearancesHint": "Players without a match yet are not ticked.",
     "openLine": "See {n, plural, one {# suggestion} other {# suggestions}} from handball.ch"
+  },
+  "requests": {
+    "eyebrow": "Team",
+    "joinTitle": "Join requests",
+    "joinHint": "Players who found the team in the official data. They see the squad only after you confirm.",
+    "joinNone": "No open requests.",
+    "wantsToJoin": "{name} wants to join",
+    "player": "Field player",
+    "goalkeeper": "Goalkeeper",
+    "matches": "Is this {who} in the squad?",
+    "confirmMatch": "Yes, link",
+    "admit": "Admit",
+    "admitNew": "Admit as a new person",
+    "decline": "Decline",
+    "approved": "{name} is in the team.",
+    "declined": "Request from {name} declined.",
+    "accessTitle": "Access requests",
+    "accessNone": "No open access requests.",
+    "forTeam": "For the team {team}",
+    "forNewTeam": "For a team not yet in the app: it is created from the official data.",
+    "forClub": "For the club",
+    "asCoach": "Admit as coach",
+    "asAdmin": "Admit as club admin"
+  },
+  "verification": {
+    "section": "Official data",
+    "title": "Club not confirmed yet",
+    "why": "Until the club is confirmed, sharing and public profiles stay off and opponents appear in match reports with numbers only. Ways to confirm:",
+    "way_mail_domain": "Sign in with an e-mail address of the club.",
+    "way_mail_domain_known": "Sign in with an e-mail address of the club ({domains}).",
+    "way_second_official": "A second person (admin or coach, not you) confirms here.",
+    "way_federation": "With a federation licence.",
+    "way_operator": "Through support.",
+    "confirm": "I confirm the club",
+    "verified": "Club confirmed ({via}, {when}).",
+    "via_mail_domain": "club e-mail",
+    "via_second_official": "second person",
+    "via_federation": "federation licence",
+    "via_operator": "support"
   }
 }

@@ -122,8 +122,10 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] Suggestion inbox `/teams/{team}/official`: squad to confirm with numbers (duplicates flagged,
   players without a game unticked), "Statistik anzeigen" (`roster_stats`), reports to import,
   schedule changes with the plan lock, the table; a line on the squad page leads there.
-- [ ] Join requests (`/teams/{team}/join-requests`), access requests
-  (`/settings/access-requests`) and the verification banner: the notification links point there.
+- [x] Join requests (`/teams/{team}/join-requests`: "Passt zu #22 … im Kader?" links the account
+  to the squad entry), access requests and the club verification in a settings section "Offizielle
+  Daten" (`/settings/access-requests` leads there).
+- [ ] A quiet "Verein noch nicht bestätigt" line outside the settings (overview for admins).
 - [x] `PUT /kickoff` with `clock_s` for clips that start mid-half: "Uhr eintragen" in the throw-off step
   ("Spieluhr zeigt hier 12:40" at the paused moment, `lib/match-workflow.ts` `parseClock`, tested).
 - [x] Shot zone split: "Fernwurf" and "Leeres Tor" (`empty_goal`) in the web texts.

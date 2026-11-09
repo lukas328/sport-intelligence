@@ -135,7 +135,12 @@
     "invalid-clock": "Diese Spielzeit liegt nicht in dieser Halbzeit.",
     "official-unavailable": "handball.ch antwortet gerade nicht. Bitte später nochmals versuchen.",
     "query-too-short": "Mindestens drei Buchstaben eingeben.",
-    "join-request-pending": "Deine Anfrage für dieses Team ist schon unterwegs."
+    "join-request-pending": "Deine Anfrage für dieses Team ist schon unterwegs.",
+    "second-person-required": "Eine zweite Person muss bestätigen, nicht wer das Team übernommen hat.",
+    "email-unverified": "Bitte zuerst deine E-Mail-Adresse bestätigen.",
+    "org-unverified": "Der Verein ist noch nicht bestätigt: das geht erst danach.",
+    "suggestion-resolved": "Dieser Vorschlag ist schon erledigt.",
+    "suggestion-stale": "Dieser Vorschlag passt nicht mehr: Spiel oder Eintrag gibt es nicht mehr."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -2541,5 +2546,44 @@
     "numberTwice": "Doppelte Rückennummer: {numbers}. Eine davon ändern oder leer lassen.",
     "noAppearancesHint": "Wer noch kein Spiel hat, ist nicht angewählt.",
     "openLine": "{n, plural, one {# Vorschlag} other {# Vorschläge}} aus handball.ch ansehen"
+  },
+  "requests": {
+    "eyebrow": "Team",
+    "joinTitle": "Beitrittsanfragen",
+    "joinHint": "Spieler/innen, die das Team in den offiziellen Daten gefunden haben. Den Kader sehen sie erst nach deiner Bestätigung.",
+    "joinNone": "Keine offenen Anfragen.",
+    "wantsToJoin": "{name} möchte beitreten",
+    "player": "Feldspieler/in",
+    "goalkeeper": "Torhüter/in",
+    "matches": "Passt zu {who} im Kader?",
+    "confirmMatch": "Ja, verknüpfen",
+    "admit": "Aufnehmen",
+    "admitNew": "Als neue Person aufnehmen",
+    "decline": "Ablehnen",
+    "approved": "{name} ist im Team.",
+    "declined": "Anfrage von {name} abgelehnt.",
+    "accessTitle": "Zugangsanfragen",
+    "accessNone": "Keine offenen Zugangsanfragen.",
+    "forTeam": "Für das Team {team}",
+    "forNewTeam": "Für ein Team, das noch nicht in der App ist: es wird aus den offiziellen Daten angelegt.",
+    "forClub": "Für den Verein",
+    "asCoach": "Als Trainer/in aufnehmen",
+    "asAdmin": "Als Vereinsadmin aufnehmen"
+  },
+  "verification": {
+    "section": "Offizielle Daten",
+    "title": "Verein noch nicht bestätigt",
+    "why": "Bis der Verein bestätigt ist, bleiben Teilen und öffentliche Profile aus, und Gegner stehen in den Spielberichten nur mit Nummer. So geht es:",
+    "way_mail_domain": "Mit einer E-Mail-Adresse des Vereins anmelden.",
+    "way_mail_domain_known": "Mit einer E-Mail-Adresse des Vereins anmelden ({domains}).",
+    "way_second_official": "Eine zweite Person (Admin oder Trainer/in, nicht du) bestätigt hier.",
+    "way_federation": "Mit einer Lizenz des Verbands.",
+    "way_operator": "Über den Support.",
+    "confirm": "Ich bestätige den Verein",
+    "verified": "Verein bestätigt ({via}, {when}).",
+    "via_mail_domain": "E-Mail des Vereins",
+    "via_second_official": "zweite Person",
+    "via_federation": "Verbandslizenz",
+    "via_operator": "Support"
   }
 }
