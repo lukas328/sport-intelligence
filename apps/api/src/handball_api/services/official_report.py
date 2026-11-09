@@ -755,9 +755,22 @@ def parse_nuliga_pdf(meeting: int, source_url: str, text: str) -> OfficialReport
     )
 
 
+def _origin(url: str) -> tuple[str, str | None, int] | None:
+    """Scheme, host and effective port of an https URL (None for anything else or a bad port)."""
+    parts = urlsplit(url)
+    if parts.scheme != "https":
+        return None
+    try:
+        port = parts.port or 443
+    except ValueError:
+        return None
+    return parts.scheme, parts.hostname, port
+
+
 async def _download(url: str, max_bytes: int, what: str) -> bytes:
-    """One GET with timeouts and a size limit; redirects are followed on the same host only."""
-    host = urlsplit(url).hostname
+    """One GET with timeouts and a size limit; redirects are followed on the same host and port
+    only (https)."""
+    origin = _origin(url)
     try:
         async with httpx.AsyncClient(
             timeout=TIMEOUT, headers=HEADERS, follow_redirects=False
@@ -766,8 +779,7 @@ async def _download(url: str, max_bytes: int, what: str) -> bytes:
                 async with client.stream("GET", url) as r:
                     if r.is_redirect:
                         target = urljoin(url, r.headers.get("location", ""))
-                        parts = urlsplit(target)
-                        if parts.scheme != "https" or parts.hostname != host:
+                        if origin is None or _origin(target) != origin:
                             raise ProblemError(
                                 502, "report-unavailable", f"{what} sent the report elsewhere"
                             )

@@ -263,6 +263,12 @@ def transport(monkeypatch: pytest.MonkeyPatch) -> list[httpx.Request]:
             return httpx.Response(200, content=b"%PDF-1.4 recorded")
         if "meeting=666" in url or "/match/666/" in url:
             return httpx.Response(302, headers={"location": "https://evil.example/x.pdf"})
+        if "meeting=667" in url:  # same host, another port
+            return httpx.Response(
+                302, headers={"location": "https://oehb-handball.liga.nu:8443/x.pdf"}
+            )
+        if "meeting=668" in url:  # same host, plain http
+            return httpx.Response(302, headers={"location": "http://oehb-handball.liga.nu/x.pdf"})
         if "meeting=404" in url:
             return httpx.Response(404)
         return httpx.Response(200, content=page("nuliga_bhv_8390512.html").encode())
@@ -288,11 +294,17 @@ async def test_download_follows_redirects_on_the_same_host_only(
     assert [r.url.host for r in transport] == ["oehb-handball.liga.nu"] * 2
     html = await service.fetch_nuliga(service.locate(BHV_URL))
     assert "Spielverlauf" in html and str(transport[-1].url) == BHV_URL
-    for meeting, status, code in ((666, 502, "report-unavailable"), (404, 404, "report-not-found")):
+    for meeting, status, code in (
+        (666, 502, "report-unavailable"),
+        (667, 502, "report-unavailable"),
+        (668, 502, "report-unavailable"),
+        (404, 404, "report-not-found"),
+    ):
         with pytest.raises(ProblemError) as err:
             await service.fetch_nuliga(service.locate(OEHB_PDF.replace("92532", str(meeting))))
         assert (err.value.status, err.value.code) == (status, code)
     assert all(r.url.host == "oehb-handball.liga.nu" for r in transport[3:])
+    assert all(r.url.port is None and r.url.scheme == "https" for r in transport)
     with pytest.raises(ProblemError) as err:  # HTML where the PDF should be
         await service.fetch_hla(1)
     assert (err.value.status, err.value.code) == (422, "report-unreadable")
