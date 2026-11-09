@@ -1,5 +1,43 @@
 # UI/UX backlog after the app-wide audit
 
+## Work queue of the UI session (2026-11-09, worked top to bottom)
+
+One ordered list from this backlog, `PROGRESS.md` ("Open"), the handover and the review rounds.
+Bugs reported from the test environment on Azure always go first. `[x]` = done.
+
+**A. Now (UI only, the API is there)**
+1. [ ] Matrix: season choice. The API reads `season_ids` (top level of the request, default the
+   current and the previous season) since 95132d3; the note further down is outdated.
+2. [ ] Würfe: full-screen review like the goal candidates (the clip plays itself, one key per
+   decision); priority 3 of the handover (one-click confirmation on real footage).
+3. [ ] Gegner: the back link leads to the fixtures and the header follows the other pages
+   (eyebrow, title); the zone split stays with the analysis session.
+4. [ ] Timeline: a label per side on the sided lanes (own team above, opponent below), not only
+   in the legend.
+5. [ ] Check and close: "Teilen" and "…" on phones (they share the row with the tabs since the
+   identity rework); search hits without a video window ("ohne Video" handles them).
+6. [ ] Analyse tab slice: possession, attacks, physical load and shots in the language of the
+   match sheet, then a fresh-eyes review round (METHOD.md).
+7. [ ] Attendance: the API has it (`/attendance/{kind}/{id}`, `/me/attendance`); the training
+   view records it. Show who comes on the squad and the dates for staff.
+
+**B. Needs the backend first (to raise with the main session)**
+- Player status (verletzt, abwesend) on the squad.
+- Assignment progress ("8 von 14 erledigt") for staff.
+- Recurring training slots.
+- A team consent table for staff (who consented to what, before filming).
+- Own drills ("Neue Übung"): a drills API; the library is static today.
+- A player's personal season line linked to the clips (per-player figures over the season).
+
+**C. Waiting for others**
+- Bugs from the test on Azure (local session sets the environment up, Lukas tests).
+- Analysis data reported in `PROGRESS.md` ("Backend findings", "Open"): goalkeeper insight, xG
+  against goals, the zone "Fernwurf / leeres Tor", implausible sprint figures, the matching
+  window of goal candidates.
+
+**D. Kept by decision**
+- Event keys stay English mnemonics (G, S, M, P, T) until a coach asks; German letters collide.
+
 Source: a fresh-eyes audit of every page outside the match page (screenshots light and dark,
 desktop and phone, local stack with test data), against `REFERENCES.md` and the rule set in
 `REPORT.md`. P1 = broken or misleading, P2 = clearly generated or unclear, P3 = polish.
@@ -148,7 +186,7 @@ this round, in rough order:
   offers no slide for hits without video).
 - [x] Referee kit: `kit_referee` shows wherever the four team kits show (match create and edit
   through `KitFields`, the analysis colours in the workspace).
-- [ ] Matrix `season_ids`: the API filter does not exist yet (`handball_metrics.query.Filter`);
+- [ ] Matrix `season_ids` (outdated: the API has it now, see the work queue at the top);
   build the season choice once the analysis session adds it.
 - [x] Shot review: e2e `shots.spec.ts` (real upload, the candidate list from a recorded fixture);
   the timeline's signal ring follows the active shot candidate.
