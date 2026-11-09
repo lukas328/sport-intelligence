@@ -255,7 +255,8 @@ async def plans(ctx: Ctx, team_id: uuid.UUID) -> list[dict[str, Any]]:
     ).all()
     if not items:
         return []
-    data = await load(ctx, team)
+    # the seasons since the oldest plan, and the one before (its "before" matches)
+    data = await load(ctx, team, since=min(p.created_at for p in items).date())
     with_events = {r.match.id for r in data.rows}
     ordered = sorted(
         (m for m in data.matches.values() if m.id in with_events), key=lambda m: m.date

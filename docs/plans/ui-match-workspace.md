@@ -323,3 +323,13 @@ Statistics fixes from the UI session (2026-11-05, metrics 0.3.0; cached stats re
   `long_range` no longer finds empty-goal shots. The web messages (`zones` in
   apps/web/messages/*.json) need `long_range` relabelled and `empty_goal` added; the court
   package exports both (`SHOT_ZONES`, `ZONE_LABELS`, `shotZone(x, y, {emptyGoal})`).
+
+Bounded team queries (review follow-ups, 2026-11-09):
+- Statistics matrix (`POST .../teams/{team}/matrix` and `.../matrix/export`): new optional body
+  field `season_ids` (list of season ids of the team, at most 20). Without it the matrix reads the
+  current and the previous season only (before: every season of the team). Suggested UI: a season
+  picker next to the filters, "Aktuelle und letzte Saison" as the default; a saved template keeps
+  the field in its `config`. The assistant also reads the current and the previous season; a
+  focus plan's before/after reads the seasons since the oldest plan and the one before.
+- Join and access requests: a double click on create, approve or decline now answers 409
+  (`join-request-pending`, `request-decided`) instead of 500; the UI can show the usual message.

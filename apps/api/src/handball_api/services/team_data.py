@@ -4,9 +4,12 @@ statistics matrix 5.4). The caller checks the permission for the team before loa
 from __future__ import annotations
 
 import uuid
+from collections.abc import Collection
 from dataclasses import replace
+from datetime import UTC, date, datetime
 
 from sqlalchemy import select
+from sqlalchemy.orm import load_only
 
 from handball_api.models import (
     Event,
@@ -15,13 +18,27 @@ from handball_api.models import (
     Play,
     Player,
     RosterEntry,
+    Season,
     Team,
 )
 from handball_api.services.context import Ctx
 from handball_api.services.events import _to_metric
-from handball_api.services.matches import duration_ms, in_video, timeline_videos
+from handball_api.services.matches import (
+    duration_ms,
+    in_video,
+    timeline_videos,
+    video_formations,
+)
 from handball_metrics.model import Event as MEvent
 from handball_metrics.query import MatchInfo, Row
+
+# what _to_metric and load read of an event (not its free text columns, timestamps, ...)
+EVENT_COLUMNS = (
+    *(Event.id, Event.match_id, Event.type, Event.side, Event.period, Event.clock_s, Event.t_ms),
+    *(Event.player_id, Event.number, Event.x, Event.y, Event.outcome, Event.shot_zone),
+    *(Event.goal_zone, Event.shot_type, Event.turnover_type, Event.assist_player_id),
+    *(Event.confidence, Event.source, Event.attributes),
+)
 
 
 class TeamData:
@@ -43,43 +60,125 @@ class TeamData:
         self.plays = plays  # play id -> name
 
 
-async def load(ctx: Ctx, team: Team) -> TeamData:
-    matches = (
-        await ctx.db.scalars(select(Match).where(Match.team_id == team.id, Match.kind == "match"))
+async def season_scope(
+    ctx: Ctx,
+    team: Team,
+    season_ids: Collection[uuid.UUID] | None = None,
+    since: date | None = None,
+) -> list[uuid.UUID]:
+    """The team's seasons to read: the ones asked for, else every season that ends on or after
+    `since` (default: the start of the current season) and the one before it (for a comparison
+    with the last matches before). Without seasons nothing is read."""
+    seasons = (
+        await ctx.db.execute(
+            select(Season.id, Season.starts_on, Season.ends_on)
+            .where(Season.team_id == team.id)
+            .order_by(Season.starts_on.desc())
+        )
     ).all()
-    ids = [m.id for m in matches]
-    opponents = {
-        o.id: o.name
-        for o in (
-            await ctx.db.scalars(
-                select(Opponent).where(
-                    Opponent.id.in_([m.opponent_id for m in matches if m.opponent_id])
+    if season_ids is not None:
+        wanted = set(season_ids)
+        return [sid for sid, _, _ in seasons if sid in wanted]
+    if since is None:
+        today = datetime.now(UTC).date()
+        current = next((s for s in seasons if s.starts_on <= today <= s.ends_on), None)
+        if current is None:  # between seasons: the latest that started
+            current = next((s for s in seasons if s.starts_on <= today), None)
+        if current is None:
+            return [sid for sid, _, _ in seasons]  # only future seasons
+        since = current.starts_on
+    recent = [sid for sid, _, ends_on in seasons if ends_on >= since]
+    older = [sid for sid, _, ends_on in seasons if ends_on < since]
+    return recent + older[:1]
+
+
+async def load(
+    ctx: Ctx,
+    team: Team,
+    season_ids: Collection[uuid.UUID] | None = None,
+    since: date | None = None,
+) -> TeamData:
+    """The events of the team's matches in the seasons of `season_scope` (by default the
+    current and the previous season), with only the columns the statistics use."""
+    scope = await season_scope(ctx, team, season_ids, since)
+    matches = (
+        (
+            await ctx.db.execute(
+                select(
+                    Match.id,
+                    Match.season_id,
+                    Match.kickoff_at,
+                    Match.opponent_id,
+                    Match.score_own,
+                    Match.score_opponent,
+                    Match.kind,
+                ).where(
+                    Match.team_id == team.id,
+                    Match.kind == "match",
+                    Match.season_id.in_(scope),
                 )
             )
         ).all()
-    }
+        if scope
+        else []
+    )
+    ids = [m.id for m in matches]
+    opponent_ids = {m.opponent_id for m in matches if m.opponent_id}
+    opponents: dict[uuid.UUID, str] = (
+        dict(
+            (
+                await ctx.db.execute(
+                    select(Opponent.id, Opponent.name).where(Opponent.id.in_(opponent_ids))
+                )
+            )
+            .tuples()
+            .all()
+        )
+        if opponent_ids
+        else {}
+    )
     entries = (
-        await ctx.db.scalars(select(RosterEntry).where(RosterEntry.team_id == team.id))
-    ).all()
-    numbers = {(r.season_id, r.player_id): r.jersey_number for r in entries}
-    positions = {
-        p.id: (p.main_position.value if p.main_position else None)
-        for p in (
-            await ctx.db.scalars(
-                select(Player).where(Player.id.in_({r.player_id for r in entries}))
+        (
+            await ctx.db.execute(
+                select(
+                    RosterEntry.season_id, RosterEntry.player_id, RosterEntry.jersey_number
+                ).where(RosterEntry.team_id == team.id, RosterEntry.season_id.in_(scope))
             )
         ).all()
-    }
+        if scope
+        else []
+    )
+    numbers = {(r.season_id, r.player_id): r.jersey_number for r in entries}
+    player_ids = {r.player_id for r in entries}
+    positions = (
+        {
+            pid: (pos.value if pos else None)
+            for pid, pos in (
+                await ctx.db.execute(
+                    select(Player.id, Player.main_position).where(Player.id.in_(player_ids))
+                )
+            )
+            .tuples()
+            .all()
+        }
+        if player_ids
+        else {}
+    )
     plays = {
-        str(p.id): p.name
-        for p in (await ctx.db.scalars(select(Play).where(Play.team_id == team.id))).all()
+        str(pid): name
+        for pid, name in (
+            await ctx.db.execute(select(Play.id, Play.name).where(Play.team_id == team.id))
+        )
+        .tuples()
+        .all()
     }
-    formations: dict[uuid.UUID, tuple[tuple[int, int, str], ...]] = {}
     timeline = await timeline_videos(ctx, ids, ready=False)
+    found = await video_formations(ctx, [v.id for v in timeline.values()])
+    formations: dict[uuid.UUID, tuple[tuple[int, int, str], ...]] = {}
     for v in timeline.values():
         segs = [
             (int(s["start_ms"]), int(s["end_ms"]), str(s["formation"]))
-            for s in (v.analysis or {}).get("formations") or []
+            for s in found.get(v.id, [])
             if s.get("team") == "away"
         ]
         if segs:
@@ -100,7 +199,13 @@ async def load(ctx: Ctx, team: Team) -> TeamData:
     rows: list[Row] = []
     video: dict[str, int | None] = {}
     events = (
-        (await ctx.db.scalars(select(Event).where(Event.match_id.in_(ids)))).all() if ids else []
+        (
+            await ctx.db.scalars(
+                select(Event).options(load_only(*EVENT_COLUMNS)).where(Event.match_id.in_(ids))
+            )
+        ).all()
+        if ids
+        else []
     )
     for e in events:
         me = _to_metric(e)
