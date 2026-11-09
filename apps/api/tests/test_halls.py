@@ -169,3 +169,42 @@ async def test_a_rerun_with_clicked_points_needs_no_hall(make_api: Callable[[], 
     payload = jobs.jobs[-1][3]
     assert payload["calibration_points"] and "hall_references" not in payload
     assert first != second
+
+
+async def test_references_read_one_court_per_video_in_sql(
+    make_api: Callable[[], Api], query_counter: list[str]
+) -> None:
+    """The newest court of each video is picked in the database (DISTINCT ON), and only the hall
+    image size is read from the analysis, not every court and analysis of the organisation."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    first, job, _ = await _video(api, ids, venue="Sporthalle Untermosen")
+    await _finish(
+        api,
+        job,
+        {"needs_calibration": True, "calibration": None, "tracks": [], "panorama": PANORAMA},
+    )
+    pts = [{"image": [100 * i, 50 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
+    body = {"points": pts, "space": "panorama"}
+    for _ in range(2):  # two courts clicked on the same video: its newest counts
+        assert (
+            await api.post(f"/v1/orgs/{org}/videos/{first}/calibration", json=body)
+        ).status_code == 202
+        await _finish(
+            api,
+            jobs.jobs[-1][2],
+            {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
+        )
+    second, _, payload = await _video(
+        api, ids, venue="Sporthalle Untermosen", kickoff_at="2026-11-14T18:00:00+01:00"
+    )
+    assert [r["video_id"] for r in payload["hall_references"]] == [first]
+    query_counter.clear()
+    a = (await api.get(f"/v1/orgs/{org}/videos/{second}/analysis")).json()
+    assert a["hall"]["calibrated_videos"] == 1
+    refs = [q for q in query_counter if "FROM calibrations" in q and "JOIN matches" in q]
+    assert refs, query_counter
+    assert all("DISTINCT ON (calibrations.video_asset_id)" in q for q in refs)
+    assert not any("video_assets.analysis AS" in q for q in refs)
