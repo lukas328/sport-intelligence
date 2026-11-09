@@ -162,6 +162,16 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (backend check on main): three findings from the UI session were already fixed on
+  main (the UI stack ran older code), nothing to change:
+  1. Feed and events outside the video: `feed.generate` skips events before or after the video
+     (`services/feed.in_video`, test `test_feed.py::test_in_video`).
+  2. Reels: the API queues `handball_worker.reels.run_highlight_reel`; the job contract test
+     (`test_job_paths.py`) checks every queued path against the worker sources and the payloads.
+  3. Season figures: every match with a result counts, goals per match from one source like the
+     match statistics (test
+     `test_insights_api.py::test_season_counts_every_played_match_and_each_goal_once`).
+
 - 2026-11-09 (UI session, demo data with a synthetic 1-minute video): 4 of 5 attacks counted as
   fast breaks; 33 and 60 sprints and 1.22 km against 2.02 km in one minute; a team row's top
   speed of 31.7 km/h (the maximum of one player?).
