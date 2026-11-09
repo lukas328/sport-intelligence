@@ -3,6 +3,7 @@ storage policy for original videos."""
 
 from __future__ import annotations
 
+import contextlib
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -177,12 +178,16 @@ async def push_status(ctx: Ctx, client: httpx.AsyncClient | None = None) -> list
     if url:
         token = ctx.settings.status_page_token
         headers = {"authorization": f"Bearer {token.get_secret_value()}"} if token else {}
-        http = client or httpx.AsyncClient(timeout=10)
-        try:
-            r = await http.post(url, json={"components": report}, headers=headers)
-            r.raise_for_status()
-        except httpx.HTTPError as exc:
-            log.warning("status_push_failed", error=str(exc))
+        async with contextlib.AsyncExitStack() as stack:
+            # a client of our own is closed again; a passed one belongs to the caller
+            http = client
+            if http is None:
+                http = await stack.enter_async_context(httpx.AsyncClient(timeout=10))
+            try:
+                r = await http.post(url, json={"components": report}, headers=headers)
+                r.raise_for_status()
+            except httpx.HTTPError as exc:
+                log.warning("status_push_failed", error=str(exc))
     return report
 
 

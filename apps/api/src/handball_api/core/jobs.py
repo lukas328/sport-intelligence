@@ -56,7 +56,8 @@ class MemoryJobQueue:
 
 class RqJobQueue:
     def __init__(self, redis_url: str) -> None:
-        self._conn = Redis.from_url(redis_url)
+        # bounded: a hanging Redis must fail the request instead of blocking a worker thread
+        self._conn = Redis.from_url(redis_url, socket_timeout=5, socket_connect_timeout=5)
 
     def enqueue(
         self,

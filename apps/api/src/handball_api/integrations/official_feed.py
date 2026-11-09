@@ -8,6 +8,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from handball_api.core import clock
 from handball_api.integrations.base import AdapterError, Stub
 
 TYPES = {"goal", "miss", "save", "7m_goal", "7m_miss", "2min", "yellow", "red", "timeout"}
@@ -29,11 +30,9 @@ class OfficialMatchFeed(Protocol):
 
 
 def parse_clock(value: str) -> float:
+    """The game clock of a feed row ("mm:ss" or seconds, core.clock), AdapterError if invalid."""
     try:
-        if ":" in value:
-            m, s = value.split(":", 1)
-            return int(m) * 60 + float(s)
-        return float(value)
+        return clock.parse_clock(value)
     except ValueError as exc:
         raise AdapterError(f"Invalid clock {value!r}") from exc
 

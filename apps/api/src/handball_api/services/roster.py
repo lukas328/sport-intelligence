@@ -34,6 +34,19 @@ PLAYER_FIELDS = (
 )
 
 
+async def numbers(ctx: Ctx, season_id: uuid.UUID, team_id: uuid.UUID) -> dict[int, uuid.UUID]:
+    """Shirt number -> player of a team's active roster in a season (entries without a number
+    are left out). Used to link official reports, overlays, feeds and paper reports to players."""
+    rows = await ctx.db.execute(
+        select(RosterEntry.jersey_number, RosterEntry.player_id).where(
+            RosterEntry.season_id == season_id,
+            RosterEntry.team_id == team_id,
+            RosterEntry.active.is_(True),
+        )
+    )
+    return {n: pid for n, pid in rows.all() if n is not None}
+
+
 async def _consented_players(ctx: Ctx, player_ids: list[uuid.UUID]) -> set[uuid.UUID]:
     if not player_ids:
         return set()

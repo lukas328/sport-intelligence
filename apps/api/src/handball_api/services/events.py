@@ -6,7 +6,6 @@ import csv
 import hashlib
 import io
 import json
-import re
 import uuid
 from typing import Any
 
@@ -14,6 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 
+from handball_api.core.clock import parse_clock
 from handball_api.core.errors import ProblemError
 from handball_api.models import (
     Correction,
@@ -451,14 +451,6 @@ OWN_ALIASES = {"own", "home_team", "us", "wir", "eigene", "h"}
 OPP_ALIASES = {"opponent", "opp", "them", "gegner", "g"}
 
 
-def _parse_clock(value: str) -> float:
-    v = value.strip()
-    m = re.fullmatch(r"(\d{1,3}):(\d{2})", v)
-    if m:
-        return int(m.group(1)) * 60 + int(m.group(2))
-    return float(v)
-
-
 async def import_feed(ctx: Ctx, match_id: uuid.UUID, data: bytes, filename: str) -> dict[str, Any]:
     """Columns: period, clock (mm:ss game clock), team (own/opponent), event, number."""
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
@@ -473,17 +465,7 @@ async def import_feed(ctx: Ctx, match_id: uuid.UUID, data: bytes, filename: str)
     else:
         delimiter = ";" if text.count(";") > text.count(",") else ","
         rows = list(csv.DictReader(io.StringIO(text), delimiter=delimiter))
-    numbers = {
-        n: pid
-        for n, pid in (
-            await ctx.db.execute(
-                select(RosterEntry.jersey_number, RosterEntry.player_id).where(
-                    RosterEntry.season_id == match.season_id, RosterEntry.active.is_(True)
-                )
-            )
-        ).all()
-        if n is not None
-    }
+    numbers = await roster.numbers(ctx, match.season_id, match.team_id)
     created, skipped, errors = 0, 0, []
     for i, row in enumerate(rows[:2000], start=2):
         try:
@@ -496,7 +478,7 @@ async def import_feed(ctx: Ctx, match_id: uuid.UUID, data: bytes, filename: str)
             if side is None:
                 raise ValueError(f"unknown team '{row.get('team')}'")
             period = int(row.get("period") or 1)
-            clock = _parse_clock(str(row["clock"]))
+            clock = parse_clock(str(row["clock"]))
             num_raw = str(row.get("number") or "").strip()
             number = int(num_raw) if num_raw.isdigit() else None
             player = numbers.get(number) if side == "own" and number is not None else None

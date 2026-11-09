@@ -64,15 +64,17 @@ from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 import httpx
 from sqlalchemy import delete, select
 
+from handball_api.core.clock import format_clock
 from handball_api.core.errors import ProblemError
 from handball_api.integrations import handball_ch
-from handball_api.models import Event, GoalCandidate, Match, Opponent, RosterEntry
+from handball_api.models import Event, GoalCandidate, Match, Opponent
 from handball_api.services import audit, match_clock, org_verification, roster
 from handball_api.services.auto_events import CANDIDATE, OFFICIAL, OVERLAY
 from handball_api.services.context import Ctx
 from handball_api.services.events import shown_attributes, video_from_clock
 from handball_api.services.matches import duration_ms, get_match, timeline_video
 from handball_api.services.policies import Action
+from handball_api.services.roster import numbers as roster_numbers
 
 SOURCE = OFFICIAL
 # goals seen on video: an official goal takes over their video time (a confirmed goal candidate
@@ -1087,19 +1089,7 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
         for g in goals
         if g.source not in AUTO_GOALS and g.clock_s is not None
     ]
-    roster = {
-        n: pid
-        for n, pid in (
-            await ctx.db.execute(
-                select(RosterEntry.jersey_number, RosterEntry.player_id).where(
-                    RosterEntry.season_id == match.season_id,
-                    RosterEntry.team_id == match.team_id,
-                    RosterEntry.active.is_(True),
-                )
-            )
-        ).all()
-        if n is not None
-    }
+    roster = await roster_numbers(ctx, match.season_id, match.team_id)
     own_team = "home" if match.is_home else "away"
 
     created, matched, kept_manual, skipped = 0, 0, 0, 0
@@ -1114,7 +1104,7 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
         side = "own" if e.team == own_team else "opponent"
         period = _period(e, match.period_s, report.half_time)
         clock = float(e.clock_s)
-        attrs: dict[str, Any] = {"official_time": f"{e.clock_s // 60:02d}:{e.clock_s % 60:02d}"}
+        attrs: dict[str, Any] = {"official_time": format_clock(e.clock_s)}
         if e.name:
             attrs["name"] = e.name[:80]
         if e.score:
@@ -1291,13 +1281,6 @@ async def import_report(
 # ---- official goals compared with the video ------------------------------------------------
 
 
-def _official_time(clock_s: float | None) -> str | None:
-    if clock_s is None:
-        return None
-    c = int(clock_s)
-    return f"{c // 60:02d}:{c % 60:02d}"
-
-
 def _review(e: Event) -> str | None:
     r = (e.attributes or {}).get("review")
     return r if r in REVIEW else None
@@ -1310,7 +1293,7 @@ def _video_goal(e: Event) -> dict[str, Any]:
         "side": e.side,
         "period": e.period,
         "clock_s": e.clock_s,
-        "official_time": _official_time(e.clock_s),
+        "official_time": format_clock(e.clock_s),
         "t_ms": e.t_ms,
         "source": e.source,
         "confidence": round(e.confidence, 3),
@@ -1386,7 +1369,7 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 "side": o.side,
                 "period": o.period,
                 "clock_s": o.clock_s,
-                "official_time": attrs.get("official_time") or _official_time(o.clock_s),
+                "official_time": attrs.get("official_time") or format_clock(o.clock_s),
                 # where the video shows it: the video reading, else the time from the clock
                 "t_ms": t_ms,
                 "estimated": video_t is None,

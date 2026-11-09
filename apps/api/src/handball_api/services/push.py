@@ -116,5 +116,5 @@ async def enqueue(ctx: Ctx, user_ids: list[uuid.UUID], kind: str, link: str | No
             "body": text_for(kind, locale),
             "data": {"kind": kind, "link": link},
         }
-        ctx.jobs.enqueue(QUEUE, FUNC, f"push-{uuid.uuid4()}", {"payload": payload})
+        await ctx.enqueue(QUEUE, FUNC, f"push-{uuid.uuid4()}", {"payload": payload})
     return len(rows)

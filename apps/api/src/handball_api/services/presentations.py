@@ -21,6 +21,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from sqlalchemy import func, select
 
 from handball_api.core.errors import ProblemError
+from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     CameraCalibration,
     Clip,
@@ -398,7 +399,7 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
                 "image_size": cal.image_size,
             }
     job_id = f"pres-{p.id}-{int(datetime.now(UTC).timestamp())}"
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "default",
         EXPORT_FUNC,
         job_id,
@@ -471,8 +472,8 @@ async def still(ctx: Ctx, video_id: uuid.UUID, t_ms: int) -> bytes | None:
         sprite, _ = await ctx.storage.get(
             ctx.settings.s3_bucket_videos, media_prefix(v) + "thumbs.jpg"
         )
-    except Exception:
-        return None
+    except ObjectNotFoundError:
+        return None  # no thumbnails (yet): the slide goes without a still
     cue = _vtt_cue(vtt.decode(), t_ms / 1000)
     if cue is None:
         return None

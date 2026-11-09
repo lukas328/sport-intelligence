@@ -39,7 +39,7 @@ from handball_api.services.matches import opponent_of, timeline_video
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 from handball_api.services.roster import consented
-from handball_api.services.videos import MEDIA_PATH, MEDIA_TYPES, media_prefix
+from handball_api.services.videos import read_media_object
 
 
 def _now() -> datetime:
@@ -271,9 +271,7 @@ async def public_media(ctx: Ctx, token: str, video_id: uuid.UUID, path: str) -> 
     """Media of a shared match or of the clips of a shared playlist; nothing else."""
     link = await _resolve(ctx, token)
     video = await ctx.db.get(VideoAsset, video_id)
-    if video is None or not MEDIA_PATH.match(path) or ".." in path:
-        raise ProblemError(404, "not-found", "Not found")
-    if path == "proxy.mp4" or path.startswith("original"):
+    if video is None:
         raise ProblemError(404, "not-found", "Not found")
     allowed = False
     if link.kind == "match":
@@ -289,11 +287,7 @@ async def public_media(ctx: Ctx, token: str, video_id: uuid.UUID, path: str) -> 
         ) is not None
     if not allowed:
         raise ProblemError(404, "not-found", "Not found")
-    try:
-        data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(video) + path)
-    except Exception as exc:
-        raise ProblemError(404, "not-found", "Not found") from exc
-    return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
+    return await read_media_object(ctx, video, path)
 
 
 async def public_reel(ctx: Ctx, token: str) -> bytes:

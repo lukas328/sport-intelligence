@@ -5,13 +5,17 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sys
+import time
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pytest
 
+from handball_worker import reels
 from handball_worker.config import WorkerSettings
+from handball_worker.export import FFMPEG_TIMEOUT_S
 from handball_worker.reels import crop_path, render_local
 
 
@@ -72,3 +76,46 @@ def test_render_portrait_reel(tmp_path: Path) -> None:
     )
     assert (info["streams"][0]["width"], info["streams"][0]["height"]) == (720, 1280)
     assert 5.5 < float(info["format"]["duration"]) < 6.6  # 3 s intro + 3 s scene
+
+
+def _hanging_ffmpeg(tmp_path: Path) -> str:
+    script = tmp_path / "fake-ffmpeg"
+    script.write_text(f"#!{sys.executable}\nimport time\ntime.sleep(30)\n")
+    script.chmod(0o755)
+    return str(script)
+
+
+def test_render_clip_stops_a_hanging_ffmpeg(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(reels, "FFMPEG_TIMEOUT_S", 0.5)
+    settings = WorkerSettings(ffmpeg=_hanging_ffmpeg(tmp_path))
+    clip = {"in_ms": 0, "out_ms": 1000, "label": ""}
+    ctx: dict[str, Any] = {"format": "16x9", "player_tracks": []}
+    started = time.monotonic()
+    with pytest.raises(RuntimeError, match="timed out"):
+        reels.render_clip(
+            settings,
+            tmp_path / "in.mp4",
+            clip,
+            np.zeros((0, 4), np.float32),
+            ctx,
+            tmp_path / "o.mp4",
+        )
+    assert time.monotonic() - started < 10
+
+
+def test_reel_ffmpeg_calls_have_a_timeout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    timeouts: list[float | None] = []
+
+    def fake_run(cmd: list[str], **kw: Any) -> subprocess.CompletedProcess[bytes]:
+        timeouts.append(kw.get("timeout"))
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(reels, "render_clip", lambda *a, **kw: None)
+    payload: dict[str, Any] = {"format": "16x9", "clips": [{"in_ms": 0, "out_ms": 1000}]}
+    render_local(
+        WorkerSettings(), payload, tmp_path / "in.mp4", np.zeros((0, 4), np.float32), None, tmp_path
+    )
+    assert timeouts == [FFMPEG_TIMEOUT_S, FFMPEG_TIMEOUT_S]

@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 PY_SRC := apps/api/src apps/worker/src apps/gpu-worker/src packages/court/handball_court packages/vision/handball_vision packages/jobkit/handball_jobkit packages/metrics/handball_metrics
-PY_TESTS := apps/api/tests apps/worker/tests apps/gpu-worker/tests packages/court/tests packages/vision/tests packages/metrics/tests
+PY_TESTS := apps/api/tests apps/worker/tests apps/gpu-worker/tests packages/court/tests packages/vision/tests packages/metrics/tests packages/jobkit/tests
 
 help: ## Show targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -48,7 +48,7 @@ typecheck: typecheck-py ## mypy strict + tsc strict
 typecheck-py:
 	uv run mypy $(PY_SRC) $(PY_TESTS)
 
-test: test-py test-js ## Run all unit tests (no running services needed)
+test: test-py test-js ## Run all unit tests (starts Postgres for the API tests)
 
 db: ## Start only Postgres (needed by the API tests)
 	docker compose up -d --wait postgres
