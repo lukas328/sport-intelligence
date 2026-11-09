@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from zoneinfo import ZoneInfo
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import Consent, Player, RosterEntry, Season
+from handball_api.models import Consent, Player, PlayerStatus, RosterEntry, Season
 from handball_api.models.enums import ConsentGivenBy, ConsentKind, Position
 from handball_api.schemas.roster import (
     ConsentCreate,
     ImportResult,
     ImportRowError,
+    PlayerStatusIn,
+    PlayerStatusOut,
     RosterEntryCreate,
     RosterEntryOut,
     RosterEntryUpdate,
@@ -62,7 +65,12 @@ async def _consented_players(ctx: Ctx, player_ids: list[uuid.UUID]) -> set[uuid.
     return {pid for pid, k in kinds.items() if ConsentKind.ANALYSIS in k}
 
 
-def _out(entry: RosterEntry, player: Player, consented: bool) -> RosterEntryOut:
+def _out(
+    entry: RosterEntry,
+    player: Player,
+    consented: bool,
+    status: PlayerStatusOut | None = None,
+) -> RosterEntryOut:
     return RosterEntryOut(
         id=entry.id,
         player_id=player.id,
@@ -77,6 +85,7 @@ def _out(entry: RosterEntry, player: Player, consented: bool) -> RosterEntryOut:
         secondary_positions=[Position(p) for p in player.secondary_positions],
         has_account=player.user_id is not None,
         consent_complete=consented,
+        status=status,
     )
 
 
@@ -99,7 +108,111 @@ async def list_roster(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> lis
     if not can(ctx.require_actor(), Action.ROSTER_WRITE, team_id):
         rows = await _without_official_only(ctx, rows)
     consented = await _consented_players(ctx, [p.id for _, p in rows])
-    return [_out(e, p, p.id in consented) for e, p in rows]
+    if can(ctx.require_actor(), Action.PLAYER_STATUS, team_id):
+        shown = [p.id for _, p in rows]
+    else:  # players see only their own status
+        shown = [p.id for _, p in rows if p.user_id is not None and p.user_id == ctx.user_id]
+    statuses = await _current_statuses(ctx, team_id, shown)
+    return [_out(e, p, p.id in consented, statuses.get(p.id)) for e, p in rows]
+
+
+# ---- player status on the squad (injured, absent; no status means fit) ----------------------
+
+
+def today() -> date:
+    """The club's day (Switzerland): an until-date counts up to its end there."""
+    return datetime.now(ZoneInfo("Europe/Zurich")).date()
+
+
+def _status_out(st: PlayerStatus) -> PlayerStatusOut:
+    return PlayerStatusOut(
+        player_id=st.player_id,
+        team_id=st.team_id,
+        kind=st.kind,
+        until=st.until,
+        note=st.note,
+        updated_at=st.updated_at,
+    )
+
+
+async def _current_statuses(
+    ctx: Ctx, team_id: uuid.UUID, player_ids: list[uuid.UUID] | None = None
+) -> dict[uuid.UUID, PlayerStatusOut]:
+    """Statuses still in force; a status past its until-date reads as no status."""
+    if player_ids is not None and not player_ids:
+        return {}
+    q = select(PlayerStatus).where(
+        PlayerStatus.team_id == team_id,
+        or_(PlayerStatus.until.is_(None), PlayerStatus.until >= today()),
+    )
+    if player_ids is not None:
+        q = q.where(PlayerStatus.player_id.in_(player_ids))
+    return {st.player_id: _status_out(st) for st in (await ctx.db.scalars(q)).all()}
+
+
+async def list_statuses(ctx: Ctx, team_id: uuid.UUID) -> list[PlayerStatusOut]:
+    """The squad's injured and absent players (staff); players hidden from this actor in the
+    roster list (official data not yet joined) are left out here too."""
+    await get_team(ctx, team_id, Action.PLAYER_STATUS)
+    statuses = await _current_statuses(ctx, team_id)
+    if statuses and not can(ctx.require_actor(), Action.ROSTER_WRITE, team_id):
+        rows = [
+            (e, p)
+            for e, p in await ctx.db.execute(
+                select(RosterEntry, Player)
+                .join(Player, Player.id == RosterEntry.player_id)
+                .where(RosterEntry.team_id == team_id, Player.id.in_(list(statuses)))
+            )
+        ]
+        visible = {p.id for _, p in await _without_official_only(ctx, rows)}
+        statuses = {pid: st for pid, st in statuses.items() if pid in visible}
+    return sorted(statuses.values(), key=lambda st: (st.until or date.max, str(st.player_id)))
+
+
+async def set_status(
+    ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID, data: PlayerStatusIn
+) -> PlayerStatusOut:
+    team = await get_team(ctx, team_id, Action.PLAYER_STATUS)
+    await _player_in_team(ctx, team_id, player_id)
+    if data.until is not None and data.until < today():
+        raise ProblemError(422, "validation", "The until-date lies in the past")
+    note = (data.note or "").strip() or None
+    st = await ctx.db.scalar(
+        select(PlayerStatus).where(
+            PlayerStatus.team_id == team_id, PlayerStatus.player_id == player_id
+        )
+    )
+    if st is None:
+        st = PlayerStatus(
+            organization_id=team.organization_id, team_id=team_id, player_id=player_id
+        )
+        ctx.db.add(st)
+    st.kind, st.until, st.note, st.set_by_id = data.kind, data.until, note, ctx.user_id
+    await ctx.db.flush()
+    await ctx.db.refresh(st)
+    # the kind only: notes stay out of the audit log
+    await audit.record(
+        ctx,
+        "player_status.set",
+        target_type="player",
+        target_id=player_id,
+        data={"kind": data.kind.value},
+    )
+    return _status_out(st)
+
+
+async def clear_status(ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID) -> None:
+    """Back to fit."""
+    await get_team(ctx, team_id, Action.PLAYER_STATUS)
+    await _player_in_team(ctx, team_id, player_id)
+    st = await ctx.db.scalar(
+        select(PlayerStatus).where(
+            PlayerStatus.team_id == team_id, PlayerStatus.player_id == player_id
+        )
+    )
+    if st is not None:
+        await ctx.db.delete(st)
+        await audit.record(ctx, "player_status.cleared", target_type="player", target_id=player_id)
 
 
 async def _without_official_only(

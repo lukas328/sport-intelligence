@@ -50,7 +50,7 @@ from handball_api.models.official import (
     OfficialSuggestion,
     OrgAccessRequest,
 )
-from handball_api.models.roster import Consent, Guardianship, Player, RosterEntry
+from handball_api.models.roster import Consent, Guardianship, Player, PlayerStatus, RosterEntry
 from handball_api.models.sessions import (
     Attendance,
     LiveTag,
@@ -124,6 +124,7 @@ __all__ = [
     "Play",
     "Player",
     "PlayerFeedItem",
+    "PlayerStatus",
     "Playlist",
     "PlaylistItem",
     "Possession",

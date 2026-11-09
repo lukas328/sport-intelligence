@@ -50,6 +50,12 @@ WHERE c.contype = 'f' AND array_length(c.conkey, 1) = 1
 
 async def test_foreign_keys_of_official_data_and_candidates_are_indexed(owner_conn: Any) -> None:
     missing = {(t, c) for t, c in await owner_conn.fetch(_UNINDEXED_FKS)}
-    checked = {"goal_candidates", "join_requests", "org_access_requests", "official_suggestions"}
+    checked = {
+        "goal_candidates",
+        "join_requests",
+        "org_access_requests",
+        "official_suggestions",
+        "player_statuses",
+    }
     assert {(t, c) for t, c in missing if t in checked} == set()
     assert ("organizations", "claimed_by_id") not in missing

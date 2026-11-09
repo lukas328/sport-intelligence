@@ -156,6 +156,13 @@ class AttendanceStatus(StrEnum):
     LATE = "late"
 
 
+class PlayerAvailability(StrEnum):
+    """A player's status on the squad, set by the staff; no status means fit."""
+
+    INJURED = "injured"  # never a diagnosis (health data minimised)
+    ABSENT = "absent"
+
+
 class UploadStatus(StrEnum):
     PENDING = "pending"
     EXTRACTED = "extracted"

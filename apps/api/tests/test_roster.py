@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import re
+import uuid
 from collections.abc import Callable
+from datetime import timedelta
+from typing import Any
 
 import pytest
+
+from handball_api.core.email import MemoryEmailSender
+from handball_api.services.roster import today
 
 from .conftest import Api, setup_club
 
@@ -128,3 +135,109 @@ async def test_consents(make_api: Callable[[], Api]) -> None:
     revoked = (await api.delete(f"{base}/{c1['id']}")).json()
     assert revoked["revoked_at"] is not None
     assert (await api.get(roster_url(ids))).json()[0]["consent_complete"] is False
+
+
+async def _join(
+    make_api: Callable[[], Api],
+    coach: Api,
+    ids: dict[str, str],
+    outbox: MemoryEmailSender,
+    email: str,
+    role: str = "player",
+    player_id: str | None = None,
+) -> Api:
+    body = {"email": email, "team_id": ids["team"], "team_role": role}
+    if player_id:
+        body["player_id"] = player_id
+    assert (await coach.post(f"/v1/orgs/{ids['org']}/invitations", json=body)).status_code == 201
+    token = re.search(r"/invite/([\w-]+)", outbox.outbox[-1].text)
+    assert token
+    api = make_api()
+    assert (await api.register(email, invitation_token=token.group(1))).status_code == 201
+    return api
+
+
+async def test_player_status(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender, owner_conn: Any
+) -> None:
+    coach = make_api()
+    ids = await setup_club(coach)
+    url = roster_url(ids)
+    team = f"/v1/orgs/{ids['org']}/teams/{ids['team']}"
+    lena = (await coach.post(url, json={"first_name": "Lena", "last_name": "Muster"})).json()
+    nora = (await coach.post(url, json={"first_name": "Nora", "last_name": "Beispiel"})).json()
+    lena_api = await _join(
+        make_api, coach, ids, outbox, "lena@hc-test.ch", player_id=lena["player_id"]
+    )
+    manager = await _join(make_api, coach, ids, outbox, "tm@hc-test.ch", "team_manager")
+    athletic = await _join(make_api, coach, ids, outbox, "ac@hc-test.ch", "athletic_coach")
+    until = (today() + timedelta(days=7)).isoformat()
+
+    # nobody has a status: everyone is fit
+    assert [e["status"] for e in (await coach.get(url)).json()] == [None, None]
+    assert (await coach.get(f"{team}/player-statuses")).json() == []
+
+    r = await coach.put(
+        f"{team}/players/{lena['player_id']}/status",
+        json={"kind": "injured", "until": until, "note": "  Rückkehr nach Absprache "},
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["kind"] == "injured" and r.json()["until"] == until
+    assert r.json()["note"] == "Rückkehr nach Absprache"
+    # the team manager and assistant coaches set statuses too
+    r = await manager.put(f"{team}/players/{nora['player_id']}/status", json={"kind": "absent"})
+    assert r.status_code == 200 and r.json()["until"] is None and r.json()["note"] is None
+    r = await athletic.put(f"{team}/players/{nora['player_id']}/status", json={"kind": "injured"})
+    assert r.status_code == 200 and r.json()["kind"] == "injured"
+
+    statuses = {e["player_id"]: e["status"] for e in (await coach.get(url)).json()}
+    assert statuses[lena["player_id"]]["kind"] == "injured"
+    assert statuses[nora["player_id"]]["kind"] == "injured"
+    listed = (await athletic.get(f"{team}/player-statuses")).json()
+    assert [s["player_id"] for s in listed] == [lena["player_id"], nora["player_id"]]
+
+    # a player sees only their own status and cannot read the list or set one
+    own = {e["player_id"]: e["status"] for e in (await lena_api.get(url)).json()}
+    assert own[lena["player_id"]]["kind"] == "injured" and own[nora["player_id"]] is None
+    assert (await lena_api.get(f"{team}/player-statuses")).status_code == 403
+    r = await lena_api.put(f"{team}/players/{nora['player_id']}/status", json={"kind": "absent"})
+    assert r.status_code == 403
+    assert (await lena_api.delete(f"{team}/players/{lena['player_id']}/status")).status_code == 403
+
+    # validation: past until-date, long note, unknown kind, player outside the team
+    past = (today() - timedelta(days=1)).isoformat()
+    bad = [
+        {"kind": "absent", "until": past},
+        {"kind": "absent", "note": "x" * 141},
+        {"kind": "sick"},
+    ]
+    for body in bad:
+        r = await coach.put(f"{team}/players/{nora['player_id']}/status", json=body)
+        assert r.status_code == 422, body
+    stranger = "00000000-0000-0000-0000-000000000003"
+    r = await coach.put(f"{team}/players/{stranger}/status", json={"kind": "absent"})
+    assert r.status_code == 404
+
+    # a status past its until-date reads as fit
+    await owner_conn.execute(
+        "UPDATE player_statuses SET until = $1 WHERE player_id = $2",
+        today() - timedelta(days=1),
+        uuid.UUID(lena["player_id"]),
+    )
+    statuses = {e["player_id"]: e["status"] for e in (await coach.get(url)).json()}
+    assert statuses[lena["player_id"]] is None
+    listed = (await coach.get(f"{team}/player-statuses")).json()
+    assert [s["player_id"] for s in listed] == [nora["player_id"]]
+    assert all(e["status"] is None for e in (await lena_api.get(url)).json())
+
+    # back to fit (twice: still fit)
+    assert (await coach.delete(f"{team}/players/{nora['player_id']}/status")).status_code == 204
+    assert (await coach.delete(f"{team}/players/{nora['player_id']}/status")).status_code == 204
+    assert (await coach.get(f"{team}/player-statuses")).json() == []
+
+    # another club sees nothing
+    other = make_api()
+    await setup_club(other, "other@hc-test.ch")
+    assert (await other.get(f"{team}/player-statuses")).status_code == 404
+    r = await other.put(f"{team}/players/{nora['player_id']}/status", json={"kind": "absent"})
+    assert r.status_code == 404

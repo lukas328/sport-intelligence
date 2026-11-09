@@ -21,6 +21,8 @@ from handball_api.schemas.roster import (
     ConsentCreate,
     ConsentOut,
     ImportResult,
+    PlayerStatusIn,
+    PlayerStatusOut,
     RosterEntryCreate,
     RosterEntryOut,
     RosterEntryUpdate,
@@ -172,6 +174,32 @@ async def update_roster_entry(
 )
 async def remove_roster_entry(team_id: uuid.UUID, entry_id: uuid.UUID, scope: OrgDep) -> None:
     await roster_service.remove_entry(scope.ctx, team_id, entry_id)
+
+
+@router.get("/{team_id}/player-statuses", response_model=list[PlayerStatusOut], tags=["roster"])
+async def list_player_statuses(team_id: uuid.UUID, scope: OrgDep) -> list[PlayerStatusOut]:
+    """Injured and absent players of the squad, still in force (staff)."""
+    return await roster_service.list_statuses(scope.ctx, team_id)
+
+
+@router.put(
+    "/{team_id}/players/{player_id}/status", response_model=PlayerStatusOut, tags=["roster"]
+)
+async def set_player_status(
+    team_id: uuid.UUID, player_id: uuid.UUID, data: PlayerStatusIn, scope: OrgDep
+) -> PlayerStatusOut:
+    """Mark a player injured or absent, optionally until a day (inclusive) and with a note."""
+    return await roster_service.set_status(scope.ctx, team_id, player_id, data)
+
+
+@router.delete(
+    "/{team_id}/players/{player_id}/status",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["roster"],
+)
+async def clear_player_status(team_id: uuid.UUID, player_id: uuid.UUID, scope: OrgDep) -> None:
+    """Back to fit (no status)."""
+    await roster_service.clear_status(scope.ctx, team_id, player_id)
 
 
 @router.get(
