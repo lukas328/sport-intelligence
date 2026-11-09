@@ -254,20 +254,20 @@ export function GoalCandidatesPanel({
                 key={side}
                 size={big}
                 variant={deciding.suggested_side === side || (!deciding.suggested_side && k === 0) ? "primary" : "secondary"}
-                className="h-auto min-w-0 justify-start px-3 py-2 text-left whitespace-normal"
+                className="h-auto min-h-11 min-w-0 justify-start px-3 py-2 text-left whitespace-normal"
                 aria-keyshortcuts={String(k + 1)}
                 onClick={() => decide(deciding, active, "confirmed", side)}
               >
-                <kbd aria-hidden className="font-score opacity-70">{k + 1}</kbd>
+                <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">{k + 1}</kbd>
                 {t("goalFor", { team: team(side) ?? "" })}
               </Button>
             ))}
-            <Button size={big} variant="secondary" className="justify-start px-3" aria-keyshortcuts="X" onClick={() => decide(deciding, active, "rejected", null)}>
-              <kbd aria-hidden className="font-score opacity-70">X</kbd>
+            <Button size={big} variant="secondary" className="min-h-11 justify-start px-3" aria-keyshortcuts="X" onClick={() => decide(deciding, active, "rejected", null)}>
+              <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">X</kbd>
               {t("noGoal")}
             </Button>
-            <Button size={big} variant="quiet" className="justify-start px-3" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
-              <kbd aria-hidden className="font-score opacity-70">R</kbd>
+            <Button size={big} variant="secondary" className="min-h-11 justify-start px-3" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
+              <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">R</kbd>
               {t("replay")}
             </Button>
           </div>
@@ -281,7 +281,7 @@ export function GoalCandidatesPanel({
           <Button variant="ghost" size="sm" className="-my-1" aria-keyshortcuts="U" onClick={undoLast}>
             <RotateCcw aria-hidden />
             {t("undo")}
-            <kbd aria-hidden className="font-score text-muted">U</kbd>
+            <kbd aria-hidden className="font-score text-muted pointer-coarse:hidden">U</kbd>
           </Button>
         )}
       </p>

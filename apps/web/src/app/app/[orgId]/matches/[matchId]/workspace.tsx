@@ -865,7 +865,8 @@ function AnalysisPanel({
   const hallCheck = canMark && fromHall && unconfirmed;
   const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
   return (
-    <section className="space-y-3" data-testid="analysis-panel">
+    // while the court waits for its check the answer bar is fixed on phones: room for it at the end
+    <section className={cn("space-y-3", hallCheck && "max-lg:pb-24")} data-testid="analysis-panel">
       <h2 className="sr-only">{t("title")}</h2>
       {analysis.status === "running" && <p className="text-sm">{t("running")}</p>}
       {analysis.status === "failed" && (
@@ -901,7 +902,9 @@ function AnalysisPanel({
         </p>
       )}
       {hallCheck ? (
-        <div className="flex flex-wrap gap-2">
+        // phones: the one answer waits in the thumb zone above the bottom navigation, wherever the
+        // page is scrolled, until the court is checked
+        <div className="flex flex-wrap gap-2 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-[calc(4.25rem+env(safe-area-inset-bottom))] max-lg:z-20 max-lg:border-t max-lg:border-foreground/15 max-lg:bg-background max-lg:px-4 max-lg:py-3 max-lg:[&>*]:flex-1">
           <Button onClick={confirmCourt} loading={confirming} data-testid="court-confirm">
             {t("courtFits")}
           </Button>
