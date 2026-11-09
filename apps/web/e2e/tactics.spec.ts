@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, openPlays, register, uniqueEmail } from "./helpers";
 
 test("play library: template, edit on the board, animate, save, find", async ({ page, browser }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
@@ -11,7 +11,7 @@ test("play library: template, edit on the board, animate, save, find", async ({ 
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
 
-  await page.getByRole("link", { name: "Spielzüge" }).click();
+  await openPlays(page);
   await expect(page.getByText("Noch keine Spielzüge.")).toBeVisible();
   await page.getByRole("searchbox").fill("5-1");
   await page.getByRole("link", { name: "Vorlage verwenden: Abwehr 5:1" }).click();
@@ -52,6 +52,7 @@ test("play library: template, edit on the board, animate, save, find", async ({ 
   await page.getByRole("button", { name: "Link erstellen" }).click();
   const shareUrl = await page.getByTestId("share-url").inputValue();
   expect(shareUrl).toMatch(/\/s\/[\w-]{20,}$/);
+  await page.keyboard.press("Escape");
   const guest = await browser.newContext();
   const gp = await guest.newPage();
   await gp.goto(shareUrl);
@@ -61,7 +62,7 @@ test("play library: template, edit on the board, animate, save, find", async ({ 
   await expectAccessible(gp);
   await guest.close();
 
-  await page.getByRole("link", { name: "Spielzüge" }).first().click();
+  await openPlays(page);
   await expect(page.getByTestId("play-list")).toContainText("Abwehr 5:1");
   await page.getByRole("searchbox").fill("offensiv");
   await expect(page.getByTestId("play-list")).toContainText("2 Phasen");

@@ -6,14 +6,13 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { problemCode } from "@handball/api-client";
 import { toDrillItem } from "@/lib/drill-snapshot";
-import { cn } from "@/lib/utils";
 import type { EventFilter } from "./event-list";
 
-interface Insight {
+export interface Insight {
   id: string;
   kind: "strength" | "weakness" | "info";
   key: string;
@@ -22,11 +21,31 @@ interface Insight {
   sample: number;
   evidence: EventFilter;
 }
-interface InsightsData {
+export interface InsightsData {
   version: string;
   baseline_matches: number;
   insights: Insight[];
   summary: { text: string; model: string; created_at: string } | null;
+}
+
+/** Plain sentence for an insight (player names from the roster, zones and types translated). */
+export function useInsightText(names: Record<string, string>): (i: Insight) => string {
+  const t = useTranslations("insights");
+  const tz = useTranslations("zones");
+  const tg = useTranslations("goalZones");
+  const te = useTranslations("events");
+  return (i: Insight) => {
+    const p = { ...i.params } as Record<string, string | number>;
+    const pid = i.params.player_id as string | null | undefined;
+    const fallback = i.key.includes("keeper") ? t("whoKeeper") : t("whoPlayer");
+    p.who = (pid && names[pid]) || (i.params.number != null ? t("player", { number: i.params.number }) : fallback);
+    if (typeof p.zone === "string") p.zone = p.zone.length === 2 ? tg(p.zone as "TL") : tz(p.zone as "wing_left");
+    if (typeof p.type === "string") p.type = te(`tt_${p.type}` as "tt_other");
+    if (typeof p.gsax === "number") p.gsax = Math.abs(p.gsax).toFixed(1);
+    delete p.player_id;
+    delete p.number;
+    return t(i.key.replace("insights.", "") as "drought", p as never);
+  };
 }
 
 /** Ranked insights with evidence (every statement opens the events behind it) and an optional summary. */
@@ -44,11 +63,9 @@ export function InsightsCard({
   onEvidence: (title: string, filter: EventFilter) => void;
 }) {
   const t = useTranslations("insights");
-  const tz = useTranslations("zones");
-  const tg = useTranslations("goalZones");
-  const te = useTranslations("events");
   const qc = useQueryClient();
   const [problem, setProblem] = useState<string | null>(null);
+  const text = useInsightText(names);
   const path = { org_id: orgId, match_id: matchId };
   const q = useQuery({
     queryKey: ["insights", matchId],
@@ -65,44 +82,28 @@ export function InsightsCard({
   const data = q.data;
   if (!data) return null;
 
-  function text(i: Insight): string {
-    const p = { ...i.params } as Record<string, string | number>;
-    const pid = i.params.player_id as string | null | undefined;
-    p.who = (pid && names[pid]) || (i.params.number != null ? t("player", { number: i.params.number }) : "?");
-    if (typeof p.zone === "string") p.zone = p.zone.length === 2 ? tg(p.zone as "TL") : tz(p.zone as "wing_left");
-    if (typeof p.type === "string") p.type = te(`tt_${p.type}` as "tt_other");
-    if (typeof p.gsax === "number") p.gsax = Math.abs(p.gsax).toFixed(1);
-    delete p.player_id;
-    delete p.number;
-    return t(i.key.replace("insights.", "") as "drought", p as never);
-  }
-
   return (
-    <Card className="space-y-3" data-testid="insights">
+    <Sheet className="space-y-3" data-testid="insights">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold">{t("title")}</h2>
+        <h2 className="text-xl">{t("title")}</h2>
         <p className="text-xs text-muted">{t("baseline", { count: data.baseline_matches })}</p>
       </div>
       {data.insights.length === 0 ? (
         <p className="text-sm text-muted">{t("none")}</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="divide-y divide-border/70">
           {data.insights.map((i) => (
-            <li key={i.id} className="flex flex-wrap items-start gap-2 text-sm">
-              <span
-                className={cn(
-                  "mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
-                  i.kind === "strength" ? "border border-ok text-foreground" : i.kind === "weakness" ? "border border-error text-foreground" : "bg-surface",
-                )}
-              >
+            <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
+              <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
+                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? "size-2.5 rounded-[2px] bg-error" : "size-2.5 rounded-[2px] bg-muted"} />
                 {t(i.kind)}
               </span>
-              <span className="min-w-0 flex-1">{text(i)}</span>
-              <button className="text-xs text-accent underline" onClick={() => onEvidence(text(i), i.evidence)}>
+              <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">{text(i)}</span>
+              <button className="text-xs font-semibold text-accent hover:underline" onClick={() => onEvidence(text(i), i.evidence)}>
                 {t("evidence")}
               </button>
               {i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
-                <Link className="text-xs text-accent underline" href={`/app/${orgId}/drills?focus=${focusForInsight(i.key, i.params.zone as string | null).join(",")}`}>
+                <Link className="text-xs font-medium text-muted hover:text-foreground hover:underline" href={`/app/${orgId}/drills?focus=${focusForInsight(i.key, i.params.zone as string | null).join(",")}`}>
                   {t("drills")}
                 </Link>
               )}
@@ -114,7 +115,7 @@ export function InsightsCard({
         </ul>
       )}
       {data.summary && (
-        <div className="space-y-1 rounded bg-surface p-3 text-sm" data-testid="summary">
+        <div className="space-y-1 rounded-md bg-surface p-4 text-sm" data-testid="summary">
           <p className="whitespace-pre-line">{data.summary.text}</p>
           <p className="text-xs text-muted">{t("summaryGenerated")}</p>
         </div>
@@ -130,7 +131,7 @@ export function InsightsCard({
         </p>
       )}
       <p className="text-xs text-muted">{t("hint")}</p>
-    </Card>
+    </Sheet>
   );
 }
 
@@ -164,17 +165,17 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
   });
   if (!open)
     return (
-      <button type="button" className="text-xs text-accent underline" onClick={() => setOpen(true)}>
+      <button type="button" className="text-xs font-medium text-muted hover:text-foreground hover:underline" onClick={() => setOpen(true)}>
         {t("train")}
       </button>
     );
   return (
-    <div className="mt-2 w-full space-y-2 rounded border border-border p-3" role="group" aria-label={t("trainTitle")}>
+    <div className="mt-2 w-full space-y-3 rounded-md bg-surface p-4" role="group" aria-label={t("trainTitle")}>
       <p className="font-medium">{t("trainTitle")}</p>
       {create.data ? (
         <p className="text-sm">
           {t("trainDone")}{" "}
-          <Link className="text-accent underline" href={`/app/${orgId}/teams/${create.data.team_id}/training`}>
+          <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/teams/${create.data.team_id}/training`}>
             {t("trainOpen")}
           </Link>
         </p>
@@ -182,7 +183,7 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
         <>
           <label className="block text-sm">
             {t("trainDate")}{" "}
-            <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="rounded border border-border bg-background px-2" />
+            <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="rounded-lg bg-raised px-2 py-1 ring-1 ring-border" />
           </label>
           <fieldset className="text-sm">
             <legend>{t("trainDrills")}</legend>

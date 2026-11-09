@@ -13,7 +13,7 @@ from sqlalchemy import func, select
 from handball_api.core.logging import get_logger
 from handball_api.integrations.support import ExternalStatusPage
 from handball_api.models import Correction, Event, OrgMembership, ProcessingJob, VideoAsset
-from handball_api.models.enums import JobStatus, OrgRole
+from handball_api.models.enums import JobStatus, OrgRole, VideoStatus
 from handball_api.services import training
 from handball_api.services.context import Ctx
 from handball_api.services.health import default_checks, run_checks
@@ -242,3 +242,33 @@ async def retention(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
         out["purged"] += 1
     await ctx.db.flush()
     return out
+
+
+ABANDONED_DAYS = 3
+
+
+async def abandoned_uploads(ctx: Ctx, now: datetime | None = None) -> int:
+    """Uploads nobody finished within ABANDONED_DAYS: the multipart upload is aborted (its parts
+    cost storage) and the video marked failed, so it no longer shows as "uploading"."""
+    now = now or datetime.now(UTC)
+    stale = (
+        await ctx.db.scalars(
+            select(VideoAsset).where(
+                VideoAsset.status == VideoStatus.UPLOADING,
+                VideoAsset.updated_at <= now - timedelta(days=ABANDONED_DAYS),
+            )
+        )
+    ).all()
+    for v in stale:
+        if v.upload_id:
+            try:
+                await ctx.storage.abort_multipart(
+                    ctx.settings.s3_bucket_videos, v.storage_key, v.upload_id
+                )
+            except Exception as exc:  # already gone
+                log.info("abort_multipart_failed", video=str(v.id), error=str(exc))
+        v.status = VideoStatus.FAILED
+        v.error = "upload abandoned"
+        v.upload_id = None
+    await ctx.db.flush()
+    return len(stale)

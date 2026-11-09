@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Übersicht</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.nav{min-height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;color:#fff;text-decoration:none;font-weight:500}
+.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Big Shoulders Display',sans-serif}
+.row{display:flex;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid #10151c;color:#10151c;text-decoration:none}
+@media (max-width:900px){.court{display:none}}
+</style>
+</helmet>
+<div style="--club: {{club}}; --deep: {{deep}}; --ink: {{ink}}; --paper: {{paper}}; --signal: {{signal}}; min-height: 1040px; display: flex; flex-wrap: wrap; background: var(--paper); color: #10151c; font-family: 'Barlow', sans-serif">
+  <nav aria-label="Hauptnavigation" style="flex: 1 1 248px; box-sizing: border-box; padding: 24px 16px; background: var(--deep); color: #fff; display: flex; flex-direction: column">
+    <div class="disp" style="padding: 0 12px; font-weight: 900; font-size: 30px; line-height: 0.95">HC<br>GRAUHOLZ</div>
+    <div style="padding: 0 12px; margin: 10px 0 28px; font-size: 15px">Herren 1, Saison 2026/27</div>
+    <a class="nav" href="#" aria-current="page" style="font-weight: 600; box-shadow: inset 3px 0 0 #ffd23f"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h16v14H2zM10 3v14M18 6c-4 0-5 2-5 4s1 4 5 4"></path></svg>Übersicht</a>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17V4h14v13M3 8h14M7.7 4v13M12.3 4v13"></path></svg>Spiele</a>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3 2 6l2 3 2-1v9h8V8l2 1 2-3-4-3-2 2H8z"></path></svg>Team</a>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3 15 17H5zM7 12h6"></path></svg>Training</a>
+    <div style="flex: 1 1 24px"></div>
+    <div style="padding: 0 12px; font-size: 15px"><div style="font-weight: 600">Andrea Keller</div><div class="num" style="font-size: 13px; margin-top: 4px">Suchen: Ctrl K</div></div>
+  </nav>
+  <main style="flex: 999 1 560px; min-width: 0">
+    <section style="position: relative; overflow: hidden; background: var(--club); color: var(--ink); padding: 40px 56px; min-height: 390px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center">
+      <svg class="court" aria-hidden="true" viewBox="0 0 1192 390" preserveAspectRatio="xMaxYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%">
+        <g fill="none" stroke="currentColor"><path d="M1192 -20 C1000 -20 900 90 900 195 C900 300 1000 410 1192 410" stroke-width="5" opacity="0.45"></path><path d="M1192 -120 C850 -120 740 60 740 195 C740 330 850 510 1192 510" stroke-width="5" stroke-dasharray="24 20" opacity="0.3"></path></g>
+      </svg>
+      <div style="position: relative">
+        <p style="margin: 0; font-size: 15px; font-weight: 600">Letztes Spiel, 01.11.26</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 32px; margin-top: 10px">
+          <div class="disp" style="font-weight: 900; font-size: clamp(110px, 12vw, 172px); line-height: 0.92; font-variant-numeric: tabular-nums">22:20</div>
+          <div class="disp" style="padding-bottom: 8px; font-weight: 800; font-size: 36px; line-height: 1; text-transform: uppercase">Sieg gegen<br>Demo HC Beispiel</div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px">
+          <a href="#" style="min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 20px; background: var(--ink); color: var(--club); font-weight: 600; text-decoration: none; border-radius: 3px">Spiel öffnen</a>
+          <a href="#" style="min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 20px; border: 2px solid var(--ink); color: var(--ink); font-weight: 600; text-decoration: none; border-radius: 3px">Frag deine Daten</a>
+        </div>
+      </div>
+    </section>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 34px 56px 44px">
+      <section>
+        <h2 class="disp" style="margin: 0 0 6px; font-size: 30px; font-weight: 800; text-transform: uppercase">Das bleibt hängen</h2>
+        <a class="row" href="#"><span class="num" style="flex: 0 0 74px; font-size: 22px; font-weight: 600">+7.7</span><span>Tore über Erwartung. Die Abschlüsse sassen, xG ist geschätzt.</span></a>
+        <a class="row" href="#" style="background: var(--signal); color: {{signalInk}}; padding-left: 10px; padding-right: 10px; margin: 0 -10px"><span class="num" style="flex: 0 0 74px; font-size: 22px; font-weight: 600">23 %</span><span>Paraden. Hier liegt der grösste Hebel fürs nächste Spiel.</span></a>
+        <a class="row" href="#"><span class="num" style="flex: 0 0 74px; font-size: 22px; font-weight: 600">4</span><span>Ballverluste. Sauber gespielt.</span></a>
+      </section>
+      <section>
+        <h2 class="disp" style="margin: 0 0 6px; font-size: 30px; font-weight: 800; text-transform: uppercase">Als Nächstes</h2>
+        <div class="row"><span class="num" style="flex: 0 0 90px; font-weight: 600">Spiel</span><span>[Noch kein Spiel angesetzt]</span></div>
+        <div class="row"><span class="num" style="flex: 0 0 90px; font-weight: 600">Training</span><span>[Noch kein Termin geplant]</span></div>
+        <a href="#" style="display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; color: #10151c; font-weight: 600">Spiel anlegen</a>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"club":{"editor":"color","default":"#0b6bcb","options":["#0b6bcb","#c8102e","#0f6b46","#ffd100"]},"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const club = this.props.club ?? '#0b6bcb';
+    const rgb = [0, 2, 4].map(function (i) { return parseInt(club.slice(1 + i, 3 + i), 16); });
+    const lin = rgb.map(function (c) { const s = c / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); });
+    const l = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    const hex = function (a) { return '#' + a.map(function (c) { return Math.round(c).toString(16).padStart(2, '0'); }).join(''); };
+    const mix = function (t, p) { return hex(rgb.map(function (c, i) { return c + (t[i] - c) * p; })); };
+    const light = 1.05 / (l + 0.05) < (l + 0.05) / 0.05;
+    return { club: club, ink: light ? '#10151c' : '#ffffff', deep: light ? '#14171c' : mix([5, 12, 24], 0.78), paper: mix([255, 255, 255], 0.93), signal: light ? '#10151c' : '#ffd23f', signalInk: light ? '#ffffff' : '#10151c' };
+  }
+}
+</script>
+</body>
+</html>

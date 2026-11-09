@@ -39,6 +39,7 @@ from handball_api.routers import focus as focus_router
 from handball_api.routers import highlights as highlights_router
 from handball_api.routers import marks as marks_router
 from handball_api.routers import matrix as matrix_router
+from handball_api.routers import official as official_router
 from handball_api.routers import ops as ops_router
 from handball_api.routers import paper_vision as paper_router
 from handball_api.routers import presentations as presentations_router
@@ -213,11 +214,13 @@ def create_app(
     app.include_router(orgs.router)
     app.include_router(teams.router)
     app.include_router(matches.router)
+    app.include_router(matches.public_media)
     app.include_router(events_router.router)
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)
     app.include_router(billing_router.router)
     app.include_router(sharing_router.router)
+    app.include_router(official_router.router)
     app.include_router(ops_router.router)
     app.include_router(privacy_router.router)
     app.include_router(family_router.router)

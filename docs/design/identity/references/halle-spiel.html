@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Spiel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Reenie+Beanie&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.nav{min-height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;color:#fff;text-decoration:none;font-weight:500}
+.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Big Shoulders Display',sans-serif}
+.tab{min-height:44px;display:inline-flex;align-items:center;padding:0 18px;border:2px solid #10151c;border-left-width:0;color:#10151c;font-weight:600;text-decoration:none;background:#fff}
+.tab:first-child{border-left-width:2px}
+</style>
+</helmet>
+<div style="--club: {{club}}; --deep: {{deep}}; --ink: {{ink}}; --paper: {{paper}}; --signal: {{signal}}; min-height: 1040px; display: flex; flex-wrap: wrap; background: var(--paper); color: #10151c; font-family: 'Barlow', sans-serif">
+  <nav aria-label="Hauptnavigation" style="flex: 1 1 248px; box-sizing: border-box; padding: 24px 16px; background: var(--deep); color: #fff; display: flex; flex-direction: column">
+    <div class="disp" style="padding: 0 12px; font-weight: 900; font-size: 30px; line-height: 0.95">HC<br>GRAUHOLZ</div>
+    <div style="padding: 0 12px; margin: 10px 0 28px; font-size: 15px">Herren 1, Saison 2026/27</div>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h16v14H2zM10 3v14M18 6c-4 0-5 2-5 4s1 4 5 4"></path></svg>Übersicht</a>
+    <a class="nav" href="#" aria-current="page" style="font-weight: 600; box-shadow: inset 3px 0 0 #ffd23f"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17V4h14v13M3 8h14M7.7 4v13M12.3 4v13"></path></svg>Spiele</a>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3 2 6l2 3 2-1v9h8V8l2 1 2-3-4-3-2 2H8z"></path></svg>Team</a>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3 15 17H5zM7 12h6"></path></svg>Training</a>
+  </nav>
+  <main style="flex: 999 1 560px; min-width: 0">
+    <section style="background: var(--club); color: var(--ink); padding: 22px 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px">
+      <div>
+        <p style="margin: 0; font-size: 15px; font-weight: 600">01.11.26, Demo-Daten</p>
+        <h1 class="disp" style="margin: 4px 0 0; font-size: 44px; font-weight: 900; line-height: 1; text-transform: uppercase">Herren 1 gegen Demo HC Beispiel</h1>
+      </div>
+      <div class="disp" style="font-size: 76px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums">22:20</div>
+    </section>
+    <div style="padding: 20px 40px 36px">
+      <nav aria-label="Spielansichten" style="display: flex; margin-bottom: 18px">
+        <a class="tab" href="#" aria-current="page" style="background: #10151c; color: #fff">Video</a>
+        <a class="tab" href="#">Analyse</a>
+        <a class="tab" href="#">Szenen</a>
+      </nav>
+      <div style="display: flex; flex-wrap: wrap; gap: 24px">
+        <section aria-label="Video" style="flex: 3 1 560px; min-width: 0">
+          <div style="aspect-ratio: 16 / 9; background: #10151c; color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box">
+            <div>
+              <button aria-label="Video abspielen" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #fff; background: transparent; color: #fff; display: inline-flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"></path></svg></button>
+              <p style="margin: 14px 0 0; font-size: 16px">[Euer Spielvideo]</p>
+            </div>
+          </div>
+          <div style="height: 54px; background: #fff; border: 2px solid #10151c; border-top: 0; position: relative" role="img" aria-label="Ereignis-Zeitleiste, Beispiel">
+            <span style="position: absolute; left: 12%; top: 10px; bottom: 10px; width: 3px; background: #1e7b3a"></span>
+            <span style="position: absolute; left: 21%; top: 10px; bottom: 10px; width: 3px; background: #b42318"></span>
+            <span style="position: absolute; left: 37%; top: 10px; bottom: 10px; width: 3px; background: #1e7b3a"></span>
+            <span style="position: absolute; left: 49%; top: 4px; bottom: 4px; width: 2px; background: #10151c"></span>
+            <span style="position: absolute; left: 62%; top: 10px; bottom: 10px; width: 3px; background: #1e7b3a"></span>
+            <span style="position: absolute; left: 83%; top: 10px; bottom: 10px; width: 3px; background: #b42318"></span>
+          </div>
+          <p class="num" style="margin: 10px 0 0; font-size: 13px">Grün Tor, Rot Gegentor, Linie Halbzeit. Marken hier nur als Beispiel.</p>
+        </section>
+        <aside aria-label="Notizen" style="flex: 1 1 280px; min-width: 0; background: #fff; border: 2px solid #10151c; padding: 18px 20px; box-sizing: border-box">
+          <h2 class="disp" style="margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase">Notizen</h2>
+          <p class="num" style="margin: 16px 0 2px; font-size: 13px">Beispiel, 12:40, Trainerin</p>
+          <p style="margin: 0; font-family: 'Reenie Beanie', cursive; font-size: 34px; line-height: 1; color: #1540b8">Hier früher schieben!</p>
+          <label for="note" style="display: block; margin-top: 28px; font-weight: 600">Notiz bei dieser Stelle</label>
+          <input id="note" style="width: 100%; box-sizing: border-box; min-height: 44px; margin-top: 6px; padding: 0 12px; border: 2px solid #10151c; border-radius: 3px; font: inherit">
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"club":{"editor":"color","default":"#0b6bcb","options":["#0b6bcb","#c8102e","#0f6b46","#ffd100"]},"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const club = this.props.club ?? '#0b6bcb';
+    const rgb = [0, 2, 4].map(function (i) { return parseInt(club.slice(1 + i, 3 + i), 16); });
+    const lin = rgb.map(function (c) { const s = c / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); });
+    const l = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    const hex = function (a) { return '#' + a.map(function (c) { return Math.round(c).toString(16).padStart(2, '0'); }).join(''); };
+    const mix = function (t, p) { return hex(rgb.map(function (c, i) { return c + (t[i] - c) * p; })); };
+    const light = 1.05 / (l + 0.05) < (l + 0.05) / 0.05;
+    return { club: club, ink: light ? '#10151c' : '#ffffff', deep: light ? '#14171c' : mix([5, 12, 24], 0.78), paper: mix([255, 255, 255], 0.93), signal: light ? '#10151c' : '#ffd23f' };
+  }
+}
+</script>
+</body>
+</html>

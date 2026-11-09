@@ -13,6 +13,7 @@ import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
 import { Alert, Card, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
+import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 
@@ -24,17 +25,44 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
   const t = useTranslations();
   const isAdmin = org.my_role === "org_admin";
   const inviteTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach").map((tm) => ({ id: tm.id, name: tm.name }));
+  const people = isAdmin || inviteTeams.length > 0;
+  const sections: [string, string][] = [
+    ...(isAdmin ? ([["club-section", t("settings.club")], ["billing", t("billing.title")]] as [string, string][]) : []),
+    ...(people ? ([["people-section", t("settings.people")]] as [string, string][]) : []),
+    ["account-section", t("account.title")],
+    ["security", t("settings.security")],
+    ["privacy", t("privacy.title")],
+  ];
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
-      {isAdmin && <ClubSection org={org} />}
-      {isAdmin && <BillingSection orgId={org.id} />}
-      {(isAdmin || inviteTeams.length > 0) && (
-        <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
-      )}
-      <AccountSection me={me} />
-      <SecuritySection me={me} />
-      <PrivacySection orgId={org.id} orgName={org.name} isAdmin={isAdmin} hasPassword={me.has_password ?? true} />
+      <PageHeader title={t("settings.title")} />
+      <div className="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-10">
+        <nav aria-label={t("settings.title")} className="scrollbar-none -mx-1 mb-6 overflow-x-auto px-1 lg:sticky lg:top-10 lg:mb-0 lg:self-start">
+          <ul className="flex gap-1 lg:flex-col">
+            {sections.map(([id, label]) => (
+              <li key={id}>
+                <a href={`#${id}`} className="block whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium text-muted hover:bg-surface hover:text-foreground lg:rounded-md">
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="min-w-0 space-y-12 [&>*]:scroll-mt-24">
+          {isAdmin && <div id="club-section"><ClubSection org={org} /></div>}
+          {isAdmin && <BillingSection orgId={org.id} />}
+          {people && (
+            <div id="people-section">
+              <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
+            </div>
+          )}
+          <div id="account-section">
+            <AccountSection me={me} />
+          </div>
+          <SecuritySection me={me} />
+          <PrivacySection orgId={org.id} orgName={org.name} isAdmin={isAdmin} hasPassword={me.has_password ?? true} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -90,8 +118,8 @@ function ClubSection({ org }: { org: Org }) {
           {saved && <Alert kind="success">{t("common.saved")}</Alert>}
           <Input label={t("onboarding.clubName")} name="name" defaultValue={org.name} required />
           <div className="grid grid-cols-2 gap-3">
-            <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue={org.primary_color} className="h-10 p-1" />
-            <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue={org.secondary_color} className="h-10 p-1" />
+            <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue={org.primary_color} className="h-11 w-24 p-1" />
+            <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue={org.secondary_color} className="h-11 w-24 p-1" />
           </div>
           <Input label={t("onboarding.logo")} name="logo" type="file" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} />
           <Button type="submit" loading={busy}>
@@ -176,7 +204,7 @@ function PeopleSection({
           <h3 className="font-semibold">{t("settings.membersTitle")}</h3>
           {roleError && <Alert>{t(`errors.${roleError}`)}</Alert>}
           {members.data && members.data.length > 0 ? (
-            <ul className="divide-y divide-border text-sm">
+            <ul className="divide-y divide-border/70 text-sm">
               {members.data.map((m) => (
                 <li key={m.user_id} className="flex flex-wrap justify-between gap-2 py-2">
                   <span>
@@ -221,7 +249,7 @@ function PeopleSection({
         {pending.length === 0 ? (
           <p className="text-sm text-muted">{t("settings.noInvitations")}</p>
         ) : (
-          <ul className="divide-y divide-border text-sm" data-testid="pending-invitations">
+          <ul className="divide-y divide-border/70 text-sm" data-testid="pending-invitations">
             {pending.map((i) => (
               <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                 <span>
@@ -319,7 +347,7 @@ function SecuritySection({ me }: { me: Me }) {
           </form>
         )}
         {codes && (
-          <div className="space-y-2 rounded-md border border-accent p-3" data-testid="recovery-codes">
+          <div className="space-y-2 rounded-md bg-surface p-4" data-testid="recovery-codes">
             <p className="text-sm font-medium">{t("settings.recoveryTitle")}</p>
             <p className="text-sm text-muted">{t("settings.recoveryHint")}</p>
             <ul className="grid grid-cols-2 gap-1 font-mono text-sm sm:grid-cols-5">

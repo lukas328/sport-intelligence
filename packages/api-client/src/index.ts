@@ -18,6 +18,8 @@ export interface ClientOptions {
   headers?: Record<string, string>;
   /** Returns the CSRF token to send on unsafe requests (browser: from the hb_csrf cookie). */
   csrfToken?: () => string | undefined;
+  /** Native apps: the session token, sent as bearer token instead of a cookie. */
+  bearerToken?: () => string | undefined;
 }
 
 const UNSAFE = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -40,6 +42,16 @@ export function createApiClient(baseUrl: string, options: ClientOptions = {}) {
       },
     };
     client.use(csrf);
+  }
+  if (options.bearerToken) {
+    const getBearer = options.bearerToken;
+    client.use({
+      onRequest({ request }) {
+        const token = getBearer();
+        if (token) request.headers.set("authorization", `Bearer ${token}`);
+        return request;
+      },
+    });
   }
   return client;
 }

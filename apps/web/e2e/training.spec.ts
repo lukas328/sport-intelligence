@@ -14,20 +14,21 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   const teamUrl = page.url();
 
   // the bell shows no unread notifications for a new coach
-  await expect(page.getByTestId("bell")).toBeVisible();
-  await page.getByTestId("bell").click();
+  await expect(page.getByTestId("bell").filter({ visible: true })).toBeVisible();
+  await page.getByTestId("bell").filter({ visible: true }).click();
   await expect(page.getByText("Keine Mitteilungen.")).toBeVisible();
   await page.keyboard.press("Escape");
 
   // drill library with focus filter
-  await page.getByRole("link", { name: "Übungen" }).first().click();
+  await page.getByRole("link", { name: "Training", exact: true }).click();
+  await page.getByRole("link", { name: "Übungen", exact: true }).click();
   await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(11);
   await page.getByRole("link", { name: "Torhüter", exact: true }).click();
   await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(2);
   await expectAccessible(page);
 
   // my assignments: empty
-  await page.getByRole("link", { name: "Aufgaben" }).first().click();
+  await page.goto(teamUrl.replace(/\/teams\/.*/, "/assignments"));
   await expect(page.getByText("Keine Aufgaben.")).toBeVisible();
 
   // team assignments: a drill for everybody; without players the API explains why it cannot
@@ -49,9 +50,9 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   const exported = await page.request.get((await page.getByTestId("export").getAttribute("href"))!);
   expect((await exported.json()).account.name).toBe("Coach Training");
   await page.getByText("Verein löschen", { exact: true }).first().click();
-  page.on("dialog", (d) => void d.accept());
   const del = page.getByRole("form", { name: "Verein löschen" });
   await del.getByLabel("Vereinsname").fill("HC Training");
   await del.getByRole("button", { name: "Verein löschen" }).click();
+  await page.getByTestId("confirm-ok").click();
   await expect(page).toHaveURL(/\/onboarding/);
 });

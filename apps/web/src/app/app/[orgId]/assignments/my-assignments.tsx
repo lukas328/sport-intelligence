@@ -35,13 +35,13 @@ export function MyAssignments({ orgId }: { orgId: string }) {
   const now = Date.now();
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("mine")}</h1>
+      <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("mine")}</h1>
       {q.data && q.data.length === 0 && <EmptyState title={t("none")} />}
       <ul className="space-y-2" data-testid="my-assignments">
         {(q.data ?? []).map((a) => {
           const overdue = !a.done_at && a.due_at && new Date(a.due_at).getTime() < now;
           return (
-            <li key={a.id} className={cn("flex flex-wrap items-center gap-3 rounded-lg border border-border p-3", a.done_at && "opacity-70")}>
+            <li key={a.id} className={cn("flex flex-wrap items-center gap-3 rounded-lg bg-raised border border-border p-3", a.done_at && "opacity-70")}>
               <div className="min-w-0 flex-1">
                 <p className={cn("font-medium", a.done_at && "line-through")}>{a.title}</p>
                 <p className="text-sm text-muted">
@@ -51,7 +51,7 @@ export function MyAssignments({ orgId }: { orgId: string }) {
                 </p>
                 {a.note && <p className="mt-1 text-sm">{a.note}</p>}
               </div>
-              <Link href={targetLink(orgId, a)} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface">
+              <Link href={targetLink(orgId, a)} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
                 {t("openTarget")}
               </Link>
               <Button variant={a.done_at ? "ghost" : "primary"} onClick={() => toggle.mutate({ id: a.id, done: !a.done_at })}>

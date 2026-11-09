@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 export const MAILPIT = process.env.E2E_MAILPIT_URL ?? "http://localhost:8025";
 
@@ -43,4 +43,56 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.getByRole("button", { name: "Konto erstellen" }).click();
   // password hashing is deliberately slow; wait until the app has moved on
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
+}
+
+/** Team area: "Team" in the main navigation, then a section (Kader, Termine). */
+export async function openTeam(page: Page, section?: "Kader" | "Termine") {
+  await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
+  if (!section || section === "Kader") return;
+  await follow(page, page.getByRole("link", { name: section, exact: true }), /\/schedule$/);
+}
+
+/** Matches area: "Spiele" in the main navigation, then a section (Spielplan, Saison, Bibliothek). */
+export async function openMatches(page: Page, section?: "Spielplan" | "Saison" | "Bibliothek") {
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
+  if (!section || section === "Spielplan") return;
+  await follow(page, page.getByRole("link", { name: section, exact: true }), section === "Saison" ? /\/season$/ : /\/library$/);
+}
+
+/** Library entry (Playlists, Präsentationen, Szenensuche); plays sit in Training. */
+export async function openLibrary(page: Page, entry: "Playlists" | "Präsentationen" | "Szenensuche") {
+  await openMatches(page, "Bibliothek");
+  const path = { Playlists: "playlists", Präsentationen: "presentations", Szenensuche: "search" }[entry];
+  await follow(page, page.getByRole("link", { name: new RegExp(`^${entry}`) }), new RegExp(`/${path}$`));
+}
+
+/** Training area, then the plays. */
+export async function openPlays(page: Page) {
+  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
+  await follow(page, page.getByRole("link", { name: "Spielzüge", exact: true }), /\/plays$/);
+}
+
+/** Match page: analysis view and one of its sections. */
+export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Matchreport") {
+  await page.getByRole("tab", { name: "Analyse", exact: true }).click();
+  await page.getByRole("tab", { name: section, exact: true }).click();
+}
+
+/** Match page: an entry of the "Mehr" menu. */
+export async function matchMenu(page: Page) {
+  await page.getByTestId("match-menu").click();
+}
+
+/**
+ * Clicks a link and waits for the URL. Under the full parallel run a click can land while the
+ * previous route is still streaming in; one retry keeps the flows stable.
+ */
+export async function follow(page: Page, link: Locator, url: RegExp) {
+  await link.click();
+  try {
+    await page.waitForURL(url, { timeout: 10_000 });
+  } catch {
+    await link.click();
+    await page.waitForURL(url);
+  }
 }

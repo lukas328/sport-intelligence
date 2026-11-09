@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Kader</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.nav{min-height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;color:#fff;text-decoration:none;font-weight:500}
+.sub{min-height:38px;display:flex;align-items:center;padding:0 12px 0 42px;color:#fff;text-decoration:none;font-size:15px}
+.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Big Shoulders Display',sans-serif}
+th{font-size:14px;font-weight:600;text-align:left;padding:12px 14px;border-bottom:2px solid #10151c}
+td{padding:14px;text-align:left;border-bottom:1px solid #10151c}
+</style>
+</helmet>
+<div style="--club: {{club}}; --deep: {{deep}}; --ink: {{ink}}; --paper: {{paper}}; --signal: {{signal}}; min-height: 900px; display: flex; flex-wrap: wrap; background: var(--paper); color: #10151c; font-family: 'Barlow', sans-serif">
+  <nav aria-label="Hauptnavigation" style="flex: 1 1 248px; box-sizing: border-box; padding: 24px 16px; background: var(--deep); color: #fff; display: flex; flex-direction: column">
+    <div class="disp" style="padding: 0 12px; font-weight: 900; font-size: 30px; line-height: 0.95">HC<br>GRAUHOLZ</div>
+    <div style="padding: 0 12px; margin: 10px 0 28px; font-size: 15px">Herren 1, Saison 2026/27</div>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h16v14H2zM10 3v14M18 6c-4 0-5 2-5 4s1 4 5 4"></path></svg>Übersicht</a>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17V4h14v13M3 8h14M7.7 4v13M12.3 4v13"></path></svg>Spiele</a>
+    <a class="nav" href="#" style="font-weight: 600"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3 2 6l2 3 2-1v9h8V8l2 1 2-3-4-3-2 2H8z"></path></svg>Team</a>
+    <a class="sub" href="#" aria-current="page" style="font-weight: 600; box-shadow: inset 3px 0 0 #ffd23f">Kader</a>
+    <a class="sub" href="#">Saison</a>
+    <a class="sub" href="#">Bibliothek</a>
+    <a class="nav" href="#"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3 15 17H5zM7 12h6"></path></svg>Training</a>
+  </nav>
+  <main style="flex: 999 1 560px; min-width: 0; padding: 40px 56px; box-sizing: border-box">
+    <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 3px solid #10151c; padding-bottom: 14px">
+      <div>
+        <p class="num" style="margin: 0; font-size: 13px">Saison 2026/27, 3 Spieler</p>
+        <h1 class="disp" style="margin: 4px 0 0; font-size: 56px; font-weight: 900; line-height: 1; text-transform: uppercase">Kader</h1>
+      </div>
+      <a href="#" style="min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; padding: 0 20px; background: #10151c; color: #fff; font-weight: 600; text-decoration: none; border-radius: 3px">Spieler hinzufügen</a>
+    </header>
+    <div style="overflow-x: auto; margin-top: 24px; background: #fff; border: 2px solid #10151c">
+      <table style="width: 100%; border-collapse: collapse; font-size: 16px">
+        <thead><tr><th style="width: 76px">Nr.</th><th>Name</th><th>Position</th><th>Wurfhand</th><th>Konto</th><th><span style="position: absolute; left: -9999px">Aktion</span></th></tr></thead>
+        <tbody>
+          <tr><td class="disp" style="font-size: 30px; font-weight: 800">3</td><td style="font-weight: 600">Keller Noah</td><td class="num">RL</td><td>Rechts</td><td>Kein Konto</td><td style="text-align: right"><a href="#" style="color: #10151c">Einladen</a></td></tr>
+          <tr><td class="disp" style="font-size: 30px; font-weight: 800">10</td><td style="font-weight: 600">Brunner Luca</td><td class="num">RM</td><td>Rechts</td><td>Kein Konto</td><td style="text-align: right"><a href="#" style="color: #10151c">Einladen</a></td></tr>
+          <tr><td class="disp" style="font-size: 30px; font-weight: 800">99</td><td style="font-weight: 600">Frei Elias</td><td class="num">TW</td><td>Links</td><td>Kein Konto</td><td style="text-align: right"><a href="#" style="color: #10151c">Einladen</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"club":{"editor":"color","default":"#0b6bcb","options":["#0b6bcb","#c8102e","#0f6b46","#ffd100"]},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const club = this.props.club ?? '#0b6bcb';
+    const rgb = [0, 2, 4].map(function (i) { return parseInt(club.slice(1 + i, 3 + i), 16); });
+    const lin = rgb.map(function (c) { const s = c / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); });
+    const l = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    const hex = function (a) { return '#' + a.map(function (c) { return Math.round(c).toString(16).padStart(2, '0'); }).join(''); };
+    const mix = function (t, p) { return hex(rgb.map(function (c, i) { return c + (t[i] - c) * p; })); };
+    const light = 1.05 / (l + 0.05) < (l + 0.05) / 0.05;
+    return { club: club, ink: light ? '#10151c' : '#ffffff', deep: light ? '#14171c' : mix([5, 12, 24], 0.78), paper: mix([255, 255, 255], 0.93), signal: light ? '#ffd100' : '#ffd23f' };
+  }
+}
+</script>
+</body>
+</html>

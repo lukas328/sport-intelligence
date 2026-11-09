@@ -17,10 +17,10 @@ from sqlalchemy import select
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, Match, Opponent, ScoutingReport, Team, VideoAsset
-from handball_api.models.enums import TeamRole, VideoRole, VideoStatus
+from handball_api.models.enums import TeamRole
 from handball_api.services import audit, scouting_pdf, training
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match
+from handball_api.services.matches import duration_ms, get_match, in_video, timeline_videos
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, can
 
@@ -39,8 +39,17 @@ def _ref(e: Event, videos: dict[uuid.UUID, uuid.UUID]) -> dict[str, Any]:
     }
 
 
-def _clips(events: list[Event], videos: dict[uuid.UUID, uuid.UUID]) -> list[dict[str, Any]]:
-    with_video = [e for e in events if e.t_ms is not None and e.match_id in videos]
+def _clips(
+    events: list[Event],
+    videos: dict[uuid.UUID, uuid.UUID],
+    lengths: dict[uuid.UUID, int | None] | None = None,
+) -> list[dict[str, Any]]:
+    """The last few events each match's video shows (an official goal before or after a clip of
+    part of the game has no moment to jump to)."""
+    lengths = lengths or {}
+    with_video = [
+        e for e in events if e.match_id in videos and in_video(e.t_ms, lengths.get(e.match_id))
+    ]
     return [_ref(e, videos) for e in with_video[-CLIPS:]]
 
 
@@ -68,6 +77,7 @@ def build_facts(
     matches: list[Match],
     events: list[Event],
     videos: dict[uuid.UUID, uuid.UUID],
+    lengths: dict[uuid.UUID, int | None] | None = None,
 ) -> dict[str, Any]:
     tagged = sorted({e.match_id for e in events})
     opp_shots = [e for e in events if e.type == "shot" and e.side == "opponent"]
@@ -122,7 +132,7 @@ def build_facts(
                 "goal_zones": dict(goal_zones.most_common()),
                 "main_zone": zones.most_common(1)[0][0] if zones else None,
                 "n": len(shots),
-                "clips": _clips(goals, videos),
+                "clips": _clips(goals, videos, lengths),
             }
         )
     shooters = shooters[:6]
@@ -132,7 +142,7 @@ def build_facts(
         "goals": len(fast),
         "share": _pct(len(fast), len(opp_goals)),
         "n": len(opp_goals),
-        "clips": _clips(fast, videos),
+        "clips": _clips(fast, videos, lengths),
     }
 
     our_short = _windows(events, "own")
@@ -146,14 +156,14 @@ def build_facts(
             "goals": len(pp_goals),
             "per_period": round(len(pp_goals) / len(our_short), 2) if our_short else None,
             "n": len(our_short),
-            "clips": _clips(pp_goals, videos),
+            "clips": _clips(pp_goals, videos, lengths),
         },
         "we_in_powerplay": {
             "periods": len(their_short),
             "goals": len(sh_goals),
             "per_period": round(len(sh_goals) / len(their_short), 2) if their_short else None,
             "n": len(their_short),
-            "clips": _clips(sh_goals, videos),
+            "clips": _clips(sh_goals, videos, lengths),
         },
     }
 
@@ -172,7 +182,7 @@ def build_facts(
                 "shots": len(shots),
                 "pct": _pct(len(goals), len(shots)),
                 "n": len(shots),
-                "clips": _clips(goals, videos),
+                "clips": _clips(goals, videos, lengths),
             }
         )
     weak = sorted((w for w in weak if w["n"] >= 3), key=lambda w: -(w["pct"] or 0))[:3]
@@ -239,7 +249,7 @@ def build_facts(
 
 async def _data(
     ctx: Ctx, team: Team, opponent: Opponent, before: datetime
-) -> tuple[list[Match], list[Event], dict[uuid.UUID, uuid.UUID]]:
+) -> tuple[list[Match], list[Event], dict[uuid.UUID, uuid.UUID], dict[uuid.UUID, int | None]]:
     matches = list(
         (
             await ctx.db.scalars(
@@ -262,18 +272,10 @@ async def _data(
             )
         ).all()
     )
-    videos = dict(
-        (
-            await ctx.db.execute(
-                select(VideoAsset.match_id, VideoAsset.id).where(
-                    VideoAsset.match_id.in_(ids),
-                    VideoAsset.role == VideoRole.MAIN,
-                    VideoAsset.status == VideoStatus.READY,
-                )
-            )
-        ).all()
-    )
-    return matches, events, videos
+    timeline = await timeline_videos(ctx, ids)
+    videos = {mid: v.id for mid, v in timeline.items()}
+    lengths = {mid: duration_ms(v) for mid, v in timeline.items()}
+    return matches, events, videos, lengths
 
 
 async def create(ctx: Ctx, match: Match) -> ScoutingReport:
@@ -282,8 +284,8 @@ async def create(ctx: Ctx, match: Match) -> ScoutingReport:
     team = await ctx.db.get(Team, match.team_id)
     opponent = await ctx.db.get(Opponent, match.opponent_id)
     assert team is not None and opponent is not None
-    matches, events, videos = await _data(ctx, team, opponent, match.kickoff_at)
-    facts = build_facts(opponent, matches, events, videos)
+    matches, events, videos, lengths = await _data(ctx, team, opponent, match.kickoff_at)
+    facts = build_facts(opponent, matches, events, videos, lengths)
     formations: Counter[str] = Counter()
     for v in (
         await ctx.db.scalars(select(VideoAsset).where(VideoAsset.id.in_(list(videos.values()))))

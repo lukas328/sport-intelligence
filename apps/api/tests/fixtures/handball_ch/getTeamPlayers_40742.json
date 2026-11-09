@@ -1,0 +1,132 @@
+{
+ "operation": "getTeamPlayers",
+ "variables": {
+  "teamId": 40742
+ },
+ "response": {
+  "data": {
+   "playerStaff": [
+    {
+     "teamId": 40742,
+     "player": [
+      {
+       "playerId": 329985,
+       "firstName": "Luca",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 302194,
+       "firstName": "Noah",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 360142,
+       "firstName": "Leon",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 297454,
+       "firstName": "Elias",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 308514,
+       "firstName": "Jonas",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 300956,
+       "firstName": "Nico",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 321280,
+       "firstName": "Tim",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 302124,
+       "firstName": "Jan",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 345728,
+       "firstName": "Fabio",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 290127,
+       "firstName": "Simon",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 297615,
+       "firstName": "Levin",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 302140,
+       "firstName": "Matteo",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 312228,
+       "firstName": "Lars",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 306454,
+       "firstName": "Robin",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 322246,
+       "firstName": "Dario",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 272284,
+       "firstName": "Gian",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 326617,
+       "firstName": "Joel",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 287738,
+       "firstName": "Yves",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 297455,
+       "firstName": "Remo",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 339405,
+       "firstName": "Silvan",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 279226,
+       "firstName": "Cedric",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 297460,
+       "firstName": "Pascal",
+       "lastName": "Muster"
+      },
+      {
+       "playerId": 312230,
+       "firstName": "Andrin",
+       "lastName": "Muster"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -3,14 +3,17 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Keyboard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
+import { CourtCalibration } from "@/components/analysis/court-calibration";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
-import { Input, Select } from "@/components/ui/field";
+import { Segmented } from "@/components/ui/tabs";
+import { control, Input, Select } from "@/components/ui/field";
 import { SpotlightControls, useSpotlight } from "@/components/video/spotlight-controls";
 import { SpotlightOverlay } from "@/components/video/spotlight";
 import { MultiAngleControls, useMultiAngle } from "@/components/video/multi-angle";
@@ -28,6 +31,7 @@ import { cn } from "@/lib/utils";
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
 type Tab = "comments" | "clips" | "drawings" | "events";
+type Deck = "detection" | "formations" | "identity";
 const TOOLS: Tool[] = ["arrow", "line", "circle", "freehand", "spotlight"];
 const COLORS = ["#facc15", "#ef4444", "#22c55e", "#3b82f6", "#ffffff"];
 
@@ -86,6 +90,7 @@ export function Workspace({
   }
   const [now, setNow] = useState(0);
   const [tab, setTab] = useState<Tab>("comments");
+  const [deck, setDeck] = useState<Deck>("detection");
   const [drawing, setDrawing] = useState(false);
   const [tool, setTool] = useState<Tool>("arrow");
   const [color, setColor] = useState(COLORS[0]!);
@@ -113,7 +118,7 @@ export function Workspace({
         .data ?? null,
   });
   const kitColours = useMemo(
-    () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: "#111827" }),
+    () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: match.kit_referee ?? "#111827" }),
     [match],
   );
   const getTime = useCallback(() => player.current.time() ?? 0, []);
@@ -309,49 +314,86 @@ export function Workspace({
         {cams.length > 1 && !offset && <MultiAngleControls cams={cams} state={multi} />}
         {spot.ready && !offset && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
-        <p className="text-xs text-muted">{t("player.shortcutsList")}</p>
-        <AnalysisPanel analysis={analysis.data ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} />
-        {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
-          <Button
-            variant="secondary"
-            title={t("tactics.fromVideoHint")}
-            onClick={async () => {
-              player.current.pause();
-              const ms = Math.round(player.current.time());
-              const doc = await playFromVideo(`/v1/orgs/${orgId}/videos/${video.id}/tracks`, analysis.data!.chunk_ms!, ms, analysis.data!.tracks);
-              if (!doc) return setFailure("generic");
-              try {
-                window.sessionStorage.setItem(FROM_VIDEO_KEY, JSON.stringify({ doc, match_id: match.id, t_ms: ms }));
-              } catch {
-                return setFailure("generic");
-              }
-              router.push(`/app/${orgId}/teams/${match.team_id}/plays/new?from=video`);
-            }}
-          >
-            {t("tactics.fromVideo")}
-          </Button>
-        )}
-        {analysis.data?.status === "ready" && (
-          <FormationsCard
-            formations={analysis.data.formations ?? []}
-            onSeek={(ms) => {
-              player.current.seek(ms);
-              player.current.play();
-            }}
-          />
-        )}
-        {staff && analysis.data?.status === "ready" && (
-          <IdentityPanel
-            orgId={orgId}
-            match={match}
-            videoId={video.id}
-            tracks={analysis.data.tracks}
-            onSeek={(ms) => {
-              player.current.pause();
-              player.current.seek(ms);
-            }}
-          />
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              title={t("tactics.fromVideoHint")}
+              onClick={async () => {
+                player.current.pause();
+                const ms = Math.round(player.current.time());
+                const doc = await playFromVideo(`/v1/orgs/${orgId}/videos/${video.id}/tracks`, analysis.data!.chunk_ms!, ms, analysis.data!.tracks);
+                if (!doc) return setFailure("generic");
+                try {
+                  window.sessionStorage.setItem(FROM_VIDEO_KEY, JSON.stringify({ doc, match_id: match.id, t_ms: ms }));
+                } catch {
+                  return setFailure("generic");
+                }
+                router.push(`/app/${orgId}/teams/${match.team_id}/plays/new?from=video`);
+              }}
+            >
+              {t("tactics.fromVideo")}
+            </Button>
+          )}
+          <details className="group relative">
+            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
+              <Keyboard aria-hidden className="size-4" />
+              {t("player.shortcuts")}
+            </summary>
+            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-md bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
+          </details>
+        </div>
+        <div className="space-y-4 rounded-lg bg-raised p-4 border border-border sm:p-5">
+          {analysis.data?.status === "ready" && (
+            <Segmented<Deck>
+              label={t("player.deck")}
+              size="sm"
+              value={deck}
+              onChange={setDeck}
+              items={[
+                { value: "detection", label: t("player.deckDetection") },
+                { value: "formations", label: t("formations.title") },
+                ...(staff ? [{ value: "identity" as const, label: t("identity.title") }] : []),
+              ]}
+            />
+          )}
+          {(deck === "detection" || !(analysis.data?.status === "ready")) && (
+            <AnalysisPanel
+              analysis={analysis.data ?? null}
+              orgId={orgId}
+              videoId={video.id}
+              colours={kitColours}
+              getTime={getTime}
+              canCalibrate={staff}
+            />
+          )}
+          {deck === "formations" && analysis.data?.status === "ready" && (
+            (
+              <FormationsCard
+                formations={analysis.data.formations ?? []}
+                onSeek={(ms) => {
+                  player.current.seek(ms);
+                  player.current.play();
+                }}
+              />
+            )
+          )}
+          {deck === "identity" && staff && analysis.data?.status === "ready" && (
+            (
+              <IdentityPanel
+                orgId={orgId}
+                match={match}
+                videoId={video.id}
+                tracks={analysis.data.tracks}
+                onSeek={(ms) => {
+                  player.current.pause();
+                  player.current.seek(ms);
+                }}
+              />
+            )
+          )}
+        </div>
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
         {notice && (
           <Alert kind="success" className="py-2">
@@ -360,20 +402,17 @@ export function Workspace({
         )}
       </div>
 
-      <Card className="flex max-h-[42rem] min-w-0 flex-col gap-3 p-3">
-        <div role="tablist" className="flex flex-wrap gap-1">
-          {(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => (
-            <button
-              key={k}
-              role="tab"
-              aria-selected={tab === k}
-              onClick={() => setTab(k)}
-              className={cn("flex-1 whitespace-nowrap rounded px-2 py-1.5 text-sm", tab === k ? "bg-accent text-accent-contrast" : "hover:bg-surface")}
-            >
-              {t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`)}
-            </button>
-          ))}
-        </div>
+      <div className="flex max-h-[44rem] min-w-0 flex-col gap-4 rounded-lg bg-raised p-4 border border-border">
+        <Segmented<Tab>
+          label={t("tabs.video")}
+          size="sm"
+          value={tab}
+          onChange={setTab}
+          items={(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => ({
+            value: k,
+            label: t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`),
+          }))}
+        />
 
         {tab === "events" && staff && (
           <div role="tabpanel" className="flex min-h-0 flex-1 flex-col">
@@ -386,8 +425,8 @@ export function Workspace({
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
               {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.empty")}</li>}
               {(comments.data ?? []).map((c) => (
-                <li key={c.id} className="rounded bg-surface p-2">
-                  <button className="font-mono text-xs text-accent underline" onClick={() => player.current.seek(c.t_ms)}>
+                <li key={c.id} className="rounded-md bg-surface px-3 py-2">
+                  <button className="rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
                     {formatClock(c.t_ms)}
                   </button>{" "}
                   <span className="text-xs text-muted">{c.author_name}</span>
@@ -417,7 +456,7 @@ export function Workspace({
                 name="body"
                 maxLength={2000}
                 placeholder={t("comments.placeholder", { time: formatClock(now) })}
-                className="min-h-10 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm"
+                className={cn(control, "min-w-0 flex-1")}
               />
               <Button type="submit" variant="secondary">
                 {t("comments.add")}
@@ -485,7 +524,7 @@ export function Workspace({
                       key={k}
                       aria-pressed={tool === k}
                       onClick={() => setTool(k)}
-                      className={cn("rounded border px-2 py-1 text-xs", tool === k ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+                      className={cn("rounded-md border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
                     >
                       {t(`draw.tool_${k}`)}
                     </button>
@@ -528,7 +567,7 @@ export function Workspace({
             </ul>
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
@@ -542,25 +581,30 @@ function AnalysisPanel({
   videoId,
   colours,
   getTime,
+  canCalibrate,
 }: {
   analysis: Analysis | null;
   orgId: string;
   videoId: string;
   colours: Record<string, string>;
   getTime: () => number;
+  canCalibrate: boolean;
 }) {
   const t = useTranslations("analysis");
+  const [marking, setMarking] = useState(false);
   const ready = analysis?.status === "ready";
   useEffect(() => {
     if (ready) track("analysis_viewed");
   }, [ready]);
   if (!analysis || analysis.status === "none") return null;
+  const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
+  const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
   return (
     <Card className="space-y-3 p-3" data-testid="analysis-panel">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold">{t("title")}</h2>
         {analysis.detector === "heuristic" && (
-          <span className="rounded-full bg-surface px-2 py-0.5 text-xs" title={t("heuristicHint")}>
+          <span className="rounded-md bg-surface px-2 py-0.5 text-xs" title={t("heuristicHint")}>
             {t("heuristic")}
           </span>
         )}
@@ -579,8 +623,23 @@ function AnalysisPanel({
             ? t("autoNoGoalkeepers")
             : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
           {t("autoLimits")}
+          {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
+            <span className="block" data-testid="overlay-goals">
+              {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}
+            </span>
+          )}
         </p>
       )}
+      {analysis.status === "ready" && analysis.needs_calibration && (
+        <Alert kind="info">{t(canMark ? "needsCalibration" : "needsCalibrationStaff")}</Alert>
+      )}
+      {analysis.status === "ready" && !analysis.needs_calibration && unconfirmed && <p className="text-sm text-muted">{t("checkCourt")}</p>}
+      {canMark && (
+        <Button variant={analysis.needs_calibration ? "primary" : "secondary"} onClick={() => setMarking(true)} data-testid="mark-court">
+          {t(analysis.needs_calibration ? "markCourt" : "checkCourtButton")}
+        </Button>
+      )}
+      {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} onClose={() => setMarking(false)} />}
       {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
         <MiniCourt
           baseUrl={`/v1/orgs/${orgId}/videos/${videoId}/tracks`}
@@ -664,7 +723,7 @@ function IdentityPanel({
                 id={`track-${tr.track_no}`}
                 value={tr.player_id ?? ""}
                 onChange={(e) => void assign(tr.track_no, e.target.value)}
-                className="min-h-9 flex-1 rounded-md border border-border bg-background px-2"
+                className="min-h-9 flex-1 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
               >
                 <option value="">{t("none")}</option>
                 {(roster.data ?? [])
@@ -716,7 +775,7 @@ function CameraSwitch({
             key={c.id}
             aria-pressed={c.id === active.id}
             onClick={() => onSwitch(c.id)}
-            className={cn("rounded border px-2 py-1", c.id === active.id ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+            className={cn("rounded-md border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
           >
             {t(c.role)}
           </button>
@@ -751,7 +810,7 @@ function CameraSwitch({
               step={10}
               defaultValue={active.time_offset_ms}
               key={active.id}
-              className="min-h-9 w-28 rounded-md border border-border bg-background px-2 text-sm"
+              className="min-h-9 w-28 rounded-md bg-raised ring-1 ring-inset ring-border px-2 text-sm"
             />
           </label>
           <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">

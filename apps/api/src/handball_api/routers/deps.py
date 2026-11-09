@@ -4,7 +4,7 @@ import re
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, Any
 from urllib.parse import urlsplit
 
 from fastapi import Depends, Path, Request, Response
@@ -77,6 +77,10 @@ CtxDep = Annotated[Ctx, Depends(get_ctx)]
 async def optional_session(request: Request, ctx: CtxDep) -> tuple[AuthSession, User] | None:
     token = request.cookies.get(ctx.settings.session_cookie)
     if not token:
+        # native apps (5.5): the session token as bearer token instead of a cookie
+        auth = request.headers.get("authorization", "")
+        token = auth[7:].strip() if auth.lower().startswith("bearer ") else None
+    if not token:
         return None
     return await auth_service.resolve_session(ctx, token)
 
@@ -137,6 +141,16 @@ def rate_limit(scope: str) -> Callable[[Request, Settings], Awaitable[None]]:
             raise ProblemError(429, "rate-limited", "Too many attempts, try again later")
 
     return _dep
+
+
+def per_user(scope: str, limit: tuple[int, int]) -> Any:
+    """Rate limit of a signed-in person: `limit` = (requests, window in seconds)."""
+
+    async def _dep(request: Request, auth: AuthedDep) -> None:
+        if not await request.app.state.rate_limiter.hit(f"{scope}:{auth.user.id}", *limit):
+            raise ProblemError(429, "rate-limited", "Too many requests, try again later")
+
+    return Depends(_dep)
 
 
 def set_session_cookies(

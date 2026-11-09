@@ -26,7 +26,7 @@ export function Remote({ orgId, presId, pairKey }: { orgId: string; presId: stri
     return [Math.round(((e.clientX - r.left) / r.width) * 1000) / 1000, Math.round(((e.clientY - r.top) / r.height) * 1000) / 1000];
   }
   if (!pairKey) return <Alert>{t("remoteMissing")}</Alert>;
-  const big = "min-h-20 rounded-xl border border-border text-xl font-semibold active:bg-surface";
+  const big = "min-h-20 rounded-md border border-border text-xl font-semibold active:bg-surface";
   return (
     <div className="mx-auto max-w-md space-y-4">
       <h1 className="text-xl font-semibold">{t("remote")}</h1>
@@ -49,7 +49,7 @@ export function Remote({ orgId, presId, pairKey }: { orgId: string; presId: stri
       <svg
         ref={pad}
         viewBox="0 0 1000 562"
-        className="aspect-video w-full touch-none rounded-lg border border-border bg-surface"
+        className="aspect-video w-full touch-none rounded-lg bg-raised border border-border bg-surface"
         role="img"
         aria-label={t("drawHere")}
         onPointerDown={(e) => setStroke([point(e)])}
@@ -61,7 +61,7 @@ export function Remote({ orgId, presId, pairKey }: { orgId: string; presId: stri
       >
         <polyline points={stroke.map(([x, y]) => `${x * 1000},${y * 562}`).join(" ")} fill="none" stroke="#facc15" strokeWidth={6} />
       </svg>
-      <button type="button" className="w-full rounded-md border border-border py-2" onClick={() => void send("clear")}>
+      <button type="button" className="w-full rounded-md ring-1 ring-inset ring-border py-2" onClick={() => void send("clear")}>
         {t("clear")}
       </button>
       {sent && (

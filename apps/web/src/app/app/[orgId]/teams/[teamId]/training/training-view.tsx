@@ -3,10 +3,11 @@
 import type { Schemas } from "@handball/api-client";
 import { DRILLS } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, Card, EmptyState, Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { move, toDrillItem, totalMinutes, type DrillItem } from "@/lib/drill-snapshot";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -97,9 +98,9 @@ function SessionForm({
                 />
                 {t("min")}
               </label>
-              <button type="button" aria-label={t("up")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, -1))}>↑</button>
-              <button type="button" aria-label={t("down")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, 1))}>↓</button>
-              <button type="button" aria-label={t("remove")} className="px-1 text-error" onClick={() => setDrills((ds) => ds.filter((_, j) => j !== i))}>×</button>
+              <button type="button" aria-label={t("up")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, -1))}><ArrowUp aria-hidden className="size-4" /></button>
+              <button type="button" aria-label={t("down")} className="px-1" onClick={() => setDrills((ds) => move(ds, i, 1))}><ArrowDown aria-hidden className="size-4" /></button>
+              <button type="button" aria-label={t("remove")} className="px-1 text-error" onClick={() => setDrills((ds) => ds.filter((_, j) => j !== i))}><X aria-hidden className="size-4" /></button>
             </li>
           ))}
         </ol>
@@ -123,7 +124,7 @@ function SessionForm({
       </div>
       <label className="block text-sm">
         <span className="block font-medium">{t("notes")}</span>
-        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full rounded-md border border-border bg-background p-2" />
+        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full rounded-md bg-raised ring-1 ring-inset ring-border p-2" />
       </label>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       <Button type="submit" disabled={save.isPending}>{t("save")}</Button>
@@ -160,7 +161,7 @@ function AttendancePanel({ orgId, kind, id }: { orgId: string; kind: "session" |
         </thead>
         <tbody>
           {list.map((r) => (
-            <tr key={r.player_id} className="border-t border-border">
+            <tr key={r.player_id} className="border-t border-border/70">
               <td className="py-1">{r.number != null ? `#${r.number} ` : ""}{r.name}</td>
               <td className="py-1">{r.response ? t(`reply_${r.response}`) : "-"}</td>
               <td className="py-1">
@@ -197,12 +198,11 @@ function FocusList({ focus }: { focus: Focus[] }) {
     <section className="space-y-2" aria-labelledby="focus-title">
       <h3 id="focus-title" className="text-lg font-semibold">{t("focusTitle")}</h3>
       <p className="text-sm text-muted">{t("focusHint")}</p>
-      <ul className="space-y-2">
+      <ul className="border-t-2 border-foreground">
         {focus.map((f) => {
           const fu = f.followup;
           return (
-            <li key={f.id}>
-              <Card className="space-y-1 text-sm">
+            <li key={f.id} className="space-y-1 border-b border-foreground/15 py-3 text-sm">
                 <p className="font-medium">{f.metric ? tm(`m_${f.metric}`) : f.insight_key}</p>
                 {fu ? (
                   <>
@@ -216,7 +216,6 @@ function FocusList({ focus }: { focus: Focus[] }) {
                 ) : (
                   <p className="text-muted">{t("noFollowup")}</p>
                 )}
-              </Card>
             </li>
           );
         })}
@@ -236,6 +235,7 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
   const [open, setOpen] = useState<string | null>(null);
   const [calendar, setCalendar] = useState<string | null>(null);
   const [imported, setImported] = useState<{ created: number; updated: number } | null>(null);
+  const [icsName, setIcsName] = useState<string | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
   const sessions = useQuery({
     queryKey: ["sessions", teamId],
@@ -286,8 +286,7 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
   };
 
   const item = (s: Session) => (
-    <li key={s.id}>
-      <Card className="space-y-2">
+    <li key={s.id} className="space-y-2 border-b border-foreground/15 py-4">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h3 className="font-semibold">{s.title || t("defaultTitle")}</h3>
           <span className="text-sm text-muted">
@@ -298,29 +297,31 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
         </div>
         {s.drills.length > 0 && <p className="text-sm">{s.drills.map((d) => d.name).join(" · ")}</p>}
         <div className="flex flex-wrap gap-3 text-sm">
-          <a className="text-accent underline" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
+          <a className="font-medium text-accent hover:underline" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
           {canPlan && (
             <>
-              <button type="button" className="text-accent underline" onClick={() => setEditing(s.id)}>{t("edit")}</button>
-              <button type="button" className="text-accent underline" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
+              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setEditing(s.id)}>{t("edit")}</button>
+              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
               <button type="button" className="text-error underline" onClick={() => remove.mutate(s.id)}>{t("delete")}</button>
             </>
           )}
         </div>
         {editing === s.id && <SessionForm orgId={orgId} teamId={teamId} initial={s} onDone={done} />}
         {open === s.id && <AttendancePanel orgId={orgId} kind="session" id={s.id} />}
-      </Card>
     </li>
   );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="text-xl font-semibold">{t("title")}</h2>
-          <p className="text-sm text-muted">{t("hint")}</p>
-        </div>
-        {canPlan && <Button onClick={() => setEditing(editing === "new" ? null : "new")}>{t("new")}</Button>}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="sr-only">{t("title")}</h2>
+        <p className="max-w-xl text-sm text-muted">{t("hint")}</p>
+        {canPlan && (
+          <Button onClick={() => setEditing(editing === "new" ? null : "new")}>
+            <Plus aria-hidden />
+            {t("new")}
+          </Button>
+        )}
       </div>
       {editing === "new" && (
         <Card>
@@ -330,35 +331,39 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       <section className="space-y-2" aria-labelledby="upcoming">
         <h3 id="upcoming" className="text-lg font-semibold">{t("upcoming")}</h3>
-        {upcoming.length === 0 ? <EmptyState title={t("none")} /> : <ul className="space-y-2">{upcoming.map(item)}</ul>}
+        {upcoming.length === 0 ? <EmptyState title={t("none")} /> : <ul className="border-t-2 border-foreground">{upcoming.map(item)}</ul>}
       </section>
       {past.length > 0 && (
         <section className="space-y-2" aria-labelledby="past">
           <h3 id="past" className="text-lg font-semibold">{t("past")}</h3>
-          <ul className="space-y-2">{past.map(item)}</ul>
+          <ul className="border-t-2 border-foreground">{past.map(item)}</ul>
         </section>
       )}
       <FocusList focus={focus.data ?? []} />
       {canPlan && (
-        <section className="grid gap-4 md:grid-cols-2">
-          <Card className="space-y-2">
-            <h3 className="font-semibold">{t("calendar")}</h3>
+        <section className="grid gap-10 md:grid-cols-2 md:gap-x-12">
+          <Sheet className="space-y-2">
+            <h3 className="text-lg">{t("calendar")}</h3>
             <p className="text-sm text-muted">{t("calendarHint")}</p>
             {calendar ? (
               <input readOnly value={calendar} aria-label={t("calendar")} className={`${control} w-full`} onFocus={(e) => e.currentTarget.select()} />
             ) : (
               <Button variant="secondary" onClick={() => link.mutate()}>{t("calendarCreate")}</Button>
             )}
-          </Card>
-          <Card>
-            <form onSubmit={importIcs} className="space-y-2">
-              <h3 className="font-semibold">{t("importTitle")}</h3>
+          </Sheet>
+          <Sheet>
+            <form onSubmit={importIcs} className="space-y-3">
+              <h3 className="text-lg">{t("importTitle")}</h3>
               <p className="text-sm text-muted">{t("importHint")}</p>
-              <input name="ics" type="file" accept=".ics,text/calendar" required className="block text-sm" aria-label={t("importTitle")} />
+              <label className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
+                <span className="ml-1 rounded-sm bg-surface px-3 py-1 text-sm font-semibold">{tr("roster.csvChoose")}</span>
+                <span className="min-w-0 truncate text-muted">{icsName ?? tr("roster.csvNone")}</span>
+                <input name="ics" type="file" accept=".ics,text/calendar" required className="sr-only" aria-label={t("importTitle")} onChange={(e) => setIcsName(e.currentTarget.files?.[0]?.name ?? null)} />
+              </label>
               <Button type="submit" variant="secondary">{t("import")}</Button>
               {imported && <p className="text-sm text-ok">{t("imported", imported)}</p>}
             </form>
-          </Card>
+          </Sheet>
         </section>
       )}
     </div>

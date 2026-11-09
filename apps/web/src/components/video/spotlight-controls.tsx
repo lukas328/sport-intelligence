@@ -19,7 +19,14 @@ export interface SpotlightState {
 
 export function useSpotlight(analysis: Analysis | null): SpotlightState {
   const [s, setS] = useState({ track: null as number | null, dim: false, trail: true, picking: false });
-  const ready = Boolean(analysis?.status === "ready" && analysis.calibration && analysis.chunk_ms && (analysis.chunks ?? 0) > 0);
+  // moving cameras: the stored calibration refers to the panorama, not to each frame (ADR 020)
+  const ready = Boolean(
+    analysis?.status === "ready" &&
+      analysis.calibration &&
+      analysis.camera !== "moving" &&
+      analysis.chunk_ms &&
+      (analysis.chunks ?? 0) > 0,
+  );
   return { ready, ...s, set: (patch) => setS((cur) => ({ ...cur, ...patch })) };
 }
 
@@ -30,7 +37,7 @@ export function SpotlightControls({ spot, tracks, names }: { spot: SpotlightStat
     (tr.player_id && names[tr.player_id]) || (tr.number != null ? `#${tr.number}` : t("track", { n: tr.track_no }));
   const players = tracks.filter((tr) => tr.team && tr.team !== "referee" && tr.observed_share > 0.05);
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-md border border-border p-2" data-testid="spotlight-controls">
+    <div className="flex flex-wrap items-end gap-3 rounded-md ring-1 ring-inset ring-border p-2" data-testid="spotlight-controls">
       <Select
         label={t("title")}
         value={spot.track ?? ""}

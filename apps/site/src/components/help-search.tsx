@@ -14,7 +14,7 @@ export function HelpSearch({ entries, locale, t }: { entries: HelpEntry[]; local
   const hits = useMemo(() => searchHelp(entries, locale, query), [entries, locale, query]);
   const card = (e: HelpEntry) => (
     <li key={e.slug}>
-      <Link href={`/${locale}/hilfe/${e.slug}/`} className="block rounded-lg border border-border p-4 hover:border-accent">
+      <Link href={`/${locale}/hilfe/${e.slug}/`} className="block rounded-2xl bg-raised ring-1 ring-border/70 p-4 hover:border-accent">
         <span className="font-semibold">{e.title[locale]}</span>
         <span className="mt-1 block text-sm text-muted">{e.summary[locale]}</span>
       </Link>
@@ -29,7 +29,7 @@ export function HelpSearch({ entries, locale, t }: { entries: HelpEntry[]; local
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t.search}
-          className="w-full rounded-md border border-border bg-background px-3 py-2.5"
+          className="w-full rounded-xl ring-1 ring-inset ring-border bg-background px-3 py-2.5"
         />
       </label>
       {query.trim() ? (

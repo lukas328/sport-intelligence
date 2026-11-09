@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, openLibrary, register, uniqueEmail } from "./helpers";
 
 // Addendum 01, A2: own tags and smart playlists, presentation with presenter view and phone remote.
 test("video session: tags, smart playlist, presentation with phone remote", async ({ page, context, browser }, info) => {
@@ -30,7 +30,7 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   }
 
   // own tags on the scene search page
-  await page.getByRole("link", { name: "Szenen", exact: true }).click();
+  await openLibrary(page, "Szenensuche");
   await expect(page.getByRole("heading", { name: "Szenen suchen" })).toBeVisible();
   const newSet = page.getByRole("form", { name: "Neues Tag-Set" });
   await newSet.getByLabel("Neues Tag-Set").fill("Abwehr");
@@ -50,7 +50,7 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   await expectAccessible(page);
 
   // presentation: text slide, presenter view, phone remote
-  await page.getByRole("link", { name: "Präsentationen" }).click();
+  await openLibrary(page, "Präsentationen");
   await page.getByLabel("Titel").fill("Video-Sitzung Dienstag");
   await page.getByRole("button", { name: "Neue Präsentation" }).click();
   await page.waitForURL(/\/presentations\/[^/]+$/);

@@ -1,74 +1,46 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import type { CSSProperties, ReactNode } from "react";
-import { LogoutButton } from "@/components/logout-button";
-import { SupportBar } from "@/components/support/support-bar";
-import { NotificationBell } from "@/components/training/bell";
+import { AppShell } from "@/components/shell/app-shell";
+import { TwoFactorBanner } from "@/components/shell/two-factor-banner";
 import { serverApi } from "@/lib/api";
-import { accentFor } from "@/lib/color";
+import { clubStyle } from "@/lib/color";
 
 export default async function OrgLayout({ children, params }: { children: ReactNode; params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
   const t = await getTranslations();
-  const { data: org, response } = await (await serverApi()).GET("/v1/orgs/{org_id}", {
-    params: { path: { org_id: orgId } },
-  });
+  const client = await serverApi();
+  const [{ data: org, response }, { data: me }, { data: teams = [] }] = await Promise.all([
+    client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
+    client.GET("/v1/me"),
+    client.GET("/v1/orgs/{org_id}/teams", { params: { path: { org_id: orgId } } }),
+  ]);
   if (response.status === 401) redirect(`/login?next=/app/${orgId}`);
-  if (!org) notFound();
-  const { accent, contrast } = accentFor(org.primary_color);
-  const style = { "--accent": accent, "--accent-contrast": contrast } as CSSProperties;
+  if (!org || !me) notFound();
+  const savedTeam = (await cookies()).get("hb_team")?.value ?? null;
+  // only while the admin has not set it up yet
+  const banner = org.two_factor_required && !me.totp_enabled ? <TwoFactorBanner orgId={org.id} /> : null;
   return (
-    <div style={style} className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-        <Link href={`/app/${org.id}`} className="flex items-center gap-3">
-          {org.has_logo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/v1/orgs/${org.id}/logo`} alt="" className="size-10 rounded object-contain" />
-          ) : (
-            <span aria-hidden className="size-10 rounded" style={{ background: org.primary_color }} />
-          )}
-          <span className="text-lg font-semibold">{org.name}</span>
-        </Link>
-        <nav aria-label={org.name} className="flex flex-wrap items-center gap-1 text-sm">
-          <Link href={`/app/${org.id}`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("common.teams")}
-          </Link>
-          <Link href={`/app/${org.id}/assignments`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("nav.assignments")}
-          </Link>
-          <Link href={`/app/${org.id}/drills`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("nav.drills")}
-          </Link>
-          <Link href={`/app/${org.id}/feed`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("nav.feed")}
-          </Link>
-          <Link href={`/app/${org.id}/schedule`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("schedule.nav")}
-          </Link>
-          <Link href={`/app/${org.id}/profile`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("profile.nav")}
-          </Link>
-          <Link href={`/app/${org.id}/consents`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("nav.consents")}
-          </Link>
-          <Link href={`/app/${org.id}/settings`} className="rounded px-3 py-2 hover:bg-surface">
-            {t("common.settings")}
-          </Link>
-          <SupportBar orgId={org.id} />
-          <NotificationBell orgId={org.id} />
-          <LogoutButton />
-        </nav>
-      </div>
-      {org.two_factor_required && (
-        <p role="status" className="rounded-md border-l-4 border-accent bg-surface px-4 py-2 text-sm">
-          {t("settings.twoFactorRequired")}{" "}
-          <Link href={`/app/${org.id}/settings#security`} className="underline underline-offset-4">
-            {t("settings.twoFactorStart")}
-          </Link>
-        </p>
-      )}
-      {children}
+    <div className="club min-h-dvh" style={clubStyle(org.primary_color) as CSSProperties}>
+      <AppShell
+        clubVars={clubStyle(org.primary_color)}
+        org={{ id: org.id, name: org.name, has_logo: org.has_logo, primary_color: org.primary_color, my_role: org.my_role }}
+        orgs={me.organizations.map((o) => ({ id: o.id, name: o.name }))}
+        teams={teams.map((x) => ({
+          id: x.id,
+          name: x.name,
+          my_role: x.my_role,
+          is_youth: x.is_youth,
+          season: x.current_season ? t("roster.season", { label: x.current_season.label }) : null,
+          season_id: x.current_season?.id ?? null,
+        }))}
+        me={{ name: me.name, email: me.email }}
+        savedTeam={savedTeam}
+        banner={banner}
+      >
+        {children}
+      </AppShell>
     </div>
   );
 }

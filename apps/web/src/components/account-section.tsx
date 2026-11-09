@@ -118,7 +118,7 @@ export function AccountSection({ me }: { me: Me }) {
       </Card>
       <Card className="space-y-3">
         <h3 className="font-semibold">{t("account.sessionsTitle")}</h3>
-        <ul className="divide-y divide-border text-sm" data-testid="sessions">
+        <ul className="divide-y divide-border/70 text-sm" data-testid="sessions">
           {(sessions.data ?? []).map((s) => (
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
               <span>

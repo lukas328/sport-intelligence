@@ -47,7 +47,8 @@ describe("deep links", () => {
     expect(parse(`https://app.handball-ai.ch/app/${ORG}/matches/${MATCH}?t=5000`)).toEqual({ screen: "match", orgId: ORG, matchId: MATCH, t: 5000 });
     expect(parse(`/app/${ORG}/assignments`)).toEqual({ screen: "assignments", orgId: ORG });
     expect(parse(`/app/${ORG}/feed`)).toEqual({ screen: "feed", orgId: ORG });
-    expect(parse(`/app/${ORG}/presentations/${MATCH}/present`)).toEqual({ screen: "presentation", orgId: ORG, presentationId: MATCH });
+    expect(parse(`/app/${ORG}/presentations/${MATCH}/present`)).toEqual({ screen: "presentation", orgId: ORG, presentationId: MATCH, key: null });
+    expect(parse(`/app/${ORG}/presentations/${MATCH}/remote?k=abc`)).toMatchObject({ key: "abc" });
     expect(parse(`handball://clip/${MATCH}?t=-4`)).toEqual({ screen: "clip", matchId: MATCH, t: 0 });
     expect(parse("javascript:alert(1)")).toEqual({ screen: "home" });
     expect(parse(null)).toEqual({ screen: "home" });

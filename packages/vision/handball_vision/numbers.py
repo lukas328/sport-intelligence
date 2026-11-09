@@ -1,0 +1,345 @@
+"""Shirt numbers (BRIEF 7.2 stage 6): read on player crops, voted per track.
+
+Text models: PP-OCRv4 detection and recognition (PaddleOCR, Apache-2.0) as ONNX, run with ONNX
+Runtime. The two files come from the `rapidocr_onnxruntime` wheel on PyPI (Apache-2.0), pinned with
+checksums in the worker image (`ml/models/ppocr-v4.md`). Only the models are used, not the package.
+
+Per crop:
+1. The upper body (10 to 60 % of the box height) is enlarged three times; numbers on amateur
+   footage are 15 to 25 px tall.
+2. Text detection (DB): probability map, threshold, boxes slightly widened ("unclip").
+3. Recognition (CTC) of every box on the green channel; only one or two digits count.
+4. Without a confident reading, a second look with the contrast stretched (`stretch_contrast`):
+   white shirts in a dim hall are grey on grey on stream footage. This doubles the cost of the
+   crops without a reading (most of them).
+
+On 720p club footage about one crop in ten shows a readable number (backs, sharp, unoccluded), and
+about 40 % of those are read; all readings with a confidence of 0.8 or more were correct on the
+checked sample. That is why a number is decided per track from many readings (`vote`), never from
+one crop.
+"""
+
+from __future__ import annotations
+
+import math
+from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import cv2
+import numpy as np
+from numpy.typing import NDArray
+
+U8 = NDArray[Any]
+F32 = NDArray[np.float32]
+
+MIN_BOX_HEIGHT = 80  # px; smaller players have unreadable numbers
+MIN_CONFIDENCE = 0.8
+
+
+@dataclass(frozen=True)
+class Reading:
+    number: int
+    confidence: float
+    frame: int = -1  # video frame of the crop (for splitting tracks at identity switches)
+
+
+class NumberReader:
+    def __init__(
+        self,
+        det_model: Path,
+        rec_model: Path,
+        det_side: int = 320,
+        threads: int | None = None,
+    ) -> None:
+        import onnxruntime as ort
+
+        opts = ort.SessionOptions()
+        if threads:
+            opts.intra_op_num_threads = threads
+        providers = [
+            p
+            for p in ("CUDAExecutionProvider", "CPUExecutionProvider")
+            if p in ort.get_available_providers()
+        ]
+        self.det = ort.InferenceSession(str(det_model), opts, providers=providers)
+        self.rec = ort.InferenceSession(str(rec_model), opts, providers=providers)
+        chars = self.rec.get_modelmeta().custom_metadata_map.get("character", "")
+        # CTC classes: 0 = blank, then the dictionary, then a space
+        self.charset = ["", *chars.split("\n"), " "]
+        self.det_side = det_side
+        self.calls = 0
+
+    # --- detection (DB) ----------------------------------------------------------------------
+
+    def _normalise(self, img: U8) -> F32:
+        x = img.astype(np.float32) / 255.0
+        x = (x - 0.5) / 0.5
+        return np.ascontiguousarray(x.transpose(2, 0, 1)[None], dtype=np.float32)
+
+    def detect(self, img: U8) -> list[NDArray[np.float32]]:
+        """Text boxes (4 corner points each, image coordinates)."""
+        h, w = img.shape[:2]
+        scale = max(1.0, self.det_side / min(h, w))
+        nh = max(32, round(h * scale / 32) * 32)
+        nw = max(32, round(w * scale / 32) * 32)
+        pred = self.det.run(None, {"x": self._normalise(cv2.resize(img, (nw, nh)))})[0][0, 0]
+        bitmap = cv2.dilate((pred > 0.3).astype(np.uint8), np.ones((2, 2), np.uint8))
+        contours, _ = cv2.findContours(bitmap, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        boxes = []
+        for c in contours[:200]:
+            rect = cv2.minAreaRect(c)
+            if min(rect[1]) < 3:
+                continue
+            x, y, bw, bh = cv2.boundingRect(c)
+            mask = np.zeros((bh, bw), np.uint8)
+            cv2.fillPoly(mask, [c - [x, y]], 1)
+            score = float(cv2.mean(pred[y : y + bh, x : x + bw], mask)[0])
+            if score < 0.5:
+                continue
+            (cx, cy), (rw, rh), angle = rect
+            area, perimeter = rw * rh, 2 * (rw + rh)
+            d = area * 1.6 / max(perimeter, 1e-6)  # unclip
+            grown = ((cx, cy), (rw + 2 * d, rh + 2 * d), angle)
+            if min(grown[1]) < 5:
+                continue
+            pts = cv2.boxPoints(grown)
+            pts[:, 0] *= w / nw
+            pts[:, 1] *= h / nh
+            boxes.append(pts.astype(np.float32))
+        return boxes
+
+    # --- recognition (CTC) ------------------------------------------------------------------
+
+    @staticmethod
+    def _crop(img: U8, pts: NDArray[np.float32]) -> U8:
+        pts = _order(pts)
+        w = int(max(np.linalg.norm(pts[0] - pts[1]), np.linalg.norm(pts[2] - pts[3])))
+        h = int(max(np.linalg.norm(pts[0] - pts[3]), np.linalg.norm(pts[1] - pts[2])))
+        w, h = max(w, 1), max(h, 1)
+        dst = np.array([[0, 0], [w, 0], [w, h], [0, h]], np.float32)
+        out = cv2.warpPerspective(
+            img, cv2.getPerspectiveTransform(pts, dst), (w, h), borderMode=cv2.BORDER_REPLICATE
+        )
+        if h / w >= 1.5:
+            out = np.rot90(out)
+        return np.asarray(out)
+
+    def recognise(self, crops: list[U8]) -> list[tuple[str, float]]:
+        if not crops:
+            return []
+        widths = [min(320, max(16, math.ceil(48 * c.shape[1] / max(1, c.shape[0])))) for c in crops]
+        width = max(widths)
+        batch = np.zeros((len(crops), 3, 48, width), np.float32)
+        for k, (c, cw) in enumerate(zip(crops, widths, strict=True)):
+            batch[k, :, :, :cw] = self._normalise(cv2.resize(c, (cw, 48)))[0]
+        probs = self.rec.run(None, {"x": batch})[0]
+        out = []
+        for p in probs:
+            idx = p.argmax(axis=1)
+            best = p.max(axis=1)
+            text, confs, prev = [], [], 0
+            for i, c in zip(idx, best, strict=True):
+                if i != 0 and i != prev and i < len(self.charset):
+                    text.append(self.charset[i])
+                    confs.append(float(c))
+                prev = i
+            out.append(("".join(text), float(np.mean(confs)) if confs else 0.0))
+        return out
+
+    # --- numbers ------------------------------------------------------------------------------
+
+    def read_player(self, frame: U8, box: tuple[float, float, float, float]) -> Reading | None:
+        """The shirt number of one player box, or None. Torsos without a confident reading get a
+        second look with the contrast stretched (`stretch_contrast`)."""
+        x1, y1, x2, y2 = (round(v) for v in box)
+        h = y2 - y1
+        if h < MIN_BOX_HEIGHT:
+            return None
+        top = max(0, y1 + int(0.1 * h))
+        torso = frame[top : max(top + 1, y1 + int(0.6 * h)), max(0, x1) : max(x1 + 1, x2)]
+        if torso.size == 0:
+            return None
+        # the green channel separates white digits from red shirts and dark digits from yellow or
+        # white ones better than colour or plain grey (more correct readings on the checked clips)
+        green = torso[..., 1] if torso.ndim == 3 else torso
+        best = self._read_channel(green)
+        if best is None or best.confidence < MIN_CONFIDENCE:
+            second = self._read_channel(stretch_contrast(green))
+            if second is not None and (best is None or second.confidence > best.confidence):
+                best = second
+        return best
+
+    def _read_channel(self, channel: U8) -> Reading | None:
+        """One or two digits in a single-channel torso crop, enlarged three times."""
+        big = cv2.resize(
+            cv2.merge([channel, channel, channel]), None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC
+        )
+        self.calls += 1
+        boxes = self.detect(big)
+        best: Reading | None = None
+        for text, conf in self.recognise([self._crop(big, b) for b in boxes]):
+            text = text.strip()
+            digits = text.isascii() and text.isdigit()
+            if 1 <= len(text) <= 2 and digits and (best is None or conf > best.confidence):
+                best = Reading(int(text), conf)
+        return best
+
+
+def stretch_contrast(channel: U8, low: float = 2.0, high: float = 98.0) -> U8:
+    """The channel's `low` to `high` percentile spread to 0..255. On stream footage of a dim hall
+    a white shirt is light grey and its number mid grey, and the text detector misses part of
+    such numbers at their own contrast. As a second look on torsos without a confident reading
+    (3-minute segments of four SG Wädenswil/Horgen stream recordings): 21 to 29 % more confident
+    readings, the share of numbers on the official match sheet the same within 3 points, at most
+    one more sheet number found per team. Stretching every torso instead was not better than
+    not stretching (-8 to +7 % readings), nor was a larger detector input (480 instead of 320:
+    +25 % readings, less precise, 2.7 times the cost)."""
+    lo, hi = np.percentile(channel, (low, high))
+    if hi - lo < 1:
+        return channel
+    out = (channel.astype(np.float32) - float(lo)) * (255.0 / float(hi - lo))
+    return np.asarray(np.clip(out, 0, 255).astype(np.uint8))
+
+
+def _order(pts: NDArray[np.float32]) -> NDArray[np.float32]:
+    """Corners as top-left, top-right, bottom-right, bottom-left."""
+    s = pts.sum(axis=1)
+    d = np.diff(pts, axis=1).ravel()
+    return np.array(
+        [pts[np.argmin(s)], pts[np.argmin(d)], pts[np.argmax(s)], pts[np.argmax(d)]], np.float32
+    )
+
+
+def sharp_enough(frame: U8, box: tuple[float, float, float, float], min_var: float = 60.0) -> bool:
+    """Motion blur hides numbers: skip crops whose upper body has little fine detail."""
+    x1, y1, x2, y2 = (round(v) for v in box)
+    h = y2 - y1
+    torso = frame[max(0, y1 + int(0.1 * h)) : max(1, y1 + int(0.6 * h)), max(0, x1) : max(1, x2)]
+    if torso.size == 0:
+        return False
+    grey = cv2.cvtColor(torso, cv2.COLOR_BGR2GRAY)
+    return float(cv2.Laplacian(grey, cv2.CV_64F).var()) >= min_var
+
+
+@dataclass(frozen=True)
+class Vote:
+    number: int
+    confidence: float  # share of the confident readings that agree, damped for few readings
+    readings: int
+    corrected: int = 0  # readings outside the roster counted for this number as known misreads
+
+
+# digit pairs PP-OCR confuses on shirts (thin strokes, folds, motion blur)
+CONFUSIONS: frozenset[frozenset[str]] = frozenset(
+    frozenset(p) for p in ("17", "14", "38", "68", "56", "08")
+)
+
+
+def _misread_of(read: str, number: str) -> bool:
+    """Whether `read` is a known OCR confusion of `number`: one digit swapped for a look-alike
+    (the same swap in every place counts once: 11 read as 44), one digit dropped (14 read as 4)
+    or one digit doubled (4 read as 44)."""
+    if len(read) == len(number):
+        swaps = {(a, b) for a, b in zip(read, number, strict=True) if a != b}
+        return len(swaps) == 1 and frozenset(next(iter(swaps))) in CONFUSIONS
+    if len(read) + 1 == len(number):
+        return any(number[:i] + number[i + 1 :] == read for i in range(len(number)))
+    if len(read) == len(number) + 1:
+        return any(
+            read[i] == read[i + 1] and read[:i] + read[i + 1 :] == number
+            for i in range(len(read) - 1)
+        )
+    return False
+
+
+def _on_roster(readings: list[Reading], allowed: set[int]) -> list[tuple[int, Reading]]:
+    """Readings as (number on the roster, reading): numbers on the roster count as read, others
+    for the roster number they are a known misreading of. A reading that fits several roster
+    numbers goes to the one this track was read as most often (directly); without such a
+    favourite, and for readings that fit none, it is ignored."""
+    direct: dict[int, float] = defaultdict(float)
+    for r in readings:
+        if r.number in allowed:
+            direct[r.number] += r.confidence
+    out: list[tuple[int, Reading]] = []
+    for r in readings:
+        if r.number in allowed:
+            out.append((r.number, r))
+            continue
+        fits = [m for m in allowed if _misread_of(str(r.number), str(m))]
+        if len(fits) > 1:
+            best = max(direct.get(m, 0.0) for m in fits)
+            fits = [m for m in fits if best > 0 and direct.get(m, 0.0) == best]
+        if len(fits) == 1:
+            out.append((fits[0], r))
+    return out
+
+
+def vote(
+    readings: list[Reading],
+    allowed: set[int] | None = None,
+    min_confidence: float = MIN_CONFIDENCE,
+    min_readings: int = 3,
+) -> Vote | None:
+    """One number per track from confident readings: the most frequent number needs at least 70 %
+    of them and `min_readings` readings; two readings suffice when both are very sure (0.95) and
+    nothing else was read. On the checked clips, numbers with two ordinary readings were often
+    wrong, numbers with three or more were right.
+
+    `allowed` is the team's roster when it is known: readings of other numbers then count for the
+    roster number they are a known misreading of (`_misread_of`: 44 for 11 or 4, 3 for 8, ...) or
+    are ignored, and the result is a roster number or None."""
+    good = [r for r in readings if r.confidence >= min_confidence]
+    counted = [(r.number, r) for r in good] if allowed is None else _on_roster(good, allowed)
+    if not counted:
+        return None
+    weight: dict[int, float] = defaultdict(float)
+    count: dict[int, int] = defaultdict(int)
+    for number, r in counted:
+        weight[number] += r.confidence
+        count[number] += 1
+    number = max(weight, key=lambda k: weight[k])
+    share = weight[number] / sum(weight.values())
+    n = count[number]
+    # "nothing else": also no ignored reading (a roster vote may not turn 56 56 56 33 33 into 33)
+    sure_pair = n == 2 and len(good) == 2 and all(r.confidence >= 0.95 for r in good)
+    if share < 0.7 or (n < min_readings and not sure_pair):
+        return None
+    damp = 1 - 0.5 ** (n + 1)  # 2 readings: 0.88, 3: 0.94, 5: 0.98
+    corrected = sum(1 for k, r in counted if k == number and r.number != number)
+    return Vote(number, round(share * damp, 3), n, corrected)
+
+
+def split_points(readings: list[Reading], min_side: int = 2, gain: int = 2) -> list[int]:
+    """Frames at which a track changes identity: confident readings that say one number for a
+    while and then another (the tracker swapped two players in a crowd). Returns split frames,
+    each halfway between the last reading of one number and the first of the next."""
+    good = sorted((r for r in readings if r.confidence >= MIN_CONFIDENCE), key=lambda r: r.frame)
+    if len(good) < 2 * min_side:
+        return []
+
+    def majority(rs: list[Reading]) -> tuple[int, int]:
+        c: dict[int, int] = defaultdict(int)
+        for r in rs:
+            c[r.number] += 1
+        k = max(c, key=lambda x: c[x])
+        return k, c[k]
+
+    _, whole = majority(good)
+    best: tuple[int, int] | None = None  # (score, index)
+    for i in range(min_side, len(good) - min_side + 1):
+        (a, ca), (b, cb) = majority(good[:i]), majority(good[i:])
+        strong = a != b and ca >= min_side and cb >= min_side and ca + cb >= whole + gain
+        if strong and (best is None or ca + cb > best[0]):
+            best = (ca + cb, i)
+    if best is None:
+        return []
+    i = best[1]
+    here = (good[i - 1].frame + good[i].frame) // 2
+    return [
+        *split_points(good[:i], min_side, gain),
+        here,
+        *split_points(good[i:], min_side, gain),
+    ]

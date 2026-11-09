@@ -1,0 +1,1 @@
+{"id": "lukasde1000/handball-ball-mine", "title": "handball ball mine", "code_file": "mine_gpu.py", "language": "python", "kernel_type": "script", "is_private": true, "enable_gpu": true, "enable_internet": false, "dataset_sources": ["lukasde1000/handball-game-segments", "lukasde1000/handball-ball-models"], "competition_sources": [], "kernel_sources": []}

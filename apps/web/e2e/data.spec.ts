@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
 
 // M10: training planning (5.7), statistics matrix (5.4), assistant without a model key (5.1)
 test("coach plans a session, opens the matrix and the assistant", async ({ page, context }, info) => {
@@ -15,7 +15,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
 
   // training: a session with two library drills, then the PDF link
-  await page.getByRole("link", { name: "Training", exact: true }).click();
+  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
   await page.getByRole("button", { name: "Neue Einheit" }).click();
   const form = page.getByRole("form", { name: "Neue Einheit" });
   const day = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
@@ -35,11 +35,13 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   // calendar link for subscription
   await page.getByRole("button", { name: "Link erzeugen" }).click();
   const url = await page.getByLabel("Kalender abonnieren").inputValue();
-  const feed = await page.request.get(url.slice(url.indexOf("/v1/")));
-  expect(await feed.text()).toContain("Abschluss Flügel");
+  // the link is stored with the request's commit; poll instead of a single read
+  await expect.poll(async () => (await page.request.get(url.slice(url.indexOf("/v1/")))).text()).toContain("Abschluss Flügel");
 
   // matrix: empty team, but the page and its controls work
-  await page.getByRole("link", { name: "Matrix", exact: true }).click();
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
+  await follow(page, page.getByRole("link", { name: "Saison", exact: true }), /\/season$/);
+  await follow(page, page.getByRole("link", { name: "Statistik-Matrix" }), /\/matrix$/);
   await expect(page.getByRole("heading", { name: "Statistik-Matrix" })).toBeVisible();
   await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
   await page.getByRole("button", { name: "Paraden", exact: true }).click();
@@ -47,7 +49,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expectAccessible(page);
 
   // assistant: no model key in this stack, so the question gets an honest message
-  await page.getByRole("link", { name: "Fragen", exact: true }).click();
+  await follow(page, page.getByRole("link", { name: "Frag deine Daten" }), /\/assistant$/);
   await page.getByPlaceholder("Frage zu euren Spielen stellen").fill("Wie oft treffen wir nach einem Timeout?");
   await page.getByRole("button", { name: "Fragen", exact: true }).click();
   await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toBeVisible();

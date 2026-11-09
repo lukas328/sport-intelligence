@@ -3,7 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
-import { EmptyState } from "@/components/ui/card";
+import { Check, ChevronRight, Film } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState, Skeleton } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 
 export function FeedList({ orgId }: { orgId: string }) {
@@ -15,25 +18,42 @@ export function FeedList({ orgId }: { orgId: string }) {
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/me/feeds", { params: { path: { org_id: orgId } } })).data ?? [],
   });
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
-      <p className="text-muted">{t("intro")}</p>
-      {q.data && q.data.length === 0 && <EmptyState title={t("none")} />}
-      <ul className="space-y-2" data-testid="feed-list">
-        {(q.data ?? []).map((f) => (
-          <li key={`${f.player_id}-${f.match_id}`}>
-            <Link
-              href={`/app/${orgId}/feed/${f.match_id}?player=${f.player_id}`}
-              className="flex flex-wrap items-center gap-3 rounded-lg border border-border p-3 hover:bg-surface"
-            >
-              <span className="text-sm text-muted tabular-nums">{format.dateTime(new Date(f.kickoff_at), { dateStyle: "medium" })}</span>
-              <span className="flex-1 font-medium">{f.opponent ?? tm("training")}</span>
-              {f.relation === "guardian" && <span className="text-sm text-muted">{f.player_first_name}</span>}
-              <span className={f.assessed ? "text-sm text-ok" : "text-sm font-medium text-accent"}>{f.assessed ? t("assessed") : t("assessNow")}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-8">
+      <PageHeader title={t("title")} description={t("intro")} />
+      {q.isLoading ? (
+        <Skeleton className="h-40" />
+      ) : (q.data ?? []).length === 0 ? (
+        <EmptyState icon={<Film />} title={t("none")} />
+      ) : (
+        <ul className="divide-y divide-border/70 overflow-hidden rounded-lg bg-raised border border-border" data-testid="feed-list">
+          {(q.data ?? []).map((f) => {
+            const d = new Date(f.kickoff_at);
+            return (
+              <li key={`${f.player_id}-${f.match_id}`}>
+                <Link href={`/app/${orgId}/feed/${f.match_id}?player=${f.player_id}`} className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-surface/70 sm:px-5">
+                  <span className="w-11 shrink-0 text-center leading-none">
+                    <span className="block text-lg font-bold font-wide tabular-nums">{format.dateTime(d, { day: "numeric" })}</span>
+                    <span className="mt-1 block text-[0.6875rem] font-medium uppercase tracking-wide text-muted">{format.dateTime(d, { month: "short" })}</span>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold">{f.opponent ?? tm("training")}</span>
+                    {f.relation === "guardian" && <span className="block text-[0.8125rem] text-muted">{f.player_first_name}</span>}
+                  </span>
+                  {f.assessed ? (
+                    <span className="inline-flex items-center gap-1 text-[0.8125rem] text-ok">
+                      <Check aria-hidden className="size-4" />
+                      {t("assessed")}
+                    </span>
+                  ) : (
+                    <Badge tone="accent">{t("assessNow")}</Badge>
+                  )}
+                  <ChevronRight aria-hidden className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

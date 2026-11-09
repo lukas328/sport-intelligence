@@ -44,6 +44,8 @@ class TokenIn(ApiModel):
 
 class LoginResult(ApiModel):
     status: Literal["ok", "totp_required"]
+    # only for the native apps (header x-client: native), which send it as a bearer token
+    token: str | None = None
 
 
 class TotpSetupOut(ApiModel):

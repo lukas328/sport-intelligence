@@ -1,5 +1,6 @@
 "use client";
 
+import { Maximize, Pause, Play, RotateCcw, RotateCw, StepBack, StepForward, Volume2, VolumeX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   forwardRef,
@@ -235,6 +236,13 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         />
         <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />
         {overlay}
+        {!playing && !overlay && duration > 0 && (
+          <span aria-hidden className="pointer-events-none absolute inset-0 grid place-items-center">
+            <span className="grid size-16 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur-sm">
+              <Play className="ml-1 size-7 fill-current" />
+            </span>
+          </span>
+        )}
         {error && (
           <p role="alert" className="absolute inset-x-0 top-1/2 text-center text-white">
             {t("error")}
@@ -242,7 +250,13 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         )}
       </div>
 
-      <div className="space-y-1 bg-neutral-900 px-3 py-2 text-white">
+      {/* controls float over the picture; while playing they show on hover, focus or pause */}
+      <div
+        className={cn(
+          "absolute inset-x-0 bottom-0 space-y-1 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-3 pt-10 pb-2 text-white transition-opacity duration-200",
+          playing && !hover && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+        )}
+      >
         <div
           className="relative h-6 cursor-pointer"
           onMouseMove={(e) => {
@@ -301,19 +315,21 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         </div>
         <div className="flex flex-wrap items-center gap-1 text-sm">
           <CtlButton label={playing ? t("pause") : t("play")} onClick={toggle}>
-            {playing ? "❚❚" : "▶"}
+            {playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}
           </CtlButton>
           <CtlButton label={t("back5")} onClick={() => seekBy(-5)}>
-            −5
+            <RotateCcw className="size-4" />
+            <span className="text-[0.6875rem] font-semibold">5</span>
           </CtlButton>
           <CtlButton label={t("fwd5")} onClick={() => seekBy(5)}>
-            +5
+            <span className="text-[0.6875rem] font-semibold">5</span>
+            <RotateCw className="size-4" />
           </CtlButton>
-          <CtlButton label={t("frameBack")} onClick={() => step(-1)}>
-            ⏮
+          <CtlButton label={t("frameBack")} onClick={() => step(-1)} className="hidden sm:inline-grid">
+            <StepBack className="size-4" />
           </CtlButton>
-          <CtlButton label={t("frameFwd")} onClick={() => step(1)}>
-            ⏭
+          <CtlButton label={t("frameFwd")} onClick={() => step(1)} className="hidden sm:inline-grid">
+            <StepForward className="size-4" />
           </CtlButton>
           <span className="px-2 tabular-nums" data-testid="clock">
             {formatClock(time)} / {formatClock(duration * 1000)}
@@ -324,7 +340,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             <select
               value={speed}
               onChange={(e) => setRate(Number(e.target.value))}
-              className="rounded bg-neutral-800 px-1 py-1"
+              className="rounded-md bg-white/10 px-2 py-1 text-xs font-semibold"
               aria-label={t("speed")}
             >
               {SPEEDS.map((s) => (
@@ -335,13 +351,13 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             </select>
           </label>
           <CtlButton label={muted ? t("unmute") : t("mute")} onClick={() => setMuted((m) => !m)}>
-            {muted ? "🔇" : "🔊"}
+            {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
           </CtlButton>
           <CtlButton
             label={t("fullscreen")}
             onClick={() => void (document.fullscreenElement ? document.exitFullscreen() : boxRef.current?.requestFullscreen())}
           >
-            ⛶
+            <Maximize className="size-4" />
           </CtlButton>
         </div>
       </div>
@@ -349,16 +365,16 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
   );
 });
 
-function CtlButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+function CtlButton({ label, onClick, children, className }: { label: string; onClick: () => void; children: ReactNode; className?: string }) {
   return (
     <button
       type="button"
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="min-h-9 min-w-9 rounded px-2 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white"
+      className={cn("inline-grid min-h-9 min-w-9 place-items-center rounded-md px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white", className)}
     >
-      <span aria-hidden>{children}</span>
+      <span aria-hidden className="inline-flex items-center gap-0.5">{children}</span>
     </button>
   );
 }

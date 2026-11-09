@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useId, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
-import { Checkbox, Input, Select } from "@/components/ui/field";
+import { KitFields } from "@/components/domain/kit-fields";
+import { Alert } from "@/components/ui/card";
+import { Input, Select } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
-import { kitWarnings, type KitKey } from "@/lib/kit";
+import type { Kits } from "@/lib/kit";
 
 const FORMATS = ["adult_2x30", "youth_2x25", "youth_2x20", "mini", "tournament"] as const;
-const KIT_DEFAULTS: Record<KitKey, string> = {
+const KIT_DEFAULTS: Kits = {
   own: "#0b6bcb",
   own_gk: "#f59e0b",
   opponent: "#dc2626",
   opponent_gk: "#16a34a",
+  referee: null,
 };
 
 function localNow(): string {
@@ -34,6 +37,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [busy, setBusy] = useState(false);
   const [kits, setKits] = useState(KIT_DEFAULTS);
   const [training, setTraining] = useState(false);
+  const [away, setAway] = useState(false);
   const [format, setFormat] = useState<string | null>(null);
   const team = useQuery({
     queryKey: ["team", orgId, teamId],
@@ -41,7 +45,6 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
       (await api.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } })).data,
   });
   const chosenFormat = format ?? (team.data?.is_youth ? "youth_2x25" : "adult_2x30");
-  const similar = kitWarnings(kits);
   const opponents = useQuery({
     queryKey: ["opponents", orgId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/opponents", { params: { path: { org_id: orgId } } })).data ?? [],
@@ -59,13 +62,14 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
       body: {
         ...(training ? { kind: "training" as const } : known ? { opponent_id: known.id } : { opponent_name: name }),
         kickoff_at: new Date(String(f.get("kickoff"))).toISOString(),
-        is_home: f.get("away") !== "on",
+        is_home: !away,
         competition: optional("competition"),
         venue: optional("venue"),
         kit_own: kits.own,
         kit_own_gk: kits.own_gk,
         kit_opponent: kits.opponent,
         kit_opponent_gk: kits.opponent_gk,
+        kit_referee: kits.referee,
         format: chosenFormat as (typeof FORMATS)[number],
       },
     });
@@ -77,65 +81,65 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
     router.push(`/app/${orgId}/matches/${data.id}`);
   }
 
+  const segment = (on: boolean) =>
+    cn(
+      "flex-1 cursor-pointer rounded-md px-4 py-1.5 text-center text-sm font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent",
+      on ? "bg-raised text-foreground shadow-sm ring-1 ring-border/60" : "text-muted hover:text-foreground",
+    );
   return (
-    <Card>
-      <h2 className="mb-4 text-lg font-semibold">{t("matches.new")}</h2>
+    <div>
       {error && <Alert className="mb-4">{t(`errors.${error}`)}</Alert>}
-      <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2" aria-label={t("matches.new")}>
-        <div className="sm:col-span-2">
-          <Checkbox name="training" label={t("matchForm.isTraining")} checked={training} onChange={(e) => setTraining(e.target.checked)} />
-        </div>
+      <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2" aria-label={t("matches.new")}>
+        <fieldset className="sm:col-span-2">
+          <legend className="sr-only">{t("matchForm.isTraining")}</legend>
+          <div className="flex max-w-xs gap-0.5 rounded-md bg-surface p-1">
+            <label className={segment(!training)}>
+              <input type="radio" name="kind" className="sr-only" checked={!training} onChange={() => setTraining(false)} />
+              {t("matches.kindMatch")}
+            </label>
+            <label className={segment(training)}>
+              <input type="radio" name="kind" className="sr-only" checked={training} onChange={() => setTraining(true)} />
+              {t("matches.kindTraining")}
+            </label>
+          </div>
+        </fieldset>
         {!training && (
-          <>
-          <Input
-            label={t("matches.opponent")}
-            name="opponent"
-            required
-            list={listId}
-            placeholder={t("matches.opponentPlaceholder")}
-            autoComplete="off"
-            error={fields.opponent_name}
-          />
-          <datalist id={listId}>
-            {opponents.data?.map((o) => <option key={o.id} value={o.name} />)}
-          </datalist>
-          </>
+          <div className="sm:col-span-2">
+            <Input
+              label={t("matches.opponent")}
+              name="opponent"
+              required
+              list={listId}
+              placeholder={t("matches.opponentPlaceholder")}
+              autoComplete="off"
+              error={fields.opponent_name}
+              className="min-h-12 text-base"
+            />
+            <datalist id={listId}>
+              {opponents.data?.map((o) => <option key={o.id} value={o.name} />)}
+            </datalist>
+          </div>
         )}
         <Input label={t("matches.kickoff")} name="kickoff" type="datetime-local" required defaultValue={localNow()} />
+        {!training ? (
+          <fieldset className="space-y-1">
+            <legend className="mb-1 block text-[0.8125rem] font-medium">{t("matches.homeAway")}</legend>
+            <div className="flex gap-0.5 rounded-md bg-surface p-1">
+              <label className={segment(!away)}>
+                <input type="radio" name="side" className="sr-only" checked={!away} onChange={() => setAway(false)} />
+                {t("matches.homeShort")}
+              </label>
+              <label className={segment(away)}>
+                <input type="radio" name="side" className="sr-only" checked={away} onChange={() => setAway(true)} />
+                {t("matches.awayShort")}
+              </label>
+            </div>
+          </fieldset>
+        ) : (
+          <span />
+        )}
         <Input label={`${t("matches.competition")} (${t("common.optional")})`} name="competition" />
         <Input label={`${t("matches.venue")} (${t("common.optional")})`} name="venue" />
-        <div className="sm:col-span-2">
-          <Checkbox name="away" label={t("matches.away")} />
-        </div>
-        <fieldset className="grid grid-cols-2 gap-3 sm:col-span-2 sm:grid-cols-4">
-          <legend className="mb-1 text-sm font-medium">{t("matches.kits")}</legend>
-          {(
-            [
-              ["own", "matches.kitOwn"],
-              ["own_gk", "matches.kitOwnGk"],
-              ["opponent", "matches.kitOpp"],
-              ["opponent_gk", "matches.kitOppGk"],
-            ] as const
-          ).map(([k, label]) => (
-            <Input
-              key={k}
-              label={t(label)}
-              name={`kit_${k}`}
-              type="color"
-              value={kits[k]}
-              onChange={(e) => setKits((v) => ({ ...v, [k]: e.target.value }))}
-              className="h-10 p-1"
-            />
-          ))}
-          <p className="col-span-full text-xs text-muted">{t("matches.kitsHint")}</p>
-          {similar.length > 0 && (
-            <p role="status" className="col-span-full rounded-md border-l-4 border-accent bg-surface px-3 py-2 text-sm" data-testid="kit-warning">
-              {t("matchForm.kitWarning", {
-                pairs: similar.map(([a, b]) => `${t(`matchForm.kit_${a}`)} / ${t(`matchForm.kit_${b}`)}`).join(", "),
-              })}
-            </p>
-          )}
-        </fieldset>
         <Select label={t("matchForm.format")} name="format" value={chosenFormat} onChange={(e) => setFormat(e.target.value)}>
           {FORMATS.map((k) => (
             <option key={k} value={k}>
@@ -143,12 +147,16 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
             </option>
           ))}
         </Select>
-        <div className="sm:col-span-2">
-          <Button type="submit" loading={busy}>
+        <fieldset className="sm:col-span-2">
+          <legend className="mb-2 block text-[0.8125rem] font-medium">{t("matches.kits")}</legend>
+          <KitFields kits={kits} onChange={setKits} />
+        </fieldset>
+        <div className="pt-2 sm:col-span-2">
+          <Button type="submit" size="lg" loading={busy}>
             {t("matches.create")}
           </Button>
         </div>
       </form>
-    </Card>
+    </div>
   );
 }

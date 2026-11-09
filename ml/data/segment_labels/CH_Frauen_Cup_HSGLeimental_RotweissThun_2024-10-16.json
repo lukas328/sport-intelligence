@@ -1,0 +1,537 @@
+{
+ "name": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+ "official": "ml/data/official/CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16.json",
+ "game_id": 488311,
+ "result": "28:33",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 30.0,
+  "duration_s": 6230.966667,
+  "batch": "batch_l02"
+ },
+ "segments": [
+  {
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s0.mp4",
+   "start_s": 934.65,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    347.0,
+    505.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1.mp4",
+   "start_s": 1869.29,
+   "clock_source": "overlay",
+   "readings": 84,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    1011.0,
+    1133.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s2.mp4",
+   "start_s": 3115.48,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "start_s": 4361.68,
+   "clock_source": "overlay",
+   "readings": 88,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2387.0,
+    2531.0
+   ],
+   "entries": 6,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "start_s": 5296.32,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    3050.0,
+    3228.0
+   ],
+   "entries": 7,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "goal": 9,
+  "warning": 1,
+  "penalty_goal": 2,
+  "suspension": 1,
+  "turnover": 7,
+  "shot_saved": 2,
+  "shot_missed": 1
+ },
+ "entries": [
+  {
+   "match_s": 367,
+   "time": "06:07",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 9,
+   "name": "GJERGJAJ Sara",
+   "score": [
+    3,
+    1
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 20267,
+   "video_ms": 954917,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 404,
+   "time": "06:44",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 10,
+   "name": "NEGRONI Simona",
+   "score": [
+    3,
+    2
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 57267,
+   "video_ms": 991917,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 430,
+   "time": "07:10",
+   "action": "Verwarnung",
+   "kind": "warning",
+   "team": "away",
+   "number": 17,
+   "name": "ALLOU Yasmine",
+   "score": [
+    3,
+    2
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 83267,
+   "video_ms": 1017917,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 500,
+   "time": "08:20",
+   "action": "7m Tor",
+   "kind": "penalty_goal",
+   "team": "home",
+   "number": 25,
+   "name": "TSCHOPP Mina",
+   "score": [
+    4,
+    2
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 161267,
+   "video_ms": 1095917,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 505,
+   "time": "08:25",
+   "action": "Zeitstrafe",
+   "kind": "suspension",
+   "team": "home",
+   "number": 5,
+   "name": "AIGNER Noemi",
+   "score": [
+    4,
+    2
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 166267,
+   "video_ms": 1100917,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1015,
+   "time": "16:55",
+   "action": "7m Tor",
+   "kind": "penalty_goal",
+   "team": "away",
+   "number": 23,
+   "name": "HOSTETTLER Fabiola",
+   "score": [
+    9,
+    6
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 26500,
+   "video_ms": 1895790,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1064,
+   "time": "17:44",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 3,
+   "name": "ACKLIN Jessica",
+   "score": [
+    10,
+    6
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 75500,
+   "video_ms": 1944790,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1073,
+   "time": "17:53",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 14,
+   "name": "GRÜRING Anouk",
+   "score": [
+    10,
+    6
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 84500,
+   "video_ms": 1953790,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1098,
+   "time": "18:18",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 8,
+   "name": "MUZZOLINI Ana",
+   "score": [
+    10,
+    6
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 109500,
+   "video_ms": 1978790,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1121,
+   "time": "18:41",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 17,
+   "name": "ALLOU Yasmine",
+   "score": [
+    10,
+    7
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 146500,
+   "video_ms": 2015790,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2391,
+   "time": "39:51",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 19,
+   "name": "MARTI-CARRARD Nora",
+   "score": [
+    17,
+    20
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 4033,
+   "video_ms": 4365713,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2395,
+   "time": "39:55",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 4,
+   "name": "MICHEL Fleur",
+   "score": [
+    17,
+    21
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 8033,
+   "video_ms": 4369713,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2453,
+   "time": "40:53",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 3,
+   "name": "ACKLIN Jessica",
+   "score": [
+    18,
+    21
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 66033,
+   "video_ms": 4427713,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2464,
+   "time": "41:04",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 17,
+   "name": "ALLOU Yasmine",
+   "score": [
+    18,
+    22
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 77033,
+   "video_ms": 4438713,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2492,
+   "time": "41:32",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 9,
+   "name": "GJERGJAJ Sara",
+   "score": [
+    18,
+    22
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 105033,
+   "video_ms": 4466713,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2497,
+   "time": "41:37",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 17,
+   "name": "ALLOU Yasmine",
+   "score": [
+    18,
+    22
+   ],
+   "goalkeeper": {
+    "number": 40,
+    "name": "NIDECKER Ronja"
+   },
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 110033,
+   "video_ms": 4471713,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3072,
+   "time": "51:12",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 15,
+   "name": "TAMBURINI Aurelia",
+   "score": [
+    24,
+    28
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 22267,
+   "video_ms": 5318587,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3079,
+   "time": "51:19",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 10,
+   "name": "NEGRONI Simona",
+   "score": [
+    24,
+    29
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 29267,
+   "video_ms": 5325587,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3120,
+   "time": "52:00",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 8,
+   "name": "MUZZOLINI Ana",
+   "score": [
+    24,
+    29
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 70267,
+   "video_ms": 5366587,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3127,
+   "time": "52:07",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 6,
+   "name": "GALLACCHI Olivia",
+   "score": [
+    25,
+    29
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 77267,
+   "video_ms": 5373587,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3174,
+   "time": "52:54",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 10,
+   "name": "NEGRONI Simona",
+   "score": [
+    25,
+    29
+   ],
+   "goalkeeper": {
+    "number": 1,
+    "name": "KANOUTE Aida"
+   },
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 124267,
+   "video_ms": 5420587,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3191,
+   "time": "53:11",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 14,
+   "name": "GRÜRING Anouk",
+   "score": [
+    25,
+    29
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 141267,
+   "video_ms": 5437587,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3225,
+   "time": "53:45",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 3,
+   "name": "ACKLIN Jessica",
+   "score": [
+    25,
+    29
+   ],
+   "segment": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 175267,
+   "video_ms": 5471587,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  }
+ ]
+}

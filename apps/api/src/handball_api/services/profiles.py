@@ -32,7 +32,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import ConsentKind, ReelStatus
 from handball_api.schemas.profiles import ProfileIn
-from handball_api.services import audit
+from handball_api.services import audit, org_verification
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import current_seasons
 from handball_api.services.roster import consented
@@ -155,6 +155,7 @@ async def save(ctx: Ctx, player_id: uuid.UUID, data: ProfileIn) -> dict[str, Any
             raise ProblemError(403, "youth-protection", "No public profiles in youth teams")
         if blocked:
             raise ProblemError(403, "consent-missing", "The public profile needs the consent")
+        await org_verification.require_verified(ctx, player.organization_id)
     reel_ids = {r.id for r in await _reels(ctx, player)}
     unknown = [r for r in data.reel_ids if r not in reel_ids]
     if unknown:

@@ -220,3 +220,40 @@ async def test_presentation_from_scouting(make_api: Callable[[], Api]) -> None:
     assert det["title"].startswith("TV Gegner")
     assert det["slide_list"][0]["type"] == "stat_card"
     assert any(s["type"] == "text" and "observation" in s["content"] for s in det["slide_list"])
+
+
+async def test_clip_slide_needs_a_video(make_api: Callable[[], Api]) -> None:
+    """A clip of a match without video (e.g. from a Sportscode import before the upload) or a
+    broken video id used to fail with a server error; a clip of another team is not found."""
+    coach = make_api()
+    ids = await setup_club(coach)
+    org, team = ids["org"], ids["team"]
+    o = f"/v1/orgs/{org}"
+    m = await new_match(coach, ids)
+    clip = (
+        await coach.post(f"{o}/clips", json={"match_id": m["id"], "start_ms": 1000, "end_ms": 8000})
+    ).json()
+    pres = (
+        await coach.post(
+            f"{o}/teams/{team}/presentations", json={"title": "T", "match_id": m["id"]}
+        )
+    ).json()
+    slides = f"{o}/presentations/{pres['id']}/slides"
+    r = await coach.post(slides, json={"type": "clip", "clip_id": clip["id"], "content": {}})
+    assert r.status_code == 422 and r.json()["type"].endswith(":no-video"), r.text
+    broken = {"type": "clip", "content": {"video_id": "nope", "in_ms": 0, "out_ms": 5}}
+    assert (await coach.post(slides, json=broken)).status_code == 404
+    # with a video the same clip works and plays the match's video
+    video = await upload(coach, ids, m["id"], b"v" * 100)
+    r = await coach.post(slides, json={"type": "clip", "clip_id": clip["id"], "content": {}})
+    assert r.status_code == 201, r.text
+    assert r.json()["content"]["video_id"] == video["id"]
+    # a clip of another team of the club
+    other = (await coach.post(f"{o}/teams", json={"name": "Damen 1", "gender": "women"})).json()
+    m2 = await new_match(coach, {**ids, "team": other["id"]})
+    await upload(coach, ids, m2["id"], b"v" * 100)
+    foreign = (
+        await coach.post(f"{o}/clips", json={"match_id": m2["id"], "start_ms": 0, "end_ms": 5000})
+    ).json()
+    r = await coach.post(slides, json={"type": "clip", "clip_id": foreign["id"], "content": {}})
+    assert r.status_code == 404, r.text

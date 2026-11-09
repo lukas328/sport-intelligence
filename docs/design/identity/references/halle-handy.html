@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Handy Spieler</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Big Shoulders Display',sans-serif}
+.tab{flex:1 1 0;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;text-decoration:none;font-size:13px;font-weight:500}
+.row{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #10151c;color:#10151c;text-decoration:none}
+</style>
+</helmet>
+<div style="--club: {{club}}; --deep: {{deep}}; --ink: {{ink}}; --paper: {{paper}}; position: relative; width: 390px; height: 844px; overflow: hidden; display: flex; flex-direction: column; background: var(--paper); color: #10151c; font-family: 'Barlow', sans-serif">
+  <section style="position: relative; overflow: hidden; background: var(--club); color: var(--ink); padding: 26px 20px 28px">
+    <svg aria-hidden="true" viewBox="0 0 390 330" style="position: absolute; inset: 0; width: 100%; height: 100%">
+      <g fill="none" stroke="currentColor"><path d="M-50 330 C-50 180 80 120 195 120 C310 120 440 180 440 330" stroke-width="4" opacity="0.3"></path><path d="M-110 330 C-110 110 60 30 195 30 C330 30 500 110 500 330" stroke-width="4" stroke-dasharray="18 15" opacity="0.25"></path></g>
+    </svg>
+    <div style="position: relative">
+      <div class="disp" style="font-size: 26px; font-weight: 900">HC GRAUHOLZ</div>
+      <p style="margin: 44px 0 0; font-size: 15px; font-weight: 600">Letztes Spiel, 01.11.26</p>
+      <div class="disp" style="font-size: 124px; font-weight: 900; line-height: 0.95; font-variant-numeric: tabular-nums">22:20</div>
+      <div class="disp" style="font-size: 30px; font-weight: 800; text-transform: uppercase">Sieg gegen Demo HC Beispiel</div>
+      <a href="#" style="min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; margin-top: 18px; padding: 0 18px; background: var(--ink); color: var(--club); font-weight: 600; text-decoration: none; border-radius: 3px">Spiel ansehen</a>
+    </div>
+  </section>
+  <main style="flex: 1 1 auto; min-height: 0; padding: 22px 20px">
+    <h1 class="disp" style="margin: 0 0 4px; font-size: 28px; font-weight: 800; text-transform: uppercase">Für dich</h1>
+    <a class="row" href="#"><span>Termine</span><span>[Noch keine]</span></a>
+    <a class="row" href="#"><span>Neue Szenen</span><span>[Noch keine]</span></a>
+    <a class="row" href="#"><span>Offene Aufgaben</span><span class="num">0</span></a>
+  </main>
+  <nav aria-label="Hauptnavigation" style="flex: 0 0 auto; display: flex; background: var(--deep)">
+    <a class="tab" href="#" aria-current="page" style="font-weight: 600"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h16v14H2zM10 3v14M18 6c-4 0-5 2-5 4s1 4 5 4"></path></svg>Übersicht</a>
+    <a class="tab" href="#"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 4h14v12H3zM8 8l5 2-5 2z"></path></svg>Szenen</a>
+    <a class="tab" href="#"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h14v12H3zM3 9h14M7 2v5M13 2v5"></path></svg>Termine</a>
+    <a class="tab" href="#"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3 2 6l2 3 2-1v9h8V8l2 1 2-3-4-3-2 2H8z"></path></svg>Team</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"club":{"editor":"color","default":"#0b6bcb","options":["#0b6bcb","#c8102e","#0f6b46","#ffd100"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const club = this.props.club ?? '#0b6bcb';
+    const rgb = [0, 2, 4].map(function (i) { return parseInt(club.slice(1 + i, 3 + i), 16); });
+    const lin = rgb.map(function (c) { const s = c / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); });
+    const l = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    const hex = function (a) { return '#' + a.map(function (c) { return Math.round(c).toString(16).padStart(2, '0'); }).join(''); };
+    const mix = function (t, p) { return hex(rgb.map(function (c, i) { return c + (t[i] - c) * p; })); };
+    const light = 1.05 / (l + 0.05) < (l + 0.05) / 0.05;
+    return { club: club, ink: light ? '#10151c' : '#ffffff', deep: light ? '#14171c' : mix([5, 12, 24], 0.78), paper: mix([255, 255, 255], 0.93) };
+  }
+}
+</script>
+</body>
+</html>

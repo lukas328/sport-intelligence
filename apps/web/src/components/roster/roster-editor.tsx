@@ -5,7 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { FileUp, Trash2, UserPlus, Users } from "lucide-react";
+import { Alert, Card, EmptyState, Skeleton } from "@/components/ui/card";
+import { useConfirm } from "@/components/ui/confirm";
+import { Dialog } from "@/components/ui/dialog";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -21,10 +24,22 @@ interface Props {
   teamId: string;
   seasonId: string;
   canEdit: boolean;
+  /** onboarding: forms always visible; team page: forms in dialogs once players exist */
+  layout?: "inline" | "page";
 }
 
-export function RosterEditor({ orgId, teamId, seasonId, canEdit }: Props) {
+const GROUPS = [
+  ["goal", ["TW"]],
+  ["back", ["RL", "RM", "RR"]],
+  ["wing", ["LA", "RA"]],
+  ["pivot", ["KM"]],
+  ["other", []],
+] as const satisfies readonly (readonly [string, readonly string[]])[];
+const ALL_POSITIONS: string[] = GROUPS.flatMap(([, ps]) => [...ps]);
+
+export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page" }: Props) {
   const t = useTranslations();
+  const confirm = useConfirm();
   const qc = useQueryClient();
   const path = { org_id: orgId, team_id: teamId, season_id: seasonId };
   const key = ["roster", seasonId];
@@ -91,104 +106,157 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit }: Props) {
   }
 
   const entries = roster.data ?? [];
+  const inline = layout === "inline" || (!roster.isLoading && entries.length === 0);
+  const addForm = (
+    <form ref={formRef} onSubmit={onAdd} className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label={t("roster.addTitle")}>
+      <Input label={t("roster.number")} name="jersey_number" type="number" min={1} max={99} inputMode="numeric" />
+      <Select label={t("roster.position")} name="main_position" defaultValue="">
+        <option value="">{t("roster.none")}</option>
+        {POSITIONS.map((p) => (
+          <option key={p} value={p}>
+            {p} · {t(`positions.${p}`)}
+          </option>
+        ))}
+      </Select>
+      <Input label={t("roster.firstName")} name="first_name" required autoComplete="off" />
+      <Input label={t("roster.lastName")} name="last_name" required autoComplete="off" />
+      <Select label={t("roster.hand")} name="shooting_hand" defaultValue="">
+        <option value="">{t("roster.none")}</option>
+        <option value="right">{t("hands.right")}</option>
+        <option value="left">{t("hands.left")}</option>
+      </Select>
+      <Input label={t("roster.birthYear")} name="birth_year" type="number" min={1940} max={2030} />
+      <div className="pt-1 sm:col-span-2">
+        <Button type="submit" loading={add.isPending}>
+          {t("common.add")}
+        </Button>
+      </div>
+    </form>
+  );
+  const csv = <CsvImport path={path} onImported={() => void qc.invalidateQueries({ queryKey: key })} />;
   return (
     <div className="space-y-6">
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
       {notice && <Alert kind="success">{notice}</Alert>}
 
-      <section aria-labelledby="roster-list" className="space-y-2">
-        <div className="flex items-baseline justify-between">
-          <h2 id="roster-list" className="text-lg font-semibold">
-            {t("roster.title")}
-          </h2>
-          <span className="text-sm text-muted" data-testid="roster-count">
-            {t("roster.count", { count: entries.length })}
-          </span>
+      <section aria-labelledby="roster-list" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <h2 id="roster-list" className="text-lg font-semibold">
+              {t("roster.title")}
+            </h2>
+            <span className="text-sm text-muted" data-testid="roster-count">
+              {t("roster.count", { count: entries.length })}
+            </span>
+          </div>
+          {canEdit && !inline && (
+            <div className="flex flex-wrap gap-2">
+              <Dialog
+                title={t("roster.addTitle")}
+                trigger={
+                  <Button size="sm">
+                    <UserPlus aria-hidden />
+                    {t("roster.addTitle")}
+                  </Button>
+                }
+              >
+                {error && <Alert className="mb-4">{t(`errors.${error}`)}</Alert>}
+                {notice && <Alert kind="success" className="mb-4">{notice}</Alert>}
+                {addForm}
+              </Dialog>
+              <Dialog
+                title={t("roster.csvTitle")}
+                trigger={
+                  <Button size="sm" variant="secondary">
+                    <FileUp aria-hidden />
+                    {t("roster.csvTitle")}
+                  </Button>
+                }
+              >
+                {csv}
+              </Dialog>
+            </div>
+          )}
         </div>
         {roster.isLoading ? (
-          <p className="text-muted">{t("common.loading")}</p>
+          <Skeleton className="h-48" />
         ) : entries.length === 0 ? (
-          <EmptyState title={t("roster.empty")}>{canEdit && t("roster.emptyHint")}</EmptyState>
+          canEdit && inline ? (
+            <p className="text-[0.9375rem] text-muted">{t("roster.emptyHint")}</p>
+          ) : (
+            <EmptyState icon={<Users />} title={t("roster.empty")}>{canEdit && t("roster.emptyHint")}</EmptyState>
+          )
         ) : (
-          <div className="overflow-x-auto rounded-md border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-surface text-muted">
-                <tr>
-                  <th scope="col" className="px-3 py-2 font-medium">{t("roster.number")}</th>
-                  <th scope="col" className="px-3 py-2 font-medium">{t("roster.lastName")}</th>
-                  <th scope="col" className="px-3 py-2 font-medium">{t("roster.firstName")}</th>
-                  <th scope="col" className="px-3 py-2 font-medium">{t("roster.position")}</th>
-                  <th scope="col" className="hidden px-3 py-2 font-medium sm:table-cell">{t("roster.hand")}</th>
-                  <th scope="col" className="hidden px-3 py-2 font-medium sm:table-cell">{t("roster.account")}</th>
-                  {canEdit && <th scope="col" className="px-3 py-2"><span className="sr-only">{t("common.edit")}</span></th>}
-                </tr>
-              </thead>
-              <tbody>
-                {entries.map((p) => (
-                  <tr key={p.id} className="border-t border-border" data-testid="roster-row">
-                    <td className="px-3 py-2 tabular-nums">{p.jersey_number ?? ""}</td>
-                    <td className="px-3 py-2 font-medium">{p.last_name}</td>
-                    <td className="px-3 py-2">{p.first_name}</td>
-                    <td className="px-3 py-2" title={p.main_position ? t(`positions.${p.main_position}`) : undefined}>
-                      {p.main_position ?? ""}
-                    </td>
-                    <td className="hidden px-3 py-2 sm:table-cell">{p.shooting_hand ? t(`hands.${p.shooting_hand}`) : ""}</td>
-                    <td className="hidden px-3 py-2 text-muted sm:table-cell">
-                      {p.has_account ? t("roster.hasAccount") : t("roster.noAccount")}
-                    </td>
-                    {canEdit && (
-                      <td className="px-3 py-2 text-right">
-                        <Button
-                          variant="ghost"
-                          className="min-h-8 px-2 py-1 text-error"
-                          aria-label={`${t("roster.remove")}: ${p.first_name} ${p.last_name}`}
-                          onClick={() => {
-                            if (window.confirm(t("roster.removeConfirm", { name: `${p.first_name} ${p.last_name}` })))
-                              remove.mutate(p.id);
-                          }}
-                        >
-                          {t("roster.remove")}
-                        </Button>
-                      </td>
+          // the squad as it lines up on the match sheet: by position, shirt number first in the club colour
+          <div className="space-y-8">
+            {GROUPS.map(([g, positions]) => {
+              const members = entries.filter((p) => (g === "other" ? !ALL_POSITIONS.includes(p.main_position ?? "") : (positions as readonly string[]).includes(p.main_position ?? "")));
+              if (members.length === 0) return null;
+              return (
+                <section key={g} aria-labelledby={`group-${g}`}>
+                  <h3 id={`group-${g}`} className="mb-1 flex items-baseline gap-2 text-lg">
+                    {t(`roster.group_${g}`)}
+                    <span className="font-sans text-sm font-medium text-muted tabular-nums">{members.length}</span>
+                  </h3>
+                  <ul className="grid border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-10 xl:grid-cols-3">
+                    {members.map((p) => (
+              <li key={p.id} className="group relative flex items-center gap-4 border-b border-foreground/15 py-3.5 pr-1" data-testid="roster-row">
+                <span className="w-14 shrink-0 text-center font-score text-[2.75rem] leading-none text-accent" aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
+                  {p.jersey_number ?? "–"}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[1.0625rem] font-semibold">
+                    {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                  </span>
+                  <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
+                    {p.main_position && (
+                      <span className="rounded-sm bg-surface px-1.5 py-px text-xs font-bold text-foreground" title={t(`positions.${p.main_position}`)}>
+                        {p.main_position}
+                      </span>
                     )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    {p.shooting_hand && <span>{t(`hands.${p.shooting_hand}`)}</span>}
+                    {p.has_account ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span aria-hidden className="size-1.5 rounded-full bg-ok" />
+                        {t("roster.hasAccount")}
+                      </span>
+                    ) : (
+                      <span className="sr-only">{t("roster.noAccount")}</span>
+                    )}
+                  </span>
+                </span>
+                {canEdit && (
+                  <Button
+                    variant="quiet"
+                    size="icon-sm"
+                    className="lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
+                    aria-label={`${t("roster.remove")}: ${p.first_name} ${p.last_name}`}
+                    title={t("roster.remove")}
+                    onClick={async () => {
+                      if (await confirm({ title: t("roster.removeConfirm", { name: `${p.first_name} ${p.last_name}` }), confirm: t("roster.remove"), danger: true }))
+                        remove.mutate(p.id);
+                    }}
+                  >
+                    <Trash2 aria-hidden />
+                  </Button>
+                )}
+              </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
           </div>
         )}
       </section>
 
-      {canEdit && (
+      {canEdit && inline && (
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <h3 className="mb-4 font-semibold">{t("roster.addTitle")}</h3>
-            <form ref={formRef} onSubmit={onAdd} className="grid grid-cols-2 gap-3" aria-label={t("roster.addTitle")}>
-              <Input label={t("roster.number")} name="jersey_number" type="number" min={1} max={99} inputMode="numeric" />
-              <Select label={t("roster.position")} name="main_position" defaultValue="">
-                <option value="">{t("roster.none")}</option>
-                {POSITIONS.map((p) => (
-                  <option key={p} value={p}>
-                    {p} · {t(`positions.${p}`)}
-                  </option>
-                ))}
-              </Select>
-              <Input label={t("roster.firstName")} name="first_name" required autoComplete="off" />
-              <Input label={t("roster.lastName")} name="last_name" required autoComplete="off" />
-              <Select label={t("roster.hand")} name="shooting_hand" defaultValue="">
-                <option value="">{t("roster.none")}</option>
-                <option value="right">{t("hands.right")}</option>
-                <option value="left">{t("hands.left")}</option>
-              </Select>
-              <Input label={t("roster.birthYear")} name="birth_year" type="number" min={1940} max={2030} />
-              <div className="col-span-2">
-                <Button type="submit" loading={add.isPending}>
-                  {t("common.add")}
-                </Button>
-              </div>
-            </form>
+            {addForm}
           </Card>
-          <CsvImport path={path} onImported={() => void qc.invalidateQueries({ queryKey: key })} />
+          <Card>{csv}</Card>
         </div>
       )}
     </div>
@@ -231,22 +299,30 @@ function CsvImport({
 
   const templateHref = `data:text/csv;charset=utf-8,${encodeURIComponent(TEMPLATE)}`;
   return (
-    <Card className="space-y-3">
+    <div className="space-y-4">
       <h3 className="font-semibold">{t("roster.csvTitle")}</h3>
       <p className="text-sm text-muted">{t("roster.csvHint")}</p>
-      <a href={templateHref} download="kader-vorlage.csv" className="text-sm text-accent underline underline-offset-4">
+      <a href={templateHref} download="kader-vorlage.csv" className="inline-block text-sm font-medium text-accent hover:underline">
         {t("roster.csvTemplate")}
       </a>
-      <Input
-        label={t("roster.csvFile")}
-        type="file"
-        accept=".csv,text/csv"
-        onChange={(e) => {
-          setFile(e.target.files?.[0] ?? null);
-          setResult(null);
-          setDone(null);
-        }}
-      />
+      <div className="space-y-1">
+        <span className="block text-sm font-semibold">{t("roster.csvFile")}</span>
+        <label className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
+          <span className="ml-1 rounded-sm bg-surface px-3 py-1 text-sm font-semibold">{t("roster.csvChoose")}</span>
+          <span className="min-w-0 truncate text-muted">{file?.name ?? t("roster.csvNone")}</span>
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            aria-label={t("roster.csvFile")}
+            className="sr-only"
+            onChange={(e) => {
+              setFile(e.target.files?.[0] ?? null);
+              setResult(null);
+              setDone(null);
+            }}
+          />
+        </label>
+      </div>
       {done !== null && <Alert kind="success">{t("roster.csvImported", { count: done })}</Alert>}
       {result && result.errors.length > 0 && (
         <Alert>
@@ -258,7 +334,7 @@ function CsvImport({
         </Alert>
       )}
       {result && result.errors.length === 0 && (
-        <ul className="max-h-40 overflow-auto text-sm" data-testid="csv-preview">
+        <ul className="max-h-40 space-y-1 overflow-auto rounded-md bg-surface p-3 text-sm" data-testid="csv-preview">
           {result.rows.map((r, i) => (
             <li key={i}>
               {r.jersey_number ?? ""} {r.first_name} {r.last_name} {r.main_position ?? ""}
@@ -276,6 +352,6 @@ function CsvImport({
           </Button>
         )}
       </div>
-    </Card>
+    </div>
   );
 }

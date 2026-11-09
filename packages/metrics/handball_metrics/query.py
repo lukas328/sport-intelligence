@@ -273,7 +273,8 @@ def compute(metric: str, rows: list[Row]) -> Value:
     if d.kind == "count":
         return Value(float(len(hits)), float(len(hits)), None, len(hits), matches, ids)
     if d.kind == "sum":
-        total = sum(expected_goal(r.event.x, r.event.y, r.event.shot_type) for r in hits)
+        xgs = [expected_goal(r.event.x, r.event.y, r.event.shot_type) for r in hits]
+        total = sum(x for x in xgs if x is not None)  # shots without a position have no xG
         return Value(round(total, 1), round(total, 1), len(hits), len(hits), matches, ids)
     assert d.den is not None
     base = [r for r in rows if d.den(r.event)]

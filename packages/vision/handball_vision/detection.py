@@ -3,6 +3,12 @@
 - `BackgroundDetector` (source "heuristic"): fixed cameras. A running median background, colour
   distance in Lab, morphology and connected components restricted to the court (+2 m). Blobs that
   are wider than a single player at that image position are split. No training data needed.
+- `MovingBackgroundDetector` (source "heuristic"): panning and zooming cameras. The background of
+  every frame is rendered from the hall panorama (`motion.CameraMotion`), the court homography of
+  the frame follows from the panorama calibration and the camera rotation; detection itself is the
+  same as for a fixed camera.
+- `YoloxDetector` (source "model"): YOLOX COCO weights (Apache-2.0) via ONNX Runtime; people and
+  the ball, filtered to the court with `filter_on_court`.
 - `OnnxDetector` (source "model"): runs any exported detector with the common
   [x1, y1, x2, y2, score, class] output, batched, on ONNX Runtime (CUDA EP when available).
   Weights come from the model registry, never from the repository (ADR 003).
@@ -48,21 +54,56 @@ class Detector(Protocol):
     def detect(self, frames: list[U8]) -> list[list[Detection]]: ...
 
 
+def _clip_front(
+    h: NDArray[np.float64], poly: NDArray[np.float64], eps: float = 1e-3
+) -> NDArray[np.float64]:
+    """Clip a court polygon to the part in front of the camera (homogeneous w > eps).
+
+    w is affine in court coordinates, so this is a half-plane clip (Sutherland-Hodgman). Needed for
+    panning cameras, where parts of the court can be behind the current view.
+    """
+    w = poly @ h[2, :2] + h[2, 2]
+    out: list[NDArray[np.float64]] = []
+    for k in range(len(poly)):
+        a, b, wa, wb = poly[k], poly[(k + 1) % len(poly)], w[k], w[(k + 1) % len(poly)]
+        if wa > eps:
+            out.append(a)
+        if (wa > eps) != (wb > eps):
+            out.append(a + (eps - wa) / (wb - wa) * (b - a))
+    return np.array(out).reshape(-1, 2)
+
+
 def court_mask(calib: Calibration, margin_m: float = 2.0) -> U8:
     w, h = calib.image_size
-    poly = calib.to_image(
-        np.array(
-            [
-                [-margin_m, -margin_m],
-                [40 + margin_m, -margin_m],
-                [40 + margin_m, 20 + margin_m],
-                [-margin_m, 20 + margin_m],
-            ]
-        )
+    court = np.array(
+        [
+            [-margin_m, -margin_m],
+            [40 + margin_m, -margin_m],
+            [40 + margin_m, 20 + margin_m],
+            [-margin_m, 20 + margin_m],
+        ]
     )
     mask = np.zeros((h, w), np.uint8)
-    cv2.fillPoly(mask, [poly.astype(np.int32)], 255)
+    front = _clip_front(calib.homography, court)
+    if len(front) >= 3:
+        poly = np.clip(calib.to_image(front), -1e5, 1e5)
+        cv2.fillPoly(mask, [poly.round().astype(np.int32)], 255)
     return mask
+
+
+def expected_height_grid(
+    calib: Calibration, xs: NDArray[np.float64], ys: NDArray[np.float64], player_m: float = 1.85
+) -> NDArray[np.float64]:
+    """Vectorised `expected_height_px` for image points (xs, ys); 0 where it is undefined."""
+    img = np.column_stack([xs.ravel(), ys.ravel()])
+    with np.errstate(all="ignore"):
+        court = calib.to_court(img)
+        half = np.array([0.5, 0.0])
+        a = calib.to_image(court - half)
+        b = calib.to_image(court + half)
+        out = np.linalg.norm(b - a, axis=1) * player_m
+    out = np.where(np.isfinite(out), out, 0.0)
+    return np.asarray(out.reshape(xs.shape), np.float64)
 
 
 def expected_height_px(
@@ -97,16 +138,11 @@ class BackgroundDetector:
 
     def _expected_height_table(self) -> NDArray[np.float64]:
         w, h = self.size
+        xs, ys = np.meshgrid(np.arange(0, w, 16, dtype=np.float64), np.arange(h, dtype=np.float64))
         table = np.zeros((h, w // 16 + 1))
-        for yi in range(h):
-            for xi in range(0, w, 16):
-                try:
-                    table[yi, xi // 16] = (
-                        expected_height_px(self.calib, (xi / self.scale, yi / self.scale))
-                        * self.scale
-                    )
-                except (ValueError, np.linalg.LinAlgError):
-                    table[yi, xi // 16] = 0
+        table[:, : xs.shape[1]] = (
+            expected_height_grid(self.calib, xs / self.scale, ys / self.scale) * self.scale
+        )
         return table
 
     def exp_h(self, x: float, y: float) -> float:
@@ -273,6 +309,180 @@ class OnnxDetector:
                     )
                 out.append(dets)
         return out
+
+
+def _yolox_grid(size: int) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
+    grids, strides = [], []
+    for stride in (8, 16, 32):
+        n = size // stride
+        yv, xv = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
+        grids.append(np.stack([xv, yv], -1).reshape(-1, 2))
+        strides.append(np.full((n * n, 1), stride))
+    return np.concatenate(grids).astype(np.float32), np.concatenate(strides).astype(np.float32)
+
+
+class YoloxDetector:
+    """YOLOX (Megvii, Apache-2.0 code and COCO weights) exported to ONNX, CPU or CUDA.
+
+    The official exports take a 640 x 640 BGR image in 0..255 (letterboxed at the top left) and
+    return raw grid outputs [1, 8400, 85]; decoding (grid, stride, exp), objectness x class score
+    and per-class NMS happen here. Only COCO "person" (0) and "sports ball" (32) are kept. The
+    model card is ml/models/yolox-coco.md.
+    """
+
+    source = "model"
+
+    def __init__(
+        self,
+        model_path: Path,
+        input_size: int = 640,
+        person_threshold: float = 0.3,
+        ball_threshold: float = 0.15,
+        threads: int | None = None,
+    ) -> None:
+        import onnxruntime as ort
+
+        options = ort.SessionOptions()
+        if threads:
+            options.intra_op_num_threads = threads
+        providers = [
+            p
+            for p in ("CUDAExecutionProvider", "CPUExecutionProvider")
+            if p in ort.get_available_providers()
+        ]
+        self.session = ort.InferenceSession(str(model_path), options, providers=providers)
+        self.input_name = self.session.get_inputs()[0].name
+        self.size = input_size
+        self.thresholds = {0: person_threshold, 32: ball_threshold}
+        self.grid, self.stride = _yolox_grid(input_size)
+        self.model = Path(model_path).stem
+
+    def _prepare(self, frame: U8) -> tuple[NDArray[np.float32], float]:
+        h, w = frame.shape[:2]
+        r = min(self.size / h, self.size / w)
+        canvas = np.full((self.size, self.size, 3), 114, np.uint8)
+        nh, nw = round(h * r), round(w * r)
+        canvas[:nh, :nw] = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_LINEAR)
+        return canvas.transpose(2, 0, 1)[None].astype(np.float32), r
+
+    def detect(self, frames: list[U8]) -> list[list[Detection]]:
+        out: list[list[Detection]] = []
+        for frame in frames:
+            x, r = self._prepare(frame)
+            raw = self.session.run(None, {self.input_name: x})[0][0]
+            xy = (raw[:, :2] + self.grid) * self.stride
+            wh = np.exp(np.clip(raw[:, 2:4], -10, 10)) * self.stride
+            boxes = np.concatenate([xy - wh / 2, xy + wh / 2], axis=1) / r
+            dets: list[Detection] = []
+            for cls, threshold in self.thresholds.items():
+                scores = raw[:, 4] * raw[:, 5 + cls]
+                keep = scores > threshold
+                if not keep.any():
+                    continue
+                b, sc = boxes[keep], scores[keep]
+                idx = cv2.dnn.NMSBoxes(
+                    np.column_stack([b[:, :2], b[:, 2:] - b[:, :2]]).tolist(),
+                    sc.tolist(),
+                    threshold,
+                    0.5,
+                )
+                for i in np.array(idx, dtype=int).ravel():
+                    x1, y1, x2, y2 = (float(v) for v in b[i])
+                    dets.append(
+                        Detection(x1, y1, x2, y2, float(sc[i]), "person" if cls == 0 else "ball")
+                    )
+            out.append(dets)
+        return out
+
+
+def filter_on_court(
+    calib: Calibration,
+    dets: list[Detection],
+    margin_m: float = 1.5,
+    min_height_ratio: float = 0.45,
+    max_height_ratio: float = 2.2,
+) -> list[Detection]:
+    """Keep people whose feet stand on the court (plus a margin) and whose box height fits a
+    standing person at that spot: drops spectators, the bench and people cut by the railing."""
+    people = [d for d in dets if d.cls != "ball"]
+    if not people:
+        return []
+    feet = foot_positions(calib, people)
+    with np.errstate(all="ignore"):
+        expected = expected_height_grid(
+            calib, np.array([d.foot[0] for d in people]), np.array([d.foot[1] for d in people])
+        ).ravel()
+    keep: list[Detection] = []
+    frame_h = calib.image_size[1]
+    for d, (x, y), e in zip(people, feet, expected, strict=True):
+        if d.y2 >= frame_h - 3:  # feet cut off by the frame edge: the foot point is wrong
+            continue
+        if not (np.isfinite(x) and np.isfinite(y)):
+            continue
+        if not (-margin_m <= x <= 40 + margin_m and -margin_m <= y <= 20 + margin_m):
+            continue
+        if e > 0 and not (min_height_ratio * e <= d.height <= max_height_ratio * e):
+            continue
+        keep.append(d)
+    return keep
+
+
+class MovingBackgroundDetector(BackgroundDetector):
+    """Background subtraction for a moving camera: call `set_frame(i)` before `detect`."""
+
+    def __init__(
+        self,
+        canvas_calib: Calibration,
+        canvas_background: U8,
+        motion: Any,  # handball_vision.motion.CameraMotion (no import cycle)
+        threshold: float = 26.0,
+        scale: float = 0.5,
+    ) -> None:
+        self.canvas_calib = canvas_calib
+        self.canvas_background = canvas_background
+        self.motion = motion
+        self.scale = scale
+        self.threshold = threshold
+        w, h = motion.frame_size
+        self.size = (round(w * scale), round(h * scale))
+        self.calib = canvas_calib
+        self.mask = np.zeros((self.size[1], self.size[0]), np.uint8)
+        self.background = None
+        self._bg_f = np.zeros(0, np.float32)
+        self._exp = np.zeros((self.size[1], self.size[0] // 16 + 1))
+
+    def frame_calibration(self, index: int) -> Calibration | None:
+        h = self.motion.canvas_to_frame(index)
+        if h is None:
+            return None
+        return Calibration(
+            h @ self.canvas_calib.homography,
+            self.canvas_calib.confidence,
+            self.canvas_calib.reprojection_px,
+            self.canvas_calib.source,
+            self.motion.frame_size,
+        )
+
+    def set_frame(self, index: int) -> Calibration | None:
+        """Prepare court mask, expected heights and background for frame `index`."""
+        calib = self.frame_calibration(index)
+        rendered = self.motion.render_from_canvas(self.canvas_background, index, self.scale)
+        if calib is None or rendered is None:
+            return None
+        self.calib = calib
+        bg, valid = rendered
+        mask = cv2.resize(court_mask(calib), self.size, interpolation=cv2.INTER_NEAREST)
+        self.mask = cv2.bitwise_and(mask, cv2.erode(valid, np.ones((5, 5), np.uint8)))
+        self._exp = self._expected_height_table()
+        self.background = cv2.cvtColor(bg, cv2.COLOR_BGR2LAB)
+        self._bg_f = self.background.astype(np.float32)
+        return calib
+
+    def warm_up(self, frames: list[U8]) -> None:  # background comes from the panorama
+        return None
+
+    def _update(self, lab: U8, foreground: U8 | None) -> None:
+        return None
 
 
 def foot_positions(calib: Calibration, dets: list[Detection]) -> NDArray[np.float64]:

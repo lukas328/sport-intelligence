@@ -1,5 +1,6 @@
 "use client";
 
+import { Play } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -70,14 +71,14 @@ export function TeamFeedView({ orgId, matchId, onPlay }: { orgId: string; matchI
             </p>
             <ol className="space-y-2">
               {p.items.map((s) => (
-                <li key={s.id} className="space-y-1 rounded-md border border-border p-2 text-sm">
+                <li key={s.id} className="space-y-1 rounded-md ring-1 ring-inset ring-border p-2 text-sm">
                   <div className="flex items-center gap-2">
                     <span className={cn("size-2 rounded-full", s.positive ? "bg-ok" : "bg-muted")} aria-hidden />
                     <span className="flex-1">{t(`reason_${s.reason}` as "reason_goal")}</span>
                     {s.seen && <span className="text-xs text-muted">{t("seen")}</span>}
                     {onPlay && (
-                      <button type="button" className="text-accent underline underline-offset-4" onClick={() => onPlay(s.start_ms)}>
-                        ▶
+                      <button type="button" className="font-medium text-accent hover:underline" onClick={() => onPlay(s.start_ms)}>
+                        <Play aria-hidden className="size-4 fill-current" />
                       </button>
                     )}
                   </div>

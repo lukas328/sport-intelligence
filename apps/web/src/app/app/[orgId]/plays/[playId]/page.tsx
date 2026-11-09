@@ -25,7 +25,7 @@ export default async function PlayPage({ params }: { params: Promise<{ orgId: st
         </Link>
       </p>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">{play.data.name}</h1>
+        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{play.data.name}</h1>
         {staff && <ShareButton orgId={orgId} teamId={play.data.team_id} kind="play" targetId={play.data.id} />}
       </div>
       <PlayEditor orgId={orgId} teamId={play.data.team_id} play={play.data} editable={staff} source={source} />

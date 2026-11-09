@@ -5,8 +5,10 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import pytest
 
+from handball_api.core.colors import analysis_kits
 from handball_api.core.email import MemoryEmailSender
 from handball_api.core.jobs import MemoryEventBus, MemoryJobQueue
 from handball_api.core.storage import MemoryStorage
@@ -429,6 +431,7 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     queue, func, analysis_id, payload = jobs.jobs[-1]
     assert (queue, func) == ("gpu", "handball_gpu_worker.analysis.run_analysis")
     assert payload["kits"]["home"] == "#2828c8"
+    assert "referee" not in payload["kits"]  # no referee colour guessed
     assert payload["calibration_points"] is None
     assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()["status"] == "running"
     storage: MemoryStorage = api.app.state.storage
@@ -506,6 +509,135 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     assert len(a["tracks"]) == 2  # previous results stay until a new run succeeds
 
 
+async def test_court_marked_on_the_hall_image(make_api: Callable[[], Api]) -> None:
+    """Moving camera, court not found automatically: the user marks it on the panorama."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    prefix = jobs.jobs[-1][3]["prefix"]
+    await api.http.post(
+        f"/internal/jobs/{jobs.jobs[-1][2]}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {"proxy_key": prefix + "proxy.mp4", "hls_prefix": prefix + "hls/"},
+        },
+    )
+    analysis_id = jobs.jobs[-1][2]
+    assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/panorama")).status_code == 404
+    pts = [{"image": [100 * i, 50 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
+    no_image = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts, "space": "panorama"}
+    )
+    assert no_image.status_code == 409
+    storage: MemoryStorage = api.app.state.storage
+    await storage.put("artifacts", prefix + "analysis/panorama.jpg", b"jpeg", "image/jpeg")
+    await api.http.post(
+        f"/internal/jobs/{analysis_id}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {
+                "camera": "moving",
+                "panorama": {"width": 3600, "height": 1100},
+                "needs_calibration": True,
+                "calibration_error": "no plausible court boundary",
+                "calibration": None,
+                "tracks": [],
+                "chunks": 0,
+                "chunk_ms": 30000,
+                "fps": 30.0,
+                "frames": 0,
+                "detector": "heuristic",
+            },
+        },
+    )
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert a["status"] == "ready" and a["needs_calibration"] is True
+    assert a["camera"] == "moving" and a["panorama"] == {"width": 3600, "height": 1100}
+    assert a["calibration"] is None and a["calibration_error"] == "no plausible court boundary"
+    img = await api.get(f"/v1/orgs/{org}/videos/{vid}/panorama")
+    assert img.status_code == 200 and img.content == b"jpeg"
+    assert img.headers["content-type"] == "image/jpeg"
+    r = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration",
+        json={"points": pts, "space": "panorama", "frame_ms": 0},
+    )
+    assert r.status_code == 202
+    payload = jobs.jobs[-1][3]
+    assert (payload["calibration_space"], payload["calibration_frame_ms"]) == ("panorama", 0)
+    bad = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts, "space": "sky"}
+    )
+    assert bad.status_code == 422
+
+
+async def test_rerun_keeps_the_clicked_court(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Flat view: the court was clicked on the hall image and a player assigned to a track. A
+    reprocess (or a retry of the analysis) used to start without the points: the automatic court
+    failed again, the run ended as "needs court points" and dropped every track, the coach's
+    assignments with them. The re-run now takes the stored points."""
+    from .test_identity_sync import _finish, _ingest, _tracks
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    roster = f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/roster"
+    mia = (
+        await api.post(roster, json={"first_name": "Mia", "last_name": "K", "jersey_number": 7})
+    ).json()
+    m = await new_match(api, ids)
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)
+    flat: dict[str, Any] = {
+        "needs_calibration": True,
+        "calibration": None,
+        "tracks": [],
+        "chunks": 0,
+    }
+    await _finish(api, jobs.jobs[-1][2], {**flat, "panorama": {"width": 3600, "height": 1100}})
+    pts = [{"image": [100 * i, 50 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
+    body = {"points": pts, "space": "panorama", "frame_ms": 0}
+    assert (
+        await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json=body)
+    ).status_code == 202
+    court = {
+        "homography": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+        "image_size": [3600, 1100],
+        "confidence": 1.0,
+        "reprojection_px": 0.5,
+        "source": "user_correction",
+    }
+    await _finish(api, jobs.jobs[-1][2], {"calibration": court, "tracks": _tracks()})
+    stored = await owner_conn.fetchval(
+        "SELECT points::text FROM calibrations WHERE video_asset_id = $1::uuid", vid
+    )
+    assert stored is not None and '"court": [10.0, 5.0]' in stored
+    track = f"/v1/orgs/{org}/videos/{vid}/tracks/1/identity"
+    assert (await api.put(track, json={"player_id": mia["player_id"]})).status_code == 200
+
+    assert (await api.post(f"/v1/orgs/{org}/videos/{vid}/reprocess")).status_code in (200, 202)
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)
+    _, func, job, payload = jobs.jobs[-1]
+    assert func == "handball_gpu_worker.analysis.run_analysis"
+    assert [p["court"] for p in payload["calibration_points"]] == [p["court"] for p in pts]
+    assert (payload["calibration_space"], payload["calibration_frame_ms"]) == ("panorama", 0)
+    await _finish(api, job, {"calibration": court, "tracks": _tracks()})
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert a["needs_calibration"] is False and a["calibration"]["source"] == "user_correction"
+    one = next(t for t in a["tracks"] if t["track_no"] == 1)
+    assert (one["player_id"], one["identity_source"]) == (mia["player_id"], "user_correction")
+
+
 async def test_opponent_players_number_first(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)
@@ -557,3 +689,84 @@ async def test_training_video_and_team_default_format(make_api: Callable[[], Api
     assert patched.json()["default_format"] == "mini" and patched.json()["level"] == "U11 Promotion"
     m = await new_match(api, ids)
     assert (m["format"], m["period_s"]) == ("mini", 600)
+
+
+async def test_possessions_summary(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    org = ids["org"]
+    for side, start, end in (
+        ("own", 0, 20_000),
+        ("opponent", 21_000, 51_000),
+        ("own", 52_000, 62_000),
+    ):
+        await owner_conn.execute(
+            "INSERT INTO possessions (id, organization_id, match_id, side, start_ms, end_ms, "
+            "confidence, source) "
+            "VALUES (gen_random_uuid(), $1::uuid, $2::uuid, $3, $4, $5, 0.8, 'heuristic')",
+            org,
+            m["id"],
+            side,
+            start,
+            end,
+        )
+    data = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/possessions")).json()
+    assert len(data["phases"]) == 3 and data["estimated"]
+    assert data["summary"]["own"] == {"count": 2, "fast_breaks": 0, "avg_s": 15.0, "share": 0.5}
+    assert data["summary"]["opponent"]["count"] == 1
+
+
+def test_analysis_kits_send_the_referee_only_when_known_and_distinct() -> None:
+    kits: dict[str, str | None] = {
+        "own": "#f0f0f0",
+        "own_gk": "#f59e0b",
+        "opponent": "#202020",
+        "opponent_gk": "#16a34a",
+    }
+    base = {"home": "#f0f0f0", "home_gk": "#f59e0b", "away": "#202020", "away_gk": "#16a34a"}
+    assert analysis_kits(kits) == base
+    assert analysis_kits({**kits, "referee": None}) == base
+    # black referees against a black opponent: left out (they would take the opponents' label)
+    assert analysis_kits({**kits, "referee": "#1a1a1a"}) == base
+    assert analysis_kits({**kits, "referee": "#f2f2f2"}) == base  # like the own kit
+    assert analysis_kits({**kits, "referee": "#ff6a13"}) == {**base, "referee": "#ff6a13"}
+
+
+async def test_referee_kit_is_a_user_choice(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids, kit_own="#f0f0f0", kit_opponent="#202020")
+    assert m["kit_referee"] is None and m["kit_warnings"] == []
+    murl = f"/v1/orgs/{org}/matches/{m['id']}"
+    black = (await api.patch(murl, json={"kit_referee": "#1a1a1a"})).json()
+    assert black["kit_referee"] == "#1a1a1a" and black["kit_warnings"] == ["opponent/referee"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+
+    async def analysis_kits_sent() -> dict[str, str]:
+        await upload(api, ids, m["id"], b"v" * 100)
+        ingest_id, prefix = jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"]
+        await api.http.post(
+            f"/internal/jobs/{ingest_id}",
+            headers=token,
+            json={
+                "status": "succeeded",
+                "progress": 1,
+                "result": {"proxy_key": prefix + "proxy.mp4", "hls_prefix": prefix + "hls/"},
+            },
+        )
+        assert jobs.jobs[-1][1] == "handball_gpu_worker.analysis.run_analysis"
+        return dict(jobs.jobs[-1][3]["kits"])
+
+    # the referee colour equals the opponent's: not sent
+    assert "referee" not in await analysis_kits_sent()
+    orange = (await api.patch(murl, json={"kit_referee": "#ff6a13"})).json()
+    assert orange["kit_referee"] == "#ff6a13" and orange["kit_warnings"] == []
+    assert (await analysis_kits_sent())["referee"] == "#ff6a13"
+    cleared = (await api.patch(murl, json={"kit_referee": None})).json()
+    assert cleared["kit_referee"] is None
+    assert (await api.patch(murl, json={"kit_referee": "orange"})).status_code == 422

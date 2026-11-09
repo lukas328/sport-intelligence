@@ -9,7 +9,7 @@ import { CourtHalf, ShotDot } from "@/components/analysis/court-half";
 import { EventList, type EventFilter } from "@/components/analysis/event-list";
 import { GoalGrid } from "@/components/analysis/goal-grid";
 import { InsightsCard } from "@/components/analysis/insights";
-import { Card, EmptyState } from "@/components/ui/card";
+import { Sheet, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
@@ -32,6 +32,7 @@ interface TeamStats {
   fast_break_goals: number;
   suspensions: number;
   attack_efficiency: number | null;
+  possessions?: number | null;
   zones: ZoneCount;
   goal_zones: ZoneCount;
   by_situation: Record<string, { shots: number; goals: number; pct: number | null }>;
@@ -80,7 +81,8 @@ export interface Stats {
     best_run: Record<string, { goals: number; from_s: number | null }>;
     longest_own_drought_s: { seconds: number };
   };
-  quality: { events: number; sources: Record<string, number> };
+  quality: { events: number; sources: Record<string, number>; attempts_known?: boolean };
+  possessions_source?: string;
 }
 
 export function useStats(orgId: string, matchId: string) {
@@ -98,7 +100,7 @@ const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v
 function N({ value, onClick, label }: { value: string | number; onClick?: () => void; label: string }) {
   if (!onClick || value === 0 || value === "0") return <span className="tabular-nums">{value}</span>;
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums text-accent underline decoration-dotted underline-offset-4 hover:decoration-solid">
+    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums font-medium text-accent hover:underline decoration-dotted underline-offset-4 hover:decoration-solid">
       {value}
     </button>
   );
@@ -127,12 +129,12 @@ function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: ReturnT
   }, [drill]);
   if (!drill) return null;
   return (
-    <Card className="space-y-2" ref={ref}>
+    <Sheet className="space-y-2" ref={ref}>
       <EventList orgId={orgId} matchId={matchId} filter={drill.filter} title={drill.title} onPlay={onPlay} names={names} />
       <button className="text-sm text-muted underline" onClick={close}>
         {t("close")}
       </button>
-    </Card>
+    </Sheet>
   );
 }
 
@@ -140,25 +142,29 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const t = useTranslations("stats");
   const oppName = useOpponentName();
   const { drill, open, close } = useDrill();
+  const attempts = stats.quality.attempts_known !== false;
   const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter }[] = [
     { label: t("goals"), own: stats.own.goals, opp: stats.opponent.goals, filter: (s) => ({ side: s, type: "shot", outcome: "goal" }) },
-    { label: t("shots"), own: stats.own.shots, opp: stats.opponent.shots, filter: (s) => ({ side: s, type: "shot" }) },
+    // goals alone (score overlay): shot counts and xG would only repeat the goals
+    ...(attempts ? [{ label: t("shots"), own: stats.own.shots, opp: stats.opponent.shots, filter: (s: "own" | "opponent") => ({ side: s, type: "shot" }) as EventFilter }] : []),
     { label: t("shootingPct"), own: pct(stats.own.shooting_pct), opp: pct(stats.opponent.shooting_pct) },
-    { label: t("saves"), own: stats.own.saves, opp: stats.opponent.saves, filter: (s) => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) },
+    ...(attempts ? [{ label: t("saves"), own: stats.own.saves, opp: stats.opponent.saves, filter: (s: "own" | "opponent") => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) as EventFilter }] : []),
     { label: t("savePct"), own: pct(stats.own.save_pct), opp: pct(stats.opponent.save_pct) },
     { label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s) => ({ side: s, type: "turnover" }) },
-    { label: t("sevenM"), own: `${stats.own.seven_m_goals}/${stats.own.seven_m_shots}`, opp: `${stats.opponent.seven_m_goals}/${stats.opponent.seven_m_shots}` },
+    ...(stats.own.seven_m_shots + stats.opponent.seven_m_shots > 0 ? [{ label: t("sevenM"), own: `${stats.own.seven_m_goals}/${stats.own.seven_m_shots}`, opp: `${stats.opponent.seven_m_goals}/${stats.opponent.seven_m_shots}` }] : []),
     { label: t("fastBreakGoals"), own: stats.own.fast_break_goals, opp: stats.opponent.fast_break_goals, filter: (s) => ({ side: s, zone: "fast_break", outcome: "goal" }) },
-    { label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s) => ({ side: s, type: "suspension_2min" }) },
+    ...(stats.own.suspensions + stats.opponent.suspensions > 0
+      ? [{ label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s: "own" | "opponent") => ({ side: s, type: "suspension_2min" }) as EventFilter }]
+      : []),
     { label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) },
-    { label: t("xg"), own: stats.own.xg.toFixed(1), opp: stats.opponent.xg.toFixed(1) },
+    { label: t("xg"), own: attempts ? stats.own.xg.toFixed(1) : "-", opp: attempts ? stats.opponent.xg.toFixed(1) : "-" },
   ];
   const run = stats.timeline.best_run.own;
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <InsightsCard orgId={orgId} matchId={match.id} names={names} staff={staff} onEvidence={open} />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="space-y-3">
+      <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
+        <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>
           <ScoreChart
             points={stats.timeline.score}
@@ -173,8 +179,8 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               <li>{t("drought", { minutes: Math.round(stats.timeline.longest_own_drought_s.seconds / 60) })}</li>
             )}
           </ul>
-        </Card>
-        <Card className="space-y-3">
+        </Sheet>
+        <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("comparison")}</h2>
           <table className="w-full text-sm" data-testid="comparison">
             <thead className="text-muted">
@@ -186,7 +192,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.label} className="border-t border-border">
+                <tr key={r.label} className="border-t border-border/70">
                   <th scope="row" className="py-1.5 text-left font-normal">{r.label}</th>
                   <td className="text-right">
                     <N value={r.own} label={`${r.label} ${teamName}`} onClick={r.filter && (() => open(`${r.label}: ${teamName}`, r.filter!("own")))} />
@@ -198,8 +204,8 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               ))}
             </tbody>
           </table>
-          <p className="text-xs text-muted">{t("possessionsHint")}</p>
-        </Card>
+          <p className="text-xs text-muted">{t(stats.possessions_source === "tracking" ? "possessionsTracked" : "possessionsHint")}</p>
+        </Sheet>
       </div>
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
@@ -220,31 +226,72 @@ function ScoreChart({
   periods: number;
 }) {
   const w = 600;
-  const h = 200;
+  const h = 210;
+  const right = 34;
   const maxT = Math.max(periodS * periods, ...points.map((p) => p.clock_s));
   const tickStep = maxT > 2400 ? 15 : 5;
   const ticks = Array.from({ length: Math.floor(maxT / 60 / tickStep) + 1 }, (_, i) => i * tickStep);
   const maxG = Math.max(5, ...points.map((p) => Math.max(p.own, p.opp)));
-  const X = (s: number) => 30 + (s / maxT) * (w - 40);
-  const Y = (g: number) => h - 20 - (g / maxG) * (h - 30);
+  const gridStep = maxG > 20 ? 10 : 5;
+  const grid = Array.from({ length: Math.floor(maxG / gridStep) + 1 }, (_, i) => i * gridStep);
+  const X = (s: number) => 28 + (s / maxT) * (w - 28 - right);
+  const Y = (g: number) => h - 22 - (g / maxG) * (h - 34);
   const step = (key: "own" | "opp") =>
     points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(0)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p[key])}`).join(" ") + ` H${X(maxT)}`;
   const timed = points.every((p) => p.clock_s > 0 || (p.own === 0 && p.opp === 0));
+  const last = points.at(-1) ?? { own: 0, opp: 0 };
+  // end labels: keep them apart when the score is close
+  let yo = Y(last.own);
+  let yp = Y(last.opp);
+  if (Math.abs(yo - yp) < 13) {
+    const mid = (yo + yp) / 2;
+    const up = last.own >= last.opp;
+    yo = mid + (up ? -7 : 7);
+    yp = mid + (up ? 7 : -7);
+  }
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${own} ${points.at(-1)?.own ?? 0}, ${opp} ${points.at(-1)?.opp ?? 0}`} className="w-full">
-      {Array.from({ length: periods - 1 }, (_, i) => (
-        <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={10} y2={h - 20} stroke="var(--border)" strokeDasharray="4 4" />
-      ))}
-      {ticks.map((m) => (
-        <text key={m} x={X(m * 60)} y={h - 4} fontSize="10" textAnchor="middle" fill="var(--muted)">
-          {m}&apos;
-        </text>
-      ))}
-      {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} />}
-      {timed && <path d={step("opp")} fill="none" stroke="var(--muted)" strokeWidth={2} strokeDasharray="5 3" />}
-      <text x={w - 6} y={14} fontSize="11" textAnchor="end" fill="var(--accent)">{own}</text>
-      <text x={w - 6} y={28} fontSize="11" textAnchor="end" fill="var(--muted)">{opp}</text>
-    </svg>
+    <figure className="space-y-3">
+      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.8125rem]">
+        <span className="inline-flex items-center gap-2 font-medium">
+          <span aria-hidden className="h-0.5 w-5 rounded-full bg-accent" />
+          {own}
+        </span>
+        <span className="inline-flex items-center gap-2 text-muted">
+          <span aria-hidden className="h-0 w-5 border-t-2 border-dashed border-muted" />
+          {opp}
+        </span>
+      </figcaption>
+      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${own} ${last.own}, ${opp} ${last.opp}`} className="w-full">
+        {grid.map((g) => (
+          <g key={g}>
+            <line x1={X(0)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke="var(--border)" strokeWidth={g === 0 ? 1.2 : 0.6} />
+            <text x={X(0) - 8} y={Y(g) + 3.5} fontSize="10" textAnchor="end" fill="var(--muted)">
+              {g}
+            </text>
+          </g>
+        ))}
+        {Array.from({ length: periods - 1 }, (_, i) => (
+          <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={8} y2={h - 22} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
+        ))}
+        {ticks.map((m) => (
+          <text key={m} x={X(m * 60)} y={h - 6} fontSize="10" textAnchor="middle" fill="var(--muted)">
+            {m}&apos;
+          </text>
+        ))}
+        {timed && <path d={step("opp")} fill="none" stroke="var(--muted)" strokeWidth={1.8} strokeDasharray="5 3" />}
+        {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />}
+        {timed && (
+          <>
+            <text x={X(maxT) + 6} y={yo + 4} fontSize="12" fontWeight="700" fill="var(--accent)">
+              {last.own}
+            </text>
+            <text x={X(maxT) + 6} y={yp + 4} fontSize="12" fontWeight="600" fill="var(--muted)">
+              {last.opp}
+            </text>
+          </>
+        )}
+      </svg>
+    </figure>
   );
 }
 
@@ -272,10 +319,10 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
     { key: "saves", label: t("saves") },
   ];
   const table = (rows: PlayerRow[], caption: string) => (
-    <div className="overflow-x-auto rounded-md border border-border">
+    <div className="overflow-x-auto rounded-lg bg-raised border border-border">
       <table className="w-full text-sm" data-testid="report-table">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-surface text-muted">
+        <thead className="text-xs text-muted">
           <tr>
             <th scope="col" className="px-3 py-2 text-left font-medium">{t("player")}</th>
             {cols.map((c) => (
@@ -286,7 +333,7 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
         </thead>
         <tbody>
           {rows.map((p) => (
-            <tr key={`${p.player_id}-${p.number}`} className="border-t border-border">
+            <tr key={`${p.player_id}-${p.number}`} className="border-t border-border/70">
               <th scope="row" className="px-3 py-1.5 text-left font-medium">
                 {p.number != null && <span className="mr-2 text-muted tabular-nums">{p.number}</span>}
                 {nameOf(p)}
@@ -351,18 +398,18 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
   const placed = list.filter((e) => e.x != null && e.y != null);
   const team = side === "own" ? stats.own : stats.opponent;
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <div className="flex flex-wrap gap-3">
         <div className="flex gap-1" role="group" aria-label={t("filterTeam")}>
           {(["own", "opponent"] as const).map((s) => (
-            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded px-3 py-1 text-sm", side === s ? "bg-accent text-accent-contrast" : "bg-surface")}>
+            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("rounded-md px-3 py-1 text-sm", side === s ? "bg-foreground text-background" : "bg-surface hover:bg-border")}>
               {s === "own" ? teamName : oppName(match)}
             </button>
           ))}
         </div>
         <label className="flex items-center gap-2 text-sm">
           {t("filterOutcome")}
-          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="rounded border border-border bg-background px-2 py-1">
+          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="rounded-lg bg-raised ring-1 ring-inset ring-border px-2 py-1">
             <option value="">{t("all")}</option>
             {["goal", "save", "miss", "post", "blocked"].map((o) => (
               <option key={o} value={o}>
@@ -372,8 +419,8 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
           </select>
         </label>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
-        <Card className="space-y-2">
+      <div className="grid gap-10 lg:grid-cols-[3fr_2fr] lg:gap-x-12">
+        <Sheet className="space-y-2">
           <h2 className="font-semibold">{t("map")}</h2>
           <CourtHalf label={t("map")}>
             {placed.map((e) => (
@@ -381,13 +428,13 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
             ))}
           </CourtHalf>
           {list.length - placed.length > 0 && <p className="text-xs text-muted">{t("noPosition", { count: list.length - placed.length })}</p>}
-        </Card>
-        <Card className="space-y-2">
+        </Sheet>
+        <Sheet className="space-y-2">
           <h2 className="font-semibold">{t("goal")}</h2>
           <GoalGrid data={team.goal_zones} onCell={(z) => open(`${t("goal")} ${z}`, { side, type: "shot", goal_zone: z })} />
-        </Card>
+        </Sheet>
       </div>
-      <Card className="space-y-2">
+      <Sheet className="space-y-2">
         <h2 className="font-semibold">{t("zones")}</h2>
         {Object.keys(team.zones).length === 0 ? (
           <EmptyState title={t("noPosition", { count: list.length })} />
@@ -401,7 +448,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
             ))}
           </ul>
         )}
-      </Card>
+      </Sheet>
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
   );

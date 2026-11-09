@@ -1,5 +1,7 @@
 "use client";
 
+import { BackLink } from "@/components/ui/back-link";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -115,21 +117,22 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
 
   return (
     <div className="space-y-5">
+      <BackLink fallback={`/app/${orgId}`} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">{p.title}</h1>
+          <h1 className="text-2xl font-bold sm:text-[1.75rem]">{p.title}</h1>
           <p className="text-sm text-muted">{t("slides", { n: slides.length })}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href={`/app/${orgId}/presentations/${presId}/present`} className="rounded-md bg-accent px-4 py-2 font-medium text-accent-contrast" data-testid="present">
             {t("present")}
           </Link>
-          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface">
+          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
             {t("pdf")}
           </a>
           {p.can_edit &&
             (p.export_status === "ready" ? (
-              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface">
+              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
                 {t("mp4Download")}
               </a>
             ) : (
@@ -159,7 +162,7 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
             onDragStart={() => setDrag(s.id)}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => drag && drag !== s.id && move(drag, i)}
-            className={cn("rounded-lg border border-border p-3", drag === s.id && "opacity-60")}
+            className={cn("rounded-lg bg-raised border border-border p-3", drag === s.id && "opacity-60")}
           >
             <div className="flex flex-wrap items-center gap-2">
               <span className="w-6 text-sm text-muted tabular-nums">{i + 1}</span>
@@ -168,10 +171,10 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
               {p.can_edit && (
                 <>
                   <Button variant="ghost" className="min-h-8 px-2 py-1" disabled={i === 0} onClick={() => move(s.id, i - 1)} aria-label={t("up")}>
-                    ↑
+                    <ArrowUp aria-hidden />
                   </Button>
                   <Button variant="ghost" className="min-h-8 px-2 py-1" disabled={i === slides.length - 1} onClick={() => move(s.id, i + 1)} aria-label={t("down")}>
-                    ↓
+                    <ArrowDown aria-hidden />
                   </Button>
                   <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => remove.mutate(s.id)}>
                     {t("remove")}
@@ -273,7 +276,7 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
             </form>
             <p className="text-sm text-muted">
               {t("addClipsHint")}{" "}
-              <Link className="text-accent underline underline-offset-4" href={`/app/${orgId}/teams/${p.team_id}/search?presentation=${presId}`}>
+              <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/teams/${p.team_id}/search?presentation=${presId}`}>
                 {t("toSearch")}
               </Link>
             </p>

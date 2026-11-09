@@ -21,7 +21,7 @@ export default async function Features({ params }: Props) {
       <p className="mt-3 max-w-2xl text-lg text-muted">{t.lead}</p>
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         {t.items.map((f) => (
-          <section key={f.title} className="rounded-lg border border-border p-5">
+          <section key={f.title} className="rounded-2xl bg-raised ring-1 ring-border/70 p-5">
             <h2 className="font-semibold">{f.title}</h2>
             <p className="mt-2 text-sm text-muted">{f.text}</p>
           </section>

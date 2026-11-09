@@ -41,6 +41,8 @@ def org_out(scope: OrgScope, org: Organization | None = None) -> OrgOut:
         and scope.ctx.settings.org_admin_2fa_required
         and not actor.has_2fa,
         created_at=org.created_at,
+        verification=org.verification,
+        official_club_id=org.official_club_id,
     )
 
 

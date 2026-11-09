@@ -170,6 +170,39 @@ async def test_identity_and_physical(make_api: Callable[[], Api]) -> None:
     assert (r.json()["player_id"], r.json()["identity_source"]) == (None, None)
 
 
+async def test_analysis_job_carries_the_rosters(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    roster = f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/roster"
+    for first, n in (("Mia", 7), ("Lea", 14), ("Noa", None)):
+        body: dict[str, Any] = {"first_name": first, "last_name": "Keller"}
+        if n is not None:
+            body["jersey_number"] = n
+        assert (await api.post(roster, json=body)).status_code == 201
+    jobs: MemoryJobQueue = api.app.state.jobs
+
+    def analysis_payload() -> dict[str, Any]:
+        return next(
+            j[3] for j in reversed(jobs.jobs) if j[1] == "handball_gpu_worker.analysis.run_analysis"
+        )
+
+    # an away game: the own team still plays in the "home" kit of the analysis
+    m = await new_match(api, ids, is_home=False)
+    await upload(api, ids, m["id"], b"v" * 100)
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    payload = analysis_payload()
+    assert payload["own_is_home"] is False
+    assert payload["rosters"] == {"home": [7, 14]}  # no opponent players entered: left out
+
+    opp = f"/v1/orgs/{org}/opponents/{m['opponent']['id']}/players"
+    assert (await api.put(opp, json=[{"number": 11}, {"number": 3}])).status_code == 200
+    m2 = await new_match(api, ids, opponent_id=m["opponent"]["id"], opponent_name=None)
+    await upload(api, ids, m2["id"], b"w" * 100)
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    assert analysis_payload()["rosters"] == {"home": [7, 14], "away": [3, 11]}
+
+
 async def test_goal_cam_sync(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)

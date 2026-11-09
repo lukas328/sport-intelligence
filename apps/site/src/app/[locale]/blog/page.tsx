@@ -23,7 +23,7 @@ export default async function Blog({ params }: Props) {
       <p className="mt-3 max-w-2xl text-lg text-muted">{t.lead}</p>
       <ul className="mt-8 max-w-3xl space-y-6">
         {posts.map((p) => (
-          <li key={p.slug} className="rounded-lg border border-border p-5">
+          <li key={p.slug} className="rounded-2xl bg-raised ring-1 ring-border/70 p-5">
             <time dateTime={p.date} className="text-sm text-muted">{date.format(new Date(p.date))}</time>
             <h2 className="mt-1 text-xl font-semibold">
               <Link href={`/${locale}/blog/${p.slug}/`} className="hover:underline">{p.title[locale]}</Link>

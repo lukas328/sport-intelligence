@@ -84,9 +84,18 @@ seed: ## Demo club, teams, matches and synthetic videos (stack must be running)
 eval: ## Evaluation harness on the synthetic golden set (writes docs/perf/eval.md)
 	uv run python ml/eval/run.py --seconds 60 --out docs/perf/eval.md
 
+eval-real: ## Health checks on the real test videos in data/videos/ (writes docs/perf/eval-real.md)
+	uv run python ml/eval/real.py --out docs/perf/eval-real.md
+
+testdata: ## Download the shared real test videos to data/videos/ (needs TESTDATA_S3_* env, see data/README.md)
+	uv run python scripts/testdata.py pull
+
+testdata-push: ## Upload a real test video: make testdata-push f=match.mp4 id=2026-10-12-u17-home
+	uv run python scripts/testdata.py push "$(f)" --id "$(id)"
+
 bench: ## Per-stage timing of the analysis pipeline
 	uv run python ml/eval/bench.py
 
 check: lint typecheck test ## Everything CI runs without services
 
-.PHONY: plans eval bench help install up down logs court api-client lint fmt typecheck typecheck-py db policy-doc test test-py test-js test-integration test-e2e migrate migration seed check
+.PHONY: plans eval eval-real testdata testdata-push bench help install up down logs court api-client lint fmt typecheck typecheck-py db policy-doc test test-py test-js test-integration test-e2e migrate migration seed check

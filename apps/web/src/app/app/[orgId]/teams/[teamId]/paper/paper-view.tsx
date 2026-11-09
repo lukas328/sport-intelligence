@@ -68,7 +68,7 @@ function Review({ orgId, upload, onDone }: { orgId: string; upload: Upload; onDo
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/v1/orgs/${orgId}/paper-photos/${upload.id}/photo`} alt={t("photoAlt")} className="w-full rounded border border-border" />
+      <img src={`/v1/orgs/${orgId}/paper-photos/${upload.id}/photo`} alt={t("photoAlt")} className="w-full rounded-lg ring-1 ring-inset ring-border" />
       <form className="space-y-3 text-sm" onSubmit={(e: FormEvent) => e.preventDefault()} aria-label={t("review")}>
         <div className="flex flex-wrap gap-3">
           <label>
@@ -212,10 +212,10 @@ export function PaperView({ orgId, teamId }: { orgId: string; teamId: string }) 
             <span>{new Date(u.created_at).toLocaleString()}</span>
             <span className="text-muted">{t(`status_${u.status}`)}</span>
             {u.status === "extracted" && (
-              <button type="button" className="text-accent underline" onClick={() => setOpen(u.id)}>{t("review")}</button>
+              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setOpen(u.id)}>{t("review")}</button>
             )}
             {u.match_id && (
-              <Link className="text-accent underline" href={`/app/${orgId}/matches/${u.match_id}`}>{t("toMatch")}</Link>
+              <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/matches/${u.match_id}`}>{t("toMatch")}</Link>
             )}
           </li>
         ))}

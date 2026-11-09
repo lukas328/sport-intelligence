@@ -8,7 +8,7 @@ export type Route =
   | { screen: "assignments"; orgId: string }
   | { screen: "feed"; orgId: string }
   | { screen: "schedule"; orgId: string }
-  | { screen: "presentation"; orgId: string; presentationId: string }
+  | { screen: "presentation"; orgId: string; presentationId: string; key: string | null }
   | { screen: "home" };
 
 const UUID = "[0-9a-fA-F-]{36}";
@@ -34,6 +34,6 @@ export function parse(link: string | null | undefined): Route {
   m = path.match(new RegExp(`^/app/(${UUID})/(assignments|feed|schedule)/?`));
   if (m) return { screen: m[2] as "assignments" | "feed" | "schedule", orgId: m[1]! };
   m = path.match(new RegExp(`^/app/(${UUID})/presentations/(${UUID})`));
-  if (m) return { screen: "presentation", orgId: m[1]!, presentationId: m[2]! };
+  if (m) return { screen: "presentation", orgId: m[1]!, presentationId: m[2]!, key: url.searchParams.get("k") ?? url.searchParams.get("key") };
   return { screen: "home" };
 }

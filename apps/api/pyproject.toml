@@ -14,6 +14,7 @@ dependencies = [
   "redis>=5.2",
   "rq>=2.1",
   "boto3>=1.36",
+  "numpy>=1.26",
   "structlog>=24.4",
   "sentry-sdk[fastapi]>=2.20",
   "argon2-cffi>=23.1",

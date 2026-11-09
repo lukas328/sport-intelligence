@@ -130,7 +130,7 @@ function PlaySlide({ orgId, playId }: { orgId: string; playId: string }) {
       {frames.length > 1 && (
         <div className="flex justify-center gap-2">
           {frames.map((_, n) => (
-            <button key={n} type="button" aria-pressed={n === i} onClick={() => setI(n)} className="rounded border border-border px-3 py-1 text-sm">
+            <button key={n} type="button" aria-pressed={n === i} onClick={() => setI(n)} className="rounded-lg ring-1 ring-inset ring-border px-3 py-1 text-sm">
               {t("step", { n: n + 1 })}
             </button>
           ))}
@@ -176,7 +176,7 @@ export function SlideView({
       {rows.length > 0 && (
         <dl className="grid gap-3 sm:grid-cols-3">
           {rows.map((r) => (
-            <div key={r.label} className="rounded-lg border border-border p-4">
+            <div key={r.label} className="rounded-lg bg-raised border border-border p-4">
               <dt className="text-sm text-muted">{r.label}</dt>
               <dd className="text-3xl font-semibold tabular-nums">{String(r.value ?? "-")}</dd>
               {r.n != null && <dd className="text-xs text-muted">n = {r.n}</dd>}

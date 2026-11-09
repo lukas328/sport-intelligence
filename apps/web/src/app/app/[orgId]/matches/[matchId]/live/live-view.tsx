@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, Clock3 } from "lucide-react";
 import type { Schemas } from "@handball/api-client";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -214,21 +215,21 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
 
   return (
     <div className="mx-auto max-w-xl space-y-4 pb-24" data-testid="live">
-      <div className="sticky top-0 z-10 -mx-4 space-y-2 border-b border-border bg-background px-4 py-3">
+      <div className="sticky top-0 z-10 -mx-4 space-y-2 border-b border-border/70 bg-background/90 backdrop-blur-xl px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <Link href={`/app/${orgId}/matches/${matchId}`} className="text-sm underline">
             {t("back")}
           </Link>
-          <span className={cn("rounded-full px-2 py-0.5 text-xs", pending ? "border border-accent" : "bg-surface")} data-testid="sync-state" aria-live="polite">
+          <span className={cn("rounded-md px-2 py-0.5 text-xs", pending ? "border border-accent" : "bg-surface")} data-testid="sync-state" aria-live="polite">
             {pending ? (online ? t("syncing", { count: pending }) : t("offline", { count: pending })) : t("synced")}
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <p className="text-4xl font-bold tabular-nums" data-testid="live-score">
+          <p className="font-score text-6xl leading-none" data-testid="live-score">
             {score.own}:{score.opp}
           </p>
           <div className="text-right">
-            <p className="font-mono text-3xl tabular-nums" data-testid="live-clock">
+            <p className="font-score text-5xl leading-none" data-testid="live-clock">
               {fmt(seconds)}
             </p>
             <p className="text-xs text-muted">{t("period", { period: clock.period })}</p>
@@ -238,16 +239,16 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
           <button className="col-span-2 rounded-md bg-accent px-3 py-3 font-semibold text-accent-contrast" onClick={() => setClock(toggle(clock))}>
             {clock.started_at !== null ? t("pause") : t("start")}
           </button>
-          <button className="rounded-md border border-border py-3" onClick={() => setClock(adjust(clock, -10))} aria-label={t("minus10")}>
+          <button className="rounded-md ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, -10))} aria-label={t("minus10")}>
             −10 s
           </button>
-          <button className="rounded-md border border-border py-3" onClick={() => setClock(adjust(clock, 10))} aria-label={t("plus10")}>
+          <button className="rounded-md ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, 10))} aria-label={t("plus10")}>
             +10 s
           </button>
         </div>
         {clock.period < (match?.periods ?? 2) && seconds >= 60 && (
           <button
-            className="w-full rounded-md border border-border py-2 text-sm"
+            className="w-full rounded-md ring-1 ring-inset ring-border py-2 text-sm"
             onClick={() => setClock({ period: clock.period + 1, base_s: 0, started_at: null })}
           >
             {t("secondHalf")}
@@ -264,7 +265,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
               key={p.player_id}
               aria-pressed={player === p.player_id}
               onClick={() => setPlayer((cur) => (cur === p.player_id ? null : p.player_id))}
-              className={cn("rounded-md border py-2 text-sm", player === p.player_id ? "border-accent bg-accent text-accent-contrast" : "border-border")}
+              className={cn("rounded-full border py-2 text-sm", player === p.player_id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
             >
               <span className="block text-lg font-bold tabular-nums">{p.jersey_number ?? "?"}</span>
               <span className="block truncate text-xs">{p.first_name}</span>
@@ -288,11 +289,11 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
         <h2 className="font-semibold">{t("opponent")}</h2>
         <label className="flex items-center gap-2 text-sm">
           {te("opponentNumber")}
-          <input inputMode="numeric" value={oppNumber} onChange={(e) => setOppNumber(e.target.value.replace(/\D/g, "").slice(0, 2))} className="min-h-10 w-16 rounded-md border border-border bg-background px-2" />
+          <input inputMode="numeric" value={oppNumber} onChange={(e) => setOppNumber(e.target.value.replace(/\D/g, "").slice(0, 2))} className="min-h-10 w-16 rounded-md bg-raised ring-1 ring-inset ring-border px-2" />
         </label>
         <div className="grid grid-cols-3 gap-1">
           {opp.map((a) => (
-            <button key={a.key} onClick={() => record("opponent", a.label, a.body, a.goal)} className="rounded-md border border-border py-4 text-base font-semibold">
+            <button key={a.key} onClick={() => record("opponent", a.label, a.body, a.goal)} className="rounded-md ring-1 ring-inset ring-border py-4 text-base font-semibold">
               {a.label}
             </button>
           ))}
@@ -302,7 +303,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
       <section aria-label={t("log")} className="space-y-2">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">{t("log")}</h2>
-          <button className="rounded-md border border-border px-3 py-2 text-sm" onClick={() => void undo()} disabled={log.length === 0}>
+          <button className="rounded-md ring-1 ring-inset ring-border px-3 py-2 text-sm" onClick={() => void undo()} disabled={log.length === 0}>
             {t("undo")}
           </button>
         </div>
@@ -314,7 +315,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
                 <span className="mr-2 font-mono text-xs text-muted">{e.clock}</span>
                 {e.label}
               </span>
-              <span className="text-xs text-muted">{e.synced ? "✓" : "…"}</span>
+              <span className="text-xs text-muted">{e.synced ? <Check aria-label={t("eventSynced")} className="size-3.5 text-ok" /> : <Clock3 aria-label={t("eventPending")} className="size-3.5" />}</span>
             </li>
           ))}
         </ol>

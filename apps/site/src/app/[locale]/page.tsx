@@ -44,10 +44,10 @@ export default async function Home({ params }: Props) {
         <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">{t.title}</h1>
         <p className="mt-5 max-w-2xl text-lg text-muted">{t.lead}</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <a href={registerUrl(APP_LOCALE[locale])} className="rounded-md bg-accent px-5 py-3 font-semibold text-accent-contrast">
+          <a href={registerUrl(APP_LOCALE[locale])} className="rounded-full bg-accent px-5 py-2.5 font-semibold text-accent-contrast">
             {t.cta}
           </a>
-          <Link href={`/${locale}/demo/`} className="rounded-md border border-border px-5 py-3 font-semibold">
+          <Link href={`/${locale}/demo/`} className="rounded-xl ring-1 ring-inset ring-border px-5 py-3 font-semibold">
             {t.ctaDemo}
           </Link>
         </div>
@@ -55,7 +55,7 @@ export default async function Home({ params }: Props) {
       </section>
       <section className="grid gap-6 sm:grid-cols-3">
         {t.points.map((p) => (
-          <div key={p.title} className="rounded-lg border border-border bg-surface p-5">
+          <div key={p.title} className="rounded-2xl bg-raised ring-1 ring-border/70 bg-surface p-5">
             <h2 className="font-semibold">{p.title}</h2>
             <p className="mt-2 text-sm text-muted">{p.text}</p>
           </div>
@@ -65,20 +65,20 @@ export default async function Home({ params }: Props) {
         <h2 className="text-2xl font-bold">{t.howTitle}</h2>
         <ol className="mt-5 grid gap-4 sm:grid-cols-4">
           {t.steps.map((s, i) => (
-            <li key={s} className="rounded-lg border border-border p-4">
+            <li key={s} className="rounded-2xl bg-raised ring-1 ring-border/70 p-4">
               <span className="block text-2xl font-bold text-accent">{i + 1}</span>
               {s}
             </li>
           ))}
         </ol>
       </section>
-      <section className="mt-14 rounded-lg border border-border bg-surface p-6">
+      <section className="mt-14 rounded-2xl bg-raised ring-1 ring-border/70 bg-surface p-6">
         <h2 className="text-xl font-bold">{t.honestTitle}</h2>
         <p className="mt-2 max-w-3xl text-muted">{t.honestText}</p>
       </section>
       <section className="mt-14 text-center">
         <h2 className="text-2xl font-bold">{t.finalTitle}</h2>
-        <a href={registerUrl(APP_LOCALE[locale])} className="mt-5 inline-block rounded-md bg-accent px-5 py-3 font-semibold text-accent-contrast">
+        <a href={registerUrl(APP_LOCALE[locale])} className="mt-5 inline-block rounded-full bg-accent px-5 py-2.5 font-semibold text-accent-contrast">
           {t.cta}
         </a>
       </section>

@@ -21,7 +21,7 @@ from handball_api.models import (
     ProcessingJob,
     Track,
 )
-from handball_api.routers.deps import OrgDep
+from handball_api.routers.deps import CtxDep, OrgDep
 from handball_api.schemas.matches import (
     AnalysisOut,
     AnnotationCreate,
@@ -59,8 +59,8 @@ from handball_api.schemas.matches import (
     VideoUpdate,
 )
 from handball_api.services import auth as auth_service
+from handball_api.services import events, media, videos
 from handball_api.services import matches as service
-from handball_api.services import media, videos
 from handball_api.services import orgs as org_service
 from handball_api.services.context import Ctx
 
@@ -203,6 +203,12 @@ async def media_file(video_id: uuid.UUID, path: str, scope: OrgDep) -> Response:
     return Response(data, media_type=ctype, headers={"cache-control": cache})
 
 
+@router.post("/videos/{video_id}/media-token", tags=["videos"])
+async def media_token(video_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
+    """Signed media path for the native apps' players (HLS segments without auth headers)."""
+    return await videos.media_token(scope.ctx, video_id)
+
+
 @router.get("/videos/{video_id}/analysis", response_model=AnalysisOut, tags=["analysis"])
 async def get_analysis(video_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
     return await videos.analysis(scope.ctx, video_id)
@@ -236,6 +242,12 @@ async def set_track_identity(
     )
 
 
+@router.get("/matches/{match_id}/possessions", response_model=dict[str, Any], tags=["analysis"])
+async def match_possessions(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
+    """Possession phases (estimated from video tracking or imported) with a summary per side."""
+    return await events.match_possessions(scope.ctx, match_id)
+
+
 @router.get("/matches/{match_id}/physical", response_model=dict[str, Any], tags=["analysis"])
 async def match_physical(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
     """Distance, speed bands, sprints and heatmap per player (estimated from video tracking)."""
@@ -244,9 +256,33 @@ async def match_physical(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object
 
 @router.post("/videos/{video_id}/calibration", status_code=202, tags=["analysis"])
 async def calibrate(video_id: uuid.UUID, data: CalibrationIn, scope: OrgDep) -> dict[str, str]:
-    points = [{"image": list(p.image), "court": list(p.court)} for p in data.points]
-    job = await videos.calibrate_manually(scope.ctx, video_id, points)
+    points = [
+        {"image": list(p.image), "court": list(p.court), "height_m": p.height_m}
+        for p in data.points
+    ]
+    job = await videos.calibrate_manually(scope.ctx, video_id, points, data.space, data.frame_ms)
     return {"job_id": str(job.id)}
+
+
+@router.post("/videos/{video_id}/calibration/confirm", tags=["analysis"])
+async def confirm_calibration(video_id: uuid.UUID, scope: OrgDep) -> dict[str, str]:
+    """The automatic court fits: keep it as confirmed (no re-run)."""
+    cal = await videos.confirm_calibration(scope.ctx, video_id)
+    return {"calibration_id": str(cal.id), "source": cal.source}
+
+
+@router.get(
+    "/videos/{video_id}/panorama",
+    tags=["analysis"],
+    response_class=Response,
+    responses={200: {"content": {"image/jpeg": {}}}},
+)
+async def panorama(video_id: uuid.UUID, scope: OrgDep) -> Response:
+    """Hall image of the last analysis (panorama or median frame) to mark the court on."""
+    data = await videos.read_panorama(scope.ctx, video_id)
+    return Response(
+        data, media_type="image/jpeg", headers={"cache-control": "private, max-age=300"}
+    )
 
 
 # ---- live job progress (SSE) ---------------------------------------------------------------
@@ -434,3 +470,16 @@ async def add_annotation(match_id: uuid.UUID, data: AnnotationCreate, scope: Org
 @router.delete("/annotations/{annotation_id}", status_code=204, tags=["annotations"])
 async def delete_annotation(annotation_id: uuid.UUID, scope: OrgDep) -> None:
     await media.delete_annotation(scope.ctx, annotation_id)
+
+
+public_media = APIRouter(prefix="/v1/media", tags=["videos"])
+
+
+@public_media.get(
+    "/{video_id}/{token}/{path:path}",
+    response_class=Response,
+    responses={200: {"content": {"application/vnd.apple.mpegurl": {}, "video/mp4": {}}}},
+)
+async def signed_media(video_id: uuid.UUID, token: str, path: str, ctx: CtxDep) -> Response:
+    data, ctype = await videos.read_signed_media(ctx, video_id, token, path)
+    return Response(data, media_type=ctype, headers={"cache-control": "private, max-age=600"})

@@ -15,10 +15,10 @@ export function ConsentBanner() {
     setAsk(false);
   };
   return (
-    <div role="dialog" aria-label={t("title")} className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background p-4 shadow-lg">
+    <div role="dialog" aria-label={t("title")} className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-raised p-4 shadow-lg">
       <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-3">
         <p className="min-w-0 flex-1 text-sm">{t("text")}</p>
-        <button type="button" className="rounded-md border border-border px-3 py-2 text-sm" onClick={() => choose("no")}>
+        <button type="button" className="rounded-md ring-1 ring-inset ring-border px-3 py-2 text-sm" onClick={() => choose("no")}>
           {t("no")}
         </button>
         <button type="button" className="rounded-md bg-accent px-3 py-2 text-sm text-accent-contrast" onClick={() => choose("yes")}>

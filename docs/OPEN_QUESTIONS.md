@@ -14,8 +14,9 @@ Each question has the **assumption** I work with until it is answered. Status: o
 ## Data and test material
 - **Q-DATA-1 Test videos** (you mentioned you have some). Needed per video: camera type (fixed / auto-follow,
   Veo, Spiideo, ...), resolution and fps, venue, whether goal cams exist, final score and scorers (ground
-  truth), and **consent of the filmed players** (minors?). *Assumption:* videos are never committed to
-  git; they go to a bucket (or Git LFS) and the repo holds only `ml/eval/golden_set/manifest.json`.
+  truth), and **consent of the filmed players** (minors?). *Decided:* videos are never committed to
+  git; they go to the R2 test-data bucket (ADR 002) via `scripts/testdata.py`, and the repo holds only
+  `ml/eval/golden_set/manifest.json` (metadata, no player names). See `data/README.md`.
 - **Q-DATA-2 Paper match report JSON schema and files** (BRIEF 15). *Assumption:* importer is built in M4
   once the schema is provided; files live in `data/paper_reports/` (gitignored by default, they contain names).
 - **Q-DATA-3 Golden set annotation**: who annotates the 5 full matches, with which tool (CVAT, Label Studio,
@@ -40,11 +41,16 @@ Each question has the **assumption** I work with until it is answered. Status: o
   (e.g. youth tournaments)?
 
 ## Infrastructure
-- **Q-INFRA-1 Hosting provider** (ADR 002 proposed: Exoscale or Infomaniak in CH, AWS Zurich fallback) and
-  **GPU provider** with CH/EU processing and DPA. Needs price/availability check.
+- **Q-INFRA-1 Hosting provider.** *Answered 2026-11-03/04 (ADR 002):* EU is enough, cost first.
+  Object storage: Cloudflare R2 with EU jurisdiction. App, Postgres, Redis, secrets and monitoring:
+  Azure West Europe. Still open: **GPU** (CPU workers first, about 2 x video length; later Azure
+  serverless GPU if available in an EU region, or an EU GPU provider with DPA). Owner checklist:
+  `docs/LIVEGANG.md`.
 - **Q-INFRA-2 GitHub repository and org**, CI secrets, preview deploy target. *Assumption:* GitHub Actions,
   preview job disabled until hosting exists (`vars.PREVIEW_DEPLOY_ENABLED`).
 - **Q-INFRA-3 E-mail provider** Postmark vs Resend (ADR in M1). *Assumption:* Postmark (EU data residency to verify).
+  *Proposal 2026-11-04:* Azure Communication Services Email (data location Europe, SMTP), so mail stays on the
+  chosen platform; needs the owner's confirmation (`docs/LIVEGANG.md`).
 - **Q-INFRA-4 MinIO** no longer ships community images; local S3 is SeaweedFS (ADR 006). Answered, for information.
 - **Q-INFRA-5 Next.js version**: the brief pins Next.js 15; Next.js 16 is current. *Assumption:* stay on 15.5.x
   as specified, upgrade in a dedicated step if wanted.
@@ -57,6 +63,18 @@ Each question has the **assumption** I work with until it is answered. Status: o
 - **Q-ML-3 Model and dataset access**: from this build environment Hugging Face, PyTorch downloads, Kaggle,
   Zenodo and Roboflow are blocked. *Assumption:* heuristic baselines now (ADR 012); trained models are added
   in an environment with access, through the ONNX detector and the model registry.
+
+- **Q-ML-5 Re-identification model licence**: the FastReID weights are Apache-2.0 but trained on MSMT17
+  (non-commercial research terms). *Decision (2026-11-04, product owner):* the risk is accepted for
+  the current phase; the model may be used while we find out what works. Before a commercial launch:
+  legal clearance or our own handball model trained on crops labelled through the shirt numbers.
+- **Q-ML-6 Ball data**: TeamTrack (MIT), five Roboflow handball sets (CC BY 4.0), our own labels and
+  DeepSport basketball (CC BY-NC-SA) are in use (ml/ball/README.md). *Decision (2026-11-04, product
+  owner):* non-commercial data are fine for the feasibility phase; a shipped ball model needs a
+  retraining without them (or a licence).
+- **Q-ML-7 Target footage**: uploads are raw amateur recordings from any camera position (phones,
+  club cameras, Veo and similar), rarely with a score overlay, not TV broadcasts. *Consequence:* the
+  overlay reader stays a bonus; goals, possession and players must work from the picture alone.
 
 ## Legal and privacy
 - **Q-LEGAL-1** Privacy policy, DPA (AVV) and terms need legal review (placeholders from M8/M9).
@@ -147,3 +165,30 @@ assistant is off without a key (503 "not set up"); run the live evaluation befor
 The export follows the public Sportscode XML layout (instances with ID, start, end, code, labels;
 rows with RGB) and round-trips losslessly through our import (tested). Opening the file in Sportscode
 itself needs a licence. **Default**: ask a club with Sportscode to open one export before launch.
+
+### Q-M11-1 Paper sheets test set
+The acceptance of 5.9 (95 % of number fields correct on 10 real sheets) needs 10 photos of real
+match sheets with their true values (`ml/eval/paper_sheets/<name>.jpg` + `<name>.json` in the
+extraction schema) and a model key; then `pytest -m live apps/api/tests/test_paper_vision.py`.
+**Default**: the feature stays off without a key; review before import is always required.
+
+### Q-M11-2 Device measurements
+Cold start under 2 s (5.5) and a 70-minute recording without interruption (5.2) need device builds on
+a mid-range iPhone and Android phone. **Default**: measure with the first internal build, record in
+the M11 report.
+
+### Q-M11-3 Store accounts and push credentials
+Apple Developer and Google Play accounts of the operating company, an Expo (EAS) project id
+(`app.json` extra.eas.projectId), APNs key and FCM credentials, the domain for app links
+(`app.handball-ai.ch`, apple-app-site-association and assetlinks.json on the web server).
+**Default**: prepared in `apps/mobile` (bundle id `ch.handballai.app`); submission once accounts exist.
+
+### Q-UX-1 Usability test with real coaches, players and parents
+The redesign (ADR 023) follows the jobs and roles in the brief and was checked with screenshots,
+Playwright flows and axe, not with people. **Default**: five short sessions (two coaches, two
+players, one parent) on a phone and a laptop before launch; tasks: find the next match, upload a
+video, open the scenes behind a number, reply to a training, change the club colour.
+
+### Q-UX-2 Typeface in the Expo app
+The app uses the new colours; Archivo is not yet bundled in the Expo build (system font).
+**Default**: add it with `expo-font` together with the first device build (Q-M11-3).

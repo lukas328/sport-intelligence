@@ -1,7 +1,7 @@
 import { statSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, openAnalysis, openLibrary, register, uniqueEmail } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -19,7 +19,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.getByRole("button", { name: "Zum Team" }).click();
 
   // create a match
-  await page.getByRole("link", { name: "Spiele" }).first().click();
+  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await expect(page.getByText("Noch keine Spiele.")).toBeVisible();
   await expectAccessible(page);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
@@ -54,13 +54,14 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByTestId("analysis-panel")).toContainText("Personen verfolgt");
   await expect(page.getByTestId("analysis-panel")).toContainText("Kalibrierung: automatisch");
+  await page.getByRole("tab", { name: "Abwehrsysteme", exact: true }).click();
   await expect(page.getByTestId("formations")).toContainText("Abwehrsysteme");
 
   // play: the HLS stream loads and time advances
   const video = page.getByTestId("video");
-  await page.getByRole("button", { name: "Abspielen" }).click();
+  await page.getByTestId("player").getByRole("button", { name: "Abspielen" }).click();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime), { timeout: 20_000 }).toBeGreaterThan(1);
-  await page.getByRole("button", { name: "Pause" }).click();
+  await page.getByTestId("player").getByRole("button", { name: "Pause" }).click();
 
   // keyboard: frame step and 5 s jumps
   await page.getByTestId("player").focus();
@@ -79,13 +80,15 @@ test("match: create, upload with pause and resume, processing, player, comment, 
     await video.evaluate((v: HTMLVideoElement, t: number) => (v.currentTime = t), s);
     await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => Math.round(v.currentTime))).toBe(s);
   };
+  // the clip form (the event list may hold buttons with the same time)
+  const clipForm = page.getByRole("form", { name: "Clip speichern" });
   await seekTo(2);
-  await page.getByRole("button", { name: "Start setzen (I)" }).click();
-  await expect(page.getByRole("button", { name: "0:02" })).toBeVisible();
+  await clipForm.getByRole("button", { name: "Start setzen (I)" }).click();
+  await expect(clipForm.getByRole("button", { name: "0:02" })).toBeVisible();
   await seekTo(6);
   await page.getByTestId("player").focus();
   await page.keyboard.press("o"); // keyboard shortcut for the end mark
-  await expect(page.getByRole("button", { name: "0:06" })).toBeVisible();
+  await expect(clipForm.getByRole("button", { name: "0:06" })).toBeVisible();
   await page.getByLabel("Titel").fill("Gegenstoss");
   await page.getByRole("button", { name: "Clip speichern" }).click();
   await expect(page.getByTestId("clips")).toContainText("Gegenstoss");
@@ -117,7 +120,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expectAccessible(page);
 
   // the overview counts it, the number opens the event, the event jumps into the video
-  await page.getByRole("tab", { name: "Übersicht" }).click();
+  await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("1");
   await expect(table.getByRole("row", { name: /^Würfe/ })).toContainText("2");
@@ -129,15 +132,16 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(3.5);
 
   // tracks can be assigned to players; physical load per track with heatmap
+  await page.getByRole("tab", { name: "Spuren zuordnen", exact: true }).click();
   await expect(page.getByTestId("identity-panel")).toBeVisible();
-  await page.getByRole("tab", { name: "Laufleistung" }).click();
+  await openAnalysis(page, "Laufleistung");
   await expect(page.getByTestId("physical-table")).toContainText("km");
   await page.getByRole("button", { name: /Heatmap zeigen/ }).nth(1).click();
   await expect(page.getByTestId("court-heatmap")).toBeVisible();
   await expectAccessible(page);
 
   // the current moment of the video as a play on the tactics board
-  await page.getByRole("tab", { name: "Video" }).click();
+  await page.getByRole("tab", { name: "Video", exact: true }).click();
   await page.getByRole("button", { name: "Als Spielzug übernehmen" }).click();
   await expect(page.getByTestId("tactics-board")).toBeVisible();
   expect(await page.getByTestId("tactics-board").locator("[data-testid^=token-]").count()).toBeGreaterThan(4);
@@ -157,7 +161,7 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await page.getByRole("link", { name: "Playlists" }).click();
+  await openLibrary(page, "Playlists");
   await page.getByLabel("Name", { exact: true }).fill("Abwehr Training");
   await page.getByRole("button", { name: "Erstellen" }).click();
   await expect(page.getByRole("heading", { name: "Abwehr Training" })).toBeVisible();

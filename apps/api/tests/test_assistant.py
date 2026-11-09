@@ -22,6 +22,7 @@ from handball_api.core.assistant_llm import (
 from .assistant_eval import MATCHES, NUMBERS, PLAYS, QUESTIONS, Question, ScriptedModel, score
 from .conftest import Api, setup_club
 from .test_matches import new_match
+from .test_official_report import recorded  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("clean_db")
 
@@ -379,3 +380,32 @@ async def test_live_eval(make_api: Callable[[], Api], owner_conn: asyncpg.Connec
     out = Path(__file__).resolve().parents[3] / "docs" / "perf" / "assistant-eval.md"  # noqa: ASYNC240
     out.write_text("\n".join(lines) + "\n")
     assert correct >= 0.9 and p95 < 8000
+
+
+@pytest.mark.usefixtures("recorded")
+async def test_clips_only_for_moments_of_the_video(make_api: Callable[[], Api]) -> None:
+    """The assistant cites clips by an event's video time. With an official report on a clip of
+    five minutes from mid-half, most events lie before (negative time) or after the video: they
+    used to be offered as clips that show nothing. Now they count as without video."""
+    from handball_api.core.db import enable_system_access, open_session
+    from handball_api.models import Team
+    from handball_api.services import team_data
+    from handball_api.services.context import Ctx
+
+    from .test_official_report import reported_clip
+
+    api = make_api()
+    ids = await setup_club(api)
+    m, _ = await reported_clip(api, ids)
+    events = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}/events")).json()
+    async with open_session() as db:
+        await enable_system_access(db, reason="test")
+        state = api.app.state
+        ctx = Ctx(db=db, settings=state.settings, email=state.email, storage=state.storage)
+        team = await db.get(Team, uuid.UUID(ids["team"]))
+        assert team is not None
+        data = await team_data.load(ctx, team)
+    for e in events:
+        inside = e["t_ms"] is not None and 0 <= e["t_ms"] <= 300_000
+        assert data.event_ms[e["id"]] == (e["t_ms"] if inside else None), e
+    assert any(v is not None for v in data.event_ms.values())

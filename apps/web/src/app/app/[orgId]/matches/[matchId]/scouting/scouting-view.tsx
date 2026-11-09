@@ -1,5 +1,6 @@
 "use client";
 
+import { BackLink } from "@/components/ui/back-link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -54,7 +55,7 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
         {refs
           .filter((r) => r.video_id && r.t_ms != null)
           .map((r, i) => (
-            <Link key={r.event_id} href={`/app/${orgId}/matches/${r.match_id}?t=${Math.max(0, (r.t_ms ?? 0) - 6000)}`} className="text-accent underline underline-offset-4">
+            <Link key={r.event_id} href={`/app/${orgId}/matches/${r.match_id}?t=${Math.max(0, (r.t_ms ?? 0) - 6000)}`} className="font-medium text-accent hover:underline">
               {t("clipN", { n: i + 1 })}
             </Link>
           ))}
@@ -64,18 +65,19 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
+      <BackLink fallback={`/app/${orgId}/matches/${matchId}`} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" loading={create.isPending} onClick={() => create.mutate()}>
             {rep ? t("refresh") : t("create")}
           </Button>
           {rep && (
             <>
-              <a className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/pdf?lang=${locale}`}>
+              <a className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/pdf?lang=${locale}`}>
                 {t("pdf")}
               </a>
-              <a className="rounded-md border border-border px-3 py-2 text-sm hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/goalkeeper-card?lang=${locale}`}>
+              <a className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/goalkeeper-card?lang=${locale}`}>
                 {t("gkCard")}
               </a>
               <Button variant="secondary" loading={asPresentation.isPending} onClick={() => asPresentation.mutate(rep.id)}>
@@ -91,7 +93,7 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
           <p className="text-sm text-muted" data-testid="scouting-basis">
             {t("basis", { matches: f.glance.matches, tagged: f.glance.tagged_matches, date: format.dateTime(new Date(rep.generated_at), { dateStyle: "medium", timeStyle: "short" }) })}
           </p>
-          {f.missing.length > 0 && <p className="rounded-md border-l-4 border-accent bg-surface px-3 py-2 text-sm">{t("missing", { items: f.missing.map((m) => t(`missing_${m}` as "missing_video")).join(", ") })}</p>}
+          {f.missing.length > 0 && <p className="rounded-md bg-surface px-3 py-2 text-sm">{t("missing", { items: f.missing.map((m) => t(`missing_${m}` as "missing_video")).join(", ") })}</p>}
 
           <Card className="space-y-2">
             <h2 className="font-semibold">{t("observations")}</h2>
@@ -125,7 +127,7 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
             {f.shooters.length === 0 && <p className="text-sm text-muted">{t("noShooters")}</p>}
             <ul className="grid gap-3 sm:grid-cols-2" data-testid="shooters">
               {f.shooters.map((s) => (
-                <li key={s.number} className="flex gap-3 rounded-md border border-border p-2 text-sm">
+                <li key={s.number} className="flex gap-3 rounded-md ring-1 ring-inset ring-border p-2 text-sm">
                   <div className="grid size-16 shrink-0 grid-cols-3 border border-error" aria-hidden>
                     {GRID.map((z) => (
                       <span key={z} className="flex items-center justify-center text-[10px] tabular-nums" style={{ background: s.goal_zones[z] ? `rgba(220,38,38,${0.15 + 0.6 * (s.goal_zones[z]! / Math.max(...Object.values(s.goal_zones)))})` : undefined }}>

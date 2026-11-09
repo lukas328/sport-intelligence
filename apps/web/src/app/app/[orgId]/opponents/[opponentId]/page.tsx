@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BackLink } from "@/components/ui/back-link";
 import Link from "next/link";
 import { OpponentPlayers } from "./opponent-players";
 import { notFound } from "next/navigation";
@@ -42,9 +43,10 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
   const fTotal = Object.values(p.formations_ms).reduce((a, b) => a + b, 0);
   return (
     <div className="space-y-6">
+      <BackLink fallback={`/app/${orgId}`} />
       <header>
         <p className="text-sm text-muted">{t("title")}</p>
-        <h1 className="text-2xl font-semibold">{p.opponent.name}</h1>
+        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{p.opponent.name}</h1>
         <p className="text-sm">{t("record", p.record)}</p>
       </header>
       <OpponentPlayers orgId={orgId} opponentId={opponentId} />
@@ -61,9 +63,9 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
               [t("fastBreak"), (p.totals.fast_break_goals / n).toFixed(1)],
               [t("turnovers"), (p.totals.turnovers / n).toFixed(1)],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-lg border border-border p-3">
-                <dt className="text-xs text-muted">{label}</dt>
-                <dd className="text-2xl font-semibold tabular-nums">{value}</dd>
+              <div key={label} className="rounded-lg bg-raised px-4 py-4 border border-border sm:px-5">
+                <dt className="text-[0.8125rem] text-muted">{label}</dt>
+                <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{value}</dd>
               </div>
             ))}
           </dl>
@@ -130,7 +132,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
       )}
       <section aria-label={t("matches")}>
         <h2 className="mb-2 font-semibold">{t("matches")}</h2>
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="divide-y divide-border/70 rounded-lg bg-raised border border-border">
           {p.matches.map((m) => (
             <li key={m.match_id}>
               <Link href={`/app/${orgId}/matches/${m.match_id}`} className="flex justify-between gap-3 px-4 py-2 hover:bg-surface">

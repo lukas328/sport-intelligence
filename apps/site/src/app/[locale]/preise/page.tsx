@@ -25,7 +25,7 @@ export default async function Pricing({ params }: Props) {
         {plans.plans.map((p) => {
           const info = t.plans[p.plan as keyof typeof t.plans];
           return (
-            <section key={p.plan} className="flex flex-col rounded-lg border border-border p-6" aria-labelledby={`plan-${p.plan}`}>
+            <section key={p.plan} className="flex flex-col rounded-2xl bg-raised ring-1 ring-border/70 p-6" aria-labelledby={`plan-${p.plan}`}>
               <h2 id={`plan-${p.plan}`} className="text-xl font-bold">{info.name}</h2>
               <p className="mt-1 text-sm text-muted">{info.text}</p>
               <p className="mt-4 text-3xl font-bold">
@@ -44,7 +44,7 @@ export default async function Pricing({ params }: Props) {
               </ul>
               <a
                 href={registerUrl(APP_LOCALE[locale])}
-                className="mt-6 rounded-md bg-accent px-4 py-2.5 text-center font-semibold text-accent-contrast"
+                className="mt-6 rounded-full bg-accent px-5 py-2.5 text-center font-semibold text-accent-contrast"
               >
                 {p.trial_days ? fmt(t.trial, { days: p.trial_days }) : fmt(t.choose, { plan: info.name })}
               </a>

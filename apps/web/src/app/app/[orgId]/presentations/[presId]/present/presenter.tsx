@@ -98,7 +98,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Link href={`/app/${orgId}/presentations/${presId}`} className="text-sm text-accent underline underline-offset-4">
+        <Link href={`/app/${orgId}/presentations/${presId}`} className="text-sm font-medium text-accent hover:underline">
           {t("back")}
         </Link>
         <span className="flex-1 font-semibold">{q.data.title}</span>
@@ -113,7 +113,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
         </Button>
       </div>
       <div className={presenterView ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
-        <div ref={stage} className="relative rounded-lg bg-background" data-testid="stage" aria-live="polite">
+        <div ref={stage} className="relative rounded-lg bg-raised" data-testid="stage" aria-live="polite">
           {slide ? (
             <SlideView orgId={orgId} slide={slide} paused={paused} extraShapes={remoteShapes} observationText={obsText} />
           ) : (
@@ -139,7 +139,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
                 <img src={qr} alt={t("qrAlt")} width={160} height={160} />
                 <p className="text-xs text-muted">{t("qrHint")}</p>
                 {remoteUrl && (
-                  <a href={remoteUrl} target="_blank" rel="noreferrer" className="text-xs text-accent underline underline-offset-4" data-testid="remote-link">
+                  <a href={remoteUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-accent hover:underline" data-testid="remote-link">
                     {t("remoteLink")}
                   </a>
                 )}
