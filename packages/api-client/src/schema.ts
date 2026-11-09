@@ -1109,7 +1109,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Assignment Detail
+         * @description One assignment with every recipient's progress and who is still open (staff).
+         */
+        get: operations["assignment_detail_v1_orgs__org_id__assignments__assignment_id__get"];
         put?: never;
         post?: never;
         /** Delete Assignment */
@@ -3753,6 +3757,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/player-statuses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Player Statuses
+         * @description Injured and absent players of the squad, still in force (staff).
+         */
+        get: operations["list_player_statuses_v1_orgs__org_id__teams__team_id__player_statuses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/consents": {
         parameters: {
             query?: never;
@@ -3783,6 +3807,30 @@ export interface paths {
         post?: never;
         /** Revoke Consent */
         delete: operations["revoke_consent_v1_orgs__org_id__teams__team_id__players__player_id__consents__consent_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Player Status
+         * @description Mark a player injured or absent, optionally until a day (inclusive) and with a note.
+         */
+        put: operations["set_player_status_v1_orgs__org_id__teams__team_id__players__player_id__status_put"];
+        post?: never;
+        /**
+         * Clear Player Status
+         * @description Back to fit (no status).
+         */
+        delete: operations["clear_player_status_v1_orgs__org_id__teams__team_id__players__player_id__status_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4700,13 +4748,13 @@ export interface components {
             /** Note */
             note: string | null;
             /** Progress */
-            progress?: {
-                [key: string]: unknown;
-            }[] | null;
+            progress?: components["schemas"]["AssignmentProgressOut"][] | null;
             /** Recipients */
             recipients: number;
             /** Seen At */
             seen_at?: string | null;
+            /** Still Open */
+            still_open?: components["schemas"]["AssignmentProgressOut"][] | null;
             /** Target Id */
             target_id: string;
             /**
@@ -4718,6 +4766,25 @@ export interface components {
             team_name?: string | null;
             /** Title */
             title: string;
+        };
+        /**
+         * AssignmentProgressOut
+         * @description One recipient's progress (staff only).
+         */
+        AssignmentProgressOut: {
+            /** Done At */
+            done_at: string | null;
+            /** Name */
+            name: string;
+            /** Player Id */
+            player_id?: string | null;
+            /** Seen At */
+            seen_at: string | null;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
         };
         /** AssignmentStatusIn */
         AssignmentStatusIn: {
@@ -7624,6 +7691,12 @@ export interface components {
             /** Tags */
             tags?: string[] | null;
         };
+        /**
+         * PlayerAvailability
+         * @description A player's status on the squad, set by the staff; no status means fit.
+         * @enum {string}
+         */
+        PlayerAvailability: "injured" | "absent";
         /** PlayerFeed */
         PlayerFeed: {
             /**
@@ -7648,6 +7721,40 @@ export interface components {
             video_id: string | null;
             /** Youth */
             youth: boolean;
+        };
+        /**
+         * PlayerStatusIn
+         * @description Injured or absent; fit is no status (DELETE). The note is short, never a diagnosis.
+         */
+        PlayerStatusIn: {
+            kind: components["schemas"]["PlayerAvailability"];
+            /** Note */
+            note?: string | null;
+            /** Until */
+            until?: string | null;
+        };
+        /** PlayerStatusOut */
+        PlayerStatusOut: {
+            kind: components["schemas"]["PlayerAvailability"];
+            /** Note */
+            note: string | null;
+            /**
+             * Player Id
+             * Format: uuid
+             */
+            player_id: string;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Until */
+            until: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** PlaylistCreate */
         PlaylistCreate: {
@@ -8094,6 +8201,7 @@ export interface components {
             /** Secondary Positions */
             secondary_positions: components["schemas"]["Position"][];
             shooting_hand: components["schemas"]["Hand"] | null;
+            status?: components["schemas"]["PlayerStatusOut"] | null;
         };
         /** RosterEntryUpdate */
         RosterEntryUpdate: {
@@ -11157,6 +11265,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assignment_detail_v1_orgs__org_id__assignments__assignment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentOut"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -17298,6 +17438,38 @@ export interface operations {
             };
         };
     };
+    list_player_statuses_v1_orgs__org_id__teams__team_id__player_statuses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayerStatusOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_consents_v1_orgs__org_id__teams__team_id__players__player_id__consents_get: {
         parameters: {
             query?: never;
@@ -17390,6 +17562,74 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ConsentOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_player_status_v1_orgs__org_id__teams__team_id__players__player_id__status_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                player_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlayerStatusIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayerStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_player_status_v1_orgs__org_id__teams__team_id__players__player_id__status_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                player_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

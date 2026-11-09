@@ -22,6 +22,17 @@ class AssignmentCreate(ApiModel):
     notify_email: bool = True
 
 
+class AssignmentProgressOut(ApiModel):
+    """One recipient's progress (staff only)."""
+
+    user_id: uuid.UUID
+    name: str
+    # the recipient's player in the team's roster, when the account is linked to one
+    player_id: uuid.UUID | None = None
+    seen_at: datetime | None
+    done_at: datetime | None
+
+
 class AssignmentOut(ApiModel):
     id: uuid.UUID
     team_id: uuid.UUID
@@ -31,13 +42,17 @@ class AssignmentOut(ApiModel):
     note: str | None
     due_at: datetime | None
     created_at: datetime
+    # staff: all recipients and how many are done ("8 von 14 erledigt"); players: only their
+    # own status (1 recipient, done 0 or 1), never the progress of other players
     recipients: int
     done: int
     # only in "my assignments"
     seen_at: datetime | None = None
     done_at: datetime | None = None
     team_name: str | None = None
-    progress: list[dict[str, Any]] | None = None
+    # only for staff: every recipient by name, and those still open
+    progress: list[AssignmentProgressOut] | None = None
+    still_open: list[AssignmentProgressOut] | None = None
 
 
 class AssignmentStatusIn(ApiModel):

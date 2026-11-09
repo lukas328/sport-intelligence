@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Index,
@@ -20,7 +21,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from handball_api.core.db import Base, EntityMixin, TenantMixin
 from handball_api.models._types import str_enum
-from handball_api.models.enums import ConsentGivenBy, ConsentKind, Hand, Position
+from handball_api.models.enums import (
+    ConsentGivenBy,
+    ConsentKind,
+    Hand,
+    PlayerAvailability,
+    Position,
+)
 
 
 class Player(Base, EntityMixin, TenantMixin):
@@ -107,4 +114,25 @@ class Guardianship(Base, EntityMixin, TenantMixin):
     )
     player_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("players.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+
+
+class PlayerStatus(Base, EntityMixin, TenantMixin):
+    """A player's status on a team's squad (injured or absent), set by the staff. No row means
+    fit; a status past its until-date reads as fit. The note is short and never a diagnosis."""
+
+    __tablename__ = "player_statuses"
+    __table_args__ = (UniqueConstraint("team_id", "player_id"),)
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    player_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("players.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    kind: Mapped[PlayerAvailability] = mapped_column(str_enum(PlayerAvailability), nullable=False)
+    until: Mapped[date | None] = mapped_column(Date)
+    note: Mapped[str | None] = mapped_column(String(140))
+    set_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
     )

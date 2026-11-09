@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import Field, field_validator
 
-from handball_api.models.enums import ConsentGivenBy, ConsentKind, Hand, Position
+from handball_api.models.enums import (
+    ConsentGivenBy,
+    ConsentKind,
+    Hand,
+    PlayerAvailability,
+    Position,
+)
 from handball_api.schemas.common import ApiModel, ShortName
 
 
@@ -33,6 +39,24 @@ class RosterEntryUpdate(ApiModel):
     active: bool | None = None
 
 
+class PlayerStatusIn(ApiModel):
+    """Injured or absent; fit is no status (DELETE). The note is short, never a diagnosis."""
+
+    kind: PlayerAvailability
+    until: date | None = None
+    note: str | None = Field(default=None, max_length=140)
+
+
+class PlayerStatusOut(ApiModel):
+    player_id: uuid.UUID
+    team_id: uuid.UUID
+    kind: PlayerAvailability
+    # inclusive; from the next day the player reads as fit again
+    until: date | None
+    note: str | None
+    updated_at: datetime
+
+
 class RosterEntryOut(ApiModel):
     id: uuid.UUID
     player_id: uuid.UUID
@@ -47,6 +71,8 @@ class RosterEntryOut(ApiModel):
     secondary_positions: list[Position]
     has_account: bool
     consent_complete: bool
+    # injured or absent (None: fit); staff see every player's, players only their own
+    status: PlayerStatusOut | None = None
 
 
 class ImportRowError(ApiModel):

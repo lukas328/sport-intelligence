@@ -162,6 +162,23 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (helper, branch `helper/squad-status-progress`): wishes 1 and 2 are built in the API
+  (migration 0036), the client is regenerated; no UI yet.
+  1. Player status: `PUT /v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/status` with
+     `{kind: "injured" | "absent", until?: date, note?: string (max 140)}`, `DELETE` on the same
+     path means fit, `GET /v1/orgs/{org_id}/teams/{team_id}/player-statuses` lists the statuses in
+     force. The roster (`GET .../seasons/{season_id}/roster`) carries `status` per entry
+     (`{player_id, team_id, kind, until, note, updated_at}` or `null` for fit). Staff (coach,
+     analyst, goalkeeper and athletic coach, team manager, club admins) read and set; players see
+     only their own `status` in the roster. `until` counts to the end of that day (Swiss time);
+     after it the status reads as `null`; an until-date in the past is a 422.
+  2. Assignment progress: `GET /v1/orgs/{org_id}/teams/{team_id}/assignments` and the new
+     `GET /v1/orgs/{org_id}/assignments/{assignment_id}` (staff who may assign) carry `recipients`,
+     `done`, `progress` (every recipient: `user_id`, `name`, `player_id` or `null`, `seen_at`,
+     `done_at`) and `still_open` (the same, only those not done, by name). "8 von 14 erledigt" is
+     `done` of `recipients`. For players (`/me/assignments`, `PUT .../status`) `recipients` and
+     `done` cover only their own status (1 and 0 or 1); `progress` and `still_open` are `null`.
+
 - 2026-11-09 (UI session, demo data with a synthetic 1-minute video): 4 of 5 attacks counted as
   fast breaks; 33 and 60 sprints and 1.22 km against 2.02 km in one minute; a team row's top
   speed of 31.7 km/h (the maximum of one player?).

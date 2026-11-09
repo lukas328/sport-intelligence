@@ -23,12 +23,18 @@ async def create_assignment(
 ) -> AssignmentOut:
     """Give players a playlist, play, match or drill to study (notification and e-mail)."""
     a = await service.create_assignment(scope.ctx, team_id, data)
-    return next(x for x in await service.team_assignments(scope.ctx, team_id) if x.id == a.id)
+    return await service.assignment_detail(scope.ctx, a.id)
 
 
 @router.get("/teams/{team_id}/assignments", response_model=list[AssignmentOut])
 async def team_assignments(team_id: uuid.UUID, scope: OrgDep) -> list[AssignmentOut]:
     return await service.team_assignments(scope.ctx, team_id)
+
+
+@router.get("/assignments/{assignment_id}", response_model=AssignmentOut)
+async def assignment_detail(assignment_id: uuid.UUID, scope: OrgDep) -> AssignmentOut:
+    """One assignment with every recipient's progress and who is still open (staff)."""
+    return await service.assignment_detail(scope.ctx, assignment_id)
 
 
 @router.delete("/assignments/{assignment_id}", status_code=204)

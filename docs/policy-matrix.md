@@ -19,6 +19,7 @@ Enforced server-side; verified by `apps/api/tests/test_policy_matrix.py`.
 | `season.write` | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |
 | `team.update` | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | `roster.write` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
+| `player_status.manage` | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ | ✓ |  |
 | `consent.read` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `consent.write` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `team.members.manage` | ✓ | ✓ |  |  |  |  |  |  |  |  |

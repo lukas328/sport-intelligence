@@ -32,6 +32,7 @@ class Action(StrEnum):
     SEASON_WRITE = "season.write"
     ROSTER_READ = "roster.read"
     ROSTER_WRITE = "roster.write"
+    PLAYER_STATUS = "player_status.manage"
     CONSENT_READ = "consent.read"
     CONSENT_WRITE = "consent.write"
     TEAM_MEMBERS_READ = "team.members.read"
@@ -85,6 +86,9 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.SEASON_WRITE: _STAFF | _MANAGER,
     Action.TEAM_UPDATE: _COACH,
     Action.ROSTER_WRITE: _ORGANISE,
+    # injured or absent on the squad: the staff who plan sessions and matches read and set it;
+    # players see only their own status
+    Action.PLAYER_STATUS: _VIDEO_WORK | _MANAGER,
     Action.CONSENT_READ: _ORGANISE,
     Action.CONSENT_WRITE: _ORGANISE,
     Action.TEAM_MEMBERS_MANAGE: _COACH,

@@ -188,6 +188,26 @@ async def _delete_entry(a: Api, w: World) -> Any:
     return await a.delete(w.t(f"/roster/{e['id']}"))
 
 
+async def _put_status(a: Api, w: World) -> Any:
+    e = await w.new_entry()
+    return await a.put(w.t(f"/players/{e['player_id']}/status"), json={"kind": "absent"})
+
+
+async def _delete_status(a: Api, w: World) -> Any:
+    e = await w.new_entry()
+    await w.admin.put(w.t(f"/players/{e['player_id']}/status"), json={"kind": "injured"})
+    return await a.delete(w.t(f"/players/{e['player_id']}/status"))
+
+
+async def _get_assignment(a: Api, w: World) -> Any:
+    r = await w.admin.post(
+        w.t("/assignments"),
+        json={"kind": "drill", "target_id": "finishing_wings", "title": "M", "notify_email": False},
+    )
+    assert r.status_code == 201, r.text
+    return await a.get(f"/v1/orgs/{w.org}/assignments/{r.json()['id']}")
+
+
 async def _get_consents(a: Api, w: World) -> Any:
     e = await w.new_entry()
     return await a.get(w.t(f"/players/{e['player_id']}/consents"))
@@ -320,6 +340,10 @@ ENDPOINTS += [
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
     ("GET team assignments", VIDEO_WORK, lambda a, w: a.get(w.t("/assignments"))),
+    ("GET assignment progress", VIDEO_WORK, _get_assignment),
+    ("GET player statuses", TRAINING, lambda a, w: a.get(w.t("/player-statuses"))),
+    ("PUT player status", TRAINING, _put_status),
+    ("DELETE player status", TRAINING, _delete_status),
     ("GET assistant conversations", VIDEO_WORK, lambda a, w: a.get(w.t("/assistant"))),
     ("GET matrix templates", READERS, lambda a, w: a.get(w.t("/matrix/templates"))),
     ("GET sessions", READERS, lambda a, w: a.get(w.t("/sessions"))),
