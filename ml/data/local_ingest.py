@@ -64,9 +64,10 @@ def upload(batch_dir: Path, user: str, slug: str) -> bool:
     (batch_dir / "dataset-metadata.json").write_text(json.dumps(meta))
     res = subprocess.run(  # noqa: S603
         ["kaggle", "datasets", "create", "-p", str(batch_dir)],  # noqa: S607
-        capture_output=True, text=True,
+        # the CLI prints a progress bar; decode as UTF-8 so a Windows console codepage cannot crash this
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
-    out = (res.stdout + res.stderr).strip()
+    out = ((res.stdout or "") + (res.stderr or "")).strip()
     print(out.splitlines()[-1] if out else f"exit {res.returncode}", flush=True)
     return res.returncode == 0 and "error" not in out.lower()
 
