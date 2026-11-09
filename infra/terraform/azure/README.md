@@ -88,6 +88,14 @@ ACR=$(terraform -chdir=infra/terraform/azure output -raw registry) TAG=$(git rev
 
 Set `image_tag` in `terraform.tfvars` to that tag.
 
+Without Docker (no admin rights on the PC), let the registry build the images. `az acr build` has no
+BuildKit (the Dockerfiles use `RUN --mount`), so use the task file, and upload a clean export of the
+tracked files only (the working tree holds `.terraform/` with 250 MB of providers and your tfvars):
+
+```bash
+TAG=$(git rev-parse --short HEAD) CTX=$(mktemp -d) && git archive HEAD | tar -x -C $CTX && az acr run -r $(terraform -chdir=infra/terraform/azure output -raw registry_name) -f infra/terraform/azure/acr-build.yaml --set tag=$TAG --timeout 7200 $CTX
+```
+
 ## 4. External secrets
 
 Type the values instead of pasting them into the command, so they stay out of the shell history:
@@ -149,6 +157,18 @@ az containerapp hostname bind -g $(terraform output -raw resource_group) -n $(te
 
 Build and push with a new tag (step 3), set `image_tag`, `terraform apply`, then start the migration job
 if the release has a migration. A GitHub Actions workflow with OIDC login is the next step (ADR 025).
+
+## Pause (test environment)
+
+Set `paused = true` and `terraform apply`: every app goes to 0 replicas and costs nothing. Stop the
+database as well (Azure starts a stopped server again by itself after 7 days):
+
+```bash
+az postgres flexible-server stop -g $(terraform output -raw resource_group) -n $(terraform output -raw postgres_server)
+```
+
+To resume: `az postgres flexible-server start ...`, `paused = false`, `terraform apply`. While paused only
+the registry (~ CHF 5), Postgres storage (~ CHF 4) and a few cents for Key Vault and logs remain.
 
 ## Known limits
 
