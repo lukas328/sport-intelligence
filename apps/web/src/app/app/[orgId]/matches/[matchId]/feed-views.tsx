@@ -4,7 +4,8 @@ import { Play } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Button, buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
@@ -238,5 +239,32 @@ export function FeedbackSummary({ orgId, matchId, onOpen }: { orgId: string; mat
       )}
       <p className="text-sm text-muted">{t("feedbackHere")}</p>
     </section>
+  );
+}
+
+/** For a player (or a parent): the way from the match to their own scenes of it. Before the
+ * self-assessment it leads with "Zuerst einschätzen", since the coach's notes wait behind it. */
+export function MyScenesLine({ orgId, matchId }: { orgId: string; matchId: string }) {
+  const t = useTranslations("feed");
+  const q = useQuery({
+    queryKey: ["my-feeds", orgId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/me/feeds", { params: { path: { org_id: orgId } } })).data ?? [],
+  });
+  const mine = (q.data ?? []).filter((f) => f.match_id === matchId);
+  if (mine.length === 0) return null;
+  return (
+    <ul className="divide-y divide-foreground/10 border-y border-foreground/15" data-testid="my-scenes">
+      {mine.map((f) => (
+        <li key={f.player_id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">{f.relation === "self" ? t("title") : t("childTitle", { name: f.player_first_name })}</span>
+            <span className="block text-sm text-muted">{f.assessed ? t("assessedLine") : t("assessFirst")}</span>
+          </span>
+          <Link href={`/app/${orgId}/feed/${matchId}?player=${f.player_id}`} className={buttonClass(f.assessed ? "secondary" : "primary", "sm")}>
+            {f.assessed ? t("watch") : t("assessNow")}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }

@@ -106,6 +106,7 @@
     "duplicate-name": "This name already exists.",
     "unknown-tag": "This tag does not belong to the team.",
     "invalid-slide": "This slide is invalid.",
+    "no-video": "This clip belongs to a match without video. Upload the video first, then the clip can be shown.",
     "nothing-to-export": "Add clip or text slides first.",
     "too-many-slides": "At most 200 slides.",
     "image-too-large": "The image may be at most 3 MB.",
@@ -448,7 +449,9 @@
     "allDemo": "Demo matches only",
     "uploadVideo": "Upload video",
     "noneUpcoming": "No match scheduled.",
-    "scheduleOne": "Schedule a match"
+    "scheduleOne": "Schedule a match",
+    "attendance": "Replies",
+    "attendanceHint": "Who comes, who is missing"
   },
   "upload": {
     "title": "Upload video",
@@ -662,6 +665,12 @@
     "calibReason_few_people": "Too few people in the picture to find the court: mark it at a moment in the middle of play.",
     "calibReason_court": "The court found does not fit reliably: please mark it by hand.",
     "courtFromHall": "Court taken over from an earlier video of the same hall ({hall}). Check briefly that it fits.",
+    "courtFromHallCheck": "Court taken over from an earlier video of the same hall ({hall}). Do the orange lines lie on the hall's lines?",
+    "courtFromHallOk": "Court taken over from an earlier video of the same hall ({hall}) and confirmed.",
+    "courtFits": "Fits",
+    "courtRemark": "Mark again",
+    "courtPreviewAlt": "Hall image with the court taken over, in orange",
+    "courtConfirmError": "The court could not be confirmed. Please try again.",
     "hallOnce": "Mark once per hall: the next videos from the same hall ({hall}) take the court over.",
     "hallUnknown": "Enter the venue on the match: the next videos from this hall then take the court over."
   },
@@ -891,14 +900,14 @@
     "topSpeed": "Top speed",
     "time": "Tracked",
     "unassigned": "Unassigned tracks",
-    "heatmap": "Heatmap",
+    "heatmap": "Where they were",
     "none": "No position data yet.",
     "km": "{value} km",
-    "m": "{value} m",
+    "m": "{value, number} m",
     "kmh": "{value} km/h",
     "min": "{value} min",
     "track": "Track {n}",
-    "showHeatmap": "Show heatmap",
+    "showHeatmap": "Show where they were",
     "teamOwn": "Own team",
     "teamOpp": "Opponent",
     "tracksOwn": "Own team's tracks, 1 minute and longer",
@@ -1533,7 +1542,11 @@
     "continueWith": "Continue with {name}",
     "ratingLow": "1 poor",
     "ratingHigh": "5 very good",
-    "coachNote": "Coach's note:"
+    "coachNote": "Coach's note:",
+    "childTitle": "{name}'s scenes",
+    "assessedLine": "Your self-assessment is in, the coach's notes are open.",
+    "assessFirst": "Your self-assessment first, then you see the coach's notes.",
+    "watch": "Watch scenes"
   },
   "scouting": {
     "title": "Preparation report",
@@ -1945,7 +1958,10 @@
     "export": "Export",
     "shirtPrefix": "No. ",
     "metricsN": "{n, plural, one {# figure} other {# figures}}",
-    "allMatches": "all"
+    "allMatches": "all",
+    "seasons": "Season",
+    "seasonsRecent": "This and last",
+    "seasonsAll": "All seasons"
   },
   "training": {
     "nav": "Training",
@@ -2211,7 +2227,9 @@
     "openTasks": "Open assignments",
     "lastMatchOn": "Last match, {date}",
     "assessLead": "Your self-assessment is still missing",
-    "assessTask": "Rate your game against {opponent}"
+    "assessTask": "Rate your game against {opponent}",
+    "replyTask": "{n, plural, one {Reply to # date} other {Reply to # dates}}",
+    "replyHint": "In or out: the coach plans with it."
   },
   "shell": {
     "search": "Search",
@@ -2333,7 +2351,7 @@
     "attacks": "{n, plural, =1 {1 attack} other {# attacks}} · {avg} s on average",
     "timeline": "Possession over the match",
     "timelineHint": "Click an attack to jump there in the video.",
-    "physical": "See physical load and heatmaps",
+    "physical": "See physical load",
     "moreTitle": "For shots, goals and saves",
     "moreText": "The video analysis does not see the ball yet. Mark goals at the courtside during the match or import the match sheet: statistics, shot maps and goalkeeper figures then appear here.",
     "marks": "Mark at the courtside",
@@ -2349,7 +2367,9 @@
     "showLess": "Show less",
     "compactTitle": "From the video:",
     "compactLine": "possession {own} % to {opp} %, {n} attacks, estimated.",
-    "compactOpen": "Show attacks"
+    "compactOpen": "Show attacks",
+    "possession": "Possession",
+    "coverage": "From {video} of video out of {game} of play, estimated from the positions."
   },
   "workflow": {
     "rail": "Work steps",
@@ -2396,6 +2416,7 @@
     "laneVideo": "Video",
     "laneReport": "Match report",
     "laneCandidates": "Candidates",
+    "laneShots": "Shots",
     "reviewOpen": "Review full screen",
     "reviewClose": "Close",
     "reviewLeft": "{n} open",
@@ -2458,7 +2479,10 @@
     "rateMore": "More or fewer suggestions",
     "rate": "Suggestions per minute",
     "perMinute": "{n} per min.",
-    "reportTime": "report {time}"
+    "reportTime": "report {time}",
+    "shotBy": "shot by {who}",
+    "noKickoff": "The throw-off is not set yet: the game times are estimated from the match report.",
+    "setKickoff": "Set the throw-off"
   },
   "officialTeams": {
     "title": "Find your team",
@@ -2545,7 +2569,9 @@
     "points": "Pts",
     "numberTwice": "Shirt number given twice: {numbers}. Change one or leave it empty.",
     "noAppearancesHint": "Players without a match yet are not ticked.",
-    "openLine": "See {n, plural, one {# suggestion} other {# suggestions}} from handball.ch"
+    "openLine": "See {n, plural, one {# suggestion} other {# suggestions}} from handball.ch",
+    "home": "vs {opponent}",
+    "away": "away at {opponent}"
   },
   "requests": {
     "eyebrow": "Team",

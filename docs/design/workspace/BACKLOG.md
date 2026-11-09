@@ -1,5 +1,43 @@
 # UI/UX backlog after the app-wide audit
 
+## Work queue of the UI session (2026-11-09, worked top to bottom)
+
+One ordered list from this backlog, `PROGRESS.md` ("Open"), the handover and the review rounds.
+Bugs reported from the test environment on Azure always go first. `[x]` = done.
+
+**A. Now (UI only, the API is there)**
+1. [x] Matrix: season choice ("Saison": this and last, one season, all; e2e in `data.spec.ts`). The API reads `season_ids` (top level of the request, default the
+   current and the previous season) since 95132d3; the note further down is outdated.
+2. [x] Würfe: full-screen review like the goal candidates (the clip plays itself, one key per
+   decision); priority 3 of the handover (one-click confirmation on real footage).
+3. [x] Gegner: the back link leads to the fixtures and the header follows the other pages
+   (eyebrow, title); the zone split stays with the analysis session.
+4. [x] Timeline: a label per side on the sided lanes (own team above, opponent below), not only
+   in the legend.
+5. [x] Check and close (both fine at 390 px and in the search; closed): "Teilen" and "…" on phones (they share the row with the tabs since the
+   identity rework); search hits without a video window ("ohne Video" handles them).
+6. [x] Analyse tab slice (review round and fixes in PROGRESS.md): possession, attacks, physical load and shots in the language of the
+   match sheet, then a fresh-eyes review round (METHOD.md).
+7. [x] Attendance (on the match page for staff: replies and who came; the squad keeps its status for B): the API has it (`/attendance/{kind}/{id}`, `/me/attendance`); the training
+   view records it. Show who comes on the squad and the dates for staff.
+
+**B. Needs the backend first (to raise with the main session)**
+- Player status (verletzt, abwesend) on the squad.
+- Assignment progress ("8 von 14 erledigt") for staff.
+- Recurring training slots.
+- A team consent table for staff (who consented to what, before filming).
+- Own drills ("Neue Übung"): a drills API; the library is static today.
+- A player's personal season line linked to the clips (per-player figures over the season).
+
+**C. Waiting for others**
+- Bugs from the test on Azure (local session sets the environment up, Lukas tests).
+- Analysis data reported in `PROGRESS.md` ("Backend findings", "Open"): goalkeeper insight, xG
+  against goals, the zone "Fernwurf / leeres Tor", implausible sprint figures, the matching
+  window of goal candidates.
+
+**D. Kept by decision**
+- Event keys stay English mnemonics (G, S, M, P, T) until a coach asks; German letters collide.
+
 Source: a fresh-eyes audit of every page outside the match page (screenshots light and dark,
 desktop and phone, local stack with test data), against `REFERENCES.md` and the rule set in
 `REPORT.md`. P1 = broken or misleading, P2 = clearly generated or unclear, P3 = polish.
@@ -84,9 +122,9 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] Kader (phone): "Kader" three times (H1, tab, group heading); "Liste bearbeiten" alone; the
   red "Spieler hinzufügen" competes with the red numbers (the button colour waits for the club-red
   decision; heading and edit button fixed).
-- [ ] Sidebar highlight for tools (Assistent, Suche, Gegner) should follow the back link.
+- [x] Sidebar highlight for tools (Assistent, Suche, Gegner) follows the section; the official data and join requests keep Team · Kader.
 - [x] Einstellungen on phones (jump links that wrap): the section tabs have no active underline and are cut at the edge.
-- [ ] Gegner: back link "Zurück" without eyebrow; the zone "Fernwurf / leeres Tor" mixes two
+- [x] Gegner: back link "Zurück" without eyebrow (PageHeader now; the zone is the analysis'); the zone "Fernwurf / leeres Tor" mixes two
   situations (analysis data, already reported).
 - [x] Dates: "29. Okt. 26" (Suche) and "29.10.2026" (Gegner): one format.
 
@@ -111,7 +149,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] P2 Aufgaben and Termine empty states without a sentence on who sets them.
 - [x] P2 Einstellungen: the 2FA admin sentence shown to players.
 - [x] P3 Spielplan: "Alles Demo-Spiele"; score emphasis on the winner instead of the own team.
-- [ ] P3 Einwilligungen: guardian wording ("Du selbst") for an adult player.
+- [x] P3 Einwilligungen: guardian wording ("Du selbst") for an adult player (the tag only shows for a child).
 
 ## From the analysis session (API additions, see `docs/plans/ui-match-workspace.md` on main)
 
@@ -129,9 +167,9 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] `PUT /kickoff` with `clock_s` for clips that start mid-half: "Uhr eintragen" in the throw-off step
   ("Spieluhr zeigt hier 12:40" at the paused moment, `lib/match-workflow.ts` `parseClock`, tested).
 - [x] Shot zone split: "Fernwurf" and "Leeres Tor" (`empty_goal`) in the web texts.
-- [ ] Search hits outside the video come with null windows ("ohne Video" already handles it).
+- [x] Search hits outside the video come with null windows ("ohne Video" already handles it).
 - [x] nuLiga/HLA report links (hint and error text); `roster_stats` toggle (in the inbox).
-- [ ] `no-video` errors on clip slides; referee kit.
+- [x] `no-video` errors on clip slides; referee kit (see "Open after PR 8").
 
 - [x] Shot candidates (`shot-candidates`): a "Würfe" tool beside the events. With a report most
   moments come with its entry: Enter takes it (player and outcome pinned to the video); otherwise
@@ -143,23 +181,22 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 State on 2026-11-09: PR 8 is merged into main. Still open from the analysis session's list and from
 this round, in rough order:
 
-- [ ] `no-video` (422) on clip slides of a match without video: a readable message in the
-  presentation editor instead of the generic error.
-- [ ] Referee kit: check that `kit_referee` shows wherever the four team kits show (match create,
-  edit, analysis colours), not only in the kit fields.
-- [ ] Matrix `season_ids`: the API filter does not exist yet (`handball_metrics.query.Filter`);
+- [x] `no-video` (422) on clip slides of a match without video: a readable message in the
+  presentation editor instead of the generic error (`errors.no-video`; the scene search already
+  offers no slide for hits without video).
+- [x] Referee kit: `kit_referee` shows wherever the four team kits show (match create and edit
+  through `KitFields`, the analysis colours in the workspace).
+- [ ] Matrix `season_ids` (outdated: the API has it now, see the work queue at the top);
   build the season choice once the analysis session adds it.
-- [ ] Shot review: no e2e (shot candidates need analysed video plus a report); a fixture seed for
-  the stack would allow one. The timeline's signal ring does not follow the active shot candidate
-  yet (it does for goal candidates).
-- [ ] Official data screens: no e2e (they need handball.ch); a recorded fixture of `/v1/official/teams`
-  and of the claim would allow one. Real player names from handball.ch must not land in committed
-  screenshots or fixtures.
-- [ ] Screenshot review round (METHOD.md) for the new screens: Würfe, Uhr eintragen, the official
-  inbox, join and access requests, the overview line. Each was checked by eye on desktop, phone and
-  dark mode, but no fresh-eyes rubric review was run.
-- [ ] The court step's "Passt" / "Neu markieren" pair for a court taken from the hall (today the
-  generic "Spielfeld neu ausrichten" shows; confirm happens in the calibration dialog).
+- [x] Shot review: e2e `shots.spec.ts` (real upload, the candidate list from a recorded fixture);
+  the timeline's signal ring follows the active shot candidate.
+- [x] Official data screens: e2e `official.spec.ts` (search, claim, access and join requests, the
+  suggestion inbox) with answers recorded by hand with invented names (`e2e/fixtures/official.ts`).
+- [x] Screenshot review round (METHOD.md) for the new screens: onboarding search, the official
+  inbox, the court from the hall, Würfe, Anwurf (scores and what is left in `PROGRESS.md`). Join and
+  access requests in the settings and the overview line were not in this round.
+- [x] The court step's "Passt" / "Neu markieren" pair for a court taken from the hall, beside the
+  hall image with the court in orange; the step stays open until then (`courtUnconfirmed`).
 
 ## Later (features)
 
@@ -167,7 +204,8 @@ this round, in rough order:
   (`xg_coverage` at least 0.7, `lib/xg.ts`, also on the match stage, the analysis overview, the
   season rows and the season's xG statement).
 - Player: one next-action list (self-assessments, assignments, replies to dates); personal season
-  line linked to clips; "Meine Szenen" on the match page; read-only drills a coach assigns.
+  line linked to clips; read-only drills a coach assigns. Done: "Meine Szenen" on the match page
+  (assessment first, then the scenes; e2e `player.spec.ts`).
 - Own drills ("Neue Übung"): needs a drills API; the library is static today.
 - Player status (verletzt, abwesend) on the squad; attendance on units and dates; assignment
   progress ("8 von 14 erledigt"); recurring training slots; a team consent table for staff.

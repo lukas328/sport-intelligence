@@ -77,20 +77,23 @@ function Row({ label, children, href }: { label: string; children: ReactNode; hr
   );
 }
 
-export function TodayView({ orgId }: { orgId: string }) {
+/** `notice`: one quiet line for the club's admins, right under the stage (the stage pulls itself
+ * up to the top edge and would cover anything above it). */
+export function TodayView({ orgId, notice }: { orgId: string; notice?: ReactNode }) {
   const { mode, team, teams } = useShell();
-  if (teams.length === 0) return <NoTeam orgId={orgId} />;
-  if (mode === "staff" && team) return <StaffToday orgId={orgId} teamId={team.id} />;
+  if (teams.length === 0) return <NoTeam orgId={orgId} notice={notice} />;
+  if (mode === "staff" && team) return <StaffToday orgId={orgId} teamId={team.id} notice={notice} />;
   if (mode === "family") return <FamilyToday orgId={orgId} />;
   return <PlayerToday orgId={orgId} />;
 }
 
-function NoTeam({ orgId }: { orgId: string }) {
+function NoTeam({ orgId, notice }: { orgId: string; notice?: ReactNode }) {
   const t = useTranslations("today");
   const greeting = useGreeting();
   return (
     <div className="space-y-8">
       <PageHeader eyebrow={greeting} title={t("teams")} />
+      {notice}
       <OnboardingChecklist orgId={orgId} teamId={null} />
       <EmptyState title={t("noTeam")} />
     </div>
@@ -99,7 +102,7 @@ function NoTeam({ orgId }: { orgId: string }) {
 
 /* ---------------- coaches and analysts ---------------- */
 
-function StaffToday({ orgId, teamId }: { orgId: string; teamId: string }) {
+function StaffToday({ orgId, teamId, notice }: { orgId: string; teamId: string; notice?: ReactNode }) {
   const t = useTranslations();
   const now = useNow({ updateInterval: 60_000 });
   const matches = useQuery({
@@ -127,6 +130,7 @@ function StaffToday({ orgId, teamId }: { orgId: string; teamId: string }) {
       ) : (
         <FirstStage base={base} />
       )}
+      {notice}
       <OnboardingChecklist orgId={orgId} teamId={teamId} />
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
         <Block title={t("today.standsOut")} href={last ? `/app/${orgId}/matches/${last.id}` : undefined} linkLabel={t("today.openMatch")}>
@@ -477,7 +481,13 @@ function PlayerToday({ orgId }: { orgId: string }) {
         </Block>
         <div className="space-y-12">
           <Block title={t("today.myTasks")} href={`/app/${orgId}/assignments`} linkLabel={t("today.allTasks")}>
-            <Tasks orgId={orgId} tasks={(tasks.data ?? []).filter((a) => !a.done_at)} assessments={pending} />
+            <Tasks
+              orgId={orgId}
+              tasks={(tasks.data ?? []).filter((a) => !a.done_at)}
+              assessments={pending}
+              // the next date is answered on the stage; the ones after it are to-dos
+              unanswered={dates.slice(1).filter((d) => d.response == null).length}
+            />
           </Block>
           {dates.length > 1 && (
             <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
@@ -554,12 +564,34 @@ function Scenes({ orgId, feeds, loading }: { orgId: string; feeds: Schemas["Feed
   );
 }
 
-function Tasks({ orgId, tasks, assessments = [] }: { orgId: string; tasks: Schemas["AssignmentOut"][]; assessments?: Schemas["FeedListItem"][] }) {
+function Tasks({
+  orgId,
+  tasks,
+  assessments = [],
+  unanswered = 0,
+}: {
+  orgId: string;
+  tasks: Schemas["AssignmentOut"][];
+  assessments?: Schemas["FeedListItem"][];
+  /** dates after the next one that still wait for a yes or no */
+  unanswered?: number;
+}) {
   const t = useTranslations();
   const format = useFormatter();
-  if (tasks.length === 0 && assessments.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
+  if (tasks.length === 0 && assessments.length === 0 && unanswered === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
   return (
     <ul>
+      {unanswered > 0 && (
+        <li className="border-b border-foreground/10 last:border-0">
+          <Link href={`/app/${orgId}/schedule`} className="group flex items-center gap-3 py-3.5 hover:text-accent">
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold">{t("today.replyTask", { n: unanswered })}</span>
+              <span className="block text-sm text-muted">{t("today.replyHint")}</span>
+            </span>
+            <ArrowRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </li>
+      )}
       {/* self-assessments are to-dos too ("Nichts offen" next to "Jetzt einschätzen" contradicted) */}
       {assessments.slice(0, 2).map((f) => (
         <li key={`a-${f.match_id}-${f.player_id}`} className="border-b border-foreground/10 last:border-0">

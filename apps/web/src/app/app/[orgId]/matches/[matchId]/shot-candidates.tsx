@@ -50,6 +50,10 @@ export function ShotCandidatesPanel({
   oppName,
   names,
   onClip,
+  onActive,
+  onSeek,
+  onSetKickoff,
+  focusMode = false,
 }: {
   orgId: string;
   matchId: string;
@@ -57,6 +61,14 @@ export function ShotCandidatesPanel({
   oppName: string;
   names: Record<string, string>;
   onClip: (fromMs: number, toMs: number) => void;
+  /** the moment that is up, for the timeline's signal ring */
+  onActive?: (id: string | null) => void;
+  /** the video goes to the moment that is up (paused, with its lead-in) */
+  onSeek?: (ms: number) => void;
+  /** set when the throw-off is missing: the game times come from the report alone */
+  onSetKickoff?: () => void;
+  /** full-screen review: each moment's clip plays when it comes up, the keys work right away */
+  focusMode?: boolean;
 }) {
   const t = useTranslations("shotCandidates");
   const te = useTranslations("events");
@@ -117,6 +129,31 @@ export function ShotCandidatesPanel({
     refocus.current = null;
     rowRefs.current[i]?.focus();
   });
+  const up = rows[Math.min(focus, rows.length - 1)];
+  useEffect(() => {
+    onActive?.(up?.status === "open" ? up.id : null);
+  }, [up?.id, up?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => onActive?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // each moment that comes up is shown in the video, so the coach looks before deciding; in the
+  // full-screen review its clip plays by itself
+  useEffect(() => {
+    if (!up || up.status !== "open") return;
+    if (focusMode) onClip(up.start_ms, up.end_ms);
+    else onSeek?.(up.start_ms);
+  }, [up?.id, focusMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (focusMode) rowRefs.current[Math.min(focus, rows.length - 1)]?.focus();
+  }, [focusMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  const undoRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    if (!focusMode) return;
+    // the last moment decided leaves nothing focused: U still takes it back
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if ((e.key === "u" || e.key === "U") && (document.activeElement === document.body || document.activeElement == null)) undoRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [focusMode]);
   if (!list || list.counts.total === 0) return null;
 
   const active = Math.min(focus, rows.length - 1);
@@ -127,14 +164,14 @@ export function ShotCandidatesPanel({
     c.clock_s != null ? tr("events.at", { period: c.period ?? 1, clock: formatClock(c.clock_s * 1000) }) : formatClock(c.goal_ms);
   const pickedSide = (c: ShotCandidate) => (side?.id === c.id ? side.side : defaultSide(c));
   const outcomeLabel = (o: string | null | undefined) => (o ? te(o as ShotOutcome) : "");
-  // the report's entry as a sentence: "Parade, #7 Muster (HC Demo-Meilen)"
+  // the report's entry as a sentence: "Parade, Wurf von #7 Muster (HC Demo-Meilen)"
   const reportLine = (c: ShotCandidate) => {
     const s = c.suggestion;
     if (!s) return null;
     const who = (s.player_id && names[s.player_id]) || playerLabel(s.number, reportName(s.name));
     // the report's own time only where it differs from the moment's clock (the clock map is an estimate)
     const off = s.clock_s != null && c.clock_s != null && Math.abs(s.clock_s - c.clock_s) >= 3 && s.official_time ? t("reportTime", { time: s.official_time }) : null;
-    return [s.penalty ? t("penalty", { what: outcomeLabel(s.outcome) }) : outcomeLabel(s.outcome), who && `${who} (${team(s.side) ?? ""})`, off]
+    return [s.penalty ? t("penalty", { what: outcomeLabel(s.outcome) }) : outcomeLabel(s.outcome), who && t("shotBy", { who: `${who} (${team(s.side) ?? ""})` }), off]
       .filter(Boolean)
       .join(", ");
   };
@@ -162,6 +199,7 @@ export function ShotCandidatesPanel({
     if (!body) return setError(outcome === "accept" ? null : "needSide");
     decide(c, index, body);
   }
+  undoRef.current = () => undoLast();
   function undoLast() {
     const id = lastDecided.current;
     if (!id) return;
@@ -228,6 +266,14 @@ export function ShotCandidatesPanel({
           {official.counts.outside > 0 && <span className="text-muted">{` ${t("reportOutside", { n: official.counts.outside })}`}</span>}
         </p>
       )}
+      {onSetKickoff && (
+        <p className="text-sm text-muted" data-testid="shot-candidates-kickoff">
+          {t("noKickoff")}{" "}
+          <button type="button" className="font-medium text-foreground underline underline-offset-4" onClick={onSetKickoff}>
+            {t("setKickoff")}
+          </button>
+        </p>
+      )}
 
       {/* the one question first: the moment that is up and its answers */}
       {deciding && (
@@ -249,11 +295,11 @@ export function ShotCandidatesPanel({
               onClick={() => answer(deciding, active, "accept")}
               data-testid="shot-accept"
             >
-              <kbd aria-hidden className="font-score opacity-70">
+              <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                 ↵
               </kbd>
               <span>
-                <span className="block text-xs font-normal opacity-80">{t("fromReportLabel")}</span>
+                <span className="block text-xs font-normal">{t("fromReportLabel")}</span>
                 {reportLine(deciding)}
               </span>
             </Button>
@@ -265,13 +311,13 @@ export function ShotCandidatesPanel({
                 <Button
                   key={s}
                   size="sm"
-                  variant={pickedSide(deciding) === s ? "secondary" : "quiet"}
-                  className={cn("min-w-0 justify-start", pickedSide(deciding) === s && "ring-2 ring-foreground ring-inset")}
+                  variant="secondary"
+                  className={cn("min-w-0 justify-start max-sm:min-h-11", pickedSide(deciding) === s && "ring-2 ring-foreground ring-inset")}
                   aria-pressed={pickedSide(deciding) === s}
                   aria-keyshortcuts={String(k + 1)}
                   onClick={() => (setSide({ id: deciding.id, side: s }), setError(null))}
                 >
-                  <kbd aria-hidden className="font-score opacity-70">
+                  <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                     {k + 1}
                   </kbd>
                   <span className="truncate">{team(s)}</span>
@@ -284,11 +330,12 @@ export function ShotCandidatesPanel({
                   key={o}
                   size="sm"
                   variant="secondary"
+                  className="max-sm:min-h-11"
                   aria-keyshortcuts={OUTCOME_KEY[o]}
                   onClick={() => answer(deciding, active, o)}
                   data-testid={`shot-outcome-${o}`}
                 >
-                  <kbd aria-hidden className="font-score opacity-70">
+                  <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                     {OUTCOME_KEY[o]}
                   </kbd>
                   {te(o)}
@@ -296,14 +343,14 @@ export function ShotCandidatesPanel({
               ))}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="quiet" aria-keyshortcuts="X" onClick={() => decide(deciding, active, { status: "rejected" })}>
-                <kbd aria-hidden className="font-score opacity-70">
+              <Button size="sm" variant="quiet" className="max-sm:min-h-11" aria-keyshortcuts="X" onClick={() => decide(deciding, active, { status: "rejected" })}>
+                <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                   X
                 </kbd>
                 {t("noShot")}
               </Button>
-              <Button size="sm" variant="quiet" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
-                <kbd aria-hidden className="font-score opacity-70">
+              <Button size="sm" variant="quiet" className="max-sm:min-h-11" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
+                <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                   R
                 </kbd>
                 {t("replay")}
@@ -315,7 +362,7 @@ export function ShotCandidatesPanel({
 
       <div aria-live="polite" className="space-y-2">
         <p className="flex min-h-8 flex-wrap items-center gap-x-3 text-sm" data-testid="shot-candidates-said">
-          {said ?? <span className="text-muted">{t("undoIdle")}</span>}
+          {said ?? <span className="text-muted pointer-coarse:hidden">{t("undoIdle")}</span>}
           {said && lastDecided.current && (
             <Button variant="ghost" size="sm" className="-my-1" aria-keyshortcuts="U" onClick={undoLast}>
               <RotateCcw aria-hidden />

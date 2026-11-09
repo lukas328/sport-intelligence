@@ -50,7 +50,8 @@ export function MyConsents({ orgId }: { orgId: string }) {
             <div>
               <h2 id={`subject-${s.player_id}`} className="text-lg font-semibold">
                 {s.first_name} {s.last_name}
-                <span className="ml-2 text-sm font-normal text-muted">{t(`consents.${s.relation as "self"}`)}</span>
+                {/* only a child needs saying: the own profile is the own name */}
+                {s.relation !== "self" && <span className="ml-2 text-sm font-normal text-muted">{t(`consents.${s.relation as "guardian"}`)}</span>}
               </h2>
               {s.teams.length > 0 && <p className="text-sm text-muted">{t("consents.teams", { teams: s.teams.map((x) => x.name).join(", ") })}</p>}
               {childLocked && <p className="text-sm">{t("consents.minor")}</p>}

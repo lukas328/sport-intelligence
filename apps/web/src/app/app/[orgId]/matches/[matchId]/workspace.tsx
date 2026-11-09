@@ -7,7 +7,7 @@ import { Crosshair, Keyboard, Maximize2, Play, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
-import { CourtCalibration } from "@/components/analysis/court-calibration";
+import { CourtCalibration, CourtPreview } from "@/components/analysis/court-calibration";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
-import { coverage, firstOpen, steps } from "@/lib/match-workflow";
+import { courtFromHall, courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
 import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
 import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
@@ -114,7 +114,10 @@ export function Workspace({
   const [goalList, setGoalList] = useState<"candidates" | "report" | null>(null);
   // review mode: the workspace full screen, one goal candidate after the other
   const [reviewing, setReviewing] = useState(false);
+  // what the full-screen review goes through: goal candidates or shot moments
+  const [reviewKind, setReviewKind] = useState<"goals" | "shots">("goals");
   const [activeCandidate, setActiveCandidate] = useState<string | null>(null);
+  const [activeShot, setActiveShot] = useState<string | null>(null);
   useEffect(() => {
     if (!reviewing) return;
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setReviewing(false);
@@ -295,7 +298,7 @@ export function Workspace({
   const reportOpen = hasReport && official.data?.imported ? goalRows(official.data, "open", false, spansFor).length : null;
   const stepList = steps({
     analysis: a
-      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: a.camera === "moving" && a.calibration?.source === "heuristic" }
+      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: courtUnconfirmed(a) }
       : null,
     kickoff: match.kickoff_ms,
     periodS: match.period_s,
@@ -374,8 +377,9 @@ export function Workspace({
   };
   const openCandidates = candidates.data && candidates.data.counts.total > 0;
   const list = goalList ?? (openCandidates || !hasReport ? "candidates" : "report");
-  const shown: Pane = reviewing ? "goals" : chosen;
+  const shown: Pane = reviewing ? reviewKind : chosen;
   const openNow = candidates.data?.counts.open_by_rate[String(rate)] ?? 0;
+  const shotsOpen = shotCandidates.data?.counts.open_by_rate[String(shotCandidates.data.default_rate)] ?? 0;
   return (
     <div
       className={cn("space-y-5", reviewing && "fixed inset-0 z-[60] !m-0 h-dvh overflow-y-auto bg-background p-4 sm:p-6 lg:px-10")}
@@ -386,11 +390,11 @@ export function Workspace({
       {reviewing ? (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-foreground/15 pb-3">
           <h2 id={`${paneId}-review`} className="font-display text-3xl">
-            {t("workflow.goals")}
+            {reviewKind === "shots" ? t("shotCandidates.title") : t("workflow.goals")}
           </h2>
           <span className="text-muted">{`${teamName} ${t("matches.vs")} ${oppName}`}</span>
           <span className="ml-auto font-score text-xl tabular-nums" aria-live="polite">
-            {t("workflow.reviewLeft", { n: openNow })}
+            {t("workflow.reviewLeft", { n: reviewKind === "shots" ? shotsOpen : openNow })}
           </span>
           <Button variant="secondary" onClick={() => setReviewing(false)} data-testid="review-close">
             <X aria-hidden />
@@ -503,7 +507,8 @@ export function Workspace({
               {t("tactics.fromVideo")}
             </Button>
           )}
-          <details className="group relative">
+          {/* keys teach only where there is a keyboard */}
+          <details className="group relative pointer-coarse:hidden">
             <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
               <Keyboard aria-hidden className="size-4" />
               {t("player.shortcuts")}
@@ -523,9 +528,11 @@ export function Workspace({
           kickoff={match.kickoff_ms}
           nowMs={now}
           official={hasReport ? official.data : null}
-          candidates={staff ? candidates.data : null}
-          rate={rate}
-          activeId={shown === "goals" ? activeCandidate : null}
+          // while shots are reviewed, their moments take the candidate lane
+          candidates={staff ? (shown === "shots" ? shotCandidates.data : candidates.data) : null}
+          candidatesLabel={shown === "shots" ? "laneShots" : "laneCandidates"}
+          rate={shown === "shots" ? (shotCandidates.data?.default_rate ?? 4) : rate}
+          activeId={shown === "goals" ? activeCandidate : shown === "shots" ? activeShot : null}
           ownName={teamName}
           oppName={oppName}
           events={staff ? events.data : null}
@@ -550,7 +557,16 @@ export function Workspace({
       >
         {shown === "court" && (
           <>
-            <AnalysisPanel analysis={a ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} canCalibrate={staff} />
+            <AnalysisPanel
+              analysis={a ?? null}
+              orgId={orgId}
+              videoId={video.id}
+              colours={kitColours}
+              getTime={getTime}
+              canCalibrate={staff}
+              // the court is checked: on to the next open step
+              onConfirmed={() => setPane(null)}
+            />
             {setup && <div className="space-y-3 border-t border-foreground/15 pt-4">{setup}</div>}
           </>
         )}
@@ -574,7 +590,7 @@ export function Workspace({
               />
             )}
             {list === "candidates" && openCandidates && !reviewing && openNow > 0 && (
-              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setGoalList("candidates"), setReviewing(true))} data-testid="review-open">
+              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setGoalList("candidates"), setReviewKind("goals"), setReviewing(true))} data-testid="review-open">
                 <Maximize2 aria-hidden />
                 {t("workflow.reviewOpen")}
               </Button>
@@ -604,7 +620,26 @@ export function Workspace({
           </div>
         )}
         {shown === "shots" && staff && (
-          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names} onClip={playClip} />
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            {!reviewing && shotsOpen > 0 && (
+              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setReviewKind("shots"), setReviewing(true))} data-testid="shots-review-open">
+                <Maximize2 aria-hidden />
+                {t("workflow.reviewOpen")}
+              </Button>
+            )}
+            <ShotCandidatesPanel
+              orgId={orgId}
+              matchId={match.id}
+              ownName={teamName}
+              oppName={oppName}
+              names={names}
+              onClip={playClip}
+              onActive={setActiveShot}
+              onSeek={seekPaused}
+              onSetKickoff={match.kickoff_ms?.["1"] == null ? () => setPane("kickoff") : undefined}
+              focusMode={reviewing}
+            />
+          </div>
         )}
         {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
         {shown === "feedback" && staff && (
@@ -787,6 +822,7 @@ function AnalysisPanel({
   colours,
   getTime,
   canCalibrate,
+  onConfirmed,
 }: {
   analysis: Analysis | null;
   orgId: string;
@@ -794,21 +830,40 @@ function AnalysisPanel({
   colours: Record<string, string>;
   getTime: () => number;
   canCalibrate: boolean;
+  onConfirmed?: () => void;
 }) {
   const t = useTranslations("analysis");
   const [marking, setMarking] = useState(false);
+  const qc = useQueryClient();
+  const confirm = useMutation({
+    mutationFn: async () => {
+      const { error } = await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", {
+        params: { path: { org_id: orgId, video_id: videoId } },
+      });
+      if (error) throw new Error("confirm");
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["analysis", videoId] });
+      onConfirmed?.();
+    },
+  });
+  const confirmCourt = () => confirm.mutate();
+  const confirming = confirm.isPending;
+  const confirmFailed = confirm.isError;
   const ready = analysis?.status === "ready";
   useEffect(() => {
     if (ready) track("analysis_viewed");
   }, [ready]);
   if (!analysis || analysis.status === "none") return null;
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
-  const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
+  const unconfirmed = courtUnconfirmed(analysis);
   const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
   const REASONS = ["camera_motion", "no_floor", "flat_view", "few_people", "court"] as const;
   const reason = REASONS.find((r) => r === info.reason) ?? (analysis.needs_calibration && analysis.calibration_error ? "court" : null);
   const hallName = analysis.hall?.name ?? null;
-  const fromHall = info.method === "hall";
+  const fromHall = courtFromHall(analysis);
+  const hallCheck = canMark && fromHall && unconfirmed;
+  const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
   return (
     <section className="space-y-3" data-testid="analysis-panel">
       <h2 className="sr-only">{t("title")}</h2>
@@ -830,16 +885,31 @@ function AnalysisPanel({
       {/* one sentence: does the court fit */}
       {analysis.status === "ready" && !analysis.needs_calibration && (
         <p className="text-[0.9375rem]">
-          {fromHall ? t("courtFromHall", { hall: hallName ?? "" }) : unconfirmed ? t("checkCourt") : t("courtOk")}
+          {fromHall
+            ? t(hallConfirmed ? "courtFromHallOk" : hallCheck ? "courtFromHallCheck" : "courtFromHall", { hall: hallName ?? "" })
+            : unconfirmed
+              ? t("checkCourt")
+              : t("courtOk")}
         </p>
       )}
+      {/* a court from the hall is checked here in one look, not in the marking dialog */}
+      {hallCheck && <CourtPreview orgId={orgId} videoId={videoId} analysis={analysis} alt={t("courtPreviewAlt")} />}
       {/* a court marked once is carried over to the next videos of the same hall */}
-      {canMark && (analysis.needs_calibration || unconfirmed) && (
+      {canMark && !fromHall && (analysis.needs_calibration || unconfirmed) && (
         <p className="text-xs text-muted" data-testid="hall-hint">
           {hallName ? t("hallOnce", { hall: hallName }) : t("hallUnknown")}
         </p>
       )}
-      {canMark && (
+      {hallCheck ? (
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={confirmCourt} loading={confirming} data-testid="court-confirm">
+            {t("courtFits")}
+          </Button>
+          <Button variant="secondary" onClick={() => setMarking(true)} data-testid="mark-court">
+            {t("courtRemark")}
+          </Button>
+        </div>
+      ) : canMark && (
         <Button
           variant={analysis.needs_calibration ? "primary" : "secondary"}
           size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
@@ -849,6 +919,7 @@ function AnalysisPanel({
           {t(analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
         </Button>
       )}
+      {confirmFailed && <Alert className="py-2">{t("courtConfirmError")}</Alert>}
       {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} onClose={() => setMarking(false)} />}
       {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
         <MiniCourt
@@ -861,14 +932,17 @@ function AnalysisPanel({
           label={t("title")}
         />
       )}
-      <div className="flex flex-wrap gap-3 text-xs text-muted">
-        {(["home", "away", "referee"] as const).map((k) => (
-          <span key={k} className="flex items-center gap-1">
-            <span aria-hidden className="inline-block size-3 rounded-full ring-1 ring-foreground/50" style={{ background: colours[k] }} />
-            {t(k)}
-          </span>
-        ))}
-      </div>
+      {/* the legend of the mini court: nothing to explain without it */}
+      {analysis.chunks != null && analysis.chunks > 0 && (
+        <div className="flex flex-wrap gap-3 text-xs text-muted">
+          {(["home", "away", "referee"] as const).map((k) => (
+            <span key={k} className="flex items-center gap-1">
+              <span aria-hidden className="inline-block size-3 rounded-full ring-1 ring-foreground/50" style={{ background: colours[k] }} />
+              {t(k)}
+            </span>
+          ))}
+        </div>
+      )}
       {/* what the analysis did, for those who want to know; not a coach's task */}
       <details className="text-xs text-muted">
         <summary className="cursor-pointer hover:text-foreground">{t("technical")}</summary>

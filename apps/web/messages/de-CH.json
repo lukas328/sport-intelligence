@@ -106,6 +106,7 @@
     "duplicate-name": "Dieser Name existiert schon.",
     "unknown-tag": "Dieser Tag gehört nicht zum Team.",
     "invalid-slide": "Diese Folie ist ungültig.",
+    "no-video": "Dieser Clip gehört zu einem Spiel ohne Video. Lade zuerst das Video hoch, dann lässt sich der Clip zeigen.",
     "nothing-to-export": "Füge zuerst Clip- oder Textfolien hinzu.",
     "too-many-slides": "Höchstens 200 Folien.",
     "image-too-large": "Das Bild darf höchstens 3 MB gross sein.",
@@ -448,7 +449,9 @@
     "allDemo": "Nur Demo-Spiele",
     "uploadVideo": "Video hochladen",
     "noneUpcoming": "Kein Spiel angesetzt.",
-    "scheduleOne": "Spiel ansetzen"
+    "scheduleOne": "Spiel ansetzen",
+    "attendance": "Zusagen",
+    "attendanceHint": "Wer kommt, wer fehlt"
   },
   "upload": {
     "title": "Video hochladen",
@@ -662,6 +665,12 @@
     "calibReason_few_people": "Zu wenige Personen im Bild, um das Spielfeld zu finden: an einer Stelle mitten im Spiel markieren.",
     "calibReason_court": "Das gefundene Spielfeld passt nicht sicher: bitte von Hand markieren.",
     "courtFromHall": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}). Kurz prüfen, ob es passt.",
+    "courtFromHallCheck": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}). Liegen die orangen Linien auf den Linien der Halle?",
+    "courtFromHallOk": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}) und bestätigt.",
+    "courtFits": "Passt",
+    "courtRemark": "Neu markieren",
+    "courtPreviewAlt": "Hallenbild mit dem übernommenen Spielfeld in Orange",
+    "courtConfirmError": "Das Spielfeld konnte nicht bestätigt werden. Bitte nochmals versuchen.",
     "hallOnce": "Einmal pro Halle markieren: die nächsten Videos aus derselben Halle ({hall}) übernehmen das Spielfeld.",
     "hallUnknown": "Den Spielort beim Spiel eintragen: dann übernehmen die nächsten Videos aus dieser Halle das Spielfeld."
   },
@@ -888,17 +897,17 @@
     "distance": "Distanz",
     "highIntensity": "Hohe Intensität",
     "sprints": "Sprints",
-    "topSpeed": "Topspeed",
+    "topSpeed": "Höchsttempo",
     "time": "Erfasst",
     "unassigned": "Nicht zugeordnete Spuren",
-    "heatmap": "Heatmap",
+    "heatmap": "Aufenthaltsorte",
     "none": "Noch keine Positionsdaten.",
     "km": "{value} km",
-    "m": "{value} m",
+    "m": "{value, number} m",
     "kmh": "{value} km/h",
     "min": "{value} min",
     "track": "Spur {n}",
-    "showHeatmap": "Heatmap zeigen",
+    "showHeatmap": "Aufenthaltsorte zeigen",
     "teamOwn": "Eigenes Team",
     "teamOpp": "Gegner",
     "tracksOwn": "Spuren des eigenen Teams, ab 1 Minute",
@@ -1533,7 +1542,11 @@
     "continueWith": "Weiter mit {name}",
     "ratingLow": "1 schwach",
     "ratingHigh": "5 sehr gut",
-    "coachNote": "Notiz des Trainers:"
+    "coachNote": "Notiz des Trainers:",
+    "childTitle": "Szenen von {name}",
+    "assessedLine": "Deine Einschätzung ist abgegeben, die Notizen des Trainers sind offen.",
+    "assessFirst": "Zuerst deine Einschätzung, danach siehst du die Notizen des Trainers.",
+    "watch": "Szenen ansehen"
   },
   "scouting": {
     "title": "Vorbereitungsbericht",
@@ -1945,7 +1958,10 @@
     "export": "Export",
     "shirtPrefix": "Nr. ",
     "metricsN": "{n, plural, one {# Kennzahl} other {# Kennzahlen}}",
-    "allMatches": "alle"
+    "allMatches": "alle",
+    "seasons": "Saison",
+    "seasonsRecent": "Diese und letzte",
+    "seasonsAll": "Alle Saisons"
   },
   "training": {
     "nav": "Training",
@@ -2211,7 +2227,9 @@
     "openTasks": "Offene Aufgaben",
     "lastMatchOn": "Letztes Spiel, {date}",
     "assessLead": "Deine Einschätzung fehlt noch",
-    "assessTask": "Spiel gegen {opponent} einschätzen"
+    "assessTask": "Spiel gegen {opponent} einschätzen",
+    "replyTask": "{n, plural, one {# Termin beantworten} other {# Termine beantworten}}",
+    "replyHint": "Dabei oder nicht: der Trainer plant damit."
   },
   "shell": {
     "search": "Suchen",
@@ -2333,7 +2351,7 @@
     "attacks": "{n, plural, =1 {1 Angriff} other {# Angriffe}} · im Schnitt {avg} s",
     "timeline": "Ballbesitz im Spielverlauf",
     "timelineHint": "Ein Klick auf einen Angriff springt im Video dorthin.",
-    "physical": "Laufleistung und Heatmaps ansehen",
+    "physical": "Laufleistung ansehen",
     "moreTitle": "Für Würfe, Tore und Paraden",
     "moreText": "Den Ball erkennt die Videoanalyse noch nicht. Markiere Tore während des Spiels am Spielfeldrand oder importiere das Matchblatt: Statistik, Wurfbilder und Torhüterwerte erscheinen dann hier.",
     "marks": "Am Spielfeldrand markieren",
@@ -2349,7 +2367,9 @@
     "showLess": "Weniger zeigen",
     "compactTitle": "Aus dem Video:",
     "compactLine": "Ballbesitz {own} % zu {opp} %, {n} Angriffe, geschätzt.",
-    "compactOpen": "Angriffe zeigen"
+    "compactOpen": "Angriffe zeigen",
+    "possession": "Ballbesitz",
+    "coverage": "Aus {video} Video von {game} Spielzeit, geschätzt aus den Positionen."
   },
   "workflow": {
     "rail": "Arbeitsschritte",
@@ -2396,6 +2416,7 @@
     "laneVideo": "Video",
     "laneReport": "Matchbericht",
     "laneCandidates": "Kandidaten",
+    "laneShots": "Würfe",
     "reviewOpen": "Im Vollbild prüfen",
     "reviewClose": "Schliessen",
     "reviewLeft": "{n} offen",
@@ -2458,7 +2479,10 @@
     "rateMore": "Mehr oder weniger Vorschläge",
     "rate": "Vorschläge pro Minute",
     "perMinute": "{n} pro Min.",
-    "reportTime": "im Bericht {time}"
+    "reportTime": "im Bericht {time}",
+    "shotBy": "Wurf von {who}",
+    "noKickoff": "Der Anwurf fehlt noch: die Spielzeiten sind aus dem Matchbericht geschätzt.",
+    "setKickoff": "Anwurf setzen"
   },
   "officialTeams": {
     "title": "Mannschaft suchen",
@@ -2545,7 +2569,9 @@
     "points": "Pkt.",
     "numberTwice": "Doppelte Rückennummer: {numbers}. Eine davon ändern oder leer lassen.",
     "noAppearancesHint": "Wer noch kein Spiel hat, ist nicht angewählt.",
-    "openLine": "{n, plural, one {# Vorschlag} other {# Vorschläge}} aus handball.ch ansehen"
+    "openLine": "{n, plural, one {# Vorschlag} other {# Vorschläge}} aus handball.ch ansehen",
+    "home": "gegen {opponent}",
+    "away": "auswärts bei {opponent}"
   },
   "requests": {
     "eyebrow": "Team",

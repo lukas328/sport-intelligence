@@ -10,6 +10,7 @@ import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { KitFields } from "@/components/domain/kit-fields";
+import { AttendancePanel } from "@/components/team/attendance-panel";
 import { useCountUp } from "@/components/domain/match-score";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB } from "@/lib/color";
@@ -36,7 +37,7 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
-import { FeedbackSummary, TeamFeedView } from "./feed-views";
+import { FeedbackSummary, MyScenesLine, TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
 import { VideoOverview } from "./video-overview";
@@ -49,7 +50,9 @@ type Job = Schemas["JobOut"];
 
 type View = "video" | "analysis" | "scenes";
 type Sub = "overview" | "shots" | "keepers" | "physical" | "report";
-const SUBS: Sub[] = ["overview", "shots", "keepers", "physical", "report"];
+// in the order of the match sheet: the overview, the record itself, shots, goalkeepers, then the
+// physical load from the tracking
+const SUBS: Sub[] = ["overview", "report", "shots", "keepers", "physical"];
 
 const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnails", "upload"] as const;
 
@@ -125,6 +128,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
   const jobs = match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job);
   const main = match.videos.find((v) => v.role === "main" && v.status === "ready");
+  // without counted events the record, shots and goalkeepers have nothing to show: no dead tabs
+  // (the overview says how they come: the match report or marking courtside)
+  const counted = (stats.data?.quality.events ?? 0) > 0;
+  const subs = counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "overview" || (v === "physical" && main));
+  const shownSub: Sub = subs.includes(sub) ? sub : "overview";
   // a match with events but no video (paper report, demo, marks) opens on its analysis
   const opened = useRef(false);
   const hasEvents = (stats.data?.own.shots ?? 0) + (stats.data?.opponent.shots ?? 0) > 0;
@@ -389,9 +397,23 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         </div>
       </div>
 
+      {/* who is coming: the players' replies, from before the match until shortly after it */}
+      {staff && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
+        <details className="group border-y border-foreground/15 py-3" data-testid="match-attendance">
+          <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
+            {t("matches.attendance")}
+            <span className="ml-2 text-sm font-normal text-muted group-open:hidden">{t("matches.attendanceHint")}</span>
+          </summary>
+          <div className="mt-3">
+            <AttendancePanel orgId={orgId} kind="match" id={match.id} />
+          </div>
+        </details>
+      )}
       {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 
       <div hidden={view !== "video"} className="space-y-6">
+        {/* a player's own scenes of this match, one step away */}
+        {!staff && <MyScenesLine orgId={orgId} matchId={match.id} />}
         {main ? (
           <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} />
         ) : !(staff && match.source !== "paper_report") ? (
@@ -408,17 +430,19 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "analysis" && (
         <div className="animate-fade space-y-6">
+          {subs.length > 1 && (
           <Segmented<Sub>
             label={t("tabs.analysis")}
             variant="underline"
             className="border-b border-foreground/15"
             size="sm"
-            value={sub}
+            value={shownSub}
             onChange={setSub}
-            items={SUBS.map((v) => ({ value: v, label: t(`tabs.${v}`) }))}
+            items={subs.map((v) => ({ value: v, label: t(`tabs.${v}`) }))}
           />
-          <div key={sub} className="animate-fade">
-          {sub === "physical" ? (
+          )}
+          <div key={shownSub} className="animate-fade">
+          {shownSub === "physical" ? (
             <PhysicalView
               orgId={orgId}
               matchId={match.id}
@@ -431,7 +455,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           ) : stats.data && stats.data.quality.events > 0 ? (
             (() => {
               const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
-              if (sub === "overview")
+              if (shownSub === "overview")
                 return (
                   <div className="space-y-10">
                     <OverviewView {...props} videoNote={videoNote} />
@@ -454,8 +478,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                     )}
                   </div>
                 );
-              if (sub === "report") return <ReportView {...props} />;
-              if (sub === "keepers") return <KeepersView {...props} />;
+              if (shownSub === "report") return <ReportView {...props} />;
+              if (shownSub === "keepers") return <KeepersView {...props} />;
               return <ShotsView {...props} />;
             })()
           ) : stats.isLoading ? (

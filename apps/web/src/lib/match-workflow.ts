@@ -62,6 +62,26 @@ export function kickoffMissing(
   return second && k["2"] == null ? [2] : [];
 }
 
+/** How the court of an analysis came about, as the coach needs to know it. */
+export interface CourtSource {
+  camera?: string | null;
+  calibration?: { source: string } | null;
+  calibration_info?: { method?: unknown } | null;
+}
+
+/** The court was carried over from an earlier video of the same hall (hallmatch). */
+export function courtFromHall(a: CourtSource): boolean {
+  return a.calibration_info?.method === "hall";
+}
+
+/**
+ * The court was found automatically and a person should look at it once: a moving camera, or a
+ * court carried over from another video of the hall. "Passt" stores it as checked.
+ */
+export function courtUnconfirmed(a: CourtSource): boolean {
+  return a.calibration?.source === "heuristic" && (a.camera === "moving" || courtFromHall(a));
+}
+
 export interface StepInput {
   analysis: { status: string; needsCalibration: boolean; unconfirmed: boolean } | null;
   kickoff: Record<string, number> | null | undefined;

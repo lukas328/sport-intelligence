@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { Step, StepId } from "@/lib/match-workflow";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +42,19 @@ export function WorkRail({
     if (!el || !b) return;
     if (el.offsetLeft < b.scrollLeft || el.offsetLeft + el.offsetWidth > b.scrollLeft + b.clientWidth) b.scrollLeft = Math.max(0, el.offsetLeft - 16);
   }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  // more tabs to the right (phones): the row fades out at its edge, so a cut label reads as
+  // "scrolls on" and not as a mistake
+  const [more, setMore] = useState(false);
+  useEffect(() => {
+    const b = box.current;
+    if (!b) return;
+    const check = () => setMore(b.scrollLeft + b.clientWidth < b.scrollWidth - 4);
+    check();
+    b.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => (b.removeEventListener("scroll", check), window.removeEventListener("resize", check));
+  }, [steps.length, tools.length]);
+  const fade = more ? "linear-gradient(to right, black calc(100% - 3rem), transparent)" : undefined;
   function onKey(e: KeyboardEvent, i: number) {
     const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     const to = e.key === "Home" ? 0 : e.key === "End" ? all.length - 1 : d ? (i + d + all.length) % all.length : -1;
@@ -75,7 +88,7 @@ export function WorkRail({
     </button>
   );
   return (
-    <div ref={box} className="scrollbar-none relative -mx-1 overflow-x-auto px-1">
+    <div ref={box} className="scrollbar-none relative -mx-1 overflow-x-auto px-1" style={{ maskImage: fade, WebkitMaskImage: fade }}>
       <div role="tablist" aria-label={t("rail")} className="flex min-w-max items-stretch gap-1 border-b border-foreground/15 sm:gap-3">
         {steps.map((s, i) => {
           const sub = t(`${s.id}_${s.reason ?? (s.state === "open" ? "open" : s.state)}`, { n: s.count ?? 0 });
