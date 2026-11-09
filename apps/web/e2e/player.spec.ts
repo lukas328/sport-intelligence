@@ -105,4 +105,13 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expect(player.getByRole("link", { name: /2 Termine beantworten/ })).toHaveAttribute("href", `/app/${orgId}/schedule`);
   await expectAccessible(player);
   await ctx.close();
+
+  // the coach gives the team a drill: who has done it, and who not yet, by name
+  await page.goto(`/app/${orgId}/teams/${teamId}/assignments`);
+  await page.getByLabel("Art").selectOption("drill");
+  await page.getByRole("button", { name: "Aufgabe geben" }).click();
+  const assignment = page.getByTestId("team-assignments").getByRole("listitem").first();
+  await expect(assignment.getByTestId("assignment-progress")).toHaveText("0 von 1 erledigt");
+  await expect(assignment.getByTestId("assignment-open")).toHaveText("Noch offen: Mia Muster");
+  await expectAccessible(page);
 });

@@ -1187,7 +1187,9 @@
     "noneOf_playlist": "Pas encore de playlist. Rassemble des clips dans la recherche de scènes et enregistre-les.",
     "noneOf_play": "Pas encore de combinaison. Crée-en une sous Entraînement, Combinaisons.",
     "noneOf_match": "Pas encore de match.",
-    "noneOf_drill": "Aucun exercice disponible."
+    "noneOf_drill": "Aucun exercice disponible.",
+    "stillOpen": "Encore ouvert : {names}",
+    "allDone": "Tout le monde l'a fait."
   },
   "drills": {
     "title": "Exercices",

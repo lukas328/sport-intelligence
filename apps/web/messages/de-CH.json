@@ -1187,7 +1187,9 @@
     "noneOf_playlist": "Noch keine Playlist. In der Szenensuche Clips sammeln und als Playlist speichern.",
     "noneOf_play": "Noch kein Spielzug. Unter Training, Spielzüge einen anlegen.",
     "noneOf_match": "Noch kein Spiel angelegt.",
-    "noneOf_drill": "Keine Übung vorhanden."
+    "noneOf_drill": "Keine Übung vorhanden.",
+    "stillOpen": "Noch offen: {names}",
+    "allDone": "Alle haben es erledigt."
   },
   "drills": {
     "title": "Übungen",

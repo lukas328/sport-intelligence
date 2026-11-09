@@ -1187,7 +1187,9 @@
     "noneOf_playlist": "No playlist yet. Collect clips in the scene search and save them as a playlist.",
     "noneOf_play": "No play yet. Create one under Training, Plays.",
     "noneOf_match": "No match yet.",
-    "noneOf_drill": "No drill available."
+    "noneOf_drill": "No drill available.",
+    "stillOpen": "Still open: {names}",
+    "allDone": "Everyone has done it."
   },
   "drills": {
     "title": "Drills",
