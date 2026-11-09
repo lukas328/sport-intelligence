@@ -11,10 +11,11 @@ the text is clean, so Tesseract (Apache-2.0, a system binary) reads it.
 2. Find the fields: Tesseract word boxes on a few candidate crops; a token like `2:1` / `2 : 1` is a
    score, `03:34` a clock. Over time the clock follows the video clock, a score does not.
 3. Read while the video streams: a field is read again only when its pixels change (score) or every
-   few seconds (clock), so a 60-minute game costs a few hundred Tesseract calls.
+   5 seconds (clock), so a 60-minute game costs about a thousand Tesseract calls.
 4. Clean the readings: a score counts once it is read twice in a row, may only grow by one goal per
    side, and a goal is placed at the first reading of the new score. The clock is turned into a
-   mapping video time -> match clock (runs, stops) for the match clock of every event.
+   mapping video time -> match clock (runs, stops) for the match clock of every event, and into
+   the stretches where the clock runs (`play_intervals`): only there does the ball count.
 """
 
 from __future__ import annotations
@@ -246,13 +247,18 @@ def _iou(a: Box, b: Box) -> float:
 @dataclass
 class Reader:
     """Feed frames in order with `add`. The score is read when its pixels change and at least every
-    `score_every_s`; the clock every `clock_every_s` (it only shows when the clock runs)."""
+    `score_every_s`; the clock every `clock_every_s` (it only shows when the clock runs).
+
+    The clock readings also decide where the ball counts (`play_intervals`). Every 5 s is about
+    720 Tesseract calls per hour of video (15 s: 240), a few tens of seconds of CPU next to an
+    observation pass of an hour and more; in return a short stop between two running readings
+    (a 7-metre throw, an injury) is placed within a few seconds instead of within 15."""
 
     fields: list[Field]
     fps: float
     look_every_s: float = 1.0
     score_every_s: float = 15.0
-    clock_every_s: float = 15.0
+    clock_every_s: float = 5.0
     scores: list[tuple[int, tuple[int, int]]] = field(default_factory=list)  # (t_ms, score)
     clocks: list[tuple[int, int]] = field(default_factory=list)  # (t_ms, clock_s)
     calls: int = 0
@@ -529,3 +535,109 @@ def read_overlay_summary(reader: Reader) -> dict[str, Any]:
         "clock": clock_segments(reader.clocks),
         "ocr_calls": reader.calls,
     }
+
+
+def _clock_runs(
+    reads: list[tuple[int, int]], tol_s: float, drift: float
+) -> tuple[list[tuple[int, list[int]]], set[int]]:
+    """Runs of readings that follow the video clock (up or down) since the run's last reading
+    and its first one, as (direction, reading indices), and the indices dropped as single
+    misreadings."""
+    runs: list[tuple[int, list[int]]] = []
+    outliers: set[int] = set()
+
+    def follows(a: int, k: int, way: int, tol: float) -> bool:
+        dt = (reads[k][0] - reads[a][0]) / 1000
+        return abs(way * (reads[k][1] - reads[a][1]) - dt) <= tol + drift * dt
+
+    def fits(run: list[int], k: int, d: int) -> int:
+        """Direction the reading k continues `run` in (0: it does not; d=0: either way)."""
+        for way in (1, -1) if d == 0 else (d,):
+            if follows(run[-1], k, way, tol_s) and follows(run[0], k, way, tol_s):
+                return way
+        return 0
+
+    run: list[int] = []
+    d = 0
+    k = 0
+    while k < len(reads):
+        if run and (way := fits(run, k, d)):
+            run.append(k)
+            if d == 0 and abs(reads[k][1] - reads[run[0]][1]) > tol_s:
+                d = way  # the clock has moved: now we know which way it counts
+            k += 1
+            continue
+        if run and k + 1 < len(reads) and fits(run, k + 1, d):
+            outliers.add(k)  # one reading that fits nothing between two that fit: misread
+            k += 1
+            continue
+        if run:
+            runs.append((d, run))
+        run, d = [k], 0
+        k += 1
+    if run:
+        runs.append((d, run))
+    for _, r in runs:
+        # read often, a clock that has just stopped still fits for a moment: the run ends at its
+        # last reading that moved (likewise at the start)
+        while len(r) > 2 and reads[r[-1]][1] == reads[r[-2]][1]:
+            r.pop()
+        while len(r) > 2 and reads[r[0]][1] == reads[r[1]][1]:
+            r.pop(0)
+    # a run counts when the clock really moved (a standing clock read often fits for a moment)
+    good = [(d, r) for d, r in runs if d != 0 and abs(reads[r[-1]][1] - reads[r[0]][1]) > tol_s]
+    return good, outliers
+
+
+def play_intervals(
+    clocks: list[tuple[int, int]], tol_s: float = 2.5, edge_s: float = 7.5, drift: float = 0.003
+) -> list[tuple[int, int]]:
+    """Video stretches (start_ms, end_ms) in which the match clock runs, from (t_ms, clock_s)
+    readings of an overlay or a hall scoreboard.
+
+    The clock runs where it follows the video clock: up (0:00 -> 30:00) or down (a countdown),
+    within `tol_s` seconds plus `drift` of the elapsed time (a video whose frame rate is a little
+    off). A standing clock (timeout, break, before and after the game) never forms a run. A single
+    reading that fits nothing between two that fit is a misreading and skipped; a run broken by a
+    clock reset (a new half from 0:00 or 30:00) ends there and the next one starts.
+
+    The edges between readings: next to a standing clock the time of the stop or restart follows
+    from the clock values (frozen at 12:30, read 12:41 eleven seconds after it restarted).
+    Between two runs (the clock hidden while it stood, or a short stop between two readings) the
+    clock's run time in the gap is split between both sides. Otherwise a run reaches at most
+    `edge_s` beyond its outer readings. Empty: no running clock found."""
+    reads = sorted({t: c for t, c in clocks}.items())
+    runs, outliers = _clock_runs(reads, tol_s, drift)
+    kept = [k for k in range(len(reads)) if k not in outliers]
+    at = {k: i for i, k in enumerate(kept)}
+    in_run = {k for _, r in runs for k in r}
+    edge = edge_s * 1000
+
+    def reach(k: int, d: int, side: int) -> float:
+        """Where the run with outer reading k (side -1: first, +1: last) begins or ends."""
+        t, c = reads[k]
+        i = at[k] + side
+        if not 0 <= i < len(kept):
+            return max(0.0, t - edge) if side < 0 else t + edge
+        tn, cn = reads[kept[i]]
+        gap = abs(tn - t)
+        ran = float(side * d * (cn - c) * 1000)  # clock time that passed between both readings, ms
+        if not 0 <= ran <= gap + tol_s * 1000:
+            limit = gap / 2 if kept[i] in in_run else gap
+            return t + side * min(edge, limit)
+        if kept[i] in in_run:
+            ran /= 2
+        return t + side * min(ran, gap)
+
+    spans = sorted((reach(r[0], d, -1), reach(r[-1], d, 1)) for d, r in runs)
+    out: list[tuple[int, int]] = []
+    for a, b in spans:
+        if out and a <= out[-1][1]:
+            out[-1] = (out[-1][0], max(out[-1][1], round(b)))
+        else:
+            out.append((round(a), round(b)))
+    return out
+
+
+def in_play_ms(intervals: list[tuple[int, int]]) -> int:
+    return sum(b - a for a, b in intervals)
