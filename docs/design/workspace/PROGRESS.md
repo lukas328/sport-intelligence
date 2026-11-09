@@ -235,3 +235,27 @@ Left open (next round):
 - Onboarding: progress segments in light mode are nearly invisible; a player joining sees the
   coach's "Schritt 1 von 4"; "@ HSG Rheinau" in the inbox (away games) reads as an anglicism.
 - After "Passt" the workspace stays on the court step instead of moving on to the next open step.
+
+## Round 2 over the new screens (UI session, 2026-11-09)
+
+Decisions taken in the session (the owner left them to it):
+- Würfe stay open without a throw-off: the moments are video times, only the game times are
+  the report's estimate. A line says so and links to the throw-off step.
+- Each moment that comes up is shown in the video, paused at its lead-in.
+- After "Passt" on a court from the hall the workspace goes to the next open step.
+
+Changed:
+- The report's entry names the shooter: "Parade, Wurf von #14 …".
+- Official inbox: "gegen X" and "auswärts bei X" instead of "@ X".
+- The `.club` scope rule moved to `@layer base`. Before, it beat the utilities on the same
+  element: the onboarding header showed the page paper instead of the club colour (the progress
+  bars white on paper, the finding "progress invisible"), and the confirm dialog, the bell and
+  the command palette showed paper instead of the raised surface. The open onboarding steps are
+  no longer faded (white at 75 % on the club colour is below 4.5:1).
+- Referee kit checked: in the create and edit forms (`KitFields`) and in the analysis colours.
+
+Checked, not a problem: "the bottom navigation covers the step panel" and the floating bars in
+the phone captures come from full-page screenshots; the page keeps 112 px free under the content.
+
+Still open: the phone work strip scrolls sideways and cuts the last visible label (a scroll
+affordance, kept); a player joining from the team search sees the coach's "Schritt 1 von 4".

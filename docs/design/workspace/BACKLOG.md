@@ -146,8 +146,8 @@ this round, in rough order:
 - [x] `no-video` (422) on clip slides of a match without video: a readable message in the
   presentation editor instead of the generic error (`errors.no-video`; the scene search already
   offers no slide for hits without video).
-- [ ] Referee kit: check that `kit_referee` shows wherever the four team kits show (match create,
-  edit, analysis colours), not only in the kit fields.
+- [x] Referee kit: `kit_referee` shows wherever the four team kits show (match create and edit
+  through `KitFields`, the analysis colours in the workspace).
 - [ ] Matrix `season_ids`: the API filter does not exist yet (`handball_metrics.query.Filter`);
   build the season choice once the analysis session adds it.
 - [x] Shot review: e2e `shots.spec.ts` (real upload, the candidate list from a recorded fixture);
