@@ -188,7 +188,8 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
     handball_metrics.stats.one_source_per_goal), from the stored result when nothing is tagged.
     Shots, saves and turnovers come from the tagged matches; the shooting and save percentages
     only from matches with recorded misses or saves; xG only covers shots with a position:
-    `xg_coverage` = shots with xG / shots on target."""
+    `xg_coverage` = shots with xG / shots on target, and `xg_goals` = the goals of those shots
+    (compare xG with `xg_goals`, not with all goals: report goals mostly have no position)."""
     matches = await _played_matches(ctx, team.id, season_id)
     names = {
         o.id: o.name
@@ -209,6 +210,7 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
         "turnovers": 0,
         "xg": 0.0,
         "xg_shots": 0,
+        "xg_goals": 0,
     }
     pct = {"goals": 0, "shots": 0, "saves": 0, "goals_against": 0}  # matches with attempts
     for m in matches:
@@ -236,14 +238,17 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
                 "turnovers": own["turnovers"],
                 "xg": own["xg"],
                 "xg_coverage": own["xg_coverage"],
+                "xg_goals": own["xg_goals"],
                 "xg_against": opp["xg"],
+                "xg_against_coverage": opp["xg_coverage"],
+                "xg_goals_against": opp["xg_goals"],
                 "seven_m": [own["seven_m_goals"], own["seven_m_shots"]],
             }
         )
         totals["goals"] += goals
         totals["goals_against"] += against
         totals["tagged_matches"] += tagged
-        for k in ("shots", "saves", "turnovers", "xg_shots"):
+        for k in ("shots", "saves", "turnovers", "xg_shots", "xg_goals"):
             totals[k] += own[k]
         totals["xg"] = round(totals["xg"] + own["xg"], 2)
         if s["quality"]["attempts_known"]:

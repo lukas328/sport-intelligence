@@ -11,9 +11,12 @@ from handball_metrics.model import Event, EventType, Side
 from handball_metrics.xg import VERSION as XG_VERSION
 from handball_metrics.xg import expected_goal
 
-METRICS_VERSION = "0.3.0"  # bump on any change of definitions: invalidates stats caches
+METRICS_VERSION = "0.4.0"  # bump on any change of definitions: invalidates stats caches
 
 SUSPENSION_S = 120
+# GSAx needs positions for most saves and for most goals: overlay, tracking and report goals often
+# have a position while saves seldom do, and xG over the goals alone is always below the goals
+MIN_XG_COVERAGE = 0.7
 
 OFFICIAL = "official_report"
 # goals seen on video (apps/api services/official_report.AUTO_GOALS)
@@ -167,7 +170,10 @@ def _team_block(
         by_sit[sit.get(e.id, "unknown")]["goals"] += e.outcome == "goal"
     penalties = [e for e in shots if e.shot_type == "penalty" or zone_of(e) == "penalty"]
     # xG only of the shots on target whose inputs are known; coverage = those / all of them
-    xgs = [x for e in on_target_shots if (x := expected_goal(e.x, e.y, e.shot_type)) is not None]
+    with_xg = [
+        (e, x) for e in on_target_shots if (x := expected_goal(e.x, e.y, e.shot_type)) is not None
+    ]
+    xgs = [x for _, x in with_xg]
     return {
         "goals": len(goals),
         "shots": len(on_target_shots),  # excluding blocked shots (BRIEF 4.8)
@@ -199,6 +205,8 @@ def _team_block(
         },
         "xg": round(sum(xgs), 2),
         "xg_shots": len(xgs),
+        # goals of the shots with xG: the like-for-like figure to set against `xg`
+        "xg_goals": sum(e.outcome == "goal" for e, _ in with_xg),
         "xg_coverage": _ratio(len(xgs), len(on_target_shots)),
     }
 
@@ -311,7 +319,9 @@ def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
     """Goalkeeper module (M5): every shot on target (goal or save) against a keeper, credited to the
     keeper in `attributes` (goalkeeper_id or goalkeeper_number), otherwise to "unknown".
     GSAx = expected goals against minus goals against, both over the shots with xG (positive =
-    saved more than expected); `xg_coverage` = shots with xG / shots faced."""
+    saved more than expected); `xg_coverage` = shots with xG / shots faced. GSAx is None unless
+    at least MIN_XG_COVERAGE of the saves and of the goals have xG: otherwise the shots with xG
+    are not a fair sample (typically goals with a position and saves without)."""
     out: dict[str, dict[str, Any]] = {}
     for e in events:
         if not e.is_shot or e.outcome not in ("goal", "save"):
@@ -330,6 +340,7 @@ def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
                 "xg_against": 0.0,
                 "xg_shots": 0,
                 "xg_goals_against": 0,
+                "xg_saves": 0,
                 "seven_m": {"faced": 0, "saves": 0},
                 "goal_zones": defaultdict(lambda: {"faced": 0, "saves": 0}),
                 "shot_zones": defaultdict(lambda: {"faced": 0, "saves": 0}),
@@ -343,6 +354,7 @@ def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
             k["xg_against"] += xg
             k["xg_shots"] += 1
             k["xg_goals_against"] += not saved
+            k["xg_saves"] += saved
         if e.shot_type == "penalty":
             k["seven_m"]["faced"] += 1
             k["seven_m"]["saves"] += saved
@@ -353,8 +365,13 @@ def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
     for k in out.values():
         k["save_pct"] = _ratio(k["saves"], k["faced"])
         k["xg_against"] = round(k["xg_against"], 2)
-        # over the shots with xG only: goals without a position would count against the keeper
-        k["gsax"] = round(k["xg_against"] - k.pop("xg_goals_against"), 2)
+        # over the shots with xG only: goals without a position would count against the keeper,
+        # and only when saves and goals are both mostly covered (see MIN_XG_COVERAGE)
+        xg_goals, xg_saves = k.pop("xg_goals_against"), k.pop("xg_saves")
+        fair = (k["saves"] == 0 or xg_saves / k["saves"] >= MIN_XG_COVERAGE) and (
+            k["goals_against"] == 0 or xg_goals / k["goals_against"] >= MIN_XG_COVERAGE
+        )
+        k["gsax"] = round(k["xg_against"] - xg_goals, 2) if fair and k["xg_shots"] else None
         k["xg_coverage"] = _ratio(k["xg_shots"], k["faced"])
         k["goal_zones"] = dict(k["goal_zones"])
         k["shot_zones"] = dict(k["shot_zones"])

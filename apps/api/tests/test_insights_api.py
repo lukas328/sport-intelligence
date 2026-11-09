@@ -179,6 +179,9 @@ async def test_season_counts_every_played_match_and_each_goal_once(
     assert season["totals"]["shooting_pct"] == 0.75
     assert season["totals"]["xg_coverage"] == 1.0
     assert rows[both]["xg_coverage"] == 1.0
+    # xG is set against the goals of the shots with xG, not the 30 goals of the season
+    assert season["totals"]["xg_goals"] == 3 and rows[both]["xg_goals"] == 3
+    assert rows[played]["xg_goals"] == 0 and rows[played]["xg_against_coverage"] is None
 
     opp_id = (await api.get(f"/v1/orgs/{org}/matches/{both}")).json()["opponent"]["id"]
     prof = (await api.get(f"/v1/orgs/{org}/opponents/{opp_id}/profile")).json()

@@ -309,7 +309,7 @@ def match_insights(
 
     # goalkeepers with enough shots faced
     for k in (stats.get("goalkeepers") or {}).values():
-        if k["side"] != "own" or k["faced"] < MIN_KEEPER_FACED:
+        if k["side"] != "own" or k["faced"] < MIN_KEEPER_FACED or k.get("gsax") is None:
             continue
         if k["gsax"] >= 2 or k["gsax"] <= -2:
             good = k["gsax"] > 0

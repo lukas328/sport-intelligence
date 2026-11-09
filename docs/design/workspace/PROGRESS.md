@@ -162,6 +162,38 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (analysis helper, branch `helper/analysis-plausibility`): the implausible figures,
+  checked against the synthetic ground truth of the demo video.
+  1. Physical load: the computation smoothed before it filtered jumps, so a track taking over a
+     neighbour 2 m away (identity switch in an occlusion) read as three steps of 9 to 10 m/s;
+     it also counted the tracker's predictions and took a 400 ms peak as top speed. Now jumps
+     and gaps are found on the raw positions, only observed points count and the top speed must
+     be held for 1 s (`handball_vision.physical`). On the demo video: top speed 34 km/h before,
+     25 km/h now (truth 23.4). The team row's top speed is the fastest player's, as intended.
+  2. Demo data itself was unrealistic: the synthetic default turns the ball over every 12 s with
+     the whole team sprinting across the court (about 190 m per minute per field player, 30
+     sprints per team and minute, a fast break in every attack). `scripts/seed.py` now renders
+     with `--demo` (goals and throw-offs, 25 s attacks, jogging between positions, sprints only
+     in counters): about 100 m per minute, a few sprints. Run `make seed` again for new figures.
+  3. Fast breaks: an attack opened by the team's own throw-off counted as a fast break when the
+     team walked up quickly from the centre line; it no longer does. "4 of 5" was correct for
+     the old demo video (four turnovers with a full sprint each).
+  4. Distances of the white kit stay about a third too high on the demo video: ghost and duplicate
+     tracks (7.9 tracks per frame for 6 field players), a tracking issue, not the metric. The UI
+     team row sums every track of a side, so it inherits them; the player rows do not.
+  5. Goalkeeper: GSAx was computed over the shots with xG, but positions come mostly with goals
+     (overlay, tracking, matched report goals), rarely with saves; over goals alone xG is always
+     below the goals ("14.8 Tore unter Erwartung" at 44 % saves). `gsax` is now null unless at
+     least 70 % of the saves and of the goals have xG, and then no keeper insight is made.
+     Match stats and season rows carry `xg_goals` (goals of the shots with xG): set xG against
+     that, not against all goals ("xG 3.4 for 26 goals" compares xG of a few shots with every
+     goal of the result). Season rows also carry `xg_against_coverage` and `xg_goals_against`;
+     the season page shows `xg_against` and the voice's defence line without a coverage check.
+  6. Goal candidates: a report goal whose video time lies before the clip (or after its end) no
+     longer counts a candidate as "schon erfasst". The zone "Fernwurf / leeres Tor" was already
+     split on main (`long_range` and `empty_goal`, zones spec version 2, alembic 0033); the
+     metrics version is bumped, so cached statistics are recomputed.
+
 - 2026-11-09 (UI session, demo data with a synthetic 1-minute video): 4 of 5 attacks counted as
   fast breaks; 33 and 60 sprints and 1.22 km against 2.02 km in one minute; a team row's top
   speed of 31.7 km/h (the maximum of one player?).

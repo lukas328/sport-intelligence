@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from handball_vision.events import detect, score
-from handball_vision.synthetic import SyntheticConfig, SyntheticMatch
+from handball_vision.synthetic import DEMO, SyntheticConfig, SyntheticMatch
 
 
 def _positions(
@@ -87,3 +87,32 @@ def test_formation_corrects_uncertain_team_labels() -> None:
     assert all(fixed[k] == teams[k] for k in teams)
     # confident labels are never overridden
     assert refine_teams(pts, labels, {k: 0.99 for k in teams}) == labels
+
+
+def test_fast_breaks_follow_lost_balls_not_throw_offs() -> None:
+    """A counter after a lost ball is a fast break; an attack opened by the team's own throw-off
+    (after a goal) is not, although the team runs up from the centre line just as fast."""
+    cfg = SyntheticConfig(seconds=300, restarts=True, phase_s=20, goal_share=0.5)
+    m, pts, teams = _positions(cfg)
+    r = detect(pts, teams)
+    throw_offs = [e.t_ms for e in r.events if e.type == "throw_off"]
+    assert len(throw_offs) >= 4
+    for p in r.possessions:
+        phase = round(p.start_ms / 1000 / cfg.phase_s - 0.25)  # starts a few seconds into a phase
+        after_lost = phase > 0 and m.outcomes[phase - 1] == "lost"
+        if m.restart(phase):
+            assert p.phase is None, p
+        elif after_lost:
+            assert p.phase == "fast_break", p
+    assert any(p.phase == "fast_break" for p in r.possessions)
+
+
+def test_demo_flow_has_few_fast_breaks() -> None:
+    """The flow of the demo footage (scripts/seed.py): goals with throw-offs, longer attacks;
+    only counters after a lost ball are fast breaks."""
+    cfg = SyntheticConfig(seconds=300, **DEMO)
+    m, pts, teams = _positions(cfg)
+    r = detect(pts, teams)
+    fast = [p for p in r.possessions if p.phase == "fast_break"]
+    lost = sum(o == "lost" for o in m.outcomes[: int(cfg.seconds // cfg.phase_s)])
+    assert len(fast) <= lost < len(r.possessions)

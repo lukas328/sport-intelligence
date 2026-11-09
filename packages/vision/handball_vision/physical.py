@@ -5,7 +5,9 @@ frame-to-frame distances overestimate running distance by a lot. We therefore:
 
 1. resample to 5 Hz (mean position per 200 ms bin),
 2. smooth with a centred moving average over 3 bins (600 ms),
-3. drop steps across gaps longer than 1 s (track lost) and physically impossible steps (> 10 m/s).
+3. drop steps across gaps longer than 1 s (track lost) and physically impossible steps (> 10 m/s),
+   found before smoothing so that a jump is not smeared into plausible steps,
+4. use only observed points (the tracker's predictions in between are not measurements).
 
 Speed bands follow common handball load monitoring practice (local positioning systems report similar
 bands); see packages/metrics/DEFINITIONS.md "Physical". All values are estimates and labelled as such in
@@ -26,6 +28,7 @@ MAX_SPEED = 10.0  # m/s, above this a step is a tracking jump
 # lower bounds in m/s: walking, jogging, running, sprinting
 BANDS = {"walk": 0.0, "jog": 2.0, "run": 4.0, "sprint": 5.5}
 SPRINT_MIN_MS = 1000
+MAX_HOLD_MS = 1000  # a top speed must be held this long
 HEAT_COLS, HEAT_ROWS = 10, 5
 COURT_L, COURT_W = 40.0, 20.0
 
@@ -60,26 +63,43 @@ def _resample(
     return uniq.astype(np.float64) * BIN_MS + BIN_MS / 2, sums / counts[:, None]
 
 
-def _smooth(t: NDArray[np.float64], xy: NDArray[np.float64]) -> NDArray[np.float64]:
-    """Centred 3-bin moving average that does not smear across gaps."""
+def _smooth(
+    t: NDArray[np.float64], xy: NDArray[np.float64], seg: NDArray[np.int64]
+) -> NDArray[np.float64]:
+    """Centred 3-bin moving average that does not smear across gaps or jumps (`seg` changes)."""
     out = xy.copy()
     for i in range(1, len(xy) - 1):
-        if t[i + 1] - t[i - 1] <= 2 * BIN_MS + 1:
+        if t[i + 1] - t[i - 1] <= 2 * BIN_MS + 1 and seg[i - 1] == seg[i + 1]:
             out[i] = xy[i - 1 : i + 2].mean(axis=0)
     return out
 
 
-def physical(t_ms: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> Physical:
-    """Load metrics for one track. `t_ms` must be sorted ascending (video time)."""
+def physical(
+    t_ms: NDArray[np.float64],
+    x: NDArray[np.float64],
+    y: NDArray[np.float64],
+    observed: NDArray[np.bool_] | None = None,
+) -> Physical:
+    """Load metrics for one track. `t_ms` must be sorted ascending (video time). `observed` marks
+    the points backed by a detection; the tracker's predictions in between are not measurements
+    and are left out (a coasting prediction that snaps back on the next detection is a jump)."""
     heat = np.zeros((HEAT_ROWS, HEAT_COLS))
+    if observed is not None:
+        keep = np.asarray(observed, bool)
+        t_ms, x, y = np.asarray(t_ms)[keep], np.asarray(x)[keep], np.asarray(y)[keep]
     if len(t_ms) < 2:
         return Physical(0.0, 0.0, 0.0, 0, {k: 0.0 for k in BANDS}, heat.tolist())
     t, xy = _resample(np.asarray(t_ms, float), np.column_stack([x, y]).astype(float))
-    xy = _smooth(t, xy)
     dt = np.diff(t)
+    # gaps and jumps are found on the raw positions: smoothing spreads a jump (the track taking
+    # over a neighbour 2 m away) over three steps that each look like a plausible sprint
+    raw_speed = np.linalg.norm(np.diff(xy, axis=0), axis=1) / (dt / 1000)
+    breaks = (dt > MAX_GAP_MS) | (raw_speed > MAX_SPEED)
+    seg = np.concatenate([[0], np.cumsum(breaks)]).astype(np.int64)
+    xy = _smooth(t, xy, seg)
     step = np.linalg.norm(np.diff(xy, axis=0), axis=1)
     speed = step / (dt / 1000)
-    valid = (dt <= MAX_GAP_MS) & (speed <= MAX_SPEED)
+    valid = ~breaks & (speed <= MAX_SPEED)
 
     band_dist = {}
     names = list(BANDS)
@@ -98,10 +118,15 @@ def physical(t_ms: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.fl
             run_ms = 0.0
     sprints += run_ms >= SPRINT_MIN_MS
 
-    # max speed: the highest speed held over two consecutive steps (400 ms), robust to single jumps
-    held = np.minimum(speed[:-1], speed[1:]) if len(speed) > 1 else speed
-    held_ok = (valid[:-1] & valid[1:]) if len(valid) > 1 else valid
-    max_speed = float(held[held_ok].max()) if held_ok.any() else 0.0
+    # max speed: the highest speed held over MAX_HOLD_MS (consecutive valid steps), so that a short
+    # tracking error (a lagging box catching up, two players merged for a moment) is not a top speed
+    max_speed = 0.0
+    k = MAX_HOLD_MS // BIN_MS
+    if len(speed) >= k:
+        win = np.lib.stride_tricks.sliding_window_view
+        held = win(np.where(valid, speed, 0.0), k).min(axis=1)
+        held_ok = win(valid, k).all(axis=1)
+        max_speed = float(held[held_ok].max()) if held_ok.any() else 0.0
 
     cols = np.clip((xy[:, 0] / COURT_L * HEAT_COLS).astype(int), 0, HEAT_COLS - 1)
     rows = np.clip((xy[:, 1] / COURT_W * HEAT_ROWS).astype(int), 0, HEAT_ROWS - 1)
