@@ -50,6 +50,7 @@ export function ShotCandidatesPanel({
   oppName,
   names,
   onClip,
+  onActive,
 }: {
   orgId: string;
   matchId: string;
@@ -57,6 +58,8 @@ export function ShotCandidatesPanel({
   oppName: string;
   names: Record<string, string>;
   onClip: (fromMs: number, toMs: number) => void;
+  /** the moment that is up, for the timeline's signal ring */
+  onActive?: (id: string | null) => void;
 }) {
   const t = useTranslations("shotCandidates");
   const te = useTranslations("events");
@@ -117,6 +120,11 @@ export function ShotCandidatesPanel({
     refocus.current = null;
     rowRefs.current[i]?.focus();
   });
+  const up = rows[Math.min(focus, rows.length - 1)];
+  useEffect(() => {
+    onActive?.(up?.status === "open" ? up.id : null);
+  }, [up?.id, up?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => onActive?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
   if (!list || list.counts.total === 0) return null;
 
   const active = Math.min(focus, rows.length - 1);

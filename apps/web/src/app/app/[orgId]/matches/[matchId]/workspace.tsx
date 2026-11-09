@@ -115,6 +115,7 @@ export function Workspace({
   // review mode: the workspace full screen, one goal candidate after the other
   const [reviewing, setReviewing] = useState(false);
   const [activeCandidate, setActiveCandidate] = useState<string | null>(null);
+  const [activeShot, setActiveShot] = useState<string | null>(null);
   useEffect(() => {
     if (!reviewing) return;
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setReviewing(false);
@@ -523,9 +524,11 @@ export function Workspace({
           kickoff={match.kickoff_ms}
           nowMs={now}
           official={hasReport ? official.data : null}
-          candidates={staff ? candidates.data : null}
-          rate={rate}
-          activeId={shown === "goals" ? activeCandidate : null}
+          // while shots are reviewed, their moments take the candidate lane
+          candidates={staff ? (shown === "shots" ? shotCandidates.data : candidates.data) : null}
+          candidatesLabel={shown === "shots" ? "laneShots" : "laneCandidates"}
+          rate={shown === "shots" ? (shotCandidates.data?.default_rate ?? 4) : rate}
+          activeId={shown === "goals" ? activeCandidate : shown === "shots" ? activeShot : null}
           ownName={teamName}
           oppName={oppName}
           events={staff ? events.data : null}
@@ -604,7 +607,7 @@ export function Workspace({
           </div>
         )}
         {shown === "shots" && staff && (
-          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names} onClip={playClip} />
+          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names} onClip={playClip} onActive={setActiveShot} />
         )}
         {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
         {shown === "feedback" && staff && (
@@ -892,14 +895,17 @@ function AnalysisPanel({
           label={t("title")}
         />
       )}
-      <div className="flex flex-wrap gap-3 text-xs text-muted">
-        {(["home", "away", "referee"] as const).map((k) => (
-          <span key={k} className="flex items-center gap-1">
-            <span aria-hidden className="inline-block size-3 rounded-full ring-1 ring-foreground/50" style={{ background: colours[k] }} />
-            {t(k)}
-          </span>
-        ))}
-      </div>
+      {/* the legend of the mini court: nothing to explain without it */}
+      {analysis.chunks != null && analysis.chunks > 0 && (
+        <div className="flex flex-wrap gap-3 text-xs text-muted">
+          {(["home", "away", "referee"] as const).map((k) => (
+            <span key={k} className="flex items-center gap-1">
+              <span aria-hidden className="inline-block size-3 rounded-full ring-1 ring-foreground/50" style={{ background: colours[k] }} />
+              {t(k)}
+            </span>
+          ))}
+        </div>
+      )}
       {/* what the analysis did, for those who want to know; not a coach's task */}
       <details className="text-xs text-muted">
         <summary className="cursor-pointer hover:text-foreground">{t("technical")}</summary>

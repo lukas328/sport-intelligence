@@ -23,6 +23,7 @@ export function MatchTimeline({
   official,
   candidates,
   rate,
+  candidatesLabel = "laneCandidates",
   activeId = null,
   ownName,
   oppName,
@@ -37,6 +38,8 @@ export function MatchTimeline({
   official: GoalComparison | null | undefined;
   candidates: CandidateList | null | undefined;
   rate: number;
+  /** what the candidate lane holds: goal candidates, or the shot moments while shots are reviewed */
+  candidatesLabel?: "laneCandidates" | "laneShots";
   ownName: string;
   oppName: string;
   /** the candidate that is up: the one signal mark on the axis */
@@ -144,7 +147,7 @@ export function MatchTimeline({
           )}
         {cands.length > 0 &&
           lane(
-            t("laneCandidates"),
+            t(candidatesLabel),
             cands
               .filter((c) => seen(c.clock_s!))
               .map((c) => {
