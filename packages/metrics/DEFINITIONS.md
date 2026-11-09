@@ -21,22 +21,25 @@ normalised so the attacked goal is at x = 40 (`packages/court`).
 | Score timeline | Score after every goal by match clock. |
 | Best run | Longest series of goals by one team without a goal of the other team (BRIEF "Tor-Läufe"). |
 | Longest own drought | Longest match-clock period without an own goal, from throw-off or the previous own goal. |
-| xG | Sum of expected goals over non-blocked shots **with the inputs known** (a position; 7 m always). Shots without a position (official report, overlay goals) have no xG (`expected_goal` returns None). `xg_shots` = shots with xG, `xg_coverage` = xg_shots / shots (null without shots): show xG only with enough coverage. v1 is a logistic prior (`xg.py`, version `prior-1`): distance to goal, angle, shot type; 7 m fixed at 0.75. **An estimate**, labelled so in the UI, refitted on own data later. |
+| xG | Sum of expected goals over non-blocked shots **with the inputs known** (a position; 7 m always). Shots without a position (official report, overlay goals) have no xG (`expected_goal` returns None). `xg_shots` = shots with xG, `xg_goals` = goals among them, `xg_coverage` = xg_shots / shots (null without shots): show xG only with enough coverage, and set it against `xg_goals`, not all goals. v1 is a logistic prior (`xg.py`, version `prior-1`): distance to goal, angle, shot type; 7 m fixed at 0.75. **An estimate**, labelled so in the UI, refitted on own data later. |
 | Player rows | Per player (roster id) or jersey number for opponents: goals, shots, misses, posts, saved, blocked, turnovers by type, suspensions, assists, 7 m, xG; goalkeeper saves via `attributes.goalkeeper_id`. |
-| Goalkeepers | Per keeper (`attributes.goalkeeper_id`, else `goalkeeper_number`, else "unknown"): shots on target faced (goal + save), saves, save %, by goal zone, by shot zone, 7 m. **xG against** = sum of xG of those shots; **GSAx** (goals saved above expected) = xG against minus goals against, both over the shots with xG (`xg_coverage` = those / faced). Misses and posts are not on target and are left out. |
+| Goalkeepers | Per keeper (`attributes.goalkeeper_id`, else `goalkeeper_number`, else "unknown"): shots on target faced (goal + save), saves, save %, by goal zone, by shot zone, 7 m. **xG against** = sum of xG of those shots; **GSAx** (goals saved above expected) = xG against minus goals against, both over the shots with xG (`xg_coverage` = those / faced); null unless at least 70 % of the saves and 70 % of the goals have xG (positions come mostly with goals: overlay, tracking, matched report goals; over the goals alone xG is always below the goals and every keeper would look bad). Misses and posts are not on target and are left out. |
 | Plus-minus | Needs on-court intervals (tracking identity); not yet computed. |
 
 ## Physical (from tracking, estimates)
 Computed per track in `handball_vision.physical` and summed per player once a track is identified
-(jersey reading or manual assignment). Positions are resampled to 5 Hz and smoothed over 600 ms; steps
-across gaps over 1 s or faster than 10 m/s are dropped.
+(jersey reading or manual assignment). Only observed positions count (the tracker's predictions in
+between are not measurements). Positions are resampled to 5 Hz; steps across gaps over 1 s or faster
+than 10 m/s are dropped, found before smoothing (a track taking over a neighbour 2 m away is one
+jump, smoothed it would read as three plausible sprint steps); then smoothed over 600 ms within the
+pieces between such breaks.
 
 | Metric | Definition |
 |---|---|
 | Distance | Sum of smoothed steps (m). |
 | Speed bands | walk < 2 m/s (7.2 km/h), jog 2 to 4 m/s, run 4 to 5.5 m/s, sprint >= 5.5 m/s (19.8 km/h). High intensity distance = run + sprint. |
 | Sprints | Runs of at least 1 s at sprint speed. |
-| Top speed | Highest speed held over two consecutive 200 ms steps. |
+| Top speed | Highest speed held over 1 s (five consecutive valid 200 ms steps). |
 | Heatmap | Share of time per cell of a 10 x 5 grid over the 40 x 20 m court (match direction, not normalised per half). |
 
 Shot zones and goal zones: `packages/court/spec/zones.json` (goal zones always from the **shooter's view**;

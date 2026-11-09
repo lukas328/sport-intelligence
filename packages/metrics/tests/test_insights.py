@@ -120,3 +120,26 @@ def test_turnovers_and_drought() -> None:
     ids = {i["id"]: i for i in match_insights(stats, base, limit=20)}
     assert ids["turnovers"]["params"]["type"] == "bad_pass"
     assert ids["drought"]["params"]["minutes"] >= 8
+
+
+def test_keeper_is_not_judged_on_goals_with_positions_alone() -> None:
+    """The demo case: positions came with the goals (overlay, tracking) but not with the saves.
+    Over those shots xG is always below the goals, so a keeper with 44 % saves read as "14.8
+    goals below expectation". Without positions for most saves and goals there is no GSAx and no
+    keeper insight; with them, a good keeper is a strength."""
+    gk = {"goalkeeper_id": "gk"}
+    goals = [shot(OPP, "goal", 100 + i, x=34.0, y=10.0, attributes=gk) for i in range(19)]
+    saves = [shot(OPP, "save", 200 + i, attributes=gk) for i in range(15)]
+    stats = compute_match_stats(goals + saves)
+    k = stats["goalkeepers"]["own:p:gk"]
+    assert k["save_pct"] == pytest.approx(15 / 34, abs=1e-3)
+    assert k["xg_shots"] == 19 and k["gsax"] is None
+    assert not [i for i in match_insights(stats, [], limit=20) if i["id"].startswith("keeper")]
+
+    saves = [shot(OPP, "save", 200 + i, x=34.0, y=10.0, attributes=gk) for i in range(15)]
+    stats = compute_match_stats(goals + saves)
+    k = stats["goalkeepers"]["own:p:gk"]
+    assert k["gsax"] == pytest.approx(k["xg_against"] - 19, abs=0.01)
+    assert k["gsax"] > 0  # 44 % saves on shots from 6 m: better than expected
+    ids = {i["id"]: i for i in match_insights(stats, [], limit=20)}
+    assert ids["keeper_gk"]["kind"] == "strength"

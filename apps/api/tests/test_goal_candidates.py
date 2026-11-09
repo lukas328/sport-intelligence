@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import Callable
 from typing import Any
 
 import pytest
 
 from handball_api.core.jobs import MemoryJobQueue
-from handball_api.services.goal_candidates import suggest_side
+from handball_api.models import Event, GoalCandidate
+from handball_api.services.goal_candidates import _covered, suggest_side
 
 from .conftest import Api, setup_club
 from .test_auto_events import AUTO
@@ -46,6 +48,27 @@ def test_suggested_side_is_the_attack_that_ended_last() -> None:
     attacks = [P("own", 40_000), P("opponent", 52_000), P("own", 70_000)]
     assert suggest_side(attacks, 55_000) == "opponent"
     assert suggest_side(attacks, 100_000) is None
+
+
+def test_goals_outside_the_video_cover_no_candidate() -> None:
+    """A clip from 12:40: the report goal at 12:26 maps to 14 s before the clip starts. Within
+    the 20 s window of clock times it used to cover a candidate 3 s into the clip ("schon
+    erfasst"); it is not on the video, so it covers nothing. The same after the clip's end."""
+    asset = uuid.uuid4()
+    cand = GoalCandidate(kind="goal", t_ms=3000, event_id=None, video_asset_id=asset)
+    late = GoalCandidate(kind="goal", t_ms=58_000, event_id=None, video_asset_id=asset)
+
+    def goal(t_ms: int) -> Event:
+        return Event(
+            id=uuid.uuid4(), type="shot", outcome="goal", source="official_report", t_ms=t_ms
+        )
+
+    before, inside, after = goal(-14_000), goal(12_000), goal(70_000)
+    assert _covered(cand, [before]) is None
+    assert _covered(cand, [before, inside]) is inside
+    assert _covered(late, [after]) is after  # length unknown: the window decides
+    assert _covered(late, [after], {asset: 60_000}) is None
+    assert _covered(late, [after, inside], {asset: 60_000}) is None  # 46 s: too far
 
 
 async def test_goal_candidates_review_flow(make_api: Callable[[], Api], owner_conn: Any) -> None:

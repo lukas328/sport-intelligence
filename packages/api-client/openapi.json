@@ -21046,7 +21046,7 @@
     },
     "/v1/orgs/{org_id}/matches/{match_id}/stats": {
       "get": {
-        "description": "Match statistics (packages/metrics). Each goal counts once: with an imported official report,\na tagged or video goal of the same side within 20 s of an official goal is that goal.\n`own`/`opponent`: `xg` covers only shots on target with a known position (and penalties),\n`xg_shots` counts them and `xg_coverage` = xg_shots / shots (null without shots); players have\n`xg_shots`, goalkeepers `xg_shots` and `xg_coverage`. Shot zones include `empty_goal`\n(shots on the empty goal, from any distance) apart from `long_range` (over 15 m).",
+        "description": "Match statistics (packages/metrics). Each goal counts once: with an imported official report,\na tagged or video goal of the same side within 20 s of an official goal is that goal.\n`own`/`opponent`: `xg` covers only shots on target with a known position (and penalties),\n`xg_shots` counts them, `xg_goals` the goals among them and `xg_coverage` = xg_shots / shots\n(null without shots); players have `xg_shots`, goalkeepers `xg_shots`, `xg_coverage` and\n`gsax` (null unless at least 70 % of the saves and of the goals have xG). Shot zones include\n`empty_goal` (shots on the empty goal, from any distance) apart from `long_range` (over\n15 m).",
         "operationId": "match_stats_v1_orgs__org_id__matches__match_id__stats_get",
         "parameters": [
           {
@@ -28455,7 +28455,7 @@
     },
     "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats": {
       "get": {
-        "description": "Per-match key numbers, totals and player totals for a season. Every played match counts (a\nresult stored or events): rows have `tagged`, `goals`/`goals_against` from the events (from the\nresult when untagged) and `xg_coverage`; totals have `matches`, `tagged_matches`, `xg`,\n`xg_shots` and `xg_coverage` = shots with xG / shots on target (null without shots), and\nshooting/save percentages only from matches with recorded misses or saves.",
+        "description": "Per-match key numbers, totals and player totals for a season. Every played match counts (a\nresult stored or events): rows have `tagged`, `goals`/`goals_against` from the events (from the\nresult when untagged), `xg_coverage`, `xg_goals` (goals of the shots with xG, the figure to set\nagainst `xg`) and the same for the opponent (`xg_against`, `xg_against_coverage`,\n`xg_goals_against`); totals have `matches`, `tagged_matches`, `xg`, `xg_shots`, `xg_goals`\nand `xg_coverage` = shots with xG / shots on target (null without shots), and\nshooting/save percentages only from matches with recorded misses or saves.",
         "operationId": "season_stats_v1_orgs__org_id__teams__team_id__seasons__season_id__stats_get",
         "parameters": [
           {

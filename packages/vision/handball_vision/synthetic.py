@@ -15,6 +15,7 @@ import subprocess
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import cv2
 import numpy as np
@@ -39,6 +40,10 @@ ROLES_DEFENCE = {  # 6-0 on the 6 m line of the defended goal at x = 40
     "D5": (36.0, 13.5),
     "D6": (39.0, 16.5),
 }
+
+
+SPRINT_SPEED = 6.5  # m/s, about 23 km/h
+COUNTER_S = 5.0  # a counter after a lost ball is run at sprint speed for this long
 
 
 @dataclass(frozen=True)
@@ -70,6 +75,11 @@ class SyntheticConfig:
     goal_share: float = 0.5
     throw_off_s: float = 8.0  # players walk back and line up (real matches: about 6 to 15 s)
     side_change_s: float | None = None
+    # top speed when nothing is at stake: None = everybody always runs at SPRINT_SPEED (a test
+    # instrument). With a value (demo footage), players jog between positions and sprint only in
+    # the counter after a lost ball, so distances and sprint counts look like a real match
+    jog_speed: float | None = None
+    tempo: float = 1.0  # pace of the movement around the positions (demo footage: calmer, 0.6)
 
 
 @dataclass(frozen=True)
@@ -98,6 +108,13 @@ class _Agent:
     pos: NDArray[np.float64]
     phase: float
     speed: float
+
+
+# Demo footage (scripts/seed.py): goals and throw-offs, attacks of 25 s, a calm set play, jogging
+# between positions and sprints only in counters. Field players then cover about 100 m per minute
+# with a few sprints, like a real match; the test default (every 12 s a turnover with the whole team
+# sprinting across the court) gives about 190 m per minute and a fast break in every attack.
+DEMO: dict[str, Any] = {"restarts": True, "phase_s": 25.0, "jog_speed": 4.0, "tempo": 0.4}
 
 
 class SyntheticMatch:
@@ -306,14 +323,15 @@ class SyntheticMatch:
                     if not own_left:
                         x = 40 - x
                     out[a.object_id] = np.array([x, y])
-        sway = math.sin(t * 0.9) * 2.0  # ball side moves left and right
+        tm = t * self.cfg.tempo  # the movement around the positions runs on this clock
+        sway = math.sin(tm * 0.9) * 2.0  # ball side moves left and right
         for team, roles in ((attack, ROLES_ATTACK), (defend, ROLES_DEFENCE)):
             players = [a for a in self.agents if a.label == team]
             if players and players[0].object_id in out:
                 continue
             for a, (_, (x, y)) in zip(players, roles.items(), strict=True):
-                dx = 1.4 * math.sin(t * 1.3 * a.speed + a.phase)
-                dy = 1.2 * math.cos(t * 1.1 * a.speed + a.phase) + (
+                dx = 1.4 * math.sin(tm * 1.3 * a.speed + a.phase)
+                dy = 1.2 * math.cos(tm * 1.1 * a.speed + a.phase) + (
                     sway * 0.6 if team == defend else sway * 0.3
                 )
                 px, py = x + dx, float(np.clip(y + dy, 0.6, 19.4))
@@ -335,12 +353,22 @@ class SyntheticMatch:
                 )
         return out
 
+    def _speed(self, t: float) -> float:
+        """Top speed (m/s) at time t: a sprint in the first seconds after a lost ball, else a jog."""
+        cfg = self.cfg
+        if cfg.jog_speed is None:
+            return SPRINT_SPEED
+        phase = int(t // cfg.phase_s)
+        counter = phase > 0 and self.outcomes[phase - 1] == "lost" and not self.restart(phase)
+        return SPRINT_SPEED if counter and t - phase * cfg.phase_s < COUNTER_S else cfg.jog_speed
+
     def _step(self, t: float, dt: float) -> None:
         targets = self._targets(t)
+        speed = self._speed(t)
         for a in self.agents:
             d = targets[a.object_id] - a.pos
             dist = float(np.linalg.norm(d))
-            vmax = 6.5 * dt  # m per frame (sprint ~6.5 m/s)
+            vmax = speed * dt  # m per frame
             a.pos = a.pos + (d if dist <= vmax else d / dist * vmax)
 
     # ---- rendering -----------------------------------------------------------------------
@@ -534,8 +562,10 @@ def main() -> None:
     ap.add_argument("--seconds", type=float, default=30)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--truth", type=Path, help="write ground truth JSON here")
+    ap.add_argument("--demo", action="store_true", help="match-like flow for demo data (DEMO)")
     args = ap.parse_args()
-    match = SyntheticMatch(SyntheticConfig(seconds=args.seconds, seed=args.seed))
+    extra = DEMO if args.demo else {}
+    match = SyntheticMatch(SyntheticConfig(seconds=args.seconds, seed=args.seed, **extra))
     truth = match.write(args.out)
     if args.truth:
         args.truth.write_text(
