@@ -13,11 +13,14 @@ import { Sheet, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { decided } from "@/lib/match-decided";
 import { cn } from "@/lib/utils";
+import { xgLabel, xgShown } from "@/lib/xg";
 import { useOpponentName } from "@/lib/opponent";
 
 type ZoneCount = Record<string, { shots: number; goals: number }>;
 interface TeamStats {
   goals: number;
+  xg_shots: number;
+  xg_coverage: number | null;
   shots: number;
   shots_blocked: number;
   misses: number;
@@ -162,7 +165,10 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
       ? [{ label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s: "own" | "opponent") => ({ side: s, type: "suspension_2min" }) as EventFilter }]
       : []),
     { label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) },
-    { label: t("xg"), own: attempts ? stats.own.xg.toFixed(1) : "-", opp: attempts ? stats.opponent.xg.toFixed(1) : "-" },
+    // xG only where most shots on target have a position (report and overlay goals have none)
+    ...(attempts && (xgShown(stats.own) || xgShown(stats.opponent))
+      ? [{ label: t("xg"), own: xgLabel(stats.own), opp: xgLabel(stats.opponent) }]
+      : []),
   ];
   // the one signal of the overview: the counted row the opponent won most clearly (after a win
   // that is the thing to work on); figures as percentages compare by points

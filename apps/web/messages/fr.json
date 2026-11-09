@@ -1211,7 +1211,11 @@
     "won": "Victoire",
     "lost": "Défaite",
     "drawn": "Nul",
-    "ourScoreFirst": "notre score d'abord"
+    "ourScoreFirst": "notre score d'abord",
+    "homeGame": "Domicile",
+    "awayGame": "Extérieur",
+    "xgPerMatch": "xG par match",
+    "xgThin": "xG : trop peu de tirs avec position ({n} sur {of})."
   },
   "billing": {
     "title": "Abonnement et factures",

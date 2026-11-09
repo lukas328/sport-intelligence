@@ -7,13 +7,14 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/card";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
+import { xgBasis } from "@/lib/xg";
 
 interface Profile {
   opponent: { id: string; name: string };
   record: { won: number; drawn: number; lost: number };
-  matches: { match_id: string; kickoff_at: string; score_own: number | null; score_opponent: number | null; events: number }[];
+  matches: { match_id: string; kickoff_at: string; is_home: boolean; score_own: number | null; score_opponent: number | null; events: number }[];
   tagged_matches: number;
-  totals: { goals: number; shots: number; shooting_pct: number | null; seven_m_goals: number; seven_m_shots: number; fast_break_goals: number; turnovers: number };
+  totals: { goals: number; shots: number; shooting_pct: number | null; seven_m_goals: number; seven_m_shots: number; fast_break_goals: number; turnovers: number; xg: number; xg_shots: number; xg_coverage: number | null };
   zones: Record<string, { shots: number; goals: number }>;
   goal_zones: Record<string, { shots: number; goals: number }>;
   scorers: { number: number; goals: number; shots: number; matches: number }[];
@@ -47,6 +48,8 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
   if (!p) notFound();
   const n = Math.max(1, p.tagged_matches);
   const fTotal = Object.values(p.formations_ms).reduce((a, b) => a + b, 0);
+  // xG only where most shots on target have a position; otherwise say why it is missing
+  const xg = xgBasis(p.totals);
   return (
     <div className="space-y-6">
       <BackLink fallback={`/app/${orgId}`} />
@@ -61,13 +64,14 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
         <>
           <p className="text-sm text-muted">{t("tagged", { count: p.tagged_matches })}</p>
           {/* one line of the match sheet, not five tiles; averages say so and drop a ".0" */}
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-4 border-t-2 border-foreground pt-4 sm:grid-cols-5" data-testid="opponent-tiles">
+          <dl className={`grid grid-cols-2 gap-x-8 gap-y-4 border-t-2 border-foreground pt-4 ${xg?.shown ? "sm:grid-cols-3 lg:grid-cols-6" : "sm:grid-cols-5"}`} data-testid="opponent-tiles">
             {[
               [t("goalsPerMatch"), avg(p.totals.goals / n)],
               [t("shootingPct"), pct(p.totals.shooting_pct)],
               [t("sevenM"), `${p.totals.seven_m_goals}/${p.totals.seven_m_shots}`],
               [t("fastBreakPerMatch"), avg(p.totals.fast_break_goals / n)],
               [t("turnoversPerMatch"), avg(p.totals.turnovers / n)],
+              ...(xg?.shown ? [[t("xgPerMatch"), (p.totals.xg / n).toFixed(1)]] : []),
             ].map(([label, value]) => (
               <div key={label}>
                 <dt className="text-[0.8125rem] text-muted">{label}</dt>
@@ -75,6 +79,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
               </div>
             ))}
           </dl>
+          {xg && !xg.shown && <p className="text-[0.8125rem] text-muted" data-testid="opponent-xg-thin">{t("xgThin", { n: xg.n, of: xg.of })}</p>}
           {/* three open columns on rules, not cards */}
           <div className="grid gap-8 md:grid-cols-3">
             <section className="space-y-2">
@@ -152,7 +157,10 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
           {p.matches.map((m) => (
             <li key={m.match_id}>
               <Link href={`/app/${orgId}/matches/${m.match_id}`} className="group flex min-h-11 items-center justify-between gap-3 py-2">
-                <span className="group-hover:underline group-hover:underline-offset-4">{format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })}</span>
+                <span>
+                  <span className="group-hover:underline group-hover:underline-offset-4">{format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })}</span>
+                  <span className="text-sm text-muted"> · {t(m.is_home ? "homeGame" : "awayGame")}</span>
+                </span>
                 <span className="flex items-baseline gap-3">
                   {m.score_own != null && m.score_opponent != null && (
                     <span className="text-sm text-muted">{t(m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "drawn")}</span>

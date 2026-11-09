@@ -1211,7 +1211,11 @@
     "won": "Win",
     "lost": "Loss",
     "drawn": "Draw",
-    "ourScoreFirst": "our score first"
+    "ourScoreFirst": "our score first",
+    "homeGame": "Home",
+    "awayGame": "Away",
+    "xgPerMatch": "xG per match",
+    "xgThin": "xG: too few shots with a position ({n} of {of})."
   },
   "billing": {
     "title": "Plan and billing",

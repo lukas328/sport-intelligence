@@ -30,6 +30,7 @@ import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
+import { xgLabel } from "@/lib/xg";
 import { UploadPanel } from "./upload-panel";
 import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
@@ -248,7 +249,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                       [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
                       [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
                       [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
-                      [t("stats.xg"), stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
+                      [t("stats.xg"), xgLabel(stats.data.own), xgLabel(stats.data.opponent)],
                     ]
                 )
                   // a row of dashes says nothing on the stage

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
+import { xgLabel } from "@/lib/xg";
 import { Stage, stageButton, stageLink } from "@/components/domain/stage";
 import { AreaSubNav } from "@/components/shell/section-nav";
 import { IconAsk } from "@/components/shell/icons";
@@ -22,12 +23,13 @@ interface Row {
   save_pct: number | null;
   turnovers: number;
   xg: number;
+  xg_coverage: number | null;
   xg_against: number;
   seven_m: [number, number];
 }
 interface Season {
   matches: Row[];
-  totals: { matches: number; goals: number; shots: number; turnovers: number; xg: number; shooting_pct: number | null; save_pct: number | null };
+  totals: { matches: number; goals: number; shots: number; turnovers: number; xg: number; xg_shots: number; xg_coverage: number | null; shooting_pct: number | null; save_pct: number | null };
   players: { player_id: string; matches: number; goals: number; shots: number; turnovers: number; suspensions: number; saves: number; xg: number; shooting_pct: number | null }[];
 }
 
@@ -86,7 +88,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const names = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.first_name} ${r.last_name}`]));
   const shirts = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, r.jersey_number]));
   const n = data.totals.matches;
-  const statement = seasonStatement(data.matches);
+  const statement = seasonStatement(data.matches, data.totals.xg_coverage);
   const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
   const lastResult = matchStatement({ own: last.score_own, opp: last.score_opponent, opponent: last.opponent });
   const focus = focusMetric({ save_pct: data.totals.save_pct, shooting_pct: data.totals.shooting_pct, turnovers_per_match: data.totals.turnovers / n });
@@ -311,7 +313,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   <td>{pct(m.shooting_pct)}</td>
                   <td>{pct(m.save_pct)}</td>
                   <td>{m.turnovers}</td>
-                  <td>{m.xg.toFixed(1)}</td>
+                  <td>{xgLabel(m)}</td>
                   <td>{m.xg_against.toFixed(1)}</td>
                   {sevenM && (
                     <td>

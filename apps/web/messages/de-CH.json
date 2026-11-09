@@ -1211,7 +1211,11 @@
     "won": "Sieg",
     "lost": "Niederlage",
     "drawn": "Unentschieden",
-    "ourScoreFirst": "unser Resultat zuerst"
+    "ourScoreFirst": "unser Resultat zuerst",
+    "homeGame": "Heim",
+    "awayGame": "Auswärts",
+    "xgPerMatch": "xG pro Spiel",
+    "xgThin": "xG: zu wenige Würfe mit Position ({n} von {of})."
   },
   "billing": {
     "title": "Abo und Rechnungen",

@@ -4,6 +4,7 @@
  * without enough data it returns null and the caller shows a neutral title. xG stays marked as
  * an estimate in every text that uses it.
  */
+import { XG_MIN_COVERAGE } from "./xg";
 
 export interface Line {
   key: string;
@@ -38,7 +39,9 @@ export function xgGap(goals: number, xg: number): "over" | "under" | null {
   return d > 0 ? "over" : "under";
 }
 
-export function seasonStatement(rows: SeasonRow[]): Statement | null {
+/** `xgCoverage`: the share of our shots on target with a position (season totals); below
+ * `XG_MIN_COVERAGE` the xG sum is mostly made of shots without one, so it says nothing. */
+export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null): Statement | null {
   if (rows.length === 0) return null;
   const sorted = [...rows].sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at));
   const results = sorted.map(result);
@@ -56,7 +59,7 @@ export function seasonStatement(rows: SeasonRow[]): Statement | null {
   const xg = sorted.reduce((s, r) => s + r.xg, 0);
   const against = sorted.reduce((s, r) => s + r.score_opponent, 0);
   const xga = sorted.reduce((s, r) => s + r.xg_against, 0);
-  const attack = xgGap(goals, xg);
+  const attack = xgCoverage === undefined || (xgCoverage != null && xgCoverage >= XG_MIN_COVERAGE) ? xgGap(goals, xg) : null;
   if (attack) {
     return {
       headline: { key: attack === "over" ? "voice.overXg" : "voice.underXg", params: {} },
