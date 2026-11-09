@@ -1,0 +1,6 @@
+# Copy to backend.hcl (git-ignored) after README step 2.
+resource_group_name  = "rg-hb-tfstate"
+storage_account_name = "<sthbtfstateXXXX>"
+container_name       = "tfstate"
+key                  = "production.tfstate"
+use_azuread_auth     = true
