@@ -1,14 +1,14 @@
 {
- "generated": "2026-11-09T10:09:34",
+ "generated": "2026-11-09T10:42:53",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
   "swiss": 179,
   "swiss_matched": 153,
   "with_log": 67,
-  "in_ingest": 246,
-  "local": 225,
-  "local_matched": 132,
+  "in_ingest": 226,
+  "local": 205,
+  "local_matched": 120,
   "local_with_log": 60
  },
  "games": [
@@ -1591,16 +1591,7 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_NLB_SGHorgen_TVSteffisburg_2016-10-09.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 29.97,
-    "duration_s": 4447.054,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l06",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_NLB_SGHorgen_GSKadettenEspoirs_2016-10-22",
@@ -1930,16 +1921,7 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_Herren_FortitudoGossau_Andelfingen_2019-08-31.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 4812.52,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l04",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12",
@@ -2495,16 +2477,7 @@
    "log_goals": 0,
    "players": 28,
    "file": "ml/data/official/CH_NLA_STVBaden_RTVBasel_2018-05-16.json",
-   "video": {
-    "width": 640,
-    "height": 360,
-    "fps": 25.0,
-    "duration_s": 5330.634,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l06",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
@@ -3005,16 +2978,7 @@
    "log_goals": 0,
    "players": 28,
    "file": "ml/data/official/CH_NLA_PlayoffF1_Kadetten_WackerThun_2016.json",
-   "video": {
-    "width": 640,
-    "height": 360,
-    "fps": 29.97,
-    "duration_s": 7853.294,
-    "codec": "vp9",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l06",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_NLA_PlayoffF2_WackerThun_Kadetten_2016-05-17",
@@ -3043,16 +3007,7 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_NLA_PlayoffF2_WackerThun_Kadetten_2016-05-17.json",
-   "video": {
-    "width": 640,
-    "height": 360,
-    "fps": 29.97,
-    "duration_s": 9289.334,
-    "codec": "vp9",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l06",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_Cupfinal_Pfadi_BSVBern_2015-05-10",
@@ -3638,16 +3593,7 @@
    "log_goals": 0,
    "players": 18,
    "file": "ml/data/official/CH_Nati_Schweiz_Tunesien_2020-01-04.json",
-   "video": {
-    "width": 640,
-    "height": 360,
-    "fps": 25.0,
-    "duration_s": 6874.4,
-    "codec": "vp9",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l05",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_Nati_Schweiz_Niederlande_2020-01-05",
@@ -4069,16 +4015,7 @@
    "log_goals": 0,
    "players": 28,
    "file": "ml/data/official/CH_U19E_HSGNordwest_BSVFutureBern_2021-04-10.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 30.0,
-    "duration_s": 5968.954,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l09",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
@@ -6056,16 +5993,7 @@
    "log_goals": 0,
    "players": 20,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_STVWillisau_2019-02-23.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 4175.994,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l02",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_Frauen_1Liga_vs_KoenizCats_2019-02-08",
@@ -6093,16 +6021,7 @@
    "log_goals": 0,
    "players": 24,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_KoenizCats_2019-02-08.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 3995.634,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l02",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_Frauen_1Liga_vs_RWThun2_2019-01-20",
@@ -6130,16 +6049,7 @@
    "log_goals": 0,
    "players": 27,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_RWThun2_2019-01-20.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 4067.654,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l02",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_Frauen_1Liga_vs_Herzogenbuchsee2_2019-01-27",
@@ -6167,16 +6077,7 @@
    "log_goals": 0,
    "players": 26,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_Herzogenbuchsee2_2019-01-27.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 3810.274,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l02",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_Frauen_1Liga_vs_TVZofingen_2017-11-04",
@@ -6204,16 +6105,7 @@
    "log_goals": 0,
    "players": 26,
    "file": "ml/data/official/CH_Frauen_1Liga_vs_TVZofingen_2017-11-04.json",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 4320.154,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l02",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "CH_SGPilatus_Staefa_ca2024",
@@ -7014,16 +6906,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 3670.447891,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l09",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "DE_Bezirksliga_Unterpfaffenhofen_2022",
@@ -7116,16 +6999,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 4422.954,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l09",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "DE_Amateur_TSVWesterland_Mildstedt2_2017",
@@ -7582,16 +7456,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 30.0,
-    "duration_s": 6208.854,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l10",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "FR_Prenationale_Final_Mios_Biard_2026",
@@ -7608,16 +7473,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 1244,
-    "height": 720,
-    "fps": 60.0,
-    "duration_s": 7629.874,
-    "codec": "av1",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l10",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "ES_HonorPlata_Burgos_Anaitasuna_2026",
@@ -7919,16 +7775,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 640,
-    "height": 360,
-    "fps": 30.0,
-    "duration_s": 5309.154,
-    "codec": "vp9",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l12",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "IT_SerieA2_Leno_MedalpTirol_2020",
@@ -8125,16 +7972,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 634,
-    "height": 480,
-    "fps": 30.0,
-    "duration_s": 4360.814,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l10",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "DK_Herren_Arresoe_Furesoe_2018",
@@ -8484,16 +8322,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 654,
-    "height": 480,
-    "fps": 29.97,
-    "duration_s": 6170.831333,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l13",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "PT_Avanca_Belenenses_2013",
@@ -8509,16 +8338,7 @@
    "info_json": true,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": {
-    "width": 854,
-    "height": 480,
-    "fps": 25.0,
-    "duration_s": 5394.234,
-    "codec": "h264",
-    "segments": 5,
-    "kaggle_dataset": "handball-segs-l12",
-    "source": "local"
-   }
+   "video": null
   },
   {
    "name": "PT_Frauen_Madeira_Gaia_2022",
