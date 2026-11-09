@@ -903,7 +903,7 @@
     "heatmap": "Carte de chaleur",
     "none": "Pas encore de données de position.",
     "km": "{value} km",
-    "m": "{value} m",
+    "m": "{value, number} m",
     "kmh": "{value} km/h",
     "min": "{value} min",
     "track": "Trace {n}",
@@ -2351,7 +2351,7 @@
     "attacks": "{n, plural, =1 {1 attaque} other {# attaques}} · {avg} s en moyenne",
     "timeline": "Possession au fil du match",
     "timelineHint": "Un clic sur une attaque y mène dans la vidéo.",
-    "physical": "Voir l'effort physique et les heatmaps",
+    "physical": "Voir l'effort physique",
     "moreTitle": "Pour les tirs, buts et arrêts",
     "moreText": "L'analyse vidéo ne voit pas encore le ballon. Marque les buts au bord du terrain pendant le match ou importe la feuille de match : statistiques, cartes de tirs et valeurs du gardien apparaissent alors ici.",
     "marks": "Marquer au bord du terrain",
@@ -2367,7 +2367,9 @@
     "showLess": "Afficher moins",
     "compactTitle": "Selon la vidéo :",
     "compactLine": "possession {own} % contre {opp} %, {n} attaques, estimé.",
-    "compactOpen": "Afficher les attaques"
+    "compactOpen": "Afficher les attaques",
+    "possession": "Possession",
+    "coverage": "Sur {video} de vidéo pour {game} de jeu, estimé d'après les positions."
   },
   "workflow": {
     "rail": "Étapes de travail",

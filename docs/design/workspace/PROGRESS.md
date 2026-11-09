@@ -162,6 +162,10 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (UI session, demo data with a synthetic 1-minute video): 4 of 5 attacks counted as
+  fast breaks; 33 and 60 sprints and 1.22 km against 2.02 km in one minute; a team row's top
+  speed of 31.7 km/h (the maximum of one player?).
+
 - 2026-11-09 (UI session): API wishes for the next UI features, none built in the UI yet:
   1. Player status on the squad (verletzt, abwesend, with an optional until-date), readable by
      staff; today a status exists only per training unit or match (`attendance`).
@@ -299,3 +303,30 @@ The owner asked the session to decide on its own. Done in this round, each with 
   next one without a reply count in "Zu erledigen".
 - e2e: `player.spec.ts` (match page and overview of a player); the court from the hall with
   "Passt" in `shots.spec.ts`.
+
+## Analyse tab review round (UI session, 2026-11-09)
+
+Demo club from `scripts/seed.py` (synthetic 1-minute video, no events counted), all sections,
+desktop light and dark and phone, reviewed with fresh eyes against `REFERENCES.md`.
+
+Scores before the fixes (anchor, signal, hairlines, game language, team by side, numbers to
+video, -, estimated vs confirmed, type, edge states): Übersicht 2, 1, 4, 3, 3, 3, -, 3, 4, 4;
+Matchbericht, Würfe, Torhüter 1, 1, 4, 2, 3, 1, -, 3, 4, 1; Laufleistung 1, 1, 3, 2, 2, 1, -, 3, 3, 3.
+
+Fixed:
+- Without counted events, Matchbericht, Würfe and Torhüter silently showed the video overview
+  under their own tab. They are no longer offered then; the overview says how they come (import
+  the match sheet, which is now the primary button, or mark courtside).
+- Sections in the order of the match sheet: Übersicht, Matchbericht, Würfe, Torhüter,
+  Laufleistung.
+- Possession: "Ballbesitz" next to each team's share; the header reads every figure against the
+  video ("Aus 1:00 Video von 60:00 Spielzeit, geschätzt aus den Positionen"); attack rows carry a
+  play mark and are 44 px tall, the helper sentence about clicking is gone.
+- Laufleistung: "Höchsttempo" (not "Topspeed"), "Aufenthaltsorte" (not "Heatmap"), metres in
+  de-CH format (1'463 m), "Erfasst" right after the name so the coverage stays in view on phones,
+  "Hohe Intensität" only from tablets up; the overview link says "Laufleistung ansehen".
+
+Left open: the attack strip and list use video time until the throw-off is set (honest, but the
+coach thinks in game time); team rows of the physical table select the map but do not lead to the
+video; the data notes for the analysis session (4 of 5 attacks counted as fast breaks, 33 and 60
+sprints in one minute, a team's top speed of 31.7 km/h) are in "Backend findings".

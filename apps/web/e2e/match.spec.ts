@@ -142,7 +142,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByTestId("identity-panel")).toBeVisible();
   await openAnalysis(page, "Laufleistung");
   await expect(page.getByTestId("physical-table")).toContainText("km");
-  await page.getByRole("button", { name: /Heatmap zeigen/ }).nth(1).click();
+  await page.getByRole("button", { name: /Aufenthaltsorte zeigen/ }).nth(1).click();
   await expect(page.getByTestId("court-heatmap")).toBeVisible();
   await expectAccessible(page);
 

@@ -4,7 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Play } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
+import { formatClock } from "@/lib/format";
 import { Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -65,7 +67,10 @@ export function VideoOverview({
       <Sheet className="space-y-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-xl">{t("title")}</h2>
-          <span className="text-xs text-muted">{t("estimated")}</span>
+          {/* every figure below reads against how much of the match the video covers */}
+          <span className="text-xs text-muted">
+            {durationMs ? t("coverage", { video: formatClock(durationMs), game: `${Math.round((periodS * 2) / 60)}:00` }) : t("estimated")}
+          </span>
         </div>
         {phases.length === 0 ? (
           <p className="text-sm text-muted">{q.isLoading ? "…" : t("noPossessions")}</p>
@@ -74,7 +79,10 @@ export function VideoOverview({
             <div className="grid gap-6 sm:grid-cols-2">
               {([["own", ownName, own], ["opponent", oppName, opp]] as const).map(([side, name, s]) => (
                 <div key={side} className="space-y-1">
-                  <p className="text-sm font-semibold">{name}</p>
+                  <p className="text-sm font-semibold">
+                    {name}
+                    <span className="font-normal text-muted">{` · ${t("possession")}`}</span>
+                  </p>
                   <p className="font-score text-[2.5rem] leading-none">{Math.round((s?.share ?? 0) * 100)} %</p>
                   <p className="text-sm text-muted">{t("attacks", { n: s?.count ?? 0, avg: Math.round(s?.avg_s ?? 0) })}</p>
                   {(s?.fast_breaks ?? 0) > 0 && <p className="text-sm text-muted">{t("fastBreaks", { n: s?.fast_breaks ?? 0 })}</p>}
@@ -106,7 +114,6 @@ export function VideoOverview({
                 </span>
                 <span>{at(end)}</span>
               </div>
-              {onPlay && <p className="text-xs text-muted">{t("timelineHint")}</p>}
             </div>
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -133,7 +140,9 @@ export function VideoOverview({
                     <ul className="border-t-2 border-foreground">
                       {shown.map((p) => (
                         <li key={p.start_ms} className="border-b border-foreground/10">
-                          <button type="button" disabled={!onPlay} onClick={() => onPlay?.(p.start_ms)} className="flex w-full items-center gap-3 py-2 text-left text-sm hover:bg-surface disabled:hover:bg-transparent">
+                          <button type="button" disabled={!onPlay} onClick={() => onPlay?.(p.start_ms)} className="flex min-h-11 w-full items-center gap-3 py-2 text-left text-sm hover:bg-surface disabled:hover:bg-transparent">
+                            {/* the row plays the attack: said by the glyph, not by a sentence */}
+                            {onPlay && <Play aria-hidden className="size-3 shrink-0 fill-current" />}
                             <span aria-hidden className={cn("size-2.5 shrink-0 rounded-[2px]", p.side === "own" ? "bg-accent" : "bg-foreground/60")} />
                             <span className="w-28 shrink-0 font-semibold">{p.side === "own" ? ownName : oppName}</span>
                             <span className="tabular-nums text-muted">
@@ -165,11 +174,12 @@ export function VideoOverview({
           <h2 className="text-xl">{t("moreTitle")}</h2>
           <p className="max-w-2xl text-sm text-muted">{t("moreText")}</p>
           <div className="flex flex-wrap gap-2">
+            {/* after the match the sheet is the way to shots and saves; marking is for the next one */}
+            <Link href={`/app/${orgId}/teams/${teamId}/paper`} className={buttonClass("primary", "sm")}>
+              {t("paper")}
+            </Link>
             <Link href={`/app/${orgId}/matches/${matchId}/marks`} className={buttonClass("secondary", "sm")}>
               {t("marks")}
-            </Link>
-            <Link href={`/app/${orgId}/teams/${teamId}/paper`} className={buttonClass("secondary", "sm")}>
-              {t("paper")}
             </Link>
           </div>
         </Sheet>
