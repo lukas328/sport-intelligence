@@ -10,7 +10,7 @@ Bugs reported from the test environment on Azure always go first. `[x]` = done.
    current and the previous season) since 95132d3; the note further down is outdated.
 2. [x] Würfe: full-screen review like the goal candidates (the clip plays itself, one key per
    decision); priority 3 of the handover (one-click confirmation on real footage).
-3. [ ] Gegner: the back link leads to the fixtures and the header follows the other pages
+3. [x] Gegner: the back link leads to the fixtures and the header follows the other pages
    (eyebrow, title); the zone split stays with the analysis session.
 4. [ ] Timeline: a label per side on the sided lanes (own team above, opponent below), not only
    in the legend.
@@ -124,7 +124,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
   decision; heading and edit button fixed).
 - [x] Sidebar highlight for tools (Assistent, Suche, Gegner) follows the section; the official data and join requests keep Team · Kader.
 - [x] Einstellungen on phones (jump links that wrap): the section tabs have no active underline and are cut at the edge.
-- [ ] Gegner: back link "Zurück" without eyebrow; the zone "Fernwurf / leeres Tor" mixes two
+- [x] Gegner: back link "Zurück" without eyebrow (PageHeader now; the zone is the analysis'); the zone "Fernwurf / leeres Tor" mixes two
   situations (analysis data, already reported).
 - [x] Dates: "29. Okt. 26" (Suche) and "29.10.2026" (Gegner): one format.
 

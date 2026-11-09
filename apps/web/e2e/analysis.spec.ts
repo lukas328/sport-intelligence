@@ -29,9 +29,13 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   expect(pdf.headers()["content-type"]).toBe("application/pdf");
   expect((await pdf.body()).subarray(0, 4).toString()).toBe("%PDF");
   await page.getByRole("menuitem", { name: /Gegner-Profil/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "TV Papierdorf" })).toBeVisible();
+  await expect(page.getByText("Unsere Bilanz gegen sie: 1 Sieg")).toBeVisible();
   await expect(page.getByTestId("opponent-tiles")).toBeVisible();
   await expectAccessible(page);
-  await page.goBack();
+  // back where the coach came from: the match
+  await page.getByRole("link", { name: "Zurück" }).click();
+  await expect(page.getByTestId("score")).toHaveText("5:4");
 
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
