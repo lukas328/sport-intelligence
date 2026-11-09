@@ -2482,7 +2482,8 @@
     "reportTime": "feuille {time}",
     "shotBy": "tir de {who}",
     "noKickoff": "L'engagement n'est pas encore placé : les temps de jeu sont estimés d'après la feuille de match.",
-    "setKickoff": "Placer l'engagement"
+    "setKickoff": "Placer l'engagement",
+    "positionReport": "{pos} sur {n} avec la feuille de match · {more} autres ouverts"
   },
   "officialTeams": {
     "title": "Chercher l'équipe",
