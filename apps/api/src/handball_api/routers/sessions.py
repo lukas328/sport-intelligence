@@ -8,7 +8,7 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, File, Query, Response, UploadFile
 
-from handball_api.models import TrainingSession
+from handball_api.models import TrainingSession, TrainingSlot
 from handball_api.routers.deps import CtxDep, OrgDep
 from handball_api.schemas.sessions import (
     AttendanceIn,
@@ -16,8 +16,12 @@ from handball_api.schemas.sessions import (
     CalendarLink,
     MyReply,
     ScheduleItem,
+    SlotGenerateIn,
+    SlotGenerateOut,
     TrainingSessionIn,
     TrainingSessionOut,
+    TrainingSlotIn,
+    TrainingSlotOut,
 )
 from handball_api.services import sessions as service
 
@@ -40,6 +44,26 @@ def _out(s: TrainingSession) -> TrainingSessionOut:
             "drills": s.drills,
             "total_minutes": service.total_minutes(s),
             "external_ref": s.external_ref,
+            "slot_id": s.slot_id,
+        }
+    )
+
+
+def _slot_out(slot: TrainingSlot) -> TrainingSlotOut:
+    return TrainingSlotOut.model_validate(
+        {
+            "id": slot.id,
+            "team_id": slot.team_id,
+            "season_id": slot.season_id,
+            "weekday": slot.weekday,
+            "start_time": slot.start_time,
+            "end_time": service.slot_end(slot),
+            "duration_min": slot.duration_min,
+            "location": slot.location,
+            "title": slot.title,
+            "note": slot.note,
+            "valid_from": slot.valid_from,
+            "valid_until": slot.valid_until,
         }
     )
 
@@ -89,6 +113,56 @@ async def pdf(session_id: uuid.UUID, scope: OrgDep, lang: Lang = "de-CH") -> Res
         data,
         media_type="application/pdf",
         headers={"content-disposition": f'inline; filename="{name}"'},
+    )
+
+
+@router.get(
+    "/teams/{team_id}/seasons/{season_id}/training-slots", response_model=list[TrainingSlotOut]
+)
+async def slots(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) -> list[TrainingSlotOut]:
+    """The recurring training times of the season, by weekday and start."""
+    return [_slot_out(x) for x in await service.list_slots(scope.ctx, team_id, season_id)]
+
+
+@router.post(
+    "/teams/{team_id}/seasons/{season_id}/training-slots",
+    response_model=TrainingSlotOut,
+    status_code=201,
+)
+async def create_slot(
+    team_id: uuid.UUID, season_id: uuid.UUID, body: TrainingSlotIn, scope: OrgDep
+) -> TrainingSlotOut:
+    return _slot_out(await service.create_slot(scope.ctx, team_id, season_id, body))
+
+
+@router.put("/training-slots/{slot_id}", response_model=TrainingSlotOut)
+async def update_slot(slot_id: uuid.UUID, body: TrainingSlotIn, scope: OrgDep) -> TrainingSlotOut:
+    """Applies to sessions created afterwards; existing sessions are not changed."""
+    return _slot_out(await service.update_slot(scope.ctx, slot_id, body))
+
+
+@router.delete("/training-slots/{slot_id}", status_code=204)
+async def delete_slot(slot_id: uuid.UUID, scope: OrgDep) -> Response:
+    """Sessions already created from the slot are kept."""
+    await service.delete_slot(scope.ctx, slot_id)
+    return Response(status_code=204)
+
+
+@router.post(
+    "/teams/{team_id}/seasons/{season_id}/training-slots/generate",
+    response_model=SlotGenerateOut,
+)
+async def generate(
+    team_id: uuid.UUID, season_id: uuid.UUID, body: SlotGenerateIn, scope: OrgDep
+) -> SlotGenerateOut:
+    """Create the sessions of the slots for a date range, skipping holidays. Running it again
+    creates nothing twice: days with a session at the slot's time are kept."""
+    created, kept, skipped = await service.generate_sessions(scope.ctx, team_id, season_id, body)
+    return SlotGenerateOut(
+        created=len(created),
+        kept=kept,
+        skipped=skipped,
+        sessions=[_out(s) for s in created],
     )
 
 

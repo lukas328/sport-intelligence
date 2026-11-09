@@ -225,6 +225,8 @@ def matrix_markdown() -> str:
         "- Youth teams (addendum 01, 4.9): share links only for plays, no consent for public "
         "purposes (public highlights, public profile), season player lists unranked.",
         "- Opponent players: number only; a name needs a public source and is never public.",
+        "- Training slots and own drills: `training.write` in the team. A drill shared in the "
+        "club is read by the readers of every team and changed only by the team that made it.",
         "- Club admin handover: `PATCH /orgs/{id}/members/{user}`; "
         "the last admin cannot step down.",
         "",

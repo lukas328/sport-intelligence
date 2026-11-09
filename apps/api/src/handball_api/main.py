@@ -31,6 +31,7 @@ from handball_api.routers import assistant as assistant_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
 from handball_api.routers import devices as devices_router
+from handball_api.routers import drills as drills_router
 from handball_api.routers import events as events_router
 from handball_api.routers import family as family_router
 from handball_api.routers import federation as federation_router
@@ -234,6 +235,7 @@ def create_app(
     app.include_router(assistant_router.router)
     app.include_router(matrix_router.router)
     app.include_router(sessions_router.router)
+    app.include_router(drills_router.router)
     app.include_router(focus_router.router)
     app.include_router(marks_router.router)
     app.include_router(profiles_router.router)

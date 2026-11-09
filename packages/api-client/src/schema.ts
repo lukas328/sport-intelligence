@@ -1384,6 +1384,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/drills/{drill_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Drill
+         * @description A library drill by its key or a club drill by its id.
+         */
+        get: operations["get_drill_v1_orgs__org_id__drills__drill_id__get"];
+        /**
+         * Update Drill
+         * @description Only the staff of the team that made it (sessions keep their snapshot).
+         */
+        put: operations["update_drill_v1_orgs__org_id__drills__drill_id__put"];
+        post?: never;
+        /** Delete Drill */
+        delete: operations["delete_drill_v1_orgs__org_id__drills__drill_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/events/{event_id}": {
         parameters: {
             query?: never;
@@ -3423,6 +3448,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/drills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Drills
+         * @description One list: the team's own drills and those shared in the club (`source` "club", by name),
+         *     then the static library (`source` "library", texts in `lang`).
+         */
+        get: operations["list_drills_v1_orgs__org_id__teams__team_id__drills_get"];
+        put?: never;
+        /**
+         * Create Drill
+         * @description An own drill of the team; `shared` shows it to every team of the club.
+         */
+        post: operations["create_drill_v1_orgs__org_id__teams__team_id__drills_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/focus": {
         parameters: {
             query?: never;
@@ -4030,6 +4080,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Slots
+         * @description The recurring training times of the season, by weekday and start.
+         */
+        get: operations["slots_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_get"];
+        put?: never;
+        /** Create Slot */
+        post: operations["create_slot_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description Create the sessions of the slots for a date range, skipping holidays. Running it again
+         *     creates nothing twice: days with a session at the slot's time are kept.
+         */
+        post: operations["generate_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/sessions": {
         parameters: {
             query?: never;
@@ -4102,6 +4194,30 @@ export interface paths {
         /** Create Tag Set */
         post: operations["create_tag_set_v1_orgs__org_id__teams__team_id__tag_sets_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/training-slots/{slot_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update Slot
+         * @description Applies to sessions created afterwards; existing sessions are not changed.
+         */
+        put: operations["update_slot_v1_orgs__org_id__training_slots__slot_id__put"];
+        post?: never;
+        /**
+         * Delete Slot
+         * @description Sessions already created from the slot are kept.
+         */
+        delete: operations["delete_slot_v1_orgs__org_id__training_slots__slot_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5380,6 +5496,43 @@ export interface components {
             token: string;
         };
         /**
+         * DrillIn
+         * @description An own drill; `shared` makes it visible to every team of the club.
+         */
+        DrillIn: {
+            /**
+             * Coaching
+             * @description Coaching points
+             */
+            coaching?: string | null;
+            /**
+             * Focus
+             * @description Category and tags, e.g. wings
+             */
+            focus?: string[];
+            /** Level */
+            level?: ("basic" | "advanced") | null;
+            /** Minutes */
+            minutes: number;
+            /** Name */
+            name: string;
+            /**
+             * Players
+             * @description Number of players, "6-12"
+             */
+            players?: string | null;
+            /**
+             * Setup
+             * @description Set-up, description
+             */
+            setup?: string | null;
+            /**
+             * Shared
+             * @default false
+             */
+            shared?: boolean;
+        };
+        /**
          * DrillItem
          * @description Snapshot of a library drill (or a free item) inside a session.
          */
@@ -5398,6 +5551,59 @@ export interface components {
             note?: string | null;
             /** Setup */
             setup?: string | null;
+        };
+        /**
+         * DrillOut
+         * @description A drill of the library (`source` "library", texts in the asked language) or of the club
+         *     (`source` "club", texts as written). `id` is the library key or the club drill's UUID; it
+         *     goes into a session's `drill_id` and an assignment's `target_id`.
+         */
+        DrillOut: {
+            /** Coaching */
+            coaching: string | null;
+            /**
+             * Editable
+             * @description The caller may edit and delete it
+             */
+            editable: boolean;
+            /** Focus */
+            focus: string[];
+            /** Id */
+            id: string;
+            /** Level */
+            level: ("basic" | "advanced") | null;
+            /** Minutes */
+            minutes: number;
+            /** Name */
+            name: string;
+            /**
+             * Own
+             * @description A drill of the club (not the static library)
+             */
+            own: boolean;
+            /** Players */
+            players: string | null;
+            /** Setup */
+            setup: string | null;
+            /**
+             * Shared
+             * @description Seen by every team of the club (library: always)
+             */
+            shared: boolean;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "library" | "club";
+            /**
+             * Team Id
+             * @description The team that made it (club drills)
+             */
+            team_id: string | null;
+            /** Team Name */
+            team_name: string | null;
+            /** Updated At */
+            updated_at: string | null;
         };
         /** EventIn */
         EventIn: {
@@ -8673,6 +8879,49 @@ export interface components {
          * @enum {string}
          */
         SlideType: "clip" | "tactics_board" | "text" | "stat_card" | "image";
+        /**
+         * SlotGenerateIn
+         * @description Create the sessions of the slots for a date range (default and limit: the season).
+         */
+        SlotGenerateIn: {
+            /** From */
+            from?: string | null;
+            /**
+             * Skip Dates
+             * @description Holidays and other days without training
+             */
+            skip_dates?: string[];
+            /**
+             * Slot Ids
+             * @description Only these slots (default: every slot)
+             */
+            slot_ids?: string[] | null;
+            /** To */
+            to?: string | null;
+        };
+        /** SlotGenerateOut */
+        SlotGenerateOut: {
+            /**
+             * Created
+             * @description New sessions
+             */
+            created: number;
+            /**
+             * Kept
+             * @description Days with a session at that time already, left as they were
+             */
+            kept: number;
+            /**
+             * Sessions
+             * @description The new sessions, by date
+             */
+            sessions: components["schemas"]["TrainingSessionOut"][];
+            /**
+             * Skipped
+             * @description Days left out because they are in skip_dates
+             */
+            skipped: number;
+        };
         /** SubjectTeam */
         SubjectTeam: {
             /**
@@ -9038,6 +9287,8 @@ export interface components {
              * Format: date
              */
             on_date: string;
+            /** Slot Id */
+            slot_id: string | null;
             /** Starts At */
             starts_at: string | null;
             /**
@@ -9049,6 +9300,77 @@ export interface components {
             title: string | null;
             /** Total Minutes */
             total_minutes: number;
+        };
+        /**
+         * TrainingSlotIn
+         * @description A recurring training time; `valid_from` and `valid_until` default to the season.
+         */
+        TrainingSlotIn: {
+            /** Duration Min */
+            duration_min: number;
+            /** Location */
+            location?: string | null;
+            /** Note */
+            note?: string | null;
+            /**
+             * Start Time
+             * Format: time
+             * @description Local time in Switzerland, e.g. 19:00
+             */
+            start_time: string;
+            /** Title */
+            title?: string | null;
+            /** Valid From */
+            valid_from?: string | null;
+            /** Valid Until */
+            valid_until?: string | null;
+            /**
+             * Weekday
+             * @description ISO weekday: 1 Monday ... 7 Sunday
+             */
+            weekday: number;
+        };
+        /** TrainingSlotOut */
+        TrainingSlotOut: {
+            /** Duration Min */
+            duration_min: number;
+            /**
+             * End Time
+             * Format: time
+             */
+            end_time: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Location */
+            location: string | null;
+            /** Note */
+            note: string | null;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /**
+             * Start Time
+             * Format: time
+             */
+            start_time: string;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Title */
+            title: string | null;
+            /** Valid From */
+            valid_from: string | null;
+            /** Valid Until */
+            valid_until: string | null;
+            /** Weekday */
+            weekday: number;
         };
         /** TrialIn */
         TrialIn: {
@@ -11855,6 +12177,106 @@ export interface operations {
                 "application/json": components["schemas"]["OrgDelete"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_drill_v1_orgs__org_id__drills__drill_id__get: {
+        parameters: {
+            query?: {
+                lang?: "de-CH" | "en" | "fr";
+            };
+            header?: never;
+            path: {
+                drill_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DrillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_drill_v1_orgs__org_id__drills__drill_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                drill_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DrillIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DrillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_drill_v1_orgs__org_id__drills__drill_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                drill_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             204: {
@@ -16616,6 +17038,76 @@ export interface operations {
             };
         };
     };
+    list_drills_v1_orgs__org_id__teams__team_id__drills_get: {
+        parameters: {
+            query?: {
+                lang?: "de-CH" | "en" | "fr";
+            };
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DrillOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_drill_v1_orgs__org_id__teams__team_id__drills_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DrillIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DrillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     plans_v1_orgs__org_id__teams__team_id__focus_get: {
         parameters: {
             query?: never;
@@ -18237,6 +18729,113 @@ export interface operations {
             };
         };
     };
+    slots_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                season_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingSlotOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_slot_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                season_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingSlotIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingSlotOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                season_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlotGenerateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlotGenerateOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     sessions_v1_orgs__org_id__teams__team_id__sessions_get: {
         parameters: {
             query?: {
@@ -18470,6 +19069,72 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["TagSetOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_slot_v1_orgs__org_id__training_slots__slot_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slot_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingSlotIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingSlotOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_slot_v1_orgs__org_id__training_slots__slot_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slot_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

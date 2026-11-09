@@ -162,6 +162,35 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (helper, branch `helper/slots-drills`): wishes 3 and 5 are built in the API
+  (migrations 0037 and 0038), the client is regenerated; no UI yet.
+  3. Training slots per team and season: `GET` and `POST
+     /v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots`, `PUT` and `DELETE
+     /v1/orgs/{org_id}/training-slots/{slot_id}`. Fields: `weekday` (ISO, 1 Monday to 7 Sunday),
+     `start_time` ("19:00", Swiss time), `duration_min` (15 to 300), `location`, `title`, `note`
+     (max 500), `valid_from` and `valid_until` (null means the season; outside the season is a
+     422); the output adds `id`, `team_id`, `season_id` and `end_time`. `POST
+     .../training-slots/generate` with `{from?, to?, skip_dates: [date], slot_ids?}` creates the
+     sessions (range default and limit: the season) and returns `{created, kept, skipped,
+     sessions}`. Running it again creates nothing twice: a day with a session at the slot's start
+     time, or one made from the same slot, is kept. New sessions carry the slot's `title`,
+     `location`, `note` (as `notes`) and `slot_id` (new field on every session, null for others);
+     changing or deleting a slot leaves existing sessions alone. Staff with `training.write`
+     write, readers of the team read.
+  5. Own drills: `GET /v1/orgs/{org_id}/teams/{team_id}/drills?lang=de-CH|en|fr` is the one
+     list: the team's own drills and the drills shared in the club (by name), then the static
+     library in the asked language. Every item: `id` (library key or UUID, usable as a session's
+     `drill_id` and an assignment's `target_id`), `source` ("library" or "club"), `own`, `name`,
+     `setup`, `coaching`, `minutes`, `players` ("6-12"), `level` ("basic", "advanced" or null),
+     `focus` (tags), `team_id` and `team_name` (who made it), `shared`, `editable`,
+     `updated_at`. `POST .../teams/{team_id}/drills`, `PUT` and `DELETE
+     /v1/orgs/{org_id}/drills/{drill_id}` with `{name, setup?, coaching?, minutes (1 to 180),
+     players?, level?, focus? (max 10 tags), shared?}`; `GET /v1/orgs/{org_id}/drills/{id}` reads
+     one (a library key works too). Staff with `training.write` of the team that made it write;
+     a shared drill is read by every team of the club (players too, like the library) and is
+     read-only there. The library copy in the API is checked against `@handball/tactics` by a
+     vitest.
+
 - 2026-11-09 (helper, branch `helper/squad-status-progress`): wishes 1 and 2 are built in the API
   (migration 0036), the client is regenerated; no UI yet.
   1. Player status: `PUT /v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/status` with

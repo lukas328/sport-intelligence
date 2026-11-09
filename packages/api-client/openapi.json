@@ -2467,6 +2467,99 @@
         "title": "DeviceIn",
         "type": "object"
       },
+      "DrillIn": {
+        "description": "An own drill; `shared` makes it visible to every team of the club.",
+        "properties": {
+          "coaching": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Coaching points",
+            "title": "Coaching"
+          },
+          "focus": {
+            "description": "Category and tags, e.g. wings",
+            "items": {
+              "maxLength": 40,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Focus",
+            "type": "array"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "enum": [
+                  "basic",
+                  "advanced"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "minutes": {
+            "maximum": 180.0,
+            "minimum": 1.0,
+            "title": "Minutes",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "players": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{1,2}(-\\d{1,2})?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Number of players, \"6-12\"",
+            "title": "Players"
+          },
+          "setup": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set-up, description",
+            "title": "Setup"
+          },
+          "shared": {
+            "default": false,
+            "title": "Shared",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "minutes"
+        ],
+        "title": "DrillIn",
+        "type": "object"
+      },
       "DrillItem": {
         "description": "Snapshot of a library drill (or a free item) inside a session.",
         "properties": {
@@ -2539,6 +2632,156 @@
           "minutes"
         ],
         "title": "DrillItem",
+        "type": "object"
+      },
+      "DrillOut": {
+        "description": "A drill of the library (`source` \"library\", texts in the asked language) or of the club\n(`source` \"club\", texts as written). `id` is the library key or the club drill's UUID; it\ngoes into a session's `drill_id` and an assignment's `target_id`.",
+        "properties": {
+          "coaching": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coaching"
+          },
+          "editable": {
+            "description": "The caller may edit and delete it",
+            "title": "Editable",
+            "type": "boolean"
+          },
+          "focus": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Focus",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "enum": [
+                  "basic",
+                  "advanced"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "minutes": {
+            "title": "Minutes",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "own": {
+            "description": "A drill of the club (not the static library)",
+            "title": "Own",
+            "type": "boolean"
+          },
+          "players": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Players"
+          },
+          "setup": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Setup"
+          },
+          "shared": {
+            "description": "Seen by every team of the club (library: always)",
+            "title": "Shared",
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "library",
+              "club"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The team that made it (club drills)",
+            "title": "Team Id"
+          },
+          "team_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Name"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "own",
+          "name",
+          "setup",
+          "coaching",
+          "minutes",
+          "players",
+          "level",
+          "focus",
+          "team_id",
+          "team_name",
+          "shared",
+          "editable",
+          "updated_at"
+        ],
+        "title": "DrillOut",
         "type": "object"
       },
       "EventIn": {
@@ -12174,6 +12417,99 @@
         "title": "SlideType",
         "type": "string"
       },
+      "SlotGenerateIn": {
+        "description": "Create the sessions of the slots for a date range (default and limit: the season).",
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From"
+          },
+          "skip_dates": {
+            "description": "Holidays and other days without training",
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "maxItems": 366,
+            "title": "Skip Dates",
+            "type": "array"
+          },
+          "slot_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "maxItems": 50,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only these slots (default: every slot)",
+            "title": "Slot Ids"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To"
+          }
+        },
+        "title": "SlotGenerateIn",
+        "type": "object"
+      },
+      "SlotGenerateOut": {
+        "properties": {
+          "created": {
+            "description": "New sessions",
+            "title": "Created",
+            "type": "integer"
+          },
+          "kept": {
+            "description": "Days with a session at that time already, left as they were",
+            "title": "Kept",
+            "type": "integer"
+          },
+          "sessions": {
+            "description": "The new sessions, by date",
+            "items": {
+              "$ref": "#/components/schemas/TrainingSessionOut"
+            },
+            "title": "Sessions",
+            "type": "array"
+          },
+          "skipped": {
+            "description": "Days left out because they are in skip_dates",
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "created",
+          "kept",
+          "skipped",
+          "sessions"
+        ],
+        "title": "SlotGenerateOut",
+        "type": "object"
+      },
       "SubjectTeam": {
         "properties": {
           "id": {
@@ -13320,6 +13656,18 @@
             "title": "On Date",
             "type": "string"
           },
+          "slot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slot Id"
+          },
           "starts_at": {
             "anyOf": [
               {
@@ -13363,9 +13711,211 @@
           "notes",
           "drills",
           "total_minutes",
-          "external_ref"
+          "external_ref",
+          "slot_id"
         ],
         "title": "TrainingSessionOut",
+        "type": "object"
+      },
+      "TrainingSlotIn": {
+        "description": "A recurring training time; `valid_from` and `valid_until` default to the season.",
+        "properties": {
+          "duration_min": {
+            "maximum": 300.0,
+            "minimum": 15.0,
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "start_time": {
+            "description": "Local time in Switzerland, e.g. 19:00",
+            "format": "time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          },
+          "weekday": {
+            "description": "ISO weekday: 1 Monday ... 7 Sunday",
+            "maximum": 7.0,
+            "minimum": 1.0,
+            "title": "Weekday",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "weekday",
+          "start_time",
+          "duration_min"
+        ],
+        "title": "TrainingSlotIn",
+        "type": "object"
+      },
+      "TrainingSlotOut": {
+        "properties": {
+          "duration_min": {
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "end_time": {
+            "format": "time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "start_time": {
+            "format": "time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          },
+          "weekday": {
+            "title": "Weekday",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "team_id",
+          "season_id",
+          "weekday",
+          "start_time",
+          "end_time",
+          "duration_min",
+          "location",
+          "title",
+          "note",
+          "valid_from",
+          "valid_until"
+        ],
+        "title": "TrainingSlotOut",
         "type": "object"
       },
       "TrialIn": {
@@ -17825,6 +18375,181 @@
         "summary": "Delete Org",
         "tags": [
           "privacy"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/drills/{drill_id}": {
+      "delete": {
+        "operationId": "delete_drill_v1_orgs__org_id__drills__drill_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "drill_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Drill Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Drill",
+        "tags": [
+          "training"
+        ]
+      },
+      "get": {
+        "description": "A library drill by its key or a club drill by its id.",
+        "operationId": "get_drill_v1_orgs__org_id__drills__drill_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "drill_id",
+            "required": true,
+            "schema": {
+              "maxLength": 80,
+              "title": "Drill Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "enum": [
+                "de-CH",
+                "en",
+                "fr"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrillOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Drill",
+        "tags": [
+          "training"
+        ]
+      },
+      "put": {
+        "description": "Only the staff of the team that made it (sessions keep their snapshot).",
+        "operationId": "update_drill_v1_orgs__org_id__drills__drill_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "drill_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Drill Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrillOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Drill",
+        "tags": [
+          "training"
         ]
       }
     },
@@ -25874,6 +26599,141 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/drills": {
+      "get": {
+        "description": "One list: the team's own drills and those shared in the club (`source` \"club\", by name),\nthen the static library (`source` \"library\", texts in `lang`).",
+        "operationId": "list_drills_v1_orgs__org_id__teams__team_id__drills_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "de-CH",
+              "enum": [
+                "de-CH",
+                "en",
+                "fr"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DrillOut"
+                  },
+                  "title": "Response List Drills V1 Orgs  Org Id  Teams  Team Id  Drills Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Drills",
+        "tags": [
+          "training"
+        ]
+      },
+      "post": {
+        "description": "An own drill of the team; `shared` shows it to every team of the club.",
+        "operationId": "create_drill_v1_orgs__org_id__teams__team_id__drills_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrillOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Drill",
+        "tags": [
+          "training"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/focus": {
       "get": {
         "description": "Training foci with before/after of their metric (observation, not proof).",
@@ -28944,6 +29804,219 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots": {
+      "get": {
+        "description": "The recurring training times of the season, by weekday and start.",
+        "operationId": "slots_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingSlotOut"
+                  },
+                  "title": "Response Slots V1 Orgs  Org Id  Teams  Team Id  Seasons  Season Id  Training Slots Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Slots",
+        "tags": [
+          "training"
+        ]
+      },
+      "post": {
+        "operationId": "create_slot_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingSlotIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingSlotOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Slot",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots/generate": {
+      "post": {
+        "description": "Create the sessions of the slots for a date range, skipping holidays. Running it again\ncreates nothing twice: days with a session at the slot's time are kept.",
+        "operationId": "generate_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_generate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlotGenerateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotGenerateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate",
+        "tags": [
+          "training"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/sessions": {
       "get": {
         "operationId": "sessions_v1_orgs__org_id__teams__team_id__sessions_get",
@@ -29398,6 +30471,115 @@
         "summary": "Create Tag Set",
         "tags": [
           "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/training-slots/{slot_id}": {
+      "delete": {
+        "description": "Sessions already created from the slot are kept.",
+        "operationId": "delete_slot_v1_orgs__org_id__training_slots__slot_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slot_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Slot Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Slot",
+        "tags": [
+          "training"
+        ]
+      },
+      "put": {
+        "description": "Applies to sessions created afterwards; existing sessions are not changed.",
+        "operationId": "update_slot_v1_orgs__org_id__training_slots__slot_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slot_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Slot Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingSlotIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingSlotOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Slot",
+        "tags": [
+          "training"
         ]
       }
     },

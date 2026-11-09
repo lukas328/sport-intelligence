@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Any
 
 from sqlalchemy import (
@@ -18,6 +18,7 @@ from sqlalchemy import (
     SmallInteger,
     String,
     Text,
+    Time,
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -25,7 +26,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from handball_api.core.db import Base, EntityMixin, TenantMixin
 from handball_api.models._types import str_enum
-from handball_api.models.enums import AttendanceStatus, UploadStatus
+from handball_api.models.enums import AttendanceStatus, DrillLevel, UploadStatus
 
 
 class MatchFormat(Base, EntityMixin, TenantMixin):
@@ -141,6 +142,64 @@ class TrainingSession(Base, EntityMixin, TenantMixin):
     drills: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False, default=list)
     notes: Mapped[str | None] = mapped_column(Text)
     external_ref: Mapped[str | None] = mapped_column(String(200))  # ICS UID, Spond id
+    # the recurring slot this session was created from (kept when the slot is deleted)
+    slot_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("training_slots.id", ondelete="SET NULL"), index=True
+    )
+
+
+class TrainingSlot(Base, EntityMixin, TenantMixin):
+    """A recurring training time of a team in a season (weekday, start, duration, hall); the
+    sessions of the season are created from the slots for a date range."""
+
+    __tablename__ = "training_slots"
+    __table_args__ = (
+        CheckConstraint("weekday BETWEEN 1 AND 7", name="weekday_range"),
+        CheckConstraint("duration_min BETWEEN 15 AND 300", name="duration_range"),
+        CheckConstraint(
+            "valid_from IS NULL OR valid_until IS NULL OR valid_from <= valid_until",
+            name="valid_order",
+        ),
+    )
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    season_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("seasons.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    weekday: Mapped[int] = mapped_column(SmallInteger, nullable=False)  # ISO: 1 Monday, 7 Sunday
+    start_time: Mapped[time] = mapped_column(Time, nullable=False)  # local time (Europe/Zurich)
+    duration_min: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    location: Mapped[str | None] = mapped_column(String(160))
+    title: Mapped[str | None] = mapped_column(String(120))
+    note: Mapped[str | None] = mapped_column(String(500))
+    # null means from the start or until the end of the season
+    valid_from: Mapped[date | None] = mapped_column(Date)
+    valid_until: Mapped[date | None] = mapped_column(Date)
+
+
+class ClubDrill(Base, EntityMixin, TenantMixin):
+    """A drill of the club's own, next to the static library (packages/tactics). Made by a
+    team's staff; shared drills are seen by every team of the club."""
+
+    __tablename__ = "club_drills"
+    __table_args__ = (CheckConstraint("minutes BETWEEN 1 AND 180", name="minutes_range"),)
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    setup: Mapped[str | None] = mapped_column(Text)
+    coaching: Mapped[str | None] = mapped_column(Text)
+    minutes: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    players: Mapped[str | None] = mapped_column(String(20))  # e.g. "6-12"
+    level: Mapped[DrillLevel | None] = mapped_column(str_enum(DrillLevel))
+    focus: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    shared: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
 
 
 class Attendance(Base, EntityMixin, TenantMixin):

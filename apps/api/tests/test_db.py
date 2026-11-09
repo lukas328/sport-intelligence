@@ -56,6 +56,9 @@ async def test_foreign_keys_of_official_data_and_candidates_are_indexed(owner_co
         "org_access_requests",
         "official_suggestions",
         "player_statuses",
+        "training_slots",
+        "training_sessions",
+        "club_drills",
     }
     assert {(t, c) for t, c in missing if t in checked} == set()
     assert ("organizations", "claimed_by_id") not in missing

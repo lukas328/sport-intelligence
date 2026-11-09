@@ -53,6 +53,7 @@ from handball_api.models.official import (
 from handball_api.models.roster import Consent, Guardianship, Player, PlayerStatus, RosterEntry
 from handball_api.models.sessions import (
     Attendance,
+    ClubDrill,
     LiveTag,
     LiveTagSession,
     MatchFormat,
@@ -60,6 +61,7 @@ from handball_api.models.sessions import (
     OpponentPlayer,
     PaperReportUpload,
     TrainingSession,
+    TrainingSlot,
 )
 from handball_api.models.sharing import ShareLink
 from handball_api.models.tactics import Play
@@ -87,6 +89,7 @@ __all__ = [
     "CameraCalibration",
     "Clip",
     "ClipTag",
+    "ClubDrill",
     "Comment",
     "Consent",
     "Correction",
@@ -145,6 +148,7 @@ __all__ = [
     "Team",
     "Track",
     "TrainingSession",
+    "TrainingSlot",
     "User",
     "VideoAsset",
     "Voucher",
