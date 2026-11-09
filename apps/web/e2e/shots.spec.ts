@@ -78,8 +78,12 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await page.getByTestId("step-shots").click();
   const panel = page.getByTestId("shot-candidates");
   await expect(panel.getByRole("heading", { name: "Würfe prüfen" })).toBeVisible();
-  await expect(page.getByTestId("shot-candidates-report")).toContainText("Matchbericht: 24 Würfe, 0 im Video bestätigt, 1 vorgeschlagen, 2 ohne Stelle im Video.");
-  await expect(page.getByTestId("shot-candidates-report")).toContainText("21 liegen ausserhalb des Videos.");
+  // the report against the video as one row of counts
+  const report = page.getByTestId("shot-candidates-report");
+  await expect(report).toContainText("Matchbericht: 24 Würfe");
+  for (const [label, n] of [["im Video bestätigt", "0"], ["vorgeschlagen", "1"], ["ohne Stelle im Video", "2"], ["ausserhalb des Videos", "21"]] as const) {
+    await expect(report.locator("dl > div").filter({ has: page.getByText(label, { exact: true }) }).locator("dd")).toHaveText(n);
+  }
   await expect(page.getByTestId("shot-accept")).toContainText("Parade, Wurf von #14 Kurt Beispiel (TV Testdorf)");
   // one count: the report's moment first, the other open ones after it
   await expect(page.getByTestId("shot-candidate-focus")).toContainText("1 von 1 mit Matchbericht · 2 weitere offen");

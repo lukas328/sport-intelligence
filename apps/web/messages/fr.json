@@ -310,7 +310,9 @@
     "consentsAll": "Consentements vidéo : les {n} sont complets.",
     "consentsMissing": "Consentement manquant pour {n} sur {total} :",
     "hand_left": "Gaucher",
-    "hand_right": "Droitier"
+    "hand_right": "Droitier",
+    "available": "Disponibles {n} sur {total}",
+    "out": "{n, plural, one {est absent·e} other {sont absent·es}}"
   },
   "settings": {
     "title": "Paramètres",
@@ -1187,7 +1189,9 @@
     "noneOf_playlist": "Pas encore de playlist. Rassemble des clips dans la recherche de scènes et enregistre-les.",
     "noneOf_play": "Pas encore de combinaison. Crée-en une sous Entraînement, Combinaisons.",
     "noneOf_match": "Pas encore de match.",
-    "noneOf_drill": "Aucun exercice disponible."
+    "noneOf_drill": "Aucun exercice disponible.",
+    "stillOpen": "Encore ouvert : {names}",
+    "allDone": "Tout le monde l'a fait."
   },
   "drills": {
     "title": "Exercices",
@@ -2022,7 +2026,9 @@
     "noFollowup": "Ce constat n'a pas de chiffre à suivre.",
     "planFirst": "Planifier la première séance",
     "noneHint": "Une séance avec exercices existe comme plan sur le téléphone et en PDF pour la salle.",
-    "calendarTools": "S'abonner au calendrier et importer des dates"
+    "calendarTools": "S'abonner au calendrier et importer des dates",
+    "outOnDay": "{n, plural, one {1 absent·e :} other {# absent·es :}}",
+    "deleteConfirm": "Supprimer « {title} » ?"
   },
   "schedule": {
     "nav": "Mes rendez-vous",
@@ -2447,8 +2453,6 @@
   "shotCandidates": {
     "title": "Vérifier les tirs",
     "keys": "Dans la liste : <k>↑</k> <k>↓</k> choisir, <k>Enter</k> reprendre l'entrée de la feuille de match, <k>1</k> {own}, <k>2</k> {opp}, puis <k>G</k> but, <k>S</k> arrêt, <k>M</k> tir manqué, <k>P</k> poteau, <k>B</k> contré, <k>X</k> pas de tir, <k>R</k> revoir, <k>U</k> annuler.",
-    "report": "Feuille de match : {total} tirs, {confirmed} confirmés sur la vidéo, {suggested} proposés, {missing} sans moment dans la vidéo.",
-    "reportOutside": "{n, plural, one {# se situe} other {# se situent}} hors de la vidéo.",
     "question": "Tir ?",
     "position": "{pos} sur {n}",
     "fromReportLabel": "Reprendre de la feuille de match",
@@ -2483,7 +2487,12 @@
     "shotBy": "tir de {who}",
     "noKickoff": "L'engagement n'est pas encore placé : les temps de jeu sont estimés d'après la feuille de match.",
     "setKickoff": "Placer l'engagement",
-    "positionReport": "{pos} sur {n} avec la feuille de match · {more} autres ouverts"
+    "positionReport": "{pos} sur {n} avec la feuille de match · {more} autres ouverts",
+    "reportTitle": "Feuille de match : {total} tirs",
+    "report_confirmed": "confirmés dans la vidéo",
+    "report_suggested": "proposés",
+    "report_missing": "sans moment dans la vidéo",
+    "report_outside": "hors de la vidéo"
   },
   "officialTeams": {
     "title": "Chercher l'équipe",
@@ -2614,5 +2623,19 @@
     "via_operator": "support",
     "line": "Le club n'est pas encore confirmé : le partage et les profils publics sont désactivés d'ici là.",
     "lineLink": "Comment faire"
+  },
+  "playerStatus": {
+    "injured": "Blessé·e",
+    "absent": "Absent·e",
+    "fit": "Apte",
+    "injuredUntil": "Blessé·e jusqu'au {date}",
+    "absentUntil": "Absent·e jusqu'au {date}",
+    "set": "Statut",
+    "formFor": "Statut de {name}",
+    "kind": "Statut",
+    "until": "Jusqu'au (inclus)",
+    "note": "Note",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
   }
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { Check } from "lucide-react";
 import { DRILLS, type Lang } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -89,35 +88,36 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <section className="space-y-3" aria-label={t("team")}>
         {list.data && list.data.length === 0 && <EmptyState title={t("none")} />}
-        <ul className="space-y-2" data-testid="team-assignments">
-          {(list.data ?? []).map((a) => (
-            <li key={a.id} className="space-y-2 rounded-lg bg-raised border border-border p-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <Link href={targetLink(orgId, a)} className="font-medium underline decoration-dotted underline-offset-4">
-                  {a.title}
-                </Link>
-                <span className="text-sm text-muted">
-                  {t(`kind_${a.kind as "drill"}`)}
-                  {a.due_at && ` · ${t("dueOn", { date: format.dateTime(new Date(a.due_at), { dateStyle: "medium" }) })}`}
-                </span>
-                <span className="ml-auto text-sm tabular-nums">{t("progress", { done: a.done, total: a.recipients })}</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded bg-surface" aria-hidden>
-                <div className="h-full bg-accent" style={{ width: `${a.recipients ? (a.done / a.recipients) * 100 : 0}%` }} />
-              </div>
-              <ul className="flex flex-wrap gap-1 text-xs">
-                {(a.progress ?? []).map((p) => (
-                  <li key={String(p.user_id)} className="rounded-md border border-border px-2 py-0.5">
-                    {p.done_at ? <Check aria-hidden className="mr-1 inline size-3.5 text-ok" /> : null}
-                    {String(p.name)}
-                  </li>
-                ))}
-              </ul>
-              <button className="text-xs text-muted underline" onClick={async () => (await confirm({ title: t("delete"), danger: true })) && remove.mutate(a.id)}>
-                {t("delete")}
-              </button>
-            </li>
-          ))}
+        <ul className="border-t-2 border-foreground" data-testid="team-assignments">
+          {(list.data ?? []).map((a) => {
+            const open = (a.still_open ?? []).map((p) => String(p.name));
+            return (
+              <li key={a.id} className="space-y-2 border-b border-foreground/15 py-3.5">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <Link href={targetLink(orgId, a)} className="font-semibold hover:underline hover:underline-offset-4">
+                    {a.title}
+                  </Link>
+                  <span className="text-sm text-muted">
+                    {t(`kind_${a.kind as "drill"}`)}
+                    {a.due_at && ` · ${t("dueOn", { date: format.dateTime(new Date(a.due_at), { dateStyle: "medium" }) })}`}
+                  </span>
+                  <span className="ml-auto font-score text-lg tabular-nums" data-testid="assignment-progress">
+                    {t("progress", { done: a.done, total: a.recipients })}
+                  </span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-[2px] bg-foreground/10" aria-hidden>
+                  <div className="h-full bg-foreground" style={{ width: `${a.recipients ? (a.done / a.recipients) * 100 : 0}%` }} />
+                </div>
+                {/* who still has to do it, by name: the coach's next message */}
+                <p className="text-sm text-muted" data-testid="assignment-open">
+                  {a.recipients > 0 && open.length === 0 ? t("allDone") : open.length > 0 ? t("stillOpen", { names: open.join(", ") }) : null}
+                </p>
+                <button className="text-xs text-muted underline underline-offset-2 hover:text-foreground" onClick={async () => (await confirm({ title: t("delete"), danger: true })) && remove.mutate(a.id)}>
+                  {t("delete")}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </section>
       <section className="h-fit space-y-3 border-t-2 border-foreground pt-3">

@@ -310,7 +310,9 @@
     "consentsAll": "Einwilligungen für Video: alle {n} vollständig.",
     "consentsMissing": "Einwilligung fehlt bei {n} von {total}:",
     "hand_left": "Wurfhand links",
-    "hand_right": "Wurfhand rechts"
+    "hand_right": "Wurfhand rechts",
+    "available": "Verfügbar {n} von {total}",
+    "out": "{n, plural, one {fällt aus} other {fallen aus}}"
   },
   "settings": {
     "title": "Einstellungen",
@@ -1187,7 +1189,9 @@
     "noneOf_playlist": "Noch keine Playlist. In der Szenensuche Clips sammeln und als Playlist speichern.",
     "noneOf_play": "Noch kein Spielzug. Unter Training, Spielzüge einen anlegen.",
     "noneOf_match": "Noch kein Spiel angelegt.",
-    "noneOf_drill": "Keine Übung vorhanden."
+    "noneOf_drill": "Keine Übung vorhanden.",
+    "stillOpen": "Noch offen: {names}",
+    "allDone": "Alle haben es erledigt."
   },
   "drills": {
     "title": "Übungen",
@@ -2022,7 +2026,9 @@
     "noFollowup": "Für diese Erkenntnis gibt es keine Kennzahl zum Verfolgen.",
     "planFirst": "Erste Einheit planen",
     "noneHint": "Eine Einheit mit Übungen gibt es als Plan fürs Handy und als PDF für die Halle.",
-    "calendarTools": "Kalender abonnieren und Termine importieren"
+    "calendarTools": "Kalender abonnieren und Termine importieren",
+    "outOnDay": "{n, plural, one {1 fällt aus:} other {# fallen aus:}}",
+    "deleteConfirm": "«{title}» löschen?"
   },
   "schedule": {
     "nav": "Meine Termine",
@@ -2447,8 +2453,6 @@
   "shotCandidates": {
     "title": "Würfe prüfen",
     "keys": "In der Liste: <k>↑</k> <k>↓</k> wählen, <k>Enter</k> Eintrag aus dem Matchbericht übernehmen, <k>1</k> {own}, <k>2</k> {opp}, dann <k>G</k> Tor, <k>S</k> Parade, <k>M</k> Fehlwurf, <k>P</k> Pfosten, <k>B</k> geblockt, <k>X</k> kein Wurf, <k>R</k> nochmals, <k>U</k> rückgängig.",
-    "report": "Matchbericht: {total} Würfe, {confirmed} im Video bestätigt, {suggested} vorgeschlagen, {missing} ohne Stelle im Video.",
-    "reportOutside": "{n, plural, one {# liegt} other {# liegen}} ausserhalb des Videos.",
     "question": "Wurf?",
     "position": "{pos} von {n}",
     "fromReportLabel": "Aus dem Matchbericht übernehmen",
@@ -2483,7 +2487,12 @@
     "shotBy": "Wurf von {who}",
     "noKickoff": "Der Anwurf fehlt noch: die Spielzeiten sind aus dem Matchbericht geschätzt.",
     "setKickoff": "Anwurf setzen",
-    "positionReport": "{pos} von {n} mit Matchbericht · {more} weitere offen"
+    "positionReport": "{pos} von {n} mit Matchbericht · {more} weitere offen",
+    "reportTitle": "Matchbericht: {total} Würfe",
+    "report_confirmed": "im Video bestätigt",
+    "report_suggested": "vorgeschlagen",
+    "report_missing": "ohne Stelle im Video",
+    "report_outside": "ausserhalb des Videos"
   },
   "officialTeams": {
     "title": "Mannschaft suchen",
@@ -2614,5 +2623,19 @@
     "via_operator": "Support",
     "line": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile sind bis dahin aus.",
     "lineLink": "So geht es"
+  },
+  "playerStatus": {
+    "injured": "Verletzt",
+    "absent": "Abwesend",
+    "fit": "Fit",
+    "injuredUntil": "Verletzt bis {date}",
+    "absentUntil": "Abwesend bis {date}",
+    "set": "Status",
+    "formFor": "Status von {name}",
+    "kind": "Status",
+    "until": "Bis und mit",
+    "note": "Notiz",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
   }
 }

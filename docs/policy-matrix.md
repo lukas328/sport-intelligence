@@ -22,6 +22,7 @@ Enforced server-side; verified by `apps/api/tests/test_policy_matrix.py`.
 | `player_status.manage` | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ | ✓ |  |
 | `consent.read` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `consent.write` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
+| `consent.overview` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `team.members.manage` | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | `invite.team` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `match.read` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ | ✓ | ✓ |  |
@@ -39,6 +40,7 @@ Enforced server-side; verified by `apps/api/tests/test_policy_matrix.py`.
 | `assignment.write` | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ |  |  |
 | `assistant.use` | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ |  |  |
 | `training.write` | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ | ✓ |  |
+| `player_line.read_all` | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ | ✓ |  |
 | `official.manage` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `join_requests.manage` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 

@@ -35,6 +35,7 @@ class Action(StrEnum):
     PLAYER_STATUS = "player_status.manage"
     CONSENT_READ = "consent.read"
     CONSENT_WRITE = "consent.write"
+    CONSENT_OVERVIEW = "consent.overview"
     TEAM_MEMBERS_READ = "team.members.read"
     TEAM_MEMBERS_MANAGE = "team.members.manage"
     INVITE_TEAM = "invite.team"
@@ -53,6 +54,7 @@ class Action(StrEnum):
     ASSIGNMENT_WRITE = "assignment.write"
     ASSISTANT_USE = "assistant.use"
     TRAINING_WRITE = "training.write"
+    PLAYER_LINE_READ_ALL = "player_line.read_all"
     OFFICIAL_MANAGE = "official.manage"
     JOIN_REQUESTS_MANAGE = "join_requests.manage"
 
@@ -91,6 +93,8 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.PLAYER_STATUS: _VIDEO_WORK | _MANAGER,
     Action.CONSENT_READ: _ORGANISE,
     Action.CONSENT_WRITE: _ORGANISE,
+    # the team's consent states per purpose before filming: whoever manages roster and consents
+    Action.CONSENT_OVERVIEW: _ORGANISE,
     Action.TEAM_MEMBERS_MANAGE: _COACH,
     Action.INVITE_TEAM: _ORGANISE,
     Action.MATCH_READ: _READERS,
@@ -110,6 +114,9 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.ASSISTANT_USE: _VIDEO_WORK,
     # sessions, attendance and the calendar feed (5.7); athletic coaches plan sessions too
     Action.TRAINING_WRITE: _VIDEO_WORK | _MANAGER,
+    # a player's season line (figures per match with event links): the staff for every player
+    # of the team, players only their own (with match.read)
+    Action.PLAYER_LINE_READ_ALL: _VIDEO_WORK | _MANAGER,
     # official data: sync and suggestions (roster suggestions carry names from the official
     # data, visible only to whoever organises the team); join requests like invitations
     Action.OFFICIAL_MANAGE: _ORGANISE,

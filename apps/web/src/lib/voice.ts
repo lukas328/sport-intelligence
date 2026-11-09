@@ -20,6 +20,8 @@ export interface SeasonRow {
   score_opponent: number;
   xg: number;
   xg_against: number;
+  /** share of the opponent's shots on target with a position (absent from older answers) */
+  xg_against_coverage?: number | null;
   kickoff_at: string;
 }
 
@@ -66,7 +68,9 @@ export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null): 
       evidence: { key: "voice.xgEvidence", params: { goals, xg: round1(xg) } },
     };
   }
-  const defence = xgGap(against, xga);
+  // the same rule as for the attack: no statement from xG against that rests on few positions
+  const defenceCovered = sorted.every((r) => r.xg_against_coverage === undefined || (r.xg_against_coverage != null && r.xg_against_coverage >= XG_MIN_COVERAGE));
+  const defence = defenceCovered ? xgGap(against, xga) : null;
   if (defence === "under") {
     return { headline: { key: "voice.defenceHeld", params: {} }, evidence: { key: "voice.xgaEvidence", params: { against, xga: round1(xga) } } };
   }
