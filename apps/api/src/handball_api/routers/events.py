@@ -20,9 +20,11 @@ from handball_api.schemas.events import (
     OfficialReportIn,
     OfficialReportResult,
 )
+from handball_api.schemas.season_line import SeasonLine
 from handball_api.services import events as service
 from handball_api.services import goal_candidates, official_report, paper_reports
 from handball_api.services import insights as insights_service
+from handball_api.services import season_line as season_line_service
 
 router = APIRouter(prefix="/v1/orgs/{org_id}", tags=["events"])
 # each import fetches the report from the federation's server (and reads a PDF)
@@ -215,6 +217,23 @@ async def season_stats(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) 
     and `xg_coverage` = shots with xG / shots on target (null without shots), and
     shooting/save percentages only from matches with recorded misses or saves."""
     return await insights_service.season_stats(scope.ctx, team_id, season_id)
+
+
+@router.get(
+    "/teams/{team_id}/seasons/{season_id}/players/{player_id}/line",
+    response_model=SeasonLine,
+    tags=["insights"],
+)
+async def season_line(
+    team_id: uuid.UUID, season_id: uuid.UUID, player_id: uuid.UUID, scope: OrgDep
+) -> SeasonLine:
+    """A player's season line: per played match (as in the season statistics) date, opponent,
+    result and the player's figures as the match statistics count them (one source per goal),
+    each with the ids of its events in `events` (same keys) to open the clips, and season
+    `totals`. Goalkeepers: `faced`, `saves`, `goals_against`, credited by the keeper on the shot.
+    `attendance` is the recorded presence; playing minutes are not recorded. The staff read
+    every player of the team, players only their own line."""
+    return await season_line_service.season_line(scope.ctx, team_id, season_id, player_id)
 
 
 @router.get("/opponents/{opponent_id}/profile", response_model=dict[str, Any], tags=["insights"])

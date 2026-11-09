@@ -162,6 +162,37 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (helper, branch `helper/consents-seasonline`): wishes 4 and 6 are built in the API
+  as read-only views (no migration), the client is regenerated; no UI yet.
+  4. Consent overview: `GET /v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/consents`
+     (action `consent.overview`: coach, team manager, club admins, as for managing roster and
+     consents; analysts and players get 403). `players` are the active roster entries by
+     jersey number (`player_id`, `roster_entry_id`, `jersey_number`, `first_name`,
+     `last_name`, `has_account`, `minor` true/false/null) with `purposes`, one per purpose
+     (`analysis`, `highlights_internal`, `highlights_public`, `public_profile`,
+     `training_data`): `{kind, state: "granted" | "refused" | "missing", since, given_by:
+     "self" | "parent" | "guardian" | null, given_by_name, consent_id, applicable}`. `since` is
+     the given date when granted, the revocation date when refused; `applicable` is false for
+     the public purposes in youth teams. `summary` per purpose: `{kind, applicable, players,
+     granted, refused, missing}` ("12 von 14" is `granted` of `players`).
+  6. Season line:
+     `GET /v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/players/{player_id}/line` (staff with `player_line.read_all`: coach, analyst, goalkeeper and
+     athletic coach, team manager, club admins; a player only their own line, else 403; an
+     official-only entry hidden by `roster.visible_players` is a 404). Header: `player_id`,
+     `first_name`, `last_name`, `jersey_number`, `main_position`. `matches` (every played match,
+     as the season statistics): `match_id`, `kickoff_at`, `opponent`, `is_home`,
+     `competition`, `score_own`, `score_opponent`, `result` ("win" | "draw" | "loss"),
+     `tagged`, `involved`, `attendance` (recorded presence) and `response`, `figures`,
+     `shooting_pct`, `save_pct`, `events`. `figures` and `events` have the same keys: `goals`,
+     `shots` (on target), `misses`, `posts`, `saved`, `blocked`, `seven_m_goals`,
+     `seven_m_shots`, `assists`, `turnovers` (technical faults), `suspensions` (2 minutes),
+     `yellow_cards`, `red_cards`, and for goalkeepers `faced`, `saves`, `goals_against`,
+     `seven_m_faced`, `seven_m_saves`; `events[key]` lists the event ids behind `figures[key]`
+     (as many as the figure) for the clips. Figures come from the match statistics (one source
+     per goal), so they agree with the match page. `totals`: the same figures summed plus
+     `matches`, `tagged_matches`, `matches_involved`, `matches_present`, `shooting_pct`,
+     `save_pct`. Playing minutes are not recorded anywhere, so there are none.
+
 - 2026-11-09 (helper, branch `helper/squad-status-progress`): wishes 1 and 2 are built in the API
   (migration 0036), the client is regenerated; no UI yet.
   1. Player status: `PUT /v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/status` with
