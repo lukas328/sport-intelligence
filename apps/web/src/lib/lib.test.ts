@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import deCH from "../../messages/de-CH.json";
 import en from "../../messages/en.json";
 import fr from "../../messages/fr.json";
 import { clubTheme, contrastRatio, contrastText } from "./color";
 import { errorKey, fieldErrors, KNOWN_ERRORS } from "./errors";
-import { safeNext } from "./nav";
+import { enterApp, safeNext } from "./nav";
 
 function keys(obj: object, prefix = ""): string[] {
   return Object.entries(obj).flatMap(([k, v]) =>
@@ -88,5 +88,21 @@ describe("safeNext", () => {
     expect(safeNext("https://evil.com")).toBe("/app");
     expect(safeNext("/\\evil.com")).toBe("/app");
     expect(safeNext(null)).toBe("/app");
+  });
+});
+
+describe("enterApp", () => {
+  it("loads the target as a new document after the session changed", () => {
+    const location = { assign: vi.fn(), replace: vi.fn() };
+    vi.stubGlobal("window", { location });
+    try {
+      enterApp("/app");
+      expect(location.assign).toHaveBeenCalledWith("/app");
+      enterApp("/login?totp=1", { replace: true });
+      expect(location.replace).toHaveBeenCalledWith("/login?totp=1");
+      expect(location.assign).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

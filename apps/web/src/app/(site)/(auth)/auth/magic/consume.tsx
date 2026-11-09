@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Card } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { enterApp } from "@/lib/nav";
 
 export function ConsumeMagicLink() {
   const t = useTranslations();
-  const router = useRouter();
   const token = useSearchParams().get("token");
   const [error, setError] = useState<ErrorKey | null>(token ? null : "invalid-token");
   const started = useRef(false);
@@ -20,10 +20,9 @@ export function ConsumeMagicLink() {
     started.current = true;
     api.POST("/v1/auth/magic-link/consume", { body: { token } }).then(({ data, error }) => {
       if (error) return setError(errorKey(error));
-      router.replace(data.status === "totp_required" ? "/login?totp=1" : "/app");
-      router.refresh();
+      enterApp(data.status === "totp_required" ? "/login?totp=1" : "/app", { replace: true });
     });
-  }, [token, router]);
+  }, [token]);
 
   return (
     <Card className="space-y-4">
