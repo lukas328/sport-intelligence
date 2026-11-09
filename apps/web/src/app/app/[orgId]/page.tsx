@@ -15,16 +15,18 @@ export default async function TodayPage({ params }: { params: Promise<{ orgId: s
   const unverified = org?.my_role === "org_admin" && org.verification === "unverified";
   const t = await getTranslations("verification");
   return (
-    <div className="space-y-6">
-      {unverified && (
-        <p className="text-sm text-muted" data-testid="unverified-line">
-          {t("line")}{" "}
-          <Link href={`/app/${orgId}/settings#official-section`} className="font-medium text-foreground underline underline-offset-4">
-            {t("lineLink")}
-          </Link>
-        </p>
-      )}
-      <TodayView orgId={orgId} />
-    </div>
+    <TodayView
+      orgId={orgId}
+      notice={
+        unverified ? (
+          <p className="text-sm text-muted" data-testid="unverified-line">
+            {t("line")}{" "}
+            <Link href={`/app/${orgId}/settings#official-section`} className="font-medium text-foreground underline underline-offset-4">
+              {t("lineLink")}
+            </Link>
+          </p>
+        ) : undefined
+      }
+    />
   );
 }

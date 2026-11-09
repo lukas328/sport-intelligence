@@ -77,20 +77,23 @@ function Row({ label, children, href }: { label: string; children: ReactNode; hr
   );
 }
 
-export function TodayView({ orgId }: { orgId: string }) {
+/** `notice`: one quiet line for the club's admins, right under the stage (the stage pulls itself
+ * up to the top edge and would cover anything above it). */
+export function TodayView({ orgId, notice }: { orgId: string; notice?: ReactNode }) {
   const { mode, team, teams } = useShell();
-  if (teams.length === 0) return <NoTeam orgId={orgId} />;
-  if (mode === "staff" && team) return <StaffToday orgId={orgId} teamId={team.id} />;
+  if (teams.length === 0) return <NoTeam orgId={orgId} notice={notice} />;
+  if (mode === "staff" && team) return <StaffToday orgId={orgId} teamId={team.id} notice={notice} />;
   if (mode === "family") return <FamilyToday orgId={orgId} />;
   return <PlayerToday orgId={orgId} />;
 }
 
-function NoTeam({ orgId }: { orgId: string }) {
+function NoTeam({ orgId, notice }: { orgId: string; notice?: ReactNode }) {
   const t = useTranslations("today");
   const greeting = useGreeting();
   return (
     <div className="space-y-8">
       <PageHeader eyebrow={greeting} title={t("teams")} />
+      {notice}
       <OnboardingChecklist orgId={orgId} teamId={null} />
       <EmptyState title={t("noTeam")} />
     </div>
@@ -99,7 +102,7 @@ function NoTeam({ orgId }: { orgId: string }) {
 
 /* ---------------- coaches and analysts ---------------- */
 
-function StaffToday({ orgId, teamId }: { orgId: string; teamId: string }) {
+function StaffToday({ orgId, teamId, notice }: { orgId: string; teamId: string; notice?: ReactNode }) {
   const t = useTranslations();
   const now = useNow({ updateInterval: 60_000 });
   const matches = useQuery({
@@ -127,6 +130,7 @@ function StaffToday({ orgId, teamId }: { orgId: string; teamId: string }) {
       ) : (
         <FirstStage base={base} />
       )}
+      {notice}
       <OnboardingChecklist orgId={orgId} teamId={teamId} />
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
         <Block title={t("today.standsOut")} href={last ? `/app/${orgId}/matches/${last.id}` : undefined} linkLabel={t("today.openMatch")}>

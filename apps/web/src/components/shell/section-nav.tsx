@@ -127,9 +127,11 @@ function BackLink({ href, parent }: { href: string; parent: Section }) {
 
 /** Team layout chrome: the header of the destination a team page belongs to. */
 export function TeamChrome() {
-  const { active } = useArea();
+  const { active, page } = useArea();
   const path = usePathname();
   if (!active) return null;
+  // the official data and the join requests sit under the squad but bring their own heading
+  if (page === "official" || page === "join-requests") return null;
   // the season page opens with its own stage (one stage per screen, at the top)
   if (/\/season$/.test(path)) return null;
   // the fixture list has its own title and actions

@@ -258,3 +258,16 @@ the phone captures come from full-page screenshots; the page keeps 112 px free u
 
 Still open: the phone work strip scrolls sideways and cuts the last visible label (a scroll
 affordance, kept); a player joining from the team search sees the coach's "Schritt 1 von 4".
+
+## Review of the remaining official-data screens (UI session, 2026-11-09)
+
+Join requests, the settings section "Offizielle Daten" (verification, access requests) and the
+overview line for an unverified club, desktop light and dark and phone, invented data.
+
+- The overview line "Der Verein ist noch nicht bestätigt …" was never visible: the stage pulls
+  itself up to the top edge and covered it. It is now passed into the overview and sits right
+  under the stage.
+- Join requests and the official inbox showed the team header ("Kader") above their own heading
+  once they belonged to Team · Kader; the team header now steps aside on these two pages.
+- The settings section reads well: ways to confirm the club with the club's mail domain, access
+  requests with "Als Trainer/in aufnehmen", "Als Vereinsadmin aufnehmen" and "Ablehnen".
