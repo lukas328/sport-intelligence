@@ -26,6 +26,7 @@ export function AccountSection({ me }: { me: Me }) {
   const [pwError, setPwError] = useState<ErrorKey | null>(null);
   const [pwDone, setPwDone] = useState(false);
   const [resent, setResent] = useState(false);
+  const [resendError, setResendError] = useState<ErrorKey | null>(null);
   const [hasPassword, setHasPassword] = useState(me.has_password);
   // a long list of old sign-ins made the page thousands of pixels long: this device and the latest few
   const [allSessions, setAllSessions] = useState(false);
@@ -79,13 +80,16 @@ export function AccountSection({ me }: { me: Me }) {
               type="button"
               className="underline underline-offset-4"
               onClick={async () => {
-                await api.POST("/v1/me/email/verify");
+                const { error } = await api.POST("/v1/me/email/verify");
+                if (error) return setResendError(errorKey(error));
+                setResendError(null);
                 setResent(true);
               }}
             >
               {t("account.resend")}
             </button>
           )}
+          {resendError && <span className="block mt-1">{t(`errors.${resendError}`)}</span>}
         </Alert>
       )}
       <div className="border-t border-foreground/15 pt-5 space-y-3">

@@ -188,6 +188,17 @@ async def _delete_entry(a: Api, w: World) -> Any:
     return await a.delete(w.t(f"/roster/{e['id']}"))
 
 
+async def _link_account(a: Api, w: World) -> Any:
+    e = await w.new_entry()
+    return await a.put(w.t(f"/players/{e['player_id']}/account"), json={"user_id": w.dummy_user})
+
+
+async def _unlink_account(a: Api, w: World) -> Any:
+    e = await w.new_entry()
+    await w.admin.put(w.t(f"/players/{e['player_id']}/account"), json={"user_id": w.dummy_user})
+    return await a.delete(w.t(f"/players/{e['player_id']}/account"))
+
+
 async def _put_status(a: Api, w: World) -> Any:
     e = await w.new_entry()
     return await a.put(w.t(f"/players/{e['player_id']}/status"), json={"kind": "absent"})
@@ -484,6 +495,8 @@ ENDPOINTS += [
     ),
     ("PATCH roster entry", ORGANISE, _patch_entry),
     ("DELETE roster entry", ORGANISE, _delete_entry),
+    ("PUT player account", ORGANISE, _link_account),
+    ("DELETE player account", ORGANISE, _unlink_account),
     ("GET consents", ORGANISE, _get_consents),
     (
         "GET consent overview",

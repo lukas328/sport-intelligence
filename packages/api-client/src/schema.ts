@@ -3829,6 +3829,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Link Player Account
+         * @description Link a team member's account to this roster player (staff). 409 if the player already
+         *     has another account: unlink first. Parents are linked to a child by invitation
+         *     (guardianship), not here.
+         */
+        put: operations["link_player_account_v1_orgs__org_id__teams__team_id__players__player_id__account_put"];
+        post?: never;
+        /**
+         * Unlink Player Account
+         * @description Remove the account link of this roster player (staff); the membership stays.
+         */
+        delete: operations["unlink_player_account_v1_orgs__org_id__teams__team_id__players__player_id__account_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/consents": {
         parameters: {
             query?: never;
@@ -6344,6 +6370,12 @@ export interface components {
              * Format: email
              */
             email: string;
+            /** First Name */
+            first_name?: string | null;
+            /** Jersey Number */
+            jersey_number?: number | null;
+            /** Last Name */
+            last_name?: string | null;
             /** @default member */
             org_role?: components["schemas"]["OrgRole"];
             /** Player Id */
@@ -8085,6 +8117,29 @@ export interface components {
             /** Tags */
             tags?: string[] | null;
         };
+        /** PlayerAccountIn */
+        PlayerAccountIn: {
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
+        /** PlayerAccountOut */
+        PlayerAccountOut: {
+            /**
+             * Name
+             * @description The linked account's name
+             */
+            name?: string | null;
+            /**
+             * Player Id
+             * Format: uuid
+             */
+            player_id: string;
+            /** User Id */
+            user_id: string | null;
+        };
         /**
          * PlayerAvailability
          * @description A player's status on the squad, set by the staff; no status means fit.
@@ -8603,6 +8658,8 @@ export interface components {
         };
         /** RosterEntryOut */
         RosterEntryOut: {
+            /** Account User Id */
+            account_user_id?: string | null;
             /** Active */
             active: boolean;
             /** Birth Year */
@@ -18296,6 +18353,74 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PlayerStatusOut"][];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    link_player_account_v1_orgs__org_id__teams__team_id__players__player_id__account_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                player_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlayerAccountIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayerAccountOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unlink_player_account_v1_orgs__org_id__teams__team_id__players__player_id__account_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                player_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -24,6 +24,22 @@ class EmailSender(Protocol):
     async def send(self, email: Email) -> None: ...
 
 
+async def try_send(sender: EmailSender, email: Email, purpose: str, **fields: object) -> bool:
+    """Send, but never let a provider failure undo the action that triggered the mail.
+
+    Logs the failure without the recipient address or the provider message (SMTP errors often
+    echo the address); `fields` carries ids only. Returns whether the mail went out.
+    """
+    try:
+        await sender.send(email)
+    except Exception as exc:
+        get_logger("email").error(
+            "email_send_failed", purpose=purpose, error=type(exc).__name__, **fields
+        )
+        return False
+    return True
+
+
 @dataclass
 class MemoryEmailSender:
     outbox: list[Email] = field(default_factory=list)

@@ -17,7 +17,7 @@ from sqlalchemy import func, select, update
 from stdnum import iso11649
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
-from handball_api.core.email import Email
+from handball_api.core.email import Email, try_send
 from handball_api.core.errors import ProblemError
 from handball_api.models import Invoice, Organization, OrgMembership, User, Voucher
 from handball_api.models.enums import OrgRole, PaymentMethod, Plan
@@ -146,7 +146,8 @@ def render_pdf(ctx: Ctx, inv: Invoice, kind: str = "invoice") -> bytes:
     )
 
 
-async def _send(ctx: Ctx, inv: Invoice, kind: str) -> None:
+async def _send(ctx: Ctx, inv: Invoice, kind: str) -> bool:
+    """False when the provider failed (logged); the invoice itself stays valid."""
     lang = str(inv.recipient.get("locale") or "de-CH")
     subject, body = MAIL.get(lang, MAIL["de-CH"])[kind]
     params = {
@@ -156,13 +157,16 @@ async def _send(ctx: Ctx, inv: Invoice, kind: str) -> None:
         "total": f"CHF {invoice_pdf.chf(inv.amount_cents)}",
         "due": inv.due_date.strftime("%d.%m.%Y"),
     }
-    await ctx.email.send(
+    return await try_send(
+        ctx.email,
         Email(
             to=str(inv.recipient["email"]),
             subject=subject.format(**params),
             text=body.format(**params),
             attachments=((f"{inv.number}.pdf", "application/pdf", render_pdf(ctx, inv, kind)),),
-        )
+        ),
+        f"invoice_{kind}",
+        invoice_id=str(inv.id),
     )
 
 
@@ -416,15 +420,17 @@ async def run_dunning(ctx: Ctx, today: date | None = None) -> dict[str, int]:
         overdue = (today - inv.due_date).days
         await set_tenant(ctx.db, inv.organization_id)
         await enable_system_access(ctx.db, reason="dunning run")
+        # a level only counts once its mail went out, so a failed mail is retried next run
         if overdue >= DUNNING_DAYS and inv.dunning_level < 2:
-            inv.dunning_level = 2
-            inv.reminded_at = datetime.now(UTC)
-            await _send(ctx, inv, "dunning")
-            counts["dunning"] += 1
-        elif overdue >= REMINDER_DAYS and inv.dunning_level < 1:
+            if await _send(ctx, inv, "dunning"):
+                inv.dunning_level = 2
+                inv.reminded_at = datetime.now(UTC)
+                counts["dunning"] += 1
+        elif (
+            overdue >= REMINDER_DAYS and inv.dunning_level < 1 and await _send(ctx, inv, "reminder")
+        ):
             inv.dunning_level = 1
             inv.reminded_at = datetime.now(UTC)
-            await _send(ctx, inv, "reminder")
             counts["reminders"] += 1
         if overdue >= CUTOFF_DAYS and inv.dunning_level < 3:
             inv.dunning_level = 3

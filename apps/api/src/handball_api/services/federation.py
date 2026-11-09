@@ -17,7 +17,7 @@ from typing import Any
 from sqlalchemy import func, select
 
 from handball_api.core.db import disable_system_access, enable_system_access
-from handball_api.core.email import Email
+from handball_api.core.email import Email, try_send
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import hash_token, new_token
 from handball_api.models import (
@@ -216,7 +216,9 @@ async def invite(ctx: Ctx, federation_id: uuid.UUID, email: str) -> dict[str, An
     await ctx.db.flush()
     await disable_system_access(ctx.db)
     link = f"{ctx.settings.web_base_url.rstrip('/')}/federation/join?token={token}"
-    await ctx.email.send(
+    # the invite stays valid when the mail fails (logged)
+    await try_send(
+        ctx.email,
         Email(
             to=email,
             subject=f"{f.name}: Lizenz für euren Verein / licence pour votre club / club licence",
@@ -230,7 +232,9 @@ async def invite(ctx: Ctx, federation_id: uuid.UUID, email: str) -> dict[str, An
                 "und keine Personen. / The federation sees usage and anonymised figures, never "
                 "videos or people."
             ),
-        )
+        ),
+        "federation_invite",
+        federation_id=str(f.id),
     )
     await audit.record(ctx, "federation.invited", target_type="federation", target_id=f.id)
     return {"email": inv.email, "expires_at": inv.expires_at}

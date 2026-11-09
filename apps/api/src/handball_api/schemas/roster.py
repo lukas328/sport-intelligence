@@ -71,6 +71,8 @@ class RosterEntryOut(ApiModel):
     main_position: Position | None
     secondary_positions: list[Position]
     has_account: bool
+    # the linked account (staff only; None for other viewers and for entries without one)
+    account_user_id: uuid.UUID | None = None
     consent_complete: bool
     # injured or absent (None: fit); staff see every player's, players only their own
     status: PlayerStatusOut | None = None
@@ -113,6 +115,17 @@ class ConsentOut(ApiModel):
     given_at: datetime
     document_ref: str | None
     revoked_at: datetime | None
+
+
+class PlayerAccountIn(ApiModel):
+    # a member of the team (not a parent: parents are linked to a child by guardianship)
+    user_id: uuid.UUID
+
+
+class PlayerAccountOut(ApiModel):
+    player_id: uuid.UUID
+    user_id: uuid.UUID | None
+    name: str | None = Field(default=None, description="The linked account's name")
 
 
 ConsentState = Literal["granted", "refused", "missing"]
