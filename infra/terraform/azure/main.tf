@@ -206,7 +206,7 @@ resource "azurerm_key_vault_secret" "manual" {
   depends_on   = [azurerm_role_assignment.kv_deployer]
 
   lifecycle {
-    ignore_changes = [value]
+    ignore_changes = [value, tags]
   }
 }
 
@@ -380,14 +380,15 @@ resource "azurerm_container_app" "redis" {
 
   # Job queue and rate limits only; nothing durable lives here (ADR 001), so no persistence.
   template {
-    min_replicas = 1
+    min_replicas = var.paused ? 0 : 1
     max_replicas = 1
     container {
       name    = "redis"
       image   = "docker.io/library/redis:7-alpine"
       cpu     = 0.25
       memory  = "0.5Gi"
-      command = ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "384mb"]
+      # via sh: the azurerm provider cannot read back an empty argument ("--save" "")
+      command = ["sh", "-c", "exec redis-server --save '' --appendonly no --maxmemory 384mb"]
     }
   }
 
@@ -432,7 +433,7 @@ resource "azurerm_container_app" "python" {
   }
 
   template {
-    min_replicas = each.value.min
+    min_replicas = var.paused ? 0 : each.value.min
     max_replicas = each.value.max
 
     container {
@@ -499,7 +500,7 @@ resource "azurerm_container_app" "web" {
   }
 
   template {
-    min_replicas = var.web_min_replicas
+    min_replicas = var.paused ? 0 : var.web_min_replicas
     max_replicas = 3
 
     container {
