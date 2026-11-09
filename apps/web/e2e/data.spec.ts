@@ -40,11 +40,28 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   // the link is stored with the request's commit; poll instead of a single read
   await expect.poll(async () => (await page.request.get(url.slice(url.indexOf("/v1/")))).text()).toContain("Abschluss Flügel");
 
-  // matrix: empty team, but the page and its controls work
+  // matrix: empty team, but the page and its controls work. The team gets an earlier season in
+  // the list, so the season choice shows; choosing the current one asks for exactly that season
+  const team = await (await page.request.get(`/v1/orgs/${orgId}/teams/${teamId}`)).json();
+  const current = team.current_season as { id: string; label: string };
+  await page.route(`**/v1/orgs/${orgId}/teams/${teamId}/seasons`, (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify([
+        { ...current, starts_on: "2026-07-01", ends_on: "2027-06-30" },
+        { id: "00000000-0000-4000-8000-000000000f25", label: "2025/26", starts_on: "2025-07-01", ends_on: "2026-06-30" },
+      ]),
+    }),
+  );
+  const asked: unknown[] = [];
+  page.on("request", (r) => r.url().endsWith("/matrix") && r.method() === "POST" && asked.push(r.postDataJSON()));
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await follow(page, page.getByRole("link", { name: "Saison", exact: true }), /\/season$/);
   await follow(page, page.getByRole("link", { name: "Statistik-Matrix" }), /\/matrix$/);
   await expect(page.getByRole("heading", { name: "Statistik-Matrix" })).toBeVisible();
+  await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
+  await page.getByTestId("matrix-seasons").selectOption(current.id);
+  await expect.poll(() => asked.at(-1)).toMatchObject({ season_ids: [current.id] });
   await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
   // on phones the selection is folded behind one line
   const selection = page.getByRole("button", { name: /^Auswahl/ });

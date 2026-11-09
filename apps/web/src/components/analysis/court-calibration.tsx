@@ -265,3 +265,24 @@ export function CourtCalibration({
     </div>
   );
 }
+
+/**
+ * The hall image with the current court drawn on it, read-only: enough to say "Passt" without
+ * opening the marking dialog. Nothing when the court is not on the hall image.
+ */
+export function CourtPreview({ orgId, videoId, analysis, alt }: { orgId: string; videoId: string; analysis: Analysis; alt: string }) {
+  const pano = analysis.panorama;
+  const cal = analysis.calibration;
+  if (!pano || !cal || cal.image_size[0] !== pano.width || cal.image_size[1] !== pano.height) return null;
+  return (
+    <div className="relative overflow-hidden rounded-md bg-black ring-1 ring-inset ring-border" data-testid="court-preview">
+      {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image, not a static asset */}
+      <img src={`/v1/orgs/${orgId}/videos/${videoId}/panorama`} alt={alt} width={pano.width} height={pano.height} className="block h-auto w-full" />
+      <svg viewBox={`0 0 ${pano.width} ${pano.height}`} className="pointer-events-none absolute inset-0 size-full" aria-hidden>
+        {courtPolylines(cal.homography).map((line, i) => (
+          <path key={i} d={imagePath(line)} fill="none" stroke="#f97316" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        ))}
+      </svg>
+    </div>
+  );
+}

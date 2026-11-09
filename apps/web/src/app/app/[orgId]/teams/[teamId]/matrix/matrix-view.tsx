@@ -57,6 +57,14 @@ export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: strin
       (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", { params: { path: { ...team, season_id: seasonId! } } })).data ?? [],
     enabled: !!seasonId,
   });
+  // which seasons the matrix reads: by default the current and the previous one (the API's default)
+  const seasons = useQuery({
+    queryKey: ["seasons", teamId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons", { params: { path: team } })).data ?? [],
+  });
+  const seasonChoice = spec.season_ids == null ? "" : spec.season_ids.length === 1 ? spec.season_ids[0]! : "all";
+  const setSeasons = (v: string) =>
+    setSpec((s) => ({ ...s, season_ids: v === "" ? null : v === "all" ? (seasons.data ?? []).map((x) => x.id).slice(0, 20) : [v] }));
   const filter = (spec.filter ?? {}) as Record<string, string | number | undefined>;
   const setFilter = (k: string, v: string | number | undefined) =>
     setSpec((s) => {
@@ -122,7 +130,15 @@ export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: strin
   };
   const select = "min-h-9 rounded-md border border-border bg-background px-2 text-sm";
 
-  const summary = [t(`dim_${spec.rows}`), filter.side === "own" ? teamName || t("own") : filter.side === "opponent" ? t("opponent") : t("both"), t("metricsN", { n: spec.metrics.length })].join(" · ");
+  const seasonLabel = seasonChoice === "" ? null : seasonChoice === "all" ? t("seasonsAll") : seasons.data?.find((x) => x.id === seasonChoice)?.label;
+  const summary = [
+    t(`dim_${spec.rows}`),
+    filter.side === "own" ? teamName || t("own") : filter.side === "opponent" ? t("opponent") : t("both"),
+    seasonLabel,
+    t("metricsN", { n: spec.metrics.length }),
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <div className="space-y-5">
       <p className="text-sm text-muted">{t("hint")}</p>
@@ -155,6 +171,20 @@ export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: strin
               <option value="opponent">{t("opponent")}</option>
             </select>
           </label>
+          {(seasons.data?.length ?? 0) > 1 && (
+            <label className="text-sm">
+              <span className="block font-medium">{t("seasons")}</span>
+              <select className={select} value={seasonChoice} onChange={(e) => setSeasons(e.target.value)} data-testid="matrix-seasons">
+                <option value="">{t("seasonsRecent")}</option>
+                {(seasons.data ?? []).map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.label}
+                  </option>
+                ))}
+                <option value="all">{t("seasonsAll")}</option>
+              </select>
+            </label>
+          )}
           <label className="text-sm">
             <span className="block font-medium">{t("lastN")}</span>
             <input

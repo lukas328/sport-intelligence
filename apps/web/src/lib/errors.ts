@@ -37,6 +37,7 @@ export const KNOWN_ERRORS = [
   "duplicate-name",
   "unknown-tag",
   "invalid-slide",
+  "no-video",
   "nothing-to-export",
   "too-many-slides",
   "image-too-large",

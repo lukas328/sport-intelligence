@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/ui/back-link";
+import { PageHeader } from "@/components/ui/page-header";
+import { BackToFixtures } from "./back-to-fixtures";
 import Link from "next/link";
 import { OpponentPlayers } from "./opponent-players";
 import { notFound } from "next/navigation";
@@ -52,12 +53,10 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
   const xg = xgBasis(p.totals);
   return (
     <div className="space-y-6">
-      <BackLink fallback={`/app/${orgId}`} />
-      <header>
-        <p className="text-sm text-muted">{t("title")}</p>
-        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{p.opponent.name}</h1>
-        <p className="text-sm">{t("record", p.record)}</p>
-      </header>
+      <div>
+        <BackToFixtures orgId={orgId} />
+        <PageHeader eyebrow={t("title")} title={p.opponent.name} description={t("record", p.record)} />
+      </div>
       {p.tagged_matches === 0 ? (
         <EmptyState title={t("none")} />
       ) : (

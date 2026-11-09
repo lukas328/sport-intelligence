@@ -18,7 +18,16 @@ type Claimed = Schemas["ClaimOut"];
 /** Step one of the onboarding with the official data: find the team, then take it over (the
  * schedule, results and squad come with it), ask its club for access, or ask to join as a player.
  * Creating a club by hand stays one click away. */
-export function OfficialTeamSearch({ onManual, onClaimed }: { onManual: () => void; onClaimed?: (club: string) => void }) {
+export function OfficialTeamSearch({
+  onManual,
+  onClaimed,
+  onJoinSent,
+}: {
+  onManual: () => void;
+  onClaimed?: (club: string) => void;
+  /** a player asked to join: the coach's steps (club, team, squad, invite) are not theirs */
+  onJoinSent?: () => void;
+}) {
   const t = useTranslations("officialTeams");
   const tr = useTranslations();
   const [q, setQ] = useState("");
@@ -86,6 +95,7 @@ export function OfficialTeamSearch({ onManual, onClaimed }: { onManual: () => vo
     if (r.error) return setError(errorKey(r.error));
     setActing(null);
     setSent(t("joinSent", { team: team.name }));
+    onJoinSent?.();
   }
 
   // after taking a team over: what came with it, and the next step (the squad)

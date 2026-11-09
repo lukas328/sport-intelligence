@@ -39,7 +39,7 @@ Code-Prüfung vor der Übergabe. Ball Runde 6: gleichauf mit Runde 3, nicht übe
 genug hochgeladene Spiele mit Matchblatt verarbeitet sind; 7 (Spielzüge) nach 1 und 4.
 Kleine Lücke aus dem Onboarding: Namen offizieller Kader-Einträge ohne Einwilligung in Ereignis-
 und Statistik-Ansichten verbergen: erledigt (Ereignisliste, Tor-Abgleich, Wurf-Vorschläge,
-PDF-Bericht; `roster.visible_players`). Noch offen: Anwesenheitsliste (Analysten, Assistenztrainer).
+PDF-Bericht, Anwesenheitsliste für Analysten und Assistenztrainer; `roster.visible_players`).
 
 ## Entscheide von Lukas (offen)
 - keine
@@ -82,11 +82,12 @@ Kleine Fixes aus dem Review sind im Branch `chore/backend-cleanup` erledigt (GPU
 blockierende Aufrufe, ffmpeg-Timeouts, gemeinsame SSRF-Prüfung, Fixture-Namen, Media-Helfer,
 Reporter, doppelte Helfer, Doku, Worker-Settings, Job-Vertragstest). Offen, für später:
 
-1. **Als Erstes nach der Übergabe:** `services/official_report.py` aufteilen (gut 1400 Zeilen).
-   Parser und Abrufe (heute etwa Zeilen 111 bis 940) nach
-   `integrations/official_reports/{handball_ch,dhb,nuliga,hla,http}.py`; Vergleich und Prüfung
-   (`comparison`, `review`, `_review`, `_video_goal`) nach `services/official_comparison.py`; `apply` in
-   kleinere Schritte zerlegen (Einträge zuordnen, Videotore abgleichen, Ergebnis schreiben).
+1. ~~`services/official_report.py` aufteilen~~ **erledigt** (Branch `helper/split-official-report`):
+   Parser und Abrufe in `integrations/official_reports/` (`base`, `handball_ch`, `dhb`, `nuliga`,
+   `hla`, `http`, Quellenerkennung `locate`/`detect` im `__init__`); Vergleich und Prüfung in
+   `services/official_comparison.py`; `apply` in Schritte zerlegt (`_known`, `_add_entries`,
+   `_settle_video_goals`, `_write_result`). `official_report` exportiert weiter alle Namen, die
+   Code und Tests nutzen; die Abruffunktionen und `_pdf_text` bleiben dort ersetzbar.
 2. Totes Gerüst löschen: `handball_worker/pipeline/` (`PipelineGraph`, `PIPELINE_VERSION`
    0.1.0, nur von `tests/test_graph.py` benutzt) und im GPU-Worker `jobs.run_stage`/`echo` mit
    `backends/base.py` (nur von Tests und dem Integrationstest benutzt). Die API reiht die Jobs

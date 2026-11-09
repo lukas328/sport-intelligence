@@ -252,12 +252,13 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         )}
       </div>
 
-      {/* controls float over the picture; while playing they show on hover, focus or pause */}
+      {/* controls float over the picture from tablets up; while playing they show on hover, focus
+          or pause. Phones: the bar sits under the picture, so the goal areas stay free and nothing
+          has to be tapped away */}
       <div
         className={cn(
-          // phones: one short bar at the bottom edge, so the goal areas stay visible
-          "absolute inset-x-0 bottom-0 space-y-0.5 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2 pt-6 pb-1 text-white transition-opacity duration-200 sm:space-y-1 sm:px-3 sm:pt-10 sm:pb-2",
-          playing && !hover && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+          "space-y-0.5 bg-black px-2 pt-1 pb-1 text-white transition-opacity duration-200 sm:absolute sm:inset-x-0 sm:bottom-0 sm:space-y-1 sm:bg-transparent sm:bg-gradient-to-t sm:from-black/85 sm:via-black/45 sm:to-transparent sm:px-3 sm:pt-10 sm:pb-2",
+          playing && !hover && "sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
         )}
       >
         <div

@@ -10,7 +10,7 @@ import { Alert, EmptyState } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
-import { duplicateNumbers, groupSuggestions, parseNumber, rosterStats, sevenM, type Suggestion } from "@/lib/official-suggestions";
+import { duplicateNumbers, groupSuggestions, parseNumber, rosterStats, sevenM, standingByRank, type Suggestion } from "@/lib/official-suggestions";
 import { cn } from "@/lib/utils";
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
@@ -287,8 +287,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
               <li key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-2.5">
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">
-                    {s.payload.is_home ? "" : "@ "}
-                    {str(s.payload.opponent)}
+                    {t(s.payload.is_home ? "home" : "away", { opponent: str(s.payload.opponent) })}
                   </span>
                   <span className="block text-sm text-muted">{date(str(s.payload.kickoff_at))}</span>
                 </span>
@@ -333,8 +332,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
                 <li key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-2.5">
                   <span className="min-w-0 flex-1">
                     <span className="block font-medium">
-                      {s.payload.is_home ? "" : "@ "}
-                      {str(s.payload.opponent)}
+                      {t(s.payload.is_home ? "home" : "away", { opponent: str(s.payload.opponent) })}
                     </span>
                     <span className="block text-sm text-muted">
                       {s.kind === "match_moved"
@@ -383,8 +381,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
                 </tr>
               </thead>
               <tbody>
-                {(l.standing ?? []).map((r) => {
-                  const row = r as { teamId?: number; rank?: number; name?: string; games?: number; goalDifference?: number; points?: number };
+                {standingByRank(l.standing ?? []).map((row) => {
                   const mine = row.teamId === own;
                   return (
                     <tr key={row.teamId ?? row.name} className={cn(mine && "font-semibold")} aria-current={mine || undefined}>

@@ -106,6 +106,7 @@
     "duplicate-name": "Ce nom existe déjà.",
     "unknown-tag": "Ce tag n'appartient pas à l'équipe.",
     "invalid-slide": "Cette diapositive n'est pas valable.",
+    "no-video": "Ce clip appartient à un match sans vidéo. Charge d'abord la vidéo, ensuite le clip pourra être montré.",
     "nothing-to-export": "Ajoute d'abord des diapositives clip ou texte.",
     "too-many-slides": "200 diapositives au maximum.",
     "image-too-large": "L'image ne doit pas dépasser 3 Mo.",
@@ -448,7 +449,9 @@
     "allDemo": "Uniquement des matchs de démo",
     "uploadVideo": "Téléverser la vidéo",
     "noneUpcoming": "Aucun match programmé.",
-    "scheduleOne": "Programmer un match"
+    "scheduleOne": "Programmer un match",
+    "attendance": "Réponses",
+    "attendanceHint": "Qui vient, qui manque"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -662,6 +665,12 @@
     "calibReason_few_people": "Trop peu de personnes à l'image pour trouver le terrain : marque-le à un moment en plein jeu.",
     "calibReason_court": "Le terrain trouvé ne correspond pas de façon sûre : marque-le à la main.",
     "courtFromHall": "Terrain repris d'une vidéo précédente de la même salle ({hall}). Vérifie rapidement qu'il correspond.",
+    "courtFromHallCheck": "Terrain repris d'une vidéo précédente de la même salle ({hall}). Les lignes orange sont-elles sur les lignes de la salle ?",
+    "courtFromHallOk": "Terrain repris d'une vidéo précédente de la même salle ({hall}) et confirmé.",
+    "courtFits": "C'est bon",
+    "courtRemark": "Marquer à nouveau",
+    "courtPreviewAlt": "Image de la salle avec le terrain repris, en orange",
+    "courtConfirmError": "Le terrain n'a pas pu être confirmé. Réessaie.",
     "hallOnce": "Une fois par salle : les prochaines vidéos de la même salle ({hall}) reprennent le terrain.",
     "hallUnknown": "Indique le lieu du match : les prochaines vidéos de cette salle reprendront alors le terrain."
   },
@@ -894,7 +903,7 @@
     "heatmap": "Carte de chaleur",
     "none": "Pas encore de données de position.",
     "km": "{value} km",
-    "m": "{value} m",
+    "m": "{value, number} m",
     "kmh": "{value} km/h",
     "min": "{value} min",
     "track": "Trace {n}",
@@ -1533,7 +1542,11 @@
     "continueWith": "Continuer avec {name}",
     "ratingLow": "1 faible",
     "ratingHigh": "5 très bien",
-    "coachNote": "Note de l'entraîneur :"
+    "coachNote": "Note de l'entraîneur :",
+    "childTitle": "Scènes de {name}",
+    "assessedLine": "Ton auto-évaluation est faite, les notes de l'entraîneur sont visibles.",
+    "assessFirst": "D'abord ton auto-évaluation, ensuite tu vois les notes de l'entraîneur.",
+    "watch": "Voir les scènes"
   },
   "scouting": {
     "title": "Rapport de préparation",
@@ -1945,7 +1958,10 @@
     "export": "Export",
     "shirtPrefix": "N° ",
     "metricsN": "{n, plural, one {# indicateur} other {# indicateurs}}",
-    "allMatches": "tous"
+    "allMatches": "tous",
+    "seasons": "Saison",
+    "seasonsRecent": "Celle-ci et la précédente",
+    "seasonsAll": "Toutes les saisons"
   },
   "training": {
     "nav": "Entraînement",
@@ -2211,7 +2227,9 @@
     "openTasks": "Tâches ouvertes",
     "lastMatchOn": "Dernier match, {date}",
     "assessLead": "Ton auto-évaluation manque encore",
-    "assessTask": "Évaluer le match contre {opponent}"
+    "assessTask": "Évaluer le match contre {opponent}",
+    "replyTask": "{n, plural, one {Répondre à # rendez-vous} other {Répondre à # rendez-vous}}",
+    "replyHint": "Présent ou non : l'entraîneur planifie avec."
   },
   "shell": {
     "search": "Rechercher",
@@ -2333,7 +2351,7 @@
     "attacks": "{n, plural, =1 {1 attaque} other {# attaques}} · {avg} s en moyenne",
     "timeline": "Possession au fil du match",
     "timelineHint": "Un clic sur une attaque y mène dans la vidéo.",
-    "physical": "Voir l'effort physique et les heatmaps",
+    "physical": "Voir l'effort physique",
     "moreTitle": "Pour les tirs, buts et arrêts",
     "moreText": "L'analyse vidéo ne voit pas encore le ballon. Marque les buts au bord du terrain pendant le match ou importe la feuille de match : statistiques, cartes de tirs et valeurs du gardien apparaissent alors ici.",
     "marks": "Marquer au bord du terrain",
@@ -2349,7 +2367,9 @@
     "showLess": "Afficher moins",
     "compactTitle": "Selon la vidéo :",
     "compactLine": "possession {own} % contre {opp} %, {n} attaques, estimé.",
-    "compactOpen": "Afficher les attaques"
+    "compactOpen": "Afficher les attaques",
+    "possession": "Possession",
+    "coverage": "Sur {video} de vidéo pour {game} de jeu, estimé d'après les positions."
   },
   "workflow": {
     "rail": "Étapes de travail",
@@ -2396,6 +2416,7 @@
     "laneVideo": "Vidéo",
     "laneReport": "Feuille de match",
     "laneCandidates": "Buts possibles",
+    "laneShots": "Tirs",
     "reviewOpen": "Vérifier en plein écran",
     "reviewClose": "Fermer",
     "reviewLeft": "{n} à vérifier",
@@ -2458,7 +2479,10 @@
     "rateMore": "Plus ou moins de propositions",
     "rate": "Propositions par minute",
     "perMinute": "{n} par min.",
-    "reportTime": "feuille {time}"
+    "reportTime": "feuille {time}",
+    "shotBy": "tir de {who}",
+    "noKickoff": "L'engagement n'est pas encore placé : les temps de jeu sont estimés d'après la feuille de match.",
+    "setKickoff": "Placer l'engagement"
   },
   "officialTeams": {
     "title": "Chercher l'équipe",
@@ -2545,7 +2569,9 @@
     "points": "Pts",
     "numberTwice": "Numéro attribué deux fois : {numbers}. Modifie l'un d'eux ou laisse-le vide.",
     "noAppearancesHint": "Les joueurs/euses sans match ne sont pas cochés.",
-    "openLine": "Voir {n, plural, one {# proposition} other {# propositions}} de handball.ch"
+    "openLine": "Voir {n, plural, one {# proposition} other {# propositions}} de handball.ch",
+    "home": "contre {opponent}",
+    "away": "à l'extérieur chez {opponent}"
   },
   "requests": {
     "eyebrow": "Équipe",

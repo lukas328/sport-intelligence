@@ -143,10 +143,10 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
   "Fernwurf / leeres Tor" mixes two situations; the goal picture adds up to 35 of 39 shots; sprint
   counts and top speeds of 31 to 32 km/h from one minute look implausible.
 
-- Team by side on the axis still reads weakly (2): a lane label per side ("H1" / opponent) would
-  make it explicit.
-- The player's control bar shows video time while the picture shows the match clock; on phones it
-  covers the lower half of the frame.
+- Done (2026-11-09): the sided lanes carry the team names at their right end (own above, opponent
+  below); the legend in the caption stays for screen readers.
+- Done (UI session, 2026-11-09): the control bar shows the match clock once the throw-off is set;
+  on phones it sits under the picture instead of over it.
 - Event keys are English mnemonics (G, S, M, P, T); German letters would collide (T for Tor and
   Ballverlust), so they stay until a coach asks.
 - Goal candidates counted as "schon erfasst" by the API can match a report goal just before the
@@ -154,14 +154,29 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
   analysis session.
 
 - Analyse tab (next slice): possession, attacks, physical load, shots in the same language.
-- Phone: "Teilen" and "…" take their own row under the tabs.
-- The video player's own control bar on phones covers half the frame.
+- Closed (2026-11-09): "Teilen" and "…" sit as icon buttons in the row of the tabs at 390 px.
 - Dev only: a hydration warning appears once after hot reloads (stale server bundle), not on a
   fresh start.
 
 ## Backend findings
 
 For the analysis session; read from this branch. Newest first.
+
+- 2026-11-09 (UI session, demo data with a synthetic 1-minute video): 4 of 5 attacks counted as
+  fast breaks; 33 and 60 sprints and 1.22 km against 2.02 km in one minute; a team row's top
+  speed of 31.7 km/h (the maximum of one player?).
+
+- 2026-11-09 (UI session): API wishes for the next UI features, none built in the UI yet:
+  1. Player status on the squad (verletzt, abwesend, with an optional until-date), readable by
+     staff; today a status exists only per training unit or match (`attendance`).
+  2. Assignment progress for staff ("8 von 14 erledigt"): per assignment the count of players
+     done and the list of who is open.
+  3. Recurring training slots (weekday, time, place) that create the units of a season.
+  4. A team consent overview for staff: per player the purposes consented, before filming.
+  5. Own drills: create, edit, share within the club (the library is static today).
+  6. A player's season line: per match their goals, shots, saves with links to the events.
+- 2026-11-09 (UI session): the matrix takes `season_ids` (since 95132d3); the UI now offers
+  "Saison" (this and last, one season, all). The earlier note below is outdated.
 
 - 2026-11-09: the matrix has no `season_ids` filter in the API (`handball_metrics.query.Filter`
   knows `match_ids`, `last_n_matches`, opponent, ...; an unknown field is a 422). The UI list
@@ -189,3 +204,129 @@ For the analysis session; read from this branch. Newest first.
   the match stage, the analysis overview, the season rows and the season's xG statement.
 - Throw-off step: "Uhr eintragen" sets the match clock at the paused moment (`clock_s`), for
   videos that start after the throw-off; the error for a time outside the half is in the texts.
+
+## Review round over the new screens (UI session, 2026-11-09)
+
+Screens: onboarding with the official team search (results, join form, after taking a team
+over), the suggestion inbox "Abgleich mit handball.ch", the court step with a court carried over
+from the hall (new: hall image with the court and "Passt" / "Neu markieren"), the Würfe tool
+before and after one decision, the throw-off step. Desktop 1440 light and dark, phone 390. Test
+data invented (the same fixtures as the new e2e specs `official` and `shots`); the analysis
+answers were stubbed, so the "In der Warteschlange 0 %" card and the 2FA banner are artifacts.
+
+Scores (1 to 5; anchor, signal, hairlines, game language, team by side, numbers to video, review
+speed, proposed vs confirmed, type, edge states):
+- Onboarding: -, 1, 4, 3, -, -, -, -, 4, 3
+- Abgleich: -, 2, 4, 3, 2, 1, -, 3, 4, 3
+- Spielfeld from the hall: 3, 2 (before Passt) / correct after, 3, 3, -, -, -, -, 4, 4
+- Würfe: 2, 2, 3, 3, 3, 1, 3, 2, 3, 2
+- Anwurf: 3, 2, 4, 4, -, -, -, -, 4, 4
+
+Fixed after the review:
+- The official table is shown in the order of its ranks (`standingByRank`, tested), not in the
+  order the rows arrive.
+- Würfe: both team choices are drawn as choices (the unselected one looked like text); the
+  buttons of the decision are 44 px on phones; key letters only where there is a fine pointer.
+- Würfe: the timeline's candidate lane shows the shot moments while shots are reviewed, with the
+  signal ring on the one that is up (as for goal candidates).
+- Court step: the team colour legend shows only with the mini court it explains.
+- Found by the new e2e (axe): the small "Aus dem Matchbericht übernehmen" label on the accent
+  button was faded to 80 % (4.2:1); no longer faded.
+
+Checked and not changed:
+- "The report card fails contrast in dark mode": it is dark text on the light accent (about 6:1).
+- "0 im Video bestätigt" after a decision and "21 liegen ausserhalb" without a throw-off came from
+  the stubbed list (it did not recount the report); the API recounts on the refetch.
+
+Left open (next round):
+- Würfe: moving to the next moment does not seek the video (the goal review does it in its full
+  screen mode); a "R"/play per row exists. Seek with pre-roll on each advance is the next step.
+- Würfe without a throw-off: the times come from the report's clock map; say "laut Matchbericht"
+  until the throw-off is set, or gate the tool behind the Anwurf step (product decision).
+- Report entry wording: "Parade, #14 …" does not say that #14 is the shooter; the analysis
+  session's report line names the shooter, the keeper is not in it.
+- Phone: the work strip of four steps and four tools scrolls sideways and cuts the last label;
+  the bottom navigation covers the end of the step panel.
+- Onboarding: progress segments in light mode are nearly invisible; a player joining sees the
+  coach's "Schritt 1 von 4"; "@ HSG Rheinau" in the inbox (away games) reads as an anglicism.
+- After "Passt" the workspace stays on the court step instead of moving on to the next open step.
+
+## Round 2 over the new screens (UI session, 2026-11-09)
+
+Decisions taken in the session (the owner left them to it):
+- Würfe stay open without a throw-off: the moments are video times, only the game times are
+  the report's estimate. A line says so and links to the throw-off step.
+- Each moment that comes up is shown in the video, paused at its lead-in.
+- After "Passt" on a court from the hall the workspace goes to the next open step.
+
+Changed:
+- The report's entry names the shooter: "Parade, Wurf von #14 …".
+- Official inbox: "gegen X" and "auswärts bei X" instead of "@ X".
+- The `.club` scope rule moved to `@layer base`. Before, it beat the utilities on the same
+  element: the onboarding header showed the page paper instead of the club colour (the progress
+  bars white on paper, the finding "progress invisible"), and the confirm dialog, the bell and
+  the command palette showed paper instead of the raised surface. The open onboarding steps are
+  no longer faded (white at 75 % on the club colour is below 4.5:1).
+- Referee kit checked: in the create and edit forms (`KitFields`) and in the analysis colours.
+
+Checked, not a problem: "the bottom navigation covers the step panel" and the floating bars in
+the phone captures come from full-page screenshots; the page keeps 112 px free under the content.
+
+Still open: the phone work strip scrolls sideways and cuts the last visible label (a scroll
+affordance, kept); a player joining from the team search sees the coach's "Schritt 1 von 4".
+
+## Review of the remaining official-data screens (UI session, 2026-11-09)
+
+Join requests, the settings section "Offizielle Daten" (verification, access requests) and the
+overview line for an unverified club, desktop light and dark and phone, invented data.
+
+- The overview line "Der Verein ist noch nicht bestätigt …" was never visible: the stage pulls
+  itself up to the top edge and covered it. It is now passed into the overview and sits right
+  under the stage.
+- Join requests and the official inbox showed the team header ("Kader") above their own heading
+  once they belonged to Team · Kader; the team header now steps aside on these two pages.
+- The settings section reads well: ways to confirm the club with the club's mail domain, access
+  requests with "Als Trainer/in aufnehmen", "Als Vereinsadmin aufnehmen" and "Ablehnen".
+
+## Autonomous round (UI session, 2026-11-09)
+
+The owner asked the session to decide on its own. Done in this round, each with tests:
+- Navigation: the official data and the join requests keep Team · Kader; an opponent keeps
+  Spiele · Spielplan.
+- Consents: no "Du selbst" on the own profile; "Dein Kind" stays for a child.
+- Onboarding: a player who asked to join no longer sees the coach's four steps.
+- Phones: the video controls sit under the picture (they covered the lower half of the frame);
+  keyboard hints are hidden for touch input; the work strip fades at its edge while more tabs
+  follow.
+- Overview: the line for an unverified club was hidden under the stage; it now sits under it.
+- Players: "Deine Szenen" on the match page (assessment first, then the scenes); dates after the
+  next one without a reply count in "Zu erledigen".
+- e2e: `player.spec.ts` (match page and overview of a player); the court from the hall with
+  "Passt" in `shots.spec.ts`.
+
+## Analyse tab review round (UI session, 2026-11-09)
+
+Demo club from `scripts/seed.py` (synthetic 1-minute video, no events counted), all sections,
+desktop light and dark and phone, reviewed with fresh eyes against `REFERENCES.md`.
+
+Scores before the fixes (anchor, signal, hairlines, game language, team by side, numbers to
+video, -, estimated vs confirmed, type, edge states): Übersicht 2, 1, 4, 3, 3, 3, -, 3, 4, 4;
+Matchbericht, Würfe, Torhüter 1, 1, 4, 2, 3, 1, -, 3, 4, 1; Laufleistung 1, 1, 3, 2, 2, 1, -, 3, 3, 3.
+
+Fixed:
+- Without counted events, Matchbericht, Würfe and Torhüter silently showed the video overview
+  under their own tab. They are no longer offered then; the overview says how they come (import
+  the match sheet, which is now the primary button, or mark courtside).
+- Sections in the order of the match sheet: Übersicht, Matchbericht, Würfe, Torhüter,
+  Laufleistung.
+- Possession: "Ballbesitz" next to each team's share; the header reads every figure against the
+  video ("Aus 1:00 Video von 60:00 Spielzeit, geschätzt aus den Positionen"); attack rows carry a
+  play mark and are 44 px tall, the helper sentence about clicking is gone.
+- Laufleistung: "Höchsttempo" (not "Topspeed"), "Aufenthaltsorte" (not "Heatmap"), metres in
+  de-CH format (1'463 m), "Erfasst" right after the name so the coverage stays in view on phones,
+  "Hohe Intensität" only from tablets up; the overview link says "Laufleistung ansehen".
+
+Left open: the attack strip and list use video time until the throw-off is set (honest, but the
+coach thinks in game time); team rows of the physical table select the map but do not lead to the
+video; the data notes for the analysis session (4 of 5 attacks counted as fast breaks, 33 and 60
+sprints in one minute, a team's top speed of 31.7 km/h) are in "Backend findings".

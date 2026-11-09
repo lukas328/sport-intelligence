@@ -204,11 +204,12 @@ export function PhysicalView({
           {r.label}
         </button>
       </th>
+      {/* what the figures cover first: on a phone it stays in view */}
+      <td className="px-2 py-1.5 text-right tabular-nums">{t("min", { value: Math.round(r.duration_s / 60) })}</td>
       <td className="px-2 py-1.5 text-right tabular-nums">{t("km", { value: km(r.distance_m) })}</td>
-      <td className="px-2 py-1.5 text-right tabular-nums">{t("m", { value: Math.round((r.band_distance_m.run ?? 0) + (r.band_distance_m.sprint ?? 0)) })}</td>
       <td className="px-2 py-1.5 text-right tabular-nums">{r.sprints}</td>
       <td className="px-2 py-1.5 text-right tabular-nums">{t("kmh", { value: (r.max_speed_ms * 3.6).toFixed(1) })}</td>
-      <td className="px-2 py-1.5 text-right tabular-nums">{t("min", { value: Math.round(r.duration_s / 60) })}</td>
+      <td className="px-2 py-1.5 text-right tabular-nums max-sm:hidden">{t("m", { value: Math.round((r.band_distance_m.run ?? 0) + (r.band_distance_m.sprint ?? 0)) })}</td>
     </tr>
   );
   return (
@@ -228,11 +229,11 @@ export function PhysicalView({
               <thead>
                 <tr>
                   <th scope="col" className="text-left" />
+                  <th scope="col">{t("time")}</th>
                   <th scope="col">{t("distance")}</th>
-                  <th scope="col">{t("highIntensity")}</th>
                   <th scope="col">{t("sprints")}</th>
                   <th scope="col">{t("topSpeed")}</th>
-                  <th scope="col">{t("time")}</th>
+                  <th scope="col" className="max-sm:hidden">{t("highIntensity")}</th>
                 </tr>
               </thead>
               <tbody>

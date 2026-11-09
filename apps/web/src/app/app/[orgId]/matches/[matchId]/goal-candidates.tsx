@@ -276,7 +276,7 @@ export function GoalCandidatesPanel({
 
       {/* what the last key did, and how to take it back */}
       <p className="flex min-h-8 flex-wrap items-center gap-x-3 text-sm" aria-live="polite" data-testid="goal-candidates-said">
-        {said ?? <span className="text-muted">{t("undoIdle")}</span>}
+        {said ?? <span className="text-muted pointer-coarse:hidden">{t("undoIdle")}</span>}
         {said && lastDecided.current && (
           <Button variant="ghost" size="sm" className="-my-1" aria-keyshortcuts="U" onClick={undoLast}>
             <RotateCcw aria-hidden />

@@ -23,6 +23,7 @@ export function MatchTimeline({
   official,
   candidates,
   rate,
+  candidatesLabel = "laneCandidates",
   activeId = null,
   ownName,
   oppName,
@@ -37,6 +38,8 @@ export function MatchTimeline({
   official: GoalComparison | null | undefined;
   candidates: CandidateList | null | undefined;
   rate: number;
+  /** what the candidate lane holds: goal candidates, or the shot moments while shots are reviewed */
+  candidatesLabel?: "laneCandidates" | "laneShots";
   ownName: string;
   oppName: string;
   /** the candidate that is up: the one signal mark on the axis */
@@ -86,6 +89,14 @@ export function MatchTimeline({
           <span key={s.from} className="absolute inset-y-0 bg-foreground/5" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
         ))}
         {sided && <span className="absolute inset-x-0 top-1/2 h-px bg-foreground/25" />}
+        {/* which side is whose, on the lane itself (the legend alone read weakly): at the right end,
+            where marks are rarest (the end of the game, or after the clip), and under them */}
+        {sided && (
+          <>
+            <span className="absolute top-0 right-1 max-w-[40%] truncate text-right text-[0.625rem] leading-tight text-muted">{ownName}</span>
+            <span className="absolute bottom-0 right-1 max-w-[40%] truncate text-right text-[0.625rem] leading-tight text-muted">{oppName}</span>
+          </>
+        )}
         {children}
         {now != null && seen(now) && <span className="absolute -inset-y-1 w-0.5 bg-foreground" style={{ left: x(now) }} />}
       </div>
@@ -144,7 +155,7 @@ export function MatchTimeline({
           )}
         {cands.length > 0 &&
           lane(
-            t("laneCandidates"),
+            t(candidatesLabel),
             cands
               .filter((c) => seen(c.clock_s!))
               .map((c) => {

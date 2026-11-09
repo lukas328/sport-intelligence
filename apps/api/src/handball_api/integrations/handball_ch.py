@@ -491,8 +491,8 @@ async def game_players(db: AsyncSession | None, game_id: int) -> list[GameAppear
 
 
 async def report(game_id: int, db: AsyncSession | None = None) -> dict[str, Any]:
-    """Game, game log and keepers of a game (parsed by services/official_report.py). Not cached
-    without `db`; with `db` for an hour (a fresh game may still get corrections)."""
+    """Game, game log and keepers of a game (parsed by official_reports/handball_ch.py). Not
+    cached without `db`; with `db` for an hour (a fresh game may still get corrections)."""
     return await query(
         Q_REPORT, {"gameId": game_id, "isLive": False}, db=db, max_age=timedelta(hours=1)
     )
