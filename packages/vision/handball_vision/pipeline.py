@@ -126,6 +126,7 @@ class AnalysisResult:
                         np.array([p.frame * 1000 / self.fps for p in pts]),
                         np.array([p.x for p in pts]),
                         np.array([p.y for p in pts]),
+                        np.array([p.observed for p in pts]),
                     ).to_dict(),
                 }
             )

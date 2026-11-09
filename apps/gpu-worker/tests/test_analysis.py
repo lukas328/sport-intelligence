@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, ClassVar
 
 import httpx
@@ -362,6 +363,8 @@ def test_learned_path_needs_calibration_then_reuses_observations(
     # goal candidates need no court: they come with the request to mark it
     assert first["goal_candidates"]["candidates"] == [{"t_ms": 4000, "rate": 1}]
     assert (root / "artifacts/o/m/a/analysis/observations.npz").exists()
+    # no overlay and no number reader: no clock, the ball is not gated
+    assert (root / "artifacts/o/m/a/analysis/play.json").read_text() == "null"
     # the re-run with clicked corners reuses the stored observations (no second download)
     h = truth[0].homography if truth[0].homography is not None else None
     if h is None:
@@ -685,3 +688,80 @@ def test_an_earlier_court_of_the_hall_comes_before_the_automatic_one(
             "hall_tried": [{"video_id": "v1", "error": "not the same hall or camera position"}],
         }
     assert seen["refs"] == refs
+
+
+def test_clock_play_from_overlay_or_hall_board() -> None:
+    run = [(t * 1000, 100 + t) for t in range(0, 60, 5)] + [
+        (t * 1000, 160) for t in range(60, 120, 5)
+    ]
+    reader = SimpleNamespace(clocks=run)
+    play = analysis.clock_play(reader, None)  # type: ignore[arg-type]
+    assert play == {"source": "overlay", "clock_readings": 24, "intervals_ms": [[0, 60_000]]}
+    assert analysis.play_intervals(play) == [(0, 60_000)]
+    readings = [SimpleNamespace(t_ms=t, clock_s=c) for t, c in run] + [
+        SimpleNamespace(t_ms=130_000, clock_s=None)
+    ]
+    board = SimpleNamespace(readings=readings)
+    found = analysis.clock_play(None, board)  # type: ignore[arg-type]
+    assert found is not None and found["source"] == "hall_scoreboard"
+    assert found["clock_readings"] == 24
+    # nothing read, or a clock that never ran: no gating
+    assert analysis.clock_play(None, None) is None
+    assert analysis.clock_play(SimpleNamespace(clocks=[]), None) is None  # type: ignore[arg-type]
+    assert analysis.play_intervals(None) is None
+    assert analysis.play_intervals({"intervals_ms": []}) is None
+
+
+def test_stored_clock_play_reaches_tracking(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A re-run with clicked points takes the clock stretches of the observation pass."""
+
+    class StopError(Exception):
+        pass
+
+    class Detector:
+        source = "model"
+        model = "stub"
+
+    class Motion:
+        moving = False
+
+        def background(self) -> Any:
+            return np.zeros((20, 40, 3), np.uint8)
+
+    class Obs:
+        motion = Motion()
+
+    seen: dict[str, Any] = {}
+
+    def track(*args: Any, play: list[tuple[int, int]] | None = None, **kw: Any) -> Any:
+        seen["play"] = play
+        raise StopError
+
+    def cached(*a: Any) -> dict[str, Any] | None:
+        return {"intervals_ms": [[1000, 9000], [12_000, 20_000]]} if a[-1] == "play.json" else None
+
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: FakeS3(tmp_path))
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Detector())
+    monkeypatch.setattr(analysis, "_cached_observations", lambda *a: Obs())
+    monkeypatch.setattr(analysis, "_cached_json", cached)
+    monkeypatch.setattr(analysis, "_points_calibration", lambda *a: object())
+    monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
+    monkeypatch.setattr("handball_vision.observe.track", track)
+    rep, _ = reporter()
+    with pytest.raises(StopError):
+        analysis.run_analysis(
+            "j",
+            "o",
+            "m",
+            "a",
+            "videos",
+            "o/m/a/proxy.mp4",
+            "o/m/a/",
+            KITS,
+            calibration_points=[{"image": [0, 0], "court": [0, 0]}],
+            settings=JobSettings(work_dir=str(tmp_path / "w")),
+            reporter=rep,
+        )
+    assert seen["play"] == [(1000, 9000), (12_000, 20_000)]

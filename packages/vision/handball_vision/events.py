@@ -17,12 +17,14 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 BIN_MS = 200
 PAUSE_MS = 45_000  # almost nobody on court
 BOUNDARY_MS = 90_000  # a long pause followed by a throw-off: probably the next match
 CENTRE = (20.0, 10.0)
+THROW_OFF_LEAD_MS = 10_000  # an attack this soon after its own throw-off is not a fast break
 MIN_SIDE_MS = 45_000  # shortest stretch a side holds (noise lasts seconds, a half 20 to 30 minutes)
 
 
@@ -320,7 +322,8 @@ def detect(points: list[tuple[int, int, float, float]], teams: dict[int, str]) -
         if p.outcome is None:
             final_phases[i] = Phase(p.team, p.start_ms, p.end_ms, p.confidence, "lost")
         events.append(Detected(p.end_ms, "possession_change", nxt.team, p.confidence))
-    final_phases = _mark_fast_breaks(final_phases, bins, sides)
+    throw_offs = [(e.t_ms, e.team) for e in events if e.type == "throw_off"]
+    final_phases = _mark_fast_breaks(final_phases, bins, sides, throw_offs)
     events += [
         Detected(p.start_ms, "fast_break", p.team, round(p.confidence * 0.8, 2))
         for p in final_phases
@@ -333,12 +336,16 @@ def _mark_fast_breaks(
     phases: list[Phase],
     bins: dict[int, dict[str, list[tuple[float, float]]]],
     sides: list[tuple[int, str]],
+    throw_offs: Sequence[tuple[int, str | None]] = (),
     min_run_m: float = 18.0,
     window_ms: int = 4_000,
 ) -> list[Phase]:
     """An attack that starts with the team running from its own half to the other one within a
     few seconds is a fast break (Gegenstoss): the team's mean position moves at least
-    `min_run_m` towards the attacked goal between 2 s before and `window_ms` after its start."""
+    `min_run_m` towards the attacked goal between 2 s before and `window_ms` after its start.
+    An attack opened by the team's own throw-off (after a goal or at the start of a half) is never
+    a fast break: the team walks up from the centre line, often quickly, but it did not win the
+    ball."""
 
     def centre(team: str, b: int) -> float | None:
         ps = bins.get(b, {}).get(team, [])
@@ -347,7 +354,11 @@ def _mark_fast_breaks(
     out: list[Phase] = []
     for p in phases:
         hd = _side_at(sides, p.start_ms)
-        if hd is None:
+        restart = any(
+            team == p.team and p.start_ms - THROW_OFF_LEAD_MS <= t <= p.start_ms + 2_000
+            for t, team in throw_offs
+        )
+        if hd is None or restart:
             out.append(p)
             continue
         sign = 1.0 if _attack_right(p.team, hd) else -1.0

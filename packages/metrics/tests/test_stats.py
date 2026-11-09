@@ -189,6 +189,7 @@ def test_xg_only_covers_shots_with_inputs() -> None:
     own = compute_match_stats(ev)["own"]
     assert own["xg"] == pytest.approx(xg(34.5, 10.0) + xg(29.0, 10.0) + 0.75, abs=0.01)
     assert own["xg_shots"] == 3
+    assert own["xg_goals"] == 2  # the report goal has no position: not set against the xG
     assert own["xg_coverage"] == pytest.approx(3 / 5, abs=1e-4)
     assert expected_goal(None, None) is None
     assert compute_match_stats([])["own"]["xg_coverage"] is None
