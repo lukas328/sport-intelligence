@@ -94,7 +94,7 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px sol
   <section>
     <div class="stage" id="stage">
       <img id="img" alt="Spielszene, in der der Ball markiert werden soll">
-      <div class="marker suggest" id="suggest" hidden></div>
+      <div class="marker suggest" id="suggest0" hidden></div><div class="marker suggest" id="suggest1" hidden></div><div class="marker suggest" id="suggest2" hidden></div>
       <div class="marker" id="marker" hidden></div>
       <video id="vid" muted playsinline preload="auto" hidden></video>
       <div class="frametag" id="frametag">Bild t</div>
@@ -123,7 +123,7 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px sol
     <div>
       <div class="label">So geht’s</div>
       <ul class="help">
-        <li>Gestrichelter gelber Kreis: Vorschlag des Erkenners. Liegt er auf dem Ball, einfach <kbd>Enter</kbd>. Sonst den Ball anklicken (auch wenn er in der Hand ist), in der Lupe nachjustieren, dann <kbd>Enter</kbd>.</li>
+        <li>Gestrichelte gelbe Kreise: bis zu drei Vorschläge des Erkenners, oft falsch (Logos, Ballwagen). Ein Klick in einen Kreis übernimmt ihn genau; ist er schon gewählt, einfach <kbd>Enter</kbd>. Sonst den Ball anklicken (auch wenn er in der Hand ist), in der Lupe nachjustieren, dann <kbd>Enter</kbd>.</li>
         <li>Beim Öffnen läuft die Sekunde davor in Zeitlupe und stoppt auf dem Bild zum Labeln (gelbe Marke). <kbd>A</kbd> wiederholt sie.</li>
         <li><kbd>M</kbd> spielt die ganze Szene (1 s davor bis 1 s danach) als Schleife. Ein Klick ins Bild stoppt sie und setzt die Markierung.</li>
         <li>Ball ganz verdeckt oder nicht im Bild: <kbd>N</kbd>. Zweifel: <kbd>U</kbd>.</li>
@@ -137,14 +137,16 @@ const $ = (id) => document.getElementById(id);
 const state = { items: [], idx: 0, labels: {}, mark: null, hover: null, motion: null, frame: 1, db: null };
 const imgs = {}; // preloaded Image objects per src
 
-function src(item) { return "t/" + item.id + ".jpg"; }
+function src(item) { return "t/" + (item.k || item.id) + ".jpg"; }
 function load(s) {
   if (!imgs[s]) { const im = new Image(); im.src = s; imgs[s] = im; }
   return imgs[s];
 }
 function cur() { return state.items[state.idx]; }
-const SUGGEST_MIN = 0.3; // OWLv2 score from which the suggestion is pre-selected
-function suggestion(it) { const b = it && it.owl && it.owl[0]; return b && b[4] >= 0.1 ? { x: b[0], y: b[1], score: b[4] } : null; }
+const SUGGEST_MIN = 0.6; // OWLv2 score from which the best box is pre-selected (below: hints only; 0.3 to 0.5 often hits logos or ball racks)
+function hints(it) { return ((it && it.owl) || []).filter((b) => b[4] >= 0.1).slice(0, 3).map((b) => ({ x: b[0], y: b[1], score: b[4] })); }
+function suggestion(it) { return hints(it)[0] || null; }
+function snap(it, m) { for (const h of hints(it)) if (Math.hypot(h.x - m.x, h.y - m.y) < 14) return { x: h.x, y: h.y, fromOwl: false, snapped: true }; return m; }
 
 function hallName(h) { return h.replace(/_/g, " "); }
 function hallNameOld(h) {
@@ -163,9 +165,12 @@ function render() {
   const mk = $("marker");
   if (m && !clipMode) { mk.hidden = false; mk.style.left = (m.x / it.w * 100) + "%"; mk.style.top = (m.y / it.h * 100) + "%"; }
   else mk.hidden = true;
-  const sg = suggestion(it), sk = $("suggest");
-  if (sg && !clipMode && !lab && !(state.mark && state.mark.fromOwl === false)) { sk.hidden = false; sk.style.left = (sg.x / it.w * 100) + "%"; sk.style.top = (sg.y / it.h * 100) + "%"; sk.title = "Vorschlag " + sg.score.toFixed(2); }
-  else sk.hidden = true;
+  const hs = hints(it);
+  for (let k = 0; k < 3; k++) {
+    const sk = $("suggest" + k), h = hs[k];
+    if (h && !clipMode && !lab) { sk.hidden = false; sk.style.left = (h.x / it.w * 100) + "%"; sk.style.top = (h.y / it.h * 100) + "%"; sk.style.opacity = k ? 0.55 : 1; }
+    else sk.hidden = true;
+  }
   $("saveBall").disabled = !state.mark;
   $("saveBall").firstChild.textContent = state.mark && state.mark.fromOwl ? "Vorschlag bestätigen " : "Ball hier speichern ";
   const chip = lab ? `<span class="chip ${lab.state}">${{ ball: "Ball", none: "kein Ball", unsure: "unsicher" }[lab.state]}</span>` : `<span class="chip">offen</span>`;
@@ -177,7 +182,7 @@ function render() {
   drawZoom();
   // preload neighbours
   for (const d of [1, 2]) { const n = state.items[state.idx + d]; if (n) load(src(n)); }
-  const nx = state.items[state.idx + 1]; if (nx && !document.querySelector(`link[data-clip="${nx.id}"]`)) { const l = document.createElement("link"); l.rel = "preload"; l.as = "video"; l.href = "v/" + nx.id + ".mp4"; l.dataset.clip = nx.id; document.head.appendChild(l); }
+  const nx = state.items[state.idx + 1]; if (nx && !document.querySelector(`link[data-clip="${nx.id}"]`)) { const l = document.createElement("link"); l.rel = "preload"; l.as = "video"; l.href = "v/" + (nx.k || nx.id) + ".mp4"; l.dataset.clip = nx.id; document.head.appendChild(l); }
 }
 
 function drawZoom() {
@@ -201,7 +206,7 @@ function toFrame(ev, el, it) {
   return { x: (ev.clientX - b.left) / b.width * it.w, y: (ev.clientY - b.top) / b.height * it.h };
 }
 
-$("stage").addEventListener("click", (ev) => { state.mark = { ...toFrame(ev, $("stage"), cur()), fromOwl: false }; render(); });
+$("stage").addEventListener("click", (ev) => { state.mark = snap(cur(), { ...toFrame(ev, $("stage"), cur()), fromOwl: false }); render(); });
 $("stage").addEventListener("mousemove", (ev) => { if (!state.mark) { state.hover = toFrame(ev, $("stage"), cur()); drawZoom(); } });
 $("zoom").addEventListener("click", (ev) => {
   const z = state.zoomCentre; if (!z) return;
@@ -217,7 +222,7 @@ async function save(kind) {
   const it = cur();
   const body = { state: kind, hall: it.hall, video: it.video, frame: it.frame, gap: it.gap, scale: it.scale, w: it.w, h: it.h, at: Date.now() };
   const sg = suggestion(it); if (sg) body.owl_score = sg.score;
-  if (kind === "ball") { if (!state.mark) return; body.x = Math.round(state.mark.x * 10) / 10; body.y = Math.round(state.mark.y * 10) / 10; body.from_owl = !!state.mark.fromOwl; }
+  if (kind === "ball") { if (!state.mark) return; body.x = Math.round(state.mark.x * 10) / 10; body.y = Math.round(state.mark.y * 10) / 10; body.from_owl = !!state.mark.fromOwl; body.snapped = !!state.mark.snapped; }
   state.labels[it.id] = body; // optimistic
   const idx = state.idx;
   goNextOpen();
@@ -251,7 +256,7 @@ function clipTick() {
 }
 function playClip(mode) {
   const it = cur(); if (!it) return;
-  const v = $("vid"); const s0 = "v/" + it.id + ".mp4";
+  const v = $("vid"); const s0 = "v/" + (it.k || it.id) + ".mp4";
   if (v.getAttribute("src") !== s0) v.src = s0;
   clipMode = mode; v.loop = mode === "loop"; v.playbackRate = RATES[rateIdx];
   v.hidden = false; $("marker").hidden = true;
