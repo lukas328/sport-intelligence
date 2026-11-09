@@ -44,7 +44,8 @@ Each question has the **assumption** I work with until it is answered. Status: o
 - **Q-INFRA-1 Hosting provider.** *Partly answered 2026-11-03:* EU is enough, cost first (ADR 002).
   Object storage: Cloudflare R2 with EU jurisdiction (test-data bucket first). Still open: app and
   managed Postgres provider in the EU (Hetzner, Scaleway, Exoscale EU) and **GPU provider** with EU
-  processing and DPA. Needs price/availability check.
+  processing and DPA. Needs price/availability check. *Answered 2026-11-09 for app and database:*
+  Azure Container Apps and Postgres Flexible Server, Switzerland North (ADR 025). GPU provider still open.
 - **Q-INFRA-2 GitHub repository and org**, CI secrets, preview deploy target. *Assumption:* GitHub Actions,
   preview job disabled until hosting exists (`vars.PREVIEW_DEPLOY_ENABLED`).
 - **Q-INFRA-3 E-mail provider** Postmark vs Resend (ADR in M1). *Assumption:* Postmark (EU data residency to verify).

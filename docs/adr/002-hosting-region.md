@@ -21,7 +21,8 @@ grows with every club; storage itself is cheap.
    the repo holds only `ml/eval/golden_set/manifest.json` (Q-DATA-1). Two tokens: read/write for the
    owner, read-only for CI and agent sessions.
 3. **Application, Postgres, Redis: EU, cheapest option that offers managed Postgres with PITR**,
-   chosen at go-live (candidates: Hetzner, Scaleway, Exoscale EU zones). Not decided yet.
+   chosen at go-live (candidates: Hetzner, Scaleway, Exoscale EU zones). *Decided 2026-11-09:* Azure
+   Container Apps and Postgres Flexible Server in Switzerland North (ADR 025).
 4. **GPU compute behind `GpuBackend`** (`local`, `runpod`, `modal`, `k8s`). The GPU provider must
    process customer video in the EU under a DPA.
 5. `Organization.data_region` stays (`ch`, `eu`); until a Swiss bucket exists, both map to the EU bucket.
