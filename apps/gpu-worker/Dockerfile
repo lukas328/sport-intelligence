@@ -43,7 +43,8 @@ RUN --mount=type=secret,id=extra_ca,required=false \
 # CPU fallback image. The CUDA image (Dockerfile.cuda) follows in M3 with onnxruntime-gpu + NVDEC.
 FROM python:3.12-slim AS runtime
 # Tesseract (Apache-2.0) reads score and match clock from broadcast overlays (scoreboard.py)
-RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr \
+# security updates of the base image first (the scan fails on fixed HIGH/CRITICAL CVEs)
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends tesseract-ocr \
     && rm -rf /var/lib/apt/lists/* && useradd --system --uid 10001 app
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
