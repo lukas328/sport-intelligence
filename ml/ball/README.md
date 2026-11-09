@@ -39,6 +39,9 @@ basketball tracking (CC BY-NC-ND), sports-ball image classification (close-ups).
 | round 2 (+ user frames, train half; Kaggle GPU) | 20 % | 28 % |
 | round 3 (+ user ball paths, DeepSport basketball) | 33 % | 47 % |
 | round 4 (+ Roboflow still frames) | 23 % | 45 % |
+| round 6 (+ OWLv2 pseudo-labels from 189 segments, no training tiles within 2 s of a test frame; not promoted) | 33 % | 42 % |
+
+Round 6 (2026-11-09, `kaggle/train_r6.py`, kept as `ball_r6.pt` in `handball-ball-models`) ties round 3 on the 40 test balls. It is more confident on the ball (score at least 0.3 on 45 % of the balls vs 23 %) but also on frames without a ball (median top peak 0.4 to 0.6 vs about 0.2). Round 3's 33 % is inflated by about 90 training tiles near test frames, round 6's is not. The test set is too small to separate the two (one ball is 2.5 points): grow it to about 200 balls before more GPU time goes into ball training.
 
 **Open-vocabulary detector, 24 balls of the test half (2 to 4 per hall):** OWLv2 base
 (Apache-2.0, queries "a photo of a handball", "a ball", "a small ball in the air", 480 px tiles
