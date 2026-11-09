@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 import { withShotReview, type ShotReviewBody } from "../src/lib/shot-candidates";
 import { shotList } from "./fixtures/shots";
@@ -6,7 +9,7 @@ import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
 
 // Shot review beside the video (Würfe): the video is uploaded for real, the candidate list and the
 // review answers come from a recorded list (fixtures/shots.ts) kept in step like the API keeps it.
-test("shot review: Enter takes the report's entry, 1 + G says a goal, X no shot, U undoes", async ({ page }, info) => {
+test("court from the hall: Passt moves on; shot review: Enter takes the report entry, 1 + G, X, undo", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   test.setTimeout(300_000);
 
@@ -23,6 +26,30 @@ test("shot review: Enter takes the report's entry, 1 + G says a goal, X no shot,
     return route.fulfill({ contentType: "application/json", body: JSON.stringify(list.candidates.find((c) => c.id === id)) });
   });
 
+  // the court was carried over from an earlier video of the same hall and waits for a look
+  let courtSource = "heuristic";
+  const H = [[30.9, 37.6, 21.8], [0, 7.35, 470.6], [0, 0.0588, 1]];
+  const logo = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "fixtures", "logo.png"));
+  await page.route("**/v1/orgs/*/videos/*/panorama", (route) => route.fulfill({ contentType: "image/png", body: logo }));
+  await page.route("**/v1/orgs/*/videos/*/calibration/confirm", (route) => {
+    courtSource = "user_correction";
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ calibration_id: "c", source: courtSource }) });
+  });
+  await page.route("**/v1/orgs/*/videos/*/analysis", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        status: "ready",
+        calibration: { homography: H, image_size: [1280, 720], confidence: 0.8, reprojection_px: 2, source: courtSource, created_at: "2026-11-09T10:00:00Z" },
+        calibration_info: { method: "hall", hall_match: "floor" },
+        camera: "fixed",
+        panorama: { width: 1280, height: 720 },
+        hall: { name: "Sporthalle Seefeld", source: "match", calibrated_videos: 2 },
+        tracks: [], chunk_ms: null, chunks: null, fps: 50, detector: "yolo", elapsed_s: 40, formations: [], auto_events: null, error: null, needs_calibration: false,
+      }),
+    }),
+  );
+
   await register(page, uniqueEmail("shots"), "Coach Würfe");
   await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Würfe");
@@ -37,6 +64,15 @@ test("shot review: Enter takes the report's entry, 1 + G says a goal, X no shot,
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
   await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
+
+  // court from the hall: one look at the orange lines, "Passt", and on to the next open step
+  await page.getByTestId("step-court").click();
+  await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Seefeld). Liegen die orangen Linien")).toBeVisible();
+  await expect(page.getByTestId("court-preview")).toBeVisible();
+  await expect(page.getByTestId("step-court")).toContainText("bitte prüfen");
+  await page.getByTestId("court-confirm").click();
+  await expect(page.getByTestId("step-kickoff")).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("step-court")).toContainText("bestätigt");
 
   // the tool sits beside the events once there are shot candidates; with a report, its moments first
   await page.getByTestId("step-shots").click();
