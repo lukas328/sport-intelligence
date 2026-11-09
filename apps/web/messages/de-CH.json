@@ -2482,7 +2482,8 @@
     "reportTime": "im Bericht {time}",
     "shotBy": "Wurf von {who}",
     "noKickoff": "Der Anwurf fehlt noch: die Spielzeiten sind aus dem Matchbericht geschätzt.",
-    "setKickoff": "Anwurf setzen"
+    "setKickoff": "Anwurf setzen",
+    "positionReport": "{pos} von {n} mit Matchbericht · {more} weitere offen"
   },
   "officialTeams": {
     "title": "Mannschaft suchen",

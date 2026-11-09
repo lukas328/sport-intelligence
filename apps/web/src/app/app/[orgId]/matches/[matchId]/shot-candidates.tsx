@@ -284,7 +284,12 @@ export function ShotCandidatesPanel({
               {game(deciding)}
             </span>
             {rows.length > 0 && (
-              <span className="ml-auto font-score text-sm text-muted tabular-nums">{t("position", { pos: active + 1, n: rows.length })}</span>
+              <span className="ml-auto font-score text-sm text-muted tabular-nums">{
+                // one count: the report's moments come first, the other open ones after them
+                shown === "report" && openAt(current) > rows.length
+                  ? t("positionReport", { pos: active + 1, n: rows.length, more: openAt(current) - rows.length })
+                  : t("position", { pos: active + 1, n: rows.length })
+              }</span>
             )}
           </p>
           {deciding.suggestion && (
