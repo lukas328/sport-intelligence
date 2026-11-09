@@ -2584,6 +2584,8 @@
     "via_mail_domain": "club e-mail",
     "via_second_official": "second person",
     "via_federation": "federation licence",
-    "via_operator": "support"
+    "via_operator": "support",
+    "line": "The club is not confirmed yet: sharing and public profiles are off until then.",
+    "lineLink": "How to confirm"
   }
 }

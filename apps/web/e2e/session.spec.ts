@@ -6,6 +6,7 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   test.skip(info.project.name !== "chromium", "full flow runs once");
   const email = uniqueEmail("session");
   await register(page, email, "Coach Video");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Sitzung");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 2");

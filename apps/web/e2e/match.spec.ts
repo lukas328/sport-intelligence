@@ -11,6 +11,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   expect(statSync(MATCH_VIDEO).size).toBeGreaterThan(10 * 1024 * 1024);
 
   await register(page, uniqueEmail("m2"), "Coach Video");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Video");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");
@@ -160,6 +161,7 @@ test("playlist: create and share with players", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   test.setTimeout(300_000);
   await register(page, uniqueEmail("pl"), "Coach Playlist");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Playlist");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U19");

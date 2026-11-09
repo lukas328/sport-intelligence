@@ -9,6 +9,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   test.skip(info.project.name !== "chromium", "runs once");
   JSON.parse(readFileSync(REPORT, "utf8")); // fixture stays valid JSON
   await register(page, uniqueEmail("paper"), "Coach Papier");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Papier");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Damen 1");

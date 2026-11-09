@@ -25,6 +25,7 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expectAccessible(page);
 
   // step 1: club
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC E2E Zürich");
   await page.getByLabel("Logo (optional)").setInputFiles(path.join(fixtures, "logo.png"));
   await page.getByRole("button", { name: "Weiter", exact: true }).click();

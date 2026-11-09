@@ -2584,6 +2584,8 @@
     "via_mail_domain": "E-Mail des Vereins",
     "via_second_official": "zweite Person",
     "via_federation": "Verbandslizenz",
-    "via_operator": "Support"
+    "via_operator": "Support",
+    "line": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile sind bis dahin aus.",
+    "lineLink": "So geht es"
   }
 }

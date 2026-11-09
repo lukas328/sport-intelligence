@@ -5,6 +5,7 @@ import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
 test("coach plans a session, opens the matrix and the assistant", async ({ page, context }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   await register(page, uniqueEmail("coach-data"), "Coach Daten");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Daten");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 2");

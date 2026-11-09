@@ -4,6 +4,7 @@ import { expectAccessible, register, uniqueEmail } from "./helpers";
 test("drills, notifications and team assignments", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("train"), "Coach Training");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Training");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U17");

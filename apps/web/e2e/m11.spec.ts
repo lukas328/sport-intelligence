@@ -5,6 +5,7 @@ import { expectAccessible, register, uniqueEmail } from "./helpers";
 test("coach marks during a match, opens the profile and paper pages", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   await register(page, uniqueEmail("coach-m11"), "Coach Elf");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Elf");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 3");
