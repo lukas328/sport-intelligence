@@ -145,8 +145,8 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 - Team by side on the axis still reads weakly (2): a lane label per side ("H1" / opponent) would
   make it explicit.
-- The player's control bar shows video time while the picture shows the match clock; on phones it
-  covers the lower half of the frame.
+- Done (UI session, 2026-11-09): the control bar shows the match clock once the throw-off is set;
+  on phones it sits under the picture instead of over it.
 - Event keys are English mnemonics (G, S, M, P, T); German letters would collide (T for Tor and
   Ballverlust), so they stay until a coach asks.
 - Goal candidates counted as "schon erfasst" by the API can match a report goal just before the
@@ -155,7 +155,6 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 - Analyse tab (next slice): possession, attacks, physical load, shots in the same language.
 - Phone: "Teilen" and "…" take their own row under the tabs.
-- The video player's own control bar on phones covers half the frame.
 - Dev only: a hydration warning appears once after hot reloads (stale server bundle), not on a
   fresh start.
 

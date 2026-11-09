@@ -504,7 +504,8 @@ export function Workspace({
               {t("tactics.fromVideo")}
             </Button>
           )}
-          <details className="group relative">
+          {/* keys teach only where there is a keyboard */}
+          <details className="group relative pointer-coarse:hidden">
             <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
               <Keyboard aria-hidden className="size-4" />
               {t("player.shortcuts")}
