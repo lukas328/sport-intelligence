@@ -34,6 +34,7 @@ from handball_api.services import audit, auto_events, billing, feed, halls, segm
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match, timeline_video
 from handball_api.services.policies import Action
+from handball_api.services.roster import numbers as roster_numbers
 from handball_api.services.segments import parse_recorded
 from handball_api.services.support import failure_code
 
@@ -632,24 +633,12 @@ async def start_analysis(
     return job
 
 
-async def _own_roster(ctx: Ctx, match: Match) -> dict[int, uuid.UUID]:
-    """Shirt number -> player of the own team's active roster in the match's season."""
-    rows = await ctx.db.execute(
-        select(RosterEntry.jersey_number, RosterEntry.player_id).where(
-            RosterEntry.season_id == match.season_id,
-            RosterEntry.team_id == match.team_id,
-            RosterEntry.active.is_(True),
-        )
-    )
-    return {n: pid for n, pid in rows.all() if n is not None}
-
-
 async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
     """Shirt numbers per kit label for the number vote of the analysis. The labels follow the
     kits in the job payload, so "home" is always the own kit (match.is_home only moves the
     overlay); the opponent side only when its players were entered. Empty sides are left out."""
     out: dict[str, list[int]] = {}
-    own = sorted(await _own_roster(ctx, match))
+    own = sorted(await roster_numbers(ctx, match.season_id, match.team_id))
     if own:
         out["home"] = own
     if match.opponent_id is not None:
@@ -720,7 +709,7 @@ async def _apply_analysis_result(
     if isinstance(tracks, list) and any(t.get("number") is not None for t in tracks):
         owner = await ctx.db.get(Match, asset.match_id)
         if owner is not None and owner.season_id is not None:
-            roster = await _own_roster(ctx, owner)
+            roster = await roster_numbers(ctx, owner.season_id, owner.team_id)
     if isinstance(tracks, list):
         for t in tracks:
             first, last = int(t["first_ms"]), int(t["last_ms"])
