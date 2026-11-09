@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import asyncio
 import copy
+import itertools
 import json
 import re
+import time
 from collections.abc import Callable, Iterator
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -181,6 +183,37 @@ async def test_client_parses_caches_and_rests_after_errors(hch: Recorded) -> Non
     with pytest.raises(ProblemError) as err:
         await official_report.fetch_handball_ch(509192)
     assert err.value.code == "report-unavailable"
+
+
+async def test_client_spaces_requests_without_waiting_for_slow_answers(hch: Recorded) -> None:
+    """Requests start MIN_INTERVAL_S apart (a reserved start time), but a slow answer does not
+    hold up the next request (no lock held during the HTTP call)."""
+    starts: list[float] = []
+    ends: list[float] = []
+
+    async def slow(request: httpx.Request) -> httpx.Response:
+        starts.append(time.monotonic())
+        await asyncio.sleep(0.3)
+        ends.append(time.monotonic())
+        return hch.handler(request)
+
+    handball_ch.set_transport(httpx.MockTransport(slow), min_interval_s=0.1)
+    began = time.monotonic()
+    seasons = await asyncio.gather(*(handball_ch.seasons(None) for _ in range(3)))
+    assert all(s == seasons[0] for s in seasons)
+    starts.sort()
+    assert all(b - a >= 0.09 for a, b in itertools.pairwise(starts))  # still spaced
+    assert starts[1] < min(ends)  # the second did not wait for the first answer
+    assert time.monotonic() - began < 0.8  # not 3 x 0.3 s one after the other
+    # after an error the requests waiting for their slot are not sent either
+    handball_ch.set_transport(httpx.MockTransport(hch.handler), min_interval_s=0.1)
+    hch.down = True
+    hch.calls.clear()
+    results = await asyncio.gather(
+        *(handball_ch.seasons(None) for _ in range(3)), return_exceptions=True
+    )
+    assert all(isinstance(r, handball_ch.UpstreamUnavailableError) for r in results)
+    assert len(hch.calls) == 1
 
 
 # ---- search ------------------------------------------------------------------------------------

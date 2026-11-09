@@ -6,7 +6,8 @@ game report (game log). Before, the same queries lived in ml/eval/fetch_handball
 ml/data/match_official.py and services/official_report.py.
 
 - Fixed host only: the endpoint is a constant; callers pass ids, never URLs.
-- Polite: at most one request every MIN_INTERVAL_S per process, a timeout on every request, and
+- Polite: requests start at least MIN_INTERVAL_S apart per process (a reserved start time, no
+  lock held during the request), a timeout on every request, and
   after an error (timeout, 429, 5xx) no request for COOLDOWN_S (Retry-After is respected).
 - Cached: answers are kept in the `official_cache` table; each reader says how old an answer may
   be (club list a week, a played game's stats forever, a team's schedule a few hours).
@@ -96,7 +97,7 @@ class UpstreamUnavailableError(AdapterError):
 # ---- transport, pacing, cache --------------------------------------------------------------
 
 _transport: httpx.AsyncBaseTransport | None = None
-_pace: dict[str, Any] = {"lock": None, "loop": None, "last": 0.0, "blocked_until": 0.0}
+_pace: dict[str, float] = {"next": 0.0, "blocked_until": 0.0}
 
 
 def set_transport(transport: httpx.AsyncBaseTransport | None, min_interval_s: float = 0.0) -> None:
@@ -104,15 +105,26 @@ def set_transport(transport: httpx.AsyncBaseTransport | None, min_interval_s: fl
     global _transport, MIN_INTERVAL_S
     _transport = transport
     MIN_INTERVAL_S = min_interval_s if transport is not None else 0.5
-    _pace.update(last=0.0, blocked_until=0.0)
+    _pace.update(next=0.0, blocked_until=0.0)
 
 
-def _lock() -> asyncio.Lock:
-    loop = asyncio.get_running_loop()
-    if _pace["loop"] is not loop:  # a lock belongs to one event loop
-        _pace.update(lock=asyncio.Lock(), loop=loop)
-    lock: asyncio.Lock = _pace["lock"]
-    return lock
+def _resting() -> None:
+    if time.monotonic() < _pace["blocked_until"]:
+        raise UpstreamUnavailableError("handball.ch is resting after an error")
+
+
+async def _take_slot() -> None:
+    """Rate limit without holding a lock during the request: each caller reserves the next free
+    start time (MIN_INTERVAL_S after the one before) and sleeps until then. The reservation
+    has no await in it, so callers on the event loop never get the same slot; a slow answer
+    no longer holds up the requests after it."""
+    _resting()
+    now = time.monotonic()
+    slot = max(now, _pace["next"])
+    _pace["next"] = slot + MIN_INTERVAL_S
+    if slot > now:
+        await asyncio.sleep(slot - now)
+        _resting()  # an error while this one waited: no request either
 
 
 def _operation(q: str) -> str:
@@ -130,33 +142,25 @@ def _cool_down(seconds: float) -> None:
 
 
 async def _post(q: str, variables: dict[str, Any]) -> dict[str, Any]:
-    async with _lock():
-        now = time.monotonic()
-        if now < _pace["blocked_until"]:
-            raise UpstreamUnavailableError("handball.ch is resting after an error")
-        wait = MIN_INTERVAL_S - (now - _pace["last"])
-        if wait > 0:
-            await asyncio.sleep(wait)
-        try:
-            async with httpx.AsyncClient(
-                timeout=TIMEOUT, headers=HEADERS, transport=_transport
-            ) as client:
-                r = await client.post(API, json={"query": q, "variables": variables})
-        except httpx.HTTPError as exc:
-            _cool_down(COOLDOWN_S)
-            raise UpstreamUnavailableError(f"handball.ch: {type(exc).__name__}") from exc
-        finally:
-            _pace["last"] = time.monotonic()
-        if r.status_code == 429 or r.status_code >= 500:
-            retry = r.headers.get("retry-after", "")
-            _cool_down(float(retry) if retry.isdigit() else COOLDOWN_S)
-            raise UpstreamUnavailableError(f"handball.ch answered {r.status_code}")
-        if r.status_code != 200:
-            raise UpstreamUnavailableError(f"handball.ch answered {r.status_code}")
-        try:
-            payload = r.json()
-        except ValueError as exc:
-            raise UpstreamUnavailableError("handball.ch answered no JSON") from exc
+    await _take_slot()
+    try:
+        async with httpx.AsyncClient(
+            timeout=TIMEOUT, headers=HEADERS, transport=_transport
+        ) as client:
+            r = await client.post(API, json={"query": q, "variables": variables})
+    except httpx.HTTPError as exc:
+        _cool_down(COOLDOWN_S)
+        raise UpstreamUnavailableError(f"handball.ch: {type(exc).__name__}") from exc
+    if r.status_code == 429 or r.status_code >= 500:
+        retry = r.headers.get("retry-after", "")
+        _cool_down(float(retry) if retry.isdigit() else COOLDOWN_S)
+        raise UpstreamUnavailableError(f"handball.ch answered {r.status_code}")
+    if r.status_code != 200:
+        raise UpstreamUnavailableError(f"handball.ch answered {r.status_code}")
+    try:
+        payload = r.json()
+    except ValueError as exc:
+        raise UpstreamUnavailableError("handball.ch answered no JSON") from exc
     data = payload.get("data") if isinstance(payload, dict) else None
     if not isinstance(data, dict):
         raise UpstreamUnavailableError("handball.ch answered without data")
