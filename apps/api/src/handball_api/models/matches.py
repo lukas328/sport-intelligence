@@ -98,6 +98,11 @@ class Match(Base, EntityMixin, TenantMixin):
     official_provider: Mapped[str | None] = mapped_column(String(20))
     official_game_id: Mapped[int | None] = mapped_column(Integer)
     official_report_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # the hourly tick found no game log yet: how often it asked, and not before when again
+    official_report_tries: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, default=0, server_default="0"
+    )
+    official_report_retry_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class VideoAsset(Base, EntityMixin, TenantMixin):
