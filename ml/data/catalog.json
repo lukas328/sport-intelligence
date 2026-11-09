@@ -1,13 +1,13 @@
 {
- "generated": "2026-11-09T08:09:24",
+ "generated": "2026-11-09T09:09:29",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
   "swiss": 179,
   "swiss_matched": 153,
   "with_log": 67,
-  "in_ingest": 223,
-  "local": 202,
+  "in_ingest": 243,
+  "local": 222,
   "local_matched": 132,
   "local_with_log": 60
  },
@@ -7452,7 +7452,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60.0,
+    "duration_s": 6089.794,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "FR_N1_Creteil2_Ivry2_2026",
@@ -7625,7 +7634,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 29.97,
+    "duration_s": 6510.036867,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "ES_HonorPlata_Burgos_Sinfin_2026",
@@ -7642,7 +7660,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 29.97,
+    "duration_s": 6404.9986,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "ES_HonorPlata_Burgos_Horneo_2025",
@@ -7685,7 +7712,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 7307.414,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
@@ -7702,7 +7738,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 7194.294,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "ES_1Nacional_Huarte_Erreka_2026",
@@ -7874,7 +7919,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 640,
+    "height": 360,
+    "fps": 30.0,
+    "duration_s": 5309.154,
+    "codec": "vp9",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "IT_SerieA2_Leno_MedalpTirol_2020",
@@ -7917,7 +7971,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 50.0,
+    "duration_s": 4228.054,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "NL_2Divisie_SEW2_Tukkers_2019",
@@ -8113,7 +8176,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 5275.573696,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "SE_Allsvenskan_Oenneredes_Ystad_2018",
@@ -8130,7 +8202,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 29.97,
+    "duration_s": 6187.774,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "SE_Amateur_Sala_Vaesteras_2022",
@@ -8147,7 +8228,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6163.114,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "SE_Test_Hammarby_Skanela_2026",
@@ -8163,7 +8253,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 4780.214,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "NO_Frauen_3Div_Sogndal_Askoey_2019",
@@ -8180,7 +8279,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5067.534,
+    "codec": "vp9",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "NO_Frauen_3Div_Sogndal_Os_2019",
@@ -8197,7 +8305,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 5177.554,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "NO_Frauen_1Div_Randesund_Gjerpen_2021",
@@ -8214,7 +8331,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6182.694,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "FI_Karsinta_Dynamo_GrIFK_2015",
@@ -8231,7 +8357,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 23.976,
+    "duration_s": 4208.394,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "UK_PremierLeague_Olympia_LondonGD_2023",
@@ -8264,7 +8399,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 5855.2,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "UK_Frauen_Islington_Liverpool_2026",
@@ -8280,7 +8424,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 4971.936,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "US_NYCity_NYAC_2019",
@@ -8329,7 +8482,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 854,
+    "height": 480,
+    "fps": 25.0,
+    "duration_s": 5394.234,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "PT_Frauen_Madeira_Gaia_2022",
@@ -8345,7 +8507,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "duration_s": 6736.814,
+    "codec": "h264",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
@@ -8363,7 +8534,16 @@
    "info_json": false,
    "game_id": null,
    "reason": "no handball.ch",
-   "video": null
+   "video": {
+    "width": 1280,
+    "height": 720,
+    "fps": 25.0,
+    "duration_s": 5480.174,
+    "codec": "av1",
+    "segments": 5,
+    "kaggle_dataset": "handball-segs-l12",
+    "source": "local"
+   }
   },
   {
    "name": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
