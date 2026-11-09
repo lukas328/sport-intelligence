@@ -387,7 +387,7 @@ observe_step = 3
 
 @pytest.mark.skipif(FFMPEG is None, reason="ffmpeg not installed")
 def test_observe_store_and_track(tmp_path: Path) -> None:
-    cfg = SyntheticConfig(seconds=12, pan=1.0)
+    cfg = SyntheticConfig(seconds=6, pan=1.0)
     m = SyntheticMatch(cfg)
     video = tmp_path / "pan.mp4"
     truth = m.write(video)

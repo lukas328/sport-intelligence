@@ -45,7 +45,7 @@ class FakeS3:
 def synthetic(tmp_path_factory: pytest.TempPathFactory) -> tuple[SyntheticMatch, Path]:
     root = tmp_path_factory.mktemp("s3")
     (root / "videos" / "o/m/a").mkdir(parents=True)
-    m = SyntheticMatch(SyntheticConfig(seconds=8))
+    m = SyntheticMatch(SyntheticConfig(seconds=5))
     m.write(root / "videos" / "o/m/a/proxy.mp4")
     return m, root
 
@@ -100,13 +100,13 @@ def test_run_analysis(
     chunk = np.frombuffer(
         (root / "artifacts/o/m/a/analysis/chunk_00000.bin").read_bytes(), "<f4"
     ).reshape(-1, 4)
-    assert chunk[:, 0].max() < 8000 and (chunk[:, 2] > -3).all() and (chunk[:, 2] < 43).all()
+    assert chunk[:, 0].max() < 5000 and (chunk[:, 2] > -3).all() and (chunk[:, 2] < 43).all()
     assert (root / "artifacts/o/m/a/analysis/tracks.parquet").exists()
     teams = {t["team"] for t in res["tracks"]}
     assert {"home", "away"} <= teams
-    # physical load per track: 8 s of synthetic play, nobody runs a marathon
+    # physical load per track: 5 s of synthetic play, nobody runs a marathon
     longest = max(res["tracks"], key=lambda t: t["last_ms"] - t["first_ms"])
-    assert 0 < longest["physical"]["distance_m"] < 80
+    assert 0 < longest["physical"]["distance_m"] < 50
     assert longest["physical"]["max_speed_ms"] < 10
     assert isinstance(res["formations"], list)
     # the hall image users click on, plus the motion cache for re-runs
@@ -231,7 +231,8 @@ def test_panning_camera_with_points_on_the_panorama(
     """A moving camera whose court is marked on the panorama: the re-run reuses the motion."""
     root = tmp_path / "s3"
     (root / "videos/o/m/p").mkdir(parents=True)
-    m = SyntheticMatch(SyntheticConfig(seconds=10, pan=1.0, focal_px=900, phase_s=4.0, walls=True))
+    # play switches sides every 2.5 s: the camera pans over the whole court within 6 s
+    m = SyntheticMatch(SyntheticConfig(seconds=6, pan=1.0, focal_px=900, phase_s=2.5, walls=True))
     truth = m.write(root / "videos/o/m/p/proxy.mp4")
     s3 = FakeS3(root)
     monkeypatch.setattr(analysis, "s3_client", lambda *a: s3)
@@ -314,7 +315,7 @@ def test_learned_path_needs_calibration_then_reuses_observations(
 
     root = tmp_path / "s3"
     (root / "videos" / "o/m/a").mkdir(parents=True)
-    m = SyntheticMatch(SyntheticConfig(seconds=6))
+    m = SyntheticMatch(SyntheticConfig(seconds=4))
     truth = m.write(root / "videos" / "o/m/a/proxy.mp4")
     boxes = {
         g.index: [Detection(*o.bbox, 0.9) for o in g.objects if o.label != "ball"] for g in truth
@@ -335,7 +336,7 @@ def test_learned_path_needs_calibration_then_reuses_observations(
     s3 = FakeS3(root)
     monkeypatch.setattr(analysis, "s3_client", lambda *a: s3)
     monkeypatch.setattr(analysis, "load_detector", lambda settings: Oracle())
-    # 6 s are too short for goal candidates: what the observation pass would give for a game
+    # 4 s are too short for goal candidates: what the observation pass would give for a game
     seen: list[int] = []
 
     def fake_candidates(obs: Any) -> dict[str, Any]:

@@ -53,11 +53,11 @@ test: test-py test-js ## Run all unit tests (starts Postgres for the API tests)
 db: ## Start only Postgres (needed by the API tests)
 	docker compose up -d --wait postgres
 
-test-py: db ## Python tests with coverage gate (80 %), needs Postgres
+test-py: db ## Python tests in parallel (pytest-xdist) with coverage gate (80 %), needs Postgres
 	uv run python packages/court/scripts/generate.py --check
 	uv run python packages/plans/generate.py --check
 	uv run python apps/site/scripts/make_demo.py --check
-	uv run pytest apps packages --cov --cov-report=term
+	uv run pytest apps packages -n auto --dist worksteal --cov --cov-report=term
 
 test-js: ## Vitest
 	pnpm test

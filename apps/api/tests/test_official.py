@@ -187,24 +187,24 @@ async def test_client_parses_caches_and_rests_after_errors(hch: Recorded) -> Non
 
 async def test_client_spaces_requests_without_waiting_for_slow_answers(hch: Recorded) -> None:
     """Requests start MIN_INTERVAL_S apart (a reserved start time), but a slow answer does not
-    hold up the next request (no lock held during the HTTP call)."""
+    hold up the next request (no lock held during the HTTP call). No answer comes before all
+    three requests have started, which could never happen if they ran one after the other;
+    no wall-clock limit, so a busy machine (parallel test workers) cannot make it flaky."""
     starts: list[float] = []
-    ends: list[float] = []
+    all_started = asyncio.Event()
 
     async def slow(request: httpx.Request) -> httpx.Response:
         starts.append(time.monotonic())
-        await asyncio.sleep(0.3)
-        ends.append(time.monotonic())
+        if len(starts) == 3:
+            all_started.set()
+        await asyncio.wait_for(all_started.wait(), timeout=10)
         return hch.handler(request)
 
     handball_ch.set_transport(httpx.MockTransport(slow), min_interval_s=0.1)
-    began = time.monotonic()
     seasons = await asyncio.gather(*(handball_ch.seasons(None) for _ in range(3)))
-    assert all(s == seasons[0] for s in seasons)
+    assert len(starts) == 3 and all(s == seasons[0] for s in seasons)
     starts.sort()
     assert all(b - a >= 0.09 for a, b in itertools.pairwise(starts))  # still spaced
-    assert starts[1] < min(ends)  # the second did not wait for the first answer
-    assert time.monotonic() - began < 0.8  # not 3 x 0.3 s one after the other
     # after an error the requests waiting for their slot are not sent either
     handball_ch.set_transport(httpx.MockTransport(hch.handler), min_interval_s=0.1)
     hch.down = True
