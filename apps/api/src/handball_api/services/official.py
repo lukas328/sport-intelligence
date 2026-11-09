@@ -1103,7 +1103,14 @@ async def list_access_requests(ctx: Ctx) -> list[tuple[OrgAccessRequest, User]]:
 async def _access_request(ctx: Ctx, request_id: uuid.UUID) -> OrgAccessRequest:
     actor = ctx.require_actor()
     authorize(actor, Action.ORG_ACCESS_MANAGE, two_factor=ctx.two_factor)
-    req = await ctx.db.get(OrgAccessRequest, request_id)
+    # locked until the decision is saved: a second click waits and then finds it decided (409,
+    # not a 500 from a duplicate membership)
+    req = await ctx.db.scalar(
+        select(OrgAccessRequest)
+        .where(OrgAccessRequest.id == request_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
     if req is None or req.organization_id != actor.organization_id:
         raise ProblemError(404, "not-found", "Request not found")
     if req.status != "pending":

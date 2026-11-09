@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
@@ -162,8 +163,14 @@ async def create(ctx: Ctx, user: User, team_id: uuid.UUID, data: JoinRequestIn) 
                 match["id"] if match and match["kind"] == "suggestion" else None
             ),
         )
-        ctx.db.add(req)
-        await ctx.db.flush()
+        try:
+            async with ctx.db.begin_nested():
+                ctx.db.add(req)
+                await ctx.db.flush()
+        except IntegrityError as exc:  # a second click while the first was being saved
+            raise ProblemError(
+                409, "join-request-pending", "Your request is already waiting"
+            ) from exc
         organisers = (
             await ctx.db.scalars(
                 select(Membership.user_id).where(
@@ -212,7 +219,7 @@ async def mine(ctx: Ctx, user: User) -> list[tuple[JoinRequest, Team, Organizati
 async def withdraw(ctx: Ctx, user: User, request_id: uuid.UUID) -> None:
     await enable_system_access(ctx.db, reason="withdraw own join request")
     try:
-        req = await ctx.db.get(JoinRequest, request_id)
+        req = await _locked(ctx, request_id)
         if req is None or req.user_id != user.id:
             raise ProblemError(404, "not-found", "Request not found")
         if req.status != "pending":
@@ -251,9 +258,22 @@ async def list_for_team(
     return out
 
 
+async def _locked(ctx: Ctx, request_id: uuid.UUID) -> JoinRequest | None:
+    """The request, locked until the decision is saved: a second click (or the requester
+    withdrawing at the same moment) waits and then finds it decided (409, not a 500 from a
+    duplicate membership)."""
+    req: JoinRequest | None = await ctx.db.scalar(
+        select(JoinRequest)
+        .where(JoinRequest.id == request_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    return req
+
+
 async def _pending(ctx: Ctx, team_id: uuid.UUID, request_id: uuid.UUID) -> tuple[Team, JoinRequest]:
     team = await get_team(ctx, team_id, Action.JOIN_REQUESTS_MANAGE)
-    req = await ctx.db.get(JoinRequest, request_id)
+    req = await _locked(ctx, request_id)
     if req is None or req.team_id != team.id:
         raise ProblemError(404, "not-found", "Request not found")
     if req.status != "pending":

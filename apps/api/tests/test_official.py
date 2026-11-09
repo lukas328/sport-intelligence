@@ -707,6 +707,34 @@ async def test_join_request_matches_roster_and_coach_approves(
     assert r.status_code == 409 and r.json()["type"].endswith("already-member")
 
 
+async def test_double_clicks_on_join_and_access_requests_answer_409(
+    make_api: Callable[[], Api],
+) -> None:
+    """Two clicks at the same moment: the first wins, the second answers 409 (not 500 from the
+    unique pending request or a duplicate membership)."""
+    api = await coach(make_api)
+    c = await claim(api)
+    joiner = await coach(make_api, "luca@example.org")
+    url = f"/v1/teams/{c['team_id']}/join-requests"
+    body = {"first_name": "Luca", "last_name": "Müster", "jersey_number": 55}
+    created = await asyncio.gather(joiner.post(url, json=body), joiner.post(url, json=body))
+    assert sorted(r.status_code for r in created) == [201, 409], [r.text for r in created]
+    req = next(r.json() for r in created if r.status_code == 201)
+    approve = base(c) + f"/join-requests/{req['id']}/approve"
+    decided = await asyncio.gather(api.post(approve), api.post(approve))
+    assert sorted(r.status_code for r in decided) == [200, 409], [r.text for r in decided]
+    assert (await joiner.get(base(c))).json()["my_role"] == "player"
+
+    second = await coach(make_api, "other@example.org")
+    access = await claim(second)
+    url = f"/v1/orgs/{c['organization_id']}/access-requests/{access['access_request_id']}/approve"
+    decided = await asyncio.gather(
+        api.post(url, json={"team_role": "coach"}), api.post(url, json={"team_role": "coach"})
+    )
+    assert sorted(r.status_code for r in decided) == [200, 409], [r.text for r in decided]
+    assert (await second.get(base(c))).json()["my_role"] == "coach"
+
+
 async def test_join_request_matches_an_open_suggestion(make_api: Callable[[], Api]) -> None:
     api = await coach(make_api)
     c = await claim(api)
