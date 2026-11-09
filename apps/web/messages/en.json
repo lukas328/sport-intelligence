@@ -131,7 +131,8 @@
     "notFoundBody": "It may have been deleted, or you do not have access to it.",
     "home": "Go to the start page",
     "pageTitle": "Something went wrong",
-    "already-a-goal": "This moment is already a goal."
+    "already-a-goal": "This moment is already a goal.",
+    "invalid-clock": "This match time is not in this half."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -1214,8 +1215,9 @@
     "ourScoreFirst": "our score first",
     "homeGame": "Home",
     "awayGame": "Away",
-    "xgPerMatch": "xG per match",
-    "xgThin": "xG: too few shots with a position ({n} of {of})."
+    "xgPerMatch": "xG per match (estimated)",
+    "xgThin": "xG: too few shots with a position ({n} of {of}).",
+    "noScorers": "No shots with a shirt number tagged yet."
   },
   "billing": {
     "title": "Plan and billing",
@@ -2356,7 +2358,7 @@
     "players_open": "{n, plural, one {# person open} other {# people open}}",
     "players_done": "assigned",
     "players_waiting": "Tracks appear after the analysis.",
-    "kickoffHint": "Move the video to the throw-off of the half and set it there. Official goals, goal candidates and events then line up with the match clock.",
+    "kickoffHint": "Skip to the throw-off of the half in the video and set it there. If the video starts later, enter what the match clock shows at one moment. Official goals, goal candidates and events then line up with the match time.",
     "period": "Half {n}",
     "setHere": "Set here",
     "notSet": "Not set",
@@ -2391,7 +2393,13 @@
     "kickoff_fromClip": "read from the video",
     "laneEvents": "Events",
     "feedback": "Feedback",
-    "legendSidesNamed": "{own} above, {opp} below"
+    "legendSidesNamed": "{own} above, {opp} below",
+    "clockHere": "Enter the clock",
+    "clockLabel": "Match clock here",
+    "clockSave": "Apply",
+    "clockCancel": "Cancel",
+    "clockInvalid": "Enter minutes and seconds, e.g. 12:40.",
+    "clockSaved": "Half {n}: clock {clock} at {time} in the video."
   },
   "file": {
     "choose": "Choose file",

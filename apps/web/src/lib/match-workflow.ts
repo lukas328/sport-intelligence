@@ -122,3 +122,13 @@ export function clockAt(kickoff: Record<string, number> | null | undefined, peri
   const [period, start] = last;
   return (period - 1) * periodS + (tMs - start) / 1000;
 }
+
+/** What a coach types for the match clock: "12:40", "12.40" or "12" (minutes), with the clock
+ * running on in the second half ("41:05"). Seconds of the match, null when it is not a time. */
+export function parseClock(text: string): number | null {
+  const m = /^\s*(\d{1,3})(?:[:.](\d{1,2}))?\s*$/.exec(text);
+  if (!m) return null;
+  const s = m[2] == null ? 0 : Number(m[2]);
+  if (s > 59 || (m[2] != null && m[2].length !== 2)) return null;
+  return Number(m[1]) * 60 + s;
+}

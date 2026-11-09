@@ -3,7 +3,7 @@
 import type { Schemas } from "@handball/api-client";
 import { ArrowRight, ScanSearch } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 type Playlist = Schemas["PlaylistOut"];
@@ -15,7 +15,9 @@ const newest = <T extends { created_at: string }>(xs: T[]) => [...xs].sort((a, b
 export function LibraryView({ base, orgBase, playlists, presentations }: { base: string; orgBase: string; playlists: Playlist[]; presentations: Presentation[] }) {
   const t = useTranslations("library");
   const format = useFormatter();
-  const when = (iso: string) => format.relativeTime(new Date(iso));
+  // relative times ("vor 5 Minuten") against a clock that moves on each minute
+  const now = useNow({ updateInterval: 60_000 });
+  const when = (iso: string) => format.relativeTime(new Date(iso), now);
   return (
     <div className="space-y-12">
       {/* the way into every scene of the season: a plain row, not a black banner */}

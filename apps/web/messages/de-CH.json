@@ -131,7 +131,8 @@
     "notFoundBody": "Vielleicht wurde sie gelöscht, oder du hast keinen Zugriff darauf.",
     "home": "Zur Startseite",
     "pageTitle": "Da ist etwas schiefgelaufen",
-    "already-a-goal": "Diese Stelle ist schon als Tor erfasst."
+    "already-a-goal": "Diese Stelle ist schon als Tor erfasst.",
+    "invalid-clock": "Diese Spielzeit liegt nicht in dieser Halbzeit."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -1214,8 +1215,9 @@
     "ourScoreFirst": "unser Resultat zuerst",
     "homeGame": "Heim",
     "awayGame": "Auswärts",
-    "xgPerMatch": "xG pro Spiel",
-    "xgThin": "xG: zu wenige Würfe mit Position ({n} von {of})."
+    "xgPerMatch": "xG pro Spiel (geschätzt)",
+    "xgThin": "xG: zu wenige Würfe mit Position ({n} von {of}).",
+    "noScorers": "Noch keine Würfe mit Rückennummer erfasst."
   },
   "billing": {
     "title": "Abo und Rechnungen",
@@ -2356,7 +2358,7 @@
     "players_open": "{n, plural, one {# Person offen} other {# Personen offen}}",
     "players_done": "zugeordnet",
     "players_waiting": "Spuren gibt es nach der Analyse.",
-    "kickoffHint": "Spul im Video zum Anwurf der Halbzeit und setze ihn dort. Damit liegen offizielle Tore, Torkandidaten und Ereignisse auf der Spielzeit.",
+    "kickoffHint": "Spul im Video zum Anwurf der Halbzeit und setze ihn dort. Beginnt das Video später, trag an einer Stelle ein, was die Spieluhr zeigt. Damit liegen offizielle Tore, Torkandidaten und Ereignisse auf der Spielzeit.",
     "period": "{n}. Halbzeit",
     "setHere": "Hier setzen",
     "notSet": "Nicht gesetzt",
@@ -2391,7 +2393,13 @@
     "kickoff_fromClip": "aus dem Video gelesen",
     "laneEvents": "Ereignisse",
     "feedback": "Feedback",
-    "legendSidesNamed": "oben {own}, unten {opp}"
+    "legendSidesNamed": "oben {own}, unten {opp}",
+    "clockHere": "Uhr eintragen",
+    "clockLabel": "Spieluhr zeigt hier",
+    "clockSave": "Übernehmen",
+    "clockCancel": "Abbrechen",
+    "clockInvalid": "Als Minuten und Sekunden eintragen, z. B. 12:40.",
+    "clockSaved": "{n}. Halbzeit: Spieluhr {clock} bei {time} im Video."
   },
   "file": {
     "choose": "Datei wählen",

@@ -118,7 +118,8 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] Web texts for the new notification kinds (join and access requests, official suggestions,
   official report), and a plain fallback for any kind without a text.
 - [ ] Official team search, claim, join requests and club verification: screens to build.
-- [ ] `PUT /kickoff` with `clock_s` for clips that start mid-half: use it in the throw-off step.
+- [x] `PUT /kickoff` with `clock_s` for clips that start mid-half: "Uhr eintragen" in the throw-off step
+  ("Spieluhr zeigt hier 12:40" at the paused moment, `lib/match-workflow.ts` `parseClock`, tested).
 - [x] Shot zone split: "Fernwurf" and "Leeres Tor" (`empty_goal`) in the web texts.
 - [ ] Search hits outside the video come with null windows ("ohne Video" already handles it).
 - [ ] `no-video` errors on clip slides; nuLiga/HLA report links; referee kit; roster suggestion
@@ -126,7 +127,9 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 
 ## Later (features)
 
-- Opponent profile: home or away per game (API field).
+- [x] Opponent profile: home or away per game (`is_home`), xG only with enough shots with a position
+  (`xg_coverage` at least 0.7, `lib/xg.ts`, also on the match stage, the analysis overview, the
+  season rows and the season's xG statement).
 - Player: one next-action list (self-assessments, assignments, replies to dates); personal season
   line linked to clips; "Meine Szenen" on the match page; read-only drills a coach assigns.
 - Own drills ("Neue Übung"): needs a drills API; the library is static today.

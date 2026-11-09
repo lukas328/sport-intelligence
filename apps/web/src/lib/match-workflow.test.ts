@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clockAt, coverage, covered, firstOpen, inside, kickoffMissing, steps, type StepInput } from "./match-workflow";
+import { clockAt, coverage, covered, firstOpen, inside, kickoffMissing, parseClock, steps, type StepInput } from "./match-workflow";
 
 const HALF = 1800;
 
@@ -100,4 +100,15 @@ describe("clockAt", () => {
 describe("throw-off read from a clip", () => {
   it("is done and says so when the video starts later in the half", () =>
     expect(steps({ ...base, kickoff: { "1": -760_000 } })[1]).toEqual({ id: "kickoff", state: "done", reason: "fromClip" }));
+});
+
+describe("the match clock a coach types", () => {
+  it("reads minutes and seconds", () => {
+    expect(parseClock("12:40")).toBe(760);
+    expect(parseClock(" 41.05 ")).toBe(2465);
+    expect(parseClock("12")).toBe(720);
+  });
+  it("is no time otherwise", () => {
+    for (const t of ["", "12:4", "12:60", "ab", "1:2:3"]) expect(parseClock(t)).toBeNull();
+  });
 });

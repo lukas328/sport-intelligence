@@ -84,7 +84,8 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
           <div className="grid gap-8 md:grid-cols-3">
             <section className="space-y-2">
               <h2 className="font-semibold">{t("scorers")}</h2>
-              <ol className="divide-y divide-foreground/10 border-t-2 border-foreground text-sm">
+              {p.scorers.length === 0 && <p className="border-t-2 border-foreground pt-2 text-sm text-muted">{t("noScorers")}</p>}
+              <ol className="divide-y divide-foreground/10 border-t-2 border-foreground text-sm empty:hidden">
                 {p.scorers.map((s) => (
                   <li key={s.number} className="flex justify-between gap-2 py-1.5">
                     <span>

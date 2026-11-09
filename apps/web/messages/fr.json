@@ -131,7 +131,8 @@
     "notFoundBody": "Elle a peut-être été supprimée, ou vous n'y avez pas accès.",
     "home": "Aller à l'accueil",
     "pageTitle": "Un problème est survenu",
-    "already-a-goal": "Ce moment est déjà un but."
+    "already-a-goal": "Ce moment est déjà un but.",
+    "invalid-clock": "Ce temps de jeu n'est pas dans cette mi-temps."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -1214,8 +1215,9 @@
     "ourScoreFirst": "notre score d'abord",
     "homeGame": "Domicile",
     "awayGame": "Extérieur",
-    "xgPerMatch": "xG par match",
-    "xgThin": "xG : trop peu de tirs avec position ({n} sur {of})."
+    "xgPerMatch": "xG par match (estimé)",
+    "xgThin": "xG : trop peu de tirs avec position ({n} sur {of}).",
+    "noScorers": "Aucun tir avec numéro de maillot saisi."
   },
   "billing": {
     "title": "Abonnement et factures",
@@ -2356,7 +2358,7 @@
     "players_open": "{n, plural, one {# personne ouverte} other {# personnes ouvertes}}",
     "players_done": "attribuées",
     "players_waiting": "Les traces apparaissent après l'analyse.",
-    "kickoffHint": "Amène la vidéo à l'engagement de la mi-temps et définis-le là. Les buts officiels, les buts possibles et les événements suivent alors le temps de jeu.",
+    "kickoffHint": "Avance la vidéo jusqu'à l'engagement de la mi-temps et place-le là. Si la vidéo commence plus tard, saisis ce qu'indique le chrono à un moment. Les buts officiels, les candidats de but et les événements suivent alors le temps de jeu.",
     "period": "{n}e mi-temps",
     "setHere": "Définir ici",
     "notSet": "Non défini",
@@ -2391,7 +2393,13 @@
     "kickoff_fromClip": "lu dans la vidéo",
     "laneEvents": "Événements",
     "feedback": "Retours",
-    "legendSidesNamed": "{own} en haut, {opp} en bas"
+    "legendSidesNamed": "{own} en haut, {opp} en bas",
+    "clockHere": "Saisir le chrono",
+    "clockLabel": "Le chrono indique ici",
+    "clockSave": "Appliquer",
+    "clockCancel": "Annuler",
+    "clockInvalid": "Saisir minutes et secondes, p. ex. 12:40.",
+    "clockSaved": "{n}e mi-temps : chrono {clock} à {time} dans la vidéo."
   },
   "file": {
     "choose": "Choisir un fichier",
