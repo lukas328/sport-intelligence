@@ -25,8 +25,9 @@ output "web_default_fqdn" {
 }
 
 output "custom_domain_verification_id" {
-  description = "Value of the TXT record asuid.<app_domain>."
+  description = "Value of the TXT record asuid.<app_domain> (terraform output -raw shows it)."
   value       = azurerm_container_app.web.custom_domain_verification_id
+  sensitive   = true
 }
 
 output "migrate_job" {
@@ -35,6 +36,11 @@ output "migrate_job" {
 
 output "postgres_host" {
   value = azurerm_postgresql_flexible_server.this.fqdn
+}
+
+output "postgres_server" {
+  description = "Server name for az postgres flexible-server stop/start (README, Pause)."
+  value       = azurerm_postgresql_flexible_server.this.name
 }
 
 output "container_app_environment" {

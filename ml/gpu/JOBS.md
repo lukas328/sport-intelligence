@@ -18,6 +18,17 @@ alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from
   Kaggle-Dataset); das neue Dataset enthält dann alle 300 zusammen.
 - Dauer etwa 6.5 h, Kosten etwa 4.3 USD.
 
+## Stand 2026-11-09 nachts (Hauptsitzung)
+Ball-Testset 2 (177 Bälle, 42 neue Hallen, `ml/ball/README.md`) zeigt: Runde 6 mit den OWL-Labels
+ist in neuen Hallen klar besser als Runde 3 (29 % gegen 15 %). Die OWL-Labels helfen also; die
+Aufträge 4 bis 10 laufen darum jetzt, aber **auf Kaggle aus der Hauptsitzung** (Gratis-Kontingent),
+nicht auf Modal: Kernels `handball-owl-r7-1` und `-2`, 144 Segmente aus l04 bis l13 (zwei pro Spiel,
+ohne die Testspiele aus `ml/ball/test_games.json` und deren Hallen). **Die lokale Sitzung führt 4
+bis 10 nicht aus.** Auftrag 3 (l02/l03 auf Modal) bleibt bei der lokalen Sitzung, falls er schon
+läuft oder Azure Pause hat; sonst hat Azure Vorrang.
+Regel für alle Ball-Trainings: die Spiele aus `ml/ball/test_games.json` und Spiele derselben
+Heimhalle nie verwenden.
+
 ## Zurückgestellt (erst nach der Auswertung von Ball-Runde 6, 2026-11-09 abends)
 GPU-Budget ist knapp (Modal-Gratisguthaben 30 USD pro Monat). Die Aufträge 4 bis 10 zusammen kosten
 etwa 28 USD. Sie laufen erst, wenn Runde 6 zeigt, dass die OWL-Labels das Ballnetz verbessern, und

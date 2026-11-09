@@ -157,6 +157,12 @@ variable "optional_secrets" {
 
 # --- Sizing -------------------------------------------------------------------------------------
 
+variable "paused" {
+  description = "true scales every app to 0 replicas (nothing runs, no compute cost); stop Postgres separately (README, \"Pause\")."
+  type        = bool
+  default     = false
+}
+
 variable "web_min_replicas" {
   description = "1 avoids cold starts on the first request; 0 saves a little more."
   type        = number

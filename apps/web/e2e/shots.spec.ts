@@ -81,6 +81,8 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(page.getByTestId("shot-candidates-report")).toContainText("Matchbericht: 24 Würfe, 0 im Video bestätigt, 1 vorgeschlagen, 2 ohne Stelle im Video.");
   await expect(page.getByTestId("shot-candidates-report")).toContainText("21 liegen ausserhalb des Videos.");
   await expect(page.getByTestId("shot-accept")).toContainText("Parade, Wurf von #14 Kurt Beispiel (TV Testdorf)");
+  // one count: the report's moment first, the other open ones after it
+  await expect(page.getByTestId("shot-candidate-focus")).toContainText("1 von 1 mit Matchbericht · 2 weitere offen");
   // no throw-off yet: the times are the report's, one click leads to the throw-off step
   await expect(page.getByTestId("shot-candidates-kickoff")).toContainText("Der Anwurf fehlt noch");
   await expectAccessible(page);
