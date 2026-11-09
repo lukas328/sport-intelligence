@@ -17,6 +17,7 @@ from handball_api.models.enums import (
 from handball_api.schemas.common import ApiModel, HexColor, Name
 
 Country = Annotated[str, StringConstraints(pattern=r"^[A-Z]{2}$")]
+InviteeName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
 
 
 class OrgCreate(ApiModel):
@@ -132,7 +133,15 @@ class InvitationCreate(ApiModel):
     org_role: OrgRole = OrgRole.MEMBER
     team_id: uuid.UUID | None = None
     team_role: TeamRole | None = None
+    # the roster entry the invitee is (player roles) or the child (parent): the accepting
+    # account is linked to it if it is still free (409 if it has another account)
     player_id: uuid.UUID | None = None
+    # without player_id: name and/or shirt number of the invitee; when they match exactly one
+    # roster entry of the team's current season that has no account yet, the invitation is
+    # made for that entry (player and goalkeeper invitations only)
+    first_name: InviteeName | None = None
+    last_name: InviteeName | None = None
+    jersey_number: int | None = Field(default=None, ge=1, le=99)
 
     @model_validator(mode="after")
     def _team_pair(self) -> InvitationCreate:
@@ -140,6 +149,9 @@ class InvitationCreate(ApiModel):
             raise ValueError("team_id and team_role go together")
         if self.org_role == OrgRole.MEMBER and self.team_id is None:
             raise ValueError("a member invitation needs a team")
+        hints = (self.first_name, self.last_name, self.jersey_number)
+        if self.team_id is None and any(h is not None for h in hints):
+            raise ValueError("name and shirt number need a team invitation")
         return self
 
 

@@ -4744,6 +4744,45 @@
             "title": "Email",
             "type": "string"
           },
+          "first_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "jersey_number": {
+            "anyOf": [
+              {
+                "maximum": 99.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jersey Number"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
           "org_role": {
             "$ref": "#/components/schemas/OrgRole",
             "default": "member"
@@ -9571,6 +9610,59 @@
         "title": "PlayUpdate",
         "type": "object"
       },
+      "PlayerAccountIn": {
+        "properties": {
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "title": "PlayerAccountIn",
+        "type": "object"
+      },
+      "PlayerAccountOut": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The linked account's name",
+            "title": "Name"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "player_id",
+          "user_id"
+        ],
+        "title": "PlayerAccountOut",
+        "type": "object"
+      },
       "PlayerAvailability": {
         "description": "A player's status on the squad, set by the staff; no status means fit.",
         "enum": [
@@ -10829,6 +10921,18 @@
       },
       "RosterEntryOut": {
         "properties": {
+          "account_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account User Id"
+          },
           "active": {
             "title": "Active",
             "type": "boolean"
@@ -27480,6 +27584,137 @@
           }
         },
         "summary": "List Player Statuses",
+        "tags": [
+          "teams",
+          "roster"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/account": {
+      "delete": {
+        "description": "Remove the account link of this roster player (staff); the membership stays.",
+        "operationId": "unlink_player_account_v1_orgs__org_id__teams__team_id__players__player_id__account_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "player_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Player Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unlink Player Account",
+        "tags": [
+          "teams",
+          "roster"
+        ]
+      },
+      "put": {
+        "description": "Link a team member's account to this roster player (staff). 409 if the player already\nhas another account: unlink first. Parents are linked to a child by invitation\n(guardianship), not here.",
+        "operationId": "link_player_account_v1_orgs__org_id__teams__team_id__players__player_id__account_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "player_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Player Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlayerAccountIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerAccountOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Link Player Account",
         "tags": [
           "teams",
           "roster"

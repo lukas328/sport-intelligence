@@ -9,12 +9,21 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import or_, select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import Consent, Player, PlayerStatus, RosterEntry, Season
-from handball_api.models.enums import ConsentGivenBy, ConsentKind, Position
+from handball_api.models import (
+    Consent,
+    Membership,
+    Player,
+    PlayerStatus,
+    RosterEntry,
+    Season,
+    User,
+)
+from handball_api.models.enums import ConsentGivenBy, ConsentKind, Position, TeamRole
 from handball_api.schemas.roster import (
     ConsentCreate,
     ImportResult,
     ImportRowError,
+    PlayerAccountOut,
     PlayerStatusIn,
     PlayerStatusOut,
     RosterEntryCreate,
@@ -70,6 +79,7 @@ def _out(
     player: Player,
     consented: bool,
     status: PlayerStatusOut | None = None,
+    show_account: bool = True,
 ) -> RosterEntryOut:
     return RosterEntryOut(
         id=entry.id,
@@ -84,6 +94,7 @@ def _out(
         main_position=player.main_position,
         secondary_positions=[Position(p) for p in player.secondary_positions],
         has_account=player.user_id is not None,
+        account_user_id=player.user_id if show_account else None,
         consent_complete=consented,
         status=status,
     )
@@ -105,7 +116,8 @@ async def list_roster(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> lis
             )
         )
     ]
-    if not can(ctx.require_actor(), Action.ROSTER_WRITE, team_id):
+    staff = can(ctx.require_actor(), Action.ROSTER_WRITE, team_id)
+    if not staff:
         rows = await _without_official_only(ctx, rows)
     consented = await _consented_players(ctx, [p.id for _, p in rows])
     if can(ctx.require_actor(), Action.PLAYER_STATUS, team_id):
@@ -113,7 +125,7 @@ async def list_roster(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> lis
     else:  # players see only their own status
         shown = [p.id for _, p in rows if p.user_id is not None and p.user_id == ctx.user_id]
     statuses = await _current_statuses(ctx, team_id, shown)
-    return [_out(e, p, p.id in consented, statuses.get(p.id)) for e, p in rows]
+    return [_out(e, p, p.id in consented, statuses.get(p.id), staff) for e, p in rows]
 
 
 # ---- player status on the squad (injured, absent; no status means fit) ----------------------
@@ -391,16 +403,77 @@ async def import_csv(
     )
 
 
-async def _player_in_team(ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID) -> Player:
-    player = await ctx.db.scalar(
+async def _player_in_team(
+    ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID, lock: bool = False
+) -> Player:
+    q = (
         select(Player)
         .join(RosterEntry, RosterEntry.player_id == Player.id)
         .where(Player.id == player_id, RosterEntry.team_id == team_id)
         .limit(1)
     )
+    if lock:
+        q = q.with_for_update(of=Player).execution_options(populate_existing=True)
+    player = await ctx.db.scalar(q)
     if player is None:
         raise ProblemError(404, "not-found", "Player not found in this team")
     return player
+
+
+# ---- the account of a roster player (invitations and join requests link it; staff fix it) ----
+
+
+async def link_account(
+    ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID, user_id: uuid.UUID
+) -> PlayerAccountOut:
+    """Link a team member's account to a roster player: the person then sees their dates,
+    status, assignments and scenes. An entry with another account is not taken over (409:
+    unlink first). Parents are linked to a child by guardianship, never as the player."""
+    await get_team(ctx, team_id, Action.ROSTER_WRITE)
+    player = await _player_in_team(ctx, team_id, player_id, lock=True)
+    row = (
+        await ctx.db.execute(
+            select(Membership.role, User.name)
+            .join(User, User.id == Membership.user_id)
+            .where(Membership.team_id == team_id, Membership.user_id == user_id)
+        )
+    ).first()
+    if row is None:
+        raise ProblemError(404, "not-found", "Team member not found")
+    role, name = row
+    if role == TeamRole.PARENT:
+        raise ProblemError(
+            422, "parent-not-player", "A parent is linked to the child, not as the player"
+        )
+    if player.user_id is not None and player.user_id != user_id:
+        raise ProblemError(409, "player-linked", "This player already has an account")
+    if player.user_id is None:
+        player.user_id = user_id
+        await ctx.db.flush()
+        await audit.record(
+            ctx,
+            "roster.account_linked",
+            target_type="player",
+            target_id=player.id,
+            data={"user_id": str(user_id)},
+        )
+    return PlayerAccountOut(player_id=player.id, user_id=user_id, name=name)
+
+
+async def unlink_account(ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID) -> None:
+    await get_team(ctx, team_id, Action.ROSTER_WRITE)
+    player = await _player_in_team(ctx, team_id, player_id, lock=True)
+    if player.user_id is not None:
+        previous = player.user_id
+        player.user_id = None
+        await ctx.db.flush()
+        await audit.record(
+            ctx,
+            "roster.account_unlinked",
+            target_type="player",
+            target_id=player.id,
+            data={"user_id": str(previous)},
+        )
 
 
 async def list_consents(ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID) -> list[Consent]:
