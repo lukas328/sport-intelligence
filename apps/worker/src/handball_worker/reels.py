@@ -6,11 +6,13 @@ add an audio track later.
 
 from __future__ import annotations
 
+import contextlib
 import io
 import subprocess
 import tempfile
+import threading
 from pathlib import Path
-from typing import Any
+from typing import IO, Any
 
 import boto3
 import httpx
@@ -20,7 +22,7 @@ from numpy.typing import NDArray
 from PIL import Image, ImageDraw, ImageFont
 
 from handball_worker.config import WorkerSettings
-from handball_worker.export import ENC, FPS
+from handball_worker.export import ENC, FFMPEG_TIMEOUT_S, FPS
 
 log = structlog.get_logger("worker.reels")
 SRC_W, SRC_H = 1280, 720
@@ -185,10 +187,56 @@ def render_clip(
         stderr=subprocess.DEVNULL,
     )
     assert dec.stdout is not None and enc.stdin is not None
+    # the frame loop blocks on the pipes, so a watchdog stops both processes when they hang
+    timed_out = threading.Event()
+
+    def _kill() -> None:
+        timed_out.set()
+        dec.kill()
+        enc.kill()
+
+    watchdog = threading.Timer(FFMPEG_TIMEOUT_S, _kill)
+    watchdog.start()
+    try:
+        # BrokenPipeError: the encoder stopped; its exit code below says why
+        with contextlib.suppress(BrokenPipeError):
+            try:
+                _pipe_frames(dec.stdout, enc.stdin, clip, rows, ctx, times, lefts, portrait, crop_w)
+            finally:
+                enc.stdin.close()
+        dec.wait()
+        code = enc.wait()
+    finally:
+        watchdog.cancel()
+        for proc in (dec, enc):
+            if proc.poll() is None:  # only after an error in the frame loop
+                proc.kill()
+                proc.wait()
+    if timed_out.is_set():
+        raise RuntimeError(f"ffmpeg timed out after {FFMPEG_TIMEOUT_S} s")
+    if code != 0:
+        raise RuntimeError("encoding failed")
+
+
+def _pipe_frames(
+    stdout: IO[bytes],
+    stdin: IO[bytes],
+    clip: dict[str, Any],
+    rows: NDArray[np.float32],
+    ctx: dict[str, Any],
+    times: list[int],
+    lefts: list[int],
+    portrait: bool,
+    crop_w: int,
+) -> None:
+    """Decoded frames in, overlay and crop, encoder frames out."""
+    out_w, out_h = (720, 1280) if portrait else (1280, 720)
+    a, n = clip["in_ms"], len(times)
+    h, size = ctx.get("homography"), tuple(ctx.get("image_size") or (SRC_W, SRC_H))
     frame_bytes = SRC_W * SRC_H * 3
     i = 0
     while True:
-        buf = dec.stdout.read(frame_bytes)
+        buf = stdout.read(frame_bytes)
         if len(buf) < frame_bytes:
             break
         img = Image.frombuffer("RGB", (SRC_W, SRC_H), buf, "raw", "RGB", 0, 1)
@@ -202,12 +250,8 @@ def render_clip(
         if portrait:
             left = lefts[min(i, n - 1)] if n else 0
             img = img.crop((left, 0, left + crop_w, SRC_H))
-        enc.stdin.write(img.resize((out_w, out_h)).tobytes())
+        stdin.write(img.resize((out_w, out_h)).tobytes())
         i += 1
-    enc.stdin.close()
-    dec.wait()
-    if enc.wait() != 0:
-        raise RuntimeError("encoding failed")
 
 
 def _rows(
@@ -310,6 +354,7 @@ def render_local(
         ],
         check=True,
         capture_output=True,
+        timeout=FFMPEG_TIMEOUT_S,
     )
     parts.append(intro)
     for i, clip in enumerate(payload["clips"], start=1):
@@ -339,5 +384,6 @@ def render_local(
         ],
         check=True,
         capture_output=True,
+        timeout=FFMPEG_TIMEOUT_S,
     )
     return final

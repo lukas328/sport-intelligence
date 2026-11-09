@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import re
 import subprocess
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
@@ -36,6 +37,8 @@ def hls_command(
     cmd = [
         ffmpeg,
         "-hide_banner",
+        "-loglevel",
+        "error",
         "-nostdin",
         "-y",
         "-i",
@@ -112,6 +115,8 @@ def proxy_command(src: Path, dst: Path, ffmpeg: str, preset: str) -> list[str]:
     return [
         ffmpeg,
         "-hide_banner",
+        "-loglevel",
+        "error",
         "-nostdin",
         "-y",
         "-i",
@@ -139,15 +144,20 @@ def proxy_command(src: Path, dst: Path, ffmpeg: str, preset: str) -> list[str]:
 def run_with_progress(
     cmd: list[str], duration_s: float, on_progress: Progress | None = None
 ) -> None:
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    assert proc.stdout is not None
-    for line in proc.stdout:
-        m = re.match(r"out_time_us=(\d+)", line.strip())
-        if m and on_progress and duration_s > 0:
-            on_progress(min(1.0, int(m.group(1)) / 1e6 / duration_s))
-    _, err = proc.communicate()
+    """Run ffmpeg, reading `-progress pipe:1` from stdout. stderr goes to a temporary file, not a
+    pipe: a pipe nobody reads fills up on a long run and blocks ffmpeg (deadlock)."""
+    with tempfile.TemporaryFile(mode="w+") as errfile:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=errfile, text=True)
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            m = re.match(r"out_time_us=(\d+)", line.strip())
+            if m and on_progress and duration_s > 0:
+                on_progress(min(1.0, int(m.group(1)) / 1e6 / duration_s))
+        proc.wait()
+        errfile.seek(0)
+        err = errfile.read().strip()
     if proc.returncode != 0:
-        raise TranscodeError(err.strip().splitlines()[-1] if err.strip() else "ffmpeg failed")
+        raise TranscodeError(err.splitlines()[-1] if err else "ffmpeg failed")
 
 
 AUDIO_SYNC_S = 600

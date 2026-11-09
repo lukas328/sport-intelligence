@@ -4,6 +4,7 @@ import json
 import shutil
 import socket
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -351,3 +352,40 @@ def test_run_import_follows_safe_redirects(tmp_path: Path, monkeypatch: pytest.M
                 client,
             )
         assert posts[-1]["status"] == "failed"
+
+
+def _fake_ffmpeg(tmp_path: Path, body: str) -> str:
+    script = tmp_path / "fake-ffmpeg"
+    script.write_text(f"#!{sys.executable}\nimport sys, time\n{body}\n")
+    script.chmod(0o755)
+    return str(script)
+
+
+def test_run_with_progress_drains_stderr(tmp_path: Path) -> None:
+    """A lot of stderr output must not block ffmpeg while stdout is read (no pipe deadlock)."""
+    ffmpeg = _fake_ffmpeg(
+        tmp_path,
+        "sys.stderr.write('noise\\n' * 50000)\n"
+        "print('out_time_us=1000000', flush=True)\n"
+        "print('out_time_us=2000000', flush=True)\n"
+        "sys.stderr.write('Conversion failed!\\n')\n"
+        "sys.exit(1)",
+    )
+    seen: list[float] = []
+    with pytest.raises(transcode.TranscodeError, match="Conversion failed!"):
+        transcode.run_with_progress([ffmpeg], 4.0, seen.append)
+    assert seen == [0.25, 0.5]
+    ok = _fake_ffmpeg(tmp_path, "print('out_time_us=4000000', flush=True)")
+    transcode.run_with_progress([ok], 4.0, seen.append)
+    assert seen[-1] == 1.0
+    silent = _fake_ffmpeg(tmp_path, "sys.exit(2)")
+    with pytest.raises(transcode.TranscodeError, match="ffmpeg failed"):
+        transcode.run_with_progress([silent], 4.0)
+
+
+def test_transcode_commands_log_errors_only(tmp_path: Path) -> None:
+    for cmd in (
+        transcode.hls_command(Path("in.mp4"), tmp_path, info(), "ffmpeg", "fast", 4),
+        transcode.proxy_command(Path("in.mp4"), tmp_path / "p.mp4", "ffmpeg", "fast"),
+    ):
+        assert cmd[cmd.index("-loglevel") + 1] == "error"
