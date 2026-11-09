@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import secrets
@@ -177,7 +178,7 @@ async def register(
         email=data.email,
         name=data.name,
         locale=data.locale,
-        password_hash=hash_password(data.password),
+        password_hash=await asyncio.to_thread(hash_password, data.password),
         terms_accepted_at=_now(),
     )
     ctx.db.add(user)
@@ -191,10 +192,13 @@ async def register(
 
 async def login(ctx: Ctx, data: LoginIn, user_agent: str | None) -> IssuedSession:
     user = await ctx.db.scalar(select(User).where(User.email == data.email))
-    if user is None or not verify_password(user.password_hash if user else None, data.password):
+    # argon2 takes tens of milliseconds of CPU: off the event loop
+    if user is None or not await asyncio.to_thread(
+        verify_password, user.password_hash if user else None, data.password
+    ):
         raise ProblemError(401, "invalid-credentials", "E-mail or password is wrong")
     if user.password_hash and needs_rehash(user.password_hash):
-        user.password_hash = hash_password(data.password)
+        user.password_hash = await asyncio.to_thread(hash_password, data.password)
     ctx.user_id = user.id
     await audit.record(ctx, "user.login", target_type="user", target_id=user.id)
     return await issue_session(ctx, user, mfa_pending=user.totp_enabled, user_agent=user_agent)
@@ -441,7 +445,7 @@ async def reset_password(
     user = await _consume_token(ctx, token, TokenPurpose.PASSWORD_RESET)
     validate_password(ctx, password, user.email)
     await check_not_pwned(ctx, password)
-    user.password_hash = hash_password(password)
+    user.password_hash = await asyncio.to_thread(hash_password, password)
     user.email_verified_at = user.email_verified_at or _now()  # the mail reached the user
     await ctx.db.execute(delete(AuthSession).where(AuthSession.user_id == user.id))
     ctx.user_id = user.id
@@ -481,11 +485,13 @@ async def change_password(
     ctx: Ctx, user: User, session: AuthSession, current: str | None, new: str
 ) -> None:
     # Accounts created via Google/Apple or magic link may have no password yet.
-    if user.password_hash and not verify_password(user.password_hash, current or ""):
+    if user.password_hash and not await asyncio.to_thread(
+        verify_password, user.password_hash, current or ""
+    ):
         raise ProblemError(403, "invalid-credentials", "The current password is wrong")
     validate_password(ctx, new, user.email)
     await check_not_pwned(ctx, new)
-    user.password_hash = hash_password(new)
+    user.password_hash = await asyncio.to_thread(hash_password, new)
     await ctx.db.execute(
         delete(AuthSession).where(AuthSession.user_id == user.id, AuthSession.id != session.id)
     )

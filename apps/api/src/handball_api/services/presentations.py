@@ -398,7 +398,7 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
                 "image_size": cal.image_size,
             }
     job_id = f"pres-{p.id}-{int(datetime.now(UTC).timestamp())}"
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "default",
         EXPORT_FUNC,
         job_id,

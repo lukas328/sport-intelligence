@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import math
@@ -202,7 +203,7 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
     match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
     url = str(data.url)
     try:
-        check_public_https_url(url)
+        await asyncio.to_thread(check_public_https_url, url)  # DNS lookup blocks
     except UnsafeUrlError as exc:
         raise ProblemError(422, "unsafe-url", str(exc)) from exc
     asset_id = uuid.uuid4()
@@ -225,9 +226,7 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
     ctx.db.add(asset)
     await ctx.db.flush()
     job = await _new_job(ctx, asset, "import")
-    ctx.require_jobs().enqueue(
-        "pipeline", IMPORT_FUNC, str(job.id), _job_payload(ctx, asset, job, url=url)
-    )
+    await ctx.enqueue("pipeline", IMPORT_FUNC, str(job.id), _job_payload(ctx, asset, job, url=url))
     await audit.record(
         ctx, "video.import_started", target_type="video", target_id=asset.id, data={"url": url}
     )
@@ -282,7 +281,7 @@ async def start_ingest(ctx: Ctx, asset: VideoAsset) -> ProcessingJob:
     match = await ctx.db.get(Match, asset.match_id)
     if match is not None and match.status != MatchStatus.READY:
         match.status = MatchStatus.PROCESSING
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "pipeline",
         INGEST_FUNC,
         str(job.id),
@@ -314,7 +313,7 @@ async def start_sync(ctx: Ctx, main: VideoAsset, other: VideoAsset) -> Processin
     if not main_key or not other_key or (other.sync or {}).get("source") == "user_correction":
         return None
     job = await _new_job(ctx, other, "sync")
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "gpu",
         SYNC_FUNC,
         str(job.id),
@@ -623,7 +622,7 @@ async def start_analysis(
         payload["rosters"] = rosters
     if refs:
         payload["hall_references"] = refs
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "gpu",
         ANALYSIS_FUNC,
         str(job.id),

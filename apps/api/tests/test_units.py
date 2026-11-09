@@ -229,3 +229,43 @@ async def test_tracing_records_spans() -> None:
         await c.get("/v1/openapi.json")
     app.state.tracer_provider.force_flush()
     assert any("openapi" in s.name for s in exporter.get_finished_spans())
+
+
+def test_rq_queue_has_socket_timeouts() -> None:
+    from handball_api.core.jobs import RqJobQueue
+
+    q = RqJobQueue("redis://127.0.0.1:1/0")
+    kwargs = q._conn.connection_pool.connection_kwargs
+    assert (kwargs["socket_timeout"], kwargs["socket_connect_timeout"]) == (5, 5)
+
+
+async def test_ctx_enqueue_runs_off_the_event_loop() -> None:
+    import threading
+    from typing import Any, cast
+
+    from handball_api.services.context import Ctx
+
+    seen: list[tuple[str, str, str, dict[str, Any], int | None, bool]] = []
+    loop_thread = threading.get_ident()
+
+    class Queue:
+        def enqueue(
+            self,
+            queue: str,
+            func: str,
+            job_id: str,
+            kwargs: dict[str, Any],
+            timeout_s: int | None = None,
+        ) -> None:
+            off_loop = threading.get_ident() != loop_thread
+            seen.append((queue, func, job_id, kwargs, timeout_s, off_loop))
+
+        def depths(self) -> dict[str, int]:
+            return {}
+
+    none = cast(Any, None)
+    ctx = Ctx(db=none, settings=none, email=none, storage=none, jobs=Queue())
+    await ctx.enqueue("gpu", "a.b", "j1", {"x": 1}, 60)
+    assert seen == [("gpu", "a.b", "j1", {"x": 1}, 60, True)]
+    with pytest.raises(RuntimeError):
+        await Ctx(db=none, settings=none, email=none, storage=none).enqueue("gpu", "a.b", "j2", {})
