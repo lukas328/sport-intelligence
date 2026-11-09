@@ -432,6 +432,20 @@ class FormationSegment(ApiModel):
     confidence: float
 
 
+class HallOut(ApiModel):
+    name: str | None = Field(description="the match's hall (venue), or a suggestion")
+    source: Literal["official", "match", "home_matches"] | None = Field(
+        default=None,
+        description="official game data, the match as entered, or the team's usual home hall "
+        "(a home game without a venue)",
+    )
+    calibrated_videos: int = Field(
+        default=0,
+        description="earlier videos of this hall with a court a person clicked or confirmed: "
+        "the analysis carries their court over when the camera stood at the same place",
+    )
+
+
 class AnalysisOut(ApiModel):
     status: Literal["none", "running", "ready", "failed"]
     formations: list[FormationSegment] = Field(default_factory=list)
@@ -452,8 +466,11 @@ class AnalysisOut(ApiModel):
     calibration_error: str | None = None
     calibration_info: dict[str, Any] | None = Field(
         default=None,
-        description="automatic calibration: goal fit, players on the court, camera position",
+        description="automatic calibration: goal fit, players on the court, camera position; "
+        "method 'hall' when the court was carried over from an earlier video of the hall "
+        "(reference_video_id); hall_tried lists earlier videos that did not fit",
     )
+    hall: HallOut | None = None
     error_code: str | None = Field(
         default=None, description="calibration, unreadable, too_short, timeout or generic"
     )

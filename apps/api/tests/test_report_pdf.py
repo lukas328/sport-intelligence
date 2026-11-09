@@ -22,7 +22,12 @@ def test_insight_texts_match_the_web_app() -> None:
         web = json.loads((WEB / f"{lang}.json").read_text(encoding="utf-8"))
         for key, text in TEXTS[lang]["insights"].items():
             assert web["insights"][key] == text, (lang, key)
-        assert TEXTS[lang]["zones"] == web["zones"]
+        # "Fernwurf / leeres Tor" split into long_range and empty_goal: the web labels follow
+        # with the UI handover (docs/plans/ui-match-workspace.md)
+        split = {"long_range", "empty_goal"}
+        assert {k: v for k, v in TEXTS[lang]["zones"].items() if k not in split} == {
+            k: v for k, v in web["zones"].items() if k not in split
+        }
 
 
 def test_insight_text_formatting() -> None:

@@ -95,7 +95,7 @@ def test_parse_handball_ch_resolves_sides_and_keepers() -> None:
         93,
         "home",
         32,
-        "KOHLBRENNER Seraina",
+        "PROBSTER Seraina",
         (1, 0),
     )
     assert {e.kind for e in r.entries} >= {"penalty_goal", "suspension", "turnover", "shot_missed"}
@@ -144,6 +144,52 @@ async def test_broken_pdf_is_unreadable() -> None:
 # ---- import into a match ---------------------------------------------------------------------
 
 
+async def ingest(api: Api, job_id: str, prefix: str, duration_s: float | None) -> None:
+    """The ingest job of a video finished (worker callback), with the video's length."""
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    r = await api.http.post(
+        f"/internal/jobs/{job_id}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {
+                "proxy_key": prefix + "proxy.mp4",
+                "hls_prefix": prefix + "hls/",
+                "duration_s": duration_s,
+            },
+        },
+    )
+    assert r.status_code == 200, r.text
+
+
+async def reported_clip(api: Api, ids: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    """Real club footage: the official report of the whole game (handball.ch, 22 events) and a
+    video of five minutes that starts at 21:00 of the first half (throw-off at -21 min in video
+    time). Most report events lie before (negative time) or after the video. Needs `recorded`."""
+    from handball_api.core.jobs import MemoryJobQueue
+
+    from .test_matches import upload
+
+    m = await new_match(api, ids, opponent_name="HC Arbon")
+    base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
+    assert (await api.post(f"{base}/official-report", json={"url": CH_URL})).status_code == 200
+    video = await upload(api, ids, m["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], 300.0)
+    # the clock shows 21:00 at the start of the video; the second half starts after it
+    for body in ({"period": 1, "t_ms": 0, "clock_s": 1260}, {"period": 2, "t_ms": 1_500_000}):
+        r = await api.put(f"{base}/kickoff", json=body)
+        assert r.status_code == 204, r.text
+    match = (await api.get(base)).json()
+    assert match["kickoff_ms"] == {"1": -1_260_000, "2": 1_500_000}
+    events = (await api.get(f"{base}/events")).json()
+    times = [e["t_ms"] for e in events]
+    assert any(t < 0 for t in times) and any(t > 300_000 for t in times)
+    assert any(0 <= t <= 300_000 for t in times)
+    return m, str(video["id"])
+
+
 async def _roster(api: Api, ids: dict[str, Any], numbers: dict[int, str]) -> dict[int, str]:
     url = f"/v1/orgs/{ids['org']}/teams/{ids['team']}/seasons/{ids['season']}/roster"
     out = {}
@@ -180,7 +226,7 @@ async def test_import_handball_ch_report(
     goals = [e for e in events if e["type"] == "shot" and e["outcome"] == "goal"]
     lisa = [e for e in goals if e["number"] == 7 and e["side"] == "own"]
     assert len(lisa) == 2 and {e["player_id"] for e in lisa} == {players[7]}
-    assert lisa[0]["attributes"]["name"] == "ZIMMERLI Lisa"
+    assert lisa[0]["attributes"]["name"] == "ZUFALL Lisa"
     second_half = next(e for e in goals if e["clock_s"] == 1846)
     assert (second_half["period"], second_half["player_id"]) == (2, players[33])
     assert second_half["attributes"]["score"] == [13, 19]
@@ -274,8 +320,9 @@ async def test_import_dhb_report_merges_video_goals(
 
     await check()
     stats = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/stats")).json()
-    # 25 official + 1 tagged; the opponent's extra goal is the overlay reading to check
-    assert (stats["own"]["goals"], stats["opponent"]["goals"]) == (26, 27)
+    # 25 official + 1 tagged = the official result; the opponent's overlay goal without an
+    # official one is a reading to check: it counts only once the coach confirms it
+    assert (stats["own"]["goals"], stats["opponent"]["goals"]) == (26, 26)
     match = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).json()
     assert (match["score_own"], match["score_opponent"], match["halftime_own"]) == (26, 26, 13)
 
@@ -530,3 +577,22 @@ async def test_goal_comparison_and_review(
         assert r.status_code == 404, r.text
     r = await api.put(review_url, json={"event_id": lone["id"], "status": "maybe"})
     assert r.status_code == 422
+
+
+@pytest.mark.usefixtures("clean_db")
+async def test_import_is_rate_limited_per_user(make_api: Callable[[], Api]) -> None:
+    """Each import fetches from the federation's server and reads a PDF: limited per person."""
+
+    class Spent:
+        async def hit(self, key: str, limit: int, window: int) -> bool:
+            return not key.startswith("official-report:")
+
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    api.app.state.rate_limiter = Spent()
+    r = await api.post(
+        f"/v1/orgs/{ids['org']}/matches/{m['id']}/official-report",
+        json={"url": "https://www.handball.ch/de/matchcenter/spiele/484345"},
+    )
+    assert r.status_code == 429, r.text

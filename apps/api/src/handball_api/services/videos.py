@@ -29,14 +29,17 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, auto_events, billing, feed, segments, training
+from handball_api.services import audit, auto_events, billing, feed, halls, segments, training
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match
+from handball_api.services.matches import get_match, timeline_video
 from handball_api.services.policies import Action
 from handball_api.services.segments import parse_recorded
 from handball_api.services.support import failure_code
 
 PIPELINE_VERSION = "0.2.0"
+# keys of VideoAsset.analysis: the court points the coach clicked (of the last run that succeeded
+# with them, reused by every later run) and those of a run still going
+CLICKED, PENDING = "court_points", "court_points_pending"
 INGEST_FUNC = "handball_worker.ingest.run_ingest"
 ANALYSIS_FUNC = "handball_gpu_worker.analysis.run_analysis"
 SYNC_FUNC = "handball_gpu_worker.sync.run_sync"
@@ -227,6 +230,19 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
     return asset
 
 
+def job_budget_s(kind: str, duration_s: float | None = None, size_bytes: int | None = None) -> int:
+    """How long a video job may run before the worker stops it (and before the alerting calls it
+    stuck). Six hours covered the five-minute test clips; a full game of 120 minutes takes about
+    2.2 x real time to analyse on a CPU worker (docs/perf/real-videos.md), the ingest of a file of
+    many GB on a slow disk about real time per GB of 10 minutes."""
+    base = 6 * 3600
+    if kind == "analysis" and duration_s:
+        return max(base, int(3 * duration_s) + 3600)
+    if kind == "ingest" and size_bytes:
+        return max(base, int(size_bytes / 1024**3 * 900) + 3600)
+    return base
+
+
 async def _new_job(ctx: Ctx, asset: VideoAsset, kind: str) -> ProcessingJob:
     job = ProcessingJob(
         organization_id=asset.organization_id,
@@ -262,7 +278,13 @@ async def start_ingest(ctx: Ctx, asset: VideoAsset) -> ProcessingJob:
     match = await ctx.db.get(Match, asset.match_id)
     if match is not None and match.status != MatchStatus.READY:
         match.status = MatchStatus.PROCESSING
-    ctx.require_jobs().enqueue("pipeline", INGEST_FUNC, str(job.id), _job_payload(ctx, asset, job))
+    ctx.require_jobs().enqueue(
+        "pipeline",
+        INGEST_FUNC,
+        str(job.id),
+        _job_payload(ctx, asset, job),
+        timeout_s=job_budget_s("ingest", size_bytes=asset.size_bytes),
+    )
     return job
 
 
@@ -482,7 +504,7 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 await start_analysis(ctx, asset, match)
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
-            await _apply_analysis_result(ctx, asset, job, data.result)
+            on_timeline = await _apply_analysis_result(ctx, asset, job, data.result)
             await training.notify(
                 ctx,
                 match.organization_id,
@@ -491,10 +513,11 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 {"match_id": str(match.id)},
                 f"/app/{match.organization_id}/matches/{match.id}",
             )
-            await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
-            from handball_api.services import highlights  # imports this module (media paths)
+            if on_timeline:
+                await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
+                from handball_api.services import highlights  # imports this module (media paths)
 
-            await highlights.auto(ctx, match)  # reels right after the analysis (4.3)
+                await highlights.auto(ctx, match)  # reels right after the analysis (4.3)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "sync" and data.result:
             _apply_sync_result(asset, data.result)
     await ctx.db.flush()
@@ -538,6 +561,26 @@ async def start_analysis(
     frame_ms: int = 0,
 ) -> ProcessingJob:
     job = await _new_job(ctx, asset, "analysis")
+    meta = dict(asset.analysis or {})
+    if points is not None:
+        # remembered with the job: stored as the video's court points once the run succeeds
+        meta[PENDING] = {
+            "job_id": str(job.id),
+            "points": points,
+            "space": space,
+            "frame_ms": frame_ms,
+        }
+        asset.analysis = meta
+    elif isinstance(meta.get(CLICKED), dict):
+        # a re-run (reprocess, retry) keeps the court the coach clicked: without it a flat view
+        # fails the automatic court again and the run would drop the tracks and identities
+        clicked = meta[CLICKED]
+        points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
+    refs: list[dict[str, Any]] = []
+    if points is None:
+        # the court clicked or confirmed on an earlier video of the same hall: the worker tries
+        # to carry it over before the automatic court
+        refs = await halls.references(ctx, asset, (await halls.hall_of(ctx, match))[0])
     payload: dict[str, object] = {
         "job_id": str(job.id),
         "organization_id": str(asset.organization_id),
@@ -563,7 +606,15 @@ async def start_analysis(
     rosters = await _rosters(ctx, match)
     if rosters:
         payload["rosters"] = rosters
-    ctx.require_jobs().enqueue("gpu", ANALYSIS_FUNC, str(job.id), payload)
+    if refs:
+        payload["hall_references"] = refs
+    ctx.require_jobs().enqueue(
+        "gpu",
+        ANALYSIS_FUNC,
+        str(job.id),
+        payload,
+        timeout_s=job_budget_s("analysis", duration_s=asset.duration_s),
+    )
     return job
 
 
@@ -604,22 +655,23 @@ async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
 
 async def _apply_analysis_result(
     ctx: Ctx, asset: VideoAsset, job: ProcessingJob, r: dict[str, object]
-) -> None:
+) -> bool:
+    """Stores the results; True when they are the match's (the video is its timeline video).
+
+    Tracks and the court belong to the video. Events, possessions, the match clock and goal
+    candidates are the match's: only the timeline video sets them (a second file of the match, e.g.
+    the second half, must not replace the first file's events with times in another video)."""
+    timeline = await timeline_video(ctx, asset.match_id)
+    on_timeline = asset.role == VideoRole.MAIN and timeline is not None and timeline.id == asset.id
     cal = r.get("calibration")
+    before = dict(asset.analysis or {})
+    pending = before.get(PENDING) if isinstance(before.get(PENDING), dict) else None
+    clicked = before.get(CLICKED) if isinstance(before.get(CLICKED), dict) else None
+    if pending is not None and pending.get("job_id") == str(job.id):
+        if isinstance(cal, dict) and cal.get("source") == "user_correction":
+            clicked = {k: pending[k] for k in ("points", "space", "frame_ms")}
+        pending = None
     if isinstance(cal, dict):
-        prev_points = (
-            await ctx.db.scalar(
-                select(CameraCalibration.points)
-                .where(
-                    CameraCalibration.video_asset_id == asset.id,
-                    CameraCalibration.source == "user_correction",
-                )
-                .order_by(CameraCalibration.created_at.desc())
-                .limit(1)
-            )
-            if cal.get("source") == "user_correction"
-            else None
-        )
         ctx.db.add(
             CameraCalibration(
                 organization_id=asset.organization_id,
@@ -629,7 +681,9 @@ async def _apply_analysis_result(
                 confidence=float(cal["confidence"]),
                 reprojection_px=float(cal["reprojection_px"]),
                 source=str(cal["source"]),
-                points=prev_points,
+                points=clicked["points"]
+                if clicked and cal.get("source") == "user_correction"
+                else None,
                 pipeline_version=job.pipeline_version,
             )
         )
@@ -704,13 +758,17 @@ async def _apply_analysis_result(
             "scoreboard",
         )
     }
+    if clicked is not None:
+        asset.analysis[CLICKED] = clicked
+    if pending is not None:  # a newer run with clicked points is still running
+        asset.analysis[PENDING] = pending
     auto = r.get("events")
     sb_raw = r.get("scoreboard")
     overlay: dict[str, Any] | None = sb_raw if isinstance(sb_raw, dict) else None
     if isinstance(auto, dict) or overlay:
         auto = auto if isinstance(auto, dict) else {}
         match = await ctx.db.get(Match, asset.match_id)
-        if match is not None and asset.role == VideoRole.MAIN:
+        if match is not None and on_timeline:
             counts = await auto_events.apply(ctx, match, auto or None, overlay)
             # courtside marks with device time follow the new goals (5.3)
             from handball_api.services import marks
@@ -737,7 +795,7 @@ async def _apply_analysis_result(
                     ],
                 },
             }
-    if "goal_candidates" in r and asset.role == VideoRole.MAIN:
+    if "goal_candidates" in r and on_timeline:
         # moments that are probably goals, for the coach to confirm (needs no court, so also
         # when the analysis waits for court points); after the automatic events: their
         # possessions suggest the side
@@ -750,6 +808,7 @@ async def _apply_analysis_result(
                 ctx, owner, asset, found if isinstance(found, dict) else None, job.pipeline_version
             )
             asset.analysis = {**asset.analysis, "goal_candidates": counts}
+    return on_timeline
 
 
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
@@ -772,6 +831,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         .limit(1)
     )
     meta = asset.analysis or {}
+    match = await ctx.db.get(Match, asset.match_id)
     status = "none"
     if job is not None:
         status = {
@@ -797,6 +857,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "needs_calibration": bool(meta.get("needs_calibration")),
         "calibration_error": meta.get("calibration_error"),
         "calibration_info": meta.get("calibration_info"),
+        "hall": await halls.summary(ctx, asset, match) if match is not None else None,
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,

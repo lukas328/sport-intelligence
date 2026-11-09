@@ -32,6 +32,44 @@ def test_template_asset_is_versioned_and_consistent() -> None:
         gc.Template.from_dict({**raw, "profile": raw["profile"][:-1]})
 
 
+def test_shot_template_asset_is_versioned_and_consistent() -> None:
+    model = gc.load_shot_model()
+    raw = json.loads(gc.SHOT_TEMPLATE_PATH.read_text())
+    assert model.template.version == raw["version"] and raw["name"] == "shot_candidates"
+    assert model.template.channels == gc.load_template().channels
+    assert model.template.profile.shape == (50, 4) and np.isfinite(model.template.profile).all()
+    assert set(model.weights) <= {"shot", "goal", "lull"} and any(model.weights.values())
+    sel = raw["selection"]
+    assert sel["default_rate"] == gc.SHOT_DEFAULT_RATE and sel["rates_per_min"] == [2, 4, 6]
+    assert 0.0 <= model.offset_s <= 4.0
+    # the evaluation that came with it: most shots at the default rate, far above chance
+    ev = raw["evaluation_leave_one_game_out"]["shots"]
+    assert ev[f"recall@{gc.SHOT_DEFAULT_RATE}"] >= 0.8
+    with pytest.raises(ValueError):
+        gc.ShotModel.from_dict({**raw, "weights": {"ball": 1.0}})
+
+
+def test_shot_score_is_the_weighted_sum_of_its_parts() -> None:
+    t = np.arange(0, 120, gc.DT)
+    rng = np.random.default_rng(3)
+    s = {
+        "t": t,
+        **{c: gc.smooth(rng.normal(size=len(t)), 0.5) for c in ("pan", "cx_v", "vx")},
+        "speed": np.abs(gc.smooth(rng.normal(size=len(t)), 0.5)) + 0.5,
+    }
+    goal = gc.load_template()
+    model = gc.load_shot_model()
+    only_goal = gc.ShotModel(model.template, {"goal": 1.0, "lull": 1.0}, 1.5)
+    np.testing.assert_allclose(gc.shot_score(s, only_goal, goal), gc.score(s, goal), atol=1e-9)
+    both = gc.ShotModel(model.template, {"shot": 2.0, "goal": 1.0, "lull": 1.0}, 1.5)
+    shot_only = gc.ShotModel(model.template, {"shot": 1.0}, 1.5)
+    np.testing.assert_allclose(
+        gc.shot_score(s, both, goal),
+        gc.score(s, goal) + 2 * gc.shot_score(s, shot_only, goal),
+        atol=1e-9,
+    )
+
+
 def test_rolling_statistics_on_a_short_video_are_global() -> None:
     rng = np.random.default_rng(1)
     x = rng.normal(3, 2, size=(900, 2))  # 90 s, shorter than the window
@@ -64,6 +102,11 @@ def test_pick_rates_are_prefixes_with_suppression_and_edges() -> None:
         rest = [c.score for c in inb if c.rate > 1]
         assert min(low) >= max(rest)
         assert sorted(c.rank for c in inb) == list(range(12))
+
+
+def test_shot_candidate_clip_and_time() -> None:
+    d = gc.Candidate(20.0, 0.5, 4, 1).to_dict(30.0, 2.0, (8.0, 4.0))
+    assert (d["t_ms"], d["goal_ms"], d["start_ms"], d["end_ms"]) == (20_000, 18_000, 12_000, 24_000)
 
 
 def test_candidate_clip_and_goal_time() -> None:
@@ -189,7 +232,7 @@ def _synthetic_game(
     centre = np.interp(t, np.arange(len(centre)) * gc.DT, centre)
     for g in goals:
         speed[(t > g + 3) & (t < g + 28)] = 0.15
-    base = rng.uniform(-150, 150, size=12)
+    base = rng.uniform(-300, 300, size=12)  # spread over about 5 body heights, as in play
     phase = rng.uniform(0, 2 * np.pi, size=12)
     frames = []
     for i in range(0, n, 3):
@@ -210,6 +253,7 @@ def test_goal_candidates_from_observations() -> None:
     assert out["template"] == gc.load_template().version
     assert out["default_rate"] == 2 and out["rates"] == [1, 2, 4]
     assert out["duration_s"] == pytest.approx(360.0)
+    assert out["play_s"] == pytest.approx(360.0) and out["no_play_ms"] == []  # fixed camera
     cands = out["candidates"]
     assert len([c for c in cands if c["rate"] <= 2]) == 12
     for c in cands:
@@ -218,6 +262,18 @@ def test_goal_candidates_from_observations() -> None:
     for g in goals:  # each goal is proposed at the default rate (the drawn run starts early)
         near = [c for c in cands if c["rate"] <= 2 and abs(c["t_ms"] - g * 1000) <= 8000]
         assert near, g
+    shots = out["shots"]
+    model = gc.load_shot_model()
+    assert shots["template"] == model.template.version
+    assert shots["default_rate"] == 4 and shots["rates"] == [2, 4, 6]
+    assert shots["clip_s"] == [-8.0, 4.0]
+    sc = shots["candidates"]
+    assert len([c for c in sc if c["rate"] <= 4]) == 24  # 4 per minute of play
+    for c in sc:
+        assert c["goal_ms"] == round(c["t_ms"] - model.offset_s * 1000)
+        assert c["start_ms"] == max(0, c["t_ms"] - 8000)
+    for g in goals:  # goals are shots
+        assert [c for c in sc if c["rate"] <= 4 and abs(c["t_ms"] - g * 1000) <= 8000], g
 
 
 def test_too_little_to_go_on() -> None:
@@ -225,3 +281,134 @@ def test_too_little_to_go_on() -> None:
     assert gc.from_observations(obs) is None
     empty = observe.Observations(CameraMotion.fixed((1280, 720), 2000), [], {}, FPS, 2000)
     assert gc.from_observations(empty) is None
+
+
+def _yaw_motion(yaws_deg: NDArray[np.float64], f: float = 1500.0) -> CameraMotion:
+    rots: list[NDArray[np.float64] | None] = []
+    for d in yaws_deg:
+        a = np.radians(d)
+        rots.append(
+            np.array(
+                [[np.cos(a), 0, -np.sin(a)], [0, 1, 0], [np.sin(a), 0, np.cos(a)]], dtype=np.float64
+            )
+        )
+    return CameraMotion(
+        (1280, 720),
+        True,
+        rots,
+        [f] * len(rots),
+        ref_r=np.eye(3),
+        canvas_f=f / 2,
+        canvas_c=(2000.0, 400.0),
+        canvas_size=(4000, 800),
+    )
+
+
+def test_wide_pans_keep_their_speed() -> None:
+    """A steady pan from one goal to the other (-60 to +60 degrees) has the same speed at the
+    ends as in the middle: the camera track is an angle, not the planar canvas x, which is
+    stretched by 1 / cos^2 (4x at 60 degrees)."""
+    n = 1200
+    motion = _yaw_motion(np.linspace(-60, 60, n))
+    cam_x = gc._camera_x(motion, n)
+    speed = np.diff(cam_x) * FPS
+    expected = 1500 * np.radians(120 / (n - 1)) * FPS
+    assert speed == pytest.approx(np.full(n - 1, expected), rel=1e-6)
+    # people standing in the hall stay put on the same cylinder while the camera turns
+    pts = np.array([[2000.0 + 750 * np.tan(np.radians(a)), 500.0] for a in (-50, 0, 50)])
+    ref = gc._canvas_to_reference(motion, pts)
+    assert ref[:, 0] == pytest.approx(1500 * np.radians([-50, 0, 50]))
+
+
+def test_a_cut_is_no_pan() -> None:
+    """A cut moves the camera track by a large step in one frame: it is no pan. A real pan
+    stays, also when the stream repeats frames (steps of 0, 0, 3x)."""
+    n = 1500
+    t = np.arange(n) / FPS
+    cam_x = np.where(t < 20, 0.0, 2000.0)  # cut at 20 s
+    pan = np.clip((t - 40) * 200, 0, 1000)  # 200 px/s from 40 to 45 s
+    cam_x = cam_x + pan[np.arange(n) // 3 * 3]  # every frame shown three times
+    pt = np.repeat(np.arange(0, 60, 0.5), 3)
+    px = np.tile([100.0, 600.0, 1100.0], len(pt) // 3) + 30 * np.sin(pt)
+    s = gc.signals(t, cam_x, pt, px, np.full(len(pt), 500.0), np.full(len(pt), 90.0), 60.0)
+    tg = s["t"]
+    assert np.abs(s["pan"][(tg > 18) & (tg < 22)]).max() < 1.0
+    assert np.mean(s["pan"][(tg > 41) & (tg < 44)]) == pytest.approx(200.0, rel=0.03)
+    steps = np.r_[np.zeros(10), 5.0, np.zeros(10)]
+    assert gc.drop_jumps(steps).tolist() == steps.tolist()  # small: kept
+    steps[10] = 300.0
+    assert not gc.drop_jumps(steps).any()
+
+
+def test_no_play_while_a_moving_camera_is_parked() -> None:
+    t = np.arange(0, 600, gc.DT)  # 10 minutes: play, 4 minutes parked, play
+    rng = np.random.default_rng(2)
+    pan = 120 * np.sin(2 * np.pi * t / 25) + rng.normal(0, 5, len(t))
+    parked = (t >= 180) & (t < 420)
+    pan[parked] = rng.normal(0, 5, parked.sum())
+    s = {"t": t, "pan": pan}
+    idle = gc.no_play(s, moving=True)
+    assert idle[(t > 260) & (t < 340)].all()
+    assert not idle[(t < 175) | (t > 425)].any()
+    assert not gc.no_play(s, moving=False).any()  # a fixed camera is always still
+    runs = gc.intervals(t, idle)
+    assert len(runs) == 1 and 180 <= runs[0][0] < 260 and 340 < runs[0][1] <= 420
+    # a parked camera for less than the window (a time-out and the attack after it) is play
+    short = pan.copy()
+    short[(t >= 180) & (t < 300)] = rng.normal(0, 5, 1200)
+    short[(t >= 300) & (t < 420)] = 120 * np.sin(2 * np.pi * t[(t >= 300) & (t < 420)] / 25)
+    assert not gc.no_play({"t": t, "pan": short}, moving=True).any()
+
+
+def test_no_play_while_people_bunch() -> None:
+    """A time-out: everybody gathers in one spot for a minute (a fixed camera, so only the people
+    tell). Spread out over 5 to 6 body heights in play, within 1.5 during the time-out; a moment
+    with fewer than 3 people in view is no evidence either way."""
+    rng = np.random.default_rng(5)
+    pt, px = [], []
+    for f in np.arange(0, 300, 0.5):
+        timeout = 120 <= f < 180
+        n = 1 if 240 <= f < 260 else 14  # a close-up: one person in view
+        width = 135.0 if timeout else 720.0  # body height 90 px
+        pt.append(np.full(n, f))
+        px.append(400 + rng.uniform(0, width, n) + (0 if timeout else 80 * np.sin(f / 7)))
+    t_p, x_p = np.concatenate(pt), np.concatenate(px)
+    y_p = 500 + rng.normal(0, 20, len(t_p))
+    s = gc.signals(
+        np.arange(0, 300, 1 / FPS),
+        np.zeros(300 * 25),
+        t_p,
+        x_p,
+        y_p,
+        np.full(len(t_p), 90.0),
+        300.0,
+    )
+    t = s["t"]
+    assert np.median(s["spread"][(t > 20) & (t < 100)]) == pytest.approx(5.6, abs=0.5)
+    assert np.all(s["spread"][(t > 130) & (t < 170)] < 1.5)
+    idle = gc.no_play(s, moving=False)
+    assert idle[(t > 135) & (t < 165)].all()
+    assert not idle[(t < 110) | (t > 190)].any()  # the close-up at 240 to 260 s included
+    runs = gc.intervals(t, idle)
+    assert len(runs) == 1 and 115 <= runs[0][0] <= 140 and 160 <= runs[0][1] <= 185
+    assert not gc.bunched({"t": t, "pan": np.zeros(len(t))}).any()  # no people channel
+    nobody = {**s, "spread": np.full(len(t), np.nan)}
+    assert not gc.no_play(nobody, moving=False).any()
+
+
+def test_running_nanmedian() -> None:
+    x = np.r_[np.full(100, 2.0), np.full(100, np.nan), np.full(100, 6.0)]
+    med = gc.running_nanmedian(x, 4.0)  # 40 samples
+    assert med[:80].tolist() == [2.0] * 80 and med[-80:].tolist() == [6.0] * 80
+    assert np.isnan(med[130:170]).all()
+    assert len(gc.running_nanmedian(np.zeros(0), 4.0)) == 0
+
+
+def test_pick_skips_no_play_and_scales_the_quota() -> None:
+    t = np.arange(0, 360, gc.DT)
+    sc = gc.smooth(np.random.default_rng(4).normal(size=len(t)), 1.0)
+    play = ~((t >= 60) & (t < 300))  # 2 minutes of play
+    got = gc.pick(t, sc, play=play)
+    assert all(not 60 <= c.t < 300 for c in got)
+    # block 1: 1 minute of play, block 2: 1 minute
+    assert [len([c for c in got if c.rate <= r]) for r in gc.RATES] == [2, 4, 8]

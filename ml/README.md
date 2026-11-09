@@ -13,7 +13,7 @@ before a commercial launch.
 | Folder | What | Status |
 |---|---|---|
 | `models/` | Model cards of everything the product loads (detector, text OCR, ReID). No weights in git. | product |
-| `data/` | Game video library: lists (`videos.csv`, `videos_next.csv`), ingest to Kaggle (`ingest_drive.py`, `local_ingest.py`), match clock per segment (`segment_clock.py`), official data per game (`match_official.py`, `official/`, `catalog.json`), labels per segment (`segment_labels/`). Guide: `ANLEITUNG_DOWNLOAD.md`. | active |
+| `data/` | Game video library: lists (`videos.csv`, `videos_next.csv`), ingest to Kaggle (`ingest_drive.py`, `local_ingest.py`), match clock per segment (`segment_clock.py`; `library.py` for the batches from the owner's computer), official data per game (`match_official.py`, `official/`, `catalog.json`), labels per segment (`segment_labels/`). Guide: `ANLEITUNG_DOWNLOAD.md`. | active |
 | `eval/` | Evaluation harness and ground truth: `run.py`/`bench.py`, golden set, official logs for the test videos (`official/`, `align_official.py`, `fetch_handball_ch.py`, `fetch_dhb_report.py`), event clips. | active |
 | `ball/` | Ball detector research: 3-frame heatmap net (rounds 1 to 5, Kaggle GPU in `kaggle/`), OWLv2 teacher, labelling pages, user benchmark. README has the benchmark table. | research, active |
 | `goals/` | Goal moments from the picture; produced the shipped goal candidates (`goal_template.py` regenerates `packages/vision/.../data/goal_template.json`). | research, shipped |

@@ -88,6 +88,8 @@ def _zone(data: EventIn | Event) -> str | None:
         return None
     if data.shot_type in ("penalty", "fast_break"):
         return "penalty" if data.shot_type == "penalty" else "fast_break"
+    if data.shot_type == "empty_net":
+        return "empty_goal"  # from any distance, not "long_range" (zones spec version 2)
     if data.x is not None and data.y is not None:
         return shot_zone(data.x, data.y)
     return None
@@ -364,9 +366,19 @@ async def cache_put(
     )
 
 
-async def set_kickoff(ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int) -> Match:
-    """Store the video time of a half's throw-off and align events that only have a clock time."""
+async def set_kickoff(
+    ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int, clock_s: float | None = None
+) -> Match:
+    """Store the video time of a half's throw-off and align events that only have a clock time.
+
+    `clock_s`: the match clock shown at `t_ms` (any moment of the half); the throw-off then lies
+    before it, also before the video's start when the video begins mid-half (negative time)."""
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
+    if clock_s is not None:
+        half_start = (period - 1) * match.period_s
+        if not half_start <= clock_s <= half_start + match.period_s:
+            raise ProblemError(422, "invalid-clock", "The clock time is not in this half")
+        t_ms = round(t_ms - (clock_s - half_start) * 1000)
     match.kickoff_ms = {**(match.kickoff_ms or {}), str(period): t_ms}
     events = (
         await ctx.db.scalars(

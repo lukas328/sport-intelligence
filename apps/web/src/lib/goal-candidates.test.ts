@@ -17,6 +17,7 @@ const cand = (
   over: Partial<Candidate> = {},
 ): Candidate => ({
   id,
+  kind: "goal",
   video_asset_id: "v",
   t_ms,
   goal_ms: t_ms - 1500,
@@ -31,6 +32,8 @@ const cand = (
   period: 1,
   clock_s: null,
   known: null,
+  outcome: null,
+  suggestion: null,
   ...over,
 });
 

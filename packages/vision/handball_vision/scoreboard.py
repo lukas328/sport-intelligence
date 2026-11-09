@@ -87,7 +87,11 @@ def parse_score(text: str) -> tuple[int, int] | None:
 
 
 def parse_clock(text: str) -> int | None:
-    m = CLOCK_RE.match(text.replace(" ", ""))
+    t = text.replace(" ", "")
+    m = CLOCK_RE.match(t)
+    if (m is None or int(m.group(1)) > 80) and len(t) == 6 and t[:1] in "1lI|":
+        # the box edge read as a leading "1" ("102:28" for 02:28)
+        m = CLOCK_RE.match(t[1:])
     if not m:
         return None
     mm, ss = int(m.group(1)), int(m.group(2))
@@ -295,7 +299,7 @@ class Reader:
         self._banner(t_ms, frame)
 
     def _banner(self, t_ms: int, frame: U8) -> None:
-        """Name banners ("7 Amy HOCHREUTENER") pop up after goals in the overlay's colour, left
+        """Name banners ("7 Amy MUSTERMANN") pop up after goals in the overlay's colour, left
         for the home team, right for the away team: read a few times while one is shown."""
         score = next((f for f in self.fields if f.kind == "score"), None)
         if score is None:
@@ -370,14 +374,14 @@ BANNER_RE = re.compile(
 
 
 def parse_banner(text: str) -> tuple[int, str] | None:
-    """'| 7 Amy HOCHREUTENER |' -> (7, 'Amy HOCHREUTENER'); '33DeniseSCHWAIGER' works too."""
-    t = re.sub(r"(?<=[a-zà-ÿ])(?=[A-ZÀ-Þ]{2})", " ", text)  # DeniseSCHWAIGER -> Denise SCHWAIGER
+    """'| 7 Amy MUSTERMANN |' -> (7, 'Amy MUSTERMANN'); '33DeniseSAMPLER' works too."""
+    t = re.sub(r"(?<=[a-zà-ÿ])(?=[A-ZÀ-Þ]{2})", " ", text)  # DeniseSAMPLER -> Denise SAMPLER
     m = BANNER_RE.search(t)
     if not m:
         return None
     words = [w for w in m.group(2).split() if len(w) >= 2]
     caps = [k for k, w in enumerate(words) if w.isupper()]
-    if caps:  # surnames in capitals: what follows the last one is OCR noise ("ZIMMERLI ton")
+    if caps:  # surnames in capitals: what follows the last one is OCR noise ("ZUFALL ton")
         words = words[: caps[-1] + 1]
     if len(words) < 2:
         return None

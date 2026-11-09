@@ -132,17 +132,25 @@ class EventOut(ApiModel):
 
 class KickoffIn(ApiModel):
     period: int = Field(ge=1, le=4)
-    t_ms: int = Field(ge=0)
+    t_ms: int = Field(ge=0, description="a time in the video")
+    clock_s: float | None = Field(
+        default=None,
+        ge=0,
+        le=4 * 3600,
+        description="match clock (s) shown at t_ms; default: the half's throw-off. A video that "
+        "starts after the throw-off (a clip from mid-half) gets its clock this way.",
+    )
 
 
 class OfficialReportIn(ApiModel):
-    # handball.ch match centre or DHB press report link; a plain game id needs the provider
+    # handball.ch match centre, DHB press report, nuLiga game report (page or PDF) or HLA report
+    # link; a plain game id needs the provider (nuLiga: the link, it names the association)
     url: str = Field(min_length=1, max_length=500)
-    provider: Literal["handball_ch", "dhb"] | None = None
+    provider: Literal["handball_ch", "dhb", "hla"] | None = None
 
 
 class OfficialReportResult(ApiModel):
-    provider: str
+    provider: str  # handball_ch, dhb, nuliga, hla
     game_id: int
     source_url: str
     home: str | None
@@ -234,63 +242,114 @@ class GoalReviewIn(ApiModel):
 
 
 CandidateStatus = Literal["open", "confirmed", "rejected"]
+CandidateKind = Literal["goal", "shot"]
+ShotOutcome = Literal["goal", "save", "miss", "post", "blocked"]
 
 
 class CandidateGoal(ApiModel):
-    """A goal already stored that covers a candidate (same moment)."""
+    """A shot already stored that covers a candidate (same moment)."""
 
     event_id: uuid.UUID
     source: str
     side: str
     t_ms: int | None
+    outcome: str | None = None
+
+
+class OfficialShot(ApiModel):
+    """A shot of the official report and where it lies on the video."""
+
+    event_id: uuid.UUID
+    side: str
+    outcome: str | None
+    penalty: bool
+    number: int | None
+    player_id: uuid.UUID | None
+    name: str | None
+    period: int
+    clock_s: float | None
+    official_time: str | None
+    # video time: confirmed on the video, else from the match clock (overlay clock, confirmed
+    # entries and throw-offs as anchors)
+    t_ms: int | None
+    uncertainty_ms: int | None  # 0: exact (overlay clock or confirmed), null: unknown
 
 
 class GoalCandidateRow(ApiModel):
-    """A moment of the video that is probably a goal (analysis), with the coach's review."""
+    """A moment of the video that is probably a goal or a shot (analysis), with the coach's
+    review."""
 
     id: uuid.UUID
+    kind: CandidateKind
     video_asset_id: uuid.UUID
-    t_ms: int  # score peak, a median 1.5 s after the goal
-    goal_ms: int  # estimated goal time (the goal event gets it on confirmation)
-    start_ms: int  # clip: 10 s before to 4 s after the peak
+    t_ms: int  # score peak, a median 1.5 s after the goal or shot
+    goal_ms: int  # estimated goal (shot) time (the event gets it on confirmation)
+    start_ms: int  # clip: 10 s (shots 8 s) before to 4 s after the peak
     end_ms: int
     score: float
-    rate: int  # lowest candidates-per-minute rate (1, 2, 4) that proposes it
+    rate: int  # lowest candidates-per-minute rate (goals 1, 2, 4; shots 2, 4, 6) proposing it
     suggested_side: Side | None  # whose attack ended just before it
     status: CandidateStatus
-    side: Side | None  # confirmed: whose goal
-    event_id: uuid.UUID | None  # confirmed: the goal event
+    side: Side | None  # confirmed: whose shot
+    outcome: ShotOutcome | None  # confirmed: the shot's outcome
+    event_id: uuid.UUID | None  # confirmed: the shot event (or the report entry it pinned)
     period: int | None
     clock_s: float | None
-    known: CandidateGoal | None  # open but already a goal (overlay, report, tagged)
+    known: CandidateGoal | None  # open but already a known shot (overlay, report, tagged)
+    # shot candidates with an official report: the report shot at this moment; confirming
+    # without a side takes it (one key)
+    suggestion: OfficialShot | None = None
 
 
 class GoalCandidateCounts(ApiModel):
     total: int
-    open: int  # open and not covered by a known goal
+    open: int  # open and not covered by a known shot
     open_by_rate: dict[str, int]
     confirmed: int
     rejected: int
     known: int
+    suggested: int = 0  # open with a suggestion from the official report
+
+
+class OfficialShotRow(OfficialShot):
+    # confirmed: on the video (a candidate, or the overlay for goals); suggested: an open
+    # candidate suggests it; outside: before or after the video; missing: no candidate near it
+    status: Literal["confirmed", "suggested", "missing", "outside"]
+    candidate_id: uuid.UUID | None
+
+
+class OfficialShotCounts(ApiModel):
+    total: int
+    confirmed: int
+    suggested: int
+    missing: int
+    outside: int
+
+
+class OfficialShots(ApiModel):
+    counts: OfficialShotCounts
+    shots: list[OfficialShotRow]
 
 
 class GoalCandidateList(ApiModel):
+    kind: CandidateKind = "goal"
     template: str | None
     rates: list[int]
     default_rate: int
     counts: GoalCandidateCounts
     candidates: list[GoalCandidateRow]
+    official: OfficialShots | None = None  # shot candidates: the report's shots on the video
 
 
 class GoalCandidateReviewIn(ApiModel):
     status: Literal["confirmed", "rejected"] | None  # null: back to open (undo)
-    side: Side | None = None  # required to confirm
-
-    @model_validator(mode="after")
-    def _side(self) -> GoalCandidateReviewIn:
-        if self.status == "confirmed" and self.side is None:
-            raise ValueError("a confirmed goal needs the side that scored")
-        return self
+    # to confirm: whose shot and its outcome (goal candidates: default goal); a shot candidate
+    # without a side takes its suggestion from the official report
+    side: Side | None = None
+    outcome: ShotOutcome | None = None
+    official_event_id: uuid.UUID | None = None  # pin this report entry to the candidate
+    number: int | None = Field(default=None, ge=0, le=99)  # scorer, when no report entry
+    player_id: uuid.UUID | None = None
 
 
 class FeedImportResult(ApiModel):

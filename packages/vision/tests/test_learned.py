@@ -215,8 +215,131 @@ def _low_camera_observations(height_m: float) -> observe.Observations:
 def test_auto_calibration_refuses_a_flat_view_quickly() -> None:
     obs = _low_camera_observations(2.0)
     hall = np.zeros((720, 1280, 3), np.uint8)
-    with pytest.raises(CalibrationError, match="too flatly"):
+    with pytest.raises(CalibrationError, match="too flatly") as exc:
         observe.auto_calibrate(obs, hall)
+    assert exc.value.reason == "flat_view"
+
+
+def _fixed_camera_observations(focal: float, centre: np.ndarray) -> observe.Observations:
+    """A fixed camera with focal length `focal` at `centre` looking at the court centre, square
+    onto the sidelines (they run nearly parallel in the image): the court lines (outline, centre
+    line, goal-area fronts) as segments and twelve standing players per frame."""
+    from handball_vision.motion import CameraMotion
+
+    k = np.array([[focal, 0, 640], [0, focal, 360], [0, 0, 1.0]])
+    look = np.array([20.0, 10.0, 0.0]) - centre
+    z = look / np.linalg.norm(look)
+    x = np.cross(z, [0, 0, 1.0])
+    x /= np.linalg.norm(x)
+    rot = np.vstack([x, np.cross(z, x), z])
+
+    def px(p: np.ndarray) -> np.ndarray:
+        q = k @ (rot @ (p - centre))
+        return np.asarray(q[:2] / q[2])
+
+    segs = []
+    for y in (0.0, 20.0):
+        for x0 in np.arange(0, 40, 2.0):
+            segs.append([*px(np.array([x0, y, 0])), *px(np.array([x0 + 1.8, y, 0]))])
+    for xg, y_from, y_to in ((0, 0, 20), (20, 0, 20), (40, 0, 20), (6, 7, 13), (34, 7, 13)):
+        for y0 in np.arange(y_from, y_to, 1.0):
+            segs.append([*px(np.array([xg, y0, 0])), *px(np.array([xg, y0 + 0.9, 0]))])
+    arr = np.array(segs)
+    inside = (arr[:, [0, 2]] > 0).all(1) & (arr[:, [0, 2]] < 1280).all(1)
+    inside &= (arr[:, [1, 3]] > 0).all(1) & (arr[:, [1, 3]] < 720).all(1)
+    rng = np.random.default_rng(2)
+    frames = []
+    for i in range(30):
+        people = []
+        for _ in range(12):
+            foot = np.array([rng.uniform(4, 36), rng.uniform(2, 18), 0.0])
+            (fx, fy), (_, hy) = px(foot), px(foot + np.array([0.0, 0.0, 1.75]))
+            w = (fy - hy) * 0.3
+            people.append(Detection(fx - w, hy, fx + w, fy, 0.9))
+        frames.append(observe.FrameObservation(i * 3, people, [None] * len(people), []))
+    motion = CameraMotion.fixed((1280, 720), 90)
+    return observe.Observations(motion, frames, {0: arr[inside]}, 25.0, 90)
+
+
+@pytest.mark.parametrize("focal", [700.0, 1000.0])
+def test_a_fixed_camera_keeps_every_focal_length_the_lines_allow(focal: float) -> None:
+    """Square onto the sidelines the markings cannot tell a long lens tilted a little from a
+    wide one tilted more: the best line fit alone was off by a factor of up to three (stream
+    cameras looked flat). The true focal length is among the few candidates kept."""
+    obs = _fixed_camera_observations(focal, np.array([20.0, -8.0, 6.0]))
+    found = observe._fixed_focals(obs)
+    assert 1 <= len(found) <= 4
+    assert any(abs(f / focal - 1) < 0.15 for f in found)
+    assert all(max(a / b, b / a) >= 1.25 for a in found for b in found if a != b)
+
+
+def test_lost_camera_motion_fails_with_its_reason() -> None:
+    from dataclasses import replace
+
+    from handball_vision.motion import CameraMotion
+
+    base = CameraMotion.fixed((1280, 720), 90)
+    lost = replace(base, moving=True, stats={"focal_px": 5100.0, "zoom_ratio": 1.1})
+    obs = observe.Observations(lost, [], {}, 25.0, 90)
+    with pytest.raises(CalibrationError, match="camera motion could not be followed") as lost_exc:
+        observe.auto_calibrate(obs, np.zeros((720, 1280, 3), np.uint8))
+    assert lost_exc.value.reason == "camera_motion"
+    zoom = replace(base, moving=True, stats={"focal_px": 1100.0, "zoom_ratio": 7.0})
+    with pytest.raises(CalibrationError, match=r"zoom x7\.0"):
+        observe.check_motion(zoom)
+    # an amateur zooming in by three still has a court (2. Liga, 2026-11-05)
+    observe.check_motion(replace(base, moving=True, stats={"focal_px": 1100.0, "zoom_ratio": 3.2}))
+    observe.check_motion(base)  # a fixed camera has no motion to lose
+
+
+def test_stream_overlays_are_not_floor_markings() -> None:
+    """A score bug stays at the same frame pixels while a panning camera moves the hall's lines
+    through the frame: its edges are masked and segments on it dropped."""
+    frames = []
+    for i in range(12):
+        f = np.zeros((120, 200, 3), np.uint8)
+        cv2.line(f, (10 + 12 * i, 110), (60 + 12 * i, 40), (255, 255, 255), 2)  # a floor line
+        cv2.rectangle(f, (140, 5), (190, 25), (0, 0, 255), -1)  # the score bug
+        cv2.putText(f, "12:9", (145, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+        frames.append(f)
+    static = observe.static_edges(frames)
+    assert static is not None and static[15, 165] > 0 and static[80, 40] == 0
+    segs = np.array([[142.0, 6.0, 188.0, 6.0], [20.0, 100.0, 60.0, 50.0]])
+    assert observe.drop_static(segs, static).tolist() == [[20.0, 100.0, 60.0, 50.0]]
+    assert observe.static_edges(frames[:5]) is None
+
+
+def test_a_slightly_wrong_camera_motion_still_shows_the_floor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A zooming wide stream camera: its motion is a degree or two off between frames, so the
+    lines of different frames agree on the floor only loosely (real halls: 24 to 33 % of the
+    line length within 1 degree, 50 to 57 % within 2; one frame alone 50 to 60 %). A moving
+    camera then gets the loose tolerance when it explains enough; a fixed one never needs it."""
+    from dataclasses import replace
+
+    obs = _fixed_camera_observations(1280.0, np.array([8.0, -10.0, 7.0]))
+    real = topview.orientation_from_normals
+    tolerances: list[float] = []
+
+    def shaky(
+        m: np.ndarray, length: np.ndarray, tol_deg: float = 1.0
+    ) -> tuple[float, float, float, float]:
+        tolerances.append(tol_deg)
+        alpha, beta, yaw, _ = real(m, length, tol_deg)
+        return alpha, beta, yaw, 0.3 if tol_deg == 1.0 else loose_fit
+
+    monkeypatch.setattr(topview, "orientation_from_normals", shaky)
+    moving = replace(obs, motion=replace(obs.motion, moving=True, stats={"focal_px": 1280.0}))
+    hall = np.zeros((720, 1280, 3), np.uint8)
+    loose_fit = 0.5
+    with pytest.raises(CalibrationError) as exc:
+        observe.auto_calibrate(moving, hall)
+    assert exc.value.reason != "no_floor" and tolerances == [1.0, 2.0]
+    loose_fit = 0.4  # not enough even within 2 degrees
+    with pytest.raises(CalibrationError, match="do not show a clear floor") as exc:
+        observe.auto_calibrate(moving, hall)
+    assert exc.value.reason == "no_floor"
 
 
 def test_same_court_compares_corners() -> None:

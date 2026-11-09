@@ -44,6 +44,12 @@ from handball_api.models.matches import (
     Track,
     VideoAsset,
 )
+from handball_api.models.official import (
+    JoinRequest,
+    OfficialCache,
+    OfficialSuggestion,
+    OrgAccessRequest,
+)
 from handball_api.models.roster import Consent, Guardianship, Player, RosterEntry
 from handball_api.models.sessions import (
     Attendance,
@@ -96,6 +102,7 @@ __all__ = [
     "HighlightReel",
     "Invitation",
     "Invoice",
+    "JoinRequest",
     "LiveTag",
     "LiveTagSession",
     "Match",
@@ -105,8 +112,11 @@ __all__ = [
     "Membership",
     "Notification",
     "OAuthIdentity",
+    "OfficialCache",
+    "OfficialSuggestion",
     "Opponent",
     "OpponentPlayer",
+    "OrgAccessRequest",
     "OrgMembership",
     "OrgShare",
     "Organization",

@@ -13,11 +13,13 @@ Outputs (re-runnable; the ingest keeps adding games):
 - ml/data/official/<name>.json: source, game_id, home, away, date, result, league, log, players
   (same shape as ml/eval/official/*.json from fetch_handball_ch.py)
 - ml/data/catalog.json: one entry per game name: parsed name, game_id or null with a reason,
-  log/goal counts, video resolution/fps/duration and the Kaggle batch from the ingest state.
+  log/goal counts, video resolution/fps/duration and the Kaggle dataset holding its segments, from
+  the ingest state (handball-segs-bNN) and the segment library of library.py (handball-segs-lNN
+  from the owner's computer, info JSONs from those datasets).
 
 API responses are cached under <scratch>/official_cache/ (0.5 s between network requests).
 
-usage: python ml/data/match_official.py [--only SUBSTR] [--refresh-drive] [-v]
+usage: python ml/data/match_official.py [--only SUBSTR] [--refresh-drive] [--library DIR] [-v]
 """
 
 from __future__ import annotations
@@ -37,6 +39,9 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from library import LIBRARY, dataset_of, library_games, merge_games  # noqa: E402
 
 URL = "https://www.handball.ch/Umbraco/Api/MatchCenter/Query"
 HEADERS = {
@@ -390,12 +395,15 @@ class Official:
 # --- video info (descriptions) -------------------------------------------------------------------
 
 class Infos:
-    """yt-dlp info JSONs: ingest batch folders, a local copy cache and the Drive folder."""
+    """yt-dlp info JSONs: ingest batch folders, the segment library (library.py), a local copy
+    cache and the Drive folder."""
 
-    def __init__(self, ingest: Path, cache: Path, drive: str | None, refresh: bool) -> None:
+    def __init__(self, ingest: Path, cache: Path, drive: str | None, refresh: bool,
+                 library: Path | None = None) -> None:
         self.dir = cache / "info"
         self.dir.mkdir(parents=True, exist_ok=True)
-        for f in ingest.glob("batch_*/*.info.json"):
+        lib = sorted(library.glob("info/*.info.json")) if library else []
+        for f in [*ingest.glob("batch_*/*.info.json"), *lib]:
             dst = self.dir / f.name
             if not dst.exists() or dst.stat().st_size != f.stat().st_size:
                 dst.write_bytes(f.read_bytes())
@@ -622,7 +630,10 @@ def find_match(p: Parsed, off: Official, info: dict[str, Any] | None) -> Match:
 
 # --- catalog -------------------------------------------------------------------------------------
 
-def load_names(csv_path: Path, ingest: Path) -> tuple[list[str], dict[str, str], dict[str, Any]]:
+def load_names(csv_path: Path, ingest: Path, library: Path | None = None
+               ) -> tuple[list[str], dict[str, str], dict[str, Any]]:
+    """Names of videos.csv, then the other games of the ingest (state and uploaded indexes) and
+    of the segment library; the video entry per name (ingest first, `library.merge_games`)."""
     names: list[str] = []
     urls: dict[str, str] = {}
     with csv_path.open(newline="", encoding="utf-8") as f:
@@ -638,6 +649,7 @@ def load_names(csv_path: Path, ingest: Path) -> tuple[list[str], dict[str, str],
     for idx in sorted((ingest / "uploaded").glob("*.index.json")):
         for n, g in json.loads(idx.read_text()).items():
             state.setdefault(n, g)
+    state = merge_games(state, library_games(library))
     for n in sorted(state):
         if n not in urls:
             names.append(n)
@@ -650,12 +662,11 @@ def video_entry(st: dict[str, Any] | None) -> dict[str, Any] | None:
         return None
     if "error" in st:
         return {"error": st["error"]}
-    b = re.fullmatch(r"batch_(\d+)", st.get("batch", ""))
     return {
         "width": st.get("width"), "height": st.get("height"), "fps": st.get("fps"),
         "duration_s": st.get("duration_s"), "codec": st.get("codec"),
         "segments": len(st.get("segments") or []),
-        "kaggle_dataset": f"handball-segs-b{int(b.group(1)):02d}" if b else None,
+        "kaggle_dataset": dataset_of(st), "source": st.get("source") or "ingest",
     }
 
 
@@ -734,6 +745,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--csv", type=Path, default=ROOT / "videos.csv")
     ap.add_argument("--ingest", type=Path, default=SCRATCH / "ingest")
+    ap.add_argument("--library", type=Path, default=LIBRARY, help="segment library (library.py)")
     ap.add_argument("--cache", type=Path, default=SCRATCH / "official_cache")
     ap.add_argument("--out", type=Path, default=ROOT / "official")
     ap.add_argument("--catalog", type=Path, default=ROOT / "catalog.json")
@@ -748,13 +760,13 @@ def main() -> None:
         run_sh = (a.ingest / "run.sh").read_text()
         m = re.search(r"https://drive\.google\.com/drive/folders/[\w-]+", run_sh)
         a.drive = m.group(0) if m else None
-    names, urls, state = load_names(a.csv, a.ingest)
+    names, urls, state = load_names(a.csv, a.ingest, a.library)
     old: dict[str, Any] = {}
     if a.catalog.exists():
         old = {e["name"]: e for e in json.loads(a.catalog.read_text()).get("games", [])}
     api = Api(a.cache, a.verbose)
     off = Official(api)
-    infos = Infos(a.ingest, a.cache, a.drive, a.refresh_drive)
+    infos = Infos(a.ingest, a.cache, a.drive, a.refresh_drive, a.library)
     a.out.mkdir(parents=True, exist_ok=True)
 
     done: dict[str, dict[str, Any]] = {}
@@ -789,6 +801,11 @@ def main() -> None:
         "swiss_matched": sum(1 for e in ch if e["game_id"]),
         "with_log": sum(1 for e in entries if e.get("has_log")),
         "in_ingest": sum(1 for e in entries if e.get("video")),
+        "local": sum(1 for e in entries if (e.get("video") or {}).get("source") == "local"),
+        "local_matched": sum(1 for e in entries
+                             if (e.get("video") or {}).get("source") == "local" and e["game_id"]),
+        "local_with_log": sum(1 for e in entries if (e.get("video") or {}).get("source") == "local"
+                              and e.get("has_log")),
     }
     a.catalog.write_text(json.dumps({
         "generated": datetime.now().isoformat(timespec="seconds"),

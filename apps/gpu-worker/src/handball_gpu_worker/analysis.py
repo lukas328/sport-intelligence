@@ -27,7 +27,7 @@ import structlog
 
 from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_dir
 from handball_vision import __version__ as vision_version
-from handball_vision import formation, goalcandidates, scoreboard
+from handball_vision import formation, goalcandidates, hallmatch, scoreboard
 from handball_vision import observe as learned
 from handball_vision.calibration import (
     Calibration,
@@ -193,9 +193,13 @@ def run_analysis(
     reporter: Reporter | None = None,
     own_is_home: bool = True,
     rosters: dict[str, list[int]] | None = None,
+    hall_references: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """`rosters` (kit label "home"/"away" -> shirt numbers, optional in the job payload) keeps
-    the voted shirt numbers on the teams' rosters (learned path only)."""
+    the voted shirt numbers on the teams' rosters (learned path only). `hall_references` (earlier
+    videos of the same hall with a court a person clicked or confirmed: `video_id`,
+    `panorama_key` in the artifacts bucket, `homography` court -> that hall image) are tried
+    before the automatic court (learned path only)."""
     settings = settings or JobSettings()
     detector = load_detector(settings)
     rep = reporter or Reporter(
@@ -219,6 +223,7 @@ def run_analysis(
             rep,
             own_is_home,
             rosters,
+            hall_references,
         )
         if learned_result is not None:
             return learned_result
@@ -375,6 +380,50 @@ def _points_calibration(
     return calibrate_points(flat_img, flat, size)
 
 
+def _hall_calibration(
+    s3: Any,
+    bucket: str,
+    hall: Any,
+    references: list[dict[str, Any]],
+    work: Path,
+    tried: list[dict[str, Any]],
+) -> tuple[Calibration, dict[str, Any]] | None:
+    """The court of an earlier video of the same hall, carried over by matching the two hall
+    images (`hallmatch.register`); the reference with most floor matches wins. None when no
+    reference fits (another camera position, another hall, a missing image): each attempt is
+    recorded in `tried` and the automatic court takes over."""
+    best: tuple[hallmatch.HallMatch, dict[str, Any]] | None = None
+    for ref in references[:3]:
+        video_id = str(ref.get("video_id") or "")
+        path = work / f"hall-{len(tried)}.jpg"
+        try:
+            s3.download_file(bucket, str(ref["panorama_key"]), str(path), Config=TRANSFER)
+            image = cv2.imread(str(path))
+            if image is None:
+                raise CalibrationError("the earlier hall image is unreadable")
+            found = hallmatch.register(image, np.asarray(ref["homography"], dtype=np.float64), hall)
+        except CalibrationError as exc:
+            tried.append({"video_id": video_id, "error": str(exc)})
+            continue
+        except Exception as exc:  # a missing image must not stop the analysis
+            log.info("hall_reference_unavailable", video_id=video_id, error=str(exc))
+            tried.append({"video_id": video_id, "error": "the earlier hall image is missing"})
+            continue
+        tried.append({"video_id": video_id, "floor_inliers": found.floor_inliers})
+        if best is None or found.floor_inliers > best[0].floor_inliers:
+            best = (found, ref)
+    if best is None:
+        return None
+    found, ref = best
+    info = {
+        **found.info(),
+        "reference_video_id": str(ref.get("video_id") or ""),
+        "hall": ref.get("hall"),
+    }
+    log.info("hall_calibration", **info)
+    return found.calibration, info
+
+
 def _cached_observations(
     s3: Any, bucket: str, prefix: str, work: Path
 ) -> learned.Observations | None:
@@ -457,6 +506,7 @@ def _run_learned(
     rep: Reporter,
     own_is_home: bool = True,
     rosters: dict[str, list[int]] | None = None,
+    hall_references: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
     """Learned detector path (ADR 025): one observation pass, automatic calibration, tracking.
     A re-run with clicked points reuses the stored observations and takes seconds. Returns None
@@ -550,13 +600,19 @@ def _run_learned(
         }
         rep.stage("calibration")
         info: dict[str, Any] = {}
+        tried: list[dict[str, Any]] = []
         try:
             if calibration_points:
                 calib = _points_calibration(
                     obs, hall, calibration_points, calibration_space, calibration_frame_ms
                 )
             else:
-                calib, info = learned.auto_calibrate(obs, hall)
+                found = _hall_calibration(
+                    s3, settings.s3_bucket_artifacts, hall, hall_references or [], work, tried
+                )
+                calib, info = found if found is not None else learned.auto_calibrate(obs, hall)
+                if found is None and tried:
+                    info = {**info, "hall_tried": tried}
         except CalibrationError as exc:
             if calibration_points:
                 raise
@@ -565,6 +621,11 @@ def _run_learned(
                 **view,
                 "needs_calibration": True,
                 "calibration_error": str(exc),
+                # why: camera_motion, no_floor, flat_view, few_people or court (ADR 025)
+                "calibration_info": {
+                    "reason": getattr(exc, "reason", "court"),
+                    **({"hall_tried": tried} if tried else {}),
+                },
                 "calibration": None,
                 "tracks": [],
                 "fps": obs.fps,

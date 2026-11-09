@@ -7,6 +7,9 @@ goal close to a manual one is dropped. The opening throw-offs set the match cloc
 An imported official report (services/official_report.py) has every goal: overlay goals close to
 one of its goals are dropped (the official goal keeps what the overlay read in attributes.video,
 as an import after the analysis does) and no goals are estimated from throw-offs.
+What the coach decided about automatic rows survives a re-analysis (after clicked court points,
+a reprocess): a check of the comparison (confirmed or dismissed) moves to the new row at the same
+moment, and an automatic row the coach deleted or changed is not created again.
 """
 
 from __future__ import annotations
@@ -15,7 +18,7 @@ from typing import Any
 
 from sqlalchemy import delete, select
 
-from handball_api.models import Event, Match, Possession, RosterEntry
+from handball_api.models import Correction, Event, Match, Possession, RosterEntry
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video, video_from_clock
 
@@ -26,6 +29,81 @@ CANDIDATE = "goal_candidate"  # a goal the coach confirmed from a goal candidate
 MIN_CONFIDENCE = 0.5
 DEDUPE_MS = 5000
 OVERLAY_DEDUPE_MS = 20000  # the overlay is updated a few seconds after the goal
+
+
+REVIEWS = ("confirmed", "dismissed")
+AUTOMATIC = (SOURCE, OVERLAY)
+
+
+# (source, type, side, video times) of an automatic row: its time and, for an overlay goal moved
+# to the end of the attack, the time the overlay changed
+_Key = tuple[str, str, str, tuple[int | None, ...]]
+
+
+def _key(e: Event) -> _Key:
+    return (e.source, e.type, e.side, (e.t_ms, (e.attributes or {}).get("overlay_ms")))
+
+
+def _same(a: _Key, b: _Key) -> bool:
+    window = OVERLAY_DEDUPE_MS if a[0] == OVERLAY else DEDUPE_MS
+    return a[:3] == b[:3] and any(
+        x is not None and y is not None and abs(int(x) - int(y)) <= window
+        for x in a[3]
+        for y in b[3]
+    )
+
+
+class _Decisions:
+    """The coach's decisions about the automatic rows of the previous run."""
+
+    def __init__(self, reviewed: list[tuple[_Key, str]], handled: list[_Key]) -> None:
+        self.reviewed = reviewed  # rows checked in the comparison, with the check
+        self.handled = handled  # automatic rows the coach deleted or changed
+
+    def rejected(self, e: Event) -> bool:
+        return any(_same(_key(e), h) for h in self.handled)
+
+    def review_of(self, e: Event) -> str | None:
+        return next((r for k, r in self.reviewed if _same(_key(e), k)), None)
+
+
+async def _decisions(ctx: Ctx, match: Match) -> _Decisions:
+    reviewed = [
+        (_key(e), str((e.attributes or {}).get("review")))
+        for e in (
+            await ctx.db.scalars(
+                select(Event).where(Event.match_id == match.id, Event.source.in_(AUTOMATIC))
+            )
+        ).all()
+        if (e.attributes or {}).get("review") in REVIEWS
+    ]
+    handled: list[_Key] = [
+        (str(b["source"]), str(b.get("type")), str(b.get("side")), (b.get("t_ms"),))
+        for b in (
+            await ctx.db.scalars(
+                select(Correction.before).where(
+                    Correction.match_id == match.id, Correction.action.in_(("delete", "update"))
+                )
+            )
+        ).all()
+        if b and b.get("source") in AUTOMATIC
+    ]
+    return _Decisions(reviewed, handled)
+
+
+async def _carry_over(ctx: Ctx, decisions: _Decisions, created: list[Event]) -> int:
+    """Drops new rows the coach rejected before and moves the checks to the new rows (all rows
+    flushed). Returns the number of rows dropped."""
+    dropped = 0
+    for e in created:
+        if decisions.rejected(e):
+            await ctx.db.delete(e)
+            dropped += 1
+            continue
+        review = decisions.review_of(e)
+        if review is not None:
+            e.attributes = {**(e.attributes or {}), "review": review}
+    return dropped
 
 
 def _side(team: object) -> str | None:
@@ -141,7 +219,7 @@ async def apply_scoreboard(
     await _align_official(ctx, match)
 
     manual = await _manual_goals(ctx, match)
-    # the overlay names the scorer after a goal ("7 Lisa ZIMMERLI"): own players by shirt number
+    # the overlay names the scorer after a goal ("7 Lisa ZUFALL"): own players by shirt number
     roster: dict[int, Any] = {
         n: pid
         for n, pid in (
@@ -238,9 +316,12 @@ async def apply(
 ) -> dict[str, int]:
     """Overlay first (exact goals and clock), then the position heuristics; a heuristic goal is
     dropped when the overlay gave goals."""
+    decisions = await _decisions(ctx, match)  # before the previous rows go
     overlay_goals: list[Event] = []
     sb = await apply_scoreboard(ctx, match, overlay, overlay_goals)
     if not payload:
+        sb["overlay_goals"] -= await _carry_over(ctx, decisions, overlay_goals)
+        await ctx.db.flush()
         return {"events": 0, "possessions": 0, **sb}
     await ctx.db.execute(delete(Event).where(Event.match_id == match.id, Event.source == SOURCE))
     await ctx.db.execute(
@@ -284,7 +365,7 @@ async def apply(
             )
         ).all()
     ]
-    created = 0
+    created: list[Event] = []
     for e in found:
         kind, side, t_ms = e.get("type"), _side(e.get("team")), int(e["t_ms"])
         conf = float(e.get("confidence", 0))
@@ -299,22 +380,21 @@ async def apply(
         derived = clock_from_video(match, t_ms)
         period, clock = derived if derived else (1, None)
         attrs = {k2: v for k2, v in e.items() if k2 not in ("t_ms", "type", "team", "confidence")}
-        ctx.db.add(
-            Event(
-                organization_id=match.organization_id,
-                match_id=match.id,
-                type="shot" if kind == "goal" else "throw_off",
-                side=side,
-                outcome="goal" if kind == "goal" else None,
-                t_ms=t_ms,
-                period=period,
-                clock_s=clock,
-                source=SOURCE,
-                confidence=conf,
-                attributes=attrs,
-            )
+        event = Event(
+            organization_id=match.organization_id,
+            match_id=match.id,
+            type="shot" if kind == "goal" else "throw_off",
+            side=side,
+            outcome="goal" if kind == "goal" else None,
+            t_ms=t_ms,
+            period=period,
+            clock_s=clock,
+            source=SOURCE,
+            confidence=conf,
+            attributes=attrs,
         )
-        created += 1
+        ctx.db.add(event)
+        created.append(event)
     rows: list[Possession] = []
     for p in payload.get("possessions") or []:
         side = _side(p.get("team"))
@@ -336,4 +416,7 @@ async def apply(
     ctx.db.add_all(rows)
     aligned = align_goals(overlay_goals, rows)
     await ctx.db.flush()
-    return {"events": created, "possessions": len(rows), "overlay_aligned": aligned, **sb}
+    sb["overlay_goals"] -= await _carry_over(ctx, decisions, overlay_goals)
+    kept = len(created) - await _carry_over(ctx, decisions, created)
+    await ctx.db.flush()
+    return {"events": kept, "possessions": len(rows), "overlay_aligned": aligned, **sb}

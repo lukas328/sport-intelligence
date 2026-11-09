@@ -22,11 +22,21 @@ def spec() -> dict[str, Any]:
     raise FileNotFoundError("zones.json not found")
 
 
-def shot_zone(x: float, y: float, *, penalty: bool = False, fast_break: bool = False) -> str:
-    """Zone of a shot from its normalised position (attacked goal at x = 40)."""
+def shot_zone(
+    x: float,
+    y: float,
+    *,
+    penalty: bool = False,
+    fast_break: bool = False,
+    empty_goal: bool = False,
+) -> str:
+    """Zone of a shot from its normalised position (attacked goal at x = 40). A shot on the empty
+    goal is "empty_goal" from any distance (not "long_range": spec version 2)."""
     s = spec()
     if penalty:
         return "penalty"
+    if empty_goal:
+        return "empty_goal"
     if fast_break:
         return "fast_break"
     d = distance_to_attacked_goal(x, y)

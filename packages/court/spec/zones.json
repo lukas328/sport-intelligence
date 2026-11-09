@@ -1,6 +1,6 @@
 {
-  "$comment": "Shot zones (BRIEF 4.3), one source for Python and TS. Positions are normalised so the attacked goal is at x = 40. 'left'/'right' are from the attacker's view: facing the goal (+x), left is +y. Distances are to the nearest point of the goal mouth.",
-  "version": 1,
+  "$comment": "Shot zones (BRIEF 4.3), one source for Python and TS. Positions are normalised so the attacked goal is at x = 40. 'left'/'right' are from the attacker's view: facing the goal (+x), left is +y. Distances are to the nearest point of the goal mouth. A shot on the empty goal (shot_type empty_net) is 'empty_goal' from any distance; up to version 1 it was part of 'long_range' ('Fernwurf / leeres Tor').",
+  "version": 2,
   "long_range_m": 15.0,
   "back_min_m": 9.5,
   "circle_max_m": 6.5,
@@ -12,7 +12,7 @@
     "back_left", "back_centre", "back_right",
     "half_left", "half_centre", "half_right",
     "circle_left", "circle_centre", "circle_right",
-    "penalty", "fast_break", "long_range"
+    "penalty", "fast_break", "long_range", "empty_goal"
   ],
   "labels": {
     "de-CH": {
@@ -20,7 +20,7 @@
       "back_left": "Rückraum links", "back_centre": "Rückraum Mitte", "back_right": "Rückraum rechts",
       "half_left": "Halbposition links", "half_centre": "Halbposition Mitte", "half_right": "Halbposition rechts",
       "circle_left": "Kreis links", "circle_centre": "Kreis Mitte", "circle_right": "Kreis rechts",
-      "penalty": "7 m", "fast_break": "Gegenstoss", "long_range": "Fernwurf / leeres Tor"
+      "penalty": "7 m", "fast_break": "Gegenstoss", "long_range": "Fernwurf", "empty_goal": "Leeres Tor"
     }
   },
   "goal_zones": ["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"]

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import uuid
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, File, Query, Response, UploadFile
 
 from handball_api.models import Event
-from handball_api.routers.deps import OrgDep
+from handball_api.routers.deps import OrgDep, per_user
 from handball_api.schemas.events import (
     EventIn,
     EventOut,
@@ -26,6 +26,8 @@ from handball_api.services import goal_candidates, official_report, paper_report
 from handball_api.services import insights as insights_service
 
 router = APIRouter(prefix="/v1/orgs/{org_id}", tags=["events"])
+# each import fetches the report from the federation's server (and reads a PDF)
+REPORT_LIMIT = (30, 3600)
 MAX_IMPORT = 2_000_000
 
 
@@ -80,12 +82,18 @@ async def shot_export(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
 
 @router.get("/matches/{match_id}/stats", response_model=dict[str, Any], tags=["stats"])
 async def match_stats(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Match statistics (packages/metrics). Each goal counts once: with an imported official report,
+    a tagged or video goal of the same side within 20 s of an official goal is that goal.
+    `own`/`opponent`: `xg` covers only shots on target with a known position (and penalties),
+    `xg_shots` counts them and `xg_coverage` = xg_shots / shots (null without shots); players have
+    `xg_shots`, goalkeepers `xg_shots` and `xg_coverage`. Shot zones include `empty_goal`
+    (shots on the empty goal, from any distance) apart from `long_range` (over 15 m)."""
     return await service.match_stats(scope.ctx, match_id)
 
 
 @router.put("/matches/{match_id}/kickoff", status_code=204)
 async def set_kickoff(match_id: uuid.UUID, data: KickoffIn, scope: OrgDep) -> None:
-    await service.set_kickoff(scope.ctx, match_id, data.period, data.t_ms)
+    await service.set_kickoff(scope.ctx, match_id, data.period, data.t_ms, data.clock_s)
 
 
 @router.post("/matches/{match_id}/events/import", response_model=FeedImportResult)
@@ -99,12 +107,17 @@ async def import_feed(
     )
 
 
-@router.post("/matches/{match_id}/official-report", response_model=OfficialReportResult)
+@router.post(
+    "/matches/{match_id}/official-report",
+    response_model=OfficialReportResult,
+    dependencies=[per_user("official-report", REPORT_LIMIT)],
+)
 async def import_official_report(
     match_id: uuid.UUID, data: OfficialReportIn, scope: OrgDep
 ) -> dict[str, Any]:
-    """Official match report (handball.ch match centre or DHB press report) as events: goals with
-    scorer and shirt number, 7-metres, suspensions, time-outs. A re-import replaces the previous
+    """Official match report (handball.ch match centre, DHB press report, nuLiga game report of the
+    German associations on nuLiga and Austria, HLA report) as events: goals with scorer and shirt
+    number, 7-metres, suspensions, time-outs. A re-import replaces the previous
     one; automatic goals from the video within 20 s are merged with the official goal."""
     return await official_report.import_report(scope.ctx, match_id, data.url, data.provider)
 
@@ -123,10 +136,20 @@ async def review_official_goal(match_id: uuid.UUID, data: GoalReviewIn, scope: O
 
 
 @router.get("/matches/{match_id}/goal-candidates", response_model=GoalCandidateList)
-async def list_goal_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
-    """Moments of the video that are probably goals (video analysis, a fixed number per minute),
-    with the coach's reviews and the goals already stored that cover them."""
-    return await goal_candidates.listing(scope.ctx, match_id)
+async def list_goal_candidates(
+    match_id: uuid.UUID, scope: OrgDep, kind: Literal["goal", "shot"] = "goal"
+) -> dict[str, Any]:
+    """Moments of the video that are probably goals (kind=shot: shots of any outcome; video
+    analysis, a fixed number per minute), with the coach's reviews, the shots already stored that
+    cover them and, for shots, the official report's suggestion."""
+    return await goal_candidates.listing(scope.ctx, match_id, kind)
+
+
+@router.get("/matches/{match_id}/shot-candidates", response_model=GoalCandidateList)
+async def list_shot_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """The shot candidates (goal-candidates?kind=shot) with the official report's shots on the
+    video."""
+    return await goal_candidates.listing(scope.ctx, match_id, "shot")
 
 
 @router.put(
@@ -135,9 +158,20 @@ async def list_goal_candidates(match_id: uuid.UUID, scope: OrgDep) -> dict[str, 
 async def review_goal_candidate(
     match_id: uuid.UUID, candidate_id: uuid.UUID, data: GoalCandidateReviewIn, scope: OrgDep
 ) -> dict[str, Any]:
-    """Confirm a candidate (a goal of the given side), reject it (kept as a hard negative for
-    training) or undo the review (null)."""
-    return await goal_candidates.review(scope.ctx, match_id, candidate_id, data.status, data.side)
+    """Confirm a candidate (a shot of the given side and outcome; a report entry is pinned to
+    the video instead of a second event), reject it (kept as a hard negative for training) or
+    undo the review (null)."""
+    return await goal_candidates.review(
+        scope.ctx,
+        match_id,
+        candidate_id,
+        data.status,
+        data.side,
+        data.outcome,
+        data.official_event_id,
+        data.number,
+        data.player_id,
+    )
 
 
 @router.post(
@@ -170,13 +204,18 @@ async def match_summary(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
     "/teams/{team_id}/seasons/{season_id}/stats", response_model=dict[str, Any], tags=["insights"]
 )
 async def season_stats(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
-    """Per-match key numbers, totals and player totals for a season."""
+    """Per-match key numbers, totals and player totals for a season. Every played match counts (a
+    result stored or events): rows have `tagged`, `goals`/`goals_against` from the events (from the
+    result when untagged) and `xg_coverage`; totals have `matches`, `tagged_matches`, `xg`,
+    `xg_shots` and `xg_coverage` = shots with xG / shots on target (null without shots), and
+    shooting/save percentages only from matches with recorded misses or saves."""
     return await insights_service.season_stats(scope.ctx, team_id, season_id)
 
 
 @router.get("/opponents/{opponent_id}/profile", response_model=dict[str, Any], tags=["insights"])
 async def opponent_profile(opponent_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
-    """Scouting profile from all tagged matches against this opponent."""
+    """Scouting profile from all tagged matches against this opponent. `matches` rows carry
+    `is_home` (our home game); `totals` carry `xg_shots` and `xg_coverage` like the season stats."""
     return await insights_service.opponent_profile(scope.ctx, opponent_id)
 
 

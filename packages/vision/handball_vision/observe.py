@@ -59,6 +59,34 @@ class Observations:
     total: int
     timings_s: dict[str, float] = field(default_factory=dict)
     detector_source: str = "model"
+    # frame pixels whose edges stay put while a moving camera turns: score bug, logo, "LIVE"
+    static: U8 | None = None
+
+
+def static_edges(frames: list[U8], min_share: float = 0.6) -> U8 | None:
+    """Edges at the same frame pixels in most of the frames (stream overlays: score, clock,
+    logo). With a panning camera the hall's lines move through the frame, an overlay does not;
+    its letters and frames otherwise count as floor markings. None with fewer than 8 frames."""
+    if len(frames) < 8:
+        return None
+    acc = np.zeros(frames[0].shape[:2], np.float32)
+    for f in frames:
+        grey = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY) if f.ndim == 3 else f
+        acc += cv2.Canny(grey, 60, 160) > 0
+    static = ((acc / len(frames)) >= min_share).astype(np.uint8) * 255
+    return np.asarray(cv2.dilate(static, np.ones((9, 9), np.uint8)), dtype=np.uint8)
+
+
+def drop_static(seg: F64, static: U8) -> F64:
+    """Segments (frame px) with at most one of their ends and middle on `static` pixels."""
+    if len(seg) == 0:
+        return seg
+    hh, ww = static.shape[:2]
+    pts = np.stack([seg[:, :2], (seg[:, :2] + seg[:, 2:]) / 2, seg[:, 2:]], axis=1)
+    xi = np.clip(pts[..., 0].round().astype(int), 0, ww - 1)
+    yi = np.clip(pts[..., 1].round().astype(int), 0, hh - 1)
+    on = (static[yi, xi] > 0).sum(axis=1)
+    return np.asarray(seg[on < 2], dtype=np.float64)
 
 
 def _torso_sample(frame: U8, d: Detection) -> NDArray[np.float64] | None:
@@ -148,7 +176,10 @@ def observe(
     if len(motion.samples) > 30:
         step = len(motion.samples) / 30
         motion.samples = [motion.samples[int(k * step)] for k in range(30)]
-    return Observations(motion, frames, segments, fps, n, dict(timings), detector.source)
+    static = static_edges([f for _, f in motion.samples]) if motion.moving else None
+    return Observations(
+        motion, frames, segments, fps, n, dict(timings), detector.source, static=static
+    )
 
 
 def read_numbers(reader: Any, frame: U8, people: list[Detection]) -> dict[int, tuple[int, float]]:
@@ -216,6 +247,7 @@ def save_observations(obs: Observations, path: Path) -> None:
         embs=np.array(embs, np.float16).reshape(len(embs), -1) if embs else np.zeros((0, 0)),
         role_idx=np.array(role_idx, np.int32).reshape(-1, 2),
         role_p=np.array(role_p, np.float16).reshape(-1, 3),
+        static=obs.static if obs.static is not None else np.zeros((0, 0), np.uint8),
     )
 
 
@@ -256,8 +288,16 @@ def load_observations(path: Path, motion: CameraMotion, source: str = "model") -
     for i in np.unique(z["seg_idx"]):
         segments[int(i)] = np.asarray(z["segs"][z["seg_idx"] == i], dtype=np.float64)
     fps, total = z["meta"]
+    static = np.asarray(z["static"]) if "static" in z.files and z["static"].size else None
     return Observations(
-        motion, [by[k] for k in sorted(by)], dict(segments), float(fps), int(total), {}, source
+        motion,
+        [by[k] for k in sorted(by)],
+        dict(segments),
+        float(fps),
+        int(total),
+        {},
+        source,
+        static=static,
     )
 
 
@@ -295,9 +335,17 @@ def people_on_canvas(
     return np.array(feet).reshape(-1, 2), np.array(heads).reshape(-1, 2)
 
 
-def _fixed_focal(obs: Observations) -> float:
-    """Focal length of a fixed camera: the one under which the hall's markings fit two
-    orthogonal floor directions best."""
+def _fixed_focals(obs: Observations, max_candidates: int = 4) -> list[float]:
+    """Focal lengths a fixed camera may have, the best line fit first.
+
+    The floor markings fix the focal length only when both line directions converge in the
+    image. A camera that looks square onto the sidelines sees them nearly parallel, and then a
+    long lens tilted a little and a wide one tilted more explain the markings about equally
+    (they share the horizon; the line fit rises by a few per cent from 0.5 to 2.5 frame
+    widths): the line fit alone picked the long lens and the view looked flat (stream cameras on
+    the gallery, 2026-11-05). Kept are the focal lengths within 10 % of the best fit: its local
+    optima first, then, where the fit is flat, the ones farthest from those taken; all at least
+    25 % apart. The court and the goals decide between them."""
     w, h = obs.motion.frame_size
     segs = (
         np.vstack([s for s in obs.segments.values() if len(s)])
@@ -305,18 +353,37 @@ def _fixed_focal(obs: Observations) -> float:
         else np.zeros((0, 4))
     )
     if len(segs) < 30:
-        raise CalibrationError("too few floor lines to estimate the camera")
-    best = (-1.0, float(w))
-    for f in np.linspace(0.5, 2.5, 21) * w:
+        raise CalibrationError("too few floor lines to estimate the camera", "no_floor")
+    grid = np.geomspace(0.45, 2.5, 20) * w
+    shares = []
+    for f in grid:
         k = np.array([[f, 0, w / 2], [0, f, h / 2], [0, 0, 1.0]])
         m, length = topview.segment_normals(segs, k)
-        share = topview.orientation_from_normals(m, length)[3]
-        if share > best[0]:
-            best = (share, float(f))
-    return best[1]
+        shares.append(topview.orientation_from_normals(m, length)[3])
+    share = np.array(shares)
+    n = len(grid)
+    near = [i for i in range(n) if share[i] >= max(MIN_FLOOR_FIT, 0.9 * share.max())]
+    peaks = [
+        i for i in near if share[i] >= share[max(0, i - 1)] and share[i] >= share[min(n - 1, i + 1)]
+    ]
+    log_f = np.log(grid)
+    apart = np.log(1.25)
+    picked = [int(np.argmax(share))]
+    for i in sorted(peaks, key=lambda i: -share[i]):
+        if len(picked) < max_candidates and all(abs(log_f[i] - log_f[j]) >= apart for j in picked):
+            picked.append(i)
+    while len(picked) < max_candidates:
+        gap = {i: min(abs(log_f[i] - log_f[j]) for j in picked) for i in near}
+        best = max(gap, key=lambda i: gap[i]) if gap else picked[0]
+        if gap.get(best, 0.0) < apart:
+            break
+        picked.append(best)
+    return [float(grid[i]) for i in picked]
 
 
-MIN_FLOOR_FIT = 0.35  # share of the marking length along two floor directions
+MIN_FLOOR_FIT = 0.35  # share of the marking length along two floor directions (within 1 degree)
+LOOSE_TOL_DEG = 2.0  # moving cameras whose motion is a little off: lines within 2 degrees ...
+LOOSE_MIN_FIT = 0.45  # ... must then explain more of the marking length
 MIN_VIEW_DEG = 10.0  # players' median angle below the horizon (flatter views are not trusted)
 
 
@@ -325,17 +392,73 @@ def auto_calibrate(
 ) -> tuple[Calibration, dict[str, Any]]:
     """Automatic court calibration of the hall image (panorama or median frame).
 
-    Fails (CalibrationError with the reason) when the markings show no clear floor, when the
-    camera sees the floor too flatly (`min_view_deg`) or when the court found is implausible."""
+    Fails (CalibrationError with the reason) when the camera motion could not be followed, when
+    the markings show no clear floor, when the camera sees the floor too flatly (`min_view_deg`)
+    or when the court found is implausible. A fixed camera's focal length is not known: each
+    focal length the markings allow is tried and the best goal fit wins."""
     motion = obs.motion
-    if not motion.moving:
-        f = _fixed_focal(obs)
+    check_motion(motion)
+    if motion.moving:
+        return _calibrate(obs, hall, min_view_deg)
+    best: tuple[float, Calibration, dict[str, Any]] | None = None
+    errors: list[CalibrationError] = []
+    for f in _fixed_focals(obs):
         motion.focals = [f] * len(motion.focals)
         motion.canvas_f = f
+        try:
+            calib, info = _calibrate(obs, hall, min_view_deg)
+        except CalibrationError as exc:
+            errors.append(exc)
+            continue
+        info = {**info, "focal_px": round(f, 1)}
+        if best is None or info["goal_score"] > best[2]["goal_score"]:
+            best = (f, calib, info)
+    if best is None:
+        # the reason of the focal length that got furthest (a court that did not fit says more
+        # than a flat view under a focal length that was wrong anyway)
+        court = [e for e in errors if e.reason not in ("flat_view", "no_floor")]
+        raise (court or errors)[0]
+    f, calib, info = best
+    motion.focals = [f] * len(motion.focals)
+    motion.canvas_f = f
+    return calib, info
+
+
+MAX_FOCAL_WIDTHS = 3.0  # a focal length beyond 3 frame widths (a 23 degree view) is a lost track
+MAX_ZOOM = 6.0  # zoom range within the video (amateurs zoom x3 and the court is still found)
+
+
+def check_motion(motion: CameraMotion) -> None:
+    """A panorama is only as good as the camera motion behind it: when the motion was lost
+    (cuts between cameras, replays, a strong zoom, a scoreboard or logo that does not move), the
+    focal length runs away and the panorama shows the hall several times over."""
+    if not motion.moving:
+        return
+    w = motion.frame_size[0]
+    focal = float(motion.stats.get("focal_px", 0.0))
+    zoom = float(motion.stats.get("zoom_ratio", 1.0))
+    if focal > MAX_FOCAL_WIDTHS * w or zoom > MAX_ZOOM:
+        raise CalibrationError(
+            "the camera motion could not be followed (focal length "
+            f"{focal / w:.1f} frame widths, zoom x{zoom:.1f}: cuts between cameras, replays or a "
+            "strong zoom), so the hall image is not reliable: a video from one camera without "
+            "replays (or a fixed camera) gives positions",
+            "camera_motion",
+        )
+
+
+def _calibrate(
+    obs: Observations, hall: U8, min_view_deg: float
+) -> tuple[Calibration, dict[str, Any]]:
+    """The court for the camera as `obs.motion` describes it (focal length known)."""
+    motion = obs.motion
     kc = _canvas_intrinsics(motion)
+    # overlays only stand out from the hall when the camera turned enough
+    static = obs.static if motion.moving and motion.stats.get("pan_deg", 0.0) >= 15 else None
     ras, rbs, ms, ls = [], [], [], []
-    for idx, seg in obs.segments.items():
+    for idx, raw in obs.segments.items():
         rot = _to_canvas_rot(motion, idx)
+        seg = drop_static(raw, static) if static is not None else raw
         if rot is None or len(seg) == 0:
             continue
         k = _frame_k(motion, idx)
@@ -346,37 +469,52 @@ def auto_calibrate(
         ms.append(m)
         ls.append(length)
     if not ms:
-        raise CalibrationError("no floor markings found")
+        raise CalibrationError("no floor markings found", "no_floor")
     ra, rb, m, length = np.vstack(ras), np.vstack(rbs), np.vstack(ms), np.concatenate(ls)
     alpha, beta, yaw, fit = topview.orientation_from_normals(m, length)
+    no_floor = CalibrationError(
+        "the hall's markings do not show a clear floor (only "
+        f"{int(fit * 100)}% of the line length runs along two floor directions, "
+        f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, a very low "
+        "camera or a camera motion that was not followed well): click the court points",
+        "no_floor",
+    )
+    tol_deg = 1.0
+    if fit < MIN_FLOOR_FIT and motion.moving:
+        # a zooming wide-angle stream camera: its motion is a degree or two off between frames
+        # (the panorama shows ghosts), the lines of one frame still agree (fit 0.5 to 0.6)
+        loose = topview.orientation_from_normals(m, length, LOOSE_TOL_DEG)
+        if loose[3] >= LOOSE_MIN_FIT:
+            alpha, beta, yaw, fit = loose
+            tol_deg = LOOSE_TOL_DEG
     if fit < MIN_FLOOR_FIT:
-        raise CalibrationError(
-            "the hall's markings do not show a clear floor (only "
-            f"{fit:.0%} of the line length runs along two floor directions, "
-            f"{MIN_FLOOR_FIT:.0%} needed; many lines on walls, nets or railings, or a very low "
-            "camera): click the court points"
-        )
+        raise no_floor
     up = topview._up(alpha, beta)
     feet, heads = people_on_canvas(obs)
     height = topview.camera_height_from_people(up, feet, heads, kc)
     fr = topview._rays(kc, feet)
     view_deg = topview.view_depression_deg(up, height, fr)
+    if view_deg < min_view_deg and tol_deg != 1.0:
+        raise no_floor  # the loose floor did not give a camera above the court either
     if view_deg < min_view_deg:
         raise CalibrationError(
             "the camera sees the floor too flatly for an automatic court (players at a median "
             f"{view_deg:.0f} degrees below the horizon, at least {min_view_deg:.0f} needed; "
-            f"camera about {height:.1f} m above the floor): click the court points"
+            f"camera about {height:.1f} m above the floor): click the court points",
+            "flat_view",
         )
-    a, b = topview.segments_on_floor(ra, rb, up, height, yaw)
+    a, b = topview.segments_on_floor(ra, rb, up, height, yaw, tol_deg=2.0 * tol_deg)
     if len(a) < 50:
-        raise CalibrationError("too few markings on the floor")
+        raise CalibrationError("too few markings on the floor", "no_floor")
     d1, d2 = topview.floor_basis(up, yaw)
     floor_to_cam = np.column_stack([d1, d2, -height * up])
     dn = fr @ up
     ok = dn < -1e-3
     pts = fr[ok] * (-height / dn[ok])[:, None]
     feet_m = np.column_stack([pts @ d1, pts @ d2])
-    base = {"floor_fit": round(fit, 3), "view_deg": round(view_deg, 1)}
+    base: dict[str, Any] = {"floor_fit": round(fit, 3), "view_deg": round(view_deg, 1)}
+    if tol_deg != 1.0:
+        base["floor_tolerance_deg"] = tol_deg
 
     def court(tv: topview.TopView, view: str) -> tuple[Calibration, dict[str, Any]]:
         info = {**base, "court_view": view}

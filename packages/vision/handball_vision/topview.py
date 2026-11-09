@@ -246,16 +246,19 @@ def frame_segments(
     return _floor_segments(frame, seen)
 
 
-def orientation_from_normals(m: F64, length: F64) -> tuple[float, float, float, float]:
+def orientation_from_normals(
+    m: F64, length: F64, tol_deg: float = 1.0
+) -> tuple[float, float, float, float]:
     """Floor tilt, roll and the yaw of the two line directions from segment plane normals.
 
     Nearly all markings in a hall run along two orthogonal floor directions; a floor direction d
-    lies in a segment's plane when m . d = 0. Returns (alpha, beta, yaw, fit share).
+    lies in a segment's plane when m . d = 0 (within `tol_deg`). Returns (alpha, beta, yaw, fit
+    share).
     """
     if len(m) < 30:
-        raise CalibrationError("too few floor lines")
+        raise CalibrationError("too few floor lines", "no_floor")
     wts = length / length.sum()
-    tol = np.sin(np.radians(1.0))
+    tol = np.sin(np.radians(tol_deg))
 
     def cost(alpha: float, beta: float, yaw: float) -> float:
         u = _up(alpha, beta)
@@ -304,7 +307,7 @@ def camera_height_from_people(
         if sol[0] > 0.02:
             units.append(sol[0])
     if len(units) < 20:
-        raise CalibrationError("too few people to scale the floor")
+        raise CalibrationError("too few people to scale the floor", "few_people")
     height = person_m / float(np.median(units))
     if not 1.0 <= height <= 40.0:
         raise CalibrationError(f"implausible camera height {height:.1f} m")

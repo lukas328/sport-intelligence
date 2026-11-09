@@ -10,7 +10,7 @@ Signals and where they come from:
 | API errors | span metrics / logs (`status >= 500`) | 5xx rate > 1 % for 5 min | page |
 | Job queues | `GET /internal/stats` (header `x-internal-token`) | `queues.gpu` > 20 or `oldest_queued_s` > 1800 | ticket |
 | Failed jobs | `/internal/stats.failed_last_hour` | > 5 per hour | ticket |
-| Stuck jobs | `/internal/stats.running_over_3h` | > 0 | ticket |
+| Stuck jobs | `/internal/stats.running_over_budget` (`running_over_3h` counts long jobs; a full game's analysis runs longer) | > 0 | ticket |
 | Payments | Stripe dashboard + in-app admin notifications (`payment_failed`) | webhook delivery failures | ticket |
 | Backups | nightly `infra/scripts/backup.sh` exit code, monthly restore test | missing or failed run | page |
 | Certificates | probe on the public hostname | expiry < 14 days | ticket |

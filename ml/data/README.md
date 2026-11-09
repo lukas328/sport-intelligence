@@ -24,3 +24,31 @@ ingest's Python (needs gdown for the info JSONs on Drive); re-running is cheap a
 uploads. First run: 138 of 178 Swiss games matched, 63 with a full game log (3,445 goals; logs
 exist from season 2023/24), the rest ambiguous (approximate dates), not on handball.ch (European
 cup, friendlies abroad, regional selections) or without team names.
+
+## Segment library: clock for the batches from the owner's computer
+`local_ingest.py` uploads `handball-segs-lNN` without clock data. `library.py` lists the account's
+`handball-segs-*` datasets on Kaggle and, for each one not yet done, downloads index.json, then
+the whole dataset as one zip (one request; per-file downloads got "rate limited"), takes the info
+JSONs and the segments out of it one at a time and reads the match clock (`segment_clock.py`, as
+the ingest does) with three readers in parallel (`--workers`, nice 10, one thread each); each
+segment is deleted once read. The zip is downloaded only when it fits with `--min-free-gb` (1.5)
+to spare and is cut back behind every segment taken out; a larger one is read in place on Kaggle's
+storage with HTTP range requests (no disk). Rate-limit answers are retried with exponential
+backoff. Segments the cloud ingest already read (bNN) are not downloaded.
+Results go to `<scratch>/library/library.json` (per game as in the ingest state.json, plus
+`kaggle_dataset`); resumable after every segment, `--watch 900` polls for new datasets. File
+names that differ from a `videos*.csv` name only in case, punctuation or a `.fNNN` suffix are
+mapped to that name. `segment_clock.py --labels` and `match_official.py` (catalog: `video.source`
+`local`, `kaggle_dataset` `handball-segs-lNN`) read the ingest state and the library together.
+
+Started as a detached background process (also in `<scratch>/library/run.sh`, to restart it after
+a container restart; stop with `pkill -g $(pgrep -f 'ml/data/library.py --watch')`):
+
+    S=/tmp/claude-0/-home-user/3dc450e2-2499-5e21-b252-1c4e366c6b5a/scratchpad
+    export KAGGLE_USERNAME=lukasde1000 KAGGLE_KEY=injected-by-proxy KAGGLE_CONFIG_DIR=$S/kg REQUESTS_CA_BUNDLE=/root/.ccr/ca-bundle.crt
+    export PATH=$S/torchenv/.venv/bin:$PATH
+    cd /home/user/handball-ai
+    setsid nohup $S/torchenv/.venv/bin/python -I ml/data/library.py --watch 900 >> $S/library/library.log 2>&1 < /dev/null &
+
+Offline test of the whole path: `--local-dir DIR` reads `DIR/handball-segs-*/` folders laid out
+like a dataset (index.json, segments, info JSONs) instead of Kaggle; use another `--libdir`.

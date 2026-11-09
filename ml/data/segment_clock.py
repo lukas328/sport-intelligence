@@ -39,14 +39,15 @@ readings that stand still throughout with no score ever read beside them (a half
     # segments are local (WORKDIR/batch_NN, or --search DIR/batch_NN, DIR)
     python ml/data/segment_clock.py --fill [--workdir W] [--search DIR ...] [--batch batch_NN ...]
         [--write-state]
-    # official log entries inside the segments -> ml/data/segment_labels/<name>.json
-    python ml/data/segment_clock.py --labels [--workdir W]
+    # official log entries inside the segments -> ml/data/segment_labels/<name>.json, for the
+    # games of the ingest state and of the segment library (library.py, e.g. handball-segs-lNN)
+    python ml/data/segment_clock.py --labels [--workdir W] [--library DIR]
 
 `--fill` writes WORKDIR/clocks.json (a running ingest owns state.json and would overwrite it; the
 ingest merges clocks.json into its state when it starts and before every poll). `--write-state`
 also merges into state.json: only while the ingest is stopped. Clock data carries the version of
 its reader ("reader"); data of a newer reader replaces older data wherever the two are merged
-(`--labels` reads state.json with clocks.json merged in this way).
+(`--labels` reads state.json with clocks.json merged in this way, and the library's games).
 
 Labels: per segment its own readings, the half from the readings of the whole game (a drop of the
 clock between or inside segments starts the second half; readings at 30:00 and above are a
@@ -72,6 +73,7 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "ml" / "eval"))
+sys.path.insert(0, str(REPO / "ml" / "data"))  # library.py (also under python -I)
 
 from align_official import (  # noqa: E402
     HALF_S,
@@ -100,6 +102,8 @@ OVERLAY_FULL_EVERY_S = 4.0  # text detection on the overlay window while no cloc
 BOARD_PROBES = 6
 BOARD_GIVE_UP_S = 60.0  # under two board readings in the first minute: give up
 MAX_CPU_S = 90.0  # stop reading (keep what was read) beyond this
+# threads of decoder, OpenCV and OCR per reader (library.py runs several readers with 1 each)
+THREADS = max(1, int(os.environ.get("HANDBALL_CLOCK_THREADS") or 2))
 SEGMENT_S = 180.0
 FEED_MS = 250  # frames handed to the board reader; it reads those due and probes in between
 PROBE_EVERY_S = 1.0  # template probes for a locked board that is out of view
@@ -128,7 +132,7 @@ def _open(path: Path, skip: str) -> tuple[Any, Any, float, tuple[int, int]]:
     container = av.open(str(path))
     stream = container.streams.video[0]
     stream.thread_type = "AUTO"
-    stream.codec_context.thread_count = 2
+    stream.codec_context.thread_count = THREADS
     stream.codec_context.skip_frame = skip  # type: ignore[assignment]  # av checks the name
     start = float(stream.start_time * stream.time_base) if stream.start_time is not None else 0.0
     w, h = stream.codec_context.width, stream.codec_context.height
@@ -172,7 +176,7 @@ def duration_ms(path: Path) -> int:
 Window = tuple[int, int, int, int]  # x0, y0, x1, y1
 
 
-def ocr_reader(models: Path, threads: int = 2) -> Any:
+def ocr_reader(models: Path, threads: int = THREADS) -> Any:
     """The PP-OCR text detector and recogniser of `hallboard` (data/models/ch_PP-OCRv4_*)."""
     from handball_vision.numbers import NumberReader
 
@@ -377,7 +381,7 @@ def read_segment_clock(
     shown (a second half may restart at 0 or continue at 30:00), misreads dropped."""
     import cv2
 
-    cv2.setNumThreads(2)
+    cv2.setNumThreads(THREADS)
     path = Path(path)
     c0, w0 = cpu_s(), time.time()
     budget = c0 + max_cpu_s
@@ -623,17 +627,23 @@ def game_labels(name: str, game: dict[str, Any], official: dict[str, Any]) -> di
     }
 
 
-def all_games(workdir: Path) -> dict[str, Any]:
-    """Games of the ingest state, clock data of clocks.json merged in."""
-    state = load_json(workdir / "state.json", {"games": {}})
-    merge_clocks(state, load_json(workdir / SIDECAR, {}))
-    return dict(state.get("games", {}))
+def all_games(workdir: Path, library: Path | None = None) -> dict[str, Any]:
+    """Games of the ingest state (clock data of clocks.json merged in) and of the segment library
+    (`library.py`: LIBRARY/library.json, the batches made elsewhere such as handball-segs-lNN;
+    default: the folder "library" beside the ingest workdir). A game in both keeps the ingest
+    entry with the newer clock data per segment (`library.merge_games`)."""
+    from library import ingest_games, library_games, merge_games
+
+    lib = library if library is not None else workdir.parent / "library"
+    return merge_games(ingest_games(workdir), library_games(lib))
 
 
-def labels(workdir: Path, out_dir: Path, official_dir: Path = OFFICIAL) -> list[Path]:
+def labels(
+    workdir: Path, out_dir: Path, official_dir: Path = OFFICIAL, library: Path | None = None
+) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
-    for name, game in sorted(all_games(workdir).items()):
+    for name, game in sorted(all_games(workdir, library).items()):
         if not any((s.get("clock") or {}).get("source") for s in game.get("segments") or []):
             continue
         # Drive names can carry a format suffix ("..._2023-09-23.f298"); the logs use the plain name
@@ -658,6 +668,8 @@ def main() -> None:
     mode.add_argument("--fill", action="store_true", help="clock data for local ingest segments")
     mode.add_argument("--labels", action="store_true", help="write ml/data/segment_labels/")
     ap.add_argument("--workdir", type=Path, default=SCRATCH / "ingest", help="ingest workdir")
+    ap.add_argument("--library", type=Path, default=None,
+                    help="--labels: segment library folder (library.py; default WORKDIR/../library)")
     ap.add_argument("--search", type=Path, nargs="*", default=[],
                     help="--fill: more folders holding batch_NN/ or the segments themselves")
     ap.add_argument("--batch", nargs="*", default=[], help="--fill: only these batches (batch_01)")
@@ -669,7 +681,7 @@ def main() -> None:
     if a.fill:
         fill(a.workdir, a.search, a.write_state, a.models, a.batch)
     elif a.labels:
-        labels(a.workdir, a.out)
+        labels(a.workdir, a.out, library=a.library)
     elif a.segments:
         for seg in a.segments:
             print(json.dumps({"file": str(seg), **read_segment_clock(seg, a.models)}), flush=True)
