@@ -19,12 +19,29 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
-  const [, orgId] = page.url().match(/\/app\/([^/]+)\/teams\//)!;
+  const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await page.waitForURL(/\/matches\/[0-9a-f-]{36}/);
   const matchId = page.url().match(/\/matches\/([0-9a-f-]{36})/)![1]!;
+
+  // the coach sees who replied to the match and notes who came
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  const team = await (await page.request.get(`/v1/orgs/${orgId}/teams/${teamId}`)).json();
+  await page.request.post(`/v1/orgs/${orgId}/teams/${teamId}/seasons/${team.current_season.id}/roster`, {
+    headers: { "x-csrf-token": csrf },
+    data: { first_name: "Lea", last_name: "Beispiel", jersey_number: 9 },
+  });
+  await page.reload();
+  const attendance = page.getByTestId("match-attendance");
+  await attendance.locator("summary").click();
+  await expect(attendance).toContainText("0 Zusagen, 0 Absagen, 1 offen");
+  await attendance.getByLabel("Anwesenheit von Lea Beispiel").selectOption("present");
+  await page.reload();
+  await page.getByTestId("match-attendance").locator("summary").click();
+  await expect(page.getByTestId("match-attendance").getByLabel("Anwesenheit von Lea Beispiel")).toHaveValue("present");
+  await expectAccessible(page);
 
   const link = await linkFromMail(page, playerEmail, "/invite/");
   const ctx = await browser.newContext();

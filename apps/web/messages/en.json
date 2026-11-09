@@ -449,7 +449,9 @@
     "allDemo": "Demo matches only",
     "uploadVideo": "Upload video",
     "noneUpcoming": "No match scheduled.",
-    "scheduleOne": "Schedule a match"
+    "scheduleOne": "Schedule a match",
+    "attendance": "Replies",
+    "attendanceHint": "Who comes, who is missing"
   },
   "upload": {
     "title": "Upload video",

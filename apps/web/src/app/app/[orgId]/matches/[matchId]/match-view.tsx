@@ -10,6 +10,7 @@ import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { KitFields } from "@/components/domain/kit-fields";
+import { AttendancePanel } from "@/components/team/attendance-panel";
 import { useCountUp } from "@/components/domain/match-score";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB } from "@/lib/color";
@@ -389,6 +390,18 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         </div>
       </div>
 
+      {/* who is coming: the players' replies, from before the match until shortly after it */}
+      {staff && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
+        <details className="group border-y border-foreground/15 py-3" data-testid="match-attendance">
+          <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
+            {t("matches.attendance")}
+            <span className="ml-2 text-sm font-normal text-muted group-open:hidden">{t("matches.attendanceHint")}</span>
+          </summary>
+          <div className="mt-3">
+            <AttendancePanel orgId={orgId} kind="match" id={match.id} />
+          </div>
+        </details>
+      )}
       {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
 
       <div hidden={view !== "video"} className="space-y-6">

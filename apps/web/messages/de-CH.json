@@ -449,7 +449,9 @@
     "allDemo": "Nur Demo-Spiele",
     "uploadVideo": "Video hochladen",
     "noneUpcoming": "Kein Spiel angesetzt.",
-    "scheduleOne": "Spiel ansetzen"
+    "scheduleOne": "Spiel ansetzen",
+    "attendance": "Zusagen",
+    "attendanceHint": "Wer kommt, wer fehlt"
   },
   "upload": {
     "title": "Video hochladen",

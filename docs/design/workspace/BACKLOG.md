@@ -18,7 +18,7 @@ Bugs reported from the test environment on Azure always go first. `[x]` = done.
    identity rework); search hits without a video window ("ohne Video" handles them).
 6. [ ] Analyse tab slice: possession, attacks, physical load and shots in the language of the
    match sheet, then a fresh-eyes review round (METHOD.md).
-7. [ ] Attendance: the API has it (`/attendance/{kind}/{id}`, `/me/attendance`); the training
+7. [x] Attendance (on the match page for staff: replies and who came; the squad keeps its status for B): the API has it (`/attendance/{kind}/{id}`, `/me/attendance`); the training
    view records it. Show who comes on the squad and the dates for staff.
 
 **B. Needs the backend first (to raise with the main session)**

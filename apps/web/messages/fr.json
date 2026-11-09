@@ -449,7 +449,9 @@
     "allDemo": "Uniquement des matchs de démo",
     "uploadVideo": "Téléverser la vidéo",
     "noneUpcoming": "Aucun match programmé.",
-    "scheduleOne": "Programmer un match"
+    "scheduleOne": "Programmer un match",
+    "attendance": "Réponses",
+    "attendanceHint": "Qui vient, qui manque"
   },
   "upload": {
     "title": "Téléverser la vidéo",
