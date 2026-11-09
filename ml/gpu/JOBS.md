@@ -6,7 +6,50 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
-(nichts)
+Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
+einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
+für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
+alle zusammen: etwa 33 USD). Vorher `git pull`: `ml/ball/kaggle/owl_gpu.py` überspringt jetzt
+Segmente, deren JSON in einem Eingabe-Dataset unter `segs/` liegt (Auftrag 3 gibt dafür das alte
+Ergebnis als Eingabe mit). Bei "budget"/"spend limit" abbrechen und melden.
+
+### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03,handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 10`
+- Das alte Ergebnis als Eingabe sorgt dafür, dass die 89 fertigen l02-Segmente übersprungen werden
+  (Log-Zeile: "200 segments, 89 already done in an input result").
+- Dauer etwa 6.5 h, Kosten etwa 4.3 USD.
+
+### 4. OWLv2 l04 (100 Segmente)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l04 --gpu T4 --budget-h 10`
+- Dauer etwa 5.8 h, Kosten etwa 3.9 USD.
+
+### 5. OWLv2 l05 (100 Segmente)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l05 --gpu T4 --budget-h 10`
+- Dauer etwa 5.8 h, Kosten etwa 3.9 USD.
+
+### 6. OWLv2 l06 (100 Segmente)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l06 --gpu T4 --budget-h 10`
+- Dauer etwa 5.8 h, Kosten etwa 3.9 USD.
+
+### 7. OWLv2 l07 (100 Segmente)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l07 --gpu T4 --budget-h 10`
+- Dauer etwa 5.8 h, Kosten etwa 3.9 USD.
+
+### 8. OWLv2 l08 (100 Segmente)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l08 --gpu T4 --budget-h 10`
+- Dauer etwa 5.8 h, Kosten etwa 3.9 USD.
+
+### 9. OWLv2 l09 (100 Segmente)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l09 --gpu T4 --budget-h 10`
+- Dauer etwa 5.8 h, Kosten etwa 3.9 USD.
+
+### 10. OWLv2 l10 und l11 (130 Segmente)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l10,handball-segs-l11 --gpu T4 --budget-h 10`
+- Dauer etwa 7.6 h, Kosten etwa 5.0 USD.
+
+Summe 3 bis 10: 841 Segmente, etwa 49 GPU-Stunden, etwa 32 USD. Falls ein Auftrag an die
+10-h-Grenze stösst: unter "Erledigt" die fehlenden Segmente nennen, der Rest folgt wie bei
+Auftrag 3 (altes Ergebnis als Eingabe dazu).
 
 ## Erledigt
 

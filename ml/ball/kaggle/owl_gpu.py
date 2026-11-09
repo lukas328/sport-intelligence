@@ -68,12 +68,14 @@ print("bench", len(bench), "frames", f"{time.time() - T0:.0f}s", flush=True)
 
 # 2) bursts from the ingested segments
 vids = sorted(a for a in ALL if a.endswith(".mp4"))
-print(len(vids), "segments", flush=True)
+# segments finished by an earlier run whose result is one of the inputs (its segs/*.json): not computed again
+DONE_IN = {os.path.basename(a)[:-5] for a in ALL if a.endswith(".json") and os.path.basename(os.path.dirname(a)) == "segs"}
+print(len(vids), "segments,", sum(os.path.basename(v)[:-4] in DONE_IN for v in vids), "already done in an input result", flush=True)
 for v in vids:
     if time.time() - T0 > BUDGET:
         print("budget reached", flush=True); break
     name_ = os.path.basename(v)[:-4]
-    if os.path.exists(f"{OUT}/segs/{name_}.json"):
+    if name_ in DONE_IN or os.path.exists(f"{OUT}/segs/{name_}.json"):
         continue
     cap = cv2.VideoCapture(v); fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
     stride = max(1, round(fps / 25)); every = int(round(6 * fps)); n = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
