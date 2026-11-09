@@ -17,12 +17,19 @@ from handball_api.models import (
     Membership,
     Notification,
     Play,
+    Player,
     Playlist,
+    RosterEntry,
     Team,
     User,
 )
 from handball_api.models.enums import TeamRole
-from handball_api.schemas.training import AssignmentCreate, AssignmentOut, NotificationList
+from handball_api.schemas.training import (
+    AssignmentCreate,
+    AssignmentOut,
+    AssignmentProgressOut,
+    NotificationList,
+)
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.mail_templates import render
@@ -207,6 +214,66 @@ def _out(a: Assignment, counts: tuple[int, int], **extra: Any) -> AssignmentOut:
     )
 
 
+async def _progress(
+    ctx: Ctx, team_id: uuid.UUID, ids: list[uuid.UUID]
+) -> dict[uuid.UUID, list[AssignmentProgressOut]]:
+    """Per assignment every recipient by name with seen and done (staff only)."""
+    if not ids:
+        return {}
+    rows = (
+        await ctx.db.execute(
+            select(AssignmentStatus, User.name)
+            .join(User, User.id == AssignmentStatus.user_id)
+            .where(AssignmentStatus.assignment_id.in_(ids))
+            .order_by(User.name, User.id)
+        )
+    ).all()
+    users = list({st.user_id for st, _ in rows})
+    players = (
+        dict(
+            (
+                await ctx.db.execute(
+                    select(Player.user_id, Player.id)
+                    .join(RosterEntry, RosterEntry.player_id == Player.id)
+                    .where(Player.user_id.in_(users), RosterEntry.team_id == team_id)
+                )
+            ).all()
+        )
+        if users
+        else {}
+    )
+    out: dict[uuid.UUID, list[AssignmentProgressOut]] = {}
+    for st, name in rows:
+        out.setdefault(st.assignment_id, []).append(
+            AssignmentProgressOut(
+                user_id=st.user_id,
+                name=name,
+                player_id=players.get(st.user_id),
+                seen_at=st.seen_at,
+                done_at=st.done_at,
+            )
+        )
+    return out
+
+
+async def _staff_out(ctx: Ctx, team_id: uuid.UUID, rows: list[Assignment]) -> list[AssignmentOut]:
+    ids = [a.id for a in rows]
+    counts = await _counts(ctx, ids)
+    progress = await _progress(ctx, team_id, ids)
+    out = []
+    for a in rows:
+        people = progress.get(a.id, [])
+        out.append(
+            _out(
+                a,
+                counts.get(a.id, (0, 0)),
+                progress=people,
+                still_open=[p for p in people if p.done_at is None],
+            )
+        )
+    return out
+
+
 async def team_assignments(ctx: Ctx, team_id: uuid.UUID) -> list[AssignmentOut]:
     team = await get_team(ctx, team_id, Action.ASSIGNMENT_WRITE)
     rows = list(
@@ -219,26 +286,21 @@ async def team_assignments(ctx: Ctx, team_id: uuid.UUID) -> list[AssignmentOut]:
             )
         ).all()
     )
-    counts = await _counts(ctx, [a.id for a in rows])
-    progress: dict[uuid.UUID, list[dict[str, Any]]] = {}
-    if rows:
-        for st, name in (
-            await ctx.db.execute(
-                select(AssignmentStatus, User.name)
-                .join(User, User.id == AssignmentStatus.user_id)
-                .where(AssignmentStatus.assignment_id.in_([a.id for a in rows]))
-                .order_by(User.name)
-            )
-        ).all():
-            progress.setdefault(st.assignment_id, []).append(
-                {
-                    "user_id": str(st.user_id),
-                    "name": name,
-                    "seen_at": st.seen_at,
-                    "done_at": st.done_at,
-                }
-            )
-    return [_out(a, counts.get(a.id, (0, 0)), progress=progress.get(a.id, [])) for a in rows]
+    return await _staff_out(ctx, team.id, rows)
+
+
+async def assignment_detail(ctx: Ctx, assignment_id: uuid.UUID) -> AssignmentOut:
+    """One assignment with its progress (staff of the team)."""
+    a = await ctx.db.get(Assignment, assignment_id)
+    if a is None:
+        raise ProblemError(404, "not-found", "Assignment not found")
+    await get_team(ctx, a.team_id, Action.ASSIGNMENT_WRITE)
+    return (await _staff_out(ctx, a.team_id, [a]))[0]
+
+
+def _own(st: AssignmentStatus) -> tuple[int, int]:
+    """A player's counts cover only their own status (no progress of other players)."""
+    return (1, 1 if st.done_at is not None else 0)
 
 
 async def my_assignments(ctx: Ctx) -> list[AssignmentOut]:
@@ -252,9 +314,8 @@ async def my_assignments(ctx: Ctx) -> list[AssignmentOut]:
             .limit(100)
         )
     ).all()
-    counts = await _counts(ctx, [a.id for a, _, _ in rows])
     return [
-        _out(a, counts.get(a.id, (0, 0)), seen_at=st.seen_at, done_at=st.done_at, team_name=team)
+        _out(a, _own(st), seen_at=st.seen_at, done_at=st.done_at, team_name=team)
         for a, st, team in rows
     ]
 
@@ -283,8 +344,7 @@ async def set_status(ctx: Ctx, assignment_id: uuid.UUID, done: bool) -> Assignme
             f"/app/{a.organization_id}/teams/{a.team_id}/assignments",
         )
     await ctx.db.flush()
-    counts = await _counts(ctx, [a.id])
-    return _out(a, counts.get(a.id, (0, 0)), seen_at=st.seen_at, done_at=st.done_at)
+    return _out(a, _own(st), seen_at=st.seen_at, done_at=st.done_at)
 
 
 async def delete_assignment(ctx: Ctx, assignment_id: uuid.UUID) -> None:
