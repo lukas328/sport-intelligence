@@ -492,6 +492,42 @@ def _overlay_summary(reader: scoreboard.Reader | None) -> dict[str, Any] | None:
     return summary if summary["first_score"] is not None else None
 
 
+def clock_play(
+    reader: scoreboard.Reader | None, board: HallBoardReader | None
+) -> dict[str, Any] | None:
+    """Where the match clock runs, from the overlay clock or else the hall scoreboard's: the ball
+    analysis counts only there (warm-up balls, ball racks and loose balls in breaks and timeouts
+    are not the game ball). None without clock readings: then every ball counts."""
+    if reader is not None:
+        source, clocks = "overlay", list(reader.clocks)
+    elif board is not None:
+        source = "hall_scoreboard"
+        clocks = [(r.t_ms, r.clock_s) for r in board.readings if r.clock_s is not None]
+    else:
+        return None
+    if not clocks:
+        return None
+    intervals = scoreboard.play_intervals(clocks)
+    log.info(
+        "clock_play",
+        source=source,
+        readings=len(clocks),
+        intervals=len(intervals),
+        in_play_s=round(scoreboard.in_play_ms(intervals) / 1000, 1),
+    )
+    return {
+        "source": source,
+        "clock_readings": len(clocks),
+        "intervals_ms": [list(iv) for iv in intervals],
+    }
+
+
+def play_intervals(play: dict[str, Any] | None) -> list[tuple[int, int]] | None:
+    """The stretches of `clock_play` for the tracking, or None (no running clock: no gating)."""
+    found = [(int(a), int(b)) for a, b in (play or {}).get("intervals_ms") or []]
+    return found or None
+
+
 def _run_learned(
     detector: YoloxDetector,
     job_id: str,
@@ -568,6 +604,7 @@ def _run_learned(
                 role_every=max(1, settings.role_every),
             )
             overlay = _overlay_summary(reader)
+            play = clock_play(reader, board)
             if overlay is None and board is not None:
                 board_summary = board.summary()
                 overlay = board_summary if board_summary["goals"] else None
@@ -584,15 +621,17 @@ def _run_learned(
                 return None
             learned.save_observations(obs, work / "observations.npz")
             (work / "scoreboard.json").write_text(json.dumps(overlay))
+            (work / "play.json").write_text(json.dumps(play))
             upload_dir_files(
                 s3,
                 settings.s3_bucket_artifacts,
                 work,
-                ["observations.npz", "scoreboard.json"],
+                ["observations.npz", "scoreboard.json", "play.json"],
                 prefix + "analysis/",
             )
         else:
             overlay = _cached_overlay(s3, settings.s3_bucket_artifacts, prefix, work)
+            play = _cached_json(s3, settings.s3_bucket_artifacts, prefix, work, "play.json")
         hall = obs.motion.background()
         view = {
             "camera": "moving" if obs.motion.moving else "fixed",
@@ -656,6 +695,7 @@ def _run_learned(
             hall,
             progress=lambda _stage, f: rep.fraction(f),
             rosters=numbers_on or None,
+            play=play_intervals(play),
         )
         if overlay and overlay.get("goals"):
             # where the goals were scored from: the scorer's track, else the nearest attacker
@@ -712,12 +752,16 @@ def _run_learned(
 
 
 def _cached_overlay(s3: Any, bucket: str, prefix: str, work: Path) -> dict[str, Any] | None:
-    path = work / "scoreboard.json"
+    return _cached_json(s3, bucket, prefix, work, "scoreboard.json")
+
+
+def _cached_json(s3: Any, bucket: str, prefix: str, work: Path, name: str) -> dict[str, Any] | None:
+    path = work / name
     try:
-        s3.download_file(bucket, prefix + "analysis/scoreboard.json", str(path), Config=TRANSFER)
+        s3.download_file(bucket, prefix + "analysis/" + name, str(path), Config=TRANSFER)
         data = json.loads(path.read_text())
         return data if isinstance(data, dict) else None
-    except Exception:  # an earlier run without overlay reading
+    except Exception:  # an earlier run without overlay or clock reading
         return None
 
 

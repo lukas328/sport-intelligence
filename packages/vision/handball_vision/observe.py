@@ -638,9 +638,12 @@ def track(
     hall: U8 | None = None,
     progress: Progress | None = None,
     rosters: dict[str, set[int]] | None = None,
+    play: list[tuple[int, int]] | None = None,
 ) -> Any:
     """Tracks, teams and the AnalysisResult from stored observations and a hall calibration.
-    `rosters` (team label -> shirt numbers) keeps voted numbers on the roster (numbers.vote)."""
+    `rosters` (team label -> shirt numbers) keeps voted numbers on the roster (numbers.vote).
+    `play` (start_ms, end_ms): where the match clock runs; the ball counts only there
+    (`ballpossession.from_observations`)."""
     from handball_vision.numbers import Reading
     from handball_vision.pipeline import _confident_label, _finish
     from handball_vision.teams import TeamAssigner
@@ -757,7 +760,7 @@ def track(
     from handball_vision.ballpossession import from_observations
 
     t0 = time.perf_counter()
-    ball = from_observations(obs, result)
+    ball = from_observations(obs, result, play=play)
     if ball is not None:
         result.extra["ball"] = ball
     result.timings_s["ball"] = time.perf_counter() - t0

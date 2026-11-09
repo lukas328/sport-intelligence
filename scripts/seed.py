@@ -199,6 +199,7 @@ def main() -> None:
                     "60",
                     "--seed",
                     str(11 + k),
+                    "--demo",
                 ],
                 check=True,
             )

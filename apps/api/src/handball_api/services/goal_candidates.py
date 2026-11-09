@@ -13,6 +13,8 @@ which list (score, rate) proposed the moment.
     official goal within OVERLAY_DEDUPE_MS (the overlay changes a few seconds after the goal;
     official times come from the clock), any other goal (tagged, corrected, a confirmed
     candidate) or a shot confirmed on a candidate within NMS_MS (the candidates' own spacing);
+    an event whose video time lies outside the video (a report goal before a clip starts) covers
+    nothing;
   * shot candidates: any shot whose video time is known (tagged, courtside mark, a confirmed
     candidate, an overlay goal, a report entry confirmed on the video) within NMS_MS, overlay
     goals within OVERLAY_DEDUPE_MS.
@@ -161,12 +163,15 @@ def _video_ms(e: Event) -> int | None:
     return int(v["t_ms"]) if v is not None else e.t_ms
 
 
-def _covers(c: GoalCandidate, e: Event) -> int | None:
-    """Distance (ms) at which event `e` covers candidate `c`, None when it does not."""
+def _covers(c: GoalCandidate, e: Event, length_ms: int | None = None) -> int | None:
+    """Distance (ms) at which event `e` covers candidate `c`, None when it does not. An event
+    whose video time lies before the start or after the end of the candidate's video (`length_ms`)
+    is not on it: a report goal at 12:26 does not cover a candidate early in a clip from 12:40,
+    although the 20 s window of clock times would reach it."""
     if c.event_id is not None and e.id == c.event_id:
         return None
     t = _video_ms(e)
-    if t is None:
+    if t is None or t < 0 or (length_ms is not None and t > length_ms):
         return None
     d = abs(int(t) - c.t_ms)
     if c.kind == "goal":
@@ -181,11 +186,15 @@ def _covers(c: GoalCandidate, e: Event) -> int | None:
     return d if d <= window else None
 
 
-def _covered(c: GoalCandidate, shots: list[Event]) -> Event | None:
-    """The shot a candidate is already covered by, nearest first."""
+def _covered(
+    c: GoalCandidate, shots: list[Event], lengths: dict[uuid.UUID, int | None] | None = None
+) -> Event | None:
+    """The shot a candidate is already covered by, nearest first (`lengths`: video length per
+    asset, where known)."""
     best: tuple[int, Event] | None = None
+    length = (lengths or {}).get(c.video_asset_id)
     for e in shots:
-        d = _covers(c, e)
+        d = _covers(c, e, length)
         if d is not None and (best is None or d < best[0]):
             best = (d, e)
     return best[1] if best else None
@@ -340,6 +349,14 @@ async def _assets(ctx: Ctx, cands: list[GoalCandidate]) -> dict[uuid.UUID, Video
     return {a.id: a for a in rows}
 
 
+async def _lengths(ctx: Ctx, cands: list[GoalCandidate]) -> dict[uuid.UUID, int | None]:
+    """Video length (ms) per asset of the candidates, None where unknown."""
+    return {
+        a.id: round(a.duration_s * 1000) if a.duration_s else None
+        for a in (await _assets(ctx, cands)).values()
+    }
+
+
 async def _candidates(ctx: Ctx, match: Match, kind: str) -> list[GoalCandidate]:
     return list(
         (
@@ -361,7 +378,8 @@ async def _report(
     asset = max(assets.values(), key=lambda a: a.created_at, default=None)
     rep = _Report(match, asset.analysis if asset is not None else None, shots)
     rep.visible = await roster.visible_players(ctx, match.team_id, match.season_id)
-    rep.suggest([c for c in cands if c.status == "open" and _covered(c, shots) is None])
+    lengths = {a.id: round(a.duration_s * 1000) if a.duration_s else None for a in assets.values()}
+    rep.suggest([c for c in cands if c.status == "open" and _covered(c, shots, lengths) is None])
     length = round(asset.duration_s * 1000) if asset is not None and asset.duration_s else None
     return rep, length
 
@@ -376,7 +394,11 @@ async def listing(ctx: Ctx, match_id: uuid.UUID, kind: str = "goal") -> dict[str
     length: int | None = None
     if kind == "shot":
         rep, length = await _report(ctx, match, cands, shots)
-    rows = [_row(c, match, _covered(c, shots), rep.suggestion(c) if rep else None) for c in cands]
+    lengths = await _lengths(ctx, cands)
+    rows = [
+        _row(c, match, _covered(c, shots, lengths), rep.suggestion(c) if rep else None)
+        for c in cands
+    ]
     open_rows = [r for r in rows if r["status"] == "open" and r["known"] is None]
     versions = sorted({c.template_version for c in cands if c.template_version})
     rates = RATES[kind]
@@ -505,7 +527,7 @@ async def review(
         if outcome not in OUTCOMES:
             raise ProblemError(422, "invalid-outcome", "A confirmed shot needs its outcome")
         if c.status == "open":
-            known = _covered(c, shots)
+            known = _covered(c, shots, await _lengths(ctx, [c]))
             if known is not None and (c.kind == "shot" or known.outcome == "goal"):
                 raise ProblemError(409, "already-a-goal", "This moment is already a known shot")
         ev = await ctx.db.get(Event, c.event_id) if c.event_id else None
@@ -601,4 +623,4 @@ async def review(
     if c.kind == "shot" and c.status == "open":
         rep, _ = await _report(ctx, match, await _candidates(ctx, match, c.kind), shots)
         sugg = rep.suggestion(c)
-    return _row(c, match, _covered(c, shots), sugg)
+    return _row(c, match, _covered(c, shots, await _lengths(ctx, [c])), sugg)

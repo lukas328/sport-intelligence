@@ -17,6 +17,7 @@ disappears for longer is a "lost" end, not a pass.
 
 from __future__ import annotations
 
+import bisect
 import itertools
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
@@ -155,29 +156,60 @@ def _apply(h: Any, x: float, y: float) -> tuple[float, float]:
     return float(v[0] / v[2]), float(v[1] / v[2])
 
 
-def from_observations(obs: Any, result: Any, min_score: float = 0.35) -> dict[str, Any] | None:
+def from_observations(
+    obs: Any,
+    result: Any,
+    min_score: float = 0.35,
+    play: Sequence[tuple[int, int]] | None = None,
+) -> dict[str, Any] | None:
     """Ball path, holders, possessions and transfers for an analysed video.
 
     `obs` is a `handball_vision.observe.Observations` (ball boxes per observed frame, camera
     motion), `result` its `AnalysisResult` (tracks keep the index of their box in the frame's
     observation). Ball peaks go to the camera-compensated canvas for the temporal path, and back
-    to frame pixels for the holder test. None without ball observations."""
+    to frame pixels for the holder test. None without ball observations.
+
+    `play`: the stretches (start_ms, end_ms) in which the match clock runs
+    (`scoreboard.play_intervals`). Balls outside them are ignored: in breaks, timeouts and before
+    and after the game warm-up balls, ball racks and loose balls are not the game ball. None or
+    empty (no clock read): every ball counts. `ball_gated_by_clock` says which it was."""
     from handball_vision import balltrack
 
     motion = obs.motion
     fw = motion.frame_size[0]
+    gate = sorted(play) if play else None
+    starts = [a for a, _ in gate or []]
+    ms = 1000 / obs.fps
     peaks: list[balltrack.Peak] = []
+    seen = False
     for fo in obs.frames:
         if not fo.balls:
             continue
+        seen = True
+        if gate is not None:
+            k = bisect.bisect_right(starts, fo.index * ms) - 1
+            if k < 0 or fo.index * ms > gate[k][1]:
+                continue
         h = motion.frame_to_canvas(fo.index)
         if h is None:
             continue
         for d in fo.balls:
             x, y = _apply(h, (d.x1 + d.x2) / 2, (d.y1 + d.y2) / 2)
             peaks.append(balltrack.Peak(fo.index, x, y, float(d.score)))
-    if not peaks:
+    if not seen or (not peaks and gate is None):
         return None
+    gated = {
+        "ball_gated_by_clock": gate is not None,
+        "in_play_s": round(sum(b - a for a, b in gate) / 1000, 1) if gate else None,
+    }
+    if not peaks:  # balls only while the clock stood
+        return {
+            **gated,
+            "path_stats": {},
+            "summary": summary([], [], obs.fps),
+            "possessions": [],
+            "transfers": [],
+        }
     step = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
     path, stats = balltrack.track(
         peaks,
@@ -204,8 +236,8 @@ def from_observations(obs: Any, result: Any, min_score: float = 0.35) -> dict[st
     teams = {tid: str(v["label"]) for tid, v in result.teams.items()}
     pos = possessions(holders(ball, boxes), teams, obs.fps)
     moves = transfers(pos, obs.fps)
-    ms = 1000 / obs.fps
     return {
+        **gated,
         "path_stats": stats,
         "summary": summary(pos, moves, obs.fps),
         "possessions": [
