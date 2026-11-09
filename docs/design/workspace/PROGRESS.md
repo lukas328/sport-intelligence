@@ -158,3 +158,26 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 - The video player's own control bar on phones covers half the frame.
 - Dev only: a hydration warning appears once after hot reloads (stale server bundle), not on a
   fresh start.
+
+## Backend findings
+
+For the analysis session; read from this branch. Newest first.
+
+- 2026-11-09: **the zone check can be switched on.** The web texts now match the PDF texts
+  exactly in de-CH, en and fr, including `zones.long_range` ("Fernwurf") and `zones.empty_goal`
+  ("Leeres Tor"); the insight texts match too (checked against `report_pdf.TEXTS` after merging
+  main). `apps/api/tests/test_report_pdf.py::test_insight_texts_match_the_web_app` can compare
+  the whole `zones` block again (drop the `split` exclusion) once PR 8 is merged.
+- Earlier, still open (see slice 3): feed generation crashes on events outside the video;
+  `run_highlight_reel` is queued under `handball_worker.export` but lives in
+  `handball_worker.reels`.
+- Earlier, still open (see Open): the season counts goals from both the report and tagging;
+  sprint counts and top speeds from one minute of video look implausible.
+
+## Round after the merge with main (2026-11-09)
+
+- Opponent profile: Heim or Auswärts per game; xG per match only when at least 70 % of the shots
+  on target have a position, else "xG: zu wenige Würfe mit Position (5 von 12)". The same rule on
+  the match stage, the analysis overview, the season rows and the season's xG statement.
+- Throw-off step: "Uhr eintragen" sets the match clock at the paused moment (`clock_s`), for
+  videos that start after the throw-off; the error for a time outside the half is in the texts.
