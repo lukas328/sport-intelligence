@@ -7,7 +7,7 @@ import { Crosshair, Keyboard, Maximize2, Play, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
-import { CourtCalibration } from "@/components/analysis/court-calibration";
+import { CourtCalibration, CourtPreview } from "@/components/analysis/court-calibration";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
-import { coverage, firstOpen, steps } from "@/lib/match-workflow";
+import { courtFromHall, courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
 import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
 import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
@@ -295,7 +295,7 @@ export function Workspace({
   const reportOpen = hasReport && official.data?.imported ? goalRows(official.data, "open", false, spansFor).length : null;
   const stepList = steps({
     analysis: a
-      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: a.camera === "moving" && a.calibration?.source === "heuristic" }
+      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: courtUnconfirmed(a) }
       : null,
     kickoff: match.kickoff_ms,
     periodS: match.period_s,
@@ -797,18 +797,33 @@ function AnalysisPanel({
 }) {
   const t = useTranslations("analysis");
   const [marking, setMarking] = useState(false);
+  const qc = useQueryClient();
+  const confirm = useMutation({
+    mutationFn: async () => {
+      const { error } = await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", {
+        params: { path: { org_id: orgId, video_id: videoId } },
+      });
+      if (error) throw new Error("confirm");
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["analysis", videoId] }),
+  });
+  const confirmCourt = () => confirm.mutate();
+  const confirming = confirm.isPending;
+  const confirmFailed = confirm.isError;
   const ready = analysis?.status === "ready";
   useEffect(() => {
     if (ready) track("analysis_viewed");
   }, [ready]);
   if (!analysis || analysis.status === "none") return null;
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
-  const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
+  const unconfirmed = courtUnconfirmed(analysis);
   const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
   const REASONS = ["camera_motion", "no_floor", "flat_view", "few_people", "court"] as const;
   const reason = REASONS.find((r) => r === info.reason) ?? (analysis.needs_calibration && analysis.calibration_error ? "court" : null);
   const hallName = analysis.hall?.name ?? null;
-  const fromHall = info.method === "hall";
+  const fromHall = courtFromHall(analysis);
+  const hallCheck = canMark && fromHall && unconfirmed;
+  const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
   return (
     <section className="space-y-3" data-testid="analysis-panel">
       <h2 className="sr-only">{t("title")}</h2>
@@ -830,16 +845,31 @@ function AnalysisPanel({
       {/* one sentence: does the court fit */}
       {analysis.status === "ready" && !analysis.needs_calibration && (
         <p className="text-[0.9375rem]">
-          {fromHall ? t("courtFromHall", { hall: hallName ?? "" }) : unconfirmed ? t("checkCourt") : t("courtOk")}
+          {fromHall
+            ? t(hallConfirmed ? "courtFromHallOk" : hallCheck ? "courtFromHallCheck" : "courtFromHall", { hall: hallName ?? "" })
+            : unconfirmed
+              ? t("checkCourt")
+              : t("courtOk")}
         </p>
       )}
+      {/* a court from the hall is checked here in one look, not in the marking dialog */}
+      {hallCheck && <CourtPreview orgId={orgId} videoId={videoId} analysis={analysis} alt={t("courtPreviewAlt")} />}
       {/* a court marked once is carried over to the next videos of the same hall */}
-      {canMark && (analysis.needs_calibration || unconfirmed) && (
+      {canMark && !fromHall && (analysis.needs_calibration || unconfirmed) && (
         <p className="text-xs text-muted" data-testid="hall-hint">
           {hallName ? t("hallOnce", { hall: hallName }) : t("hallUnknown")}
         </p>
       )}
-      {canMark && (
+      {hallCheck ? (
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={confirmCourt} loading={confirming} data-testid="court-confirm">
+            {t("courtFits")}
+          </Button>
+          <Button variant="secondary" onClick={() => setMarking(true)} data-testid="mark-court">
+            {t("courtRemark")}
+          </Button>
+        </div>
+      ) : canMark && (
         <Button
           variant={analysis.needs_calibration ? "primary" : "secondary"}
           size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
@@ -849,6 +879,7 @@ function AnalysisPanel({
           {t(analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
         </Button>
       )}
+      {confirmFailed && <Alert className="py-2">{t("courtConfirmError")}</Alert>}
       {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} onClose={() => setMarking(false)} />}
       {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
         <MiniCourt

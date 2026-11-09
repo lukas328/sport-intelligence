@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clockAt, coverage, covered, firstOpen, inside, kickoffMissing, parseClock, steps, type StepInput } from "./match-workflow";
+import { clockAt, courtFromHall, courtUnconfirmed, coverage, covered, firstOpen, inside, kickoffMissing, parseClock, steps, type StepInput } from "./match-workflow";
 
 const HALF = 1800;
 
@@ -110,5 +110,24 @@ describe("the match clock a coach types", () => {
   });
   it("is no time otherwise", () => {
     for (const t of ["", "12:4", "12:60", "ab", "1:2:3"]) expect(parseClock(t)).toBeNull();
+  });
+});
+
+describe("courtUnconfirmed", () => {
+  const auto = { source: "heuristic" };
+  it("asks for a check of an automatic court from a moving camera", () => {
+    expect(courtUnconfirmed({ camera: "moving", calibration: auto })).toBe(true);
+    expect(courtUnconfirmed({ camera: "fixed", calibration: auto })).toBe(false);
+  });
+
+  it("asks for a check of a court carried over from the hall until a person confirms it", () => {
+    const hall = { method: "hall" };
+    expect(courtFromHall({ calibration_info: hall })).toBe(true);
+    expect(courtUnconfirmed({ camera: "fixed", calibration: auto, calibration_info: hall })).toBe(true);
+    expect(courtUnconfirmed({ camera: "fixed", calibration: { source: "user_correction" }, calibration_info: hall })).toBe(false);
+  });
+
+  it("needs nothing without a court", () => {
+    expect(courtUnconfirmed({ camera: "moving", calibration: null })).toBe(false);
   });
 });
