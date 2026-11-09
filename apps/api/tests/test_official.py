@@ -1002,7 +1002,14 @@ async def test_daily_tick_syncs_and_imports_reports(
     c = await claim(api)
     token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
     r = await api.http.post("/internal/official/sync", headers=token)
-    assert r.json() == {"teams": 0, "suggestions": 0, "reports": 0, "failed": 0, "stopped": 0}
+    assert r.json() == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 0,
+        "failed": 0,
+        "stopped": 0,
+        "purged": 0,
+    }
     # a day later: the daily sync finds a new player
     await owner_conn.execute("UPDATE teams SET official_synced_at = now() - interval '2 days'")
     players = hch.data("getTeamPlayers", {"teamId": TEAM})
@@ -1022,7 +1029,14 @@ async def test_daily_tick_syncs_and_imports_reports(
         "UPDATE matches SET kickoff_at = now() - interval '3 hours' WHERE official_game_id = 509192"
     )
     r = await api.http.post("/internal/official/sync", headers=token)
-    assert r.json() == {"teams": 0, "suggestions": 0, "reports": 1, "failed": 0, "stopped": 0}
+    assert r.json() == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 1,
+        "failed": 0,
+        "stopped": 0,
+        "purged": 0,
+    }
     count = await owner_conn.fetchval(
         "SELECT count(*) FROM events e JOIN matches m ON m.id = e.match_id "
         "WHERE m.official_game_id = 509192 AND e.source = 'official_report'"
@@ -1033,7 +1047,14 @@ async def test_daily_tick_syncs_and_imports_reports(
     kinds = {r["kind"] for r in await owner_conn.fetch("SELECT kind FROM notifications")}
     assert {"official_suggestions", "official_report"} <= kinds
     r = await api.http.post("/internal/official/sync", headers=token)
-    assert r.json() == {"teams": 0, "suggestions": 0, "reports": 0, "failed": 0, "stopped": 0}
+    assert r.json() == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 0,
+        "failed": 0,
+        "stopped": 0,
+        "purged": 0,
+    }
     # when handball.ch is down the tick stops quietly
     await owner_conn.execute("UPDATE teams SET official_synced_at = now() - interval '2 days'")
     hch.down = True
@@ -1141,7 +1162,14 @@ async def test_tick_keeps_going_after_an_unexpected_error(
     monkeypatch.setattr(official, "import_report", import_report)
     monkeypatch.setattr(official, "sync_team", sync_team)
     out = await _tick(api)
-    assert out == {"teams": 0, "suggestions": 0, "reports": 1, "failed": 2, "stopped": 0}
+    assert out == {
+        "teams": 0,
+        "suggestions": 0,
+        "reports": 1,
+        "failed": 2,
+        "stopped": 0,
+        "purged": 0,
+    }
     # the imported report stays; the failed game and team are rolled back and tried again later
     assert await owner_conn.fetchval(
         "SELECT count(*) FROM events e JOIN matches m ON m.id = e.match_id "
@@ -1162,7 +1190,37 @@ async def test_tick_keeps_going_after_an_unexpected_error(
         "reports": 0,
         "failed": 0,
         "stopped": 0,
+        "purged": 0,
     }
+
+
+async def test_tick_purges_cached_answers_past_their_use(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """official_cache keeps player names and statistics only as long as they are useful: a
+    played game's player stats a year, every other answer a month."""
+    api = await coach(make_api)
+    await claim(api)
+    fresh = await owner_conn.fetchval("SELECT count(*) FROM official_cache")
+    old = {
+        "getReport": "40 days",
+        "getTeamPlayers": "40 days",
+        "getGamePlayers": "400 days",
+    }
+    kept = {"getGamePlayers": "40 days", "getStanding": "20 days"}
+    for i, (operation, age) in enumerate([*old.items(), *kept.items()]):
+        await owner_conn.execute(
+            "INSERT INTO official_cache (key, provider, operation, variables, data, fetched_at) "
+            "VALUES ($1, 'handball_ch', $2, '{}', '{}', now() - $3::text::interval)",
+            f"old-{i}",
+            operation,
+            age,
+        )
+    out = await _tick(api)
+    assert out["purged"] == len(old)
+    left = await owner_conn.fetch("SELECT key FROM official_cache WHERE key LIKE 'old-%'")
+    assert sorted(r["key"] for r in left) == ["old-3", "old-4"]
+    assert await owner_conn.fetchval("SELECT count(*) FROM official_cache") == fresh + len(kept)
 
 
 def test_public_mail_providers_prove_no_club_role() -> None:

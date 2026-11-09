@@ -1254,13 +1254,17 @@ def _upstream_down(exc: ProblemError) -> bool:
 
 async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
     """Hourly worker tick: each linked team once a day (schedule, roster, standing, next season
-    as suggestions) and the official report of every linked game that ended, the latest first.
+    as suggestions) and the official report of every linked game that ended, the latest first;
+    cached handball.ch answers past their retention are deleted.
 
     Each team and each game runs in its own savepoint: an unexpected error rolls back that team
     (tried again the next day) or game (tried again later), not the whole tick. A game without a
     game log yet is asked again after an hour, then after ever longer waits (up to a day). Stops
     at the first sign that handball.ch is not answering (no hammering)."""
     now = now or _now()
+    out = Counter[str]()
+    # public answers of handball.ch (no tenant data): kept only as long as they are useful
+    out["purged"] = await ch.purge_cache(ctx.db, now)
     await enable_system_access(ctx.db, reason="official data sync")
     try:
         teams = [
@@ -1294,7 +1298,6 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
         ]
     finally:
         await disable_system_access(ctx.db)
-    out = Counter[str]()
     try:
         for team_id, org_id in teams:
             await set_tenant(ctx.db, org_id)
@@ -1345,7 +1348,8 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
     finally:
         ctx.actor = None
     await ctx.db.flush()
-    return {k: out[k] for k in ("teams", "suggestions", "reports", "failed", "stopped")}
+    keys = ("teams", "suggestions", "reports", "failed", "stopped", "purged")
+    return {k: out[k] for k in keys}
 
 
 async def _postpone_team(ctx: Ctx, team_id: uuid.UUID, now: datetime) -> None:

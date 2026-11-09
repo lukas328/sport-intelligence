@@ -28,7 +28,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -81,6 +81,12 @@ FRESH = timedelta(0)
 WEEK = timedelta(days=7)
 DAY = timedelta(days=1)
 HOURS_6 = timedelta(hours=6)
+# how long an answer is kept at all (official_cache retention, purged by the hourly tick): the
+# readers want younger answers, an older one only stands in while handball.ch does not answer.
+# Player names and statistics are not kept for ever: a played game's player stats (asked once,
+# kept for the roster suggestions of its season) a year, everything else a month.
+KEEP = timedelta(days=30)
+KEEP_BY_OPERATION = {"getGamePlayers": timedelta(days=365)}
 
 
 class UpstreamUnavailableError(AdapterError):
@@ -197,6 +203,24 @@ async def query(
             )
         )
     return data
+
+
+async def purge_cache(db: AsyncSession, now: datetime | None = None) -> int:
+    """Delete the cached answers older than they are useful (KEEP, KEEP_BY_OPERATION)."""
+    now = now or datetime.now(UTC)
+    longer = list(KEEP_BY_OPERATION)
+    expired = (
+        OfficialCache.operation.not_in(longer) & (OfficialCache.fetched_at < now - KEEP)
+    ) | or_(
+        *(
+            (OfficialCache.operation == op) & (OfficialCache.fetched_at < now - keep)
+            for op, keep in KEEP_BY_OPERATION.items()
+        )
+    )
+    result = await db.execute(
+        delete(OfficialCache).where(expired).execution_options(synchronize_session=False)
+    )
+    return int(getattr(result, "rowcount", 0) or 0)
 
 
 async def cached_at(db: AsyncSession, q: str, variables: dict[str, Any]) -> datetime | None:
