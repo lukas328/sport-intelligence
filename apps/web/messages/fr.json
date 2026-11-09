@@ -200,7 +200,10 @@
     "status_expired": "Cette invitation a expiré.",
     "notFound": "Cette invitation n'existe pas.",
     "child": "Enfant",
-    "childHint": "Les parents ne voient que les contenus de leur enfant et gèrent ses consentements."
+    "childHint": "Les parents ne voient que les contenus de leur enfant et gèrent ses consentements.",
+    "entry": "Dans l'effectif",
+    "entryLater": "Pas encore dans l'effectif / lier plus tard",
+    "entryHint": "Une fois liée, la personne voit ses rendez-vous, tâches et scènes dès la première connexion."
   },
   "roles": {
     "org_admin": "Admin du club",
@@ -1407,7 +1410,14 @@
     "purpose_public_profile": "Profil public",
     "purpose_public_profile_help": "Un profil avec des scènes et des chiffres choisis peut être public.",
     "purpose_training_data": "Améliorer la reconnaissance",
-    "purpose_training_data_help": "Des extraits anonymisés peuvent aider à améliorer la reconnaissance automatique."
+    "purpose_training_data_help": "Des extraits anonymisés peuvent aider à améliorer la reconnaissance automatique.",
+    "overviewOpen": "Consentements par personne et usage",
+    "overviewTitle": "Consentements de l'équipe",
+    "player": "Joueur·euse",
+    "countOf": "{n} sur {total}",
+    "state_granted": "donné",
+    "state_refused": "refusé",
+    "state_missing": "manquant"
   },
   "members": {
     "makeAdmin": "Nommer admin du club",
@@ -2638,5 +2648,37 @@
     "note": "Note",
     "save": "Enregistrer",
     "cancel": "Annuler"
+  },
+  "accountLink": {
+    "title": "{n, plural, one {1 compte sans entrée dans l'effectif} other {# comptes sans entrée dans l'effectif}}",
+    "hint": "Sans lien, ces joueur·euses ne voient ni rendez-vous ni leurs scènes.",
+    "formFor": "Lier {name}",
+    "entry": "Entrée de l'effectif",
+    "pick": "Choisir une entrée",
+    "link": "Lier",
+    "linked": "Compte : {name}",
+    "unlink": "Délier"
+  },
+  "seasonLine": {
+    "title": "Saison",
+    "notFound": "Pas de saison pour cette personne.",
+    "summary": "{matches, plural, one {1 match joué} other {# matchs joués}}, impliqué·e dans {involved}, présent·e {present}×",
+    "goals": "Buts",
+    "shots": "Tirs",
+    "shootingPct": "Réussite",
+    "sevenM": "7 m",
+    "assists": "Passes déc.",
+    "turnovers": "Pertes",
+    "suspensions": "2 min",
+    "saves": "Arrêts",
+    "faced": "Tirs cadrés",
+    "savePct": "Taux d'arrêts",
+    "matches": "Matchs de la saison",
+    "match": "Match",
+    "result": "Résultat",
+    "home": "contre {opponent}",
+    "away": "à l'extérieur chez {opponent}",
+    "noMatches": "Pas encore de match cette saison.",
+    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies."
   }
 }

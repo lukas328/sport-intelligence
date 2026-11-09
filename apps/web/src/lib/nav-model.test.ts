@@ -72,4 +72,9 @@ describe("navigation model", () => {
     expect(destOf("/app/o/opponents/x", "staff")).toBe("matches");
     expect(sectionOf("/app/o/opponents/x")).toBe("fixtures");
   });
+
+  it("keeps the squad highlighted on a player's season line", () => {
+    expect(destOf("/app/o/teams/00000000-0000-4000-8000-000000000001/players/x", "staff")).toBe("team");
+    expect(sectionOf("/app/o/teams/00000000-0000-4000-8000-000000000001/players/x")).toBe("roster");
+  });
 });

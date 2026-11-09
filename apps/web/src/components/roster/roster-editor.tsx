@@ -2,7 +2,10 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AccountLine, UnlinkedAccounts, useTeamMembers } from "./account-link";
+import { ConsentOverview } from "./consent-overview";
 import { StatusEditor, StatusLine } from "./player-status";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +64,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   const [editing, setEditing] = useState(false);
   // the player whose status (injured, absent) is being set
   const [statusFor, setStatusFor] = useState<string | null>(null);
+  const teamMembers = useTeamMembers(orgId, teamId, canEdit);
   const formRef = useRef<HTMLFormElement>(null);
 
   const add = useMutation({
@@ -217,6 +221,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                 </p>
               );
             })()}
+            {canEdit && teamMembers.data && <UnlinkedAccounts orgId={orgId} teamId={teamId} entries={entries} members={teamMembers.data} rosterKey={key} />}
             {/* before filming: who still lacks a consent, in one sentence (staff only) */}
             {canEdit && (() => {
               const missing = entries.filter((p) => !p.consent_complete);
@@ -233,6 +238,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                 </p>
               );
             })()}
+            {canEdit && <ConsentOverview orgId={orgId} teamId={teamId} seasonId={seasonId} />}
             {GROUPS.map(([g, positions]) => {
               const members = entries.filter((p) => (g === "other" ? !ALL_POSITIONS.includes(p.main_position ?? "") : (positions as readonly string[]).includes(p.main_position ?? "")));
               if (members.length === 0) return null;
@@ -250,7 +256,16 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[1.0625rem] font-semibold">
-                    {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                    {/* staff open a player's season line from the name */}
+                    {canEdit ? (
+                      <Link href={`/app/${orgId}/teams/${teamId}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
+                        {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                      </Link>
+                    ) : (
+                      <>
+                        {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                      </>
+                    )}
                   </span>
                   <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
                     {p.main_position && (
@@ -300,6 +315,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                     <Trash2 aria-hidden />
                   </Button>
                 )}
+                {canEdit && statusFor === p.player_id && teamMembers.data && <AccountLine orgId={orgId} teamId={teamId} entry={p} members={teamMembers.data} rosterKey={key} />}
                 {canEdit && statusFor === p.player_id && (
                   <StatusEditor
                     orgId={orgId}

@@ -496,3 +496,17 @@ Fixed:
 Not changed: the player who saw no dates had an account that was not linked to a squad entry
 (test data); the US date format comes from the emulated browser's language (the field follows
 it, see batch 3).
+
+## Accounts, consents and the season line (UI session, 2026-11-10, after PRs 28 and 29)
+
+- Invitations: for players and goalkeepers the form offers the free squad entries ("Im Kader",
+  default "später verknüpfen"), as for a parent's child.
+- Squad: "1 Konto ohne Kadereintrag" lists team members (players, goalkeepers) whose account
+  belongs to no entry, each with the free entries and "Verknüpfen" (the entry with the same name
+  is preselected); a row's panel shows "Konto: …" with "Lösen".
+- Consents: "Einwilligungen pro Person und Zweck" under the consent line folds out a table, per
+  purpose "n von m", per player given, refused or missing (coaches, team managers, admins).
+- Season line: `teams/{team}/players/{player}` from the name in the squad (staff): totals as one
+  printed row and a table per played match; every count leads to the scene search filtered by
+  player and match (the search now reads `player` and `match` from the URL). Goalkeepers get
+  saves, shots faced, save rate and 7 m. Not involved matches are muted.

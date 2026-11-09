@@ -125,4 +125,36 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expect(assignment.getByTestId("assignment-progress")).toHaveText("0 von 1 erledigt");
   await expect(assignment.getByTestId("assignment-open")).toHaveText("Noch offen: Mia Muster");
   await expectAccessible(page);
+
+  // the squad: Mia's account belongs to no entry yet; the coach links it, sees it, and unlinks it
+  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  const unlinked = page.getByTestId("unlinked-accounts");
+  await expect(unlinked).toContainText("1 Konto ohne Kadereintrag");
+  const linkForm = unlinked.getByRole("form", { name: "Mia Muster verknüpfen" });
+  await linkForm.getByLabel("Kadereintrag").selectOption({ label: "#9 Lea Beispiel" });
+  await linkForm.getByRole("button", { name: "Verknüpfen" }).click();
+  await expect(unlinked).toHaveCount(0);
+  await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
+  await expect(lea.getByTestId("account-line")).toContainText("Konto: Mia Muster");
+  await lea.getByRole("button", { name: "Lösen" }).click();
+  await expect(page.getByTestId("unlinked-accounts")).toContainText("Mia Muster");
+
+  // consents per person and purpose, before filming
+  await page.getByText("Einwilligungen pro Person und Zweck").click();
+  const consents = page.getByTestId("consent-overview");
+  await expect(consents.getByRole("columnheader", { name: /Videoanalyse im Team/ })).toContainText("0 von 1");
+  await expect(consents.getByRole("row", { name: /Lea Beispiel/ })).toContainText("fehlt");
+  await expectAccessible(page);
+
+  // the invitation offers the free squad entry for a player
+  await page.goto(`/app/${orgId}/settings`);
+  const invite = page.getByRole("form", { name: "Person einladen" });
+  await expect(invite.getByLabel("Im Kader").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
+
+  // Lea's season line from her name in the squad: no played match yet
+  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  await page.getByRole("link", { name: "Lea Beispiel" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "#9 Lea Beispiel" })).toBeVisible();
+  await expect(page.getByText("Noch keine Spiele in dieser Saison.")).toBeVisible();
+  await expectAccessible(page);
 });

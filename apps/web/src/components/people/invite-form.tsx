@@ -39,10 +39,12 @@ export function InviteForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [team, setTeam] = useState(teams[0]?.id ?? "org");
   const [role, setRole] = useState<string>("player");
-  // parents are invited for one child of the team roster (guardianship)
+  // parents are invited for one child of the team roster (guardianship); players and goalkeepers
+  // for their own entry, so they see their dates and scenes from the first sign-in
+  const linksEntry = role === "parent" || role === "player" || role === "goalkeeper";
   const children = useQuery({
     queryKey: ["invite-children", orgId, team],
-    enabled: role === "parent" && team !== "org",
+    enabled: linksEntry && team !== "org",
     queryFn: async () => {
       const p = { org_id: orgId, team_id: team };
       const info = (await api.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: p } })).data;
@@ -68,6 +70,7 @@ export function InviteForm({
             team_id: target,
             team_role: String(f.get("role")) as (typeof TEAM_ROLES)[number],
             ...(f.get("role") === "parent" && f.get("child") ? { player_id: String(f.get("child")) } : {}),
+            ...((f.get("role") === "player" || f.get("role") === "goalkeeper") && f.get("entry") ? { player_id: String(f.get("entry")) } : {}),
           };
     setBusy(true);
     const { error } = await api.POST("/v1/orgs/{org_id}/invitations", { params: { path: { org_id: orgId } }, body });
@@ -107,6 +110,19 @@ export function InviteForm({
                 {c.first_name} {c.last_name}
               </option>
             ))}
+          </Select>
+        )}
+        {(role === "player" || role === "goalkeeper") && team !== "org" && (children.data ?? []).some((c) => !c.has_account) && (
+          <Select label={t("invite.entry")} name="entry" defaultValue="" hint={t("invite.entryHint")}>
+            <option value="">{t("invite.entryLater")}</option>
+            {(children.data ?? [])
+              .filter((c) => !c.has_account)
+              .map((c) => (
+                <option key={c.player_id} value={c.player_id}>
+                  {c.jersey_number ? `#${c.jersey_number} ` : ""}
+                  {c.first_name} {c.last_name}
+                </option>
+              ))}
           </Select>
         )}
       </div>

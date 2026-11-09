@@ -200,7 +200,10 @@
     "status_expired": "Diese Einladung ist abgelaufen.",
     "notFound": "Diese Einladung gibt es nicht.",
     "child": "Kind",
-    "childHint": "Eltern sehen nur Inhalte ihres eigenen Kindes und verwalten dessen Einwilligungen."
+    "childHint": "Eltern sehen nur Inhalte ihres eigenen Kindes und verwalten dessen Einwilligungen.",
+    "entry": "Im Kader",
+    "entryLater": "Noch nicht im Kader / später verknüpfen",
+    "entryHint": "Verknüpft sieht die Person ihre Termine, Aufgaben und Szenen ab dem ersten Login."
   },
   "roles": {
     "org_admin": "Vereinsadmin",
@@ -1407,7 +1410,14 @@
     "purpose_public_profile": "Öffentliches Profil",
     "purpose_public_profile_help": "Ein Profil mit ausgewählten Szenen und Zahlen darf öffentlich sein.",
     "purpose_training_data": "Verbesserung der Erkennung",
-    "purpose_training_data_help": "Anonymisierte Ausschnitte dürfen helfen, die automatische Erkennung zu verbessern."
+    "purpose_training_data_help": "Anonymisierte Ausschnitte dürfen helfen, die automatische Erkennung zu verbessern.",
+    "overviewOpen": "Einwilligungen pro Person und Zweck",
+    "overviewTitle": "Einwilligungen des Teams",
+    "player": "Spieler/in",
+    "countOf": "{n} von {total}",
+    "state_granted": "erteilt",
+    "state_refused": "abgelehnt",
+    "state_missing": "fehlt"
   },
   "members": {
     "makeAdmin": "Zum Vereinsadmin machen",
@@ -2638,5 +2648,37 @@
     "note": "Notiz",
     "save": "Speichern",
     "cancel": "Abbrechen"
+  },
+  "accountLink": {
+    "title": "{n, plural, one {1 Konto ohne Kadereintrag} other {# Konten ohne Kadereintrag}}",
+    "hint": "Ohne Verknüpfung sehen diese Spieler/innen keine Termine und keine eigenen Szenen.",
+    "formFor": "{name} verknüpfen",
+    "entry": "Kadereintrag",
+    "pick": "Eintrag wählen",
+    "link": "Verknüpfen",
+    "linked": "Konto: {name}",
+    "unlink": "Lösen"
+  },
+  "seasonLine": {
+    "title": "Saisonverlauf",
+    "notFound": "Für diese Person gibt es keinen Saisonverlauf.",
+    "summary": "{matches, plural, one {1 Spiel} other {# Spiele}} gespielt, an {involved} beteiligt, {present}× anwesend",
+    "goals": "Tore",
+    "shots": "Würfe",
+    "shootingPct": "Wurfquote",
+    "sevenM": "7 m",
+    "assists": "Assists",
+    "turnovers": "Fehler",
+    "suspensions": "2 Min",
+    "saves": "Paraden",
+    "faced": "Würfe aufs Tor",
+    "savePct": "Paradenquote",
+    "matches": "Spiele der Saison",
+    "match": "Spiel",
+    "result": "Resultat",
+    "home": "gegen {opponent}",
+    "away": "auswärts bei {opponent}",
+    "noMatches": "Noch keine Spiele in dieser Saison.",
+    "source": "Aus den Matchberichten und dem Erfassten, wie auf den Matchseiten. Spielminuten werden nicht erfasst."
   }
 }

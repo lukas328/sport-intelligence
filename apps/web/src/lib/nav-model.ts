@@ -59,6 +59,8 @@ const SECTION_OF_PAGE: Record<string, Section> = {
   // the official data and join requests change the squad
   official: "roster",
   "join-requests": "roster",
+  // a player's season line is opened from the squad
+  players: "roster",
   season: "season",
   matrix: "season",
   assistant: "season",
@@ -93,7 +95,7 @@ export function destOf(path: string, mode: Mode): Dest | null {
   if (["training", "assignments", "drills"].includes(first)) return staff ? "training" : "today";
   if (first === "plays") return staff ? "training" : "team";
   if (first === "schedule") return staff ? "team" : "dates";
-  if (["official", "join-requests"].includes(first)) return "team";
+  if (["official", "join-requests", "players"].includes(first)) return "team";
   if (["season", "matrix", "assistant", "library", "playlists", "presentations", "search"].includes(first)) return staff ? "matches" : "team";
   return null;
 }
