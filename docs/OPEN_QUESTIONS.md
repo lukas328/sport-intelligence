@@ -41,11 +41,11 @@ Each question has the **assumption** I work with until it is answered. Status: o
   (e.g. youth tournaments)?
 
 ## Infrastructure
-- **Q-INFRA-1 Hosting provider.** *Answered 2026-11-03/04 (ADR 002):* EU is enough, cost first.
-  Object storage: Cloudflare R2 with EU jurisdiction. App, Postgres, Redis, secrets and monitoring:
-  Azure West Europe. Still open: **GPU** (CPU workers first, about 2 x video length; later Azure
-  serverless GPU if available in an EU region, or an EU GPU provider with DPA). Owner checklist:
-  `docs/LIVEGANG.md`.
+- **Q-INFRA-1 Hosting provider.** *Answered 2026-11-03/04 (ADR 002), region updated 2026-11-09 (ADR 025):*
+  EU is enough, cost first. Object storage: Cloudflare R2 with EU jurisdiction. App, Postgres, Redis,
+  secrets and monitoring: Azure Container Apps and Postgres Flexible Server, Switzerland North. Still
+  open: **GPU** (CPU workers first, about 2 x video length; later an EU/CH GPU provider with DPA).
+  Owner checklists: `docs/LIVEGANG.md`, `docs/plans/produktion-checkliste.md`.
 - **Q-INFRA-2 GitHub repository and org**, CI secrets, preview deploy target. *Assumption:* GitHub Actions,
   preview job disabled until hosting exists (`vars.PREVIEW_DEPLOY_ENABLED`).
 - **Q-INFRA-3 E-mail provider** Postmark vs Resend (ADR in M1). *Assumption:* Postmark (EU data residency to verify).

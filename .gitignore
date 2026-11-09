@@ -42,3 +42,10 @@ playwright-report/
 test-results/
 .DS_Store
 .ux-artifacts/
+
+# Terraform (infra/terraform)
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+backend.hcl

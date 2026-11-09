@@ -1,3 +1,6 @@
 # Terraform
 
-Production infrastructure, one module per provider with identical outputs. ADR 002 is accepted for storage (Cloudflare R2, EU); the app provider is still open (OPEN_QUESTIONS Q-INFRA-1).
+Production infrastructure, one module per provider with identical outputs.
+
+- Storage: Cloudflare R2 with EU jurisdiction (ADR 002), buckets created by the migration job.
+- App, Postgres, Redis, secrets: [`azure/`](azure/README.md) (ADR 025).

@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -9,7 +10,8 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   reactStrictMode: true,
   transpilePackages: ["@handball/court", "@handball/api-client", "@handball/tactics", "@handball/client-core"],
-  outputFileTracingRoot: new URL("../../", import.meta.url).pathname,
+  // fileURLToPath, not URL.pathname: on Windows pathname is "/C:/..." and Turbopack rejects it
+  outputFileTracingRoot: fileURLToPath(new URL("../../", import.meta.url)),
   async headers() {
     return [
       {
