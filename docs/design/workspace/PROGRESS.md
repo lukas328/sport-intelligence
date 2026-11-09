@@ -143,8 +143,8 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
   "Fernwurf / leeres Tor" mixes two situations; the goal picture adds up to 35 of 39 shots; sprint
   counts and top speeds of 31 to 32 km/h from one minute look implausible.
 
-- Team by side on the axis still reads weakly (2): a lane label per side ("H1" / opponent) would
-  make it explicit.
+- Done (2026-11-09): the sided lanes carry the team names at their right end (own above, opponent
+  below); the legend in the caption stays for screen readers.
 - Done (UI session, 2026-11-09): the control bar shows the match clock once the throw-off is set;
   on phones it sits under the picture instead of over it.
 - Event keys are English mnemonics (G, S, M, P, T); German letters would collide (T for Tor and

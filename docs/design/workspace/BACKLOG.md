@@ -12,7 +12,7 @@ Bugs reported from the test environment on Azure always go first. `[x]` = done.
    decision); priority 3 of the handover (one-click confirmation on real footage).
 3. [x] Gegner: the back link leads to the fixtures and the header follows the other pages
    (eyebrow, title); the zone split stays with the analysis session.
-4. [ ] Timeline: a label per side on the sided lanes (own team above, opponent below), not only
+4. [x] Timeline: a label per side on the sided lanes (own team above, opponent below), not only
    in the legend.
 5. [ ] Check and close: "Teilen" and "…" on phones (they share the row with the tabs since the
    identity rework); search hits without a video window ("ohne Video" handles them).
