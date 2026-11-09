@@ -117,13 +117,19 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 
 - [x] Web texts for the new notification kinds (join and access requests, official suggestions,
   official report), and a plain fallback for any kind without a text.
-- [ ] Official team search, claim, join requests and club verification: screens to build.
+- [x] Official team search and claim: onboarding starts with "Mannschaft suchen" (grouped by club,
+  take over, ask for access, join as a player; a club by hand stays one click away).
+- [x] Suggestion inbox `/teams/{team}/official`: squad to confirm with numbers (duplicates flagged,
+  players without a game unticked), "Statistik anzeigen" (`roster_stats`), reports to import,
+  schedule changes with the plan lock, the table; a line on the squad page leads there.
+- [ ] Join requests (`/teams/{team}/join-requests`), access requests
+  (`/settings/access-requests`) and the verification banner: the notification links point there.
 - [x] `PUT /kickoff` with `clock_s` for clips that start mid-half: "Uhr eintragen" in the throw-off step
   ("Spieluhr zeigt hier 12:40" at the paused moment, `lib/match-workflow.ts` `parseClock`, tested).
 - [x] Shot zone split: "Fernwurf" and "Leeres Tor" (`empty_goal`) in the web texts.
 - [ ] Search hits outside the video come with null windows ("ohne Video" already handles it).
-- [ ] `no-video` errors on clip slides; nuLiga/HLA report links; referee kit; roster suggestion
-  stats with the per-team `roster_stats` toggle.
+- [x] nuLiga/HLA report links (hint and error text); `roster_stats` toggle (in the inbox).
+- [ ] `no-video` errors on clip slides; referee kit.
 
 - [x] Shot candidates (`shot-candidates`): a "Würfe" tool beside the events. With a report most
   moments come with its entry: Enter takes it (player and outcome pinned to the video); otherwise

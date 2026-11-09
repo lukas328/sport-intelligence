@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { OfficialTeamSearch } from "./team-search";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 
 type Org = Schemas["OrgOut"];
@@ -32,6 +33,11 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
   // the club colour as it is being picked: the welcome band shows it right away
   const [colour, setColour] = useState(existingOrg?.primary_color ?? "#0b6bcb");
   const [name, setName] = useState(existingOrg?.name ?? "");
+  // a new coach first looks for the team in the official data; a club by hand on request
+  const [manual, setManual] = useState(false);
+  // a team taken over from the official data: club and team are there, the squad is next
+  const [claimed, setClaimed] = useState(false);
+  const shownStep = claimed ? 2 : step;
 
   async function createOrg(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -97,12 +103,12 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
       <header className="club relative overflow-hidden rounded-lg bg-club px-6 pt-6 pb-5 text-club-ink transition-colors duration-300 sm:px-8 sm:pt-8" style={clubStyle(colour) as CSSProperties}>
         <CourtLines className="absolute right-0 bottom-0 hidden aspect-square h-full sm:block" />
         <div className="relative">
-          <p className="text-[0.9375rem] font-semibold">{t("onboarding.progress", { step: step + 1, total: STEPS.length })}</p>
+          <p className="text-[0.9375rem] font-semibold">{t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}</p>
           <h1 className="mt-1 text-[2.5rem] leading-[0.95] sm:text-5xl">{name.trim() || t("onboarding.title")}</h1>
-          <ol className="mt-6 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: step + 1, total: STEPS.length })}>
+          <ol className="mt-6 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}>
             {STEPS.map((s, i) => (
-              <li key={s} aria-current={i === step ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= step ? "font-semibold" : "opacity-75"}`}>
-                <span aria-hidden className={`block h-1 rounded-full ${i <= step ? "bg-club-ink" : "bg-club-ink/30"}`} />
+              <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= shownStep ? "font-semibold" : "opacity-75"}`}>
+                <span aria-hidden className={`block h-1 rounded-full ${i <= shownStep ? "bg-club-ink" : "bg-club-ink/30"}`} />
                 {t(`onboarding.${s}`)}
               </li>
             ))}
@@ -111,7 +117,9 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
       </header>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
 
-      {step === 0 && (
+      {step === 0 && !manual && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club) => (setName(club), setClaimed(true))} />}
+
+      {step === 0 && manual && (
         <Card>
           <form onSubmit={createOrg} className="space-y-4" noValidate>
             <p className="text-muted">{t("onboarding.clubIntro")}</p>

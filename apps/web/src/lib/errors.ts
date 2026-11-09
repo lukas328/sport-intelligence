@@ -59,6 +59,9 @@ export const KNOWN_ERRORS = [
   "report-unavailable",
   "already-a-goal",
   "invalid-clock",
+  "official-unavailable",
+  "query-too-short",
+  "join-request-pending",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";
