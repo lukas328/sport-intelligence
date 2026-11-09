@@ -14,9 +14,9 @@ Segmente, deren JSON in einem Eingabe-Dataset unter `segs/` liegt (Auftrag 3 gib
 Ergebnis als Eingabe mit). Bei "budget"/"spend limit" abbrechen und melden.
 
 ### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
-- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03,handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 10`
-- Das alte Ergebnis als Eingabe sorgt dafür, dass die 89 fertigen l02-Segmente übersprungen werden
-  (Log-Zeile: "200 segments, 89 already done in an input result").
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`
+- `--resume-from` übernimmt die 189 fertigen Segmente (zuerst vom Modal-Volume, sonst aus dem
+  Kaggle-Dataset); das neue Dataset enthält dann alle 300 zusammen.
 - Dauer etwa 6.5 h, Kosten etwa 4.3 USD.
 
 ### 4. OWLv2 l04 (100 Segmente)
