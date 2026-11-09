@@ -8,7 +8,7 @@ Bugs reported from the test environment on Azure always go first. `[x]` = done.
 **A. Now (UI only, the API is there)**
 1. [x] Matrix: season choice ("Saison": this and last, one season, all; e2e in `data.spec.ts`). The API reads `season_ids` (top level of the request, default the
    current and the previous season) since 95132d3; the note further down is outdated.
-2. [ ] Würfe: full-screen review like the goal candidates (the clip plays itself, one key per
+2. [x] Würfe: full-screen review like the goal candidates (the clip plays itself, one key per
    decision); priority 3 of the handover (one-click confirmation on real footage).
 3. [ ] Gegner: the back link leads to the fixtures and the header follows the other pages
    (eyebrow, title); the zone split stays with the analysis session.

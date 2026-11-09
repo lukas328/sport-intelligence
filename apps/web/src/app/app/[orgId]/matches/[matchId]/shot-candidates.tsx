@@ -53,6 +53,7 @@ export function ShotCandidatesPanel({
   onActive,
   onSeek,
   onSetKickoff,
+  focusMode = false,
 }: {
   orgId: string;
   matchId: string;
@@ -66,6 +67,8 @@ export function ShotCandidatesPanel({
   onSeek?: (ms: number) => void;
   /** set when the throw-off is missing: the game times come from the report alone */
   onSetKickoff?: () => void;
+  /** full-screen review: each moment's clip plays when it comes up, the keys work right away */
+  focusMode?: boolean;
 }) {
   const t = useTranslations("shotCandidates");
   const te = useTranslations("events");
@@ -131,10 +134,26 @@ export function ShotCandidatesPanel({
     onActive?.(up?.status === "open" ? up.id : null);
   }, [up?.id, up?.status]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => onActive?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
-  // each moment that comes up is shown in the video, so the coach looks before deciding
+  // each moment that comes up is shown in the video, so the coach looks before deciding; in the
+  // full-screen review its clip plays by itself
   useEffect(() => {
-    if (up && up.status === "open") onSeek?.(up.start_ms);
-  }, [up?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!up || up.status !== "open") return;
+    if (focusMode) onClip(up.start_ms, up.end_ms);
+    else onSeek?.(up.start_ms);
+  }, [up?.id, focusMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (focusMode) rowRefs.current[Math.min(focus, rows.length - 1)]?.focus();
+  }, [focusMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  const undoRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    if (!focusMode) return;
+    // the last moment decided leaves nothing focused: U still takes it back
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if ((e.key === "u" || e.key === "U") && (document.activeElement === document.body || document.activeElement == null)) undoRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [focusMode]);
   if (!list || list.counts.total === 0) return null;
 
   const active = Math.min(focus, rows.length - 1);
@@ -180,6 +199,7 @@ export function ShotCandidatesPanel({
     if (!body) return setError(outcome === "accept" ? null : "needSide");
     decide(c, index, body);
   }
+  undoRef.current = () => undoLast();
   function undoLast() {
     const id = lastDecided.current;
     if (!id) return;

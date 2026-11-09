@@ -106,14 +106,22 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 12:52: Tor Herren 1.");
   expect(reviews.at(-1)).toEqual({ status: "confirmed", side: "own", outcome: "goal" });
 
+  // the last one in the full-screen review: its clip plays by itself, the keys work at once;
   // X: not a shot; U takes it back
   await expect(rows).toHaveCount(1);
-  await rows.first().focus();
+  await page.getByTestId("shots-review-open").click();
+  const review = page.getByRole("dialog", { name: "Würfe prüfen" });
+  await expect(review).toContainText("1 offen");
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused)).toBe(true);
   await page.keyboard.press("x");
   await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 13:00: Kein Wurf.");
+  await expect(review).toContainText("0 offen");
   await expect(panel.getByText("Alle Würfe sind geprüft.")).toBeVisible();
   await panel.getByRole("button", { name: "Rückgängig", exact: true }).click();
   await expect(rows).toHaveCount(1);
   expect(reviews.at(-1)).toEqual({ status: null });
   await expectAccessible(page);
+  // Escape leaves the full screen
+  await page.keyboard.press("Escape");
+  await expect(review).toHaveCount(0);
 });

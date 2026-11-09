@@ -114,6 +114,8 @@ export function Workspace({
   const [goalList, setGoalList] = useState<"candidates" | "report" | null>(null);
   // review mode: the workspace full screen, one goal candidate after the other
   const [reviewing, setReviewing] = useState(false);
+  // what the full-screen review goes through: goal candidates or shot moments
+  const [reviewKind, setReviewKind] = useState<"goals" | "shots">("goals");
   const [activeCandidate, setActiveCandidate] = useState<string | null>(null);
   const [activeShot, setActiveShot] = useState<string | null>(null);
   useEffect(() => {
@@ -375,8 +377,9 @@ export function Workspace({
   };
   const openCandidates = candidates.data && candidates.data.counts.total > 0;
   const list = goalList ?? (openCandidates || !hasReport ? "candidates" : "report");
-  const shown: Pane = reviewing ? "goals" : chosen;
+  const shown: Pane = reviewing ? reviewKind : chosen;
   const openNow = candidates.data?.counts.open_by_rate[String(rate)] ?? 0;
+  const shotsOpen = shotCandidates.data?.counts.open_by_rate[String(shotCandidates.data.default_rate)] ?? 0;
   return (
     <div
       className={cn("space-y-5", reviewing && "fixed inset-0 z-[60] !m-0 h-dvh overflow-y-auto bg-background p-4 sm:p-6 lg:px-10")}
@@ -387,11 +390,11 @@ export function Workspace({
       {reviewing ? (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-foreground/15 pb-3">
           <h2 id={`${paneId}-review`} className="font-display text-3xl">
-            {t("workflow.goals")}
+            {reviewKind === "shots" ? t("shotCandidates.title") : t("workflow.goals")}
           </h2>
           <span className="text-muted">{`${teamName} ${t("matches.vs")} ${oppName}`}</span>
           <span className="ml-auto font-score text-xl tabular-nums" aria-live="polite">
-            {t("workflow.reviewLeft", { n: openNow })}
+            {t("workflow.reviewLeft", { n: reviewKind === "shots" ? shotsOpen : openNow })}
           </span>
           <Button variant="secondary" onClick={() => setReviewing(false)} data-testid="review-close">
             <X aria-hidden />
@@ -587,7 +590,7 @@ export function Workspace({
               />
             )}
             {list === "candidates" && openCandidates && !reviewing && openNow > 0 && (
-              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setGoalList("candidates"), setReviewing(true))} data-testid="review-open">
+              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setGoalList("candidates"), setReviewKind("goals"), setReviewing(true))} data-testid="review-open">
                 <Maximize2 aria-hidden />
                 {t("workflow.reviewOpen")}
               </Button>
@@ -617,12 +620,26 @@ export function Workspace({
           </div>
         )}
         {shown === "shots" && staff && (
-          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names}
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            {!reviewing && shotsOpen > 0 && (
+              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setReviewKind("shots"), setReviewing(true))} data-testid="shots-review-open">
+                <Maximize2 aria-hidden />
+                {t("workflow.reviewOpen")}
+              </Button>
+            )}
+            <ShotCandidatesPanel
+              orgId={orgId}
+              matchId={match.id}
+              ownName={teamName}
+              oppName={oppName}
+              names={names}
               onClip={playClip}
               onActive={setActiveShot}
               onSeek={seekPaused}
               onSetKickoff={match.kickoff_ms?.["1"] == null ? () => setPane("kickoff") : undefined}
+              focusMode={reviewing}
             />
+          </div>
         )}
         {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
         {shown === "feedback" && staff && (
