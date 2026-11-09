@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09T11:09:39",
+ "generated": "2026-11-09T20:10:51",
  "source": "ml/data/match_official.py",
  "summary": {
   "games": 247,
@@ -251,7 +251,7 @@
    ],
    "date": "2022-11-17",
    "date_kind": "exact",
-   "info_json": true,
+   "info_json": false,
    "game_id": 447179,
    "match": "search",
    "match_score": 1.0,
@@ -631,7 +631,7 @@
    ],
    "date": "2023-09-23",
    "date_kind": "exact",
-   "info_json": true,
+   "info_json": false,
    "game_id": 453441,
    "match": "search",
    "match_score": 1.0,
