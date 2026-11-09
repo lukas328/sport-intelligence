@@ -4,14 +4,23 @@
  */
 export const SIMILAR_DELTA_E = 25;
 
-export type KitKey = "own" | "own_gk" | "opponent" | "opponent_gk";
+export type TeamKitKey = "own" | "own_gk" | "opponent" | "opponent_gk";
+/** The referee kit is optional (null: unknown); the analysis leaves it out when it is close to a
+ * team's field kit. */
+export type KitKey = TeamKitKey | "referee";
+export type Kits = Record<TeamKitKey, string> & { referee: string | null };
 export const KIT_PAIRS: [KitKey, KitKey][] = [
   ["own", "opponent"],
   ["own", "opponent_gk"],
   ["own_gk", "opponent"],
   ["own", "own_gk"],
   ["opponent", "opponent_gk"],
+  ["own", "referee"],
+  ["opponent", "referee"],
 ];
+
+/** What the colour picker opens on while the referee kit is unknown: referees mostly wear yellow. */
+export const REFEREE_PICK = "#facc15";
 
 const lin = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 const f = (t: number) => (t > (6 / 29) ** 3 ? Math.cbrt(t) : t / (3 * (6 / 29) ** 2) + 4 / 29);
@@ -31,6 +40,11 @@ export function deltaE(a: string, b: string): number {
   return Math.hypot(la[0] - lb[0], la[1] - lb[1], la[2] - lb[2]);
 }
 
-export function kitWarnings(kits: Record<KitKey, string>): [KitKey, KitKey][] {
-  return KIT_PAIRS.filter(([a, b]) => deltaE(kits[a], kits[b]) < SIMILAR_DELTA_E);
+/** Pairs of known kits whose colours are too similar (unknown kits are left out). */
+export function kitWarnings(kits: Partial<Record<KitKey, string | null>>): [KitKey, KitKey][] {
+  return KIT_PAIRS.filter(([a, b]) => {
+    const x = kits[a];
+    const y = kits[b];
+    return !!x && !!y && deltaE(x, y) < SIMILAR_DELTA_E;
+  });
 }

@@ -109,7 +109,8 @@ Die Wurfzonen sind fest definiert und in `packages/court/zones.ts` und `zones.py
 - **Kreis links, Mitte, rechts**: am oder im 6-m-Raum
 - **7 m**
 - **Gegenstoss**: Wurf innerhalb von x Sekunden nach Ballgewinn, unabhängig von der Position (Parameter, Standard 6 s)
-- **Fernwurf / leeres Tor**: Wurf aus über 15 m Entfernung
+- **Fernwurf**: Wurf aus über 15 m Entfernung
+- **Leeres Tor**: Wurf auf das leere Tor (Wurfart `empty_net`), aus jeder Entfernung
 
 ### 4.4 Torzonen
 Das Tor ist in ein 3×3-Raster geteilt: `TL TC TR / ML MC MR / BL BC BR`. Gespeichert wird **immer aus Sicht des Werfers**. Die UI kann auf die Sicht des Torhüters umschalten (gespiegelt). Diese Konvention wird überall einheitlich verwendet und dokumentiert.

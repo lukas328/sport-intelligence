@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 from handball_court.zones import shot_zone
@@ -11,9 +11,14 @@ from handball_metrics.model import Event, EventType, Side
 from handball_metrics.xg import VERSION as XG_VERSION
 from handball_metrics.xg import expected_goal
 
-METRICS_VERSION = "0.2.0"  # bump on any change of definitions: invalidates stats caches
+METRICS_VERSION = "0.3.0"  # bump on any change of definitions: invalidates stats caches
 
 SUSPENSION_S = 120
+
+OFFICIAL = "official_report"
+# goals seen on video (apps/api services/official_report.AUTO_GOALS)
+AUTO_GOALS = ("heuristic", "model", "scoreboard_ocr", "goal_candidate")
+GOAL_WINDOW_S = 20.0  # as official_report.MATCH_WINDOW_S: the same goal, same side
 
 
 def _ratio(a: float, b: float) -> float | None:
@@ -34,6 +39,9 @@ class _Clock:
 
 
 def zone_of(e: Event) -> str | None:
+    if e.shot_type == "empty_net":
+        # its own zone since metrics 0.3 (was part of "long_range"): rows stored before map here
+        return "empty_goal"
     if e.shot_zone:
         return e.shot_zone
     if e.shot_type == "penalty":
@@ -41,6 +49,69 @@ def zone_of(e: Event) -> str | None:
     if e.x is not None and e.y is not None:
         return shot_zone(e.x, e.y, fast_break=e.shot_type == "fast_break")
     return None
+
+
+def _apart_s(a: Event, b: Event) -> float | None:
+    if a.clock_s is not None and b.clock_s is not None:
+        return abs(a.clock_s - b.clock_s)
+    if a.t_ms is not None and b.t_ms is not None:
+        return abs(a.t_ms - b.t_ms) / 1000
+    return None
+
+
+def one_source_per_goal(events: list[Event]) -> list[Event]:
+    """Each goal from one source (the rules of official_report.apply, also for goals stored after
+    the import): with an official report, a goal of another source on the same side within
+    GOAL_WINDOW_S of an official goal is that goal (nearest pairs first, one per source and
+    official goal) and does not count again; the official goal takes over what it lacks (shot
+    position, zones, scorer). Automatic goals without an official counterpart count only when the
+    coach confirmed them in the comparison (attributes.review); goals a person entered count."""
+    official = [e for e in events if e.is_goal and e.source == OFFICIAL]
+    if not official:
+        return events
+    others: dict[str, list[Event]] = defaultdict(list)
+    for e in events:
+        if e.is_goal and e.source != OFFICIAL:
+            others[e.source].append(e)
+    drop: set[str] = set()
+    takes: dict[str, list[Event]] = defaultdict(list)
+    for group in others.values():
+        pairs = sorted(
+            (d, i, j)
+            for i, o in enumerate(official)
+            for j, g in enumerate(group)
+            if o.side is g.side and (d := _apart_s(o, g)) is not None and d <= GOAL_WINDOW_S
+        )
+        used_o: set[int] = set()
+        for _, i, j in pairs:
+            g = group[j]
+            if i in used_o or g.id in drop:
+                continue
+            used_o.add(i)
+            drop.add(g.id)
+            takes[official[i].id].append(g)
+    for group in others.values():
+        for g in group:
+            if g.source in AUTO_GOALS and g.attributes.get("review") != "confirmed":
+                drop.add(g.id)
+    out: list[Event] = []
+    for e in events:
+        if e.id in drop:
+            continue
+        # what a person tagged first, then what the video read
+        for g in sorted(takes.get(e.id, []), key=lambda g: g.source in AUTO_GOALS):
+            e = replace(
+                e,
+                x=e.x if e.x is not None else g.x,
+                y=e.y if e.y is not None else g.y,
+                goal_zone=e.goal_zone or g.goal_zone,
+                shot_type=e.shot_type or g.shot_type,
+                shot_zone=e.shot_zone or g.shot_zone,
+                player_id=e.player_id or g.player_id,
+                assist_player_id=e.assist_player_id or g.assist_player_id,
+            )
+        out.append(e)
+    return out
 
 
 def situations(events: list[Event]) -> dict[str, str]:
@@ -70,6 +141,9 @@ def _team_block(
 ) -> dict[str, Any]:
     mine = [e for e in events if e.side is side]
     theirs = [e for e in events if e.side is side.other]
+    # goals alone (score overlay, throw-off heuristic) say nothing about shooting or saving: the
+    # ratios need at least one recorded miss, save, post or block in the match
+    attempts_known = any(e.is_shot and e.outcome != "goal" for e in events)
     shots = [e for e in mine if e.is_shot]
     on_target_shots = [e for e in shots if e.outcome != "blocked"]
     goals = [e for e in shots if e.outcome == "goal"]
@@ -92,16 +166,17 @@ def _team_block(
         by_sit[sit.get(e.id, "unknown")]["shots"] += 1
         by_sit[sit.get(e.id, "unknown")]["goals"] += e.outcome == "goal"
     penalties = [e for e in shots if e.shot_type == "penalty" or zone_of(e) == "penalty"]
-    xg = sum(expected_goal(e.x, e.y, e.shot_type) for e in shots if e.outcome != "blocked")
+    # xG only of the shots on target whose inputs are known; coverage = those / all of them
+    xgs = [x for e in on_target_shots if (x := expected_goal(e.x, e.y, e.shot_type)) is not None]
     return {
         "goals": len(goals),
         "shots": len(on_target_shots),  # excluding blocked shots (BRIEF 4.8)
         "shots_blocked": len(shots) - len(on_target_shots),
         "misses": sum(e.outcome == "miss" for e in shots),
         "posts": sum(e.outcome == "post" for e in shots),
-        "shooting_pct": _ratio(len(goals), len(on_target_shots)),
+        "shooting_pct": _ratio(len(goals), len(on_target_shots)) if attempts_known else None,
         "saves": len(saves),
-        "save_pct": _ratio(len(saves), len(saves) + len(goals_against)),
+        "save_pct": _ratio(len(saves), len(saves) + len(goals_against)) if attempts_known else None,
         "goals_against": len(goals_against),
         "turnovers": len(turnovers),
         "turnovers_by_type": dict(Counter(e.turnover_type or "other" for e in turnovers)),
@@ -122,7 +197,9 @@ def _team_block(
         "by_situation": {
             k: {**v, "pct": _ratio(v["goals"], v["shots"])} for k, v in by_sit.items()
         },
-        "xg": round(xg, 2),
+        "xg": round(sum(xgs), 2),
+        "xg_shots": len(xgs),
+        "xg_coverage": _ratio(len(xgs), len(on_target_shots)),
     }
 
 
@@ -148,6 +225,7 @@ def _players(events: list[Event]) -> dict[str, dict[str, Any]]:
                 "seven_m_goals": 0,
                 "seven_m_shots": 0,
                 "xg": 0.0,
+                "xg_shots": 0,
                 "saves": 0,
             }
         return out[key]
@@ -166,7 +244,10 @@ def _players(events: list[Event]) -> dict[str, dict[str, Any]]:
             r = row(k, e)
             if e.outcome != "blocked":
                 r["shots"] += 1
-                r["xg"] = round(r["xg"] + expected_goal(e.x, e.y, e.shot_type), 3)
+                xg = expected_goal(e.x, e.y, e.shot_type)
+                if xg is not None:
+                    r["xg"] = round(r["xg"] + xg, 3)
+                    r["xg_shots"] += 1
             r["goals"] += e.outcome == "goal"
             r["misses"] += e.outcome == "miss"
             r["posts"] += e.outcome == "post"
@@ -208,6 +289,7 @@ def _players(events: list[Event]) -> dict[str, dict[str, Any]]:
                     "seven_m_goals": 0,
                     "seven_m_shots": 0,
                     "xg": 0.0,
+                    "xg_shots": 0,
                     "saves": 0,
                 }
             out[key]["saves"] += 1
@@ -228,7 +310,8 @@ def _keeper_key(e: Event) -> str:
 def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
     """Goalkeeper module (M5): every shot on target (goal or save) against a keeper, credited to the
     keeper in `attributes` (goalkeeper_id or goalkeeper_number), otherwise to "unknown".
-    GSAx = expected goals against minus goals against (positive = saved more than expected)."""
+    GSAx = expected goals against minus goals against, both over the shots with xG (positive =
+    saved more than expected); `xg_coverage` = shots with xG / shots faced."""
     out: dict[str, dict[str, Any]] = {}
     for e in events:
         if not e.is_shot or e.outcome not in ("goal", "save"):
@@ -245,6 +328,8 @@ def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
                 "saves": 0,
                 "goals_against": 0,
                 "xg_against": 0.0,
+                "xg_shots": 0,
+                "xg_goals_against": 0,
                 "seven_m": {"faced": 0, "saves": 0},
                 "goal_zones": defaultdict(lambda: {"faced": 0, "saves": 0}),
                 "shot_zones": defaultdict(lambda: {"faced": 0, "saves": 0}),
@@ -253,7 +338,11 @@ def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
         k["faced"] += 1
         k["saves"] += saved
         k["goals_against"] += not saved
-        k["xg_against"] += expected_goal(e.x, e.y, e.shot_type)
+        xg = expected_goal(e.x, e.y, e.shot_type)
+        if xg is not None:
+            k["xg_against"] += xg
+            k["xg_shots"] += 1
+            k["xg_goals_against"] += not saved
         if e.shot_type == "penalty":
             k["seven_m"]["faced"] += 1
             k["seven_m"]["saves"] += saved
@@ -264,7 +353,9 @@ def _goalkeepers(events: list[Event]) -> dict[str, dict[str, Any]]:
     for k in out.values():
         k["save_pct"] = _ratio(k["saves"], k["faced"])
         k["xg_against"] = round(k["xg_against"], 2)
-        k["gsax"] = round(k["xg_against"] - k["goals_against"], 2)
+        # over the shots with xG only: goals without a position would count against the keeper
+        k["gsax"] = round(k["xg_against"] - k.pop("xg_goals_against"), 2)
+        k["xg_coverage"] = _ratio(k["xg_shots"], k["faced"])
         k["goal_zones"] = dict(k["goal_zones"])
         k["shot_zones"] = dict(k["shot_zones"])
     return out
@@ -318,6 +409,7 @@ def _timeline(events: list[Event]) -> dict[str, Any]:
 def compute_match_stats(
     events: list[Event], possessions: dict[str, int] | None = None
 ) -> dict[str, Any]:
+    events = one_source_per_goal(events)
     sit = situations(events)
     poss = possessions or {}
     low_conf = [e for e in events if e.confidence < 0.6]
@@ -329,6 +421,8 @@ def compute_match_stats(
         "timeline": _timeline(events),
         "quality": {
             "events": len(events),
+            # false when only goals are known (score overlay): shots, ratios and xG mean nothing
+            "attempts_known": any(e.is_shot and e.outcome != "goal" for e in events),
             "low_confidence": len(low_conf),
             "sources": dict(Counter(e.source for e in events)),
         },

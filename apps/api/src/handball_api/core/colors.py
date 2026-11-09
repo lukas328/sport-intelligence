@@ -14,6 +14,16 @@ KIT_PAIRS = (
     ("own_gk", "opponent"),
     ("own", "own_gk"),
     ("opponent", "opponent_gk"),
+    ("own", "referee"),
+    ("opponent", "referee"),
+)
+
+# the analysis' kit labels and the match fields they come from
+ANALYSIS_KITS = (
+    ("home", "own"),
+    ("home_gk", "own_gk"),
+    ("away", "opponent"),
+    ("away_gk", "opponent_gk"),
 )
 
 
@@ -47,3 +57,19 @@ def kit_warnings(kits: dict[str, str]) -> list[str]:
         for a, b in KIT_PAIRS
         if a in kits and b in kits and delta_e(kits[a], kits[b]) < SIMILAR_DELTA_E
     ]
+
+
+def analysis_kits(kits: dict[str, str | None]) -> dict[str, str]:
+    """Kit colours for the analysis job (match field names as in `KIT_PAIRS`). The referee kit is
+    sent only when it is known and differs from both teams' field kits: a referee colour equal to
+    a team's (black referees, black opponents) makes the analysis call that team's players
+    referees; without it the analysis finds referees by appearance (handball_vision.roles)."""
+    out = {label: str(kits[field]) for label, field in ANALYSIS_KITS if kits.get(field)}
+    referee = kits.get("referee")
+    if referee and all(
+        delta_e(referee, str(kits[team])) >= SIMILAR_DELTA_E
+        for team in ("own", "opponent")
+        if kits.get(team)
+    ):
+        out["referee"] = referee
+    return out

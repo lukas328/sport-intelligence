@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from collections.abc import Callable, Iterator
-from dataclasses import dataclass, field
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from dataclasses import dataclass, field, replace
+from itertools import pairwise
 from pathlib import Path
 from typing import Any, Literal
 
@@ -35,13 +36,22 @@ from handball_vision.detection import (
     Detector,
     MovingBackgroundDetector,
     court_mask,
+    filter_on_court,
     foot_positions,
 )
-from handball_vision.events import EventResult, refine_teams
+from handball_vision.events import EventResult, assign_goalkeepers, refine_teams
 from handball_vision.events import detect as detect_events
 from handball_vision.motion import CameraMotion, estimate_motion
+from handball_vision.numbers import MIN_CONFIDENCE, Reading, split_points, vote
 from handball_vision.physical import physical
-from handball_vision.teams import TeamAssigner
+from handball_vision.reid import Fragment, assign, fragment_roles
+from handball_vision.teams import (
+    TeamAssigner,
+    colour_runs,
+    relabel_by_clusters,
+    side_of,
+    team_centres,
+)
 from handball_vision.tracking import CourtTracker, TrackPoint, stitch
 
 U8 = NDArray[Any]  # images (OpenCV returns loosely typed arrays)
@@ -107,6 +117,11 @@ class AnalysisResult:
                     "observed_share": round(sum(p.observed for p in pts) / len(pts), 3),
                     "team": team.get("label"),
                     "team_confidence": team.get("confidence"),
+                    "number": team.get("number"),
+                    "number_confidence": team.get("number_confidence"),
+                    "number_source": team.get(
+                        "number_source", "read" if team.get("number") is not None else None
+                    ),
                     "physical": physical(
                         np.array([p.frame * 1000 / self.fps for p in pts]),
                         np.array([p.x for p in pts]),
@@ -217,6 +232,15 @@ def prepare_view(path: Path, max_frames: int | None = None) -> CameraMotion:
     return fixed
 
 
+def _people(det: Detector, frame: U8, calib: Calibration) -> list[Detection]:
+    """People on the court in one frame. A learned detector finds everyone in the hall (bench,
+    spectators, people behind the railing); only those standing on the court are kept."""
+    found = det.detect([frame])[0]
+    if det.source == "model":
+        return filter_on_court(calib, found)
+    return [d for d in found if d.cls != "ball"]
+
+
 def _confident_label(
     teams: TeamAssigner, colour: NDArray[np.float64], min_conf: float = 0.25
 ) -> str | None:
@@ -292,7 +316,7 @@ def analyse_video(
         dets: list[Detection] = []
         if n % detect_every == 0:
             t0 = time.perf_counter()
-            dets = [d for d in det.detect([frame])[0] if d.cls != "ball"]
+            dets = _people(det, frame, calib)
             timings["detection"] += time.perf_counter() - t0
         n_dets += len(dets)
         t0 = time.perf_counter()
@@ -307,7 +331,7 @@ def analyse_video(
         timings["tracking"] += time.perf_counter() - t0
         for tp in step:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.samples[tp.track_id].append(feats[tp.det_index])
+                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
         points += step
         n += 1
         if progress and total and n % 100 == 0:
@@ -325,23 +349,76 @@ def _finish(
     timings: dict[str, float],
     source: str,
     extra: dict[str, Any],
+    number_reads: dict[int, list[Reading]] | None = None,
+    vectors: dict[int, list[tuple[int, NDArray[np.float64]]]] | None = None,
+    role_samples: dict[int, list[tuple[int, NDArray[np.float64]]]] | None = None,
+    rosters: dict[str, set[int]] | None = None,
 ) -> AnalysisResult:
     t0 = time.perf_counter()
     colours = {tid: np.median(np.stack(v), axis=0) for tid, v in teams.samples.items() if v}
     raw_tracks = len({p.track_id for p in points})
     points, mapping = stitch(points, fps, colours=colours)
+    framed = all(len(teams.frames.get(t, [])) == len(v) for t, v in teams.samples.items())
     stitched: dict[int, list[NDArray[Any]]] = defaultdict(list)
+    stitched_frames: dict[int, list[int]] = defaultdict(list)
     for old, samples in teams.samples.items():
         stitched[mapping.get(old, old)].extend(samples)
-    teams.samples = stitched
+        stitched_frames[mapping.get(old, old)].extend(teams.frames.get(old, []))
+    teams.samples, teams.frames = stitched, stitched_frames
+    reads: dict[int, list[Reading]] = defaultdict(list)
+    for old, rs in (number_reads or {}).items():
+        reads[mapping.get(old, old)].extend(rs)
+    looks: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
+    for old, vs in (vectors or {}).items():
+        looks[mapping.get(old, old)].extend(vs)
+    role_framed: dict[int, list[tuple[int, NDArray[np.float64]]]] = defaultdict(list)
+    for old, role_list in (role_samples or {}).items():
+        role_framed[mapping.get(old, old)].extend(role_list)
     timings["stitching"] += time.perf_counter() - t0
+    # people outside play (bench, staff, spectators at the court edge) leave the tracks before
+    # anything is learned from them (handball_vision.bench, ADR 028 addendum)
+    t0 = time.perf_counter()
+    points, bench = _drop_bench(points, fps, calib, teams, reads, looks, role_framed, framed)
+    extra = {**extra, "bench": bench}
+    timings["bench"] += time.perf_counter() - t0
+    role_looks = {t: [v for _, v in vs] for t, vs in role_framed.items() if vs}
     team_out: dict[int, dict[str, Any]] = {}
     for tid in {p.track_id for p in points}:
         r = teams.result(tid)
         if r:
-            team_out[tid] = {"label": r.label, "confidence": r.confidence, "samples": r.samples}
-    # second signal besides the kit colour: throw-off formations (addendum 01, 4.8)
+            lab = np.median(np.stack(teams.samples[tid]), axis=0)
+            bgr = cv2.cvtColor(
+                np.clip(lab, 0, 255).astype(np.uint8).reshape(1, 1, 3), cv2.COLOR_LAB2BGR
+            )[0, 0]
+            team_out[tid] = {
+                "label": r.label,
+                "confidence": r.confidence,
+                "samples": r.samples,
+                "colour": f"#{int(bgr[2]):02x}{int(bgr[1]):02x}{int(bgr[0]):02x}",
+                "lab": [round(float(v), 1) for v in lab],
+            }
+    # team labels relative to this match's colours (lighting shifts absolute colours)
+    clustered = relabel_by_clusters(
+        {
+            t: (np.asarray(v["lab"], dtype=np.float64), int(v["samples"]))
+            for t, v in team_out.items()
+        },
+        teams.kits,
+    )
+    for tid, label in clustered.items():
+        if team_out[tid]["label"] != label:
+            team_out[tid]["label"] = label
+            team_out[tid]["label_source"] = "cluster"
+    # goalkeepers by position and by which team defends their goal (kit colours often missing)
     pts = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points]
+    observed = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points if p.observed]
+    for tid, label in assign_goalkeepers(
+        observed, {t: str(v["label"]) for t, v in team_out.items()}
+    ).items():
+        if tid in team_out and team_out[tid]["label"] != label:
+            team_out[tid]["label"] = label
+            team_out[tid]["label_source"] = "position"
+    # second signal besides the kit colour: throw-off formations (addendum 01, 4.8)
     refined = refine_teams(
         pts,
         {t: str(v["label"]) for t, v in team_out.items()},
@@ -351,6 +428,33 @@ def _finish(
         if label != team_out[tid]["label"]:
             team_out[tid]["label"] = label
             team_out[tid]["label_source"] = "formation"
+    if role_looks:
+        changed = _apply_role_votes(points, team_out, role_looks, observed)
+        extra = {**extra, "roles_changed": changed}
+    if reads and framed:
+        # the team of a number is the colour of the shirt it was read on
+        t0 = time.perf_counter()
+        points, by_colour = split_by_reading_colour(
+            points, team_out, teams, reads, [looks, role_framed], fps
+        )
+        extra = {**extra, "reading_colour": by_colour}
+        timings["numbers_vote"] += time.perf_counter() - t0
+    if reads:
+        t0 = time.perf_counter()
+        before = len({p.track_id for p in points})
+        points, merged = merge_by_number(
+            points, team_out, reads, fps, looks=looks, rosters=rosters, roles=role_framed
+        )
+        extra = {
+            **extra,
+            "merged_by_number": merged,
+            "split_by_number": len({p.track_id for p in points}) + merged - before,
+        }
+        if looks:
+            extra["identified_by_appearance"] = identify_by_appearance(
+                points, team_out, looks, fps, reads, roles=role_framed
+            )
+        timings["numbers_vote"] += time.perf_counter() - t0
     return AnalysisResult(
         calib,
         fps,
@@ -362,6 +466,445 @@ def _finish(
         detections_per_frame=n_dets / max(1, n),
         extra={"raw_tracks": raw_tracks, "tracks": len(team_out), **extra},
     )
+
+
+def _drop_bench(
+    points: list[TrackPoint],
+    fps: float,
+    calib: Calibration,
+    teams: TeamAssigner,
+    reads: dict[int, list[Reading]],
+    looks: dict[int, list[tuple[int, NDArray[np.float64]]]],
+    role_looks: dict[int, list[tuple[int, NDArray[np.float64]]]],
+    framed: bool = True,
+) -> tuple[list[TrackPoint], dict[str, Any]]:
+    """Cut the bench stretches out of the tracks and move every look (colour, number, appearance,
+    role) to the track it now belongs to; looks on a bench stretch are dropped. Without frames
+    for the colour samples (`framed` False) a track keeps its samples and a new piece copies its
+    parent's."""
+    from handball_vision.bench import split_bench
+
+    split = split_bench(points, fps, calib)
+    if not split.stretches:
+        return points, {"stretches": 0, "tracks_removed": 0, "pieces": 0, "items": []}
+
+    def regroup(items: dict[int, list[Any]], frame_of: Callable[[Any], int]) -> None:
+        out: dict[int, list[Any]] = defaultdict(list)
+        for t, vs in items.items():
+            for v in vs:
+                owner = split.owner(t, frame_of(v))
+                if owner is not None:
+                    out[owner].append(v)
+        items.clear()
+        items.update(out)
+
+    if framed:
+        pairs = {t: list(zip(teams.frames[t], vs, strict=True)) for t, vs in teams.samples.items()}
+        regroup(pairs, lambda v: int(v[0]))
+        teams.samples = defaultdict(list, {t: [c for _, c in vs] for t, vs in pairs.items()})
+        teams.frames = defaultdict(list, {t: [f for f, _ in vs] for t, vs in pairs.items()})
+    else:
+        for t in split.removed:
+            teams.samples.pop(t, None)
+        for new, (old, _, _) in split.pieces.items():
+            teams.samples[new] = list(teams.samples.get(old, []))
+    regroup(reads, lambda r: int(r.frame))
+    regroup(looks, lambda v: int(v[0]))
+    regroup(role_looks, lambda v: int(v[0]))
+    return split.points, {
+        "stretches": len(split.stretches),
+        "tracks_removed": len(split.removed),
+        "pieces": len(split.pieces),
+        "items": [s.to_dict(fps) for s in split.stretches],
+    }
+
+
+def _apply_role_votes(
+    points: list[TrackPoint],
+    team_out: dict[int, dict[str, Any]],
+    role_looks: dict[int, list[NDArray[np.float64]]],
+    observed: list[tuple[int, int, float, float]],
+) -> dict[str, int]:
+    """Referees and short goalkeeper tracks from the role classifier (handball_vision.roles)."""
+    from handball_vision.roles import apply_roles, goal_presence, track_roles
+
+    roles = track_roles(role_looks)
+    for tid, probs in roles.items():
+        if tid in team_out:
+            team_out[tid]["role_p"] = [round(float(v), 3) for v in probs]
+    spans: dict[int, tuple[int, int]] = {}
+    for p in points:
+        a, b = spans.get(p.track_id, (p.frame, p.frame))
+        spans[p.track_id] = (min(a, p.frame), max(b, p.frame))
+    near, side = goal_presence(observed)
+    # the team defending a goal: from the goalkeepers the position rule found (nearest in time)
+    keepers = [
+        (t, str(v["label"]).removesuffix("_gk"), side.get(t))
+        for t, v in team_out.items()
+        if str(v.get("label", "")).endswith("_gk") and side.get(t)
+    ]
+    goal_team: dict[int, str] = {}
+    for t in roles:
+        if t not in side or t not in spans:
+            continue
+        same = [
+            (abs(spans[k][0] - spans[t][0]), team)
+            for k, team, s in keepers
+            if s == side[t] and k in spans
+        ]
+        if same:
+            goal_team[t] = min(same)[1]
+    changes = apply_roles(team_out, roles, spans, near, goal_team)
+    for tid, label in changes.items():
+        team_out[tid]["label"] = label
+        team_out[tid]["label_source"] = "role"
+    return {
+        "referee": sum(1 for v in changes.values() if v == "referee"),
+        "goalkeeper": sum(1 for v in changes.values() if v.endswith("_gk")),
+        "team": sum(1 for v in changes.values() if v in ("home", "away")),
+    }
+
+
+def split_by_reading_colour(
+    points: list[TrackPoint],
+    team_out: dict[int, dict[str, Any]],
+    teams: TeamAssigner,
+    reads: dict[int, list[Reading]],
+    framed_items: Sequence[dict[int, list[tuple[int, Any]]]],
+    fps: float,
+    min_side: int = 2,
+) -> tuple[list[TrackPoint], dict[str, int]]:
+    """The team of a number is the colour of the shirt it was read on (ADR 027 addendum).
+
+    Every confident reading gets the team of the torso colour sampled on the same crop
+    (`teams.side_of` against this match's team colours). A field track whose readings disagree
+    with its team label carries a second person for a while (the tracker swapped a white and a
+    black player): with `min_side` or more such readings, the track is cut at its colour switches
+    (`teams.colour_runs`) and each piece takes the team of its colour; then every reading that
+    still disagrees with its track's team is dropped. Goalkeeper and referee tracks are left as
+    they are (their kits differ from the teams'). `reads`, the per-track (frame, item) lists in
+    `framed_items` (appearance vectors, role samples) and the colour samples in `teams` move to
+    the new pieces in place."""
+    stats = {"tracks_split": 0, "pieces": 0, "readings_dropped": 0}
+    centres = team_centres(team_out, teams.samples)
+    if not centres:
+        return points, stats
+    colour_at = {
+        (t, f): c
+        for t, cs in teams.samples.items()
+        for f, c in zip(teams.frames[t], cs, strict=True)
+    }
+
+    def side(t: int, frame: int) -> str | None:
+        return side_of(colour_at.get((t, frame)), centres)
+
+    next_id = max([p.track_id for p in points], default=0) + 1
+    cuts: dict[int, list[tuple[int, int, int]]] = {}  # track -> [(from, to frame, piece id)]
+    for t, rs in reads.items():
+        label = str(team_out.get(t, {}).get("label", ""))
+        if label not in ("home", "away"):
+            continue
+        against = [
+            r
+            for r in rs
+            if r.confidence >= MIN_CONFIDENCE and side(t, r.frame) not in (None, label)
+        ]
+        if len(against) < min_side:
+            continue
+        runs = colour_runs(teams.frames[t], [side_of(c, centres) for c in teams.samples[t]], fps)
+        if len(runs) < 2:
+            continue
+        edges = [(a + b) // 2 + 1 for (_, a, _), (b, _, _) in pairwise(runs)]
+        parent = {
+            k: v
+            for k, v in team_out[t].items()
+            if k not in ("number", "number_confidence", "number_readings")
+        }
+        pieces = []
+        for k, (_, _, run_side) in enumerate(runs):
+            nid = t if k == 0 else next_id
+            if k:
+                pieces.append((edges[k - 1], edges[k] if k < len(edges) else 2**62, nid))
+                next_id += 1
+            team_out[nid] = (
+                dict(parent)
+                if run_side == label
+                else {**parent, "label": run_side, "label_source": "reading_colour"}
+            )
+        cuts[t] = pieces
+        stats["tracks_split"] += 1
+        stats["pieces"] += len(runs)
+
+    def owner(t: int, frame: int) -> int:
+        for a, b, nid in cuts.get(t, []):
+            if a <= frame < b:
+                return nid
+        return t
+
+    if cuts:
+        moved = {
+            t: [(owner(t, f), f, c) for f, c in zip(teams.frames[t], teams.samples[t], strict=True)]
+            for t in cuts
+        }
+        for t, items in moved.items():
+            for nid in [t, *(n for _, _, n in cuts[t])]:
+                teams.samples[nid], teams.frames[nid] = [], []
+            for nid, f, c in items:
+                teams.samples[nid].append(c)
+                teams.frames[nid].append(f)
+            for nid in [t, *(n for _, _, n in cuts[t])]:
+                cs = teams.samples[nid]
+                if cs:
+                    lab = np.median(np.stack(cs), axis=0)
+                    team_out[nid].update(lab=[round(float(v), 1) for v in lab], samples=len(cs))
+        per_track: list[dict[int, list[Any]]] = [reads, *framed_items]
+        for group in per_track:
+            for t in [t for t in group if t in cuts]:
+                for v in group.pop(t):
+                    f = v.frame if isinstance(v, Reading) else int(v[0])
+                    group.setdefault(owner(t, f), []).append(v)
+        points = [replace(p, track_id=owner(p.track_id, p.frame)) for p in points]
+        colour_at = {
+            (t, f): c
+            for t, cs in teams.samples.items()
+            for f, c in zip(teams.frames[t], cs, strict=True)
+        }
+    for t, rs in reads.items():
+        label = str(team_out.get(t, {}).get("label", ""))
+        if label not in ("home", "away"):
+            continue
+        keep = [r for r in rs if r.confidence < MIN_CONFIDENCE or side(t, r.frame) in (None, label)]
+        stats["readings_dropped"] += len(rs) - len(keep)
+        rs[:] = keep
+    return points, stats
+
+
+def _split_at_switches(
+    points: list[TrackPoint],
+    team_out: dict[int, dict[str, Any]],
+    reads: dict[int, list[Reading]],
+    framed_items: Sequence[dict[int, list[tuple[int, Any]]]] = (),
+) -> tuple[list[TrackPoint], dict[int, list[Reading]], list[dict[int, list[tuple[int, Any]]]]]:
+    """Cut tracks where the shirt numbers say the tracker swapped players; each part becomes its
+    own track (same team entry) with its own readings and (frame, item) looks."""
+    next_id = max([p.track_id for p in points], default=0) + 1
+    cuts: dict[int, list[tuple[int, int]]] = {}  # track -> [(from_frame, new id)]
+    out_reads: dict[int, list[Reading]] = defaultdict(list)
+    for t, rs in reads.items():
+        frames = split_points(rs) if t in team_out else []
+        bounds = [(f, next_id + k) for k, f in enumerate(frames)]
+        next_id += len(frames)
+        if bounds:
+            cuts[t] = bounds
+            for _, nid in bounds:
+                team_out[nid] = {
+                    k: v
+                    for k, v in team_out[t].items()
+                    if k not in ("number", "number_confidence", "number_readings")
+                }
+        for r in rs:
+            tid = t
+            for f, nid in bounds:
+                if r.frame >= f:
+                    tid = nid
+            out_reads[tid].append(r)
+
+    def owner(t: int, frame: int) -> int:
+        tid = t
+        for f, nid in cuts.get(t, []):
+            if frame >= f:
+                tid = nid
+        return tid
+
+    out_items: list[dict[int, list[tuple[int, Any]]]] = []
+    for items in framed_items:
+        moved: dict[int, list[tuple[int, Any]]] = defaultdict(list)
+        for t, vs in items.items():
+            for f0, v in vs:
+                moved[owner(t, f0)].append((f0, v))
+        out_items.append(moved)
+    if not cuts:
+        return points, out_reads, out_items
+    return (
+        [replace(p, track_id=owner(p.track_id, p.frame)) for p in points],
+        out_reads,
+        out_items,
+    )
+
+
+MIN_ANCHOR_READINGS = 4
+
+
+def identify_by_appearance(
+    points: list[TrackPoint],
+    team_out: dict[int, dict[str, Any]],
+    looks: Mapping[int, Sequence[NDArray[np.float64] | tuple[int, NDArray[np.float64]]]],
+    fps: float,
+    reads: Mapping[int, list[Reading]] | None = None,
+    roles: Mapping[int, Sequence[tuple[int, NDArray[np.float64]]]] | None = None,
+) -> int:
+    """Numbers for tracks nobody read a number on, by appearance (reid.py): the numbered tracks of
+    this match teach what each player looks like. `looks` is keyed by the final track ids, as
+    vectors or (frame, vector); with frames and the tracks' `reads` a numbered track teaches only
+    with the vectors next to readings of its number (reid.anchor_vectors), and a track whose own
+    readings say otherwise is not given the number (reid.contradicts). With the tracks' `roles`
+    ((frame, role probabilities), roles.py) only fragments that look like field players teach or
+    are given a number (reid.plays): not referees, goalkeepers, staff or the bench."""
+    span: dict[int, list[TrackPoint]] = defaultdict(list)
+    for p in points:
+        span[p.track_id].append(p)
+    frags = []
+    for tid, ps in span.items():
+        info = team_out.get(tid)
+        if info is None or str(info["label"]) == "referee" or len(looks.get(tid, [])) < 3:
+            continue
+        ps.sort(key=lambda p: p.frame)
+        # only well-read numbers teach; a number read a few times may be a misreading (24 for
+        # 14) and is checked against the anchors like a track without number
+        anchor = int(info.get("number_readings", 0)) >= MIN_ANCHOR_READINGS
+        items = looks[tid]
+        framed = all(isinstance(v, tuple) for v in items)
+        vectors = np.stack([v[1] if isinstance(v, tuple) else v for v in items])
+        frames = np.array([v[0] for v in items if isinstance(v, tuple)], np.int64)
+        readings = tuple(
+            (r.frame, r.number)
+            for r in (reads or {}).get(tid, [])
+            if r.confidence >= MIN_CONFIDENCE
+        )
+        number = info.get("number") if anchor else None
+        frags.append(
+            Fragment(
+                tid,
+                str(info["label"]),
+                ps[0].frame,
+                ps[-1].frame,
+                (ps[0].x, ps[0].y),
+                (ps[-1].x, ps[-1].y),
+                vectors,
+                number,
+                frames if framed and reads is not None else None,
+                readings,
+                fragment_roles(list((roles or {}).get(tid, [])), readings, number, fps),
+            )
+        )
+    found = assign(frags, fps)
+    for tid, number in found.items():
+        read = team_out[tid].get("number")
+        team_out[tid].update(
+            number=number, number_source="read" if read == number else "appearance"
+        )
+    return len(found)
+
+
+def merge_by_number(
+    points: list[TrackPoint],
+    team_out: dict[int, dict[str, Any]],
+    reads: dict[int, list[Reading]],
+    fps: float,
+    max_overlap_s: float = 1.0,
+    looks: dict[int, list[tuple[int, Any]]] | None = None,
+    rosters: dict[str, set[int]] | None = None,
+    roles: dict[int, list[tuple[int, Any]]] | None = None,
+) -> tuple[list[TrackPoint], int]:
+    """Number per track by vote, then one track per player: fragments of the same team with the
+    same number that do not overlap in time are joined (the number is the identity the tracker
+    loses on occlusions and camera pans). When two fragments with the same number overlap, the one
+    with the weaker vote loses its number. Returns the points and the number of joined fragments.
+
+    `rosters` ("home"/"away" -> shirt numbers) restricts each team's votes to its roster (see
+    `vote`); a team without roster is voted freely. `reads`, `looks` and `roles` (per-track
+    (frame, role probabilities)) are updated in place to the new track ids (cut at switches,
+    joined by number)."""
+    framed = [d for d in (looks, roles) if d is not None]
+    points, split_reads, moved = _split_at_switches(points, team_out, reads, framed)
+    reads.clear()
+    reads.update(split_reads)
+    for d, m in zip(framed, moved, strict=True):
+        d.clear()
+        d.update(m)
+    span: dict[int, tuple[int, int]] = {}
+    for p in points:
+        a, b = span.get(p.track_id, (p.frame, p.frame))
+        span[p.track_id] = (min(a, p.frame), max(b, p.frame))
+
+    def side(t: int) -> str:
+        # a number belongs to one person of a team: a "goalkeeper" fragment with a field player's
+        # number is the position heuristic being wrong (they still may not overlap in time)
+        return str(team_out[t]["label"]).removesuffix("_gk")
+
+    votes = {
+        t: v
+        for t, rs in reads.items()
+        if t in team_out and (v := vote(rs, (rosters or {}).get(side(t)))) is not None
+    }
+    for t, v in votes.items():
+        team_out[t].update(
+            number=v.number, number_confidence=v.confidence, number_readings=v.readings
+        )
+
+    groups: dict[tuple[str, int], list[int]] = defaultdict(list)
+    for t, v in votes.items():
+        if side(t) != "referee":
+            groups[(side(t), v.number)].append(t)
+    max_overlap = max_overlap_s * fps  # frames
+    rename: dict[int, int] = {}
+    for tids in groups.values():
+        tids.sort(key=lambda t: -votes[t].confidence * votes[t].readings)
+        chains: list[list[int]] = []
+        for t in tids:
+            a, b = span[t]
+            for chain in chains:
+                clash = any(min(b, span[c][1]) - max(a, span[c][0]) > max_overlap for c in chain)
+                if not clash:
+                    chain.append(t)
+                    break
+            else:
+                if chains:  # overlaps the stronger fragment: its number is the misreading
+                    for k in ("number", "number_confidence", "number_readings"):
+                        team_out[t].pop(k, None)
+                    continue
+                chains.append([t])
+        for chain in chains:
+            head = min(chain, key=lambda c: span[c][0])
+            for c in chain:
+                if c != head:
+                    rename[c] = head
+    if not rename:
+        return points, 0
+    for old, new in rename.items():
+        for d in framed:
+            if old in d:
+                d.setdefault(new, []).extend(d.pop(old))
+        if old in reads:
+            reads.setdefault(new, []).extend(reads.pop(old))
+        keep, gone = team_out[new], team_out.pop(old)
+        if span[old][1] - span[old][0] > span[new][1] - span[new][0]:
+            keep["label"] = gone["label"]  # the longer fragment knows the role better
+        if int(gone.get("number_readings", 0)) > int(keep.get("number_readings", 0)):
+            for k in ("number_confidence", "number_readings"):
+                keep[k] = gone[k]
+        keep["samples"] = int(keep.get("samples", 0)) + int(gone.get("samples", 0))
+        keep["merged_from"] = [*keep.get("merged_from", []), old]
+    out = [
+        TrackPoint(
+            rename.get(p.track_id, p.track_id),
+            p.frame,
+            p.x,
+            p.y,
+            p.vx,
+            p.vy,
+            p.observed,
+            p.det_index,
+        )
+        for p in points
+    ]
+    # the same frame twice in one track (rounding at the joins): keep the observed point
+    seen: dict[tuple[int, int], TrackPoint] = {}
+    for p in out:
+        key = (p.track_id, p.frame)
+        if key not in seen or (p.observed and not seen[key].observed):
+            seen[key] = p
+    return sorted(seen.values(), key=lambda p: (p.frame, p.track_id)), len(rename)
 
 
 def _frames(path: Path, max_frames: int | None) -> Iterator[U8]:
@@ -441,14 +984,17 @@ def _analyse_moving(
     n = n_dets = n_lost = 0
     for frame in _frames(path, max_frames):
         t0 = time.perf_counter()
-        frame_calib = moving_det.set_frame(n)
+        # a learned detector needs only the court homography, not the rendered background
+        frame_calib = (
+            moving_det.set_frame(n) if detector is None else moving_det.frame_calibration(n)
+        )
         timings["view"] += time.perf_counter() - t0
         dets: list[Detection] = []
         if frame_calib is None:
             n_lost += 1
         elif n % detect_every == 0:
             t0 = time.perf_counter()
-            dets = [d for d in det.detect([frame])[0] if d.cls != "ball"]
+            dets = _people(det, frame, frame_calib)
             timings["detection"] += time.perf_counter() - t0
         n_dets += len(dets)
         t0 = time.perf_counter()
@@ -463,7 +1009,7 @@ def _analyse_moving(
         timings["tracking"] += time.perf_counter() - t0
         for tp in step:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.samples[tp.track_id].append(feats[tp.det_index])
+                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
         points += step
         n += 1
         if progress and total and n % 100 == 0:

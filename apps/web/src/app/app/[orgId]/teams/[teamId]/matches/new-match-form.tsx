@@ -5,19 +5,21 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useId, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { KitFields } from "@/components/domain/kit-fields";
 import { Alert } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
-import { kitWarnings, type KitKey } from "@/lib/kit";
+import type { Kits } from "@/lib/kit";
 
 const FORMATS = ["adult_2x30", "youth_2x25", "youth_2x20", "mini", "tournament"] as const;
-const KIT_DEFAULTS: Record<KitKey, string> = {
+const KIT_DEFAULTS: Kits = {
   own: "#0b6bcb",
   own_gk: "#f59e0b",
   opponent: "#dc2626",
   opponent_gk: "#16a34a",
+  referee: null,
 };
 
 function localNow(): string {
@@ -43,7 +45,6 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
       (await api.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } })).data,
   });
   const chosenFormat = format ?? (team.data?.is_youth ? "youth_2x25" : "adult_2x30");
-  const similar = kitWarnings(kits);
   const opponents = useQuery({
     queryKey: ["opponents", orgId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/opponents", { params: { path: { org_id: orgId } } })).data ?? [],
@@ -68,6 +69,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         kit_own_gk: kits.own_gk,
         kit_opponent: kits.opponent,
         kit_opponent_gk: kits.opponent_gk,
+        kit_referee: kits.referee,
         format: chosenFormat as (typeof FORMATS)[number],
       },
     });
@@ -147,40 +149,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         </Select>
         <fieldset className="sm:col-span-2">
           <legend className="mb-2 block text-[0.8125rem] font-medium">{t("matches.kits")}</legend>
-          <div className="flex flex-wrap gap-x-5 gap-y-3">
-            {(
-              [
-                ["own", "matches.kitOwn"],
-                ["own_gk", "matches.kitOwnGk"],
-                ["opponent", "matches.kitOpp"],
-                ["opponent_gk", "matches.kitOppGk"],
-              ] as const
-            ).map(([k, label]) => (
-              <label key={k} className="flex cursor-pointer items-center gap-2 text-sm">
-                <span className="relative grid size-8 place-items-center overflow-hidden rounded-full ring-1 ring-border" style={{ background: kits[k] }}>
-                  <input
-                    aria-label={t(label)}
-                    name={`kit_${k}`}
-                    type="color"
-                    value={kits[k]}
-                    onChange={(e) => setKits((v) => ({ ...v, [k]: e.target.value }))}
-                    className="absolute inset-0 size-full cursor-pointer opacity-0"
-                  />
-                </span>
-                {t(label)}
-              </label>
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-muted">{t("matches.kitsHint")}</p>
-          {similar.length > 0 && (
-            <Alert kind="info" className="mt-3">
-              <span data-testid="kit-warning">
-                {t("matchForm.kitWarning", {
-                  pairs: similar.map(([a, b]) => `${t(`matchForm.kit_${a}`)} / ${t(`matchForm.kit_${b}`)}`).join(", "),
-                })}
-              </span>
-            </Alert>
-          )}
+          <KitFields kits={kits} onChange={setKits} />
         </fieldset>
         <div className="pt-2 sm:col-span-2">
           <Button type="submit" size="lg" loading={busy}>

@@ -56,6 +56,7 @@ def _team_out(ctx: Ctx, team: Team, season: Season | None) -> TeamOut:
         default_format=team.default_format,
         my_role=actor.team_role(team.id),
         current_season=SeasonOut.model_validate(season) if season else None,
+        official_team_id=team.official_team_id,
     )
 
 

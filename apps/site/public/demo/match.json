@@ -1426,6 +1426,8 @@
     "steps": 2
    },
    "xg": 23.87,
+   "xg_coverage": 1.0,
+   "xg_shots": 40,
    "yellow_cards": 0,
    "zones": {
     "back_centre": {
@@ -1543,6 +1545,8 @@
     "steps": 3
    },
    "xg": 23.13,
+   "xg_coverage": 1.0,
+   "xg_shots": 39,
    "yellow_cards": 0,
    "zones": {
     "back_centre": {
@@ -1914,7 +1918,7 @@
    ]
   },
   "versions": {
-   "metrics": "0.2.0",
+   "metrics": "0.3.0",
    "xg": "prior-1"
   }
  }

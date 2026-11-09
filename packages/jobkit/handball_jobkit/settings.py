@@ -15,3 +15,20 @@ class JobSettings(BaseSettings):
     s3_secret_key: str = "handball-secret"  # noqa: S105
     s3_bucket_artifacts: str = "artifacts"
     work_dir: str = "/tmp/handball-work"  # noqa: S108
+    # learned person detector (ADR 025): ONNX weights baked into the GPU worker image; without
+    # the file the classical background detector runs (ADR 012)
+    detector_model: str = "/models/yolox_s.onnx"
+    detect_every: int = 3
+    detector_threads: int = 0
+    # shirt numbers (PP-OCRv4 text models) and re-identification (person appearance network);
+    # each step runs only when its model files are installed
+    number_det_model: str = "/models/ch_PP-OCRv4_det_infer.onnx"
+    number_rec_model: str = "/models/ch_PP-OCRv4_rec_infer.onnx"
+    number_every: int = 6  # frames; 3 on the GPU image (every detection frame)
+    reid_model: str = "/models/reid.onnx"
+    reid_every: int = 30  # frames: about once per second per player
+    role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)
+    role_every: int = 30
+    hallboard_every_s: float = 1.0  # hall scoreboard reading when the video has no overlay
+    hallboard_full_every_s: float = 4.0  # whole-frame search for the board while it is not in view
+    hallboard_probe_every_s: float = 0.25  # template probes for a locked board out of view

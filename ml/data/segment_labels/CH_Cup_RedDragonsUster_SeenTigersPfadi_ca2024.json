@@ -1,0 +1,513 @@
+{
+ "name": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+ "official": "ml/data/official/CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024.json",
+ "game_id": 477815,
+ "result": "23:27",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 30.0,
+  "duration_s": 5835.434,
+  "batch": "batch_l01"
+ },
+ "segments": [
+  {
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s0.mp4",
+   "start_s": 875.32,
+   "clock_source": "hall_board",
+   "readings": 51,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    0.0,
+    63.0
+   ],
+   "entries": 2,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s1.mp4",
+   "start_s": 1750.63,
+   "clock_source": "overlay",
+   "readings": 88,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    748.0,
+    828.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s2.mp4",
+   "start_s": 2917.72,
+   "clock_source": "overlay",
+   "readings": 58,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    1685.0,
+    1799.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3.mp4",
+   "start_s": 4084.8,
+   "clock_source": "overlay",
+   "readings": 88,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2201.0,
+    2354.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "start_s": 4960.12,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2916.0,
+    3085.0
+   ],
+   "entries": 8,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "shot_missed": 4,
+  "goal": 8,
+  "timeout": 1,
+  "shot_saved": 5,
+  "turnover": 3
+ },
+ "entries": [
+  {
+   "match_s": 37,
+   "time": "00:37",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 9,
+   "name": "KRETZ Alex",
+   "score": [
+    0,
+    0
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 153000,
+   "video_ms": 1028320,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 41,
+   "time": "00:41",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 5,
+   "name": "KYBURZ Marius",
+   "score": [
+    0,
+    1
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 157000,
+   "video_ms": 1032320,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 749,
+   "time": "12:29",
+   "action": "Team Time-Out",
+   "kind": "timeout",
+   "team": null,
+   "number": null,
+   "name": null,
+   "score": [
+    4,
+    7
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 1500,
+   "video_ms": 1752130,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 792,
+   "time": "13:12",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 9,
+   "name": "KRETZ Alex",
+   "score": [
+    4,
+    7
+   ],
+   "goalkeeper": {
+    "number": 1,
+    "name": "STAUB Magnus"
+   },
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 143500,
+   "video_ms": 1894130,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 824,
+   "time": "13:44",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "away",
+   "number": 6,
+   "name": "WATKINS Ryan",
+   "score": [
+    4,
+    7
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 175500,
+   "video_ms": 1926130,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1696,
+   "time": "28:16",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 11,
+   "name": "BACHMANN Levin",
+   "score": [
+    5,
+    15
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 14267,
+   "video_ms": 2931987,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1739,
+   "time": "28:59",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 5,
+   "name": "KYBURZ Marius",
+   "score": [
+    5,
+    16
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 57267,
+   "video_ms": 2974987,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1770,
+   "time": "29:30",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 3,
+   "name": "HIRZEL Andreas",
+   "score": [
+    6,
+    16
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s2.mp4",
+   "segment_index": 2,
+   "segment_ms": 88267,
+   "video_ms": 3005987,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2222,
+   "time": "37:02",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 6,
+   "name": "RÜETSCHI Mark",
+   "score": [
+    10,
+    19
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 37767,
+   "video_ms": 4122567,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2256,
+   "time": "37:36",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 24,
+   "name": "KOBLET Loris",
+   "score": [
+    10,
+    19
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 71767,
+   "video_ms": 4156567,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2269,
+   "time": "37:49",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 21,
+   "name": "HIRZEL Reto",
+   "score": [
+    10,
+    19
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "FREI Loris"
+   },
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 84767,
+   "video_ms": 4169567,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2312,
+   "time": "38:32",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 9,
+   "name": "KÖLLER Nicolas",
+   "score": [
+    10,
+    20
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 127767,
+   "video_ms": 4212567,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2343,
+   "time": "39:03",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 2,
+   "name": "HÄBERLI Marco",
+   "score": [
+    11,
+    20
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 167000,
+   "video_ms": 4251800,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2928,
+   "time": "48:48",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 6,
+   "name": "RÜETSCHI Mark",
+   "score": [
+    18,
+    23
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "FREI Loris"
+   },
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 12000,
+   "video_ms": 4972120,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2940,
+   "time": "49:00",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 3,
+   "name": "OTT Yannick",
+   "score": [
+    18,
+    23
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "RITZ BOSSICARD Nathan"
+   },
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 24000,
+   "video_ms": 4984120,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2943,
+   "time": "49:03",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 3,
+   "name": "OTT Yannick",
+   "score": [
+    18,
+    24
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 27000,
+   "video_ms": 4987120,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3002,
+   "time": "50:02",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 9,
+   "name": "KRETZ Alex",
+   "score": [
+    18,
+    24
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 86000,
+   "video_ms": 5046120,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3034,
+   "time": "50:34",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 25,
+   "name": "BLUMER Michael",
+   "score": [
+    18,
+    25
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 118000,
+   "video_ms": 5078120,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3039,
+   "time": "50:39",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 7,
+   "name": "SCHNEEBERGER Basil",
+   "score": [
+    18,
+    25
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 123000,
+   "video_ms": 5083120,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3077,
+   "time": "51:17",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 77,
+   "name": "NUSSBAUMER Ramon",
+   "score": [
+    18,
+    25
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "RITZ BOSSICARD Nathan"
+   },
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 171733,
+   "video_ms": 5131853,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3083,
+   "time": "51:23",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 6,
+   "name": "RÜETSCHI Mark",
+   "score": [
+    18,
+    25
+   ],
+   "segment": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 177733,
+   "video_ms": 5137853,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  }
+ ]
+}

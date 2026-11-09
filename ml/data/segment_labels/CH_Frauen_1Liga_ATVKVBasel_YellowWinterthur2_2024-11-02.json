@@ -1,0 +1,576 @@
+{
+ "name": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+ "official": "ml/data/official/CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02.json",
+ "game_id": 481710,
+ "result": "32:24",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 30.0,
+  "duration_s": 5425.0,
+  "batch": "batch_l02"
+ },
+ "segments": [
+  {
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "start_s": 813.75,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    214.0,
+    393.0
+   ],
+   "entries": 9,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "start_s": 1627.5,
+   "clock_source": "overlay",
+   "readings": 88,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    954.0,
+    1116.0
+   ],
+   "entries": 6,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s2.mp4",
+   "start_s": 2712.5,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "start_s": 3797.5,
+   "clock_source": "overlay",
+   "readings": 88,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2306.0,
+    2486.0
+   ],
+   "entries": 6,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s4.mp4",
+   "start_s": 4611.25,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    3020.0,
+    3108.0
+   ],
+   "entries": 4,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "warning": 2,
+  "turnover": 2,
+  "goal": 14,
+  "shot_missed": 2,
+  "penalty_goal": 1,
+  "shot_saved": 2,
+  "suspension": 1,
+  "timeout": 1
+ },
+ "entries": [
+  {
+   "match_s": 218,
+   "time": "03:38",
+   "action": "Verwarnung",
+   "kind": "warning",
+   "team": "away",
+   "number": 20,
+   "name": "ITEN Sarah",
+   "score": [
+    2,
+    2
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 4033,
+   "video_ms": 817783,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 236,
+   "time": "03:56",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 15,
+   "name": "ESTERMANN Eliane",
+   "score": [
+    2,
+    2
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 22033,
+   "video_ms": 835783,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 250,
+   "time": "04:10",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 5,
+   "name": "RUBIO RODRIGUEZ Enya",
+   "score": [
+    2,
+    3
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 36033,
+   "video_ms": 849783,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 278,
+   "time": "04:38",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 8,
+   "name": "NYFFENEGGER Danielle",
+   "score": [
+    3,
+    3
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 64033,
+   "video_ms": 877783,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 303,
+   "time": "05:03",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 6,
+   "name": "VON ARX Simone",
+   "score": [
+    3,
+    4
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 89033,
+   "video_ms": 902783,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 315,
+   "time": "05:15",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 20,
+   "name": "NEGRONI Latina",
+   "score": [
+    3,
+    4
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 101033,
+   "video_ms": 914783,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 324,
+   "time": "05:24",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 5,
+   "name": "RUBIO RODRIGUEZ Enya",
+   "score": [
+    3,
+    5
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 110033,
+   "video_ms": 923783,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 357,
+   "time": "05:57",
+   "action": "Verwarnung",
+   "kind": "warning",
+   "team": "away",
+   "number": 18,
+   "name": "GEMPERLI Isabelle",
+   "score": [
+    3,
+    5
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 143033,
+   "video_ms": 956783,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 369,
+   "time": "06:09",
+   "action": "7m Tor",
+   "kind": "penalty_goal",
+   "team": "home",
+   "number": 15,
+   "name": "ESTERMANN Eliane",
+   "score": [
+    4,
+    5
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 155033,
+   "video_ms": 968783,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 968,
+   "time": "16:08",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 5,
+   "name": "LANGHEIN Saskja",
+   "score": [
+    10,
+    6
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 14533,
+   "video_ms": 1642033,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 987,
+   "time": "16:27",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 7,
+   "name": "SCHERB Anja",
+   "score": [
+    11,
+    6
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 33533,
+   "video_ms": 1661033,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1008,
+   "time": "16:48",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 18,
+   "name": "GEMPERLI Isabelle",
+   "score": [
+    11,
+    7
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 54500,
+   "video_ms": 1682000,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1016,
+   "time": "16:56",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 8,
+   "name": "NYFFENEGGER Danielle",
+   "score": [
+    11,
+    7
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "SCHWARZ Rahel"
+   },
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 62500,
+   "video_ms": 1690000,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1047,
+   "time": "17:27",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 15,
+   "name": "FELLER Luana",
+   "score": [
+    11,
+    8
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 93500,
+   "video_ms": 1721000,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1101,
+   "time": "18:21",
+   "action": "Zeitstrafe",
+   "kind": "suspension",
+   "team": "away",
+   "number": 44,
+   "name": "TOMCHEVSKA Andrea",
+   "score": [
+    11,
+    8
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 147500,
+   "video_ms": 1775000,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2324,
+   "time": "38:44",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 15,
+   "name": "ESTERMANN Eliane",
+   "score": [
+    22,
+    14
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 17767,
+   "video_ms": 3815267,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2351,
+   "time": "39:11",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 17,
+   "name": "KRATZ Sara",
+   "score": [
+    22,
+    14
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "ANLIKER-ORT Marion"
+   },
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 44767,
+   "video_ms": 3842267,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2369,
+   "time": "39:29",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 2,
+   "name": "HOFER Isabel",
+   "score": [
+    23,
+    14
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 62767,
+   "video_ms": 3860267,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2407,
+   "time": "40:07",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 6,
+   "name": "VON ARX Simone",
+   "score": [
+    23,
+    14
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 100767,
+   "video_ms": 3898267,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2452,
+   "time": "40:52",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 15,
+   "name": "ESTERMANN Eliane",
+   "score": [
+    23,
+    14
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 145767,
+   "video_ms": 3943267,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2484,
+   "time": "41:24",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 6,
+   "name": "VON ARX Simone",
+   "score": [
+    23,
+    15
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 177767,
+   "video_ms": 3975267,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3031,
+   "time": "50:31",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 6,
+   "name": "VON ARX Simone",
+   "score": [
+    26,
+    19
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 18533,
+   "video_ms": 4629783,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3073,
+   "time": "51:13",
+   "action": "Team Time-Out",
+   "kind": "timeout",
+   "team": null,
+   "number": null,
+   "name": null,
+   "score": [
+    26,
+    19
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 60533,
+   "video_ms": 4671783,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3086,
+   "time": "51:26",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 99,
+   "name": "ZUBER Arlette",
+   "score": [
+    27,
+    19
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 157267,
+   "video_ms": 4768517,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3095,
+   "time": "51:35",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 5,
+   "name": "RUBIO RODRIGUEZ Enya",
+   "score": [
+    27,
+    20
+   ],
+   "segment": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 166267,
+   "video_ms": 4777517,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  }
+ ]
+}

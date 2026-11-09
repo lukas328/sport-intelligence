@@ -7,11 +7,12 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import pytest
 
 from handball_api.core.email import MemoryEmailSender
 from handball_api.models import Event
-from handball_api.services.feed import Scene, classify, select_scenes
+from handball_api.services.feed import Scene, classify, in_video, select_scenes
 
 from .conftest import Api, setup_club
 from .test_matches import new_match
@@ -41,6 +42,13 @@ def test_classify_player_part() -> None:
     assert classify(_ev(type="shot", outcome="goal", player_id=uuid.uuid4()), PID) is None
 
 
+def test_in_video() -> None:
+    assert in_video(_ev(t_ms=0), None) and in_video(_ev(t_ms=90_000), 90_000)
+    assert not in_video(_ev(t_ms=-1), None)  # before the video (clip starts mid-half)
+    assert not in_video(_ev(t_ms=90_001), 90_000)  # after its end
+    assert not in_video(_ev(t_ms=None), None)
+
+
 def _scene(reason: str, positive: bool, score: float) -> Scene:
     return Scene(_ev(type="shot"), reason, positive, score)
 
@@ -67,7 +75,9 @@ pytestmark_db = pytest.mark.usefixtures("clean_db")
 
 
 @pytestmark_db
-async def test_feed_flow(make_api: Callable[[], Api], outbox: MemoryEmailSender) -> None:
+async def test_feed_flow(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender, owner_conn: asyncpg.Connection
+) -> None:
     coach = make_api()
     ids = await setup_club(coach)
     org, team = ids["org"], ids["team"]
@@ -134,6 +144,22 @@ async def test_feed_flow(make_api: Callable[[], Api], outbox: MemoryEmailSender)
     await coach.post(
         ev,
         json={"type": "turnover", "side": "own", "t_ms": 500_000, "player_id": lena["player_id"]},
+    )
+
+    # a goal before the start of the video (official report aligned to a clip that starts
+    # mid-half): its scene would be a clip ending before 0 s and must be skipped, not crash
+    early = await coach.post(
+        ev,
+        json={
+            "type": "shot",
+            "side": "own",
+            "outcome": "goal",
+            "t_ms": 0,
+            "player_id": lena["player_id"],
+        },
+    )
+    await owner_conn.execute(
+        "UPDATE events SET t_ms = -30000 WHERE id = $1", uuid.UUID(early.json()["id"])
     )
 
     gen = await coach.post(f"/v1/orgs/{org}/matches/{m['id']}/feed/generate")

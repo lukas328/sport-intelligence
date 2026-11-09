@@ -78,6 +78,23 @@ export function CourtCalibration({
     if (next) setSelected(next.id);
   }
 
+  const autoCourt = existing != null && analysis.calibration?.source === "heuristic";
+
+  async function confirmAuto() {
+    setSaving(true);
+    setError(false);
+    const { error: err } = await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", {
+      params: { path: { org_id: orgId, video_id: videoId } },
+    });
+    setSaving(false);
+    if (err) {
+      setError(true);
+      return;
+    }
+    await qc.invalidateQueries({ queryKey: ["analysis", videoId] });
+    onClose();
+  }
+
   async function save() {
     setSaving(true);
     setError(false);
@@ -212,7 +229,7 @@ export function CourtCalibration({
                 {t("spread")}
               </Alert>
             )}
-            {!live && points.length === 0 && existing && <p className="text-muted">{t("existing")}</p>}
+            {!live && points.length === 0 && existing && <p className="text-muted">{t(autoCourt ? "existingAuto" : "existing")}</p>}
             <ul className="flex flex-wrap gap-2">
               {points.map((p) => (
                 <li key={p.id}>
@@ -229,7 +246,12 @@ export function CourtCalibration({
             </ul>
             {error && <Alert>{t("error")}</Alert>}
             <div className="flex flex-wrap gap-2 pt-1">
-              <Button onClick={save} disabled={!live} loading={saving} data-testid="calibration-save">
+              {autoCourt && points.length === 0 && (
+                <Button onClick={confirmAuto} loading={saving} data-testid="calibration-confirm">
+                  {t("confirm")}
+                </Button>
+              )}
+              <Button variant={autoCourt && points.length === 0 ? "secondary" : "primary"} onClick={save} disabled={!live} loading={saving} data-testid="calibration-save">
                 {t("save")}
               </Button>
               <Button variant="secondary" onClick={() => setPoints([])} disabled={points.length === 0}>

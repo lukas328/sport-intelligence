@@ -7,8 +7,10 @@ import { Button, buttonClass } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { OfficialReportImport } from "./official-report";
 
-/** Sportscode XML and CSV export, Sportscode XML import as own tags (addendum 01, 5.4). */
+/** Sportscode XML and CSV export, Sportscode XML import as own tags (addendum 01, 5.4), official
+ * match report import by link. */
 export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; matchId: string; canImport: boolean }) {
   const t = useTranslations("exchange");
   const tr = useTranslations();
@@ -65,6 +67,7 @@ export function ExchangePanel({ orgId, matchId, canImport }: { orgId: string; ma
             {error && <Alert>{tr(`errors.${error}`)}</Alert>}
           </form>
         )}
+        {canImport && <OfficialReportImport orgId={orgId} matchId={matchId} />}
       </div>
     </div>
   );

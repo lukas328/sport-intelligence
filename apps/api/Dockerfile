@@ -22,7 +22,10 @@ RUN --mount=type=secret,id=extra_ca,required=false --mount=type=cache,target=/ro
     if [ -s /run/secrets/extra_ca ]; then export SSL_CERT_FILE=/run/secrets/extra_ca PIP_CERT=/run/secrets/extra_ca; fi; uv sync --frozen --no-dev --package handball-api --no-editable
 
 FROM python:3.12-slim AS runtime
-RUN useradd --system --uid 10001 app
+# pdftotext (poppler-utils, GPL-2.0, called as a separate program) reads DHB press reports
+# (services/official_report.py)
+RUN apt-get update && apt-get install -y --no-install-recommends poppler-utils \
+    && rm -rf /var/lib/apt/lists/* && useradd --system --uid 10001 app
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
 COPY apps/api/alembic.ini apps/api/alembic.ini

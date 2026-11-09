@@ -52,6 +52,12 @@ export const KNOWN_ERRORS = [
   "paper-incomplete",
   "quota-reached",
   "already-member",
+  "report-url-unsupported",
+  "report-not-found",
+  "report-unreadable",
+  "report-empty",
+  "report-unavailable",
+  "already-a-goal",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

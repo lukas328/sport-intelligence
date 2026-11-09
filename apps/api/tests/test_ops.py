@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 
+import asyncpg
 import pytest
 from fastapi import FastAPI
 
@@ -88,3 +89,34 @@ async def test_internal_stats(make_api: Callable[[], Api]) -> None:
     assert set(body["queues"]) == {"default", "pipeline", "gpu"}
     assert body["failed_last_hour"] == 0 and body["running_over_3h"] == 0
     assert body["oldest_queued_s"] >= 0
+
+
+async def test_full_game_jobs_get_the_time_they_need(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """A game of two hours: the queue gave every job six hours, but its analysis on a CPU worker
+    takes about 2.2 x real time (4.4 h), so the worker stopped it before the end and the alerting
+    called it stuck after three hours. The analysis now gets time for the video's length; stuck
+    is a job past that time."""
+    from .test_official_report import ingest
+
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    await upload(api, ids, m["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    assert jobs.timeouts[jobs.jobs[-1][2]] == 6 * 3600  # ingest of a small file
+    await ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], 7200.0)
+    _, func, job, _ = jobs.jobs[-1]
+    assert func == "handball_gpu_worker.analysis.run_analysis"
+    assert jobs.timeouts[job] >= 3 * 7200
+
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    for hours, over in ((5, 0), (8, 1)):
+        await owner_conn.execute(
+            "UPDATE processing_jobs SET status = 'running', "
+            f"started_at = now() - interval '{hours} hours' WHERE id = $1::uuid",
+            job,
+        )
+        body = (await api.http.get("/internal/stats", headers=token)).json()
+        assert (body["running_over_3h"], body["running_over_budget"]) == (1, over)

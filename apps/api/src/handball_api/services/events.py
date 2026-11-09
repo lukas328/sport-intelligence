@@ -88,6 +88,8 @@ def _zone(data: EventIn | Event) -> str | None:
         return None
     if data.shot_type in ("penalty", "fast_break"):
         return "penalty" if data.shot_type == "penalty" else "fast_break"
+    if data.shot_type == "empty_net":
+        return "empty_goal"  # from any distance, not "long_range" (zones spec version 2)
     if data.x is not None and data.y is not None:
         return shot_zone(data.x, data.y)
     return None
@@ -364,9 +366,19 @@ async def cache_put(
     )
 
 
-async def set_kickoff(ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int) -> Match:
-    """Store the video time of a half's throw-off and align events that only have a clock time."""
+async def set_kickoff(
+    ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int, clock_s: float | None = None
+) -> Match:
+    """Store the video time of a half's throw-off and align events that only have a clock time.
+
+    `clock_s`: the match clock shown at `t_ms` (any moment of the half); the throw-off then lies
+    before it, also before the video's start when the video begins mid-half (negative time)."""
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
+    if clock_s is not None:
+        half_start = (period - 1) * match.period_s
+        if not half_start <= clock_s <= half_start + match.period_s:
+            raise ProblemError(422, "invalid-clock", "The clock time is not in this half")
+        t_ms = round(t_ms - (clock_s - half_start) * 1000)
     match.kickoff_ms = {**(match.kickoff_ms or {}), str(period): t_ms}
     events = (
         await ctx.db.scalars(
@@ -376,7 +388,11 @@ async def set_kickoff(ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int) -> 
         )
     ).all()
     for e in events:
-        if e.source in ("official_feed", "paper_report") or e.t_ms is None:
+        # official report goals matched with the video keep the video time
+        from_video = e.source == "official_report" and "video" in (e.attributes or {})
+        if e.t_ms is None or (
+            e.source in ("official_feed", "paper_report", "official_report") and not from_video
+        ):
             e.t_ms = video_from_clock(match, period, e.clock_s or 0.0)
     return match
 
@@ -547,4 +563,43 @@ async def shot_export(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             }
             for e in shots
         ],
+    }
+
+
+async def match_possessions(ctx: Ctx, match_id: uuid.UUID) -> dict[str, object]:
+    """Possession phases of a match (from video tracking or imports) and a summary per side:
+    number of attacks, average length and share of the observed time."""
+    match = await get_match(ctx, match_id)
+    rows = (
+        await ctx.db.scalars(
+            select(Possession).where(Possession.match_id == match.id).order_by(Possession.start_ms)
+        )
+    ).all()
+    phases = [
+        {
+            "side": p.side,
+            "start_ms": p.start_ms,
+            "end_ms": p.end_ms,
+            "outcome": p.outcome,
+            "phase": p.phase,
+            "confidence": round(p.confidence, 3),
+            "source": p.source,
+        }
+        for p in rows
+    ]
+    total = sum(max(0, p.end_ms - p.start_ms) for p in rows) or 1
+    summary: dict[str, dict[str, float]] = {}
+    for side in ("own", "opponent"):
+        mine = [p for p in rows if p.side == side]
+        dur = sum(max(0, p.end_ms - p.start_ms) for p in mine)
+        summary[side] = {
+            "count": len(mine),
+            "fast_breaks": sum(p.phase == "fast_break" for p in mine),
+            "avg_s": round(dur / len(mine) / 1000, 1) if mine else 0.0,
+            "share": round(dur / total, 3),
+        }
+    return {
+        "phases": phases,
+        "summary": summary,
+        "estimated": any(p.source != "manual" for p in rows),
     }

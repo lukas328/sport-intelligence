@@ -71,6 +71,11 @@ class MatchCreate(ApiModel):
     kit_own_gk: HexColor = "#f59e0b"
     kit_opponent: HexColor = "#dc2626"
     kit_opponent_gk: HexColor = "#16a34a"
+    kit_referee: HexColor | None = Field(
+        default=None,
+        description="referee shirt colour when known; left out of the analysis when it is close "
+        "to a team's kit",
+    )
     format: MatchFormatKey | None = Field(
         default=None, description="template; default adult_2x30, youth teams youth_2x25"
     )
@@ -101,6 +106,7 @@ class MatchUpdate(ApiModel):
     kit_own_gk: HexColor | None = None
     kit_opponent: HexColor | None = None
     kit_opponent_gk: HexColor | None = None
+    kit_referee: HexColor | None = Field(default=None, description="null clears it (unknown)")
     format: MatchFormatKey | None = None
     period_s: int | None = Field(default=None, ge=60, le=3600)
     periods: int | None = Field(default=None, ge=1, le=4)
@@ -166,6 +172,7 @@ class MatchOut(ApiModel):
     kit_own_gk: str
     kit_opponent: str
     kit_opponent_gk: str
+    kit_referee: str | None = Field(default=None, description="null: unknown")
     kit_warnings: list[str] = Field(description="kit pairs with similar colours, e.g. own/opponent")
     format: str
     period_s: int
@@ -425,6 +432,20 @@ class FormationSegment(ApiModel):
     confidence: float
 
 
+class HallOut(ApiModel):
+    name: str | None = Field(description="the match's hall (venue), or a suggestion")
+    source: Literal["official", "match", "home_matches"] | None = Field(
+        default=None,
+        description="official game data, the match as entered, or the team's usual home hall "
+        "(a home game without a venue)",
+    )
+    calibrated_videos: int = Field(
+        default=0,
+        description="earlier videos of this hall with a court a person clicked or confirmed: "
+        "the analysis carries their court over when the camera stood at the same place",
+    )
+
+
 class AnalysisOut(ApiModel):
     status: Literal["none", "running", "ready", "failed"]
     formations: list[FormationSegment] = Field(default_factory=list)
@@ -443,6 +464,13 @@ class AnalysisOut(ApiModel):
     panorama: PanoramaOut | None = None  # hall image to mark the court on
     needs_calibration: bool = False  # the court was not found automatically
     calibration_error: str | None = None
+    calibration_info: dict[str, Any] | None = Field(
+        default=None,
+        description="automatic calibration: goal fit, players on the court, camera position; "
+        "method 'hall' when the court was carried over from an earlier video of the hall "
+        "(reference_video_id); hall_tried lists earlier videos that did not fit",
+    )
+    hall: HallOut | None = None
     error_code: str | None = Field(
         default=None, description="calibration, unreadable, too_short, timeout or generic"
     )
@@ -451,6 +479,9 @@ class AnalysisOut(ApiModel):
 class CalibrationPoint(ApiModel):
     image: tuple[float, float]
     court: tuple[float, float]
+    height_m: float = Field(
+        default=0.0, ge=0.0, le=2.5, description="above the floor, e.g. 2 for the crossbar"
+    )
 
     @model_validator(mode="after")
     def _ranges(self) -> CalibrationPoint:

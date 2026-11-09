@@ -14,7 +14,7 @@ from .test_identity_sync import _finish, _ingest, _tracks
 from .test_matches import new_match, upload
 
 pytestmark = pytest.mark.usefixtures("clean_db")
-REEL = "handball_worker.export.run_highlight_reel"
+REEL = "handball_worker.reels.run_highlight_reel"
 
 
 async def _consent(api: Api, ids: dict[str, Any], player: str, kind: str) -> None:

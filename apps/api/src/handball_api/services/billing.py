@@ -144,12 +144,14 @@ async def check_new_team(ctx: Ctx, org_id: uuid.UUID) -> None:
         raise _limit("teams", f"The plan allows {s.teams} team(s)")
 
 
-async def check_new_match(
+async def matches_left(
     ctx: Ctx, org_id: uuid.UUID, team_id: uuid.UUID, season_id: uuid.UUID
-) -> None:
+) -> int | None:
+    """Matches the team may still create in the season; None = no limit (unlimited plan or
+    enforcement off)."""
     check = await _limit_check(ctx, org_id)
     if check is None or check[1].matches_per_season is None:
-        return
+        return None
     count = await ctx.db.scalar(
         select(func.count(Match.id)).where(
             Match.team_id == team_id,
@@ -158,8 +160,18 @@ async def check_new_match(
             Match.quota_credit.is_(False),  # failed analyses are credited (addendum 01, 4.11)
         )
     )
-    if (count or 0) >= check[1].matches_per_season:
-        raise _limit("matches", f"The plan allows {check[1].matches_per_season} matches per season")
+    return max(0, check[1].matches_per_season - int(count or 0))
+
+
+async def check_new_match(
+    ctx: Ctx, org_id: uuid.UUID, team_id: uuid.UUID, season_id: uuid.UUID
+) -> None:
+    left = await matches_left(ctx, org_id, team_id, season_id)
+    if left is not None and left <= 0:
+        org = await _org(ctx, org_id)
+        raise _limit(
+            "matches", f"The plan allows {spec(org).matches_per_season} matches per season"
+        )
 
 
 async def check_upload(ctx: Ctx, org_id: uuid.UUID, size_bytes: int) -> None:
