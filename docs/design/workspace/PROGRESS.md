@@ -410,5 +410,36 @@ Fixed:
 - Shot review: one count ("1 von 1 mit Matchbericht · 2 weitere offen") instead of "1 von 1"
   next to a tab saying "Offen (3)".
 
-Left open: the hero and the tab row above the workspace on phones (collapse while reviewing);
-the dense report sentence above the shots as a row of tappable counts.
+- After PR 22: the report line above the shots is a printed row of counts (im Video bestätigt,
+  vorgeschlagen, ohne Stelle, ausserhalb); "vorgeschlagen" opens its list.
+
+Left open: the hero and the tab row above the workspace on phones (collapse while reviewing).
+
+## Squad status, assignment progress, xG against (UI session, 2026-11-09, after PR 23)
+
+- Squad: staff set a player injured or away ("Status" in the row: kind, until-date, short note)
+  and back to fit; the row reads "Verletzt bis 16. Nov. · Knöchel". Players see only their own.
+- Assignments: hairline rows with "0 von 1 erledigt" and "Noch offen: …" by name
+  (`still_open`), or "Alle haben es erledigt.".
+- xG against only with enough positioned shots of the opponent (`xg_against_coverage`, 70 %):
+  the season table shows "-" otherwise, and the season statement says nothing about the defence.
+
+## Phone round over squad, training and the player's side (UI session, 2026-11-09)
+
+Pixel 7 emulation, coach and player, fresh-eyes review. Scores (one signal, hairlines, game
+language, type, edge states): Kader 1, 4, 4, 4, 3; Aufgaben (coach) 2, 4, 3, 4, 3; Training 1, 4,
+4, 3, 3; Start (player) 2, 4, 3, 4, 2; Kader (player) -, 5, 4, 4, -; Aufgaben and Termine
+(player) 1, 2, 3, 2, 2.
+
+Fixed:
+- Kader: "Verfügbar 3 von 5 · Lea Beispiel, Sara Keller fallen aus" above the list; the shirt
+  number of a player who is out is muted; the consent note is no longer repeated on every row
+  (the line above the list sums it up); "Status" is an outlined button, 44 px on phones.
+- Training: an upcoming unit says who is out that day ("1 fällt aus: Lea Beispiel (verletzt)");
+  "Löschen" sits apart from the everyday actions and asks first.
+- Meine Aufgaben (player): hairline rows instead of squeezed cards, the title on its own line,
+  "Öffnen" and "Erledigt" full width under it on phones; "überfällig" in ink, not red.
+
+Not changed: the player who saw no dates had an account that was not linked to a squad entry
+(test data); the US date format comes from the emulated browser's language (the field follows
+it, see batch 3).

@@ -256,15 +256,34 @@ export function ShotCandidatesPanel({
 
       {/* the report against the video: what is placed, what waits for a click, what is missing */}
       {official && (
-        <p className="text-sm" data-testid="shot-candidates-report">
-          {t("report", {
-            total: official.counts.total,
-            confirmed: official.counts.confirmed,
-            suggested: official.counts.suggested,
-            missing: official.counts.missing,
-          })}
-          {official.counts.outside > 0 && <span className="text-muted">{` ${t("reportOutside", { n: official.counts.outside })}`}</span>}
-        </p>
+        // the report against the video as one printed row: the counts read at a glance, the
+        // proposed ones lead to their list
+        <div className="space-y-1.5 text-sm" data-testid="shot-candidates-report">
+          <p className="font-semibold">{t("reportTitle", { total: official.counts.total })}</p>
+          <dl className="grid grid-cols-4 gap-x-3 border-y border-foreground/15 py-1.5">
+            {(
+              [
+                ["confirmed", official.counts.confirmed],
+                ["suggested", official.counts.suggested],
+                ["missing", official.counts.missing],
+                ["outside", official.counts.outside],
+              ] as const
+            ).map(([k, v]) => (
+              <div key={k} className="min-w-0">
+                <dt className="truncate text-xs text-muted">{t(`report_${k}`)}</dt>
+                <dd className="font-score text-lg tabular-nums">
+                  {k === "suggested" && v > 0 ? (
+                    <button type="button" className="min-h-8 underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-solid" onClick={() => setFilter("report")}>
+                      {v}
+                    </button>
+                  ) : (
+                    v
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       )}
       {onSetKickoff && (
         <p className="text-sm text-muted" data-testid="shot-candidates-kickoff">

@@ -25,6 +25,8 @@ interface Row {
   xg: number;
   xg_coverage: number | null;
   xg_against: number;
+  /** share of the opponent's shots on target with a position; xG against only with enough of them */
+  xg_against_coverage?: number | null;
   seven_m: [number, number];
 }
 interface Season {
@@ -314,7 +316,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   <td>{pct(m.save_pct)}</td>
                   <td>{m.turnovers}</td>
                   <td>{xgLabel(m)}</td>
-                  <td>{m.xg_against.toFixed(1)}</td>
+                  <td>{xgLabel({ xg: m.xg_against, xg_coverage: m.xg_against_coverage ?? null })}</td>
                   {sevenM && (
                     <td>
                       {m.seven_m[0]}/{m.seven_m[1]}
