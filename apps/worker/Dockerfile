@@ -24,7 +24,9 @@ RUN --mount=type=secret,id=extra_ca,required=false --mount=type=cache,target=/ro
 FROM python:3.12-slim AS runtime
 # Static ffmpeg/ffprobe (x264, aac, fMP4 HLS). Pinned version; smaller and fewer CVEs than distro ffmpeg.
 COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /ffprobe /usr/local/bin/
-RUN useradd --system --uid 10001 app && mkdir -p /tmp/handball-work && chown app /tmp/handball-work
+# security updates of the base image (the scan fails on fixed HIGH/CRITICAL CVEs)
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --uid 10001 app && mkdir -p /tmp/handball-work && chown app /tmp/handball-work
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1
