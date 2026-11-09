@@ -807,10 +807,13 @@ def main() -> None:
         "local_with_log": sum(1 for e in entries if (e.get("video") or {}).get("source") == "local"
                               and e.get("has_log")),
     }
-    a.catalog.write_text(json.dumps({
-        "generated": datetime.now().isoformat(timespec="seconds"),
-        "source": "ml/data/match_official.py", "summary": summary, "games": entries,
-    }, ensure_ascii=False, indent=1))
+    body = {"source": "ml/data/match_official.py", "summary": summary, "games": entries}
+    old = json.loads(a.catalog.read_text(encoding="utf-8")) if a.catalog.exists() else {}
+    old.pop("generated", None)
+    if old != body:  # only rewrite (and bump the date) when the content changed
+        a.catalog.write_text(json.dumps(
+            {"generated": datetime.now().isoformat(timespec="seconds"), **body},
+            ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(summary), f"api requests: {api.requests}", flush=True)
 
 
