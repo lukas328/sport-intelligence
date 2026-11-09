@@ -13,6 +13,7 @@ from datetime import UTC, datetime, timedelta
 import httpx
 from sqlalchemy import delete, select
 
+from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
 from handball_api.core.logging import get_logger
 from handball_api.core.security import (
@@ -186,6 +187,7 @@ async def register(
     ctx.user_id = user.id
     await audit.record(ctx, "user.registered", target_type="user", target_id=user.id)
     if not data.invitation_token:  # invitations prove the address already
+        # A mail outage must not lose the account: the banner in the app offers a resend.
         await send_email_verification(ctx, user)
     return user, await issue_session(ctx, user, mfa_pending=False, user_agent=user_agent)
 
@@ -296,7 +298,9 @@ async def request_magic_link(ctx: Ctx, email: str) -> None:
         )
     )
     link = f"{ctx.settings.web_base_url}/auth/magic?token={token}"
-    await ctx.email.send(
+    # same answer either way (no account enumeration); a failure is logged
+    await try_send(
+        ctx.email,
         render(
             "magic_link",
             user.locale,
@@ -304,7 +308,9 @@ async def request_magic_link(ctx: Ctx, email: str) -> None:
             name=user.name,
             link=link,
             minutes=ctx.settings.magic_link_ttl_minutes,
-        )
+        ),
+        "magic_link",
+        user_id=str(user.id),
     )
 
 
@@ -420,7 +426,9 @@ async def request_password_reset(ctx: Ctx, email: str) -> None:
         return
     minutes = ctx.settings.password_reset_ttl_minutes
     token = await _issue_token(ctx, user, TokenPurpose.PASSWORD_RESET, timedelta(minutes=minutes))
-    await ctx.email.send(
+    # same answer either way (no account enumeration); a failure is logged
+    await try_send(
+        ctx.email,
         render(
             "password_reset",
             user.locale,
@@ -428,7 +436,9 @@ async def request_password_reset(ctx: Ctx, email: str) -> None:
             name=user.name,
             minutes=minutes,
             link=f"{ctx.settings.web_base_url}/auth/reset?token={token}",
-        )
+        ),
+        "password_reset",
+        user_id=str(user.id),
     )
     await audit.record(
         ctx,
@@ -455,12 +465,14 @@ async def reset_password(
     )
 
 
-async def send_email_verification(ctx: Ctx, user: User) -> None:
+async def send_email_verification(ctx: Ctx, user: User) -> bool:
+    """Returns False when the mail provider failed (logged); the token stays valid for a resend."""
     if user.email_verified_at is not None:
-        return
+        return True
     hours = ctx.settings.email_verify_ttl_hours
     token = await _issue_token(ctx, user, TokenPurpose.EMAIL_VERIFY, timedelta(hours=hours))
-    await ctx.email.send(
+    return await try_send(
+        ctx.email,
         render(
             "email_verify",
             user.locale,
@@ -468,8 +480,18 @@ async def send_email_verification(ctx: Ctx, user: User) -> None:
             name=user.name,
             hours=hours,
             link=f"{ctx.settings.web_base_url}/auth/verify?token={token}",
-        )
+        ),
+        "email_verify",
+        user_id=str(user.id),
     )
+
+
+async def resend_email_verification(ctx: Ctx, user: User) -> None:
+    """The user asked for the mail explicitly, so a provider failure is reported (503)."""
+    if not await send_email_verification(ctx, user):
+        raise ProblemError(
+            503, "email-unavailable", "The e-mail could not be sent; please try again later"
+        )
 
 
 async def verify_email(ctx: Ctx, token: str) -> User:

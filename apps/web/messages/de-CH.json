@@ -141,7 +141,8 @@
     "email-unverified": "Bitte zuerst deine E-Mail-Adresse bestätigen.",
     "org-unverified": "Der Verein ist noch nicht bestätigt: das geht erst danach.",
     "suggestion-resolved": "Dieser Vorschlag ist schon erledigt.",
-    "suggestion-stale": "Dieser Vorschlag passt nicht mehr: Spiel oder Eintrag gibt es nicht mehr."
+    "suggestion-stale": "Dieser Vorschlag passt nicht mehr: Spiel oder Eintrag gibt es nicht mehr.",
+    "email-unavailable": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuch es später nochmals."
   },
   "auth": {
     "loginTitle": "Anmelden",

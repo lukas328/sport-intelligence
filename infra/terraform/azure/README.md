@@ -122,6 +122,11 @@ The job creates the runtime role `handball_app` (no BYPASSRLS, ADR 005), runs `a
 `handball_api.bootstrap` (buckets and CORS). Logs: Azure portal → the job → Execution history.
 Run it again after every deploy that contains a new migration.
 
+The bootstrap only writes what is missing. With an object-scoped storage key (R2 "Object Read & Write")
+it cannot create buckets or set CORS: the job still succeeds and logs `bootstrap_manual_step` with what to
+do by hand (create the bucket, or set the printed CORS rule on the video bucket). A bucket that is missing
+and cannot be created fails the job (`bootstrap_failed`).
+
 **Optional settings** such as Sign in with Google: put the secret into Key Vault under the variable name
 in lowercase with dashes, list the variable in `optional_secrets`, add the non-secret part to `extra_env`
 and apply:

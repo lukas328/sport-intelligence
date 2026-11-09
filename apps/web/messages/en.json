@@ -141,7 +141,8 @@
     "email-unverified": "Please confirm your e-mail address first.",
     "org-unverified": "The club is not confirmed yet: this works after that.",
     "suggestion-resolved": "This suggestion is already done.",
-    "suggestion-stale": "This suggestion no longer fits: the match or entry is gone."
+    "suggestion-stale": "This suggestion no longer fits: the match or entry is gone.",
+    "email-unavailable": "The e-mail could not be sent right now. Please try again later."
   },
   "auth": {
     "loginTitle": "Sign in",

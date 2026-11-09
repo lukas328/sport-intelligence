@@ -18,7 +18,7 @@ from typing import Any
 
 from sqlalchemy import func, select
 
-from handball_api.core.email import Email
+from handball_api.core.email import Email, try_send
 from handball_api.core.errors import ProblemError
 from handball_api.integrations.support import CrispChat, NoSupportChat
 from handball_api.models import (
@@ -79,14 +79,22 @@ async def feedback(
             raise ProblemError(422, "validation", "Screenshot must be a PNG up to 2 MB")
         attachments = (("screenshot.png", "image/png", raw),)
     lines = [f"{k}: {v}" for k, v in sorted(context.items()) if v not in (None, "")]
-    await ctx.email.send(
+    # the mail is the whole action here: report the outage instead of a bare 500
+    sent = await try_send(
+        ctx.email,
         Email(
             to=ctx.settings.support_email,
             subject=f"Feedback: {message[:60]}",
             text=f"{message}\n\n---\nVon: {user.name} <{user.email}>\n" + "\n".join(lines),
             attachments=attachments,
-        )
+        ),
+        "feedback",
+        user_id=str(user.id),
     )
+    if not sent:
+        raise ProblemError(
+            503, "email-unavailable", "The e-mail could not be sent; please try again later"
+        )
     await audit.record(ctx, "support.feedback", data={"page": context.get("page")})
 
 
@@ -266,7 +274,8 @@ async def run_series(ctx: Ctx, now: datetime | None = None) -> int:
             else ctx.settings.help_base_url + SERIES_LINKS[day][6:]
         )
         unsub = f"{base}/v1/onboarding/unsubscribe?u={u.id}&t={unsubscribe_token(ctx, u.id)}"
-        await ctx.email.send(
+        sent_ok = await try_send(
+            ctx.email,
             render(
                 f"onboarding_{day}",
                 u.locale,
@@ -274,8 +283,12 @@ async def run_series(ctx: Ctx, now: datetime | None = None) -> int:
                 name=u.name.split()[0],
                 link=link,
                 unsubscribe=unsub,
-            )
+            ),
+            f"onboarding_{day}",
+            user_id=str(u.id),
         )
+        if not sent_ok:  # retried on the next run; the other users still get theirs
+            continue
         u.onboarding_sent = sorted({*(u.onboarding_sent or []), *due})
         sent += 1
     await ctx.db.flush()
