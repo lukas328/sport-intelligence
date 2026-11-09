@@ -279,8 +279,12 @@ export function CourtPreview({ orgId, videoId, analysis, alt }: { orgId: string;
       {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image, not a static asset */}
       <img src={`/v1/orgs/${orgId}/videos/${videoId}/panorama`} alt={alt} width={pano.width} height={pano.height} className="block h-auto w-full" />
       <svg viewBox={`0 0 ${pano.width} ${pano.height}`} className="pointer-events-none absolute inset-0 size-full" aria-hidden>
+        {/* a dark halo under the orange: the lines must stand out on any hall floor, also outdoors on a phone */}
         {courtPolylines(cal.homography).map((line, i) => (
-          <path key={i} d={imagePath(line)} fill="none" stroke="#f97316" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+          <path key={`h${i}`} d={imagePath(line)} fill="none" stroke="#000" strokeOpacity={0.55} strokeWidth={5} vectorEffect="non-scaling-stroke" />
+        ))}
+        {courtPolylines(cal.homography).map((line, i) => (
+          <path key={i} d={imagePath(line)} fill="none" stroke="#f97316" strokeWidth={2.5} vectorEffect="non-scaling-stroke" />
         ))}
       </svg>
     </div>

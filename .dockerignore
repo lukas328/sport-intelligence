@@ -12,3 +12,8 @@ data
 **/playwright-report
 *.mp4
 *.mov
+infra
+**/.terraform
+*.tfplan
+*.tfvars
+*.tfstate*

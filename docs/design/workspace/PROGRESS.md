@@ -193,6 +193,15 @@ For the analysis session; read from this branch. Newest first.
      longer counts a candidate as "schon erfasst". The zone "Fernwurf / leeres Tor" was already
      split on main (`long_range` and `empty_goal`, zones spec version 2, alembic 0033); the
      metrics version is bumped, so cached statistics are recomputed.
+- 2026-11-09 (backend check on main): three findings from the UI session were already fixed on
+  main (the UI stack ran older code), nothing to change:
+  1. Feed and events outside the video: `feed.generate` skips events before or after the video
+     (`services/feed.in_video`, test `test_feed.py::test_in_video`).
+  2. Reels: the API queues `handball_worker.reels.run_highlight_reel`; the job contract test
+     (`test_job_paths.py`) checks every queued path against the worker sources and the payloads.
+  3. Season figures: every match with a result counts, goals per match from one source like the
+     match statistics (test
+     `test_insights_api.py::test_season_counts_every_played_match_and_each_goal_once`).
 
 - 2026-11-09 (UI session, demo data with a synthetic 1-minute video): 4 of 5 attacks counted as
   fast breaks; 33 and 60 sprints and 1.22 km against 2.02 km in one minute; a team row's top
@@ -362,3 +371,28 @@ Left open: the attack strip and list use video time until the throw-off is set (
 coach thinks in game time); team rows of the physical table select the map but do not lead to the
 video; the data notes for the analysis session (4 of 5 attacks counted as fast breaks, 33 and 60
 sprints in one minute, a team's top speed of 31.7 km/h) are in "Backend findings".
+
+## Phone round over the match workspace (UI session, 2026-11-09, after PR 18)
+
+Real phone emulation (Pixel 7, touch), viewport captures of the court from the hall, the goal
+candidates and the shots, inline and in the full-screen review; fresh-eyes review.
+
+Scores (anchor, signal, hairlines, game language, team by side, numbers to video, review speed,
+proposed vs confirmed, type, edge states): court 3, 2, 3, 4, -, -, 2, -, 4, 3; goals inline 3, 2,
+3, 4, 3, 4, 2, 3, 4, 4; goal review 4, 4, 4, 4, 3, 4, 4, 3, 4, 4; shots inline 3, 3, 3, 4, -, 2, 2,
+3, 4, 4; shot review 4, 4, 3, 4, 3, 3, 3, 3, 4, 4. Both full-screen reviews fit video and decision
+on one screen.
+
+Fixed:
+- Court from the hall: "Passt" and "Neu markieren" sat under the bottom navigation; on phones they
+  are now a fixed bar above it (thumb zone) until the court is checked. The orange court lines
+  have a dark halo, so they stand out on a wooden floor.
+- Goal candidates: key letters hidden for touch input (as for shots), all four answers at least
+  44 px, "Nochmals" an outlined button (it looked disabled).
+- Shots: "Kein Wurf" and "Nochmals" outlined buttons instead of bare text.
+
+- Shot review: one count ("1 von 1 mit Matchbericht · 2 weitere offen") instead of "1 von 1"
+  next to a tab saying "Offen (3)".
+
+Left open: the hero and the tab row above the workspace on phones (collapse while reviewing);
+the dense report sentence above the shots as a row of tappable counts.

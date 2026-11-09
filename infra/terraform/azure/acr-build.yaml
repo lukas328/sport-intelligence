@@ -1,0 +1,28 @@
+# Builds the four images inside the registry (no local Docker needed). README, step 3.
+# az acr run -r <registry> -f infra/terraform/azure/acr-build.yaml --set tag=<tag> --timeout 7200 <clean context>
+version: v1.1.0
+stepTimeout: 5400
+steps:
+  - id: api
+    build: -t $Registry/hb-api:{{.Values.tag}} -f apps/api/Dockerfile .
+    env: ["DOCKER_BUILDKIT=1"]
+    when: ["-"]
+  - id: worker
+    build: -t $Registry/hb-worker:{{.Values.tag}} -f apps/worker/Dockerfile .
+    env: ["DOCKER_BUILDKIT=1"]
+    when: ["-"]
+  - id: web
+    build: -t $Registry/hb-web:{{.Values.tag}} -f apps/web/Dockerfile .
+    env: ["DOCKER_BUILDKIT=1"]
+    when: ["-"]
+  - id: gpu-worker
+    build: -t $Registry/hb-gpu-worker:{{.Values.tag}} -f apps/gpu-worker/Dockerfile .
+    env: ["DOCKER_BUILDKIT=1"]
+    when: ["-"]
+  - id: push
+    push:
+      - $Registry/hb-api:{{.Values.tag}}
+      - $Registry/hb-worker:{{.Values.tag}}
+      - $Registry/hb-web:{{.Values.tag}}
+      - $Registry/hb-gpu-worker:{{.Values.tag}}
+    when: ["api", "worker", "web", "gpu-worker"]

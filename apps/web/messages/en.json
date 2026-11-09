@@ -2482,7 +2482,8 @@
     "reportTime": "report {time}",
     "shotBy": "shot by {who}",
     "noKickoff": "The throw-off is not set yet: the game times are estimated from the match report.",
-    "setKickoff": "Set the throw-off"
+    "setKickoff": "Set the throw-off",
+    "positionReport": "{pos} of {n} with the match report · {more} more open"
   },
   "officialTeams": {
     "title": "Find your team",

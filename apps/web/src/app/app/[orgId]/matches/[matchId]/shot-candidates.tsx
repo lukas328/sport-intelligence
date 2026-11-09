@@ -284,7 +284,12 @@ export function ShotCandidatesPanel({
               {game(deciding)}
             </span>
             {rows.length > 0 && (
-              <span className="ml-auto font-score text-sm text-muted tabular-nums">{t("position", { pos: active + 1, n: rows.length })}</span>
+              <span className="ml-auto font-score text-sm text-muted tabular-nums">{
+                // one count: the report's moments come first, the other open ones after them
+                shown === "report" && openAt(current) > rows.length
+                  ? t("positionReport", { pos: active + 1, n: rows.length, more: openAt(current) - rows.length })
+                  : t("position", { pos: active + 1, n: rows.length })
+              }</span>
             )}
           </p>
           {deciding.suggestion && (
@@ -343,13 +348,13 @@ export function ShotCandidatesPanel({
               ))}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="quiet" className="max-sm:min-h-11" aria-keyshortcuts="X" onClick={() => decide(deciding, active, { status: "rejected" })}>
+              <Button size="sm" variant="secondary" className="max-sm:min-h-11" aria-keyshortcuts="X" onClick={() => decide(deciding, active, { status: "rejected" })}>
                 <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                   X
                 </kbd>
                 {t("noShot")}
               </Button>
-              <Button size="sm" variant="quiet" className="max-sm:min-h-11" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
+              <Button size="sm" variant="secondary" className="max-sm:min-h-11" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
                 <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                   R
                 </kbd>
@@ -367,7 +372,7 @@ export function ShotCandidatesPanel({
             <Button variant="ghost" size="sm" className="-my-1" aria-keyshortcuts="U" onClick={undoLast}>
               <RotateCcw aria-hidden />
               {t("undo")}
-              <kbd aria-hidden className="font-score text-muted">
+              <kbd aria-hidden className="font-score text-muted pointer-coarse:hidden">
                 U
               </kbd>
             </Button>
