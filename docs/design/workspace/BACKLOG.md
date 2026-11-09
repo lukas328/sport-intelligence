@@ -14,7 +14,7 @@ Bugs reported from the test environment on Azure always go first. `[x]` = done.
    (eyebrow, title); the zone split stays with the analysis session.
 4. [x] Timeline: a label per side on the sided lanes (own team above, opponent below), not only
    in the legend.
-5. [ ] Check and close: "Teilen" and "…" on phones (they share the row with the tabs since the
+5. [x] Check and close (both fine at 390 px and in the search; closed): "Teilen" and "…" on phones (they share the row with the tabs since the
    identity rework); search hits without a video window ("ohne Video" handles them).
 6. [ ] Analyse tab slice: possession, attacks, physical load and shots in the language of the
    match sheet, then a fresh-eyes review round (METHOD.md).
@@ -167,7 +167,7 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [x] `PUT /kickoff` with `clock_s` for clips that start mid-half: "Uhr eintragen" in the throw-off step
   ("Spieluhr zeigt hier 12:40" at the paused moment, `lib/match-workflow.ts` `parseClock`, tested).
 - [x] Shot zone split: "Fernwurf" and "Leeres Tor" (`empty_goal`) in the web texts.
-- [ ] Search hits outside the video come with null windows ("ohne Video" already handles it).
+- [x] Search hits outside the video come with null windows ("ohne Video" already handles it).
 - [x] nuLiga/HLA report links (hint and error text); `roster_stats` toggle (in the inbox).
 - [x] `no-video` errors on clip slides; referee kit (see "Open after PR 8").
 

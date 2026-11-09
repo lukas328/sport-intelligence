@@ -154,7 +154,7 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
   analysis session.
 
 - Analyse tab (next slice): possession, attacks, physical load, shots in the same language.
-- Phone: "Teilen" and "…" take their own row under the tabs.
+- Closed (2026-11-09): "Teilen" and "…" sit as icon buttons in the row of the tabs at 390 px.
 - Dev only: a hydration warning appears once after hot reloads (stale server bundle), not on a
   fresh start.
 
