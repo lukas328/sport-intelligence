@@ -9,9 +9,8 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
 einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
 für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
-alle zusammen: etwa 33 USD). Vorher `git pull`: `ml/ball/kaggle/owl_gpu.py` überspringt jetzt
-Segmente, deren JSON in einem Eingabe-Dataset unter `segs/` liegt (Auftrag 3 gibt dafür das alte
-Ergebnis als Eingabe mit). Bei "budget"/"spend limit" abbrechen und melden.
+alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from`). Bei
+"budget"/"spend limit" abbrechen und melden.
 
 ### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
 - Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`
@@ -49,7 +48,7 @@ Ergebnis als Eingabe mit). Bei "budget"/"spend limit" abbrechen und melden.
 
 Summe 3 bis 10: 841 Segmente, etwa 49 GPU-Stunden, etwa 32 USD. Falls ein Auftrag an die
 10-h-Grenze stösst: unter "Erledigt" die fehlenden Segmente nennen, der Rest folgt wie bei
-Auftrag 3 (altes Ergebnis als Eingabe dazu).
+Auftrag 3 (mit `--resume-from <Dataset des Teillaufs>`).
 
 ## Erledigt
 
