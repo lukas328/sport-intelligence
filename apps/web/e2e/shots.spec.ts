@@ -44,7 +44,9 @@ test("shot review: Enter takes the report's entry, 1 + G says a goal, X no shot,
   await expect(panel.getByRole("heading", { name: "Würfe prüfen" })).toBeVisible();
   await expect(page.getByTestId("shot-candidates-report")).toContainText("Matchbericht: 24 Würfe, 0 im Video bestätigt, 1 vorgeschlagen, 2 ohne Stelle im Video.");
   await expect(page.getByTestId("shot-candidates-report")).toContainText("21 liegen ausserhalb des Videos.");
-  await expect(page.getByTestId("shot-accept")).toContainText("Parade, #14 Kurt Beispiel (TV Testdorf)");
+  await expect(page.getByTestId("shot-accept")).toContainText("Parade, Wurf von #14 Kurt Beispiel (TV Testdorf)");
+  // no throw-off yet: the times are the report's, one click leads to the throw-off step
+  await expect(page.getByTestId("shot-candidates-kickoff")).toContainText("Der Anwurf fehlt noch");
   await expectAccessible(page);
 
   // Enter on the moment takes the report's entry (player and outcome pinned to the video)
@@ -52,11 +54,14 @@ test("shot review: Enter takes the report's entry, 1 + G says a goal, X no shot,
   await expect(rows).toHaveCount(1);
   await rows.first().focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 12:45: Parade, #14 Kurt Beispiel (TV Testdorf) aus dem Matchbericht.");
+  await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 12:45: Parade, Wurf von #14 Kurt Beispiel (TV Testdorf) aus dem Matchbericht.");
   expect(reviews.at(-1)).toEqual({ status: "confirmed" });
 
-  // the report's moments are done: the open ones follow; a team first, then the outcome
+  // the report's moments are done: the open ones follow, and the video goes to the next one
+  // (paused at its lead-in: 12 s minus 6 s); a team first, then the outcome
   await expect(rows).toHaveCount(2);
+  const video = page.getByTestId("video");
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => Math.round(v.currentTime))).toBe(6);
   await rows.first().focus();
   await page.keyboard.press("g");
   await expect(panel.getByText("Erst das Team wählen: 1 oder 2.")).toBeVisible();

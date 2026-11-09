@@ -2466,7 +2466,10 @@
     "rateMore": "Mehr oder weniger Vorschläge",
     "rate": "Vorschläge pro Minute",
     "perMinute": "{n} pro Min.",
-    "reportTime": "im Bericht {time}"
+    "reportTime": "im Bericht {time}",
+    "shotBy": "Wurf von {who}",
+    "noKickoff": "Der Anwurf fehlt noch: die Spielzeiten sind aus dem Matchbericht geschätzt.",
+    "setKickoff": "Anwurf setzen"
   },
   "officialTeams": {
     "title": "Mannschaft suchen",
@@ -2553,7 +2556,9 @@
     "points": "Pkt.",
     "numberTwice": "Doppelte Rückennummer: {numbers}. Eine davon ändern oder leer lassen.",
     "noAppearancesHint": "Wer noch kein Spiel hat, ist nicht angewählt.",
-    "openLine": "{n, plural, one {# Vorschlag} other {# Vorschläge}} aus handball.ch ansehen"
+    "openLine": "{n, plural, one {# Vorschlag} other {# Vorschläge}} aus handball.ch ansehen",
+    "home": "gegen {opponent}",
+    "away": "auswärts bei {opponent}"
   },
   "requests": {
     "eyebrow": "Team",

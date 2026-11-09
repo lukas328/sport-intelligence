@@ -2466,7 +2466,10 @@
     "rateMore": "Plus ou moins de propositions",
     "rate": "Propositions par minute",
     "perMinute": "{n} par min.",
-    "reportTime": "feuille {time}"
+    "reportTime": "feuille {time}",
+    "shotBy": "tir de {who}",
+    "noKickoff": "L'engagement n'est pas encore placé : les temps de jeu sont estimés d'après la feuille de match.",
+    "setKickoff": "Placer l'engagement"
   },
   "officialTeams": {
     "title": "Chercher l'équipe",
@@ -2553,7 +2556,9 @@
     "points": "Pts",
     "numberTwice": "Numéro attribué deux fois : {numbers}. Modifie l'un d'eux ou laisse-le vide.",
     "noAppearancesHint": "Les joueurs/euses sans match ne sont pas cochés.",
-    "openLine": "Voir {n, plural, one {# proposition} other {# propositions}} de handball.ch"
+    "openLine": "Voir {n, plural, one {# proposition} other {# propositions}} de handball.ch",
+    "home": "contre {opponent}",
+    "away": "à l'extérieur chez {opponent}"
   },
   "requests": {
     "eyebrow": "Équipe",

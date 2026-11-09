@@ -553,7 +553,16 @@ export function Workspace({
       >
         {shown === "court" && (
           <>
-            <AnalysisPanel analysis={a ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} canCalibrate={staff} />
+            <AnalysisPanel
+              analysis={a ?? null}
+              orgId={orgId}
+              videoId={video.id}
+              colours={kitColours}
+              getTime={getTime}
+              canCalibrate={staff}
+              // the court is checked: on to the next open step
+              onConfirmed={() => setPane(null)}
+            />
             {setup && <div className="space-y-3 border-t border-foreground/15 pt-4">{setup}</div>}
           </>
         )}
@@ -607,7 +616,12 @@ export function Workspace({
           </div>
         )}
         {shown === "shots" && staff && (
-          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names} onClip={playClip} onActive={setActiveShot} />
+          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names}
+              onClip={playClip}
+              onActive={setActiveShot}
+              onSeek={seekPaused}
+              onSetKickoff={match.kickoff_ms?.["1"] == null ? () => setPane("kickoff") : undefined}
+            />
         )}
         {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
         {shown === "feedback" && staff && (
@@ -790,6 +804,7 @@ function AnalysisPanel({
   colours,
   getTime,
   canCalibrate,
+  onConfirmed,
 }: {
   analysis: Analysis | null;
   orgId: string;
@@ -797,6 +812,7 @@ function AnalysisPanel({
   colours: Record<string, string>;
   getTime: () => number;
   canCalibrate: boolean;
+  onConfirmed?: () => void;
 }) {
   const t = useTranslations("analysis");
   const [marking, setMarking] = useState(false);
@@ -808,7 +824,10 @@ function AnalysisPanel({
       });
       if (error) throw new Error("confirm");
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["analysis", videoId] }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["analysis", videoId] });
+      onConfirmed?.();
+    },
   });
   const confirmCourt = () => confirm.mutate();
   const confirming = confirm.isPending;

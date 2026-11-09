@@ -2466,7 +2466,10 @@
     "rateMore": "More or fewer suggestions",
     "rate": "Suggestions per minute",
     "perMinute": "{n} per min.",
-    "reportTime": "report {time}"
+    "reportTime": "report {time}",
+    "shotBy": "shot by {who}",
+    "noKickoff": "The throw-off is not set yet: the game times are estimated from the match report.",
+    "setKickoff": "Set the throw-off"
   },
   "officialTeams": {
     "title": "Find your team",
@@ -2553,7 +2556,9 @@
     "points": "Pts",
     "numberTwice": "Shirt number given twice: {numbers}. Change one or leave it empty.",
     "noAppearancesHint": "Players without a match yet are not ticked.",
-    "openLine": "See {n, plural, one {# suggestion} other {# suggestions}} from handball.ch"
+    "openLine": "See {n, plural, one {# suggestion} other {# suggestions}} from handball.ch",
+    "home": "vs {opponent}",
+    "away": "away at {opponent}"
   },
   "requests": {
     "eyebrow": "Team",

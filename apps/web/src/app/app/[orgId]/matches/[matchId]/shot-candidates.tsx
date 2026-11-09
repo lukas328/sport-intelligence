@@ -51,6 +51,8 @@ export function ShotCandidatesPanel({
   names,
   onClip,
   onActive,
+  onSeek,
+  onSetKickoff,
 }: {
   orgId: string;
   matchId: string;
@@ -60,6 +62,10 @@ export function ShotCandidatesPanel({
   onClip: (fromMs: number, toMs: number) => void;
   /** the moment that is up, for the timeline's signal ring */
   onActive?: (id: string | null) => void;
+  /** the video goes to the moment that is up (paused, with its lead-in) */
+  onSeek?: (ms: number) => void;
+  /** set when the throw-off is missing: the game times come from the report alone */
+  onSetKickoff?: () => void;
 }) {
   const t = useTranslations("shotCandidates");
   const te = useTranslations("events");
@@ -125,6 +131,10 @@ export function ShotCandidatesPanel({
     onActive?.(up?.status === "open" ? up.id : null);
   }, [up?.id, up?.status]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => onActive?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // each moment that comes up is shown in the video, so the coach looks before deciding
+  useEffect(() => {
+    if (up && up.status === "open") onSeek?.(up.start_ms);
+  }, [up?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!list || list.counts.total === 0) return null;
 
   const active = Math.min(focus, rows.length - 1);
@@ -135,14 +145,14 @@ export function ShotCandidatesPanel({
     c.clock_s != null ? tr("events.at", { period: c.period ?? 1, clock: formatClock(c.clock_s * 1000) }) : formatClock(c.goal_ms);
   const pickedSide = (c: ShotCandidate) => (side?.id === c.id ? side.side : defaultSide(c));
   const outcomeLabel = (o: string | null | undefined) => (o ? te(o as ShotOutcome) : "");
-  // the report's entry as a sentence: "Parade, #7 Muster (HC Demo-Meilen)"
+  // the report's entry as a sentence: "Parade, Wurf von #7 Muster (HC Demo-Meilen)"
   const reportLine = (c: ShotCandidate) => {
     const s = c.suggestion;
     if (!s) return null;
     const who = (s.player_id && names[s.player_id]) || playerLabel(s.number, reportName(s.name));
     // the report's own time only where it differs from the moment's clock (the clock map is an estimate)
     const off = s.clock_s != null && c.clock_s != null && Math.abs(s.clock_s - c.clock_s) >= 3 && s.official_time ? t("reportTime", { time: s.official_time }) : null;
-    return [s.penalty ? t("penalty", { what: outcomeLabel(s.outcome) }) : outcomeLabel(s.outcome), who && `${who} (${team(s.side) ?? ""})`, off]
+    return [s.penalty ? t("penalty", { what: outcomeLabel(s.outcome) }) : outcomeLabel(s.outcome), who && t("shotBy", { who: `${who} (${team(s.side) ?? ""})` }), off]
       .filter(Boolean)
       .join(", ");
   };
@@ -234,6 +244,14 @@ export function ShotCandidatesPanel({
             missing: official.counts.missing,
           })}
           {official.counts.outside > 0 && <span className="text-muted">{` ${t("reportOutside", { n: official.counts.outside })}`}</span>}
+        </p>
+      )}
+      {onSetKickoff && (
+        <p className="text-sm text-muted" data-testid="shot-candidates-kickoff">
+          {t("noKickoff")}{" "}
+          <button type="button" className="font-medium text-foreground underline underline-offset-4" onClick={onSetKickoff}>
+            {t("setKickoff")}
+          </button>
         </p>
       )}
 

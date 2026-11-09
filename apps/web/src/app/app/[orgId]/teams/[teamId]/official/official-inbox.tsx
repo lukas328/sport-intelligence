@@ -287,8 +287,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
               <li key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-2.5">
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">
-                    {s.payload.is_home ? "" : "@ "}
-                    {str(s.payload.opponent)}
+                    {t(s.payload.is_home ? "home" : "away", { opponent: str(s.payload.opponent) })}
                   </span>
                   <span className="block text-sm text-muted">{date(str(s.payload.kickoff_at))}</span>
                 </span>
@@ -333,8 +332,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
                 <li key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-2.5">
                   <span className="min-w-0 flex-1">
                     <span className="block font-medium">
-                      {s.payload.is_home ? "" : "@ "}
-                      {str(s.payload.opponent)}
+                      {t(s.payload.is_home ? "home" : "away", { opponent: str(s.payload.opponent) })}
                     </span>
                     <span className="block text-sm text-muted">
                       {s.kind === "match_moved"
