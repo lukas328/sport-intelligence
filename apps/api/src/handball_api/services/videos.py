@@ -446,6 +446,14 @@ def job_event(job: ProcessingJob) -> dict[str, object]:
     }
 
 
+def _elapsed_seconds(result: dict[str, Any]) -> float:
+    """Run time of a job from its result (`elapsed_s`), 0 when missing or not a number."""
+    value = result.get("elapsed_s")
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        return 0.0
+    return max(0.0, float(value))
+
+
 async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> ProcessingJob:
     await enable_system_access(ctx.db, reason="worker job callback")
     job = await ctx.db.get(ProcessingJob, job_id)
@@ -466,6 +474,9 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         job.stages = {**job.stages, **data.stages}
     if data.gpu_seconds is not None:
         job.gpu_seconds = data.gpu_seconds
+    elif job.kind == "analysis" and data.status == JobStatus.SUCCEEDED and data.result:
+        # the analysis worker reports its run time as `elapsed_s`; that is what billing counts
+        job.gpu_seconds = _elapsed_seconds(data.result)
     if data.cost_chf is not None:
         job.cost_chf = data.cost_chf
     asset = await ctx.db.get(VideoAsset, job.video_asset_id) if job.video_asset_id else None
