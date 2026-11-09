@@ -1,7 +1,6 @@
 import { forwardRef } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
-import { CourtLines } from "@/components/domain/court-lines";
 import { cn } from "@/lib/utils";
 
 /** A white panel on the paper background. No heavy borders: a hairline and space do the work. */
@@ -55,13 +54,12 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    // calm, on the paper: a faint goal area at the right edge instead of a dashed box
-    <div className={cn("relative flex flex-col items-start overflow-hidden rounded-lg bg-surface/70 px-6 py-9", className)}>
-      <CourtLines className="absolute inset-y-0 right-0 hidden h-full w-auto text-foreground/25 sm:block" />
-      {icon && <div className="relative mb-4 text-muted [&_svg]:size-6">{icon}</div>}
-      <p className="relative text-xl font-bold font-display">{title}</p>
-      {children && <div className="relative mt-1 max-w-lg text-[0.9375rem] text-muted sm:max-w-[60%]">{children}</div>}
-      {action && <div className="relative mt-5">{action}</div>}
+    // an open line on the paper: one sentence of what is missing, the way out of it as one action
+    <div className={cn("flex flex-col items-start border-t border-foreground/15 pt-4 pb-2", className)}>
+      {icon && <div className="mb-2 text-muted [&_svg]:size-5">{icon}</div>}
+      <p className="text-[1.0625rem] font-semibold">{title}</p>
+      {children && <div className="mt-1 max-w-xl text-[0.9375rem] text-muted">{children}</div>}
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }

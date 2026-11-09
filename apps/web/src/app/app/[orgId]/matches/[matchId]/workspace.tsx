@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Keyboard } from "lucide-react";
+import { Crosshair, Keyboard, Maximize2, Play, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import { CourtCalibration } from "@/components/analysis/court-calibration";
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/tabs";
 import { control, Input, Select } from "@/components/ui/field";
 import { SpotlightControls, useSpotlight } from "@/components/video/spotlight-controls";
@@ -26,12 +26,22 @@ import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
+import { coverage, firstOpen, steps } from "@/lib/match-workflow";
+import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
+import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
+import { ShotCandidatesPanel, useShotCandidates } from "./shot-candidates";
+import { KickoffPanel } from "./kickoff-panel";
+import { MatchTimeline } from "./match-timeline";
+import { OfficialGoalsPanel, useOfficialGoals } from "./official-goals";
+import { OfficialReportImport } from "./official-report";
+import { WorkRail, type Pane } from "./work-rail";
+import { useGameTime } from "./game-time";
+import { TeamFeedView } from "./feed-views";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
-type Tab = "comments" | "clips" | "drawings" | "events";
-type Deck = "detection" | "formations" | "identity";
+type Tab = "comments" | "clips" | "drawings";
 const TOOLS: Tool[] = ["arrow", "line", "circle", "freehand", "spotlight"];
 const COLORS = ["#facc15", "#ef4444", "#22c55e", "#3b82f6", "#ffffff"];
 
@@ -41,6 +51,10 @@ export function Workspace({
   video,
   staff,
   teamName,
+  oppName,
+  names,
+  setup,
+  requestPane = null,
   handle,
 }: {
   orgId: string;
@@ -48,6 +62,12 @@ export function Workspace({
   video: Video;
   staff: boolean;
   teamName: string;
+  oppName: string;
+  names: Record<string, string>;
+  /** the video's own setup (more cameras, quality): shown with the court, not under every step */
+  setup?: React.ReactNode;
+  /** a pane to open from outside; a new object each time */
+  requestPane?: { pane: Pane } | null;
   handle?: Ref<PlayerHandle | null>;
 }) {
   const t = useTranslations();
@@ -90,7 +110,22 @@ export function Workspace({
   }
   const [now, setNow] = useState(0);
   const [tab, setTab] = useState<Tab>("comments");
-  const [deck, setDeck] = useState<Deck>("detection");
+  const [pane, setPane] = useState<Pane | null>(null);
+  const [goalList, setGoalList] = useState<"candidates" | "report" | null>(null);
+  // review mode: the workspace full screen, one goal candidate after the other
+  const [reviewing, setReviewing] = useState(false);
+  const [activeCandidate, setActiveCandidate] = useState<string | null>(null);
+  useEffect(() => {
+    if (!reviewing) return;
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setReviewing(false);
+    window.addEventListener("keydown", onEsc);
+    const before = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onEsc);
+      document.body.style.overflow = before;
+    };
+  }, [reviewing]);
   const [drawing, setDrawing] = useState(false);
   const [tool, setTool] = useState<Tool>("arrow");
   const [color, setColor] = useState(COLORS[0]!);
@@ -166,6 +201,7 @@ export function Workspace({
   const startDrawing = useCallback(() => {
     player.current.pause();
     setDrawing(true);
+    setPane("notes");
     setTab("drawings");
   }, []);
 
@@ -207,13 +243,17 @@ export function Workspace({
     void qc.invalidateQueries({ queryKey: ["clips", match.id] });
   }
 
+  const paneId = `ws-${match.id}`;
   const spot = useSpotlight(analysis.data ?? null);
+  const [spotOpen, setSpotOpen] = useState(false);
+  const spotShown = spotOpen || spot.track != null || spot.picking;
   const multi = useMultiAngle(cams, video.id);
   const pickCam = multi.pick;
   const mainVideo = useCallback(() => raw.current?.video() ?? null, []);
   const events = useQuery({
     queryKey: ["events", match.id],
-    enabled: multi.auto && cams.length > 1,
+    // the auto camera and the events lane of the timeline
+    enabled: (multi.auto && cams.length > 1) || staff,
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/events", { params: { path: { org_id: orgId, match_id: match.id } } })).data ?? [],
   });
   // best camera around events (4.5): the goal camera takes over shortly before a shot on goal
@@ -243,22 +283,135 @@ export function Workspace({
     return tr ? (tr.player_id && spotNames[tr.player_id]) || (tr.number != null ? `#${tr.number}` : "") : "";
   })();
 
+  // the order of work: court, throw-off, goals, players; the lists share the panels' caches
+  const hasReport = match.report_extra?.official_report != null;
+  const candidates = useGoalCandidates(orgId, match.id, staff);
+  const shotCandidates = useShotCandidates(orgId, match.id, staff);
+  const official = useOfficialGoals(orgId, match.id, staff && hasReport);
+  const durationMs = video.duration_s ? video.duration_s * 1000 : null;
+  const rate = candidates.data?.default_rate ?? 2;
+  const a = analysis.data;
+  const spansFor = coverage(match.kickoff_ms, match.period_s, video.duration_s ? video.duration_s * 1000 : null);
+  const reportOpen = hasReport && official.data?.imported ? goalRows(official.data, "open", false, spansFor).length : null;
+  const stepList = steps({
+    analysis: a
+      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: a.camera === "moving" && a.calibration?.source === "heuristic" }
+      : null,
+    kickoff: match.kickoff_ms,
+    periodS: match.period_s,
+    durationMs,
+    candidatesOpen: candidates.data && candidates.data.counts.total > 0 ? (candidates.data.counts.open_by_rate[String(rate)] ?? 0) : null,
+    // only goals the video can show: one beyond the clip is not open
+    officialOpen: reportOpen,
+    unassigned: a?.status === "ready" && a.tracks.length > 0 ? ownTracks(a.tracks).filter((tr) => !tr.player_id).length : null,
+  });
+  const loaded = !analysis.isLoading && !candidates.isLoading && !(hasReport && official.isLoading);
+  // players watch and comment; the court, defence systems and events are the coach's workbench
+  // shots to review sit next to the events they become
+  const hasShots = (shotCandidates.data?.counts.total ?? 0) > 0;
+  const tools: Pane[] = staff
+    ? ["events", ...(hasShots ? (["shots"] as const) : []), ...(a?.status === "ready" ? (["formations"] as const) : []), "notes", "feedback"]
+    : ["notes"];
+  // another tab asks for a pane (e.g. "Feedback geben" from the scenes tab)
+  useEffect(() => {
+    if (requestPane) setPane(requestPane.pane);
+  }, [requestPane]);
+  const chosen: Pane = pane ?? (staff ? (firstOpen(stepList) ?? "notes") : "notes");
+  // the first open step is shown once the lists are in; from then on the coach decides
+  useEffect(() => {
+    if (pane == null && loaded) setPane(chosen);
+  }, [loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { at: gameAt } = useGameTime(match.kickoff_ms, match.period_s);
+  // the clock on the picture follows the player: client only, so the server HTML stays the same
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const jump = useCallback((ms: number) => {
+    player.current.seek(ms);
+    player.current.play();
+  }, []);
+  // a clip (goal candidate): plays from `from` and stops at `to`; a seek elsewhere ends it
+  const clipEnd = useRef<(() => void) | null>(null);
+  useEffect(() => () => clipEnd.current?.(), []);
+  const playClip = useCallback((from: number, to: number) => {
+    clipEnd.current?.();
+    player.current.seek(from);
+    player.current.play();
+    const v = player.current.video();
+    if (!v) return;
+    let started = false; // the seek may land after the first time updates
+    const tick = () => {
+      const ms = player.current.time();
+      if (!started) started = ms >= from - 500 && ms < to;
+      else if (ms < from - 2000 || ms > to + 1500) stop(); // the coach seeked elsewhere
+      else if (ms >= to) {
+        v.pause();
+        stop();
+      }
+    };
+    const stop = () => {
+      v.removeEventListener("timeupdate", tick);
+      clipEnd.current = null;
+    };
+    v.addEventListener("timeupdate", tick);
+    clipEnd.current = stop;
+  }, []);
+
   const onKey = useCallback(
     (key: string) => {
       if (!staff) return false;
       const ms = player.current.time() ?? 0;
-      if (key === "i") return setMarkIn(ms), setTab("clips"), true;
-      if (key === "o") return setMarkOut(ms), setTab("clips"), true;
+      if (key === "i") return setMarkIn(ms), setPane("notes"), setTab("clips"), true;
+      if (key === "o") return setMarkOut(ms), setPane("notes"), setTab("clips"), true;
       if (key === "d") return startDrawing(), true;
       return false;
     },
     [staff, startDrawing],
   );
 
+  const seekPaused = (ms: number) => {
+    player.current.pause();
+    player.current.seek(ms);
+  };
+  const openCandidates = candidates.data && candidates.data.counts.total > 0;
+  const list = goalList ?? (openCandidates || !hasReport ? "candidates" : "report");
+  const shown: Pane = reviewing ? "goals" : chosen;
+  const openNow = candidates.data?.counts.open_by_rate[String(rate)] ?? 0;
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="min-w-0 space-y-2">
-        <div className={cn("relative", multi.mode === "side" && multi.secondary && !offset && "grid gap-2 md:grid-cols-2")}>
+    <div
+      className={cn("space-y-5", reviewing && "fixed inset-0 z-[60] !m-0 h-dvh overflow-y-auto bg-background p-4 sm:p-6 lg:px-10")}
+      role={reviewing ? "dialog" : undefined}
+      aria-modal={reviewing || undefined}
+      aria-labelledby={reviewing ? `${paneId}-review` : undefined}
+    >
+      {reviewing ? (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-foreground/15 pb-3">
+          <h2 id={`${paneId}-review`} className="font-display text-3xl">
+            {t("workflow.goals")}
+          </h2>
+          <span className="text-muted">{`${teamName} ${t("matches.vs")} ${oppName}`}</span>
+          <span className="ml-auto font-score text-xl tabular-nums" aria-live="polite">
+            {t("workflow.reviewLeft", { n: openNow })}
+          </span>
+          <Button variant="secondary" onClick={() => setReviewing(false)} data-testid="review-close">
+            <X aria-hidden />
+            {t("workflow.reviewClose")}
+          </Button>
+        </div>
+      ) : staff || tools.length > 1 ? (
+        <WorkRail steps={staff ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+      ) : null}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
+      {/* the player stays in view while the coach works through a list beside it */}
+      {/* phones: the column dissolves into the grid, so the player can stay at the top while the
+          list below it scrolls */}
+      <div className="min-w-0 max-lg:contents lg:sticky lg:top-4 lg:space-y-3">
+        <div
+          className={cn(
+            "relative max-lg:sticky max-lg:z-20 max-lg:self-start",
+            reviewing ? "max-lg:top-0" : "max-lg:top-14",
+            multi.mode === "side" && multi.secondary && !offset && "grid gap-2 md:grid-cols-2",
+          )}
+        >
         <VideoPlayer
           ref={raw}
           src={`${media}/hls/master.m3u8`}
@@ -273,6 +426,8 @@ export function Workspace({
           }
           onTime={onTime}
           onKey={onKey}
+          // the controls read the match clock once the video sits on it (main camera only)
+          clock={spansFor && !offset ? gameAt : undefined}
           overlay={
             drawing ? (
               <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} />
@@ -293,6 +448,12 @@ export function Workspace({
             ) : undefined
           }
         />
+        {/* the match clock on the picture, as on a broadcast: what the coach talks about */}
+        {mounted && spansFor && !drawing && (
+          <span aria-hidden className="pointer-events-none absolute left-2 top-2 z-10 rounded-xs bg-black/65 px-2 py-0.5 font-score text-base text-white tabular-nums">
+            {gameAt(now)}
+          </span>
+        )}
         {multi.secondaryCam && !offset && (multi.mode !== "single" || autoCam) && (
           <SyncedCam
             key={multi.secondaryCam.id}
@@ -312,12 +473,18 @@ export function Workspace({
         )}
         </div>
         {cams.length > 1 && !offset && <MultiAngleControls cams={cams} state={multi} />}
-        {spot.ready && !offset && <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />}
         {cams.length > 1 && <CameraSwitch orgId={orgId} cams={cams} active={cam} staff={staff} onSwitch={switchCamera} />}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* quiet tools under the picture; the spotlight unfolds on demand */}
+        <div className={cn("flex flex-wrap items-center gap-1 max-lg:order-last", reviewing && "hidden")}>
+          {spot.ready && !offset && (
+            <Button variant={spotShown ? "secondary" : "quiet"} size="sm" aria-expanded={spotShown} aria-controls={`${paneId}-spot`} onClick={() => setSpotOpen((v) => !v)}>
+              <Crosshair aria-hidden />
+              {t("spotlight.title")}
+            </Button>
+          )}
           {staff && analysis.data?.status === "ready" && analysis.data.chunk_ms && (analysis.data.chunks ?? 0) > 0 && (
             <Button
-              variant="secondary"
+              variant="quiet"
               size="sm"
               title={t("tactics.fromVideoHint")}
               onClick={async () => {
@@ -344,55 +511,27 @@ export function Workspace({
             <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-md bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
           </details>
         </div>
-        <div className="space-y-4 rounded-lg bg-raised p-4 border border-border sm:p-5">
-          {analysis.data?.status === "ready" && (
-            <Segmented<Deck>
-              label={t("player.deck")}
-              size="sm"
-              value={deck}
-              onChange={setDeck}
-              items={[
-                { value: "detection", label: t("player.deckDetection") },
-                { value: "formations", label: t("formations.title") },
-                ...(staff ? [{ value: "identity" as const, label: t("identity.title") }] : []),
-              ]}
-            />
-          )}
-          {(deck === "detection" || !(analysis.data?.status === "ready")) && (
-            <AnalysisPanel
-              analysis={analysis.data ?? null}
-              orgId={orgId}
-              videoId={video.id}
-              colours={kitColours}
-              getTime={getTime}
-              canCalibrate={staff}
-            />
-          )}
-          {deck === "formations" && analysis.data?.status === "ready" && (
-            (
-              <FormationsCard
-                formations={analysis.data.formations ?? []}
-                onSeek={(ms) => {
-                  player.current.seek(ms);
-                  player.current.play();
-                }}
-              />
-            )
-          )}
-          {deck === "identity" && staff && analysis.data?.status === "ready" && (
-            (
-              <IdentityPanel
-                orgId={orgId}
-                match={match}
-                videoId={video.id}
-                tracks={analysis.data.tracks}
-                onSeek={(ms) => {
-                  player.current.pause();
-                  player.current.seek(ms);
-                }}
-              />
-            )
-          )}
+        {spot.ready && !offset && !reviewing && spotShown && (
+          <div id={`${paneId}-spot`} className="max-lg:order-last">
+            <SpotlightControls spot={spot} tracks={analysis.data!.tracks} names={spotNames} />
+          </div>
+        )}
+        <div className="max-lg:order-last">
+        <MatchTimeline
+          spans={spansFor}
+          periodS={match.period_s}
+          kickoff={match.kickoff_ms}
+          nowMs={now}
+          official={hasReport ? official.data : null}
+          candidates={staff ? candidates.data : null}
+          rate={rate}
+          activeId={shown === "goals" ? activeCandidate : null}
+          ownName={teamName}
+          oppName={oppName}
+          events={staff ? events.data : null}
+          notes={[...(comments.data ?? []).map((c) => c.t_ms), ...(clips.data ?? []).map((c) => c.start_ms), ...(annotations.data ?? []).map((x) => x.t_ms)]}
+          onSetKickoff={staff ? () => setPane("kickoff") : undefined}
+        />
         </div>
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
         {notice && (
@@ -402,32 +541,96 @@ export function Workspace({
         )}
       </div>
 
-      <div className="flex max-h-[44rem] min-w-0 flex-col gap-4 rounded-lg bg-raised p-4 border border-border">
-        <Segmented<Tab>
-          label={t("tabs.video")}
-          size="sm"
-          value={tab}
-          onChange={setTab}
-          items={(staff ? (["comments", "clips", "drawings", "events"] as const) : (["comments", "clips", "drawings"] as const)).map((k) => ({
-            value: k,
-            label: t(k === "drawings" ? "draw.list" : k === "events" ? "events.title" : `${k}.title`),
-          }))}
-        />
-
-        {tab === "events" && staff && (
-          <div role="tabpanel" className="flex min-h-0 flex-1 flex-col">
+      <div
+        id={`${paneId}-pane`}
+        // a tab panel only when there is a tab row (players see the one tool without tabs)
+        role={reviewing || !(staff || tools.length > 1) ? undefined : "tabpanel"}
+        aria-labelledby={reviewing || !(staff || tools.length > 1) ? undefined : `${paneId}-tab-${shown}`}
+        className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:pr-1"
+      >
+        {shown === "court" && (
+          <>
+            <AnalysisPanel analysis={a ?? null} orgId={orgId} videoId={video.id} colours={kitColours} getTime={getTime} canCalibrate={staff} />
+            {setup && <div className="space-y-3 border-t border-foreground/15 pt-4">{setup}</div>}
+          </>
+        )}
+        {shown === "kickoff" && staff && (
+          <KickoffPanel orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} durationMs={durationMs} getTime={getTime} onSeek={seekPaused} />
+        )}
+        {shown === "goals" && staff && (
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            {hasReport && openCandidates && !reviewing && (
+              <Segmented<"candidates" | "report">
+                className="border-b border-foreground/15 max-lg:order-last"
+                label={t("workflow.goalLists")}
+                variant="underline"
+                size="sm"
+                value={list}
+                onChange={setGoalList}
+                items={[
+                  { value: "candidates", label: t("workflow.listCandidates", { n: openNow }) },
+                  { value: "report", label: t("workflow.listReport", { n: reportOpen ?? 0 }) },
+                ]}
+              />
+            )}
+            {list === "candidates" && openCandidates && !reviewing && openNow > 0 && (
+              <Button variant="secondary" className="self-start max-lg:order-last" onClick={() => (setGoalList("candidates"), setReviewing(true))} data-testid="review-open">
+                <Maximize2 aria-hidden />
+                {t("workflow.reviewOpen")}
+              </Button>
+            )}
+            {list === "report" && hasReport && !reviewing ? (
+              <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} isHome={match.is_home} names={names} covers={spansFor} onPlay={jump} />
+            ) : openCandidates ? (
+              <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} onClip={playClip} onActive={setActiveCandidate} focusMode={reviewing} />
+            ) : (
+              <p className="text-sm text-muted">{t("workflow.goalsNone")}</p>
+            )}
+            {!hasReport && (
+              <div className="space-y-1">
+                <p className="text-sm text-muted">{t("workflow.noReport")}</p>
+                <OfficialReportImport orgId={orgId} matchId={match.id} />
+              </div>
+            )}
+          </div>
+        )}
+        {shown === "players" && staff && a?.status === "ready" && (
+          <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} onSeek={seekPaused} at={gameAt} />
+        )}
+        {shown === "players" && staff && a?.status !== "ready" && <p className="text-sm text-muted">{t("workflow.players_waiting")}</p>}
+        {shown === "events" && staff && (
+          <div className="flex min-h-0 flex-1 flex-col">
             <Tagger orgId={orgId} match={match} teamName={teamName} getTime={getTime} />
           </div>
         )}
-
+        {shown === "shots" && staff && (
+          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names} onClip={playClip} />
+        )}
+        {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
+        {shown === "feedback" && staff && (
+          // beside the player: watch a scene and write the note without leaving the list
+          <TeamFeedView orgId={orgId} matchId={match.id} onPlay={jump} kickoff={match.kickoff_ms} periodS={match.period_s} compact />
+        )}
+        {shown === "notes" && (
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <Segmented<Tab>
+          label={t("workflow.notes")}
+          size="sm"
+          value={tab}
+          onChange={setTab}
+          items={(["comments", "clips", "drawings"] as const).map((k) => ({
+            value: k,
+            label: t(k === "drawings" ? "draw.list" : `${k}.title`),
+          }))}
+        />
         {tab === "comments" && (
           <div role="tabpanel" className="flex min-h-0 flex-1 flex-col gap-2">
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
-              {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.empty")}</li>}
+              {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.emptyHint", { time: gameAt(now) })}</li>}
               {(comments.data ?? []).map((c) => (
                 <li key={c.id} className="rounded-md bg-surface px-3 py-2">
                   <button className="rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
-                    {formatClock(c.t_ms)}
+                    {gameAt(c.t_ms)}
                   </button>{" "}
                   <span className="text-xs text-muted">{c.author_name}</span>
                   <p>{c.body}</p>
@@ -449,13 +652,13 @@ export function Workspace({
               className="flex gap-2"
             >
               <label className="sr-only" htmlFor="comment-body">
-                {t("comments.placeholder", { time: formatClock(now) })}
+                {t("comments.placeholder", { time: gameAt(now) })}
               </label>
               <input
                 id="comment-body"
                 name="body"
                 maxLength={2000}
-                placeholder={t("comments.placeholder", { time: formatClock(now) })}
+                placeholder={t("comments.placeholder", { time: gameAt(now) })}
                 className={cn(control, "min-w-0 flex-1")}
               />
               <Button type="submit" variant="secondary">
@@ -499,7 +702,7 @@ export function Workspace({
                     player.current.seek(c.start_ms);
                     player.current.play();
                   }}>
-                    <span className="font-mono text-xs">{t("clips.range", { start: formatClock(c.start_ms), end: formatClock(c.end_ms) })}</span>{" "}
+                    <span className="font-score text-xs">{t("clips.range", { start: gameAt(c.start_ms), end: gameAt(c.end_ms) })}</span>{" "}
                     {c.title}
                   </button>
                 </li>
@@ -556,22 +759,24 @@ export function Workspace({
               {(annotations.data ?? []).length === 0 && <li className="text-muted">{t("draw.empty")}</li>}
               {(annotations.data ?? []).map((a) => (
                 <li key={a.id}>
-                  <button className="rounded px-2 py-1 font-mono text-xs hover:bg-surface" onClick={() => {
+                  <button className="rounded px-2 py-1 font-score text-xs hover:bg-surface" onClick={() => {
                     player.current.pause();
                     player.current.seek(a.t_ms + 100);
                   }}>
-                    {formatClock(a.t_ms)} · {a.shapes.length}×
+                    {gameAt(a.t_ms)} · {a.shapes.length}×
                   </button>
                 </li>
               ))}
             </ul>
           </div>
         )}
+          </div>
+        )}
+      </div>
       </div>
     </div>
   );
 }
-
 
 type Analysis = Schemas["AnalysisOut"];
 
@@ -599,17 +804,15 @@ function AnalysisPanel({
   if (!analysis || analysis.status === "none") return null;
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
   const unconfirmed = analysis.camera === "moving" && analysis.calibration?.source === "heuristic";
+  const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
+  const REASONS = ["camera_motion", "no_floor", "flat_view", "few_people", "court"] as const;
+  const reason = REASONS.find((r) => r === info.reason) ?? (analysis.needs_calibration && analysis.calibration_error ? "court" : null);
+  const hallName = analysis.hall?.name ?? null;
+  const fromHall = info.method === "hall";
   return (
-    <Card className="space-y-3 p-3" data-testid="analysis-panel">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-semibold">{t("title")}</h2>
-        {analysis.detector === "heuristic" && (
-          <span className="rounded-md bg-surface px-2 py-0.5 text-xs" title={t("heuristicHint")}>
-            {t("heuristic")}
-          </span>
-        )}
-      </div>
-      {analysis.status === "running" && <p className="text-sm text-muted">{t("running")}</p>}
+    <section className="space-y-3" data-testid="analysis-panel">
+      <h2 className="sr-only">{t("title")}</h2>
+      {analysis.status === "running" && <p className="text-sm">{t("running")}</p>}
       {analysis.status === "failed" && (
         <Alert>
           <span className="block font-medium">{t(`failure_${analysis.error_code ?? "generic"}` as "failure_generic")}</span>
@@ -617,26 +820,33 @@ function AnalysisPanel({
           <span className="block text-xs">{t("failureCredit")}</span>
         </Alert>
       )}
-      {analysis.auto_events && (
-        <p className="text-sm text-muted" data-testid="auto-events">
-          {(analysis.auto_events.missing as string[] | undefined)?.includes("goalkeepers")
-            ? t("autoNoGoalkeepers")
-            : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
-          {t("autoLimits")}
-          {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
-            <span className="block" data-testid="overlay-goals">
-              {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}
-            </span>
-          )}
+      {analysis.status === "ready" && analysis.needs_calibration && (
+        <Alert kind="info">
+          {t(canMark ? "needsCalibration" : "needsCalibrationStaff")}
+          {/* why the automatic court failed, in the coach's words (ADR 025: a reason code) */}
+          {reason && <span className="mt-1 block text-muted">{t(`calibReason_${reason}`)}</span>}
+        </Alert>
+      )}
+      {/* one sentence: does the court fit */}
+      {analysis.status === "ready" && !analysis.needs_calibration && (
+        <p className="text-[0.9375rem]">
+          {fromHall ? t("courtFromHall", { hall: hallName ?? "" }) : unconfirmed ? t("checkCourt") : t("courtOk")}
         </p>
       )}
-      {analysis.status === "ready" && analysis.needs_calibration && (
-        <Alert kind="info">{t(canMark ? "needsCalibration" : "needsCalibrationStaff")}</Alert>
+      {/* a court marked once is carried over to the next videos of the same hall */}
+      {canMark && (analysis.needs_calibration || unconfirmed) && (
+        <p className="text-xs text-muted" data-testid="hall-hint">
+          {hallName ? t("hallOnce", { hall: hallName }) : t("hallUnknown")}
+        </p>
       )}
-      {analysis.status === "ready" && !analysis.needs_calibration && unconfirmed && <p className="text-sm text-muted">{t("checkCourt")}</p>}
       {canMark && (
-        <Button variant={analysis.needs_calibration ? "primary" : "secondary"} onClick={() => setMarking(true)} data-testid="mark-court">
-          {t(analysis.needs_calibration ? "markCourt" : "checkCourtButton")}
+        <Button
+          variant={analysis.needs_calibration ? "primary" : "secondary"}
+          size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
+          onClick={() => setMarking(true)}
+          data-testid="mark-court"
+        >
+          {t(analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
         </Button>
       )}
       {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} onClose={() => setMarking(false)} />}
@@ -654,20 +864,48 @@ function AnalysisPanel({
       <div className="flex flex-wrap gap-3 text-xs text-muted">
         {(["home", "away", "referee"] as const).map((k) => (
           <span key={k} className="flex items-center gap-1">
-            <span aria-hidden className="inline-block size-3 rounded-full border border-neutral-700" style={{ background: colours[k] }} />
+            <span aria-hidden className="inline-block size-3 rounded-full ring-1 ring-foreground/50" style={{ background: colours[k] }} />
             {t(k)}
           </span>
         ))}
-        {analysis.calibration && (
-          <span>
-            {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
-            {t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
-          </span>
-        )}
-        {analysis.tracks.length > 0 && <span>{t("tracks", { count: analysis.tracks.length })}</span>}
       </div>
-    </Card>
+      {/* what the analysis did, for those who want to know; not a coach's task */}
+      <details className="text-xs text-muted">
+        <summary className="cursor-pointer hover:text-foreground">{t("technical")}</summary>
+        <div className="mt-2 space-y-1.5">
+          {analysis.detector === "heuristic" && <p title={t("heuristicHint")}>{t("heuristic")}</p>}
+          {analysis.auto_events && (
+            <p data-testid="auto-events">
+              {(analysis.auto_events.missing as string[] | undefined)?.includes("goalkeepers")
+                ? t("autoNoGoalkeepers")
+                : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
+              {t("autoLimits")}
+              {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
+                <span className="block" data-testid="overlay-goals">
+                  {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}
+                </span>
+              )}
+            </p>
+          )}
+          {analysis.calibration && (
+            <p>
+              {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
+              {t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
+            </p>
+          )}
+          {analysis.tracks.length > 0 && <p>{t("tracks", { count: analysis.tracks.length })}</p>}
+        </div>
+      </details>
+    </section>
   );
+}
+
+/** Own-team tracks worth naming: the longest 40. */
+function ownTracks(tracks: Analysis["tracks"]) {
+  return tracks
+    .filter((tr) => tr.team === "home" || tr.team === "home_gk")
+    .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
+    .slice(0, 40);
 }
 
 
@@ -678,21 +916,27 @@ function IdentityPanel({
   videoId,
   tracks,
   onSeek,
+  at,
 }: {
   orgId: string;
   match: Match;
   videoId: string;
   tracks: Analysis["tracks"];
   onSeek: (ms: number) => void;
+  at: (videoMs: number) => string;
 }) {
   const t = useTranslations("identity");
   const qc = useQueryClient();
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const [notice, setNotice] = useState<string | null>(null);
-  const own = tracks
-    .filter((tr) => tr.team === "home" || tr.team === "home_gk")
-    .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
-    .slice(0, 40);
+  const [all, setAll] = useState(false);
+  // in the order they appear, so the coach goes through the video once
+  const own = [...ownTracks(tracks)].sort((a, b) => a.first_ms - b.first_ms);
+  const open = own.filter((tr) => !tr.player_id);
+  // the next open people first; the whole list on request
+  // a few seconds on screen is rarely worth a name: those fold away with the rest
+  const long = open.filter((tr) => tr.last_ms - tr.first_ms >= 5000);
+  const shown = all ? own : [...long.slice(0, 8), ...own.filter((tr) => tr.player_id)].sort((a, b) => a.first_ms - b.first_ms);
   if (own.length === 0) return null;
   async function assign(trackNo: number, playerId: string) {
     const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
@@ -706,16 +950,24 @@ function IdentityPanel({
     }
   }
   return (
-    <Card className="p-3" data-testid="identity-panel">
-      <details>
-        <summary className="cursor-pointer font-semibold">{t("title")}</summary>
-        <p className="mt-2 text-xs text-muted">{t("hint")}</p>
-        <ul className="mt-2 max-h-72 space-y-1 overflow-auto text-sm">
-          {own.map((tr) => (
-            <li key={tr.track_no} className="flex flex-wrap items-center gap-2">
-              <button className="w-36 text-left font-mono text-xs underline" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}`}>
-                {t("track", { n: tr.track_no })} · {formatClock(tr.first_ms)}
-              </button>
+    <section data-testid="identity-panel" aria-labelledby="identity-title">
+        <h2 id="identity-title" className="font-display text-xl">{t("title")}</h2>
+        <p className="mt-1 text-sm">
+          {open.length > 0 ? t("openCount", { n: open.length, first: at(open[0]!.first_ms) }) : t("allDone")}
+        </p>
+        <p className="mt-1 text-xs text-muted">{t("hint")}</p>
+        <ul className="mt-3 divide-y divide-border/70 text-sm">
+          {shown.map((tr) => (
+            <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5">
+              <Button variant="quiet" size="sm" className="min-w-0 justify-start" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}, ${at(tr.first_ms)}`}>
+                <Play aria-hidden className="size-3 fill-current" />
+                <span className="font-score tabular-nums">{at(tr.first_ms)}</span>
+                {/* a shirt number the analysis read helps to recognise the person; the track id does not */}
+                <span className="text-muted">
+                  {tr.number != null ? t("shirt", { n: tr.number }) : t("track", { n: tr.track_no })}
+                  {` · ${t("onScreen", { s: Math.round((tr.last_ms - tr.first_ms) / 1000) })}`}
+                </span>
+              </Button>
               <label className="sr-only" htmlFor={`track-${tr.track_no}`}>
                 {t("track", { n: tr.track_no })}
               </label>
@@ -739,13 +991,17 @@ function IdentityPanel({
             </li>
           ))}
         </ul>
+        {own.length > shown.length && (
+          <Button variant="ghost" size="sm" className="mt-1" onClick={() => setAll(true)}>
+            {t("showAll", { n: own.length })}
+          </Button>
+        )}
         {notice && (
           <p className="mt-2 text-xs text-ok" aria-live="polite">
             {notice}
           </p>
         )}
-      </details>
-    </Card>
+    </section>
   );
 }
 
@@ -828,7 +1084,7 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
   const t = useTranslations("formations");
   const label = (f: string) => (f === "open" ? t("open") : f.replaceAll("-", ":"));
   return (
-    <Card className="space-y-2 p-3" data-testid="formations">
+    <section className="space-y-2" data-testid="formations">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">{t("title")}</h2>
         <p className="text-xs text-muted">{t("hint")}</p>
@@ -851,7 +1107,7 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
               {segs.map((f) => (
                 <li key={`${f.start_ms}-${f.team}`}>
                   <button
-                    className="rounded bg-surface px-2 py-0.5 font-mono text-xs hover:brightness-90"
+                    className="rounded bg-surface px-2 py-0.5 font-score text-xs hover:brightness-90"
                     onClick={() => onSeek(f.start_ms)}
                     aria-label={t("jump", { formation: label(f.formation), time: formatClock(f.start_ms) })}
                   >
@@ -863,6 +1119,6 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
           </div>
         );
       })}
-    </Card>
+    </section>
   );
 }

@@ -9,6 +9,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   test.skip(info.project.name !== "chromium", "runs once");
   JSON.parse(readFileSync(REPORT, "utf8")); // fixture stays valid JSON
   await register(page, uniqueEmail("paper"), "Coach Papier");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Papier");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Damen 1");
@@ -37,11 +38,11 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
   await expectAccessible(page);
   // every number opens the events behind it
-  await expect(page.getByTestId("insights")).toContainText("Erkenntnisse");
+  await expect(page.getByTestId("insights")).toContainText("Was auffällt");
   await table.getByRole("button", { name: "Tore Damen 1" }).click();
   await expect(page.getByTestId("event-list").getByRole("listitem")).toHaveCount(5);
 
-  await page.getByRole("tab", { name: "Matchreport" }).click();
+  await page.getByRole("tab", { name: "Matchbericht", exact: true }).click();
   await expect(page.getByText("Anna Muster").first()).toBeVisible();
   await expectAccessible(page);
 
@@ -51,8 +52,10 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
 
   // goalkeeper module: the sheet's keeper with saves and goals against by zone
   await page.getByRole("tab", { name: "Torhüter" }).click();
-  const keeper = page.getByTestId("keeper-card").filter({ hasText: "Mia Tor" });
-  await expect(keeper).toContainText("Paraden");
+  // one row per goalkeeper in a match-sheet table
+  const keepers = page.getByTestId("keeper-table");
+  await expect(keepers).toContainText("Paraden");
+  const keeper = keepers.getByRole("row", { name: /Mia Tor/ });
   await expect(keeper.getByText("6", { exact: true })).toBeVisible();
   await expectAccessible(page);
 

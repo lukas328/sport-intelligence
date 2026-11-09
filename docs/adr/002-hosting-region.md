@@ -20,12 +20,12 @@ grows with every club; storage itself is cheap.
 2. **First use: shared test videos.** Bucket `handball-testdata`, synced with `scripts/testdata.py`;
    the repo holds only `ml/eval/golden_set/manifest.json` (Q-DATA-1). Two tokens: read/write for the
    owner, read-only for CI and agent sessions.
-3. **Application, Postgres, Redis, secrets, monitoring: Microsoft Azure, region West Europe**
-   (owner decision 2026-11-04). The owner knows Azure and wants one platform for operations, secrets
-   (Key Vault) and cost control (budgets). Planned services: Container Apps (web, API, workers),
-   Azure Database for PostgreSQL Flexible Server (PITR), Redis, Key Vault, Container Registry,
-   Log Analytics / Application Insights; deploys from GitHub Actions with OIDC (no stored password).
-   Video files stay in R2 (point 1) because Azure bills egress per GB.
+3. **Application, Postgres, Redis, secrets, monitoring: Microsoft Azure** (owner decision 2026-11-04).
+   The owner knows Azure and wants one platform for operations, secrets (Key Vault) and cost control
+   (budgets). Services: Container Apps (web, API, workers), Azure Database for PostgreSQL Flexible
+   Server (PITR), Redis, Key Vault, Container Registry, Log Analytics; deploys from GitHub Actions
+   with OIDC (no stored password). Video files stay in R2 (point 1) because Azure bills egress per GB.
+   *Region changed 2026-11-09:* Switzerland North instead of West Europe (ADR 025, `infra/terraform/azure`).
 4. **GPU compute behind `GpuBackend`** (`local`, `runpod`, `modal`, `k8s`). The GPU provider must
    process customer video in the EU under a DPA.
 5. `Organization.data_region` stays (`ch`, `eu`); until a Swiss bucket exists, both map to the EU bucket.

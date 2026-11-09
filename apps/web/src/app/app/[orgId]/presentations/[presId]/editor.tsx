@@ -14,6 +14,7 @@ import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { isPacked, packPresentation, unpack } from "@/lib/offline-pack";
 import { cn } from "@/lib/utils";
+import { FileField } from "@/components/ui/file-field";
 
 type Slide = Schemas["SlideOut"];
 
@@ -26,6 +27,7 @@ function slideTitle(s: Slide, t: (k: string, v?: Record<string, string | number>
 export function PresentationEditor({ orgId, presId }: { orgId: string; presId: string }) {
   const t = useTranslations("presentations");
   const tr = useTranslations();
+  const tf = useTranslations("file");
   const locale = useLocale();
   const qc = useQueryClient();
   const key = ["presentation", presId];
@@ -245,7 +247,7 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
                 e.currentTarget.reset();
               }}
             >
-              <Input label={t("imageFile")} name="image" type="file" accept="image/png,image/jpeg" required />
+              <FileField label={t("imageFile")} name="image" accept="image/png,image/jpeg" required button={tf("choose")} empty={tf("none")} />
               <Input label={t("caption")} name="caption" maxLength={200} />
               <Button type="submit" variant="secondary">
                 {t("add")}

@@ -3,9 +3,8 @@
 import type { Schemas } from "@handball/api-client";
 import { ArrowRight, ScanSearch } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
 
 type Playlist = Schemas["PlaylistOut"];
 type Presentation = Schemas["PresentationOut"];
@@ -16,14 +15,17 @@ const newest = <T extends { created_at: string }>(xs: T[]) => [...xs].sort((a, b
 export function LibraryView({ base, orgBase, playlists, presentations }: { base: string; orgBase: string; playlists: Playlist[]; presentations: Presentation[] }) {
   const t = useTranslations("library");
   const format = useFormatter();
-  const when = (iso: string) => format.relativeTime(new Date(iso));
+  // relative times ("vor 5 Minuten") against a clock that moves on each minute
+  const now = useNow({ updateInterval: 60_000 });
+  const when = (iso: string) => format.relativeTime(new Date(iso), now);
   return (
     <div className="space-y-12">
-      <Link href={`${base}/search`} className="group flex items-center gap-4 rounded-lg bg-foreground px-5 py-4 text-background transition-transform hover:-translate-y-px sm:px-6">
-        <ScanSearch aria-hidden className="size-5 shrink-0 opacity-80" />
+      {/* the way into every scene of the season: a plain row, not a black banner */}
+      <Link href={`${base}/search`} className="group flex items-center gap-4 border-y-2 border-foreground py-4">
+        <ScanSearch aria-hidden className="size-5 shrink-0" />
         <span className="min-w-0 flex-1">
-          <span className="block font-semibold font-wide">{t("search")}</span>
-          <span className="block truncate text-sm opacity-70">{t("searchHint")}</span>
+          <span className="block text-lg font-bold group-hover:underline group-hover:underline-offset-4">{t("search")}</span>
+          <span className="block text-sm text-muted">{t("searchHint")}</span>
         </span>
         <ArrowRight aria-hidden className="size-5 shrink-0 transition-transform group-hover:translate-x-1" />
       </Link>
@@ -31,7 +33,7 @@ export function LibraryView({ base, orgBase, playlists, presentations }: { base:
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
         <Shelf title={t("playlists")} href={`${base}/playlists`} count={playlists.length}>
           {playlists.length === 0 ? (
-            <Empty>{t("emptyPlaylists")}</Empty>
+            <Empty href={`${base}/playlists`} action={t("newPlaylist")}>{t("emptyPlaylists")}</Empty>
           ) : (
             <Rows>
               {newest(playlists)
@@ -44,7 +46,7 @@ export function LibraryView({ base, orgBase, playlists, presentations }: { base:
         </Shelf>
         <Shelf title={t("presentations")} href={`${base}/presentations`} count={presentations.length}>
           {presentations.length === 0 ? (
-            <Empty>{t("emptyPresentations")}</Empty>
+            <Empty href={`${base}/presentations`} action={t("newPresentation")}>{t("emptyPresentations")}</Empty>
           ) : (
             <Rows>
               {newest(presentations)
@@ -64,19 +66,20 @@ function Shelf({ title, href, count, children }: { title: string; href: string; 
   const t = useTranslations("library");
   return (
     <section className="space-y-4">
-      <div className="flex items-baseline justify-between gap-3 border-b border-border/70 pb-3">
+      <div className="flex items-baseline justify-between gap-3 border-b border-foreground/15 pb-3">
         <h2 className="text-lg font-bold">
-          <Link href={href} className="hover:text-accent">
+          <Link href={href} className="hover:underline hover:underline-offset-4">
             {title}
           </Link>
-          <span className="ml-2 text-sm font-medium text-muted tabular-nums">{count}</span>
+          {count > 0 && <span className="ml-2 text-sm font-medium text-muted tabular-nums">{count}</span>}
         </h2>
-        <div className="flex items-center gap-4 text-sm">
-          <Link href={href} className="inline-flex items-center gap-1 font-medium text-accent hover:underline" aria-label={`${t("all")}: ${title}`}>
+        {/* nothing to show yet: no "Alle anzeigen" into an empty list */}
+        {count > 5 && (
+          <Link href={href} className="inline-flex min-h-8 items-center gap-1 text-sm font-medium underline underline-offset-4" aria-label={`${t("all")}: ${title}`}>
             {t("all")}
             <ArrowRight aria-hidden className="size-3.5" />
           </Link>
-        </div>
+        )}
       </div>
       {children}
     </section>
@@ -84,7 +87,7 @@ function Shelf({ title, href, count, children }: { title: string; href: string; 
 }
 
 function Rows({ children }: { children: ReactNode }) {
-  return <ul className="divide-y divide-border/70">{children}</ul>;
+  return <ul className="divide-y divide-foreground/10">{children}</ul>;
 }
 
 function Row({ href, title, meta }: { href: string; title: string; meta: (string | null)[] }) {
@@ -92,7 +95,7 @@ function Row({ href, title, meta }: { href: string; title: string; meta: (string
     <li>
       <Link href={href} className="group flex items-center gap-3 py-3">
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium group-hover:text-accent">{title}</span>
+          <span className="block truncate font-medium group-hover:underline group-hover:underline-offset-4">{title}</span>
           <span className="block truncate text-[0.8125rem] text-muted">{meta.filter(Boolean).join(" · ")}</span>
         </span>
         <ArrowRight aria-hidden className="size-4 shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
@@ -101,6 +104,13 @@ function Row({ href, title, meta }: { href: string; title: string; meta: (string
   );
 }
 
-function Empty({ children }: { children: ReactNode }) {
-  return <p className={cn("max-w-prose text-sm text-muted")}>{children}</p>;
+function Empty({ children, href, action }: { children: ReactNode; href: string; action: string }) {
+  return (
+    <p className="max-w-prose text-sm text-muted">
+      {children}{" "}
+      <Link href={href} className="font-medium text-foreground underline underline-offset-4">
+        {action}
+      </Link>
+    </p>
+  );
 }

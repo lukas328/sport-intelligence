@@ -43,8 +43,15 @@ export function Segmented<T extends string>({
     onChange(items[to]!.value);
   }
   return (
-    <div className={cn("scrollbar-none -mx-1 overflow-x-auto px-1", className)}>
-      <div role="tablist" aria-label={label} className={variant === "underline" ? "inline-flex gap-7" : "inline-flex gap-0.5 rounded-md bg-surface p-1"}>
+    <div
+      className={cn(
+        "scrollbar-none -mx-1 overflow-x-auto px-1",
+        // phones: a fade at the right edge says the row scrolls
+        variant === "underline" && size === "sm" && "max-sm:[mask-image:linear-gradient(to_right,black_82%,transparent)]",
+        className,
+      )}
+    >
+      <div role="tablist" aria-label={label} className={variant === "underline" ? (size === "sm" ? "inline-flex gap-5" : "inline-flex gap-7") : "inline-flex gap-0.5 rounded-md bg-surface p-1"}>
         {items.map((it, i) => {
           const active = it.value === value;
           return (
@@ -64,8 +71,14 @@ export function Segmented<T extends string>({
               className={
                 variant === "underline"
                   ? cn(
-                      "whitespace-nowrap pt-1 pb-2 font-display text-xl uppercase tracking-wide transition-[color,box-shadow] duration-150",
-                      active ? "text-foreground shadow-[inset_0_-4px_0_var(--accent)]" : "text-muted hover:text-foreground hover:shadow-[inset_0_-4px_0_var(--border)]",
+                      "whitespace-nowrap transition-[color,box-shadow] duration-150",
+                      // the second level is smaller and underlined in ink, so the main switch stays the main one
+                      size === "sm"
+                        ? cn("pb-1.5 text-[0.9375rem] font-semibold", active ? "text-foreground shadow-[inset_0_-3px_0_var(--foreground)]" : "text-muted hover:text-foreground")
+                        : cn(
+                            "pt-1 pb-2 font-display text-xl uppercase tracking-wide",
+                            active ? "text-foreground shadow-[inset_0_-4px_0_var(--accent)]" : "text-muted hover:text-foreground hover:shadow-[inset_0_-4px_0_var(--border)]",
+                          ),
                     )
                   : cn(
                       "whitespace-nowrap rounded-[5px] font-semibold transition-[background,color] duration-150",

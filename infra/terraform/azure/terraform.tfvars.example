@@ -1,0 +1,21 @@
+# Copy to terraform.tfvars (git-ignored). No secrets here: they live in Key Vault.
+subscription_id = "00000000-0000-0000-0000-000000000000"
+environment     = "production"
+location        = "switzerlandnorth"
+app_domain      = "app.example.ch"
+alert_emails    = ["you@example.ch"]
+budget_amount   = 80
+
+s3_endpoint_url = "https://<account-id>.eu.r2.cloudflarestorage.com"
+s3_access_key   = "<r2-access-key-id>"
+
+email_from    = "Example <noreply@example.ch>"
+smtp_host     = "smtp.postmarkapp.com"
+smtp_port     = 587
+smtp_username = "<postmark-server-token>"
+
+operator_emails = ["you@example.ch"]
+
+# Add once the values are in Key Vault (README, step 5)
+# extra_env        = { HB_GOOGLE_CLIENT_ID = "123.apps.googleusercontent.com" }
+# optional_secrets = ["HB_GOOGLE_CLIENT_SECRET"]

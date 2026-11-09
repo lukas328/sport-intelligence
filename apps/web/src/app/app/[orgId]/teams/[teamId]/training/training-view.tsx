@@ -7,7 +7,7 @@ import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState, Sheet } from "@/components/ui/card";
+import { Alert, EmptyState, Sheet } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { move, toDrillItem, totalMinutes, type DrillItem } from "@/lib/drill-snapshot";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -324,14 +324,23 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
         )}
       </div>
       {editing === "new" && (
-        <Card>
+        <section className="border-t-2 border-foreground pt-4">
           <SessionForm orgId={orgId} teamId={teamId} onDone={done} />
-        </Card>
+        </section>
       )}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       <section className="space-y-2" aria-labelledby="upcoming">
         <h3 id="upcoming" className="text-lg font-semibold">{t("upcoming")}</h3>
-        {upcoming.length === 0 ? <EmptyState title={t("none")} /> : <ul className="border-t-2 border-foreground">{upcoming.map(item)}</ul>}
+        {upcoming.length === 0 ? (
+          <EmptyState
+            title={t("none")}
+            action={canPlan && editing !== "new" ? <Button variant="secondary" size="sm" onClick={() => setEditing("new")}>{t("planFirst")}</Button> : undefined}
+          >
+            {canPlan ? t("noneHint") : null}
+          </EmptyState>
+        ) : (
+          <ul className="border-t-2 border-foreground">{upcoming.map(item)}</ul>
+        )}
       </section>
       {past.length > 0 && (
         <section className="space-y-2" aria-labelledby="past">
@@ -341,7 +350,10 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
       )}
       <FocusList focus={focus.data ?? []} />
       {canPlan && (
-        <section className="grid gap-10 md:grid-cols-2 md:gap-x-12">
+        // the calendar is a schedule tool: folded, so the page stays about the units
+        <details className="border-t border-foreground/15 pt-3">
+        <summary className="cursor-pointer font-medium">{t("calendarTools")}</summary>
+        <section className="mt-4 grid gap-10 md:grid-cols-2 md:gap-x-12">
           <Sheet className="space-y-2">
             <h3 className="text-lg">{t("calendar")}</h3>
             <p className="text-sm text-muted">{t("calendarHint")}</p>
@@ -365,6 +377,7 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
             </form>
           </Sheet>
         </section>
+        </details>
       )}
     </div>
   );

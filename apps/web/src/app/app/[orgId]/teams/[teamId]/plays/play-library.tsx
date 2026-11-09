@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { Board } from "@/components/tactics/board";
 import { EmptyState } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { buttonClass } from "@/components/ui/button";
 
 const CATEGORIES = ["attack", "defence", "fast_break", "set_piece", "seven_m", "other"] as const;
 
@@ -29,6 +30,9 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end gap-3">
+        {/* search and filters only when there is something to search: own plays, or the templates for staff */}
+        {(plays.length > 0 || staff) && (
+        <>
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">{t("search")}</span>
           <input
@@ -39,20 +43,22 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
             className="min-h-10 w-64 rounded-md bg-raised ring-1 ring-inset ring-border px-3"
           />
         </label>
-        <div role="group" aria-label={t("category")} className="flex flex-wrap gap-1">
+        <div role="group" aria-label={t("category")} className="flex flex-wrap gap-x-4">
           {["", ...CATEGORIES].map((c) => (
             <button
               key={c || "all"}
               aria-pressed={cat === c}
               onClick={() => setCat(c)}
-              className={cn("rounded-md border px-3 py-1 text-sm", cat === c ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+              className={cn("min-h-9 border-b-2 px-1 text-sm font-semibold", cat === c ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
             >
               {c ? t(`cat_${c}`) : t("all")}
             </button>
           ))}
         </div>
+        </>
+        )}
         {staff && (
-          <Link href={`/app/${orgId}/teams/${teamId}/plays/new`} className="ml-auto rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-contrast hover:brightness-90">
+          <Link href={`/app/${orgId}/teams/${teamId}/plays/new`} className={cn(buttonClass("primary", "sm"), "ml-auto")}>
             {t("new")}
           </Link>
         )}
@@ -61,10 +67,10 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
       {list.length === 0 ? (
         <EmptyState title={t("empty")}>{staff && t("emptyHint")}</EmptyState>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="play-list">
+        <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="play-list">
           {list.map((p) => (
             <li key={p.id}>
-              <Link href={`/app/${orgId}/plays/${p.id}`} className="block space-y-2 rounded-lg bg-raised border border-border p-3 hover:bg-surface">
+              <Link href={`/app/${orgId}/plays/${p.id}`} className="block space-y-2 border-t-2 border-foreground pt-2 hover:text-accent">
                 <Preview doc={p.doc as unknown as PlayDoc} label={p.name} />
                 <p className="font-medium">{p.name}</p>
                 <p className="text-sm text-muted">
@@ -81,12 +87,12 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
       {templates.length > 0 && (
         <section className="space-y-3" aria-label={t("templates")}>
           <h2 className="text-lg font-semibold">{t("templates")}</h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
             {templates.map((tpl) => (
               <li key={tpl.id}>
                 <Link
                   href={`/app/${orgId}/teams/${teamId}/plays/new?template=${tpl.id}`}
-                  className="block space-y-2 rounded-lg border border-dashed border-border p-3 hover:bg-surface"
+                  className="block space-y-2 border-t border-foreground/30 pt-2 hover:text-accent"
                   aria-label={`${t("fromTemplate")}: ${t(`tpl_${tpl.id}`)}`}
                 >
                   <Preview doc={tpl.doc} label={t(`tpl_${tpl.id}`)} />

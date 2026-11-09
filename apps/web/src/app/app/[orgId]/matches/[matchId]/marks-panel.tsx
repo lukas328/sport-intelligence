@@ -27,7 +27,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
   const d = data.data;
   const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
   return (
-    <details className="group rounded-lg bg-raised px-5 py-4 border border-border" data-testid="marks-panel">
+    <details className="group border-t border-foreground/15 pt-3" data-testid="marks-panel">
       <summary className="flex cursor-pointer list-none items-center gap-2 font-semibold [&::-webkit-details-marker]:hidden">
         <Hand aria-hidden className="size-4 text-muted" />
         {t("panel", { n: d?.marks.length ?? 0 })}

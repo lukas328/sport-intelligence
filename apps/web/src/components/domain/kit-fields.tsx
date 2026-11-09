@@ -15,7 +15,24 @@ const TEAM_KITS = [
   ["opponent_gk", "matches.kitOppGk"],
 ] as const satisfies readonly (readonly [TeamKitKey, string])[];
 
-const SWATCH = "relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full";
+const SWATCH = "relative grid size-9 shrink-0 place-items-center rounded-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent";
+
+/** A shirt in the kit's colour: the swatch looks like what it stands for. */
+function Shirt({ colour, empty = false }: { colour?: string; empty?: boolean }) {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className="size-9">
+      <path
+        d="M8 3 4.2 4.8 2 9l3.2 1.6L6.4 9v12h11.2V9l1.2 1.6L22 9l-2.2-4.2L16 3c-.9 1.4-2.3 2.2-4 2.2S8.9 4.4 8 3Z"
+        fill={empty ? "none" : colour}
+        stroke="currentColor"
+        strokeOpacity={empty ? 0.6 : 0.35}
+        strokeWidth="1"
+        strokeDasharray={empty ? "2 1.5" : undefined}
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 const PICKER = "absolute inset-0 size-full cursor-pointer opacity-0";
 
 /** The kit colours of a match as colour swatches: four team kits and the optional referee kit,
@@ -30,7 +47,8 @@ export function KitFields({ kits, onChange }: { kits: Kits; onChange: (kits: Kit
       <div className="flex flex-wrap gap-x-5 gap-y-3">
         {TEAM_KITS.map(([k, label]) => (
           <label key={k} className="flex cursor-pointer items-center gap-2 text-sm">
-            <span className={cn(SWATCH, "ring-1 ring-border")} style={{ background: kits[k] }}>
+            <span className={SWATCH}>
+              <Shirt colour={kits[k]} />
               <input
                 aria-label={t(label)}
                 name={`kit_${k}`}
@@ -45,17 +63,9 @@ export function KitFields({ kits, onChange }: { kits: Kits; onChange: (kits: Kit
         ))}
         <div className="flex items-center gap-2">
           <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <span
-              className={cn(
-                SWATCH,
-                kits.referee
-                  ? "ring-1 ring-border"
-                  : "border border-dashed border-muted text-muted",
-              )}
-              style={kits.referee ? { background: kits.referee } : undefined}
-              data-testid="kit-referee"
-            >
-              {!kits.referee && <Plus aria-hidden className="size-4" />}
+            <span className={cn(SWATCH, !kits.referee && "text-muted")} data-testid="kit-referee">
+              <Shirt colour={kits.referee ?? undefined} empty={!kits.referee} />
+              {!kits.referee && <Plus aria-hidden className="absolute size-3.5" />}
               <input
                 aria-label={referee}
                 aria-describedby={hintId}

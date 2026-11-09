@@ -6,11 +6,10 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge, type Tone } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, CardTitle } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/tabs";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
-import { formatClock } from "@/lib/format";
 import {
   gameTime,
   goalRows,
@@ -22,6 +21,7 @@ import {
   type GoalRow,
   type Review,
 } from "@/lib/official-goals";
+import type { Span } from "@/lib/match-workflow";
 import { playerLabel, reportName } from "@/lib/player-name";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +34,20 @@ const TONE: Record<GoalRow["kind"], Tone> = {
 
 export const officialGoalsKey = (matchId: string) => ["official-goals", matchId];
 
+/** The comparison with the official report; the work steps and the timeline share the cache. */
+export function useOfficialGoals(orgId: string, matchId: string, enabled = true) {
+  return useQuery({
+    queryKey: officialGoalsKey(matchId),
+    enabled,
+    queryFn: async () =>
+      (
+        await api.GET("/v1/orgs/{org_id}/matches/{match_id}/official-report/comparison", {
+          params: { path: { org_id: orgId, match_id: matchId } },
+        })
+      ).data ?? null,
+  });
+}
+
 /** The goals of the imported official match report next to the goals the video analysis found:
  * how far the video timeline can be trusted, and a jump to each gap to check it. */
 export function OfficialGoalsPanel({
@@ -43,6 +57,7 @@ export function OfficialGoalsPanel({
   oppName,
   isHome,
   names,
+  covers = null,
   onPlay,
 }: {
   orgId: string;
@@ -51,6 +66,8 @@ export function OfficialGoalsPanel({
   oppName: string;
   isHome: boolean;
   names: Record<string, string>;
+  /** what the video covers of the match: goals beyond it are not missing */
+  covers?: Span[] | null;
   onPlay: (ms: number) => void;
 }) {
   const t = useTranslations("officialGoals");
@@ -61,15 +78,7 @@ export function OfficialGoalsPanel({
   const [filter, setFilter] = useState<GoalFilter>("all");
   const [showOutside, setShowOutside] = useState(false);
   const [error, setError] = useState<ErrorKey | null>(null);
-  const q = useQuery({
-    queryKey: key,
-    queryFn: async () =>
-      (
-        await api.GET("/v1/orgs/{org_id}/matches/{match_id}/official-report/comparison", {
-          params: { path },
-        })
-      ).data ?? null,
-  });
+  const q = useOfficialGoals(orgId, matchId);
   const reviewKey = ["review", ...key];
   const review = useMutation({
     // one at a time, in click order: a confirm and its undo must reach the server in that order
@@ -102,8 +111,15 @@ export function OfficialGoalsPanel({
 
   const cmp = q.data;
   if (!cmp?.imported) return null;
-  const rows = goalRows(cmp, filter, showOutside);
-  const outside = cmp.counts.outside;
+  const rows = goalRows(cmp, filter, showOutside, covers);
+  const every = goalRows(cmp, "all", true, covers);
+  const outside = every.filter((r) => r.kind === "outside").length;
+  const missing = every.filter((r) => r.kind === "missing").length;
+  const openRows = goalRows(cmp, "open", false, covers);
+  const open = openRows.length;
+  // the one mark of the list: the first goal still to check
+  const firstOpen = openRows.find((r) => jumpTarget(r) != null)?.id;
+  const inVideo = cmp.counts.official - outside;
   const team = (side: string) => (side === "own" ? ownName : oppName);
   const score = (s: number[] | null) =>
     s && s.length === 2 ? (isHome ? `${s[0]}:${s[1]}` : `${s[1]}:${s[0]}`) : null;
@@ -112,26 +128,18 @@ export function OfficialGoalsPanel({
     (r.playerId && names[r.playerId]) || playerLabel(r.number, reportName(r.name));
 
   return (
-    <Card className="space-y-4" data-testid="official-goals">
+    <section className="flex min-h-0 flex-1 flex-col gap-3" data-testid="official-goals" aria-labelledby={`og-title-${matchId}`}>
       <div className="space-y-1">
-        <CardTitle>{t("title")}</CardTitle>
-        <p className="text-sm text-muted">{t("hint", { window: Math.round(cmp.window_s) })}</p>
+        <h2 id={`og-title-${matchId}`} className="sr-only">{t("title")}</h2>
+        {/* counts read against what the video covers: goals before or after a clip are no gap */}
+        <p className="text-sm" data-testid="official-goals-counts">
+          {inVideo > 0
+            ? t("summary", { inVideo, found: cmp.counts.found, missing })
+            : t("summaryNone", { n: cmp.counts.official })}
+          {cmp.counts.extra > 0 && ` ${t("summaryExtra", { n: cmp.counts.extra })}`}
+        </p>
+        <p className="text-xs text-muted">{t("hint", { window: Math.round(cmp.window_s) })}</p>
       </div>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="official-goals-counts">
-        {(
-          [
-            ["countOfficial", cmp.counts.official],
-            ["countFound", cmp.counts.found],
-            ["countMissing", cmp.counts.missing],
-            ["countExtra", cmp.counts.extra],
-          ] as const
-        ).map(([label, value]) => (
-          <div key={label} className="rounded-md bg-surface px-3 py-2.5">
-            <dt className="text-[0.8125rem] text-muted">{t(label)}</dt>
-            <dd className="mt-1 font-score text-[1.75rem] leading-none tabular-nums">{value}</dd>
-          </div>
-        ))}
-      </dl>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Segmented<GoalFilter>
           label={t("filter")}
@@ -145,7 +153,7 @@ export function OfficialGoalsPanel({
                 n: cmp.counts.official + cmp.counts.extra - (showOutside ? 0 : outside),
               }),
             },
-            { value: "open", label: t("open", { n: cmp.counts.open }) },
+            { value: "open", label: t("open", { n: open }) },
           ]}
         />
         <p className="text-xs text-muted">{t("reviewHint")}</p>
@@ -155,7 +163,7 @@ export function OfficialGoalsPanel({
       ) : (
         <ul
           // the padding keeps the focus outlines of the buttons at the edges inside the scroll box
-          className="-mx-1.5 max-h-[28rem] divide-y divide-border/70 overflow-auto px-1.5 text-sm"
+          className="-mx-1.5 max-h-[28rem] min-h-0 flex-1 divide-y divide-border/70 overflow-auto px-1.5 text-sm lg:max-h-none"
           aria-label={t("title")}
         >
           {rows.map((r) => {
@@ -163,33 +171,32 @@ export function OfficialGoalsPanel({
             const time = gameTime(r);
             const label = [time, team(r.side), who(r)].filter(Boolean).join(", ");
             const away = r.kind === "outside";
+            // the match clock as the coach says it ("1. HZ 13:21")
+            const clockLabel = time ? tr("events.at", { period: r.period, clock: time }) : "-";
             return (
               <li
                 key={r.id}
                 // phone: time and checks on top, the goal below; wider: one line
-                className="grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-2 sm:flex sm:flex-wrap"
+                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-2 sm:flex sm:flex-wrap"
                 data-testid="official-goal-row"
               >
                 {target != null ? (
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-[5.5rem] tabular-nums"
-                    aria-label={t("jump", { time: formatClock(r.tMs!), goal: label })}
+                    className="font-score tabular-nums"
+                    aria-label={t("jump", { time: clockLabel, goal: label })}
                     onClick={() => onPlay(target)}
                   >
                     <Play aria-hidden className="size-3 fill-current" />
-                    {formatClock(r.tMs!)}
+                    <span className={cn(r.id === firstOpen && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{clockLabel}</span>
                   </Button>
                 ) : (
-                  <span className="inline-flex w-[5.5rem] text-xs text-muted">
-                    {away ? t("outside") : t("noTime")}
+                  <span className="inline-flex items-baseline gap-2 text-sm">
+                    <span className="font-score tabular-nums">{clockLabel}</span>
+                    <span className="text-xs text-muted">{away ? t("outside") : t("noTime")}</span>
                   </span>
                 )}
-                <span className="w-12 font-mono text-xs tabular-nums">
-                  <span className="sr-only">{t("gameTime")} </span>
-                  {time ?? "-"}
-                </span>
                 <span
                   className={cn(
                     "col-span-full row-start-2 min-w-0 sm:min-w-48 sm:flex-1",
@@ -201,7 +208,7 @@ export function OfficialGoalsPanel({
                   {who(r) && <span className="text-muted">{` · ${who(r)}`}</span>}
                   {r.penalty && <span className="text-muted">{` · ${t("penalty")}`}</span>}
                   {score(r.score) && (
-                    <span className="ml-1.5 font-mono text-xs tabular-nums text-muted">
+                    <span className="ml-1.5 font-score text-xs tabular-nums text-muted">
                       {score(r.score)}
                     </span>
                   )}
@@ -219,7 +226,7 @@ export function OfficialGoalsPanel({
                   <span
                     role="group"
                     aria-label={label}
-                    className="col-start-4 row-start-1 flex gap-1 justify-self-end"
+                    className="col-start-3 row-start-1 flex gap-1 justify-self-end"
                   >
                     {(["confirmed", "dismissed"] as const).map((s) => {
                       const Icon = s === "confirmed" ? Check : X;
@@ -263,6 +270,6 @@ export function OfficialGoalsPanel({
         </p>
       )}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-    </Card>
+    </section>
   );
 }

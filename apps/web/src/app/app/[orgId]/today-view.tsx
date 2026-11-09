@@ -19,7 +19,6 @@ import { EmptyState, Skeleton } from "@/components/ui/card";
 import { control } from "@/components/ui/field";
 import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
-import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { matchStatement } from "@/lib/voice";
 import { targetLink } from "./assignments/my-assignments";
@@ -233,7 +232,6 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
   const greeting = useGreeting();
   const href = `/app/${orgId}/matches/${m.id}`;
   const statement = matchStatement({ own: m.score_own, opp: m.score_opponent, opponent: m.opponent_name });
-  const state = matchState(m);
   const needsVideo = !m.has_video && m.status !== "processing" && m.status !== "uploading";
   const teamName = useShell().team?.name;
   return (
@@ -254,9 +252,10 @@ function LastStage({ orgId, m, base }: { orgId: string; m: Match; base: string }
       <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
         {statement ? t(statement.headline.key as "voice.won", statement.headline.params as never) : m.kind === "training" ? t("matches.training") : m.opponent_name}
       </h1>
-      <p className="mt-3 text-lg">
-        {m.status === "processing" || m.status === "uploading" ? t("today.analysing") : needsVideo ? t("today.uploadHint") : t(state.label)}
-      </p>
+      {/* the state only when it asks for something (running, or a video to upload) */}
+      {(m.status === "processing" || m.status === "uploading" || needsVideo) && (
+        <p className="mt-3 text-lg">{m.status === "processing" || m.status === "uploading" ? t("today.analysing") : t("today.uploadHint")}</p>
+      )}
       {m.is_demo && (
         <p className="mt-3">
           <StageTag>{t("matches.demo")}</StageTag>
@@ -307,7 +306,10 @@ function TopInsights({ orgId, m }: { orgId: string; m: Match }) {
   const roster = useRosterNames(orgId, m.team_id, team?.season_id ?? "");
   const names = useMemo(() => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.first_name} ${r.last_name}`])), [roster.data]);
   const text = useInsightText(names);
-  const top = (q.data?.insights ?? []).slice(0, 3);
+  // the same order as on the match page: a win opens with what worked
+  const won = m.score_own != null && m.score_opponent != null && m.score_own > m.score_opponent;
+  const rank = (k: string) => (k === "strength" ? (won ? 0 : 1) : k === "weakness" ? (won ? 1 : 0) : 2);
+  const top = [...(q.data?.insights ?? [])].sort((a, b) => rank(a.kind) - rank(b.kind)).slice(0, 3);
   if (q.isLoading) return <Skeleton className="h-24" />;
   if (top.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.noInsights")}</p>;
   // the first weakness carries the signal: the one thing to take into the next training
@@ -318,13 +320,21 @@ function TopInsights({ orgId, m }: { orgId: string; m: Match }) {
         <li key={i.id} className="border-b border-foreground/10 last:border-0">
           <Link
             href={`/app/${orgId}/matches/${m.id}`}
-            className={cn("flex items-start gap-3 px-2 py-3 text-[0.9375rem] transition-colors", i.id === focus ? "-mx-0 rounded-md bg-signal text-signal-ink" : "hover:bg-surface")}
+            className="flex items-start gap-3 px-2 py-3 text-[0.9375rem] transition-colors hover:bg-surface"
           >
-            <span aria-hidden className={cn("mt-2 size-2 shrink-0 rounded-full", i.kind === "strength" ? "bg-ok" : i.kind === "weakness" ? (i.id === focus ? "bg-signal-ink" : "bg-error") : "bg-muted")} />
+            {/* the same marks as on the match page: strength green, the first weakness the signal */}
+            <span
+              aria-hidden
+              className={cn(
+                "mt-1.5 size-2.5 shrink-0 rounded-[2px]",
+                i.kind === "strength" ? "bg-ok" : i.id === focus ? "bg-signal ring-1 ring-foreground/30" : "bg-foreground/45",
+              )}
+            />
             <span>
               <span className="sr-only">{t(`insights.${i.kind}`)}: </span>
               {text(i)}
             </span>
+            <ArrowRight aria-hidden className="mt-1 ml-auto size-4 shrink-0 text-muted" />
           </Link>
         </li>
       ))}
@@ -411,6 +421,9 @@ function PlayerToday({ orgId }: { orgId: string }) {
   const { schedule, tasks, feeds } = useMember(orgId);
   const dates = schedule.items.data ?? [];
   const next = dates[0];
+  // a self-assessment waiting is the player's to-do; without a date it takes the stage
+  const pending = (feeds.data ?? []).filter((f) => !f.assessed && f.relation !== "guardian");
+  const lead = !next && !schedule.items.isLoading ? pending[0] : undefined;
   const when = next ? new Date(next.starts_at ?? `${next.on_date}T12:00:00`) : null;
   const choice = (r: "yes" | "no") =>
     next && (
@@ -437,11 +450,26 @@ function PlayerToday({ orgId }: { orgId: string }) {
           ) : undefined
         }
       >
-        <p className="mt-6 text-lg font-semibold">{t("today.yourNext")}</p>
-        <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">
-          {schedule.items.isLoading ? "" : next ? (next.kind === "match" ? t("schedule.match", { opponent: next.title ?? "" }) : next.title || t("schedule.training")) : t("today.noDates")}
-        </h1>
-        {next && <div className="mt-7 flex flex-wrap gap-3">{choice("yes")}{choice("no")}</div>}
+        {lead ? (
+          <>
+            <p className="mt-6 text-lg font-semibold">{t("today.assessLead")}</p>
+            <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">{lead.opponent ? t("schedule.match", { opponent: lead.opponent }) : t("matches.training")}</h1>
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link href={`/app/${orgId}/feed/${lead.match_id}?player=${lead.player_id}`} className={stageButton("solid")}>
+                {t("feed.assessNow")}
+              </Link>
+              <span className="text-[0.9375rem] opacity-80">{t("today.noDates")}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="mt-6 text-lg font-semibold">{t("today.yourNext")}</p>
+            <h1 className="mt-1 text-[2.75rem] leading-[0.95] sm:text-6xl">
+              {schedule.items.isLoading ? "" : next ? (next.kind === "match" ? t("schedule.match", { opponent: next.title ?? "" }) : next.title || t("schedule.training")) : t("today.noDates")}
+            </h1>
+            {next && <div className="mt-7 flex flex-wrap gap-3">{choice("yes")}{choice("no")}</div>}
+          </>
+        )}
       </Stage>
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
         <Block title={t("today.newScenes")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
@@ -449,7 +477,7 @@ function PlayerToday({ orgId }: { orgId: string }) {
         </Block>
         <div className="space-y-12">
           <Block title={t("today.myTasks")} href={`/app/${orgId}/assignments`} linkLabel={t("today.allTasks")}>
-            <Tasks orgId={orgId} tasks={(tasks.data ?? []).filter((a) => !a.done_at)} />
+            <Tasks orgId={orgId} tasks={(tasks.data ?? []).filter((a) => !a.done_at)} assessments={pending} />
           </Block>
           {dates.length > 1 && (
             <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
@@ -526,12 +554,24 @@ function Scenes({ orgId, feeds, loading }: { orgId: string; feeds: Schemas["Feed
   );
 }
 
-function Tasks({ orgId, tasks }: { orgId: string; tasks: Schemas["AssignmentOut"][] }) {
+function Tasks({ orgId, tasks, assessments = [] }: { orgId: string; tasks: Schemas["AssignmentOut"][]; assessments?: Schemas["FeedListItem"][] }) {
   const t = useTranslations();
   const format = useFormatter();
-  if (tasks.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
+  if (tasks.length === 0 && assessments.length === 0) return <p className="text-[0.9375rem] text-muted">{t("today.nothing")}</p>;
   return (
     <ul>
+      {/* self-assessments are to-dos too ("Nichts offen" next to "Jetzt einschätzen" contradicted) */}
+      {assessments.slice(0, 2).map((f) => (
+        <li key={`a-${f.match_id}-${f.player_id}`} className="border-b border-foreground/10 last:border-0">
+          <Link href={`/app/${orgId}/feed/${f.match_id}?player=${f.player_id}`} className="group flex items-center gap-3 py-3.5 hover:text-accent">
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold">{t("today.assessTask", { opponent: f.opponent ?? t("matches.training") })}</span>
+              <span className="block text-sm text-muted">{format.dateTime(new Date(f.kickoff_at), { day: "numeric", month: "short" })}</span>
+            </span>
+            <ArrowRight aria-hidden className="size-4 text-muted transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </li>
+      ))}
       {tasks.slice(0, 4).map((a) => (
         <li key={a.id} className="border-b border-foreground/10 last:border-0">
           <Link href={targetLink(orgId, a)} className="group flex items-center gap-3 py-3.5 hover:text-accent">

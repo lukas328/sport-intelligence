@@ -9,13 +9,15 @@ import { useFormatter, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { useEffect, useState, type FormEvent } from "react";
 import { AccountSection } from "@/components/account-section";
+import { AccessRequests, Verification } from "@/components/official/requests";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { FileField } from "@/components/ui/file-field";
 
 type Org = Schemas["OrgOut"];
 type Team = Schemas["TeamOut"];
@@ -24,11 +26,14 @@ type Me = Schemas["MeOut"];
 export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: Me }) {
   const t = useTranslations();
   const isAdmin = org.my_role === "org_admin";
+  // a club taken over from the official data: its verification and access requests
+  const official = org.official_club_id != null;
   const inviteTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach").map((tm) => ({ id: tm.id, name: tm.name }));
   const people = isAdmin || inviteTeams.length > 0;
   const sections: [string, string][] = [
     ...(isAdmin ? ([["club-section", t("settings.club")], ["billing", t("billing.title")]] as [string, string][]) : []),
     ...(people ? ([["people-section", t("settings.people")]] as [string, string][]) : []),
+    ...(isAdmin && official ? ([["official-section", t("verification.section")]] as [string, string][]) : []),
     ["account-section", t("account.title")],
     ["security", t("settings.security")],
     ["privacy", t("privacy.title")],
@@ -37,11 +42,12 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
     <div className="space-y-8">
       <PageHeader title={t("settings.title")} />
       <div className="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-10">
-        <nav aria-label={t("settings.title")} className="scrollbar-none -mx-1 mb-6 overflow-x-auto px-1 lg:sticky lg:top-10 lg:mb-0 lg:self-start">
-          <ul className="flex gap-1 lg:flex-col">
+        {/* jump links, not tabs: on phones they wrap instead of being cut at the edge */}
+        <nav aria-label={t("settings.title")} className="mb-6 border-b border-foreground/15 pb-3 lg:sticky lg:top-10 lg:mb-0 lg:self-start lg:border-0 lg:pb-0">
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1">
             {sections.map(([id, label]) => (
               <li key={id}>
-                <a href={`#${id}`} className="block whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium text-muted hover:bg-surface hover:text-foreground lg:rounded-md">
+                <a href={`#${id}`} className="block min-h-8 whitespace-nowrap py-1.5 text-sm font-medium text-muted underline-offset-4 hover:text-foreground hover:underline lg:rounded-md lg:px-3.5 lg:hover:bg-surface lg:hover:no-underline">
                   {label}
                 </a>
               </li>
@@ -56,10 +62,21 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
               <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
             </div>
           )}
+          {isAdmin && official && (
+            <section id="official-section" aria-labelledby="official-title" className="space-y-3">
+              <h2 id="official-title" className="text-lg font-semibold">
+                {t("verification.section")}
+              </h2>
+              <div className="space-y-8 border-t border-foreground/15 pt-5">
+                <Verification orgId={org.id} />
+                <AccessRequests orgId={org.id} teams={teams.map((x) => ({ id: x.id, name: x.name }))} />
+              </div>
+            </section>
+          )}
           <div id="account-section">
             <AccountSection me={me} />
           </div>
-          <SecuritySection me={me} />
+          <SecuritySection me={me} isAdmin={isAdmin} />
           <PrivacySection orgId={org.id} orgName={org.name} isAdmin={isAdmin} hasPassword={me.has_password ?? true} />
         </div>
       </div>
@@ -112,7 +129,7 @@ function ClubSection({ org }: { org: Org }) {
       <h2 id="club" className="text-lg font-semibold">
         {t("settings.club")}
       </h2>
-      <Card>
+      <div className="border-t border-foreground/15 pt-5">
         <form onSubmit={submit} className="space-y-4">
           {error && <Alert>{t(`errors.${error}`)}</Alert>}
           {saved && <Alert kind="success">{t("common.saved")}</Alert>}
@@ -121,12 +138,12 @@ function ClubSection({ org }: { org: Org }) {
             <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue={org.primary_color} className="h-11 w-24 p-1" />
             <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue={org.secondary_color} className="h-11 w-24 p-1" />
           </div>
-          <Input label={t("onboarding.logo")} name="logo" type="file" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} />
+          <FileField label={t("onboarding.logo")} name="logo" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} button={t("file.choose")} empty={t("file.none")} />
           <Button type="submit" loading={busy}>
             {t("common.save")}
           </Button>
         </form>
-      </Card>
+      </div>
     </section>
   );
 }
@@ -200,7 +217,7 @@ function PeopleSection({
         {t("settings.people")}
       </h2>
       {isAdmin && (
-        <Card className="space-y-3">
+        <div className="border-t border-foreground/15 pt-5 space-y-3">
           <h3 className="font-semibold">{t("settings.membersTitle")}</h3>
           {roleError && <Alert>{t(`errors.${roleError}`)}</Alert>}
           {members.data && members.data.length > 0 ? (
@@ -233,9 +250,9 @@ function PeopleSection({
           ) : (
             <EmptyState title={t("settings.membersEmpty")} />
           )}
-        </Card>
+        </div>
       )}
-      <Card className="space-y-3">
+      <div className="border-t border-foreground/15 pt-5 space-y-3">
         <h3 className="font-semibold">{t("settings.inviteTitle")}</h3>
         <InviteForm
           orgId={orgId}
@@ -243,8 +260,8 @@ function PeopleSection({
           isAdmin={isAdmin}
           onInvited={() => void qc.invalidateQueries({ queryKey: ["invitations", orgId] })}
         />
-      </Card>
-      <Card className="space-y-3">
+      </div>
+      <div className="border-t border-foreground/15 pt-5 space-y-3">
         <h3 className="font-semibold">{t("settings.invitationsTitle")}</h3>
         {pending.length === 0 ? (
           <p className="text-sm text-muted">{t("settings.noInvitations")}</p>
@@ -266,12 +283,12 @@ function PeopleSection({
             ))}
           </ul>
         )}
-      </Card>
+      </div>
     </section>
   );
 }
 
-function SecuritySection({ me }: { me: Me }) {
+function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const [setup, setSetup] = useState<Schemas["TotpSetupOut"] | null>(null);
@@ -314,11 +331,12 @@ function SecuritySection({ me }: { me: Me }) {
       <h2 id="security-title" className="text-lg font-semibold">
         {t("settings.security")}
       </h2>
-      <Card className="space-y-4">
+      <div className="border-t border-foreground/15 pt-5 space-y-4">
         <h3 className="font-semibold">{t("settings.twoFactorTitle")}</h3>
         {error && <Alert>{t(`errors.${error}`)}</Alert>}
         <p className="text-sm text-muted" data-testid="totp-state">
           {enabled ? t("settings.twoFactorOn") : t("settings.twoFactorOff")}
+          {!enabled && isAdmin && ` ${t("settings.twoFactorAdmins")}`}
         </p>
         {!enabled && !setup && (
           <Button
@@ -379,7 +397,7 @@ function SecuritySection({ me }: { me: Me }) {
             </Button>
           </form>
         )}
-      </Card>
+      </div>
     </section>
   );
 }

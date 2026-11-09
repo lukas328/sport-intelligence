@@ -30,13 +30,15 @@ import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
+import { xgLabel } from "@/lib/xg";
 import { UploadPanel } from "./upload-panel";
 import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
-import { TeamFeedView } from "./feed-views";
+import { formatClock } from "@/lib/format";
+import { coverage } from "@/lib/match-workflow";
+import { FeedbackSummary, TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
-import { OfficialGoalsPanel, officialGoalsKey } from "./official-goals";
-import { GoalCandidatesPanel } from "./goal-candidates";
+import { officialGoalsKey } from "./official-goals";
 import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
@@ -85,7 +87,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       setLive((l) => ({ ...l, [ev.job_id]: ev }));
       if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
       // a new analysis reads the goals again: the comparison with the official report changes
-      if (ev.status === "succeeded") void qc.invalidateQueries({ queryKey: officialGoalsKey(initial.id) });
+      if (ev.status === "succeeded") {
+        void qc.invalidateQueries({ queryKey: officialGoalsKey(initial.id) });
+        void qc.invalidateQueries({ queryKey: ["goal-candidates", initial.id] });
+        void qc.invalidateQueries({ queryKey: ["analysis"] });
+      }
       // the moment the analysis is done: said on the stage, not in a toast
       if (ev.status === "succeeded" && ev.kind !== "ingest") setJustDone(true);
     });
@@ -93,6 +99,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }, [orgId, initial.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [view, setView] = useState<View>("video");
+  const [askPane, setAskPane] = useState<{ pane: "feedback" } | null>(null);
   const [sub, setSub] = useState<Sub>("overview");
   const player = useRef<PlayerHandle | null>(null);
   // deep links (?t=ms), e.g. from a play drawn on a video moment
@@ -167,8 +174,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     window.setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
-  // lists that jump to a moment (official goals, goal candidates) sit below the player, often a
-  // screen or more: bring the player into view, the focus stays where it is
+  // numbers in the analysis and scenes views jump to a moment: bring the player into view, the
+  // focus stays where it is
   function reveal() {
     const v = player.current?.video();
     if (!v) return;
@@ -188,44 +195,38 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     });
   }
 
-  // a clip (goal candidate): plays from `from` and stops at `to`; a seek elsewhere ends it
-  const clipEnd = useRef<(() => void) | null>(null);
-  useEffect(() => () => clipEnd.current?.(), []);
-  function onClip(from: number, to: number) {
-    clipEnd.current?.();
-    setView("video");
-    requestAnimationFrame(() => {
-      player.current?.seek(from);
-      player.current?.play();
-      reveal();
-      const v = player.current?.video();
-      if (!v) return;
-      let started = false; // the seek may land after the first time updates
-      const tick = () => {
-        const ms = v.currentTime * 1000;
-        if (!started) started = ms >= from - 500 && ms < to;
-        else if (ms < from - 2000 || ms > to + 1500) stop(); // the coach seeked elsewhere
-        else if (ms >= to) {
-          v.pause();
-          stop();
-        }
-      };
-      const stop = () => {
-        v.removeEventListener("timeupdate", tick);
-        clipEnd.current = null;
-      };
-      v.addEventListener("timeupdate", tick);
-      clipEnd.current = stop;
-    });
-  }
-
   const base = `/app/${orgId}/matches/${match.id}`;
+  // what the video covers of the match, for the analysis to say which figures it can carry
+  const covers = main ? coverage(match.kickoff_ms, match.period_s, main.duration_s ? main.duration_s * 1000 : null) : null;
+  const videoNote = covers?.length
+    ? t("workflow.coverage", { clip: covers.map((c) => `${formatClock(c.from * 1000)} ${t("workflow.to")} ${formatClock(c.to * 1000)}`).join(", ") })
+    : null;
+  // the main video is there: more cameras (goal cameras, a second angle) and the quality of the
+  // recording belong to the court step of the workspace, not under every step
+  const setup = main ? (
+    <>
+      {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
+      {staff && match.source !== "paper_report" && (
+        <details id="upload" className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <Plus aria-hidden className="size-4" />
+            {t("upload.addCamera")}
+          </summary>
+          <div className="pt-3">
+            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+          </div>
+        </details>
+      )}
+    </>
+  ) : null;
   return (
     <div className="space-y-8">
       <Stage
         compact
         aside={
           stats.data && hasEvents ? (
+            // phones, video view: the score is enough; the figures sit in the analysis
+            <div className={cn(view === "video" && "max-sm:hidden")}>
             <table className="text-[0.9375rem]">
               <caption className="sr-only">{t("stats.comparison")}</caption>
               <thead>
@@ -233,15 +234,14 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                   <th scope="col" className="sr-only">
                     {t("stats.comparison")}
                   </th>
-                  <th scope="col" className="px-3 pb-1 text-right font-semibold">{t("stats.own")}</th>
-                  <th scope="col" className="pb-1 pl-3 text-right font-semibold opacity-80">{t("stats.opponent")}</th>
+                  <th scope="col" className="max-w-28 truncate px-3 pb-1 text-right font-semibold">{teamName}</th>
+                  <th scope="col" className="max-w-28 truncate pb-1 pl-3 text-right font-semibold opacity-80">{oppName(match)}</th>
                 </tr>
               </thead>
               <tbody>
                 {(stats.data.quality.attempts_known === false
-                  ? // only goals are known (score overlay): goals, attacks and goals per attack
+                  ? // only goals are known (score overlay): attacks and goals per attack; the score says the goals
                     [
-                      [t("stats.goals"), stats.data.own.goals, stats.data.opponent.goals],
                       [t("stats.possessions"), stats.data.own.possessions ?? "-", stats.data.opponent.possessions ?? "-"],
                       [t("stats.efficiency"), pctLabel(stats.data.own.attack_efficiency), pctLabel(stats.data.opponent.attack_efficiency)],
                     ]
@@ -249,9 +249,12 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                       [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
                       [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
                       [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
-                      ["xG", stats.data.own.xg.toFixed(1), stats.data.opponent.xg.toFixed(1)],
+                      [t("stats.xg"), xgLabel(stats.data.own), xgLabel(stats.data.opponent)],
                     ]
-                ).map(([label, a, b]) => (
+                )
+                  // a row of dashes says nothing on the stage
+                  .filter(([, a, b]) => !(a === "-" && b === "-"))
+                  .map(([label, a, b]) => (
                   <tr key={String(label)} className="border-t border-current/20">
                     <th scope="row" className="py-1.5 pr-4 text-left font-medium">{label}</th>
                     <td className="px-3 py-1.5 text-right font-score text-2xl leading-none">{a}</td>
@@ -260,6 +263,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 ))}
               </tbody>
             </table>
+            </div>
           ) : undefined
         }
       >
@@ -296,8 +300,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         )}
       </Stage>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-foreground/15">
+        <div className="flex items-end justify-between gap-3 border-b border-foreground/15">
           <Segmented<View>
+            className="min-w-0"
             variant="underline"
             label={t("tabs.video")}
             value={view}
@@ -388,42 +393,25 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       <div hidden={view !== "video"} className="space-y-6">
         {main ? (
-          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} handle={player} />
+          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} />
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
-        {staff && match.source !== "paper_report" && (
+        {staff && match.source !== "paper_report" && !main && (
           <div id="upload" className="scroll-mt-24">
-            {main ? (
-              // the main video is there: more cameras (goal cameras, a second angle) on demand
-              <details className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
-                <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
-                  <Plus aria-hidden className="size-4" />
-                  {t("upload.addCamera")}
-                </summary>
-                <div className="pt-3">
-                  <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
-                </div>
-              </details>
-            ) : (
-              <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
-            )}
+            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </div>
         )}
-        {staff && main && match.report_extra?.official_report != null && (
-          <OfficialGoalsPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} isHome={match.is_home} names={names} onPlay={onPlay} />
-        )}
-        {staff && main && (
-          <GoalCandidatesPanel orgId={orgId} matchId={match.id} ownName={ourName} oppName={oppName(match)} onClip={onClip} />
-        )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
-        {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
+        {!main && match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
       </div>
 
       {view === "analysis" && (
         <div className="animate-fade space-y-6">
           <Segmented<Sub>
             label={t("tabs.analysis")}
+            variant="underline"
+            className="border-b border-foreground/15"
             size="sm"
             value={sub}
             onChange={setSub}
@@ -431,11 +419,41 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           />
           <div key={sub} className="animate-fade">
           {sub === "physical" ? (
-            <PhysicalView orgId={orgId} matchId={match.id} names={names} />
+            <PhysicalView
+              orgId={orgId}
+              matchId={match.id}
+              names={names}
+              teamName={teamName}
+              oppName={oppName(match)}
+              videoNote={videoNote}
+              short={covers != null && covers.reduce((s, c) => s + c.to - c.from, 0) < match.period_s}
+            />
           ) : stats.data && stats.data.quality.events > 0 ? (
             (() => {
               const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
-              if (sub === "overview") return <OverviewView {...props} />;
+              if (sub === "overview")
+                return (
+                  <div className="space-y-10">
+                    <OverviewView {...props} videoNote={videoNote} />
+                    {/* what the video itself shows (possession, attacks) belongs to the overview too */}
+                    {main && (
+                      <VideoOverview
+                        orgId={orgId}
+                        matchId={match.id}
+                        teamId={match.team_id}
+                        ownName={teamName}
+                        oppName={oppName(match)}
+                        durationMs={main.duration_s ? main.duration_s * 1000 : null}
+                        kickoff={match.kickoff_ms}
+                        periodS={match.period_s}
+                        onPlay={onPlay}
+                        onPhysical={() => setSub("physical")}
+                        staff={false}
+                        compact
+                      />
+                    )}
+                  </div>
+                );
               if (sub === "report") return <ReportView {...props} />;
               if (sub === "keepers") return <KeepersView {...props} />;
               return <ShotsView {...props} />;
@@ -450,6 +468,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               ownName={teamName}
               oppName={oppName(match)}
               durationMs={main.duration_s ? main.duration_s * 1000 : null}
+              kickoff={match.kickoff_ms}
+              periodS={match.period_s}
               onPlay={onPlay}
               onPhysical={() => setSub("physical")}
               staff={staff}
@@ -465,9 +485,14 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "scenes" && (
         <div className="animate-fade space-y-8">
+          {/* the coach's job here first: feedback per player; then the reels to share */}
+          {staff && main && (
+            // feedback on the players' scenes happens beside the player in the video tab
+            <FeedbackSummary orgId={orgId} matchId={match.id} onOpen={() => (setView("video"), setAskPane({ pane: "feedback" }))} />
+          )}
           <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />
+          {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
           {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
-          {staff && <TeamFeedView orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
         </div>
       )}
 
@@ -552,16 +577,17 @@ function QualityReport({ video }: { video: Video }) {
     overall: "ok" | "warn" | "fail";
     checks: { id: string; level: string; value: number | null; tip: string | null }[];
   };
-  const tone = { ok: "text-ok", warn: "text-warn", fail: "text-error" }[report.overall];
+  // quiet unless the recording fails: the signal colour belongs to the open work step
+  const tone = report.overall === "fail" ? "text-error" : "";
   return (
-    <details className="group rounded-lg bg-raised px-5 py-4 border border-border">
+    <details className="group">
       <summary className="flex cursor-pointer list-none items-center gap-2 text-sm [&::-webkit-details-marker]:hidden">
         <span className="font-medium">{t("title")}:</span>
         <span className={cn("font-medium", tone)}>{t(`overall_${report.overall}`)}</span>
         <span className="text-xs text-muted">({t("heuristic")})</span>
         <ChevronDown aria-hidden className="ml-auto size-4 text-muted transition-transform group-open:rotate-180" />
       </summary>
-      <ul className="mt-4 divide-y divide-border/70 text-sm">
+      <ul className="mt-3 divide-y divide-border/70 text-sm">
         {report.checks.map((c) => (
           <li key={c.id} className="flex flex-wrap gap-x-4 gap-y-1 py-2">
             <span className="w-44 shrink-0 text-muted">{t(`check_${c.id}` as "check_fps")}</span>
@@ -647,7 +673,8 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
 }
 
 /** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
-const pctLabel = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
+// a share above 100 % means the sources disagree (e.g. goals from a report, attacks from a clip)
+const pctLabel = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Math.round(v * 100)} %`);
 
 function ScoreRows({ home, away, hs, as, ownHome, halftime, halftimeLabel }: { home: string; away: string; hs: number | null; as: number | null; ownHome: boolean; halftime: string | null; halftimeLabel: string }) {
   const [h, a] = useCountUp(hs ?? 0, as ?? 0);

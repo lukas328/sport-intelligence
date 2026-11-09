@@ -42,11 +42,11 @@ export function OnboardingChecklist({ orgId, teamId }: { orgId: string; teamId: 
   const next = items.find((i) => !i.done && (i.link || (i.key === "demo" && teamId)));
   const action = (i: (typeof items)[number], primary: boolean) =>
     i.key === "demo" && teamId ? (
-      <Button variant={primary ? "primary" : "secondary"} size="sm" loading={demo.isPending} onClick={() => demo.mutate()}>
+      <Button variant={primary ? "secondary" : "ghost"} size="sm" loading={demo.isPending} onClick={() => demo.mutate()}>
         {t("tryDemo")}
       </Button>
     ) : i.link ? (
-      <Link href={i.link} className={buttonClass(primary ? "primary" : "secondary", "sm")}>
+      <Link href={i.link} className={buttonClass(primary ? "secondary" : "ghost", "sm")}>
         {t("go")}
       </Link>
     ) : null;

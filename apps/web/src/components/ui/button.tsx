@@ -5,7 +5,7 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "quie
 export type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-accent text-accent-contrast hover:brightness-[0.92] active:brightness-90",
+  primary: "bg-accent text-accent-contrast hover:brightness-[0.92] active:brightness-90 disabled:bg-foreground/10 disabled:text-muted disabled:opacity-100 aria-disabled:bg-foreground/10 aria-disabled:text-muted aria-disabled:opacity-100",
   secondary: "bg-raised text-foreground ring-1 ring-inset ring-foreground/20 hover:ring-foreground/40 hover:bg-surface",
   ghost: "text-foreground hover:bg-surface",
   quiet: "text-muted hover:bg-surface hover:text-foreground",

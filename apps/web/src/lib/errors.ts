@@ -58,6 +58,15 @@ export const KNOWN_ERRORS = [
   "report-empty",
   "report-unavailable",
   "already-a-goal",
+  "invalid-clock",
+  "official-unavailable",
+  "query-too-short",
+  "join-request-pending",
+  "second-person-required",
+  "email-unverified",
+  "org-unverified",
+  "suggestion-resolved",
+  "suggestion-stale",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

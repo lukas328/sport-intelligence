@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -37,7 +37,7 @@ export function OpponentPlayers({ orgId, opponentId }: { orgId: string; opponent
   });
   const set = (i: number, patch: Partial<Row>) => setRows(list.map((r, n) => (n === i ? { ...r, ...patch } : r)));
   return (
-    <Card className="space-y-3">
+    <section className="space-y-3 border-t border-foreground/15 pt-4">
       <h2 className="font-semibold">{t("title")}</h2>
       <p className="text-sm text-muted">{t("hint")}</p>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
@@ -61,6 +61,6 @@ export function OpponentPlayers({ orgId, opponentId }: { orgId: string; opponent
           {t("save")}
         </Button>
       </div>
-    </Card>
+    </section>
   );
 }

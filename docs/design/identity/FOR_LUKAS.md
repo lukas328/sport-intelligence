@@ -20,3 +20,15 @@ Was ich ohne dich nicht entscheiden wollte oder konnte.
 6. **Marketing-Site und Expo-App** tragen noch den Look von ADR 023. Wenn dir die neue Identität
    gefällt, ziehe ich sie dort nach (Schrift, Farben, Bühne).
 7. **Usability-Test (Q-UX-1)** bleibt offen: 20 Minuten mit einem Trainer und einem Spieler am Handy.
+8. **Rote Vereinsfarbe als Akzent.** Der Akzent (Hauptknöpfe, Links, Fokus) ist die Vereinsfarbe.
+   Für einen roten Verein wie den Demo-Verein lesen sich "Speichern", "Bericht erstellen" oder
+   "Rechnung anfordern" wie Fehler, denn Rot heisst in der App sonst Gegentor und Fehler.
+   Möglichkeiten:
+   - **A (mein Vorschlag): Hauptknöpfe in Tinte, Vereinsfarbe nur auf der Bühne.** Knöpfe schwarz
+     (im Dunkelmodus weiss), Links unterstrichen in Tinte; die Vereinsfarbe bleibt oben in der Bühne,
+     im Logo und in den Rückennummern. Rot und Fehler kollidieren nie mehr, für jeden Verein gleich.
+   - **B: Akzent nur, wenn die Vereinsfarbe nicht rot ist.** Rote Vereine bekommen automatisch
+     Tinte. Ein Verein mit Blau behält blaue Knöpfe. Nachteil: zwei Verhalten, schwer zu erklären.
+   - **C: so lassen** und Fehler zusätzlich mit Symbol und Wort kennzeichnen (das tun sie schon).
+   Bei A ist es eine Änderung an den Tokens in `globals.css` und am Button; ich setze es um, wenn du
+   zustimmst.

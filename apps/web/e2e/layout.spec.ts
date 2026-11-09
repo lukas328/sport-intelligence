@@ -13,6 +13,7 @@ async function noHorizontalScroll(page: Page) {
 test("no horizontal scrolling on phones", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "phone viewport only");
   await register(page, uniqueEmail("layout"), "Coach Mobile");
+  await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC Schmal");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Junioren U15 Leistungsgruppe");

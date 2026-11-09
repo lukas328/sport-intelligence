@@ -55,14 +55,21 @@ export function InsightsCard({
   names,
   staff,
   onEvidence,
+  won = false,
+  noSignal = false,
 }: {
   orgId: string;
   matchId: string;
   names: Record<string, string>;
   staff: boolean;
   onEvidence: (title: string, filter: EventFilter) => void;
+  /** a win opens with what worked */
+  won?: boolean;
+  /** the screen's signal sits elsewhere (e.g. on what decided the match) */
+  noSignal?: boolean;
 }) {
   const t = useTranslations("insights");
+  const [all, setAll] = useState(false);
   const qc = useQueryClient();
   const [problem, setProblem] = useState<string | null>(null);
   const text = useInsightText(names);
@@ -81,28 +88,35 @@ export function InsightsCard({
   });
   const data = q.data;
   if (!data) return null;
+  // the three that matter, a win opening with what worked; the rest on request
+  const rank = (k: string) => (k === "strength" ? (won ? 0 : 1) : k === "weakness" ? (won ? 1 : 0) : 2);
+  const ordered = [...data.insights].sort((a, b) => rank(a.kind) - rank(b.kind));
+  const shown = all ? ordered : ordered.slice(0, 3);
+  // one signal per screen: only the first weakness carries it
+  const firstWeak = noSignal ? -1 : shown.findIndex((i) => i.kind === "weakness");
 
   return (
     <Sheet className="space-y-3" data-testid="insights">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-xl">{t("title")}</h2>
-        <p className="text-xs text-muted">{t("baseline", { count: data.baseline_matches })}</p>
+        {data.baseline_matches > 0 && <p className="text-xs text-muted">{t("baseline", { count: data.baseline_matches })}</p>}
       </div>
       {data.insights.length === 0 ? (
         <p className="text-sm text-muted">{t("none")}</p>
       ) : (
         <ul className="divide-y divide-border/70">
-          {data.insights.map((i) => (
+          {shown.map((i, n) => (
             <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
               <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
-                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? "size-2.5 rounded-[2px] bg-error" : "size-2.5 rounded-[2px] bg-muted"} />
+                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? (n === firstWeak ? "size-2.5 rounded-[2px] bg-signal ring-1 ring-foreground/30" : "size-2.5 rounded-[2px] bg-foreground/45") : "size-2.5 rounded-[2px] bg-muted"} />
                 {t(i.kind)}
               </span>
               <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">{text(i)}</span>
               <button className="text-xs font-semibold text-accent hover:underline" onClick={() => onEvidence(text(i), i.evidence)}>
                 {t("evidence")}
               </button>
-              {i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
+              {/* drills are a staff page: players would land on a 404 */}
+              {staff && i.kind === "weakness" && focusForInsight(i.key, i.params.zone as string | null).length > 0 && (
                 <Link className="text-xs font-medium text-muted hover:text-foreground hover:underline" href={`/app/${orgId}/drills?focus=${focusForInsight(i.key, i.params.zone as string | null).join(",")}`}>
                   {t("drills")}
                 </Link>
@@ -114,6 +128,11 @@ export function InsightsCard({
           ))}
         </ul>
       )}
+      {ordered.length > shown.length && (
+        <button type="button" className="block text-sm font-medium text-accent hover:underline" onClick={() => setAll(true)}>
+          {t("showAll", { n: ordered.length })}
+        </button>
+      )}
       {data.summary && (
         <div className="space-y-1 rounded-md bg-surface p-4 text-sm" data-testid="summary">
           <p className="whitespace-pre-line">{data.summary.text}</p>
@@ -121,7 +140,7 @@ export function InsightsCard({
         </div>
       )}
       {staff && data.insights.length > 0 && !data.summary && (
-        <Button variant="secondary" disabled={summarise.isPending} onClick={() => summarise.mutate()}>
+        <Button variant="secondary" size="sm" disabled={summarise.isPending} onClick={() => summarise.mutate()}>
           {t("summarise")}
         </Button>
       )}
@@ -130,7 +149,8 @@ export function InsightsCard({
           {problem === "text-unavailable" ? t("summaryUnavailable") : t("summaryRejected")}
         </p>
       )}
-      <p className="text-xs text-muted">{t("hint")}</p>
+      {/* no other match yet: the hint must not claim a comparison */}
+      <p className="text-xs text-muted">{t(data.baseline_matches > 0 ? "hint" : "hintAlone")}</p>
     </Sheet>
   );
 }

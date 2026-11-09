@@ -4,7 +4,7 @@ import { problemCode } from "@handball/api-client";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { useConfirm } from "@/components/ui/confirm";
@@ -47,7 +47,7 @@ export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId
       <h2 id="privacy-title" className="text-lg font-semibold">
         {t("title")}
       </h2>
-      <Card className="space-y-4">
+      <div className="border-t border-foreground/15 pt-5 space-y-4">
         <div className="space-y-2">
           <p className="text-sm">{t("exportHint")}</p>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API download, not a page */}
@@ -79,7 +79,7 @@ export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId
           </details>
         )}
         {problem && <Alert>{messages[problem] ?? t("failed")}</Alert>}
-      </Card>
+      </div>
     </section>
   );
 }

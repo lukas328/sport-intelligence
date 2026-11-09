@@ -10,7 +10,7 @@ import { ArrowUp, Play } from "lucide-react";
 import { control } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 
@@ -31,7 +31,7 @@ function BarList({ chart }: { chart: Chart }) {
             <li key={`${label}-${i}`} className="grid grid-cols-[minmax(5rem,10rem)_1fr_3.5rem] items-center gap-2 text-sm" title={`${label}: ${fmt(v)}`}>
               <span className="truncate text-muted">{label}</span>
               <span className="h-3 rounded-r bg-surface" aria-hidden>
-                <span className="block h-3 rounded-r bg-accent" style={{ width: `${(Math.abs(v) / max) * 100}%` }} />
+                <span className="block h-3 rounded-r bg-foreground" style={{ width: `${(Math.abs(v) / max) * 100}%` }} />
               </span>
               <span className="tabular-nums">{fmt(v)}</span>
             </li>
@@ -59,8 +59,8 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
   const a = m.answer;
   return (
     <div className="space-y-3">
-      <p className="ml-auto w-fit max-w-[85%] rounded-lg rounded-br-md bg-foreground px-4 py-2.5 text-background">{m.question}</p>
-      <Card className="space-y-3">
+      <p className="font-semibold">{m.question}</p>
+      <div className="space-y-3 border-l-2 border-foreground/20 pl-4">
         <p>{a.text}</p>
         {a.sample_size != null && <p className="text-sm text-muted">{t("sample", { n: a.sample_size })}</p>}
         {a.chart && <BarList chart={a.chart} />}
@@ -72,7 +72,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
                 <li key={c.event_id}>
                   <Link
                     href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}
-                    className="inline-flex min-h-8 items-center gap-1.5 rounded-md bg-accent/10 px-3 text-sm font-medium text-accent hover:bg-accent/20"
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-sm font-semibold ring-1 ring-inset ring-foreground/20 hover:bg-surface"
                   >
                     <Play aria-hidden className="size-3 fill-current" /> {c.label}
                   </Link>
@@ -84,7 +84,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
         {!a.answerable && a.suggestion && (
           <p className="text-sm">
             {t("tryInstead")}{" "}
-            <button type="button" className="font-medium text-accent hover:underline" onClick={() => onAsk(a.suggestion!)}>
+            <button type="button" className="font-medium underline underline-offset-4" onClick={() => onAsk(a.suggestion!)}>
               {a.suggestion}
             </button>
           </p>
@@ -110,7 +110,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
             {t("bad")}
           </button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -168,57 +168,68 @@ export function AssistantView({ orgId, teamId }: { orgId: string; teamId: string
     if (question.trim().length >= 3) ask.mutate(question.trim());
   };
   const examples = [t("example1"), t("example2"), t("example3")];
+  const form = (
+    <form onSubmit={submit} className="relative">
+      <label className="block">
+        <span className="sr-only">{t("question")}</span>
+        <input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder={t("placeholder")}
+          maxLength={500}
+          className={cn(control, "min-h-14 pr-28 pl-4 text-base")}
+        />
+      </label>
+      <Button type="submit" className="absolute top-2 right-2" disabled={ask.isPending || question.trim().length < 3}>
+        <ArrowUp aria-hidden />
+        {t("ask")}
+      </Button>
+    </form>
+  );
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_16rem]">
       <section className="space-y-4" aria-labelledby="assistant-title">
         <div>
-          <h2 id="assistant-title" className="text-xl font-bold">{t("title")}</h2>
+          <h2 id="assistant-title" className="sr-only">{t("title")}</h2>
           <p className="text-sm text-muted">{t("hint")}</p>
         </div>
+        {/* before the first question the field comes first (on phones it was below the fold) */}
+        {messages.length === 0 && form}
         {messages.length === 0 && (
-          <div className="flex flex-wrap gap-2">
-            {examples.map((q) => (
-              <button key={q} type="button" className="rounded-md bg-raised px-4 py-2 text-left text-sm border border-border transition-colors hover:bg-surface" onClick={() => ask.mutate(q)}>
-                {q}
-              </button>
-            ))}
+          <div className="space-y-1">
+            <p className="text-sm text-muted">{t("examples")}</p>
+            <ul className="divide-y divide-foreground/10 border-y border-foreground/10">
+              {examples.map((q) => (
+                <li key={q}>
+                  <button type="button" className="flex min-h-11 w-full items-center text-left text-sm font-medium hover:underline" onClick={() => ask.mutate(q)}>
+                    {q}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
-        <div className="space-y-6" aria-live="polite">
+        <div className="space-y-8" aria-live="polite">
           {messages.map((m) => (
             <AnswerCard key={m.id} m={m} orgId={orgId} onAsk={(q) => ask.mutate(q)} />
           ))}
           {ask.isPending && <p className="text-sm text-muted">{t("thinking")}</p>}
         </div>
         {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-        <form onSubmit={submit} className="relative">
-          <label className="block">
-            <span className="sr-only">{t("question")}</span>
-            <input
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder={t("placeholder")}
-              maxLength={500}
-              className={cn(control, "min-h-14 rounded-full pr-28 pl-5 text-base shadow-sm")}
-            />
-          </label>
-          <Button type="submit" className="absolute top-2 right-2" disabled={ask.isPending || question.trim().length < 3}>
-            <ArrowUp aria-hidden />
-            {t("ask")}
-          </Button>
-        </form>
+        {messages.length > 0 && form}
       </section>
-      <aside className="space-y-2" aria-label={t("history")}>
+      <aside className="space-y-2 lg:border-l lg:border-foreground/15 lg:pl-6" aria-label={t("history")}>
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">{t("history")}</h3>
-          <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => { setConversation(null); setMessages([]); }}>
+          <button type="button" className="min-h-8 text-sm font-medium underline underline-offset-4" onClick={() => { setConversation(null); setMessages([]); }}>
             {t("new")}
           </button>
         </div>
+        {history.data && history.data.length === 0 && <p className="text-sm text-muted">{t("historyNone")}</p>}
         <ul className="space-y-1 text-sm">
           {(history.data ?? []).map((c) => (
             <li key={c.id}>
-              <button type="button" className="w-full truncate text-left hover:underline" aria-current={c.id === conversation} onClick={() => void open(c.id)}>
+              <button type="button" className="min-h-8 w-full truncate text-left hover:underline aria-[current=true]:font-semibold" aria-current={c.id === conversation} onClick={() => void open(c.id)}>
                 {c.title}
               </button>
             </li>

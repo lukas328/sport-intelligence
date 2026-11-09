@@ -4,6 +4,7 @@
  * without enough data it returns null and the caller shows a neutral title. xG stays marked as
  * an estimate in every text that uses it.
  */
+import { XG_MIN_COVERAGE } from "./xg";
 
 export interface Line {
   key: string;
@@ -25,15 +26,22 @@ export interface SeasonRow {
 const round1 = (v: number) => Math.round(v * 10) / 10;
 const result = (r: Pick<SeasonRow, "score_own" | "score_opponent">) => (r.score_own > r.score_opponent ? "w" : r.score_own < r.score_opponent ? "l" : "d");
 
-/** Clear gap between goals and expected goals: at least 2 and at least 10 %. */
+/**
+ * Clear gap between goals and expected goals: at least 2 and at least 10 %. A gap of more than
+ * double either way says more about the estimate than the team (e.g. 26 goals from 3.4 when the
+ * shots were not tagged): then nothing is said.
+ */
 export function xgGap(goals: number, xg: number): "over" | "under" | null {
   if (xg <= 0) return null;
+  if (goals > xg * 2 || goals < xg / 2) return null;
   const d = goals - xg;
   if (Math.abs(d) < Math.max(2, xg * 0.1)) return null;
   return d > 0 ? "over" : "under";
 }
 
-export function seasonStatement(rows: SeasonRow[]): Statement | null {
+/** `xgCoverage`: the share of our shots on target with a position (season totals); below
+ * `XG_MIN_COVERAGE` the xG sum is mostly made of shots without one, so it says nothing. */
+export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null): Statement | null {
   if (rows.length === 0) return null;
   const sorted = [...rows].sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at));
   const results = sorted.map(result);
@@ -51,7 +59,7 @@ export function seasonStatement(rows: SeasonRow[]): Statement | null {
   const xg = sorted.reduce((s, r) => s + r.xg, 0);
   const against = sorted.reduce((s, r) => s + r.score_opponent, 0);
   const xga = sorted.reduce((s, r) => s + r.xg_against, 0);
-  const attack = xgGap(goals, xg);
+  const attack = xgCoverage === undefined || (xgCoverage != null && xgCoverage >= XG_MIN_COVERAGE) ? xgGap(goals, xg) : null;
   if (attack) {
     return {
       headline: { key: attack === "over" ? "voice.overXg" : "voice.underXg", params: {} },

@@ -73,7 +73,7 @@ export async function openPlays(page: Page) {
 }
 
 /** Match page: analysis view and one of its sections. */
-export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Matchreport") {
+export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Matchbericht") {
   await page.getByRole("tab", { name: "Analyse", exact: true }).click();
   await page.getByRole("tab", { name: section, exact: true }).click();
 }
