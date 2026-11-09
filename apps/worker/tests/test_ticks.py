@@ -26,6 +26,7 @@ def test_scouting_tick_posts_and_survives_errors() -> None:
         "/internal/billing/dunning",
         "/internal/onboarding/run",
         "/internal/ops/tick",
+        "/internal/official/sync",
     ]
     assert seen[0].headers["x-internal-token"]
 

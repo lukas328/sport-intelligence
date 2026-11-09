@@ -18,10 +18,18 @@ from redis.asyncio import Redis as AsyncRedis
 from rq import Queue
 
 QUEUES = ("default", "pipeline", "gpu")
+DEFAULT_TIMEOUT_S = 6 * 3600
 
 
 class JobQueue(Protocol):
-    def enqueue(self, queue: str, func: str, job_id: str, kwargs: dict[str, Any]) -> None: ...
+    def enqueue(
+        self,
+        queue: str,
+        func: str,
+        job_id: str,
+        kwargs: dict[str, Any],
+        timeout_s: int | None = None,
+    ) -> None: ...
 
     def depths(self) -> dict[str, int]: ...
 
@@ -29,9 +37,18 @@ class JobQueue(Protocol):
 @dataclass
 class MemoryJobQueue:
     jobs: list[tuple[str, str, str, dict[str, Any]]] = field(default_factory=list)
+    timeouts: dict[str, int] = field(default_factory=dict)  # job id -> seconds
 
-    def enqueue(self, queue: str, func: str, job_id: str, kwargs: dict[str, Any]) -> None:
+    def enqueue(
+        self,
+        queue: str,
+        func: str,
+        job_id: str,
+        kwargs: dict[str, Any],
+        timeout_s: int | None = None,
+    ) -> None:
         self.jobs.append((queue, func, job_id, kwargs))
+        self.timeouts[job_id] = timeout_s or DEFAULT_TIMEOUT_S
 
     def depths(self) -> dict[str, int]:
         return {q: 0 for q in QUEUES}
@@ -41,12 +58,21 @@ class RqJobQueue:
     def __init__(self, redis_url: str) -> None:
         self._conn = Redis.from_url(redis_url)
 
-    def enqueue(self, queue: str, func: str, job_id: str, kwargs: dict[str, Any]) -> None:
+    def enqueue(
+        self,
+        queue: str,
+        func: str,
+        job_id: str,
+        kwargs: dict[str, Any],
+        timeout_s: int | None = None,
+    ) -> None:
+        """`timeout_s`: how long the worker may run the job (default six hours; a full game's
+        analysis on a CPU worker takes longer, see services/videos.job_budget_s)."""
         Queue(queue, connection=self._conn).enqueue(
             func,
             kwargs=kwargs,
             job_id=job_id,
-            job_timeout=6 * 3600,
+            job_timeout=timeout_s or DEFAULT_TIMEOUT_S,
             result_ttl=86400,
             failure_ttl=7 * 86400,
         )

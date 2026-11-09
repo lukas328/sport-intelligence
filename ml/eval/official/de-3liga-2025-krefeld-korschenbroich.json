@@ -1,0 +1,747 @@
+{
+ "source": "https://dhbdata.fmp.sportradar.com/match/83388/pressReport.pdf",
+ "match_id": 83388,
+ "competition": "3. Liga Männer 24/25 - Staffel Süd-West",
+ "home": "HSG Krefeld Niederrhein",
+ "away": "TV Korschenbroich",
+ "date": "15.02.2025",
+ "final": [
+  37,
+  26
+ ],
+ "half_time": [
+  18,
+  15
+ ],
+ "log": [
+  {
+   "timeInt": 42,
+   "timeString": "00:42",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 19,
+   "name": "Tim Hildenbrand",
+   "result": "1:0"
+  },
+  {
+   "timeInt": 99,
+   "timeString": "01:39",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "2:0"
+  },
+  {
+   "timeInt": 174,
+   "timeString": "02:54",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "3:0"
+  },
+  {
+   "timeInt": 204,
+   "timeString": "03:24",
+   "actionText": "7m Tor",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": "3:1"
+  },
+  {
+   "timeInt": 239,
+   "timeString": "03:59",
+   "actionText": "Verwarnung",
+   "team": "away",
+   "number": 77,
+   "name": "Fritz Ferdinand Bitzel",
+   "result": null
+  },
+  {
+   "timeInt": 262,
+   "timeString": "04:22",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 10,
+   "name": "Maximilian Eugler",
+   "result": null
+  },
+  {
+   "timeInt": 267,
+   "timeString": "04:27",
+   "actionText": "7m Tor",
+   "team": "home",
+   "number": 19,
+   "name": "Tim Hildenbrand",
+   "result": "4:1"
+  },
+  {
+   "timeInt": 348,
+   "timeString": "05:48",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "5:1"
+  },
+  {
+   "timeInt": 377,
+   "timeString": "06:17",
+   "actionText": "Zeitstrafe",
+   "team": "home",
+   "number": 55,
+   "name": "Niklas Ingenpass",
+   "result": null
+  },
+  {
+   "timeInt": 383,
+   "timeString": "06:23",
+   "actionText": "7m Fehlwurf",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": null
+  },
+  {
+   "timeInt": 461,
+   "timeString": "07:41",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 8,
+   "name": "Christopher Klasmann",
+   "result": "6:1"
+  },
+  {
+   "timeInt": 517,
+   "timeString": "08:37",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 20,
+   "name": "Mats Wolf",
+   "result": "6:2"
+  },
+  {
+   "timeInt": 525,
+   "timeString": "08:45",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 11,
+   "name": "Lucas Schneider",
+   "result": "7:2"
+  },
+  {
+   "timeInt": 559,
+   "timeString": "09:19",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 20,
+   "name": "Mats Wolf",
+   "result": "7:3"
+  },
+  {
+   "timeInt": 642,
+   "timeString": "10:42",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 77,
+   "name": "Fritz Ferdinand Bitzel",
+   "result": null
+  },
+  {
+   "timeInt": 740,
+   "timeString": "12:20",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": "7:4"
+  },
+  {
+   "timeInt": 757,
+   "timeString": "12:37",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 11,
+   "name": "Lucas Schneider",
+   "result": "8:4"
+  },
+  {
+   "timeInt": 769,
+   "timeString": "12:49",
+   "actionText": "Team Time-Out",
+   "team": "away",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 844,
+   "timeString": "14:04",
+   "actionText": "Zeitstrafe",
+   "team": "home",
+   "number": 19,
+   "name": "Tim Hildenbrand",
+   "result": null
+  },
+  {
+   "timeInt": 902,
+   "timeString": "15:02",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Mike Schulz",
+   "result": "9:4"
+  },
+  {
+   "timeInt": 973,
+   "timeString": "16:13",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 35,
+   "name": "Ben Büscher",
+   "result": "9:5"
+  },
+  {
+   "timeInt": 993,
+   "timeString": "16:33",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 55,
+   "name": "Niklas Ingenpass",
+   "result": "10:5"
+  },
+  {
+   "timeInt": 1035,
+   "timeString": "17:15",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "11:5"
+  },
+  {
+   "timeInt": 1078,
+   "timeString": "17:58",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 20,
+   "name": "Mats Wolf",
+   "result": "11:6"
+  },
+  {
+   "timeInt": 1118,
+   "timeString": "18:38",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 50,
+   "name": "Dustin Franz",
+   "result": "11:7"
+  },
+  {
+   "timeInt": 1176,
+   "timeString": "19:36",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": "11:8"
+  },
+  {
+   "timeInt": 1185,
+   "timeString": "19:45",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 17,
+   "name": "Philip Schneider",
+   "result": null
+  },
+  {
+   "timeInt": 1189,
+   "timeString": "19:49",
+   "actionText": "7m Tor",
+   "team": "home",
+   "number": 19,
+   "name": "Tim Hildenbrand",
+   "result": "12:8"
+  },
+  {
+   "timeInt": 1306,
+   "timeString": "21:46",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "13:8"
+  },
+  {
+   "timeInt": 1340,
+   "timeString": "22:20",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 77,
+   "name": "Fritz Ferdinand Bitzel",
+   "result": "13:9"
+  },
+  {
+   "timeInt": 1353,
+   "timeString": "22:33",
+   "actionText": "Team Time-Out",
+   "team": "home",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 1383,
+   "timeString": "23:03",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": "13:10"
+  },
+  {
+   "timeInt": 1398,
+   "timeString": "23:18",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 20,
+   "name": "Lukas Siegler",
+   "result": "14:10"
+  },
+  {
+   "timeInt": 1424,
+   "timeString": "23:44",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": "14:11"
+  },
+  {
+   "timeInt": 1463,
+   "timeString": "24:23",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 3,
+   "name": "Robert Krass",
+   "result": "15:11"
+  },
+  {
+   "timeInt": 1505,
+   "timeString": "25:05",
+   "actionText": "7m Tor",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": "15:12"
+  },
+  {
+   "timeInt": 1534,
+   "timeString": "25:34",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 3,
+   "name": "Robert Krass",
+   "result": "16:12"
+  },
+  {
+   "timeInt": 1547,
+   "timeString": "25:47",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 72,
+   "name": "Melle van Katwijk",
+   "result": "16:13"
+  },
+  {
+   "timeInt": 1599,
+   "timeString": "26:39",
+   "actionText": "7m Fehlwurf",
+   "team": "away",
+   "number": 27,
+   "name": "Max Zimmermann",
+   "result": null
+  },
+  {
+   "timeInt": 1665,
+   "timeString": "27:45",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 3,
+   "name": "Robert Krass",
+   "result": "17:13"
+  },
+  {
+   "timeInt": 1728,
+   "timeString": "28:48",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 20,
+   "name": "Mats Wolf",
+   "result": "17:14"
+  },
+  {
+   "timeInt": 1793,
+   "timeString": "29:53",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 20,
+   "name": "Mats Wolf",
+   "result": "17:15"
+  },
+  {
+   "timeInt": 1800,
+   "timeString": "30:00",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 20,
+   "name": "Lukas Siegler",
+   "result": "18:15"
+  },
+  {
+   "timeInt": 1866,
+   "timeString": "31:06",
+   "actionText": "7m Fehlwurf",
+   "team": "away",
+   "number": 24,
+   "name": "Jan Magnus König",
+   "result": null
+  },
+  {
+   "timeInt": 1902,
+   "timeString": "31:42",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Mike Schulz",
+   "result": "19:15"
+  },
+  {
+   "timeInt": 1914,
+   "timeString": "31:54",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 4,
+   "name": "Florian Krantzen",
+   "result": "19:16"
+  },
+  {
+   "timeInt": 1988,
+   "timeString": "33:08",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 3,
+   "name": "Robert Krass",
+   "result": "20:16"
+  },
+  {
+   "timeInt": 2031,
+   "timeString": "33:51",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 10,
+   "name": "Maximilian Eugler",
+   "result": "20:17"
+  },
+  {
+   "timeInt": 2089,
+   "timeString": "34:49",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 17,
+   "name": "Philip Schneider",
+   "result": null
+  },
+  {
+   "timeInt": 2194,
+   "timeString": "36:34",
+   "actionText": "7m Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Mike Schulz",
+   "result": "21:17"
+  },
+  {
+   "timeInt": 2223,
+   "timeString": "37:03",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 10,
+   "name": "Maximilian Eugler",
+   "result": "21:18"
+  },
+  {
+   "timeInt": 2233,
+   "timeString": "37:13",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 20,
+   "name": "Lukas Siegler",
+   "result": "22:18"
+  },
+  {
+   "timeInt": 2296,
+   "timeString": "38:16",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 10,
+   "name": "Maximilian Eugler",
+   "result": "22:19"
+  },
+  {
+   "timeInt": 2388,
+   "timeString": "39:48",
+   "actionText": "Team Time-Out",
+   "team": "away",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 2440,
+   "timeString": "40:40",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 27,
+   "name": "Lukas Hüller",
+   "result": "23:19"
+  },
+  {
+   "timeInt": 2541,
+   "timeString": "42:21",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 4,
+   "name": "Florian Krantzen",
+   "result": "23:20"
+  },
+  {
+   "timeInt": 2602,
+   "timeString": "43:22",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 11,
+   "name": "Lucas Schneider",
+   "result": "24:20"
+  },
+  {
+   "timeInt": 2652,
+   "timeString": "44:12",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 27,
+   "name": "Lukas Hüller",
+   "result": "25:20"
+  },
+  {
+   "timeInt": 2713,
+   "timeString": "45:13",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 55,
+   "name": "Niklas Ingenpass",
+   "result": "26:20"
+  },
+  {
+   "timeInt": 2754,
+   "timeString": "45:54",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 35,
+   "name": "Ben Büscher",
+   "result": "26:21"
+  },
+  {
+   "timeInt": 2833,
+   "timeString": "47:13",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 55,
+   "name": "Niklas Ingenpass",
+   "result": "27:21"
+  },
+  {
+   "timeInt": 2865,
+   "timeString": "47:45",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 24,
+   "name": "Jan Magnus König",
+   "result": null
+  },
+  {
+   "timeInt": 2886,
+   "timeString": "48:06",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Mike Schulz",
+   "result": "28:21"
+  },
+  {
+   "timeInt": 2936,
+   "timeString": "48:56",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "29:21"
+  },
+  {
+   "timeInt": 2940,
+   "timeString": "49:00",
+   "actionText": "Team Time-Out",
+   "team": "away",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 2994,
+   "timeString": "49:54",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 27,
+   "name": "Lukas Hüller",
+   "result": "30:21"
+  },
+  {
+   "timeInt": 3023,
+   "timeString": "50:23",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 50,
+   "name": "Dustin Franz",
+   "result": "30:22"
+  },
+  {
+   "timeInt": 3033,
+   "timeString": "50:33",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "31:22"
+  },
+  {
+   "timeInt": 3090,
+   "timeString": "51:30",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 23,
+   "name": "Mike Schulz",
+   "result": "32:22"
+  },
+  {
+   "timeInt": 3121,
+   "timeString": "52:01",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 50,
+   "name": "Dustin Franz",
+   "result": "32:23"
+  },
+  {
+   "timeInt": 3131,
+   "timeString": "52:11",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 27,
+   "name": "Lukas Hüller",
+   "result": "33:23"
+  },
+  {
+   "timeInt": 3238,
+   "timeString": "53:58",
+   "actionText": "7m Fehlwurf",
+   "team": "home",
+   "number": 23,
+   "name": "Mike Schulz",
+   "result": null
+  },
+  {
+   "timeInt": 3263,
+   "timeString": "54:23",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 50,
+   "name": "Dustin Franz",
+   "result": "33:24"
+  },
+  {
+   "timeInt": 3276,
+   "timeString": "54:36",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 27,
+   "name": "Lukas Hüller",
+   "result": "34:24"
+  },
+  {
+   "timeInt": 3330,
+   "timeString": "55:30",
+   "actionText": "Team Time-Out",
+   "team": "home",
+   "number": null,
+   "name": null,
+   "result": null
+  },
+  {
+   "timeInt": 3408,
+   "timeString": "56:48",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 34,
+   "name": "Jörn Persson",
+   "result": "35:24"
+  },
+  {
+   "timeInt": 3435,
+   "timeString": "57:15",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 50,
+   "name": "Dustin Franz",
+   "result": "35:25"
+  },
+  {
+   "timeInt": 3437,
+   "timeString": "57:17",
+   "actionText": "Zeitstrafe",
+   "team": "away",
+   "number": 50,
+   "name": "Dustin Franz",
+   "result": null
+  },
+  {
+   "timeInt": 3458,
+   "timeString": "57:38",
+   "actionText": "Tor",
+   "team": "home",
+   "number": 27,
+   "name": "Lukas Hüller",
+   "result": "36:25"
+  },
+  {
+   "timeInt": 3496,
+   "timeString": "58:16",
+   "actionText": "Tor",
+   "team": "away",
+   "number": 72,
+   "name": "Melle van Katwijk",
+   "result": "36:26"
+  },
+  {
+   "timeInt": 3536,
+   "timeString": "58:56",
+   "actionText": "7m Tor",
+   "team": "home",
+   "number": 14,
+   "name": "Pascal Noll",
+   "result": "37:26"
+  }
+ ]
+}

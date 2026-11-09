@@ -33,7 +33,7 @@ from handball_api.services import insights as insights_service
 from handball_api.services import training as training_service
 from handball_api.services.context import Ctx
 from handball_api.services.events import _to_metric
-from handball_api.services.matches import get_match
+from handball_api.services.matches import clip_window, get_match, in_video, video_duration_ms
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 from handball_api.services.team_data import load
@@ -179,7 +179,13 @@ async def create(ctx: Ctx, match_id: uuid.UUID, data: FocusIn) -> FocusPlan:
             )
         ).all()
         evidence = dict(item.get("evidence") or {})
-        hits = [e for e in events if _matches_evidence(e, evidence, numbers)][:40]
+        # events before or after the video (a clip of part of the game) have nothing to show
+        duration = await video_duration_ms(ctx, match)
+        hits = [
+            e
+            for e in events
+            if in_video(e.t_ms, duration) and _matches_evidence(e, evidence, numbers)
+        ][:40]
         pl = Playlist(
             organization_id=team.organization_id,
             team_id=team.id,
@@ -191,11 +197,12 @@ async def create(ctx: Ctx, match_id: uuid.UUID, data: FocusIn) -> FocusPlan:
         await ctx.db.flush()
         for pos, e in enumerate(sorted(hits, key=lambda x: x.t_ms or 0)):
             assert e.t_ms is not None
+            start, end = clip_window(e.t_ms, PRE_MS, POST_MS, duration)
             clip = Clip(
                 organization_id=team.organization_id,
                 match_id=match.id,
-                start_ms=max(0, e.t_ms - PRE_MS),
-                end_ms=e.t_ms + POST_MS,
+                start_ms=start,
+                end_ms=end,
                 title=title[:200],
                 source=ClipSource.EVENT,
                 source_ref=e.id,

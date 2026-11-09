@@ -8,6 +8,7 @@ import pytest
 
 from .conftest import Api, setup_club
 from .test_matches import new_match
+from .test_official_report import recorded, reported_clip  # noqa: F401
 from .test_tactics import doc
 
 pytestmark = pytest.mark.usefixtures("clean_db")
@@ -148,3 +149,24 @@ async def test_tags_search_and_smart_playlist(make_api: Callable[[], Api]) -> No
         "clips": {},
         "events": {},
     }
+
+
+@pytest.mark.usefixtures("recorded")
+async def test_search_hits_outside_the_video_have_no_window(make_api: Callable[[], Api]) -> None:
+    """An official report on a clip from mid-half: a hit before the video used to get the window
+    0 to -1'215 s (a playlist item from it is refused), one after the video a window past its
+    end. Such hits keep their time but have no window; the others are cut at the video's end."""
+    api = make_api()
+    ids = await setup_club(api)
+    _, video_id = await reported_clip(api, ids)
+    r = await api.post(f"/v1/orgs/{ids['org']}/teams/{ids['team']}/search", json={})
+    assert r.status_code == 200, r.text
+    hits = r.json()["hits"]
+    assert hits and all(h["video_id"] == video_id for h in hits)
+    for h in hits:
+        inside = 0 <= h["t_ms"] <= 300_000
+        if inside:
+            assert 0 <= h["start_ms"] <= h["t_ms"] < h["end_ms"] <= 300_000, h
+        else:
+            assert (h["start_ms"], h["end_ms"]) == (None, None), h
+    assert {h["start_ms"] is None for h in hits} == {True, False}

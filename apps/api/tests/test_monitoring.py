@@ -115,3 +115,41 @@ async def test_metrics_quality_status_and_retention(
     token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
     stats = (await api.http.get("/internal/stats", headers=token)).json()
     assert "alerts" in stats and stats["metrics"]["analyses_7d"] == 1
+
+
+async def test_abandoned_uploads_are_aborted_and_marked_failed(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    r = await api.post(
+        f"/v1/orgs/{ids['org']}/matches/{m['id']}/videos",
+        json={
+            "filename": "spiel.mp4",
+            "size_bytes": 100,
+            "content_type": "video/mp4",
+            "role": "main",
+        },
+    )
+    vid = r.json()["video"]["id"]
+    async with open_session() as db:
+        ctx = Ctx(
+            db=db,
+            settings=api.app.state.settings,
+            email=api.app.state.email,
+            storage=api.app.state.storage,
+        )
+        await enable_system_access(db, reason="test")
+        # fresh uploads stay, three days without progress end them
+        assert await monitoring.abandoned_uploads(ctx) == 0
+        assert await monitoring.abandoned_uploads(ctx, datetime.now(UTC) + timedelta(days=4)) == 1
+        await db.commit()
+    row = await owner_conn.fetchrow(
+        "SELECT status, error, upload_id FROM video_assets WHERE id = $1::uuid", vid
+    )
+    assert (
+        row["status"] == "failed"
+        and row["error"] == "upload abandoned"
+        and row["upload_id"] is None
+    )

@@ -40,6 +40,7 @@ from handball_api.schemas.presentations import (
 )
 from handball_api.services import audit
 from handball_api.services.context import Ctx
+from handball_api.services.matches import timeline_video
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, can
 from handball_api.services.report_pdf import _esc, _styles
@@ -133,27 +134,30 @@ def _num(content: dict[str, Any], key: str) -> int:
 async def _validate(
     ctx: Ctx, p: Presentation, data: SlideIn | SlidePatch, type_: SlideType
 ) -> None:
-    c = data.content or {}
+    c = data.content if data.content is not None else {}  # the defaults below are stored
     if len(str(c)) > 50_000:
         raise ProblemError(422, "invalid-slide", "Slide content too large")
     if type_ == SlideType.CLIP:
         clip_id = getattr(data, "clip_id", None)
         if clip_id:
             clip = await ctx.db.get(Clip, clip_id)
-            if clip is None:
+            owner = await ctx.db.get(Match, clip.match_id) if clip else None
+            if clip is None or owner is None or owner.team_id != p.team_id:
                 raise ProblemError(404, "not-found", "Clip not found")
             c.setdefault("in_ms", clip.start_ms)
             c.setdefault("out_ms", clip.end_ms)
             if "video_id" not in c:
-                c["video_id"] = str(
-                    await ctx.db.scalar(
-                        select(VideoAsset.id).where(
-                            VideoAsset.match_id == clip.match_id, VideoAsset.role == "main"
-                        )
-                    )
-                )
+                # the video the clip's times refer to; a match without one has nothing to play
+                main = await timeline_video(ctx, clip.match_id)
+                if main is None:
+                    raise ProblemError(422, "no-video", "The clip's match has no video yet")
+                c["video_id"] = str(main.id)
         if "video_id" in c:
-            v = await ctx.db.get(VideoAsset, uuid.UUID(str(c["video_id"])))
+            try:
+                video_id = uuid.UUID(str(c["video_id"]))
+            except ValueError as exc:
+                raise ProblemError(404, "not-found", "Video not found") from exc
+            v = await ctx.db.get(VideoAsset, video_id)
             m = await ctx.db.get(Match, v.match_id) if v else None
             if m is None or m.team_id != p.team_id:
                 raise ProblemError(404, "not-found", "Video not found")

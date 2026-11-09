@@ -41,14 +41,16 @@ Each question has the **assumption** I work with until it is answered. Status: o
   (e.g. youth tournaments)?
 
 ## Infrastructure
-- **Q-INFRA-1 Hosting provider.** *Partly answered 2026-11-03:* EU is enough, cost first (ADR 002).
-  Object storage: Cloudflare R2 with EU jurisdiction (test-data bucket first). Still open: app and
-  managed Postgres provider in the EU (Hetzner, Scaleway, Exoscale EU) and **GPU provider** with EU
-  processing and DPA. Needs price/availability check. *Answered 2026-11-09 for app and database:*
-  Azure Container Apps and Postgres Flexible Server, Switzerland North (ADR 025). GPU provider still open.
+- **Q-INFRA-1 Hosting provider.** *Answered 2026-11-03/04 (ADR 002), region updated 2026-11-09 (ADR 025):*
+  EU is enough, cost first. Object storage: Cloudflare R2 with EU jurisdiction. App, Postgres, Redis,
+  secrets and monitoring: Azure Container Apps and Postgres Flexible Server, Switzerland North. Still
+  open: **GPU** (CPU workers first, about 2 x video length; later an EU/CH GPU provider with DPA).
+  Owner checklists: `docs/LIVEGANG.md`, `docs/plans/produktion-checkliste.md`.
 - **Q-INFRA-2 GitHub repository and org**, CI secrets, preview deploy target. *Assumption:* GitHub Actions,
   preview job disabled until hosting exists (`vars.PREVIEW_DEPLOY_ENABLED`).
 - **Q-INFRA-3 E-mail provider** Postmark vs Resend (ADR in M1). *Assumption:* Postmark (EU data residency to verify).
+  *Proposal 2026-11-04:* Azure Communication Services Email (data location Europe, SMTP), so mail stays on the
+  chosen platform; needs the owner's confirmation (`docs/LIVEGANG.md`).
 - **Q-INFRA-4 MinIO** no longer ships community images; local S3 is SeaweedFS (ADR 006). Answered, for information.
 - **Q-INFRA-5 Next.js version**: the brief pins Next.js 15; Next.js 16 is current. *Assumption:* stay on 15.5.x
   as specified, upgrade in a dedicated step if wanted.
@@ -61,6 +63,18 @@ Each question has the **assumption** I work with until it is answered. Status: o
 - **Q-ML-3 Model and dataset access**: from this build environment Hugging Face, PyTorch downloads, Kaggle,
   Zenodo and Roboflow are blocked. *Assumption:* heuristic baselines now (ADR 012); trained models are added
   in an environment with access, through the ONNX detector and the model registry.
+
+- **Q-ML-5 Re-identification model licence**: the FastReID weights are Apache-2.0 but trained on MSMT17
+  (non-commercial research terms). *Decision (2026-11-04, product owner):* the risk is accepted for
+  the current phase; the model may be used while we find out what works. Before a commercial launch:
+  legal clearance or our own handball model trained on crops labelled through the shirt numbers.
+- **Q-ML-6 Ball data**: TeamTrack (MIT), five Roboflow handball sets (CC BY 4.0), our own labels and
+  DeepSport basketball (CC BY-NC-SA) are in use (ml/ball/README.md). *Decision (2026-11-04, product
+  owner):* non-commercial data are fine for the feasibility phase; a shipped ball model needs a
+  retraining without them (or a licence).
+- **Q-ML-7 Target footage**: uploads are raw amateur recordings from any camera position (phones,
+  club cameras, Veo and similar), rarely with a score overlay, not TV broadcasts. *Consequence:* the
+  overlay reader stays a bonus; goals, possession and players must work from the picture alone.
 
 ## Legal and privacy
 - **Q-LEGAL-1** Privacy policy, DPA (AVV) and terms need legal review (placeholders from M8/M9).

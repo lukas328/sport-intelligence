@@ -1,0 +1,422 @@
+{
+ "name": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+ "official": "ml/data/official/CH_Frauen_Cup_Bruehl_LKZug_2024-04-27.json",
+ "game_id": 469477,
+ "result": "37:30",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 50.0,
+  "duration_s": 7695.0,
+  "batch": "batch_l02"
+ },
+ "segments": [
+  {
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "start_s": 1154.25,
+   "clock_source": "overlay",
+   "readings": 84,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    64.0,
+    232.0
+   ],
+   "entries": 6,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1.mp4",
+   "start_s": 2308.5,
+   "clock_source": "hall_board",
+   "readings": 49,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    1093.0,
+    1202.0
+   ],
+   "entries": 6,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s2.mp4",
+   "start_s": 3847.5,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "start_s": 5386.5,
+   "clock_source": "overlay",
+   "readings": 68,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2828.0,
+    2974.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s4.mp4",
+   "start_s": 6540.75,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "turnover": 4,
+  "warning": 1,
+  "shot_missed": 1,
+  "goal": 7,
+  "timeout": 1,
+  "shot_saved": 3
+ },
+ "entries": [
+  {
+   "match_s": 73,
+   "time": "01:13",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 34,
+   "name": "BÄCHTIGER Emma",
+   "score": [
+    1,
+    0
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 8870,
+   "video_ms": 1163120,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 127,
+   "time": "02:07",
+   "action": "Verwarnung",
+   "kind": "warning",
+   "team": "away",
+   "number": 10,
+   "name": "ZAETTA Sara",
+   "score": [
+    1,
+    0
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 62870,
+   "video_ms": 1217120,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 151,
+   "time": "02:31",
+   "action": "Wurf Fehler",
+   "kind": "shot_missed",
+   "team": "home",
+   "number": 4,
+   "name": "KERNATSCH Mia",
+   "score": [
+    1,
+    0
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 86870,
+   "video_ms": 1241120,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 197,
+   "time": "03:17",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 15,
+   "name": "TOMASINI Fabienne",
+   "score": [
+    2,
+    0
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 140980,
+   "video_ms": 1295230,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 207,
+   "time": "03:27",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 34,
+   "name": "BÄCHTIGER Emma",
+   "score": [
+    2,
+    1
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 150980,
+   "video_ms": 1305230,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 221,
+   "time": "03:41",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 15,
+   "name": "TOMASINI Fabienne",
+   "score": [
+    3,
+    1
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 164980,
+   "video_ms": 1319230,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1099,
+   "time": "18:19",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 77,
+   "name": "PETRIG Jacqueline",
+   "score": [
+    13,
+    9
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 6000,
+   "video_ms": 2314500,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1103,
+   "time": "18:23",
+   "action": "Team Time-Out",
+   "kind": "timeout",
+   "team": null,
+   "number": null,
+   "name": null,
+   "score": [
+    13,
+    9
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 10000,
+   "video_ms": 2318500,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1134,
+   "time": "18:54",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 7,
+   "name": "PAVIC Martina",
+   "score": [
+    13,
+    9
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 112750,
+   "video_ms": 2421250,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1141,
+   "time": "19:01",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 77,
+   "name": "PETRIG Jacqueline",
+   "score": [
+    13,
+    9
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 119750,
+   "video_ms": 2428250,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1147,
+   "time": "19:07",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 15,
+   "name": "TOMASINI Fabienne",
+   "score": [
+    14,
+    9
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 125750,
+   "video_ms": 2434250,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 1201,
+   "time": "20:01",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 77,
+   "name": "PETRIG Jacqueline",
+   "score": [
+    14,
+    9
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "DOKOVIC Sladana"
+   },
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 179750,
+   "video_ms": 2488250,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2836,
+   "time": "47:16",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 77,
+   "name": "PETRIG Jacqueline",
+   "score": [
+    26,
+    23
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "DOKOVIC Sladana"
+   },
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 7240,
+   "video_ms": 5393740,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2866,
+   "time": "47:46",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 14,
+   "name": "WOLFF Laurentia",
+   "score": [
+    27,
+    23
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 37240,
+   "video_ms": 5423740,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2900,
+   "time": "48:20",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "away",
+   "number": 51,
+   "name": "BRUNETT Yara-Ladina",
+   "score": [
+    27,
+    23
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 90760,
+   "video_ms": 5477260,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2943,
+   "time": "49:03",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 22,
+   "name": "GUTKOWSKA Kinga",
+   "score": [
+    27,
+    23
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "KNÖRR Stephanie"
+   },
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 133760,
+   "video_ms": 5520260,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2967,
+   "time": "49:27",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 77,
+   "name": "PETRIG Jacqueline",
+   "score": [
+    27,
+    24
+   ],
+   "segment": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 157760,
+   "video_ms": 5544260,
+   "anchor_gap_s": 1.0,
+   "half_certain": true
+  }
+ ]
+}

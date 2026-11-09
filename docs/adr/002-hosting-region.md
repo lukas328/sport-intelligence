@@ -1,7 +1,7 @@
 # 002. Hosting and data region: EU is enough, cost first, provider abstracted
 
-- Status: accepted (owner decision 2026-11-03, answers Q-INFRA-1 for storage)
-- Date: 2026-11-02, revised 2026-11-03
+- Status: accepted (owner decisions 2026-11-03: storage; 2026-11-04: app platform Azure West Europe)
+- Date: 2026-11-02, revised 2026-11-03 and 2026-11-04
 
 ## Context
 Customers are Swiss and German clubs, many with minors (BRIEF 12). The first proposal kept all data in
@@ -20,13 +20,21 @@ grows with every club; storage itself is cheap.
 2. **First use: shared test videos.** Bucket `handball-testdata`, synced with `scripts/testdata.py`;
    the repo holds only `ml/eval/golden_set/manifest.json` (Q-DATA-1). Two tokens: read/write for the
    owner, read-only for CI and agent sessions.
-3. **Application, Postgres, Redis: EU, cheapest option that offers managed Postgres with PITR**,
-   chosen at go-live (candidates: Hetzner, Scaleway, Exoscale EU zones). *Decided 2026-11-09:* Azure
-   Container Apps and Postgres Flexible Server in Switzerland North (ADR 025).
+3. **Application, Postgres, Redis, secrets, monitoring: Microsoft Azure** (owner decision 2026-11-04).
+   The owner knows Azure and wants one platform for operations, secrets (Key Vault) and cost control
+   (budgets). Services: Container Apps (web, API, workers), Azure Database for PostgreSQL Flexible
+   Server (PITR), Redis, Key Vault, Container Registry, Log Analytics; deploys from GitHub Actions
+   with OIDC (no stored password). Video files stay in R2 (point 1) because Azure bills egress per GB.
+   *Region changed 2026-11-09:* Switzerland North instead of West Europe (ADR 025, `infra/terraform/azure`).
 4. **GPU compute behind `GpuBackend`** (`local`, `runpod`, `modal`, `k8s`). The GPU provider must
    process customer video in the EU under a DPA.
 5. `Organization.data_region` stays (`ch`, `eu`); until a Swiss bucket exists, both map to the EU bucket.
 6. Infrastructure as code in `infra/terraform` with one module per provider behind the same outputs.
+7. **Video delivery must not pass through Azure** to keep the R2 egress advantage: today HLS playlists
+   and segments are read by the API and streamed through the web proxy (ADR 011), so every watched
+   gigabyte would be Azure egress. Before production, segments are served from R2 directly
+   (short-lived presigned URLs or a Cloudflare-cached custom domain with signed tokens), the API keeps
+   the authorisation check and the playlist.
 
 ## Consequences
 - Local development and CI stay provider-free (docker compose, SeaweedFS). Nothing in domain code

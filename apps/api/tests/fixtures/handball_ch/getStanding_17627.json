@@ -1,0 +1,166 @@
+{
+ "operation": "getStanding",
+ "variables": {
+  "groupId": 17627
+ },
+ "response": {
+  "data": {
+   "standing": [
+    {
+     "teamId": 41523,
+     "clubId": 140771,
+     "name": "SG Horgen/Wädenswil 1",
+     "rank": 1,
+     "games": 6,
+     "won": 6,
+     "drawn": 0,
+     "lost": 0,
+     "goalsFor": 182,
+     "goalsAgainst": 131,
+     "goalDifference": 51,
+     "points": 12
+    },
+    {
+     "teamId": 40762,
+     "clubId": 140558,
+     "name": "SG Stäfa / Meilen",
+     "rank": 2,
+     "games": 7,
+     "won": 4,
+     "drawn": 2,
+     "lost": 1,
+     "goalsFor": 192,
+     "goalsAgainst": 185,
+     "goalDifference": 7,
+     "points": 10
+    },
+    {
+     "teamId": 41831,
+     "clubId": 140685,
+     "name": "HC Goldach-Rorschach 2",
+     "rank": 3,
+     "games": 6,
+     "won": 4,
+     "drawn": 1,
+     "lost": 1,
+     "goalsFor": 169,
+     "goalsAgainst": 144,
+     "goalDifference": 25,
+     "points": 9
+    },
+    {
+     "teamId": 41503,
+     "clubId": 140633,
+     "name": "SG Handball Züri Oberland 1",
+     "rank": 4,
+     "games": 8,
+     "won": 3,
+     "drawn": 3,
+     "lost": 2,
+     "goalsFor": 234,
+     "goalsAgainst": 226,
+     "goalDifference": 8,
+     "points": 9
+    },
+    {
+     "teamId": 40742,
+     "clubId": 140371,
+     "name": "TV Thalwil",
+     "rank": 5,
+     "games": 6,
+     "won": 3,
+     "drawn": 1,
+     "lost": 2,
+     "goalsFor": 167,
+     "goalsAgainst": 151,
+     "goalDifference": 16,
+     "points": 7
+    },
+    {
+     "teamId": 41280,
+     "clubId": 140568,
+     "name": "HC Stammheim 1",
+     "rank": 6,
+     "games": 6,
+     "won": 2,
+     "drawn": 1,
+     "lost": 3,
+     "goalsFor": 163,
+     "goalsAgainst": 186,
+     "goalDifference": -23,
+     "points": 5
+    },
+    {
+     "teamId": 41343,
+     "clubId": 140582,
+     "name": "Grün-Weiss Effretikon 1",
+     "rank": 7,
+     "games": 4,
+     "won": 1,
+     "drawn": 2,
+     "lost": 1,
+     "goalsFor": 100,
+     "goalsAgainst": 102,
+     "goalDifference": -2,
+     "points": 4
+    },
+    {
+     "teamId": 41833,
+     "clubId": 140390,
+     "name": "Blaui Schwänli Schwamendingen",
+     "rank": 8,
+     "games": 5,
+     "won": 1,
+     "drawn": 0,
+     "lost": 4,
+     "goalsFor": 107,
+     "goalsAgainst": 136,
+     "goalDifference": -29,
+     "points": 2
+    },
+    {
+     "teamId": 41387,
+     "clubId": 140373,
+     "name": "SG Uster / Volketswil",
+     "rank": 9,
+     "games": 5,
+     "won": 0,
+     "drawn": 0,
+     "lost": 5,
+     "goalsFor": 125,
+     "goalsAgainst": 150,
+     "goalDifference": -25,
+     "points": 0
+    },
+    {
+     "teamId": 41402,
+     "clubId": 140550,
+     "name": "HC Neftenbach 1",
+     "rank": 10,
+     "games": 5,
+     "won": 0,
+     "drawn": 0,
+     "lost": 5,
+     "goalsFor": 126,
+     "goalsAgainst": 154,
+     "goalDifference": -28,
+     "points": 0
+    },
+    {
+     "teamId": 41109,
+     "clubId": 140319,
+     "name": "HC Kaltenbach 1 [Rückzug]",
+     "rank": 11,
+     "games": 0,
+     "won": 0,
+     "drawn": 0,
+     "lost": 0,
+     "goalsFor": 0,
+     "goalsAgainst": 0,
+     "goalDifference": 0,
+     "points": 0
+    }
+   ]
+  }
+ }
+}

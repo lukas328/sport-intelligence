@@ -231,7 +231,11 @@ def _zone_label(z: str) -> str:
 
 def _xg(side: str) -> float:
     return round(
-        sum(expected_goal(e["x"], e["y"], e["shot_type"]) for e in evs(type="shot", side=side)),
+        sum(
+            x
+            for e in evs(type="shot", side=side)
+            if (x := expected_goal(e["x"], e["y"], e["shot_type"])) is not None
+        ),
         1,
     )
 

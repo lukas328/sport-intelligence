@@ -45,6 +45,9 @@ class OrgOut(ApiModel):
     my_role: OrgRole
     two_factor_required: bool
     created_at: datetime
+    # official club link (federation onboarding): none | unverified | verified
+    verification: str = "none"
+    official_club_id: int | None = None
 
 
 class SeasonCreate(ApiModel):
@@ -100,6 +103,8 @@ class TeamOut(ApiModel):
     default_format: str | None = None
     my_role: TeamRole | None
     current_season: SeasonOut | None
+    # registered team in the official data (handball.ch team id of the season)
+    official_team_id: int | None = None
 
 
 class MemberOut(ApiModel):

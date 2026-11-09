@@ -16,9 +16,7 @@ from handball_api.models import (
     Playlist,
     PlaylistItem,
     User,
-    VideoAsset,
 )
-from handball_api.models.enums import VideoRole, VideoStatus
 from handball_api.schemas.matches import (
     AnnotationCreate,
     ClipCreate,
@@ -34,7 +32,7 @@ from handball_api.schemas.matches import (
 )
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match
+from handball_api.services.matches import get_match, timeline_videos
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, can
 
@@ -152,22 +150,7 @@ async def playlist_detail(ctx: Ctx, playlist_id: uuid.UUID) -> PlaylistDetail:
         )
     ).all()
     match_ids = {clip.match_id for _, clip, _, _ in rows}
-    videos = (
-        {
-            mid: vid
-            for mid, vid in (
-                await ctx.db.execute(
-                    select(VideoAsset.match_id, VideoAsset.id).where(
-                        VideoAsset.match_id.in_(match_ids),
-                        VideoAsset.role == VideoRole.MAIN,
-                        VideoAsset.status == VideoStatus.READY,
-                    )
-                )
-            ).all()
-        }
-        if match_ids
-        else {}
-    )
+    videos = {mid: v.id for mid, v in (await timeline_videos(ctx, match_ids)).items()}
     items = [
         PlaylistItemOut(
             video_id=videos.get(clip.match_id),

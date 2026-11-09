@@ -45,10 +45,77 @@ accurate on real footage. The goal posts alone, however, do not fix the court's 
 span at least 20 m of length and 10 m of width (corners, centre line ends). A fully checked analysis of a real
 clip still needs those points from someone who knows which lines in the hall are the handball court.
 
+## 2026-11-04, learned detector and top-view calibration (ADR 025)
+Pretrained Apache-2.0 weights are reachable now (GitHub releases). With YOLOX-S (COCO) and the new
+automatic calibration all three clips run end to end without any click:
+
+| Clip | Camera | Calibration (automatic) | People on court / frame | Teams (tracks > 30 s) | Possession phases |
+|---|---|---|---|---|---|
+| Horgen - Stäfa (NLB 2017) | balcony, 6.0 m high, 5.6 m behind the near sideline | goal fit 0.76, both goal frames on the real goals | 14 | 35 / 28, referees 12, keepers by position | 11 in 5 min |
+| Horgen - Möhlin (NLB 2017) | 4.2 m high, 5.9 m behind the sideline, low and flat | goal fit 0.56, one goal about 1 m off | 14 | 27 / 30, referees 12 | 8 |
+| Leimental - Arbon (SPL2 2024, broadcast) | 5.5 m high above the near sideline | goal fit 0.63 | 13 | 30 / 24 | 10 |
+
+How it works (details in ADR 025): floor orientation from the hall's markings over many frames, scale
+from person heights, a top view drawn from the aligned markings only, court template search with
+the players (on the court, nobody behind the goal lines, goalkeepers in the goal mouths), refined on
+the striped goal frames. Check images: the court and both 3D goal frames drawn on the panorama
+(`data/views/*-court.jpg`, local only).
+
+What was fixed on the way:
+- **Floor from a single panorama is wrong** (walls, banners and the railing give many segments):
+  segments from 100 frames with the top 30 % and the people masked give a clean fit (tilt 17.8
+  instead of 8 degrees on Stäfa).
+- **Pixel masks in the top view** are dominated by white walls and reflections smeared along rays;
+  drawing only segments along the two hall directions gives a clean map.
+- **Goal search on red paint** locked onto red wall frames and window mullions; the score now asks
+  for alternation along posts and crossbar (stripes), and a small move penalty keeps the court near
+  the top-view result.
+- **Team colours**: video washes colours out (yellow looks beige, white grey); kits are compared by
+  hue, and the final labels come from clustering this match's colours and matching the two team
+  clusters by order (lighter to lighter, hue to hue).
+- **Goalkeepers by position** (most of the time within 6.5 m of a goal) and by which team defends
+  that goal in set attacks; kit colours for goalkeepers are often missing or wrong.
+- **Panning camera**: tracks of players outside the view wait instead of ageing.
+
+Still open:
+- **Goals** from the throw-off heuristic: none on these clips (after a goal the panning camera rarely
+  shows the whole throw-off formation). Where a league stream shows a score overlay, goals and match
+  clock come from the overlay instead (ADR 026, see below); otherwise from courtside marks, the paper
+  report or tagging.
+- **Ball and shots** need a handball-trained detector (COCO finds no handball).
+- **Track identities** fragment (110 to 200 tracks per 5 minutes for about 16 people on court);
+  team-level analysis (formations, possession, heatmaps) works, per-player numbers need shirt numbers
+  or the manual assignment.
+- **Speed on CPU** (4 cores): about 2x real time (detection on every 3rd frame dominates); a GPU
+  worker brings this well under real time.
+
+## 2026-11-04, later: full-length games and the score overlay
+
+**30 minutes in one file** (the Stäfa clip six times in a row, so five hard cuts), learned path on
+4 shared CPU cores:
+
+| Step | Result |
+|---|---|
+| Observation pass (motion, detection every 3rd frame) | 3984 s for 1800 s video (2.2 x real time, CPU shared with tests) |
+| Camera motion | 5 cuts found and re-attached, coverage 1.0, focal 1223 px (5-minute clip: 1208 px) |
+| Automatic calibration | goal fit 0.72, players on court 0.86 (5-minute clip: 0.76, 0.85) |
+| Memory | observation pass grows to 0.8 GB, peak 1.8 GB during calibration and tracking |
+
+Before this change the camera motion kept every frame-to-frame match (up to 8 KB per frame, more than a
+gigabyte for a 90-minute game); it now keeps 64 point pairs in float32 (about 1 KB per frame,
+rotations within 0.09 degrees median of the full version). A worker with 4 GB is enough for a full game.
+
+**Score overlay** (ADR 026): on the SPL2 clip all 5 goals are read in order (1:1, 2:1, 2:2, 2:3, 3:3)
+with the match clock, about 100 Tesseract calls per 5 minutes. The possession segmentation had the
+scoring team attacking before each of the 5 goals; the attack ended 1 to 3 s before the overlay
+changed, so goals are placed at the end of that attack. The 2017 clips have no overlay; none is found.
+
+**Shirt numbers** with Tesseract on 720p player crops: not readable ("23" read as "2", "43" as "4",
+most crops nothing). Per-player identity needs a dedicated number recogniser (BRIEF stage 6).
+
 ## Next steps
-1. **Use the dialog on the real clips** with points on both sidelines and check the result against the video
-   (club staff know which lines belong to the handball court).
-2. **Top-down search with the known focal length**: all line sets of a hall run parallel to its walls, so the
+1. ~~Use the dialog on the real clips~~ (automatic now; the dialog stays as fallback).
+2. ~~Top-down search with the known focal length~~ (done, ADR 025):: all line sets of a hall run parallel to its walls, so the
    two floor vanishing points give the floor orientation; with the focal length from the camera motion the
    panorama floor can be rectified to a top view, where the handball court is a 40 x 20 m template that only
    needs position and scale (no need to see all four boundary lines).

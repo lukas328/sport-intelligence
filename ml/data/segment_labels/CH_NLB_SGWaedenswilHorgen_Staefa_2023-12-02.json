@@ -1,0 +1,352 @@
+{
+ "name": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+ "official": "ml/data/official/CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02.json",
+ "game_id": 453485,
+ "result": "28:29",
+ "video": {
+  "width": 1280,
+  "height": 720,
+  "fps": 60.0,
+  "duration_s": 7248.514,
+  "batch": "batch_04"
+ },
+ "segments": [
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s0.mp4",
+   "start_s": 1087.28,
+   "clock_source": "hall_board",
+   "readings": 43,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    3.0,
+    90.0
+   ],
+   "entries": 2,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s1.mp4",
+   "start_s": 2174.55,
+   "clock_source": "overlay",
+   "readings": 87,
+   "half": 1,
+   "half_certain": true,
+   "match_s": [
+    763.0,
+    935.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s2.mp4",
+   "start_s": 3624.26,
+   "clock_source": null,
+   "readings": 0,
+   "half": null,
+   "half_certain": null,
+   "entries": 0,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3.mp4",
+   "start_s": 5073.96,
+   "clock_source": "overlay",
+   "readings": 89,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    2297.0,
+    2429.0
+   ],
+   "entries": 3,
+   "skipped_at_stopped_start": 0
+  },
+  {
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4.mp4",
+   "start_s": 6161.24,
+   "clock_source": "overlay",
+   "readings": 90,
+   "half": 2,
+   "half_certain": true,
+   "match_s": [
+    3097.0,
+    3253.0
+   ],
+   "entries": 5,
+   "skipped_at_stopped_start": 0
+  }
+ ],
+ "counts": {
+  "goal": 6,
+  "turnover": 2,
+  "suspension": 1,
+  "shot_saved": 4
+ },
+ "entries": [
+  {
+   "match_s": 35,
+   "time": "00:35",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 9,
+   "name": "ADLER Mathias",
+   "score": [
+    0,
+    1
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 123750,
+   "video_ms": 1211030,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 85,
+   "time": "01:25",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 11,
+   "name": "SIDOROWICZ Roman",
+   "score": [
+    0,
+    1
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s0.mp4",
+   "segment_index": 0,
+   "segment_ms": 173750,
+   "video_ms": 1261030,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 777,
+   "time": "12:57",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 43,
+   "name": "BARTH Louis",
+   "score": [
+    7,
+    8
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 13500,
+   "video_ms": 2188050,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 822,
+   "time": "13:42",
+   "action": "Techn. Fehler",
+   "kind": "turnover",
+   "team": "home",
+   "number": 9,
+   "name": "GANTNER Daniel",
+   "score": [
+    7,
+    8
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 57983,
+   "video_ms": 2232533,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 862,
+   "time": "14:22",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 9,
+   "name": "ADLER Mathias",
+   "score": [
+    7,
+    9
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s1.mp4",
+   "segment_index": 1,
+   "segment_ms": 98250,
+   "video_ms": 2272800,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2298,
+   "time": "38:18",
+   "action": "Zeitstrafe",
+   "kind": "suspension",
+   "team": "home",
+   "number": 9,
+   "name": "GANTNER Daniel",
+   "score": [
+    20,
+    22
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 1625,
+   "video_ms": 5075585,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2382,
+   "time": "39:42",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "away",
+   "number": 43,
+   "name": "BARTH Louis",
+   "score": [
+    20,
+    22
+   ],
+   "goalkeeper": {
+    "number": 16,
+    "name": "STEINER Jonas"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 123233,
+   "video_ms": 5197193,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 2429,
+   "time": "40:29",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 11,
+   "name": "SIDOROWICZ Roman",
+   "score": [
+    20,
+    22
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "WYSS Marco"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3.mp4",
+   "segment_index": 3,
+   "segment_ms": 170733,
+   "video_ms": 5244693,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3105,
+   "time": "51:45",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "home",
+   "number": 51,
+   "name": "KARLEN Adrian",
+   "score": [
+    26,
+    25
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 8000,
+   "video_ms": 6169240,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3117,
+   "time": "51:57",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 10,
+   "name": "HONEGGER Luc",
+   "score": [
+    26,
+    26
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 20000,
+   "video_ms": 6181240,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3197,
+   "time": "53:17",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 4,
+   "name": "POSPISIL Fabian",
+   "score": [
+    26,
+    26
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "WYSS Marco"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 122233,
+   "video_ms": 6283473,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3239,
+   "time": "53:59",
+   "action": "Tor",
+   "kind": "goal",
+   "team": "away",
+   "number": 43,
+   "name": "BARTH Louis",
+   "score": [
+    26,
+    27
+   ],
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 164233,
+   "video_ms": 6325473,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  },
+  {
+   "match_s": 3253,
+   "time": "54:13",
+   "action": "Wurf Parade",
+   "kind": "shot_saved",
+   "team": "home",
+   "number": 23,
+   "name": "WÜNSCH Tim",
+   "score": [
+    26,
+    27
+   ],
+   "goalkeeper": {
+    "number": 12,
+    "name": "WYSS Marco"
+   },
+   "segment": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4.mp4",
+   "segment_index": 4,
+   "segment_ms": 178233,
+   "video_ms": 6339473,
+   "anchor_gap_s": 0.0,
+   "half_certain": true
+  }
+ ]
+}

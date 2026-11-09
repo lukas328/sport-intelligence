@@ -27,12 +27,18 @@ from handball_api.models import (
     RosterEntry,
     SelfAssessment,
     Team,
-    VideoAsset,
 )
-from handball_api.models.enums import ClipSource, ConsentKind, VideoRole, VideoStatus
+from handball_api.models.enums import ClipSource, ConsentKind
 from handball_api.services import audit, training
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match, opponent_of
+from handball_api.services.matches import (
+    clip_window,
+    get_match,
+    opponent_of,
+    timeline_video,
+    video_duration_ms,
+)
+from handball_api.services.matches import in_video as in_video_at
 from handball_api.services.policies import Action
 from handball_api.services.roster import consented
 
@@ -136,6 +142,12 @@ def select_scenes(scenes: list[Scene], youth: bool, n: int = SCENES) -> list[Sce
     return chosen
 
 
+def in_video(e: Event, duration_ms: int | None) -> bool:
+    """The event lies inside the video. Events from the match clock or an official report can lie
+    before or after it when the video covers only part of the game (negative or too large times)."""
+    return in_video_at(e.t_ms, duration_ms)
+
+
 async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
     """(Re)builds the feed of all players of a match. Returns the number of players with scenes."""
     team = await ctx.db.get(Team, match.team_id)
@@ -161,6 +173,8 @@ async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
             )
         ).all()
     )
+    duration = await video_duration_ms(ctx, match)
+    events = [e for e in events if in_video(e, duration)]
     close = _close_events(events)
     # drop the previous automatic feed (coach comments on kept scenes are kept below)
     old = {
@@ -225,12 +239,13 @@ async def generate(ctx: Ctx, match: Match, notify: bool = True) -> int:
 
 
 async def _clip_for(ctx: Ctx, match: Match, e: Event) -> Clip:
-    assert e.t_ms is not None
+    assert e.t_ms is not None and e.t_ms >= 0
+    start, end = clip_window(e.t_ms, PRE_MS, POST_MS, await video_duration_ms(ctx, match))
     clip = Clip(
         organization_id=match.organization_id,
         match_id=match.id,
-        start_ms=max(0, e.t_ms - PRE_MS),
-        end_ms=e.t_ms + POST_MS,
+        start_ms=start,
+        end_ms=end,
         source=ClipSource.EVENT,
         source_ref=e.id,
     )
@@ -333,13 +348,8 @@ async def player_feed(
     now = datetime.now(UTC)
     for f, _ in items:
         f.seen_at = f.seen_at or now
-    video_id = await ctx.db.scalar(
-        select(VideoAsset.id).where(
-            VideoAsset.match_id == match_id,
-            VideoAsset.role == VideoRole.MAIN,
-            VideoAsset.status == VideoStatus.READY,
-        )
-    )
+    video = await timeline_video(ctx, match_id, ready=True)
+    video_id = video.id if video is not None else None
     return {
         "match_id": match_id,
         "player_id": pid,
@@ -477,7 +487,7 @@ async def swap(ctx: Ctx, item_id: uuid.UUID, event_id: uuid.UUID) -> None:
     """The coach replaces a scene with another event of the same match."""
     item, match = await _item(ctx, item_id)
     e = await ctx.db.get(Event, event_id)
-    if e is None or e.match_id != match.id or e.t_ms is None:
+    if e is None or e.match_id != match.id or not in_video(e, await video_duration_ms(ctx, match)):
         raise ProblemError(422, "invalid-scene", "Choose an event of this match with video time")
     c = classify(e, item.player_id)
     clip = await ctx.db.scalar(

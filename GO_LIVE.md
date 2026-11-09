@@ -20,10 +20,11 @@ Status of the platform at the end of M9 and what has to happen before real clubs
 
 ## Infrastructure (ADR 002, Q-INFRA-1)
 - ✅ Object storage decided: Cloudflare R2 with EU jurisdiction (ADR 002); test-data bucket via `scripts/testdata.py`
-- ✅ App hosting and managed Postgres with PITR decided: Azure Container Apps and Postgres Flexible Server, Switzerland North (ADR 025)
-- ☐ GPU provider with DPA (Modal backend not implemented yet; `local` on container CPUs for the pilot)
+- ✅ App hosting and managed Postgres with PITR decided: Azure Container Apps and Postgres Flexible Server, Switzerland North (ADR 002, ADR 025); owner checklists: `docs/LIVEGANG.md`, `docs/plans/produktion-checkliste.md`
 - ✅ Terraform module `infra/terraform/azure` (written, not yet applied)
 - ☐ First apply, migration job, custom domain with managed certificate (`infra/terraform/azure/README.md`)
+- ☐ Serve HLS segments from R2 directly, not through the API and web proxy (ADR 002 point 7)
+- ☐ GPU provider with DPA (Modal backend not implemented yet; `local` on container CPUs for the pilot)
 - ☐ TLS on the load balancer, HSTS preload decision, CDN for HLS segments
 - ☐ Off-site backup bucket with object lock; schedule `backup.sh`; first production restore test recorded
 

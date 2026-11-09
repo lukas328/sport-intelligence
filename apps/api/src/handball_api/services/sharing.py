@@ -30,12 +30,12 @@ from handball_api.models import (
     Team,
     VideoAsset,
 )
-from handball_api.models.enums import ConsentKind, ReelStatus, VideoRole, VideoStatus
-from handball_api.services import audit, billing
+from handball_api.models.enums import ConsentKind, ReelStatus
+from handball_api.services import audit, billing, org_verification
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
 from handball_api.services.highlights import rank
-from handball_api.services.matches import opponent_of
+from handball_api.services.matches import opponent_of, timeline_video
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 from handball_api.services.roster import consented
@@ -95,6 +95,8 @@ async def create(
 ) -> tuple[ShareLink, str]:
     team = await get_team(ctx, team_id, Action.PLAYLIST_WRITE)
     await billing.require_feature(ctx, "share_links", team.organization_id)
+    # a club claimed from the official data shares nothing publicly until it is verified
+    await org_verification.require_verified(ctx, team.organization_id)
     if team.is_youth and kind != "play":
         # youth protection (addendum 01): no public video or player data of children
         raise ProblemError(
@@ -165,13 +167,7 @@ async def _numbers(ctx: Ctx, season_id: uuid.UUID) -> dict[str, int]:
 
 
 async def _main_video(ctx: Ctx, match_id: uuid.UUID) -> VideoAsset | None:
-    return await ctx.db.scalar(
-        select(VideoAsset).where(
-            VideoAsset.match_id == match_id,
-            VideoAsset.role == VideoRole.MAIN,
-            VideoAsset.status == VideoStatus.READY,
-        )
-    )
+    return await timeline_video(ctx, match_id, ready=True)
 
 
 def _team_block(block: dict[str, Any]) -> dict[str, Any]:

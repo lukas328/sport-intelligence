@@ -12,6 +12,7 @@ import pytest
 from .conftest import Api, setup_club
 from .test_assistant import seed
 from .test_matches import new_match
+from .test_official_report import recorded, reported_clip  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("clean_db")
 
@@ -75,12 +76,15 @@ async def test_sessions_pdf_calendar_and_import(
     assert (await anon.get(second[second.index("/v1/calendar/") :])).status_code == 404
 
     # ICS import: known UIDs are updated, not duplicated
+    # dates a month ahead, away from the sessions created above for tomorrow
+    d1 = tomorrow + timedelta(days=30)
+    d3 = d1 + timedelta(days=2)
     ics = (
         "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Spond//EN\r\n"
-        "BEGIN:VEVENT\r\nUID:spond-1\r\nSUMMARY:Training\r\nDTSTART:20261110T180000Z\r\n"
-        "DTEND:20261110T193000Z\r\nLOCATION:Halle Süd\r\nEND:VEVENT\r\n"
-        "BEGIN:VEVENT\r\nUID:spond-2\r\nSUMMARY:Athletik\r\nDTSTART;VALUE=DATE:20261112\r\nEND:VEVENT\r\n"
-        "END:VCALENDAR\r\n"
+        f"BEGIN:VEVENT\r\nUID:spond-1\r\nSUMMARY:Training\r\nDTSTART:{d1:%Y%m%d}T180000Z\r\n"
+        f"DTEND:{d1:%Y%m%d}T193000Z\r\nLOCATION:Halle Süd\r\nEND:VEVENT\r\n"
+        f"BEGIN:VEVENT\r\nUID:spond-2\r\nSUMMARY:Athletik\r\nDTSTART;VALUE=DATE:{d3:%Y%m%d}\r\n"
+        "END:VEVENT\r\nEND:VCALENDAR\r\n"
     ).encode()
     url = f"/v1/orgs/{org}/teams/{team}/sessions/import"
     first = await api.post(url, files={"file": ("cal.ics", ics, "text/calendar")})
@@ -88,7 +92,9 @@ async def test_sessions_pdf_calendar_and_import(
     again = await api.post(url, files={"file": ("cal.ics", ics, "text/calendar")})
     assert again.json() == {"created": 0, "updated": 2}
     imported = (
-        await api.get(f"/v1/orgs/{org}/teams/{team}/sessions?from=2026-11-10&to=2026-11-12")
+        await api.get(
+            f"/v1/orgs/{org}/teams/{team}/sessions?from={d1.isoformat()}&to={d3.isoformat()}"
+        )
     ).json()
     assert {x["title"] for x in imported} == {"Training", "Athletik"}
     assert next(x for x in imported if x["title"] == "Training")["location"] == "Halle Süd"
@@ -248,3 +254,29 @@ async def test_focus_from_insight_with_followup(
     assert f["trend"] in ("better", "worse", "same")
     closed = (await api.post(f"/v1/orgs/{org}/focus/{plan['id']}/close")).json()
     assert closed["closed_at"]
+
+
+@pytest.mark.usefixtures("recorded")
+async def test_focus_playlist_skips_events_outside_the_video(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """A clip of five minutes from mid-half with the whole game's official report: the events
+    before the video (negative time) and after it have no scene; a focus playlist used to cut a
+    clip ending before 0 s and failed with a server error."""
+    api = make_api()
+    ids = await setup_club(api)
+    m, _ = await reported_clip(api, ids)
+    base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
+    insights = (await api.get(f"{base}/insights")).json()["insights"]
+    assert insights
+    plans = 0
+    for item in insights:
+        body = {"insight_key": item["key"], "params": item["params"], "playlist": True}
+        r = await api.post(f"{base}/focus", json=body)
+        assert r.status_code in (201, 422), (item["key"], r.status_code, r.text)
+        plans += r.status_code == 201
+    assert plans
+    windows = await owner_conn.fetch(
+        "SELECT start_ms, end_ms FROM clips WHERE match_id = $1::uuid", m["id"]
+    )
+    assert all(0 <= w["start_ms"] < w["end_ms"] <= 300_000 for w in windows), windows

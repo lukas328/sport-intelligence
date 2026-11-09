@@ -17,11 +17,10 @@ from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, LiveTag, LiveTagSession, Match, Team, VideoAsset
-from handball_api.models.enums import VideoRole
 from handball_api.schemas.marks import MarkIn, MarkKey
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match
+from handball_api.services.matches import get_match, timeline_video
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 from handball_metrics.sync import estimate_offset
@@ -111,12 +110,7 @@ async def add(ctx: Ctx, session_id: uuid.UUID, items: list[MarkIn]) -> dict[str,
 
 
 async def _main_video(ctx: Ctx, match_id: uuid.UUID) -> VideoAsset | None:
-    return await ctx.db.scalar(
-        select(VideoAsset)
-        .where(VideoAsset.match_id == match_id, VideoAsset.role == VideoRole.MAIN)
-        .order_by(VideoAsset.recorded_at.nulls_last(), VideoAsset.created_at)
-        .limit(1)
-    )
+    return await timeline_video(ctx, match_id)
 
 
 def _ms(dt: datetime) -> int:
