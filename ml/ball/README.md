@@ -43,6 +43,28 @@ basketball tracking (CC BY-NC-ND), sports-ball image classification (close-ups).
 
 Round 6 (2026-11-09, `kaggle/train_r6.py`, kept as `ball_r6.pt` in `handball-ball-models`) ties round 3 on the 40 test balls. It is more confident on the ball (score at least 0.3 on 45 % of the balls vs 23 %) but also on frames without a ball (median top peak 0.4 to 0.6 vs about 0.2). Round 3's 33 % is inflated by about 90 training tiles near test frames, round 6's is not. The test set is too small to separate the two (one ball is 2.5 points): grow it to about 200 balls before more GPU time goes into ball training.
 
+## Benchmark: test set 2 (177 balls, 42 new halls, 2026-11-09)
+252 frames from 42 games in halls never used for training or the first test (`testset_pick.py`,
+games in `test_games.json`: leave them out of every ball training), 2-second clips, labelled on the
+page "Ball-Testset: neue Hallen" (`labelling/testset.html`): 177 balls, 72 frames without a ball,
+3 unsure. Half of the frames come from moments with a running match clock. `bench_testset2.py`
+(CPU, about 10 minutes):
+
+| Model | Top peak on the ball | Ball among top 5 | Score at the ball >= 0.3 | No-ball frames with a peak >= 0.5 |
+|---|---|---|---|---|
+| OWLv2 (suggestions, centre frame) | 44 % | 66 % | 51 % | 10 % |
+| round 3 (`ball_best.pt`) | 15 % | 29 % | 11 % | 8 % |
+| round 6 (`ball_r6.pt`) | 29 % | 51 % | 44 % | 43 % |
+
+- With 177 balls one ball is 0.6 points (standard error about 3.5 points): round 6 is clearly better
+  than round 3 in new halls. The first test (40 balls, 7 halls also in training) showed a tie: it
+  mostly measured the known halls. The OWLv2 pseudo-labels help generalisation.
+- Round 6's weakness is false alarms: 43 % of the frames without a ball have a peak of 0.5 or more.
+- The labeller saw OWLv2's suggestions (85 balls clicked on a suggestion), so OWLv2's numbers are
+  optimistic where the ball is ambiguous; the nets did not see anything.
+- Notes from labelling: many balls are covered by a body; balls in hands are found best; fast
+  passes and shots are often blurred or invisible in a single frame; breaks bring warm-up balls.
+
 **Open-vocabulary detector, 24 balls of the test half (2 to 4 per hall):** OWLv2 base
 (Apache-2.0, queries "a photo of a handball", "a ball", "a small ball in the air", 480 px tiles
 upscaled to 960) puts its top box on the ball in 50 % (round 3 net on the same frames: 29 %,

@@ -1,0 +1,337 @@
+<title>Ball-Testset Hallen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a work bench. Frame stage on the left, magnifier and decisions on the right; stacks on phones. */
+:root {
+  --bg: #eef1f4;
+  --panel: #ffffff;
+  --ink: #17202b;
+  --muted: #5a6675;
+  --line: #d3d9e1;
+  --ball: #e8b100;        /* handball resin yellow */
+  --ball-ink: #1b1600;
+  --court: #2b6cb0;       /* hall floor blue */
+  --good: #1f8a4c;
+  --warn: #b25d00;
+  --mark: #ff3b5c;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+    --ball: #f2c230; --ball-ink: #1b1600; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+  --ball: #f2c230; --ball-ink: #1b1600; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 24px;
+}
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 12px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { flex: 1 1 160px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; align-self: center; min-width: 120px; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--ball); transition: width .3s; }
+.note { font-size: 13px; color: var(--warn); }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+.stage { position: relative; background: #000; border-radius: 6px; overflow: hidden; cursor: crosshair; user-select: none; touch-action: manipulation; }
+.stage img { display: block; width: 300%; max-width: none; height: 100%; position: absolute; left: 0; top: 0; }
+.marker { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 2px solid var(--mark); border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
+.marker::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; background: var(--mark); border-radius: 50%; }
+.marker.suggest { border: 2px dashed var(--ball); }
+.marker.suggest::after { background: var(--ball); }
+.stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; background: #000; }
+.clipbar { position: relative; height: 4px; background: var(--line); margin-top: 6px; border-radius: 2px; }
+.clipbar > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--court); border-radius: 2px; }
+.clipbar > b { position: absolute; left: 50%; top: -3px; width: 2px; height: 10px; background: var(--ball); }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.frametag { position: absolute; left: 8px; top: 8px; font-family: var(--mono); font-size: 11px; background: rgba(0,0,0,.6); color: #fff; padding: 2px 6px; border-radius: 3px; pointer-events: none; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+.chip { display: inline-block; font-family: var(--mono); font-size: 12px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--line); }
+.chip.ball { background: var(--ball); color: var(--ball-ink); border-color: transparent; }
+.chip.none { background: var(--court); color: #fff; border-color: transparent; }
+.chip.unsure { border-color: var(--warn); color: var(--warn); }
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.zoomwrap { position: relative; }
+canvas#zoom { width: 100%; max-width: 100%; aspect-ratio: 1; background: #000; border-radius: 4px; display: block; cursor: crosshair; image-rendering: pixelated; }
+.label { font-family: var(--display); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button { font: 600 14px var(--body); padding: 10px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.primary { grid-column: 1 / -1; background: var(--ball); color: var(--ball-ink); border-color: transparent; }
+button.wide { grid-column: 1 / -1; }
+button.on { background: var(--court); color: #fff; border-color: transparent; }
+kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
+.help { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; padding-left: 18px; }
+.fpbox { display: flex; flex-direction: column; gap: 6px; }
+.fprow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.fprow button { font-size: 13px; padding: 7px 6px; }
+.fprow button.on { background: var(--warn); color: #fff; }
+.toast { min-height: 18px; font-size: 13px; color: var(--good); }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<header>
+  <h1>Ball-Testset: neue Hallen</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+  <span class="note" id="note" hidden></span>
+</header>
+
+<main>
+  <section>
+    <div class="stage" id="stage">
+      <img id="img" alt="Spielszene, in der der Ball markiert werden soll">
+      <div class="marker suggest" id="suggest0" hidden></div><div class="marker suggest" id="suggest1" hidden></div><div class="marker suggest" id="suggest2" hidden></div>
+      <div class="marker" id="marker" hidden></div>
+      <video id="vid" muted playsinline preload="auto" hidden></video>
+      <div class="frametag" id="frametag">Bild t</div>
+    </div>
+    <div class="clipbar" aria-hidden="true"><i id="clipfill" style="width:50%"></i><b title="zu labelndes Bild"></b></div>
+    <div class="meta" id="meta"></div>
+  </section>
+
+  <aside>
+    <div>
+      <div class="label">Lupe (4×)</div>
+      <div class="zoomwrap"><canvas id="zoom" width="240" height="240" aria-label="Vergrösserung um Maus oder Markierung, Klick verfeinert die Position"></canvas></div>
+    </div>
+    <div class="btns">
+      <button class="primary" id="saveBall" disabled>Ball hier speichern <kbd>Enter</kbd></button>
+      <button id="noBall">Kein Ball sichtbar <kbd>N</kbd></button>
+      <button id="unsure">Unsicher <kbd>U</kbd></button>
+      <button id="motion">Szene abspielen <kbd>M</kbd></button>
+      <button id="speed">Tempo 0.5×</button>
+      <button class="wide" id="lead">Anlauf nochmals <kbd>A</kbd></button>
+      <button id="prev">← Zurück</button>
+      <button id="next">Weiter →</button>
+    </div>
+    <div class="fpbox" id="fpbox" hidden>
+      <div class="label">Stärkster Vorschlag (kräftigster Kreis) ist kein Ball, sondern … (freiwillig)</div>
+      <div class="fprow">
+        <button data-fp="head">Kopf <kbd>1</kbd></button>
+        <button data-fp="hand">Hand / Arm <kbd>2</kbd></button>
+        <button data-fp="foot">Fuss / Bein <kbd>3</kbd></button>
+        <button data-fp="other">Anderes <kbd>4</kbd></button>
+      </div>
+    </div>
+    <label class="row"><input type="checkbox" id="autolead" checked> Anlauf beim Öffnen automatisch abspielen</label>
+    <div class="toast" id="toast" role="status"></div>
+    <div>
+      <div class="label">So geht’s</div>
+      <ul class="help">
+        <li>Gestrichelte gelbe Kreise: bis zu drei Vorschläge des Erkenners, oft falsch (Logos, Ballwagen). Ein Klick in einen Kreis übernimmt ihn genau; ist er schon gewählt, einfach <kbd>Enter</kbd>. Sonst den Ball anklicken (auch wenn er in der Hand ist), in der Lupe nachjustieren, dann <kbd>Enter</kbd>.</li>
+        <li>Beim Öffnen läuft die Sekunde davor in Zeitlupe und stoppt auf dem Bild zum Labeln (gelbe Marke). <kbd>A</kbd> wiederholt sie.</li>
+        <li><kbd>M</kbd> spielt die ganze Szene (1 s davor bis 1 s danach) als Schleife. Ein Klick ins Bild stoppt sie und setzt die Markierung.</li>
+        <li>Ball ganz verdeckt oder nicht im Bild: <kbd>N</kbd>. Zweifel: <kbd>U</kbd>.</li>
+        <li>Freiwillig: liegt der stärkste Vorschlag (kräftigster Kreis) nicht auf dem Ball, mit <kbd>1</kbd> bis <kbd>4</kbd> sagen, was es ist (Kopf, Hand/Arm, Fuss/Bein, Anderes). Hilft uns, einen Filter für Körperteile zu bauen.</li>
+      </ul>
+    </div>
+  </aside>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { fp: null, items: [], idx: 0, labels: {}, mark: null, hover: null, motion: null, frame: 1, db: null };
+const imgs = {}; // preloaded Image objects per src
+
+function src(item) { return "t/" + (item.k || item.id) + ".jpg"; }
+function load(s) {
+  if (!imgs[s]) { const im = new Image(); im.src = s; imgs[s] = im; }
+  return imgs[s];
+}
+function cur() { return state.items[state.idx]; }
+const SUGGEST_MIN = 0.6; // OWLv2 score from which the best box is pre-selected (below: hints only; 0.3 to 0.5 often hits logos or ball racks)
+function hints(it) { return ((it && it.owl) || []).filter((b) => b[4] >= 0.1).slice(0, 3).map((b) => ({ x: b[0], y: b[1], score: b[4] })); }
+function suggestion(it) { return hints(it)[0] || null; }
+function snap(it, m) { for (const h of hints(it)) if (Math.hypot(h.x - m.x, h.y - m.y) < 14) return { x: h.x, y: h.y, fromOwl: false, snapped: true }; return m; }
+
+function hallName(h) { return h.replace(/_/g, " "); }
+function hallNameOld(h) {
+  return ({ uznach_dietikon: "Uznach", eisenach_wetzlar: "Eisenach", eisenach_wetzlar_2: "Eisenach", leimental_arbon: "Leimental",
+           horgen_moehlin: "Horgen/Möhlin", horgen_staefa: "Horgen/Stäfa", cottbus_seg: "Cottbus (Veo)" })[h] || h;
+}
+
+function render() {
+  const it = cur(); if (!it) return;
+  const lab = state.labels[it.id];
+  const s0 = src(it); if ($("img").getAttribute("src") !== s0) $("img").src = s0;
+  $("img").style.left = (-100 * state.frame) + "%";
+  $("stage").style.aspectRatio = it.w + " / " + it.h;
+  if (!clipMode) $("frametag").textContent = "Bild zum Labeln";
+  const m = state.mark || (lab && lab.state === "ball" ? { x: lab.x, y: lab.y } : null);
+  const mk = $("marker");
+  if (m && !clipMode) { mk.hidden = false; mk.style.left = (m.x / it.w * 100) + "%"; mk.style.top = (m.y / it.h * 100) + "%"; }
+  else mk.hidden = true;
+  const hs = hints(it);
+  const topIsMark = hs[0] && state.mark && Math.hypot(hs[0].x - state.mark.x, hs[0].y - state.mark.y) < 14;
+  $("fpbox").hidden = !hs[0] || !!lab || topIsMark;
+  for (const b of document.querySelectorAll("[data-fp]")) b.classList.toggle("on", state.fp === b.dataset.fp);
+  for (let k = 0; k < 3; k++) {
+    const sk = $("suggest" + k), h = hs[k];
+    if (h && !clipMode && !lab) { sk.hidden = false; sk.style.left = (h.x / it.w * 100) + "%"; sk.style.top = (h.y / it.h * 100) + "%"; sk.style.opacity = k ? 0.55 : 1; }
+    else sk.hidden = true;
+  }
+  $("saveBall").disabled = !state.mark;
+  $("saveBall").firstChild.textContent = state.mark && state.mark.fromOwl ? "Vorschlag bestätigen " : "Ball hier speichern ";
+  const chip = lab ? `<span class="chip ${lab.state}">${{ ball: "Ball", none: "kein Ball", unsure: "unsicher" }[lab.state]}</span>` : `<span class="chip">offen</span>`;
+  $("meta").innerHTML = `<span><b>${state.idx + 1}</b> / ${state.items.length}</span><span>Halle <b>${hallName(it.hall)}</b></span><span>Status ${chip}</span>`;
+  const done = state.items.filter((x) => state.labels[x.id]).length;
+  const balls = state.items.filter((x) => state.labels[x.id]?.state === "ball").length;
+  $("progress").textContent = `${done} von ${state.items.length} erledigt · ${balls} Bälle`;
+  $("barfill").style.width = (done / Math.max(1, state.items.length) * 100) + "%";
+  drawZoom();
+  // preload neighbours
+  for (const d of [1, 2]) { const n = state.items[state.idx + d]; if (n) load(src(n)); }
+  const nx = state.items[state.idx + 1]; if (nx && !document.querySelector(`link[data-clip="${nx.id}"]`)) { const l = document.createElement("link"); l.rel = "preload"; l.as = "video"; l.href = "v/" + (nx.k || nx.id) + ".mp4"; l.dataset.clip = nx.id; document.head.appendChild(l); }
+}
+
+function drawZoom() {
+  const it = cur(); const c = $("zoom"); const g = c.getContext("2d");
+  const p = state.mark || state.hover || (state.labels[it.id]?.state === "ball" ? state.labels[it.id] : null);
+  g.fillStyle = "#000"; g.fillRect(0, 0, c.width, c.height);
+  const im = load(src(it));
+  if (!im.complete || !p) { if (!im.complete) im.onload = () => drawZoom(); return; }
+  const r = 30; // source half-size in frame px -> 240 px canvas = 4x
+  g.imageSmoothingEnabled = false;
+  g.drawImage(im, state.frame * it.w + p.x - r, p.y - r, 2 * r, 2 * r, 0, 0, c.width, c.height);
+  if (state.mark) {
+    g.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--mark").trim() || "#ff3b5c";
+    g.lineWidth = 2; g.beginPath(); g.arc(c.width / 2, c.height / 2, 26, 0, Math.PI * 2); g.stroke();
+  }
+  state.zoomCentre = { x: p.x, y: p.y, r };
+}
+
+function toFrame(ev, el, it) {
+  const b = el.getBoundingClientRect();
+  return { x: (ev.clientX - b.left) / b.width * it.w, y: (ev.clientY - b.top) / b.height * it.h };
+}
+
+$("stage").addEventListener("click", (ev) => { state.mark = snap(cur(), { ...toFrame(ev, $("stage"), cur()), fromOwl: false }); render(); });
+$("stage").addEventListener("mousemove", (ev) => { if (!state.mark) { state.hover = toFrame(ev, $("stage"), cur()); drawZoom(); } });
+$("zoom").addEventListener("click", (ev) => {
+  const z = state.zoomCentre; if (!z) return;
+  const b = $("zoom").getBoundingClientRect();
+  const fx = (ev.clientX - b.left) / b.width, fy = (ev.clientY - b.top) / b.height;
+  state.mark = { x: z.x - z.r + fx * 2 * z.r, y: z.y - z.r + fy * 2 * z.r, fromOwl: false };
+  render();
+});
+
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2500); }
+
+async function save(kind) {
+  const it = cur();
+  const body = { state: kind, hall: it.hall, video: it.video, frame: it.frame, gap: it.gap, scale: it.scale, w: it.w, h: it.h, at: Date.now() };
+  const sg = suggestion(it); if (sg) body.owl_score = sg.score;
+  if (state.fp && sg && !(kind === "ball" && state.mark && Math.hypot(sg.x - state.mark.x, sg.y - state.mark.y) < 14)) { body.owl_fp = state.fp; body.owl_fp_x = sg.x; body.owl_fp_y = sg.y; }
+  if (kind === "ball") { if (!state.mark) return; body.x = Math.round(state.mark.x * 10) / 10; body.y = Math.round(state.mark.y * 10) / 10; body.from_owl = !!state.mark.fromOwl; body.snapped = !!state.mark.snapped; }
+  state.labels[it.id] = body; // optimistic
+  const idx = state.idx;
+  goNextOpen();
+  if (!state.db) { toast("Nicht gespeichert: Speicher nicht erreichbar."); return; }
+  try { await state.db.collection("labels").doc(it.id).set(body); toast(`Gespeichert (${idx + 1})`); }
+  catch (e) { toast("Speichern fehlgeschlagen: " + (e && e.message ? e.message : "unbekannter Fehler")); }
+}
+
+function go(i) {
+  state.idx = Math.max(0, Math.min(state.items.length - 1, i));
+  state.mark = null; state.hover = null; state.frame = 1; state.fp = null;
+  const it = cur(), sg = suggestion(it);
+  if (it && sg && sg.score >= SUGGEST_MIN && !state.labels[it.id]) state.mark = { x: sg.x, y: sg.y, fromOwl: true };
+  stopMotion(); render(); autoLead();
+}
+function goNextOpen() {
+  for (let d = 1; d <= state.items.length; d++) {
+    const j = (state.idx + d) % state.items.length;
+    if (!state.labels[state.items[j].id]) { go(j); return; }
+  }
+  go(state.idx + 1); toast("Alles erledigt, danke!");
+}
+const CENTRE_S = 1.0; // the labelled frame sits 1 s into each clip
+const RATES = [0.25, 0.5, 1]; let rateIdx = 1;
+let clipMode = null; // null | "lead" | "loop"
+function clipTick() {
+  const v = $("vid"); if (!clipMode) return;
+  $("clipfill").style.width = Math.min(100, v.currentTime / 2 * 100) + "%";
+  if (clipMode === "lead" && v.currentTime >= CENTRE_S - 0.02) { stopMotion(); render(); return; }
+  requestAnimationFrame(clipTick);
+}
+function playClip(mode) {
+  const it = cur(); if (!it) return;
+  const v = $("vid"); const s0 = "v/" + (it.k || it.id) + ".mp4";
+  if (v.getAttribute("src") !== s0) v.src = s0;
+  clipMode = mode; v.loop = mode === "loop"; v.playbackRate = RATES[rateIdx];
+  v.hidden = false; $("marker").hidden = true;
+  $("frametag").textContent = mode === "lead" ? "Anlauf (Sekunde davor)" : "Szene läuft";
+  $("motion").classList.toggle("on", mode === "loop");
+  try { v.currentTime = 0; } catch (e) {}
+  const p = v.play(); if (p && p.catch) p.catch(() => { stopMotion(); render(); });
+  requestAnimationFrame(clipTick);
+}
+function stopMotion() {
+  const v = $("vid"); clipMode = null;
+  try { v.pause(); } catch (e) {}
+  v.hidden = true; $("motion").classList.remove("on"); $("clipfill").style.width = "50%"; state.frame = 1;
+}
+function toggleMotion() { if (clipMode === "loop") { stopMotion(); render(); } else playClip("loop"); }
+$("vid").addEventListener("click", (ev) => { ev.stopPropagation(); const m = { ...toFrame(ev, $("stage"), cur()), fromOwl: false }; stopMotion(); state.mark = m; render(); });
+$("speed").onclick = () => { rateIdx = (rateIdx + 1) % RATES.length; $("speed").textContent = "Tempo " + RATES[rateIdx] + "×"; $("vid").playbackRate = RATES[rateIdx]; };
+$("lead").onclick = () => playClip("lead");
+function autoLead() { let on = true; try { on = $("autolead").checked; } catch (e) {} if (on) playClip("lead"); }
+$("saveBall").onclick = () => save("ball");
+$("noBall").onclick = () => save("none");
+$("unsure").onclick = () => save("unsure");
+$("prev").onclick = () => go(state.idx - 1);
+const FP_KEYS = { "1": "head", "2": "hand", "3": "foot", "4": "other" };
+function setFp(k) { state.fp = state.fp === k ? null : k; render(); }
+for (const b of document.querySelectorAll("[data-fp]")) b.onclick = () => setFp(b.dataset.fp);
+$("next").onclick = () => go(state.idx + 1);
+$("motion").onclick = toggleMotion;
+document.addEventListener("keydown", (ev) => {
+  if (ev.target.tagName === "INPUT") return;
+  const k = ev.key.toLowerCase();
+  if (k === "enter") { ev.preventDefault(); save("ball"); }
+  else if (FP_KEYS[k] && !$("fpbox").hidden) setFp(FP_KEYS[k]);
+  else if (k === "n") save("none");
+  else if (k === "u") save("unsure");
+  else if (k === "m") toggleMotion();
+  else if (k === "a") playClip("lead");
+  else if (k === "arrowleft") go(state.idx - 1);
+  else if (k === "arrowright") go(state.idx + 1);
+  else if (k === "escape") { state.mark = null; render(); }
+});
+
+async function start() {
+  try { state.items = await (await fetch("items.json")).json(); }
+  catch (e) { $("progress").textContent = "Bildliste konnte nicht geladen werden."; return; }
+  render();
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen. Labels gehen sonst verloren."; return; }
+  state.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Labels noch nicht erreichbar, Stand evtl. veraltet."; }, 10000);
+  let first = true;
+  db.collection("labels").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); $("note").hidden = true; }
+    for (const d of snap.docs) state.labels[d.id] = d.data();
+    if (first) { first = false; const j = state.items.findIndex((x) => !state.labels[x.id]); if (j >= 0) { go(j); return; } }
+    render();
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Labels konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>

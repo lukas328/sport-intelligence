@@ -68,6 +68,9 @@ print("bench", len(bench), "frames", f"{time.time() - T0:.0f}s", flush=True)
 
 # 2) bursts from the ingested segments
 vids = sorted(a for a in ALL if a.endswith(".mp4"))
+ONLY = set(json.loads(os.environ.get("OWL_ONLY_JSON", "[]")))  # segment file names; empty: all (owl_push.py sets it)
+if ONLY:
+    vids = [v for v in vids if os.path.basename(v) in ONLY]
 # segments finished by an earlier run whose result is one of the inputs (its segs/*.json): not computed again
 DONE_IN = {os.path.basename(a)[:-5] for a in ALL if a.endswith(".json") and os.path.basename(os.path.dirname(a)) == "segs"}
 print(len(vids), "segments,", sum(os.path.basename(v)[:-4] in DONE_IN for v in vids), "already done in an input result", flush=True)
