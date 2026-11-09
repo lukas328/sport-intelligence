@@ -189,3 +189,49 @@ For the analysis session; read from this branch. Newest first.
   the match stage, the analysis overview, the season rows and the season's xG statement.
 - Throw-off step: "Uhr eintragen" sets the match clock at the paused moment (`clock_s`), for
   videos that start after the throw-off; the error for a time outside the half is in the texts.
+
+## Review round over the new screens (UI session, 2026-11-09)
+
+Screens: onboarding with the official team search (results, join form, after taking a team
+over), the suggestion inbox "Abgleich mit handball.ch", the court step with a court carried over
+from the hall (new: hall image with the court and "Passt" / "Neu markieren"), the Würfe tool
+before and after one decision, the throw-off step. Desktop 1440 light and dark, phone 390. Test
+data invented (the same fixtures as the new e2e specs `official` and `shots`); the analysis
+answers were stubbed, so the "In der Warteschlange 0 %" card and the 2FA banner are artifacts.
+
+Scores (1 to 5; anchor, signal, hairlines, game language, team by side, numbers to video, review
+speed, proposed vs confirmed, type, edge states):
+- Onboarding: -, 1, 4, 3, -, -, -, -, 4, 3
+- Abgleich: -, 2, 4, 3, 2, 1, -, 3, 4, 3
+- Spielfeld from the hall: 3, 2 (before Passt) / correct after, 3, 3, -, -, -, -, 4, 4
+- Würfe: 2, 2, 3, 3, 3, 1, 3, 2, 3, 2
+- Anwurf: 3, 2, 4, 4, -, -, -, -, 4, 4
+
+Fixed after the review:
+- The official table is shown in the order of its ranks (`standingByRank`, tested), not in the
+  order the rows arrive.
+- Würfe: both team choices are drawn as choices (the unselected one looked like text); the
+  buttons of the decision are 44 px on phones; key letters only where there is a fine pointer.
+- Würfe: the timeline's candidate lane shows the shot moments while shots are reviewed, with the
+  signal ring on the one that is up (as for goal candidates).
+- Court step: the team colour legend shows only with the mini court it explains.
+- Found by the new e2e (axe): the small "Aus dem Matchbericht übernehmen" label on the accent
+  button was faded to 80 % (4.2:1); no longer faded.
+
+Checked and not changed:
+- "The report card fails contrast in dark mode": it is dark text on the light accent (about 6:1).
+- "0 im Video bestätigt" after a decision and "21 liegen ausserhalb" without a throw-off came from
+  the stubbed list (it did not recount the report); the API recounts on the refetch.
+
+Left open (next round):
+- Würfe: moving to the next moment does not seek the video (the goal review does it in its full
+  screen mode); a "R"/play per row exists. Seek with pre-roll on each advance is the next step.
+- Würfe without a throw-off: the times come from the report's clock map; say "laut Matchbericht"
+  until the throw-off is set, or gate the tool behind the Anwurf step (product decision).
+- Report entry wording: "Parade, #14 …" does not say that #14 is the shooter; the analysis
+  session's report line names the shooter, the keeper is not in it.
+- Phone: the work strip of four steps and four tools scrolls sideways and cuts the last label;
+  the bottom navigation covers the end of the step panel.
+- Onboarding: progress segments in light mode are nearly invisible; a player joining sees the
+  coach's "Schritt 1 von 4"; "@ HSG Rheinau" in the inbox (away games) reads as an anglicism.
+- After "Passt" the workspace stays on the court step instead of moving on to the next open step.

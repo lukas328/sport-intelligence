@@ -257,7 +257,7 @@ export function ShotCandidatesPanel({
               onClick={() => answer(deciding, active, "accept")}
               data-testid="shot-accept"
             >
-              <kbd aria-hidden className="font-score opacity-70">
+              <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                 ↵
               </kbd>
               <span>
@@ -273,13 +273,13 @@ export function ShotCandidatesPanel({
                 <Button
                   key={s}
                   size="sm"
-                  variant={pickedSide(deciding) === s ? "secondary" : "quiet"}
-                  className={cn("min-w-0 justify-start", pickedSide(deciding) === s && "ring-2 ring-foreground ring-inset")}
+                  variant="secondary"
+                  className={cn("min-w-0 justify-start max-sm:min-h-11", pickedSide(deciding) === s && "ring-2 ring-foreground ring-inset")}
                   aria-pressed={pickedSide(deciding) === s}
                   aria-keyshortcuts={String(k + 1)}
                   onClick={() => (setSide({ id: deciding.id, side: s }), setError(null))}
                 >
-                  <kbd aria-hidden className="font-score opacity-70">
+                  <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                     {k + 1}
                   </kbd>
                   <span className="truncate">{team(s)}</span>
@@ -292,11 +292,12 @@ export function ShotCandidatesPanel({
                   key={o}
                   size="sm"
                   variant="secondary"
+                  className="max-sm:min-h-11"
                   aria-keyshortcuts={OUTCOME_KEY[o]}
                   onClick={() => answer(deciding, active, o)}
                   data-testid={`shot-outcome-${o}`}
                 >
-                  <kbd aria-hidden className="font-score opacity-70">
+                  <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                     {OUTCOME_KEY[o]}
                   </kbd>
                   {te(o)}
@@ -304,14 +305,14 @@ export function ShotCandidatesPanel({
               ))}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="quiet" aria-keyshortcuts="X" onClick={() => decide(deciding, active, { status: "rejected" })}>
-                <kbd aria-hidden className="font-score opacity-70">
+              <Button size="sm" variant="quiet" className="max-sm:min-h-11" aria-keyshortcuts="X" onClick={() => decide(deciding, active, { status: "rejected" })}>
+                <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                   X
                 </kbd>
                 {t("noShot")}
               </Button>
-              <Button size="sm" variant="quiet" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
-                <kbd aria-hidden className="font-score opacity-70">
+              <Button size="sm" variant="quiet" className="max-sm:min-h-11" aria-keyshortcuts="R" onClick={() => onClip(deciding.start_ms, deciding.end_ms)}>
+                <kbd aria-hidden className="font-score opacity-70 pointer-coarse:hidden">
                   R
                 </kbd>
                 {t("replay")}

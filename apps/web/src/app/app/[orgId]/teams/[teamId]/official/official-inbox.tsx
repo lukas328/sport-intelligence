@@ -10,7 +10,7 @@ import { Alert, EmptyState } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
-import { duplicateNumbers, groupSuggestions, parseNumber, rosterStats, sevenM, type Suggestion } from "@/lib/official-suggestions";
+import { duplicateNumbers, groupSuggestions, parseNumber, rosterStats, sevenM, standingByRank, type Suggestion } from "@/lib/official-suggestions";
 import { cn } from "@/lib/utils";
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
@@ -383,8 +383,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
                 </tr>
               </thead>
               <tbody>
-                {(l.standing ?? []).map((r) => {
-                  const row = r as { teamId?: number; rank?: number; name?: string; games?: number; goalDifference?: number; points?: number };
+                {standingByRank(l.standing ?? []).map((row) => {
                   const mine = row.teamId === own;
                   return (
                     <tr key={row.teamId ?? row.name} className={cn(mine && "font-semibold")} aria-current={mine || undefined}>

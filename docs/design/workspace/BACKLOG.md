@@ -143,23 +143,22 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 State on 2026-11-09: PR 8 is merged into main. Still open from the analysis session's list and from
 this round, in rough order:
 
-- [ ] `no-video` (422) on clip slides of a match without video: a readable message in the
-  presentation editor instead of the generic error.
+- [x] `no-video` (422) on clip slides of a match without video: a readable message in the
+  presentation editor instead of the generic error (`errors.no-video`; the scene search already
+  offers no slide for hits without video).
 - [ ] Referee kit: check that `kit_referee` shows wherever the four team kits show (match create,
   edit, analysis colours), not only in the kit fields.
 - [ ] Matrix `season_ids`: the API filter does not exist yet (`handball_metrics.query.Filter`);
   build the season choice once the analysis session adds it.
-- [ ] Shot review: no e2e (shot candidates need analysed video plus a report); a fixture seed for
-  the stack would allow one. The timeline's signal ring does not follow the active shot candidate
-  yet (it does for goal candidates).
-- [ ] Official data screens: no e2e (they need handball.ch); a recorded fixture of `/v1/official/teams`
-  and of the claim would allow one. Real player names from handball.ch must not land in committed
-  screenshots or fixtures.
-- [ ] Screenshot review round (METHOD.md) for the new screens: Würfe, Uhr eintragen, the official
-  inbox, join and access requests, the overview line. Each was checked by eye on desktop, phone and
-  dark mode, but no fresh-eyes rubric review was run.
-- [ ] The court step's "Passt" / "Neu markieren" pair for a court taken from the hall (today the
-  generic "Spielfeld neu ausrichten" shows; confirm happens in the calibration dialog).
+- [x] Shot review: e2e `shots.spec.ts` (real upload, the candidate list from a recorded fixture);
+  the timeline's signal ring follows the active shot candidate.
+- [x] Official data screens: e2e `official.spec.ts` (search, claim, access and join requests, the
+  suggestion inbox) with answers recorded by hand with invented names (`e2e/fixtures/official.ts`).
+- [x] Screenshot review round (METHOD.md) for the new screens: onboarding search, the official
+  inbox, the court from the hall, Würfe, Anwurf (scores and what is left in `PROGRESS.md`). Join and
+  access requests in the settings and the overview line were not in this round.
+- [x] The court step's "Passt" / "Neu markieren" pair for a court taken from the hall, beside the
+  hall image with the court in orange; the step stays open until then (`courtUnconfirmed`).
 
 ## Later (features)
 

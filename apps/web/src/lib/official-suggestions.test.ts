@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { duplicateNumbers, groupSuggestions, parseNumber, sevenM, type Suggestion } from "./official-suggestions";
+import { duplicateNumbers, groupSuggestions, parseNumber, sevenM, standingByRank, type Suggestion } from "./official-suggestions";
 
 const s = (id: string, kind: Suggestion["kind"], payload: Record<string, unknown>, status: Suggestion["status"] = "open"): Suggestion => ({
   id,
@@ -34,5 +34,12 @@ describe("official suggestions", () => {
   });
   it("find numbers given twice", () => {
     expect([...duplicateNumbers([22, 5, null, 22, undefined, 7])]).toEqual([22]);
+  });
+});
+
+describe("standingByRank", () => {
+  it("orders the table by rank and keeps rows without one at the end", () => {
+    const rows = [{ rank: 2, name: "B" }, { name: "X" }, { rank: 1, name: "A" }];
+    expect(standingByRank(rows).map((r) => r.name)).toEqual(["A", "B", "X"]);
   });
 });

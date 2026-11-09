@@ -69,3 +69,21 @@ export function duplicateNumbers(numbers: (number | null | undefined)[]): Set<nu
   for (const n of numbers) if (n != null) (seen.has(n) ? twice : seen).add(n);
   return twice;
 }
+
+export interface StandingRow {
+  teamId?: number;
+  rank?: number;
+  name?: string;
+  games?: number;
+  goalDifference?: number;
+  points?: number;
+}
+
+/** The official table in the order of its ranks, whatever order the rows came in; rows without
+ * a rank keep their place at the end. */
+export function standingByRank(rows: readonly Record<string, unknown>[]): StandingRow[] {
+  return (rows as readonly StandingRow[])
+    .map((row, i) => ({ row, i }))
+    .sort((a, b) => (a.row.rank ?? Infinity) - (b.row.rank ?? Infinity) || a.i - b.i)
+    .map((x) => x.row);
+}
