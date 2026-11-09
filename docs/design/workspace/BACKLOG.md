@@ -138,6 +138,29 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
   1 / 2 for the team and the tagger's letters G, S, M, P, B for the outcome; X no shot, U undo.
   Filter "Mit Matchbericht" first, the report counted against the video (`lib/shot-candidates.ts`).
 
+## Open after PR 8 (for the next UI session)
+
+State on 2026-11-09: PR 8 is merged into main. Still open from the analysis session's list and from
+this round, in rough order:
+
+- [ ] `no-video` (422) on clip slides of a match without video: a readable message in the
+  presentation editor instead of the generic error.
+- [ ] Referee kit: check that `kit_referee` shows wherever the four team kits show (match create,
+  edit, analysis colours), not only in the kit fields.
+- [ ] Matrix `season_ids`: the API filter does not exist yet (`handball_metrics.query.Filter`);
+  build the season choice once the analysis session adds it.
+- [ ] Shot review: no e2e (shot candidates need analysed video plus a report); a fixture seed for
+  the stack would allow one. The timeline's signal ring does not follow the active shot candidate
+  yet (it does for goal candidates).
+- [ ] Official data screens: no e2e (they need handball.ch); a recorded fixture of `/v1/official/teams`
+  and of the claim would allow one. Real player names from handball.ch must not land in committed
+  screenshots or fixtures.
+- [ ] Screenshot review round (METHOD.md) for the new screens: Würfe, Uhr eintragen, the official
+  inbox, join and access requests, the overview line. Each was checked by eye on desktop, phone and
+  dark mode, but no fresh-eyes rubric review was run.
+- [ ] The court step's "Passt" / "Neu markieren" pair for a court taken from the hall (today the
+  generic "Spielfeld neu ausrichten" shows; confirm happens in the calibration dialog).
+
 ## Later (features)
 
 - [x] Opponent profile: home or away per game (`is_home`), xG only with enough shots with a position

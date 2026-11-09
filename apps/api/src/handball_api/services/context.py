@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import uuid
 from dataclasses import dataclass
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,6 +40,17 @@ class Ctx:
         if self.jobs is None:
             raise RuntimeError("job queue missing")
         return self.jobs
+
+    async def enqueue(
+        self,
+        queue: str,
+        func: str,
+        job_id: str,
+        kwargs: dict[str, Any],
+        timeout_s: int | None = None,
+    ) -> None:
+        """Enqueue a worker job without blocking the event loop (the RQ client is synchronous)."""
+        await asyncio.to_thread(self.require_jobs().enqueue, queue, func, job_id, kwargs, timeout_s)
 
     def require_events(self) -> EventBus:
         if self.events is None:

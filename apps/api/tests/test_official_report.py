@@ -1,7 +1,8 @@
 """Official match reports (handball.ch match centre, DHB press report) imported into a match.
 
 The network is never used: the fetchers are replaced by data recorded from the real sources
-(tests/fixtures/official_report, the games of ml/eval/official)."""
+(tests/fixtures/official_report, the games of ml/eval/official; player and official names
+replaced by fake ones of the same length, so the columns of the text reports stay aligned)."""
 
 from __future__ import annotations
 
@@ -122,7 +123,7 @@ def test_parse_dhb_press_report() -> None:
         322,
         "away",
         26,
-        "Alexander Schütze",
+        "Bifenomul Duletes",
     )
     # the last goal of the first half falls at 30:00 exactly
     last = next(e for e in r.entries if e.clock_s == 1800)
@@ -259,14 +260,14 @@ async def test_import_dhb_report_merges_video_goals(
 ) -> None:
     api = make_api()
     ids = await setup_club(api)
-    players = await _roster(api, ids, {13: "Martin", 60: "Marc", 2: "Matheus"})
+    players = await _roster(api, ids, {13: "Digana", 60: "Bako", 2: "Letuzug"})
     m = await new_match(api, ids, opponent_name="SC Magdeburg II", is_home=False)  # we: Rostock
     org = ids["org"]
     ev_url = f"/v1/orgs/{org}/matches/{m['id']}/events"
     shot = {"type": "shot", "outcome": "goal", "period": 1}
-    # tagged by hand (Pedersen's goal at 01:39): stays, no official duplicate
+    # tagged by hand (Zodibafa's goal at 01:39): stays, no official duplicate
     manual = (await api.post(ev_url, json={**shot, "side": "own", "clock_s": 95})).json()
-    # read from the overlay 9 s after Pedersen's goal at 04:31: merged into the official goal
+    # read from the overlay 9 s after Zodibafa's goal at 04:31: merged into the official goal
     overlay = (await api.post(ev_url, json={**shot, "side": "own", "clock_s": 280})).json()
     # an overlay goal without an official one (no Magdeburg goal near 50:00) stays for checking
     lone = (await api.post(ev_url, json={**shot, "side": "opponent", "clock_s": 3000})).json()
@@ -500,7 +501,7 @@ async def test_goal_comparison_and_review(
         "SC Magdeburg II",
         20.0,
     )
-    # 52 goals in the report; merged on import: Pedersen's goal at 04:31
+    # 52 goals in the report; merged on import: Zodibafa's goal at 04:31
     assert cmp["counts"] == {
         "official": 52,
         "found": 1,

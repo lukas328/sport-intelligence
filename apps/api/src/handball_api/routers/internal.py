@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
@@ -77,7 +78,7 @@ async def stats(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "") ->
         select(func.min(ProcessingJob.created_at)).where(ProcessingJob.status == JobStatus.QUEUED)
     )
     return {
-        "queues": ctx.require_jobs().depths(),
+        "queues": await asyncio.to_thread(ctx.require_jobs().depths),
         "failed_last_hour": int(failed or 0),
         "running_over_3h": stuck,
         "running_over_budget": over_budget,

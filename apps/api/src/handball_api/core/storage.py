@@ -23,6 +23,11 @@ class ObjectNotFoundError(Exception):
     pass
 
 
+def _is_not_found(exc: ClientError) -> bool:
+    code = str(exc.response.get("Error", {}).get("Code", ""))
+    return code in ("NoSuchKey", "NotFound", "404")
+
+
 @dataclass(frozen=True, slots=True)
 class UploadedPart:
     number: int
@@ -144,7 +149,9 @@ class S3Storage:
             try:
                 obj = self._client.get_object(Bucket=bucket, Key=key)
             except ClientError as exc:
-                raise ObjectNotFoundError(key) from exc
+                if _is_not_found(exc):
+                    raise ObjectNotFoundError(key) from exc
+                raise  # access denied, outage: not a missing object
             return obj["Body"].read(), obj.get("ContentType", "application/octet-stream")
 
         return await asyncio.to_thread(_get)

@@ -30,8 +30,8 @@ from handball_vision.pipeline import analyse_video, camera_moves
 from handball_vision.synthetic import SyntheticConfig, SyntheticMatch
 
 FFMPEG = shutil.which("ffmpeg")
-# play switches sides every 4 s, so the camera shows the whole court within the clip
-PAN = SyntheticConfig(seconds=10, fps=25, pan=1.0, focal_px=900, phase_s=4.0)
+# play switches sides every 2.5 s, so the camera shows the whole court within the short clip
+PAN = SyntheticConfig(seconds=6, fps=25, pan=1.0, focal_px=900, phase_s=2.5)
 
 
 def _rotation_and_focal(p: np.ndarray[Any, Any], size: tuple[int, int]) -> tuple[Any, float]:
