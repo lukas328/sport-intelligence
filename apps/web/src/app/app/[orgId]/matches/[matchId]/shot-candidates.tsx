@@ -253,7 +253,7 @@ export function ShotCandidatesPanel({
                 ↵
               </kbd>
               <span>
-                <span className="block text-xs font-normal opacity-80">{t("fromReportLabel")}</span>
+                <span className="block text-xs font-normal">{t("fromReportLabel")}</span>
                 {reportLine(deciding)}
               </span>
             </Button>
