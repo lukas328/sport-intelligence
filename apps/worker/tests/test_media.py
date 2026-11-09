@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from handball_jobkit import Reporter
+from handball_jobkit.net import UnsafeUrlError, check_public_https_url
 from handball_worker import ingest
 from handball_worker.config import WorkerSettings
 from handball_worker.media import quality, transcode
@@ -285,13 +286,55 @@ def test_run_ingest_reports_failure(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert posts[-1]["error"].startswith("video could not be processed")
 
 
-def test_check_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    for bad in ("http://x.ch/a", "https://x.ch:8080/a", "https:///a"):
-        with pytest.raises(ingest.UnsafeUrlError):
-            ingest.check_url(bad)
-    monkeypatch.setattr(socket, "getaddrinfo", lambda *a, **k: [(0, 0, 0, "", ("10.1.2.3", 443))])
-    with pytest.raises(ingest.UnsafeUrlError, match="private"):
-        ingest.check_url("https://intranet.example/a.mp4")
+def test_import_checks_every_url(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The worker uses the shared SSRF check (jobkit): user info, private and multicast
+    addresses and hosts that do not resolve are refused before anything is downloaded."""
+    for bad in ("http://x.ch/a", "https://x.ch:8080/a", "https:///a", "https://u:p@x.ch/a"):
+        with pytest.raises(UnsafeUrlError):
+            check_public_https_url(bad)
+    for ip in ("10.1.2.3", "224.0.0.1", "127.0.0.1"):
+        monkeypatch.setattr(
+            socket, "getaddrinfo", lambda *a, ip=ip, **k: [(0, 0, 0, "", (ip, 443))]
+        )
+        with pytest.raises(UnsafeUrlError, match="private"):
+            check_public_https_url("https://intranet.example/a.mp4")
+
+    def unresolvable(*a: Any, **k: Any) -> Any:
+        raise socket.gaierror("no such host")
+
+    monkeypatch.setattr(socket, "getaddrinfo", unresolvable)
+    with pytest.raises(UnsafeUrlError, match="resolve"):
+        check_public_https_url("https://nowhere.example/a.mp4")
+    # run_import fails the job instead of fetching
+    rep = Reporter(
+        "http://api",
+        "t",
+        "j",
+        ingest.IMPORT_STAGES,
+        client=httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200))),
+    )
+    fetched: list[str] = []
+
+    def fetch(request: httpx.Request) -> httpx.Response:
+        fetched.append(str(request.url))
+        return httpx.Response(200)
+
+    client = httpx.Client(transport=httpx.MockTransport(fetch))
+    with pytest.raises(UnsafeUrlError):
+        ingest.run_import(
+            "j",
+            "o",
+            "m",
+            "a",
+            "b",
+            "k",
+            "o/",
+            "https://u:p@x.ch/a.mp4",
+            WorkerSettings(work_dir=str(tmp_path)),
+            rep,
+            client,
+        )
+    assert fetched == []
 
 
 def test_run_import_follows_safe_redirects(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

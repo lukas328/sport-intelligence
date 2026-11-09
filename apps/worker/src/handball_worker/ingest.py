@@ -8,19 +8,18 @@ run_import: fetch a video from a public https link into storage (SSRF-checked on
 from __future__ import annotations
 
 import hashlib
-import ipaddress
 import shutil
-import socket
 import tempfile
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urljoin
 
 import boto3
 import httpx
 import structlog
 
 from handball_jobkit import TRANSFER, Reporter, upload_dir
+from handball_jobkit.net import check_public_https_url
 from handball_worker.config import WorkerSettings
 from handball_worker.media import quality, transcode
 from handball_worker.media.probe import ProbeError, probe
@@ -152,19 +151,6 @@ def _workdir(settings: WorkerSettings) -> str:
 # ---- link import ----------------------------------------------------------------------------
 
 
-class UnsafeUrlError(ValueError):
-    pass
-
-
-def check_url(url: str) -> None:
-    parts = urlsplit(url)
-    if parts.scheme != "https" or not parts.hostname or parts.port not in (None, 443):
-        raise UnsafeUrlError("only https on the default port")
-    for info in socket.getaddrinfo(parts.hostname, 443, proto=socket.IPPROTO_TCP):
-        if not ipaddress.ip_address(info[4][0]).is_global:
-            raise UnsafeUrlError("private address")
-
-
 def run_import(
     job_id: str,
     organization_id: str,
@@ -189,7 +175,7 @@ def run_import(
         dst = work / "original"
         current = url
         for _ in range(5):  # follow redirects manually, checking every hop
-            check_url(current)
+            check_public_https_url(current)
             with http.stream("GET", current) as resp:
                 if resp.status_code in (301, 302, 303, 307, 308):
                     current = urljoin(current, resp.headers["location"])
