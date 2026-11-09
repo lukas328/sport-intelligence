@@ -162,6 +162,28 @@ as an underline toggle, the "Moment" axis with the half ("1. HZ 12:40").
 
 For the analysis session; read from this branch. Newest first.
 
+- 2026-11-09 (helper, branch `helper/invite-roster-link`, no migration): invited players were
+  linked to their roster entry only when the invitation named it (`player_id`), and the invite
+  form sends `player_id` for parents only, so an invited player saw no dates and none of their
+  own views. The API now:
+  1. `POST /v1/orgs/{org_id}/invitations` takes `player_id` for player and goalkeeper
+     invitations too (the UI should offer the roster entry like the child for parents; 409
+     `player-linked` if the entry has another account). Without `player_id`, optional
+     `first_name`, `last_name`, `jersey_number` pick the entry when they match exactly one entry
+     of the team's current season without an account; the response's `player_id` says whether
+     one was found (null: link later).
+  2. Accepting an invitation without an entry (onboarding, e-mail only) links the one free entry
+     whose full name is the account's name; an entry with another account answers 409
+     `player-linked` on accept and is never taken over.
+  3. Join requests: unchanged, approving with `player_id` (or the suggested match) links it, 409
+     `player-linked` if taken.
+  4. Staff link or unlink later: `PUT /v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/account`
+     with `{user_id}` (a member of the team, not a parent: 422 `parent-not-player`; 404 for non
+     members; 409 `player-linked` if another account holds it) answers `{player_id, user_id,
+     name}`; `DELETE` on the same path unlinks (204). Roster entries carry `account_user_id`
+     (staff only, null for others), to show whom an entry belongs to against the team members.
+  Parents stay separate: a parent invitation with the child creates a guardianship; the child's
+  account link is not touched.
 - 2026-11-09 (helper, branch `helper/consents-seasonline`): wishes 4 and 6 are built in the API
   as read-only views (no migration), the client is regenerated; no UI yet.
   4. Consent overview: `GET /v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/consents`

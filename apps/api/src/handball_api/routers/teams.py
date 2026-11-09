@@ -22,6 +22,8 @@ from handball_api.schemas.roster import (
     ConsentOut,
     ConsentOverview,
     ImportResult,
+    PlayerAccountIn,
+    PlayerAccountOut,
     PlayerStatusIn,
     PlayerStatusOut,
     RosterEntryCreate,
@@ -201,6 +203,28 @@ async def set_player_status(
 async def clear_player_status(team_id: uuid.UUID, player_id: uuid.UUID, scope: OrgDep) -> None:
     """Back to fit (no status)."""
     await roster_service.clear_status(scope.ctx, team_id, player_id)
+
+
+@router.put(
+    "/{team_id}/players/{player_id}/account", response_model=PlayerAccountOut, tags=["roster"]
+)
+async def link_player_account(
+    team_id: uuid.UUID, player_id: uuid.UUID, data: PlayerAccountIn, scope: OrgDep
+) -> PlayerAccountOut:
+    """Link a team member's account to this roster player (staff). 409 if the player already
+    has another account: unlink first. Parents are linked to a child by invitation
+    (guardianship), not here."""
+    return await roster_service.link_account(scope.ctx, team_id, player_id, data.user_id)
+
+
+@router.delete(
+    "/{team_id}/players/{player_id}/account",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["roster"],
+)
+async def unlink_player_account(team_id: uuid.UUID, player_id: uuid.UUID, scope: OrgDep) -> None:
+    """Remove the account link of this roster player (staff); the membership stays."""
+    await roster_service.unlink_account(scope.ctx, team_id, player_id)
 
 
 @router.get(
