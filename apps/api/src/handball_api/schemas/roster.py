@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import Field, field_validator
 
@@ -125,3 +126,53 @@ class PlayerAccountOut(ApiModel):
     player_id: uuid.UUID
     user_id: uuid.UUID | None
     name: str | None = Field(default=None, description="The linked account's name")
+
+
+ConsentState = Literal["granted", "refused", "missing"]
+
+
+class PurposeState(ApiModel):
+    """A player's consent for one purpose: `granted` (an unrevoked consent, `since` = its
+    given_at), `refused` (the latest consent was revoked, `since` = revoked_at) or `missing`
+    (never given). `given_by` and `given_by_name` are those of that consent: the player
+    (`self`), a parent or a guardian; who revoked it is in the audit log."""
+
+    kind: ConsentKind
+    state: ConsentState
+    since: datetime | None
+    given_by: ConsentGivenBy | None
+    given_by_name: str | None
+    consent_id: uuid.UUID | None
+    # false for the public purposes in youth teams (4.9): they cannot be given there
+    applicable: bool
+
+
+class ConsentOverviewPlayer(ApiModel):
+    player_id: uuid.UUID
+    roster_entry_id: uuid.UUID
+    jersey_number: int | None
+    first_name: str
+    last_name: str
+    has_account: bool
+    # None when the birth year is unknown; minors consent through a parent or guardian
+    minor: bool | None
+    purposes: list[PurposeState]
+
+
+class PurposeSummary(ApiModel):
+    """One purpose over the listed players: "12 von 14" is `granted` of `players`."""
+
+    kind: ConsentKind
+    applicable: bool
+    players: int
+    granted: int
+    refused: int
+    missing: int
+
+
+class ConsentOverview(ApiModel):
+    team_id: uuid.UUID
+    season_id: uuid.UUID
+    is_youth: bool
+    players: list[ConsentOverviewPlayer]
+    summary: list[PurposeSummary]

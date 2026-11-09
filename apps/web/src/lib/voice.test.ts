@@ -37,6 +37,9 @@ describe("voice", () => {
     expect(seasonStatement([row(22, 20, 14.3, 20)], 0.9)?.headline.key).toBe("voice.overXg");
     const held = seasonStatement([row(22, 15, 22, 21)]);
     expect(held?.headline.key).toBe("voice.defenceHeld");
+    // xG against from few positioned shots: no statement about the defence
+    expect(seasonStatement([{ ...row(22, 15, 22, 21), xg_against_coverage: 0.4 }])?.headline.key).not.toBe("voice.defenceHeld");
+    expect(seasonStatement([{ ...row(22, 15, 22, 21), xg_against_coverage: 0.8 }])?.headline.key).toBe("voice.defenceHeld");
     // nothing stands out in a single match: neutral title
     expect(seasonStatement([row(22, 20)])).toBeNull();
     expect(seasonStatement([row(22, 20, 22, 20, 1), row(18, 24, 18, 24, 2)])?.headline.key).toBe("voice.level");

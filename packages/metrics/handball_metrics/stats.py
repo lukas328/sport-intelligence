@@ -307,6 +307,76 @@ def _players(events: list[Event]) -> dict[str, dict[str, Any]]:
     return out
 
 
+LINE_KEYS = (
+    "goals",
+    "shots",
+    "misses",
+    "posts",
+    "saved",
+    "blocked",
+    "seven_m_goals",
+    "seven_m_shots",
+    "assists",
+    "turnovers",
+    "suspensions",
+    "yellow_cards",
+    "red_cards",
+    "faced",
+    "saves",
+    "goals_against",
+    "seven_m_faced",
+    "seven_m_saves",
+)
+
+
+def player_event_ids(events: list[Event], player_id: str) -> dict[str, list[str]]:
+    """The event ids behind one player's figures in `compute_match_stats`, so each figure links
+    to its clips: the same goals (`one_source_per_goal`) and the rules of `_players` (field
+    figures) and `_goalkeepers` (faced, saves, goals against, credited by `goalkeeper_id`).
+    `len(ids[key])` equals the figure; cards are counted per player only here. In match-clock
+    order."""
+    events = one_source_per_goal(events)
+    ordered = [e for _, e in sorted(((_Clock.key(e, i), e) for i, e in enumerate(events)))]
+    out: dict[str, list[str]] = {k: [] for k in LINE_KEYS}
+    for e in ordered:
+        if e.player_id == player_id:
+            if e.is_shot:
+                if e.outcome != "blocked":
+                    out["shots"].append(e.id)
+                key = {"goal": "goals", "miss": "misses", "post": "posts", "save": "saved"}
+                if e.outcome == "blocked":
+                    out["blocked"].append(e.id)
+                elif e.outcome in key:
+                    out[key[e.outcome]].append(e.id)
+                if e.shot_type == "penalty" or e.shot_zone == "penalty":
+                    out["seven_m_shots"].append(e.id)
+                    if e.outcome == "goal":
+                        out["seven_m_goals"].append(e.id)
+            elif e.type is EventType.TURNOVER:
+                out["turnovers"].append(e.id)
+            elif e.type is EventType.SUSPENSION:
+                out["suspensions"].append(e.id)
+            elif e.type is EventType.YELLOW:
+                out["yellow_cards"].append(e.id)
+            elif e.type is EventType.RED:
+                out["red_cards"].append(e.id)
+        if e.is_goal and e.assist_player_id == player_id and (e.player_id or e.number is not None):
+            out["assists"].append(e.id)
+        if (
+            e.is_shot
+            and e.outcome in ("goal", "save")
+            and e.attributes.get("goalkeeper_id") == player_id
+        ):
+            saved = e.outcome == "save"
+            out["faced"].append(e.id)
+            out["saves" if saved else "goals_against"].append(e.id)
+            if e.shot_type == "penalty":
+                out["seven_m_faced"].append(e.id)
+                if saved:
+                    out["seven_m_saves"].append(e.id)
+    return out
+
+
 def _keeper_key(e: Event) -> str:
     gk = e.attributes.get("goalkeeper_id")
     if gk:

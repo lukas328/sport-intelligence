@@ -20,6 +20,7 @@ from handball_api.schemas.orgs import (
 from handball_api.schemas.roster import (
     ConsentCreate,
     ConsentOut,
+    ConsentOverview,
     ImportResult,
     PlayerAccountIn,
     PlayerAccountOut,
@@ -224,6 +225,18 @@ async def link_player_account(
 async def unlink_player_account(team_id: uuid.UUID, player_id: uuid.UUID, scope: OrgDep) -> None:
     """Remove the account link of this roster player (staff); the membership stays."""
     await roster_service.unlink_account(scope.ctx, team_id, player_id)
+
+
+@router.get(
+    "/{team_id}/seasons/{season_id}/consents", response_model=ConsentOverview, tags=["consents"]
+)
+async def consent_overview(
+    team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep
+) -> ConsentOverview:
+    """The season roster's consents per purpose (active entries): `granted`, `refused` or
+    `missing`, since when and given by whom (the player, a parent or a guardian), with a count
+    per purpose in `summary`. For the staff who manage roster and consents."""
+    return await roster_service.consent_overview(scope.ctx, team_id, season_id)
 
 
 @router.get(

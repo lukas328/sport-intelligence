@@ -21,11 +21,16 @@ from handball_api.models import (
 from handball_api.models.enums import ConsentGivenBy, ConsentKind, Position, TeamRole
 from handball_api.schemas.roster import (
     ConsentCreate,
+    ConsentOverview,
+    ConsentOverviewPlayer,
+    ConsentState,
     ImportResult,
     ImportRowError,
     PlayerAccountOut,
     PlayerStatusIn,
     PlayerStatusOut,
+    PurposeState,
+    PurposeSummary,
     RosterEntryCreate,
     RosterEntryOut,
     RosterEntryUpdate,
@@ -483,6 +488,102 @@ async def list_consents(ctx: Ctx, team_id: uuid.UUID, player_id: uuid.UUID) -> l
         select(Consent).where(Consent.player_id == player_id).order_by(Consent.given_at.desc())
     )
     return list(rows.all())
+
+
+def _purpose_state(kind: ConsentKind, rows: list[Consent], applicable: bool) -> PurposeState:
+    """The latest unrevoked consent grants; otherwise the latest revoked one refuses."""
+    active = [c for c in rows if c.revoked_at is None]
+    if active:
+        c = max(active, key=lambda c: c.given_at)
+        state: ConsentState = "granted"
+        since: datetime | None = c.given_at
+    elif rows:
+        c = max(rows, key=lambda c: c.revoked_at or c.given_at)
+        state, since = "refused", c.revoked_at
+    else:
+        return PurposeState(
+            kind=kind,
+            state="missing",
+            since=None,
+            given_by=None,
+            given_by_name=None,
+            consent_id=None,
+            applicable=applicable,
+        )
+    return PurposeState(
+        kind=kind,
+        state=state,
+        since=since,
+        given_by=c.given_by,
+        given_by_name=c.given_by_name,
+        consent_id=c.id,
+        applicable=applicable,
+    )
+
+
+async def consent_overview(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> ConsentOverview:
+    """Every active roster entry of the season with its state per consent purpose, and a count
+    per purpose, so the staff see before filming who may be filmed, analysed or shared. Entries
+    from the official data follow the roster list's rule (`_without_official_only`)."""
+    team = await get_team(ctx, team_id, Action.CONSENT_OVERVIEW)
+    await get_season(ctx, team_id, season_id)
+    rows = [
+        (e, p)
+        for e, p in await ctx.db.execute(
+            select(RosterEntry, Player)
+            .join(Player, Player.id == RosterEntry.player_id)
+            .where(
+                RosterEntry.season_id == season_id,
+                RosterEntry.team_id == team_id,
+                RosterEntry.active.is_(True),
+            )
+            .order_by(RosterEntry.jersey_number.nulls_last(), Player.last_name, Player.first_name)
+        )
+    ]
+    if not can(ctx.require_actor(), Action.ROSTER_WRITE, team_id):
+        rows = await _without_official_only(ctx, rows)
+    consents: dict[tuple[uuid.UUID, ConsentKind], list[Consent]] = {}
+    if rows:
+        for c in await ctx.db.scalars(
+            select(Consent).where(Consent.player_id.in_([p.id for _, p in rows]))
+        ):
+            consents.setdefault((c.player_id, c.kind), []).append(c)
+    now = datetime.now(UTC)
+    kinds = list(ConsentKind)
+    applicable = {k: not (team.is_youth and k in PUBLIC_PURPOSES) for k in kinds}
+    players = [
+        ConsentOverviewPlayer(
+            player_id=p.id,
+            roster_entry_id=e.id,
+            jersey_number=e.jersey_number,
+            first_name=p.first_name,
+            last_name=p.last_name,
+            has_account=p.user_id is not None,
+            minor=is_minor(p.birth_year, now),
+            purposes=[_purpose_state(k, consents.get((p.id, k), []), applicable[k]) for k in kinds],
+        )
+        for e, p in rows
+    ]
+    summary = []
+    for i, k in enumerate(kinds):
+        states = [pl.purposes[i].state for pl in players]
+        summary.append(
+            PurposeSummary(
+                kind=k,
+                applicable=applicable[k],
+                players=len(players),
+                granted=states.count("granted"),
+                refused=states.count("refused"),
+                missing=states.count("missing"),
+            )
+        )
+    return ConsentOverview(
+        team_id=team.id,
+        season_id=season_id,
+        is_youth=team.is_youth,
+        players=players,
+        summary=summary,
+    )
 
 
 async def add_consent(

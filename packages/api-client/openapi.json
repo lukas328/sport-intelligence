@@ -1041,6 +1041,17 @@
         "title": "AttendanceRow",
         "type": "object"
       },
+      "AttendanceStatus": {
+        "enum": [
+          "present",
+          "absent",
+          "excused",
+          "injured",
+          "late"
+        ],
+        "title": "AttendanceStatus",
+        "type": "string"
+      },
       "BallIn": {
         "properties": {
           "x": {
@@ -2274,6 +2285,114 @@
           "revoked_at"
         ],
         "title": "ConsentOut",
+        "type": "object"
+      },
+      "ConsentOverview": {
+        "properties": {
+          "is_youth": {
+            "title": "Is Youth",
+            "type": "boolean"
+          },
+          "players": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentOverviewPlayer"
+            },
+            "title": "Players",
+            "type": "array"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "$ref": "#/components/schemas/PurposeSummary"
+            },
+            "title": "Summary",
+            "type": "array"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "team_id",
+          "season_id",
+          "is_youth",
+          "players",
+          "summary"
+        ],
+        "title": "ConsentOverview",
+        "type": "object"
+      },
+      "ConsentOverviewPlayer": {
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "has_account": {
+            "title": "Has Account",
+            "type": "boolean"
+          },
+          "jersey_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jersey Number"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          },
+          "minor": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minor"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "purposes": {
+            "items": {
+              "$ref": "#/components/schemas/PurposeState"
+            },
+            "title": "Purposes",
+            "type": "array"
+          },
+          "roster_entry_id": {
+            "format": "uuid",
+            "title": "Roster Entry Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "player_id",
+          "roster_entry_id",
+          "jersey_number",
+          "first_name",
+          "last_name",
+          "has_account",
+          "minor",
+          "purposes"
+        ],
+        "title": "ConsentOverviewPlayer",
         "type": "object"
       },
       "ConsentSubject": {
@@ -5502,6 +5621,276 @@
           "t_ms"
         ],
         "title": "KickoffIn",
+        "type": "object"
+      },
+      "LineEvents": {
+        "description": "The event ids behind each figure (same keys, as many ids as the figure counts), in\nmatch-clock order: open the clips with them.",
+        "properties": {
+          "assists": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Assists",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Blocked",
+            "type": "array"
+          },
+          "faced": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Faced",
+            "type": "array"
+          },
+          "goals": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "goals_against": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Goals Against",
+            "type": "array"
+          },
+          "misses": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Misses",
+            "type": "array"
+          },
+          "posts": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Posts",
+            "type": "array"
+          },
+          "red_cards": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Red Cards",
+            "type": "array"
+          },
+          "saved": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Saved",
+            "type": "array"
+          },
+          "saves": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Saves",
+            "type": "array"
+          },
+          "seven_m_faced": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Seven M Faced",
+            "type": "array"
+          },
+          "seven_m_goals": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Seven M Goals",
+            "type": "array"
+          },
+          "seven_m_saves": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Seven M Saves",
+            "type": "array"
+          },
+          "seven_m_shots": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Seven M Shots",
+            "type": "array"
+          },
+          "shots": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Shots",
+            "type": "array"
+          },
+          "suspensions": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Suspensions",
+            "type": "array"
+          },
+          "turnovers": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Turnovers",
+            "type": "array"
+          },
+          "yellow_cards": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Yellow Cards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "goals",
+          "shots",
+          "misses",
+          "posts",
+          "saved",
+          "blocked",
+          "seven_m_goals",
+          "seven_m_shots",
+          "assists",
+          "turnovers",
+          "suspensions",
+          "yellow_cards",
+          "red_cards",
+          "faced",
+          "saves",
+          "goals_against",
+          "seven_m_faced",
+          "seven_m_saves"
+        ],
+        "title": "LineEvents",
+        "type": "object"
+      },
+      "LineFigures": {
+        "description": "A player's figures as the match statistics count them (one source per goal). Field\nplayer: `shots` are on target (blocked ones apart, as on the match page), `turnovers` are\ntechnical faults, `suspensions` 2-minute suspensions. Goalkeeper (credited by the keeper\nrecorded on the shot): `faced` = `saves` + `goals_against`.",
+        "properties": {
+          "assists": {
+            "title": "Assists",
+            "type": "integer"
+          },
+          "blocked": {
+            "title": "Blocked",
+            "type": "integer"
+          },
+          "faced": {
+            "title": "Faced",
+            "type": "integer"
+          },
+          "goals": {
+            "title": "Goals",
+            "type": "integer"
+          },
+          "goals_against": {
+            "title": "Goals Against",
+            "type": "integer"
+          },
+          "misses": {
+            "title": "Misses",
+            "type": "integer"
+          },
+          "posts": {
+            "title": "Posts",
+            "type": "integer"
+          },
+          "red_cards": {
+            "title": "Red Cards",
+            "type": "integer"
+          },
+          "saved": {
+            "title": "Saved",
+            "type": "integer"
+          },
+          "saves": {
+            "title": "Saves",
+            "type": "integer"
+          },
+          "seven_m_faced": {
+            "title": "Seven M Faced",
+            "type": "integer"
+          },
+          "seven_m_goals": {
+            "title": "Seven M Goals",
+            "type": "integer"
+          },
+          "seven_m_saves": {
+            "title": "Seven M Saves",
+            "type": "integer"
+          },
+          "seven_m_shots": {
+            "title": "Seven M Shots",
+            "type": "integer"
+          },
+          "shots": {
+            "title": "Shots",
+            "type": "integer"
+          },
+          "suspensions": {
+            "title": "Suspensions",
+            "type": "integer"
+          },
+          "turnovers": {
+            "title": "Turnovers",
+            "type": "integer"
+          },
+          "yellow_cards": {
+            "title": "Yellow Cards",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "goals",
+          "shots",
+          "misses",
+          "posts",
+          "saved",
+          "blocked",
+          "seven_m_goals",
+          "seven_m_shots",
+          "assists",
+          "turnovers",
+          "suspensions",
+          "yellow_cards",
+          "red_cards",
+          "faced",
+          "saves",
+          "goals_against",
+          "seven_m_faced",
+          "seven_m_saves"
+        ],
+        "title": "LineFigures",
         "type": "object"
       },
       "LinkImport": {
@@ -10587,6 +10976,121 @@
         "title": "PublicProfileOut",
         "type": "object"
       },
+      "PurposeState": {
+        "description": "A player's consent for one purpose: `granted` (an unrevoked consent, `since` = its\ngiven_at), `refused` (the latest consent was revoked, `since` = revoked_at) or `missing`\n(never given). `given_by` and `given_by_name` are those of that consent: the player\n(`self`), a parent or a guardian; who revoked it is in the audit log.",
+        "properties": {
+          "applicable": {
+            "title": "Applicable",
+            "type": "boolean"
+          },
+          "consent_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent Id"
+          },
+          "given_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsentGivenBy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "given_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given By Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ConsentKind"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Since"
+          },
+          "state": {
+            "enum": [
+              "granted",
+              "refused",
+              "missing"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "state",
+          "since",
+          "given_by",
+          "given_by_name",
+          "consent_id",
+          "applicable"
+        ],
+        "title": "PurposeState",
+        "type": "object"
+      },
+      "PurposeSummary": {
+        "description": "One purpose over the listed players: \"12 von 14\" is `granted` of `players`.",
+        "properties": {
+          "applicable": {
+            "title": "Applicable",
+            "type": "boolean"
+          },
+          "granted": {
+            "title": "Granted",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ConsentKind"
+          },
+          "missing": {
+            "title": "Missing",
+            "type": "integer"
+          },
+          "players": {
+            "title": "Players",
+            "type": "integer"
+          },
+          "refused": {
+            "title": "Refused",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "applicable",
+          "players",
+          "granted",
+          "refused",
+          "missing"
+        ],
+        "title": "PurposeSummary",
+        "type": "object"
+      },
       "RateIn": {
         "properties": {
           "rating": {
@@ -11724,6 +12228,367 @@
           "ends_on"
         ],
         "title": "SeasonCreate",
+        "type": "object"
+      },
+      "SeasonLine": {
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "jersey_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jersey Number"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          },
+          "main_position": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/SeasonLineMatch"
+            },
+            "title": "Matches",
+            "type": "array"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/SeasonLineTotals"
+          }
+        },
+        "required": [
+          "player_id",
+          "team_id",
+          "season_id",
+          "first_name",
+          "last_name",
+          "jersey_number",
+          "main_position",
+          "matches",
+          "totals"
+        ],
+        "title": "SeasonLine",
+        "type": "object"
+      },
+      "SeasonLineMatch": {
+        "properties": {
+          "attendance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "competition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Competition"
+          },
+          "events": {
+            "$ref": "#/components/schemas/LineEvents"
+          },
+          "figures": {
+            "$ref": "#/components/schemas/LineFigures"
+          },
+          "involved": {
+            "title": "Involved",
+            "type": "boolean"
+          },
+          "is_home": {
+            "title": "Is Home",
+            "type": "boolean"
+          },
+          "kickoff_at": {
+            "format": "date-time",
+            "title": "Kickoff At",
+            "type": "string"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "opponent": {
+            "title": "Opponent",
+            "type": "string"
+          },
+          "response": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "enum": [
+                  "win",
+                  "draw",
+                  "loss"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "save_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Save Pct"
+          },
+          "score_opponent": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Opponent"
+          },
+          "score_own": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Own"
+          },
+          "shooting_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shooting Pct"
+          },
+          "tagged": {
+            "title": "Tagged",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "match_id",
+          "kickoff_at",
+          "opponent",
+          "is_home",
+          "competition",
+          "score_own",
+          "score_opponent",
+          "result",
+          "tagged",
+          "involved",
+          "attendance",
+          "response",
+          "figures",
+          "shooting_pct",
+          "save_pct",
+          "events"
+        ],
+        "title": "SeasonLineMatch",
+        "type": "object"
+      },
+      "SeasonLineTotals": {
+        "properties": {
+          "assists": {
+            "title": "Assists",
+            "type": "integer"
+          },
+          "blocked": {
+            "title": "Blocked",
+            "type": "integer"
+          },
+          "faced": {
+            "title": "Faced",
+            "type": "integer"
+          },
+          "goals": {
+            "title": "Goals",
+            "type": "integer"
+          },
+          "goals_against": {
+            "title": "Goals Against",
+            "type": "integer"
+          },
+          "matches": {
+            "title": "Matches",
+            "type": "integer"
+          },
+          "matches_involved": {
+            "title": "Matches Involved",
+            "type": "integer"
+          },
+          "matches_present": {
+            "title": "Matches Present",
+            "type": "integer"
+          },
+          "misses": {
+            "title": "Misses",
+            "type": "integer"
+          },
+          "posts": {
+            "title": "Posts",
+            "type": "integer"
+          },
+          "red_cards": {
+            "title": "Red Cards",
+            "type": "integer"
+          },
+          "save_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Save Pct"
+          },
+          "saved": {
+            "title": "Saved",
+            "type": "integer"
+          },
+          "saves": {
+            "title": "Saves",
+            "type": "integer"
+          },
+          "seven_m_faced": {
+            "title": "Seven M Faced",
+            "type": "integer"
+          },
+          "seven_m_goals": {
+            "title": "Seven M Goals",
+            "type": "integer"
+          },
+          "seven_m_saves": {
+            "title": "Seven M Saves",
+            "type": "integer"
+          },
+          "seven_m_shots": {
+            "title": "Seven M Shots",
+            "type": "integer"
+          },
+          "shooting_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shooting Pct"
+          },
+          "shots": {
+            "title": "Shots",
+            "type": "integer"
+          },
+          "suspensions": {
+            "title": "Suspensions",
+            "type": "integer"
+          },
+          "tagged_matches": {
+            "title": "Tagged Matches",
+            "type": "integer"
+          },
+          "turnovers": {
+            "title": "Turnovers",
+            "type": "integer"
+          },
+          "yellow_cards": {
+            "title": "Yellow Cards",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "goals",
+          "shots",
+          "misses",
+          "posts",
+          "saved",
+          "blocked",
+          "seven_m_goals",
+          "seven_m_shots",
+          "assists",
+          "turnovers",
+          "suspensions",
+          "yellow_cards",
+          "red_cards",
+          "faced",
+          "saves",
+          "goals_against",
+          "seven_m_faced",
+          "seven_m_saves",
+          "matches",
+          "tagged_matches",
+          "matches_involved",
+          "matches_present",
+          "shooting_pct",
+          "save_pct"
+        ],
+        "title": "SeasonLineTotals",
         "type": "object"
       },
       "SeasonOut": {
@@ -28885,6 +29750,146 @@
         "tags": [
           "teams",
           "seasons"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/consents": {
+      "get": {
+        "description": "The season roster's consents per purpose (active entries): `granted`, `refused` or\n`missing`, since when and given by whom (the player, a parent or a guardian), with a count\nper purpose in `summary`. For the staff who manage roster and consents.",
+        "operationId": "consent_overview_v1_orgs__org_id__teams__team_id__seasons__season_id__consents_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Consent Overview",
+        "tags": [
+          "teams",
+          "consents"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/players/{player_id}/line": {
+      "get": {
+        "description": "A player's season line: per played match (as in the season statistics) date, opponent,\nresult and the player's figures as the match statistics count them (one source per goal),\neach with the ids of its events in `events` (same keys) to open the clips, and season\n`totals`. Goalkeepers: `faced`, `saves`, `goals_against`, credited by the keeper on the shot.\n`attendance` is the recorded presence; playing minutes are not recorded. The staff read\nevery player of the team, players only their own line.",
+        "operationId": "season_line_v1_orgs__org_id__teams__team_id__seasons__season_id__players__player_id__line_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "player_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Player Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonLine"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Season Line",
+        "tags": [
+          "events",
+          "insights"
         ]
       }
     },

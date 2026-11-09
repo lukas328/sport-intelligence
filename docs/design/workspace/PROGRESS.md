@@ -184,6 +184,37 @@ For the analysis session; read from this branch. Newest first.
      (staff only, null for others), to show whom an entry belongs to against the team members.
   Parents stay separate: a parent invitation with the child creates a guardianship; the child's
   account link is not touched.
+- 2026-11-09 (helper, branch `helper/consents-seasonline`): wishes 4 and 6 are built in the API
+  as read-only views (no migration), the client is regenerated; no UI yet.
+  4. Consent overview: `GET /v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/consents`
+     (action `consent.overview`: coach, team manager, club admins, as for managing roster and
+     consents; analysts and players get 403). `players` are the active roster entries by
+     jersey number (`player_id`, `roster_entry_id`, `jersey_number`, `first_name`,
+     `last_name`, `has_account`, `minor` true/false/null) with `purposes`, one per purpose
+     (`analysis`, `highlights_internal`, `highlights_public`, `public_profile`,
+     `training_data`): `{kind, state: "granted" | "refused" | "missing", since, given_by:
+     "self" | "parent" | "guardian" | null, given_by_name, consent_id, applicable}`. `since` is
+     the given date when granted, the revocation date when refused; `applicable` is false for
+     the public purposes in youth teams. `summary` per purpose: `{kind, applicable, players,
+     granted, refused, missing}` ("12 von 14" is `granted` of `players`).
+  6. Season line:
+     `GET /v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/players/{player_id}/line` (staff with `player_line.read_all`: coach, analyst, goalkeeper and
+     athletic coach, team manager, club admins; a player only their own line, else 403; an
+     official-only entry hidden by `roster.visible_players` is a 404). Header: `player_id`,
+     `first_name`, `last_name`, `jersey_number`, `main_position`. `matches` (every played match,
+     as the season statistics): `match_id`, `kickoff_at`, `opponent`, `is_home`,
+     `competition`, `score_own`, `score_opponent`, `result` ("win" | "draw" | "loss"),
+     `tagged`, `involved`, `attendance` (recorded presence) and `response`, `figures`,
+     `shooting_pct`, `save_pct`, `events`. `figures` and `events` have the same keys: `goals`,
+     `shots` (on target), `misses`, `posts`, `saved`, `blocked`, `seven_m_goals`,
+     `seven_m_shots`, `assists`, `turnovers` (technical faults), `suspensions` (2 minutes),
+     `yellow_cards`, `red_cards`, and for goalkeepers `faced`, `saves`, `goals_against`,
+     `seven_m_faced`, `seven_m_saves`; `events[key]` lists the event ids behind `figures[key]`
+     (as many as the figure) for the clips. Figures come from the match statistics (one source
+     per goal), so they agree with the match page. `totals`: the same figures summed plus
+     `matches`, `tagged_matches`, `matches_involved`, `matches_present`, `shooting_pct`,
+     `save_pct`. Playing minutes are not recorded anywhere, so there are none.
+
 - 2026-11-09 (helper, branch `helper/squad-status-progress`): wishes 1 and 2 are built in the API
   (migration 0036), the client is regenerated; no UI yet.
   1. Player status: `PUT /v1/orgs/{org_id}/teams/{team_id}/players/{player_id}/status` with
@@ -432,5 +463,36 @@ Fixed:
 - Shot review: one count ("1 von 1 mit Matchbericht · 2 weitere offen") instead of "1 von 1"
   next to a tab saying "Offen (3)".
 
-Left open: the hero and the tab row above the workspace on phones (collapse while reviewing);
-the dense report sentence above the shots as a row of tappable counts.
+- After PR 22: the report line above the shots is a printed row of counts (im Video bestätigt,
+  vorgeschlagen, ohne Stelle, ausserhalb); "vorgeschlagen" opens its list.
+
+Left open: the hero and the tab row above the workspace on phones (collapse while reviewing).
+
+## Squad status, assignment progress, xG against (UI session, 2026-11-09, after PR 23)
+
+- Squad: staff set a player injured or away ("Status" in the row: kind, until-date, short note)
+  and back to fit; the row reads "Verletzt bis 16. Nov. · Knöchel". Players see only their own.
+- Assignments: hairline rows with "0 von 1 erledigt" and "Noch offen: …" by name
+  (`still_open`), or "Alle haben es erledigt.".
+- xG against only with enough positioned shots of the opponent (`xg_against_coverage`, 70 %):
+  the season table shows "-" otherwise, and the season statement says nothing about the defence.
+
+## Phone round over squad, training and the player's side (UI session, 2026-11-09)
+
+Pixel 7 emulation, coach and player, fresh-eyes review. Scores (one signal, hairlines, game
+language, type, edge states): Kader 1, 4, 4, 4, 3; Aufgaben (coach) 2, 4, 3, 4, 3; Training 1, 4,
+4, 3, 3; Start (player) 2, 4, 3, 4, 2; Kader (player) -, 5, 4, 4, -; Aufgaben and Termine
+(player) 1, 2, 3, 2, 2.
+
+Fixed:
+- Kader: "Verfügbar 3 von 5 · Lea Beispiel, Sara Keller fallen aus" above the list; the shirt
+  number of a player who is out is muted; the consent note is no longer repeated on every row
+  (the line above the list sums it up); "Status" is an outlined button, 44 px on phones.
+- Training: an upcoming unit says who is out that day ("1 fällt aus: Lea Beispiel (verletzt)");
+  "Löschen" sits apart from the everyday actions and asks first.
+- Meine Aufgaben (player): hairline rows instead of squeezed cards, the title on its own line,
+  "Öffnen" and "Erledigt" full width under it on phones; "überfällig" in ink, not red.
+
+Not changed: the player who saw no dates had an account that was not linked to a squad entry
+(test data); the US date format comes from the emulated browser's language (the field follows
+it, see batch 3).

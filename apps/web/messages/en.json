@@ -310,7 +310,9 @@
     "consentsAll": "Video consents: all {n} complete.",
     "consentsMissing": "Consent missing for {n} of {total}:",
     "hand_left": "Left-handed",
-    "hand_right": "Right-handed"
+    "hand_right": "Right-handed",
+    "available": "Available {n} of {total}",
+    "out": "{n, plural, one {is out} other {are out}}"
   },
   "settings": {
     "title": "Settings",
@@ -1187,7 +1189,9 @@
     "noneOf_playlist": "No playlist yet. Collect clips in the scene search and save them as a playlist.",
     "noneOf_play": "No play yet. Create one under Training, Plays.",
     "noneOf_match": "No match yet.",
-    "noneOf_drill": "No drill available."
+    "noneOf_drill": "No drill available.",
+    "stillOpen": "Still open: {names}",
+    "allDone": "Everyone has done it."
   },
   "drills": {
     "title": "Drills",
@@ -2022,7 +2026,9 @@
     "noFollowup": "This insight has no figure to follow.",
     "planFirst": "Plan the first session",
     "noneHint": "A session with drills comes as a plan on the phone and a PDF for the hall.",
-    "calendarTools": "Subscribe to the calendar and import dates"
+    "calendarTools": "Subscribe to the calendar and import dates",
+    "outOnDay": "{n, plural, one {1 is out:} other {# are out:}}",
+    "deleteConfirm": "Delete “{title}”?"
   },
   "schedule": {
     "nav": "My dates",
@@ -2447,8 +2453,6 @@
   "shotCandidates": {
     "title": "Review shots",
     "keys": "In the list: <k>↑</k> <k>↓</k> select, <k>Enter</k> take the match report entry, <k>1</k> {own}, <k>2</k> {opp}, then <k>G</k> goal, <k>S</k> save, <k>M</k> miss, <k>P</k> post, <k>B</k> blocked, <k>X</k> no shot, <k>R</k> replay, <k>U</k> undo.",
-    "report": "Match report: {total} shots, {confirmed} confirmed on video, {suggested} suggested, {missing} without a moment in the video.",
-    "reportOutside": "{n, plural, one {# lies} other {# lie}} outside the video.",
     "question": "Shot?",
     "position": "{pos} of {n}",
     "fromReportLabel": "Take from the match report",
@@ -2483,7 +2487,12 @@
     "shotBy": "shot by {who}",
     "noKickoff": "The throw-off is not set yet: the game times are estimated from the match report.",
     "setKickoff": "Set the throw-off",
-    "positionReport": "{pos} of {n} with the match report · {more} more open"
+    "positionReport": "{pos} of {n} with the match report · {more} more open",
+    "reportTitle": "Match report: {total} shots",
+    "report_confirmed": "confirmed in the video",
+    "report_suggested": "suggested",
+    "report_missing": "no moment in the video",
+    "report_outside": "outside the video"
   },
   "officialTeams": {
     "title": "Find your team",
@@ -2614,5 +2623,19 @@
     "via_operator": "support",
     "line": "The club is not confirmed yet: sharing and public profiles are off until then.",
     "lineLink": "How to confirm"
+  },
+  "playerStatus": {
+    "injured": "Injured",
+    "absent": "Away",
+    "fit": "Fit",
+    "injuredUntil": "Injured until {date}",
+    "absentUntil": "Away until {date}",
+    "set": "Status",
+    "formFor": "Status of {name}",
+    "kind": "Status",
+    "until": "Until (inclusive)",
+    "note": "Note",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }

@@ -3995,6 +3995,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/consents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consent Overview
+         * @description The season roster's consents per purpose (active entries): `granted`, `refused` or
+         *     `missing`, since when and given by whom (the player, a parent or a guardian), with a count
+         *     per purpose in `summary`. For the staff who manage roster and consents.
+         */
+        get: operations["consent_overview_v1_orgs__org_id__teams__team_id__seasons__season_id__consents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/players/{player_id}/line": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Season Line
+         * @description A player's season line: per played match (as in the season statistics) date, opponent,
+         *     result and the player's figures as the match statistics count them (one source per goal),
+         *     each with the ids of its events in `events` (same keys) to open the clips, and season
+         *     `totals`. Goalkeepers: `faced`, `saves`, `goals_against`, credited by the keeper on the shot.
+         *     `attendance` is the recorded presence; playing minutes are not recorded. The staff read
+         *     every player of the team, players only their own line.
+         */
+        get: operations["season_line_v1_orgs__org_id__teams__team_id__seasons__season_id__players__player_id__line_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster": {
         parameters: {
             query?: never;
@@ -4856,6 +4903,11 @@ export interface components {
             /** Status */
             status: ("present" | "absent" | "excused" | "injured" | "late") | null;
         };
+        /**
+         * AttendanceStatus
+         * @enum {string}
+         */
+        AttendanceStatus: "present" | "absent" | "excused" | "injured" | "late";
         /** BallIn */
         BallIn: {
             /** X */
@@ -5319,6 +5371,50 @@ export interface components {
             player_id: string;
             /** Revoked At */
             revoked_at: string | null;
+        };
+        /** ConsentOverview */
+        ConsentOverview: {
+            /** Is Youth */
+            is_youth: boolean;
+            /** Players */
+            players: components["schemas"]["ConsentOverviewPlayer"][];
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /** Summary */
+            summary: components["schemas"]["PurposeSummary"][];
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+        };
+        /** ConsentOverviewPlayer */
+        ConsentOverviewPlayer: {
+            /** First Name */
+            first_name: string;
+            /** Has Account */
+            has_account: boolean;
+            /** Jersey Number */
+            jersey_number: number | null;
+            /** Last Name */
+            last_name: string;
+            /** Minor */
+            minor: boolean | null;
+            /**
+             * Player Id
+             * Format: uuid
+             */
+            player_id: string;
+            /** Purposes */
+            purposes: components["schemas"]["PurposeState"][];
+            /**
+             * Roster Entry Id
+             * Format: uuid
+             */
+            roster_entry_id: string;
         };
         /** ConsentSubject */
         ConsentSubject: {
@@ -6313,6 +6409,94 @@ export interface components {
              * @description a time in the video
              */
             t_ms: number;
+        };
+        /**
+         * LineEvents
+         * @description The event ids behind each figure (same keys, as many ids as the figure counts), in
+         *     match-clock order: open the clips with them.
+         */
+        LineEvents: {
+            /** Assists */
+            assists: string[];
+            /** Blocked */
+            blocked: string[];
+            /** Faced */
+            faced: string[];
+            /** Goals */
+            goals: string[];
+            /** Goals Against */
+            goals_against: string[];
+            /** Misses */
+            misses: string[];
+            /** Posts */
+            posts: string[];
+            /** Red Cards */
+            red_cards: string[];
+            /** Saved */
+            saved: string[];
+            /** Saves */
+            saves: string[];
+            /** Seven M Faced */
+            seven_m_faced: string[];
+            /** Seven M Goals */
+            seven_m_goals: string[];
+            /** Seven M Saves */
+            seven_m_saves: string[];
+            /** Seven M Shots */
+            seven_m_shots: string[];
+            /** Shots */
+            shots: string[];
+            /** Suspensions */
+            suspensions: string[];
+            /** Turnovers */
+            turnovers: string[];
+            /** Yellow Cards */
+            yellow_cards: string[];
+        };
+        /**
+         * LineFigures
+         * @description A player's figures as the match statistics count them (one source per goal). Field
+         *     player: `shots` are on target (blocked ones apart, as on the match page), `turnovers` are
+         *     technical faults, `suspensions` 2-minute suspensions. Goalkeeper (credited by the keeper
+         *     recorded on the shot): `faced` = `saves` + `goals_against`.
+         */
+        LineFigures: {
+            /** Assists */
+            assists: number;
+            /** Blocked */
+            blocked: number;
+            /** Faced */
+            faced: number;
+            /** Goals */
+            goals: number;
+            /** Goals Against */
+            goals_against: number;
+            /** Misses */
+            misses: number;
+            /** Posts */
+            posts: number;
+            /** Red Cards */
+            red_cards: number;
+            /** Saved */
+            saved: number;
+            /** Saves */
+            saves: number;
+            /** Seven M Faced */
+            seven_m_faced: number;
+            /** Seven M Goals */
+            seven_m_goals: number;
+            /** Seven M Saves */
+            seven_m_saves: number;
+            /** Seven M Shots */
+            seven_m_shots: number;
+            /** Shots */
+            shots: number;
+            /** Suspensions */
+            suspensions: number;
+            /** Turnovers */
+            turnovers: number;
+            /** Yellow Cards */
+            yellow_cards: number;
         };
         /** LinkImport */
         LinkImport: {
@@ -8108,6 +8292,47 @@ export interface components {
             /** Team */
             team: string;
         };
+        /**
+         * PurposeState
+         * @description A player's consent for one purpose: `granted` (an unrevoked consent, `since` = its
+         *     given_at), `refused` (the latest consent was revoked, `since` = revoked_at) or `missing`
+         *     (never given). `given_by` and `given_by_name` are those of that consent: the player
+         *     (`self`), a parent or a guardian; who revoked it is in the audit log.
+         */
+        PurposeState: {
+            /** Applicable */
+            applicable: boolean;
+            /** Consent Id */
+            consent_id: string | null;
+            given_by: components["schemas"]["ConsentGivenBy"] | null;
+            /** Given By Name */
+            given_by_name: string | null;
+            kind: components["schemas"]["ConsentKind"];
+            /** Since */
+            since: string | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "granted" | "refused" | "missing";
+        };
+        /**
+         * PurposeSummary
+         * @description One purpose over the listed players: "12 von 14" is `granted` of `players`.
+         */
+        PurposeSummary: {
+            /** Applicable */
+            applicable: boolean;
+            /** Granted */
+            granted: number;
+            kind: components["schemas"]["ConsentKind"];
+            /** Missing */
+            missing: number;
+            /** Players */
+            players: number;
+            /** Refused */
+            refused: number;
+        };
         /** RateIn */
         RateIn: {
             /**
@@ -8492,6 +8717,123 @@ export interface components {
              * Format: date
              */
             starts_on: string;
+        };
+        /** SeasonLine */
+        SeasonLine: {
+            /** First Name */
+            first_name: string;
+            /** Jersey Number */
+            jersey_number: number | null;
+            /** Last Name */
+            last_name: string;
+            main_position: components["schemas"]["Position"] | null;
+            /** Matches */
+            matches: components["schemas"]["SeasonLineMatch"][];
+            /**
+             * Player Id
+             * Format: uuid
+             */
+            player_id: string;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            totals: components["schemas"]["SeasonLineTotals"];
+        };
+        /** SeasonLineMatch */
+        SeasonLineMatch: {
+            attendance: components["schemas"]["AttendanceStatus"] | null;
+            /** Competition */
+            competition: string | null;
+            events: components["schemas"]["LineEvents"];
+            figures: components["schemas"]["LineFigures"];
+            /** Involved */
+            involved: boolean;
+            /** Is Home */
+            is_home: boolean;
+            /**
+             * Kickoff At
+             * Format: date-time
+             */
+            kickoff_at: string;
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Opponent */
+            opponent: string;
+            /** Response */
+            response: string | null;
+            /** Result */
+            result: ("win" | "draw" | "loss") | null;
+            /** Save Pct */
+            save_pct: number | null;
+            /** Score Opponent */
+            score_opponent: number | null;
+            /** Score Own */
+            score_own: number | null;
+            /** Shooting Pct */
+            shooting_pct: number | null;
+            /** Tagged */
+            tagged: boolean;
+        };
+        /** SeasonLineTotals */
+        SeasonLineTotals: {
+            /** Assists */
+            assists: number;
+            /** Blocked */
+            blocked: number;
+            /** Faced */
+            faced: number;
+            /** Goals */
+            goals: number;
+            /** Goals Against */
+            goals_against: number;
+            /** Matches */
+            matches: number;
+            /** Matches Involved */
+            matches_involved: number;
+            /** Matches Present */
+            matches_present: number;
+            /** Misses */
+            misses: number;
+            /** Posts */
+            posts: number;
+            /** Red Cards */
+            red_cards: number;
+            /** Save Pct */
+            save_pct: number | null;
+            /** Saved */
+            saved: number;
+            /** Saves */
+            saves: number;
+            /** Seven M Faced */
+            seven_m_faced: number;
+            /** Seven M Goals */
+            seven_m_goals: number;
+            /** Seven M Saves */
+            seven_m_saves: number;
+            /** Seven M Shots */
+            seven_m_shots: number;
+            /** Shooting Pct */
+            shooting_pct: number | null;
+            /** Shots */
+            shots: number;
+            /** Suspensions */
+            suspensions: number;
+            /** Tagged Matches */
+            tagged_matches: number;
+            /** Turnovers */
+            turnovers: number;
+            /** Yellow Cards */
+            yellow_cards: number;
         };
         /** SeasonOut */
         SeasonOut: {
@@ -18205,6 +18547,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SeasonOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    consent_overview_v1_orgs__org_id__teams__team_id__seasons__season_id__consents_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                season_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    season_line_v1_orgs__org_id__teams__team_id__seasons__season_id__players__player_id__line_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                season_id: string;
+                player_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeasonLine"];
                 };
             };
             /** @description Validation Error */
