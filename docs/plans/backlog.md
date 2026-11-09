@@ -1,20 +1,14 @@
 # Backlog und Prioritäten (Backend und Analyse)
 
-Stand 2026-11-05. Ziel des Produkts: Video hochladen, automatisch die Schlüsselsituationen
+Stand 2026-11-09. Ziel des Produkts: Video hochladen, automatisch die Schlüsselsituationen
 (Tore, Würfe, wer den Ball hat, wohin der Wurf geht, Spielzüge) und pro Spieler auswerten. Die UI
 macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
 
 ## Läuft gerade
-| Thema | Stand |
-|---|---|
-| Würfe als Vorschläge (wie Torkandidaten) | Messung und Einbau laufen |
-| Mannschaft aus handball.ch übernehmen (Phase 1 bis 3) | Backend fertig (64bade8, fab3011), UI-Sitzung baut die Screens |
-| 1. Kalibrierung für Stream-Kameras | läuft (messen, dann verbessern, Klick-Kalibrierung pro Halle) |
-| 6. Spielberichte per Link aus nuLiga (DE, AT) und HLA-PDF | läuft |
-| Backend-Prüfung auf Fehler bei echtem Material (Teil-Videos, ganze Spiele, Rechte) | läuft, erste Fixes gepusht |
-| Torkandidaten im Produktpfad messen | läuft |
-| Uploads von Lukas verarbeiten, schneller machen | läuft |
-| Ball Runde 5 / 5b (OWLv2-Labels) | Kaggle, Auswertung danach |
+Stand und Prioritäten der Woche: `docs/plans/HANDOVER.md` (2026-11-09). Fertig seit dem 5.11.:
+Würfe als Vorschläge, Mannschaft aus handball.ch (Phase 1 bis 3), Spielberichte per Link (nuLiga,
+HLA), Kalibrierung mit Gründen und Hallen-Wiederverwendung, Rückennummern breit gemessen,
+Code-Prüfung vor der Übergabe. Ball Runde 6: gleichauf mit Runde 3, nicht übernommen.
 
 ## Als Nächstes (Reihenfolge)
 1. **Kalibrierung für Stream-Kameras.** Auf allen vier geprüften Wädenswil/Horgen-Clips scheiterte
@@ -28,8 +22,8 @@ macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
 3. **Wohin der Wurf geht.** Beim Bestätigen eines Tors oder Wurfs die Torzone mit einem Klick
    erfassen (Raster 3x3), Wurfposition auf dem Feld aus den Spuren; Auswertung pro Spieler und
    Torhüter. Automatische Torzone erst, wenn der Ball gut genug ist.
-4. **Ball Runde 6** mit OWLv2-Labels aus den neuen Spielen (Modal über die lokale Sitzung), danach
-   "Wer hat den Ball" pro Spieler neu trainieren.
+4. **Ball:** Runde 6 (OWLv2-Labels) liegt gleichauf mit Runde 3 (33 %). Zuerst das Testset auf etwa
+   200 Bälle vergrössern, dann weiter trainieren und "Wer hat den Ball" pro Spieler neu trainieren.
 5. **Rückennummern**: breit gemessen (2026-11-09, 12 Spiele aus mindestens 11 Hallen, ADR 027):
    94 % der gelesenen Nummernzeit auf dem Matchblatt, Rollen-Schwelle der ReID 0.75 -> 0.45,
    Farb-Schwellen bleiben. Offen: Spieler-Statistik aus bestätigten Ereignissen prüfen;
@@ -82,12 +76,6 @@ PDF-Bericht; `roster.visible_players`). Noch offen: Anwesenheitsliste (Analysten
 7. Echte Spielernamen im Repo: `ml/data/official/*.json` (öffentliche Spielprotokolle).
    Entschieden (Lukas, 2026-11-05): bleiben vorerst im Repo, die Daten sind öffentlich online;
    Repo bleibt privat. Test-Fixtures nutzen weiter erfundene Namen.
-
-## Nach dem Merge der UI-Branch
-- `apps/api/tests/test_report_pdf.py::test_insight_texts_match_the_web_app` wieder für
-  `zones.long_range` und `zones.empty_goal` einschalten: die Web-Texte sind im UI-Branch
-  `claude/exciting-franklin-g1ecgw` angepasst; die Prüfung erst nach dessen Merge in main scharf
-  stellen, sonst schlägt sie im Backend-Branch fehl.
 
 ## Code health (from the review before handover)
 Kleine Fixes aus dem Review sind im Branch `chore/backend-cleanup` erledigt (GPU-Minuten,
