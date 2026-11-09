@@ -77,19 +77,28 @@ def _dsn(db: str, user: str = "handball", password: str = "handball") -> str:
 
 @pytest.fixture(scope="session")
 def test_db() -> Iterator[str]:
-    """Fresh database per test session, migrated with Alembic as the owner role."""
-    name = f"handball_test_{uuid.uuid4().hex[:8]}"
+    """Fresh database per test session, migrated with Alembic as the owner role.
+
+    With pytest-xdist every worker is its own session, so every worker gets its own database.
+    """
+    worker = os.environ.get("PYTEST_XDIST_WORKER", "main")
+    name = f"handball_test_{worker}_{uuid.uuid4().hex[:8]}"
 
     async def setup() -> None:
         conn = await asyncpg.connect(ADMIN_DSN)
         try:
             await conn.execute(f'CREATE DATABASE "{name}"')
-            exists = await conn.fetchval("SELECT 1 FROM pg_roles WHERE rolname = 'handball_app'")
-            if not exists:
-                await conn.execute(
-                    f"CREATE ROLE handball_app LOGIN PASSWORD '{APP_PASSWORD}' "
-                    "NOSUPERUSER NOBYPASSRLS"
+            # roles are cluster-wide: parallel workers serialise check-and-create on a lock
+            async with conn.transaction():
+                await conn.execute("SELECT pg_advisory_xact_lock(hashtext('handball_app role'))")
+                exists = await conn.fetchval(
+                    "SELECT 1 FROM pg_roles WHERE rolname = 'handball_app'"
                 )
+                if not exists:
+                    await conn.execute(
+                        f"CREATE ROLE handball_app LOGIN PASSWORD '{APP_PASSWORD}' "
+                        "NOSUPERUSER NOBYPASSRLS"
+                    )
         finally:
             await conn.close()
 
@@ -120,9 +129,10 @@ def test_db() -> Iterator[str]:
     asyncio.run(teardown())
 
 
-TABLES = (
-    "audit_logs, official_cache, consents, invitations, roster_entries, players, memberships, "
-    "seasons, teams, org_memberships, organizations, auth_tokens, auth_sessions, users"
+# Every table but the migration marker: nothing a test writes (federations, stripe_events,
+# vouchers, ...) leaks into the next one.
+TABLES_SQL = (
+    "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'alembic_version'"
 )
 
 
@@ -136,7 +146,13 @@ async def owner_conn(test_db: str) -> AsyncIterator[asyncpg.Connection]:
 @pytest.fixture
 async def clean_db(owner_conn: asyncpg.Connection) -> AsyncIterator[None]:
     yield
-    await owner_conn.execute(f"TRUNCATE {TABLES} CASCADE")
+    # DELETE, not TRUNCATE: TRUNCATE gives each of the ~70 tables and their indexes new files
+    # (seconds per test), while a test leaves a handful of rows. The replica role skips the
+    # foreign key triggers, so the order of the tables does not matter.
+    tables = [r["tablename"] for r in await owner_conn.fetch(TABLES_SQL)]
+    async with owner_conn.transaction():
+        await owner_conn.execute("SET LOCAL session_replication_role = replica")
+        await owner_conn.execute("".join(f'DELETE FROM "{t}";' for t in tables))
 
 
 @pytest.fixture
