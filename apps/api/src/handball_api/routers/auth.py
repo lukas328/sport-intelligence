@@ -236,7 +236,7 @@ async def email_verify(data: TokenIn, ctx: CtxDep) -> None:
     dependencies=[Depends(rate_limit("verify-resend"))],
 )
 async def email_verify_resend(auth: AuthedDep) -> None:
-    await service.send_email_verification(auth.ctx, auth.user)
+    await service.resend_email_verification(auth.ctx, auth.user)
 
 
 @router.post(

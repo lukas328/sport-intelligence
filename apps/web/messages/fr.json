@@ -141,7 +141,8 @@
     "email-unverified": "Confirme d'abord ton adresse e-mail.",
     "org-unverified": "Le club n'est pas encore confirmé : ce sera possible ensuite.",
     "suggestion-resolved": "Cette proposition est déjà traitée.",
-    "suggestion-stale": "Cette proposition ne correspond plus : le match ou l'entrée n'existe plus."
+    "suggestion-stale": "Cette proposition ne correspond plus : le match ou l'entrée n'existe plus.",
+    "email-unavailable": "L'e-mail n'a pas pu être envoyé pour le moment. Veuillez réessayer plus tard."
   },
   "auth": {
     "loginTitle": "Connexion",

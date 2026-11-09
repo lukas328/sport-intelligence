@@ -8,8 +8,8 @@ from typing import Any
 
 from sqlalchemy import func, select, update
 
+from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
-from handball_api.core.logging import get_logger
 from handball_api.models import (
     Assignment,
     AssignmentStatus,
@@ -36,7 +36,6 @@ from handball_api.services.mail_templates import render
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 
-log = get_logger("handball_api.training")
 RECEIVERS = (TeamRole.PLAYER, TeamRole.GOALKEEPER)
 
 
@@ -155,22 +154,22 @@ async def create_assignment(ctx: Ctx, team_id: uuid.UUID, data: AssignmentCreate
             due = f" Bis {a.due_at:%d.%m.%Y}." if a.due_at and u.locale == "de-CH" else ""
             if a.due_at and u.locale != "de-CH":
                 due = f" {a.due_at:%Y-%m-%d}."
-            try:
-                await ctx.email.send(
-                    render(
-                        "assignment",
-                        u.locale,
-                        to=u.email,
-                        name=u.name,
-                        coach=coach.name if coach else team.name,
-                        team=team.name,
-                        title=a.title,
-                        due=due,
-                        link=f"{ctx.settings.web_base_url}{link}",
-                    )
-                )
-            except Exception:
-                log.warning("assignment_mail_failed", user_id=str(u.id))
+            await try_send(
+                ctx.email,
+                render(
+                    "assignment",
+                    u.locale,
+                    to=u.email,
+                    name=u.name,
+                    coach=coach.name if coach else team.name,
+                    team=team.name,
+                    title=a.title,
+                    due=due,
+                    link=f"{ctx.settings.web_base_url}{link}",
+                ),
+                "assignment",
+                user_id=str(u.id),
+            )
     await audit.record(
         ctx,
         "assignment.created",

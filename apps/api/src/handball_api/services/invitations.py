@@ -8,6 +8,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import hash_token, new_token
 from handball_api.integrations.handball_ch import fold
@@ -145,7 +146,9 @@ async def create(
     )
     ctx.db.add(inv)
     await ctx.db.flush()
-    await ctx.email.send(
+    # the invitation stays valid when the mail fails (logged); it can be revoked and sent again
+    await try_send(
+        ctx.email,
         render(
             "invitation",
             inviter.locale,
@@ -155,7 +158,9 @@ async def create(
             team=f" ({team.name})" if team else "",
             link=f"{ctx.settings.web_base_url}/invite/{token}",
             days=ctx.settings.invitation_ttl_days,
-        )
+        ),
+        "invitation",
+        invitation_id=str(inv.id),
     )
     await audit.record(
         ctx,
