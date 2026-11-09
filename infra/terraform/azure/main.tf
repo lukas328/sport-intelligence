@@ -279,6 +279,20 @@ resource "azurerm_container_app_environment" "this" {
 }
 
 locals {
+  # Apps without an HTTP rule (workers, Redis over TCP) never scale in on their own, even with
+  # min_replicas = 0. While paused they get a cron rule that is active one minute a year, so KEDA
+  # scales them to 0 the rest of the time.
+  paused_rule = {
+    name = "paused"
+    type = "cron"
+    metadata = {
+      timezone        = "Etc/UTC"
+      start           = "0 0 1 1 *"
+      end             = "1 0 1 1 *"
+      desiredReplicas = "1"
+    }
+  }
+
   app_names = {
     web   = "${local.prefix}-web"
     api   = "${local.prefix}-api"
@@ -382,6 +396,16 @@ resource "azurerm_container_app" "redis" {
   template {
     min_replicas = var.paused ? 0 : 1
     max_replicas = 1
+
+    dynamic "custom_scale_rule" {
+      for_each = var.paused ? [local.paused_rule] : []
+      content {
+        name             = custom_scale_rule.value.name
+        custom_rule_type = custom_scale_rule.value.type
+        metadata         = custom_scale_rule.value.metadata
+      }
+    }
+
     container {
       name    = "redis"
       image   = "docker.io/library/redis:7-alpine"
@@ -435,6 +459,15 @@ resource "azurerm_container_app" "python" {
   template {
     min_replicas = var.paused ? 0 : each.value.min
     max_replicas = each.value.max
+
+    dynamic "custom_scale_rule" {
+      for_each = var.paused ? [local.paused_rule] : []
+      content {
+        name             = custom_scale_rule.value.name
+        custom_rule_type = custom_scale_rule.value.type
+        metadata         = custom_scale_rule.value.metadata
+      }
+    }
 
     container {
       name   = each.key

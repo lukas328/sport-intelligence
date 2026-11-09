@@ -160,8 +160,12 @@ if the release has a migration. A GitHub Actions workflow with OIDC login is the
 
 ## Pause (test environment)
 
-Set `paused = true` and `terraform apply`: every app goes to 0 replicas and costs nothing. Stop the
-database as well (Azure starts a stopped server again by itself after 7 days):
+Set `paused = true` and `terraform apply`: every app goes to 0 replicas and costs nothing (web and api
+scale in on HTTP; the workers and Redis get a cron scale rule that is active one minute a year, because
+without any rule they keep one replica despite `min_replicas = 0`). Scale-in takes about 5 minutes.
+Stop the database last, after the apply (Azure starts a stopped server again by itself after 7 days).
+While it is stopped, `terraform plan` fails to read the server; start it first or plan with
+`-refresh=false` for app-only changes:
 
 ```bash
 az postgres flexible-server stop -g $(terraform output -raw resource_group) -n $(terraform output -raw postgres_server)
