@@ -22,8 +22,10 @@ Lookup: `handball_api.integrations.adapter("team_ops", "ics")`.
 number`. Events: `goal, miss, save, 7m_goal, 7m_miss, 2min, yellow, red, timeout`. JSON: a list of the
 same objects or `{"events": [...]}`.
 
-**Official match report by link** (`services/official_report.py`, not an adapter: public data, no
-contract): `POST /v1/orgs/{org}/matches/{match}/official-report` with `{"url": "..."}` (coach, analyst).
+**Official match report by link** (`services/official_report.py`, fetch and parsers in
+`integrations/official_reports/`, comparison with the video in `services/official_comparison.py`;
+not an adapter: public data, no contract): `POST /v1/orgs/{org}/matches/{match}/official-report`
+with `{"url": "..."}` (coach, analyst).
 Sources (sources and terms: `docs/plans/data-sources-de.md`):
 
 | Provider | Link the coach pastes | What is read |
