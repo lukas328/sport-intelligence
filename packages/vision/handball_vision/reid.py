@@ -122,7 +122,11 @@ def anchor_vectors(f: Fragment, fps: float, window_s: float = ANCHOR_WINDOW_S) -
     return np.asarray(f.vectors[gap <= window_s * fps], np.float64)
 
 
-MIN_PLAYER_P = 0.75  # mean player probability a fragment needs to teach or to get a number
+# mean player probability a fragment needs to teach or to get a number. 0.75 was set on four
+# games of one hall; on twelve games of other halls 0.45 finds 330 instead of 290 hidden numbers
+# with 57 instead of 53 wrong, and still keeps out what the classifier calls a referee or a
+# goalkeeper (ADR 027, broad measurement)
+MIN_PLAYER_P = 0.45
 
 
 def fragment_roles(

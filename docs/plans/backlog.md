@@ -30,8 +30,10 @@ macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
    Torhüter. Automatische Torzone erst, wenn der Ball gut genug ist.
 4. **Ball Runde 6** mit OWLv2-Labels aus den neuen Spielen (Modal über die lokale Sitzung), danach
    "Wer hat den Ball" pro Spieler neu trainieren.
-5. **Rückennummern breit messen** auf den neuen Spielen mit Matchblatt (ab 2023/24), Schwellen
-   einstellen; Spieler-Statistik aus bestätigten Ereignissen prüfen.
+5. **Rückennummern**: breit gemessen (2026-11-09, 12 Spiele aus mindestens 11 Hallen, ADR 027):
+   94 % der gelesenen Nummernzeit auf dem Matchblatt, Rollen-Schwelle der ReID 0.75 -> 0.45,
+   Farb-Schwellen bleiben. Offen: Spieler-Statistik aus bestätigten Ereignissen prüfen;
+   Schiedsrichter und Staff am Spielfeldrand in TV-Streams (Schweiz - Island: halbe Nummernzeit).
 6. **Spielberichte per Link aus nuLiga (DE, AT) und HLA-PDF (AT)** importieren, ohne Vertrag
    (`docs/plans/data-sources-de.md`).
 7. **Spielzüge.** Angriffe gibt es schon als Phasen; erkennen, welche Auslösung gespielt wurde
@@ -41,8 +43,9 @@ macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
 2 (ganzes Spiel) sobald die Upload-Verarbeitung fertig ist; 3 (Torzone) nach den Würfen;
 4 (Ball Runde 6) nach der Auswertung von Runde 5 als Auftrag in `ml/gpu/JOBS.md`; 5 (Nummern) wenn
 genug hochgeladene Spiele mit Matchblatt verarbeitet sind; 7 (Spielzüge) nach 1 und 4.
-Kleine Lücke aus dem Onboarding: Namen offizieller Kader-Einträge ohne Einwilligung auch in
-Ereignis- und Statistik-Ansichten verbergen (mit 5).
+Kleine Lücke aus dem Onboarding: Namen offizieller Kader-Einträge ohne Einwilligung in Ereignis-
+und Statistik-Ansichten verbergen: erledigt (Ereignisliste, Tor-Abgleich, Wurf-Vorschläge,
+PDF-Bericht; `roster.visible_players`). Noch offen: Anwesenheitsliste (Analysten, Assistenztrainer).
 
 ## Entscheide von Lukas (offen)
 - keine
