@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import math
@@ -33,6 +34,7 @@ from handball_api.services import audit, auto_events, billing, feed, halls, segm
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match, timeline_video
 from handball_api.services.policies import Action
+from handball_api.services.roster import numbers as roster_numbers
 from handball_api.services.segments import parse_recorded
 from handball_api.services.support import failure_code
 
@@ -202,7 +204,7 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
     match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
     url = str(data.url)
     try:
-        check_public_https_url(url)
+        await asyncio.to_thread(check_public_https_url, url)  # DNS lookup blocks
     except UnsafeUrlError as exc:
         raise ProblemError(422, "unsafe-url", str(exc)) from exc
     asset_id = uuid.uuid4()
@@ -225,9 +227,7 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
     ctx.db.add(asset)
     await ctx.db.flush()
     job = await _new_job(ctx, asset, "import")
-    ctx.require_jobs().enqueue(
-        "pipeline", IMPORT_FUNC, str(job.id), _job_payload(ctx, asset, job, url=url)
-    )
+    await ctx.enqueue("pipeline", IMPORT_FUNC, str(job.id), _job_payload(ctx, asset, job, url=url))
     await audit.record(
         ctx, "video.import_started", target_type="video", target_id=asset.id, data={"url": url}
     )
@@ -282,7 +282,7 @@ async def start_ingest(ctx: Ctx, asset: VideoAsset) -> ProcessingJob:
     match = await ctx.db.get(Match, asset.match_id)
     if match is not None and match.status != MatchStatus.READY:
         match.status = MatchStatus.PROCESSING
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "pipeline",
         INGEST_FUNC,
         str(job.id),
@@ -314,7 +314,7 @@ async def start_sync(ctx: Ctx, main: VideoAsset, other: VideoAsset) -> Processin
     if not main_key or not other_key or (other.sync or {}).get("source") == "user_correction":
         return None
     job = await _new_job(ctx, other, "sync")
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "gpu",
         SYNC_FUNC,
         str(job.id),
@@ -373,9 +373,20 @@ async def read_media(ctx: Ctx, asset_id: uuid.UUID, path: str) -> tuple[bytes, s
         if guest is None or not await feed.guardian_sees_match(ctx, guest.match_id):
             raise
         asset = guest
-    if not MEDIA_PATH.match(path) or ".." in path:
-        raise ProblemError(404, "not-found", "Not found")
-    if path == "proxy.mp4" or path.startswith("original"):
+    return await read_media_object(ctx, asset, path)
+
+
+async def read_media_object(ctx: Ctx, asset: VideoAsset, path: str) -> tuple[bytes, str]:
+    """One file of a video's player media (HLS, poster, thumbnails) and its content type, for a
+    caller that has already checked access. Originals and the analysis proxy are never served.
+    A missing object is a 404; any other storage error propagates (a 500 the alerting sees, not a
+    silent 404)."""
+    if (
+        not MEDIA_PATH.match(path)
+        or ".." in path
+        or path == "proxy.mp4"
+        or path.startswith("original")
+    ):
         raise ProblemError(404, "not-found", "Not found")
     try:
         data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
@@ -411,23 +422,12 @@ async def read_signed_media(
         raise ProblemError(404, "not-found", "Not found")
     if not hmac.compare_digest(sig, _media_sig(ctx, asset_id, int(exp_s))):
         raise ProblemError(404, "not-found", "Not found")
-    if (
-        not MEDIA_PATH.match(path)
-        or ".." in path
-        or path == "proxy.mp4"
-        or path.startswith("original")
-    ):
-        raise ProblemError(404, "not-found", "Not found")
     await enable_system_access(ctx.db, reason="signed media")
     asset = await ctx.db.get(VideoAsset, asset_id)
     await disable_system_access(ctx.db)
     if asset is None:
         raise ProblemError(404, "not-found", "Not found")
-    try:
-        data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
-    except ObjectNotFoundError as exc:
-        raise ProblemError(404, "not-found", "Not found") from exc
-    return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
+    return await read_media_object(ctx, asset, path)
 
 
 # ---- worker callbacks (internal) ------------------------------------------------------------
@@ -444,6 +444,14 @@ def job_event(job: ProcessingJob) -> dict[str, object]:
         "error": job.error,
         "video_asset_id": str(job.video_asset_id) if job.video_asset_id else None,
     }
+
+
+def _elapsed_seconds(result: dict[str, Any]) -> float:
+    """Run time of a job from its result (`elapsed_s`), 0 when missing or not a number."""
+    value = result.get("elapsed_s")
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        return 0.0
+    return max(0.0, float(value))
 
 
 async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> ProcessingJob:
@@ -466,6 +474,9 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         job.stages = {**job.stages, **data.stages}
     if data.gpu_seconds is not None:
         job.gpu_seconds = data.gpu_seconds
+    elif job.kind == "analysis" and data.status == JobStatus.SUCCEEDED and data.result:
+        # the analysis worker reports its run time as `elapsed_s`; that is what billing counts
+        job.gpu_seconds = _elapsed_seconds(data.result)
     if data.cost_chf is not None:
         job.cost_chf = data.cost_chf
     asset = await ctx.db.get(VideoAsset, job.video_asset_id) if job.video_asset_id else None
@@ -612,7 +623,7 @@ async def start_analysis(
         payload["rosters"] = rosters
     if refs:
         payload["hall_references"] = refs
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "gpu",
         ANALYSIS_FUNC,
         str(job.id),
@@ -622,24 +633,12 @@ async def start_analysis(
     return job
 
 
-async def _own_roster(ctx: Ctx, match: Match) -> dict[int, uuid.UUID]:
-    """Shirt number -> player of the own team's active roster in the match's season."""
-    rows = await ctx.db.execute(
-        select(RosterEntry.jersey_number, RosterEntry.player_id).where(
-            RosterEntry.season_id == match.season_id,
-            RosterEntry.team_id == match.team_id,
-            RosterEntry.active.is_(True),
-        )
-    )
-    return {n: pid for n, pid in rows.all() if n is not None}
-
-
 async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
     """Shirt numbers per kit label for the number vote of the analysis. The labels follow the
     kits in the job payload, so "home" is always the own kit (match.is_home only moves the
     overlay); the opponent side only when its players were entered. Empty sides are left out."""
     out: dict[str, list[int]] = {}
-    own = sorted(await _own_roster(ctx, match))
+    own = sorted(await roster_numbers(ctx, match.season_id, match.team_id))
     if own:
         out["home"] = own
     if match.opponent_id is not None:
@@ -710,7 +709,7 @@ async def _apply_analysis_result(
     if isinstance(tracks, list) and any(t.get("number") is not None for t in tracks):
         owner = await ctx.db.get(Match, asset.match_id)
         if owner is not None and owner.season_id is not None:
-            roster = await _own_roster(ctx, owner)
+            roster = await roster_numbers(ctx, owner.season_id, owner.team_id)
     if isinstance(tracks, list):
         for t in tracks:
             first, last = int(t["first_ms"]), int(t["last_ms"])

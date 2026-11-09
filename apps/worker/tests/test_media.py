@@ -4,6 +4,7 @@ import json
 import shutil
 import socket
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,7 @@ import numpy as np
 import pytest
 
 from handball_jobkit import Reporter
+from handball_jobkit.net import UnsafeUrlError, check_public_https_url
 from handball_worker import ingest
 from handball_worker.config import WorkerSettings
 from handball_worker.media import quality, transcode
@@ -284,13 +286,55 @@ def test_run_ingest_reports_failure(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert posts[-1]["error"].startswith("video could not be processed")
 
 
-def test_check_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    for bad in ("http://x.ch/a", "https://x.ch:8080/a", "https:///a"):
-        with pytest.raises(ingest.UnsafeUrlError):
-            ingest.check_url(bad)
-    monkeypatch.setattr(socket, "getaddrinfo", lambda *a, **k: [(0, 0, 0, "", ("10.1.2.3", 443))])
-    with pytest.raises(ingest.UnsafeUrlError, match="private"):
-        ingest.check_url("https://intranet.example/a.mp4")
+def test_import_checks_every_url(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The worker uses the shared SSRF check (jobkit): user info, private and multicast
+    addresses and hosts that do not resolve are refused before anything is downloaded."""
+    for bad in ("http://x.ch/a", "https://x.ch:8080/a", "https:///a", "https://u:p@x.ch/a"):
+        with pytest.raises(UnsafeUrlError):
+            check_public_https_url(bad)
+    for ip in ("10.1.2.3", "224.0.0.1", "127.0.0.1"):
+        monkeypatch.setattr(
+            socket, "getaddrinfo", lambda *a, ip=ip, **k: [(0, 0, 0, "", (ip, 443))]
+        )
+        with pytest.raises(UnsafeUrlError, match="private"):
+            check_public_https_url("https://intranet.example/a.mp4")
+
+    def unresolvable(*a: Any, **k: Any) -> Any:
+        raise socket.gaierror("no such host")
+
+    monkeypatch.setattr(socket, "getaddrinfo", unresolvable)
+    with pytest.raises(UnsafeUrlError, match="resolve"):
+        check_public_https_url("https://nowhere.example/a.mp4")
+    # run_import fails the job instead of fetching
+    rep = Reporter(
+        "http://api",
+        "t",
+        "j",
+        ingest.IMPORT_STAGES,
+        client=httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200))),
+    )
+    fetched: list[str] = []
+
+    def fetch(request: httpx.Request) -> httpx.Response:
+        fetched.append(str(request.url))
+        return httpx.Response(200)
+
+    client = httpx.Client(transport=httpx.MockTransport(fetch))
+    with pytest.raises(UnsafeUrlError):
+        ingest.run_import(
+            "j",
+            "o",
+            "m",
+            "a",
+            "b",
+            "k",
+            "o/",
+            "https://u:p@x.ch/a.mp4",
+            WorkerSettings(work_dir=str(tmp_path)),
+            rep,
+            client,
+        )
+    assert fetched == []
 
 
 def test_run_import_follows_safe_redirects(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -351,3 +395,40 @@ def test_run_import_follows_safe_redirects(tmp_path: Path, monkeypatch: pytest.M
                 client,
             )
         assert posts[-1]["status"] == "failed"
+
+
+def _fake_ffmpeg(tmp_path: Path, body: str) -> str:
+    script = tmp_path / "fake-ffmpeg"
+    script.write_text(f"#!{sys.executable}\nimport sys, time\n{body}\n")
+    script.chmod(0o755)
+    return str(script)
+
+
+def test_run_with_progress_drains_stderr(tmp_path: Path) -> None:
+    """A lot of stderr output must not block ffmpeg while stdout is read (no pipe deadlock)."""
+    ffmpeg = _fake_ffmpeg(
+        tmp_path,
+        "sys.stderr.write('noise\\n' * 50000)\n"
+        "print('out_time_us=1000000', flush=True)\n"
+        "print('out_time_us=2000000', flush=True)\n"
+        "sys.stderr.write('Conversion failed!\\n')\n"
+        "sys.exit(1)",
+    )
+    seen: list[float] = []
+    with pytest.raises(transcode.TranscodeError, match="Conversion failed!"):
+        transcode.run_with_progress([ffmpeg], 4.0, seen.append)
+    assert seen == [0.25, 0.5]
+    ok = _fake_ffmpeg(tmp_path, "print('out_time_us=4000000', flush=True)")
+    transcode.run_with_progress([ok], 4.0, seen.append)
+    assert seen[-1] == 1.0
+    silent = _fake_ffmpeg(tmp_path, "sys.exit(2)")
+    with pytest.raises(transcode.TranscodeError, match="ffmpeg failed"):
+        transcode.run_with_progress([silent], 4.0)
+
+
+def test_transcode_commands_log_errors_only(tmp_path: Path) -> None:
+    for cmd in (
+        transcode.hls_command(Path("in.mp4"), tmp_path, info(), "ffmpeg", "fast", 4),
+        transcode.proxy_command(Path("in.mp4"), tmp_path / "p.mp4", "ffmpeg", "fast"),
+    ):
+        assert cmd[cmd.index("-loglevel") + 1] == "error"

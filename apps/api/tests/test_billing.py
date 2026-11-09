@@ -136,6 +136,64 @@ async def test_free_plan_limits(make_api: Callable[[], Api], billing_on: FakeGat
     assert b["features"] == ["events"]
 
 
+async def test_gpu_minutes_from_analysis_runs(make_api: Callable[[], Api]) -> None:
+    """The analysis worker reports `elapsed_s`; billing counts it as GPU time."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    await upload(api, ids, m["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    prefix = jobs.jobs[-1][3]["prefix"]
+    await api.http.post(
+        f"/internal/jobs/{jobs.jobs[-1][2]}",
+        headers=token,
+        json={"status": "succeeded", "progress": 1, "result": {"proxy_key": prefix + "proxy.mp4"}},
+    )
+    assert jobs.jobs[-1][1] == "handball_gpu_worker.analysis.run_analysis"
+    analysis_id = jobs.jobs[-1][2]
+    # progress callbacks carry no result and do not count
+    await api.http.post(
+        f"/internal/jobs/{analysis_id}", headers=token, json={"status": "running", "progress": 0.5}
+    )
+    await api.http.post(
+        f"/internal/jobs/{analysis_id}",
+        headers=token,
+        json={
+            "status": "succeeded",
+            "progress": 1,
+            "result": {"needs_calibration": True, "tracks": [], "elapsed_s": 90.0},
+        },
+    )
+    b = (await api.get(f"/v1/orgs/{org}/billing")).json()
+    assert b["usage"]["gpu_minutes"] == 1.5
+    # a late duplicate callback does not count twice
+    await api.http.post(
+        f"/internal/jobs/{analysis_id}",
+        headers=token,
+        json={"status": "succeeded", "progress": 1, "result": {"elapsed_s": 600.0}},
+    )
+    assert (await api.get(f"/v1/orgs/{org}/billing")).json()["usage"]["gpu_minutes"] == 1.5
+
+
+@pytest.mark.parametrize(
+    ("result", "seconds"),
+    [
+        ({"elapsed_s": 12.5}, 12.5),
+        ({"elapsed_s": 3}, 3.0),
+        ({}, 0.0),
+        ({"elapsed_s": "x"}, 0.0),
+        ({"elapsed_s": True}, 0.0),
+        ({"elapsed_s": -4}, 0.0),
+    ],
+)
+def test_elapsed_seconds(result: dict[str, Any], seconds: float) -> None:
+    from handball_api.services.videos import _elapsed_seconds
+
+    assert _elapsed_seconds(result) == seconds
+
+
 async def test_checkout_webhooks_and_portal(
     make_api: Callable[[], Api], billing_on: FakeGateway
 ) -> None:

@@ -39,6 +39,7 @@ from typing import Any
 
 from sqlalchemy import delete, select
 
+from handball_api.core.clock import format_clock
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, GoalCandidate, Match, Possession, VideoAsset
 from handball_api.schemas.events import EventIn
@@ -207,13 +208,6 @@ async def _shots(ctx: Ctx, match_id: uuid.UUID) -> list[Event]:
 # ---- suggestions from the official report -------------------------------------------------
 
 
-def _official_time(clock_s: float | None) -> str | None:
-    if clock_s is None:
-        return None
-    c = int(clock_s)
-    return f"{c // 60:02d}:{c % 60:02d}"
-
-
 def _entry(
     e: Event, t_ms: int | None, unc: int | None, visible: set[uuid.UUID] | None = None
 ) -> dict[str, Any]:
@@ -228,7 +222,7 @@ def _entry(
         "name": attrs.get("name"),
         "period": e.period,
         "clock_s": e.clock_s,
-        "official_time": attrs.get("official_time") or _official_time(e.clock_s),
+        "official_time": attrs.get("official_time") or format_clock(e.clock_s),
         "t_ms": t_ms,
         "uncertainty_ms": unc,
     }

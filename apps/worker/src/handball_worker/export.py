@@ -15,7 +15,6 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-import boto3
 import httpx
 import structlog
 from PIL import Image, ImageDraw, ImageFont
@@ -25,6 +24,7 @@ from handball_worker.config import WorkerSettings
 log = structlog.get_logger("worker.export")
 W, H, FPS = 1280, 720, 25
 CARD_S = 4.0
+FFMPEG_TIMEOUT_S = 900  # per ffmpeg call; a stuck ffmpeg must not hold the worker forever
 ENC = ["-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-r", str(FPS), "-an"]
 SCALE = f"scale={W}:{H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2"
 
@@ -97,7 +97,7 @@ def _ff(settings: WorkerSettings, args: list[str]) -> None:
         [settings.ffmpeg, "-hide_banner", "-nostdin", "-y", *args],
         check=True,
         capture_output=True,
-        timeout=900,
+        timeout=FFMPEG_TIMEOUT_S,
     )
 
 
@@ -246,13 +246,7 @@ def render(
 
 def run_presentation_export(payload: dict[str, Any]) -> dict[str, Any]:
     settings = WorkerSettings()
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=settings.s3_endpoint_url,
-        region_name=settings.s3_region,
-        aws_access_key_id=settings.s3_access_key,
-        aws_secret_access_key=settings.s3_secret_key,
-    )
+    s3 = settings.s3()
     base = settings.api_internal_url.rstrip("/")
     url = f"{base}/internal/presentations/{payload['presentation_id']}/export"
     headers = {"x-internal-token": settings.internal_token}

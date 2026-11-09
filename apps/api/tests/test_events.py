@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import uuid
 from collections.abc import Callable
 from typing import Any
 
@@ -412,3 +413,35 @@ async def test_shot_export_for_goalkeeper_trainer(make_api: Callable[[], Api]) -
     [shot] = data["shots"]
     assert (shot["side"], shot["shooter_number"], shot["release_ms"]) == ("opponent", 23, 90_000)
     assert shot["goal_zone"] == "TL"
+
+
+async def test_feed_links_only_the_active_roster_of_the_team(
+    make_api: Callable[[], Api], owner_conn: Any
+) -> None:
+    """Shirt numbers resolve against the team's active roster of the season (roster.numbers):
+    an inactive entry, or one of another team, is not linked."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    players = await roster(api, ids)
+    other = await api.post(f"/v1/orgs/{org}/teams", json={"name": "Damen", "gender": "women"})
+    assert other.status_code == 201, other.text
+    await owner_conn.execute(
+        "UPDATE roster_entries SET team_id = $1 WHERE player_id = $2",
+        uuid.UUID(other.json()["id"]),
+        uuid.UUID(players[9]),
+    )
+    await owner_conn.execute(
+        "UPDATE roster_entries SET active = false WHERE player_id = $1", uuid.UUID(players[1])
+    )
+    m = (await new_match(api, ids))["id"]
+    csv = "period;clock;team;event;number\n" + "".join(
+        f"1;0{n}:00;own;goal;{n}\n" for n in (7, 9, 1)
+    )
+    r = await api.post(
+        f"/v1/orgs/{org}/matches/{m}/events/import",
+        files={"file": ("feed.csv", csv.encode(), "text/csv")},
+    )
+    assert r.json()["created"] == 3
+    events = (await api.get(f"/v1/orgs/{org}/matches/{m}/events")).json()
+    assert {e["number"]: e["player_id"] for e in events} == {7: players[7], 9: None, 1: None}

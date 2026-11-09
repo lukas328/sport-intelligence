@@ -18,9 +18,10 @@ from typing import Any
 
 from sqlalchemy import delete, select
 
-from handball_api.models import Correction, Event, Match, Possession, RosterEntry
+from handball_api.models import Correction, Event, Match, Possession
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video, video_from_clock
+from handball_api.services.roster import numbers
 
 SOURCE = "heuristic"
 OVERLAY = "scoreboard_ocr"
@@ -220,19 +221,7 @@ async def apply_scoreboard(
 
     manual = await _manual_goals(ctx, match)
     # the overlay names the scorer after a goal ("7 Lisa ZUFALL"): own players by shirt number
-    roster: dict[int, Any] = {
-        n: pid
-        for n, pid in (
-            await ctx.db.execute(
-                select(RosterEntry.jersey_number, RosterEntry.player_id).where(
-                    RosterEntry.season_id == match.season_id,
-                    RosterEntry.team_id == match.team_id,
-                    RosterEntry.active.is_(True),
-                )
-            )
-        ).all()
-        if n is not None
-    }
+    roster = await numbers(ctx, match.season_id, match.team_id)
     created = 0
     confidence = 0.8 if overlay.get("source") == "hall_scoreboard" else 0.95
     noted: set[int] = set()  # official goals given the overlay reading in this run

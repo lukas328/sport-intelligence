@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -172,7 +173,9 @@ async def export(ctx: Ctx, user: User) -> dict[str, Any]:
 async def delete_account(ctx: Ctx, user: User, password: str | None, confirm_email: str) -> None:
     if confirm_email.strip().lower() != user.email.lower():
         raise ProblemError(422, "confirmation-mismatch", "Type your e-mail address to confirm")
-    if user.password_hash and not verify_password(user.password_hash, password or ""):
+    if user.password_hash and not await asyncio.to_thread(
+        verify_password, user.password_hash, password or ""
+    ):
         raise ProblemError(403, "invalid-credentials", "Wrong password")
     await enable_system_access(ctx.db, reason="account deletion (own account)")
     try:

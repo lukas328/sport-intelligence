@@ -189,7 +189,7 @@ async def build(
     title = [org.name, f"{home} - {away}".strip(" -"), score]
     if player_id is not None:
         title.insert(1, names.get(player_id, ""))
-    ctx.require_jobs().enqueue(
+    await ctx.enqueue(
         "default",
         FUNC,
         f"reel-{reel.id}",

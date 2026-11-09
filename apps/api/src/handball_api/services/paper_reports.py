@@ -16,10 +16,10 @@ from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import Event, Match, RosterEntry, Season
+from handball_api.models import Event, Match, Season
 from handball_api.models.enums import MatchStatus
 from handball_api.schemas.matches import OpponentCreate
-from handball_api.services import audit
+from handball_api.services import audit, roster
 from handball_api.services.context import Ctx
 from handball_api.services.matches import create_opponent
 from handball_api.services.orgs import current_seasons, get_team
@@ -145,17 +145,7 @@ async def import_report(ctx: Ctx, team_id: uuid.UUID, data: bytes) -> dict[str, 
     )
     ctx.db.add(match)
     await ctx.db.flush()
-    numbers = {
-        n: pid
-        for n, pid in (
-            await ctx.db.execute(
-                select(RosterEntry.jersey_number, RosterEntry.player_id).where(
-                    RosterEntry.season_id == season.id, RosterEntry.active.is_(True)
-                )
-            )
-        ).all()
-        if n is not None
-    }
+    numbers = await roster.numbers(ctx, season.id, team.id)
 
     def ev(**kw: Any) -> Event:
         return Event(
