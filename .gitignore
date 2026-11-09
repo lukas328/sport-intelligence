@@ -49,3 +49,6 @@ test-results/
 *.tfstate.*
 terraform.tfvars
 backend.hcl
+
+# working copies of helper sessions
+.claude/worktrees/
