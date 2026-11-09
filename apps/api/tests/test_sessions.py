@@ -199,7 +199,7 @@ async def test_attendance_replies_and_records(
 
 
 async def test_focus_from_insight_with_followup(
-    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection, query_counter: list[str]
 ) -> None:
     api = make_api()
     ids = await seed(api, owner_conn)
@@ -221,9 +221,11 @@ async def test_focus_from_insight_with_followup(
         "playlist": True,
         "assignment": True,
     }
+    query_counter.clear()
     r = await api.post(f"/v1/orgs/{org}/matches/{newest}/focus", json=body)
     assert r.status_code == 201, r.text
     plan = r.json()
+    inserts = sum(q.lstrip().startswith("INSERT INTO clips") for q in query_counter)
     assert plan["metric"] and plan["session_id"] and plan["playlist_id"]
     # nobody in the seeded team has an account: no assignment, the rest is created
     assert plan["assignment_id"] is None
@@ -231,7 +233,7 @@ async def test_focus_from_insight_with_followup(
     items = await owner_conn.fetchval(
         "SELECT count(*) FROM playlist_items WHERE playlist_id = $1::uuid", plan["playlist_id"]
     )
-    assert items > 0
+    assert items > 1 and inserts == 1  # all clips in one statement, not one per clip
     session = (await api.get(f"/v1/orgs/{org}/sessions/{plan['session_id']}")).json()
     assert session["total_minutes"] == 45 and session["title"] == "Fokus Abschluss"
     bad = {**body, "params": {"zone": "nowhere"}}
@@ -253,7 +255,7 @@ async def test_focus_from_insight_with_followup(
 
 @pytest.mark.usefixtures("recorded")
 async def test_focus_playlist_skips_events_outside_the_video(
-    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection, query_counter: list[str]
 ) -> None:
     """A clip of five minutes from mid-half with the whole game's official report: the events
     before the video (negative time) and after it have no scene; a focus playlist used to cut a
@@ -267,9 +269,12 @@ async def test_focus_playlist_skips_events_outside_the_video(
     plans = 0
     for item in insights:
         body = {"insight_key": item["key"], "params": item["params"], "playlist": True}
+        query_counter.clear()
         r = await api.post(f"{base}/focus", json=body)
         assert r.status_code in (201, 422), (item["key"], r.status_code, r.text)
         plans += r.status_code == 201
+        # all clips of the playlist in one statement, not a round trip per clip
+        assert sum(q.lstrip().startswith("INSERT INTO clips") for q in query_counter) <= 1
     assert plans
     windows = await owner_conn.fetch(
         "SELECT start_ms, end_ms FROM clips WHERE match_id = $1::uuid", m["id"]
