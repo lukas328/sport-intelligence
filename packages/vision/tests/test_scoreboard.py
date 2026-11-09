@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import cv2
 import numpy as np
 import pytest
@@ -155,3 +157,75 @@ def test_reads_score_and_clock_from_a_video() -> None:
     (clock,) = summary["clock"]
     assert clock["start_ms"] == 0 and clock["start_clock_s"] == 120
     assert reader.calls < 40  # read on change, not on every frame
+
+
+def _readings(
+    clock: Callable[[int], int | None], end_s: int, every_s: int = 5
+) -> list[tuple[int, int]]:
+    """(t_ms, clock_s) every `every_s` seconds of video; `clock(t)` None: unreadable."""
+    return [(t * 1000, c) for t in range(0, end_s, every_s) if (c := clock(t)) is not None]
+
+
+def _match(t: int) -> int:
+    """Warm-up at 0:00 until 2:00, runs to 10:00, a timeout, runs to 15:40, stands after."""
+    if t < 120:
+        return 0
+    if t < 600:
+        return t - 120
+    if t < 660:
+        return 480
+    if t < 1000:
+        return 480 + t - 660
+    return 820
+
+
+@pytest.mark.parametrize("every_s", [1, 5, 15])
+def test_play_intervals_running_and_timeout(every_s: int) -> None:
+    # next to a standing clock the stop and restart follow from the clock values
+    assert sb.play_intervals(_readings(_match, 1200, every_s)) == [
+        (120_000, 600_000),
+        (660_000, 1_000_000),
+    ]
+
+
+def test_play_intervals_skip_single_misreads() -> None:
+    reads = _readings(_match, 1200)
+    reads[50] = (reads[50][0], reads[50][1] + 300)  # 1 read as 6 while running
+    reads[80] = (reads[80][0], reads[80][1] - 100)  # a reading that jumps back
+    reads[125] = (reads[125][0], 400)  # the standing clock misread once
+    assert sb.play_intervals(reads) == [(120_000, 600_000), (660_000, 1_000_000)]
+
+
+def test_play_intervals_clock_hidden_while_it_stands() -> None:
+    # some overlays only show the clock while it runs: the run time in the gap is split
+    hidden = sb.play_intervals(_readings(lambda t: None if 600 <= t < 660 else _match(t), 1200))
+    assert hidden[0] == (120_000, 597_500) and hidden[1] == (657_500, 1_000_000)
+    assert sb.in_play_ms(hidden) == 480_000 + 340_000
+
+
+@pytest.mark.parametrize("restart", [0, 1800])
+def test_play_intervals_half_time(restart: int) -> None:
+    """Second half from 30:00 on, or from 0:00 again; the break in between does not count."""
+
+    def clock(t: int) -> int:
+        if t < 1800:
+            return t
+        if t < 2400:
+            return 1800
+        if t < 2410:
+            return restart  # reset during the break
+        return restart + min(t - 2410, 1800)
+
+    assert sb.play_intervals(_readings(clock, 4300)) == [(0, 1_800_000), (2_410_000, 4_210_000)]
+
+
+def test_play_intervals_countdown_and_unknown_edges() -> None:
+    # a clock that counts down from 20:00; before and after it no readings at all
+    reads = [(t * 1000, 1200 - (t - 100)) for t in range(100, 1300, 5)]
+    assert sb.play_intervals(reads) == [(92_500, 1_302_500)]
+
+
+def test_play_intervals_without_a_running_clock() -> None:
+    assert sb.play_intervals([]) == []
+    assert sb.play_intervals([(t * 1000, 175) for t in range(0, 300, 5)]) == []
+    assert sb.play_intervals([(0, 100), (5_000, 900), (10_000, 33)]) == []  # noise
