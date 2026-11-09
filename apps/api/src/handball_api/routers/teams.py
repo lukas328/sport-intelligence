@@ -20,6 +20,7 @@ from handball_api.schemas.orgs import (
 from handball_api.schemas.roster import (
     ConsentCreate,
     ConsentOut,
+    ConsentOverview,
     ImportResult,
     PlayerStatusIn,
     PlayerStatusOut,
@@ -200,6 +201,18 @@ async def set_player_status(
 async def clear_player_status(team_id: uuid.UUID, player_id: uuid.UUID, scope: OrgDep) -> None:
     """Back to fit (no status)."""
     await roster_service.clear_status(scope.ctx, team_id, player_id)
+
+
+@router.get(
+    "/{team_id}/seasons/{season_id}/consents", response_model=ConsentOverview, tags=["consents"]
+)
+async def consent_overview(
+    team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep
+) -> ConsentOverview:
+    """The season roster's consents per purpose (active entries): `granted`, `refused` or
+    `missing`, since when and given by whom (the player, a parent or a guardian), with a count
+    per purpose in `summary`. For the staff who manage roster and consents."""
+    return await roster_service.consent_overview(scope.ctx, team_id, season_id)
 
 
 @router.get(

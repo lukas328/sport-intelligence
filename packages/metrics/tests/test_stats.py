@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from handball_metrics import Event, EventType, Side, compute_match_stats, expected_goal
-from handball_metrics.stats import situations, zone_of
+from handball_metrics.stats import LINE_KEYS, player_event_ids, situations, zone_of
 
 OWN, OPP = Side.OWN, Side.OPPONENT
 
@@ -231,3 +231,39 @@ def test_long_range_and_empty_goal_are_separate_zones() -> None:
         id="c", type=EventType.SHOT, side=OWN, shot_type="empty_net", shot_zone="long_range"
     )
     assert zone_of(old) == "empty_goal"
+
+
+def test_player_event_ids_match_the_figures() -> None:
+    ev = [
+        shot(1, OWN, "goal", 8, player_id="a", source="user_correction"),
+        # the same goal from the official report, without scorer: it takes over "a"
+        shot(2, OWN, "goal", 10, source="official_report"),
+        shot(3, OWN, "goal", 300, player_id="a", shot_type="penalty", assist_player_id="b"),
+        shot(4, OWN, "miss", 400, player_id="a"),
+        shot(5, OWN, "blocked", 450, player_id="a"),
+        shot(6, OWN, "save", 460, player_id="a", shot_type="penalty"),
+        Event(id="t1", type=EventType.TURNOVER, side=OWN, clock_s=500, player_id="a"),
+        Event(id="p1", type=EventType.SUSPENSION, side=OWN, clock_s=600, player_id="a"),
+        Event(id="y1", type=EventType.YELLOW, side=OWN, clock_s=200, player_id="a"),
+        shot(7, OPP, "save", 700, attributes={"goalkeeper_id": "gk"}),
+        shot(8, OPP, "goal", 800, attributes={"goalkeeper_id": "gk"}, shot_type="penalty"),
+    ]
+    stats = compute_match_stats(ev)
+    ids = player_event_ids(ev, "a")
+    assert set(ids) == set(LINE_KEYS)
+    assert ids["goals"] == ["s2", "s3"]  # in clock order, by the official goal's id
+    assert ids["shots"] == ["s2", "s3", "s4", "s6"] and ids["blocked"] == ["s5"]
+    assert ids["seven_m_shots"] == ["s3", "s6"] and ids["seven_m_goals"] == ["s3"]
+    assert ids["yellow_cards"] == ["y1"]
+    row = stats["players"]["p:a"]
+    for k in ("goals", "shots", "misses", "saved", "blocked", "turnovers", "suspensions"):
+        assert len(ids[k]) == row[k], k
+    assert len(ids["seven_m_goals"]) == row["seven_m_goals"]
+    assert len(ids["seven_m_shots"]) == row["seven_m_shots"]
+    assert player_event_ids(ev, "b")["assists"] == ["s3"]
+    assert stats["players"]["p:b"]["assists"] == 1
+    keeper = player_event_ids(ev, "gk")
+    gk = stats["goalkeepers"]["own:p:gk"]
+    assert keeper["saves"] == ["s7"] and keeper["goals_against"] == ["s8"]
+    assert len(keeper["faced"]) == gk["faced"] and len(keeper["saves"]) == gk["saves"]
+    assert len(keeper["seven_m_faced"]) == gk["seven_m"]["faced"] == 1

@@ -213,6 +213,11 @@ async def _get_consents(a: Api, w: World) -> Any:
     return await a.get(w.t(f"/players/{e['player_id']}/consents"))
 
 
+async def _get_season_line(a: Api, w: World) -> Any:
+    e = await w.new_entry()
+    return await a.get(w.t(f"/seasons/{w.season}/players/{e['player_id']}/line"))
+
+
 async def _post_consent(a: Api, w: World) -> Any:
     e = await w.new_entry()
     return await a.post(
@@ -418,6 +423,13 @@ ENDPOINTS += [
     ("PATCH roster entry", ORGANISE, _patch_entry),
     ("DELETE roster entry", ORGANISE, _delete_entry),
     ("GET consents", ORGANISE, _get_consents),
+    (
+        "GET consent overview",
+        ORGANISE,
+        lambda a, w: a.get(w.t(f"/seasons/{w.season}/consents")),
+    ),
+    # players read only their own line (the matrix player has no roster entry)
+    ("GET season line", TRAINING, _get_season_line),
     ("POST consent", ORGANISE, _post_consent),
     ("DELETE team", ADMIN, _delete_team),
 ]
