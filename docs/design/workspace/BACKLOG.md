@@ -125,6 +125,11 @@ Einstellungen (still cards, a full bar for "Teams 2 / 1"). Fixed after the revie
 - [ ] `no-video` errors on clip slides; nuLiga/HLA report links; referee kit; roster suggestion
   stats with the per-team `roster_stats` toggle.
 
+- [x] Shot candidates (`shot-candidates`): a "Würfe" tool beside the events. With a report most
+  moments come with its entry: Enter takes it (player and outcome pinned to the video); otherwise
+  1 / 2 for the team and the tagger's letters G, S, M, P, B for the outcome; X no shot, U undo.
+  Filter "Mit Matchbericht" first, the report counted against the video (`lib/shot-candidates.ts`).
+
 ## Later (features)
 
 - [x] Opponent profile: home or away per game (`is_home`), xG only with enough shots with a position

@@ -7,7 +7,7 @@ import type { Step, StepId } from "@/lib/match-workflow";
 import { cn } from "@/lib/utils";
 
 /** What the side of the video workspace shows: a work step or one of the tools. */
-export type Pane = StepId | "events" | "formations" | "notes" | "feedback";
+export type Pane = StepId | "events" | "shots" | "formations" | "notes" | "feedback";
 
 /** The order of work on a match video as one row of tabs: numbered steps with what is still open,
  * then the tools (events, defence systems, notes). One tab is open; the panel sits next to the

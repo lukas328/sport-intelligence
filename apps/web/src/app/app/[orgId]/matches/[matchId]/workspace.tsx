@@ -30,6 +30,7 @@ import { coverage, firstOpen, steps } from "@/lib/match-workflow";
 import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
 import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
+import { ShotCandidatesPanel, useShotCandidates } from "./shot-candidates";
 import { KickoffPanel } from "./kickoff-panel";
 import { MatchTimeline } from "./match-timeline";
 import { OfficialGoalsPanel, useOfficialGoals } from "./official-goals";
@@ -285,6 +286,7 @@ export function Workspace({
   // the order of work: court, throw-off, goals, players; the lists share the panels' caches
   const hasReport = match.report_extra?.official_report != null;
   const candidates = useGoalCandidates(orgId, match.id, staff);
+  const shotCandidates = useShotCandidates(orgId, match.id, staff);
   const official = useOfficialGoals(orgId, match.id, staff && hasReport);
   const durationMs = video.duration_s ? video.duration_s * 1000 : null;
   const rate = candidates.data?.default_rate ?? 2;
@@ -305,7 +307,11 @@ export function Workspace({
   });
   const loaded = !analysis.isLoading && !candidates.isLoading && !(hasReport && official.isLoading);
   // players watch and comment; the court, defence systems and events are the coach's workbench
-  const tools: Pane[] = staff ? ["events", ...(a?.status === "ready" ? (["formations"] as const) : []), "notes", "feedback"] : ["notes"];
+  // shots to review sit next to the events they become
+  const hasShots = (shotCandidates.data?.counts.total ?? 0) > 0;
+  const tools: Pane[] = staff
+    ? ["events", ...(hasShots ? (["shots"] as const) : []), ...(a?.status === "ready" ? (["formations"] as const) : []), "notes", "feedback"]
+    : ["notes"];
   // another tab asks for a pane (e.g. "Feedback geben" from the scenes tab)
   useEffect(() => {
     if (requestPane) setPane(requestPane.pane);
@@ -596,6 +602,9 @@ export function Workspace({
           <div className="flex min-h-0 flex-1 flex-col">
             <Tagger orgId={orgId} match={match} teamName={teamName} getTime={getTime} />
           </div>
+        )}
+        {shown === "shots" && staff && (
+          <ShotCandidatesPanel orgId={orgId} matchId={match.id} ownName={teamName} oppName={oppName} names={names} onClip={playClip} />
         )}
         {shown === "formations" && a?.status === "ready" && <FormationsCard formations={a.formations ?? []} onSeek={jump} />}
         {shown === "feedback" && staff && (
