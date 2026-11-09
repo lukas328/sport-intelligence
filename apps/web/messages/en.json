@@ -2617,5 +2617,19 @@
     "via_operator": "support",
     "line": "The club is not confirmed yet: sharing and public profiles are off until then.",
     "lineLink": "How to confirm"
+  },
+  "playerStatus": {
+    "injured": "Injured",
+    "absent": "Away",
+    "fit": "Fit",
+    "injuredUntil": "Injured until {date}",
+    "absentUntil": "Away until {date}",
+    "set": "Status",
+    "formFor": "Status of {name}",
+    "kind": "Status",
+    "until": "Until (inclusive)",
+    "note": "Note",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }

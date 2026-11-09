@@ -2617,5 +2617,19 @@
     "via_operator": "support",
     "line": "Le club n'est pas encore confirmé : le partage et les profils publics sont désactivés d'ici là.",
     "lineLink": "Comment faire"
+  },
+  "playerStatus": {
+    "injured": "Blessé·e",
+    "absent": "Absent·e",
+    "fit": "Apte",
+    "injuredUntil": "Blessé·e jusqu'au {date}",
+    "absentUntil": "Absent·e jusqu'au {date}",
+    "set": "Statut",
+    "formFor": "Statut de {name}",
+    "kind": "Statut",
+    "until": "Jusqu'au (inclus)",
+    "note": "Note",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
   }
 }

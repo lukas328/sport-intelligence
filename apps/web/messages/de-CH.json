@@ -2617,5 +2617,19 @@
     "via_operator": "Support",
     "line": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile sind bis dahin aus.",
     "lineLink": "So geht es"
+  },
+  "playerStatus": {
+    "injured": "Verletzt",
+    "absent": "Abwesend",
+    "fit": "Fit",
+    "injuredUntil": "Verletzt bis {date}",
+    "absentUntil": "Abwesend bis {date}",
+    "set": "Status",
+    "formFor": "Status von {name}",
+    "kind": "Status",
+    "until": "Bis und mit",
+    "note": "Notiz",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
   }
 }

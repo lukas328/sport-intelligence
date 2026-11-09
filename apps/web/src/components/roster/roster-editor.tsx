@@ -2,6 +2,7 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { StatusEditor, StatusLine } from "./player-status";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,8 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   const [notice, setNotice] = useState<string | null>(null);
   // phones: removing players is an edit mode, not a trash can on every row
   const [editing, setEditing] = useState(false);
+  // the player whose status (injured, absent) is being set
+  const [statusFor, setStatusFor] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const add = useMutation({
@@ -230,7 +233,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                   </h3>
                   <ul className="grid border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-10 xl:grid-cols-3">
                     {members.map((p) => (
-              <li key={p.id} className="group relative flex items-center gap-4 border-b border-foreground/15 py-3.5 pr-1" data-testid="roster-row">
+              <li key={p.id} className="group relative flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-foreground/15 py-3.5 pr-1" data-testid="roster-row">
                 <span className="w-14 shrink-0 text-center font-score text-[2.75rem] leading-none text-accent" aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
                   {p.jersey_number ?? "–"}
                 </span>
@@ -245,6 +248,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                       </span>
                     )}
                     {p.shooting_hand && <span>{t(`roster.hand_${p.shooting_hand as "left"}`)}</span>}
+                    <StatusLine status={p.status} />
                     {canEdit && !p.consent_complete && <span className="font-semibold text-foreground">{t("roster.consentMissing")}</span>}
                     {/* whether a player has an account is staff business */}
                     {canEdit &&
@@ -261,6 +265,18 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                 {canEdit && (
                   <Button
                     variant="quiet"
+                    size="sm"
+                    className={cn(statusFor !== p.player_id && !p.status && "lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100")}
+                    aria-expanded={statusFor === p.player_id}
+                    aria-label={`${t("playerStatus.set")}: ${p.first_name} ${p.last_name}`}
+                    onClick={() => setStatusFor(statusFor === p.player_id ? null : p.player_id)}
+                  >
+                    {t("playerStatus.set")}
+                  </Button>
+                )}
+                {canEdit && (
+                  <Button
+                    variant="quiet"
                     size="icon-sm"
                     className={cn(!editing && "max-lg:hidden", "lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100")}
                     aria-label={`${t("roster.remove")}: ${p.first_name} ${p.last_name}`}
@@ -272,6 +288,17 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                   >
                     <Trash2 aria-hidden />
                   </Button>
+                )}
+                {canEdit && statusFor === p.player_id && (
+                  <StatusEditor
+                    orgId={orgId}
+                    teamId={teamId}
+                    playerId={p.player_id}
+                    name={`${p.first_name} ${p.last_name}`}
+                    status={p.status}
+                    rosterKey={key}
+                    onDone={() => setStatusFor(null)}
+                  />
                 )}
               </li>
                     ))}

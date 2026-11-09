@@ -43,6 +43,24 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expect(page.getByTestId("match-attendance").getByLabel("Anwesenheit von Lea Beispiel")).toHaveValue("present");
   await expectAccessible(page);
 
+  // the squad: Lea is injured until next week, then fit again
+  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  const lea = page.getByTestId("roster-row").filter({ hasText: "Lea" });
+  await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
+  const form = page.getByRole("form", { name: "Status von Lea Beispiel" });
+  await form.getByLabel("Status").selectOption("injured");
+  const until = new Date(Date.now() + 7 * 86400_000);
+  await form.getByLabel(/Bis und mit/).fill(until.toISOString().slice(0, 10));
+  await form.getByLabel(/Notiz/).fill("Knöchel");
+  await form.getByRole("button", { name: "Speichern" }).click();
+  await expect(lea.getByTestId("player-status")).toContainText("Verletzt bis");
+  await expect(lea.getByTestId("player-status")).toContainText("Knöchel");
+  await expectAccessible(page);
+  await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
+  await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByLabel("Status").selectOption("fit");
+  await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByRole("button", { name: "Speichern" }).click();
+  await expect(lea.getByTestId("player-status")).toHaveCount(0);
+
   const link = await linkFromMail(page, playerEmail, "/invite/");
   const ctx = await browser.newContext();
   const player = await ctx.newPage();
