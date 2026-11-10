@@ -4,6 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AccountLine, UnlinkedAccounts, useTeamMembers } from "./account-link";
 import { ConsentOverview } from "./consent-overview";
+import { useOptionalShell } from "@/components/shell/context";
 import { StatusEditor, StatusLine } from "./player-status";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -65,6 +66,9 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   // the player whose status (injured, absent) is being set
   const [statusFor, setStatusFor] = useState<string | null>(null);
   const teamMembers = useTeamMembers(orgId, teamId, canEdit);
+  // the onboarding renders the squad outside the app shell: the editing coach is staff there
+  const shell = useOptionalShell();
+  const staffView = shell ? shell.mode === "staff" : canEdit;
   const formRef = useRef<HTMLFormElement>(null);
 
   const add = useMutation({
@@ -238,7 +242,9 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                 </p>
               );
             })()}
-            {canEdit && <ConsentOverview orgId={orgId} teamId={teamId} seasonId={seasonId} />}
+            {/* staff read it before filming (analysts too, read only); the API answers 403 for others
+                and the section stays hidden */}
+            {staffView && <ConsentOverview orgId={orgId} teamId={teamId} seasonId={seasonId} />}
             {GROUPS.map(([g, positions]) => {
               const members = entries.filter((p) => (g === "other" ? !ALL_POSITIONS.includes(p.main_position ?? "") : (positions as readonly string[]).includes(p.main_position ?? "")));
               if (members.length === 0) return null;
