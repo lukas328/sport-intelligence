@@ -116,14 +116,15 @@ async def test_consent_overview(
     assert noah_c["highlights_internal"]["state"] == "granted"
     assert noah_c["highlights_internal"]["since"].startswith("2026-10-01")
 
-    # who manages roster and consents reads it: coach, team manager; not analysts or players
+    # who manages roster and consents reads it (coach, team manager) and the analysts who film;
+    # not players
     manager = await _join(make_api, coach, ids, outbox, "tm@hc-test.ch", "team_manager")
     analyst = await _join(make_api, coach, ids, outbox, "an@hc-test.ch", "analyst")
     player = await _join(
         make_api, coach, ids, outbox, "lena@hc-test.ch", player_id=lena["player_id"]
     )
     assert (await manager.get(url)).status_code == 200
-    assert (await analyst.get(url)).status_code == 403
+    assert (await analyst.get(url)).status_code == 200
     assert (await player.get(url)).status_code == 403
 
     # an entry from the official data without account or consent: still listed for organisers
@@ -133,6 +134,9 @@ async def test_consent_overview(
         uuid.UUID(mia["player_id"]),
     )
     assert len((await manager.get(url)).json()["players"]) == 3
+    # analysts follow the roster rule for official names: the entry without consent is hidden
+    seen = [p["player_id"] for p in (await analyst.get(url)).json()["players"]]
+    assert mia["player_id"] not in seen and len(seen) == 2
 
     # unknown season, another club
     assert (await coach.get(f"{team}/seasons/{uuid.uuid4()}/consents")).status_code == 404

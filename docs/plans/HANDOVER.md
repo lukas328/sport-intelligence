@@ -29,8 +29,8 @@ Gemergt (alle bei grüner CI): #16 bis #32.
 - Azure: Pause bis 0 Replikas (#21, #27); Registrierung ohne 500 bei Mailfehler und Bootstrap ohne
   R2-Admin-Token (#31). Für Lukas: Migrations-Job neu starten, CORS-Regel aus dem Log
   (`bootstrap_manual_step`) im R2-Dashboard setzen, Postmark/SMTP einrichten.
-- Offene Entscheide für Lukas: Einwilligungs-Übersicht auch für Analysten? Verknüpfung über den
-  Kontonamen beim Annehmen einer Einladung behalten?
+- Entschieden (Lukas, 2026-11-10): Analysten sehen die Einwilligungs-Übersicht (offizielle Namen
+  ohne Einwilligung bleiben für sie verborgen); die Verknüpfung über den Kontonamen bleibt.
 
 ## Sitzungen und wer was macht
 | Sitzung | Wo | Aufgabe |
