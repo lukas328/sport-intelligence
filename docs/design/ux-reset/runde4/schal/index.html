@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="de-CH" data-club="rot">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schal · Handball AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@600;700;800&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Schal: the app is the club scarf. Name, score and the number of each insight are knitted
+   in the two club yarns; everything you read stays set in type.
+   spacing 4 8 12 16 24 32 48 64 · type 13 15 17 20 26 34 48 */
+:root{
+  --paper:#fff; --ink:#1c1b1f; --ink-2:#5b5860; --ink-3:#86828b; --rule:#e5e2e7; --soft:#f4f3f5;
+  --night:#18171b; --night-2:#242228; --night-3:#34313a; --on:#f4f2f6; --on-2:#bdb8c3;
+  --floor:#f4f3f5; --area:#e6e3e9; --line:#a29ea8; --them:#fff; --them-edge:var(--ink); --us:var(--yarn-a); --us-edge:var(--ink);
+  --opp:#1b6f8a; --mark:var(--yarn-a); --club:var(--yarn-a); --att:#e8a900; --att-soft:#e8a90026; --win:#1d7a46; --loss:#b3261e;
+  --disp:"Gabarito",system-ui,sans-serif; --text:"Figtree",system-ui,sans-serif;
+}
+html[data-club=rot]{--yarn-a:#d3122c;--yarn-b:#fff;--club-t:#b80f25;--edge:transparent}
+html[data-club=blau]{--yarn-a:#1f4fd6;--yarn-b:#fff;--club-t:#1f4fd6;--edge:transparent}
+html[data-club=gelb]{--yarn-a:#ffcc00;--yarn-b:#1c1b1f;--club-t:#1c1b1f;--edge:transparent}
+html[data-club=schwarz]{--yarn-a:#1c1b1f;--yarn-b:#fff;--club-t:#1c1b1f;--edge:transparent}
+html[data-club=weiss]{--yarn-a:#fff;--yarn-b:#1c1b1f;--club-t:#1c1b1f;--edge:#1c1b1f}
+html[data-club=gruen]{--yarn-a:#1b7a3e;--yarn-b:#fff;--club-t:#1b7a3e;--edge:transparent}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9e7ec;color:var(--ink);font:17px/1.5 var(--text)}
+a{color:inherit}
+.knit{display:block;width:100%;height:auto}
+/* report */
+.doc{max-width:1360px;margin:0 auto;padding:48px 24px 96px}
+.doc>header{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding-bottom:24px;border-bottom:2px solid var(--ink)}
+.doc .kick{font-weight:700;color:var(--ink-2)}
+.doc .title{width:360px;margin:12px 0 16px}
+.doc .lead{font:600 22px/1.4 var(--disp);max-width:780px}
+.sw{display:flex;gap:8px;flex-wrap:wrap;align-items:center;max-width:420px}
+.sw span{font-size:15px;color:var(--ink-2);width:100%}
+.sw button{min-height:44px;padding:0 12px;border:2px solid #d2cfd6;background:#fff;font:700 15px var(--text);display:flex;gap:8px;align-items:center;cursor:pointer}
+.sw button i{width:14px;height:14px;outline:1px solid #0004;display:block}
+.sw button[aria-pressed=true]{border-color:var(--ink)}
+.view{margin-top:56px}
+.view h2{font:800 30px/1 var(--disp);margin-bottom:16px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.view h2 small{font:400 16px var(--text);color:var(--ink-2)}
+.fit{position:relative;overflow:hidden}
+.frame{transform-origin:0 0;background:var(--paper);box-shadow:0 0 0 1px #0002}
+.frame.desk{width:1280px}.frame.phone{width:390px}
+.pair{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+/* ---------- shell ---------- */
+.app{display:flex;flex-direction:column;min-height:100%;background:var(--paper)}
+.rim{height:24px;flex:none}
+.rim .knit{height:24px}
+.bar{display:flex;align-items:center;gap:24px;height:72px;padding:0 48px;border-bottom:1px solid var(--rule)}
+.crest{width:36px;flex:none;display:block}
+.bar .club{display:flex;gap:12px;align-items:center}
+.bar .club b{display:block;font:800 18px/1.1 var(--disp)}.bar .club small{font-size:13px;color:var(--ink-2)}
+.nav{display:flex;gap:4px;height:100%;margin-left:24px}
+.nav a{display:flex;align-items:center;padding:0 14px;font:700 18px var(--disp);color:var(--ink-2);text-decoration:none;position:relative}
+.nav a.on{color:var(--ink)}
+.nav a.on::after,.tabs span.on::after,.tabbar span.on::before{content:"";position:absolute;left:10px;right:10px;bottom:0;height:8px;background:radial-gradient(circle at 25% 0,var(--yarn-a) 2.6px,transparent 3px) 0 0/8px 8px,radial-gradient(circle at 75% 0,var(--yarn-a) 2.6px,transparent 3px) 0 0/8px 8px;background-color:transparent}
+.bar .right{margin-left:auto;display:flex;align-items:center;gap:20px}
+.av{width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:700 14px var(--text)}
+/* buttons are patches: a stitched seam inside */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;font:700 17px var(--disp);background:var(--ink);color:#fff;text-decoration:none;white-space:nowrap;cursor:pointer;border:0;border-radius:6px;outline:2px dashed #ffffff8c;outline-offset:-6px}
+.btn.line{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink);outline-color:#1c1b1f66}
+.btn small{font:400 15px var(--text);opacity:.8}
+.lnk{font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;min-height:44px;display:inline-flex;align-items:center}
+.att{display:inline-flex;align-items:center;gap:8px}
+.att::before{content:"";width:12px;height:12px;background:var(--att);border-radius:3px}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.top,.tabbar{display:none}
+.is-phone .bar{display:none}
+.is-phone .top{display:flex;align-items:center;gap:12px;height:64px;padding:0 16px;border-bottom:1px solid var(--rule)}
+.top .crest{width:32px}
+.top .team{flex:1;font:800 17px/1.15 var(--disp)}.top .team small{display:block;font:400 13px var(--text);color:var(--ink-2)}
+.top .sq{width:44px;height:44px;display:grid;place-items:center}
+.top .btn{width:46px;padding:0}
+.is-phone .tabbar{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);margin-top:auto}
+.tabbar span{min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 13px var(--disp);color:var(--ink-2);position:relative}
+.tabbar span.on{color:var(--ink)}
+.tabbar span.on::before{top:0;bottom:auto;transform:scaleY(-1);left:24%;right:24%}
+.main{display:flex;flex-direction:column;gap:56px;padding:40px 48px 64px}
+.is-phone .main{padding:24px 16px 40px;gap:40px}
+/* ---------- the scarf ---------- */
+.scarf{position:relative;margin:0 20px;box-shadow:0 0 0 2px var(--edge)}
+.scarf::before,.scarf::after{content:"";position:absolute;top:6px;bottom:6px;width:22px;background:repeating-linear-gradient(180deg,var(--yarn-a) 0 7px,transparent 7px 11px)}
+.scarf::before{right:100%}.scarf::after{left:100%}
+html[data-club=weiss] .scarf::before,html[data-club=weiss] .scarf::after{background:repeating-linear-gradient(180deg,#fff 0 6px,#1c1b1f 6px 7px,transparent 7px 11px)}
+.scarf .body{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--yarn-a);position:relative}
+.scarf .body>.knit{grid-column:1/4;grid-row:1}
+.scarf .side{grid-row:1;z-index:1;padding:0 32px}
+.scarf .lab{grid-row:1;font:800 20px var(--disp)}
+.under{display:flex;justify-content:space-between;gap:24px;font-size:15px;color:var(--ink-2);margin:12px 20px 0}
+.under b{color:var(--ink);font-family:var(--disp);font-size:17px}
+.hero h1{font:800 56px/1.02 var(--disp);letter-spacing:-.8px;margin-top:8px;max-width:760px;text-wrap:balance}
+.meta{font-weight:700;color:var(--ink-2);font-size:15px}
+.hero .say{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end;margin-top:32px}
+/* ---------- the three things: knitted patches ---------- */
+.h{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.h b{font:800 34px/1 var(--disp)}
+.h span{font-size:15px;color:var(--ink-2)}
+.h .btn,.h .lnk{margin-left:auto}
+.sec{display:flex;flex-direction:column;gap:20px}
+.things{list-style:none;border-top:2px solid var(--ink)}
+.thing{display:grid;grid-template-columns:200px minmax(0,1fr) 200px auto;gap:28px;align-items:center;padding:24px 0;border-bottom:1px solid var(--rule)}
+.patch{display:inline-block;box-shadow:0 0 0 2px var(--edge);align-self:start}
+.patch .knit{height:auto}
+.thing .rk{font:800 15px var(--disp);color:var(--ink-2);display:block;margin-bottom:6px}
+.thing .tx p{font:700 25px/1.2 var(--disp)}
+.thing .tx small{display:block;font-size:16px;color:var(--ink-2);margin-top:6px}
+.thing .tx small.best{color:var(--win);font-weight:700}
+.thing .tx .drill{display:block;font-size:15px;color:var(--ink-2);margin-top:6px}
+.thing .tx .drill a{color:var(--ink);font-weight:700}
+.thing svg.mf{width:200px;height:124px;display:block}
+.thing .go{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.thing .go small{font-size:14px;color:var(--ink-2)}
+.actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.is-desk .things.mid .thing{grid-template-columns:150px minmax(0,1fr) 176px;row-gap:12px}
+.is-desk .things.mid svg.mf{width:176px;height:109px}
+.is-desk .things.mid .go{grid-column:3;flex-direction:row;align-items:center;gap:10px}
+/* ---------- lists ---------- */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:56px;align-items:start}
+.cols>div,.cols>aside{display:flex;flex-direction:column;gap:48px;min-width:0}
+.games{list-style:none;border-top:2px solid var(--ink)}
+.game{display:grid;grid-template-columns:64px 112px minmax(0,1fr) 116px;gap:20px;align-items:center;padding:16px 0;border-bottom:1px solid var(--rule)}
+.game .d{font-size:13px;line-height:1.25;color:var(--ink-2)}.game .d b{display:block;font:800 20px var(--disp);color:var(--ink)}
+.game svg.mf{width:112px;height:70px;display:block}
+.game .nov{width:112px;height:70px;display:grid;place-items:center;font-size:13px;color:var(--ink-2);border:2px dashed #cbc7cf;border-radius:6px}
+.game h4{font:800 22px/1.15 var(--disp)}
+.game p{font-size:15px;color:var(--ink-2)}
+.game p .lnk{min-height:0;color:var(--ink)}
+.prog{margin-top:8px;max-width:260px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.prog .count{width:180px;height:auto}
+.game .r{text-align:right}
+.game .r b{font:800 30px/1 var(--disp);font-variant-numeric:tabular-nums}
+.game .r small{display:block;font:700 14px var(--text);margin-top:6px}
+.game .r.w small{color:var(--win)}.game .r.l small{color:var(--loss)}
+.next .label{font:700 15px var(--text);color:var(--ink-2)}
+.next h3{font:800 40px/1 var(--disp);margin:6px 0 12px}
+.next .oppscarf{--yarn-a:#2f6b4f;--yarn-b:#fff}
+.facts{list-style:none;border-top:2px solid var(--ink);margin-top:16px}
+.facts li{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;min-height:56px;border-bottom:1px solid var(--rule);font-size:16px}
+.facts b{font:800 20px var(--disp)}
+.facts .lnk{min-height:0;font-size:15px}
+.tab{width:100%;border-collapse:collapse;font-size:16px}
+.tab th{font:700 13px var(--text);color:var(--ink-2);text-align:right;padding:8px 4px;border-bottom:2px solid var(--ink)}
+.tab td{padding:12px 4px;text-align:right;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.tab th:first-child,.tab td:first-child{text-align:left}
+.tab tr.mine td{font-weight:700}
+.tab tr.mine td:first-child{display:flex;align-items:center;gap:8px}
+.tab tr.mine .knit{width:28px;box-shadow:0 0 0 1px var(--edge)}
+/* ---------- match head ---------- */
+.mscarf .body{grid-template-columns:1fr auto 1fr}
+.minfo{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:start;margin:14px 20px 0}
+.minfo>div:last-child{text-align:right}
+.minfo b{display:block;font:800 26px/1.1 var(--disp)}
+.minfo small,.minfo p{font-size:15px;color:var(--ink-2)}
+.minfo p{text-align:center}
+.lamps{display:inline-flex;gap:4px;margin-left:6px;vertical-align:middle}
+.lamps i{width:10px;height:10px;border-radius:2px;box-shadow:inset 0 0 0 2px var(--ink-2)}.lamps i.on{background:var(--ink-2)}
+.tabs{display:flex;gap:8px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.tabs span{min-height:52px;display:flex;align-items:center;padding:0 16px;font:700 19px var(--disp);color:var(--ink-2);position:relative}
+.tabs span.on{color:var(--ink)}
+.tabs .todo{margin-left:auto;color:var(--ink);gap:8px}
+.tabs .todo::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--att)}
+.src{font-size:15px;color:var(--ink-2);margin-top:12px}
+.src .lnk{min-height:0;color:var(--ink)}
+.flowk{display:grid;grid-template-columns:36px 1fr;gap:8px}
+.flowk .y{position:relative;font-size:13px;color:var(--ink-2);text-align:right}
+.flowk .y span{position:absolute;right:0;bottom:calc(var(--v) * var(--sh) - 9px)}
+.flowk{--sh:24px}
+.is-phone .flowk{--sh:18px}
+.flowk .cols12{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;align-items:end;border-bottom:2px solid var(--ink);height:calc(9 * var(--sh) + 8px);position:relative;background:linear-gradient(var(--rule),var(--rule)) 0 calc(100% - 4 * var(--sh))/100% 1px no-repeat,linear-gradient(var(--rule),var(--rule)) 0 calc(100% - 8 * var(--sh))/100% 1px no-repeat}
+.flowk .c{display:flex;flex-direction:column-reverse;gap:0;align-items:center;position:relative;height:100%;justify-content:flex-start}
+.flowk .c svg{width:30px;height:var(--sh);display:block}
+.flowk .c.ph{background:var(--att-soft);box-shadow:inset 0 0 0 2px var(--att)}
+.flowk .c em{position:absolute;bottom:calc(var(--n) * var(--sh) + 4px);font:800 15px var(--disp);font-style:normal}
+.flowk .x{grid-column:2;display:grid;grid-template-columns:repeat(12,1fr);gap:10px;font-size:13px;color:var(--ink-2);text-align:center}
+.flowk .note{grid-column:2;font-size:14px;color:var(--ink-2)}
+.tele{font:400 18px/1.65 var(--text)}
+.tele b{font-weight:700}
+svg.court{width:100%;display:block}
+.zn{font:800 15px var(--disp);fill:var(--ink)}.zn.on{fill:var(--yarn-b)}
+.legend{display:flex;gap:20px;font-size:14px;color:var(--ink-2);margin-top:8px}
+.legend span{display:flex;align-items:center;gap:8px}
+.kpi{list-style:none;border-top:2px solid var(--ink)}
+.kpi li{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;min-height:72px;border-bottom:1px solid var(--rule);padding:8px 0}
+.kpi li b{display:block;font:700 17px var(--disp)}
+.kpi li span{font-size:14px;color:var(--ink-2)}
+.kpi strong{font:800 40px/1 var(--disp);font-variant-numeric:tabular-nums}
+.kpi strong small{font-size:20px}
+.kpi li.mark strong{box-shadow:inset 0 -6px 0 var(--att)}
+/* ---------- video ---------- */
+.night{background:var(--night);color:var(--on)}
+.night .bar{border-color:var(--night-3)}
+.night .nav a{color:var(--on-2)}.night .nav a.on{color:var(--on)}.night .bar .club small{color:var(--on-2)}
+html[data-club=schwarz] .night .nav a.on::after,html[data-club=schwarz] .night .tabs span.on::after{filter:invert(1)}
+.night .main{background:var(--night)}
+.night .tabs{border-color:var(--night-3)}
+.night .tabs span{color:var(--on-2)}.night .tabs span.on,.night .tabs .todo{color:var(--on)}
+.night .h span{color:var(--on-2)}
+.night .btn{background:var(--on);color:var(--night);outline-color:#1c1b1f55}
+.night .btn.line{background:transparent;color:var(--on);box-shadow:inset 0 0 0 2px var(--on-2);outline-color:#ffffff55}
+.mini{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.mini strong{font:800 40px/1 var(--disp);font-variant-numeric:tabular-nums}
+.mini span{font:700 18px var(--disp)}.mini small{font-size:15px;color:var(--ink-2)}
+.night .mini small{color:var(--on-2)}
+.vid{position:relative}
+.vid svg{display:block;width:100%}
+.vid .clock{position:absolute;right:16px;top:14px;background:#000a;color:#fff;font:800 26px/1 var(--disp);padding:8px 12px;border-radius:6px;font-variant-numeric:tabular-nums}
+.vid .clock small{display:block;font:400 12px var(--text);opacity:.85;margin-top:2px}
+.vid .cap{position:absolute;left:16px;bottom:16px;background:#000b;color:#fff;padding:10px 14px;border-radius:6px;font-weight:700}
+.tl{background:var(--night-2);padding:16px 20px 12px;--tl-us:var(--yarn-a);--tl-them:#f4f2f6;--tl-axis:#6a6670;--tl-head:#fff}
+html[data-club=schwarz] .tl{--tl-us:#9a96a0}
+.tl svg{width:100%;height:84px;display:block}
+.tl .ax{display:flex;justify-content:space-between;font-size:13px;color:var(--on-2);margin-top:4px}
+.key{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--on-2);margin-top:10px}
+.key span{display:flex;gap:8px;align-items:center}.key i{width:12px;height:12px;display:block;border-radius:2px}
+.tools{display:flex;gap:12px;flex-wrap:wrap;padding-top:20px}
+.scn{list-style:none;border-top:2px solid var(--on)}
+.scn li{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--night-3);min-height:56px}
+.scn li b{font:800 19px var(--disp);font-variant-numeric:tabular-nums}
+.scn li span{font-size:15px;line-height:1.35}.scn li small{display:block;color:var(--on-2);font-size:13px}
+.scn li.on{background:var(--night-3);margin:0 -12px;padding:12px;border-radius:6px}
+.scn li.on small{color:var(--on)}
+.note p{font:700 20px/1.35 var(--disp)}
+.note small{font-size:14px;color:var(--on-2)}
+/* ---------- numbers ---------- */
+.sheet{width:100%;border-collapse:collapse;font-size:16px}
+.sheet th{font:700 13px var(--text);color:var(--ink-2);text-align:right;padding:10px;border-bottom:2px solid var(--ink);white-space:nowrap}
+.sheet td{height:50px;padding:0 10px;text-align:right;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.sheet th:first-child,.sheet td:first-child{text-align:left}
+.sheet td:first-child{font-weight:700}
+.sheet td:first-child em{font:800 18px var(--disp);font-style:normal;display:inline-block;width:32px;color:var(--ink-2)}
+.sheet td a{text-decoration:underline;text-decoration-color:#c9c5cd;text-decoration-thickness:2px;text-underline-offset:3px}
+.sheet .ok{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ink-2)}
+.sheet .ok svg{width:18px;height:18px;fill:none;stroke:var(--win);stroke-width:3}
+.sheet .open{font-size:13px;color:var(--ink-2)}
+.small{font-size:15px;color:var(--ink-2)}.small .lnk{min-height:0;color:var(--ink)}
+.goal{display:grid;grid-template-columns:repeat(3,1fr);border:8px solid var(--ink);border-bottom:0}
+.goal span{height:68px;display:grid;place-items:center;font:800 26px var(--disp);border:1px solid var(--rule)}
+.goal span.hi{background:var(--ink);color:#fff}
+.phase{list-style:none;border-top:2px solid var(--ink)}
+.phase li{display:grid;grid-template-columns:1fr auto;gap:8px 12px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.phase li b{font-weight:700}
+.phase li strong{font:800 24px/1 var(--disp)}
+.phase .count{grid-column:1/3;height:14px;width:auto;max-width:100%}
+/* ---------- phone ---------- */
+.is-phone .scarf{margin:0 12px}
+.is-phone .scarf::before,.is-phone .scarf::after{width:12px}
+.is-phone .scarf .side{padding:0 12px}
+.is-phone .hero h1{font-size:36px}
+.is-phone .hero .say{grid-template-columns:1fr;margin-top:24px;gap:16px}
+.is-phone .under{margin:10px 12px 0;font-size:13px}
+.is-phone .h b{font-size:28px}
+.is-phone .thing{grid-template-columns:1fr;gap:12px 16px;padding:20px 0}
+.is-phone .thing .tx p{font-size:20px}
+.is-phone .thing svg.mf,.is-phone .thing .go{grid-column:1}
+.is-phone .thing svg.mf{width:220px;height:136px}
+.is-phone .thing .go{flex-direction:row;align-items:center;gap:12px}
+.is-phone .cols{grid-template-columns:1fr}
+.is-phone .game{grid-template-columns:52px minmax(0,1fr) 84px;gap:12px}
+.is-phone .game>div:nth-child(2){display:none}
+.is-phone .game h4{font-size:19px}
+.is-phone .game .r b{font-size:24px}
+.is-phone .next h3{font-size:32px}
+.is-phone .minfo{grid-template-columns:1fr 1fr;margin:10px 12px 0}
+.is-phone .minfo p{grid-column:1/3;grid-row:2;text-align:left}
+.is-phone .minfo b{font-size:20px}
+.is-phone .tabs span{font-size:17px;padding:0 10px}
+.is-phone .kpi strong{font-size:32px}
+.is-phone .flowk .cols12{gap:4px}
+.is-phone .flowk .c svg{width:22px}
+.is-phone .flowk .c em{font-size:13px}
+.is-phone .flowk .x{gap:4px;font-size:11px}
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <div>
+      <p class="kick">Runde 4 · Richtung B · verspielt und gezeichnet</p>
+      <div class="title" data-knit="SCHAL" data-padx="2"></div>
+      <p class="lead">Die App ist der Vereinsschal. Name, Resultat und die Zahl jedes Dings sind gestrickt, in den zwei Garnen des Vereins. Alles, was man lesen muss, bleibt gesetzt.</p>
+    </div>
+    <div class="sw" role="group" aria-label="Vereinsfarbe">
+      <span>Vereinsfarbe</span>
+      <button data-c="rot"><i style="background:#d3122c"></i>Rot</button>
+      <button data-c="blau"><i style="background:#1f4fd6"></i>Blau</button>
+      <button data-c="gelb"><i style="background:#ffcc00"></i>Gelb</button>
+      <button data-c="schwarz"><i style="background:#1c1b1f"></i>Schwarz</button>
+      <button data-c="weiss"><i style="background:#fff"></i>Weiss</button>
+      <button data-c="gruen"><i style="background:#1b7a3e"></i>Grün</button>
+    </div>
+  </header>
+
+  <!-- ================= START DESKTOP ================= -->
+  <section class="view">
+    <h2>Start <small>Desktop, 1280 px · der Schal mit dem Resultat ist der Kopf</small></h2>
+    <div class="fit"><div class="frame desk" id="start-desk"><div class="app" data-on="spiele">
+      <div class="main">
+        <div class="hero">
+          <div class="scarf" data-scarf="start-desk"></div>
+          <div class="under"><span><b>HC Zürichsee 26</b> · Heim · Halbzeit 13:9</span><span><b>TSV Thalwil 18</b> · Rang 5</span></div>
+          <div class="say"><div><p class="meta">Samstag gegen TSV Thalwil · Analyse fertig seit Sonntag, 9:40</p><h1>Gewonnen. Und drei Dinge zum Mitnehmen.</h1></div>
+            <div class="actions"><a class="btn">Spiel öffnen</a><a class="btn line">Fürs Team zusammenstellen</a></div></div>
+        </div>
+        <div class="sec">
+          <div class="h"><b>Drei Dinge</b><span>aus Video und Spielbericht</span><a class="lnk att">3 Fragen offen, 1 Minute</a></div>
+          <ol class="things" data-things></ol>
+        </div>
+        <div class="cols">
+          <div class="sec"><div class="h"><b>Alle Spiele</b><span>2 von 5 ohne Video</span></div><ul class="games" data-games></ul></div>
+          <aside>
+            <div class="next" data-next></div>
+            <div class="sec"><div class="h"><b>Saison</b><span>3. Liga, Gruppe 2</span></div><div data-table></div></div>
+          </aside>
+        </div>
+      </div>
+    </div></div></div>
+  </section>
+
+  <!-- ================= PHONES ================= -->
+  <section class="view">
+    <h2>Start und Spiel <small>Handy, 390 px</small></h2>
+    <div class="pair">
+      <div class="fit" style="width:390px"><div class="frame phone" id="start-phone"><div class="app" data-on="spiele">
+        <div class="main">
+          <div class="hero">
+            <div class="scarf" data-scarf="start-phone"></div>
+            <div class="under"><span><b>Zürichsee 26</b></span><span><b>Thalwil 18</b></span></div>
+            <div class="say"><div><p class="meta">Samstag gegen TSV Thalwil · Analyse fertig seit Sonntag, 9:40</p><h1>Gewonnen. Und drei Dinge zum Mitnehmen.</h1></div>
+              <div class="actions"><a class="btn" style="flex:1">Spiel öffnen</a><a class="btn line" style="flex:1">Fürs Team</a></div></div>
+          </div>
+          <div class="sec"><div class="h"><b>Drei Dinge</b><a class="lnk att">3 Fragen offen, 1 Minute</a></div><ol class="things" data-things></ol></div>
+          <div class="sec"><div class="h"><b>Alle Spiele</b><span>2 von 5 ohne Video</span></div><ul class="games" data-games></ul></div>
+          <div class="next" data-next></div>
+          <div class="sec"><div class="h"><b>Saison</b><span>3. Liga, Gruppe 2</span></div><div data-table></div></div>
+        </div>
+      </div></div></div>
+      <div class="fit" style="width:390px"><div class="frame phone" id="spiel-phone"><div class="app" data-on="spiele">
+        <div class="main">
+          <div><div class="scarf mscarf" data-scarf="spiel-phone"></div><div class="minfo" data-minfo="ph"></div></div>
+          <div><div class="tabs"><span class="on">Spiel</span><span>Video</span><span>Zahlen</span><span class="todo">Prüfen 3</span></div>
+            <p class="src">Quellen: Video (60 von 60 Minuten) · Spielbericht von handball.ch · 21 von 24 Würfen von dir bestätigt</p></div>
+          <div class="sec"><div class="h"><b>Drei Dinge</b></div><ol class="things" data-things data-drill></ol>
+            <div class="actions"><a class="btn" style="width:100%">Fürs Team zusammenstellen</a><a class="lnk">Highlights teilen</a><a class="lnk">Als Bild für den Chat</a></div></div>
+          <div class="sec"><div class="h"><b>Verlauf</b><span>Tordifferenz, eine Masche pro Tor</span></div><div class="flowk" data-flowk></div></div>
+          <div class="sec"><div class="h"><b>Gegentore</b><span>woher sie kamen</span></div><svg class="court zonen"></svg></div>
+          <ul class="kpi" data-kpi></ul>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- ================= SPIEL DESKTOP ================= -->
+  <section class="view">
+    <h2>Spiel <small>Desktop, Tab «Spiel» · der Verlauf ist gestrickt, eine Masche pro Tor Vorsprung</small></h2>
+    <div class="fit"><div class="frame desk" id="spiel-desk"><div class="app" data-on="spiele">
+      <div class="main">
+        <div><div class="scarf mscarf" data-scarf="spiel-desk"></div><div class="minfo" data-minfo="desk"></div></div>
+        <div style="margin-top:-24px"><div class="tabs"><span class="on">Spiel</span><span>Video</span><span>Zahlen</span><span class="todo">Prüfen 3</span></div>
+          <p class="src">Quellen: Video (60 von 60 Minuten) · Spielbericht von handball.ch · 21 von 24 Würfen von dir bestätigt · <a class="lnk">Wie gerechnet?</a></p></div>
+        <div class="cols">
+          <div>
+            <div class="sec"><div class="h"><b>Drei Dinge</b></div><ol class="things mid" data-things data-drill></ol>
+              <div class="actions"><a class="btn">Fürs Team zusammenstellen</a><a class="lnk">Highlights teilen</a><a class="lnk">Als Bild für den Chat</a></div></div>
+            <div class="sec"><div class="h"><b>Verlauf</b><span>Tordifferenz alle fünf Minuten · die markierte Phase öffnet das Video</span></div><div class="flowk" data-flowk role="img" aria-label="Tordifferenz alle fünf Minuten: plus 1, 1, 2, 3, 3, 4, 4, 3, 3, 5, 7, 8. Zwischen der 38. und 44. Minute drei Ballverluste."></div></div>
+            <div class="sec"><div class="h"><b>Telegramm</b><span>aus dem Spielbericht</span><a class="btn line">Kopieren</a></div>
+              <p class="tele"><b>HC Zürichsee gegen TSV Thalwil 26:18 (13:9).</b> Halle Seefeld. Torfolge: 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18. Strafen: 3-mal 2 Minuten gegen Zürichsee, 4-mal 2 Minuten gegen Thalwil. Beste Werfer: Brunner 7, Graf 5/2, Schmid 4. Im Tor: Meier, 11 Paraden.</p></div>
+          </div>
+          <aside>
+            <div class="sec"><div class="h"><b>Gegentore</b><span>woher sie kamen</span></div><svg class="court zonen" role="img" aria-label="Gegentore nach Position: rechts aussen 9, Rückraum links 3, Rückraum Mitte 2, links aussen 2, Rückraum rechts 1, Kreis 1"></svg></div>
+            <div class="sec"><div class="h"><b>Eigene Würfe</b><span>26 von 45</span></div><svg class="court shotmap" role="img" aria-label="Wurfbild: 26 Tore aus 45 Würfen"></svg><div class="legend" data-legend></div></div>
+            <ul class="kpi" data-kpi></ul>
+          </aside>
+        </div>
+      </div>
+    </div></div></div>
+  </section>
+
+  <!-- ================= VIDEO ================= -->
+  <section class="view">
+    <h2>Video <small>Desktop · Ruhe: nur der Schalrand oben, sonst das Bild</small></h2>
+    <div class="fit"><div class="frame desk" id="video-desk"><div class="app night" data-on="spiele" data-rim="1">
+      <div class="main" style="gap:24px">
+        <div><div class="mini" data-mini></div>
+          <div class="tabs" style="margin-top:12px"><span>Spiel</span><span class="on">Video</span><span>Zahlen</span><span class="todo">Prüfen 3</span></div></div>
+        <div class="cols" style="grid-template-columns:minmax(0,1fr) 330px;gap:40px">
+          <div style="gap:0">
+            <div class="vid"><svg class="videobild"></svg>
+              <div class="clock" aria-label="Spielzeit 41 Minuten 12">41:12<small>2. Halbzeit · 17:15</small></div>
+              <p class="cap">Gegenstoss Thalwil nach Ballverlust · 2. Halbzeit</p></div>
+            <div class="tl"><svg class="zeitleiste" role="img" aria-label="Zeitleiste: Tore beider Teams über 60 Minuten, Abwehrsystem als Band, markierte Phase von der 38. bis zur 44. Minute"></svg>
+              <div class="ax"><span>Anwurf</span><span>Halbzeit</span><span>Schluss</span></div>
+              <div class="key"><span><i style="background:var(--yarn-a);box-shadow:0 0 0 1px #fff6"></i>Tor HC Zürichsee</span><span><i style="background:#f4f2f6"></i>Tor Thalwil</span><span><i style="background:#3f6d8f"></i>Abwehr 6:0</span><span><i style="background:#86b5d6"></i>Abwehr 5:1</span><span><i style="background:transparent;box-shadow:inset 0 0 0 2px var(--att)"></i>Phase aus Punkt 2</span></div></div>
+            <div class="tools"><a class="btn">Szene merken</a><a class="btn line">Zeichnen</a><a class="btn line">Spielerin hervorheben</a><a class="btn line">Teilen</a></div>
+          </div>
+          <aside style="gap:40px">
+            <div class="sec"><div class="h"><b style="font-size:26px">38. bis 44. Minute</b><span>5 Szenen</span></div>
+              <ul class="scn"><li><b>38:40</b><span>Ballverlust Graf, Fehlpass<small>Gegenstoss, Tor Thalwil</small></span></li><li><b>39:55</b><span>Tor Thalwil über rechts aussen</span></li><li class="on"><b>41:05</b><span>Ballverlust Schmid, Schrittfehler<small>läuft gerade</small></span></li><li><b>42:30</b><span>Parade Meier, Wurf vom Kreis</span></li><li><b>43:48</b><span>Ballverlust Brunner, Stürmerfoul<small>Gegenstoss, Tor Thalwil</small></span></li></ul></div>
+            <div class="sec"><div class="h"><b style="font-size:26px">Notizen</b></div><div class="note"><p>41:05 Rückzug! Nur zwei laufen zurück.</p><small>Du · nur für dich, bis du die Szene teilst</small></div></div>
+          </aside>
+        </div>
+      </div>
+    </div></div></div>
+  </section>
+
+  <!-- ================= ZAHLEN ================= -->
+  <section class="view">
+    <h2>Zahlen <small>Desktop · Ruhe: Tabellen; nur die Phasen zählen in Maschen</small></h2>
+    <div class="fit"><div class="frame desk" id="zahlen-desk"><div class="app" data-on="spiele" data-rim="1">
+      <div class="main" style="gap:32px">
+        <div><div class="mini" data-mini></div>
+          <div class="tabs" style="margin-top:12px"><span>Spiel</span><span>Video</span><span class="on">Zahlen</span><span class="todo">Prüfen 3</span></div>
+          <p class="src">Jede Zahl öffnet ihre Szenen. Ein Haken heisst: von dir bestätigt.</p></div>
+        <div class="cols">
+          <div>
+            <div class="sec"><div class="h"><b>Feld</b><span>nach Toren</span></div>
+              <table class="sheet"><thead><tr><th>Nr. Name</th><th>Tore</th><th>Würfe</th><th>Quote</th><th>7 m</th><th>Fehler</th><th>2 Min</th><th>Zuordnung</th></tr></thead><tbody data-feld></tbody></table>
+              <p class="small">Vier weitere ohne Wurf. <a class="lnk">Alle zeigen</a></p></div>
+            <div class="sec"><div class="h"><b>Tor</b></div>
+              <table class="sheet"><thead><tr><th>Nr. Name</th><th>Paraden</th><th>Würfe aufs Tor</th><th>Quote</th><th>7 m</th><th>Saison</th><th>Zuordnung</th></tr></thead><tbody data-tor></tbody></table></div>
+          </div>
+          <aside>
+            <div class="sec"><div class="h"><b>Wohin die Gegner trafen</b><span>18 Tore</span></div>
+              <div class="goal" role="img" aria-label="18 Gegentore nach Torecke: oben links 3, oben Mitte 1, oben rechts 2, Mitte links 1, Mitte 0, Mitte rechts 2, unten links 5, unten Mitte 1, unten rechts 3"><span>3</span><span>1</span><span>2</span><span>1</span><span>0</span><span>2</span><span class="hi">5</span><span>1</span><span>3</span></div>
+              <p class="small">Unten links aus Sicht der Werferin. <a class="lnk">5 Szenen</a></p></div>
+            <div class="sec"><div class="h"><b>Phasen</b><span>eine Masche pro Tor, wir zuerst</span></div><ul class="phase" data-phase></ul></div>
+          </aside>
+        </div>
+      </div>
+    </div></div></div>
+  </section>
+</div>
+
+<script>
+/* Strick: letters, numbers and patterns made of stitches, like the jacquard of a club scarf.
+   One pixel is one stitch: a small V of two loops. Two yarns per piece: a (ground) and b (motif). */
+var STRICK = (function () {
+  var F = {
+    "0": "01110 10001 10011 10101 11001 10001 01110", "1": "00100 01100 00100 00100 00100 00100 01110",
+    "2": "01110 10001 00001 00110 01000 10000 11111", "3": "11110 00001 00001 01110 00001 00001 11110",
+    "4": "00010 00110 01010 10010 11111 00010 00010", "5": "11111 10000 11110 00001 00001 10001 01110",
+    "6": "00110 01000 10000 11110 10001 10001 01110", "7": "11111 00001 00010 00100 01000 01000 01000",
+    "8": "01110 10001 10001 01110 10001 10001 01110", "9": "01110 10001 10001 01111 00001 00010 01100",
+    ":": "0 0 1 0 1 0 0", " ": "00 00 00 00 00 00 00", ".": "0 0 0 0 0 0 1", "-": "000 000 000 111 000 000 000", "+": "000 000 010 111 010 000 000",
+    "/": "001 001 010 010 010 100 100", "%": "11001 11010 00010 00100 01000 01011 10011",
+    "*": "00000 01110 11011 10101 11011 01110 00000",
+    A: "01110 10001 10001 11111 10001 10001 10001", B: "11110 10001 10001 11110 10001 10001 11110", C: "01110 10001 10000 10000 10000 10001 01110",
+    D: "11110 10001 10001 10001 10001 10001 11110", E: "11111 10000 10000 11110 10000 10000 11111", F: "11111 10000 10000 11110 10000 10000 10000",
+    G: "01110 10001 10000 10111 10001 10001 01111", H: "10001 10001 10001 11111 10001 10001 10001", I: "111 010 010 010 010 010 111",
+    J: "00111 00010 00010 00010 00010 10010 01100", K: "10001 10010 10100 11000 10100 10010 10001", L: "10000 10000 10000 10000 10000 10000 11111",
+    M: "10001 11011 10101 10101 10001 10001 10001", N: "10001 10001 11001 10101 10011 10001 10001", O: "01110 10001 10001 10001 10001 10001 01110",
+    P: "11110 10001 10001 11110 10000 10000 10000", R: "11110 10001 10001 11110 10100 10010 10001", S: "01111 10000 10000 01110 00001 00001 11110",
+    T: "11111 00100 00100 00100 00100 00100 00100", U: "10001 10001 10001 10001 10001 10001 01110", V: "10001 10001 10001 10001 10001 01010 00100",
+    W: "10001 10001 10001 10101 10101 10101 01010", Z: "11111 00001 00010 00100 01000 10000 11111", Y: "10001 10001 01010 00100 00100 00100 00100",
+    "Ü": "01010 00000 10001 10001 10001 10001 01110", "Ä": "01010 00000 01110 10001 11111 10001 10001", "Ö": "01010 00000 01110 10001 10001 10001 01110"
+  };
+  function grid(text, gap) {
+    var rows = [[], [], [], [], [], [], []], chars = String(text).toUpperCase().split("");
+    chars.forEach(function (ch, i) {
+      var g = (F[ch] || F[" "]).split(" ");
+      for (var r = 0; r < 7; r++) { for (var c = 0; c < g[r].length; c++) rows[r].push(g[r][c] === "1"); if (i < chars.length - 1) for (var k = 0; k < (gap == null ? 1 : gap); k++) rows[r].push(false); }
+    });
+    return rows;
+  }
+  function st(x, y, col) {
+    return '<path d="M' + (x + 1) + " " + (y + 0.6) + "c1.3 0 4 3.8 4 9c-2.7-.5-4.7-4.2-4-9Z" + "M" + (x + 9) + " " + (y + 0.6) + "c-1.3 0-4 3.8-4 9c2.7-.5 4.7-4.2 4-9Z" + '" fill="' + col + '"/>';
+  }
+  function piece(w, h, cell, o, label) {
+    var s = '<svg class="knit" viewBox="0 0 ' + w * 10 + " " + h * 10 + '" ' + (label ? 'role="img" aria-label="' + label + '"' : 'aria-hidden="true"') + ' preserveAspectRatio="' + (o.stretch ? "none" : "xMidYMid meet") + '"' + (o.cell ? ' style="width:' + w * o.cell + 'px"' : "") + ">";
+    s += '<rect width="' + w * 10 + '" height="' + h * 10 + '" fill="' + (o.a || "var(--yarn-a)") + '"/><rect width="' + w * 10 + '" height="' + h * 10 + '" fill="#000" opacity="' + (o.shade == null ? 0.22 : o.shade) + '"/>';
+    for (var r = 0; r < h; r++) for (var c = 0; c < w; c++) s += st(c * 10, r * 10, cell(r, c) ? (o.b || "var(--yarn-b)") : (o.a || "var(--yarn-a)"));
+    return s + "</svg>";
+  }
+  /* knitted text on its own ground */
+  function knit(text, o) {
+    o = o || {};
+    var g = grid(text, o.gap), px = o.padx == null ? 2 : o.padx, py = o.pady == null ? 2 : o.pady, w = g[0].length + px * 2, h = 7 + py * 2;
+    return piece(w, h, function (r, c) { return r >= py && r < py + 7 && c >= px && c < px + g[0].length && g[r - py][c - px]; }, o, o.label || text);
+  }
+  /* a band: one pattern letter per row. a = ground, b = motif, x = checker, k = chevron top, v = chevron bottom, d = dots */
+  var ROW = {
+    a: function () { return 0; }, b: function () { return 1; }, x: function (c, r) { return (c + r) % 2; },
+    k: function (c) { return c % 4 === 0; }, v: function (c) { return c % 4 === 1 || c % 4 === 3; }, d: function (c) { return c % 6 === 3; }
+  };
+  function band(rows, n, o) { o = o || {}; return piece(n, rows.length, function (r, c) { return ROW[rows[r]](c, r); }, o); }
+  /* a band with a repeated name, the way scarves carry it: NAME * NAME * NAME */
+  function nameBand(text, n, o) {
+    o = o || {}; var unit = grid(text + " * ", 1), L = unit[0].length;
+    return piece(n, 11, function (r, c) { if (r < 2 || r > 8) return r === 0 || r === 10; return unit[r - 2][(c + (o.offset || 0)) % L]; }, o, o.label || text);
+  }
+  /* counting in stitches: n stitches of yarn b, then m of a muted yarn, one row */
+  function count(n, m, o) {
+    o = o || {}; var s = '<svg class="knit count" viewBox="0 0 ' + (n + m) * 10 + ' 10" aria-hidden="true">';
+    for (var i = 0; i < n + m; i++) s += st(i * 10, 0, i < n ? (o.b || "var(--yarn-a)") : (o.m || "#cfcbd2"));
+    return s + "</svg>";
+  }
+  return { knit: knit, band: band, nameBand: nameBand, count: count, grid: grid, st: st, piece: piece };
+})();
+</script>
+<script>
+/* Court, charts and demo data shared by both directions. Colours come from CSS variables:
+   --floor --area --line (court), --us --us-edge --them --them-edge (players), --ink, --mark. */
+var FELD = (function () {
+  function half() {
+    return '<rect x="-2" y="-2" width="204" height="130" fill="var(--floor)"/><path d="M40 0A60 60 0 0 0 85 60h30A60 60 0 0 0 160 0z" fill="var(--area)"/>'
+      + '<g fill="none" stroke="var(--line)" stroke-width="1.6"><path d="M40 0A60 60 0 0 0 85 60h30A60 60 0 0 0 160 0"/><path d="M10 0A90 90 0 0 0 85 90h30A90 90 0 0 0 190 0" stroke-dasharray="6 4.5"/><path d="M95 70h10"/></g>'
+      + '<rect x="84" y="-1" width="32" height="5" fill="var(--ink)"/>';
+  }
+  function us(p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6.4" fill="var(--us)" stroke="var(--us-edge)" stroke-width="1.6"/>'; }
+  function them(p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="5.6" fill="var(--them)" stroke="var(--them-edge)" stroke-width="1.6"/>'; }
+  function arrow(a, dash) {
+    var dx = a[2] - a[0], dy = a[3] - a[1], l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, x = a[2], y = a[3];
+    var s = '<path d="M' + a[0] + " " + a[1] + "L" + x + " " + y + '" stroke="var(--ink)" stroke-width="' + (dash ? 1.8 : 2.4) + '" fill="none" stroke-linecap="round"' + (dash ? ' stroke-dasharray="1.5 4.5"' : "") + "/>";
+    if (!dash) s += '<path d="M' + (x - ux * 9 - uy * 5) + " " + (y - uy * 9 + ux * 5) + "L" + x + " " + y + "L" + (x - ux * 9 + uy * 5) + " " + (y - uy * 9 - ux * 5) + 'z" fill="var(--ink)"/>';
+    return s;
+  }
+  var D60 = [[34, 46], [60, 62], [88, 70], [112, 70], [140, 62], [166, 46]], A = [[100, 104], [52, 92], [150, 92], [14, 26], [187, 22], [104, 64]];
+  var SC = {
+    ra: { u: D60, t: A, pass: [150, 92, 187, 22], shot: [187, 22, 113, 6] },
+    tv: { u: [[156, 104], [118, 116], [58, 108]], t: [[100, 50], [66, 90], [38, 62]], pass: [66, 90, 100, 50], shot: [100, 50, 93, 6] },
+    kr: { u: [[100, 104], [52, 92], [150, 92], [14, 26], [187, 22], [97, 64]], t: D60, pass: [52, 92, 97, 64], shot: [97, 64, 90, 6] },
+    d60: { u: D60, t: A }
+  };
+  var SHOTS = [[14, 24, 1], [24, 36, 0], [186, 20, 1], [190, 30, 1], [178, 38, 0], [100, 66, 1], [92, 64, 1], [108, 68, 1], [116, 66, 0], [58, 86, 1], [50, 94, 0], [68, 98, 1], [100, 100, 1], [94, 106, 0], [108, 102, 1], [142, 90, 1], [150, 96, 0], [134, 100, 1], [100, 73, 1], [85, 71, 1], [154, 82, 0], [42, 72, 1], [100, 34, 1], [113, 37, 1], [89, 38, 0], [164, 62, 0]];
+  var ZONES = [[16, 30, 2], [50, 96, 3], [100, 108, 2], [150, 96, 1], [174, 36, 9], [100, 72, 1]];
+  function courts(root) {
+    root.querySelectorAll("svg.mf[data-mf]").forEach(function (s) {
+      var c = SC[s.dataset.mf], h = half();
+      if (c.pass) h += arrow(c.pass, 1);
+      c.t.forEach(function (p) { h += them(p); }); c.u.forEach(function (p) { h += us(p); });
+      if (c.shot) h += arrow(c.shot, 0);
+      if (s.classList.contains("ghost")) h = '<g opacity=".38">' + h + "</g>";
+      s.setAttribute("viewBox", "0 0 200 124"); s.setAttribute("aria-hidden", "true"); s.innerHTML = h;
+    });
+    root.querySelectorAll("svg.shotmap").forEach(function (s) {
+      var h = half();
+      SHOTS.forEach(function (d) { h += d[2] ? '<circle cx="' + d[0] + '" cy="' + d[1] + '" r="4.6" fill="var(--us)" stroke="var(--us-edge)" stroke-width="1.3"/>' : '<path d="M' + (d[0] - 3.4) + " " + (d[1] - 3.4) + "l6.8 6.8M" + (d[0] + 3.4) + " " + (d[1] - 3.4) + 'l-6.8 6.8" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/>'; });
+      s.setAttribute("viewBox", "0 0 200 124"); s.innerHTML = h;
+    });
+    root.querySelectorAll("svg.zonen").forEach(function (s) {
+      var h = half();
+      ZONES.forEach(function (d) {
+        var r = Math.max(11, 6.6 * Math.sqrt(d[2])), top = d[2] === 9;
+        h += '<circle cx="' + d[0] + '" cy="' + d[1] + '" r="' + r.toFixed(1) + '" fill="' + (top ? "var(--mark)" : "var(--paper)") + '" stroke="var(--ink)" stroke-width="1.6"/><text x="' + d[0] + '" y="' + (d[1] + 5.5) + '" text-anchor="middle" class="zn' + (top ? " on" : "") + '">' + d[2] + "</text>";
+      });
+      s.setAttribute("viewBox", "0 0 200 124"); s.innerHTML = h;
+    });
+  }
+  /* the hall seen from the gallery, as a stand-in for a video frame */
+  function videobild(s, o) {
+    o = o || {};
+    function P(x, y) { var t = y / 20, sy = 92 + 268 * Math.pow(t, 1.15), hw = 230 + 60 * t; return [+(322 + (x - 28) / 12 * hw).toFixed(1), +sy.toFixed(1)]; }
+    function line(pts) { return "M" + pts.map(function (p) { return P(p[0], p[1]).join(" "); }).join("L"); }
+    function dee(r) { var pts = []; for (var i = 0; i <= 20; i++) { var t = Math.PI / 2 * i / 20; pts.push([40 - r * Math.sin(t), 8.5 - r * Math.cos(t)]); } pts.push([40 - r, 11.5]); for (var j = 0; j <= 20; j++) { var u = Math.PI / 2 * j / 20; pts.push([40 - r * Math.cos(u), 11.5 + r * Math.sin(u)]); } return pts; }
+    var h = '<rect width="640" height="360" fill="#121214"/><rect width="640" height="92" fill="#1d1c20"/>';
+    for (var i = 0; i < 32; i++) h += '<rect x="' + (i * 20 + 4) + '" y="' + (36 + (i * 7) % 18) + '" width="11" height="18" fill="#2b2a30"/>';
+    var c = [[0, 0], [40, 0], [40, 20], [0, 20]].map(function (p) { return P(p[0], p[1]).join(" "); });
+    h += '<path d="M' + c.join("L") + 'Z" fill="' + (o.floor || "#c49a63") + '"/>';
+    for (var k = 0; k < 40; k++) { var a = P(k, 0), b = P(k, 20); h += '<path d="M' + a[0] + " " + a[1] + "L" + b[0] + " " + b[1] + '" stroke="#0000001c" stroke-width="1"/>'; }
+    h += '<path d="' + line(dee(6)) + 'Z" fill="' + (o.area || "#4f7fa3") + '"/>';
+    h += '<g fill="none" stroke="#fff" stroke-width="2.2"><path d="M' + c.join("L") + 'Z"/><path d="' + line([[20, 0], [20, 20]]) + '"/><path d="' + line(dee(6)) + '"/><path d="' + line(dee(9)) + '" stroke-dasharray="9 7"/></g>';
+    var g1 = P(40, 8.5), g2 = P(40, 11.5); h += '<path d="M' + g1[0] + " " + g1[1] + "L" + (g1[0] + 10) + " " + (g1[1] - 30) + "L" + (g2[0] + 12) + " " + (g2[1] - 34) + "L" + g2[0] + " " + g2[1] + '" fill="none" stroke="#fff" stroke-width="3"/>';
+    var PL = [[34.6, 4.2, 1], [33.2, 7.4, 1], [32.8, 10.8, 1], [33.4, 14, 1], [35, 16.4, 1], [24, 9.4, 1], [26.5, 7, 0], [21, 13.5, 0], [29.5, 3, 0], [37.6, 2.2, 0], [37.4, 18.6, 0], [22.6, 11.8, 0], [39.5, 10, 1]];
+    PL.forEach(function (p) { var q = P(p[0], p[1]), sc = 0.55 + p[1] / 22; h += '<ellipse cx="' + q[0] + '" cy="' + (q[1] + 2) + '" rx="' + 9 * sc + '" ry="' + 3 * sc + '" fill="#0006"/><rect x="' + (q[0] - 5 * sc) + '" y="' + (q[1] - 28 * sc) + '" width="' + 10 * sc + '" height="' + 28 * sc + '" rx="' + 4 * sc + '" fill="' + (p[2] ? "var(--club)" : "#f2f2f2") + '" stroke="#121214" stroke-width="1.2"/>'; });
+    if (o.ring) { var r = P(37.6, 2.2); h += '<circle cx="' + r[0] + '" cy="' + (r[1] - 12) + '" r="20" fill="none" stroke="' + o.ring + '" stroke-width="3"/>'; }
+    s.setAttribute("viewBox", "0 0 640 360"); s.setAttribute("aria-hidden", "true"); s.innerHTML = h;
+  }
+  /* goal difference over 60 minutes */
+  var FLOW = [[0, 0], [5, 1], [10, 1], [15, 2], [20, 3], [25, 3], [30, 4], [35, 4], [38, 4], [41, 3], [44, 3], [50, 5], [55, 7], [60, 8]];
+  var TL = { us: [2, 5, 9, 11, 14, 17, 19, 22, 24, 26, 27, 29, 29.5, 32, 35, 36, 46, 48, 50, 51, 53, 54, 56, 57, 58, 59.5], them: [3, 7, 12, 16, 20, 23, 25, 28, 30, 39, 40, 41, 42, 43, 44, 49, 55, 58.5] };
+  function zeitleiste(s) {
+    var W = 1000; function x(m) { return m / 60 * W; }
+    var c = '<rect x="' + x(38) + '" y="0" width="' + (x(44) - x(38)) + '" height="66" fill="var(--att-soft)" stroke="var(--att)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>';
+    c += '<rect x="0" y="56" width="' + x(21) + '" height="10" fill="#3f6d8f"/><rect x="' + x(21) + '" y="56" width="' + (x(33) - x(21)) + '" height="10" fill="#86b5d6"/><rect x="' + x(33) + '" y="56" width="' + (W - x(33)) + '" height="10" fill="#3f6d8f"/>';
+    c += '<line x1="0" x2="' + W + '" y1="28" y2="28" stroke="var(--tl-axis)"/><line x1="' + x(30) + '" x2="' + x(30) + '" y1="0" y2="52" stroke="var(--tl-axis)" stroke-dasharray="2 4"/>';
+    TL.us.forEach(function (m) { c += '<rect x="' + (x(m) - 2.5) + '" y="6" width="5" height="22" fill="var(--tl-us)"/>'; });
+    TL.them.forEach(function (m) { c += '<rect x="' + (x(m) - 2.5) + '" y="28" width="5" height="18" fill="var(--tl-them)"/>'; });
+    c += '<line x1="' + x(41.2) + '" x2="' + x(41.2) + '" y1="-6" y2="70" stroke="var(--tl-head)" stroke-width="3"/><circle cx="' + x(41.2) + '" cy="-8" r="6" fill="var(--tl-head)"/>';
+    s.setAttribute("viewBox", "-8 -16 1016 88"); s.setAttribute("preserveAspectRatio", "none"); s.innerHTML = c;
+  }
+  var GAMES = [
+    { d: "Sa", dt: "31.10.", w: "auswärts", o: "BSV Stäfa", p: "33 Szenen · 2 Dinge · Ballverluste im Aufbau", mf: "tv", r: "19:26", res: "l", best: "graf", bn: "Elias, 6 Tore" },
+    { d: "Sa", dt: "24.10.", w: "Heim", o: "HC Meilen", p: "Analyse läuft, noch etwa 25 Minuten", run: 62, r: "23:22", res: "w" },
+    { d: "Sa", dt: "17.10.", w: "auswärts", o: "SG Horgen", nov: 1, r: "29:19", res: "w" },
+    { d: "Sa", dt: "10.10.", w: "Heim", o: "TV Wädenswil", nov: 1, r: "24:27", res: "l" }];
+  var FELDROWS = [["brunner", 7, 10, "70 %", "", 2, "", 1], ["graf", 5, 9, "56 %", "2/2", 3, 1, 1], ["schmid", 4, 8, "50 %", "", 2, "", 1], ["meier", 4, 5, "80 %", "", 1, 1, 0], ["roth", 3, 6, "50 %", "", 1, "", 1], ["baumann", 2, 4, "50 %", "", 1, 1, 0], ["rbrunner", 1, 3, "33 %", "", 1, "", 0]];
+  /* fit frames to the window; club switch with buttons and ?club= */
+  function frames() {
+    document.querySelectorAll(".frame").forEach(function (f) { f.querySelector(".app").classList.add(f.classList.contains("desk") ? "is-desk" : "is-phone"); });
+    function fit() { document.querySelectorAll(".fit").forEach(function (f) { var fr = f.firstElementChild, w = fr.offsetWidth, k = Math.min(1, f.clientWidth / w); fr.style.transform = "scale(" + k + ")"; f.style.height = Math.ceil(fr.offsetHeight * k) + "px"; }); }
+    fit(); addEventListener("resize", fit); addEventListener("load", fit); if (document.fonts) document.fonts.ready.then(fit);
+    var root = document.documentElement, q = (location.search.match(/club=(\w+)/) || [])[1];
+    function set(c) { root.dataset.club = c; document.querySelectorAll(".sw button").forEach(function (o) { o.setAttribute("aria-pressed", o.dataset.c === c ? "true" : "false"); }); setTimeout(fit, 30); }
+    set(q || root.dataset.club || "rot");
+    document.querySelectorAll(".sw button").forEach(function (b) { b.addEventListener("click", function () { set(b.dataset.c); }); });
+  }
+  return { courts: courts, videobild: videobild, zeitleiste: zeitleiste, FLOW: FLOW, GAMES: GAMES, FELDROWS: FELDROWS, frames: frames, half: half };
+})();
+</script>
+<script>
+(function(){
+"use strict";
+var K=STRICK;
+var ICON={plus:'<path d="M12 5v14M5 12h14"/>',suche:'<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/>',spiele:'<path d="M4 6h16v12H4zM12 6v12"/>',szenen:'<path d="M4 5h16v14H4z"/><path d="M10 9v6l5-3z" fill="currentColor"/>',saison:'<path d="M4 20h16M7 16v-4M11 16V7M15 16v-6M19 16V5"/>',team:'<circle cx="9" cy="9" r="3"/><circle cx="16" cy="10" r="2.5"/><path d="M3 19c.6-3 3-5 6-5s5.4 2 6 5M14 15c3 0 5 1.5 6 4"/>'};
+function ic(n){return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+ICON[n]+'</svg>';}
+var NAV=[["spiele","Spiele"],["szenen","Szenen"],["saison","Saison"],["team","Team"]];
+/* the crest is a knitted patch with the initials */
+function crest(){return '<span class="crest" style="box-shadow:0 0 0 1.5px var(--edge)">'+K.knit('Z',{padx:1,pady:1,label:'HC Zürichsee'})+'</span>';}
+function chrome(app){var on=app.dataset.on;
+  var b='<header class="bar"><div class="club">'+crest()+'<div><b>HC Zürichsee</b><small>Herren 1 · 3. Liga</small></div></div><nav class="nav">';
+  NAV.forEach(function(n){b+='<a class="'+(n[0]===on?'on':'')+'">'+n[1]+'</a>';});
+  b+='</nav><div class="right"><a class="lnk">'+ic('suche')+'&nbsp;Suchen</a><a class="btn">'+ic('plus')+'Video hochladen</a><span class="av" aria-label="Demo Trainerin">DT</span></div></header>';
+  var t='<header class="top">'+crest()+'<span class="team">Herren 1<small>HC Zürichsee</small></span><span class="sq" role="button" aria-label="Suchen">'+ic('suche')+'</span><a class="btn" aria-label="Video hochladen">'+ic('plus')+'</a></header>';
+  var tb='<nav class="tabbar">';NAV.forEach(function(n){tb+='<span class="'+(n[0]===on?'on':'')+'">'+ic(n[0])+n[1]+'</span>';});tb+='</nav>';
+  var rim=app.dataset.rim?'<div class="rim">'+K.band(['k','v'],256,{stretch:1})+'</div>':'';
+  app.insertAdjacentHTML('afterbegin',rim+b+t);app.insertAdjacentHTML('beforeend',tb);}
+/* the scarf: pattern band, the knitted score, the name band */
+function scarf(el){var k=el.dataset.scarf,ph=k.indexOf('phone')>-1,start=k.indexOf('start')>-1;
+  var txt=start?'26:18':(ph?'26:18':'HCZ 26:18 TSV'),cols=K.grid(txt,1)[0].length,n=start?(ph?37:62):(ph?37:80);
+  var h=K.band(['b','k','v'],n,{});
+  h+='<div class="body">'+K.knit(txt,{padx:Math.floor((n-cols)/2),pady:2,label:start||ph?'26 zu 18':'HC Zürichsee 26, TSV Thalwil 18'})+'</div>';
+  h+=K.band(['v','k','b'],n,{});
+  el.innerHTML=h;}
+var THINGS=[{mf:"ra",k:"9/18",t:"9 von 18 Gegentoren über rechts aussen",s:"Saison bisher: jedes dritte über diese Seite",n:"9 Szenen",l:"2:40",dr:"Abwehr gegen Flügel"},
+ {mf:"tv",k:"6",t:"Nach Ballverlust 6 Gegenstosstore",s:"3 davon zwischen der 38. und 44. Minute",n:"6 Szenen",l:"1:55",dr:"Rückzug in die 5:1"},
+ {mf:"kr",k:"7/8",t:"Kreisanspiel: 7 von 8 verwertet",s:"bester Wert der Saison",best:1,n:"8 Szenen",l:"2:10"}];
+function things(el){var drill=el.hasAttribute('data-drill'),ph=!!el.closest('.phone'),h='';THINGS.forEach(function(t,i){
+  h+='<li class="thing"><div><span class="rk">'+(i+1)+'.</span><div class="patch">'+K.knit(t.k,{padx:2,pady:2,cell:ph||el.classList.contains('mid')?6:8,label:t.k.replace('/',' von ')})+'</div></div><div class="tx"><p>'+t.t+'</p><small'+(t.best?' class="best"':'')+'>'+t.s+'</small>'+(drill&&t.dr?'<span class="drill">Dazu üben: <a>'+t.dr+'</a></span>':'')+'</div><svg class="mf" data-mf="'+t.mf+'"></svg><div class="go"><a class="btn line">'+t.n+'</a><small>'+t.l+' Minuten</small></div></li>';});el.innerHTML=h;
+}
+function games(el){var h='';FELD.GAMES.forEach(function(g){
+  var pic=g.mf?'<svg class="mf" data-mf="'+g.mf+'"></svg>':g.run?'<svg class="mf ghost" data-mf="d60"></svg>':'<span class="nov">kein Video</span>';
+  var p=g.nov?'Spielbericht da · <a class="lnk">Video hochladen</a>':g.p;
+  h+='<li class="game"><div class="d">'+g.d+'<b>'+g.dt+'</b>'+g.w+'</div><div>'+pic+'</div><div><h4>'+g.o+'</h4><p>'+p+'</p>'+(g.run?'<div class="prog" role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100">'+K.count(12,8,{b:'var(--ink)'})+'<span>62 %</span></div>':'')+'</div><div class="r '+g.res+'"><b>'+g.r+'</b><small>'+(g.res==='w'?'Sieg':'Niederlage')+'</small></div></li>';});el.innerHTML=h;}
+function next(el){el.innerHTML='<p class="label">Nächster Gegner · Sonntag, 17:30</p><h3>bei HSG Rheinau</h3><div class="oppscarf" style="width:100%">'+K.nameBand('RHEINAU',46,{label:'Schal von HSG Rheinau'})+'</div><ul class="facts"><li><b>3.</b><span>Rang 3, zuletzt drei Siege</span><span></span></li><li><b>24:27</b><span>Hinspiel verloren</span><a class="lnk">12 Szenen</a></li><li><b>Nr. 9</b><span>wirft ein Drittel ihrer Tore</span><span></span></li></ul>';}
+function table(el){el.innerHTML='<table class="tab"><thead><tr><th>Rang</th><th>Sp.</th><th>Diff.</th><th>Pkt.</th></tr></thead><tbody><tr><td>1 TV Talwiese</td><td>6</td><td>+21</td><td>10</td></tr><tr class="mine"><td>'+K.band(['k','v'],8,{})+'2 HC Zürichsee</td><td>6</td><td>+14</td><td>9</td></tr><tr><td>3 HSG Rheinau</td><td>6</td><td>+9</td><td>8</td></tr></tbody></table>';}
+function minfo(el){var ph=el.dataset.minfo==='ph';
+  el.innerHTML='<div><b>'+(ph?'Zürichsee':'HC Zürichsee')+'</b><small>Heim · Time-outs <span class="lamps" title="2 von 3 genommen"><i class="on"></i><i class="on"></i><i></i></span></small></div><p>Halbzeit 13:9 · Sa., 7. Nov. · Halle Seefeld</p><div><b>'+(ph?'Thalwil':'TSV Thalwil')+'</b><small>Rang 5 · Time-outs <span class="lamps" title="3 von 3 genommen"><i class="on"></i><i class="on"></i><i class="on"></i></span></small></div>';}
+function mini(el){el.innerHTML='<strong>26:18</strong><span>HC Zürichsee gegen TSV Thalwil</span><small>Sa., 7. Nov. · Halle Seefeld</small>';}
+function kpi(el){el.innerHTML='<li><div><b>Wurfquote</b><span>26 von 45</span></div><strong>58<small> %</small></strong></li><li><div><b>Paraden</b><span>11 von 29</span></div><strong>38<small> %</small></strong></li><li class="mark"><div><b>Ballverluste</b><span>Saison 9,4 · von dir markiert</span></div><strong>11</strong></li>';}
+/* Verlauf in stitches: one stitch per goal ahead, every five minutes */
+function flowk(el){var V=[[5,1],[10,1],[15,2],[20,3],[25,3],[30,4],[35,4],[40,3],[45,3],[50,5],[55,7],[60,8]];
+  var y='<div class="y"><span style="--v:8">+8</span><span style="--v:4">+4</span><span style="--v:0">0</span></div><div class="cols12">';
+  V.forEach(function(v){var ph=v[0]===40||v[0]===45,s='';for(var i=0;i<v[1];i++)s+='<svg viewBox="0 0 10 10" aria-hidden="true">'+K.st(0,0,'var(--yarn-a)')+'</svg>';
+    y+='<div class="c'+(ph?' ph':'')+'" style="--n:'+v[1]+'">'+s+(v[0]===60?'<em>+8</em>':'')+'</div>';});
+  y+='</div><div class="x">'+V.map(function(v){return '<span>'+(v[0]===30?'HZ':v[0]+'.')+'</span>';}).join('')+'</div><p class="note">Gelb: 38. bis 44. Minute, drei Ballverluste. Am Schluss acht Tore vorn.</p>';
+  el.innerHTML=y;}
+var OK='<span class="ok"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10.5l4.5 4.5L17 5"/></svg>bestätigt</span>';
+var NAMES={brunner:['4','Levin Brunner'],graf:['10','Elias Graf'],schmid:['11','Jonas Schmid'],meier:['8','Nico Meier'],roth:['7','Luca Roth'],baumann:['13','Jana Baumann'],rbrunner:['6','Rafael Brunner']};
+function feld(el){var h='';FELD.FELDROWS.forEach(function(r){var p=NAMES[r[0]];function a(v){return v===''?'':'<a>'+v+'</a>';}
+  h+='<tr><td><em>'+p[0]+'</em>'+p[1]+'</td><td>'+a(r[1])+'</td><td>'+a(r[2])+'</td><td>'+r[3]+'</td><td>'+a(r[4])+'</td><td>'+a(r[5])+'</td><td>'+a(r[6])+'</td><td>'+(r[7]?OK:'<span class="open">offen</span>')+'</td></tr>';});el.innerHTML=h;}
+function phase(el){var L=[['6 gegen 6',19,14],['Überzahl, 8 Minuten',5,1],['Unterzahl, 6 Minuten',2,3],['Gegenstösse',4,6]];
+  el.innerHTML=L.map(function(x){return '<li><b>'+x[0]+'</b><strong>'+x[1]+':'+x[2]+'</strong>'+K.count(x[1],x[2],{})+'</li>';}).join('');
+  el.querySelectorAll('.count').forEach(function(c,i){c.style.width=((L[i][1]+L[i][2])*14)+'px';});}
+document.querySelectorAll('[data-knit]').forEach(function(e){e.innerHTML=K.knit(e.dataset.knit,{padx:+e.dataset.padx,pady:2});});
+document.querySelectorAll('[data-scarf]').forEach(scarf);
+document.querySelectorAll('[data-things]').forEach(things);
+document.querySelectorAll('[data-games]').forEach(games);
+document.querySelectorAll('[data-next]').forEach(next);
+document.querySelectorAll('[data-table]').forEach(table);
+document.querySelectorAll('[data-minfo]').forEach(minfo);
+document.querySelectorAll('[data-mini]').forEach(mini);
+document.querySelectorAll('[data-kpi]').forEach(kpi);
+document.querySelectorAll('[data-flowk]').forEach(flowk);
+document.querySelectorAll('[data-feld]').forEach(feld);
+document.querySelectorAll('[data-phase]').forEach(phase);
+document.querySelectorAll('[data-tor]').forEach(function(e){e.innerHTML='<tr><td><em>1</em>Mia Meier</td><td><a>11</a></td><td><a>29</a></td><td>38 %</td><td><a>2/3</a></td><td>33 %</td><td>'+OK+'</td></tr>';});
+document.querySelectorAll('[data-legend]').forEach(function(e){e.innerHTML='<span><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" fill="var(--yarn-a)" stroke="var(--ink)" stroke-width="1.3"/></svg>Tor</span><span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3 3 11" stroke="var(--ink)" stroke-width="2"/></svg>kein Tor</span>';});
+document.querySelectorAll('.app').forEach(chrome);
+FELD.courts(document);
+document.querySelectorAll('svg.videobild').forEach(function(s){FELD.videobild(s,{ring:'#fff'});});
+document.querySelectorAll('svg.zeitleiste').forEach(FELD.zeitleiste);
+FELD.frames();
+})();
+</script>
+</body>
+</html>
