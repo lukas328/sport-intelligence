@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap" rel="stylesheet">
+<style>
+/* ===== Spur: every match leaves a print, and the print is its face ===== */
+:root {
+  --club: #d3202e; --club-ink: #fff; --club-line: #d3202e; --club-on-light: #c11d2a;
+  --opp: #0f7a6c; --opp-line: #0f7a6c; --opp-on-dark: #39c7b3;
+  --ground: #efebe3; --ground-2: #e6e1d6; --ink: #141518; --ink-2: #55585e; --rule: #cdc7bb;
+  --attn: #ffd23c; --win: #1b6a3a; --loss: #a8271e;
+  --d: "Anybody", system-ui, sans-serif; --t: "Schibsted Grotesk", system-ui, sans-serif;
+  /* type scale: 13 15 17 22 30 44 64 112 ; spacing 4 8 12 16 24 32 48 64 */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #d9d4c8; color: var(--ink); font-family: var(--t); -webkit-font-smoothing: antialiased; }
+@media (prefers-reduced-motion: no-preference) {
+  .play .ln { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .5s cubic-bezier(.3, .6, .3, 1) forwards; animation-delay: calc(var(--i) * 28ms); }
+  .play .draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.4s ease-out forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+}
+/* highlighting the lines behind an insight is a state change, not decoration */
+.print.focus .ln { stroke-opacity: .12 !important; }
+.print.focus.f-ra .ln.z-ra-o, .print.focus.f-gs .ln.z-gs-o, .print.focus.f-kr .ln.z-kr { stroke-opacity: 1 !important; }
+
+/* ---------- document head ---------- */
+.doc { max-width: 1280px; margin: 0 auto; padding: 48px 0 24px; }
+.doc .kick { font: 600 15px var(--t); color: var(--ink-2); margin: 0 0 12px; }
+.doc h1 { font: 900 112px/0.85 var(--d); font-stretch: 140%; margin: 0 0 24px; letter-spacing: -0.02em; }
+.doc .idea { font: 600 26px/1.25 var(--t); max-width: 900px; margin: 0 0 16px; }
+.doc p { max-width: 860px; font-size: 17px; line-height: 1.5; margin: 0 0 12px; color: #33363b; }
+.switch { display: flex; gap: 8px; align-items: center; margin-top: 24px; flex-wrap: wrap; }
+.switch span { font: 600 15px var(--t); color: var(--ink-2); margin-right: 8px; }
+.switch button { font: 700 15px var(--t); min-height: 44px; padding: 0 16px 0 12px; border: 2px solid #b5afa3; background: transparent; color: var(--ink); display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+.switch button i { width: 16px; height: 16px; display: block; }
+.switch button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
+.view { max-width: 1280px; margin: 64px auto 0; }
+.view > header { display: flex; gap: 16px; align-items: baseline; padding: 0 0 12px; border-bottom: 1.5px solid var(--ink); margin-bottom: 16px; }
+.view > header b { font: 800 22px var(--d); font-stretch: 110%; }
+.view > header span { font-size: 15px; color: var(--ink-2); }
+.pair { display: flex; gap: 48px; align-items: flex-start; }
+
+/* ---------- app ---------- */
+.app { background: var(--ground); color: var(--ink); position: relative; overflow: hidden; font-size: 17px; line-height: 1.45; }
+.app.desk { width: 1280px; }
+.app.phone { width: 390px; }
+.app :where(h1, h2, h3, h4, p, ul, ol) { margin: 0; }
+.app ul, .app ol { padding: 0; list-style: none; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: inherit; }
+.top { display: flex; align-items: center; gap: 32px; height: 72px; padding: 0 48px; border-bottom: 1.5px solid var(--ink); }
+.club { display: flex; gap: 12px; align-items: center; font: 800 22px/1 var(--d); font-stretch: 90%; }
+.crest { width: 36px; height: 40px; background: var(--club); color: var(--club-ink); display: grid; place-items: center; font: 900 13px var(--d); font-stretch: 80%; clip-path: polygon(0 0, 100% 0, 100% 74%, 50% 100%, 0 74%); }
+.nav { display: flex; gap: 4px; margin-left: 16px; }
+.nav a { min-height: 72px; display: flex; align-items: center; padding: 0 14px; font: 700 17px var(--t); text-decoration: none; color: var(--ink-2); position: relative; }
+.nav a[aria-current] { color: var(--ink); }
+.nav a[aria-current]::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -1.5px; height: 6px; background: var(--club); }
+.top .right { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; font: 700 17px var(--t); background: var(--ink); color: #fff; text-decoration: none; border: 2px solid var(--ink); white-space: nowrap; }
+.btn.line { background: transparent; color: var(--ink); }
+.btn.s { min-height: 44px; padding: 0 16px; font-size: 15px; }
+.lnk { font-weight: 700; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; min-height: 44px; display: inline-flex; align-items: center; }
+.k { font: 600 15px var(--t); color: var(--ink-2); }
+.h { display: flex; align-items: baseline; gap: 16px; padding-bottom: 12px; border-bottom: 1.5px solid var(--ink); margin-bottom: 16px; }
+.h b { font: 800 30px/1 var(--d); font-stretch: 110%; letter-spacing: -0.01em; }
+.h span { font-size: 15px; color: var(--ink-2); }
+.h .lnk { margin-left: auto; font-size: 15px; min-height: 0; }
+
+/* weighted score */
+.score { display: inline-flex; align-items: baseline; font-family: var(--d); font-weight: 900; line-height: .8; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.score i { font-style: normal; font-stretch: 60%; padding: 0 .04em; color: var(--ink-2); font-weight: 700; }
+
+/* ---------- start desktop ---------- */
+.poster { display: grid; grid-template-columns: 520px 1fr; gap: 40px; padding: 48px 64px 32px 48px; align-items: end; }
+.poster .kick { font-size: 15px; color: var(--ink-2); margin-bottom: 16px; }
+.poster h1 { font: 900 64px/0.92 var(--d); font-stretch: 112%; letter-spacing: -0.02em; text-wrap: balance; }
+.poster h1 span { display: block; font-size: 40px; font-weight: 700; font-stretch: 100%; line-height: 1.05; margin-top: 8px; letter-spacing: -0.01em; }
+.poster .score { font-size: 136px; margin: 32px 0 0 -6px; }
+.poster .teams { display: flex; justify-content: space-between; font: 700 15px var(--t); color: var(--ink-2); margin-top: 8px; max-width: 460px; }
+.poster .acts { display: flex; gap: 12px; align-items: center; margin-top: 32px; flex-wrap: wrap; }
+.print-wrap { position: relative; }
+.print { width: 100%; display: block; overflow: visible; }
+.print-cap { display: flex; gap: 24px; font-size: 15px; color: var(--ink-2); margin-top: 12px; flex-wrap: wrap; align-items: center; }
+.print-cap i { display: inline-block; width: 28px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 8px; }
+.print-cap i.thin { border-top-width: 1px; }
+.print-cap b { color: var(--ink); }
+.print-name { position: absolute; left: 0; top: 0; font: 700 13px var(--t); color: var(--ink-2); }
+.app .three { display: grid; grid-template-columns: repeat(3, 1fr); padding: 0 48px; }
+.three li { padding: 24px 24px 24px 0; border-top: 1.5px solid var(--ink); display: flex; flex-direction: column; gap: 8px; cursor: default; }
+.three li + li { padding-left: 24px; border-left: 1px solid var(--rule); }
+.three .big { display: flex; align-items: baseline; gap: 8px; }
+.three .big b { font: 900 96px/0.8 var(--d); font-stretch: 130%; letter-spacing: -0.03em; }
+.three .big span { font: 700 22px/1.1 var(--d); font-stretch: 100%; color: var(--ink-2); }
+.three .big em { font-style: normal; margin-left: auto; font: 900 22px var(--d); font-stretch: 110%; color: var(--ink-2); }
+.three p { font: 600 22px/1.2 var(--t); text-wrap: balance; }
+.three small { font-size: 15px; color: var(--ink-2); }
+.three small.up { color: var(--win); font-weight: 700; }
+.three svg { width: 100%; display: block; margin: 8px 0; }
+.three .drill { font-size: 15px; }
+.three .btn { align-self: flex-start; margin-top: auto; }
+.cols { display: grid; grid-template-columns: 1fr 340px; gap: 48px; padding: 48px; }
+.game { display: grid; grid-template-columns: 64px 132px 1fr auto; gap: 20px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.game .when { font-size: 15px; line-height: 1.25; color: var(--ink-2); }
+.game .when b { display: block; color: var(--ink); font: 800 22px var(--d); font-stretch: 90%; }
+.game .gl { width: 132px; height: 66px; display: block; overflow: visible; }
+.game .gl.none { border: 1.5px dashed #a59f93; display: grid; place-items: center; font-size: 13px; color: var(--ink-2); }
+.game h4 { font: 800 22px/1.1 var(--d); font-stretch: 100%; }
+.game p { font-size: 15px; color: var(--ink-2); }
+.game p .lnk { min-height: 0; font-size: 15px; color: var(--ink); }
+.game .res { text-align: right; }
+.game .res .score { font-size: 44px; }
+.game .res small { display: block; font-weight: 700; font-size: 15px; margin-top: 6px; }
+.res.w small { color: var(--win); } .res.l small { color: var(--loss); }
+.bar { height: 4px; background: var(--rule); margin-top: 8px; max-width: 240px; } .bar i { display: block; height: 100%; background: var(--ink); }
+.side { display: flex; flex-direction: column; gap: 40px; }
+.next h3 { font: 900 44px/0.95 var(--d); font-stretch: 105%; letter-spacing: -0.01em; margin: 4px 0 16px; }
+.facts li { padding: 10px 0; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 8px; align-items: center; min-height: 44px; }
+.facts li .lnk { min-height: 0; font-size: 15px; }
+table.st { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+table.st th { font: 600 13px var(--t); color: var(--ink-2); text-align: right; padding: 0 0 8px 8px; }
+table.st th:first-child, table.st td:first-child { text-align: left; padding-left: 0; }
+table.st td { text-align: right; padding: 0 0 0 8px; height: 44px; border-top: 1px solid var(--rule); }
+table.st tr.me td { font-weight: 800; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
+table.st tr.me td:first-child::before { content: ""; display: inline-block; width: 10px; height: 10px; background: var(--club); margin-right: 8px; }
+
+/* ---------- phone ---------- */
+.ptop { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 16px; border-bottom: 1.5px solid var(--ink); }
+.ptop .club { font-size: 18px; flex: 1; }
+.ptop .crest { width: 30px; height: 34px; font-size: 11px; }
+.ibtn { width: 44px; height: 44px; display: grid; place-items: center; border: 2px solid var(--ink); background: transparent; color: var(--ink); }
+.ibtn.plus { background: var(--ink); color: #fff; }
+.ibtn svg { width: 20px; height: 20px; }
+.tabbar { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1.5px solid var(--ink); background: var(--ground); }
+.tabbar a { min-height: 56px; display: grid; place-items: center; font: 700 15px var(--t); color: var(--ink-2); text-decoration: none; position: relative; }
+.tabbar a[aria-current] { color: var(--ink); }
+.tabbar a[aria-current]::before { content: ""; position: absolute; left: 20px; right: 20px; top: -1.5px; height: 6px; background: var(--club); }
+.pposter { padding: 24px 16px 0; }
+.pposter .kick { font-size: 13px; color: var(--ink-2); margin-bottom: 8px; }
+.pposter h1 { font: 900 44px/0.92 var(--d); font-stretch: 105%; letter-spacing: -0.02em; }
+.pposter h1 span { display: block; font-size: 26px; font-weight: 700; font-stretch: 100%; line-height: 1.05; margin-top: 6px; }
+.pposter .score { font-size: 92px; margin-top: 16px; }
+.pposter .teams { display: flex; justify-content: space-between; font: 700 13px var(--t); color: var(--ink-2); margin-top: 4px; }
+.pthree li { padding: 20px 0; border-top: 1.5px solid var(--ink); display: grid; grid-template-columns: 1fr 120px; gap: 4px 16px; }
+.pthree .big { grid-column: 1; display: flex; align-items: baseline; gap: 6px; }
+.pthree .big b { font: 900 64px/0.8 var(--d); font-stretch: 130%; letter-spacing: -0.03em; }
+.pthree .big span { font: 700 17px var(--d); color: var(--ink-2); }
+.pthree svg { grid-column: 2; grid-row: 1 / span 3; width: 120px; align-self: start; }
+.pthree p { grid-column: 1; font: 600 17px/1.25 var(--t); }
+.pthree small { grid-column: 1; font-size: 13px; color: var(--ink-2); }
+.pthree small.up { color: var(--win); font-weight: 700; }
+.pthree .btn { grid-column: 1 / -1; justify-self: start; margin-top: 8px; }
+.pgame { display: grid; grid-template-columns: 76px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.pgame .gl { width: 76px; height: 38px; display: block; }
+.pgame .gl.none { border: 1.5px dashed #a59f93; display: grid; place-items: center; font-size: 11px; color: var(--ink-2); }
+.pgame h4 { font: 800 18px/1.1 var(--d); }
+.pgame p { font-size: 13px; color: var(--ink-2); line-height: 1.3; }
+.pgame .res .score { font-size: 26px; }
+.pgame .res { text-align: right; } .pgame .res small { display: block; font-size: 13px; font-weight: 700; margin-top: 4px; }
+
+/* ---------- Spiel ---------- */
+.mhead { display: grid; grid-template-columns: 1fr 520px; gap: 32px; padding: 40px 48px 24px; align-items: end; }
+.mhead .names { display: flex; gap: 12px; align-items: baseline; font: 800 30px/1 var(--d); font-stretch: 100%; flex-wrap: wrap; }
+.mhead .names i { font-style: normal; font: 400 17px var(--t); color: var(--ink-2); }
+.mhead .score { font-size: 150px; margin: 12px 0 0 -6px; }
+.mhead .meta { display: flex; gap: 24px; font-size: 15px; color: var(--ink-2); margin-top: 16px; flex-wrap: wrap; align-items: center; }
+.tto { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 6px; }
+.tto i { width: 6px; height: 14px; border: 1.5px solid var(--ink); display: block; } .tto i.on { background: var(--ink); }
+.tabs { display: flex; gap: 8px; padding: 0 48px; border-bottom: 1.5px solid var(--ink); }
+.tabs a { min-height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 12px; font: 800 22px var(--d); font-stretch: 100%; text-decoration: none; color: var(--ink-2); position: relative; }
+.tabs a[aria-current] { color: var(--ink); }
+.tabs a[aria-current]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1.5px; height: 6px; background: var(--club); }
+.tabs .q { margin-left: auto; color: var(--ink); }
+.tabs .q em { font-style: normal; background: var(--attn); color: var(--ink); min-width: 30px; height: 30px; display: grid; place-items: center; font: 900 17px var(--d); }
+.src { font-size: 15px; color: var(--ink-2); padding: 16px 48px 0; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.src .lnk { min-height: 0; color: var(--ink); }
+.curve { padding: 32px 48px 0; }
+.curve svg { width: 100%; display: block; }
+svg text { font-family: var(--t); font-size: 13px; fill: var(--ink-2); }
+svg text.on { fill: var(--ink); font-weight: 700; }
+svg text.big { font: 900 30px var(--d); font-stretch: 120%; fill: var(--club-on-light); }
+svg text.ax { font-weight: 700; fill: var(--ink); }
+svg .zn { font-family: var(--d); font-weight: 900; fill: var(--ink); }
+.sp-grid { display: grid; grid-template-columns: 1fr 360px; gap: 48px; padding: 40px 48px 48px; }
+.telegramm { font-size: 17px; line-height: 1.55; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); }
+.kpi { padding: 12px 12px 12px 0; border-top: 1.5px solid var(--ink); }
+.kpi + .kpi { padding-left: 12px; border-left: 1px solid var(--rule); }
+.kpi b { font: 900 44px/0.9 var(--d); display: block; font-variant-numeric: tabular-nums; }
+.kpi b small { font-size: 22px; font-weight: 700; }
+.kpi span { font-size: 13px; color: var(--ink-2); line-height: 1.3; display: block; margin-top: 8px; }
+.kpi.pick b { text-decoration: underline; text-decoration-color: var(--attn); text-decoration-thickness: 10px; text-underline-offset: -2px; text-decoration-skip-ink: none; }
+.kpi.pick em { font-style: normal; font-size: 13px; font-weight: 700; display: block; margin-top: 4px; }
+.legend { display: flex; gap: 16px; font-size: 13px; color: var(--ink-2); margin-top: 8px; flex-wrap: wrap; align-items: center; }
+.legend i { display: inline-block; width: 24px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
+
+/* ---------- Video ---------- */
+.vhead { display: flex; align-items: center; gap: 24px; padding: 24px 48px 16px; }
+.vhead .score { font-size: 48px; }
+.vhead p { font: 800 22px/1.1 var(--d); }
+.vhead p small { display: block; font: 400 15px var(--t); color: var(--ink-2); margin-top: 4px; }
+.vgrid { display: grid; grid-template-columns: 1fr 320px; gap: 40px; padding: 24px 48px 48px; }
+.screen { position: relative; aspect-ratio: 16 / 9; background: #222; }
+.screen svg { width: 100%; height: 100%; display: block; }
+.screen .clock { position: absolute; right: 16px; top: 16px; background: var(--ground); color: var(--ink); font: 900 22px var(--d); font-stretch: 110%; padding: 4px 12px; font-variant-numeric: tabular-nums; }
+.screen .cap { position: absolute; left: 16px; bottom: 16px; background: var(--ground); padding: 8px 14px; font: 600 15px var(--t); border-left: 6px solid var(--opp); }
+.zeit { margin-top: 20px; }
+.zeit svg { width: 100%; height: 96px; display: block; }
+.zeit .ax { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+.tools { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+.scn li { display: grid; grid-template-columns: 64px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--rule); min-height: 44px; }
+.scn li b { font: 800 17px var(--d); font-stretch: 100%; font-variant-numeric: tabular-nums; }
+.scn li span { font-size: 15px; line-height: 1.35; }
+.scn li small { display: block; color: var(--ink-2); font-size: 13px; }
+.scn li.on { background: var(--attn); margin: 0 -12px; padding: 10px 12px; border-top-color: transparent; }
+.note { font-style: italic; font-size: 17px; border-left: 3px solid var(--ink); padding-left: 12px; }
+.note + small { display: block; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+
+/* ---------- Zahlen ---------- */
+table.tb { width: 100%; border-collapse: collapse; font-size: 17px; font-variant-numeric: tabular-nums; }
+table.tb th { font: 600 13px var(--t); color: var(--ink-2); text-align: right; padding: 0 10px 10px; border-bottom: 1.5px solid var(--ink); white-space: nowrap; }
+table.tb td { text-align: right; padding: 0 10px; height: 48px; border-bottom: 1px solid var(--rule); }
+table.tb th:first-child, table.tb td:first-child { text-align: left; padding-left: 0; }
+table.tb td:first-child b { display: inline-block; width: 36px; font: 900 22px var(--d); font-stretch: 110%; }
+table.tb td a { font-weight: 600; text-decoration-color: #a59f93; text-underline-offset: 4px; }
+table.tb .q { width: 132px; white-space: nowrap; }
+table.tb .q span { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+table.tb .q svg { width: 56px; height: 10px; }
+table.tb .ok svg { width: 18px; height: 18px; vertical-align: -3px; }
+.foot { font-size: 15px; color: var(--ink-2); margin-top: 12px; }
+.tor { display: grid; grid-template-columns: repeat(3, 1fr); border: 6px solid var(--ink); border-bottom: 0; }
+.tor span { height: 76px; display: grid; place-items: center; font-family: var(--d); font-weight: 900; line-height: 1; border: 1px solid var(--rule); }
+.tor span.hot { background: var(--attn); }
+.phs li { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; padding: 10px 0; border-top: 1px solid var(--rule); align-items: center; }
+.phs li b { font-family: var(--d); font-weight: 900; font-size: 22px; }
+.phs .pb { grid-column: 1 / -1; height: 6px; display: flex; gap: 3px; }
+.phs .pb i { display: block; height: 100%; }
+</style>
+</head>
+<body>
+<header class="doc">
+  <p class="kick">Runde 2 · Richtung B · Feld: das Bild und die Bewegung</p>
+  <h1>Spur</h1>
+  <p class="idea">Jedes Spiel hinterlässt eine Spur: Aus allen Würfen mit ihrem Anlauf entsteht eine Form, die nur dieses Spiel hat, und diese Form ist sein Gesicht.</p>
+  <p>Der <b>Abdruck</b> ist keine Grafik zum Schmuck, sondern das Wurfbild beider Teams in einem: jede Linie ein Wurf vom Anlauf bis zum Tor, kräftig wenn er drin war. Er wird beim Öffnen in Spielreihenfolge gezeichnet. Ziffern werden nach ihrem Wert gesetzt: Wer mehr Tore hat, steht breiter. Das Videobild in «Video» ist eine Skizze an Stelle eines echten Bildes. Fahr mit der Maus über eines der drei Dinge: Im Abdruck bleiben seine Linien stehen.</p>
+  <div class="switch" role="group" aria-label="Vereinsfarbe"><span>Vereinsfarbe</span>
+    <button data-club="rot"><i style="background:#d3202e"></i>Rot</button>
+    <button data-club="blau"><i style="background:#1f4fd6"></i>Blau</button>
+    <button data-club="gelb"><i style="background:#f6c500"></i>Gelb</button>
+    <button data-club="schwarz"><i style="background:#17191c"></i>Schwarz</button>
+  </div>
+</header>
+
+<!-- ================= START DESKTOP ================= -->
+<section class="view"><header><b>Start</b><span>Desktop 1280</span></header>
+<div class="app desk" data-shot="start-desk">
+  <header class="top">
+    <span class="club"><span class="crest">HCZ</span>HC Zürichsee</span>
+    <nav class="nav" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav>
+    <div class="right"><a class="lnk" href="#" style="font-weight:600">Suchen</a><a class="btn" href="#">Video hochladen</a></div>
+  </header>
+  <section class="poster">
+    <div>
+      <p class="kick">Samstag gegen TSV Thalwil · Analyse fertig seit Sonntag, 9:40</p>
+      <h1>Gewonnen. <span>Und drei Dinge zum Mitnehmen.</span></h1>
+      <div class="score" data-score="26:18"></div>
+      <div class="teams"><span>HC Zürichsee</span><span>TSV Thalwil</span></div>
+      <div class="acts"><a class="btn" href="#">Spiel öffnen</a><a class="btn line" href="#">Fürs Team zusammenstellen</a><a class="lnk" href="#">3 Fragen offen, 1 Minute</a></div>
+    </div>
+    <div class="print-wrap">
+      <svg class="print play" data-match="thalwil" data-w="684" data-court role="img" aria-label="Abdruck des Spiels: 45 Würfe von Zürichsee nach rechts, 26 davon Tore; 34 Würfe von Thalwil nach links, 18 davon Tore, 9 über rechts aussen."></svg>
+      <p class="print-cap"><span><i style="border-color:var(--club-line)"></i><b>Zürichsee</b>, 45 Würfe, 26 Tore</span><span><i style="border-color:var(--opp-line)"></i><b>Thalwil</b>, 34 Würfe, 18 Tore</span><span><i class="thin" style="border-color:var(--ink-2)"></i>kein Tor</span></p>
+    </div>
+  </section>
+  <ol class="three">
+    <li data-f="ra"><div class="big"><b class="num">9</b><span>von 18</span><em>1</em></div><p>Gegentore über rechts aussen</p><small>Saison bisher: jedes dritte über diese Seite</small><svg data-bundle="ra" data-w="352" aria-hidden="true"></svg><a class="btn s" href="#">9 Szenen · 2:40</a></li>
+    <li data-f="gs"><div class="big"><b class="num">6</b><span>Gegenstoss&shy;tore</span><em>2</em></div><p>nach eigenem Ballverlust</p><small>3 davon zwischen der 38. und 44. Minute</small><svg data-bundle="tv" data-w="352" aria-hidden="true"></svg><a class="btn s" href="#">6 Szenen · 1:55</a></li>
+    <li data-f="kr"><div class="big"><b class="num">7</b><span>von 8</span><em>3</em></div><p>Kreisanspiele verwertet</p><small class="up">bester Wert der Saison</small><svg data-bundle="kr" data-w="352" aria-hidden="true"></svg><a class="btn s" href="#">8 Szenen · 2:10</a></li>
+  </ol>
+  <div class="cols">
+    <section>
+      <div class="h"><b>Alle Spiele</b><span>2 von 5 ohne Video</span></div>
+      <div class="game"><div class="when">Sa<b>31.10.</b>auswärts</div><svg class="gl" data-match="staefa" data-w="132" aria-hidden="true"></svg><div><h4>BSV Stäfa</h4><p>33 Szenen · 2 Dinge · Ballverluste im Aufbau</p></div><div class="res l"><span class="score" data-score="19:26"></span><small>Niederlage</small></div></div>
+      <div class="game"><div class="when">Sa<b>24.10.</b>Heim</div><svg class="gl" data-match="meilen" data-w="132" data-p=".62" aria-hidden="true"></svg><div><h4>HC Meilen</h4><p>Analyse läuft, noch etwa 25 Minuten</p><div class="bar" role="progressbar" aria-label="Analyse 62 Prozent" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"><i style="width:62%"></i></div></div><div class="res w"><span class="score" data-score="23:22"></span><small>Sieg</small></div></div>
+      <div class="game"><div class="when">Sa<b>17.10.</b>auswärts</div><svg class="gl" data-seq="2:1 5:4 9:6 14:8 18:11 22:14 26:16 29:19" role="img" aria-label="Torfolge aus dem Spielbericht"></svg><div><h4>SG Horgen</h4><p>Nur Spielbericht · <a class="lnk" href="#">Video hochladen</a></p></div><div class="res w"><span class="score" data-score="29:19"></span><small>Sieg</small></div></div>
+      <div class="game"><div class="when">Sa<b>10.10.</b>Heim</div><svg class="gl" data-seq="1:2 4:5 7:9 11:12 14:15 17:19 21:23 24:27" role="img" aria-label="Torfolge aus dem Spielbericht"></svg><div><h4>TV Wädenswil</h4><p>Nur Spielbericht · <a class="lnk" href="#">Video hochladen</a></p></div><div class="res l"><span class="score" data-score="24:27"></span><small>Niederlage</small></div></div>
+    </section>
+    <aside class="side">
+      <section class="next"><span class="k">Nächster Gegner · So, 17:30</span><h3>bei HSG Rheinau</h3>
+        <svg data-match="rheinau" data-w="340" data-court style="width:100%;display:block;margin-bottom:4px" role="img" aria-label="Abdruck des Hinspiels gegen Rheinau, 24 zu 27"></svg>
+        <p class="k" style="font-size:13px;margin-bottom:8px">Hinspiel, 24:27 verloren</p>
+        <ul class="facts"><li>Rang 3, zuletzt drei Siege</li><li><span>Hinspiel ansehen</span><a class="lnk" href="#">12 Szenen</a></li><li>Nr. 9 wirft ein Drittel ihrer Tore</li></ul></section>
+      <section><div class="h" style="margin-bottom:4px"><b style="font-size:22px">3. Liga, Gruppe 2</b></div>
+        <table class="st"><thead><tr><th>Rang</th><th>Sp.</th><th>Diff.</th><th>Pkt.</th></tr></thead><tbody><tr><td>1 TV Talwiese</td><td>6</td><td>+21</td><td>10</td></tr><tr class="me"><td>2 HC Zürichsee</td><td>6</td><td>+14</td><td>9</td></tr><tr><td>3 HSG Rheinau</td><td>6</td><td>+9</td><td>8</td></tr></tbody></table></section>
+    </aside>
+  </div>
+</div>
+</section>
+
+<!-- ================= PHONES ================= -->
+<section class="view"><header><b>Start und Spiel</b><span>Handy 390</span></header>
+<div class="pair">
+<div class="app phone" data-shot="start-phone">
+  <header class="ptop"><span class="club"><span class="crest">HCZ</span>HC Zürichsee</span><button class="ibtn" aria-label="Suchen"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l5 5"/></svg></button><button class="ibtn plus" aria-label="Video hochladen"><svg viewBox="0 0 20 20" stroke="currentColor" stroke-width="2.6"><path d="M10 3v14M3 10h14"/></svg></button></header>
+  <section class="pposter">
+    <p class="kick">Sa gegen TSV Thalwil · fertig seit So, 9:40</p>
+    <h1>Gewonnen. <span>Und drei Dinge zum Mitnehmen.</span></h1>
+    <div class="score" data-score="26:18"></div>
+    <div class="teams"><span>HC Zürichsee</span><span>TSV Thalwil</span></div>
+    <svg class="print play" data-match="thalwil" data-w="358" data-court style="margin-top:20px" role="img" aria-label="Abdruck des Spiels: 45 Würfe von Zürichsee, 26 Tore; 34 Würfe von Thalwil, 18 Tore."></svg>
+    <p class="print-cap" style="font-size:13px;gap:12px"><span><i style="border-color:var(--club-line);width:20px"></i>wir, 26 aus 45</span><span><i style="border-color:var(--opp-line);width:20px"></i>Thalwil, 18 aus 34</span></p>
+    <div style="display:flex;gap:12px;align-items:center;margin-top:20px;flex-wrap:wrap"><a class="btn" href="#">Spiel öffnen</a><a class="lnk" href="#" style="font-size:15px">3 Fragen offen, 1 Minute</a></div>
+  </section>
+  <ol class="pthree" style="padding:32px 16px 0">
+    <li><div class="big"><b class="num">9</b><span>von 18</span></div><svg data-bundle="ra" data-w="120" aria-hidden="true"></svg><p>Gegentore über rechts aussen</p><small>Saison: jedes dritte über diese Seite</small><a class="btn s" href="#">9 Szenen</a></li>
+    <li><div class="big"><b class="num">6</b><span>Gegenstösse</span></div><svg data-bundle="tv" data-w="120" aria-hidden="true"></svg><p>Tore nach eigenem Ballverlust</p><small>3 davon zwischen der 38. und 44. Minute</small><a class="btn s" href="#">6 Szenen</a></li>
+    <li><div class="big"><b class="num">7</b><span>von 8</span></div><svg data-bundle="kr" data-w="120" aria-hidden="true"></svg><p>Kreisanspiele verwertet</p><small class="up">bester Wert der Saison</small><a class="btn s" href="#">8 Szenen</a></li>
+  </ol>
+  <div style="padding:8px 16px 0"><a class="btn line" href="#" style="width:100%">Fürs Team zusammenstellen</a></div>
+  <section style="padding:40px 16px 24px">
+    <div class="h"><b style="font-size:26px">Alle Spiele</b><span>2 ohne Video</span></div>
+    <div class="pgame"><svg class="gl" data-match="staefa" data-w="76" aria-hidden="true"></svg><div><h4>BSV Stäfa</h4><p>31.10. · 33 Szenen</p></div><div class="res l"><span class="score" data-score="19:26"></span><small>Niederlage</small></div></div>
+    <div class="pgame"><svg class="gl" data-match="meilen" data-w="76" data-p=".62" aria-hidden="true"></svg><div><h4>HC Meilen</h4><p>Analyse läuft, noch 25 Min.</p></div><div class="res w"><span class="score" data-score="23:22"></span><small>Sieg</small></div></div>
+    <div class="pgame"><svg class="gl" data-seq="2:1 5:4 9:6 14:8 18:11 22:14 26:16 29:19" aria-hidden="true"></svg><div><h4>SG Horgen</h4><p>17.10. · <a class="lnk" style="min-height:0;font-size:13px" href="#">Video hochladen</a></p></div><div class="res w"><span class="score" data-score="29:19"></span><small>Sieg</small></div></div>
+    <div class="pgame"><svg class="gl" data-seq="1:2 4:5 7:9 11:12 14:15 17:19 21:23 24:27" aria-hidden="true"></svg><div><h4>TV Wädenswil</h4><p>10.10. · <a class="lnk" style="min-height:0;font-size:13px" href="#">Video hochladen</a></p></div><div class="res l"><span class="score" data-score="24:27"></span><small>Niederlage</small></div></div>
+    <section class="next" style="margin-top:32px"><span class="k" style="font-size:13px">Nächster Gegner · So, 17:30</span><h3 style="font-size:36px">bei HSG Rheinau</h3><ul class="facts"><li>Rang 3, zuletzt drei Siege</li><li><span>Hinspiel 24:27 verloren</span><a class="lnk" href="#">12 Szenen</a></li><li>Nr. 9 wirft ein Drittel ihrer Tore</li></ul></section>
+  </section>
+  <nav class="tabbar" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav>
+</div>
+
+<div class="app phone" data-shot="spiel-phone">
+  <header class="ptop"><span class="club"><span class="crest">HCZ</span>HC Zürichsee</span><button class="ibtn" aria-label="Suchen"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l5 5"/></svg></button><button class="ibtn plus" aria-label="Video hochladen"><svg viewBox="0 0 20 20" stroke="currentColor" stroke-width="2.6"><path d="M10 3v14M3 10h14"/></svg></button></header>
+  <section style="padding:20px 16px 16px">
+    <p style="font:800 22px/1.1 var(--d)">Zürichsee <span style="font:400 15px var(--t);color:var(--ink-2)">gegen</span> Thalwil</p>
+    <div class="score" data-score="26:18" style="font-size:92px;margin-top:8px"></div>
+    <p style="font-size:13px;color:var(--ink-2);margin-top:12px">Halbzeit 13:9 · Sa., 7. Nov. · Halle Seefeld</p>
+    <p style="font-size:13px;color:var(--ink-2);margin-top:2px">Time-outs <span class="tto" role="img" aria-label="Zürichsee 2 von 3"><i class="on"></i><i class="on"></i><i></i></span> 2 von 3 · Thalwil 3 von 3</p>
+  </section>
+  <nav class="tabs" style="padding:0 4px;gap:0"><a href="#" aria-current="page" style="font-size:18px">Spiel</a><a href="#" style="font-size:18px">Video</a><a href="#" style="font-size:18px">Zahlen</a><a class="q" href="#" style="font-size:18px;padding-right:12px"><em>3</em>Prüfen</a></nav>
+  <p class="src" style="padding:12px 16px 0;font-size:13px">Video 60 von 60 Minuten · Spielbericht von handball.ch · 21 von 24 Würfen bestätigt</p>
+  <section class="curve" style="padding:24px 16px 0"><div class="h" style="margin-bottom:8px"><b style="font-size:24px">Verlauf</b><span>Tordifferenz</span></div><svg data-kurve data-w="358" data-h="190" role="img" aria-label="Tordifferenz über 60 Minuten, Halbzeit plus 4, Schluss plus 8. Von der 38. bis zur 44. Minute fünf Tore Thalwil."></svg></section>
+  <ol class="pthree" style="padding:24px 16px 0">
+    <li><div class="big"><b class="num">9</b><span>von 18</span></div><svg data-bundle="ra" data-w="120" aria-hidden="true"></svg><p>Gegentore über rechts aussen</p><small>Dazu üben: <a href="#">Abwehr gegen Flügel</a></small><a class="btn s" href="#">9 Szenen</a></li>
+    <li><div class="big"><b class="num">6</b><span>Gegenstösse</span></div><svg data-bundle="tv" data-w="120" aria-hidden="true"></svg><p>Tore nach eigenem Ballverlust</p><small>Dazu üben: <a href="#">Rückzug in die 5:1</a></small><a class="btn s" href="#">6 Szenen</a></li>
+    <li><div class="big"><b class="num">7</b><span>von 8</span></div><svg data-bundle="kr" data-w="120" aria-hidden="true"></svg><p>Kreisanspiele verwertet</p><small class="up">bester Wert der Saison</small><a class="btn s" href="#">8 Szenen</a></li>
+  </ol>
+  <div style="padding:8px 16px 0;display:flex;flex-direction:column;gap:4px"><a class="btn" href="#">Fürs Team zusammenstellen</a><div style="display:flex;gap:16px"><a class="lnk" href="#" style="font-size:15px">Highlights teilen</a><a class="lnk" href="#" style="font-size:15px">Als Bild für den Chat</a></div></div>
+  <section style="padding:24px 16px 24px"><div class="h" style="margin-bottom:8px"><b style="font-size:24px">Gegentore</b><span>woher</span></div><svg data-zonen data-w="358" style="width:100%;display:block" role="img" aria-label="Gegentore nach Position: rechts aussen 9, Rückraum links 3, Rückraum Mitte 2, links aussen 2, Rückraum rechts 1, Kreis 1"></svg>
+    <div class="kpis" style="margin-top:24px"><div class="kpi"><b class="num">58<small>%</small></b><span>Wurfquote, 26 von 45</span></div><div class="kpi"><b class="num">38<small>%</small></b><span>Paraden, 11 von 29</span></div><div class="kpi pick"><b class="num">11</b><span>Ballverluste, Saison 9,4</span><em>von dir markiert</em></div></div></section>
+  <nav class="tabbar" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav>
+</div>
+</div>
+</section>
+
+<!-- ================= SPIEL DESKTOP ================= -->
+<section class="view"><header><b>Spiel</b><span>Desktop 1280 · Tab «Spiel»</span></header>
+<div class="app desk" data-shot="spiel-desk">
+  <header class="top">
+    <span class="club"><span class="crest">HCZ</span>HC Zürichsee</span>
+    <nav class="nav" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav>
+    <div class="right"><a class="lnk" href="#" style="font-weight:600">Suchen</a><a class="btn" href="#">Video hochladen</a></div>
+  </header>
+  <section class="mhead">
+    <div>
+      <p class="names">HC Zürichsee <i>gegen</i> TSV Thalwil</p>
+      <div class="score" data-score="26:18"></div>
+      <p class="meta"><span>Halbzeit 13:9</span><span>Samstag, 7. November</span><span>Halle Seefeld</span><span>Time-outs <span class="tto" role="img" aria-label="Zürichsee 2 von 3"><i class="on"></i><i class="on"></i><i></i></span> 2 von 3, Thalwil 3 von 3</span></p>
+    </div>
+    <div><svg class="print play" data-match="thalwil" data-w="520" data-court role="img" aria-label="Abdruck des Spiels"></svg>
+      <p class="print-cap" style="font-size:13px"><span><i style="border-color:var(--club-line)"></i>wir, 26 aus 45</span><span><i style="border-color:var(--opp-line)"></i>Thalwil, 18 aus 34</span><span><i class="thin" style="border-color:var(--ink-2)"></i>kein Tor</span></p></div>
+  </section>
+  <nav class="tabs"><a href="#" aria-current="page">Spiel</a><a href="#">Video</a><a href="#">Zahlen</a><a class="q" href="#"><em>3</em>Prüfen</a></nav>
+  <p class="src"><span>Quellen: Video (60 von 60 Minuten) · Spielbericht von handball.ch · 21 von 24 Würfen von dir bestätigt</span><a class="lnk" href="#">Wie gerechnet?</a></p>
+  <section class="curve"><div class="h"><b>Verlauf</b><span>Tordifferenz: jede Stufe nach oben ein Tor von uns, jeder Strich unten eines von Thalwil</span></div><svg data-kurve data-w="1184" data-h="240" role="img" aria-label="Tordifferenz über 60 Minuten. Halbzeit plus 4, Schluss plus 8. Von der 38. bis zur 44. Minute drei Ballverluste und fünf Tore Thalwil."></svg></section>
+  <div class="h" style="margin:40px 48px 0;border:0;padding:0"><b>Drei Dinge</b></div>
+  <ol class="three" style="margin-top:12px">
+    <li><div class="big"><b class="num">9</b><span>von 18</span><em>1</em></div><p>Gegentore über rechts aussen</p><small>Saison bisher: jedes dritte über diese Seite</small><svg data-bundle="ra" data-w="352" aria-hidden="true"></svg><span class="drill">Dazu üben: <a href="#" style="font-weight:700">Abwehr gegen Flügel</a></span><a class="btn s" href="#">9 Szenen · 2:40</a></li>
+    <li><div class="big"><b class="num">6</b><span>Gegenstoss&shy;tore</span><em>2</em></div><p>nach eigenem Ballverlust</p><small>3 davon zwischen der 38. und 44. Minute</small><svg data-bundle="tv" data-w="352" aria-hidden="true"></svg><span class="drill">Dazu üben: <a href="#" style="font-weight:700">Rückzug in die 5:1</a></span><a class="btn s" href="#">6 Szenen · 1:55</a></li>
+    <li><div class="big"><b class="num">7</b><span>von 8</span><em>3</em></div><p>Kreisanspiele verwertet</p><small class="up">bester Wert der Saison</small><svg data-bundle="kr" data-w="352" aria-hidden="true"></svg><span class="drill">&nbsp;</span><a class="btn s" href="#">8 Szenen · 2:10</a></li>
+  </ol>
+  <div style="display:flex;gap:16px;align-items:center;padding:24px 48px 0"><a class="btn" href="#">Fürs Team zusammenstellen</a><a class="lnk" href="#">Highlights teilen</a><a class="lnk" href="#">Als Bild für den Chat</a></div>
+  <div class="sp-grid">
+    <section><div class="h"><b>Telegramm</b><a class="lnk" href="#">Kopieren</a></div>
+      <p class="telegramm"><b>HC Zürichsee gegen TSV Thalwil 26:18 (13:9).</b> Halle Seefeld. Torfolge: 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18. Strafen: 3-mal 2 Minuten gegen Zürichsee, 4-mal 2 Minuten gegen Thalwil. Beste Werfer: Brunner 7, Graf 5/2, Schmid 4. Im Tor: Meier, 11 Paraden.</p>
+      <div class="kpis" style="margin-top:40px"><div class="kpi"><b class="num">58<small>%</small></b><span>Wurfquote, 26 von 45</span></div><div class="kpi"><b class="num">38<small>%</small></b><span>Paraden, 11 von 29</span></div><div class="kpi pick"><b class="num">11</b><span>Ballverluste, Saison 9,4</span><em>von dir markiert</em></div></div></section>
+    <aside><div class="h"><b>Gegentore</b><span>woher sie kamen</span></div><svg data-zonen data-w="360" style="width:100%;display:block" role="img" aria-label="Gegentore nach Position: rechts aussen 9, Rückraum links 3, Rückraum Mitte 2, links aussen 2, Rückraum rechts 1, Kreis 1"></svg>
+      <p class="legend">Strichbreite und Zahl: Tore aus dieser Position</p></aside>
+  </div>
+</div>
+</section>
+
+<!-- ================= VIDEO DESKTOP ================= -->
+<section class="view"><header><b>Video</b><span>Desktop 1280 · ruhig</span></header>
+<div class="app desk" data-shot="video-desk">
+  <header class="top">
+    <span class="club"><span class="crest">HCZ</span>HC Zürichsee</span>
+    <nav class="nav" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav>
+    <div class="right"><a class="lnk" href="#" style="font-weight:600">Suchen</a><a class="btn" href="#">Video hochladen</a></div>
+  </header>
+  <div class="vhead"><span class="score" data-score="26:18"></span><p>HC Zürichsee gegen TSV Thalwil<small>Sa., 7. Nov. · Halle Seefeld</small></p></div>
+  <nav class="tabs"><a href="#">Spiel</a><a href="#" aria-current="page">Video</a><a href="#">Zahlen</a><a class="q" href="#"><em>3</em>Prüfen</a></nav>
+  <div class="vgrid">
+    <div style="min-width:0">
+      <div class="screen"><svg class="play" data-kamera role="img" aria-label="Videobild, 41. Minute: Gegenstoss Thalwil; der Laufweg der Nummer 5 wird auf dem Boden mitgezeichnet."></svg><span class="clock" aria-label="Spielzeit 41 Minuten 12">41:12</span><span class="cap">Gegenstoss Thalwil nach Ballverlust · 2. Halbzeit</span></div>
+      <div class="zeit"><svg data-zeit role="img" aria-label="Zeitleiste: jedes Tor ein Strich, Zürichsee oben, Thalwil unten, markierte Phase von der 38. bis zur 44. Minute"></svg><div class="ax"><span>Anwurf</span><span>Halbzeit</span><span>Schluss</span></div>
+        <div class="legend"><span><i style="border-color:var(--club-line)"></i>Tor wir</span><span><i style="border-color:var(--opp-line)"></i>Tor Thalwil</span><span><i style="border-color:var(--attn);border-top-width:8px"></i>Phase aus Punkt 2</span></div></div>
+      <div class="tools"><a class="btn" href="#">Szene merken</a><a class="btn line" href="#">Zeichnen</a><a class="btn line" href="#">Spielerin hervorheben</a><a class="btn line" href="#">Teilen</a></div>
+    </div>
+    <aside class="side" style="gap:40px">
+      <section><div class="h"><b style="font-size:26px">38. bis 44.</b><span>5 Szenen</span></div>
+        <ul class="scn">
+          <li><b>38:40</b><span>Ballverlust Graf, Fehlpass<small>Gegenstoss, Tor Thalwil</small></span></li>
+          <li><b>39:55</b><span>Tor Thalwil über rechts aussen</span></li>
+          <li class="on" aria-current="true"><b>41:05</b><span>Ballverlust Schmid, Schrittfehler<small style="color:var(--ink)">läuft gerade</small></span></li>
+          <li><b>42:30</b><span>Parade Meier, Wurf vom Kreis</span></li>
+          <li><b>43:48</b><span>Ballverlust Brunner, Stürmerfoul<small>Gegenstoss, Tor Thalwil</small></span></li>
+        </ul></section>
+      <section><div class="h"><b style="font-size:26px">Notizen</b></div><p class="note">41:05 Rückzug! Nur zwei laufen zurück.</p><small>Du · nur für dich, bis du die Szene teilst</small></section>
+    </aside>
+  </div>
+</div>
+</section>
+
+<!-- ================= ZAHLEN DESKTOP ================= -->
+<section class="view"><header><b>Zahlen</b><span>Desktop 1280 · ruhig</span></header>
+<div class="app desk" data-shot="zahlen-desk">
+  <header class="top">
+    <span class="club"><span class="crest">HCZ</span>HC Zürichsee</span>
+    <nav class="nav" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav>
+    <div class="right"><a class="lnk" href="#" style="font-weight:600">Suchen</a><a class="btn" href="#">Video hochladen</a></div>
+  </header>
+  <div class="vhead"><span class="score" data-score="26:18"></span><p>HC Zürichsee gegen TSV Thalwil<small>Sa., 7. Nov. · Halle Seefeld</small></p></div>
+  <nav class="tabs"><a href="#">Spiel</a><a href="#">Video</a><a href="#" aria-current="page">Zahlen</a><a class="q" href="#"><em>3</em>Prüfen</a></nav>
+  <p class="src">Jede Zahl führt zu ihren Szenen. Ein Haken heisst: von dir bestätigt.</p>
+  <div class="sp-grid" style="grid-template-columns:1fr 320px">
+    <div style="display:flex;flex-direction:column;gap:48px;min-width:0">
+      <section><div class="h"><b>Feld</b><span>nach Toren</span></div>
+        <table class="tb"><thead><tr><th>Nr. Name</th><th>Tore</th><th>Würfe</th><th class="q">Quote</th><th>7 m</th><th>Fehler</th><th>2 Min</th><th>Bestätigt</th></tr></thead><tbody id="feld"></tbody></table>
+        <p class="foot">Vier weitere ohne Wurf. <a class="lnk" href="#" style="min-height:0;color:var(--ink)">Alle zeigen</a></p></section>
+      <section><div class="h"><b>Tor</b></div>
+        <table class="tb"><thead><tr><th>Nr. Name</th><th>Paraden</th><th>Würfe aufs Tor</th><th class="q">Quote</th><th>7 m</th><th>Saison</th><th>Bestätigt</th></tr></thead><tbody>
+          <tr><td><b>1</b>Mia Meier</td><td><a href="#">11</a></td><td><a href="#">29</a></td><td class="q"><span><svg viewBox="0 0 56 10" aria-hidden="true"><rect y="4" width="56" height="2" fill="var(--rule)"/><rect y="2" width="21.3" height="6" fill="var(--ink)"/></svg>38 %</span></td><td><a href="#">2/3</a></td><td>33 %</td><td class="ok"><svg viewBox="0 0 18 18" role="img" aria-label="bestätigt"><path d="M3 9.5l4 4 8-9" fill="none" stroke="var(--win)" stroke-width="2.6"/></svg></td></tr>
+        </tbody></table></section>
+    </div>
+    <aside class="side" style="gap:48px">
+      <section><div class="h"><b style="font-size:26px">Wohin sie trafen</b></div>
+        <div class="tor" role="img" aria-label="Gegentore nach Torecke: oben links 3, oben Mitte 1, oben rechts 2, Mitte links 1, Mitte 0, Mitte rechts 2, unten links 5, unten Mitte 1, unten rechts 3" id="tor"></div>
+        <p class="foot">18 Tore. Unten links aus Sicht der Werferin, die Grösse der Zahl ist ihr Wert. <a class="lnk" href="#" style="min-height:0;color:var(--ink)">5 Szenen</a></p></section>
+      <section><div class="h"><b style="font-size:26px">Phasen</b></div>
+        <ul class="phs">
+          <li><span>6 gegen 6</span><b class="score" data-score="19:14" style="font-size:26px"></b><span class="pb"><i style="flex:19;background:var(--club-line)"></i><i style="flex:14;background:var(--opp-line)"></i></span></li>
+          <li><span>Überzahl, 8 Minuten</span><b class="score" data-score="5:1" style="font-size:26px"></b><span class="pb"><i style="flex:5;background:var(--club-line)"></i><i style="flex:1;background:var(--opp-line)"></i></span></li>
+          <li><span>Unterzahl, 6 Minuten</span><b class="score" data-score="2:3" style="font-size:26px"></b><span class="pb"><i style="flex:2;background:var(--club-line)"></i><i style="flex:3;background:var(--opp-line)"></i></span></li>
+          <li><span>Gegenstösse</span><b class="score" data-score="4:6" style="font-size:26px"></b><span class="pb"><i style="flex:4;background:var(--club-line)"></i><i style="flex:6;background:var(--opp-line)"></i></span></li>
+        </ul>
+        <p class="legend"><span><i style="border-color:var(--club-line)"></i>wir</span><span><i style="border-color:var(--opp-line)"></i>Thalwil</span></p></section>
+    </aside>
+  </div>
+</div>
+</section>
+<div style="height:64px"></div>
+<script>
+/* Shared drawing core: club colours, court geometry in metres, scenes from position data. */
+var CLUBS = { rot: "#d3202e", blau: "#1f4fd6", gelb: "#f6c500", schwarz: "#17191c" };
+function hex2rgb(h) { h = h.replace("#", ""); return [0, 2, 4].map(function (i) { return parseInt(h.substr(i, 2), 16); }); }
+function rgb2hex(c) { return "#" + c.map(function (v) { v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? "0" : "") + v.toString(16); }).join(""); }
+function lum(h) { return hex2rgb(h).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }).reduce(function (a, v, i) { return a + v * [0.2126, 0.7152, 0.0722][i]; }, 0); }
+function contrast(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function mix(a, b, t) { var p = hex2rgb(a), q = hex2rgb(b); return rgb2hex(p.map(function (v, i) { return v + (q[i] - v) * t; })); }
+/* shift a colour towards white (or black) until it reaches the contrast it needs on a ground */
+function reach(c, ground, need, to) { for (var t = 0; t <= 1; t += 0.02) { var m = mix(c, to, t); if (contrast(m, ground) >= need) return m; } return to; }
+function setClub(name, grounds) {
+  var c = CLUBS[name] || name, r = document.documentElement.style;
+  r.setProperty("--club", c);
+  r.setProperty("--club-ink", contrast(c, "#ffffff") >= 4.5 ? "#ffffff" : "#0c1015");
+  if (grounds.dark) r.setProperty("--club-on-dark", reach(c, grounds.dark, 3.2, "#ffffff"));
+  if (grounds.light) r.setProperty("--club-on-light", reach(c, grounds.light, 4.5, "#000000"));
+  document.querySelectorAll("[data-club]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.club === name ? "true" : "false"); });
+  try { localStorage.setItem("r2club", name); } catch (e) {}
+}
+
+/* ---------- court in metres: 40 x 20, goals at x = 0 and x = 40 ---------- */
+var NS = ' vector-effect="non-scaling-stroke"';
+function goalArea(r) {
+  var k = Math.sqrt(r * r - 8.5 * 8.5 > 0 ? r * r - 8.5 * 8.5 : 0), y0 = r > 8.5 ? 0 : 8.5 - r, x0 = r > 8.5 ? k : 0;
+  return "M" + x0.toFixed(3) + " " + y0.toFixed(3) + " A" + r + " " + r + " 0 0 1 " + r + " 8.5 L" + r + " 11.5 A" + r + " " + r + " 0 0 1 " + x0.toFixed(3) + " " + (20 - y0).toFixed(3);
+}
+function courtLines(o) {
+  o = o || {};
+  var L = o.line || "var(--court-line)", w = o.lw || 1.5, h = "";
+  if (o.floor) h += '<rect x="-3" y="-3" width="46" height="26" fill="' + o.floor + '"/>';
+  if (o.area) h += '<path d="' + goalArea(6) + ' Z" fill="' + o.area + '"/><path d="' + goalArea(6) + ' Z" fill="' + o.area + '" transform="matrix(-1 0 0 1 40 0)"/>';
+  h += '<g fill="none" stroke="' + L + '" stroke-width="' + w + '">';
+  h += '<rect x="0" y="0" width="40" height="20"' + NS + '/><path d="M20 0V20"' + NS + "/>";
+  [1, -1].forEach(function (s) {
+    var t = s < 0 ? ' transform="matrix(-1 0 0 1 40 0)"' : "";
+    h += "<g" + t + '><path d="' + goalArea(6) + '"' + NS + '/><path d="' + goalArea(9) + '" stroke-dasharray="5 4"' + NS + '/><path d="M7 9.5V10.5M4 9.85V10.15"' + NS + "/></g>";
+  });
+  h += "</g>";
+  h += '<rect x="-0.6" y="8.5" width="0.6" height="3" fill="' + (o.goal || L) + '"/><rect x="40" y="8.5" width="0.6" height="3" fill="' + (o.goal || L) + '"/>';
+  return h;
+}
+/* views: full court, or a half turned so its goal is at the top */
+var VIEWS = {
+  full: { box: [-1.2, -1.2, 42.4, 22.4], m: null, f: function (p) { return p; } },
+  halfL: { box: [-0.6, -0.9, 21.2, 14.2], m: "matrix(0 1 1 0 0 0)", f: function (p) { return [p[1], p[0]]; } },
+  halfR: { box: [-0.6, -0.9, 21.2, 14.2], m: "matrix(0 -1 -1 0 20 40)", f: function (p) { return [20 - p[1], 40 - p[0]]; } },
+  halfLdeep: { box: [-0.6, -0.9, 21.2, 18.6], m: "matrix(0 1 1 0 0 0)", f: function (p) { return [p[1], p[0]]; } },
+  leftWide: { box: [-1, -1, 23, 22], m: null, f: function (p) { return p; } }
+};
+function viewWrap(v, inner) { return v.m ? '<g transform="' + v.m + '">' + inner + "</g>" : inner; }
+
+/* ---------- curves ---------- */
+function cr(pts, n) { /* Catmull-Rom sampled */
+  if (pts.length < 2) return pts.slice();
+  var out = [], P = [pts[0]].concat(pts, [pts[pts.length - 1]]);
+  for (var i = 1; i < P.length - 2; i++) for (var k = 0; k < n; k++) {
+    var t = k / n, t2 = t * t, t3 = t2 * t, a = P[i - 1], b = P[i], c = P[i + 1], d = P[i + 2];
+    out.push([0, 1].map(function (j) { return 0.5 * (2 * b[j] + (-a[j] + c[j]) * t + (2 * a[j] - 5 * b[j] + 4 * c[j] - d[j]) * t2 + (-a[j] + 3 * b[j] - 3 * c[j] + d[j]) * t3); }));
+  }
+  out.push(pts[pts.length - 1]);
+  return out;
+}
+function upto(s, t) { var n = Math.max(1, Math.round((s.length - 1) * t)); return s.slice(0, n + 1); }
+function d(pts) { return pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(2) + " " + p[1].toFixed(2); }).join(""); }
+function rng(seed) { var s = seed >>> 0 || 1; return function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
+
+/* ---------- scenes in full-court metres (our goal on the left in defence scenes) ---------- */
+var SCENES = {
+  ra: { /* Gegentor ueber rechts aussen: our 7 steps out, the gap opens */
+    us: [[1, [[1.0, 11.2], [0.9, 10.2], [0.7, 9.1]]], [7, [[5.6, 2.2], [6.2, 2.9], [7.2, 3.8], [8.4, 5.0]]], [13, [[6.6, 7.2], [7.2, 7.0], [7.9, 7.3]]], [4, [[7.0, 10.6], [7.4, 9.8], [7.6, 9.6]]], [10, [[6.8, 12.4], [7.2, 11.4], [7.4, 10.8]]], [11, [[6.8, 14.8], [7.1, 13.8], [7.3, 13.1]]], [8, [[5.8, 17.6], [6.1, 16.9], [6.4, 16.2]]]],
+    them: [[5, [[1.2, 0.5], [0.7, 0.9], [1.4, 1.3], [2.7, 1.9], [3.9, 2.9]]], [9, [[15.2, 8.6], [14.0, 7.2], [12.2, 5.8], [10.5, 5.0]]], [14, [[14.6, 12.4], [13.4, 11.0], [12.1, 10.0]]], [22, [[13.0, 17.0], [11.8, 15.8], [10.9, 14.6]]], [3, [[0.8, 19.4], [1.2, 19.0], [1.6, 18.6]]], [18, [[6.2, 12.4], [6.4, 10.6], [6.7, 8.6], [6.6, 7.4]]]],
+    pass: [[[12.1, 10.0], [10.5, 5.0], 0.35], [[10.5, 5.0], [3.4, 2.4], 0.7]],
+    shot: [[3.9, 2.9], [0.15, 8.9]],
+    zone: "M0 0H7.6L5.2 4.6 1.6 6.2 0 6.4Z", zoneAt: [5.6, 1.2], zoneText: ["9 von 18", "Gegentoren hier"],
+    focus: 5, gap: [[6.6, 4.4], [7.2, 6.6]]
+  },
+  tv: { /* Gegenstoss nach Ballverlust: two run back, four watch */
+    us: [[1, [[1.6, 10], [2.2, 9.6], [2.6, 9.0]]], [10, [[31, 8], [26, 8.2], [20.5, 8.4]]], [4, [[33, 12.5], [29, 12.6], [25.5, 12.8]]], [11, [[34.5, 15], [33.4, 14.8], [32.6, 14.6]]], [13, [[36, 10], [35.6, 10], [35.2, 10]]], [7, [[37.5, 2.5], [37, 2.8], [36.6, 3.0]]], [8, [[34, 6], [33.5, 6.2], [33.2, 6.3]]]],
+    them: [[5, [[30.2, 4.2], [24, 4.2], [15, 4.8], [8, 6], [5.6, 6.8]]], [9, [[28.5, 12.5], [22, 12], [15, 11.2], [11.5, 10.8]]], [14, [[33, 9], [31, 9.2], [29.5, 9.4]]], [22, [[34, 17], [32, 16.5], [30.6, 16]]]],
+    pass: [[[30.6, 8.2], [14, 5.2], 0.55]],
+    shot: [[5.6, 6.8], [0.15, 9.3]],
+    loss: [31, 8], lossText: "Ballverlust 38:40",
+    focus: 5
+  },
+  kr: { /* Kreisanspiel: block and roll, pass from the middle */
+    us: [[7, [[38.6, 1.6], [38.4, 1.8], [38.2, 2.0]]], [10, [[30, 5], [30.6, 5.6], [31, 6.2]]], [4, [[28.2, 10.6], [28.8, 10.3], [29.2, 10.0]]], [11, [[30, 15], [30.4, 14.6], [30.7, 14.2]]], [13, [[38.6, 18.4], [38.4, 18.2], [38.2, 18.0]]], [8, [[34.2, 12.4], [34.1, 11.4], [34.4, 10.4], [34.8, 9.7]]]],
+    them: [[1, [[39.2, 10.4], [39.3, 10.1], [39.4, 9.9]]], [6, [[34, 3.6], [33.8, 3.8], [33.7, 4.0]]], [12, [[33.2, 6.8], [32.9, 7.2], [32.7, 7.4]]], [15, [[33, 9.2], [32.4, 9.6], [32.0, 9.9]]], [17, [[33, 11.2], [32.8, 11.4], [32.8, 11.6]]], [19, [[33.2, 13.6], [33.2, 13.4], [33.2, 13.2]]], [21, [[34, 16.6], [34, 16.4], [34, 16.2]]]],
+    pass: [[[29.2, 10.0], [34.7, 9.8], 0.6]],
+    shot: [[34.8, 9.7], [39.85, 10.9]],
+    focus: 8
+  }
+};
+
+/* ---------- Spur: every match leaves a print ---------- */
+/* zones from the attacker's view; x = metres from the goal line, y across */
+var ZONES = {
+  la: { x: [0.8, 3.0], y: [0.8, 3.4], run: [1.3, -0.2] }, ra: { x: [0.8, 3.0], y: [16.6, 19.2], run: [1.3, 0.2] },
+  rl: { x: [8.6, 11.5], y: [3.6, 7.6], run: [1, 0.5] }, rm: { x: [8.8, 12], y: [8.2, 11.8], run: [1, 0] }, rr: { x: [8.6, 11.5], y: [12.4, 16.4], run: [1, -0.5] },
+  kr: { x: [6.0, 7.2], y: [8.0, 12.0], run: [0.4, 1] }, m7: { x: [7, 7], y: [10, 10], run: [0, 0] }, gs: { x: [5.0, 8.0], y: [5, 15], run: [1, 0], far: 1 }
+};
+/* a match: who shot from where, how many went in */
+function match(seed, own, opp) {
+  var R = rng(seed), list = [];
+  function side(spec, us) {
+    Object.keys(spec).forEach(function (z) {
+      var n = spec[z][0], g = spec[z][1];
+      for (var i = 0; i < n; i++) {
+        var Z = ZONES[z], x = Z.x[0] + R() * (Z.x[1] - Z.x[0]), y = Z.y[0] + R() * (Z.y[1] - Z.y[0]);
+        var len = Z.far ? 14 + R() * 10 : 2.5 + R() * 4, ax = Z.run[0] * len + (R() - 0.5) * 3, ay = Z.run[1] * len * 0.6 + (R() - 0.5) * 4;
+        if (Z.far) { ay = (R() - 0.5) * 8; }
+        var goal = i < g, gy = 8.7 + R() * 2.6, ty = goal ? gy : (R() < 0.5 ? 8.5 + R() * 3 : (R() < 0.5 ? 8.1 : 11.9)), tx = goal ? 0 : 0.6 + R() * 0.8;
+        var bend = (R() - 0.5) * 6;
+        var s = { us: us, zone: z, goal: goal, t: R() * 60, run: [[x + ax, y + ay], [x + ax * 0.5 + bend * 0.5, y + ay * 0.5 + bend], [x, y]], to: [tx, ty] };
+        if (z === "m7") s.run = [[x + 0.6, y], [x, y]];
+        list.push(s);
+      }
+    });
+  }
+  side(own, true); side(opp, false);
+  list.sort(function (a, b) { return a.t - b.t; });
+  return list;
+}
+/* our attack plays to the right goal, theirs to the left */
+function place(p, us) { return us ? [40 - p[0], p[1]] : [p[0], 20 - p[1]]; }
+var M = {
+  thalwil: match(26, { la: [5, 3], ra: [5, 3], rl: [7, 3], rm: [6, 3], rr: [6, 3], kr: [8, 7], m7: [3, 2], gs: [5, 2] }, { la: [3, 1], ra: [11, 9], rl: [5, 3], rm: [4, 2], rr: [3, 1], kr: [2, 1], m7: [1, 0], gs: [5, 1] }),
+  staefa: match(31, { la: [3, 1], ra: [4, 2], rl: [10, 4], rm: [9, 4], rr: [6, 3], kr: [3, 2], m7: [3, 3], gs: [2, 0] }, { la: [4, 3], ra: [3, 2], rl: [6, 4], rm: [5, 3], rr: [6, 4], kr: [5, 4], m7: [2, 2], gs: [8, 4] }),
+  meilen: match(44, { la: [4, 2], ra: [3, 2], rl: [6, 3], rm: [8, 4], rr: [6, 3], kr: [6, 5], m7: [3, 2], gs: [4, 2] }, { la: [3, 2], ra: [4, 3], rl: [8, 5], rm: [7, 4], rr: [6, 3], kr: [5, 3], m7: [2, 2], gs: [2, 0] }),
+  rheinau: match(57, { la: [2, 1], ra: [4, 2], rl: [9, 5], rm: [8, 4], rr: [8, 4], kr: [4, 3], m7: [3, 3], gs: [3, 2] }, { la: [4, 3], ra: [3, 2], rl: [12, 8], rm: [7, 4], rr: [5, 3], kr: [5, 4], m7: [2, 2], gs: [2, 1] })
+};
+function shotPath(s) {
+  /* the run-up bends into the shooting spot and leaves it heading for the goal; the throw is straight */
+  var r = s.run.map(function (p) { return place(p, s.us); }), to = place(s.to, s.us);
+  var A = r[r.length - 1], S0 = r[0];
+  S0 = [Math.max(0.3, Math.min(39.7, S0[0])), Math.max(0.4, Math.min(19.6, S0[1]))];
+  var gx = A[0] - to[0], gy = A[1] - to[1], gl = Math.hypot(gx, gy) || 1, L = Math.hypot(S0[0] - A[0], S0[1] - A[1]);
+  var c = [A[0] + gx / gl * L * 0.55, A[1] + gy / gl * L * 0.55];
+  c = [Math.max(0.3, Math.min(39.7, c[0])), Math.max(0.4, Math.min(19.6, c[1]))];
+  var pts = []; for (var i = 0; i <= 18; i++) { var t = i / 18, u = 1 - t; pts.push([u * u * S0[0] + 2 * u * t * c[0] + t * t * A[0], u * u * S0[1] + 2 * u * t * c[1] + t * t * A[1]]); }
+  return { run: pts, to: to, at: A };
+}
+/* draw a print into an svg; opts: lines width scale, ghost court, progress (share of lines finished) */
+function abdruck(svg) {
+  var key = svg.dataset.match, list = M[key], W = +svg.dataset.w || 600, k = W / 42, prog = svg.dataset.p ? +svg.dataset.p : 1, small = W < 200;
+  var h = svg.hasAttribute("data-court") ? '<g opacity="' + (small ? 0.18 : 0.3) + '">' + courtLines({ line: "var(--ink)", lw: small ? 0.6 : 1 }) + "</g>" : "";
+  var n = Math.round(list.length * prog), lw = small ? 0.5 : 1;
+  list.forEach(function (s, i) {
+    var P = shotPath(s), col = s.us ? "var(--club-line)" : "var(--opp-line)", done = i < n;
+    var dd = d(P.run.concat([P.to]));
+    var cls = "ln" + (s.us ? " us" : " them") + (s.goal ? " g" : " m") + " z-" + s.zone + (s.us ? "" : "-o");
+    if (!done) { h += '<path d="' + dd + '" fill="none" stroke="var(--ink)" stroke-opacity=".14" stroke-width="' + lw + '" stroke-dasharray="1 3"' + NS + "/>"; return; }
+    h += '<path class="' + cls + '" style="--i:' + i + '" pathLength="1" d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + (s.goal ? 2.4 : 1) * lw + '" stroke-opacity="' + (s.goal ? 1 : 0.55) + '" stroke-linecap="round" stroke-linejoin="round"' + NS + "/>";
+    if (s.goal && !small) h += '<circle cx="' + P.to[0] + '" cy="' + P.to[1] + '" r="' + 2.6 / k + '" fill="' + col + '"/>';
+  });
+  svg.setAttribute("viewBox", "-1 -1 42 22"); svg.innerHTML = h;
+}
+/* a match with only a match report: the goal sequence as a stair, nothing more */
+function torfolge(svg) {
+  var seq = svg.dataset.seq.split(" ").map(function (p) { return p.split(":").map(Number); }), W = 120, H = 60;
+  var last = seq[seq.length - 1], tot = last[0] + last[1], x = 4, y = H / 2, h = '<line x1="0" x2="' + W + '" y1="' + H / 2 + '" y2="' + H / 2 + '" stroke="var(--rule)"/>';
+  var pa = "M4 " + y, a = 0, b = 0;
+  seq.forEach(function (p) {
+    while (a < p[0] || b < p[1]) { var us = (p[0] - a) / Math.max(1, p[0] - a + p[1] - b) >= 0.5 && a < p[0]; if (us) a++; else b++; x += (W - 8) / tot; pa += "H" + x.toFixed(1); y = H / 2 - (a - b) * 3.2; pa += "V" + y.toFixed(1); }
+  });
+  h += '<path d="' + pa + '" fill="none" stroke="var(--ink)" stroke-width="1.5"' + NS + "/>";
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = h;
+}
+/* the bundle behind one insight, on a half court turned with the goal at the top */
+function bundle(svg) {
+  var which = svg.dataset.bundle, V = VIEWS[which === "kr" ? "halfR" : "halfL"], W = +svg.dataset.w, k = W / V.box[2], list = M.thalwil, h = viewWrap(V, '<g opacity=".32">' + courtLines({ line: "var(--ink)", lw: 1 }) + "</g>");
+  var pick = list.filter(function (s) {
+    if (which === "ra") return !s.us && s.zone === "ra";
+    if (which === "tv") return !s.us && s.zone === "gs" || (!s.us && s.zone === "rm" && s.goal);
+    return s.us && s.zone === "kr";
+  });
+  if (which === "tv") pick = list.filter(function (s) { return !s.us && (s.zone === "gs" || s.zone === "ra"); }).slice(0, 6).map(function (s, i) {
+    var y = 3 + i * 2.6; return { us: false, goal: true, zone: "gs", run: [[30 - i * 1.5, 20 - y], [16 - i, 20 - y + (i % 2 ? 2.5 : -2.5)], [6.5 + i * 0.3, 20 - (y * 0.5 + 5)]], to: [0, 8.8 + i * 0.45] };
+  });
+  var others = list.filter(function (s) { return which === "kr" ? s.us && s.zone !== "kr" : !s.us && s.zone !== "ra"; });
+  others.forEach(function (s) { var P = shotPath(s); h += '<path d="' + d(P.run.concat([P.to]).map(V.f)) + '" fill="none" stroke="var(--ink)" stroke-opacity=".13" stroke-width="1"' + NS + "/>"; });
+  pick.forEach(function (s) {
+    var P = shotPath(s), col = s.us ? "var(--club-line)" : "var(--opp-line)", pts = P.run.concat([P.to]).map(V.f);
+    h += '<path d="' + d(pts) + '" fill="none" stroke="' + col + '" stroke-width="' + (s.goal ? 3 : 1.2) + '" stroke-opacity="' + (s.goal ? 1 : 0.6) + '" stroke-linecap="round" stroke-linejoin="round"' + NS + "/>";
+    if (s.goal) { var e = pts[pts.length - 1]; h += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="' + 3.4 / k + '" fill="' + col + '"/>'; }
+    else { var e2 = pts[pts.length - 1]; h += '<path d="M' + (e2[0] - 3 / k) + " " + e2[1] + "h" + 6 / k + '" stroke="' + col + '" stroke-width="2"' + NS + "/>"; }
+  });
+  svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
+}
+/* Gegentore: one stroke per zone into the goal, width by count */
+function zonenB(svg) {
+  var V = VIEWS.halfL, W = +svg.dataset.w, k = W / V.box[2], h = viewWrap(V, '<g opacity=".32">' + courtLines({ line: "var(--ink)", lw: 1 }) + "</g>");
+  var z = [["la", 2.2, 17.6, 2], ["rl", 9.6, 15.4, 3], ["rm", 10.6, 10, 2], ["rr", 9.6, 4.6, 1], ["ra", 2.0, 2.4, 9], ["kr", 6.6, 10, 1]];
+  z.forEach(function (q) {
+    var a = V.f([q[1], q[2]]), b = V.f([0.2, 10 + (q[2] - 10) * 0.08]), w = 3 + q[3] * 2.2, top = q[3] === 9;
+    var c = [(a[0] + b[0]) / 2 + (a[1] - b[1]) * 0.12, (a[1] + b[1]) / 2];
+    h += '<path d="M' + a[0] + " " + a[1] + "Q" + c[0] + " " + c[1] + " " + b[0] + " " + b[1] + '" fill="none" stroke="' + (top ? "var(--opp-line)" : "var(--ink)") + '" stroke-opacity="' + (top ? 1 : 0.5) + '" stroke-width="' + w + '" stroke-linecap="round"' + NS + "/>";
+    h += '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="' + (13 / k) + '" fill="var(--ground)" stroke="' + (top ? "var(--opp-line)" : "var(--ink)") + '" stroke-width="' + (top ? 2.5 : 1.2) + '"' + NS + "/>";
+    h += '<text x="' + a[0] + '" y="' + (a[1] + 5.4 / k) + '" style="font-size:' + (16 / k).toFixed(3) + 'px" text-anchor="middle" class="zn">' + q[3] + "</text>";
+  });
+  svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
+}
+/* the match curve: goal difference as a ribbon, every goal a tick */
+function kurve(svg) {
+  var data = [[0, 0], [2, 1], [3, 0], [5, 1], [7, 0], [9, 1], [11, 2], [12, 1], [14, 2], [16, 1], [17, 2], [19, 3], [20, 2], [22, 3], [23, 2], [24, 3], [25, 2], [26, 3], [27, 4], [28, 3], [29, 4], [30, 4], [32, 5], [35, 6], [36, 7], [38.6, 6], [39.9, 5], [41, 4], [42, 3], [43.8, 2], [44, 2], [46, 3], [48, 4], [49, 3], [50, 4], [51, 5], [53, 6], [54, 7], [55, 6], [56, 7], [57, 8], [58, 9], [58.5, 8], [59.5, 8], [60, 8]];
+  var W = +svg.dataset.w, H = +svg.dataset.h || 220, X0 = 8, X1 = W - 56, base = H * 0.64, U = (base - 46) / 9;
+  function x(m) { return X0 + (X1 - X0) * m / 60; } function y(v) { return base - v * U; }
+  var c = '<rect x="' + x(38) + '" y="4" width="' + (x(44) - x(38)) + '" height="' + (H - 34) + '" fill="var(--attn)" fill-opacity=".55"/>';
+  var pts = []; data.forEach(function (p, i) { if (i) pts.push([x(p[0]), y(data[i - 1][1])]); pts.push([x(p[0]), y(p[1])]); });
+  var sm = pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
+  c += '<polygon points="' + x(0) + "," + base + " " + sm + " " + x(60) + "," + base + '" fill="var(--club-line)" fill-opacity=".14"/>';
+  c += '<line x1="' + X0 + '" x2="' + X1 + '" y1="' + base + '" y2="' + base + '" stroke="var(--ink)" stroke-width="1.5"/>';
+  c += '<polyline points="' + sm + '" fill="none" stroke="var(--club-line)" stroke-width="3.5" stroke-linejoin="round"/>';
+  /* goals: ours above the base line, theirs below, as short throws */
+  var us = [2, 5, 9, 11, 14, 17, 19, 22, 24, 26, 27, 29, 29.5, 32, 35, 36, 46, 48, 50, 51, 53, 54, 56, 57, 58, 59.5], them = [3, 7, 12, 16, 20, 23, 25, 28, 30, 39, 40, 41, 42, 43, 44, 49, 55, 58.5];
+  them.forEach(function (m) { var a = x(m); c += '<path d="M' + (a - 6) + " " + (base + 26) + "Q" + (a - 1) + " " + (base + 6) + " " + (a + 2) + " " + (base + 3) + '" fill="none" stroke="var(--opp-line)" stroke-width="2" stroke-linecap="round"/>'; });
+  c += '<line x1="' + x(30) + '" x2="' + x(30) + '" y1="4" y2="' + (H - 30) + '" stroke="var(--ink)" stroke-dasharray="2 4"/>';
+  [[0, "Anwurf"], [30, "Halbzeit 13:9"], [60, "Schluss"]].forEach(function (t) { c += '<text x="' + x(t[0]) + '" y="' + (H - 8) + '" text-anchor="' + (t[0] === 0 ? "start" : t[0] === 60 ? "end" : "middle") + '">' + t[1] + "</text>"; });
+  c += '<text x="' + (x(38) + 6) + '" y="22" class="on">' + (W < 500 ? "38. bis 44." : "38. bis 44.: drei Ballverluste, fünf Tore Thalwil") + "</text>";
+  c += '<text x="' + (X1 + 8) + '" y="' + (y(8) + 10) + '" class="big">+8</text>';
+  c += '<text x="' + (X1 + 8) + '" y="' + (base + 5) + '" class="ax">0</text>';
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = c;
+}
+/* camera stand-in for the video, lighter than in Einblendung: the way of the scene drawn in on the floor */
+function kameraB(svg) {
+  var C = [13, -15, 10.5], T = [12, 9, 0];
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function norm(a) { var l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; }
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  var f = norm(sub(T, C)), rr = norm([f[1], -f[0], 0]), u = [rr[1] * f[2] - rr[2] * f[1], rr[2] * f[0] - rr[0] * f[2], rr[0] * f[1] - rr[1] * f[0]]; if (u[2] < 0) u = u.map(function (v) { return -v; });
+  var W = 1000, H = 562, F = 760;
+  function P(x, y, z) { var v = sub([x, y, z || 0], C), dz = dot(v, f); return [W / 2 + F * dot(v, rr) / dz, H * 0.42 - F * dot(v, u) / dz]; }
+  function poly(pts, close) { return pts.map(function (p, i) { var q = P(p[0], p[1], p[2]); return (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); }).join("") + (close ? "Z" : ""); }
+  function arcPts(cx, cy, r, a0, a1) { var o = []; for (var i = 0; i <= 24; i++) { var a = a0 + (a1 - a0) * i / 24; o.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return o; }
+  function area(r, s) { var a = arcPts(0, 8.5, r, -Math.PI / 2, 0).filter(function (p) { return p[1] >= 0; }), b = arcPts(0, 11.5, r, 0, Math.PI / 2).filter(function (p) { return p[1] <= 20; }); var pts = a.concat(b); return s ? pts.map(function (p) { return [40 - p[0], p[1]]; }) : pts; }
+  var h = '<rect width="1000" height="562" fill="#3a3d40"/>';
+  h += '<path d="' + poly([[-6, 23, 0], [46, 23, 0], [46, 23, 4], [-6, 23, 4]], 1) + '" fill="#2f3235"/>';
+  h += '<path d="' + poly([[-4, -4], [44, -4], [44, 22.4], [-4, 22.4]], 1) + '" fill="#8a6f55"/>';
+  h += '<path d="' + poly([[0, 0], [40, 0], [40, 20], [0, 20]], 1) + '" fill="#a8865f"/>';
+  [0, 1].forEach(function (s) { h += '<path d="' + poly(area(6, s).concat([[s * 40, 17.5], [s * 40, 2.5]]), 1) + '" fill="#2f6e93"/>'; });
+  h += '<g fill="none" stroke="#f4f1ea" stroke-opacity=".9" stroke-width="1.6"><path d="' + poly([[0, 0], [40, 0], [40, 20], [0, 20]], 1) + '"/><path d="' + poly([[20, 0], [20, 20]]) + '"/>';
+  [0, 1].forEach(function (s) { h += '<path d="' + poly(area(6, s)) + '"/><path d="' + poly(area(9, s)) + '" stroke-dasharray="7 6"/>'; });
+  h += "</g>";
+  [0, 40].forEach(function (x) { h += '<path d="' + poly([[x, 8.5, 0], [x, 8.5, 2], [x, 11.5, 2], [x, 11.5, 0]]) + '" fill="none" stroke="#f3f3f0" stroke-width="3"/>'; });
+  var S = SCENES.tv, run = cr(S.them[0][1], 14);
+  h += '<path class="draw" pathLength="1" d="' + poly(run) + '" fill="none" stroke="var(--opp-on-dark)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>';
+  h += '<path d="' + poly([S.shot[0], S.shot[1]]) + '" fill="none" stroke="var(--opp-on-dark)" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>';
+  var pl = [];
+  S.us.forEach(function (p) { pl.push([p[1][p[1].length - 1], true]); });
+  S.them.forEach(function (p) { pl.push([p[1][p[1].length - 1], false]); });
+  pl.push([[16, 15.5], true]); pl.push([[12, 3.2], false]);
+  pl.sort(function (a, b) { return b[0][1] - a[0][1]; });
+  pl.forEach(function (q) {
+    var x = q[0][0], y = q[0][1], ft = P(x, y, 0), hd = P(x, y, 1.6), w = Math.abs(P(x + 0.5, y, 0)[0] - ft[0]), kn = P(x, y, 0.85), sh = P(x, y, 1.5);
+    h += '<ellipse cx="' + ft[0] + '" cy="' + ft[1] + '" rx="' + w * 0.9 + '" ry="' + w * 0.3 + '" fill="#000" opacity=".28"/>';
+    h += '<path d="M' + (ft[0] - w * 0.18) + " " + ft[1] + "L" + (kn[0] - w * 0.12) + " " + kn[1] + "M" + (ft[0] + w * 0.18) + " " + ft[1] + "L" + (kn[0] + w * 0.12) + " " + kn[1] + '" stroke="#2a2c30" stroke-width="' + w * 0.26 + '" stroke-linecap="round"/>';
+    h += '<path d="M' + kn[0] + " " + kn[1] + "L" + sh[0] + " " + sh[1] + '" stroke="' + (q[1] ? "var(--club)" : "var(--opp)") + '" stroke-width="' + w * 0.62 + '" stroke-linecap="round"/>';
+    h += '<circle cx="' + hd[0] + '" cy="' + (hd[1] - w * 0.1) + '" r="' + w * 0.2 + '" fill="#b88b6c"/>';
+  });
+  svg.setAttribute("viewBox", "0 0 1000 562"); svg.innerHTML = h;
+}
+/* timeline: every goal a small throw, ours up, theirs down */
+function zeitB(svg) {
+  var W = 1000, base = 40, us = [2, 5, 9, 11, 14, 17, 19, 22, 24, 26, 27, 29, 29.5, 32, 35, 36, 46, 48, 50, 51, 53, 54, 56, 57, 58, 59.5], them = [3, 7, 12, 16, 20, 23, 25, 28, 30, 39, 40, 41, 42, 43, 44, 49, 55, 58.5];
+  function x(m) { return (m / 60) * W; }
+  var c = '<rect x="' + x(38) + '" y="0" width="' + (x(44) - x(38)) + '" height="80" fill="var(--attn)" fill-opacity=".55"/>';
+  c += '<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--ink)" stroke-width="1.5"/><line x1="' + x(30) + '" x2="' + x(30) + '" y1="2" y2="78" stroke="var(--ink)" stroke-dasharray="2 4"/>';
+  us.forEach(function (m) { var a = x(m); c += '<path d="M' + (a - 9) + " " + (base - 2) + "Q" + (a - 4) + " " + (base - 30) + " " + (a + 3) + " " + (base - 34) + '" fill="none" stroke="var(--club-line)" stroke-width="3" stroke-linecap="round"/>'; });
+  them.forEach(function (m) { var a = x(m); c += '<path d="M' + (a - 9) + " " + (base + 2) + "Q" + (a - 4) + " " + (base + 30) + " " + (a + 3) + " " + (base + 34) + '" fill="none" stroke="var(--opp-line)" stroke-width="3" stroke-linecap="round"/>'; });
+  c += '<line x1="' + x(41.2) + '" x2="' + x(41.2) + '" y1="-4" y2="84" stroke="var(--ink)" stroke-width="2.5"/><path d="M' + (x(41.2) - 7) + ' -10h14l-7 9z" fill="var(--ink)"/>';
+  svg.setAttribute("viewBox", "-10 -12 1020 100"); svg.setAttribute("preserveAspectRatio", "none"); svg.innerHTML = c;
+}
+/* weighted numerals: the side with more goals is set wider */
+function weigh(root) {
+  root.querySelectorAll("[data-score]").forEach(function (el) {
+    var p = el.dataset.score.split(":").map(Number), a = p[0], b = p[1], hi = Math.max(a, b), wa = 50 + 100 * Math.max(0, a / hi - 0.4) / 0.6, wb = 50 + 100 * Math.max(0, b / hi - 0.4) / 0.6;
+    el.innerHTML = '<span style="font-stretch:' + wa.toFixed(0) + '%">' + a + '</span><i aria-hidden="true">:</i><span style="font-stretch:' + wb.toFixed(0) + '%">' + b + "</span>";
+    el.setAttribute("aria-label", a + " zu " + b);
+  });
+}
+function drawAll(root) {
+  root.querySelectorAll("svg[data-match]").forEach(abdruck);
+  root.querySelectorAll("svg[data-seq]").forEach(torfolge);
+  root.querySelectorAll("svg[data-bundle]").forEach(bundle);
+  root.querySelectorAll("svg[data-zonen]").forEach(zonenB);
+  root.querySelectorAll("svg[data-kurve]").forEach(kurve);
+  root.querySelectorAll("svg[data-kamera]").forEach(kameraB);
+  root.querySelectorAll("svg[data-zeit]").forEach(zeitB);
+  weigh(root);
+}
+
+(function () {
+  var rows = [[4, "Levin Brunner", 7, 10, "", 2, "", 1], [10, "Elias Graf", 5, 9, "2/2", 3, 1, 1], [11, "Jonas Schmid", 4, 8, "", 2, "", 1], [8, "Nico Meier", 4, 5, "", 1, 1, 0], [7, "Luca Roth", 3, 6, "", 1, "", 1], [13, "Jana Baumann", 2, 4, "", 1, 1, 0], [6, "Rafael Brunner", 1, 3, "", 1, "", 0]];
+  var ok = '<svg viewBox="0 0 18 18" role="img" aria-label="bestätigt"><path d="M3 9.5l4 4 8-9" fill="none" stroke="var(--win)" stroke-width="2.6"/></svg>';
+  function L(v) { return v === "" ? "" : '<a href="#">' + v + "</a>"; }
+  document.getElementById("feld").innerHTML = rows.map(function (r) {
+    var q = r[2] / r[3], w = (q * 56).toFixed(1);
+    return "<tr><td><b>" + r[0] + "</b>" + r[1] + "</td><td>" + L(r[2]) + "</td><td>" + L(r[3]) + '</td><td class="q"><span><svg viewBox="0 0 56 10" aria-hidden="true"><rect y="4" width="56" height="2" fill="var(--rule)"/><rect y="2" width="' + w + '" height="6" fill="var(--club-line)"/></svg>' + Math.round(q * 100) + " %</span></td><td>" + L(r[4]) + "</td><td>" + L(r[5]) + "</td><td>" + L(r[6]) + '</td><td class="ok">' + (r[7] ? ok : "") + "</td></tr>";
+  }).join("");
+  document.getElementById("tor").innerHTML = [3, 1, 2, 1, 0, 2, 5, 1, 3].map(function (v) { return '<span class="' + (v === 5 ? "hot" : "") + '" style="font-size:' + (18 + v * 8) + "px;font-stretch:" + (60 + v * 16) + "%" + (v ? "" : ";color:var(--ink-2)") + '">' + v + "</span>"; }).join("");
+
+  var OPP = "#0f7a6c";
+  function hue(h) { var c = hex2rgb(h).map(function (v) { return v / 255; }), mx = Math.max.apply(null, c), mn = Math.min.apply(null, c), d = mx - mn; if (!d) return -1; var x = mx === c[0] ? ((c[1] - c[2]) / d) % 6 : mx === c[1] ? (c[2] - c[0]) / d + 2 : (c[0] - c[1]) / d + 4; return (x * 60 + 360) % 360; }
+  function apply(n) {
+    var club = CLUBS[n];
+    setClub(n, { light: "#efebe3" });
+    var R = document.documentElement.style;
+    R.setProperty("--club-line", reach(club, "#efebe3", 3, "#000000"));
+    /* clash rule: an opponent close in hue to our colour is drawn in ink */
+    var hc = hue(club), ho = hue(OPP), clash = hc >= 0 && Math.min(Math.abs(hc - ho), 360 - Math.abs(hc - ho)) < 40;
+    R.setProperty("--opp", clash ? "#141518" : OPP); R.setProperty("--opp-line", clash ? "#141518" : OPP); R.setProperty("--opp-on-dark", clash ? "#f4f1ea" : "#39c7b3");
+    drawAll(document);
+  }
+  var start = "rot"; try { start = new URLSearchParams(location.search).get("club") || localStorage.getItem("r2club") || "rot"; } catch (e) {}
+  if (/still/.test(location.search)) document.querySelectorAll(".play").forEach(function (e) { e.classList.remove("play"); });
+  document.querySelectorAll("[data-club]").forEach(function (b) { b.addEventListener("click", function () { apply(b.dataset.club); }); });
+  apply(start);
+  /* an insight points at its lines in the print */
+  document.querySelectorAll(".three li[data-f]").forEach(function (li) {
+    var pr = li.closest(".app").querySelector(".print");
+    li.addEventListener("mouseenter", function () { pr.classList.add("focus", "f-" + li.dataset.f); });
+    li.addEventListener("mouseleave", function () { pr.classList.remove("focus", "f-" + li.dataset.f); });
+  });
+})();
+</script>
+</body>
+</html>

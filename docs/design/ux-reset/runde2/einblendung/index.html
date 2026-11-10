@@ -99,7 +99,7 @@ body { margin: 0; font-family: var(--f); color: var(--n-ink); background: #2b2f3
 /* svg text */
 svg text { font-family: var(--f); fill: var(--n-ink); }
 svg .tok { font-weight: 800; font-stretch: 80%; fill: var(--n-ink); }
-svg .tok.us { fill: var(--club-ink); }
+svg .tok.us { fill: var(--club-tok-ink); }
 svg .tag text { font-weight: 700; font-stretch: 85%; fill: #fff; }
 svg .tag text.dim { font-weight: 500; fill: var(--n-ink-2); }
 svg .zn { font-weight: 900; fill: var(--n-ink); }
@@ -421,10 +421,10 @@ table.tb .ok svg { width: 18px; height: 18px; vertical-align: -3px; }
 <div class="app phone" data-shot="spiel-phone">
   <header class="ptop"><span class="crest">HCZ</span><b>HC Zürichsee<small>Herren 1</small></b><button class="ibtn" aria-label="Suchen"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l5 5"/></svg></button><button class="ibtn plus" aria-label="Video hochladen"><svg viewBox="0 0 20 20" stroke="currentColor" stroke-width="2.6"><path d="M10 3v14M3 10h14"/></svg></button></header>
   <section class="endstand" style="padding:16px 16px 0">
-    <div class="es" style="height:auto;grid-template-columns:1fr auto 1fr">
-      <div class="tm us" style="padding:12px 24px 12px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)"><b style="font-size:22px">Zürichsee</b><small style="font-size:12px">Heim</small></div>
-      <div class="score" style="padding:0 6px"><span style="font-size:44px;padding:0 6px" class="num">26</span><i style="height:32px"></i><span style="font-size:44px;padding:0 6px" class="num">18</span></div>
-      <div class="tm them" style="padding:12px 12px 12px 24px;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%)"><b style="font-size:22px">Thalwil</b><small style="font-size:12px">Rang 5</small></div>
+    <div class="es" style="height:auto;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)">
+      <div class="tm us" style="padding:12px 24px 12px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)"><b style="font-size:20px">Zürichsee</b><small style="font-size:12px">Heim</small></div>
+      <div class="score" style="padding:0 6px"><span style="font-size:36px;padding:0 4px" class="num">26</span><i style="height:28px"></i><span style="font-size:36px;padding:0 4px" class="num">18</span></div>
+      <div class="tm them" style="padding:12px 12px 12px 24px;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%)"><b style="font-size:20px">Thalwil</b><small style="font-size:12px">Rang 5</small></div>
     </div>
     <p class="esline" style="font-size:12px;padding:8px 0 12px;flex-wrap:wrap;gap:4px 16px"><span>Halbzeit 13:9</span><span>Sa., 7. Nov. · Halle Seefeld</span></p>
     <nav class="tabs" style="gap:0"><a href="#" aria-current="page" style="padding:0 14px;font-size:18px">Spiel</a><a href="#" style="padding:0 12px;font-size:18px">Video</a><a href="#" style="padding:0 12px;font-size:18px">Zahlen</a><a class="q" href="#" style="padding:0 0 0 8px;font-size:18px"><em>3</em>Prüfen</a></nav>
@@ -712,7 +712,7 @@ function scene(svg, t) {
   if (S.shot && t >= 0.85) h += arrow(V.f(S.shot[0]), V.f(S.shot[1]), k);
   ends.forEach(function (e) {
     var p = e[1];
-    if (e[2]) h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="var(--club)" stroke="var(--club-ring)" stroke-width="1.5"' + NS + "/>";
+    if (e[2]) h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="var(--club-tok)" stroke="var(--club-ring)" stroke-width="1.5"' + NS + "/>";
     else h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r * 0.92) + '" fill="var(--floor)" stroke="var(--opp-line)" stroke-width="2"' + NS + "/>";
     if (svg.hasAttribute("data-num")) h += '<text x="' + p[0] + '" y="' + (p[1] + r * 0.36) + '" font-size="' + (r * 1.02) + '" text-anchor="middle" class="tok' + (e[2] ? " us" : "") + '">' + e[0] + "</text>";
     if (e[0] === S.focus && !e[2] === (svg.dataset.scene !== "kr") && t >= 1 && labels) h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r * 2.1 + '" fill="none" stroke="var(--tele)" stroke-width="2.5"' + NS + "/>";
@@ -752,7 +752,7 @@ function shots(svg) {
   var S = [[38.8, 1.6, 1], [38.2, 2.8, 0], [38.6, 18.3, 1], [37.9, 17.6, 1], [37.4, 16.9, 0], [33.6, 10.2, 1], [33.9, 9.4, 1], [34.1, 11.0, 1], [34.0, 8.6, 0], [34.3, 10.8, 1], [34.4, 9.0, 1], [33.8, 12.0, 1], [30.1, 5.0, 1], [29.6, 6.2, 0], [29.0, 4.4, 0], [28.6, 10.1, 1], [28.9, 9.0, 0], [29.3, 11.6, 1], [30.0, 14.6, 1], [29.4, 15.6, 0], [28.7, 13.5, 1], [31.0, 15.9, 0], [33.0, 10.0, 1], [33.0, 10.0, 1], [35.6, 7.0, 1], [35.2, 13.0, 1], [36.4, 5.0, 0], [31.6, 3.4, 1], [28.2, 7.4, 0], [27.6, 12.0, 0]];
   S.forEach(function (s) {
     var p = V.f([s[0], s[1]]), r = 5 / k;
-    h += s[2] ? '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="var(--club)" stroke="var(--club-ring)" stroke-width="1.2"' + NS + "/>"
+    h += s[2] ? '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="var(--club-tok)" stroke="var(--club-ring)" stroke-width="1.2"' + NS + "/>"
       : '<path d="M' + (p[0] - r) + " " + (p[1] - r) + "l" + 2 * r + " " + 2 * r + "M" + (p[0] + r) + " " + (p[1] - r) + "l" + -2 * r + " " + 2 * r + '" stroke="var(--opp-line)" stroke-width="2" stroke-linecap="round"' + NS + "/>";
   });
   svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
@@ -853,7 +853,11 @@ function play(svg) {
   function apply(n) {
     setClub(n, { dark: "#0f2333", light: "#f2f1ec" });
     /* our token ring separates a dark club colour from the dark floor */
-    document.documentElement.style.setProperty("--club-ring", contrast(CLUBS[n], "#0f2333") < 2 ? "#e9eef2" : "#0a0d11");
+    /* a club colour that disappears on the dark floor is drawn as its light shift, so our marks stay solid and theirs hollow */
+    var dark = contrast(CLUBS[n], "#0f2333") < 2, R = document.documentElement.style;
+    R.setProperty("--club-tok", dark ? getComputedStyle(document.documentElement).getPropertyValue("--club-on-dark") : CLUBS[n]);
+    R.setProperty("--club-tok-ink", dark ? "#0a0d11" : getComputedStyle(document.documentElement).getPropertyValue("--club-ink"));
+    R.setProperty("--club-ring", "#0a0d11");
     drawAll(document);
     document.querySelectorAll("svg[data-t]").forEach(function (s) { scene(s, +s.dataset.t); });
   }
