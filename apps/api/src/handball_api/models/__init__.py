@@ -64,7 +64,7 @@ from handball_api.models.sessions import (
     TrainingSession,
     TrainingSlot,
 )
-from handball_api.models.sharing import ShareLink
+from handball_api.models.sharing import ConsentLink, ShareLink
 from handball_api.models.tactics import Play
 from handball_api.models.tenancy import (
     Invitation,
@@ -95,6 +95,7 @@ __all__ = [
     "CollectionItem",
     "Comment",
     "Consent",
+    "ConsentLink",
     "Correction",
     "DeviceToken",
     "Event",

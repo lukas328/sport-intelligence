@@ -2791,5 +2791,25 @@
     "to": "bis",
     "fromMatch": "Fürs Team zusammenstellen",
     "fromMatchTitle": "Gegen {opponent}"
+  },
+  "consentLink": {
+    "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",
+    "title": "Einwilligung für {team}",
+    "form": "Einwilligung",
+    "player": "Für wen?",
+    "whoAmI": "Wer gibt die Einwilligung?",
+    "by_self": "Ich selbst (ab 18)",
+    "by_parent": "Mutter oder Vater",
+    "by_guardian": "Andere erziehungsberechtigte Person",
+    "name": "Dein Vor- und Nachname",
+    "agree": "Damit bin ich einverstanden",
+    "note": "Du kannst die Einwilligung jederzeit mit demselben Link ändern. Was nicht angekreuzt ist, gilt als nicht erlaubt.",
+    "send": "Einwilligung senden",
+    "thanks": "Danke. Die Einwilligung für {player} ist gespeichert.",
+    "staffTitle": "Einwilligung per Link",
+    "status": "{n, plural, =0 {Noch keine Antwort} one {# Antwort} other {# Antworten}} · gültig bis {date}",
+    "create": "Link für den Team-Chat erstellen",
+    "renew": "Neuen Link erstellen",
+    "revoke": "Link sperren"
   }
 }

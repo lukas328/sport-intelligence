@@ -2791,5 +2791,25 @@
     "to": "to",
     "fromMatch": "Put together for the team",
     "fromMatchTitle": "Against {opponent}"
+  },
+  "consentLink": {
+    "invalid": "This link is no longer valid. Ask the team for the new one.",
+    "title": "Consent for {team}",
+    "form": "Consent",
+    "player": "For whom?",
+    "whoAmI": "Who gives the consent?",
+    "by_self": "Myself (18 or older)",
+    "by_parent": "Mother or father",
+    "by_guardian": "Another guardian",
+    "name": "Your first and last name",
+    "agree": "I agree to",
+    "note": "You can change the consent at any time with the same link. What is not ticked is not allowed.",
+    "send": "Send consent",
+    "thanks": "Thank you. The consent for {player} is saved.",
+    "staffTitle": "Consent by link",
+    "status": "{n, plural, =0 {No answer yet} one {# answer} other {# answers}} · valid until {date}",
+    "create": "Create a link for the team chat",
+    "renew": "Create a new link",
+    "revoke": "Revoke link"
   }
 }

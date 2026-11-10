@@ -470,6 +470,7 @@ ENDPOINTS += [
     ),
     ("GET share links", VIDEO_WORK, lambda a, w: a.get(w.t("/share-links"))),
     ("GET collections", VIDEO_WORK, lambda a, w: a.get(w.t("/collections"))),
+    ("GET consent link", ORGANISE, lambda a, w: a.get(w.t("/consent-link"))),
     (
         "POST collection",
         VIDEO_WORK,

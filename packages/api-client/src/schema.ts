@@ -245,6 +245,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/consent/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Public Page
+         * @description What the public consent page shows (no sign-in).
+         */
+        get: operations["public_page_v1_consent__token__get"];
+        put?: never;
+        /**
+         * Answer
+         * @description A player (adult) or a parent or guardian answers for one player.
+         */
+        post: operations["answer_v1_consent__token__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/federations": {
         parameters: {
             query?: never;
@@ -3494,6 +3518,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/consent-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Link
+         * @description The team's active consent link (without its token), or null.
+         */
+        get: operations["get_link_v1_orgs__org_id__teams__team_id__consent_link_get"];
+        put?: never;
+        /**
+         * Create Link
+         * @description A new link for the team chat (90 days); the previous one stops working.
+         */
+        post: operations["create_link_v1_orgs__org_id__teams__team_id__consent_link_post"];
+        /** Revoke Link */
+        delete: operations["revoke_link_v1_orgs__org_id__teams__team_id__consent_link_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
         parameters: {
             query?: never;
@@ -5622,6 +5671,22 @@ export interface components {
              */
             status: "ok" | "error";
         };
+        /** ConsentAnswer */
+        ConsentAnswer: {
+            /**
+             * Agreed
+             * @description purposes agreed to; the others asked are withdrawn
+             */
+            agreed?: components["schemas"]["ConsentKind"][];
+            given_by: components["schemas"]["ConsentGivenBy"];
+            /** Given By Name */
+            given_by_name: string;
+            /**
+             * Player Id
+             * Format: uuid
+             */
+            player_id: string;
+        };
         /** ConsentCreate */
         ConsentCreate: {
             /** Document Ref */
@@ -5647,6 +5712,57 @@ export interface components {
          * @enum {string}
          */
         ConsentKind: "analysis" | "highlights_internal" | "highlights_public" | "public_profile" | "training_data";
+        /** ConsentLinkCreated */
+        ConsentLinkCreated: {
+            /**
+             * Answers
+             * @description consents that came in through the link
+             */
+            answers: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Token
+             * @description shown once; the page is /einwilligung/<token>
+             */
+            token: string;
+        };
+        /** ConsentLinkOut */
+        ConsentLinkOut: {
+            /**
+             * Answers
+             * @description consents that came in through the link
+             */
+            answers: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** ConsentOut */
         ConsentOut: {
             /** Document Ref */
@@ -8771,6 +8887,37 @@ export interface components {
             /** Providers */
             providers: string[];
         };
+        /** PublicConsentPage */
+        PublicConsentPage: {
+            /** Club */
+            club: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Players */
+            players: components["schemas"]["PublicPlayer"][];
+            /** Purposes */
+            purposes: components["schemas"]["ConsentKind"][];
+            /** Team */
+            team: string;
+            /** Youth */
+            youth: boolean;
+        };
+        /** PublicPlayer */
+        PublicPlayer: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Label
+             * @description number, first name, initial; never a last name
+             */
+            label: string;
+        };
         /** PublicProfileOut */
         PublicProfileOut: {
             /** Bio */
@@ -10824,6 +10971,74 @@ export interface operations {
                 };
                 content: {
                     "text/calendar": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_page_v1_consent__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicConsentPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    answer_v1_consent__token__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentAnswer"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -17949,6 +18164,100 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CollectionOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_link_v1_orgs__org_id__teams__team_id__consent_link_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentLinkOut"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_link_v1_orgs__org_id__teams__team_id__consent_link_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentLinkCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_link_v1_orgs__org_id__teams__team_id__consent_link_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

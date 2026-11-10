@@ -2791,5 +2791,25 @@
     "to": "à",
     "fromMatch": "Préparer pour l’équipe",
     "fromMatchTitle": "Contre {opponent}"
+  },
+  "consentLink": {
+    "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",
+    "title": "Consentement pour {team}",
+    "form": "Consentement",
+    "player": "Pour qui ?",
+    "whoAmI": "Qui donne le consentement ?",
+    "by_self": "Moi-même (18 ans ou plus)",
+    "by_parent": "Mère ou père",
+    "by_guardian": "Autre représentant légal",
+    "name": "Ton prénom et ton nom",
+    "agree": "J’accepte",
+    "note": "Tu peux modifier le consentement à tout moment avec le même lien. Ce qui n’est pas coché n’est pas autorisé.",
+    "send": "Envoyer le consentement",
+    "thanks": "Merci. Le consentement pour {player} est enregistré.",
+    "staffTitle": "Consentement par lien",
+    "status": "{n, plural, =0 {Pas encore de réponse} one {# réponse} other {# réponses}} · valable jusqu’au {date}",
+    "create": "Créer un lien pour le chat de l’équipe",
+    "renew": "Créer un nouveau lien",
+    "revoke": "Bloquer le lien"
   }
 }

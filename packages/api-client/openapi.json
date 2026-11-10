@@ -2350,6 +2350,39 @@
         "title": "ComponentStatus",
         "type": "object"
       },
+      "ConsentAnswer": {
+        "properties": {
+          "agreed": {
+            "description": "purposes agreed to; the others asked are withdrawn",
+            "items": {
+              "$ref": "#/components/schemas/ConsentKind"
+            },
+            "title": "Agreed",
+            "type": "array"
+          },
+          "given_by": {
+            "$ref": "#/components/schemas/ConsentGivenBy"
+          },
+          "given_by_name": {
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Given By Name",
+            "type": "string"
+          },
+          "player_id": {
+            "format": "uuid",
+            "title": "Player Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "player_id",
+          "given_by",
+          "given_by_name"
+        ],
+        "title": "ConsentAnswer",
+        "type": "object"
+      },
       "ConsentCreate": {
         "properties": {
           "document_ref": {
@@ -2411,6 +2444,76 @@
         ],
         "title": "ConsentKind",
         "type": "string"
+      },
+      "ConsentLinkCreated": {
+        "properties": {
+          "answers": {
+            "description": "consents that came in through the link",
+            "title": "Answers",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "token": {
+            "description": "shown once; the page is /einwilligung/<token>",
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "expires_at",
+          "answers",
+          "created_at",
+          "token"
+        ],
+        "title": "ConsentLinkCreated",
+        "type": "object"
+      },
+      "ConsentLinkOut": {
+        "properties": {
+          "answers": {
+            "description": "consents that came in through the link",
+            "title": "Answers",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "expires_at",
+          "answers",
+          "created_at"
+        ],
+        "title": "ConsentLinkOut",
+        "type": "object"
       },
       "ConsentOut": {
         "properties": {
@@ -11670,6 +11773,71 @@
         "title": "ProvidersOut",
         "type": "object"
       },
+      "PublicConsentPage": {
+        "properties": {
+          "club": {
+            "title": "Club",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "players": {
+            "items": {
+              "$ref": "#/components/schemas/PublicPlayer"
+            },
+            "title": "Players",
+            "type": "array"
+          },
+          "purposes": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentKind"
+            },
+            "title": "Purposes",
+            "type": "array"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          },
+          "youth": {
+            "title": "Youth",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "club",
+          "team",
+          "youth",
+          "purposes",
+          "players",
+          "expires_at"
+        ],
+        "title": "PublicConsentPage",
+        "type": "object"
+      },
+      "PublicPlayer": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "description": "number, first name, initial; never a last name",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "PublicPlayer",
+        "type": "object"
+      },
       "PublicProfileOut": {
         "properties": {
           "bio": {
@@ -17011,6 +17179,102 @@
         "summary": "Feed",
         "tags": [
           "training"
+        ]
+      }
+    },
+    "/v1/consent/{token}": {
+      "get": {
+        "description": "What the public consent page shows (no sign-in).",
+        "operationId": "public_page_v1_consent__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicConsentPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Page",
+        "tags": [
+          "consents"
+        ]
+      },
+      "post": {
+        "description": "A player (adult) or a parent or guardian answers for one player.",
+        "operationId": "answer_v1_consent__token__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Answer V1 Consent  Token  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Answer",
+        "tags": [
+          "consents"
         ]
       }
     },
@@ -28532,6 +28796,164 @@
         "summary": "Collection From Match",
         "tags": [
           "collections"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/consent-link": {
+      "delete": {
+        "operationId": "revoke_link_v1_orgs__org_id__teams__team_id__consent_link_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Link",
+        "tags": [
+          "consents"
+        ]
+      },
+      "get": {
+        "description": "The team's active consent link (without its token), or null.",
+        "operationId": "get_link_v1_orgs__org_id__teams__team_id__consent_link_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ConsentLinkOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Link V1 Orgs  Org Id  Teams  Team Id  Consent Link Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Link",
+        "tags": [
+          "consents"
+        ]
+      },
+      "post": {
+        "description": "A new link for the team chat (90 days); the previous one stops working.",
+        "operationId": "create_link_v1_orgs__org_id__teams__team_id__consent_link_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentLinkCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Link",
+        "tags": [
+          "consents"
         ]
       }
     },

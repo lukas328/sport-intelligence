@@ -3,6 +3,7 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AccountLine, UnlinkedAccounts, useTeamMembers } from "./account-link";
+import { ConsentLinkBox } from "./consent-link";
 import { ConsentOverview } from "./consent-overview";
 import { useOptionalShell } from "@/components/shell/context";
 import { StatusEditor, StatusLine } from "./player-status";
@@ -245,6 +246,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
             {/* staff read it before filming (analysts too, read only); the API answers 403 for others
                 and the section stays hidden */}
             {staffView && <ConsentOverview orgId={orgId} teamId={teamId} seasonId={seasonId} />}
+            {staffView && <ConsentLinkBox orgId={orgId} teamId={teamId} />}
             {GROUPS.map(([g, positions]) => {
               const members = entries.filter((p) => (g === "other" ? !ALL_POSITIONS.includes(p.main_position ?? "") : (positions as readonly string[]).includes(p.main_position ?? "")));
               if (members.length === 0) return null;

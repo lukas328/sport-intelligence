@@ -27,3 +27,25 @@ class ShareLink(Base, EntityMixin, TenantMixin):
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )
+
+
+class ConsentLink(Base, EntityMixin, TenantMixin):
+    """One link per team for the team chat: players and parents give consent without an account
+    (SPEC section 1). Only the hash is stored; the link expires and can be revoked."""
+
+    __tablename__ = "consent_links"
+
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    season_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("seasons.id", ondelete="CASCADE"), nullable=False
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # how many consents came in through it
+    answers: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
