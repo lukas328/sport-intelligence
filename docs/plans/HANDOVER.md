@@ -13,6 +13,23 @@ dann `docs/plans/backlog.md`.
 - **Code-Prüfung vor der Übergabe** (PR 12, 13): die gefundenen Fehler sind behoben, die grösseren
   Umbauten stehen in `docs/plans/backlog.md` unter "Code health".
 
+## Nacht 2026-11-09/10 (Hauptsitzung)
+Gemergt (alle bei grüner CI): #16 bis #32.
+- Ball: Testset 2 mit 177 Bällen aus 42 neuen Hallen (`ml/ball/README.md`). Runde 6 schlägt Runde 3
+  in neuen Hallen klar (29 % gegen 15 %), hat aber viele Fehlalarme. Runde 7 (mehr Hallen per OWLv2
+  auf Kaggle, Testhallen ausgeschlossen, mehr Negative, Bewegungsunschärfe) läuft auf Kaggle
+  (`handball-ball-r7`); Auswertung auf Testset 2 folgt. Testspiele in `ml/ball/test_games.json` nie
+  fürs Training verwenden. OWL-Aufträge 4 bis 10 laufen auf Kaggle, nicht auf Modal.
+- Produkt: Ballbesitz nur bei laufender Uhr (#24); plausible Laufwerte, Konter, Torhüter-GSAx (#25);
+  Spielerstatus, Aufgaben-Fortschritt (#23); Einwilligungs-Übersicht, Saisonverlauf (#28);
+  eingeladene Spieler werden mit dem Kadereintrag verknüpft (#29, inkl. Abgleich über den
+  Kontonamen, entfernbar); Trainingszeiten, eigene Übungen (#30); Screens dazu (#26, #32).
+- Azure: Pause bis 0 Replikas (#21, #27); Registrierung ohne 500 bei Mailfehler und Bootstrap ohne
+  R2-Admin-Token (#31). Für Lukas: Migrations-Job neu starten, CORS-Regel aus dem Log
+  (`bootstrap_manual_step`) im R2-Dashboard setzen, Postmark/SMTP einrichten.
+- Offene Entscheide für Lukas: Einwilligungs-Übersicht auch für Analysten? Verknüpfung über den
+  Kontonamen beim Annehmen einer Einladung behalten?
+
 ## Sitzungen und wer was macht
 | Sitzung | Wo | Aufgabe |
 |---|---|---|
