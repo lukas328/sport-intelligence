@@ -549,3 +549,26 @@ it, see batch 3).
   focus, set-up, coaching points, "Im Verein teilen"); own drills can be edited and deleted,
   drills shared by other teams read "Geteilt von …". The unit form offers the team's whole list
   (own and club drills first, then the library).
+
+## Review round over the night's screens (UI session, 2026-11-10, after PR 32)
+
+Assignments, squad (status, accounts, consents), status panel, season line, training (times and
+generated units), drills and the drill form; desktop light and dark, phone, axe on every screen.
+
+Scores (anchor, one signal, hairlines, game language, type, edge states): assignments 3, 1, 4, 3,
+4, 3; squad 2, 1, 4, 4, 4, -; status panel 2, 1, 3, 4, 3, -; season line 3, 1, 4, 3, 4, 2;
+training 1, 1, 4, 3, 3, 3; drills 4, 1, 4, 5, 4, -; drill form 4, 1, 4, 4, 4, -.
+
+Fixed:
+- Training: the units of a whole season filled the page (8124 px, now 1746): the next four weeks
+  show, the rest folds; the training times sit above the units; "fällt aus" only in the next two
+  weeks; an empty unit reads "noch leer" (not "0 Min."); the holidays offered to skip are only
+  those on a training day.
+- Squad: "Abwesend bis auf Weiteres" without an end date; "Verknüpfen" is the primary action; the
+  status panel opens across the whole row on desktop.
+- Season line: one sentence instead of a row of zeros before the first match; "Torvorlagen".
+- Drills: "Bibliothek" heading above the static library.
+- axe: the sideways-scrolling consent and season tables are focusable regions.
+
+Not changed: the US date format in the screenshots is the test browser's language (native date
+fields follow the browser).

@@ -38,8 +38,18 @@ export function TrainingSlots({ orgId, teamId, season, onGenerated }: { orgId: s
   const [result, setResult] = useState<{ created: number; kept: number; skipped: number } | null>(null);
   const today = new Date().toISOString().slice(0, 10);
   const from = today > season.starts_on ? today : season.starts_on;
-  const holidays = holidaysBetween(from, season.ends_on);
-  const [skip, setSkip] = useState<string[]>(() => holidays.map((h) => h.date));
+  // only the holidays that fall on a training day matter
+  const days = new Set((slots.data ?? []).map((s) => s.weekday));
+  const isoDay = (d: string) => ((new Date(`${d}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+  const holidays = holidaysBetween(from, season.ends_on).filter((h) => days.has(isoDay(h.date)));
+  const [skipOff, setSkipOff] = useState<string[]>([]);
+  const [skipExtra, setSkipExtra] = useState<string[]>([]);
+  const skip = [...new Set([...holidays.map((h) => h.date).filter((d) => !skipOff.includes(d)), ...skipExtra])];
+  const setSkip = (f: (s: string[]) => string[]) => {
+    const next = f(skip);
+    setSkipOff(holidays.map((h) => h.date).filter((d) => !next.includes(d)));
+    setSkipExtra(next.filter((d) => !holidays.some((h) => h.date === d)));
+  };
   const [extra, setExtra] = useState("");
   const dayLabel = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { weekday: "short", day: "numeric", month: "short" });
   const weekday = (n: number) => format.dateTime(new Date(Date.UTC(2024, 0, n, 12)), { weekday: "short" }); // 1 Jan 2024 was a Monday

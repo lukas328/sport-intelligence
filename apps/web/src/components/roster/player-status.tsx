@@ -19,7 +19,7 @@ export function StatusLine({ status }: { status: Status | null | undefined }) {
   const until = status.until ? format.dateTime(new Date(`${status.until}T12:00:00`), { day: "numeric", month: "short" }) : null;
   return (
     <span className="font-semibold text-foreground" data-testid="player-status">
-      {until ? t(`${status.kind}Until`, { date: until }) : t(status.kind)}
+      {until ? t(`${status.kind}Until`, { date: until }) : t(`${status.kind}Open`)}
       {status.note && <span className="font-normal text-muted">{` · ${status.note}`}</span>}
     </span>
   );
