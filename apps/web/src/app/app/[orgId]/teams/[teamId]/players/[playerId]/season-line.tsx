@@ -89,7 +89,10 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
           description={t("summary", { matches: l.totals.matches, involved: l.totals.matches_involved, present: l.totals.matches_present })}
         />
       </div>
-      {/* the season in one printed row, every count leads to its scenes */}
+      {/* the season in one printed row, every count leads to its scenes; nothing played: one sentence */}
+      {l.totals.matches === 0 ? (
+        <p className="text-[0.9375rem] text-muted" data-testid="season-line-empty">{t("noMatchesYet")}</p>
+      ) : (
       <dl className="grid grid-cols-3 gap-x-6 gap-y-4 border-y-2 border-foreground py-4 sm:grid-cols-4 lg:grid-cols-7" data-testid="season-line-totals">
         {cols.map((c) => (
           <div key={c.key}>
@@ -98,9 +101,8 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
           </div>
         ))}
       </dl>
-      {l.matches.length === 0 ? (
-        <p className="text-[0.9375rem] text-muted">{t("noMatches")}</p>
-      ) : (
+      )}
+      {l.matches.length === 0 ? null : (
         <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("matches")}>
           <table className="w-full min-w-[36rem] text-sm" data-testid="season-line-matches">
             <caption className="sr-only">{t("matches")}</caption>

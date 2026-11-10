@@ -1237,7 +1237,8 @@
     "focusLabel": "Focus",
     "shareLabel": "Share in the club (every team can use it, only you can change it)",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "library": "Library"
   },
   "opponent": {
     "title": "Opponent profile",
@@ -2059,7 +2060,8 @@
     "outOnDay": "{n, plural, one {1 is out:} other {# are out:}}",
     "deleteConfirm": "Delete “{title}”?",
     "upcomingMore": "{n, plural, one {Show 1 more unit} other {Show all # more units}}",
-    "upcomingLess": "Only the next four weeks"
+    "upcomingLess": "Only the next four weeks",
+    "empty": "still empty"
   },
   "schedule": {
     "nav": "My dates",
@@ -2667,7 +2669,9 @@
     "until": "Until (inclusive)",
     "note": "Note",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "absentOpen": "Away until further notice",
+    "injuredOpen": "Injured until further notice"
   },
   "accountLink": {
     "title": "{n, plural, one {1 account without a squad entry} other {# accounts without a squad entry}}",
@@ -2699,7 +2703,8 @@
     "home": "vs {opponent}",
     "away": "away at {opponent}",
     "noMatches": "No matches this season yet.",
-    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded."
+    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded.",
+    "noMatchesYet": "No match played this season yet. The figures appear after the first match with a report or tagging."
   },
   "slots": {
     "title": "Training times {season}",

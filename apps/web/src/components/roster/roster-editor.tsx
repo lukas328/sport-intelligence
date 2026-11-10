@@ -250,7 +250,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                   </h3>
                   <ul className="grid border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-10 xl:grid-cols-3">
                     {members.map((p) => (
-              <li key={p.id} className="group relative flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-foreground/15 py-3.5 pr-1" data-testid="roster-row">
+              <li key={p.id} className={cn("group relative flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-foreground/15 py-3.5 pr-1", statusFor === p.player_id && "sm:col-span-2 xl:col-span-3")} data-testid="roster-row">
                 <span className={cn("w-14 shrink-0 text-center font-score text-[2.75rem] leading-none", p.status ? "text-muted" : "text-accent")} aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
                   {p.jersey_number ?? "–"}
                 </span>
