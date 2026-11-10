@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { FileField } from "@/components/ui/file-field";
+import { TeamFeaturesSection } from "@/components/settings/team-features";
 
 type Org = Schemas["OrgOut"];
 type Team = Schemas["TeamOut"];
@@ -30,9 +31,12 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
   const official = org.official_club_id != null;
   const inviteTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach").map((tm) => ({ id: tm.id, name: tm.name }));
   const people = isAdmin || inviteTeams.length > 0;
+  // who may change a team's settings: admins and its coaches (policy TEAM_UPDATE)
+  const featureTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach");
   const sections: [string, string][] = [
     ...(isAdmin ? ([["club-section", t("settings.club")], ["billing", t("billing.title")]] as [string, string][]) : []),
     ...(people ? ([["people-section", t("settings.people")]] as [string, string][]) : []),
+    ...(featureTeams.length > 0 ? ([["team-features", t("settings.teamFeatures")]] as [string, string][]) : []),
     ...(isAdmin && official ? ([["official-section", t("verification.section")]] as [string, string][]) : []),
     ["account-section", t("account.title")],
     ["security", t("settings.security")],
@@ -62,6 +66,7 @@ export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: 
               <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
             </div>
           )}
+          <TeamFeaturesSection orgId={org.id} teams={featureTeams} />
           {isAdmin && official && (
             <section id="official-section" aria-labelledby="official-title" className="space-y-3">
               <h2 id="official-title" className="text-lg font-semibold">

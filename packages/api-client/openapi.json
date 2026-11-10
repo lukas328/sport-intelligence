@@ -14118,12 +14118,45 @@
           "players_see_team_stats": {
             "title": "Players See Team Stats",
             "type": "boolean"
+          },
+          "team_features": {
+            "default": false,
+            "title": "Team Features",
+            "type": "boolean"
           }
         },
         "required": [
           "players_see_team_stats"
         ],
         "title": "TeamSettings",
+        "type": "object"
+      },
+      "TeamSettingsUpdate": {
+        "properties": {
+          "players_see_team_stats": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Players See Team Stats"
+          },
+          "team_features": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Features"
+          }
+        },
+        "title": "TeamSettingsUpdate",
         "type": "object"
       },
       "TeamUpdate": {
@@ -14201,7 +14234,7 @@
           "settings": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/TeamSettings"
+                "$ref": "#/components/schemas/TeamSettingsUpdate"
               },
               {
                 "type": "null"

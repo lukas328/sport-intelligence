@@ -52,7 +52,8 @@ export function AppShell({
   }, [urlTeam]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo<ShellValue>(() => ({ org, orgs, teams, team, mode, me, setTeam }), [org, orgs, teams, team, mode, me, setTeam]);
-  const items = navFor(mode, org.id, team?.id ?? null);
+  const navOpts = { teamFunctions: team?.team_features ?? false };
+  const items = navFor(mode, org.id, team?.id ?? null, navOpts);
   const active = destOf(path, mode);
   const home = startHref(mode, org.id, team?.id ?? null);
   // one action reachable from everywhere for staff (SPEC section 6)
@@ -128,7 +129,7 @@ export function AppShell({
               {items.map((it) => {
                 const Icon = DEST_ICON[it.key];
                 const on = active === it.key;
-                const subs = on ? sectionsFor(it.key, mode, org.id, team?.id ?? null) : [];
+                const subs = on ? sectionsFor(it.key, mode, org.id, team?.id ?? null, navOpts) : [];
                 const subOn = sectionOf(path);
                 const here = on && !subs.some((x) => x.key === subOn);
                 return (

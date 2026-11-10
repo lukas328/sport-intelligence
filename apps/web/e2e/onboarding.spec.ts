@@ -90,8 +90,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
   await expect(player.getByRole("main")).toContainText("Paul");
-  // players see four places: today, clips, dates, team
-  await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(4);
+  // "Teamfunktionen" is off for a new team: players see the start and the team only (ADR 029)
+  await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(2);
   await player.getByRole("link", { name: "Team", exact: true }).click();
   await expect(player.getByTestId("roster-row")).toHaveCount(4);
   // players cannot edit the roster

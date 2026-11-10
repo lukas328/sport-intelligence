@@ -346,7 +346,9 @@
     "recoveryHint": "Keep these codes safe (for example printed). Each code works once when you cannot use your authenticator app. They are shown only now.",
     "recoveryLeft": "{count, plural, one {# recovery code} other {# recovery codes}} left.",
     "recoveryNew": "New recovery codes",
-    "twoFactorAdmins": "For club admins it is required after 14 days."
+    "twoFactorAdmins": "For club admins it is required after 14 days.",
+    "teamFeatures": "Team features",
+    "teamFeaturesHint": "Training, dates, RSVP, tasks and own areas for players and parents. Switched off, everything stays stored and comes back when you switch it on."
   },
   "dashboard": {
     "teamsTitle": "Teams",

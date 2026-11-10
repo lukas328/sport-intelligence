@@ -91,7 +91,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 </Command.Group>
               )}
               <Command.Group heading={t("palette.go")} className={group}>
-                {navFor(mode, org.id, team?.id ?? null).map((it) => {
+                {navFor(mode, org.id, team?.id ?? null, { teamFunctions: team?.team_features ?? false }).map((it) => {
                   const Icon = DEST_ICON[it.key];
                   return row(it.key, t(`shell.${it.key}`), <Icon />, it.href);
                 })}

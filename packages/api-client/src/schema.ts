@@ -9538,6 +9538,18 @@ export interface components {
         TeamSettings: {
             /** Players See Team Stats */
             players_see_team_stats: boolean;
+            /**
+             * Team Features
+             * @default false
+             */
+            team_features?: boolean;
+        };
+        /** TeamSettingsUpdate */
+        TeamSettingsUpdate: {
+            /** Players See Team Stats */
+            players_see_team_stats?: boolean | null;
+            /** Team Features */
+            team_features?: boolean | null;
         };
         /** TeamUpdate */
         TeamUpdate: {
@@ -9551,7 +9563,7 @@ export interface components {
             level?: string | null;
             /** Name */
             name?: string | null;
-            settings?: components["schemas"]["TeamSettings"] | null;
+            settings?: components["schemas"]["TeamSettingsUpdate"] | null;
         };
         /** TemplateIn */
         TemplateIn: {

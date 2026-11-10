@@ -5,6 +5,7 @@ import { DRILLS } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/ui/confirm";
@@ -316,6 +317,10 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="sr-only">{t("title")}</h2>
         <p className="max-w-xl text-sm text-muted">{t("hint")}</p>
+        {/* the drill library left the navigation with the training plan; this is its way in */}
+        <Link href={`/app/${orgId}/drills`} className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
+          {tr("shell.drills")}
+        </Link>
         {canPlan && (
           <Button onClick={() => setEditing(editing === "new" ? null : "new")}>
             <Plus aria-hidden />

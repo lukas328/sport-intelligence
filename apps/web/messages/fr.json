@@ -346,7 +346,9 @@
     "recoveryHint": "Conserve ces codes en lieu sûr (par exemple imprimés). Chaque code fonctionne une fois si tu n'as pas accès à ton application d'authentification. Ils ne sont affichés que maintenant.",
     "recoveryLeft": "{count, plural, one {# code de récupération restant} other {# codes de récupération restants}}.",
     "recoveryNew": "Nouveaux codes de récupération",
-    "twoFactorAdmins": "Pour les admins du club, elle est obligatoire après 14 jours."
+    "twoFactorAdmins": "Pour les admins du club, elle est obligatoire après 14 jours.",
+    "teamFeatures": "Fonctions d'équipe",
+    "teamFeaturesHint": "Entraînement, dates, réponses, tâches et espaces pour joueuses, joueurs et parents. Désactivé, tout reste enregistré et revient à la réactivation."
   },
   "dashboard": {
     "teamsTitle": "Équipes",

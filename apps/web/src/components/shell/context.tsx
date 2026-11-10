@@ -10,6 +10,8 @@ export interface ShellTeam {
   is_youth: boolean;
   season: string | null;
   season_id: string | null;
+  /** "Teamfunktionen" (ADR 029): training, dates, RSVP, tasks, player and parent areas */
+  team_features: boolean;
 }
 
 export interface ShellOrg {

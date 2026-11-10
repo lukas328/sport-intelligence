@@ -34,6 +34,7 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           is_youth: x.is_youth,
           season: x.current_season ? t("roster.season", { label: x.current_season.label }) : null,
           season_id: x.current_season?.id ?? null,
+          team_features: x.settings.team_features ?? false,
         }))}
         me={{ name: me.name, email: me.email }}
         savedTeam={savedTeam}

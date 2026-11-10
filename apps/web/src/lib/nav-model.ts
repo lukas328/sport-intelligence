@@ -38,8 +38,17 @@ export function uploadHref(orgId: string, teamId: string | null): string | null 
   return teamId ? `/app/${orgId}/teams/${teamId}/matches?upload=1` : null;
 }
 
-export function navFor(mode: Mode, orgId: string, teamId: string | null): NavItem[] {
+/**
+ * Team setting "Teamfunktionen" (ADR 029). Off: training, dates, RSVP, tasks and the destinations
+ * of players and parents are out of the navigation and the search. Their routes stay reachable.
+ */
+export interface NavOptions {
+  teamFunctions?: boolean;
+}
+
+export function navFor(mode: Mode, orgId: string, teamId: string | null, opts: NavOptions = {}): NavItem[] {
   const org = `/app/${orgId}`;
+  const on = Boolean(opts.teamFunctions);
   const team: string | null = teamId ? `${org}/teams/${teamId}` : null;
   const items: (NavItem | null)[] =
     mode === "staff"
@@ -52,12 +61,12 @@ export function navFor(mode: Mode, orgId: string, teamId: string | null): NavIte
       : mode === "player"
         ? [
             { key: "today", href: org },
-            { key: "scenes", href: `${org}/feed` },
-            { key: "dates", href: `${org}/schedule` },
+            on ? { key: "scenes", href: `${org}/feed` } : null,
+            on ? { key: "dates", href: `${org}/schedule` } : null,
             team ? { key: "team", href: team } : null,
           ]
         : mode === "family"
-          ? [{ key: "today", href: org }, { key: "dates", href: `${org}/schedule` }, team ? { key: "team", href: team } : null]
+          ? [{ key: "today", href: org }, on ? { key: "dates", href: `${org}/schedule` } : null, team ? { key: "team", href: team } : null]
           : [{ key: "matches", href: team ? `${team}/matches` : org }, team ? { key: "team", href: team } : null];
   return items.filter((i): i is NavItem => Boolean(i));
 }
@@ -148,10 +157,11 @@ export interface SubItem {
 
 /**
  * The one level of tabs inside a destination, never more than four. Staff: Szenen = search,
- * collections, plays, table. Spiele, Saison and Team have no tabs (a single tab is no tab).
+ * collections, plays, table. Spiele and Saison have no tabs; Team has none either (a single tab is
+ * no tab) unless "Teamfunktionen" is on: then squad, dates, training plan and tasks.
  * Players and parents: Team = squad and season.
  */
-export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: string | null): SubItem[] {
+export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: string | null, opts: NavOptions = {}): SubItem[] {
   const org = `/app/${orgId}`;
   const team = teamId ? `${org}/teams/${teamId}` : null;
   const staff = mode === "staff";
@@ -161,6 +171,14 @@ export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: strin
       { key: "collections", href: `${team}/library` },
       { key: "plays", href: `${team}/plays` },
       { key: "matrix", href: `${team}/matrix` },
+    ];
+  }
+  if (dest === "team" && team && staff && opts.teamFunctions) {
+    return [
+      { key: "roster", href: team },
+      { key: "dates", href: `${org}/schedule` },
+      { key: "plan", href: `${team}/training` },
+      { key: "assignments", href: `${team}/assignments` },
     ];
   }
   if (dest === "team" && team && !staff) {

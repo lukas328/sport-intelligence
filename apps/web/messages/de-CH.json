@@ -346,7 +346,9 @@
     "recoveryHint": "Bewahre diese Codes sicher auf (zum Beispiel ausgedruckt). Jeder Code funktioniert einmal, wenn du keinen Zugriff auf deine Authenticator-App hast. Sie werden nur jetzt angezeigt.",
     "recoveryLeft": "{count, plural, one {# Wiederherstellungscode} other {# Wiederherstellungscodes}} übrig.",
     "recoveryNew": "Neue Wiederherstellungscodes",
-    "twoFactorAdmins": "Für Vereinsadmins ist sie nach 14 Tagen Pflicht."
+    "twoFactorAdmins": "Für Vereinsadmins ist sie nach 14 Tagen Pflicht.",
+    "teamFeatures": "Teamfunktionen",
+    "teamFeaturesHint": "Training, Termine, Zusagen, Aufgaben und eigene Bereiche für Spielerinnen, Spieler und Eltern. Ausgeschaltet bleibt alles gespeichert und kommt beim Einschalten zurück."
   },
   "dashboard": {
     "teamsTitle": "Teams",

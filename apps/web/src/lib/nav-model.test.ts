@@ -24,7 +24,6 @@ describe("navigation model", () => {
       expect(navFor(m, "o", T).length).toBeLessThanOrEqual(4);
       expect(navFor(m, "o", null).length).toBeGreaterThan(0);
     }
-    expect(navFor("player", "o", T).map((i) => i.key)).toEqual(["today", "scenes", "dates", "team"]);
     expect(navFor("guest", "o", T).map((i) => i.key)).toEqual(["matches", "team"]);
   });
 
@@ -80,6 +79,23 @@ describe("navigation model", () => {
     expect(sectionsFor("team", "player", "o", T).map((i) => i.key)).toEqual(["roster", "season"]);
     for (const d of ["today", "matches", "scenes", "season", "team", "dates"] as const)
       for (const m of ["staff", "player", "family", "guest"] as const) expect(sectionsFor(d, m, "o", T).length).toBeLessThanOrEqual(4);
+  });
+
+  it("hides training, dates, tasks and the player and parent destinations unless Teamfunktionen is on", () => {
+    const on = { teamFunctions: true };
+    // staff: the same four destinations either way; the team features become tabs of Team
+    expect(navFor("staff", "o", T, on).map((i) => i.key)).toEqual(["matches", "scenes", "season", "team"]);
+    expect(sectionsFor("team", "staff", "o", T, on).map((i) => i.key)).toEqual(["roster", "dates", "plan", "assignments"]);
+    expect(sectionsFor("team", "staff", "o", T)).toEqual([]);
+    // players and parents: their own scenes and the dates only with the setting
+    expect(navFor("player", "o", T).map((i) => i.key)).toEqual(["today", "team"]);
+    expect(navFor("player", "o", T, on).map((i) => i.key)).toEqual(["today", "scenes", "dates", "team"]);
+    expect(navFor("family", "o", T).map((i) => i.key)).toEqual(["today", "team"]);
+    expect(navFor("family", "o", T, on).map((i) => i.key)).toEqual(["today", "dates", "team"]);
+    // the routes stay reachable and keep a destination
+    expect(destOf(`${TEAM}/training`, "staff")).toBe("team");
+    expect(sectionOf(`${TEAM}/training`)).toBe("plan");
+    expect(sectionOf(`${TEAM}/assignments`)).toBe("assignments");
   });
 
   it("keeps the squad highlighted on the official data, join requests and a player's line", () => {

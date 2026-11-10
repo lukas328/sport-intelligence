@@ -43,7 +43,7 @@ function useArea() {
   const path = usePathname();
   const { org, team, mode } = useShell();
   const dest = destOf(path, mode);
-  const items = dest ? sectionsFor(dest, mode, org.id, team?.id ?? null).map((x) => ({ ...x, label: t(x.key) })) : [];
+  const items = dest ? sectionsFor(dest, mode, org.id, team?.id ?? null, { teamFunctions: team?.team_features ?? false }).map((x) => ({ ...x, label: t(x.key) })) : [];
   const page: string = path.replace(/^\/app\/[^/]+(\/teams\/[^/]+)?/, "").split("/")[1] ?? "";
   return { dest, items, active: sectionOf(path), page, org, team, mode };
 }
