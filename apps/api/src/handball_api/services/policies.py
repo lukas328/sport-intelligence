@@ -93,8 +93,9 @@ TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
     Action.PLAYER_STATUS: _VIDEO_WORK | _MANAGER,
     Action.CONSENT_READ: _ORGANISE,
     Action.CONSENT_WRITE: _ORGANISE,
-    # the team's consent states per purpose before filming: whoever manages roster and consents
-    Action.CONSENT_OVERVIEW: _ORGANISE,
+    # the team's consent states per purpose before filming: whoever manages roster and consents,
+    # and the analysts, who often film (decided by the owner, 2026-11-10)
+    Action.CONSENT_OVERVIEW: _ORGANISE | frozenset({TeamRole.ANALYST}),
     Action.TEAM_MEMBERS_MANAGE: _COACH,
     Action.INVITE_TEAM: _ORGANISE,
     Action.MATCH_READ: _READERS,
