@@ -148,9 +148,9 @@ table.st tr.me td:first-child::before { content: ""; display: inline-block; widt
 .tabbar a[aria-current]::before { content: ""; position: absolute; left: 0; right: 0; top: -2px; height: 6px; background: var(--club); box-shadow: 0 0 0 1px var(--club-edge) inset; }
 .phone .face .tm { top: 12px; font-size: 12px; } .phone .face .tm b { font-size: 17px; }
 .phone .face .tm.us { left: 12px; } .phone .face .tm.them { right: 12px; }
-.phone .face .big { font-size: 84px; }
+.phone .face .big { font-size: 80px; top: 48%; }
 .phone .face .big.us { right: calc(50% + 12px); } .phone .face .big.them { left: calc(50% + 12px); }
-.phone .face .sub { bottom: 10px; font-size: 12px; } .phone .face .sub.us { right: calc(50% + 12px); } .phone .face .sub.them { left: calc(50% + 12px); }
+.phone .face .sub { top: 56px; bottom: auto; font-size: 12px; } .phone .face .sub.us { left: 12px; right: auto; } .phone .face .sub.them { right: 12px; left: auto; }
 .pmeta { padding: 10px 16px; font-size: 13px; color: var(--ink-2); border-bottom: 2px solid var(--ink); }
 .ptitle { padding: 24px 16px 0; }
 .ptitle .kick { font-size: 13px; color: var(--ink-2); margin-bottom: 8px; }
@@ -295,7 +295,7 @@ table.tb .ok svg { width: 18px; height: 18px; vertical-align: -3px; }
   <p class="qline"><span class="tag">Prüfen</span><a class="lnk" href="#" style="min-height:0">3 Fragen offen, 1 Minute</a></p>
   <div class="cols">
     <section><div class="h"><b>Alle Spiele</b><span>2 von 5 ohne Video</span></div>
-      <div class="game"><div class="when">Sa<b>31.10.</b>auswärts</div><svg class="gl" data-match="staefa" data-opp="staefa" data-w="128" data-h="64" data-flow aria-hidden="true"></svg><div><h4>BSV Stäfa</h4><p>33 Szenen · 2 Dinge · Ballverluste im Aufbau</p></div><div class="res l"><span class="score" data-score="19:26"></span><small>Niederlage</small></div></div>
+      <div class="game"><div class="when">Sa<b>31.10.</b>auswärts</div><svg class="gl" data-match="staefa" data-opp="staefa" data-w="128" data-h="64" aria-hidden="true"></svg><div><h4>BSV Stäfa</h4><p>33 Szenen · 2 Dinge · Ballverluste im Aufbau</p></div><div class="res l"><span class="score" data-score="19:26"></span><small>Niederlage</small></div></div>
       <div class="game"><div class="when">Sa<b>24.10.</b>Heim</div><svg class="gl" data-match="meilen" data-opp="meilen" data-w="128" data-h="64" data-p=".62" aria-hidden="true"></svg><div><h4>HC Meilen</h4><p>Analyse läuft, noch etwa 25 Minuten</p><div class="bar" role="progressbar" aria-label="Analyse 62 Prozent" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"><i style="width:62%"></i></div></div><div class="res w"><span class="score" data-score="23:22"></span><small>Sieg</small></div></div>
       <div class="game"><div class="when">Sa<b>17.10.</b>auswärts</div><svg class="gl" data-match="horgen" data-opp="horgen" data-seq="2:1 5:4 9:6 14:8 18:11 22:14 26:16 29:19" data-w="128" data-h="64" role="img" aria-label="Nur Spielbericht: Torfolge"></svg><div><h4>SG Horgen</h4><p>Nur Spielbericht · <a class="lnk" href="#">Video hochladen</a></p></div><div class="res w"><span class="score" data-score="29:19"></span><small>Sieg</small></div></div>
       <div class="game"><div class="when">Sa<b>10.10.</b>Heim</div><svg class="gl" data-match="waedenswil" data-opp="waedenswil" data-seq="1:2 4:5 7:9 11:12 14:15 17:19 21:23 24:27" data-w="128" data-h="64" role="img" aria-label="Nur Spielbericht: Torfolge"></svg><div><h4>TV Wädenswil</h4><p>Nur Spielbericht · <a class="lnk" href="#">Video hochladen</a></p></div><div class="res l"><span class="score" data-score="24:27"></span><small>Niederlage</small></div></div>
@@ -471,7 +471,7 @@ table.tb .ok svg { width: 18px; height: 18px; vertical-align: -3px; }
   </ol>
   <div style="padding:16px 16px 0"><a class="btn line" href="#" style="width:100%">Fürs Team zusammenstellen</a></div>
   <section style="padding:32px 16px 24px"><div class="h"><b style="font-size:22px">Alle Spiele</b><span>2 ohne Video</span></div>
-    <div class="pgame"><svg class="gl" data-match="staefa" data-opp="staefa" data-w="80" data-h="40" data-flow aria-hidden="true"></svg><div><h4>BSV Stäfa</h4><p>31.10. · 33 Szenen</p></div><div class="res l"><span class="score" data-score="19:26"></span><small>Niederlage</small></div></div>
+    <div class="pgame"><svg class="gl" data-match="staefa" data-opp="staefa" data-w="80" data-h="40" aria-hidden="true"></svg><div><h4>BSV Stäfa</h4><p>31.10. · 33 Szenen</p></div><div class="res l"><span class="score" data-score="19:26"></span><small>Niederlage</small></div></div>
     <div class="pgame"><svg class="gl" data-match="meilen" data-opp="meilen" data-w="80" data-h="40" data-p=".62" aria-hidden="true"></svg><div><h4>HC Meilen</h4><p>Analyse läuft, noch 25 Min.</p></div><div class="res w"><span class="score" data-score="23:22"></span><small>Sieg</small></div></div>
     <div class="pgame"><svg class="gl" data-match="horgen" data-opp="horgen" data-seq="2:1 5:4 9:6 14:8 18:11 22:14 26:16 29:19" data-w="80" data-h="40" aria-hidden="true"></svg><div><h4>SG Horgen</h4><p>17.10. · <a class="lnk" style="min-height:0;font-size:13px" href="#">Video hochladen</a></p></div><div class="res w"><span class="score" data-score="29:19"></span><small>Sieg</small></div></div>
     <div class="pgame"><svg class="gl" data-match="waedenswil" data-opp="waedenswil" data-seq="1:2 4:5 7:9 11:12 14:15 17:19 21:23 24:27" data-w="80" data-h="40" aria-hidden="true"></svg><div><h4>TV Wädenswil</h4><p>10.10. · <a class="lnk" style="min-height:0;font-size:13px" href="#">Video hochladen</a></p></div><div class="res l"><span class="score" data-score="24:27"></span><small>Niederlage</small></div></div>
@@ -587,7 +587,7 @@ function near(a, b) { var ha = hue(a), hb = hue(b); if (ha < 0 || hb < 0) return
 function kit(club, opp) {
   var c = KITS[club], o = opp && KITS[opp], k = {};
   /* the ground carries a breath of the club: 6 % of its colour on cool white; light kits get a cool grey */
-  k.ground = lum(c[0]) > 0.6 ? "#eceef0" : mix("#f4f5f3", c[0], 0.045);
+  k.ground = "#eef0f2"; /* one cool ground for every club: the colour belongs to the head, the lines and the numerals */
   k.rule = mix(k.ground, INK, 0.16);
   k.club = c[0]; k.clubInk = contrast(c[0], "#ffffff") >= 3.2 ? "#ffffff" : INK;
   /* a line in a light kit colour is piped with its trim, so it stays the kit's colour and still reads */
@@ -688,10 +688,11 @@ function face(svg) {
   h += '<rect x="-0.9" y="8.5" width="0.9" height="3" fill="var(--club-ink)"/><rect x="40" y="8.5" width="0.9" height="3" fill="var(--opp-ink)"/>';
   list.forEach(function (sh, i) {
     if (i >= n || svg.hasAttribute("data-noshots")) return;
+    if (W < 500 && !sh.goal) return;
     var col = sh.us ? "var(--club-ink)" : "var(--opp-ink)", pts = shotPath(sh).slice(small ? 12 : 8);
     pts = pts.map(function (p) { return [sh.us ? Math.min(p[0], 19.6) : Math.max(p[0], 20.4), p[1]]; });
     var dd = d(pts);
-    h += '<path class="ln" style="--i:' + i + '" pathLength="1" d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + (sh.goal ? (small ? 1.1 : W < 500 ? 1.4 : 2.2) : (small ? 0.5 : 1)) + '" stroke-opacity="' + (sh.goal ? 0.92 : W < 500 ? 0.25 : 0.38) + '" stroke-linecap="round"' + NS + "/>";
+    h += '<path class="ln" style="--i:' + i + '" pathLength="1" d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + (sh.goal ? (small ? 1 : W < 500 ? 1.3 : 2.2) : 1) + '" stroke-opacity="' + (sh.goal ? (W < 500 ? 0.7 : 0.92) : 0.38) + '" stroke-linecap="round"' + NS + "/>";
   });
   h += "</g>";
   if (svg.hasAttribute("data-flow")) h += flowLine(FLOW[key], W, H, svg.hasAttribute("data-phase"), small, W < 500);
@@ -699,7 +700,7 @@ function face(svg) {
 }
 /* the run of the match: one line, left to right is minute 0 to 60, up is our lead */
 function flowLine(data, W, H, phase, small, compact) {
-  var pad = small ? 10 : compact ? 14 : 32, U = (H * 0.46) / 9, mid = H * 0.8;
+  var pad = small ? 10 : compact ? 14 : 32, U = compact ? (H * 0.13) / 9 : (H * 0.46) / 9, mid = compact ? H * 0.9 : H * 0.8;
   function x(m) { return pad + (W - 2 * pad) * m / 60; } function y(v) { return mid - v * U; }
   var pts = []; data.forEach(function (p, i) { if (i) pts.push([x(p[0]), y(data[i - 1][1])]); pts.push([x(p[0]), y(p[1])]); });
   var dd = d(pts), o = "", last = data[data.length - 1];
@@ -715,7 +716,7 @@ function flowLine(data, W, H, phase, small, compact) {
   }
   var ex = x(60), ey = y(last[1]);
   o += '<circle cx="' + ex + '" cy="' + ey + '" r="' + (small ? 3 : 9) + '" fill="#fff" stroke="' + INK + '" stroke-width="' + (small ? 1 : 2) + '"/>';
-  if (!small && compact) o += '<text x="' + (ex - 14) + '" y="' + (ey + 26) + '" text-anchor="end" class="fl">+' + last[1] + "</text>";
+  if (!small && compact) o += '<text x="' + (ex - 14) + '" y="' + (ey - 8) + '" text-anchor="end" class="fl">' + (last[1] > 0 ? "+" : "") + last[1] + "</text>";
   if (!small && !compact) {
     o += '<text x="' + (ex - 16) + '" y="' + (ey - 16) + '" text-anchor="end" class="fl b">Schluss ' + (last[1] > 0 ? "+" : "") + last[1] + "</text>";
     o += '<text x="' + x(0) + '" y="' + (mid - 14) + '" class="fl">Verlauf</text>';

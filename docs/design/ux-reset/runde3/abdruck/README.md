@@ -51,11 +51,10 @@ Taktikkamera aus «Einblendung».
 
 ## Die sieben Punkte
 
-1. **Grund.** Kein Beige mehr. Der Grund ist ein kühles Weiss mit einem Hauch der Vereinsfarbe
-   (4,5 %): Bei Rot leicht rosig, bei Grün leicht mint, bei Gelb leicht cremig. Helle Trikots
-   (Weiss, Gelb über 60 % Helligkeit) bekommen ein kühles Hallengrau `#eceef0`, damit die weisse
-   Fläche steht. Die App gehört dem Verein, bevor eine Zahl gelesen ist. Schwarz-weiss wirkt sie
-   nicht, weil der Kopf jedes Spiels zwei volle Farbflächen trägt.
+1. **Grund.** Kein Beige, kein Hauch Vereinsfarbe (der ergab bei Rot wieder rosa Papier). Ein
+   fester, kühler Grund `#eef0f2`, für jeden Verein gleich. Die Farbe gehört ganz dem Kopf, den
+   Bahnen und den Ziffern; weisse Flächen bekommen dort eine Kante in Tinte. Schwarz-weiss wirkt
+   es nicht, weil der Kopf jedes Spiels zwei volle Farbflächen trägt.
 2. **Tempo ohne Kursiv.** Die Schrift steht aufrecht. Tempo zeigen die Wurfbahnen, die Treppe des
    Verlaufs, die von links unten durch das Resultat steigt, und die Breite der Ziffern. Anybody
    wurde gewählt, weil sie die Breite als Achse hat; damit ist die Breite eine Aussage, kein Stil.
@@ -83,7 +82,7 @@ Taktikkamera aus «Einblendung».
 
 - **Anybody** (SIL OFL, Breite 50 bis 150, Gewicht 500 bis 900): Resultat, Titel, Namen, Ziffern.
 - **Schibsted Grotesk** (SIL OFL): Text, Tabellen, Knöpfe.
-- Tinte `#15171a`, Text 2 `#545960`, Grund aus der Vereinsfarbe (siehe oben), Linien 16 % Tinte auf
+- Tinte `#15171a`, Text 2 `#545960`, Grund `#eef0f2` für alle Vereine, Linien 16 % Tinte auf
   dem Grund. Gelb `#ffd23c` nur für Prüfen und die markierte Phase. Sieg `#17703f`, Niederlage
   `#a8261e`, immer mit Wort. Unbekannter Gegner `#646b73`.
 - Trikots als Paar aus Farbe und Zweitfarbe, zum Beispiel Rot `#d3202e` mit Weiss, Gelb `#f6c500`
@@ -93,8 +92,10 @@ Taktikkamera aus «Einblendung».
 
 ## Offen
 
-- Das Gesicht am Handy ist dicht: 300 px Höhe für 79 Würfe, Resultat und Verlauf. Es funktioniert,
-  ist aber an der Grenze. Möglich: am Handy nur die Tore zeichnen.
+- Handy und Spielliste zeichnen nur die Tore, die Bahnen liegen hinter den Ziffern, und der
+  Verlauf läuft am Handy als ruhiges Band unter dem Resultat; in der Liste fehlt er ganz. Am
+  Desktop bleibt er durchs Resultat. Ob das Handy-Gesicht noch genug «Gesicht» ist, sollte man am
+  echten Gerät prüfen.
 - Die Zeile «Jede Linie ein Wurf» steht nur auf dem Start. Ob man sie nach dem ersten Mal weglässt,
   sollte ein Test mit zwei, drei Trainerinnen zeigen.
 - Die Kollisionsregel braucht die Zweitfarbe des Gegners. Ohne sie fällt er auf Tinte zurück.
