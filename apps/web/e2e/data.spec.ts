@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, register, uniqueEmail, openTraining } from "./helpers";
 
 // M10: training planning (5.7), statistics matrix (5.4), assistant without a model key (5.1)
 test("coach plans a session, opens the matrix and the assistant", async ({ page, context }, info) => {
@@ -16,7 +16,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
 
   // training: a session with two library drills, then the PDF link
-  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
+  await openTraining(page);
   await page.getByRole("button", { name: "Neue Einheit" }).click();
   const form = page.getByRole("form", { name: "Neue Einheit" });
   const day = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);

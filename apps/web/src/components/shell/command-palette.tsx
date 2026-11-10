@@ -13,6 +13,7 @@ import {
   Plus,
   ScanSearch,
   Settings,
+  Upload,
   UserRound,
   Users,
 } from "lucide-react";
@@ -94,18 +95,18 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   const Icon = DEST_ICON[it.key];
                   return row(it.key, t(`shell.${it.key}`), <Icon />, it.href);
                 })}
-                {teamBase && staff && row("season", t("shell.season"), <Grid3x3 />, `${teamBase}/season`, ["statistik", "stats"])}
-                {teamBase && staff && row("matrix", t("palette.matrix"), <Grid3x3 />, `${teamBase}/matrix`)}
-                {teamBase && staff && row("library", t("shell.library"), <BookOpen />, `${teamBase}/library`, ["playlists", "präsentationen", "presentations"])}
+                {teamBase && staff && row("collections", t("shell.collections"), <BookOpen />, `${teamBase}/library`, ["playlists", "präsentationen", "presentations", "sammlung"])}
                 {teamBase && staff && row("plays", t("shell.plays"), <BookOpen />, `${teamBase}/plays`, ["spielzüge", "taktik", "tactics"])}
+                {teamBase && staff && row("matrix", t("palette.matrix"), <Grid3x3 />, `${teamBase}/matrix`)}
                 {row("profile", t("shell.profile"), <UserRound />, `${base}/profile`)}
                 {row("settings", t("shell.settings"), <Settings />, `${base}/settings`)}
               </Command.Group>
               {staff && teamBase && (
                 <Command.Group heading={t("palette.actions")} className={group}>
+                  {row("upload", t("shell.upload"), <Upload />, `${teamBase}/matches?upload=1`, ["video"])}
                   {row("new-match", t("palette.newMatch"), <Plus />, `${teamBase}/matches?new=1`)}
                   {row("ask", t("palette.ask"), <MessageCircleQuestion />, `${teamBase}/assistant`)}
-                  {row("search", t("palette.searchScenes"), <ScanSearch />, `${teamBase}/search`)}
+                  {row("search", t("palette.searchScenes"), <ScanSearch />, `${teamBase}/scenes`)}
                   {row("paper", t("palette.paper"), <Camera />, `${teamBase}/paper`)}
                 </Command.Group>
               )}

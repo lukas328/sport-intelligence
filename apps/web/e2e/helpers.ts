@@ -52,24 +52,42 @@ export async function openTeam(page: Page, section?: "Kader" | "Termine") {
   await follow(page, page.getByRole("link", { name: section, exact: true }), /\/schedule$/);
 }
 
-/** Matches area: "Spiele" in the main navigation, then a section (Spielplan, Saison, Bibliothek). */
+/** Spiele in the main navigation (the start for staff). Saison is a destination of its own;
+ * "Bibliothek" is the collections tab of Szenen (SPEC section 6). */
 export async function openMatches(page: Page, section?: "Spielplan" | "Saison" | "Bibliothek") {
+  if (section === "Saison") return follow(page, page.getByRole("link", { name: "Saison", exact: true }).first(), /\/season$/);
+  if (section === "Bibliothek") return openScenes(page, "Sammlungen");
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
-  if (!section || section === "Spielplan") return;
-  await follow(page, page.getByRole("link", { name: section, exact: true }), section === "Saison" ? /\/season$/ : /\/library$/);
 }
 
-/** Library entry (Playlists, Präsentationen, Szenensuche); plays sit in Training. */
+/** Szenen in the main navigation, then a tab (Szenen, Sammlungen, Spielzüge, Tabelle). */
+export async function openScenes(page: Page, tab?: "Szenen" | "Sammlungen" | "Spielzüge" | "Tabelle") {
+  await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
+  if (!tab || tab === "Szenen") return;
+  const path = { Sammlungen: "library", Spielzüge: "plays", Tabelle: "matrix" }[tab];
+  await follow(page, page.getByRole("link", { name: tab, exact: true }).first(), new RegExp(`/${path}$`));
+}
+
+/** Library entry (Playlists, Präsentationen) under Sammlungen; the scene search is Szenen itself. */
 export async function openLibrary(page: Page, entry: "Playlists" | "Präsentationen" | "Szenensuche") {
-  await openMatches(page, "Bibliothek");
-  const path = { Playlists: "playlists", Präsentationen: "presentations", Szenensuche: "search" }[entry];
+  if (entry === "Szenensuche") return openScenes(page);
+  await openScenes(page, "Sammlungen");
+  const path = { Playlists: "playlists", Präsentationen: "presentations" }[entry];
   await follow(page, page.getByRole("link", { name: new RegExp(`^${entry}`) }), new RegExp(`/${path}$`));
 }
 
-/** Training area, then the plays. */
+/** Plays: a tab of Szenen. */
 export async function openPlays(page: Page) {
-  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
-  await follow(page, page.getByRole("link", { name: "Spielzüge", exact: true }), /\/plays$/);
+  await openScenes(page, "Spielzüge");
+}
+
+/** The training plan is out of the main navigation (SPEC section 1, "Next"); its route stays. */
+export async function openTraining(page: Page) {
+  const team = /\/app\/[^/]+\/teams\/[0-9a-f-]{36}/.exec(page.url())?.[0];
+  if (!team) await follow(page, page.getByRole("link", { name: "Team", exact: true }).first(), /\/teams\/[^/]+$/);
+  const base = /\/app\/[^/]+\/teams\/[0-9a-f-]{36}/.exec(page.url())![0];
+  await page.goto(`${base}/training`);
+  await page.waitForURL(/\/training$/);
 }
 
 /** Match page: analysis view and one of its sections. */

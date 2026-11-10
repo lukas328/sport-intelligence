@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, linkFromMail, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, linkFromMail, register, uniqueEmail, openTraining } from "./helpers";
 
 // The player's side of a match: the way to their own scenes, before and after the
 // self-assessment. Scenes come from the analysis; the list of the player's feeds is answered
@@ -59,7 +59,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expectAccessible(page);
 
   // a unit in two days: the plan says who is out that day
-  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
+  await openTraining(page);
   await page.getByRole("button", { name: "Neue Einheit" }).click();
   const unit = page.getByRole("form", { name: "Neue Einheit" });
   await unit.getByLabel("Datum").fill(new Date(Date.now() + 2 * 86400_000).toISOString().slice(0, 10));

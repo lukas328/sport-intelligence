@@ -457,7 +457,9 @@
     "noneUpcoming": "Aucun match programmé.",
     "scheduleOne": "Programmer un match",
     "attendance": "Réponses",
-    "attendanceHint": "Qui vient, qui manque"
+    "attendanceHint": "Qui vient, qui manque",
+    "uploadFor": "De quel match vient la vidéo ?",
+    "uploadOther": "Ou créer un nouveau match"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -2305,7 +2307,11 @@
     "theme_system": "Automatique",
     "fixtures": "Calendrier",
     "plays": "Systèmes",
-    "matchSections": "Sections des matchs"
+    "matchSections": "Sections des matchs",
+    "upload": "Téléverser une vidéo",
+    "collections": "Sélections",
+    "matrix": "Tableau",
+    "scenesSections": "Rubriques des scènes"
   },
   "palette": {
     "newMatch": "Ajouter un match",

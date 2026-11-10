@@ -457,7 +457,9 @@
     "noneUpcoming": "Kein Spiel angesetzt.",
     "scheduleOne": "Spiel ansetzen",
     "attendance": "Zusagen",
-    "attendanceHint": "Wer kommt, wer fehlt"
+    "attendanceHint": "Wer kommt, wer fehlt",
+    "uploadFor": "Zu welchem Spiel gehört das Video?",
+    "uploadOther": "Oder ein neues Spiel anlegen"
   },
   "upload": {
     "title": "Video hochladen",
@@ -2305,7 +2307,11 @@
     "theme_system": "Automatisch",
     "fixtures": "Spielplan",
     "plays": "Spielzüge",
-    "matchSections": "Bereiche der Spiele"
+    "matchSections": "Bereiche der Spiele",
+    "upload": "Video hochladen",
+    "collections": "Sammlungen",
+    "matrix": "Tabelle",
+    "scenesSections": "Bereiche der Szenen"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",

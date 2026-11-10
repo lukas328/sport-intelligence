@@ -4,15 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Search, X } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { NotificationBell } from "@/components/training/bell";
-import { destOf, modeFor, navFor, sectionOf, sectionsFor, teamInPath } from "@/lib/nav-model";
+import { destOf, modeFor, navFor, sectionOf, sectionsFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
+import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
 import { ShellContext, setCookie, TEAM_COOKIE, type ShellOrg, type ShellTeam, type ShellValue } from "./context";
-import { DEST_ICON } from "./icons";
+import { DEST_ICON, IconUpload } from "./icons";
 import { NextUp } from "./next-up";
 import { TeamSwitcher } from "./team-switcher";
 
@@ -53,6 +54,9 @@ export function AppShell({
   const value = useMemo<ShellValue>(() => ({ org, orgs, teams, team, mode, me, setTeam }), [org, orgs, teams, team, mode, me, setTeam]);
   const items = navFor(mode, org.id, team?.id ?? null);
   const active = destOf(path, mode);
+  const home = startHref(mode, org.id, team?.id ?? null);
+  // one action reachable from everywhere for staff (SPEC section 6)
+  const upload = mode === "staff" ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
@@ -108,11 +112,17 @@ export function AppShell({
           {/* desktop sidebar: the club's deep colour, a dark island in every theme */}
           <aside className="on-deep sticky top-0 hidden h-dvh flex-col gap-7 bg-deep px-3 pt-5 pb-4 lg:flex">
             <div className="space-y-3 px-1">
-              <Link href={`/app/${org.id}`} className="flex items-center gap-3 rounded-md p-1 hover:bg-surface">
+              <Link href={home} className="flex items-center gap-3 rounded-md p-1 hover:bg-surface">
                 <ClubMark org={org} />
                 <span className="min-w-0 text-[1.375rem] leading-[1.05] font-display break-words">{org.name}</span>
               </Link>
               <TeamSwitcher />
+              {upload && (
+                <Link href={upload} className={buttonClass("primary", "md", "w-full")} data-testid="upload-video">
+                  <IconUpload />
+                  {t("upload")}
+                </Link>
+              )}
             </div>
             <nav aria-label={t("mainNav")} className="flex flex-col gap-0.5">
               {items.map((it) => {
@@ -179,7 +189,7 @@ export function AppShell({
           <div className="flex min-w-0 flex-col overflow-x-clip">
             {/* phone top bar */}
             <header className="on-deep sticky top-0 z-30 flex items-center gap-2 bg-deep px-3 py-2 lg:hidden">
-              <Link href={`/app/${org.id}`} aria-label={org.name} className="shrink-0">
+              <Link href={home} aria-label={org.name} className="shrink-0">
                 <ClubMark org={org} className="size-8 rounded-md" />
               </Link>
               <div className="min-w-0 flex-1">
@@ -193,6 +203,11 @@ export function AppShell({
               >
                 <Search aria-hidden className="size-5" />
               </button>
+              {upload && (
+                <Link href={upload} aria-label={t("upload")} className="grid size-10 place-items-center rounded-md text-muted ring-1 ring-border hover:bg-surface hover:text-foreground" data-testid="upload-video-compact">
+                  <Plus aria-hidden className="size-5" />
+                </Link>
+              )}
               <NotificationBell orgId={org.id} />
               <AccountMenu compact />
             </header>

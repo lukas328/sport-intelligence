@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, Grid3x3 } from "lucide-react";
-import { IconAsk } from "./icons";
-import { buttonClass } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -50,9 +48,9 @@ function useArea() {
   return { dest, items, active: sectionOf(path), page, org, team, mode };
 }
 
-const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "trainingSections" | "teamSections">> = {
+const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "scenesSections" | "teamSections">> = {
   matches: "matchSections",
-  training: "trainingSections",
+  scenes: "scenesSections",
   team: "teamSections",
 };
 
@@ -66,9 +64,9 @@ export function AreaSubNav() {
 
 /** Leaf pages one level below a section item, with a way back to it. */
 const LEAF: Record<string, { parent: Section; title: string; href?: string }> = {
-  playlists: { parent: "library", title: "library.playlists" },
-  presentations: { parent: "library", title: "library.presentations" },
-  search: { parent: "library", title: "library.search" },
+  playlists: { parent: "collections", title: "library.playlists", href: "library" },
+  presentations: { parent: "collections", title: "library.presentations", href: "library" },
+  assistant: { parent: "scenes", title: "palette.ask" },
   paper: { parent: "fixtures", title: "paper.photoTitle", href: "matches" },
 };
 
@@ -79,36 +77,18 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
   const { dest, items, active, page, org, team } = useArea();
   const teamBase = team ? `/app/${org.id}/teams/${team.id}` : null;
   const leaf = LEAF[page];
-  const seasonTools =
-    teamBase && active === "season" ? (
-      <>
-        {/* on a tool page only the other tool */}
-        {page !== "matrix" && (
-          <Link href={`${teamBase}/matrix`} className={buttonClass("secondary", "sm")}>
-            <Grid3x3 aria-hidden />
-            {tr("palette.matrix")}
-          </Link>
-        )}
-        {page !== "assistant" && (
-          <Link href={`${teamBase}/assistant`} className={buttonClass("secondary", "sm")}>
-            <IconAsk />
-            {tr("palette.ask")}
-          </Link>
-        )}
-      </>
-    ) : null;
   // the title names the page; the destination and the team go into the eyebrow
-  const destTitle = dest === "matches" ? t("matches") : dest === "training" ? t("training") : dest === "team" ? t("team") : undefined;
-  const tool = page === "matrix" ? tr("palette.matrix") : page === "assistant" ? tr("palette.ask") : null;
-  const pageTitle = (leaf && tr(leaf.title as "library.plays")) || tool || items.find((i) => i.key === active)?.label || destTitle || fallbackTitle || "";
+  const destTitle = dest ? t(dest) : undefined;
+  const pageTitle =
+    (leaf && tr(leaf.title as "library.plays")) || items.find((i) => i.key === active)?.label || fallbackTitle || (active ? t(active) : null) || destTitle || "";
   const heading = dest
     ? { eyebrow: [destTitle, team?.name].filter(Boolean).join(" · ") || undefined, title: pageTitle }
     : { eyebrow: undefined, title: fallbackTitle ?? "" };
   return (
     <div className="space-y-5">
-      {(leaf || tool) && teamBase && <BackLink href={`${teamBase}/${leaf ? leaf.href ?? leaf.parent : "season"}`} parent={leaf ? leaf.parent : "season"} />}
-      <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions ?? seasonTools} />
-      {dest && items.length > 0 && !leaf && !tool && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
+      {leaf && teamBase && <BackLink href={`${teamBase}/${leaf.href ?? leaf.parent}`} parent={leaf.parent} />}
+      <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions} />
+      {dest && items.length > 0 && !leaf && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
     </div>
   );
 }
@@ -116,7 +96,7 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
 /** The way back from a page one level below a section item: a text link above the title. */
 function BackLink({ href, parent }: { href: string; parent: Section }) {
   const t = useTranslations();
-  const parentLabel = parent === "library" ? t("library.title") : t(`shell.${parent}` as "shell.season");
+  const parentLabel = t(`shell.${parent}` as "shell.season");
   return (
     <Link href={href} className="-mb-3 inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
       <ChevronLeft aria-hidden className="size-4" />
@@ -142,6 +122,6 @@ export function TeamChrome() {
 /** Header for org-level pages that sit in a destination for staff and stand alone for others. */
 export function AreaOrPageHeader({ title }: { title: string }) {
   const { mode, dest, team } = useArea();
-  if (mode === "staff" && (dest === "training" || (dest === "team" && team))) return <AreaHeader title={title} />;
+  if (mode === "staff" && dest === "team" && team) return <AreaHeader title={title} />;
   return <PageHeader title={title} />;
 }

@@ -5,7 +5,7 @@ import { Camera, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -22,6 +22,9 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   const params = useSearchParams();
   const router = useRouter();
   const [open, setOpen] = useState(params.get("new") === "1");
+  // "Video hochladen" from the frame: pick the match the video belongs to, or create it
+  const [upload, setUpload] = useState(params.get("upload") === "1");
+  useEffect(() => setUpload(params.get("upload") === "1"), [params]);
   // kept here: the import refreshes the list, which swaps the layout below
   const [warnings, setWarnings] = useState<string[]>([]);
   const notice = warnings.length > 0 && (
@@ -54,6 +57,19 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
       <div className="space-y-8">
         <PageHeader title={t("matches.title")} />
         {notice}
+        {canWrite && (
+        <UploadPicker
+          open={upload}
+          onOpenChange={(o) => {
+            setUpload(o);
+            if (!o && params.get("upload")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          orgId={orgId}
+          teamId={teamId}
+          matches={matches}
+        />
+      )}
+
         <p className="sr-only">{t("matches.empty")}</p>
         {canWrite ? (
           <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
@@ -102,6 +118,19 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
       />
       {canWrite && <div className="-mt-6">{extra}</div>}
       {notice}
+      {canWrite && (
+        <UploadPicker
+          open={upload}
+          onOpenChange={(o) => {
+            setUpload(o);
+            if (!o && params.get("upload")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          orgId={orgId}
+          teamId={teamId}
+          matches={matches}
+        />
+      )}
+
       {upcoming.length > 0 ? (
         <MatchList title={t("matches.upcoming")} orgId={orgId} matches={upcoming} />
       ) : (
@@ -118,6 +147,42 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
       )}
       {played.length > 0 && <MatchList title={t("matches.played")} orgId={orgId} matches={played} countMissing={canWrite} />}
     </div>
+  );
+}
+
+/** The upload starts from a match: the played ones without a video first, or a new one. */
+function UploadPicker({ open, onOpenChange, orgId, teamId, matches }: { open: boolean; onOpenChange: (o: boolean) => void; orgId: string; teamId: string; matches: Match[] }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const now = Date.now();
+  const candidates = matches
+    .filter((m) => !m.has_video && m.kind !== "training" && new Date(m.kickoff_at).getTime() < now + 86_400_000)
+    .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at))
+    .slice(0, 5);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange} title={t("matches.uploadVideo")} wide>
+      <div className="space-y-6" data-testid="upload-picker">
+        {candidates.length > 0 && (
+          <section className="space-y-2">
+            <h3 className="font-semibold">{t("matches.uploadFor")}</h3>
+            <ul className="border-t border-foreground/15">
+              {candidates.map((m) => (
+                <li key={m.id} className="border-b border-foreground/10">
+                  <Link href={`/app/${orgId}/matches/${m.id}`} className="flex min-h-11 items-center justify-between gap-3 px-1 py-2 hover:bg-surface">
+                    <span className="font-medium">{m.opponent_name}</span>
+                    <span className="text-sm text-muted">{format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "short" })}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        <section className="space-y-3">
+          <h3 className="font-semibold">{candidates.length > 0 ? t("matches.uploadOther") : t("matches.new")}</h3>
+          <NewMatchForm orgId={orgId} teamId={teamId} />
+        </section>
+      </div>
+    </Dialog>
   );
 }
 

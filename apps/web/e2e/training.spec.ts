@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { expectAccessible, register, uniqueEmail, openTraining } from "./helpers";
 
 test("drills, notifications and team assignments", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
@@ -23,7 +23,7 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.keyboard.press("Escape");
 
   // drill library with focus filter
-  await page.getByRole("link", { name: "Training", exact: true }).click();
+  await openTraining(page);
   await page.getByRole("link", { name: "Übungen", exact: true }).click();
   await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(11);
   await page.getByRole("link", { name: "Torhüter", exact: true }).click();

@@ -457,7 +457,9 @@
     "noneUpcoming": "No match scheduled.",
     "scheduleOne": "Schedule a match",
     "attendance": "Replies",
-    "attendanceHint": "Who comes, who is missing"
+    "attendanceHint": "Who comes, who is missing",
+    "uploadFor": "Which match is the video from?",
+    "uploadOther": "Or create a new match"
   },
   "upload": {
     "title": "Upload video",
@@ -2305,7 +2307,11 @@
     "theme_system": "Automatic",
     "fixtures": "Fixtures",
     "plays": "Plays",
-    "matchSections": "Match sections"
+    "matchSections": "Match sections",
+    "upload": "Upload video",
+    "collections": "Collections",
+    "matrix": "Table",
+    "scenesSections": "Scene sections"
   },
   "palette": {
     "newMatch": "Add a match",
