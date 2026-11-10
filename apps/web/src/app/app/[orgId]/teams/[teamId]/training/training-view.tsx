@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/ui/confirm";
 import { Alert, EmptyState, Sheet } from "@/components/ui/card";
 import { AttendancePanel } from "@/components/team/attendance-panel";
+import { TrainingSlots } from "@/components/training/training-slots";
 import { api } from "@/lib/client";
 import { move, toDrillItem, totalMinutes, type DrillItem } from "@/lib/drill-snapshot";
+import { drillItemOf, useTeamDrills } from "@/lib/team-drills";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 
 type Session = Schemas["TrainingSessionOut"];
@@ -33,7 +35,10 @@ function SessionForm({
   const tr = useTranslations();
   const locale = useLocale();
   const [drills, setDrills] = useState<DrillItem[]>(initial?.drills ?? []);
-  const [pick, setPick] = useState(DRILLS[0]?.id ?? "");
+  // the team's list (own and club drills first, then the library); the static library until it loads
+  const teamDrills = useTeamDrills(orgId, teamId, locale);
+  const choices: DrillItem[] = teamDrills.data?.length ? teamDrills.data.map(drillItemOf) : DRILLS.map((d) => toDrillItem(d, locale));
+  const [pick, setPick] = useState("");
   const [error, setError] = useState<ErrorKey | null>(null);
   const save = useMutation({
     mutationFn: async (body: Schemas["TrainingSessionIn"]) => {
@@ -106,16 +111,16 @@ function SessionForm({
         </ol>
         <div className="flex flex-wrap gap-2">
           <select aria-label={t("addDrill")} className={control} value={pick} onChange={(e) => setPick(e.target.value)}>
-            {DRILLS.map((d) => (
-              <option key={d.id} value={d.id}>{toDrillItem(d, locale).name} ({d.minutes} {t("min")})</option>
+            {choices.map((d) => (
+              <option key={d.drill_id} value={d.drill_id}>{d.name} ({d.minutes} {t("min")})</option>
             ))}
           </select>
           <Button
             type="button"
             variant="secondary"
             onClick={() => {
-              const d = DRILLS.find((x) => x.id === pick);
-              if (d) setDrills((ds) => [...ds, toDrillItem(d, locale)]);
+              const d = choices.find((x) => x.drill_id === (pick || choices[0]?.drill_id));
+              if (d) setDrills((ds) => [...ds, d]);
             }}
           >
             {t("addDrill")}
@@ -212,6 +217,12 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
       })
       .filter((x): x is string => x != null);
   const confirm = useConfirm();
+  const teamInfo = useQuery({
+    queryKey: ["team-info", teamId],
+    enabled: canPlan,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: team } })).data ?? null,
+  });
+  const season = teamInfo.data?.current_season ?? null;
   const focus = useQuery({
     queryKey: ["focus", teamId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/focus", { params: { path: team } })).data ?? [],
@@ -330,6 +341,9 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
           <h3 id="past" className="text-lg font-semibold">{t("past")}</h3>
           <ul className="border-t-2 border-foreground">{past.map(item)}</ul>
         </section>
+      )}
+      {canPlan && season && (
+        <TrainingSlots orgId={orgId} teamId={teamId} season={season} onGenerated={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />
       )}
       <FocusList focus={focus.data ?? []} />
       {canPlan && (

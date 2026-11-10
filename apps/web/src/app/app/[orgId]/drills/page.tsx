@@ -5,6 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { AreaOrPageHeader } from "@/components/shell/section-nav";
 import { DrillCourt } from "@/components/domain/drill-court";
 import { cn } from "@/lib/utils";
+import { ClubDrills } from "./club-drills";
 
 const FOCI: Focus[] = ["finishing", "wings", "back_court", "pivot", "seven_m", "goalkeeping", "passing", "transition_defence", "fast_break", "defence", "powerplay"];
 
@@ -40,6 +41,8 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
           </Link>
         ))}
       </nav>
+      <ClubDrills orgId={orgId} focus={wanted} />
+      {/* the library: the club's own drills come first, above */}
       <ul className="grid border-t-2 border-foreground md:grid-cols-2 md:gap-x-12" data-testid="drills">
         {list.map((d) => (
           <li key={d.id} id={d.id} className="grid scroll-mt-4 grid-cols-[4.5rem_minmax(0,1fr)] gap-x-5 border-b border-foreground/15 py-5 target:bg-surface sm:grid-cols-[6rem_minmax(0,1fr)]">

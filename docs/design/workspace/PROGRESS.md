@@ -538,3 +538,14 @@ it, see batch 3).
   printed row and a table per played match; every count leads to the scene search filtered by
   player and match (the search now reads `player` and `match` from the URL). Goalkeepers get
   saves, shots faced, save rate and 7 m. Not involved matches are muted.
+
+## Training times and own drills (UI session, 2026-11-10, after PR 30)
+
+- Training: "Trainingszeiten {Saison}" for staff: weekday, start, length, place, title per time;
+  "Einheiten erzeugen" creates the units from today to the end of the season with the Swiss
+  public holidays preselected as days without training (`lib/holidays.ts`, Easter-based ones
+  included, tested), more days can be added; the result line says created, kept, skipped.
+- Drills: "Eigene Übungen" above the library with "Neue Übung" (name, minutes, players, level,
+  focus, set-up, coaching points, "Im Verein teilen"); own drills can be edited and deleted,
+  drills shared by other teams read "Geteilt von …". The unit form offers the team's whole list
+  (own and club drills first, then the library).

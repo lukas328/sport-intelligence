@@ -28,6 +28,21 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(11);
   await page.getByRole("link", { name: "Torhüter", exact: true }).click();
   await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(2);
+
+  // an own drill, shared in the club: it sits above the library and in the unit's drill list
+  await page.getByRole("link", { name: "Alle", exact: true }).click();
+  await page.getByTestId("drill-new").click();
+  const drill = page.getByRole("form", { name: "Neue Übung" });
+  await drill.getByLabel("Name").fill("Kreuzen im Rückraum");
+  await drill.getByLabel("Minuten").fill("20");
+  await drill.getByLabel("Rückraum").check();
+  await drill.getByLabel("Aufbau").fill("Zwei Rückraumspieler kreuzen, Kreis sperrt.");
+  await drill.getByLabel(/Im Verein teilen/).check();
+  await drill.getByRole("button", { name: "Speichern" }).click();
+  const own = page.getByTestId("club-drill").filter({ hasText: "Kreuzen im Rückraum" });
+  await expect(own).toContainText("Eigene Übung, im Verein geteilt");
+  await expect(own).toContainText("Rückraum · 20 min");
+  await expectAccessible(page);
   await expectAccessible(page);
 
   // my assignments: empty
