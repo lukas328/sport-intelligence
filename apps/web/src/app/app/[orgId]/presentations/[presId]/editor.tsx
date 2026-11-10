@@ -278,7 +278,7 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
             </form>
             <p className="text-sm text-muted">
               {t("addClipsHint")}{" "}
-              <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/teams/${p.team_id}/search?presentation=${presId}`}>
+              <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/teams/${p.team_id}/scenes?presentation=${presId}`}>
                 {t("toSearch")}
               </Link>
             </p>

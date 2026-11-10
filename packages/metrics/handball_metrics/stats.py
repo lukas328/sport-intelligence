@@ -67,17 +67,19 @@ def position_of_zone(zone: str | None) -> str | None:
 def by_position(zones: dict[str, dict[str, int]]) -> dict[str, dict[str, Any]]:
     """Shots and goals per position from the zone counts, with the zones that make it up (they are
     the filter to open the scenes). Every position is there, empty ones with zeros."""
-    out: dict[str, dict[str, Any]] = {p: {"shots": 0, "goals": 0, "zones": []} for p in POSITIONS}
+    counts = {p: [0, 0] for p in POSITIONS}
+    parts: dict[str, list[str]] = {p: [] for p in POSITIONS}
     for zone, v in zones.items():
         pos = position_of_zone(zone)
         if pos is None:
             continue
-        out[pos]["shots"] += v["shots"]
-        out[pos]["goals"] += v["goals"]
-        out[pos]["zones"].append(zone)
-    for v in out.values():
-        v["zones"].sort()
-    return out
+        counts[pos][0] += v["shots"]
+        counts[pos][1] += v["goals"]
+        parts[pos].append(zone)
+    return {
+        p: {"shots": counts[p][0], "goals": counts[p][1], "zones": sorted(parts[p])}
+        for p in POSITIONS
+    }
 
 
 def zone_of(e: Event) -> str | None:

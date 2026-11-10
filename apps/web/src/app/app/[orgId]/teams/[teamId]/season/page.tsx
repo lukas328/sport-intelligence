@@ -6,6 +6,7 @@ import { serverApi } from "@/lib/api";
 import { xgLabel } from "@/lib/xg";
 import { Stage, stageButton, stageLink } from "@/components/domain/stage";
 import { AreaSubNav } from "@/components/shell/section-nav";
+import { SeasonThemes } from "@/components/season/season-themes";
 import { IconAsk } from "@/components/shell/icons";
 import { focusMetric, matchStatement, seasonStatement } from "@/lib/voice";
 import { cn } from "@/lib/utils";
@@ -101,10 +102,10 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const turnovers = data.totals.turnovers / n;
   // one row per figure: value, a bar on a fixed scale and a tick for the reference (or goals against)
   const cells: { key: string; label: string; value: string; href: string; share: number | null; tick: number; refText: string; focus?: boolean }[] = [
-    { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: goalsFor.toFixed(1), href: `${base}/search?type=shot&outcome=goal&side=own`, share: goalsFor / 40, tick: goalsAgainst / 40, refText: tv("againstRef", { value: goalsAgainst.toFixed(1) }) },
-    { key: "shooting", label: t("shootingPct"), value: pct(data.totals.shooting_pct), href: `${base}/search?type=shot&side=own`, share: data.totals.shooting_pct, tick: 0.55, refText: tv("reference", { value: "55 %" }), focus: focus === "shooting_pct" },
-    { key: "save", label: t("savePct"), value: pct(data.totals.save_pct), href: `${base}/search?type=shot&outcome=save&side=opponent`, share: data.totals.save_pct, tick: 0.3, refText: tv("reference", { value: "30 %" }), focus: focus === "save_pct" },
-    { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: turnovers.toFixed(1), href: `${base}/search?type=turnover&side=own`, share: turnovers / 24, tick: 0.5, refText: `${tv("reference", { value: "12" })}, ${tv("lowerBetter")}`, focus: focus === "turnovers" },
+    { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: goalsFor.toFixed(1), href: `${base}/scenes?type=shot&outcome=goal&side=own`, share: goalsFor / 40, tick: goalsAgainst / 40, refText: tv("againstRef", { value: goalsAgainst.toFixed(1) }) },
+    { key: "shooting", label: t("shootingPct"), value: pct(data.totals.shooting_pct), href: `${base}/scenes?type=shot&side=own`, share: data.totals.shooting_pct, tick: 0.55, refText: tv("reference", { value: "55 %" }), focus: focus === "shooting_pct" },
+    { key: "save", label: t("savePct"), value: pct(data.totals.save_pct), href: `${base}/scenes?type=shot&outcome=save&side=opponent`, share: data.totals.save_pct, tick: 0.3, refText: tv("reference", { value: "30 %" }), focus: focus === "save_pct" },
+    { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: turnovers.toFixed(1), href: `${base}/scenes?type=turnover&side=own`, share: turnovers / 24, tick: 0.5, refText: `${tv("reference", { value: "12" })}, ${tv("lowerBetter")}`, focus: focus === "turnovers" },
   ];
   const pick = (score: (r: Row) => number | null) =>
     data.matches.reduce<Row | null>((best, r) => (score(r) != null && (best == null || score(r)! > score(best)!) ? r : best), null);
@@ -155,13 +156,16 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
         </h1>
         {statement?.evidence && <p className="mt-4 max-w-xl text-lg">{tv(statement.evidence.key.replace("voice.", "") as "record", statement.evidence.params as never)}</p>}
         <div className="mt-7 flex flex-wrap gap-3">
-          <Link href={`${base}/search?type=shot&outcome=goal&side=own`} className={stageButton("solid")}>
+          <Link href={`${base}/scenes?type=shot&outcome=goal&side=own`} className={stageButton("solid")}>
             {tv("goalsAsClips")}
           </Link>
           {tools}
         </div>
       </Stage>
       </div>
+
+      {/* what repeats over the matches with video (SPEC 7.9) */}
+      <SeasonThemes orgId={orgId} teamId={teamId} seasonId={seasonId} names={names} />
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-16">
         <section className="space-y-4">

@@ -31218,6 +31218,73 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/themes": {
+      "get": {
+        "description": "Themes that repeat over the season's matches with video (SPEC 7.9): empty below two such\nmatches. Each theme has `matches` (in how many it showed) of `of`, and `per_match` with the\nvalue of its figure, whether it fired, and the scenes (events) behind it.",
+        "operationId": "season_themes_v1_orgs__org_id__teams__team_id__seasons__season_id__themes_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Season Themes V1 Orgs  Org Id  Teams  Team Id  Seasons  Season Id  Themes Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Season Themes",
+        "tags": [
+          "events",
+          "insights"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots": {
       "get": {
         "description": "The recurring training times of the season, by weekday and start.",

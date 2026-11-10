@@ -4153,6 +4153,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Season Themes
+         * @description Themes that repeat over the season's matches with video (SPEC 7.9): empty below two such
+         *     matches. Each theme has `matches` (in how many it showed) of `of`, and `per_match` with the
+         *     value of its figure, whether it fired, and the scenes (events) behind it.
+         */
+        get: operations["season_themes_v1_orgs__org_id__teams__team_id__seasons__season_id__themes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots": {
         parameters: {
             query?: never;
@@ -19294,6 +19316,41 @@ export interface operations {
         };
     };
     season_stats_v1_orgs__org_id__teams__team_id__seasons__season_id__stats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                season_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    season_themes_v1_orgs__org_id__teams__team_id__seasons__season_id__themes_get: {
         parameters: {
             query?: never;
             header?: never;

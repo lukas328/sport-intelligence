@@ -2766,5 +2766,11 @@
     "holiday_national": "National Day",
     "holiday_christmas": "Christmas",
     "holiday_stephen": "St Stephen's Day"
+  },
+  "themes": {
+    "title": "What keeps coming back",
+    "fromMatches": "In {k} of {n} matches with video",
+    "scenes": "{n, plural, one {# scene} other {# scenes}}",
+    "conceded_position": "{position} stays open: {k} of {n} goals conceded in the last match."
   }
 }

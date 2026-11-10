@@ -2766,5 +2766,11 @@
     "holiday_national": "Bundesfeier",
     "holiday_christmas": "Weihnachten",
     "holiday_stephen": "Stephanstag"
+  },
+  "themes": {
+    "title": "Was sich wiederholt",
+    "fromMatches": "In {k} von {n} Spielen mit Video",
+    "scenes": "{n, plural, one {# Szene} other {# Szenen}}",
+    "conceded_position": "{position} bleibt offen: {k} von {n} Gegentoren im letzten Spiel."
   }
 }

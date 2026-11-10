@@ -66,7 +66,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
         { key: "turnovers", label: t("turnovers"), value: (f) => String(f.turnovers), filter: "type=turnover" },
         { key: "suspensions", label: t("suspensions"), value: (f) => String(f.suspensions), filter: "type=suspension_2min" },
       ];
-  const search = (filter: string, matchId?: string) => `/app/${orgId}/teams/${teamId}/search?player=${playerId}${matchId ? `&match=${matchId}` : ""}&${filter}`;
+  const search = (filter: string, matchId?: string) => `/app/${orgId}/teams/${teamId}/scenes?player=${playerId}${matchId ? `&match=${matchId}` : ""}&${filter}`;
   const cell = (c: (typeof cols)[number], f: Figures, m?: Schemas["SeasonLineMatch"]) => {
     const v = c.value(f, m);
     // a count leads to its scenes; zeros and rates do not

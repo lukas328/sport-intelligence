@@ -2766,5 +2766,11 @@
     "holiday_national": "Fête nationale",
     "holiday_christmas": "Noël",
     "holiday_stephen": "Saint-Étienne"
+  },
+  "themes": {
+    "title": "Ce qui revient",
+    "fromMatches": "Dans {k} des {n} matchs avec vidéo",
+    "scenes": "{n, plural, one {# scène} other {# scènes}}",
+    "conceded_position": "{position} reste ouvert : {k} des {n} buts encaissés lors du dernier match."
   }
 }
