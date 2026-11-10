@@ -1,9 +1,10 @@
 # UX-Assessment und Zielbild
 
 Stand: 10. November 2026. Grundlage: alle 66 Screens in `docs/screens` (Desktop 1440 px und Phone
-390 px), `docs/DESIGN.md`, `apps/web/src/lib/nav-model.ts`. Die gestaltete Fassung mit Skizzen
-liegt in `zielbild.html` (gleicher Ordner). Diese Datei ist das Protokoll dazu: Befunde pro
-Screen, neue Struktur, Wörter, Reihenfolge. Nichts davon ist umgesetzt.
+390 px), `docs/DESIGN.md`, `apps/web/src/lib/nav-model.ts`. Diese Datei hält die Befunde pro
+Screen fest. Wie es künftig aussieht, steht in `SPEC.md` (verbindlich) und `zielbild.html` (das
+Bild dazu); wo der Abschnitt «Zielbild» unten davon abweicht, gilt die Spezifikation. Nichts
+davon ist umgesetzt.
 
 ## Kurzfassung
 

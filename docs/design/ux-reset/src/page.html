@@ -1,0 +1,560 @@
+<title>Handball AI Zielbild</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Instrument+Sans:wght@400..700&family=Mansalva&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62,900&display=swap">
+<!-- css -->
+
+<div class="rp halle">
+
+<header class="r-kopf">
+  <h1>So sieht die App künftig aus.</h1>
+  <div class="r-fields">
+    <div><small>Dokument</small><b>Zielbild, zweite Fassung</b></div>
+    <div><small>Stand</small><b>10. November 2026</b></div>
+    <div><small>Umfang</small><b>13 Zielbilder, Desktop und Handy</b></div>
+    <div><small>Für</small><b>die UI-Umsetzung</b></div>
+  </div>
+  <p class="r-lead">Die erste Fassung hat gezeigt, was nicht stimmt und wohin die Struktur soll. Diese Fassung legt fest, wie es aussieht und sich anfühlt: ein eigenes Gestaltungssystem aus vier Materialien, jede Funktion daran geprüft, wie oft sie im Vereinsalltag wirklich passiert, und jeder wichtige Screen ausgearbeitet für beide Breiten. Alle Skizzen auf dieser Seite sind echtes HTML und CSS aus diesem System.</p>
+</header>
+
+<!-- ============ WARUM ============ -->
+<section class="r-sec" id="warum">
+  <div class="head"><b>Ausgangslage</b></div>
+  <h2>Die App zeigt heute die Maschine. Sie soll die Woche zeigen.</h2>
+  <div class="r-two">
+    <div><h4>Versprochen ist «automatisch», gezeigt wird Arbeit</h4><p>Die Spielseite beginnt mit vier Pflichtschritten, neun Reitern und 36 Dropdowns «Person 9 · 60 s im Bild».</p></div>
+    <div><h4>Sortiert nach Ablage statt nach Aufgabe</h4><p>Sechs Seiten ohne Navigationspunkt, zweimal «Bibliothek», drei Kalender, Personen an vier Orten.</p></div>
+    <div><h4>Mehrere Wörter für dasselbe Ding</h4><p>Szene, Clip, Reel, Highlight, Markierung. Matchbogen, Matchblatt, Matchbericht, Spielbericht.</p></div>
+    <div><h4>Text statt Bild</h4><p>Kein Vorschaubild in irgendeiner Liste. Ein Erklärsatz unter fast jedem Titel, eine Fussnote an fast jeder Zahl.</p></div>
+    <div><h4>Die Demo ist leer</h4><p>«Noch keine Erkenntnisse», Quoten mit Strich, und als Bestwert «Wenigste Ballverluste: 0».</p></div>
+    <div><h4>Ein Motiv, überall gleich</h4><p>Roter Block mit Kreisbogen, darunter rosa Papier. Überschriften aus der Schablone. Rot heisst Knopf, Link, Niederlage und Fehler.</p></div>
+  </div>
+  <p class="r-cap" style="margin-top:14px">Die Befunde mit allen Belegen pro Screen stehen in <code>docs/design/ux-reset/ASSESSMENT.md</code>.</p>
+</section>
+
+<!-- ============ CHARAKTER ============ -->
+<section class="r-sec" id="charakter">
+  <div class="head"><b>Charakter</b></div>
+  <h2>Vier Materialien und ein Hallenboden.</h2>
+  <div class="r-prose">
+    <p>Eine Oberfläche wirkt generiert, wenn nichts an ihr entschieden wurde: eine Rundung für alles, eine Farbe für alles, eine Karte für alles. Charakter entsteht, wenn jedes Mittel genau eine Aufgabe hat und aus der Welt des Themas kommt. Hier ist das die Turnhalle am Samstagabend: der Spielbericht auf Papier, der Filzstift an der Taktiktafel, die Anzeigetafel über dem Zeitnehmertisch, das Trikot mit der Nummer.</p>
+    <p>Jedes Material sagt, wer spricht. Das ist der Kern, und es löst nebenbei die Frage, wie man Schätzungen ehrlich zeigt: Was gedruckt ist, kommt vom System. Was mit Filzstift geschrieben ist, kommt von einem Menschen.</p>
+  </div>
+
+  <div class="r-pick" role="group" aria-label="Vereinsfarbe für alle Skizzen">
+    <span>Vereinsfarbe ausprobieren:</span>
+    <button type="button" id="pick-rot" data-club="#c8102e" data-on="#ffffff" data-text="#c8102e" aria-pressed="true"><i style="background:#c8102e"></i>Rot</button>
+    <button type="button" id="pick-blau" data-club="#0b5cc7" data-on="#ffffff" data-text="#0b5cc7" aria-pressed="false"><i style="background:#0b5cc7"></i>Blau</button>
+    <button type="button" id="pick-gruen" data-club="#0e7a4f" data-on="#ffffff" data-text="#0e7a4f" aria-pressed="false"><i style="background:#0e7a4f"></i>Grün</button>
+    <button type="button" id="pick-gelb" data-club="#f4c20d" data-on="#14171a" data-text="#7a5d00" aria-pressed="false"><i style="background:#f4c20d"></i>Gelb</button>
+    <button type="button" id="pick-schwarz" data-club="#14171a" data-on="#ffffff" data-text="#14171a" aria-pressed="false"><i style="background:#14171a"></i>Schwarz</button>
+  </div>
+
+  <div style="margin-top:26px">
+    <div class="r-mat">
+      <div class="txt">
+        <h3>Papier<small>Das System spricht.</small></h3>
+        <p>Die Seite ist ein Blatt, kein Stapel Karten. Gegliedert wird wie auf einem Formular: ein Etikett, dann eine Linie bis zum Rand. Links läuft eine Randspalte für Tag und Uhrzeit, rechts der Inhalt.</p>
+        <ul><li>Ecken fast eckig (2 px), keine Schatten, keine getönten Kästen.</li><li>Tabellen sind Matchblätter: Haarlinien, Zahlen rechtsbündig.</li><li>Automatische Sätze sind gedruckt und konkret: «9 von 18 über rechts aussen».</li></ul>
+      </div>
+      <div class="spec">
+        <div>
+          <div class="head"><b>Kommt</b><span>Formularkopf</span></div>
+          <div class="led-row"><div class="mg">Do<span class="n">18:30</span></div><div class="body"><h4>Abschluss, Halle Seefeld</h4><p class="small">13 von 14 dabei</p></div></div>
+          <div class="led-row"><div class="mg">So<span class="n">17:30</span></div><div class="body"><h4>bei HSG Rheinau</h4><p class="small">Rang 3 · Hinspiel 24:27 verloren</p></div></div>
+        </div>
+        <table class="sheet"><thead><tr><th>Tabelle</th><th>Sp.</th><th>Diff.</th><th>Pkt.</th></tr></thead><tbody><tr><td>1 TV Talwiese</td><td>6</td><td>+21</td><td>10</td></tr><tr class="me"><td>2 HC Zürichsee</td><td>6</td><td>+14</td><td>9</td></tr><tr><td>3 HSG Rheinau</td><td>6</td><td>+9</td><td>8</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div class="r-mat">
+      <div class="txt">
+        <h3>Filzstift<small>Ein Mensch war hier.</small></h3>
+        <p>Handschrift, Kreis, Haken, Strich und Leuchtstift gibt es nur dort, wo eine Person etwas getan hat: die Notiz der Trainerin, eine bestätigte Antwort, eine Abmeldung, der Titel einer Besprechung auf einem Streifen Tape.</p>
+        <ul><li>Nie für automatische Texte. Das ist die eine Regel, die nicht bricht.</li><li>Striche werden mit leichtem Zittern gezeichnet und sehen nie zweimal gleich aus (<code>marker.js</code>, 40 Zeilen).</li><li>Höchstens drei Filzstift-Spuren pro Bildschirm.</li></ul>
+      </div>
+      <div class="spec">
+        <p class="hand">Abwehr war <span data-mark="under">stark</span>. Heute üben wir den Rückzug.</p>
+        <div class="r-row">
+          <span><span class="tickbox" data-mark="tick"></span> bestätigt</span>
+          <span class="nums"><i>4</i><i class="out" data-mark="strike">5</i><i>6</i></span>
+          <span class="n" style="font-size:34px" data-mark="circle">11</span>
+          <span class="hand s"><span data-mark="hl">kurze Ecke</span></span>
+        </div>
+        <div class="r-row"><span class="tape" style="font-size:20px">Rückzug nach Ballverlust</span><span class="tape" style="transform:rotate(1deg)">Fürs Team</span></div>
+        <p class="r-cap">Haken, Abmeldung, Kreis, Leuchtstift, Tape. Tape gehört zu von Hand beschrifteten Dingen, so wie Trinkflaschen und Taschen im Verein beschriftet sind.</p>
+      </div>
+    </div>
+
+    <div class="r-mat">
+      <div class="txt">
+        <h3>LED<small>Der Spielstand und die Uhr.</small></h3>
+        <p>Resultate und laufende Zeit stehen in Sieben-Segment-Ziffern auf einer dunklen Tafel, mit den dunklen Segmenten dahinter wie bei einer echten Anzeige. Die Lämpchen zeigen die genommenen Team-Time-outs.</p>
+        <ul><li>Genau eine Tafel pro Bildschirm. In Listen stehen Resultate als gedruckte Ziffern.</li><li>Ersetzt den roten Block. Braucht halb so viel Höhe und bleibt beim Wechsel der Reiter stehen.</li><li>Einzige Bewegung: die Tafel schaltet um, wenn ein Resultat neu ist.</li></ul>
+      </div>
+      <div class="spec">
+        <div class="board">
+          <div class="side"><b>HC Zürichsee</b><small>Heim <span class="lamps"><i class="on"></i><i class="on"></i><i></i></span></small></div>
+          <div class="mid"><span class="led">26:18</span><small>Halbzeit 13:9</small></div>
+          <div class="side r"><b>TSV Thalwil</b><small><span class="lamps"><i class="on"></i><i class="on"></i><i class="on"></i></span> Gast</small></div>
+        </div>
+        <div class="board s"><div class="mid"><span class="led">41:12</span></div><div class="side"><b>Spielzeit im Video</b><small>kleine Tafel für Uhr und Listen-Kopf</small></div></div>
+      </div>
+    </div>
+
+    <div class="r-mat">
+      <div class="txt">
+        <h3>Trikot<small>Der Verein.</small></h3>
+        <p>Die Vereinsfarbe ist das Trikot, nicht die Tapete. Sie sitzt auf dem Wappen, den Rückennummern, den eigenen Magneten im Feld und dem Punkt am aktiven Navigationsziel. Flächen bleiben Papier, Knöpfe sind Tinte.</p>
+        <ul><li>Menschen sind Nummern und Sammelbilder. Viele Amateurvereine machen eigene Stickeralben, das Bild kennt jeder.</li><li>Ein leerer Platz mit gestrichelter Linie heisst: eingeladen, aber noch nicht da.</li><li>Gezählte Dinge (Nummern, Tore, Quoten) stehen in schmalen, fetten Trikotziffern.</li></ul>
+      </div>
+      <div class="spec">
+        <div class="r-row" style="align-items:flex-start">
+          <div class="sticker" style="width:112px"><div class="pic"><span class="pos">RL</span><span class="n">10</span></div><div class="cap"><b>Elias Graf</b><span>dabei</span></div></div>
+          <div class="sticker away" style="width:112px"><div class="pic"><span class="pos">LA</span><span class="n">3</span></div><div class="cap"><b>Tim Huber</b><span>verletzt bis 19.11.</span></div></div>
+          <div class="sticker gap" style="width:112px"><div class="pic"><span class="pos">RA</span><span class="n">14</span></div><div class="cap"><b>Sara Steiner</b><span>eingeladen</span></div></div>
+        </div>
+        <div class="r-row"><span class="crest" style="width:34px;height:40px;font-size:12px">HCZ</span><div class="nums"><i>1</i><i>4</i><i>6</i><i>7</i><i>8</i><i>9</i><i>10</i><i>11</i></div><span class="n" style="font-size:40px">58<small style="font-size:.5em"> %</small></span></div>
+      </div>
+    </div>
+
+    <div class="r-mat">
+      <div class="txt">
+        <h3>Der Boden<small>Die eigene Farbe der App.</small></h3>
+        <p>Jede Szene hat ein Minifeld: der Hallenboden von oben, aus den Positionsdaten gezeichnet. Hallenblau mit orangen Handballlinien, so wie die Linien in vielen Mehrzweckhallen aussehen. Das ist das Vorschaubild, das kein anderes Produkt hat, und es braucht keine Einwilligung fürs Bild.</p>
+        <ul><li>Eigene Spieler in Vereinsfarbe mit weissem Rand, Gegner weiss mit Tintenrand.</li><li>Pass gepunktet, Wurf mit Pfeil. Ein echtes Standbild ist Zugabe, wenn die Einwilligung da ist.</li><li>Derselbe Boden für Wurfbild, Spielzüge, Übungen und leere Zustände.</li></ul>
+      </div>
+      <div class="spec">
+        <div class="r-row" style="align-items:flex-start">
+          <div style="width:230px"><svg class="mf" data-mf="ra"></svg><p class="r-cap">Szene: Tor über rechts aussen</p></div>
+          <div style="width:230px"><svg class="mf shotmap"></svg><p class="r-cap">Wurfbild: Punkt ist Tor, Kreuz kein Tor</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="r-sub">
+    <h3>Farben</h3>
+    <div class="r-sw">
+      <div><i style="background:#fcfcfa"></i><b>Papier</b>#fcfcfa · Seite</div>
+      <div><i style="background:#f2f3ef"></i><b>Papier 2</b>#f2f3ef · Notiz, Chip</div>
+      <div><i style="background:#14171a"></i><b>Tinte</b>#14171a · Text, Knöpfe, Linien</div>
+      <div><i style="background:#bcd6dd"></i><b>Boden</b>#bcd6dd · Feld</div>
+      <div><i style="background:#e2560b"></i><b>Linie</b>#e2560b · nur im Feld</div>
+      <div><i style="background:#ffd23f"></i><b>Harz</b>#ffd23f · Leuchtstift, «Prüfen»</div>
+      <div><i style="background:#101316;box-shadow:inset 0 -18px 0 #ffb21f"></i><b>Nacht und LED</b>#101316 · #ffb21f</div>
+      <div><i style="background:#1b7046;box-shadow:inset -66px 0 0 #b3261e"></i><b>Sieg, Niederlage</b>#1b7046 · #b3261e</div>
+      <div><i style="background:var(--club)"></i><b>Verein</b>pro Verein · Trikot</div>
+    </div>
+    <p class="r-cap" style="margin-top:12px">Harz ist die eine Signalfarbe. Rot und Grün bedeuten nur Niederlage und Sieg, Fehler und in Ordnung. Orange kommt ausserhalb des Felds nicht vor.</p>
+  </div>
+
+  <div class="r-sub">
+    <h3>Schrift</h3>
+    <div class="r-type">
+      <div><small>Titel · Bricolage Grotesque, schmal, 800</small><span class="h1" style="font-size:44px">Zwei Trainings bis Rheinau.</span></div>
+      <div><small>Köpfe · Bricolage Grotesque 700</small><span class="h3">Training, Halle Seefeld</span></div>
+      <div><small>Text · Instrument Sans 400, Körper 16 px</small><span>12 von 14 dabei. Tim (Knöchel) und Ben fehlen.</span></div>
+      <div><small>Trikotziffern · Archivo, schmal, 900, nur Ziffern</small><span class="n" style="font-size:46px">1 4 7 10 11 14 · 26:18 · 58 %</span></div>
+      <div><small>Tafel · DSEG7 Classic Bold</small><span style="background:var(--night);padding:8px 12px 6px;border-radius:4px;justify-self:start"><span class="led" style="font-size:30px">23:41</span></span></div>
+      <div><small>Hand · Mansalva</small><span class="hand">Nur zwei laufen zurück!</span></div>
+    </div>
+    <p class="r-cap" style="margin-top:12px">Alle sechs unter SIL OFL, selbst gehostet. Barlow und Barlow Condensed entfallen. Titel haben engen Zeilenabstand und negative Laufweite, Etiketten stehen in normaler Schreibweise ohne Sperrung.</p>
+  </div>
+
+  <div class="r-sub">
+    <h3>Was wir nicht tun</h3>
+    <p class="r-prose" style="margin-top:0">Die bekannten Erkennungszeichen generierter Oberflächen, jeweils mit dem, was hier an ihre Stelle tritt. Das ist die Prüfliste für die Umsetzung.</p>
+    <div class="r-tw"><table class="r-t">
+      <thead><tr><th>Muster</th><th>Heute in der App</th><th>Stattdessen</th></tr></thead>
+      <tbody>
+        <tr><td>Eine Rundung für alles</td><td>6 bis 8 px überall</td><td>Nach Rolle: Papier 2 px, Knopf 6 px, Tafel 5 px, Sammelbild 3 px.</td></tr>
+        <tr><td>Karte mit Rahmen, Schatten, Tönung</td><td>weisse Karten auf rosa Papier</td><td>Ein Blatt. Gliederung durch Formularkopf und Haarlinie. Rahmen nur für echte Gegenstände: Sammelbild, Tafel.</td></tr>
+        <tr><td>Farbbalken an einer Seite</td><td>aktives Navigationsziel</td><td>Ein Punkt in Vereinsfarbe.</td></tr>
+        <tr><td>Markenfarbe auf allem</td><td>Rot für Bühne, Knopf, Link, Fehler</td><td>Vereinsfarbe nur auf Wappen, Ziffern, Magneten, Punkt.</td></tr>
+        <tr><td>Etikett in Grossbuchstaben mit Sperrung über jedem Block</td><td>teilweise</td><td>Etikett im Formularkopf, normale Schreibweise.</td></tr>
+        <tr><td>Pfeil hinter jedem Link</td><td>«Zum Spiel →»</td><td>Unterstrichenes Verb ohne Pfeil.</td></tr>
+        <tr><td>Pillen «Demo», «Neu», «Live»</td><td>Demo-Pille</td><td>Als Wort in der Zeile, und nur wenn es stimmt.</td></tr>
+        <tr><td>Zahlenkacheln als Einstieg</td><td>«Die Saison in Zahlen»</td><td>Der Titel ist eine Aussage. Zahlen stehen dort, wo sie etwas erklären.</td></tr>
+        <tr><td>Symbol im farbigen Kreis, ein Fremd-Iconset</td><td>Lucide für Bedienelemente</td><td>Eigene Symbole, eine Strichstärke, nie im Kreis.</td></tr>
+        <tr><td>Schablonensatz</td><td>«Mehr Siege als Niederlagen.»</td><td>Titel aus dem Moment oder aus echten Daten. Sonst keiner.</td></tr>
+        <tr><td>Runde erfundene Zahlen, Platzhalternamen</td><td>Demo mit Strichen und Nullen</td><td>Demo mit krummen, plausiblen Zahlen und Namen aus der Region.</td></tr>
+        <tr><td>Bewegung als Schmuck</td><td>Resultat zählt hoch</td><td>Bewegung nur, wenn sie etwas zeigt: Tafel schaltet um, Haken wird gezeichnet.</td></tr>
+        <tr><td>Dunkelmodus als Umkehrung</td><td>abgeleitet</td><td>«Halle bei Nacht» eigens gestaltet. Video ist immer dunkel.</td></tr>
+        <tr><td>Fehlende Zustände</td><td>leere Seite aus einem Satz</td><td>Leer, lädt, läuft, Fehler für jeden Screen gestaltet, siehe unten.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============ STRUKTUR ============ -->
+<section class="r-sec" id="struktur">
+  <div class="head"><b>Struktur</b></div>
+  <h2>Heute, zuletzt, kommt.</h2>
+  <div class="r-prose">
+    <p>Ein Amateurtrainer öffnet die App zwischen zwei Spielen etwa sechsmal: am Spieltag, zum Hochladen, für die drei Dinge, für die Besprechung, vor dem Training, vor dem nächsten Gegner. Der Startbildschirm ist darum kein Dashboard, sondern ein Wochenblatt mit immer denselben drei Abschnitten: <b>Heute</b>, <b>Zuletzt</b>, <b>Kommt</b>. Nur der Inhalt wechselt, der Aufbau bleibt. Daneben liegt «Offen», die eine Sammelstelle für alles, was auf eine Antwort wartet.</p>
+  </div>
+
+  <div class="r-sub">
+    <h3>Navigation pro Rolle</h3>
+    <div class="r-tw"><table class="r-t">
+      <thead><tr><th>Rolle</th><th>Heute</th><th>Neu</th><th>Was sich ändert</th></tr></thead>
+      <tbody>
+        <tr><td>Trainer, Analyst, Teammanager, Admin</td><td>Übersicht · Spiele · Training · Team</td><td><b>Heute · Spiele · Szenen · Training · Team</b></td><td>Video bekommt einen eigenen Platz. «Offen» und «Suchen» liegen fest darunter, «Video hochladen» ist überall eine Taste.</td></tr>
+        <tr><td>Spielerin, Spieler</td><td>Übersicht · Szenen · Termine · Team</td><td><b>Heute · Szenen · Termine · Team</b></td><td>Stimmt schon. Zusagen drehen sich um, Aufgaben werden «Vom Trainer», die Spielseite zeigt nur Video und eigene Szenen.</td></tr>
+        <tr><td>Eltern</td><td>Übersicht</td><td><b>Heute · Termine · Kind</b></td><td>Einwilligung ist der erste Schritt, nicht eine Seite im Menü.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="r-sub">
+    <h3>Wohin alles wandert</h3>
+    <div class="r-tw"><table class="r-t">
+      <thead><tr><th>Heute</th><th>Neu</th><th>Was passiert</th></tr></thead>
+      <tbody>
+        <tr><td>Übersicht mit Bühne, Erste Schritte, 2FA-Banner</td><td>Heute</td><td>Wochenblatt. Erste Schritte, 2FA, Beitrittsanfragen, Abgleich und fehlende Einwilligungen werden Einträge in «Offen».</td></tr>
+        <tr><td>Spielplan, Saison, Gegner</td><td>Spiele</td><td>Eine Liste mit Minifeld pro Spiel. Saison und Gegner sind Ansichten davon.</td></tr>
+        <tr><td>Spiel › Video mit neun Unterreitern</td><td>Spiel · Video · Zahlen und Prüfen</td><td>Ergebnis zuerst. Alle Korrekturen laufen als eine Warteschlange. Abwehrsysteme werden ein Band auf der Zeitleiste.</td></tr>
+        <tr><td>Live erfassen, Am Spielfeldrand markieren</td><td>Spieltag</td><td>Ein Werkzeug, zwei Stufen.</td></tr>
+        <tr><td>Matchbogen-Foto, Datei-Import, Matchbericht-Link, Abgleich</td><td>Spielbericht</td><td>Kommt von handball.ch von selbst. Sonst ein Dialog mit Link, Foto oder Datei.</td></tr>
+        <tr><td>Playlists, Präsentationen, Aufgaben</td><td>Besprechung</td><td>Ein Objekt aus Szenen, Spielzügen und Notizen. Zwei Verben: Zeigen und Schicken.</td></tr>
+        <tr><td>Szenensuche, Statistik-Matrix, Frag deine Daten</td><td>Szenen › Suchfeld</td><td>Eine Eingabe für Filter und Fragen. Antwort: Zahl, Szenen, auf Wunsch Tabelle.</td></tr>
+        <tr><td>Planung, Übungen, Spielzüge</td><td>Training mit Baukasten</td><td>Wochenansicht statt 78 Zeilen. Trainingszeiten einmal im Dialog.</td></tr>
+        <tr><td>Kader, Termine, Einstellungen › Personen, Beitrittsanfragen</td><td>Team</td><td>Personen an einem Ort, Einladung per Link und QR-Code.</td></tr>
+        <tr><td>Einstellungen (eine Seite, 3355 px)</td><td>Ich und Verein</td><td>Persönliches getrennt von Vereinssachen, je mit Reitern.</td></tr>
+        <tr><td>Einstieg in vier Schritten</td><td>Zwei Schritte</td><td>Team finden, bestätigen, Trikotfarbe wählen. Danach das erste Video.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="r-sub">
+    <h3>Ein Wort pro Ding</h3>
+    <div class="r-tw"><table class="r-t">
+      <thead><tr><th>Künftig</th><th>Ersetzt</th><th>Bedeutung</th></tr></thead>
+      <tbody>
+        <tr><td>Szene</td><td><span class="no">Clip, Reel, Markierung</span></td><td>Ein Stück Video, egal woher.</td></tr>
+        <tr><td>Highlights</td><td><span class="no">Reel</span></td><td>Der automatische Zusammenschnitt zum Teilen.</td></tr>
+        <tr><td>Spielbericht</td><td><span class="no">Matchbogen, Matchblatt, Matchbericht</span></td><td>Das offizielle Protokoll.</td></tr>
+        <tr><td>Besprechung</td><td><span class="no">Playlist, Präsentation, Folien, Aufgabe</span></td><td>Was du dem Team zeigst oder schickst. Arbeitstitel, mit zwei Trainern prüfen.</td></tr>
+        <tr><td>Spieltag</td><td><span class="no">Live erfassen, Markieren</span></td><td>Tippen während des Spiels.</td></tr>
+        <tr><td>Prüfen</td><td><span class="no">Spielfeld, Anwurf, Tore prüfen, Spieler zuordnen, Würfe</span></td><td>Fragen, die die Analyse an dich hat.</td></tr>
+        <tr><td>Suchen</td><td><span class="no">Frag deine Daten, Matrix, Szenensuche</span></td><td>Ein Feld, kein Produktname.</td></tr>
+        <tr><td>Heute</td><td><span class="no">Übersicht</span></td><td>Sagt, was der Bildschirm tut.</td></tr>
+        <tr><td>Baukasten</td><td><span class="no">Übungen, Bibliothek, Vorlagen</span></td><td>Übungen und Spielzüge zum Einplanen.</td></tr>
+        <tr><td>Offen</td><td><span class="no">Erste Schritte, Mitteilungen, Banner</span></td><td>Was auf dich wartet.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============ REALITÄTSCHECK ============ -->
+<section class="r-sec" id="check">
+  <div class="head"><b>Realitätscheck</b></div>
+  <h2>Wie oft passiert das wirklich?</h2>
+  <div class="r-prose">
+    <p>Jede Funktion musste eine Frage bestehen: Wer tut das, wie oft, und was kostet es ihn? Ein Trainer mit Beruf und 14 Spielern schreibt keine 14 Notizen pro Woche. Was selten passiert, bekommt keinen eigenen Ort. Was nie ohne Aufwand passiert, muss ohne Aufwand ein Ergebnis liefern. Daraus folgt die Regel für jeden Screen: <b>Er ist vollständig, auch wenn niemand etwas von Hand getan hat.</b></p>
+  </div>
+  <div class="r-tw"><table class="r-t">
+    <thead><tr><th>Funktion</th><th>Wer, wie oft</th><th>Entscheid</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Video hochladen</td><td>Trainer oder Betreuerin, einmal pro Woche, grosse Datei</td><td>Eine Taste überall. Läuft weiter, wenn die App zu ist.</td><td><span class="tag k">Kern</span></td></tr>
+      <tr><td>Drei Dinge lesen</td><td>Trainer, nach jedem Spiel</td><td>Automatisch. Lieber zwei belegte als drei gefüllte.</td><td><span class="tag k">Kern</span></td></tr>
+      <tr><td>Zusagen</td><td>Spieler, mehrmals pro Woche</td><td>Bei festen Trainings ist man dabei, bis man sich abmeldet. Andere Team-Apps bieten denselben Modus.</td><td><span class="tag k">Kern</span></td></tr>
+      <tr><td>Prüfen</td><td>Trainer höchstens ein paar Minuten, oft gar nicht</td><td>Freiwillig, wichtigste Frage zuerst. <b>Neu:</b> Spieler bestätigen ihre eigenen Bilder mit «Bist du das?».</td><td><span class="tag y">neu gedacht</span></td></tr>
+      <tr><td>Besprechung</td><td>alle ein bis drei Wochen, zehn Minuten vor dem Training oder als Link</td><td>Entsteht als Vorschlag aus den drei Dingen, den man kürzt. Schicken ist häufiger als Zeigen.</td><td><span class="tag">bleibt</span></td></tr>
+      <tr><td>Notiz fürs Team</td><td>einmal pro Spiel, ein bis drei Sätze</td><td>Neu und freiwillig. Fehlt sie, fehlt nichts.</td><td><span class="tag y">neu</span></td></tr>
+      <tr><td>Notiz an einzelne Spieler</td><td>selten</td><td>Kein eigener Ort. Entsteht nebenbei, wenn man eine Szene an jemanden schickt.</td><td><span class="tag">Nebenprodukt</span></td></tr>
+      <tr><td>Aufgaben mit Frist</td><td>selten</td><td>«Gesehen von 9 von 14» ersetzt Frist und Kontrolle.</td><td><span class="tag">raus</span></td></tr>
+      <tr><td>Training planen</td><td>zweimal pro Woche, viele planen im Kopf</td><td>Drei bis fünf Bausteine und ein Blatt für die Halle. Der Vorschlag aus den drei Dingen ist der Grund, es hier zu tun.</td><td><span class="tag">leicht</span></td></tr>
+      <tr><td>Anwesenheit</td><td>jedes Training, im Nachwuchs für J+S nötig</td><td>Entsteht aus den Zusagen, der Trainer korrigiert nur. Export für die J+S-Anwesenheitskontrolle später.</td><td><span class="tag">bleibt</span></td></tr>
+      <tr><td>Spieltag tippen</td><td>der Trainer coacht in dieser Zeit</td><td>Sechs Tasten und ein Link für jemanden auf der Bank. Rückfall für Teams ohne offiziellen Spielbericht.</td><td><span class="tag">leicht</span></td></tr>
+      <tr><td>Gegner ansehen</td><td>einmal pro Woche</td><td>Automatisch aus Tabelle, Spielberichten und Hinspiel. Nichts zum Pflegen.</td><td><span class="tag">automatisch</span></td></tr>
+      <tr><td>Tabelle bauen, Daten fragen</td><td>selten, eher Analysten</td><td>Hinter dem Suchfeld. «Als Tabelle» ist eine Ansicht der Antwort.</td><td><span class="tag">versteckt</span></td></tr>
+      <tr><td>Einwilligung</td><td>einmal pro Saison</td><td>Erster Schritt nach der Einladung. Trainer sieht, wer fehlt, und erinnert mit einem Tipp.</td><td><span class="tag">einmalig</span></td></tr>
+      <tr><td>Öffentliches Profil, Fernbedienung, MP4-Export, Offline</td><td>sehr selten</td><td>Ins Menü oder parken, bis jemand danach fragt.</td><td><span class="tag">parken</span></td></tr>
+      <tr><td>Aufgebot, Fahrgemeinschaften, Kasse</td><td>wäre Teamverwaltung</td><td>Nicht bauen. Video zuerst, Teamverwaltung nur Kader und Zusagen.</td><td><span class="tag">nein</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ ZIELBILDER ============ -->
+<section class="r-sec" id="zielbilder">
+  <div class="head"><b>Zielbilder</b></div>
+  <h2>13 Screens, je am Desktop und am Handy.</h2>
+  <div class="r-prose"><p>Beide Breiten kommen aus demselben Markup. Namen und Zahlen sind Beispiele für den Demo-Verein. Die Vereinsfarbe lässt sich oben umschalten und gilt für alle Skizzen.</p></div>
+  <nav class="r-idx" aria-label="Zielbilder">
+    <a href="#s-heute">1 Heute</a><a href="#s-spiele">2 Spiele</a><a href="#s-spiel">3 Spiel</a><a href="#s-video">4 Video</a><a href="#s-pruefen">5 Prüfen</a><a href="#s-szenen">6 Szenen</a><a href="#s-besprechung">7 Besprechung</a><a href="#s-training">8 Training</a><a href="#s-team">9 Team</a><a href="#s-spieltag">10 Spieltag</a><a href="#s-spielerin">11 Spielerin</a><a href="#s-eltern">12 Eltern</a><a href="#s-einstieg">13 Einstieg</a>
+  </nav>
+
+  <article class="r-screen" id="s-heute">
+    <div class="head"><b>1 · Heute</b><span>Trainerin</span></div>
+    <p class="why">Das Wochenblatt. Der Titel nennt den Moment, darunter stehen immer Heute, Zuletzt und Kommt.</p>
+    <div data-tpl="t-heute" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-heute" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Eine Antwort auf «Was ist jetzt dran?». Am Dienstag: Training heute, mit der Analyse vom Samstag direkt darunter.</li><li>Jede der drei Dinge ist ein Video. Ein Tipp spielt die Szenen ab.</li><li>Der Vorschlag verbindet Analyse und Training: «Zu Punkt 1 passt …».</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Titel aus dem Moment: «Heute ist Training.», «Heute ist Spiel.», «Gestern war Spiel.», «Die Analyse läuft.», «Freie Woche.».</li><li>Der Kreis um den Wochentag markiert heute. Durchgestrichene Nummern sind Abmeldungen.</li><li>«Offen» zeigt höchstens fünf Einträge, Erledigtes von gestern bleibt einen Tag mit Haken stehen.</li><li>Die Notiz fürs Team erscheint nur, wenn sie geschrieben wurde. Sonst steht dort eine Zeile «Dem Team einen Satz schreiben».</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>/app/[orgId]</code> mit Bühne, Checkliste, «Was auffällt», «Als Nächstes», 2FA-Banner.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-spiele">
+    <div class="head"><b>2 · Spiele</b><span>Trainerin</span></div>
+    <p class="why">Spielplan und Resultate in einer Liste. Jede Zeile sagt, was mit dem Spiel los ist und was als Nächstes geht.</p>
+    <div data-tpl="t-spiele" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-spiele" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Vier Zustände pro Spiel, auf einen Blick: Analyse fertig (Minifeld und Zahl der Szenen), Analyse läuft (blasses Feld und Balken), kein Video (gestrichelter Platz und Link), kommt (leeres Feld).</li><li>Der Titel ist der Tabellenrang, weil das die Frage ist, mit der man die Seite öffnet.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Resultate in Trikotziffern, Sieg und Niederlage als Wort in Grün und Rot. Keine farbigen Quadrate.</li><li>«Saison» zeigt Tabelle, Verlauf und Kennzahlen. Kennzahlen ohne Daten werden weggelassen, nie als Strich oder Null gezeigt.</li><li>«Gegner» zeigt pro Gegner Rang, bisherige Spiele und die Szenen gegen ihn.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>teams/[teamId]/matches</code>, <code>…/season</code>, <code>opponents/[id]</code>, <code>…/paper</code>, <code>…/official</code> (Spielplan-Teil).</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-spiel">
+    <div class="head"><b>3 · Spiel</b><span>Trainerin · Reiter «Spiel»</span></div>
+    <p class="why">Die Geschichte des Spiels auf einem Blatt: Verlauf, drei Dinge, Wurfbild, Telegramm.</p>
+    <div data-tpl="t-spiel" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-spiel" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Die Anzeigetafel ersetzt den roten Kopf und bleibt über allen drei Reitern stehen.</li><li>Drei Reiter statt zwölf Stellen: Spiel, Video, Zahlen. «Prüfen 3» erscheint nur, wenn Fragen offen sind.</li><li>Eine Quellenzeile sagt einmal, woher die Zahlen kommen. Das ersetzt die Fussnoten.</li><li>Das Telegramm ist die Form, in der Regionalzeitungen Spiele melden. Es entsteht aus dem Spielbericht und lässt sich kopieren.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Der gelbe Balken im Verlauf ist die Phase aus Punkt 2. Ein Tipp darauf öffnet das Video an dieser Stelle.</li><li>Der Kreis um «11» ist von der Trainerin gesetzt (Zahl antippen, «merken»). Automatisch wird nichts eingekreist.</li><li>Vor dem Anpfiff zeigt dieselbe Seite die Vorbereitung: Gegner in drei Punkten, wer dabei ist, «Spieltag starten».</li><li>Ohne Video: Telegramm und Zahlen aus dem Spielbericht, dazu die Aufforderung zum Hochladen.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>matches/[matchId]</code> mit Bühne, Reiter Analyse, <code>…/scouting</code>.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-video">
+    <div class="head"><b>4 · Video</b><span>Trainerin · Reiter «Video»</span></div>
+    <p class="why">Ansehen und merken. Video ist dunkel, alles andere tritt zurück.</p>
+    <div data-tpl="t-video" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-video" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Die Zeitleiste fehlt heute ganz. Sie zeigt Tore beider Teams, das Abwehrsystem als Band und die markierte Phase.</li><li>Rechts die Szenen im sichtbaren Ausschnitt. Ein Tipp springt hin.</li><li>Vier Werkzeuge: Szene merken, Zeichnen, jemanden hervorheben, an jemanden schicken. Mehr nicht.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Die Uhr im Bild ist die Spielzeit, nicht die Videozeit. Ist der Anwurf nicht gesetzt, zeigt sie Videozeit und «Prüfen» enthält die Frage dazu.</li><li>Notizen sind Handschrift und für das Team sichtbar, ausser man stellt es um.</li><li>Abwehrsysteme, Kommentare, Clips, Zeichnungen und Feedback sind keine Reiter mehr.</li><li>Die Skizze zeigt den Boden als Platzhalter. In der App läuft dort das Video.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li>Reiter Video mit Ereignisse, Abwehrsysteme, Kommentare, Feedback; Reiter Szenen.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-pruefen">
+    <div class="head"><b>5 · Prüfen</b><span>Trainerin, Assistenz · Vollbild</span></div>
+    <p class="why">Eine Frage pro Bildschirm. Das Muster kommt vom besten Screen der heutigen App, «Würfe prüfen».</p>
+    <div data-tpl="t-pruefen" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-pruefen" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Eine Warteschlange für alles: Spielfeld passt?, Anwurf hier?, Tor oder kein Tor?, Wer ist das?</li><li>Die wahrscheinlichste Antwort steht vorn und ist dunkel. Am Desktop geht alles über die Tastatur.</li><li>Die Reihenfolge folgt dem Nutzen: wer am längsten im Bild ist, kommt zuerst.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Immer abbrechbar, nie Voraussetzung. Das Spiel ist ohne Prüfen ansehbar.</li><li>Jede Antwort wird sofort gespeichert und setzt in den Zahlen einen Haken «von dir bestätigt».</li><li>Spieler bekommen dieselbe Frage zu sich selbst als «Bist du das?» (Screen 11).</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li>Die Schritte Spielfeld, Anwurf, Tore prüfen, Spieler zuordnen; Reiter Würfe; «Im Vollbild prüfen».</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-szenen">
+    <div class="head"><b>6 · Szenen</b><span>Trainerin</span></div>
+    <p class="why">Der Ort für Video über alle Spiele. Das Suchfeld ist die Seite.</p>
+    <div data-tpl="t-szenen" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-szenen" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Eine Eingabe versteht Filter («Gegentor, rechts aussen») und Fragen («Wie oft treffen wir nach einem Time-out?»). Die erkannten Filter stehen als Chips darunter und lassen sich antippen.</li><li>Die Antwort ist eine Zahl mit Bezug, dann die Szenen. «Als Tabelle» öffnet die heutige Matrix mit dieser Auswahl.</li><li>Darunter die Besprechungen und die automatischen Highlights.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Ohne Eingabe zeigt die Seite die neuesten Szenen und vier Beispielsuchen aus den eigenen Daten.</li><li>Besprechungen tragen ihren Titel auf Tape, weil eine Person ihn vergeben hat.</li><li>Jede Kachel ist ein Minifeld mit Länge. Standbild nur mit Einwilligung.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>…/library</code>, <code>…/search</code>, <code>…/matrix</code>, <code>…/assistant</code>, <code>…/playlists</code>, <code>…/presentations</code>.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-besprechung">
+    <div class="head"><b>7 · Besprechung</b><span>Trainerin</span></div>
+    <p class="why">Was das Team sehen soll, in einer Reihenfolge. Aus Playlists, Präsentationen und Aufgaben wird ein Ding.</p>
+    <div data-tpl="t-besprechung" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-besprechung" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Entsteht mit einem Tipp aus den drei Dingen und ist sofort brauchbar. Die Trainerin kürzt und ergänzt.</li><li>Drei Arten von Einträgen: Szene, Spielzug, Notiz. Notizen an Szenen sind freiwillig.</li><li>«Zeigen» spielt im Vollbild mit Zeichnen. «Ans Team schicken» erzeugt einen Link für den Teamchat.</li><li>«Gesehen» in Rückennummern ersetzt Frist und Kontrolle.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Kein Folien-Editor. Text ist immer eine Notiz in Handschrift.</li><li>Fernbedienung, PDF, MP4 und Offline liegen im Menü.</li><li>Empfänger sind standardmässig alle. Einzelne Personen wählt man über ihre Nummer.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>playlists/[id]</code>, <code>presentations/[id]</code>, <code>…/assignments</code>.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-training">
+    <div class="head"><b>8 · Training</b><span>Trainerin</span></div>
+    <p class="why">Die Woche statt der Saison. Planen heisst: drei bis fünf Bausteine antippen.</p>
+    <div data-tpl="t-training" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-training" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Dasselbe Wochenblatt wie in Heute, mit dem Plan pro Training. Das Spiel am Sonntag steht mit drin, damit die Woche vollständig ist.</li><li>Rechts stehen die Bausteine, die zu den drei Dingen passen. Antippen plant ein.</li><li>Übungen und Spielzüge sind ein Baukasten aus Bildkacheln. Text kommt beim Öffnen.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Trainingszeiten und freie Tage stellt man einmal pro Saison in einem Dialog ein. Die Einheiten entstehen von selbst.</li><li>«Blatt für die Halle» ersetzt «PDF». «Anwesenheit» zeigt die Zusagen als Rückennummern zum Abhaken.</li><li>Vergangene Wochen erreicht man durch Blättern, nicht durch Scrollen.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>…/training</code>, <code>drills</code>, <code>…/plays</code>, <code>schedule</code> für Trainer.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-team">
+    <div class="head"><b>9 · Team</b><span>Trainerin</span></div>
+    <p class="why">Der Kader als Albumseite. Wer fehlt, sieht man an der Lücke.</p>
+    <div data-tpl="t-team" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-team" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Alle Personen an einem Ort: Kader, Trainerbank, Einladung, Anfragen.</li><li>Ein Link und ein QR-Code für den Teamchat. Wer ihn öffnet, wählt seine Nummer und ist verknüpft.</li><li>Zustand pro Person in einer Zeile: dabei, verletzt bis, abwesend, Einwilligung fehlt.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Volles Sammelbild: Person ist in der App. Gestrichelter Platz: eingeladen oder angefragt. Grau: fällt heute aus.</li><li>Einwilligung ist ein gelber Punkt und ein Filter, keine Tabelle. Die Matrix pro Zweck liegt hinter «erinnern».</li><li>Ein Foto ersetzt das Trikot im Bild, wenn die Person eines hochlädt.</li><li>Tipp auf ein Bild öffnet die Person: Saison, Szenen, Status, Konto.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>teams/[teamId]</code>, <code>…/join-requests</code>, <code>…/official</code> (Kader-Teil), Einstellungen › Personen, <code>…/players/[id]</code>.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-spieltag">
+    <div class="head"><b>10 · Spieltag</b><span>am Spielfeldrand · Handy</span></div>
+    <p class="why">Ein Werkzeug für die Bank. Grosse Tasten, eine Hand, auch ohne Netz.</p>
+    <div class="r-split solo">
+      <div data-tpl="t-spieltag" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Sechs Tasten setzen Marken mit der Uhrzeit des Handys. Nach der Analyse liegen sie im Video.</li><li>Die Tafel zeigt Stand und Spielzeit, so wie sie in der Halle hängt.</li><li>Die letzte Eingabe steht unten und lässt sich zurücknehmen.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Die Trainerin coacht in dieser Zeit. Darum gibt es den Link für jemanden auf der Bank, ohne Konto.</li><li>«Pro Spielerin erfassen» öffnet die genaue Stufe mit Rückennummern. Sie ist die Ausnahme.</li><li>Gibt es einen offiziellen Spielbericht mit Torfolge, schlägt die App nur die vier unteren Tasten vor.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>matches/[id]/live</code> und <code>…/marks</code>.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-spielerin">
+    <div class="head"><b>11 · Heute</b><span>Spielerin</span></div>
+    <p class="why">Vollständig, ohne dass die Trainerin etwas getan hat: Termin, eigene Szenen, eigene Zahlen.</p>
+    <div data-tpl="t-spielerin" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-spielerin" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Ein Schalter pro Termin. Bei festen Trainings steht er auf «Dabei».</li><li>Die eigenen besten Szenen entstehen automatisch nach jedem Spiel.</li><li>«Bist du das?» lässt die Spielerin ihre eigenen Bilder bestätigen. Das nimmt der Trainerin die 36 Dropdowns ab.</li><li>Die Notiz fürs Team steht in Handschrift, wenn es eine gibt.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Eigene Zahlen im Vergleich zur eigenen Saison, nie in einer Rangliste gegen Mitspieler. Im Nachwuchs keine Teamstatistik.</li><li>Spiele ausserhalb der festen Trainings brauchen eine Antwort: beide Seiten des Schalters sind leer.</li><li>Abmelden fragt nach einem Grund in einem Tipp (krank, Arbeit, Ferien) und optional «bis wann».</li><li>Der Reiter Szenen zeigt dieselben Szenen pro Spiel plus die Besprechungen des Teams.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>/app/[orgId]</code> für Spieler, <code>feed</code>, <code>assignments</code>, Spielseite mit Trainerwerkzeugen.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-eltern">
+    <div class="head"><b>12 · Heute</b><span>Eltern</span></div>
+    <p class="why">Zuerst die eine Sache, die nur Eltern entscheiden können. Dann die Woche des Kindes.</p>
+    <div data-tpl="t-eltern" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-eltern" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Solange die Einwilligung offen ist, steht sie oben. Danach rückt die Woche nach oben.</li><li>Jede Frage in einem Satz und mit Ja oder Nein. Der Satz darunter sagt, was ohne Ja passiert.</li><li>Zu- und Absagen im Namen des Kindes mit demselben Schalter wie bei Spielern.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Keine Zahlen und keine Szenen, solange «Im Team anschauen» nicht auf Ja steht.</li><li>«Verbesserung der Erkennung» und «Öffentliches Profil» liegen unter «Kind», nicht im ersten Schritt.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>/app/[orgId]</code> für Eltern, <code>consents</code>, <code>schedule</code>.</li></ul></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="r-screen" id="s-einstieg">
+    <div class="head"><b>13 · Einstieg</b><span>erster Start</span></div>
+    <p class="why">Zwei Schritte statt vier. Im zweiten wird die App zum eigenen Verein.</p>
+    <div data-tpl="t-einstieg" data-w="desk"></div>
+    <div class="r-split">
+      <div data-tpl="t-einstieg" data-w="phone"></div>
+      <div class="r-notes">
+        <div><h4>Was der Screen leistet</h4><ul><li>Schritt 1 bleibt die Teamsuche über handball.ch. Schritt 2 zeigt, was gefunden wurde, und fragt nur noch nach der Trikotfarbe.</li><li>Die Sammelbilder daneben wechseln sofort die Farbe. Das ist der Moment, in dem es «unser» wird.</li><li>Danach landet man in Heute mit genau einer Aufgabe: das erste Video hochladen, oder das Demo-Spiel ansehen.</li></ul></div>
+        <div><h4>Regeln</h4><ul><li>Kader von Hand oder per CSV nur, wenn handball.ch nichts liefert.</li><li>Einladen passiert später über den Link im Team, nicht im Einstieg.</li><li>Anmelden und Registrieren tragen dieselbe Gestaltung: Papier, Tinte, eine Tafel mit dem letzten Resultat des Demo-Spiels.</li></ul></div>
+        <div><h4>Ersetzt</h4><ul><li><code>/onboarding</code> (vier Schritte), blaue Einstiegsseiten.</li></ul></div>
+      </div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ ZUSTÄNDE ============ -->
+<section class="r-sec" id="zustaende">
+  <div class="head"><b>Zustände</b></div>
+  <h2>Leer ist auch ein Screen.</h2>
+  <div class="r-prose"><p>Drei Beispiele für die Regel: sagen, was los ist, zeigen, was kommt, eine Handlung anbieten. Ein leerer Screen zeigt blass, wie er gefüllt aussieht.</p></div>
+  <div class="r-states">
+    <div><div data-tpl="t-z-upload" data-w="phone"></div><p class="r-cap">Heute am Tag nach dem Spiel, noch ohne Video.</p></div>
+    <div><div data-tpl="t-z-laeuft" data-w="phone"></div><p class="r-cap">Heute während der Analyse. Schritte in Worten statt Prozent.</p></div>
+    <div><div data-tpl="t-z-leer" data-w="phone"></div><p class="r-cap">Szenen vor dem ersten Spiel. Die blassen Kacheln sind die Vorschau.</p></div>
+  </div>
+</section>
+
+<!-- ============ TON ============ -->
+<section class="r-sec" id="ton">
+  <div class="head"><b>Ton</b></div>
+  <h2>So redet die App.</h2>
+  <div class="r-tw"><table class="r-t">
+    <thead><tr><th>Heute</th><th>Künftig</th><th>Warum</th></tr></thead>
+    <tbody>
+      <tr><td>«Deutlich gewonnen gegen TSV Demo-Thalwil.»</td><td>«Heute ist Training.»</td><td>Der Titel nennt den Moment. Das Resultat steht auf der Tafel.</td></tr>
+      <tr><td>«Für dieses Spiel gibt es noch keine Erkenntnisse.»</td><td>«Lad das Video hoch. Nach etwa 40 Minuten bekommst du die drei Dinge.»</td><td>Sagen, was als Nächstes passiert.</td></tr>
+      <tr><td>«Einheiten aus Übungen planen, als PDF in die Halle mitnehmen, Anwesenheit erfassen.»</td><td>kein Satz</td><td>Eine Seite, die das braucht, ist nicht klar genug.</td></tr>
+      <tr><td>«36 Personen ohne Namen, die erste bei 0:00.»</td><td>«Wer ist das?»</td><td>Eine Frage, die man beantworten kann.</td></tr>
+      <tr><td>«Den Ball erkennt die Videoanalyse noch nicht.»</td><td>«Quellen: Video, Spielbericht.»</td><td>Sagen, was da ist. Einmal, nicht an jeder Zahl.</td></tr>
+      <tr><td>«Guten Morgen, Demo»</td><td>«Hoi Mia.»</td><td>de-CH. Französisch «Salut», Englisch «Hi».</td></tr>
+      <tr><td>«Ich komme» und «Ich komme nicht», zehnmal</td><td>«Dabei» als Normalfall, «Abmelden» als Handlung</td><td>Weniger Arbeit für alle.</td></tr>
+      <tr><td>«Mehr Siege als Niederlagen.»</td><td>«Rang 2 nach fünf Spielen.»</td><td>Eine Tatsache aus der Tabelle statt eines Satzes aus der Schablone.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="r-prose">
+    <ul>
+      <li>Zahlen sind konkret und krumm: «9 von 18», nicht «viele». Prozent nur mit der Grundmenge daneben.</li>
+      <li>Auf Knöpfen stehen Verben: «Besprechung bauen», «Video hochladen». Keine Pfeile.</li>
+      <li>Du-Form, de-CH ohne ß, keine langen Gedankenstriche. Kein Wort in Grossbuchstaben.</li>
+      <li>Wenn die Daten keinen Satz hergeben, steht keiner da.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ ÜBERGABE ============ -->
+<section class="r-sec" id="uebergabe">
+  <div class="head"><b>Übergabe</b></div>
+  <h2>Für die UI-Umsetzung.</h2>
+  <div class="r-prose">
+    <p>Alles liegt in <code>docs/design/ux-reset/</code>. Die verbindliche Fassung ist <code>SPEC.md</code>, diese Seite ist das Bild dazu. Das CSS der Skizzen (<code>assets/halle.css</code>) ist so geschrieben, dass sich Tokens und Bausteine in <code>apps/web/src/app/globals.css</code> und die React-Komponenten übertragen lassen.</p>
+  </div>
+  <div class="r-tw"><table class="r-t">
+    <thead><tr><th>Schritt</th><th>Inhalt</th><th>Fertig, wenn</th></tr></thead>
+    <tbody>
+      <tr><td>1 Grundlage</td><td>Tokens, sechs Schriften, Bausteine: Formularkopf, Wochenblatt-Zeile, Tafel, Minifeld, Trikotziffern, Sammelbild, Filzstift, Tape, Knöpfe, Reiter.</td><td>Eine Seite <code>/dev/halle</code> zeigt alle Bausteine in beiden Themen und mit fünf Vereinsfarben.</td></tr>
+      <tr><td>2 Rahmen</td><td>Fünf Ziele, «Offen», «Suchen», «Video hochladen». Heute als Wochenblatt mit allen Momenten. Einstellungen in Ich und Verein.</td><td><code>nav-model.ts</code> und sein Test bilden die neue Struktur ab.</td></tr>
+      <tr><td>3 Spiel</td><td>Tafel, Spiel · Video · Zahlen, Zeitleiste, Prüfen als Warteschlange, Spieltag, Spielbericht-Dialog.</td><td>Kein Screen hat mehr als eine Reiterebene.</td></tr>
+      <tr><td>4 Szenen</td><td>Suchfeld für Filter und Fragen, Besprechung statt Playlist, Präsentation, Aufgabe.</td><td>Die alten Routen leiten um.</td></tr>
+      <tr><td>5 Training, Team</td><td>Woche, Baukasten, Album, Einladungslink.</td><td>Personen werden nur noch in Team verwaltet.</td></tr>
+      <tr><td>6 Spieler, Eltern, Einstieg</td><td>Heute für beide Rollen, «Bist du das?», Einwilligung als erster Schritt, Einstieg in zwei Schritten.</td><td>Jeder Screen ist ohne Zutun der Trainerin vollständig.</td></tr>
+      <tr><td>7 Inhalt</td><td>Wörter in de-CH, fr, en. Demo-Verein mit einem voll analysierten Spiel. Screenshots neu.</td><td><code>docs/screens</code> zeigt keinen Screen mehr, der aus einem Satz besteht.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="r-ask">
+    <h3 class="h2">Annahmen, die ich getroffen habe</h3>
+    <ol>
+      <li><b>Umfang.</b> Videoanalyse zuerst. Teamverwaltung nur Kader und Zusagen, kein Aufgebot, keine Fahrgemeinschaften, keine Kasse.</li>
+      <li><b>Fünf Ziele</b> für Trainer mit «Szenen» auf oberster Ebene. <code>docs/DESIGN.md</code> und ADR 023/024 nennen vier Ziele und die Bühne. Sie werden mit Schritt 2 durch ein neues ADR ersetzt.</li>
+      <li><b>Die Wörter</b> wie in der Tabelle oben. «Besprechung» bleibt Arbeitstitel, bis zwei Trainer es gehört haben.</li>
+      <li><b>Minifeld als Standard</b>, Standbild als Zugabe bei vorhandener Einwilligung «Videoanalyse im Team».</li>
+      <li><b>Knöpfe in Tinte</b>, wie in <code>docs/design/identity/FOR_LUKAS.md</code> Punkt 8 als Variante A vorgeschlagen.</li>
+    </ol>
+    <p style="margin-top:14px;font-size:15px;color:var(--ink-2)">Wenn dir einer dieser Punkte nicht passt, sag es, bevor die UI-Session startet. Alles andere folgt daraus.</p>
+  </div>
+
+  <div class="r-sub">
+    <h3>Quellen der Recherche</h3>
+    <ul class="r-src">
+      <li>Erkennungszeichen generierter Oberflächen und ihre Ursachen: <a href="https://noqta.tn/en/blog/ai-design-slop-overused-ui-patterns-fix-2026">noqta.tn</a>, <a href="https://github.com/Laith0003/ux-skill/wiki/How-to-detect-AI-slop-in-your-design">ux-skill Wiki</a>, <a href="https://www.saasui.design/blog/saas-ui-looks-ai-generated">saasui.design</a>.</li>
+      <li>Zusagen mit «Spieler müssen absagen» als Modus: <a href="https://support.spielerplus.de/hc/en-us/articles/8294249861393-How-can-I-set-that-members-have-to-actively-decline-an-appointment">SpielerPlus Hilfe</a>.</li>
+      <li>Szenen und Playlists an Gruppen oder einzelne Spieler schicken: <a href="https://www.hudl.com/blog/the-basics-it-all-starts-with-clips">Hudl</a>, <a href="https://www.veo.com/user/clubs">Veo</a>.</li>
+      <li>Anzeigetafel mit Zeitstrafen und Team-Time-out: <a href="https://www.stramatel.com/en/gamme-sport/exclusion-time-display-mvb/">Stramatel</a>.</li>
+      <li>Stickeralben in Amateurvereinen: <a href="https://www.infranken.de/lk/forchheim/stickerstars-werden-geboren-art-3246060">inFranken über Stickerstars</a>.</li>
+      <li>Linienfarben in Mehrzweckhallen (Handball meist orange oder gelb, nicht vorgeschrieben): <a href="https://www.continentalsports.co.uk/technical-information/court-markings-and-court-dimensions">Continental Sports</a>.</li>
+      <li>Anwesenheitskontrolle bei Jugend+Sport: <a href="https://www.jugendundsport.ch/dam/de/sd-web/r7zfoYesYtPm/NDS-Info_13_2025_12_DE.pdf">NDS-Info, BASPO</a>.</li>
+      <li>Sieben-Segment-Schrift DSEG, SIL OFL: <a href="https://www.keshikan.net/fonts-e.html">keshikan.net</a>.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<!-- screens -->
+<!-- js -->
