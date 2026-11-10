@@ -38,6 +38,8 @@ interface TeamStats {
   attack_efficiency: number | null;
   possessions?: number | null;
   zones: ZoneCount;
+  /** shots and goals by attacking position (metrics 0.5) */
+  positions?: Record<string, { shots: number; goals: number; zones: string[] }>;
   goal_zones: ZoneCount;
   by_situation: Record<string, { shots: number; goals: number; pct: number | null }>;
   xg: number;
@@ -590,5 +592,33 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
       </Sheet>
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
+  );
+}
+
+const POSITION_ORDER = ["LA", "RL", "RM", "RR", "RA", "KM"] as const;
+
+/**
+ * Gegentore nach Position (SPEC 7.2): the opponent's goals by the position they came from. Plain
+ * list for now; the court with circles comes with the new look. Left out when no goal has a place.
+ */
+export function ConcededByPosition({ stats }: { stats: Stats }) {
+  const t = useTranslations();
+  const pos = stats.opponent.positions;
+  if (!pos || POSITION_ORDER.every((p) => (pos[p]?.goals ?? 0) === 0)) return null;
+  return (
+    <section aria-labelledby="conceded-title" className="space-y-3" data-testid="conceded-by-position">
+      <h2 id="conceded-title" className="text-2xl">
+        {t("stats.concededByPosition")}
+      </h2>
+      <ul className="grid grid-cols-3 gap-px border-y border-foreground/15 sm:grid-cols-6">
+        {POSITION_ORDER.map((p) => (
+          <li key={p} className="py-3 text-center">
+            <span className="block font-score text-3xl tabular-nums">{pos[p]?.goals ?? 0}</span>
+            <span className="block text-sm text-muted">{t(`positions.${p}`)}</span>
+            <span className="block text-xs text-muted tabular-nums">{t("stats.ofShots", { n: pos[p]?.shots ?? 0 })}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

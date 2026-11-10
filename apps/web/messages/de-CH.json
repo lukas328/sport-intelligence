@@ -633,7 +633,7 @@
     "items": "{count, plural, one {# Szene} other {# Szenen}}",
     "shared": "Für Spieler sichtbar",
     "notShared": "Nur Staff",
-    "share": "Teilen",
+    "share": "Im Team teilen",
     "unshare": "Nicht mehr teilen",
     "play": "Abspielen",
     "remove": "Entfernen",
@@ -771,7 +771,9 @@
     "edgeScenes_saves": "Paraden ansehen",
     "edgeScenes_shooting": "Würfe ansehen",
     "edgeScenes_turnovers": "Ballverluste des Gegners ansehen",
-    "edgeScenes_fastBreaks": "Gegenstosstore ansehen"
+    "edgeScenes_fastBreaks": "Gegenstosstore ansehen",
+    "concededByPosition": "Gegentore nach Position",
+    "ofShots": "{n, plural, one {aus # Wurf} other {aus # Würfen}}"
   },
   "shotsView": {
     "title": "Würfe",
@@ -1674,7 +1676,7 @@
     "offline": "Offline verfügbar machen",
     "offlineRemove": "Offline-Paket entfernen",
     "offlineReady": "Offline verfügbar: Die Sammlung läuft auch ohne Netz in diesem Browser.",
-    "share": "Teilen (nur ansehen)",
+    "share": "Im Team teilen (nur ansehen)",
     "noSlides": "Noch keine Einträge.",
     "noSlidesHint": "Füge Notizen und Spielzüge hier hinzu, Szenen über Szenen.",
     "up": "Nach oben",

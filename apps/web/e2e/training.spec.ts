@@ -56,15 +56,16 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await expect(page.getByText(/Lade zuerst Spieler/)).toBeVisible();
   await expectAccessible(page);
 
-  // plan and usage in the settings (limits are not enforced in this installation)
-  await page.goto(teamUrl.replace(/\/teams\/.*/, "/settings"));
+  // plan and usage under Verein, Abo und Rechnungen (limits are not enforced in this installation)
+  await page.goto(teamUrl.replace(/\/teams\/.*/, "/club/billing"));
   const billing = page.getByTestId("billing");
   await expect(billing).toContainText("Gratis");
   await expect(billing).toContainText("Limiten sind in dieser Installation nicht aktiv.");
   await expect(page.getByTestId("plans").getByRole("listitem").filter({ hasText: "CHF 39 pro Monat" })).toBeVisible();
   await expectAccessible(page);
 
-  // privacy: personal data download and club deletion with name confirmation
+  // privacy (Ich, Meine Daten): personal data download and club deletion with name confirmation
+  await page.goto(teamUrl.replace(/\/teams\/.*/, "/me/data"));
   const exported = await page.request.get((await page.getByTestId("export").getAttribute("href"))!);
   expect((await exported.json()).account.name).toBe("Coach Training");
   await page.getByText("Verein löschen", { exact: true }).first().click();

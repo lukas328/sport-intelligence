@@ -633,7 +633,7 @@
     "items": "{count, plural, one {# scene} other {# scenes}}",
     "shared": "Visible to players",
     "notShared": "Staff only",
-    "share": "Share",
+    "share": "Share in the team",
     "unshare": "Stop sharing",
     "play": "Play",
     "remove": "Remove",
@@ -771,7 +771,9 @@
     "edgeScenes_saves": "Watch the saves",
     "edgeScenes_shooting": "Watch the shots",
     "edgeScenes_turnovers": "Watch the opponent's turnovers",
-    "edgeScenes_fastBreaks": "Watch the fast-break goals"
+    "edgeScenes_fastBreaks": "Watch the fast-break goals",
+    "concededByPosition": "Goals conceded by position",
+    "ofShots": "{n, plural, one {from # shot} other {from # shots}}"
   },
   "shotsView": {
     "title": "Shots",
@@ -1674,7 +1676,7 @@
     "offline": "Make available offline",
     "offlineRemove": "Remove offline pack",
     "offlineReady": "Available offline: the collection also runs without network in this browser.",
-    "share": "Share (view only)",
+    "share": "Share in the team (view only)",
     "noSlides": "No entries yet.",
     "noSlidesHint": "Add notes and plays here, scenes from Scenes.",
     "up": "Move up",

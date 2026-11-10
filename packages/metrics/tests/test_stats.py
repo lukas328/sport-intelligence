@@ -3,7 +3,14 @@ from __future__ import annotations
 import pytest
 
 from handball_metrics import Event, EventType, Side, compute_match_stats, expected_goal
-from handball_metrics.stats import LINE_KEYS, player_event_ids, situations, zone_of
+from handball_metrics.stats import (
+    LINE_KEYS,
+    POSITIONS,
+    player_event_ids,
+    position_of_zone,
+    situations,
+    zone_of,
+)
 
 OWN, OPP = Side.OWN, Side.OPPONENT
 
@@ -267,3 +274,34 @@ def test_player_event_ids_match_the_figures() -> None:
     assert keeper["saves"] == ["s7"] and keeper["goals_against"] == ["s8"]
     assert len(keeper["faced"]) == gk["faced"] and len(keeper["saves"]) == gk["saves"]
     assert len(keeper["seven_m_faced"]) == gk["seven_m"]["faced"] == 1
+
+
+def test_goals_conceded_by_position() -> None:
+    """Six positions (LA, RL, RM, RR, RA, KM) from the shot zones; 7 m and fast breaks are none."""
+    assert position_of_zone("wing_left") == "LA"
+    assert position_of_zone("half_right") == "RR"
+    assert position_of_zone("circle_centre") == "KM"
+    assert position_of_zone("penalty") is None
+    events = [
+        shot(1, OPP, "goal", 60, x=38.0, y=18.5),  # left wing
+        shot(2, OPP, "goal", 120, x=38.0, y=1.5),  # right wing
+        shot(3, OPP, "save", 180, x=38.0, y=1.5),
+        shot(4, OPP, "goal", 240, x=34.5, y=10.0),  # pivot, 5.5 m
+        shot(5, OPP, "goal", 300, shot_type="penalty"),
+        shot(6, OWN, "goal", 360, x=38.0, y=18.5),
+    ]
+    s = compute_match_stats(events)
+    conceded = s["opponent"]["positions"]
+    assert tuple(conceded) == POSITIONS
+    assert {p: v["goals"] for p, v in conceded.items()} == {
+        "LA": 1,
+        "RL": 0,
+        "RM": 0,
+        "RR": 0,
+        "RA": 1,
+        "KM": 1,
+    }
+    assert conceded["RA"] == {"shots": 2, "goals": 1, "zones": ["wing_right"]}
+    # the penalty goal is in the total but has no position
+    assert s["own"]["goals_against"] == 4
+    assert s["own"]["positions"]["LA"]["goals"] == 1

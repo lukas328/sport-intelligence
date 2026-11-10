@@ -27,6 +27,9 @@ Logs and pid files are in `$TMPDIR/handball-local` (default `/tmp/handball-local
 `scripts/local-stack.sh status` and `scripts/local-stack.sh down` do what they say; Postgres and
 Redis keep running (stop them with `service postgresql stop`).
 
+`next dev` caches `apps/web/messages/*.json`: after editing them run
+`scripts/local-stack.sh restart-web`, which clears `apps/web/.next` and starts the web again.
+
 Without `HB_WEB_DEV=1` the script runs `next start` if `apps/web/.next` holds a production build
 (`pnpm --filter @handball/web build`), which is closer to production and faster for screenshots.
 

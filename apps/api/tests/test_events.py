@@ -93,6 +93,10 @@ async def test_events_crud_filters_corrections_and_stats(
         stats["own"]["goals"] == 1 and stats["own"]["shots"] == 2 and stats["own"]["turnovers"] == 1
     )
     assert stats["opponent"]["goals"] == 1
+    # shots by attacking position: the pivot goal at 5.5 m is "KM"; the opponent's goal without a
+    # position on the court has none (goals conceded by position, SPEC 7.2)
+    assert stats["own"]["positions"]["KM"] == {"shots": 1, "goals": 1, "zones": ["circle_centre"]}
+    assert sum(v["goals"] for v in stats["opponent"]["positions"].values()) == 0
     assert stats["players"][f"p:{players[7]}"]["goals"] == 1
     assert stats["possessions_source"] == "heuristic_estimate"
     assert stats["own"]["possessions"] == 3

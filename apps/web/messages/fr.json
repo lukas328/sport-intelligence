@@ -633,7 +633,7 @@
     "items": "{count, plural, one {# scène} other {# scènes}}",
     "shared": "Visible pour les joueurs",
     "notShared": "Staff uniquement",
-    "share": "Partager",
+    "share": "Partager dans l’équipe",
     "unshare": "Ne plus partager",
     "play": "Lire",
     "remove": "Retirer",
@@ -771,7 +771,9 @@
     "edgeScenes_saves": "Voir les arrêts",
     "edgeScenes_shooting": "Voir les tirs",
     "edgeScenes_turnovers": "Voir les pertes de balle adverses",
-    "edgeScenes_fastBreaks": "Voir les buts en contre-attaque"
+    "edgeScenes_fastBreaks": "Voir les buts en contre-attaque",
+    "concededByPosition": "Buts encaissés par poste",
+    "ofShots": "{n, plural, one {sur # tir} other {sur # tirs}}"
   },
   "shotsView": {
     "title": "Tirs",
@@ -1674,7 +1676,7 @@
     "offline": "Rendre disponible hors ligne",
     "offlineRemove": "Supprimer le paquet hors ligne",
     "offlineReady": "Disponible hors ligne : la sélection fonctionne aussi sans réseau dans ce navigateur.",
-    "share": "Partager (lecture seule)",
+    "share": "Partager dans l’équipe (lecture seule)",
     "noSlides": "Pas encore d'entrées.",
     "noSlidesHint": "Ajoute ici des notes et des systèmes, les scènes via Scènes.",
     "up": "Monter",

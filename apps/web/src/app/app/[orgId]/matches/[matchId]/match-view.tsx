@@ -24,7 +24,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { Segmented } from "@/components/ui/tabs";
 import type { PlayerHandle } from "@/components/video/player";
-import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
+import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { KeepersView, PhysicalView } from "./m5-views";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
@@ -450,6 +450,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           {stats.data && stats.data.quality.events > 0 ? (
             <div className="space-y-10">
               <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} />
+              <ConcededByPosition stats={stats.data} />
               {/* what the video itself shows (possession, attacks) belongs to the match too */}
               {main && (
                 <VideoOverview

@@ -56,7 +56,7 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   await page.getByRole("button", { name: "Neue Sammlung zum Zeigen" }).click();
   await page.waitForURL(/\/presentations\/[^/]+$/);
   for (const title of ["Rückzug", "Abschluss"]) {
-    const form = page.getByRole("form", { name: "Textfolie" });
+    const form = page.getByRole("form", { name: "Notiz" });
     await form.getByLabel("Titel").fill(title);
     await form.getByRole("button", { name: "Hinzufügen" }).click();
     await expect(page.getByTestId("slides")).toContainText(title);

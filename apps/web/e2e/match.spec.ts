@@ -173,7 +173,7 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByRole("button", { name: "Neue Sammlung" }).click();
   await expect(page.getByRole("heading", { name: "Abwehr Training" })).toBeVisible();
   await expect(page.getByText(/Diese Sammlung hat noch keine Szenen/)).toBeVisible();
-  await page.getByRole("button", { name: "Teilen", exact: true }).click();
+  await page.getByRole("button", { name: "Im Team teilen", exact: true }).click();
   await expect(page.getByText("Für Spieler sichtbar")).toBeVisible();
   await expectAccessible(page);
 });

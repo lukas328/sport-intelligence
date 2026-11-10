@@ -6,6 +6,7 @@
 #   scripts/local-stack.sh up       # start everything (idempotent)
 #   scripts/local-stack.sh down     # stop the processes started here
 #   scripts/local-stack.sh status
+#   scripts/local-stack.sh restart-web   # after editing apps/web/messages (dev server cache)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -40,13 +41,13 @@ start() { # name, command...
     echo "$name already running"
     return
   fi
-  (cd "$ROOT" && nohup "$@" >"$RUN/$name.log" 2>&1 & echo $! >"$RUN/$name.pid")
+  (cd "$ROOT" && nohup setsid "$@" </dev/null >"$RUN/$name.log" 2>&1 & echo $! >"$RUN/$name.pid")
   echo "$name started (log $RUN/$name.log)"
 }
 
 wait_for() { # url, seconds
   for _ in $(seq 1 "$2"); do
-    curl -fsS -o /dev/null "$1" 2>/dev/null && return 0
+    curl -fsS -m 10 -o /dev/null "$1" 2>/dev/null && return 0
     sleep 1
   done
   echo "timeout waiting for $1" >&2
@@ -85,12 +86,26 @@ SQL
 down() {
   for name in web gpu-worker worker api s3; do
     if [[ -f "$RUN/$name.pid" ]]; then
-      pkill -P "$(cat "$RUN/$name.pid")" 2>/dev/null || true
-      kill "$(cat "$RUN/$name.pid")" 2>/dev/null || true
+      # setsid made each process the leader of its own group: stop the whole group (uv, next)
+      kill -- -"$(cat "$RUN/$name.pid")" 2>/dev/null || kill "$(cat "$RUN/$name.pid")" 2>/dev/null || true
       rm -f "$RUN/$name.pid"
       echo "$name stopped"
     fi
   done
+}
+
+# messages/*.json are cached by the dev server: after editing them, restart it with a clean cache
+restart-web() {
+  if [[ -f "$RUN/web.pid" ]]; then
+    kill -- -"$(cat "$RUN/web.pid")" 2>/dev/null || true
+    rm -f "$RUN/web.pid"
+  fi
+  pkill -f "next dev" 2>/dev/null || true
+  pkill -f next-server 2>/dev/null || true
+  sleep 2
+  rm -rf "$ROOT/apps/web/.next"
+  start web pnpm --filter @handball/web dev
+  wait_for http://localhost:3000/api/healthz 180
 }
 
 status() {

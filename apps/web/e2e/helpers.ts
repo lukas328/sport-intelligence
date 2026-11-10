@@ -74,7 +74,7 @@ export async function openLibrary(page: Page, entry: "Sammlungen" | "Zum Zeigen"
   if (entry === "Szenen") return openScenes(page);
   await openScenes(page, "Sammlungen");
   const path = { Sammlungen: "playlists", "Zum Zeigen": "presentations" }[entry];
-  await follow(page, page.getByRole("link", { name: new RegExp(`^${entry}`) }), new RegExp(`/${path}$`));
+  await follow(page, page.getByRole("main").getByRole("link", { name: new RegExp(`^${entry}`) }).first(), new RegExp(`/${path}$`));
 }
 
 /** Plays: a tab of Szenen. */

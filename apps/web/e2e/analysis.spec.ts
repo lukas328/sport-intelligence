@@ -66,8 +66,8 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await expect(keeper.getByText("6", { exact: true })).toBeVisible();
   await expectAccessible(page);
 
-  // season view across matches (back to the team's match list)
-  await page.goBack();
+  // season view across matches (Saison is in the main navigation; going back would reopen the
+  // report dialog the match was imported from)
   await openMatches(page, "Saison");
   // the number of matches is part of the stage line now, the strip holds the per-match figures
   await expect(page.getByRole("main")).toContainText("nach 1 Spiel");

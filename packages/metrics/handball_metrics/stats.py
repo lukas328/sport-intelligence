@@ -11,7 +11,7 @@ from handball_metrics.model import Event, EventType, Side
 from handball_metrics.xg import VERSION as XG_VERSION
 from handball_metrics.xg import expected_goal
 
-METRICS_VERSION = "0.4.0"  # bump on any change of definitions: invalidates stats caches
+METRICS_VERSION = "0.5.0"  # bump on any change of definitions: invalidates stats caches
 
 SUSPENSION_S = 120
 # GSAx needs positions for most saves and for most goals: overlay, tracking and report goals often
@@ -39,6 +39,45 @@ class _Clock:
         if e.t_ms is not None:
             return (e.t_ms / 1000, i)
         return (float(i), i)
+
+
+# the six attacking positions (SPEC 7.2, "Gegentore"): where on the court a shot came from, named
+# like the players there. 7 m, fast breaks, empty goal and long range are not a position.
+POSITIONS = ("LA", "RL", "RM", "RR", "RA", "KM")
+_POSITION_OF_ZONE = {
+    "wing_left": "LA",
+    "back_left": "RL",
+    "half_left": "RL",
+    "back_centre": "RM",
+    "half_centre": "RM",
+    "back_right": "RR",
+    "half_right": "RR",
+    "wing_right": "RA",
+    "circle_left": "KM",
+    "circle_centre": "KM",
+    "circle_right": "KM",
+}
+
+
+def position_of_zone(zone: str | None) -> str | None:
+    """Attacking position of a shot zone (left/right from the attacking team's view)."""
+    return _POSITION_OF_ZONE.get(zone or "")
+
+
+def by_position(zones: dict[str, dict[str, int]]) -> dict[str, dict[str, Any]]:
+    """Shots and goals per position from the zone counts, with the zones that make it up (they are
+    the filter to open the scenes). Every position is there, empty ones with zeros."""
+    out: dict[str, dict[str, Any]] = {p: {"shots": 0, "goals": 0, "zones": []} for p in POSITIONS}
+    for zone, v in zones.items():
+        pos = position_of_zone(zone)
+        if pos is None:
+            continue
+        out[pos]["shots"] += v["shots"]
+        out[pos]["goals"] += v["goals"]
+        out[pos]["zones"].append(zone)
+    for v in out.values():
+        v["zones"].sort()
+    return out
 
 
 def zone_of(e: Event) -> str | None:
@@ -199,6 +238,8 @@ def _team_block(
         "attack_efficiency": _ratio(len(goals), possessions or 0),
         "turnover_rate": _ratio(len(turnovers), possessions or 0),
         "zones": dict(zones),
+        # the same shots by position: the opponent side's goals are the goals conceded by position
+        "positions": by_position(dict(zones)),
         "goal_zones": dict(goal_zones),
         "by_situation": {
             k: {**v, "pct": _ratio(v["goals"], v["shots"])} for k, v in by_sit.items()
