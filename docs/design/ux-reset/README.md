@@ -6,6 +6,7 @@ noch nichts.
 | Datei | Wozu |
 |---|---|
 | `zielbild.html` | Das Bild: Fokus, Gestaltungssystem, 12 Screens für Desktop und Handy. Im Browser öffnen. |
+| `TRIKOT.md` | Das gewählte Aussehen: Idee, Farbmodell, Zonen, Details, Qualitätsmassstab. |
 | `SPEC.md` | Die verbindliche Fassung für die Umsetzung: Prinzipien, Tokens, Bausteine, Navigation, Routen, jeder Screen, Wörter, Reihenfolge. |
 | `richtungen.html` | Vier alternative Gestaltungsrichtungen zum Abwägen (Konsole, Trikot, Piktogramm, Kassette), je am Start-Screen. Quellen in `richtungen/`. |
 | `ASSESSMENT.md` | Die Befunde aus den 66 Screenshots, pro Bereich. |
@@ -18,10 +19,14 @@ noch nichts.
 
 ## Vor dem Start
 
-**Die Gestaltungsrichtung ist noch nicht entschieden.** `zielbild.html` und `SPEC.md` beschreiben
-die Richtung «Halle». `richtungen.html` stellt ihr vier Alternativen gegenüber. Aufbau, Umfang und
-Wörter gelten für jede Richtung; Aussehen, Tokens und Bausteine werden nach der Wahl angepasst. Die
-UI-Session startet erst danach.
+**Die Richtung ist entschieden: Trikot** (10. November 2026). `TRIKOT.md` legt das Aussehen fest und
+ersetzt die Abschnitte 3 bis 5 von `SPEC.md`. Alles andere in `SPEC.md` gilt weiter: Umfang,
+Navigation, Routen, Inhalt jedes Screens, Wörter, Reihenfolge. `zielbild.html` zeigt bis zur
+Überarbeitung noch die frühere Richtung «Halle».
+
+Die Arbeit läuft in zwei Sessions: eine arbeitet das Zielbild in Trikot für alle Screens aus
+(Branch `claude/trikot-zielbild`), eine baut in `apps/web` zuerst Struktur und Daten und danach das
+Aussehen (Branch `claude/trikot-ui`).
 
 In `SPEC.md`, Abschnitt 14, stehen sechs Annahmen (Kern ist die Spielauswertung für die Trainerin,
 Spieler-Funktionen ausgeblendet, Einwilligung per Link, vier Ziele, «Sammlung», Minifeld). Wenn
