@@ -33,6 +33,7 @@ def org_out(scope: OrgScope, org: Organization | None = None) -> OrgOut:
         country=org.country,
         primary_color=org.primary_color,
         secondary_color=org.secondary_color,
+        kit_pattern=org.kit_pattern,
         has_logo=org.logo_key is not None,
         plan=org.plan,
         data_region=org.data_region,

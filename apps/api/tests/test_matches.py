@@ -770,3 +770,57 @@ async def test_referee_kit_is_a_user_choice(make_api: Callable[[], Api]) -> None
     cleared = (await api.patch(murl, json={"kit_referee": None})).json()
     assert cleared["kit_referee"] is None
     assert (await api.patch(murl, json={"kit_referee": "orange"})).status_code == 422
+
+
+async def test_opponent_colour_is_said_remembered_never_guessed(
+    make_api: Callable[[], Api],
+) -> None:
+    """TRIKOT.md, section 2: the opponent's colour per match comes from what somebody said for this
+    match or remembered for the opponent club; while unknown it stays null."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    base = f"/v1/orgs/{org}/teams/{ids['team']}/matches"
+    # nobody said a colour: unknown, although kit_opponent holds the pipeline default
+    first = await new_match(api, ids, opponent_name="TSV Thalwil")
+    assert first["opponent_colors"] == {"color": None, "second": None, "source": None}
+    listed = (await api.get(base)).json()
+    assert listed[0]["opponent_color"] is None
+    # said for this match (the question "Welche Farbe trägt Thalwil?")
+    murl = f"/v1/orgs/{org}/matches/{first['id']}"
+    said = (await api.patch(murl, json={"opponent_kit": "#1e4fa0"})).json()
+    assert said["opponent_colors"] == {"color": "#1e4fa0", "second": None, "source": "match"}
+    # the next match against the same club remembers it, and the analysis gets it as kit
+    opp_id = first["opponent"]["id"]
+    second = (
+        await api.post(
+            base,
+            json={"opponent_id": opp_id, "kickoff_at": "2026-12-01T18:00:00+01:00"},
+        )
+    ).json()
+    assert second["opponent_colors"] == {"color": "#1e4fa0", "second": None, "source": "opponent"}
+    assert second["kit_opponent"] == "#1e4fa0"
+    assert {m["id"]: m["opponent_color"] for m in (await api.get(base)).json()}[second["id"]] == (
+        "#1e4fa0"
+    )
+    # an explicit shirt colour in "Spiel anlegen" is the colour of that match and updates the memory
+    third = (
+        await api.post(
+            base,
+            json={
+                "opponent_id": opp_id,
+                "kickoff_at": "2026-12-08T18:00:00+01:00",
+                "kit_opponent": "#ffffff",
+            },
+        )
+    ).json()
+    assert third["opponent_colors"]["source"] == "match"
+    assert third["opponent_colors"]["color"] == "#ffffff"
+    # clearing the match's colour falls back to the remembered one, which is now white
+    cleared = (await api.patch(murl, json={"opponent_kit": None})).json()
+    assert cleared["opponent_colors"] == {"color": "#ffffff", "second": None, "source": "opponent"}
+    # trainings have no opponent
+    training = (
+        await api.post(base, json={"kind": "training", "kickoff_at": "2026-12-02T18:00:00+01:00"})
+    ).json()
+    assert training["opponent_colors"] is None

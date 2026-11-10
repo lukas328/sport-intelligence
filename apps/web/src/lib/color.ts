@@ -133,3 +133,107 @@ export function clubStyle(hex: string | null | undefined): Record<string, string
     "--raised-d": t.dark.raised,
   };
 }
+
+// ---- Trikot: the club's kit and the opponent's colour (docs/design/ux-reset/TRIKOT.md) ----------
+
+export const KIT_PATTERNS = ["uni", "stripes", "hoops", "sash", "halves"] as const;
+export type KitPattern = (typeof KIT_PATTERNS)[number];
+
+/** Neutral page and ink of both themes (TRIKOT.md, section 5). */
+export const CLOTH = { light: "#f6f5f2", dark: "#121416" } as const;
+export const KIT_INK = { light: "#14171a", dark: "#f1f0ec" } as const;
+/** The opponent's colour while nobody has said it: never a guess. */
+export const OPPONENT_UNKNOWN = "#3d4449";
+
+export interface Kit {
+  a: string;
+  b: string;
+  pattern: KitPattern;
+}
+
+export interface KitText {
+  /** numerals and names in the kit colour, at least 4.5:1 on the cloth */
+  color: string;
+  /** set when the kit colour itself cannot carry text (white, yellow on light; black on dark):
+   * the text falls back to ink and the kit colour becomes its hard shadow */
+  shadow: string | null;
+}
+
+export interface KitTheme {
+  a: string;
+  b: string;
+  pattern: KitPattern;
+  /** text on the first colour (ink or white) */
+  ink: string;
+  text: { light: KitText; dark: KitText };
+}
+
+function kitText(a: string, cloth: string, ink: string): KitText {
+  // a colour too close to the cloth would have to change its hue to become readable
+  if (contrastRatio(a, cloth) < 2) return { color: ink, shadow: a };
+  return { color: readableOn(a, cloth), shadow: null };
+}
+
+function normalise(hex: string | null | undefined, fallback: string): string {
+  return hex && parse(hex) ? hex.toLowerCase() : fallback;
+}
+
+/** Derived values of a club kit: text on the shirt, kit-coloured text on the page in both themes. */
+export function kitTheme(kit: Partial<Kit> & { a: string }): KitTheme {
+  const a = normalise(kit.a, DEFAULT_CLUB);
+  const b = normalise(kit.b, "#ffffff");
+  const pattern = KIT_PATTERNS.includes(kit.pattern as KitPattern) ? (kit.pattern as KitPattern) : "uni";
+  return {
+    a,
+    b,
+    pattern,
+    ink: contrastRatio(a, "#ffffff") >= contrastRatio(a, KIT_INK.light) ? "#ffffff" : KIT_INK.light,
+    text: { light: kitText(a, CLOTH.light, KIT_INK.light), dark: kitText(a, CLOTH.dark, KIT_INK.dark) },
+  };
+}
+
+/** Too close to tell apart on a shirt: same measure and threshold as the kit warnings (lib/kit.ts). */
+export function kitsClash(x: string, y: string): boolean {
+  if (!parse(x) || !parse(y)) return false;
+  return kitDistance(x, y) < 25;
+}
+
+function kitDistance(x: string, y: string): number {
+  const lab = (hex: string) => {
+    const [r, g, b] = parse(hex)!.map((c) => {
+      const s = c / 255;
+      return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    }) as [number, number, number];
+    const f = (t: number) => (t > (6 / 29) ** 3 ? Math.cbrt(t) : t / (3 * (6 / 29) ** 2) + 4 / 29);
+    const X = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047;
+    const Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const Z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883;
+    return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))] as const;
+  };
+  const p = lab(x);
+  const q = lab(y);
+  return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+}
+
+export interface OpponentShown {
+  /** the colour to draw the opponent in */
+  color: string;
+  /** text on that colour */
+  ink: string;
+  /** first: their colour; second: their second colour because the first clashes with ours;
+   * ink: both clash or no second colour; unknown: nobody said it, nothing is guessed */
+  source: "first" | "second" | "ink" | "unknown";
+}
+
+/**
+ * The opponent as shown next to us (TRIKOT.md, clash rule): like a real away kit, an opponent
+ * whose colour is too close to ours appears in its second colour, or in ink.
+ */
+export function opponentShown(own: string, first: string | null | undefined, second?: string | null): OpponentShown {
+  const ink = (c: string) => (contrastRatio(c, "#ffffff") >= contrastRatio(c, KIT_INK.light) ? "#ffffff" : KIT_INK.light);
+  if (!first || !parse(first)) return { color: OPPONENT_UNKNOWN, ink: "#ffffff", source: "unknown" };
+  const a = first.toLowerCase();
+  if (!kitsClash(own, a)) return { color: a, ink: ink(a), source: "first" };
+  if (second && parse(second) && !kitsClash(own, second)) return { color: second.toLowerCase(), ink: ink(second), source: "second" };
+  return { color: KIT_INK.light, ink: "#ffffff", source: "ink" };
+}

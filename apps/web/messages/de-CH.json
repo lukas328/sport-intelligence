@@ -356,7 +356,13 @@
     "tab_club": "Verein",
     "tab_teams": "Teams und Rollen",
     "tab_billing": "Abo und Rechnungen",
-    "tab_federation": "Verband"
+    "tab_federation": "Verband",
+    "kitPattern": "Trikotmuster",
+    "kitPattern_uni": "Uni",
+    "kitPattern_stripes": "Längsstreifen",
+    "kitPattern_hoops": "Querstreifen",
+    "kitPattern_sash": "Schärpe",
+    "kitPattern_halves": "Zweigeteilt"
   },
   "dashboard": {
     "teamsTitle": "Teams",

@@ -76,6 +76,11 @@ class MatchCreate(ApiModel):
         description="referee shirt colour when known; left out of the analysis when it is close "
         "to a team's kit",
     )
+    opponent_kit: HexColor | None = Field(
+        default=None,
+        description="the opponent's shirt colour when somebody knows it; also taken from "
+        "kit_opponent when that is sent. Remembered for the opponent; never guessed",
+    )
     format: MatchFormatKey | None = Field(
         default=None, description="template; default adult_2x30, youth teams youth_2x25"
     )
@@ -107,6 +112,9 @@ class MatchUpdate(ApiModel):
     kit_opponent: HexColor | None = None
     kit_opponent_gk: HexColor | None = None
     kit_referee: HexColor | None = Field(default=None, description="null clears it (unknown)")
+    opponent_kit: HexColor | None = Field(
+        default=None, description="the opponent's shirt colour; null clears it (unknown)"
+    )
     format: MatchFormatKey | None = None
     period_s: int | None = Field(default=None, ge=60, le=3600)
     periods: int | None = Field(default=None, ge=1, le=4)
@@ -158,6 +166,17 @@ class JobOut(ApiModel):
     finished_at: datetime | None
 
 
+class OpponentColors(ApiModel):
+    """The opponent's colours for this match (TRIKOT.md, section 2). The web applies the clash rule
+    (lib/color.ts, opponentShown); nothing here is guessed."""
+
+    color: str | None = Field(description="first colour; null while nobody said it")
+    second: str | None = Field(description="second colour, for the clash rule")
+    source: Literal["match", "opponent"] | None = Field(
+        description="match: said for this match; opponent: remembered from an earlier match"
+    )
+
+
 class MatchOut(ApiModel):
     id: uuid.UUID
     team_id: uuid.UUID
@@ -174,6 +193,7 @@ class MatchOut(ApiModel):
     kit_opponent_gk: str
     kit_referee: str | None = Field(default=None, description="null: unknown")
     kit_warnings: list[str] = Field(description="kit pairs with similar colours, e.g. own/opponent")
+    opponent_colors: OpponentColors | None = Field(default=None, description="null for trainings")
     format: str
     period_s: int
     periods: int
@@ -203,6 +223,9 @@ class MatchSummary(ApiModel):
     status: MatchStatus
     is_demo: bool
     has_video: bool
+    opponent_color: str | None = Field(
+        default=None, description="the opponent's colour for the kit chip; null while unknown"
+    )
 
 
 class UploadCreate(ApiModel):

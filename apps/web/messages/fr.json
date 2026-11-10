@@ -356,7 +356,13 @@
     "tab_club": "Club",
     "tab_teams": "Équipes et rôles",
     "tab_billing": "Abonnement et factures",
-    "tab_federation": "Fédération"
+    "tab_federation": "Fédération",
+    "kitPattern": "Motif du maillot",
+    "kitPattern_uni": "Uni",
+    "kitPattern_stripes": "Rayures verticales",
+    "kitPattern_hoops": "Rayures horizontales",
+    "kitPattern_sash": "Écharpe",
+    "kitPattern_halves": "Moitiés"
   },
   "dashboard": {
     "teamsTitle": "Équipes",

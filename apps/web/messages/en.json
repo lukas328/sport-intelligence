@@ -356,7 +356,13 @@
     "tab_club": "Club",
     "tab_teams": "Teams and roles",
     "tab_billing": "Plan and invoices",
-    "tab_federation": "Federation"
+    "tab_federation": "Federation",
+    "kitPattern": "Kit pattern",
+    "kitPattern_uni": "Plain",
+    "kitPattern_stripes": "Stripes",
+    "kitPattern_hoops": "Hoops",
+    "kitPattern_sash": "Sash",
+    "kitPattern_halves": "Halves"
   },
   "dashboard": {
     "teamsTitle": "Teams",

@@ -6944,6 +6944,11 @@ export interface components {
             kit_referee?: string | null;
             /** Opponent Id */
             opponent_id?: string | null;
+            /**
+             * Opponent Kit
+             * @description the opponent's shirt colour when somebody knows it; also taken from kit_opponent when that is sent. Remembered for the opponent; never guessed
+             */
+            opponent_kit?: string | null;
             /** Opponent Name */
             opponent_name?: string | null;
             /** Period S */
@@ -7021,6 +7026,8 @@ export interface components {
             kit_warnings: string[];
             /** @description null for trainings */
             opponent: components["schemas"]["OpponentOut"] | null;
+            /** @description null for trainings */
+            opponent_colors?: components["schemas"]["OpponentColors"] | null;
             /** Period S */
             period_s: number;
             /** Periods */
@@ -7079,6 +7086,11 @@ export interface components {
             /** Kind */
             kind: string;
             /**
+             * Opponent Color
+             * @description the opponent's colour for the kit chip; null while unknown
+             */
+            opponent_color?: string | null;
+            /**
              * Opponent Name
              * @description empty for trainings
              */
@@ -7131,6 +7143,11 @@ export interface components {
              * @description null clears it (unknown)
              */
             kit_referee?: string | null;
+            /**
+             * Opponent Kit
+             * @description the opponent's shirt colour; null clears it (unknown)
+             */
+            opponent_kit?: string | null;
             /** Period S */
             period_s?: number | null;
             /** Periods */
@@ -7697,6 +7714,28 @@ export interface components {
             /** Verified */
             verified: boolean;
         };
+        /**
+         * OpponentColors
+         * @description The opponent's colours for this match (TRIKOT.md, section 2). The web applies the clash rule
+         *     (lib/color.ts, opponentShown); nothing here is guessed.
+         */
+        OpponentColors: {
+            /**
+             * Color
+             * @description first colour; null while nobody said it
+             */
+            color: string | null;
+            /**
+             * Second
+             * @description second colour, for the clash rule
+             */
+            second: string | null;
+            /**
+             * Source
+             * @description match: said for this match; opponent: remembered from an earlier match
+             */
+            source: ("match" | "opponent") | null;
+        };
         /** OpponentCreate */
         OpponentCreate: {
             /** Name */
@@ -7773,6 +7812,12 @@ export interface components {
              * @default CH
              */
             country?: string;
+            /**
+             * Kit Pattern
+             * @default uni
+             * @enum {string}
+             */
+            kit_pattern?: "uni" | "stripes" | "hoops" | "sash" | "halves";
             /** Name */
             name: string;
             /**
@@ -7808,6 +7853,12 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Kit Pattern
+             * @default uni
+             * @enum {string}
+             */
+            kit_pattern?: "uni" | "stripes" | "hoops" | "sash" | "halves";
             my_role: components["schemas"]["OrgRole"];
             /** Name */
             name: string;
@@ -7851,6 +7902,8 @@ export interface components {
         OrgUpdate: {
             /** Country */
             country?: string | null;
+            /** Kit Pattern */
+            kit_pattern?: ("uni" | "stripes" | "hoops" | "sash" | "halves") | null;
             /** Name */
             name?: string | null;
             /** Primary Color */

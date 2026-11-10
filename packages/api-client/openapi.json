@@ -6717,6 +6717,18 @@
             ],
             "title": "Opponent Id"
           },
+          "opponent_kit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the opponent's shirt colour when somebody knows it; also taken from kit_opponent when that is sent. Remembered for the opponent; never guessed",
+            "title": "Opponent Kit"
+          },
           "opponent_name": {
             "anyOf": [
               {
@@ -6954,6 +6966,17 @@
             ],
             "description": "null for trainings"
           },
+          "opponent_colors": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpponentColors"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null for trainings"
+          },
           "period_s": {
             "title": "Period S",
             "type": "integer"
@@ -7114,6 +7137,18 @@
           "kind": {
             "title": "Kind",
             "type": "string"
+          },
+          "opponent_color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the opponent's colour for the kit chip; null while unknown",
+            "title": "Opponent Color"
           },
           "opponent_name": {
             "description": "empty for trainings",
@@ -7335,6 +7370,18 @@
             ],
             "description": "null clears it (unknown)",
             "title": "Kit Referee"
+          },
+          "opponent_kit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the opponent's shirt colour; null clears it (unknown)",
+            "title": "Opponent Kit"
           },
           "period_s": {
             "anyOf": [
@@ -9045,6 +9092,58 @@
         "title": "OperatorVerifyIn",
         "type": "object"
       },
+      "OpponentColors": {
+        "description": "The opponent's colours for this match (TRIKOT.md, section 2). The web applies the clash rule\n(lib/color.ts, opponentShown); nothing here is guessed.",
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "first colour; null while nobody said it",
+            "title": "Color"
+          },
+          "second": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "second colour, for the clash rule",
+            "title": "Second"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "match",
+                  "opponent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "match: said for this match; opponent: remembered from an earlier match",
+            "title": "Source"
+          }
+        },
+        "required": [
+          "color",
+          "second",
+          "source"
+        ],
+        "title": "OpponentColors",
+        "type": "object"
+      },
       "OpponentCreate": {
         "properties": {
           "name": {
@@ -9318,6 +9417,18 @@
             "title": "Country",
             "type": "string"
           },
+          "kit_pattern": {
+            "default": "uni",
+            "enum": [
+              "uni",
+              "stripes",
+              "hoops",
+              "sash",
+              "halves"
+            ],
+            "title": "Kit Pattern",
+            "type": "string"
+          },
           "name": {
             "maxLength": 120,
             "minLength": 1,
@@ -9376,6 +9487,18 @@
           "id": {
             "format": "uuid",
             "title": "Id",
+            "type": "string"
+          },
+          "kit_pattern": {
+            "default": "uni",
+            "enum": [
+              "uni",
+              "stripes",
+              "hoops",
+              "sash",
+              "halves"
+            ],
+            "title": "Kit Pattern",
             "type": "string"
           },
           "my_role": {
@@ -9490,6 +9613,24 @@
               }
             ],
             "title": "Country"
+          },
+          "kit_pattern": {
+            "anyOf": [
+              {
+                "enum": [
+                  "uni",
+                  "stripes",
+                  "hoops",
+                  "sash",
+                  "halves"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kit Pattern"
           },
           "name": {
             "anyOf": [

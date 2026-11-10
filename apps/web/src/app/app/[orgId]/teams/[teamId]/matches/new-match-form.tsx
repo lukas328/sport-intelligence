@@ -36,6 +36,8 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [kits, setKits] = useState(KIT_DEFAULTS);
+  // the opponent's colour counts as said only when somebody picked it (never a default, TRIKOT.md)
+  const [opponentPicked, setOpponentPicked] = useState(false);
   const [training, setTraining] = useState(false);
   const [away, setAway] = useState(false);
   const [format, setFormat] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         venue: optional("venue"),
         kit_own: kits.own,
         kit_own_gk: kits.own_gk,
-        kit_opponent: kits.opponent,
+        ...(opponentPicked ? { kit_opponent: kits.opponent } : {}),
         kit_opponent_gk: kits.opponent_gk,
         kit_referee: kits.referee,
         format: chosenFormat as (typeof FORMATS)[number],
@@ -149,7 +151,13 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         </Select>
         <fieldset className="sm:col-span-2">
           <legend className="mb-2 block text-[0.8125rem] font-medium">{t("matches.kits")}</legend>
-          <KitFields kits={kits} onChange={setKits} />
+          <KitFields
+            kits={kits}
+            onChange={(next) => {
+              if (next.opponent !== kits.opponent) setOpponentPicked(true);
+              setKits(next);
+            }}
+          />
         </fieldset>
         <div className="pt-2 sm:col-span-2">
           <Button type="submit" size="lg" loading={busy}>
