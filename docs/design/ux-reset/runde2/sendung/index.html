@@ -43,7 +43,8 @@ button{font:inherit;color:inherit}
 .fit{position:relative;overflow:hidden}
 .frame{transform-origin:0 0;background:var(--studio);box-shadow:0 0 0 1px var(--edge)}
 .frame.desk{width:1280px}.frame.phone{width:390px}
-.pair{display:flex;gap:40px;align-items:flex-start}
+.pair{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+@media (max-width:720px){.doc>header{grid-template-columns:1fr}.doc>header h1{font-size:72px}.doc{padding-left:16px;padding-right:16px}}
 /* ---------- app shell ---------- */
 .app{display:flex;min-height:100%;background:var(--studio);color:var(--on)}
 .rail{width:232px;flex:none;background:#06090e;padding:24px 16px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--edge)}
@@ -517,6 +518,7 @@ html[data-club=gelb] .phase .vs i,html[data-club=schwarz] .phase .vs i{backgroun
 <script>
 (function(){
 "use strict";
+if(!document.documentElement.dataset.club)document.documentElement.dataset.club="rot";//dataset.club||
 var ICONS={
   spiele:'<path d="M3 6h18v12H3zM12 6v12"/>',
   szenen:'<path d="M3 5h18v14H3z"/><path d="M10 9v6l5-3z" fill="currentColor"/>',
