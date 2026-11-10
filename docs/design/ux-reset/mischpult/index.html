@@ -22,10 +22,12 @@ html, body { margin: 0; background: #d9dcdf; color: #15171a; font-family: "Schib
 .desk-ui .roll { background: #ffd23c; color: #15171a; border-color: #ffd23c; }
 .code { display: flex; align-items: center; gap: 0; margin-left: auto; }
 .code output { font: 600 15px "IBM Plex Mono", monospace; background: #000; padding: 0 12px; min-height: 36px; display: flex; align-items: center; border: 1.5px solid #4a5058; border-right: 0; }
-.rows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 20px; }
+.code input { font: 600 14px "IBM Plex Mono", monospace; min-height: 36px; width: 230px; background: #f2f3f4; color: #15171a; border: 0; padding: 0 10px; margin-left: 8px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 24px; }
 .rg { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .rg > span { font: 700 12px "IBM Plex Mono", monospace; color: #9aa3ac; width: 64px; flex: none; }
-.rg .opts { display: flex; gap: 3px; overflow-x: auto; scrollbar-width: none; }
+.rg .opts { display: flex; gap: 3px; flex-wrap: wrap; }
 .rg .opts button { font-size: 13px; padding: 0 8px; min-height: 34px; }
 .rg .opts button b { font: 700 11px "IBM Plex Mono", monospace; opacity: .6; margin-right: 4px; }
 .rg .sw { width: 34px; padding: 0; display: grid; place-items: center; }
@@ -33,12 +35,12 @@ html, body { margin: 0; background: #d9dcdf; color: #15171a; font-family: "Schib
 .rg .sw i.q { border-style: dashed; background: repeating-linear-gradient(45deg, #5d656e 0 3px, #2a2f35 3px 6px); }
 .rg .sep { width: 1px; background: #4a5058; margin: 0 6px; flex: none; }
 .fold { display: none; }
-@media (max-width: 1100px) { .rows { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1100px) { .rows { grid-template-columns: 1fr; } }
 @media (max-width: 700px) {
   .rows { grid-template-columns: 1fr; } .desk-ui .row1 { gap: 8px; } .desk-ui h1 { font-size: 18px; }
   .fold { display: inline-flex; } .desk-ui.closed .rows { display: none; }
   .desk-ui .presets { flex-wrap: nowrap; overflow-x: auto; width: 100%; order: 5; scrollbar-width: none; }
-  .code { margin-left: 0; } .code output { font-size: 12px; white-space: nowrap; padding: 0 8px; } #copy { font-size: 13px; }
+  .code { margin-left: 0; flex-wrap: wrap; row-gap: 6px; } .code input { width: 170px; margin-left: 0; } .code output { font-size: 12px; white-space: nowrap; padding: 0 8px; } #copy { font-size: 13px; }
   .desk-ui { padding: 8px 12px 10px; } .rows { max-height: 52vh; overflow-y: auto; }
 }
 .stage { padding: 20px 16px 64px; }
@@ -67,8 +69,9 @@ html, body { margin: 0; background: #d9dcdf; color: #15171a; font-family: "Schib
 .g1 { --mf-floor: #e2e6ea; --mf-area: #d0d7de; } .g2 { --mf-floor: #e8e1d2; --mf-area: #dacfba; }
 .g3 { --mf-floor: #1a1f25; --mf-area: #252c34; } .g4 { --mf-floor: #cfe1ec; --mf-area: #b3cddc; }
 .g4 { background: var(--floor); }
-.g4 .sheet { background: var(--ground); margin: 0 24px 24px; box-shadow: 0 2px 0 rgb(0 0 0 / .18); position: relative; }
-.g4.phone .sheet { margin: 0 8px 8px; }
+.g4 .sheet { background: var(--ground); margin: 8px 56px 56px; box-shadow: 0 2px 0 rgb(0 0 0 / .25), 0 0 0 1px rgb(0 0 0 / .12); position: relative; }
+.g4 .top { padding: 0 56px; }
+.g4.phone .sheet { margin: 4px 14px 18px; } .g4 .ptop { padding: 0 14px; }
 .g4 .top, .g4 .ptop { color: #fff; border-color: transparent; }
 .g4 .top .nav a { color: #d5e5ef; } .g4 .top .nav a[aria-current] { color: #fff; }
 .app.g4 .top .btn, .g4 .ptop .ibtn.plus { background: #fff; color: #15171a; border-color: #fff; }
@@ -120,14 +123,14 @@ html, body { margin: 0; background: #d9dcdf; color: #15171a; font-family: "Schib
 .h-face svg { display: block; width: 100%; }
 .h-face .tm { position: absolute; top: 22px; display: flex; flex-direction: column; gap: 2px; font-size: 15px; font-weight: 600; }
 .h-face .tm b { font-size: calc(26px * var(--dz)); line-height: 1; }
-.h-face .tm.us { left: 32px; color: var(--club-ink); } .h-face .tm.them { right: 32px; text-align: right; color: var(--opp-ink); align-items: flex-end; }
+.h-face .tm.us { right: calc(50% + 28px); color: var(--club-ink); text-align: right; align-items: flex-end; } .h-face .tm.them { left: calc(50% + 28px); color: var(--opp-ink); }
 .h-face .big { position: absolute; top: 50%; transform: translateY(-46%); font-size: calc(250px * var(--nz)); line-height: .8; }
 .h-face .big.us { right: calc(50% + 28px); color: var(--club-ink); } .h-face .big.them { left: calc(50% + 28px); color: var(--opp-ink); }
 .h-face .sub { position: absolute; bottom: 22px; font-size: 15px; font-weight: 600; }
 .h-face .sub.us { right: calc(50% + 28px); color: var(--club-ink); } .h-face .sub.them { left: calc(50% + 28px); color: var(--opp-ink); }
 .h-face .ask { position: absolute; right: 32px; bottom: 18px; background: #fff; color: #15171a; padding: 6px 12px; font-weight: 700; font-size: 15px; border: 2px solid #15171a; }
 .phone .h-face .tm { top: 12px; font-size: 12px; } .phone .h-face .tm b { font-size: calc(17px * var(--dz)); }
-.phone .h-face .tm.us { left: 12px; } .phone .h-face .tm.them { right: 12px; }
+.phone .h-face .tm.us { right: auto; left: 12px; text-align: left; align-items: flex-start; } .phone .h-face .tm.them { left: auto; right: 12px; text-align: right; align-items: flex-end; }
 .phone .h-face .big { font-size: calc(80px * var(--nz)); top: 48%; } .phone .h-face .big.us { right: calc(50% + 12px); } .phone .h-face .big.them { left: calc(50% + 12px); }
 .phone .h-face .sub { top: 56px; bottom: auto; font-size: 12px; } .phone .h-face .sub.us { left: 12px; right: auto; } .phone .h-face .sub.them { right: 12px; left: auto; }
 .phone .h-face .ask { right: 8px; bottom: 8px; font-size: 12px; padding: 4px 8px; }
@@ -159,20 +162,54 @@ svg text.fl.b { font-size: 16px; } svg text.ph { font: 700 14px "Schibsted Grote
 .h-wurf .echo span { display: block; }
 .h-wurf .echo .e { position: absolute; right: 0; top: 0; color: transparent; -webkit-text-stroke: 1.5px var(--club-ink); opacity: .45; }
 .h-wurf .echo .e1 { transform: translate(-22px, -4px); } .h-wurf .echo .e2 { transform: translate(-44px, -8px); opacity: .25; }
+.h-wurf .echo u { text-decoration: underline; text-decoration-color: var(--opp); text-decoration-thickness: .075em; text-underline-offset: .06em; text-decoration-skip-ink: none; }
+.h-wurf .oc { display: inline-block; width: 12px; height: 12px; background: var(--opp); box-shadow: 0 0 0 1.5px var(--club-ink); margin-right: 8px; vertical-align: -1px; }
 .h-wurf .names { display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; margin: 14px 0 0 80px; }
 .h-wurf svg { position: absolute; left: 0; right: 0; bottom: 92px; width: 100%; }
 svg text.fw { font: 600 14px "Schibsted Grotesk", sans-serif; fill: var(--club-ink); }
-.phone .h-wurf { height: 380px; grid-template-columns: 1fr; padding: 22px 16px 0; gap: 0; clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%); }
+.phone .h-wurf { height: 430px; grid-template-columns: 1fr; padding: 22px 16px 0; gap: 0; clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%); }
 .phone .h-wurf h1 { font-size: calc(32px * var(--dz)); } .phone .h-wurf .kick { font-size: 13px; margin-bottom: 8px; }
 .phone .h-wurf .echo { font-size: calc(96px * var(--nz)); text-align: left; margin-top: 18px; } .phone .h-wurf .echo .e { left: 0; right: auto; }
 .phone .h-wurf .echo .e1 { transform: translate(12px, -3px); } .phone .h-wurf .echo .e2 { transform: translate(24px, -6px); }
-.phone .h-wurf .names { margin: 8px 0 0; font-size: 12px; justify-content: flex-start; gap: 24px; }
-.phone .h-wurf svg { bottom: 44px; }
+.phone .h-wurf .echo u { text-decoration: underline; text-decoration-color: var(--opp); text-decoration-thickness: .075em; text-underline-offset: .06em; text-decoration-skip-ink: none; }
+.h-wurf .oc { display: inline-block; width: 12px; height: 12px; background: var(--opp); box-shadow: 0 0 0 1.5px var(--club-ink); margin-right: 8px; vertical-align: -1px; }
+.h-wurf .names { margin: 8px 0 0; font-size: 12px; justify-content: flex-start; gap: 24px; }
+.phone .h-wurf svg { bottom: 34px; }
 
+/* the wide face: phone titles get a smaller size so they break in three lines */
+.s1.phone .ptitle h1, .s1.phone .h-wurf h1 { font-size: 30px; } .s1.phone .lt3 h1 { font-size: 26px; }
+/* flock is tall: the flying score is capped so it stays inside the field */
+.s4 .h-wurf .echo { font-size: 200px; } .s4.phone .h-wurf .echo { font-size: 92px; }
+/* the wide face in narrow phone rows */
+.s1.phone .pgame h4 { font-size: 15px; } .s1.phone .t-bund .no > span, .s1.phone .t-val .val small { font-size: 14px; }
 /* the wide face is too wide for the two fixed-width heads: there it stands at normal width */
 .s1 .h-wurf .echo, .s1 .h-plakat .n, .s1.phone .h-plakat .n { font-stretch: 100%; }
 .s1 .h-wurf .echo { font-size: 160px; } .s1.phone .h-wurf .echo { font-size: 84px; }
 .phone .h-plakat .n { font-size: calc(104px * var(--nz)); } .s1.phone .h-plakat .n { font-size: 92px; }
+/* ----- K6 quiet print: Plakat with the face's lines held back ----- */
+.h-quiet { position: relative; }
+.h-quiet svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.h-quiet .pf.us, .h-quiet .pf.them { background: transparent; box-shadow: none; }
+/* ----- K7 Hallenlicht: the floor in perspective, brings its own dark hall ----- */
+.h-hall { position: relative; height: 470px; overflow: hidden; background: #121417; perspective: 1300px; perspective-origin: 50% -20%; color: #eef0f2; }
+.h-hall::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 50% at 50% 0%, rgb(255 250 235 / .16), transparent 70%); }
+.h-hall .floor { position: absolute; left: 50%; width: 1400px; height: 700px; margin-left: -700px; bottom: -150px; transform-origin: 50% 100%; transform: rotateX(62deg); }
+.h-hall .floor svg { width: 100%; height: 100%; display: block; }
+.h-hall .floor .sheen { position: absolute; inset: 0; mix-blend-mode: screen; background: radial-gradient(5% 22% at 22% 46%, rgb(255 248 232 / .55), transparent), radial-gradient(5% 22% at 50% 40%, rgb(255 248 232 / .6), transparent), radial-gradient(5% 22% at 78% 46%, rgb(255 248 232 / .55), transparent), radial-gradient(40% 55% at 50% 45%, rgb(255 240 210 / .16), transparent); }
+.h-hall .floor .falloff { position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(18 20 23 / .7), rgb(18 20 23 / 0) 45%); }
+.h-hall svg text.hs { font-family: var(--fd); font-weight: 900; font-style: var(--fds); font-stretch: var(--fdw); font-size: 72px; letter-spacing: -2px; fill: #f6f2ea; opacity: .93; }
+.h-hall .over { position: absolute; inset: 0 0 auto 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 28px 40px; z-index: 2; }
+.h-hall .team b { display: block; font-size: calc(26px * var(--dz)); line-height: 1.05; }
+.h-hall .team small { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #b9c0c7; margin-top: 6px; }
+.h-hall .team.r { text-align: right; } .h-hall .team.r small { justify-content: flex-end; }
+.h-hall .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 1.5px rgb(255 255 255 / .5); } .h-hall .dot.us { background: var(--club); } .h-hall .dot.them { background: var(--opp); }
+.h-hall .mid { font-size: 13px; color: #b9c0c7; padding-top: 6px; }
+.phone .h-hall { height: 300px; perspective: 900px; }
+.phone .h-hall .floor { width: 540px; height: 270px; margin-left: -270px; bottom: -34px; transform: rotateX(54deg); }
+.phone .h-hall .over { padding: 14px 16px; } .phone .h-hall .team b { font-size: calc(18px * var(--dz)); }
+.phone .h-hall .mid.ph { position: absolute; left: 0; right: 0; top: 64px; text-align: center; font-size: 12px; z-index: 2; }
+.strip7.h-hall { height: 150px; } .strip7.h-hall { height: 132px; } .strip7.h-hall .floor { left: 0; right: 0; top: 0; bottom: 0; width: auto; height: auto; margin: 0; transform: none; }
+.strip7 .floor svg { height: 100%; } .strip7 .floor .falloff { background: linear-gradient(to right, rgb(18 20 23 / .85), rgb(18 20 23 / .15) 30%, rgb(18 20 23 / .15) 70%, rgb(18 20 23 / .85)); } .strip7 .over { padding: 22px 32px; }
 /* ----- K4 Tafel: brings its own dark box ----- */
 .h-tafel { background: #0b0d10; color: #e9ecef; padding: 32px 40px 0; }
 .h-tafel .board { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; }
@@ -215,15 +252,15 @@ svg text.fw { font: 600 14px "Schibsted Grotesk", sans-serif; fill: var(--club-i
 .t-bund { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); margin: 0 32px; }
 .t-bund li { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 8px; } .t-bund li + li { border-left: 1px solid var(--rule); }
 .t-bund li:first-child { padding-left: 0; } .t-bund li:last-child { padding-right: 0; }
-.t-bund .no { display: flex; align-items: baseline; gap: 10px; }
+.t-bund .no { display: flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
 .t-bund .no em { font-style: normal; width: 28px; height: 28px; display: grid; place-items: center; background: var(--ink); color: var(--ground); font: 800 15px var(--ft); align-self: center; }
 .t-bund .no b { font-size: calc(100px * var(--nz)); line-height: .8; }
 .t-bund .no > span { font-size: calc(22px * var(--dz)); color: var(--ink-2); }
 .t-bund p { font-weight: 700; font-size: 21px; line-height: 1.2; text-wrap: balance; }
 .t-bund small, .tx small { font-size: 15px; color: var(--ink-2); } .up { color: var(--win) !important; font-weight: 700; }
 .t-bund svg { width: 100%; display: block; margin: 6px 0; } .t-bund .btn { align-self: flex-start; margin-top: auto; }
-.phone .t-bund { grid-template-columns: 1fr; margin: 24px 16px 0; border-bottom: 0; }
-.phone .t-bund li { display: grid; grid-template-columns: 1fr 128px; gap: 4px 14px; padding: 16px 0 20px; border-left: 0 !important; border-bottom: 1px solid var(--rule); }
+.phone .t-bund { grid-template-columns: minmax(0, 1fr); margin: 24px 16px 0; border-bottom: 0; }
+.phone .t-bund li { display: grid; grid-template-columns: minmax(0, 1fr) 128px; gap: 4px 14px; padding: 16px 0 20px; border-left: 0 !important; border-bottom: 1px solid var(--rule); }
 .phone .t-bund .no { grid-column: 1; } .phone .t-bund .no em { display: none; } .phone .t-bund .no b { font-size: calc(64px * var(--nz)); } .phone .t-bund .no > span { font-size: 16px; }
 .phone .t-bund svg { grid-column: 2; grid-row: 1 / span 3; width: 128px; margin: 0; } .phone .t-bund p { font-size: 17px; grid-column: 1; } .phone .t-bund small { grid-column: 1; font-size: 13px; }
 .phone .t-bund .btn { grid-column: 1 / -1; margin-top: 6px; }
@@ -237,8 +274,8 @@ svg text.fw { font: 600 14px "Schibsted Grotesk", sans-serif; fill: var(--club-i
 .t-back .rn.lo { color: var(--club); -webkit-text-stroke: 2px var(--club-2); text-shadow: 4px 4px 0 var(--club-2); }
 .t-back p { font-size: 16px; line-height: 1.35; } .t-back p b { font-weight: 800; }
 .t-back svg { width: 100%; display: block; } .t-back .btn { margin-top: auto; }
-.phone .t-back { grid-template-columns: 1fr; margin: 24px 16px 0; gap: 20px; }
-.phone .t-back li { display: grid; grid-template-columns: 96px 1fr; text-align: left; align-items: center; gap: 6px 14px; padding: 28px 16px 16px; }
+.phone .t-back { grid-template-columns: minmax(0, 1fr); margin: 24px 16px 0; gap: 20px; }
+.phone .t-back li { display: grid; grid-template-columns: 96px minmax(0, 1fr); text-align: left; align-items: center; gap: 6px 14px; padding: 28px 16px 16px; }
 .phone .t-back .rn { font-size: calc(96px * var(--nz)); grid-row: 1 / span 2; text-align: center; } .phone .t-back .lab { font-size: calc(16px * var(--dz)); }
 .phone .t-back svg { grid-column: 1 / -1; } .phone .t-back .btn { grid-column: 1 / -1; justify-self: start; }
 
@@ -253,7 +290,7 @@ svg text.fw { font: 600 14px "Schibsted Grotesk", sans-serif; fill: var(--club-i
 .t-pikt p { font-weight: 700; font-size: 19px; line-height: 1.2; } .t-pikt small { font-size: 14px; color: var(--ink-2); }
 .app .t-pikt .bar { display: flex; justify-content: space-between; align-items: center; min-height: 46px; padding: 0 16px; background: var(--ink); color: var(--ground); font-weight: 800; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; margin-top: auto; }
 .t-pikt .bar span { font: 500 13px "IBM Plex Mono", monospace; letter-spacing: 0; }
-.phone .t-pikt { grid-template-columns: 1fr; margin: 24px 16px 0; border-bottom: 0; }
+.phone .t-pikt { grid-template-columns: minmax(0, 1fr); margin: 24px 16px 0; border-bottom: 0; }
 .phone .t-pikt li { padding: 16px 0 20px; border-left: 0 !important; border-bottom: 2px solid var(--ink); }
 .phone .t-pikt .big { font-size: calc(80px * var(--nz)); }
 
@@ -268,7 +305,7 @@ svg text.fw { font: 600 14px "Schibsted Grotesk", sans-serif; fill: var(--club-i
 .t-prog .rt { font: 600 22px "IBM Plex Mono", monospace; text-align: right; font-variant-numeric: tabular-nums; }
 .t-prog .play { display: inline-flex; align-items: center; gap: 8px; }
 .t-prog .play svg { width: 14px; height: 14px; }
-.phone .t-prog { margin: 24px 16px 0; } .phone .t-prog li { grid-template-columns: 36px 1fr auto; gap: 6px 12px; }
+.phone .t-prog { margin: 24px 16px 0; } .phone .t-prog li { grid-template-columns: 36px minmax(0, 1fr) auto; gap: 6px 12px; }
 .phone .t-prog .i { font-size: calc(40px * var(--nz)); grid-row: 1 / span 2; } .phone .t-prog svg.mf { display: none; }
 .phone .t-prog p { font-size: 16px; grid-column: 2; } .phone .t-prog small { font-size: 13px; }
 .phone .t-prog .rt { font-size: 15px; grid-column: 3; grid-row: 1; } .phone .t-prog .play { grid-column: 2 / -1; justify-self: start; }
@@ -281,11 +318,28 @@ svg text.fw { font: 600 14px "Schibsted Grotesk", sans-serif; fill: var(--club-i
 .t-mag .fig { font-size: calc(40px * var(--dz)); line-height: 1; } .t-mag p { font-size: 19px; font-weight: 600; margin-top: 6px; }
 .t-mag small { display: block; font-size: 15px; color: var(--ink-2); margin-top: 2px; }
 .t-mag .go { text-align: center; } .t-mag .go small { font: 500 13px "IBM Plex Mono", monospace; margin-top: 6px; }
-.phone .t-mag { margin: 24px 16px 0; } .phone .t-mag li { grid-template-columns: 52px 1fr; gap: 8px 14px; }
+.phone .t-mag { margin: 24px 16px 0; } .phone .t-mag li { grid-template-columns: 52px minmax(0, 1fr); gap: 8px 14px; }
 .phone .t-mag .i { font-size: calc(60px * var(--nz)); grid-row: 1 / span 2; align-self: start; } .phone .t-mag svg.mf { width: 100%; grid-column: 2; }
 .phone .t-mag .tx { grid-column: 2; } .phone .t-mag .fig { font-size: calc(28px * var(--dz)); } .phone .t-mag p { font-size: 16px; }
 .phone .t-mag .go { grid-column: 2; text-align: left; display: flex; gap: 12px; align-items: center; } .phone .t-mag .go small { margin: 0; }
 
+/* ----- D6 magnets, value first ----- */
+.t-val { margin: 0 32px; border-top: 2px solid var(--ink); }
+.t-val li { display: grid; grid-template-columns: 250px 1fr auto; gap: 28px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+.t-val svg.mf { width: 250px; display: block; }
+.t-val .rk { display: block; font: 600 13px "IBM Plex Mono", monospace; color: var(--ink-2); margin-bottom: 6px; }
+.t-val .val { display: flex; align-items: baseline; gap: 10px; font-size: calc(88px * var(--nz)); line-height: .8; color: var(--club-text); }
+.t-val .val small { font-size: .3em; color: var(--ink); line-height: 1; }
+.t-val p { font-size: 20px; font-weight: 700; margin-top: 10px; } .t-val .tx > small { display: block; font-size: 15px; color: var(--ink-2); margin-top: 2px; }
+.phone .t-val { margin: 24px 16px 0; } .phone .t-val li { grid-template-columns: 1fr 140px; gap: 6px 14px; align-items: start; }
+.phone .t-val svg.mf { width: 140px; grid-column: 2; grid-row: 1; } .phone .t-val .tx { grid-column: 1; grid-row: 1; }
+.phone .t-val .val { font-size: calc(58px * var(--nz)); } .phone .t-val p { font-size: 16px; } .phone .t-val .tx > small { font-size: 13px; }
+.phone .t-val .go { grid-column: 1 / -1; }
+/* D3 on the phone: number and court side by side */
+.phone .t-pikt li { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 8px 14px; align-items: start; }
+.phone .t-pikt .tp { grid-column: 1 / -1; } .phone .t-pikt .tp .picto { width: 40px; height: 40px; }
+.phone .t-pikt .big { grid-column: 1; grid-row: 2; align-self: center; } .phone .t-pikt svg.mf { grid-column: 2; grid-row: 2; width: 150px; }
+.phone .t-pikt p, .phone .t-pikt small, .phone .t-pikt .bar { grid-column: 1 / -1; } .phone .t-pikt p { font-size: 17px; }
 /* list and side */
 .qline { display: flex; gap: 12px; align-items: center; padding: 14px 32px; font-size: 15px; } .phone .qline { padding: 14px 16px; }
 .tag { font-weight: 800; font-size: 13px; background: #ffd23c; color: #15171a; padding: 3px 8px; }
@@ -316,7 +370,7 @@ table.st th { font-size: 12px; font-weight: 600; color: var(--ink-2); text-align
 table.st td { text-align: right; padding: 0 0 0 8px; height: 44px; border-top: 1px solid var(--rule); }
 table.st tr.me td { font-weight: 800; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
 table.st tr.me td:first-child::before { content: ""; display: inline-block; width: 12px; height: 12px; background: var(--club); box-shadow: inset 0 0 0 1.5px var(--club-edge); margin-right: 8px; vertical-align: -1px; }
-.pgame { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); min-height: 72px; }
+.pgame { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); min-height: 72px; }
 .pgame .sg.face { width: 80px; height: 40px; } .pgame .sg.chip { width: 40px; height: 40px; } .pgame .sg.mfz, .pgame .sg.mfz svg { width: 80px; } .pgame .sg.none { width: 80px; height: 50px; font-size: 10px; text-align: center; }
 .pgame h4 { font-size: calc(17px * var(--dz)); line-height: 1.1; } .pgame p { font-size: 13px; color: var(--ink-2); line-height: 1.3; }
 .pgame .res .wscore { font-size: calc(26px * var(--nz)); } .pgame .res small { font-size: 12px; margin-top: 4px; }
@@ -353,7 +407,7 @@ table.tb .ok svg { width: 18px; height: 18px; vertical-align: -3px; }
     <h1>Mischpult</h1>
     <div class="presets" id="presets" role="group" aria-label="Fertige Richtungen"></div>
     <button class="roll" id="roll">Würfeln</button>
-    <div class="code"><output id="code" aria-live="polite"></output><button id="copy">Kennung kopieren</button></div>
+    <div class="code"><output id="code" aria-live="polite"></output><button id="copy">Kopieren</button><label class="vh" for="paste">Kennung einfügen</label><input id="paste" placeholder="Kennung einfügen, Enter" autocomplete="off" spellcheck="false"><button id="apply">Anwenden</button></div>
     <button class="fold" id="fold" aria-expanded="true">Regler</button>
   </div>
   <div class="rows" id="rows"></div>
@@ -364,7 +418,7 @@ table.tb .ok svg { width: 18px; height: 18px; vertical-align: -3px; }
     <div><p class="cap">Start · Handy 390</p><div class="frame" id="w-phone"></div></div>
   </div>
   <div style="margin-top:28px"><p class="cap">Spiel, Tab Zahlen · Desktop 1280</p><div class="frame" id="w-zahlen"></div></div>
-  <p class="note">Jeder Baustein bringt mit, was er braucht: Tafel und Taktikkamera haben ihren dunklen Kasten dabei, helle Vereinsfarben bekommen Kante und Paspel, ein Gegner in derselben Farbfamilie tritt in seiner Zweitfarbe an. Die Kennung steht auch in der Adresse; ein Link mit Kennung öffnet genau diese Kombination. Videobilder gibt es hier keine, die Daten sind die Demo-Daten aus der Spezifikation.</p>
+  <p class="note">Jeder Baustein bringt mit, was er braucht: Tafel und Taktikkamera haben ihren dunklen Kasten dabei, helle Vereinsfarben bekommen Kante und Paspel, ein Gegner in derselben Farbfamilie tritt in seiner Zweitfarbe an. Eine Kennung lässt sich oben einfügen; Enter wendet sie an. Videobilder gibt es hier keine, die Daten sind die Demo-Daten aus der Spezifikation.</p>
 </main>
 <script>
 /* Shared drawing core: club colours, court geometry in metres, scenes from position data. */
@@ -574,14 +628,14 @@ function face(svg) {
   h += '<rect x="-0.9" y="8.5" width="0.9" height="3" fill="var(--club-ink)"/><rect x="40" y="8.5" width="0.9" height="3" fill="var(--opp-ink)"/>';
   list.forEach(function (sh, i) {
     if (i >= n || svg.hasAttribute("data-noshots")) return;
-    if (W < 500 && !sh.goal) return;
+    if ((W < 500 || svg.hasAttribute("data-quiet")) && !sh.goal) return;
     var col = sh.us ? "var(--club-ink)" : "var(--opp-ink)", pts = shotPath(sh).slice(small ? 12 : 8);
     pts = pts.map(function (p) { return [sh.us ? Math.min(p[0], 19.6) : Math.max(p[0], 20.4), p[1]]; });
     var dd = d(pts);
-    h += '<path class="ln" style="--i:' + i + '" pathLength="1" d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + (sh.goal ? (small ? 1 : W < 500 ? 1.3 : 2.2) : 1) + '" stroke-opacity="' + (sh.goal ? (W < 500 ? 0.7 : 0.92) : 0.38) + '" stroke-linecap="round"' + NS + "/>";
+    h += '<path class="ln" style="--i:' + i + '" pathLength="1" d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + (svg.hasAttribute("data-quiet") ? 1 : sh.goal ? (small ? 1 : W < 500 ? 1.3 : 2.2) : 1) + '" stroke-opacity="' + (svg.hasAttribute("data-quiet") ? 0.32 : sh.goal ? (W < 500 ? 0.7 : 0.92) : 0.38) + '" stroke-linecap="round"' + NS + "/>";
   });
   h += "</g>";
-  if (svg.hasAttribute("data-flow")) h += flowLine(FLOW[key], W, H, svg.hasAttribute("data-phase"), small, W < 500);
+  if (svg.hasAttribute("data-flow")) h += svg.hasAttribute("data-quiet") ? quietFlow(FLOW[key], W, H) : flowLine(FLOW[key], W, H, svg.hasAttribute("data-phase"), small, W < 500);
   svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = h;
 }
 /* the run of the match: one line, left to right is minute 0 to 60, up is our lead */
@@ -605,9 +659,16 @@ function flowLine(data, W, H, phase, small, compact) {
   if (!small && compact) o += '<text x="' + (ex - 14) + '" y="' + (ey - 8) + '" text-anchor="end" class="fl">' + (last[1] > 0 ? "+" : "") + last[1] + "</text>";
   if (!small && !compact) {
     o += '<text x="' + (ex - 16) + '" y="' + (ey - 16) + '" text-anchor="end" class="fl b">Schluss ' + (last[1] > 0 ? "+" : "") + last[1] + "</text>";
-    o += '<text x="' + x(0) + '" y="' + (mid - 14) + '" class="fl">Verlauf</text>';
   }
   return o;
+}
+/* the quiet run: one hairline in the lower third, ending in a small ball, no words */
+function quietFlow(data, W, H) {
+  var pad = W < 500 ? 12 : 26, U = H * 0.16 / 9, mid = H * 0.9;
+  function x(m) { return pad + (W - 2 * pad) * m / 60; } function y(v) { return mid - v * U; }
+  var pts = []; data.forEach(function (p, i) { if (i) pts.push([x(p[0]), y(data[i - 1][1])]); pts.push([x(p[0]), y(p[1])]); });
+  var last = data[data.length - 1];
+  return '<path d="' + d(pts) + '" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.5" stroke-linejoin="round"/><circle cx="' + x(60) + '" cy="' + y(last[1]) + '" r="' + (W < 500 ? 3 : 4.5) + '" fill="#fff"/>';
 }
 /* without video: the goal sequence as a stair, nothing more */
 function stairs(seq, W, H) {
@@ -879,11 +940,28 @@ function flight(svg) {
   if (W > 500) o += '<text x="' + x(30) + '" y="' + (y(4) - 12) + '" text-anchor="middle" class="fw">Halbzeit +4</text><text x="' + (e[0] - 18) + '" y="' + (e[1] + 5) + '" text-anchor="end" class="fw">Schluss +8</text><text x="' + x(41) + '" y="' + (y(2) + 22) + '" text-anchor="middle" class="fw">38. bis 44.: drei Ballverluste</text>';
   svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = o;
 }
+/* ---------- Hallenlicht: the wooden floor seen from the stand, goal areas painted in both kits ---------- */
+function hallFloor(svg) {
+  var h = '<rect width="400" height="200" fill="#c8915a"/>';
+  for (var y = 0, i = 0; y < 200; y += 5, i++) {
+    var t = ((i * 37) % 11) / 11, o = 0.04 + t * 0.07;
+    h += '<rect x="0" y="' + y + '" width="400" height="5" fill="' + (i % 2 ? "#8a5a2e" : "#f0c08a") + '" opacity="' + o.toFixed(3) + '"/>';
+    for (var x = ((i * 53) % 90); x < 400; x += 90 + ((i * 17) % 40)) h += '<rect x="' + x + '" y="' + y + '" width=".5" height="5" fill="#6d4522" opacity=".25"/>';
+  }
+  h += '<rect x="-2" y="-2" width="404" height="204" fill="none" stroke="#2a2f34" stroke-width="12" opacity=".9"/>';
+  h += '<path d="M0 40 A60 60 0 0 1 60 85 L60 115 A60 60 0 0 1 0 160 Z" fill="var(--club)" opacity=".94"/><path d="M400 40 A60 60 0 0 0 340 85 L340 115 A60 60 0 0 0 400 160 Z" fill="var(--opp)" opacity=".94"/>';
+  h += '<g fill="none" stroke="#f6f2ea" stroke-width="1.6" opacity=".95"><rect x="2" y="2" width="396" height="196"/><path d="M200 2v196"/><circle cx="200" cy="100" r="12"/>'
+    + '<path d="M0 40 A60 60 0 0 1 60 85 L60 115 A60 60 0 0 1 0 160"/><path d="M400 40 A60 60 0 0 0 340 85 L340 115 A60 60 0 0 0 400 160"/>'
+    + '<path d="M0 10 A90 90 0 0 1 90 85 L90 115 A90 90 0 0 1 0 190" stroke-dasharray="6 5"/><path d="M400 10 A90 90 0 0 0 310 85 L310 115 A90 90 0 0 0 400 190" stroke-dasharray="6 5"/></g>';
+  h += '<rect x="-3" y="85" width="4" height="30" fill="#f6f2ea"/><rect x="399" y="85" width="4" height="30" fill="#f6f2ea"/>';
+  h += '<text x="186" y="124" text-anchor="end" class="hs">26</text><text x="214" y="124" text-anchor="start" class="hs">18</text>';
+  svg.setAttribute("viewBox", svg.closest(".strip7") ? "0 62 400 76" : "0 0 400 200"); svg.innerHTML = h;
+}
 
 /* ===== Mischpult: templates and controls ===== */
 var REG = [
-  { key: "K", name: "Kopf", opts: ["Abdruck", "Plakat", "Wurf", "Tafel", "Taktikkamera"] },
-  { key: "D", name: "3 Dinge", opts: ["Bündel", "Rückennummern", "Piktogramm", "Programm", "Magnete"] },
+  { key: "K", name: "Kopf", opts: ["Abdruck", "Plakat", "Wurf", "Tafel", "Taktikkamera", "Abdruck leise", "Hallenlicht"] },
+  { key: "D", name: "3 Dinge", opts: ["Bündel", "Rückennummern", "Piktogramm", "Programm", "Magnete", "Wert zuerst"] },
   { key: "S", name: "Schrift", opts: ["breit", "schmal", "schräg", "Flock", "Bricolage"] },
   { key: "G", name: "Grund", opts: ["kühl hell", "warm hell", "dunkel", "Hallenboden"] },
   { key: "Z", name: "Liste", opts: ["Fächer", "Farbquadrat", "Minifeld", "Lämpchen"] }
@@ -891,7 +969,8 @@ var REG = [
 var CLUBN = ["rot", "blau", "gelb", "schwarz", "weiss", "gruen"], OPPN = ["petrol", "blau", "gelb", "schwarz", "unbekannt"];
 var PRESETS = {
   Abdruck: "K1-D1-S1-G1-Z1", Plakat: "K2-D3-S2-G2-Z2", Wurf: "K3-D5-S3-G2-Z3", Trikot: "K2-D2-S4-G2-Z2",
-  Piktogramm: "K2-D3-S2-G1-Z4", Halle: "K4-D5-S2-G4-Z3", Flutlicht: "K4-D3-S2-G3-Z4", Einblendung: "K5-D5-S2-G3-Z3"
+  Piktogramm: "K2-D3-S2-G1-Z4", Halle: "K4-D5-S2-G4-Z3", Flutlicht: "K4-D3-S2-G3-Z4", Einblendung: "K5-D5-S2-G3-Z3", Hallenlicht: "K7-D6-S5-G1-Z1",
+  Programm: "K1-D3-S2-G2-Z1", "Programm ruhig": "K6-D1-S2-G2-Z1", Nacht: "K1-D4-S2-G3-Z1-weiss-petrol"
 };
 var ST = { K: 1, D: 1, S: 1, G: 1, Z: 1, club: "rot", opp: "petrol" };
 function codeOf() { return "K" + ST.K + "-D" + ST.D + "-S" + ST.S + "-G" + ST.G + "-Z" + ST.Z + "-" + ST.club + "-" + ST.opp; }
@@ -935,7 +1014,7 @@ function headPlakat(ph, W, unknown) {
 }
 function headWurf(ph, W) {
   return '<section class="h-wurf"><div><p class="kick">' + (ph ? "Sa gegen TSV Thalwil · fertig seit So, 9:40" : KICK) + '</p><h1 class="d">' + TITLE + '</h1></div>'
-    + '<div><div class="echo d num"><span class="e e2">26:18</span><span class="e e1">26:18</span><span>26:18</span></div><div class="names"><span>HC Zürichsee</span><span>TSV Thalwil' + (ph ? "" : ", Rang 5") + "</span></div></div>"
+    + '<div><div class="echo d num"><span class="e e2">26:18</span><span class="e e1">26:18</span><span>26:<u>18</u></span></div><div class="names"><span>HC Zürichsee</span><span><i class="oc"></i>TSV Thalwil' + (ph ? "" : ", Rang 5") + "</span></div></div>"
     + '<svg data-flight data-w="' + W + '" data-h="' + (ph ? 90 : 130) + '" aria-hidden="true"></svg></section>'
     + '<div class="actrow">' + (ph ? '<a class="btn" href="#">Spiel öffnen</a><a class="lnk" href="#">3 Fragen offen, 1 Minute</a>' : '<a class="btn" href="#">Spiel öffnen</a><a class="btn line" href="#">Fürs Team zusammenstellen</a>') + "</div>";
 }
@@ -952,7 +1031,17 @@ function headTakt(ph, W) {
   if (ph) return '<section class="h-takt"><svg data-tscene="ra" data-view="halfLdeep" data-w="' + W + '" data-r="10" role="img" aria-label="Taktikkamera, 39. Minute: Gegentor über rechts aussen"></svg>' + bug + "</section>" + lt;
   return '<section class="h-takt"><svg data-tscene="ra" data-view="full" data-w="' + W + '" data-r="13" data-labels role="img" aria-label="Taktikkamera, 39. Minute: unsere Nummer 7 tritt heraus, Thalwil trifft über rechts aussen"></svg>' + bug + '<p class="camtag"><b>Taktikkamera</b> aus Positionsdaten · 39:55</p>' + lt + "</section>";
 }
-function head(ph, W, unknown) { return [null, headFace, headPlakat, headWurf, headTafel, headTakt][ST.K](ph, W, unknown); }
+function headQuiet(ph, W, unknown) {
+  var w = ph ? W - 32 : W - 64, hh = ph ? 230 : 380;
+  return '<section class="h-plakat h-quiet"><svg data-match="thalwil" data-quiet data-flow data-w="' + w + '" data-h="' + hh + '" aria-hidden="true"></svg><div class="pf us"><span class="lab">Heim</span><b class="d">HC Zürichsee</b><span class="n d num">26</span></div><div class="pf them"><span class="lab">' + (unknown ? "Gast · Farbe offen" : "Gast · Rang 5") + '</span><b class="d">TSV Thalwil</b><span class="n d num">18</span></div></section>'
+    + '<div class="cells"><div><span class="k">Halbzeit</span>13:9</div><div><span class="k">Samstag</span>7. November</div><div><span class="k">Halle</span>Seefeld, Meilen</div><div><span class="k">Würfe</span>' + (ph ? "45 und 34" : "45 und 34, Linien: Tore") + "</div></div>";
+}
+function headHall(ph, W, unknown) {
+  return '<section class="h-hall"><div class="floor" aria-hidden="true"><svg class="hfloor"></svg><div class="sheen"></div><div class="falloff"></div></div>'
+    + '<div class="over"><div class="team"><b class="d">' + (ph ? "Zürichsee" : "HC Zürichsee") + '</b><small><i class="dot us"></i>Heim</small></div>' + (ph ? "" : '<p class="mid">Halbzeit 13:9 · Sa., 7. November · Halle Seefeld</p>')
+    + '<div class="team r"><b class="d">' + (ph ? "Thalwil" : "TSV Thalwil") + "</b><small>" + (unknown ? "Farbe offen" : "Gast, Rang 5") + '<i class="dot them"></i></small></div></div>' + (ph ? '<p class="mid ph">Halbzeit 13:9 · Sa., 7. Nov.</p>' : "") + "</section>";
+}
+function head(ph, W, unknown) { return [null, headFace, headPlakat, headWurf, headTafel, headTakt, headQuiet, headHall][ST.K](ph, W, unknown); }
 function ownsTitle() { return ST.K === 3 || ST.K === 5; }
 function title(ph) {
   if (ownsTitle()) return "";
@@ -978,6 +1067,10 @@ function things(ph) {
   if (ST.D === 4) {
     THINGS.forEach(function (t, i) { o += '<li><span class="i d num">' + (i + 1) + '</span><svg class="mf" data-mf="' + t.mf + '" aria-hidden="true"></svg><div><p><em>' + t.fig + "</em> · " + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small></div><span class="rt">' + t.t + '</span><a class="btn s play" href="#">' + I.play + t.sc + "</a></li>"; });
     return '<div class="t-prog"><p class="ph"><span>Drei Dinge · Seite A</span><span>23 Szenen · 6:45</span></p><ol>' + o + "</ol></div>";
+  }
+  if (ST.D === 6) {
+    THINGS.forEach(function (t, i) { var v = t.fig.split(" "); o += '<li><svg class="mf" data-mf="' + t.mf + '" data-chrono aria-hidden="true"></svg><div class="tx"><span class="rk">' + (i + 1) + ' von 3</span><span class="val d num">' + v[0] + "<small>" + v.slice(1).join(" ") + "</small></span><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small></div><div class="go"><a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></div></li>"; });
+    return '<ol class="t-val">' + o + "</ol>";
   }
   THINGS.forEach(function (t, i) { o += '<li><span class="i d num">' + (i + 1) + '</span><svg class="mf" data-mf="' + t.mf + '" data-chrono aria-hidden="true"></svg><div class="tx"><span class="fig d">' + t.fig + "</span><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small></div><div class="go"><a class="btn s line" href="#">' + t.sc + "</a><small>" + t.t + " Minuten</small></div></li>"; });
   return '<ol class="t-mag">' + o + "</ol>";
@@ -1037,8 +1130,9 @@ function strip(W) {
     + '<span class="d num" data-score="26:18" data-one="26" style="position:absolute;right:calc(50% + 18px);top:50%;transform:translateY(-44%);font-size:calc(72px * var(--nz));line-height:.8;color:var(--club-ink)">26</span>'
     + '<span class="d num" data-score="26:18" data-one="18" style="position:absolute;left:calc(50% + 18px);top:50%;transform:translateY(-44%);font-size:calc(72px * var(--nz));line-height:.8;color:var(--opp-ink)">18</span>'
     + '<span class="nm d" style="position:absolute;right:32px;top:50%;transform:translateY(-50%);text-align:right;color:var(--opp-ink);font-size:calc(24px * var(--dz))">TSV Thalwil<small style="display:block;font:500 13px var(--ft);margin-top:4px;text-transform:none;letter-spacing:0">Gast · Halbzeit 13:9</small></span></section>';
-  if (ST.K === 2) return '<section style="display:grid;grid-template-columns:1fr auto auto 1fr;align-items:stretch;margin:24px 32px 0;height:88px"><span class="d" style="align-self:center;font-size:calc(24px * var(--dz))">HC Zürichsee</span><span class="d num" style="background:var(--club);color:var(--club-ink);font-size:calc(80px * var(--nz));line-height:1;padding:4px 18px 0;box-shadow:inset 0 0 0 2px var(--club-edge)">26</span><span class="d num" style="background:var(--opp);color:var(--opp-ink);font-size:calc(80px * var(--nz));line-height:1;padding:4px 18px 0;box-shadow:inset 0 0 0 2px var(--opp-edge)">18</span><span class="d" style="align-self:center;text-align:right;font-size:calc(24px * var(--dz))">TSV Thalwil</span></section><div class="cells" style="margin-top:16px"><div><span class="k">Halbzeit</span>13:9</div><div><span class="k">Samstag</span>7. November</div><div><span class="k">Halle</span>Seefeld, Meilen</div><div><span class="k">Strafen</span>3 und 4 mal 2 Minuten</div></div>';
+  if (ST.K === 2 || ST.K === 6) return '<section style="display:grid;grid-template-columns:1fr auto auto 1fr;align-items:stretch;margin:24px 32px 0;height:88px"><span class="d" style="align-self:center;font-size:calc(24px * var(--dz))">HC Zürichsee</span><span class="d num" style="background:var(--club);color:var(--club-ink);font-size:calc(80px * var(--nz));line-height:1;padding:4px 18px 0;box-shadow:inset 0 0 0 2px var(--club-edge)">26</span><span class="d num" style="background:var(--opp);color:var(--opp-ink);font-size:calc(80px * var(--nz));line-height:1;padding:4px 18px 0;box-shadow:inset 0 0 0 2px var(--opp-edge)">18</span><span class="d" style="align-self:center;text-align:right;font-size:calc(24px * var(--dz))">TSV Thalwil</span></section><div class="cells" style="margin-top:16px"><div><span class="k">Halbzeit</span>13:9</div><div><span class="k">Samstag</span>7. November</div><div><span class="k">Halle</span>Seefeld, Meilen</div><div><span class="k">Strafen</span>3 und 4 mal 2 Minuten</div></div>';
   if (ST.K === 3) return '<section class="stripx" style="background:var(--club);color:var(--club-ink);clip-path:polygon(0 0,100% 0,100% 74%,0 100%);height:118px;align-items:flex-start;padding-top:22px;box-shadow:inset 0 0 0 2px var(--club-edge)"><span class="nm d">HC Zürichsee gegen TSV Thalwil<small>Sa., 7. Nov. · Halle Seefeld · Halbzeit 13:9</small></span><span class="d num" style="font-size:calc(70px * var(--nz));line-height:.8">26:18</span></section>';
+  if (ST.K === 7) return '<section class="h-hall strip7"><div class="floor" aria-hidden="true"><svg class="hfloor" preserveAspectRatio="xMidYMid slice"></svg><div class="falloff"></div></div><div class="over"><div class="team"><b class="d">HC Zürichsee</b><small><i class="dot us"></i>Heim · Sa., 7. Nov.</small></div><div class="team r"><b class="d">TSV Thalwil</b><small>Halbzeit 13:9<i class="dot them"></i></small></div></div></section>';
   if (ST.K === 4) return '<section class="h-tafel" style="padding:16px 32px"><div class="board" style="grid-template-columns:1fr auto 1fr"><div class="tn us" style="font-size:26px">Zürichsee</div><div class="seg" data-seg="26:18" data-glow="8" style="width:220px" role="img" aria-label="26 zu 18"></div><div class="tn them" style="font-size:26px">Thalwil</div></div></section><div class="bande"><span class="us" style="padding:4px 32px;font-size:13px">Sa., 7. Nov. · Halle Seefeld</span><span class="them" style="padding:4px 32px;font-size:13px">Halbzeit 13:9</span></div>';
   return '<section style="background:#0f2333;color:#eef2f5;height:88px;display:flex;align-items:center;gap:20px;padding:0 32px"><div class="bug" style="position:static" role="img" aria-label="Endstand 26 zu 18"><span class="t us">HCZ</span><span class="n">26</span><span class="n">18</span><span class="t them">TSV</span><span class="st">Ende</span></div><p style="font-weight:700">HC Zürichsee gegen TSV Thalwil<small style="display:block;font:500 12px IBM Plex Mono,monospace;color:#a5b0bb">Sa., 7. Nov. · Halle Seefeld</small></p></section>';
 }
@@ -1063,7 +1157,7 @@ function zahlen() {
 var FLOORBG = null;
 function floorBg() {
   if (FLOORBG) return FLOORBG;
-  var s = '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900"><g fill="none" stroke-width="5"><path d="M-40 640 A420 420 0 0 1 380 1060" stroke="#e98a3c" stroke-opacity=".55"/><path d="M1320 -60 A520 520 0 0 0 800 460" stroke="#fff" stroke-opacity=".35"/><path d="M640 -10 V910" stroke="#7cc49a" stroke-opacity=".35"/><path d="M-10 220 H1290" stroke="#1d3d58" stroke-opacity=".45"/></g></svg>';
+  var s = '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900"><g fill="none" stroke-width="5"><path d="M-40 640 A420 420 0 0 1 380 1060" stroke="#f08c3a" stroke-opacity=".95"/><path d="M1320 -60 A520 520 0 0 0 800 460" stroke="#fff" stroke-opacity=".7"/><path d="M640 -10 V910" stroke="#7fd19f" stroke-opacity=".75"/><path d="M-10 220 H1290" stroke="#ffd23c" stroke-opacity=".6"/></g></svg>';
   FLOORBG = 'url("data:image/svg+xml,' + encodeURIComponent(s) + '")'; return FLOORBG;
 }
 function dress(app, opp) {
@@ -1082,6 +1176,7 @@ function dress(app, opp) {
   app.querySelectorAll("[data-seg]").forEach(function (e) { e.dataset.lit = "#ffb31a"; e.dataset.ghostc = "#1b170d"; seg7svg(e); });
   app.querySelectorAll("svg[data-tscene]").forEach(function (s) { s._kit = k; tscene(s); });
   app.querySelectorAll("svg[data-flight]").forEach(flight);
+  app.querySelectorAll("svg.hfloor").forEach(hallFloor);
   if (ST.S === 1) weigh(app);
   /* the face of the start carries its numerals in the face's own weights */
 }
@@ -1107,7 +1202,7 @@ function fit() {
 function syncButtons() {
   document.querySelectorAll("[data-reg]").forEach(function (b) { b.setAttribute("aria-pressed", String(ST[b.dataset.reg] == b.dataset.v)); });
   var code5 = codeOf().split("-").slice(0, 5).join("-");
-  document.querySelectorAll("[data-preset]").forEach(function (b) { b.setAttribute("aria-pressed", String(PRESETS[b.dataset.preset] === code5)); });
+  document.querySelectorAll("[data-preset]").forEach(function (b) { var pc = PRESETS[b.dataset.preset]; b.setAttribute("aria-pressed", String(pc.split("-").length > 5 ? pc === codeOf() : pc === code5)); });
 }
 function build() {
   var rows = document.getElementById("rows"), h = "";
@@ -1123,10 +1218,13 @@ function build() {
     else if (b.dataset.preset) { parse(PRESETS[b.dataset.preset]); render(); }
     else if (b.id === "roll") { REG.forEach(function (r) { ST[r.key] = 1 + Math.floor(Math.random() * r.opts.length); }); ST.club = CLUBN[Math.floor(Math.random() * 6)]; ST.opp = OPPN[Math.floor(Math.random() * 5)]; render(); }
     else if (b.id === "copy") { var c = codeOf(); try { navigator.clipboard.writeText(c); b.textContent = "Kopiert"; } catch (x) { b.textContent = c; } setTimeout(function () { b.textContent = "Kennung kopieren"; }, 1600); }
+    else if (b.id === "apply") { applyCode(); }
     else if (b.id === "fold") { var ui = document.getElementById("ui"); ui.classList.toggle("closed"); b.setAttribute("aria-expanded", String(!ui.classList.contains("closed"))); }
   });
   window.addEventListener("resize", fit);
+  document.getElementById("paste").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); applyCode(); } });
 }
+function applyCode() { var f = document.getElementById("paste"), v = f.value.trim().replace(/\s+/g, ""); if (parse(v)) { render(); f.value = ""; f.placeholder = "angewendet"; } else { f.value = ""; f.placeholder = "Kennung nicht erkannt"; } }
 build();
 if (window.matchMedia("(max-width: 700px)").matches) { document.getElementById("ui").classList.add("closed"); document.getElementById("fold").setAttribute("aria-expanded", "false"); }
 parse(decodeURIComponent(location.hash.slice(1)));
