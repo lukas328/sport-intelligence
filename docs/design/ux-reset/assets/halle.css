@@ -79,7 +79,7 @@
 .halle .head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
 .halle .head b { font: 700 15px/1 var(--f-display); font-stretch: 88%; white-space: nowrap; }
 .halle .head::after { content: ""; flex: 1; border-top: 1.5px solid var(--ink); transform: translateY(-4px); order: 2; }
-.halle .head span { order: 3; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+.halle .head span { order: 3; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .halle .head a { order: 3; }
 
 /* ---------- controls ---------- */
@@ -216,6 +216,7 @@
 .halle.is-desk .cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; align-items: start; }
 .halle .cols { display: grid; gap: 30px; }
 .halle .cols > * { min-width: 0; display: grid; gap: 34px; align-content: start; }
+.halle .cols > * > * { min-width: 0; }
 
 /* ledger: a margin column for day and time, content to the right */
 .halle .led-row { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 4px 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
@@ -253,6 +254,7 @@
    Screens
    ===================================================================== */
 .halle .stack { display: grid; gap: 12px; align-content: start; }
+.halle .stack > * { min-width: 0; }
 .halle .res { font: 900 30px/0.9 var(--f-num); font-stretch: 62%; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 .halle .res small { display: block; font: 650 12px/1 var(--f-text); margin-top: 5px; }
 .halle .res.w small { color: var(--win); }
@@ -433,3 +435,86 @@
 .halle .steps li .st { width: 52px; flex: none; font-size: 12px; color: var(--ink-3); }
 .halle .steps li.now { font-weight: 650; }
 .halle .ghost { opacity: 0.32; filter: grayscale(1); pointer-events: none; }
+
+/* =====================================================================
+   Second pass: the hall is the frame. The app sits on the hall floor (blue, with the lines of
+   several sports crossing), the content is a sheet of paper lying on it. Insights are printed
+   on the yellow copy of the match sheet.
+   ===================================================================== */
+.halle { --sheet-yellow: #ffe57a; --led-red: #ff5a4d; --line-white: #f7fbfc; --line-green: #2f8f5b; --line-navy: #27485a; }
+.halle.app { background: var(--floor); }
+.halle .main { background: var(--paper); }
+.halle .topbar { background: var(--floor); border-bottom: 3px solid var(--line); }
+.halle .tabbar { background: var(--floor); border-top: 3px solid var(--line); }
+.halle .tabbar span { color: var(--ink-2); }
+.halle .tabbar span.on { color: var(--ink); }
+.halle .topbar .team small { color: var(--ink-2); }
+.halle.is-desk .rail { border-right: 0; padding: 22px 14px 14px 16px; background-repeat: no-repeat; background-position: left 0 bottom 150px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='212' height='330'%3E%3Cpath d='M-70 330 A270 270 0 0 1 212 96' fill='none' stroke='%23e2560b' stroke-width='5'/%3E%3Cpath d='M-70 250 A190 190 0 0 1 130 330' fill='none' stroke='%23e2560b' stroke-width='4' stroke-dasharray='16 12'/%3E%3Cpath d='M0 62 H212' stroke='%23f7fbfc' stroke-width='4'/%3E%3Cpath d='M168 0 V330' stroke='%2327485a' stroke-width='3'/%3E%3Cpath d='M0 204 H212' stroke='%232f8f5b' stroke-width='3'/%3E%3C/svg%3E"); }
+.halle.is-desk .main { margin: 12px 12px 12px 0; border-radius: 2px; padding: 28px 36px 44px; }
+.halle .rail .item { padding: 9px 8px; border-radius: 2px; color: var(--ink); }
+.halle .rail .item.on { background: var(--paper); }
+.halle .rail .club small { color: var(--ink-2); }
+.halle .rail .foot { background: var(--paper); padding: 6px 8px 10px; border-radius: 2px; }
+.halle .rail .me { margin-top: 6px; padding-top: 10px; }
+.halle .rail .up { margin: 0 0 18px; }
+
+/* the yellow sheet: the three things */
+.halle .gelb { background: var(--sheet-yellow); padding: 16px 18px 18px; border-radius: 2px; }
+.halle .gelb .head::after { border-color: var(--ink); }
+.halle .gelb .head span { color: var(--ink-2); }
+.halle .gelb .thing { border-color: rgba(20, 23, 26, 0.22); }
+.halle .gelb .thing:last-child { border-bottom: 0; }
+.halle .gelb .thing::before { color: var(--ink); }
+.halle .gelb .thing small { color: var(--ink-2); }
+.halle .gelb .thing small.up { color: #14603a; }
+.halle .gelb .btn.line { background: var(--paper); box-shadow: none; }
+.halle .gelb .mf { box-shadow: 0 0 0 1.5px var(--ink); }
+.halle .thing .drill { display: block; font-size: 12.5px; font-weight: 400; margin-top: 4px; }
+
+/* board with crests; the clock burns red like in the hall */
+.halle .led.red { color: var(--led-red); text-shadow: 0 0 0.22em rgba(255, 60, 40, 0.5); }
+.halle .board .side { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.halle .board .side.r { flex-direction: row-reverse; }
+.halle .board .side > div { min-width: 0; }
+.halle .board .crest { width: 30px; height: 35px; font-size: 10px; }
+.halle .crest.opp { background: #dfe5e3; color: var(--ink); }
+.halle.is-phone .board:not(.s) .side, .halle.is-phone .board:not(.s) .side.r { flex-direction: column; gap: 6px; }
+.halle .board.s .side { display: block; }
+
+/* zones: where it happened, as sized circles on the court */
+.halle svg.zonen { width: 100%; height: auto; border-radius: 2px; }
+.halle svg.zonen text { font: 900 15px var(--f-num); font-stretch: 62%; fill: var(--ink); text-anchor: middle; }
+.halle svg.zonen text.lab { font: 600 7.5px var(--f-text); font-stretch: 100%; fill: var(--ink); }
+
+/* small series: one value per match */
+.halle .trend { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 12px; align-items: end; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.halle .trend h4 { font: 700 16px/1.2 var(--f-display); font-stretch: 88%; }
+.halle .trend p { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+.halle svg.reihe { width: 100%; max-width: 230px; height: auto; overflow: visible; justify-self: end; }
+.halle svg.reihe text { font: 900 12px var(--f-num); font-stretch: 62%; fill: var(--ink-2); text-anchor: middle; }
+.halle svg.reihe text.now { fill: var(--ink); font-size: 15px; }
+.halle.is-desk .trend { grid-template-columns: minmax(0, 1fr) 190px; }
+
+/* goal grid */
+.halle .tor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; border: 4px solid var(--ink); border-bottom: 0; padding: 3px; max-width: 250px; background: var(--paper); }
+.halle .tor span { aspect-ratio: 5 / 3; display: grid; place-items: center; font: 900 20px/1 var(--f-num); font-stretch: 62%; background: var(--paper-2); }
+.halle .tor span small { font: 400 11px/1 var(--f-text); color: var(--ink-2); display: block; margin-top: 3px; }
+
+/* sharing: what lands in the team chat */
+.halle .chat { background: #e6ddd3; padding: 14px 12px; border-radius: 2px; }
+.halle .bubble { background: #d9fdd3; border-radius: 8px 8px 2px 8px; padding: 5px 5px 6px; max-width: 272px; margin-left: auto; font-size: 13.5px; line-height: 1.35; color: #111b21; }
+.halle .bubble .prev { background: #c9efc3; border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
+.halle .bubble .prev .mf { border-radius: 0; }
+.halle .bubble .prev p { padding: 7px 9px 8px; font-size: 13px; line-height: 1.3; }
+.halle .bubble .prev p b { display: block; }
+.halle .bubble .prev p span { color: #54656f; font-size: 12px; }
+.halle .bubble > p { padding: 0 5px; }
+.halle .bubble .t { display: block; text-align: right; font-size: 11px; color: #54656f; padding: 2px 5px 0; }
+.halle .shared-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--floor); border-bottom: 3px solid var(--line); }
+.halle .shared-top b { font: 700 15px/1.1 var(--f-display); font-stretch: 88%; }
+.halle .shared-top small { display: block; font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+
+/* onboarding and other bare screens lie on the floor too */
+.halle.app[data-bare] .welcome { background: var(--paper); margin: 12px; border-radius: 2px; }
+.halle.app[data-bare] .check, .halle.app[data-bare] .bare { background: var(--paper); }
+.halle .later { opacity: 1; }

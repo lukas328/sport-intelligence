@@ -3,8 +3,9 @@
 Stand: 10. November 2026. Grundlage: alle 66 Screens in `docs/screens` (Desktop 1440 px und Phone
 390 px), `docs/DESIGN.md`, `apps/web/src/lib/nav-model.ts`. Diese Datei hält die Befunde pro
 Screen fest. Wie es künftig aussieht, steht in `SPEC.md` (verbindlich) und `zielbild.html` (das
-Bild dazu); wo der Abschnitt «Zielbild» unten davon abweicht, gilt die Spezifikation. Nichts
-davon ist umgesetzt.
+Bild dazu); wo der Abschnitt «Zielbild» unten davon abweicht, gilt die Spezifikation. Das gilt
+vor allem für den Umfang: Die Spezifikation beschränkt sich auf die Spielauswertung für die
+Trainerin, Training und alles für Spieler und Eltern kommen später. Nichts davon ist umgesetzt.
 
 ## Kurzfassung
 

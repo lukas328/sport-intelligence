@@ -11,6 +11,7 @@
     szenen: '<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M10 9.2v5.6l5-2.8z" fill="currentColor"/>',
     training: '<path d="M9.2 5h5.6l4.2 14H5z"/><path d="M7.4 11.5h9.2M6.2 15.5h11.6"/>',
     team: '<path d="M8.5 4 4 6.8l1.8 3.6L8 9.2V20h8V9.2l2.2 1.2L20 6.8 15.5 4c-.6 1.3-1.9 2-3.5 2s-2.9-.7-3.5-2z"/>',
+    saison: '<path d="M4 19.5h16"/><path d="M6.5 16v-4M11 16V7.5M15.5 16v-6M20 16V5"/>',
     termine: '<rect x="4" y="5.5" width="16" height="14" rx="1.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
     kind: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-4 3.4-6 7-6s6.4 2 7 6"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
@@ -20,25 +21,21 @@
   function icon(name) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[name] + "</svg>"; }
 
   var NAV = {
-    coach: [["heute", "Heute"], ["spiele", "Spiele"], ["szenen", "Szenen"], ["training", "Training"], ["team", "Team"]],
-    player: [["heute", "Heute"], ["szenen", "Szenen"], ["termine", "Termine"], ["team", "Team"]],
-    parent: [["heute", "Heute"], ["termine", "Termine"], ["kind", "Kind"]]
+    coach: [["spiele", "Spiele"], ["szenen", "Szenen"], ["saison", "Saison"], ["team", "Team"]]
   };
-  var WHO = { coach: ["DT", "Demo Trainerin"], player: ["MM", "Mia Meier"], parent: ["EB", "Eva Beispiel"] };
+  var WHO = { coach: ["DT", "Demo Trainerin"] };
 
   function chrome(app) {
     var role = app.dataset.role, on = app.dataset.on, bare = app.dataset.bare;
     if (!role || bare) return;
-    var items = NAV[role], who = WHO[role], open = role === "coach" ? 3 : 0;
+    var items = NAV[role], who = WHO[role];
     var rail = '<nav class="rail"><div class="club"><span class="crest">HCZ</span><div><b>HC Zürichsee</b><small>' + (app.dataset.team || "Herren 1 · 3. Liga") + "</small></div></div>";
+    rail += '<span class="btn up">' + icon("plus") + "Video hochladen</span>";
     items.forEach(function (i) { rail += '<span class="item' + (i[0] === on ? " on" : "") + '">' + icon(i[0]) + i[1] + "</span>"; });
-    rail += '<div class="foot">';
-    if (open) rail += '<span class="item">' + icon("glocke") + 'Offen<span class="count">' + open + "</span></span>";
-    rail += '<span class="item">' + icon("suche") + "Suchen</span>";
+    rail += '<div class="foot"><span class="item">' + icon("suche") + "Suchen</span>";
     rail += '<div class="me"><span class="crest" style="clip-path:none;border-radius:50%;width:30px;height:30px;padding:0;background:var(--ink);color:var(--paper)">' + who[0] + "</span>" + who[1] + "</div></div></nav>";
     var top = '<header class="topbar"><span class="crest">HCZ</span><span class="team">' + (app.dataset.teamShort || "Herren 1") + "<small>HC Zürichsee</small></span>";
-    if (role === "coach") top += '<span class="sq line" title="Offen">' + icon("glocke") + '</span><span class="sq" title="Video hochladen">' + icon("plus") + "</span>";
-    else top += '<span class="sq line">' + icon("glocke") + "</span>";
+    top += '<span class="sq line" title="Suchen">' + icon("suche") + '</span><span class="sq" title="Video hochladen">' + icon("plus") + "</span>";
     top += "</header>";
     var bar = '<nav class="tabbar">';
     items.forEach(function (i) { bar += '<span class="' + (i[0] === on ? "on" : "") + '">' + icon(i[0]) + i[1] + "</span>"; });
@@ -148,6 +145,34 @@
     });
   }
 
+  /* ---------- zones and small series ---------- */
+  function zones(root) {
+    root.querySelectorAll("svg.zonen").forEach(function (s) {
+      var z = [["LA", 16, 30, 2], ["RL", 50, 96, 3], ["RM", 100, 108, 2], ["RR", 150, 96, 1], ["RA", 174, 36, 9], ["KM", 100, 72, 1]];
+      var max = Math.max.apply(null, z.map(function (d) { return d[3]; })), h = half();
+      z.forEach(function (d) {
+        var r = 6.6 * Math.sqrt(d[3]), top = d[3] === max;
+        h += '<circle cx="' + d[1] + '" cy="' + d[2] + '" r="' + r.toFixed(1) + '" fill="' + (top ? "var(--harz)" : "#fff") + '" stroke="var(--ink)" stroke-width="1.6"/>';
+        h += '<text x="' + d[1] + '" y="' + (d[2] + 5.2) + '">' + d[3] + "</text>";
+      });
+      s.setAttribute("viewBox", "0 0 200 124"); s.innerHTML = h;
+    });
+    root.querySelectorAll("svg.reihe").forEach(function (s) {
+      var v = s.dataset.v.split(",").map(Number), signed = s.hasAttribute("data-signed"), n = v.length;
+      var W = 150, H = 62, bw = 18, gap = (W - n * bw) / (n - 1), max = Math.max.apply(null, v.map(Math.abs)), c = "";
+      var base = signed ? 40 : H, span = signed ? 24 : H - 18;
+      if (signed) c += '<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--ink)" stroke-width="1.2"/>';
+      v.forEach(function (d, i) {
+        var x = i * (bw + gap), hgt = Math.max(2, Math.abs(d) / max * span), y = d >= 0 ? base - hgt : base, last = i === n - 1;
+        var fill = signed ? (d >= 0 ? "var(--win)" : "var(--loss)") : (last ? "var(--club)" : "var(--floor-area)");
+        c += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw + '" height="' + hgt.toFixed(1) + '" fill="' + fill + '"/>';
+        var ty = d >= 0 ? y - 4 : y + hgt + 12;
+        c += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + ty.toFixed(1) + '"' + (last ? ' class="now"' : "") + ">" + (signed && d > 0 ? "+" : "") + d + "</text>";
+      });
+      s.setAttribute("viewBox", "0 -8 " + W + " " + (H + 16)); s.innerHTML = c;
+    });
+  }
+
   /* ---------- LED ghosts ---------- */
   function leds(root) {
     root.querySelectorAll(".led:not([data-ghost])").forEach(function (el) {
@@ -198,7 +223,7 @@
       s.setAttribute("viewBox", "0 0 21 21"); s.setAttribute("fill", "#14171a"); s.setAttribute("aria-hidden", "true"); s.innerHTML = h;
     });
   }
-  function dress(root) { root.querySelectorAll(".halle.app").forEach(chrome); leds(root); courts(root); charts(root); extras(root); marks(root); }
+  function dress(root) { root.querySelectorAll(".halle.app").forEach(chrome); leds(root); courts(root); zones(root); charts(root); extras(root); marks(root); }
 
   /* ---------- frames: one template, shown at desktop and phone width ---------- */
   var W = { desk: 1280, phone: 390 };
