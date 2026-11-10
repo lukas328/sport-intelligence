@@ -2772,5 +2772,22 @@
     "fromMatches": "In {k} of {n} matches with video",
     "scenes": "{n, plural, one {# scene} other {# scenes}}",
     "conceded_position": "{position} stays open: {k} of {n} goals conceded in the last match."
+  },
+  "collections": {
+    "title": "Collection",
+    "all": "All collections",
+    "entries": "{n, plural, =0 {empty} one {# entry} other {# entries}}",
+    "draft": "Draft",
+    "source_playlist": "from a playlist",
+    "source_presentation": "to show",
+    "source_assignment": "from a task",
+    "present": "Show on screen",
+    "edit": "Edit",
+    "run": "Running order",
+    "empty": "No entries yet.",
+    "scene": "Scene",
+    "to": "to",
+    "fromMatch": "Put together for the team",
+    "fromMatchTitle": "Against {opponent}"
   }
 }

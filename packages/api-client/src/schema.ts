@@ -1347,6 +1347,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/collections/{collection_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Collection
+         * @description A collection, or a playlist, presentation or assignment read as one (by its id).
+         */
+        get: operations["get_collection_v1_orgs__org_id__collections__collection_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Collection */
+        delete: operations["delete_collection_v1_orgs__org_id__collections__collection_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Collection
+         * @description Title, draft state, entries (the whole ordered list). Older objects: 409 read-only-source.
+         */
+        patch: operations["update_collection_v1_orgs__org_id__collections__collection_id__patch"];
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/comments/{comment_id}": {
         parameters: {
             query?: never;
@@ -3428,6 +3453,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/collections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Collections
+         * @description Collections of the team; playlists, presentations and assignments are listed as ones.
+         */
+        get: operations["list_collections_v1_orgs__org_id__teams__team_id__collections_get"];
+        put?: never;
+        /** Create Collection */
+        post: operations["create_collection_v1_orgs__org_id__teams__team_id__collections_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/collections/from-match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Collection From Match
+         * @description 'Fürs Team zusammenstellen': a draft with the scenes behind the three things of a match.
+         */
+        post: operations["collection_from_match_v1_orgs__org_id__teams__team_id__collections_from_match_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
         parameters: {
             query?: never;
@@ -5408,6 +5474,83 @@ export interface components {
             /** Start Ms */
             start_ms: number;
         };
+        /** CollectionCreate */
+        CollectionCreate: {
+            /** Items */
+            items?: components["schemas"]["ItemIn"][];
+            /** Title */
+            title: string;
+        };
+        /** CollectionOut */
+        CollectionOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Draft */
+            draft: boolean;
+            /**
+             * Editable
+             * @description only collections; older objects change where they are
+             */
+            editable: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Items */
+            items: components["schemas"]["ItemOut"][];
+            /** Match Id */
+            match_id: string | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "collection" | "playlist" | "presentation" | "assignment";
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Title */
+            title: string;
+        };
+        /** CollectionPatch */
+        CollectionPatch: {
+            /** Draft */
+            draft?: boolean | null;
+            /** Items */
+            items?: components["schemas"]["ItemIn"][] | null;
+            /** Title */
+            title?: string | null;
+        };
+        /** CollectionSummary */
+        CollectionSummary: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Draft */
+            draft: boolean;
+            /** Entries */
+            entries: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Source
+             * @description collection, or the older object read as one
+             * @enum {string}
+             */
+            source: "collection" | "playlist" | "presentation" | "assignment";
+            /** Title */
+            title: string;
+        };
         /** CommentCreate */
         CommentCreate: {
             /** Body */
@@ -6148,6 +6291,16 @@ export interface components {
             /** Tokens */
             tokens: components["schemas"]["handball_api__schemas__tactics__TokenIn"][];
         };
+        /** FromMatch */
+        FromMatch: {
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Title */
+            title: string;
+        };
         /** GoalCandidateCounts */
         GoalCandidateCounts: {
             /** Confirmed */
@@ -6518,6 +6671,44 @@ export interface components {
             reference: string | null;
             /** Vat Cents */
             vat_cents: number;
+        };
+        /** ItemIn */
+        ItemIn: {
+            /** Clip Id */
+            clip_id?: string | null;
+            /** End Ms */
+            end_ms?: number | null;
+            /** Event Id */
+            event_id?: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "scene" | "play" | "note";
+            /** Match Id */
+            match_id?: string | null;
+            /** Play Id */
+            play_id?: string | null;
+            /** Start Ms */
+            start_ms?: number | null;
+            /** Text */
+            text?: string | null;
+            /** Title */
+            title?: string | null;
+        };
+        /** ItemOut */
+        ItemOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "scene" | "play" | "note";
+            play: components["schemas"]["PlayRef"] | null;
+            /** Position */
+            position: number;
+            scene: components["schemas"]["SceneOut"] | null;
+            /** Text */
+            text: string | null;
         };
         /** JobOut */
         JobOut: {
@@ -8166,6 +8357,16 @@ export interface components {
              */
             updated_at: string;
         };
+        /** PlayRef */
+        PlayRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+        };
         /** PlaySource */
         PlaySource: {
             /**
@@ -8808,6 +9009,25 @@ export interface components {
             /** Name */
             name: string;
             query: components["schemas"]["SearchFilter"];
+        };
+        /** SceneOut */
+        SceneOut: {
+            /**
+             * Clip Id
+             * Format: uuid
+             */
+            clip_id: string;
+            /** End Ms */
+            end_ms: number;
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Start Ms */
+            start_ms: number;
+            /** Title */
+            title: string | null;
         };
         /** ScheduleItem */
         ScheduleItem: {
@@ -12607,6 +12827,104 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_collection_v1_orgs__org_id__collections__collection_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_collection_v1_orgs__org_id__collections__collection_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_collection_v1_orgs__org_id__collections__collection_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollectionPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -17480,6 +17798,110 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_collections_v1_orgs__org_id__teams__team_id__collections_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_collection_v1_orgs__org_id__teams__team_id__collections_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollectionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    collection_from_match_v1_orgs__org_id__teams__team_id__collections_from_match_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromMatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
             };
             /** @description Validation Error */
             422: {

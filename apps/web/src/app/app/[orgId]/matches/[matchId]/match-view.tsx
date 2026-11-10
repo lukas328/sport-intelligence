@@ -24,6 +24,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { Segmented } from "@/components/ui/tabs";
 import type { PlayerHandle } from "@/components/video/player";
+import { FromMatchButton } from "@/components/collections/from-match";
 import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { KeepersView, PhysicalView } from "./m5-views";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -447,6 +448,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "game" && (
         <div className="animate-fade space-y-10">
+          {staff && counted && match.opponent && (
+            <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} />
+          )}
           {stats.data && stats.data.quality.events > 0 ? (
             <div className="space-y-10">
               <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} />

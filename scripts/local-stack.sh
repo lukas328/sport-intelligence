@@ -7,6 +7,7 @@
 #   scripts/local-stack.sh down     # stop the processes started here
 #   scripts/local-stack.sh status
 #   scripts/local-stack.sh restart-web   # after editing apps/web/messages (dev server cache)
+#   scripts/local-stack.sh restart-api   # after backend changes (runs the migrations too)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -34,15 +35,36 @@ export HB_OPERATOR_EMAILS='["@ops-e2e.ch"]'
 export HB_S3_PUBLIC_URL=http://localhost:9000
 export FORWARDED_ALLOW_IPS="*"
 
+# how each service shows up in the process list (uv and pnpm start child processes, so pid files lie)
+pattern() {
+  case "$1" in
+    s3) echo "moto_server -H 127.0.0.1 -p 9000" ;;
+    api) echo "bin/handball-api" ;;
+    worker) echo "bin/handball-worker" ;;
+    gpu-worker) echo "bin/handball-gpu-worker" ;;
+    web) echo "next-server|next dev" ;;
+  esac
+}
+
+running() { pgrep -f "$(pattern "$1")" >/dev/null; }
+
 start() { # name, command...
   local name="$1"
   shift
-  if [[ -f "$RUN/$name.pid" ]] && kill -0 "$(cat "$RUN/$name.pid")" 2>/dev/null; then
+  if running "$name"; then
     echo "$name already running"
     return
   fi
-  (cd "$ROOT" && nohup setsid "$@" </dev/null >"$RUN/$name.log" 2>&1 & echo $! >"$RUN/$name.pid")
+  # no file descriptor of the caller stays open in the service (pipes would never close)
+  (cd "$ROOT" && exec nohup "$@" >"$RUN/$name.log" 2>&1) </dev/null >/dev/null 2>&1 &
   echo "$name started (log $RUN/$name.log)"
+}
+
+stop() {
+  if running "$1"; then
+    pkill -f "$(pattern "$1")" || true
+    echo "$1 stopped"
+  fi
 }
 
 wait_for() { # url, seconds
@@ -83,38 +105,32 @@ SQL
   echo "web http://localhost:3000  api http://localhost:8000  (seed: make seed)"
 }
 
-down() {
-  for name in web gpu-worker worker api s3; do
-    if [[ -f "$RUN/$name.pid" ]]; then
-      # setsid made each process the leader of its own group: stop the whole group (uv, next)
-      kill -- -"$(cat "$RUN/$name.pid")" 2>/dev/null || kill "$(cat "$RUN/$name.pid")" 2>/dev/null || true
-      rm -f "$RUN/$name.pid"
-      echo "$name stopped"
-    fi
-  done
-}
 
 # messages/*.json are cached by the dev server: after editing them, restart it with a clean cache
 restart-web() {
-  if [[ -f "$RUN/web.pid" ]]; then
-    kill -- -"$(cat "$RUN/web.pid")" 2>/dev/null || true
-    rm -f "$RUN/web.pid"
-  fi
-  pkill -f "next dev" 2>/dev/null || true
-  pkill -f next-server 2>/dev/null || true
+  stop web
   sleep 2
   rm -rf "$ROOT/apps/web/.next"
   start web pnpm --filter @handball/web dev
   wait_for http://localhost:3000/api/healthz 180
 }
 
+# after backend changes: migrations, then API and workers with the new code
+restart-api() {
+  stop api
+  stop worker
+  stop gpu-worker
+  sleep 2
+  up
+}
+
+down() {
+  for name in web gpu-worker worker api s3; do stop "$name"; done
+}
+
 status() {
   for name in s3 api worker gpu-worker web; do
-    if [[ -f "$RUN/$name.pid" ]] && kill -0 "$(cat "$RUN/$name.pid")" 2>/dev/null; then
-      echo "$name running"
-    else
-      echo "$name stopped"
-    fi
+    if running "$name"; then echo "$name running"; else echo "$name stopped"; fi
   done
 }
 

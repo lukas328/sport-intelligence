@@ -469,6 +469,12 @@ ENDPOINTS += [
         lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/tag-links"),
     ),
     ("GET share links", VIDEO_WORK, lambda a, w: a.get(w.t("/share-links"))),
+    ("GET collections", VIDEO_WORK, lambda a, w: a.get(w.t("/collections"))),
+    (
+        "POST collection",
+        VIDEO_WORK,
+        lambda a, w: a.post(w.t("/collections"), json={"title": f"S{_seq(w)}"}),
+    ),
     ("GET my assignments", MEMBERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/me/assignments")),
     ("GET notifications", MEMBERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/me/notifications")),
     (

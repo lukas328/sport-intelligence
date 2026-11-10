@@ -2772,5 +2772,22 @@
     "fromMatches": "In {k} von {n} Spielen mit Video",
     "scenes": "{n, plural, one {# Szene} other {# Szenen}}",
     "conceded_position": "{position} bleibt offen: {k} von {n} Gegentoren im letzten Spiel."
+  },
+  "collections": {
+    "title": "Sammlung",
+    "all": "Alle Sammlungen",
+    "entries": "{n, plural, =0 {leer} one {# Eintrag} other {# Einträge}}",
+    "draft": "Entwurf",
+    "source_playlist": "aus einer Playlist",
+    "source_presentation": "zum Zeigen",
+    "source_assignment": "aus einer Aufgabe",
+    "present": "Am Bildschirm zeigen",
+    "edit": "Bearbeiten",
+    "run": "Ablauf",
+    "empty": "Noch keine Einträge.",
+    "scene": "Szene",
+    "to": "bis",
+    "fromMatch": "Fürs Team zusammenstellen",
+    "fromMatchTitle": "Gegen {opponent}"
   }
 }

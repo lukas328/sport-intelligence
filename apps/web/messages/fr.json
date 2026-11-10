@@ -2772,5 +2772,22 @@
     "fromMatches": "Dans {k} des {n} matchs avec vidéo",
     "scenes": "{n, plural, one {# scène} other {# scènes}}",
     "conceded_position": "{position} reste ouvert : {k} des {n} buts encaissés lors du dernier match."
+  },
+  "collections": {
+    "title": "Sélection",
+    "all": "Toutes les sélections",
+    "entries": "{n, plural, =0 {vide} one {# entrée} other {# entrées}}",
+    "draft": "Brouillon",
+    "source_playlist": "d’une playlist",
+    "source_presentation": "à montrer",
+    "source_assignment": "d’une tâche",
+    "present": "Montrer à l’écran",
+    "edit": "Modifier",
+    "run": "Déroulé",
+    "empty": "Pas encore d’entrées.",
+    "scene": "Scène",
+    "to": "à",
+    "fromMatch": "Préparer pour l’équipe",
+    "fromMatchTitle": "Contre {opponent}"
   }
 }
