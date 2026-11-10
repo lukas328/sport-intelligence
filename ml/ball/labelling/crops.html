@@ -29,8 +29,9 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; 
 .bar > i { display: block; height: 100%; width: 0; background: var(--ball); transition: width .3s; }
 .note { font-size: 13px; color: var(--warn); }
 main { max-width: 980px; display: grid; gap: 12px; }
+.crop { max-width: 760px; }
 .crop { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
-.crop img { display: block; width: 100%; height: auto; image-rendering: auto; }
+.crop canvas { display: block; width: 100%; height: auto; }
 /* a ring at the centre of each of the three frames: the detector's peak */
 .crop .ring { position: absolute; top: 50%; width: 12%; aspect-ratio: 1; transform: translate(-50%, -50%);
   border: 2px solid var(--mark); border-radius: 50%; box-shadow: 0 0 0 1px rgba(0,0,0,.6); pointer-events: none; }
@@ -38,7 +39,7 @@ main { max-width: 980px; display: grid; gap: 12px; }
   color: #fff; padding: 2px 6px; border-radius: 3px; }
 .row { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 12px; align-items: start; }
 @media (max-width: 760px) { .row { grid-template-columns: minmax(0, 1fr); } }
-.ctx img { display: block; width: 100%; border-radius: 6px; }
+.ctx canvas { display: block; width: 100%; height: auto; border-radius: 6px; }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
 .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 button { font: 600 15px var(--body); padding: 12px 8px; min-height: 44px; border-radius: 6px; border: 1px solid var(--line);
@@ -68,12 +69,12 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px sol
 
 <main>
   <div class="crop" id="crop">
-    <img id="cimg" alt="Ausschnitt um den Punkt des Erkenners, drei Bilder nacheinander">
+    <canvas id="cimg" width="576" height="192" role="img" aria-label="Ausschnitt um den Punkt des Erkenners, drei Bilder nacheinander"></canvas>
     <span class="ring" style="left:16.67%"></span><span class="ring" style="left:50%"></span><span class="ring" style="left:83.33%"></span>
     <span class="tags">vorher · jetzt · nachher</span>
   </div>
   <div class="row">
-    <div class="ctx"><img id="ximg" alt="Ganze Szene, der Punkt ist gelb eingekreist"></div>
+    <div class="ctx"><canvas id="ximg" width="576" height="324" role="img" aria-label="Ganze Szene, der Punkt ist gelb eingekreist"></canvas></div>
     <div class="panel">
       <div class="meta" id="meta"></div>
       <div class="btns">
@@ -96,12 +97,24 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px sol
 const $ = (id) => document.getElementById(id);
 const state = { items: [], idx: 0, labels: {}, db: null };
 const cache = {};
-function pre(src) { if (!cache[src]) { const i = new Image(); i.src = src; cache[src] = i; } }
+function pre(src) { if (!cache[src]) { const i = new Image(); i.src = src; cache[src] = i; } return cache[src]; }
+// one image per item: the three-frame crop on top (ch px), the scene below (xh px)
+function draw(it) {
+  const im = pre("i/" + it.k + ".jpg");
+  const paint = () => {
+    if (cur() !== it) return;
+    const c = $("cimg"), x = $("ximg");
+    c.width = im.width; c.height = it.ch; x.width = im.width; x.height = it.xh;
+    c.getContext("2d").drawImage(im, 0, 0, im.width, it.ch, 0, 0, im.width, it.ch);
+    x.getContext("2d").drawImage(im, 0, it.ch, im.width, it.xh, 0, 0, im.width, it.xh);
+  };
+  if (im.complete && im.naturalWidth) paint(); else im.onload = paint;
+}
 function cur() { return state.items[state.idx]; }
 
 function render() {
   const it = cur(); if (!it) return;
-  $("cimg").src = "c/" + it.k + ".jpg"; $("ximg").src = "x/" + it.k + ".jpg";
+  draw(it);
   const lab = state.labels[it.id];
   const chip = lab ? `<span class="chip ${lab.state}">${{ ball: "Ball", none: "kein Ball", unsure: "unsicher" }[lab.state]}</span>` : `<span class="chip">offen</span>`;
   $("meta").innerHTML = `<b>${state.idx + 1}</b> / ${state.items.length} · ${chip}`;
@@ -109,7 +122,7 @@ function render() {
   const balls = state.items.filter((x) => state.labels[x.id]?.state === "ball").length;
   $("progress").textContent = `${done} von ${state.items.length} erledigt · ${balls} Bälle`;
   $("barfill").style.width = (done / Math.max(1, state.items.length) * 100) + "%";
-  for (const d of [1, 2, 3]) { const n = state.items[state.idx + d]; if (n) { pre("c/" + n.k + ".jpg"); pre("x/" + n.k + ".jpg"); } }
+  for (const d of [1, 2, 3]) { const n = state.items[state.idx + d]; if (n) pre("i/" + n.k + ".jpg"); }
 }
 function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2000); }
 function go(i) { state.idx = Math.max(0, Math.min(state.items.length - 1, i)); render(); }
