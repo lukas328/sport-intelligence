@@ -55,6 +55,10 @@ describe("navigation model", () => {
     expect(destOf("/app/o/schedule", "player")).toBe("dates");
     expect(destOf("/app/o/feed/x", "player")).toBe("scenes");
     expect(destOf("/app/o/settings", "staff")).toBeNull();
+    expect(destOf("/app/o/me/security", "staff")).toBeNull();
+    expect(destOf("/app/o/club/teams", "staff")).toBeNull();
+    expect(destOf(`${TEAM}/collections`, "staff")).toBe("scenes");
+    expect(destOf("/app/o/matches/x/matchday", "staff")).toBe("matches");
   });
 
   it("finds the tab and the team", () => {
@@ -74,6 +78,7 @@ describe("navigation model", () => {
 
   it("has at most one level of tabs with at most four items", () => {
     expect(sectionsFor("scenes", "staff", "o", T).map((i) => i.key)).toEqual(["scenes", "collections", "plays", "matrix"]);
+    expect(sectionsFor("scenes", "staff", "o", T)[1]?.href).toBe(`${TEAM}/collections`);
     // a single tab is no tab
     for (const d of ["matches", "season", "team"] as const) expect(sectionsFor(d, "staff", "o", T)).toEqual([]);
     expect(sectionsFor("team", "player", "o", T).map((i) => i.key)).toEqual(["roster", "season"]);

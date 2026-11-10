@@ -23,7 +23,7 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   });
 
   // coach invites a parent for Noah
-  await page.goto(`/app/${orgId}/settings`);
+  await page.goto(`/app/${orgId}/club/teams`);
   const parentEmail = uniqueEmail("parent");
   const invite = page.getByRole("form", { name: "Person einladen" });
   await invite.getByLabel("E-Mail").fill(parentEmail);

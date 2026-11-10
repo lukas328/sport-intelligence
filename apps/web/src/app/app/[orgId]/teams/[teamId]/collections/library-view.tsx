@@ -21,7 +21,7 @@ export function LibraryView({ base, orgBase, playlists, presentations }: { base:
   return (
     <div className="space-y-12">
       {/* the way into every scene of the season: a plain row, not a black banner */}
-      <Link href={`${base}/search`} className="group flex items-center gap-4 border-y-2 border-foreground py-4">
+      <Link href={`${base}/scenes`} className="group flex items-center gap-4 border-y-2 border-foreground py-4">
         <ScanSearch aria-hidden className="size-5 shrink-0" />
         <span className="min-w-0 flex-1">
           <span className="block text-lg font-bold group-hover:underline group-hover:underline-offset-4">{t("search")}</span>

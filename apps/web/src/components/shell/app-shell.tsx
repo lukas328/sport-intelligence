@@ -82,7 +82,7 @@ export function AppShell({
   }, []);
 
   // courtside and presentation tools use the whole screen, with one way back
-  const tool = /\/(present|remote|live|marks)$/.test(path);
+  const tool = /\/(present|remote|live|marks|matchday)$/.test(path);
   if (tool) {
     const back = path.replace(/\/[^/]+$/, "");
     return (

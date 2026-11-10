@@ -64,8 +64,8 @@ export function AreaSubNav() {
 
 /** Leaf pages one level below a section item, with a way back to it. */
 const LEAF: Record<string, { parent: Section; title: string; href?: string }> = {
-  playlists: { parent: "collections", title: "library.playlists", href: "library" },
-  presentations: { parent: "collections", title: "library.presentations", href: "library" },
+  playlists: { parent: "collections", title: "library.playlists", href: "collections" },
+  presentations: { parent: "collections", title: "library.presentations", href: "collections" },
   assistant: { parent: "scenes", title: "palette.ask" },
   paper: { parent: "fixtures", title: "paper.photoTitle", href: "matches" },
 };

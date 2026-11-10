@@ -168,7 +168,7 @@ export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: strin
   if (dest === "scenes" && staff && team) {
     return [
       { key: "scenes", href: `${team}/scenes` },
-      { key: "collections", href: `${team}/library` },
+      { key: "collections", href: `${team}/collections` },
       { key: "plays", href: `${team}/plays` },
       { key: "matrix", href: `${team}/matrix` },
     ];

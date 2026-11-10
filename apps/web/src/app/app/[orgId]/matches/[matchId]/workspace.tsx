@@ -380,6 +380,21 @@ export function Workspace({
   const shown: Pane = reviewing ? reviewKind : chosen;
   const openNow = candidates.data?.counts.open_by_rate[String(rate)] ?? 0;
   const shotsOpen = shotCandidates.data?.counts.open_by_rate[String(shotCandidates.data.default_rate)] ?? 0;
+  // Prüfen (/matches/[m]/check) opens the full-screen review at once: goals first, then shots
+  const checkOpened = useRef(false);
+  useEffect(() => {
+    if (checkOpened.current || !staff || !candidates.data || !shotCandidates.data) return;
+    if (new URLSearchParams(window.location.search).get("check") !== "1") return;
+    checkOpened.current = true;
+    if (openNow > 0) {
+      setGoalList("candidates");
+      setReviewKind("goals");
+      setReviewing(true);
+    } else if (shotsOpen > 0) {
+      setReviewKind("shots");
+      setReviewing(true);
+    }
+  }, [staff, candidates.data, shotCandidates.data, openNow, shotsOpen]);
   return (
     <div
       className={cn("space-y-5", reviewing && "fixed inset-0 z-[60] !m-0 h-dvh overflow-y-auto bg-background p-4 sm:p-6 lg:px-10")}

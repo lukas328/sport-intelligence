@@ -64,7 +64,7 @@ export async function openMatches(page: Page, section?: "Spielplan" | "Saison" |
 export async function openScenes(page: Page, tab?: "Szenen" | "Sammlungen" | "Spielzüge" | "Tabelle") {
   await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
   if (!tab || tab === "Szenen") return;
-  const path = { Sammlungen: "library", Spielzüge: "plays", Tabelle: "matrix" }[tab];
+  const path = { Sammlungen: "collections", Spielzüge: "plays", Tabelle: "matrix" }[tab];
   await follow(page, page.getByRole("link", { name: tab, exact: true }).first(), new RegExp(`/${path}$`));
 }
 
@@ -90,10 +90,12 @@ export async function openTraining(page: Page) {
   await page.waitForURL(/\/training$/);
 }
 
-/** Match page: analysis view and one of its sections. */
+/** Match page: one level of tabs, Spiel · Video · Zahlen (SPEC 7.2 to 7.4). "Übersicht" is on
+ * Spiel; the figure sheets are stacked on Zahlen, each under its heading. */
 export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Matchbericht") {
-  await page.getByRole("tab", { name: "Analyse", exact: true }).click();
-  await page.getByRole("tab", { name: section, exact: true }).click();
+  if (section === "Übersicht") return page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
+  await page.getByRole("heading", { name: section, exact: true }).scrollIntoViewIfNeeded();
 }
 
 /** Match page: an entry of the "Mehr" menu. */

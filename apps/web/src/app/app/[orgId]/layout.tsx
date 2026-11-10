@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
@@ -20,7 +21,19 @@ export default async function OrgLayout({ children, params }: { children: ReactN
   if (!org || !me) notFound();
   const savedTeam = (await cookies()).get("hb_team")?.value ?? null;
   // only while the admin has not set it up yet
-  const banner = org.two_factor_required && !me.totp_enabled ? <TwoFactorBanner orgId={org.id} /> : null;
+  // a club taken over from the official data and not confirmed yet: one quiet line for its admins
+  const unverified = org.my_role === "org_admin" && org.verification === "unverified";
+  const banner =
+    org.two_factor_required && !me.totp_enabled ? (
+      <TwoFactorBanner orgId={org.id} />
+    ) : unverified ? (
+      <p className="px-4 py-2 text-sm text-muted shadow-[inset_0_-1px_0_var(--border)] sm:px-6 lg:px-10" data-testid="unverified-line">
+        {t("verification.line")}{" "}
+        <Link href={`/app/${org.id}/club/federation`} className="font-medium text-foreground underline underline-offset-4">
+          {t("verification.lineLink")}
+        </Link>
+      </p>
+    ) : null;
   return (
     <div className="club min-h-dvh" style={clubStyle(org.primary_color) as CSSProperties}>
       <AppShell

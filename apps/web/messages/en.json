@@ -348,7 +348,15 @@
     "recoveryNew": "New recovery codes",
     "twoFactorAdmins": "For club admins it is required after 14 days.",
     "teamFeatures": "Team features",
-    "teamFeaturesHint": "Training, dates, RSVP, tasks and own areas for players and parents. Switched off, everything stays stored and comes back when you switch it on."
+    "teamFeaturesHint": "Training, dates, RSVP, tasks and own areas for players and parents. Switched off, everything stays stored and comes back when you switch it on.",
+    "me": "Me",
+    "tab_profile": "Profile",
+    "tab_security": "Security",
+    "tab_data": "My data",
+    "tab_club": "Club",
+    "tab_teams": "Teams and roles",
+    "tab_billing": "Plan and invoices",
+    "tab_federation": "Federation"
   },
   "dashboard": {
     "teamsTitle": "Teams",
@@ -461,7 +469,9 @@
     "attendance": "Replies",
     "attendanceHint": "Who comes, who is missing",
     "uploadFor": "Which match is the video from?",
-    "uploadOther": "Or create a new match"
+    "uploadOther": "Or create a new match",
+    "addReport": "Add match report",
+    "reportFile": "Or as a file:"
   },
   "upload": {
     "title": "Upload video",
@@ -693,7 +703,9 @@
     "physical": "Physical",
     "scenes": "Scenes",
     "highlights": "Highlights",
-    "analysis": "Analysis"
+    "analysis": "Analysis",
+    "game": "Match",
+    "numbers": "Numbers"
   },
   "stats": {
     "goals": "Goals",
@@ -2313,7 +2325,9 @@
     "upload": "Upload video",
     "collections": "Collections",
     "matrix": "Table",
-    "scenesSections": "Scene sections"
+    "scenesSections": "Scene sections",
+    "me": "Me",
+    "club": "Club"
   },
   "palette": {
     "newMatch": "Add a match",

@@ -14,7 +14,7 @@ const RULES: [RegExp, string][] = [
   [/\/matches\/[^/]+$/, "analyse-lesen"],
   [/\/matches$/, "video-hochladen"],
   [/\/plays/, "taktiktafel"],
-  [/\/settings/, "rollen-und-rechte"],
+  [/\/(settings|club)/, "rollen-und-rechte"],
   [/\/teams\/[^/]+$/, "kader"],
 ];
 

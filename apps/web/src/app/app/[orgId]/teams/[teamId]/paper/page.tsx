@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { PaperView } from "./paper-view";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("paper"))("photoTitle") };
-}
-
+/** Old address of the match report photo: now the dialog "Spielbericht hinzufügen" on Spiele. */
 export default async function PaperPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
   const { orgId, teamId } = await params;
-  return <PaperView orgId={orgId} teamId={teamId} />;
+  redirect(`/app/${orgId}/teams/${teamId}/matches?report=1`);
 }

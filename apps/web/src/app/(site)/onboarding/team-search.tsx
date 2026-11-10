@@ -114,7 +114,7 @@ export function OfficialTeamSearch({
         {(p?.matches_held_back ?? 0) > 0 && org && (
           <p className="text-sm text-muted">
             {t("heldBack", { n: p?.matches_held_back ?? 0 })}{" "}
-            <Link className="font-medium text-foreground underline underline-offset-4" href={`/app/${org}/settings#billing`}>
+            <Link className="font-medium text-foreground underline underline-offset-4" href={`/app/${org}/club/billing`}>
               {t("upgrade")}
             </Link>
           </p>

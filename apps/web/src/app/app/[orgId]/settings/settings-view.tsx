@@ -1,95 +1,26 @@
 "use client";
 
-import { BillingSection } from "@/components/billing/billing-section";
-import { PrivacySection } from "@/components/privacy/privacy-section";
+// Sections of "Ich" and "Verein" (me/, club/); the single settings page they came from redirects.
+
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { useEffect, useState, type FormEvent } from "react";
-import { AccountSection } from "@/components/account-section";
-import { AccessRequests, Verification } from "@/components/official/requests";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
 import { Alert, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
-import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { FileField } from "@/components/ui/file-field";
-import { TeamFeaturesSection } from "@/components/settings/team-features";
 
 type Org = Schemas["OrgOut"];
 type Team = Schemas["TeamOut"];
 type Me = Schemas["MeOut"];
 
-export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: Me }) {
-  const t = useTranslations();
-  const isAdmin = org.my_role === "org_admin";
-  // a club taken over from the official data: its verification and access requests
-  const official = org.official_club_id != null;
-  const inviteTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach").map((tm) => ({ id: tm.id, name: tm.name }));
-  const people = isAdmin || inviteTeams.length > 0;
-  // who may change a team's settings: admins and its coaches (policy TEAM_UPDATE)
-  const featureTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach");
-  const sections: [string, string][] = [
-    ...(isAdmin ? ([["club-section", t("settings.club")], ["billing", t("billing.title")]] as [string, string][]) : []),
-    ...(people ? ([["people-section", t("settings.people")]] as [string, string][]) : []),
-    ...(featureTeams.length > 0 ? ([["team-features", t("settings.teamFeatures")]] as [string, string][]) : []),
-    ...(isAdmin && official ? ([["official-section", t("verification.section")]] as [string, string][]) : []),
-    ["account-section", t("account.title")],
-    ["security", t("settings.security")],
-    ["privacy", t("privacy.title")],
-  ];
-  return (
-    <div className="space-y-8">
-      <PageHeader title={t("settings.title")} />
-      <div className="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-10">
-        {/* jump links, not tabs: on phones they wrap instead of being cut at the edge */}
-        <nav aria-label={t("settings.title")} className="mb-6 border-b border-foreground/15 pb-3 lg:sticky lg:top-10 lg:mb-0 lg:self-start lg:border-0 lg:pb-0">
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1">
-            {sections.map(([id, label]) => (
-              <li key={id}>
-                <a href={`#${id}`} className="block min-h-8 whitespace-nowrap py-1.5 text-sm font-medium text-muted underline-offset-4 hover:text-foreground hover:underline lg:rounded-md lg:px-3.5 lg:hover:bg-surface lg:hover:no-underline">
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="min-w-0 space-y-12 [&>*]:scroll-mt-24">
-          {isAdmin && <div id="club-section"><ClubSection org={org} /></div>}
-          {isAdmin && <BillingSection orgId={org.id} />}
-          {people && (
-            <div id="people-section">
-              <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
-            </div>
-          )}
-          <TeamFeaturesSection orgId={org.id} teams={featureTeams} />
-          {isAdmin && official && (
-            <section id="official-section" aria-labelledby="official-title" className="space-y-3">
-              <h2 id="official-title" className="text-lg font-semibold">
-                {t("verification.section")}
-              </h2>
-              <div className="space-y-8 border-t border-foreground/15 pt-5">
-                <Verification orgId={org.id} />
-                <AccessRequests orgId={org.id} teams={teams.map((x) => ({ id: x.id, name: x.name }))} />
-              </div>
-            </section>
-          )}
-          <div id="account-section">
-            <AccountSection me={me} />
-          </div>
-          <SecuritySection me={me} isAdmin={isAdmin} />
-          <PrivacySection orgId={org.id} orgName={org.name} isAdmin={isAdmin} hasPassword={me.has_password ?? true} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ClubSection({ org }: { org: Org }) {
+export function ClubSection({ org }: { org: Org }) {
   const t = useTranslations();
   const router = useRouter();
   const [error, setError] = useState<ErrorKey | null>(null);
@@ -153,7 +84,7 @@ function ClubSection({ org }: { org: Org }) {
   );
 }
 
-function PeopleSection({
+export function PeopleSection({
   orgId,
   isAdmin,
   teams,
@@ -293,7 +224,7 @@ function PeopleSection({
   );
 }
 
-function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
+export function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const [setup, setSetup] = useState<Schemas["TotpSetupOut"] | null>(null);

@@ -348,7 +348,15 @@
     "recoveryNew": "Nouveaux codes de récupération",
     "twoFactorAdmins": "Pour les admins du club, elle est obligatoire après 14 jours.",
     "teamFeatures": "Fonctions d'équipe",
-    "teamFeaturesHint": "Entraînement, dates, réponses, tâches et espaces pour joueuses, joueurs et parents. Désactivé, tout reste enregistré et revient à la réactivation."
+    "teamFeaturesHint": "Entraînement, dates, réponses, tâches et espaces pour joueuses, joueurs et parents. Désactivé, tout reste enregistré et revient à la réactivation.",
+    "me": "Moi",
+    "tab_profile": "Profil",
+    "tab_security": "Sécurité",
+    "tab_data": "Mes données",
+    "tab_club": "Club",
+    "tab_teams": "Équipes et rôles",
+    "tab_billing": "Abonnement et factures",
+    "tab_federation": "Fédération"
   },
   "dashboard": {
     "teamsTitle": "Équipes",
@@ -461,7 +469,9 @@
     "attendance": "Réponses",
     "attendanceHint": "Qui vient, qui manque",
     "uploadFor": "De quel match vient la vidéo ?",
-    "uploadOther": "Ou créer un nouveau match"
+    "uploadOther": "Ou créer un nouveau match",
+    "addReport": "Ajouter la feuille de match",
+    "reportFile": "Ou comme fichier :"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -693,7 +703,9 @@
     "physical": "Physique",
     "scenes": "Scènes",
     "highlights": "Highlights",
-    "analysis": "Analyse"
+    "analysis": "Analyse",
+    "game": "Match",
+    "numbers": "Chiffres"
   },
   "stats": {
     "goals": "Buts",
@@ -2313,7 +2325,9 @@
     "upload": "Téléverser une vidéo",
     "collections": "Sélections",
     "matrix": "Tableau",
-    "scenesSections": "Rubriques des scènes"
+    "scenesSections": "Rubriques des scènes",
+    "me": "Moi",
+    "club": "Club"
   },
   "palette": {
     "newMatch": "Ajouter un match",

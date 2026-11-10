@@ -126,10 +126,11 @@ test("screens", async ({ page, browser }, info) => {
   const upcoming = matches.find((m) => m.score_own == null && !m.has_video && Date.parse(m.kickoff_at) > Date.now()) ?? matches[0]!;
   const plays = await (await page.request.get(`/v1/orgs/${org}/teams/${team.id}/plays`)).json();
 
+  // staff start on Spiele (SPEC section 6): /app/<org> redirects there
   await go(page, `/app/${org}`);
-  await snap(page, T, "uebersicht");
-  await go(page, `${base}/matches`);
-  await snap(page, T, "spielplan");
+  await snap(page, T, "spiele");
+  await go(page, `${base}/matches?upload=1`);
+  await snap(page, T, "video-hochladen");
   await go(page, `${base}/matches?new=1`);
   await snap(page, T, "neues-spiel");
   await go(page, `/app/${org}/matches/${upcoming.id}`);
@@ -162,27 +163,22 @@ test("screens", async ({ page, browser }, info) => {
     await snap(page, T, "spiel-wuerfe-vollbild");
     await page.keyboard.press("Escape");
   }
-  await page.getByRole("tab", { name: "Analyse", exact: true }).click();
-  for (const sub of ["Übersicht", "Matchbericht", "Würfe", "Torhüter", "Laufleistung"]) {
-    const tab = page.getByRole("tab", { name: sub, exact: true });
-    if (!(await tab.isVisible().catch(() => false))) continue;
-    await snap(page, T, `spiel-analyse-${sub.toLowerCase().replace("ü", "ue")}`, async () => {
-      await page.getByRole("tab", { name: "Analyse", exact: true }).click();
-      await page.getByRole("tab", { name: sub, exact: true }).click();
-    });
-  }
-  await snap(page, T, "spiel-szenen", async () => {
-    await page.getByRole("tab", { name: "Szenen", exact: true }).click();
+  // one level of tabs: Spiel · Video · Zahlen
+  await snap(page, T, "spiel-spiel", async () => {
+    await page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  });
+  await snap(page, T, "spiel-zahlen", async () => {
+    await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
   });
   await page.unroute("**/v1/orgs/*/matches/*/shot-candidates");
-  await go(page, `/app/${org}/matches/${upcoming.id}/live`);
-  await snap(page, T, "spiel-live-erfassen");
-  await go(page, `/app/${org}/matches/${upcoming.id}/marks`);
-  await snap(page, T, "spiel-am-spielfeldrand-markieren");
+  await go(page, `/app/${org}/matches/${upcoming.id}/matchday`);
+  await snap(page, T, "spieltag");
+  await go(page, `/app/${org}/matches/${upcoming.id}/matchday?mode=marks`);
+  await snap(page, T, "spieltag-markieren");
   await go(page, `/app/${org}/matches/${upcoming.id}/scouting`);
   await snap(page, T, "spiel-scouting");
-  await go(page, `${base}/paper`);
-  await snap(page, T, "matchblatt-foto");
+  await go(page, `${base}/matches?report=1`);
+  await snap(page, T, "spielbericht-hinzufuegen");
   const opponent = matches.find((m) => m.opponent?.id)?.opponent?.id;
   if (opponent) {
     await go(page, `/app/${org}/opponents/${opponent}`);
@@ -194,8 +190,10 @@ test("screens", async ({ page, browser }, info) => {
   await snap(page, T, "statistik-matrix");
   await go(page, `${base}/assistant`);
   await snap(page, T, "assistent");
-  await go(page, `${base}/library`);
-  await snap(page, T, "bibliothek");
+  await go(page, `${base}/scenes`);
+  await snap(page, T, "szenen");
+  await go(page, `${base}/collections`);
+  await snap(page, T, "sammlungen");
   await go(page, `${base}/playlists`);
   await snap(page, T, "playlists");
   if (playlists[0]) {
@@ -208,8 +206,6 @@ test("screens", async ({ page, browser }, info) => {
     await go(page, `/app/${org}/presentations/${pres[0].id}`);
     await snap(page, T, "praesentation-bearbeiten");
   }
-  await go(page, `${base}/search`);
-  await snap(page, T, "szenensuche");
   await go(page, `${base}/training`);
   await snap(page, T, "training-plan");
   await go(page, `/app/${org}/drills`);
@@ -242,11 +238,18 @@ test("screens", async ({ page, browser }, info) => {
   );
   await go(page, `${base}/join-requests`);
   await snap(page, T, "team-beitrittsanfragen");
-  await go(page, `/app/${org}/settings`);
-  await snap(page, T, "einstellungen");
-  await go(page, `/app/${org}/profile`);
-  await snap(page, T, "profil");
-  await go(page, `/app/${org}`);
+  for (const [path, name] of [
+    ["me", "ich-profil"],
+    ["me/security", "ich-sicherheit"],
+    ["me/data", "ich-daten"],
+    ["club", "verein"],
+    ["club/teams", "verein-teams"],
+    ["club/billing", "verein-abo"],
+  ] as const) {
+    await go(page, `/app/${org}/${path}`);
+    await snap(page, T, name);
+  }
+  await go(page, `${base}/matches`);
   await snap(page, T, "mitteilungen", async () => {
     await page.keyboard.press("Escape");
     await page.getByTestId("bell").filter({ visible: true }).first().click({ timeout: 5000 });
@@ -292,8 +295,8 @@ test("screens", async ({ page, browser }, info) => {
     await snap(p, S, "spiel");
     await go(p, `/app/${org}/teams/${team.id}/players/${free[0].player_id}`);
     await snap(p, S, "mein-saisonverlauf");
-    await go(p, `/app/${org}/profile`);
-    await snap(p, S, "profil");
+    await go(p, `/app/${org}/me`);
+    await snap(p, S, "ich");
     await go(p, `/app/${org}/consents`);
     await snap(p, S, "einwilligungen");
     await ctx.close();

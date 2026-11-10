@@ -348,7 +348,15 @@
     "recoveryNew": "Neue Wiederherstellungscodes",
     "twoFactorAdmins": "Für Vereinsadmins ist sie nach 14 Tagen Pflicht.",
     "teamFeatures": "Teamfunktionen",
-    "teamFeaturesHint": "Training, Termine, Zusagen, Aufgaben und eigene Bereiche für Spielerinnen, Spieler und Eltern. Ausgeschaltet bleibt alles gespeichert und kommt beim Einschalten zurück."
+    "teamFeaturesHint": "Training, Termine, Zusagen, Aufgaben und eigene Bereiche für Spielerinnen, Spieler und Eltern. Ausgeschaltet bleibt alles gespeichert und kommt beim Einschalten zurück.",
+    "me": "Ich",
+    "tab_profile": "Profil",
+    "tab_security": "Sicherheit",
+    "tab_data": "Meine Daten",
+    "tab_club": "Verein",
+    "tab_teams": "Teams und Rollen",
+    "tab_billing": "Abo und Rechnungen",
+    "tab_federation": "Verband"
   },
   "dashboard": {
     "teamsTitle": "Teams",
@@ -461,7 +469,9 @@
     "attendance": "Zusagen",
     "attendanceHint": "Wer kommt, wer fehlt",
     "uploadFor": "Zu welchem Spiel gehört das Video?",
-    "uploadOther": "Oder ein neues Spiel anlegen"
+    "uploadOther": "Oder ein neues Spiel anlegen",
+    "addReport": "Spielbericht hinzufügen",
+    "reportFile": "Oder als Datei:"
   },
   "upload": {
     "title": "Video hochladen",
@@ -693,7 +703,9 @@
     "physical": "Laufleistung",
     "scenes": "Szenen",
     "highlights": "Highlights",
-    "analysis": "Analyse"
+    "analysis": "Analyse",
+    "game": "Spiel",
+    "numbers": "Zahlen"
   },
   "stats": {
     "goals": "Tore",
@@ -2313,7 +2325,9 @@
     "upload": "Video hochladen",
     "collections": "Sammlungen",
     "matrix": "Tabelle",
-    "scenesSections": "Bereiche der Szenen"
+    "scenesSections": "Bereiche der Szenen",
+    "me": "Ich",
+    "club": "Verein"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",

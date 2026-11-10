@@ -342,7 +342,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
                   </span>
                   {s.blocked === "plan_limit" ? (
                     // the plan holds no more games this season: an upgrade, not a dead button
-                    <Link className={buttonClass("secondary", "sm")} href={`/app/${orgId}/settings#billing`}>
+                    <Link className={buttonClass("secondary", "sm")} href={`/app/${orgId}/club/billing`}>
                       <Lock aria-hidden />
                       {t("upgrade")}
                     </Link>

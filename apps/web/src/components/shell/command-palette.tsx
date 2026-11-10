@@ -95,11 +95,12 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   const Icon = DEST_ICON[it.key];
                   return row(it.key, t(`shell.${it.key}`), <Icon />, it.href);
                 })}
-                {teamBase && staff && row("collections", t("shell.collections"), <BookOpen />, `${teamBase}/library`, ["playlists", "präsentationen", "presentations", "sammlung"])}
+                {teamBase && staff && row("collections", t("shell.collections"), <BookOpen />, `${teamBase}/collections`, ["playlists", "präsentationen", "presentations", "sammlung"])}
                 {teamBase && staff && row("plays", t("shell.plays"), <BookOpen />, `${teamBase}/plays`, ["spielzüge", "taktik", "tactics"])}
                 {teamBase && staff && row("matrix", t("palette.matrix"), <Grid3x3 />, `${teamBase}/matrix`)}
-                {row("profile", t("shell.profile"), <UserRound />, `${base}/profile`)}
-                {row("settings", t("shell.settings"), <Settings />, `${base}/settings`)}
+                {row("me", t("shell.me"), <UserRound />, `${base}/me`, ["profil", "profile", "passwort", "password"])}
+                {(org.my_role === "org_admin" || teams.some((x) => x.my_role === "coach")) &&
+                  row("club", t("shell.club"), <Settings />, `${base}/club`, ["einstellungen", "settings", "teamfunktionen"])}
               </Command.Group>
               {staff && teamBase && (
                 <Command.Group heading={t("palette.actions")} className={group}>
@@ -107,7 +108,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   {row("new-match", t("palette.newMatch"), <Plus />, `${teamBase}/matches?new=1`)}
                   {row("ask", t("palette.ask"), <MessageCircleQuestion />, `${teamBase}/assistant`)}
                   {row("search", t("palette.searchScenes"), <ScanSearch />, `${teamBase}/scenes`)}
-                  {row("paper", t("palette.paper"), <Camera />, `${teamBase}/paper`)}
+                  {row("paper", t("palette.paper"), <Camera />, `${teamBase}/matches?report=1`)}
                 </Command.Group>
               )}
               {(matches.data ?? []).length > 0 && (

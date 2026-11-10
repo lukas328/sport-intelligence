@@ -100,11 +100,15 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
 
   // settings: pending invitations are empty now, members list shows the player
   await page.getByTestId("account-menu").filter({ visible: true }).click();
-  await page.getByRole("menuitem", { name: "Einstellungen" }).click();
+  await page.getByRole("menuitem", { name: "Verein" }).click();
+  await page.getByRole("link", { name: "Teams und Rollen", exact: true }).click();
   await expect(page.getByText("Paul Spieler")).toBeVisible();
   await expectAccessible(page);
 
-  // enable two-factor sign-in, sign out, sign in with code
+  // enable two-factor sign-in ("Ich", tab Sicherheit), sign out, sign in with code
+  await page.getByTestId("account-menu").filter({ visible: true }).click();
+  await page.getByRole("menuitem", { name: "Ich" }).click();
+  await page.getByRole("link", { name: "Sicherheit", exact: true }).click();
   await page.getByRole("button", { name: "Einrichten" }).click();
   const secret = (await page.getByTestId("totp-secret").textContent())!.trim();
   const totp = new TOTP({ secret: Secret.fromBase32(secret) });
@@ -122,7 +126,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expect(page.getByRole("heading", { name: "Zwei-Faktor-Code" })).toBeVisible();
   await page.getByLabel("Code").fill(totp.generate());
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("main")).toContainText("Sandra");
+  // staff start on Spiele (SPEC section 6)
+  await page.waitForURL(/\/teams\/[^/]+\/matches$/);
 
   // lost phone: a recovery code works once
   await page.getByTestId("account-menu").filter({ visible: true }).click();
@@ -132,7 +137,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await page.getByLabel("Code").fill(recovery);
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("main")).toContainText("Sandra");
+  // staff start on Spiele (SPEC section 6)
+  await page.waitForURL(/\/teams\/[^/]+\/matches$/);
 });
 
 test("magic link sign-in", async ({ page }, info) => {

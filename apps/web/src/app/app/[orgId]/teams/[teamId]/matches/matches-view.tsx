@@ -14,6 +14,7 @@ import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { NewMatchForm } from "./new-match-form";
 import { PaperImport } from "./paper-import";
+import { PaperView } from "../paper/paper-view";
 
 type Match = Schemas["MatchSummary"];
 
@@ -25,6 +26,9 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   // "Video hochladen" from the frame: pick the match the video belongs to, or create it
   const [upload, setUpload] = useState(params.get("upload") === "1");
   useEffect(() => setUpload(params.get("upload") === "1"), [params]);
+  // "Spielbericht hinzufügen": photo, file or link, one dialog (SPEC section 6)
+  const [report, setReport] = useState(params.get("report") === "1");
+  useEffect(() => setReport(params.get("report") === "1"), [params]);
   // kept here: the import refreshes the list, which swaps the layout below
   const [warnings, setWarnings] = useState<string[]>([]);
   const notice = warnings.length > 0 && (
@@ -44,11 +48,10 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   const played = matches.filter((m) => !upcoming.includes(m)).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at));
   const extra = canWrite && (
     <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
-      <Link href={`/app/${orgId}/teams/${teamId}/paper`} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-accent">
+      <Link href={`/app/${orgId}/teams/${teamId}/matches?report=1`} onClick={() => setReport(true)} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-accent" data-testid="add-report">
         <Camera aria-hidden className="size-4" />
-        {t("matches.photoSheet")}
+        {t("matches.addReport")}
       </Link>
-      <PaperImport orgId={orgId} teamId={teamId} onWarnings={setWarnings} />
     </p>
   );
 
@@ -58,6 +61,25 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
         <PageHeader title={t("matches.title")} />
         {notice}
         {canWrite && (
+        <Dialog
+          open={report}
+          onOpenChange={(o) => {
+            setReport(o);
+            if (!o && params.get("report")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          title={t("matches.addReport")}
+          wide
+        >
+          <div className="space-y-8" data-testid="report-dialog">
+            <PaperView orgId={orgId} teamId={teamId} />
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
+              {t("matches.reportFile")}
+              <PaperImport orgId={orgId} teamId={teamId} onWarnings={setWarnings} />
+            </p>
+          </div>
+        </Dialog>
+      )}
+      {canWrite && (
         <UploadPicker
           open={upload}
           onOpenChange={(o) => {
@@ -118,6 +140,25 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
       />
       {canWrite && <div className="-mt-6">{extra}</div>}
       {notice}
+      {canWrite && (
+        <Dialog
+          open={report}
+          onOpenChange={(o) => {
+            setReport(o);
+            if (!o && params.get("report")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          title={t("matches.addReport")}
+          wide
+        >
+          <div className="space-y-8" data-testid="report-dialog">
+            <PaperView orgId={orgId} teamId={teamId} />
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
+              {t("matches.reportFile")}
+              <PaperImport orgId={orgId} teamId={teamId} onWarnings={setWarnings} />
+            </p>
+          </div>
+        </Dialog>
+      )}
       {canWrite && (
         <UploadPicker
           open={upload}

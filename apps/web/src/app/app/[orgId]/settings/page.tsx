@@ -1,22 +1,10 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { serverApi } from "@/lib/api";
-import { SettingsView } from "./settings-view";
+import { redirect } from "next/navigation";
+import { settingsTarget } from "@/lib/settings-model";
+import { loadSettings } from "./load";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("settings"))("title") };
-}
-
-export default async function SettingsPage({ params }: { params: Promise<{ orgId: string }> }) {
+/** Old single settings page: split into "Ich" and "Verein" (SPEC section 6). */
+export default async function SettingsPage({ params, searchParams }: { params: Promise<{ orgId: string }>; searchParams: Promise<{ section?: string }> }) {
   const { orgId } = await params;
-  const client = await serverApi();
-  const path = { params: { path: { org_id: orgId } } };
-  const [org, teams, me] = await Promise.all([
-    client.GET("/v1/orgs/{org_id}", path),
-    client.GET("/v1/orgs/{org_id}/teams", path),
-    client.GET("/v1/me"),
-  ]);
-  if (!org.data || !me.data) notFound();
-  return <SettingsView org={org.data} teams={teams.data ?? []} me={me.data} />;
+  const { isAdmin } = await loadSettings(orgId);
+  redirect(settingsTarget(orgId, isAdmin, (await searchParams).section));
 }

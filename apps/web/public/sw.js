@@ -39,7 +39,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(fetch(req).catch(() => caches.match(req, { ignoreSearch: false }).then((hit) => hit || Response.error())));
     return;
   }
-  if (req.mode === "navigate" && /\/matches\/[^/]+\/live$/.test(url.pathname)) {
+  // Spieltag (and its old address /live) works offline
+  if (req.mode === "navigate" && /\/matches\/[^/]+\/(live|matchday)$/.test(url.pathname)) {
     event.respondWith(
       fetch(req)
         .then((res) => {

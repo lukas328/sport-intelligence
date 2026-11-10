@@ -147,7 +147,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expectAccessible(page);
 
   // the invitation offers the free squad entry for a player
-  await page.goto(`/app/${orgId}/settings`);
+  await page.goto(`/app/${orgId}/club/teams`);
   const invite = page.getByRole("form", { name: "Person einladen" });
   await expect(invite.getByLabel("Im Kader").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
 

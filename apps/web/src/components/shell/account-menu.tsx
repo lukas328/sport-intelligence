@@ -37,7 +37,10 @@ export function initials(name: string): string {
 export function AccountMenu({ compact }: { compact?: boolean }) {
   const t = useTranslations("shell");
   const tc = useTranslations("common");
-  const { org, me } = useShell();
+  const { org, me, team, teams } = useShell();
+  // "Verein" for admins and coaches (lib/settings-model.ts); own consents with "Teamfunktionen"
+  const club = org.my_role === "org_admin" || teams.some((x) => x.my_role === "coach");
+  const consents = team?.team_features ?? false;
   const router = useRouter();
   const locale = useLocale();
   const path = usePathname();
@@ -73,15 +76,19 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
           )}
         </MenuTrigger>
         <MenuContent align={compact ? "end" : "start"} side={compact ? "bottom" : "top"} className="w-64">
-          <MenuItem href={`${base}/profile`} icon={<UserRound />}>
-            {t("profile")}
+          <MenuItem href={`${base}/me`} icon={<UserRound />} testId="menu-me">
+            {t("me")}
           </MenuItem>
-          <MenuItem href={`${base}/consents`} icon={<ShieldCheck />}>
-            {t("consents")}
-          </MenuItem>
-          <MenuItem href={`${base}/settings`} icon={<Settings />} testId="menu-settings">
-            {t("settings")}
-          </MenuItem>
+          {club && (
+            <MenuItem href={`${base}/club`} icon={<Settings />} testId="menu-settings">
+              {t("club")}
+            </MenuItem>
+          )}
+          {consents && (
+            <MenuItem href={`${base}/consents`} icon={<ShieldCheck />}>
+              {t("consents")}
+            </MenuItem>
+          )}
           <MenuSeparator />
           <MenuLabel>{t("appearance")}</MenuLabel>
           {themes.map(([k, Icon]) => (

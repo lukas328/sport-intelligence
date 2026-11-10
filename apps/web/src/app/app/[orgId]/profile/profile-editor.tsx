@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, EmptyState } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 
@@ -139,17 +139,17 @@ export function ProfileEditor({ orgId }: { orgId: string }) {
     queryKey: ["my-profiles", orgId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/me/profiles", { params: { path: { org_id: orgId } } })).data ?? [],
   });
+  // part of "Ich": only for people with a player entry in the squad
+  if ((items.data ?? []).length === 0) return null;
   return (
-    <div className="space-y-4">
+    <section aria-labelledby="player-profile" className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("title")}</h1>
+        <h2 id="player-profile" className="text-lg font-semibold">{t("title")}</h2>
         <p className="text-sm text-muted">{t("hint")}</p>
       </div>
-      {(items.data ?? []).length === 0 ? (
-        <EmptyState title={items.isLoading ? "…" : t("none")} />
-      ) : (
-        (items.data ?? []).map((i) => <Editor key={i.player_id} orgId={orgId} item={i} />)
-      )}
-    </div>
+      {(items.data ?? []).map((i) => (
+        <Editor key={i.player_id} orgId={orgId} item={i} />
+      ))}
+    </section>
   );
 }

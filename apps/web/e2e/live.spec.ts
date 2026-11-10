@@ -50,7 +50,7 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
   await context.setOffline(false);
   await expect(page.getByTestId("sync-state")).toHaveText("Alles gespeichert", { timeout: 20_000 });
 
-  const match = page.url().match(/matches\/([^/]+)\/live/)![1];
+  const match = page.url().match(/matches\/([^/]+)\/matchday/)![1];
   const events = await (await page.request.get(`/v1/orgs/${orgId}/matches/${match}/events`)).json();
   expect(events).toHaveLength(3);
   expect(events.filter((e: { outcome: string }) => e.outcome === "goal")).toHaveLength(2);

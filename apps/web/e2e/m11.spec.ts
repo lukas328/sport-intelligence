@@ -31,19 +31,22 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await expect(page.getByText("Alles hochgeladen")).toBeVisible({ timeout: 15_000 });
   await expectAccessible(page);
   await page.goto(`/app/${orgId}/matches/${match.id}`);
-  await page.getByRole("tab", { name: "Szenen", exact: true }).click();
+  await page.getByRole("tab", { name: "Spiel", exact: true }).click();
   await page.getByTestId("marks-panel").getByText(/Markiert während des Spiels \(2\)/).click();
   await expect(page.getByTestId("marks-panel")).toContainText("noch nicht mit dem Video abgeglichen");
 
-  // the coach has no player profile; the profile page explains it
+  // the coach has no player profile: "Ich" (the old /profile redirects there) leaves it out
   await page.goto(`/app/${orgId}/profile`);
-  await expect(page.getByRole("heading", { name: "Öffentliches Profil" })).toBeVisible();
+  await expect(page).toHaveURL(/\/me$/);
+  await expect(page.getByRole("heading", { name: "Öffentliches Profil" })).toHaveCount(0);
   await expectAccessible(page);
   await page.goto("/p/nobody-123456");
   await expect(page.getByText("Dieses Profil ist nicht öffentlich.")).toBeVisible();
 
-  // paper photos: without a model key the upload says so honestly
+  // paper photos (old /paper opens the dialog "Spielbericht hinzufügen"): without a model key
+  // the upload says so honestly
   await page.goto(`/app/${orgId}/teams/${teamId}/paper`);
+  await expect(page.getByTestId("report-dialog")).toBeVisible();
   await page.getByLabel("Foto").setInputFiles({ name: "bogen.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0x00]) });
   await page.getByRole("button", { name: "Auslesen" }).click();
   await expect(page.getByText("Das Auslesen von Fotos ist in dieser Installation nicht eingerichtet.")).toBeVisible();
