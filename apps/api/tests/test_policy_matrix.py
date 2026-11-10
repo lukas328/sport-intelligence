@@ -219,6 +219,50 @@ async def _get_assignment(a: Api, w: World) -> Any:
     return await a.get(f"/v1/orgs/{w.org}/assignments/{r.json()['id']}")
 
 
+_SLOT = {"weekday": 2, "start_time": "19:00", "duration_min": 90}
+_DRILL = {"name": "Matrix", "minutes": 10}
+
+
+async def _new_slot(w: World) -> str:
+    r = await w.admin.post(w.t(f"/seasons/{w.season}/training-slots"), json=_SLOT)
+    assert r.status_code == 201, r.text
+    return str(r.json()["id"])
+
+
+async def _put_slot(a: Api, w: World) -> Any:
+    return await a.put(f"/v1/orgs/{w.org}/training-slots/{await _new_slot(w)}", json=_SLOT)
+
+
+async def _delete_slot(a: Api, w: World) -> Any:
+    return await a.delete(f"/v1/orgs/{w.org}/training-slots/{await _new_slot(w)}")
+
+
+async def _generate(a: Api, w: World) -> Any:
+    await _new_slot(w)
+    day = f"2040-01-{_seq(w) % 28 + 1:02d}"
+    return await a.post(
+        w.t(f"/seasons/{w.season}/training-slots/generate"), json={"from": day, "to": day}
+    )
+
+
+async def _new_drill(w: World) -> str:
+    r = await w.admin.post(w.t("/drills"), json=_DRILL)
+    assert r.status_code == 201, r.text
+    return str(r.json()["id"])
+
+
+async def _get_drill(a: Api, w: World) -> Any:
+    return await a.get(f"/v1/orgs/{w.org}/drills/{await _new_drill(w)}")
+
+
+async def _put_drill(a: Api, w: World) -> Any:
+    return await a.put(f"/v1/orgs/{w.org}/drills/{await _new_drill(w)}", json=_DRILL)
+
+
+async def _delete_drill(a: Api, w: World) -> Any:
+    return await a.delete(f"/v1/orgs/{w.org}/drills/{await _new_drill(w)}")
+
+
 async def _get_consents(a: Api, w: World) -> Any:
     e = await w.new_entry()
     return await a.get(w.t(f"/players/{e['player_id']}/consents"))
@@ -363,6 +407,24 @@ ENDPOINTS += [
     ("GET assistant conversations", VIDEO_WORK, lambda a, w: a.get(w.t("/assistant"))),
     ("GET matrix templates", READERS, lambda a, w: a.get(w.t("/matrix/templates"))),
     ("GET sessions", READERS, lambda a, w: a.get(w.t("/sessions"))),
+    (
+        "GET training slots",
+        READERS,
+        lambda a, w: a.get(w.t(f"/seasons/{w.season}/training-slots")),
+    ),
+    (
+        "POST training slot",
+        TRAINING,
+        lambda a, w: a.post(w.t(f"/seasons/{w.season}/training-slots"), json=_SLOT),
+    ),
+    ("PUT training slot", TRAINING, _put_slot),
+    ("DELETE training slot", TRAINING, _delete_slot),
+    ("POST generate sessions", TRAINING, _generate),
+    ("GET drills", READERS, lambda a, w: a.get(w.t("/drills"))),
+    ("POST drill", TRAINING, lambda a, w: a.post(w.t("/drills"), json=_DRILL)),
+    ("GET drill", READERS, _get_drill),
+    ("PUT drill", TRAINING, _put_drill),
+    ("DELETE drill", TRAINING, _delete_drill),
     ("GET mark keys", READERS, lambda a, w: a.get(w.t("/mark-keys"))),
     (
         "POST mark session",

@@ -163,6 +163,11 @@ class PlayerAvailability(StrEnum):
     ABSENT = "absent"
 
 
+class DrillLevel(StrEnum):
+    BASIC = "basic"
+    ADVANCED = "advanced"
+
+
 class UploadStatus(StrEnum):
     PENDING = "pending"
     EXTRACTED = "extracted"
