@@ -73,6 +73,50 @@ page "Ball-Testset: neue Hallen" (`labelling/testset.html`): 177 balls, 72 frame
 - Notes from labelling: many balls are covered by a body; balls in hands are found best; fast
   passes and shots are often blurred or invisible in a single frame; breaks bring warm-up balls.
 
+### What the false peaks sit on (rounds 6 and 7, 2026-11-10)
+Round 7 (`ball_r7.pt`) puts its top peak on the ball in 35 % but has a peak >= 0.5 on 54 % of the
+72 no-ball frames. `false_alarms.py` (CPU, three stages: net peaks, pose, report) takes every peak
+>= 0.4 of the top 5 that is not within 12 px of a labelled ball and sorts it by the nearest keypoint
+of an RTMPose person (`rtmlib`, Apache-2.0, ONNX, YOLOX person detector, "balanced" mode) within
+max(10 px, 0.1 x person height): head, hand (wrist), foot (ankle); else "body" inside a person box,
+else "off-body". "Static" = local motion against its own surroundings < 0.2 (as in the round 6
+pseudo-label filter).
+
+| Category | r6 share | r7 share | r7 clock running | r7 clock stopped | r7 mean score | r7 static | true balls (same rule) |
+|---|---|---|---|---|---|---|---|
+| hand | 41 % | 41 % | 46 % | 37 % | 0.58 | 19 % | 43 % (76) |
+| body | 19 % | 20 % | 23 % | 17 % | 0.56 | 19 % | 11 % (20) |
+| off-body | 27 % | 25 % | 20 % | 30 % | 0.57 | 44 % | 34 % (61) |
+| head | 9 % | 9 % | 7 % | 11 % | 0.55 | 21 % | 7 % (12) |
+| foot | 4 % | 4 % | 3 % | 5 % | 0.52 | 0 % | 5 % (8) |
+| false peaks | 347 | 362 | 187 | 175 | | 25 % | 177 balls |
+
+- Top peaks >= 0.5 on the 39 no-ball frames of round 7: hand 19, body 9, off-body 9, head 1,
+  foot 1. Ball frames where the top peak is a false one (94): hand 42, body 22, off-body 21, head 7.
+- The false peaks sit where the balls sit: 45 % of the 177 true balls are within 15 px of a
+  detected wrist (98 within 25 px), about as many as the false peaks (45 %). A hand filter from
+  the pose model would remove half of the hits. 12 % of the true balls are "static" by the 0.2
+  test (14 of them static and off-body), so a static filter (removes 25 % of the false peaks) or
+  static and off-body (11 %) costs balls too: the ratio is poor.
+- Check by eye (contact sheet of 40 round 7 crops, 8 per category): the location category was
+  right in about 35 of 40. Errors: people the detector misses (bench, small far players) become
+  "off-body"; a peak on the floor next to a shoe becomes "body". Many "foot" peaks are white
+  shoes, some look like real balls (on the floor at the feet, a ball held over the head, a ball
+  rack): perhaps 3 to 5 of 40 are real balls that are not the labelled game ball. Off-body
+  peaks: logos, lamp reflections, railings, the ball rack. The human OWL tags (`owl_fp`) overlap
+  our peaks only twice (both "hand", both auto "hand"): no real validation.
+- Uncertainty: 72 no-ball frames and 42 halls; one frame is worth 1.4 points of the no-ball rate.
+  Keypoint thresholds are set by hand, not tuned.
+
+Next step (proposal): the pose model cannot tell an empty hand from a hand with a ball, and the
+motion test cannot either (balls are held still too). The confusion is in appearance, so attack
+hands first with a verifier crop classifier (ball / no ball, about 64 px around the peak, three
+frames), trained with hard negatives cut automatically at wrists, heads and torsos of RTMPose
+people where the frame has no labelled or OWL-confirmed ball near them, plus the static off-body
+spots (logos, lamps, ball racks) from the round 6 hard-negative cells. As a cheaper first try,
+the same negatives can go into the heatmap training of the next round. Hands and bodies are 61 %
+of the false peaks and 64 of the 94 wrong top peaks on ball frames.
+
 **Open-vocabulary detector, 24 balls of the test half (2 to 4 per hall):** OWLv2 base
 (Apache-2.0, queries "a photo of a handball", "a ball", "a small ball in the air", 480 px tiles
 upscaled to 960) puts its top box on the ball in 50 % (round 3 net on the same frames: 29 %,
