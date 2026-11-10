@@ -84,6 +84,54 @@ confident boxes, kept only where the temporal path confirms them, become trainin
 On TeamTrack's own validation the 3-frame net finds 64 % at 2 % false alarms: the gap is the domain
 (one hall vs many), not the method.
 
+## Verifier on the top-5 peaks (test set 2, 2026-11-10)
+A small crop classifier (ball / no ball) re-scores round 7's top-5 peaks per frame. Scripts in
+`verifier/` (CPU only, paths as arguments): `data.py` (net peaks on the training tiles, RTMPose
+people, crops), `train.py`, `eval.py`. Weights stay outside the repo.
+
+- Data: the round 7 OWL tiles (test set 2 halls already excluded), 72 px crops, three frames
+  stacked (9 channels). Positives: the confirmed ball (9 311) and round 7 peaks within 12 px of it
+  (9 299). Negatives: round 7 peaks (score >= 0.05) more than 20 px from the ball (13 948), RTMPose
+  wrists (9 013), noses (6 446) and torso centres (5 564) with no ball within 20 px (pose on 4 000
+  of the 12 321 tiles: all no-ball tiles, then positives), the fixed ball-like spot of each no-ball
+  tile (1 405), one random point per tile (10 716). 14 of 111 games held out whole for validation.
+- Model: 4-stage conv net (145 k parameters, 64 px input), balanced batches (half positives),
+  shift, flip, time reversal, brightness/contrast/colour mixing, motion blur, noise; 6 459 steps of
+  128, 43 minutes on 4 CPU cores. Held-out games: AUC 0.91 against net peaks, 0.98 against hands.
+- Test set 2 (re-ranking only, so "ball among top 5" stays 52.5 % for every scorer; "found at
+  FA x" = top peak on the ball and above the threshold at which x of the 72 no-ball frames alarm,
+  because the scores live on different scales and "no-ball >= 0.5" alone is not comparable;
+  "score at the ball" = best of the five peaks within 12 px, where `bench_testset2.py` reads the
+  heatmap near the label, hence 47.5 % instead of 50 % for the net):
+
+| Scorer | Top peak on the ball | Score at the ball >= 0.3 | No-ball >= 0.5 | Found at FA 10 % | Found at FA 25 % | Top 1 vs net (gained / lost, McNemar p) |
+|---|---|---|---|---|---|---|
+| net alone (round 7) | 35.0 % | 47.5 % | 54 % | 15.8 % | 25.4 % | |
+| verifier alone | 31.6 % | 44.6 % | 71 % | 15.3 % | 21.5 % | +9 / -15, p = 0.31 |
+| net x verifier | 36.2 % | 37.9 % | 26 % | 18.1 % | 28.2 % | +8 / -6, p = 0.79 |
+| sqrt(net x verifier) | 36.2 % | 46.3 % | 51 % | 18.1 % | 28.2 % | +8 / -6, p = 0.79 |
+
+- Result: no measurable gain. The product moves 2 balls in top 1 (+1.2 points, p = 0.79) and finds
+  4 more balls at the same false-alarm rate (10 %); both are within the noise of 177 balls (one
+  ball = 0.6 points). The lower "no-ball >= 0.5" of the product (26 %) is only a change of scale:
+  at matched false alarms it is almost the same as the net. The combination was fixed before the
+  test run (no tuning on test set 2; there is no other honest tuning set, see below).
+- Why: on the confident false peaks (>= 0.4) the verifier does separate better than the net
+  (AUC against the 93 hit peaks 0.73 vs 0.61; body 0.78, head 0.75, off-body 0.74, hand 0.70), and
+  the two scores are only weakly correlated (0.21). But it also rejects 22 % of the true balls
+  (probability < 0.5; 16 % of the balls at a hand, 40 % of the balls on a body), and over all
+  peaks, low ones included, it is weaker than the net (AUC 0.81 vs 0.83). Hands stay the hardest
+  case: false hand peaks have a median probability of 0.62.
+- Main limit of the data: round 7 was trained on these tiles and is almost perfect on them (top 1
+  99 %, a no-ball tile with a peak >= 0.5 in 0.3 %), so its "hard" negatives on the training tiles
+  are low-score peaks, not the confident mistakes it makes in new halls. The held-out games come
+  from the same sources, so validation AUC (0.91) overstates what transfers (0.81 on test peaks).
+- Next: hard negatives from halls the net has not seen (run round 7 on unlabelled frames of new
+  games and keep confident peaks that OWLv2 and the temporal path do not confirm), more context
+  for hands (96 px or the forearm direction), and cross-fitting (verifier trained on a net that did
+  not see those tiles). A tuning set separate from test set 2 is needed before choosing how to
+  combine the scores.
+
 ## Findings
 - Most earlier "ball" labels from Möhlin were a fixed, ball-like spot on the wall; the three-frame
   view shows it never moves. They taught the single-frame net the static-spot error.
