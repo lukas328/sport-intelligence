@@ -340,6 +340,14 @@ svg text.fw { font: 600 14px "Schibsted Grotesk", sans-serif; fill: var(--club-i
 .phone .t-pikt .tp { grid-column: 1 / -1; } .phone .t-pikt .tp .picto { width: 40px; height: 40px; }
 .phone .t-pikt .big { grid-column: 1; grid-row: 2; align-self: center; } .phone .t-pikt svg.mf { grid-column: 2; grid-row: 2; width: 150px; }
 .phone .t-pikt p, .phone .t-pikt small, .phone .t-pikt .bar { grid-column: 1 / -1; } .phone .t-pikt p { font-size: 17px; }
+/* ----- people ----- */
+.who { font-size: 19px; font-weight: 600; margin-top: 14px; max-width: 760px; }
+.phone .who { font-size: 16px; margin-top: 10px; }
+.ppl { font-size: 14px; color: var(--ink-2); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 4px; grid-column: 1 / -1; }
+.pp { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600; }
+.pp b { min-width: 26px; height: 26px; padding: 0 4px; display: inline-grid; place-items: center; background: var(--club); color: var(--club-ink); box-shadow: inset 0 0 0 1.5px var(--club-edge); font-size: 15px; line-height: 1; }
+.t-back .ppl { justify-content: center; } .phone .t-back .ppl { justify-content: flex-start; }
+.t-prog .ppl, .t-mag .ppl, .t-val .ppl { margin-top: 8px; }
 /* list and side */
 .qline { display: flex; gap: 12px; align-items: center; padding: 14px 32px; font-size: 15px; } .phone .qline { padding: 14px 16px; }
 .tag { font-weight: 800; font-size: 13px; background: #ffd23c; color: #15171a; padding: 3px 8px; }
@@ -964,7 +972,8 @@ var REG = [
   { key: "D", name: "3 Dinge", opts: ["Bündel", "Rückennummern", "Piktogramm", "Programm", "Magnete", "Wert zuerst"] },
   { key: "S", name: "Schrift", opts: ["breit", "schmal", "schräg", "Flock", "Bricolage"] },
   { key: "G", name: "Grund", opts: ["kühl hell", "warm hell", "dunkel", "Hallenboden"] },
-  { key: "Z", name: "Liste", opts: ["Fächer", "Farbquadrat", "Minifeld", "Lämpchen"] }
+  { key: "Z", name: "Liste", opts: ["Fächer", "Farbquadrat", "Minifeld", "Lämpchen"] },
+  { key: "M", name: "Menschen", opts: ["aus", "an"] }
 ];
 var CLUBN = ["rot", "blau", "gelb", "schwarz", "weiss", "gruen"], OPPN = ["petrol", "blau", "gelb", "schwarz", "unbekannt"];
 var PRESETS = {
@@ -972,11 +981,11 @@ var PRESETS = {
   Piktogramm: "K2-D3-S2-G1-Z4", Halle: "K4-D5-S2-G4-Z3", Flutlicht: "K4-D3-S2-G3-Z4", Einblendung: "K5-D5-S2-G3-Z3", Hallenlicht: "K7-D6-S5-G1-Z1",
   Programm: "K1-D3-S2-G2-Z1", "Programm ruhig": "K6-D1-S2-G2-Z1", Nacht: "K1-D4-S2-G3-Z1-weiss-petrol"
 };
-var ST = { K: 1, D: 1, S: 1, G: 1, Z: 1, club: "rot", opp: "petrol" };
-function codeOf() { return "K" + ST.K + "-D" + ST.D + "-S" + ST.S + "-G" + ST.G + "-Z" + ST.Z + "-" + ST.club + "-" + ST.opp; }
+var ST = { K: 1, D: 1, S: 1, G: 1, Z: 1, M: 1, club: "rot", opp: "petrol" };
+function codeOf() { return "K" + ST.K + "-D" + ST.D + "-S" + ST.S + "-G" + ST.G + "-Z" + ST.Z + "-M" + ST.M + "-" + ST.club + "-" + ST.opp; }
 function parse(c) {
-  if (!c) return false; var ok = false;
-  c.split("-").forEach(function (p) { var m = /^([KDSGZ])(\d)$/.exec(p); if (m) { ST[m[1]] = +m[2]; ok = true; } else if (CLUBN.indexOf(p) >= 0 && !parse._club) { ST.club = p; parse._club = 1; } else if (OPPN.indexOf(p) >= 0) ST.opp = p; });
+  if (!c) return false; var ok = false; if (/^K\d/.test(c)) ST.M = 1;
+  c.split("-").forEach(function (p) { var m = /^([KDSGZM])(\d)$/.exec(p); if (m) { ST[m[1]] = +m[2]; ok = true; } else if (CLUBN.indexOf(p) >= 0 && !parse._club) { ST.club = p; parse._club = 1; } else if (OPPN.indexOf(p) >= 0) ST.opp = p; });
   parse._club = 0; return ok;
 }
 
@@ -998,6 +1007,12 @@ var THINGS = [
   { n: 6, of: 6, unit: "Gegenstösse", lab: "Ballverlust", fig: "6 Tore", p: "Tore nach eigenem Ballverlust", s: "3 davon zwischen der 38. und 44. Minute", sc: "6 Szenen", t: "1:55", b: "tv", mf: "tv", pic: "gegenstoss", drill: "Rückzug in die 5:1" },
   { n: 7, of: 8, unit: "von 8", lab: "Kreisspiel", fig: "7 von 8", p: "Kreisanspiele verwertet", s: "bester Wert der Saison", up: 1, sc: "8 Szenen", t: "2:10", b: "kr", mf: "kr", pic: "kreis" }
 ];
+
+/* ---------- people (from «Profil»): numbers and first names, never faces; errors in neutral words ---------- */
+var PEOPLE = { ra: ["Auf dieser Seite in der Abwehr", [[7, "Luca"], [13, "Jana"]]], tv: ["Im Rückzug", [[10, "Elias"], [4, "Levin"], [11, "Jonas"]]], kr: ["Am Kreis", [[8, "Nico"]], "Pässe von", [[4, "Levin"]]] };
+function chips(l) { return l.map(function (q) { return '<span class="pp"><b class="d num">' + q[0] + "</b>" + q[1] + "</span>"; }).join(""); }
+function ppl(t) { if (ST.M !== 2) return ""; var P = PEOPLE[t.b]; return '<p class="ppl">' + P[0] + ": " + chips(P[1]) + (P[2] ? " " + P[2] + " " + chips(P[3]) : "") + "</p>"; }
+function peopleLine() { return ST.M === 2 ? '<p class="who">Levin wirft sieben, Mia hält elf. Jana steht bei drei Gegenstössen gut.</p>' : ""; }
 
 /* ---------- heads ---------- */
 function headFace(ph, W, unknown) {
@@ -1045,34 +1060,34 @@ function head(ph, W, unknown) { return [null, headFace, headPlakat, headWurf, he
 function ownsTitle() { return ST.K === 3 || ST.K === 5; }
 function title(ph) {
   if (ownsTitle()) return "";
-  if (ph) return '<section class="ptitle"><p class="kick">Sa gegen TSV Thalwil · fertig seit So, 9:40</p><h1 class="d">' + TITLE + '</h1><div class="acts"><a class="btn" href="#">Spiel öffnen</a><a class="lnk" href="#">3 Fragen offen, 1 Minute</a></div></section>';
-  return '<section class="title"><div><p class="kick">' + KICK + '</p><h1 class="d">' + TITLE + '</h1></div><div class="acts"><a class="btn" href="#">Spiel öffnen</a><a class="btn line" href="#">Fürs Team zusammenstellen</a></div></section>';
+  if (ph) return '<section class="ptitle"><p class="kick">Sa gegen TSV Thalwil · fertig seit So, 9:40</p><h1 class="d">' + TITLE + "</h1>" + peopleLine() + '<div class="acts"><a class="btn" href="#">Spiel öffnen</a><a class="lnk" href="#">3 Fragen offen, 1 Minute</a></div></section>';
+  return '<section class="title"><div><p class="kick">' + KICK + '</p><h1 class="d">' + TITLE + "</h1>" + peopleLine() + '</div><div class="acts"><a class="btn" href="#">Spiel öffnen</a><a class="btn line" href="#">Fürs Team zusammenstellen</a></div></section>';
 }
 
 /* ---------- the three things ---------- */
 function things(ph) {
   var o = "";
   if (ST.D === 1) {
-    THINGS.forEach(function (t, i) { o += '<li><div class="no"><em>' + (i + 1) + "</em>" + one(t.n, t.of, "num") + '<span class="d">' + t.unit + "</span></div><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small><svg data-bundle="' + t.b + '" data-w="' + (ph ? 128 : 380) + '" aria-hidden="true"></svg><a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></li>"; });
+    THINGS.forEach(function (t, i) { o += '<li><div class="no"><em>' + (i + 1) + "</em>" + one(t.n, t.of, "num") + '<span class="d">' + t.unit + "</span></div><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small>' + ppl(t) + '<svg data-bundle="' + t.b + '" data-w="' + (ph ? 128 : 380) + '" aria-hidden="true"></svg><a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></li>"; });
     return '<ol class="t-bund">' + o + "</ol>";
   }
   if (ST.D === 2) {
-    THINGS.forEach(function (t, i) { o += '<li><span class="lab d">' + t.lab + '</span><span class="rn d num' + (kit(ST.club, "", GROUNDS[ST.G]).clubLow ? " lo" : "") + '">' + (i + 1) + "</span><p><b>" + t.fig + "</b> " + t.p.replace(/^Gegentore |^Tore |^Kreisanspiele /, function (m) { return m; }) + "</p>" + '<svg class="mf" data-mf="' + t.mf + '" aria-hidden="true"></svg><a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></li>"; });
+    THINGS.forEach(function (t, i) { o += '<li><span class="lab d">' + t.lab + '</span><span class="rn d num' + (kit(ST.club, "", GROUNDS[ST.G]).clubLow ? " lo" : "") + '">' + (i + 1) + "</span><p><b>" + t.fig + "</b> " + t.p.replace(/^Gegentore |^Tore |^Kreisanspiele /, function (m) { return m; }) + "</p>" + ppl(t) + '<svg class="mf" data-mf="' + t.mf + '" aria-hidden="true"></svg><a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></li>"; });
     return '<ol class="t-back">' + o + "</ol>";
   }
   if (ST.D === 3) {
-    THINGS.forEach(function (t, i) { o += '<li><div class="tp"><span>0' + (i + 1) + "</span>" + picto(t.pic) + '</div><div class="big d num">' + t.n + (t.of !== t.n ? "<small>/" + t.of + "</small>" : "") + '</div><svg class="mf" data-mf="' + t.mf + '" aria-hidden="true"></svg><p>' + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small><a class="bar" href="#">' + t.sc + "<span>" + t.t + "</span></a></li>"; });
+    THINGS.forEach(function (t, i) { o += '<li><div class="tp"><span>0' + (i + 1) + "</span>" + picto(t.pic) + '</div><div class="big d num">' + t.n + (t.of !== t.n ? "<small>/" + t.of + "</small>" : "") + '</div><svg class="mf" data-mf="' + t.mf + '" aria-hidden="true"></svg><p>' + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small>' + ppl(t) + '<a class="bar" href="#">' + t.sc + "<span>" + t.t + "</span></a></li>"; });
     return '<ol class="t-pikt">' + o + "</ol>";
   }
   if (ST.D === 4) {
-    THINGS.forEach(function (t, i) { o += '<li><span class="i d num">' + (i + 1) + '</span><svg class="mf" data-mf="' + t.mf + '" aria-hidden="true"></svg><div><p><em>' + t.fig + "</em> · " + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small></div><span class="rt">' + t.t + '</span><a class="btn s play" href="#">' + I.play + t.sc + "</a></li>"; });
+    THINGS.forEach(function (t, i) { o += '<li><span class="i d num">' + (i + 1) + '</span><svg class="mf" data-mf="' + t.mf + '" aria-hidden="true"></svg><div><p><em>' + t.fig + "</em> · " + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small>' + ppl(t) + '</div><span class="rt">' + t.t + '</span><a class="btn s play" href="#">' + I.play + t.sc + "</a></li>"; });
     return '<div class="t-prog"><p class="ph"><span>Drei Dinge · Seite A</span><span>23 Szenen · 6:45</span></p><ol>' + o + "</ol></div>";
   }
   if (ST.D === 6) {
-    THINGS.forEach(function (t, i) { var v = t.fig.split(" "); o += '<li><svg class="mf" data-mf="' + t.mf + '" data-chrono aria-hidden="true"></svg><div class="tx"><span class="rk">' + (i + 1) + ' von 3</span><span class="val d num">' + v[0] + "<small>" + v.slice(1).join(" ") + "</small></span><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small></div><div class="go"><a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></div></li>"; });
+    THINGS.forEach(function (t, i) { var v = t.fig.split(" "); o += '<li><svg class="mf" data-mf="' + t.mf + '" data-chrono aria-hidden="true"></svg><div class="tx"><span class="rk">' + (i + 1) + ' von 3</span><span class="val d num">' + v[0] + "<small>" + v.slice(1).join(" ") + "</small></span><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small>' + ppl(t) + '</div><div class="go"><a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></div></li>"; });
     return '<ol class="t-val">' + o + "</ol>";
   }
-  THINGS.forEach(function (t, i) { o += '<li><span class="i d num">' + (i + 1) + '</span><svg class="mf" data-mf="' + t.mf + '" data-chrono aria-hidden="true"></svg><div class="tx"><span class="fig d">' + t.fig + "</span><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small></div><div class="go"><a class="btn s line" href="#">' + t.sc + "</a><small>" + t.t + " Minuten</small></div></li>"; });
+  THINGS.forEach(function (t, i) { o += '<li><span class="i d num">' + (i + 1) + '</span><svg class="mf" data-mf="' + t.mf + '" data-chrono aria-hidden="true"></svg><div class="tx"><span class="fig d">' + t.fig + "</span><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + '</small>' + ppl(t) + '</div><div class="go"><a class="btn s line" href="#">' + t.sc + "</a><small>" + t.t + " Minuten</small></div></li>"; });
   return '<ol class="t-mag">' + o + "</ol>";
 }
 
@@ -1113,14 +1128,14 @@ function side() {
 function startDesk(unknown) {
   var W = ST.G === 4 ? 1232 : 1280;
   return topDesk() + '<div class="sheet">' + head(false, W, unknown) + title(false)
-    + '<div style="margin-top:' + (ownsTitle() ? 32 : 0) + 'px">' + things(false) + "</div>"
+    + (ownsTitle() && ST.M === 2 ? '<div style="padding:24px 32px 0">' + peopleLine() + "</div>" : "") + '<div style="margin-top:' + (ownsTitle() ? 32 : 0) + 'px">' + things(false) + "</div>"
     + '<p class="qline"><span class="tag">Prüfen</span><a class="lnk" href="#">3 Fragen offen, 1 Minute</a></p>'
     + '<div class="cols"><section><div class="hh"><b class="d">Alle Spiele</b><span>2 von 5 ohne Video</span></div>' + list(false) + "</section>" + side() + "</div></div>";
 }
 function startPhone() {
   var W = ST.G === 4 ? 374 : 390;
   return topPhone() + '<div class="sheet">' + head(true, W) + (ST.K === 1 ? '<p class="k" style="padding:10px 16px;border-bottom:2px solid var(--ink)">Sa gegen TSV Thalwil · fertig seit So, 9:40</p>' : "") + title(true)
-    + '<div style="margin-top:' + (ownsTitle() ? 8 : 0) + 'px">' + things(true) + "</div>"
+    + (ownsTitle() && ST.M === 2 ? '<div style="padding:20px 16px 0">' + peopleLine() + "</div>" : "") + '<div style="margin-top:' + (ownsTitle() ? 8 : 0) + 'px">' + things(true) + "</div>"
     + '<div style="padding:16px 16px 0"><a class="btn line" href="#" style="width:100%">Fürs Team zusammenstellen</a></div>'
     + '<section style="padding:32px 16px 24px"><div class="hh"><b class="d">Alle Spiele</b><span>2 ohne Video</span></div>' + list(true) + "</section></div>" + tabbar();
 }
@@ -1202,7 +1217,7 @@ function fit() {
 function syncButtons() {
   document.querySelectorAll("[data-reg]").forEach(function (b) { b.setAttribute("aria-pressed", String(ST[b.dataset.reg] == b.dataset.v)); });
   var code5 = codeOf().split("-").slice(0, 5).join("-");
-  document.querySelectorAll("[data-preset]").forEach(function (b) { var pc = PRESETS[b.dataset.preset]; b.setAttribute("aria-pressed", String(pc.split("-").length > 5 ? pc === codeOf() : pc === code5)); });
+  document.querySelectorAll("[data-preset]").forEach(function (b) { var pc = PRESETS[b.dataset.preset]; b.setAttribute("aria-pressed", String(ST.M === 1 && (pc.split("-").length > 5 ? pc === codeOf().replace("-M1", "") : pc === code5))); });
 }
 function build() {
   var rows = document.getElementById("rows"), h = "";
