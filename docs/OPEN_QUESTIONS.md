@@ -192,3 +192,36 @@ video, open the scenes behind a number, reply to a training, change the club col
 ### Q-UX-2 Typeface in the Expo app
 The app uses the new colours; Archivo is not yet bundled in the Expo build (system font).
 **Default**: add it with `expo-font` together with the first device build (Q-M11-3).
+
+## Redesign phase 1 (ADR 029, 2026-11-10)
+- **Q-UX-1 ADR number.** The brief asked for "ADR 025"; 025 to 028 exist. *Assumption:* ADR 029.
+- **Q-UX-2 Matrix and data assistant.** SPEC routes both into Szenen. *Assumption:* until the
+  search field answers questions itself they stay as pages: the matrix is the tab "Tabelle",
+  the assistant a page under Szenen (palette "Suchen: …").
+- **Q-UX-3 Video tab tools.** The match workspace keeps its tool tabs (comments, scenes,
+  drawings) and step rail inside Video. *Assumption:* removed with the new look in phase 2.
+- **Q-UX-4 Spieltag.** One address (`matches/[m]/matchday`) for both existing levels: score and
+  team events by default, quick marks with `?mode=marks`. *Assumption:* merged into one screen
+  (SPEC 7.11) in phase 2.
+- **Q-UX-5 Prüfen.** `matches/[m]/check` opens the existing full-screen review (goals, then
+  shots). *Assumption:* the question-by-question screen (SPEC 7.5) comes in phase 2.
+- **Q-UX-6 Opponent colour from "Spiel anlegen".** The form now sends the opponent's shirt
+  colour only when somebody picked it; a match created through the API with an explicit
+  `kit_opponent` counts as said. *Assumption:* that is the meaning of "aus den Trikotfarben des
+  Spiels".
+- **Q-UX-7 Clash rule.** "Same hue family and similar lightness" is implemented with the
+  measure of the existing kit warnings (CIE76 delta E < 25). *Assumption:* good enough; tune with
+  real kits.
+- **Q-UX-8 Goals conceded by position.** Positions come from the shot zones (wings, backs incl.
+  half distance, circle); 7 m, fast breaks, empty goal and long range have none.
+- **Q-UX-9 Season themes.** A theme repeats in at least two matches with video; positions count
+  from six goals against and a share of 30 %. Values for themes without a clear figure stay empty.
+- **Q-UX-10 Consent link.** One link per team, 90 days, players listed as number, first name and
+  initial. *Assumption:* an adult player or a parent may answer for any player of the team; abuse
+  is limited by the link being in the team chat, rate limits and the audit log.
+- **Q-UX-11 Sammlungen of the old kinds** are read-only through the collections API (changed on
+  their old pages). *Assumption:* no data migration; a coach who edits one creates a collection.
+- **Q-UX-12 Onboarding in two steps** (SPEC 7.12) and the onboarding e-mail "Deine Spieler
+  mitnehmen" (invites players, which is behind Teamfunktionen now) are left for phase 2.
+- **Q-UX-13 Share a single scene.** The API and the shared page support it; a share button per
+  scene comes with the Video tab in phase 2.

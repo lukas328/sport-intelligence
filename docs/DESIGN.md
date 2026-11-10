@@ -1,6 +1,7 @@
 # Design
 
-How the web app looks and behaves, and why. The rules below are checked where possible
+How the web app looks and behaves, and why. The redesign is decided: scope and navigation in
+ADR 029, the look "Trikot" in `docs/design/ux-reset/TRIKOT.md` (phase 2 builds it). The rules below are checked where possible
 (`apps/web/src/lib/design-lint.test.ts`, `apps/web/src/lib/nav-model.test.ts`). ADR 023 records
 the decisions; this file is the working reference.
 
@@ -18,50 +19,41 @@ the decisions; this file is the working reference.
 6. **Quiet chrome, loud content.** Navigation and controls are neutral; the score, the video and
    the court are the loudest things on screen.
 
-## Navigation
+## Navigation (ADR 029)
 
-At most **four destinations per role** (main navigation: sidebar on desktop, tab bar on phones).
+Scope and structure follow `docs/design/ux-reset/SPEC.md` (sections 1, 6, 7, 9) and ADR 029.
+The look is defined in `docs/design/ux-reset/TRIKOT.md`; until phase 2 is built, the sections
+below on identity and visual language describe what is still on screen and are superseded there.
 
 | Role | Destinations |
 |---|---|
-| Coach, analyst, team manager, admin | Übersicht · Spiele · Training · Team |
-| Player, goalkeeper | Übersicht · Szenen · Termine · Team |
-| Parent | Übersicht · Termine · Team |
-| Guest | Übersicht · Spiele · Team |
+| Coach, analyst, team manager, admin | Spiele · Szenen · Saison · Team (start: Spiele) |
+| Player, goalkeeper | Start · Team; with Teamfunktionen Start · Szenen · Termine · Team |
+| Parent | Start · Team; with Teamfunktionen Start · Termine · Team |
+| Guest | Spiele · Team |
 
-- Order for staff follows the coach's week: the match, its analysis, the training, then the squad.
-- Second level, never more than four, grouped by the job: Spiele → Spielplan · Saison · Bibliothek
-  (playlists, presentations, scene search: material from the matches); Training → Planung ·
-  Übungen · Spielzüge · Aufgaben; Team → Kader · Termine (the people and when they meet). For
-  players, parents and guests Team → Kader · Saison. On desktop the second level unfolds in the
-  sidebar under the active destination; on phones it is a row of links under the title. There is
-  no third level: pages below (Playlists, Präsentationen, Szenensuche) show a back link to their
-  parent; Matrix and Frag deine Daten are tools on the season page.
-- The sidebar also shows the next match of the active team.
-- Account menu (avatar): Profil, Einwilligungen, Einstellungen, Darstellung (hell, dunkel,
-  automatisch), Hilfe, Feedback, Abmelden.
-- Team switcher in the sidebar or top bar; every team page follows the active team (cookie
-  `hb_team`), a match page switches it to the match's team.
-- Command palette (⌘K / Ctrl K, search icon on phones): destinations, actions (new match, ask the
-  data, search scenes, photograph a sheet), the team's matches, other teams. A typed question
-  goes straight to the data assistant.
-- Courtside and presentation tools (`/live`, `/marks`, `/present`, `/remote`) run full screen
-  with a single close button.
+- One level of tabs per destination, never two: Szenen → Szenen · Sammlungen · Spielzüge ·
+  Tabelle; a match → Spiel · Video · Zahlen; Team → Kader · Termine · Training · Aufgaben only with
+  Teamfunktionen. Spiele and Saison have none.
+- "Video hochladen" is a button in the sidebar and a + in the phone top bar
+  (`matches?upload=1`: pick a played match without video or create one).
+- "Teamfunktionen" (team setting, off by default) hides training, dates, RSVP, tasks and the
+  player and parent destinations from the navigation and the search; routes stay reachable.
+- Account menu: Ich (Profil, Sicherheit, Meine Daten) and Verein (Verein, Teams und Rollen with
+  Teamfunktionen, Abo und Rechnungen, Verband), two pages with one tab level each
+  (`lib/settings-model.ts`).
+- Full screen without the frame: Spieltag (`matches/[m]/matchday`), presentations, remote.
+- Old addresses redirect (`/live`, `/marks`, `library`, `search`, `paper`, `settings`, `profile`).
 
 ## Key screens
 
-- **Übersicht** (coach): a stage with the next match when it is close (time, opponent, prepare, live), otherwise the last result and its statement; below: next match with "Vorbereiten" and "Live erfassen"; last match with score,
-  analysis state and the three strongest insights; "Frag deine Daten"; next training. The first
-  steps checklist shows one next step and folds the rest; it can be hidden.
-- **Übersicht** (player, parent): next dates with yes / no reply, open assignments, new scenes.
-- **Spiel**: scoreboard header, three views (Video · Analyse · Szenen). Analyse holds Übersicht,
-  Würfe, Torhüter, Laufleistung and Matchreport. Upload sits in the video view while there is no
-  video; processing shows as one progress card. PDF, live, marks, scouting, opponent, data
-  exchange, edit and delete live in the "…" menu.
-- **Spiele**: upcoming and played, each row with date block, opponent, state and result. A new
-  match opens in a dialog; the first match is created inline.
+See `SPEC.md`, section 7 for what each screen contains. Built in phase 1 as plain pages:
+Szenen (`teams/[t]/scenes`), Sammlungen and a collection (`collections/[id]`, `…/present`), the
+shared page for scenes and collections (`/s/[token]`, with Open Graph data), consent by link
+(`/einwilligung/[token]`), "Was sich wiederholt" on Saison, "Gegentore nach Position" on the
+Spiel tab, the dialog "Spielbericht hinzufügen".
 
-## Identity: "Die Halle" (ADR 024)
+## Identity: "Die Halle" (ADR 024, superseded by TRIKOT.md)
 
 The app should feel like a club's hall, not like a dashboard. Two modes, one rule:
 
