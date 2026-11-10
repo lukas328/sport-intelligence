@@ -2021,7 +2021,7 @@ body { margin: 0; background: #fcfcfa; color: #14171a; }
   }
   document.querySelectorAll("[data-tpl]").forEach(function (slot) {
     var tpl = document.getElementById(slot.dataset.tpl); if (!tpl) return;
-    var kind = slot.dataset.w, node = tpl.content.cloneNode(true), app = node.querySelector(".halle");
+    var kind = slot.dataset.w, node = tpl.content.cloneNode(true), app = node.firstElementChild;
     app.classList.add(kind === "desk" ? "is-desk" : "is-phone");
     var fr = document.createElement("div"); fr.className = "frame " + kind; fr.style.width = W[kind] + "px";
     fr.appendChild(node); slot.classList.add("fit"); slot.appendChild(fr);

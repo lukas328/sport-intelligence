@@ -7,6 +7,7 @@ noch nichts.
 |---|---|
 | `zielbild.html` | Das Bild: Fokus, Gestaltungssystem, 12 Screens für Desktop und Handy. Im Browser öffnen. |
 | `SPEC.md` | Die verbindliche Fassung für die Umsetzung: Prinzipien, Tokens, Bausteine, Navigation, Routen, jeder Screen, Wörter, Reihenfolge. |
+| `richtungen.html` | Vier alternative Gestaltungsrichtungen zum Abwägen (Konsole, Trikot, Piktogramm, Kassette), je am Start-Screen. Quellen in `richtungen/`. |
 | `ASSESSMENT.md` | Die Befunde aus den 66 Screenshots, pro Bereich. |
 | `assets/halle.css` | Das CSS der Skizzen: Tokens und Bausteine zum Übertragen. |
 | `assets/marker.js` | Die Filzstift-Striche als kleines Modul. |
@@ -16,6 +17,11 @@ noch nichts.
 | `src/page.html`, `build.py` | Der Bericht und sein Build: `python3 docs/design/ux-reset/build.py` schreibt `zielbild.html` neu. |
 
 ## Vor dem Start
+
+**Die Gestaltungsrichtung ist noch nicht entschieden.** `zielbild.html` und `SPEC.md` beschreiben
+die Richtung «Halle». `richtungen.html` stellt ihr vier Alternativen gegenüber. Aufbau, Umfang und
+Wörter gelten für jede Richtung; Aussehen, Tokens und Bausteine werden nach der Wahl angepasst. Die
+UI-Session startet erst danach.
 
 In `SPEC.md`, Abschnitt 14, stehen sechs Annahmen (Kern ist die Spielauswertung für die Trainerin,
 Spieler-Funktionen ausgeblendet, Einwilligung per Link, vier Ziele, «Sammlung», Minifeld). Wenn
