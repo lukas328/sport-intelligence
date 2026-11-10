@@ -1343,7 +1343,9 @@
     "copied": "Copied",
     "invalid": "This link has expired or was revoked.",
     "readOnly": "View only, valid until {date}",
-    "scene": "Scene"
+    "scene": "Scene",
+    "previewScenes": "{n, plural, one {# scene} other {# scenes}}",
+    "previewMinutes": "{n} min"
   },
   "ops": {
     "title": "Backoffice",

@@ -9,7 +9,7 @@ import { VideoPlayer } from "@/components/video/player";
 import { cn } from "@/lib/utils";
 
 export interface Shared {
-  kind: "play" | "match" | "playlist" | "highlight";
+  kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection";
   title: string;
   team: string;
   expires_at: string;
@@ -27,6 +27,19 @@ export interface Shared {
   };
   highlight?: { format: string; scenes: number };
   playlist?: { title: string; description: string | null; clips: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null }[] };
+  scene?: SharedRun;
+  collection?: SharedRun;
+}
+
+/** A shared scene (a run of one) or collection: scenes, plays and notes in order. */
+interface SharedRun {
+  title: string;
+  items: {
+    kind: "scene" | "play" | "note";
+    text: string | null;
+    play: { id: string; name: string } | null;
+    scene: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null } | null;
+  }[];
 }
 
 const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
@@ -52,6 +65,7 @@ export function SharedView({ token, data }: { token: string; data: Shared }) {
       )}
       {data.match && <MatchShare m={data.match} media={media} t={t} ts={ts} format={format} />}
       {data.playlist && <PlaylistShare p={data.playlist} media={media} />}
+      {(data.scene ?? data.collection) && <RunShare run={(data.scene ?? data.collection)!} media={media} />}
       {data.highlight && (
         <video
           controls
@@ -145,6 +159,34 @@ function PlaylistShare({ p, media }: { p: NonNullable<Shared["playlist"]>; media
           </li>
         ))}
       </ol>
+    </div>
+  );
+}
+
+/** Scenes play one after the other with the coach's note; notes and plays are listed in order. */
+function RunShare({ run, media }: { run: SharedRun; media: (v: string) => string }) {
+  const notes = run.items.filter((i) => i.kind !== "scene" && i.text);
+  const scenes = run.items.filter((i) => i.scene);
+  return (
+    <div className="space-y-4">
+      <PlaylistShare
+        p={{
+          title: run.title,
+          description: null,
+          clips: scenes.map((i) => ({ ...i.scene!, title: [i.scene!.title, i.text].filter(Boolean).join(": ") || null })),
+        }}
+        media={media}
+      />
+      {notes.length > 0 && (
+        <ul className="space-y-2 text-sm">
+          {notes.map((i, k) => (
+            <li key={k} className="whitespace-pre-line">
+              {i.play ? `${i.play.name}: ` : ""}
+              {i.text}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

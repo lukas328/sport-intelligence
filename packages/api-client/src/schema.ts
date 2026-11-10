@@ -4700,6 +4700,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/share/{token}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview
+         * @description Data for the link preview (title, club, length); does not count as an opening.
+         */
+        get: operations["preview_v1_share__token__preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/share/{token}/reel.mp4": {
         parameters: {
             query?: never;
@@ -9434,14 +9454,14 @@ export interface components {
         ShareCreate: {
             /**
              * Days
-             * @default 14
+             * @default 30
              */
             days?: number;
             /**
              * Kind
              * @enum {string}
              */
-            kind: "play" | "match" | "playlist" | "highlight";
+            kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection";
             /**
              * Target Id
              * Format: uuid
@@ -9511,6 +9531,33 @@ export interface components {
             title: string;
             /** Views */
             views: number;
+        };
+        /**
+         * SharePreview
+         * @description What a chat shows for the link (Open Graph): no names of people, nothing behind a login.
+         */
+        SharePreview: {
+            /** Club */
+            club: string;
+            /** Duration S */
+            duration_s: number | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Kind */
+            kind: string;
+            /** Kit */
+            kit: {
+                [key: string]: string;
+            };
+            /** Scenes */
+            scenes: number;
+            /** Team */
+            team: string;
+            /** Title */
+            title: string;
         };
         /**
          * SlideIn
@@ -20848,6 +20895,37 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_v1_share__token__preview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SharePreview"];
                 };
             };
             /** @description Validation Error */

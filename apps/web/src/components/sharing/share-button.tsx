@@ -11,11 +11,13 @@ import { api } from "@/lib/client";
 import { errorKey } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
-/** Creates a read-only public link (play, match report or playlist) and shows it once. */
-export function ShareButton({ orgId, teamId, kind, targetId }: { orgId: string; teamId: string; kind: "play" | "match" | "playlist" | "highlight"; targetId: string }) {
+/** Creates a read-only public link (play, match report, playlist, scene, collection or highlights)
+ * and shows it once. */
+export function ShareButton({ orgId, teamId, kind, targetId }: { orgId: string; teamId: string; kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection"; targetId: string }) {
   const t = useTranslations("share");
   const te = useTranslations("errors");
-  const [days, setDays] = useState(14);
+  // 30 days unless chosen otherwise (SPEC 7.8)
+  const [days, setDays] = useState(30);
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);

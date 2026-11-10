@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { buttonClass } from "@/components/ui/button";
+import { ShareButton } from "@/components/sharing/share-button";
 import { serverApi } from "@/lib/api";
 
 type Params = { params: Promise<{ orgId: string; collectionId: string }> };
@@ -38,6 +39,7 @@ export default async function CollectionPage({ params }: Params) {
         title={c.title}
         actions={
           <>
+            <ShareButton orgId={orgId} teamId={c.team_id} kind="collection" targetId={c.id} />
             <Link href={`${org}/collections/${c.id}/present`} className={buttonClass("secondary")}>
               {t("present")}
             </Link>

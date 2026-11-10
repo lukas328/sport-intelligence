@@ -171,17 +171,26 @@ async def _resolve(ctx: Ctx, collection_id: uuid.UUID) -> tuple[Source, Any]:
     raise ProblemError(404, "not-found", "Collection not found")
 
 
+async def resolve(ctx: Ctx, collection_id: uuid.UUID) -> tuple[Source, Any]:
+    """The object behind a collection id, without a permission check (callers check)."""
+    return await _resolve(ctx, collection_id)
+
+
+async def items_of(ctx: Ctx, source: Source, row: Any) -> list[dict[str, Any]]:
+    """The entries of any kind of collection (no permission check: callers check)."""
+    if source == "collection":
+        return await _items_of_collection(ctx, row)
+    if source == "playlist":
+        return await _items_of_playlist(ctx, row.id)
+    if source == "presentation":
+        return await _items_of_presentation(ctx, row.id)
+    return await _items_of_assignment(ctx, row)
+
+
 async def get(ctx: Ctx, collection_id: uuid.UUID) -> dict[str, Any]:
     source, row = await _resolve(ctx, collection_id)
     await get_team(ctx, row.team_id, Action.PLAYLIST_READ_ALL)
-    if source == "collection":
-        items = await _items_of_collection(ctx, row)
-    elif source == "playlist":
-        items = await _items_of_playlist(ctx, row.id)
-    elif source == "presentation":
-        items = await _items_of_presentation(ctx, row.id)
-    else:
-        items = await _items_of_assignment(ctx, row)
+    items = await items_of(ctx, source, row)
     return {
         "id": str(row.id),
         "team_id": str(row.team_id),

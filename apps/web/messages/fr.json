@@ -1343,7 +1343,9 @@
     "copied": "Copié",
     "invalid": "Ce lien a expiré ou a été retiré.",
     "readOnly": "Lecture seule, valable jusqu'au {date}",
-    "scene": "Scène"
+    "scene": "Scène",
+    "previewScenes": "{n, plural, one {# scène} other {# scènes}}",
+    "previewMinutes": "{n} min"
   },
   "ops": {
     "title": "Backoffice",

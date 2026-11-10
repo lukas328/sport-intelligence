@@ -15,9 +15,10 @@ router = APIRouter(tags=["sharing"])
 
 
 class ShareCreate(ApiModel):
-    kind: Literal["play", "match", "playlist", "highlight"]
+    kind: Literal["play", "match", "playlist", "highlight", "scene", "collection"]
     target_id: uuid.UUID
-    days: int = Field(default=14, ge=1, le=90)
+    # a shared link is valid 30 days by default (SPEC 7.8), revocable at any time
+    days: int = Field(default=30, ge=1, le=90)
 
 
 class ShareOut(ApiModel):
@@ -64,6 +65,29 @@ async def revoke(link_id: uuid.UUID, scope: OrgDep) -> None:
 async def public(token: str, ctx: CtxDep) -> dict[str, Any]:
     """Public, read-only content of a share link (no sign-in)."""
     return await service.public(ctx, token)
+
+
+class SharePreview(ApiModel):
+    """What a chat shows for the link (Open Graph): no names of people, nothing behind a login."""
+
+    kind: str
+    title: str
+    club: str
+    team: str
+    scenes: int
+    duration_s: int | None
+    kit: dict[str, str]
+    expires_at: datetime
+
+
+@router.get(
+    "/v1/share/{token}/preview",
+    response_model=SharePreview,
+    dependencies=[Depends(rate_limit("share"))],
+)
+async def preview(token: str, ctx: CtxDep) -> dict[str, Any]:
+    """Data for the link preview (title, club, length); does not count as an opening."""
+    return await service.preview(ctx, token)
 
 
 @router.get(

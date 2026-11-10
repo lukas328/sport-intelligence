@@ -13659,7 +13659,7 @@
       "ShareCreate": {
         "properties": {
           "days": {
-            "default": 14,
+            "default": 30,
             "maximum": 90.0,
             "minimum": 1.0,
             "title": "Days",
@@ -13670,7 +13670,9 @@
               "play",
               "match",
               "playlist",
-              "highlight"
+              "highlight",
+              "scene",
+              "collection"
             ],
             "title": "Kind",
             "type": "string"
@@ -13811,6 +13813,66 @@
           "created_at"
         ],
         "title": "ShareOut",
+        "type": "object"
+      },
+      "SharePreview": {
+        "description": "What a chat shows for the link (Open Graph): no names of people, nothing behind a login.",
+        "properties": {
+          "club": {
+            "title": "Club",
+            "type": "string"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "kit": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Kit",
+            "type": "object"
+          },
+          "scenes": {
+            "title": "Scenes",
+            "type": "integer"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "club",
+          "team",
+          "scenes",
+          "duration_s",
+          "kit",
+          "expires_at"
+        ],
+        "title": "SharePreview",
         "type": "object"
       },
       "SlideIn": {
@@ -33907,6 +33969,49 @@
           }
         },
         "summary": "Public",
+        "tags": [
+          "sharing"
+        ]
+      }
+    },
+    "/v1/share/{token}/preview": {
+      "get": {
+        "description": "Data for the link preview (title, club, length); does not count as an opening.",
+        "operationId": "preview_v1_share__token__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharePreview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview",
         "tags": [
           "sharing"
         ]

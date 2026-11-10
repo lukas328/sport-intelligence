@@ -1343,7 +1343,9 @@
     "copied": "Kopiert",
     "invalid": "Dieser Link ist abgelaufen oder wurde zurückgezogen.",
     "readOnly": "Nur ansehen, gültig bis {date}",
-    "scene": "Szene"
+    "scene": "Szene",
+    "previewScenes": "{n, plural, one {# Szene} other {# Szenen}}",
+    "previewMinutes": "{n} min"
   },
   "ops": {
     "title": "Backoffice",
