@@ -500,7 +500,7 @@ ENDPOINTS += [
     ("GET consents", ORGANISE, _get_consents),
     (
         "GET consent overview",
-        ORGANISE,
+        ORGANISE | {"analyst"},
         lambda a, w: a.get(w.t(f"/seasons/{w.season}/consents")),
     ),
     # players read only their own line (the matrix player has no roster entry)

@@ -22,7 +22,7 @@ Enforced server-side; verified by `apps/api/tests/test_policy_matrix.py`.
 | `player_status.manage` | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ | ✓ |  |
 | `consent.read` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `consent.write` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
-| `consent.overview` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
+| `consent.overview` | ✓ | ✓ | ✓ |  |  |  |  |  | ✓ |  |
 | `team.members.manage` | ✓ | ✓ |  |  |  |  |  |  |  |  |
 | `invite.team` | ✓ | ✓ |  |  |  |  |  |  | ✓ |  |
 | `match.read` | ✓ | ✓ | ✓ | ✓ | ✓ |  | ✓ | ✓ | ✓ |  |
