@@ -69,7 +69,7 @@
 .pl .nav span.on { background: var(--ink); color: var(--sheet); }
 .pl .nav span.on i { color: var(--signal); }
 .pl .top .gap { flex: 1; border-right: 2px solid var(--ink); }
-.pl .search { gap: 10px; padding: 0 22px; color: var(--ink-2); font-size: 14px; min-width: 220px; }
+.pl .search { gap: 10px; padding: 0 22px; color: var(--ink-2); font-size: 14px; min-width: 176px; }
 .pl .top .up { gap: 10px; padding: 0 22px; background: var(--ink); color: var(--sheet); font: 800 13px/1 var(--f); font-stretch: 125%; letter-spacing: 0.05em; text-transform: uppercase; border-right: 0; white-space: nowrap; }
 .pl .acct { justify-content: center; width: 64px; font: 900 13px/1 var(--f); font-stretch: 112%; border-right: 0 !important; border-left: 2px solid var(--ink); }
 .pl.is-phone .top { height: 56px; }
@@ -197,7 +197,7 @@
 .pl th { text-align: right; font: 700 11px/1.2 var(--f); font-stretch: 125%; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2); padding: 0 0 10px 12px; border-bottom: 2px solid var(--ink); white-space: nowrap; }
 .pl th:first-child, .pl td:first-child { text-align: left; padding-left: 0; }
 .pl td { text-align: right; padding: 12px 0 12px 12px; border-bottom: 1px solid var(--hair); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pl td .nr { display: inline-block; width: 30px; font: 900 17px/1 var(--f); font-stretch: 62%; }
+.pl td .nr { display: inline-block; width: 28px; margin-right: 12px; padding: 6px 0 5px; text-align: center; font: 900 17px/1 var(--f); font-stretch: 62%; font-variant-numeric: tabular-nums; color: var(--home-ink); background: var(--home); }
 .pl tr.me td { font-weight: 800; background: var(--sheet); }
 .pl .ok { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); font-weight: 400; }
 .pl .ok i { width: 14px; height: 14px; display: grid; place-items: center; background: var(--ink); color: var(--sheet); font: 900 10px/1 var(--f); font-style: normal; }
@@ -257,7 +257,7 @@
 /* zahlen */
 .pl .goal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--hair); border: 6px solid var(--ink); border-bottom: 0; }
 .pl .goal span { aspect-ratio: 1.45; display: grid; place-items: center; font: 900 40px/1 var(--f); font-stretch: 62%; font-variant-numeric: tabular-nums; background: var(--sheet); }
-.pl .goal span.top { background: var(--signal); }
+.pl .goal span.hot { background: var(--signal); }
 .pl .goal span.zero { color: var(--ink-3); }
 .pl .phases { border-bottom: 2px solid var(--ink); }
 .pl .phases li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-top: 1px solid var(--hair); font-size: 14px; }
@@ -593,7 +593,7 @@ body { margin: 0; background: var(--paper); }
         <section>
           <div class="sh"><h2>Wohin die Gegner trafen</h2><span>18 Tore</span></div>
           <div class="goal" role="img" aria-label="Tore nach Torecke: oben links 3, oben Mitte 1, oben rechts 2, Mitte links 1, Mitte 0, Mitte rechts 2, unten links 5, unten Mitte 1, unten rechts 3">
-            <span>3</span><span>1</span><span>2</span><span>1</span><span class="zero">0</span><span>2</span><span class="top">5</span><span>1</span><span>3</span>
+            <span>3</span><span>1</span><span>2</span><span>1</span><span class="zero">0</span><span>2</span><span class="hot">5</span><span>1</span><span>3</span>
           </div>
           <p class="small" style="margin-top:12px">Unten links aus Sicht der Werferin, die häufigste Ecke. <span class="lnk">5 Szenen</span></p>
         </section>
