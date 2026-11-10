@@ -28,6 +28,18 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expect(form.getByRole("listitem")).toHaveCount(2);
   await form.getByRole("button", { name: "Speichern" }).click();
   await expect(page.getByRole("heading", { name: "Abschluss Flügel" })).toBeVisible();
+
+  // a regular training time, then all units of the rest of the season at once, holidays skipped
+  const slots = page.getByTestId("training-slots");
+  await slots.getByRole("button", { name: "Trainingszeit hinzufügen" }).click();
+  const slotForm = slots.getByRole("form", { name: "Trainingszeit hinzufügen" });
+  await slotForm.getByLabel("Ort (optional)").fill("Halle Seefeld");
+  await slotForm.getByRole("button", { name: "Speichern" }).click();
+  await expect(slots.getByTestId("training-slot")).toContainText("19:00 bis 20:30");
+  await expect(slots.getByTestId("slots-generate")).toContainText("Weihnachten");
+  await slots.getByTestId("slots-generate-button").click();
+  await expect(slots.getByRole("status")).toContainText(/Einheiten? angelegt/);
+  await expectAccessible(page);
   const pdf = page.getByRole("link", { name: "PDF" }).first();
   const res = await page.request.get((await pdf.getAttribute("href"))!);
   expect(res.headers()["content-type"]).toContain("application/pdf");

@@ -59,7 +59,17 @@ export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: strin
     const outcomes = (params.get("outcome") ?? "").split(",").filter((o): o is (typeof OUTCOMES)[number] => (OUTCOMES as readonly string[]).includes(o));
     const types = (params.get("type") ?? "").split(",").filter((o): o is (typeof TYPES)[number] => (TYPES as readonly string[]).includes(o));
     const side = params.get("side");
-    return { ...(outcomes.length ? { outcomes } : {}), ...(types.length ? { types } : {}), ...(side === "own" || side === "opponent" ? { sides: [side] } : {}) } as Filter;
+    // from a player's season line: that player's events, in one match or the whole season
+    const uuid = /^[0-9a-f-]{36}$/;
+    const player = params.get("player");
+    const match = params.get("match");
+    return {
+      ...(outcomes.length ? { outcomes } : {}),
+      ...(types.length ? { types } : {}),
+      ...(side === "own" || side === "opponent" ? { sides: [side] } : {}),
+      ...(player && uuid.test(player) ? { player_ids: [player] } : {}),
+      ...(match && uuid.test(match) ? { match_ids: [match] } : {}),
+    } as Filter;
   });
   const [error, setError] = useState<ErrorKey | null>(null);
   const team = { org_id: orgId, team_id: teamId };

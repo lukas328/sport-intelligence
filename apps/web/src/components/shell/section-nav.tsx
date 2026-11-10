@@ -131,7 +131,7 @@ export function TeamChrome() {
   const path = usePathname();
   if (!active) return null;
   // the official data and the join requests sit under the squad but bring their own heading
-  if (page === "official" || page === "join-requests") return null;
+  if (page === "official" || page === "join-requests" || page === "players") return null;
   // the season page opens with its own stage (one stage per screen, at the top)
   if (/\/season$/.test(path)) return null;
   // the fixture list has its own title and actions
