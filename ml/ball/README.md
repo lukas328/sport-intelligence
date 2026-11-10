@@ -55,10 +55,18 @@ page "Ball-Testset: neue Hallen" (`labelling/testset.html`): 177 balls, 72 frame
 | OWLv2 (suggestions, centre frame) | 44 % | 66 % | 51 % | 10 % |
 | round 3 (`ball_best.pt`) | 15 % | 29 % | 11 % | 8 % |
 | round 6 (`ball_r6.pt`) | 29 % | 51 % | 44 % | 43 % |
+| round 7 (`ball_r7.pt`, 2026-11-10) | 35 % | 53 % | 50 % | 54 % |
 
 - With 177 balls one ball is 0.6 points (standard error about 3.5 points): round 6 is clearly better
   than round 3 in new halls. The first test (40 balls, 7 halls also in training) showed a tie: it
   mostly measured the known halls. The OWLv2 pseudo-labels help generalisation.
+- Round 7 (`kaggle/train_r7_push.py`: round 6 plus OWLv2 labels from 144 more segments of 72 games,
+  test set 2 halls held out, twice the negatives, motion blur, 30 000 steps from round 6; kept as
+  `ball_r7.pt` in `handball-ball-models`): 35 % against 29 % top peak, the balls it gains outnumber
+  the ones it loses 15 to 5 (paired, p = 0.04). But false alarms got worse (54 % of the frames
+  without a ball have a peak of 0.5 or more), so more negative tiles of the same kind do not fix
+  them. Next step there: find out what the false peaks sit on (body parts, ball racks, logos) before
+  more GPU time.
 - Round 6's weakness is false alarms: 43 % of the frames without a ball have a peak of 0.5 or more.
 - The labeller saw OWLv2's suggestions (85 balls clicked on a suggestion), so OWLv2's numbers are
   optimistic where the ball is ambiguous; the nets did not see anything.

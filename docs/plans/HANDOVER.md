@@ -17,8 +17,10 @@ dann `docs/plans/backlog.md`.
 Gemergt (alle bei grüner CI): #16 bis #32.
 - Ball: Testset 2 mit 177 Bällen aus 42 neuen Hallen (`ml/ball/README.md`). Runde 6 schlägt Runde 3
   in neuen Hallen klar (29 % gegen 15 %), hat aber viele Fehlalarme. Runde 7 (mehr Hallen per OWLv2
-  auf Kaggle, Testhallen ausgeschlossen, mehr Negative, Bewegungsunschärfe) läuft auf Kaggle
-  (`handball-ball-r7`); Auswertung auf Testset 2 folgt. Testspiele in `ml/ball/test_games.json` nie
+  auf Kaggle, Testhallen ausgeschlossen, mehr Negative, Bewegungsunschärfe) lief auf Kaggle
+  (`handball-ball-r7`): auf Testset 2 35 % (Runde 6: 29 %, gepaart p = 0.04), aber mehr Fehlalarme
+  (54 % statt 43 %). Nächster Schritt: Fehlalarme zerlegen (Körperteile, Ballwagen, Logos), erst dann
+  wieder GPU. Testspiele in `ml/ball/test_games.json` nie
   fürs Training verwenden. OWL-Aufträge 4 bis 10 laufen auf Kaggle, nicht auf Modal.
 - Produkt: Ballbesitz nur bei laufender Uhr (#24); plausible Laufwerte, Konter, Torhüter-GSAx (#25);
   Spielerstatus, Aufgaben-Fortschritt (#23); Einwilligungs-Übersicht, Saisonverlauf (#28);
