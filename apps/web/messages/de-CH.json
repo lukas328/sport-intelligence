@@ -1237,7 +1237,8 @@
     "focusLabel": "Schwerpunkt",
     "shareLabel": "Im Verein teilen (alle Teams können sie nutzen, nur ihr könnt sie ändern)",
     "save": "Speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "library": "Bibliothek"
   },
   "opponent": {
     "title": "Gegner-Profil",
@@ -2057,7 +2058,10 @@
     "noneHint": "Eine Einheit mit Übungen gibt es als Plan fürs Handy und als PDF für die Halle.",
     "calendarTools": "Kalender abonnieren und Termine importieren",
     "outOnDay": "{n, plural, one {1 fällt aus:} other {# fallen aus:}}",
-    "deleteConfirm": "«{title}» löschen?"
+    "deleteConfirm": "«{title}» löschen?",
+    "upcomingMore": "{n, plural, one {1 weitere Einheit zeigen} other {Alle # weiteren Einheiten zeigen}}",
+    "upcomingLess": "Nur die nächsten vier Wochen zeigen",
+    "empty": "noch leer"
   },
   "schedule": {
     "nav": "Meine Termine",
@@ -2665,7 +2669,9 @@
     "until": "Bis und mit",
     "note": "Notiz",
     "save": "Speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "absentOpen": "Abwesend bis auf Weiteres",
+    "injuredOpen": "Verletzt bis auf Weiteres"
   },
   "accountLink": {
     "title": "{n, plural, one {1 Konto ohne Kadereintrag} other {# Konten ohne Kadereintrag}}",
@@ -2685,7 +2691,7 @@
     "shots": "Würfe",
     "shootingPct": "Wurfquote",
     "sevenM": "7 m",
-    "assists": "Assists",
+    "assists": "Torvorlagen",
     "turnovers": "Fehler",
     "suspensions": "2 Min",
     "saves": "Paraden",
@@ -2697,7 +2703,8 @@
     "home": "gegen {opponent}",
     "away": "auswärts bei {opponent}",
     "noMatches": "Noch keine Spiele in dieser Saison.",
-    "source": "Aus den Matchberichten und dem Erfassten, wie auf den Matchseiten. Spielminuten werden nicht erfasst."
+    "source": "Aus den Matchberichten und dem, was erfasst wurde, wie auf den Matchseiten. Spielminuten werden nicht erfasst.",
+    "noMatchesYet": "Noch kein gespieltes Spiel in dieser Saison. Die Zahlen erscheinen nach dem ersten Spiel mit Matchbericht oder Erfassung."
   },
   "slots": {
     "title": "Trainingszeiten {season}",

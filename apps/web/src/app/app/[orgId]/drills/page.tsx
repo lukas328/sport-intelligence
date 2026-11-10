@@ -43,6 +43,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
       </nav>
       <ClubDrills orgId={orgId} focus={wanted} />
       {/* the library: the club's own drills come first, above */}
+      <h2 className="text-xl">{t("library")}</h2>
       <ul className="grid border-t-2 border-foreground md:grid-cols-2 md:gap-x-12" data-testid="drills">
         {list.map((d) => (
           <li key={d.id} id={d.id} className="grid scroll-mt-4 grid-cols-[4.5rem_minmax(0,1fr)] gap-x-5 border-b border-foreground/15 py-5 target:bg-surface sm:grid-cols-[6rem_minmax(0,1fr)]">

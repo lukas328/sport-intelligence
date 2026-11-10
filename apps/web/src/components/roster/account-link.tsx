@@ -80,7 +80,7 @@ export function UnlinkedAccounts({ orgId, teamId, entries, members, rosterKey }:
                   </option>
                 ))}
               </Select>
-              <Button type="submit" size="sm" variant="secondary" className="max-sm:min-h-11" loading={link.isPending && link.variables?.userId === m.user_id}>
+              <Button type="submit" size="sm" className="max-sm:min-h-11" loading={link.isPending && link.variables?.userId === m.user_id}>
                 {t("accountLink.link")}
               </Button>
             </form>

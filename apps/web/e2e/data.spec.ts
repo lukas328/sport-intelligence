@@ -33,10 +33,13 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   const slots = page.getByTestId("training-slots");
   await slots.getByRole("button", { name: "Trainingszeit hinzufügen" }).click();
   const slotForm = slots.getByRole("form", { name: "Trainingszeit hinzufügen" });
+  await slotForm.getByLabel("Wochentag").selectOption("1");
   await slotForm.getByLabel("Ort (optional)").fill("Halle Seefeld");
   await slotForm.getByRole("button", { name: "Speichern" }).click();
   await expect(slots.getByTestId("training-slot")).toContainText("19:00 bis 20:30");
-  await expect(slots.getByTestId("slots-generate")).toContainText("Weihnachten");
+  // only holidays on a training day are offered (Monday: Ostermontag, Pfingstmontag)
+  await expect(slots.getByTestId("slots-generate")).toContainText("Ostermontag");
+  await expect(slots.getByTestId("slots-generate")).not.toContainText("Weihnachten");
   await slots.getByTestId("slots-generate-button").click();
   await expect(slots.getByRole("status")).toContainText(/Einheiten? angelegt/);
   await expectAccessible(page);

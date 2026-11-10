@@ -155,6 +155,6 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await page.goto(`/app/${orgId}/teams/${teamId}`);
   await page.getByRole("link", { name: "Lea Beispiel" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "#9 Lea Beispiel" })).toBeVisible();
-  await expect(page.getByText("Noch keine Spiele in dieser Saison.")).toBeVisible();
+  await expect(page.getByTestId("season-line-empty")).toContainText("Noch kein gespieltes Spiel in dieser Saison.");
   await expectAccessible(page);
 });

@@ -261,6 +261,11 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
   const today = new Date().toISOString().slice(0, 10);
   const all = sessions.data ?? [];
   const upcoming = all.filter((s) => s.on_date >= today);
+  const inFourWeeks = new Date(Date.now() + 28 * 86400_000).toISOString().slice(0, 10);
+  const inTwoWeeks = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10);
+  // at least the next unit, even when it is further away
+  const soon = upcoming.filter((s, i) => i === 0 || s.on_date <= inFourWeeks);
+  const [allUpcoming, setAllUpcoming] = useState(false);
   const past = all.filter((s) => s.on_date < today).reverse().slice(0, 10);
   const done = () => {
     setEditing(null);
@@ -274,11 +279,12 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
           <span className="text-sm text-muted">
             {format.dateTime(new Date(`${s.on_date}T12:00:00`), { weekday: "short", day: "numeric", month: "short" })}
             {s.starts_at && `, ${format.dateTime(new Date(s.starts_at), { hour: "2-digit", minute: "2-digit" })}`}
-            {s.location && ` · ${s.location}`} · {t("totalMinutes", { minutes: s.total_minutes })}
+            {s.location && ` · ${s.location}`} · {s.total_minutes > 0 ? t("totalMinutes", { minutes: s.total_minutes }) : t("empty")}
           </span>
         </div>
         {s.drills.length > 0 && <p className="text-sm">{s.drills.map((d) => d.name).join(" · ")}</p>}
-        {canPlan && s.on_date >= today && outOn(s.on_date).length > 0 && (
+        {/* who is out only where it changes the plan: the next two weeks */}
+        {canPlan && s.on_date >= today && s.on_date <= inTwoWeeks && outOn(s.on_date).length > 0 && (
           <p className="text-sm" data-testid="session-out">
             <span className="font-semibold">{t("outOnDay", { n: outOn(s.on_date).length })}</span> <span className="text-muted">{outOn(s.on_date).join(", ")}</span>
           </p>
@@ -323,6 +329,9 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
         </section>
       )}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
+      {canPlan && season && (
+        <TrainingSlots orgId={orgId} teamId={teamId} season={season} onGenerated={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />
+      )}
       <section className="space-y-2" aria-labelledby="upcoming">
         <h3 id="upcoming" className="text-lg font-semibold">{t("upcoming")}</h3>
         {upcoming.length === 0 ? (
@@ -333,7 +342,15 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
             {canPlan ? t("noneHint") : null}
           </EmptyState>
         ) : (
-          <ul className="border-t-2 border-foreground">{upcoming.map(item)}</ul>
+          <>
+            {/* units made for a whole season would fill the page: the next four weeks, the rest folded */}
+            <ul className="border-t-2 border-foreground">{(allUpcoming ? upcoming : soon).map(item)}</ul>
+            {upcoming.length > soon.length && (
+              <button type="button" className="min-h-9 text-sm font-medium underline underline-offset-2" onClick={() => setAllUpcoming((v) => !v)}>
+                {allUpcoming ? t("upcomingLess") : t("upcomingMore", { n: upcoming.length - soon.length })}
+              </button>
+            )}
+          </>
         )}
       </section>
       {past.length > 0 && (
@@ -341,9 +358,6 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
           <h3 id="past" className="text-lg font-semibold">{t("past")}</h3>
           <ul className="border-t-2 border-foreground">{past.map(item)}</ul>
         </section>
-      )}
-      {canPlan && season && (
-        <TrainingSlots orgId={orgId} teamId={teamId} season={season} onGenerated={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />
       )}
       <FocusList focus={focus.data ?? []} />
       {canPlan && (

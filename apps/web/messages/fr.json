@@ -1237,7 +1237,8 @@
     "focusLabel": "Thème",
     "shareLabel": "Partager dans le club (toutes les équipes peuvent l'utiliser, vous seuls pouvez le modifier)",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "library": "Bibliothèque"
   },
   "opponent": {
     "title": "Profil adversaire",
@@ -2057,7 +2058,10 @@
     "noneHint": "Une séance avec exercices existe comme plan sur le téléphone et en PDF pour la salle.",
     "calendarTools": "S'abonner au calendrier et importer des dates",
     "outOnDay": "{n, plural, one {1 absent·e :} other {# absent·es :}}",
-    "deleteConfirm": "Supprimer « {title} » ?"
+    "deleteConfirm": "Supprimer « {title} » ?",
+    "upcomingMore": "{n, plural, one {Afficher 1 autre séance} other {Afficher les # autres séances}}",
+    "upcomingLess": "Seulement les quatre prochaines semaines",
+    "empty": "encore vide"
   },
   "schedule": {
     "nav": "Mes rendez-vous",
@@ -2665,7 +2669,9 @@
     "until": "Jusqu'au (inclus)",
     "note": "Note",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "absentOpen": "Absent·e jusqu'à nouvel ordre",
+    "injuredOpen": "Blessé·e jusqu'à nouvel ordre"
   },
   "accountLink": {
     "title": "{n, plural, one {1 compte sans entrée dans l'effectif} other {# comptes sans entrée dans l'effectif}}",
@@ -2697,7 +2703,8 @@
     "home": "contre {opponent}",
     "away": "à l'extérieur chez {opponent}",
     "noMatches": "Pas encore de match cette saison.",
-    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies."
+    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies.",
+    "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille ou saisie."
   },
   "slots": {
     "title": "Horaires d'entraînement {season}",
