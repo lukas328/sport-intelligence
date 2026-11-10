@@ -1,0 +1,157 @@
+<title>Ball oder nicht</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* One decision per crop: the detector's confident peak, three frames, the scene below. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --ink: #17202b; --muted: #5a6675; --line: #d3d9e1;
+  --ball: #e8b100; --ball-ink: #1b1600; --court: #2b6cb0; --good: #1f8a4c; --warn: #b25d00; --mark: #ff3b5c;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+    --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+  --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; margin: 0;
+  padding: 14px max(16px, env(safe-area-inset-left, 0px)) 24px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 12px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { flex: 1 1 160px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; align-self: center; min-width: 120px; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--ball); transition: width .3s; }
+.note { font-size: 13px; color: var(--warn); }
+main { max-width: 980px; display: grid; gap: 12px; }
+.crop { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
+.crop img { display: block; width: 100%; height: auto; image-rendering: auto; }
+/* a ring at the centre of each of the three frames: the detector's peak */
+.crop .ring { position: absolute; top: 50%; width: 12%; aspect-ratio: 1; transform: translate(-50%, -50%);
+  border: 2px solid var(--mark); border-radius: 50%; box-shadow: 0 0 0 1px rgba(0,0,0,.6); pointer-events: none; }
+.tags { position: absolute; left: 8px; top: 8px; font-family: var(--mono); font-size: 11px; background: rgba(0,0,0,.6);
+  color: #fff; padding: 2px 6px; border-radius: 3px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 12px; align-items: start; }
+@media (max-width: 760px) { .row { grid-template-columns: minmax(0, 1fr); } }
+.ctx img { display: block; width: 100%; border-radius: 6px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button { font: 600 15px var(--body); padding: 12px 8px; min-height: 44px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+button.yes { background: var(--ball); color: var(--ball-ink); border-color: transparent; }
+button.no { background: var(--court); color: #fff; border-color: transparent; }
+button.wide { grid-column: 1 / -1; }
+kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px solid currentColor; border-radius: 3px; opacity: .8; }
+.meta { font-size: 13px; color: var(--muted); }
+.meta b { color: var(--ink); }
+.chip { font-family: var(--mono); font-size: 12px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--line); }
+.chip.ball { background: var(--ball); color: var(--ball-ink); border-color: transparent; }
+.chip.none { background: var(--court); color: #fff; border-color: transparent; }
+.chip.unsure { border-color: var(--warn); color: var(--warn); }
+.help { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; padding-left: 18px; }
+.toast { min-height: 18px; font-size: 13px; color: var(--good); }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<header>
+  <h1>Ball oder nicht?</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+  <span class="note" id="note" hidden></span>
+</header>
+
+<main>
+  <div class="crop" id="crop">
+    <img id="cimg" alt="Ausschnitt um den Punkt des Erkenners, drei Bilder nacheinander">
+    <span class="ring" style="left:16.67%"></span><span class="ring" style="left:50%"></span><span class="ring" style="left:83.33%"></span>
+    <span class="tags">vorher · jetzt · nachher</span>
+  </div>
+  <div class="row">
+    <div class="ctx"><img id="ximg" alt="Ganze Szene, der Punkt ist gelb eingekreist"></div>
+    <div class="panel">
+      <div class="meta" id="meta"></div>
+      <div class="btns">
+        <button class="yes" id="yes">Ball <kbd>J</kbd></button>
+        <button class="no" id="no">Kein Ball <kbd>F</kbd></button>
+        <button id="unsure">Unsicher <kbd>U</kbd></button>
+        <button id="prev">← Zurück</button>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
+      <ul class="help">
+        <li>Liegt im roten Kreis ein Ball (auch in der Hand, auch ein Ball neben dem Spiel)? <kbd>J</kbd> = Ball, <kbd>F</kbd> = kein Ball.</li>
+        <li>Das untere Bild zeigt die ganze Szene, der Punkt ist gelb eingekreist.</li>
+        <li>Zweifel: <kbd>U</kbd>. Pfeiltasten blättern.</li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { items: [], idx: 0, labels: {}, db: null };
+const cache = {};
+function pre(src) { if (!cache[src]) { const i = new Image(); i.src = src; cache[src] = i; } }
+function cur() { return state.items[state.idx]; }
+
+function render() {
+  const it = cur(); if (!it) return;
+  $("cimg").src = "c/" + it.k + ".jpg"; $("ximg").src = "x/" + it.k + ".jpg";
+  const lab = state.labels[it.id];
+  const chip = lab ? `<span class="chip ${lab.state}">${{ ball: "Ball", none: "kein Ball", unsure: "unsicher" }[lab.state]}</span>` : `<span class="chip">offen</span>`;
+  $("meta").innerHTML = `<b>${state.idx + 1}</b> / ${state.items.length} · ${chip}`;
+  const done = state.items.filter((x) => state.labels[x.id]).length;
+  const balls = state.items.filter((x) => state.labels[x.id]?.state === "ball").length;
+  $("progress").textContent = `${done} von ${state.items.length} erledigt · ${balls} Bälle`;
+  $("barfill").style.width = (done / Math.max(1, state.items.length) * 100) + "%";
+  for (const d of [1, 2, 3]) { const n = state.items[state.idx + d]; if (n) { pre("c/" + n.k + ".jpg"); pre("x/" + n.k + ".jpg"); } }
+}
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2000); }
+function go(i) { state.idx = Math.max(0, Math.min(state.items.length - 1, i)); render(); }
+function nextOpen() {
+  for (let d = 1; d <= state.items.length; d++) {
+    const j = (state.idx + d) % state.items.length;
+    if (!state.labels[state.items[j].id]) { go(j); return; }
+  }
+  go(state.idx + 1); toast("Alles erledigt, danke!");
+}
+async function save(kind) {
+  const it = cur(); if (!it) return;
+  const body = { state: kind, game: it.game, video: it.video, frame: it.frame, x: it.x, y: it.y, score: it.score, at: Date.now() };
+  state.labels[it.id] = body; nextOpen();
+  if (!state.db) { toast("Nicht gespeichert: Speicher nicht erreichbar."); return; }
+  try { await state.db.collection("labels").doc(it.id).set(body); }
+  catch (e) { toast("Speichern fehlgeschlagen: " + (e && e.message ? e.message : "unbekannter Fehler")); }
+}
+$("yes").onclick = () => save("ball");
+$("no").onclick = () => save("none");
+$("unsure").onclick = () => save("unsure");
+$("prev").onclick = () => go(state.idx - 1);
+document.addEventListener("keydown", (ev) => {
+  const k = ev.key.toLowerCase();
+  if (k === "j") save("ball"); else if (k === "f") save("none"); else if (k === "u") save("unsure");
+  else if (k === "arrowleft") go(state.idx - 1); else if (k === "arrowright") go(state.idx + 1);
+});
+async function start() {
+  try { state.items = await (await fetch("items.json")).json(); }
+  catch (e) { $("progress").textContent = "Liste konnte nicht geladen werden."; return; }
+  render();
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
+  state.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Labels noch nicht erreichbar."; }, 10000);
+  let first = true;
+  db.collection("labels").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); $("note").hidden = true; }
+    for (const d of snap.docs) state.labels[d.id] = d.data();
+    if (first) { first = false; const j = state.items.findIndex((x) => !state.labels[x.id]); if (j >= 0) { go(j); return; } }
+    render();
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Labels konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>
