@@ -167,7 +167,7 @@ class JobOut(ApiModel):
 
 
 class OpponentColors(ApiModel):
-    """The opponent's colours for this match (TRIKOT.md, section 2). The web applies the clash rule
+    """The opponent's colours for this match (docs/design/ux-reset). The web applies the clash rule
     (lib/color.ts, opponentShown); nothing here is guessed."""
 
     color: str | None = Field(description="first colour; null while nobody said it")

@@ -1,7 +1,7 @@
 # Design
 
-How the web app looks and behaves, and why. The redesign is decided: scope and navigation in
-ADR 029, the look "Trikot" in `docs/design/ux-reset/TRIKOT.md` (phase 2 builds it). The rules below are checked where possible
+How the web app looks and behaves, and why. Scope and navigation of the redesign are in ADR
+029. The new look is decided in `docs/design/ux-reset/` and still open. The rules below are checked where possible
 (`apps/web/src/lib/design-lint.test.ts`, `apps/web/src/lib/nav-model.test.ts`). ADR 023 records
 the decisions; this file is the working reference.
 
@@ -22,8 +22,8 @@ the decisions; this file is the working reference.
 ## Navigation (ADR 029)
 
 Scope and structure follow `docs/design/ux-reset/SPEC.md` (sections 1, 6, 7, 9) and ADR 029.
-The look is defined in `docs/design/ux-reset/TRIKOT.md`; until phase 2 is built, the sections
-below on identity and visual language describe what is still on screen and are superseded there.
+The new look is decided in `docs/design/ux-reset/` and still open; the sections below on
+identity and visual language describe what is on screen today.
 
 | Role | Destinations |
 |---|---|
@@ -53,7 +53,7 @@ shared page for scenes and collections (`/s/[token]`, with Open Graph data), con
 (`/einwilligung/[token]`), "Was sich wiederholt" on Saison, "Gegentore nach Position" on the
 Spiel tab, the dialog "Spielbericht hinzufügen".
 
-## Identity: "Die Halle" (ADR 024, superseded by TRIKOT.md)
+## Identity: "Die Halle" (ADR 024, on screen today; the new look is open)
 
 The app should feel like a club's hall, not like a dashboard. Two modes, one rule:
 

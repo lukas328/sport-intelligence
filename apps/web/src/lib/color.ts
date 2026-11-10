@@ -134,12 +134,9 @@ export function clubStyle(hex: string | null | undefined): Record<string, string
   };
 }
 
-// ---- Trikot: the club's kit and the opponent's colour (docs/design/ux-reset/TRIKOT.md) ----------
+// ---- the club's two colours and the opponent's colour (docs/design/ux-reset; look still open) ------
 
-export const KIT_PATTERNS = ["uni", "stripes", "hoops", "sash", "halves"] as const;
-export type KitPattern = (typeof KIT_PATTERNS)[number];
-
-/** Neutral page and ink of both themes (TRIKOT.md, section 5). */
+/** Neutral page and ink of both themes, the reference for the contrast values below. */
 export const CLOTH = { light: "#f6f5f2", dark: "#121416" } as const;
 export const KIT_INK = { light: "#14171a", dark: "#f1f0ec" } as const;
 /** The opponent's colour while nobody has said it: never a guess. */
@@ -148,21 +145,19 @@ export const OPPONENT_UNKNOWN = "#3d4449";
 export interface Kit {
   a: string;
   b: string;
-  pattern: KitPattern;
 }
 
 export interface KitText {
   /** numerals and names in the kit colour, at least 4.5:1 on the cloth */
   color: string;
   /** set when the kit colour itself cannot carry text (white, yellow on light; black on dark):
-   * the text falls back to ink and the kit colour becomes its hard shadow */
+   * the text falls back to ink and the kit colour can accompany it (e.g. as a shadow or mark) */
   shadow: string | null;
 }
 
 export interface KitTheme {
   a: string;
   b: string;
-  pattern: KitPattern;
   /** text on the first colour (ink or white) */
   ink: string;
   text: { light: KitText; dark: KitText };
@@ -178,15 +173,13 @@ function normalise(hex: string | null | undefined, fallback: string): string {
   return hex && parse(hex) ? hex.toLowerCase() : fallback;
 }
 
-/** Derived values of a club kit: text on the shirt, kit-coloured text on the page in both themes. */
+/** Derived values of the club colours: text on the shirt, kit-coloured text on the page in both themes. */
 export function kitTheme(kit: Partial<Kit> & { a: string }): KitTheme {
   const a = normalise(kit.a, DEFAULT_CLUB);
   const b = normalise(kit.b, "#ffffff");
-  const pattern = KIT_PATTERNS.includes(kit.pattern as KitPattern) ? (kit.pattern as KitPattern) : "uni";
   return {
     a,
     b,
-    pattern,
     ink: contrastRatio(a, "#ffffff") >= contrastRatio(a, KIT_INK.light) ? "#ffffff" : KIT_INK.light,
     text: { light: kitText(a, CLOTH.light, KIT_INK.light), dark: kitText(a, CLOTH.dark, KIT_INK.dark) },
   };
@@ -226,7 +219,7 @@ export interface OpponentShown {
 }
 
 /**
- * The opponent as shown next to us (TRIKOT.md, clash rule): like a real away kit, an opponent
+ * The opponent as shown next to us (clash rule): like a real away kit, an opponent
  * whose colour is too close to ours appears in its second colour, or in ink.
  */
 export function opponentShown(own: string, first: string | null | undefined, second?: string | null): OpponentShown {

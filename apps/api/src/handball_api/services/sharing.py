@@ -361,7 +361,6 @@ async def preview(ctx: Ctx, token: str) -> dict[str, Any]:
         "kit": {
             "a": org.primary_color if org else "#0b6bcb",
             "b": org.secondary_color if org else "#ffffff",
-            "pattern": org.kit_pattern if org else "uni",
         },
         "expires_at": link.expires_at,
     }

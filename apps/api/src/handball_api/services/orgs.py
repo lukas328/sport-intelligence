@@ -47,7 +47,6 @@ async def create_org(ctx: Ctx, user: User, data: OrgCreate) -> Organization:
         country=data.country,
         primary_color=data.primary_color,
         secondary_color=data.secondary_color,
-        kit_pattern=data.kit_pattern,
     )
     ctx.db.add(org)
     await ctx.db.flush()

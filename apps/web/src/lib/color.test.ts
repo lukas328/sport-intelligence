@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CLOTH, contrastRatio, KIT_INK, kitsClash, kitTheme, opponentShown, OPPONENT_UNKNOWN } from "./color";
 
-// the kits TRIKOT.md asks to check every screen with, plus the plain ones
+// club colours to check every screen with
 const KITS = {
   red: "#c8102e",
   blue: "#0b3d91",
@@ -15,8 +15,7 @@ const KITS = {
 describe("kit theme", () => {
   for (const [name, a] of Object.entries(KITS)) {
     it(`keeps ${name} text readable on the cloth in both themes`, () => {
-      const k = kitTheme({ a, b: "#ffffff", pattern: "stripes" });
-      expect(k.pattern).toBe("stripes");
+      const k = kitTheme({ a, b: "#ffffff" });
       // text on the shirt itself
       expect(contrastRatio(k.ink, k.a)).toBeGreaterThanOrEqual(4.5);
       for (const theme of ["light", "dark"] as const) {
@@ -40,9 +39,8 @@ describe("kit theme", () => {
     expect(kitTheme({ a: KITS.blue }).text.light.shadow).toBeNull();
   });
 
-  it("defaults pattern and second colour, and rejects broken input", () => {
+  it("defaults the second colour and rejects broken input", () => {
     const k = kitTheme({ a: "not a colour" });
-    expect(k.pattern).toBe("uni");
     expect(k.b).toBe("#ffffff");
     expect(k.a).toMatch(/^#[0-9a-f]{6}$/);
   });

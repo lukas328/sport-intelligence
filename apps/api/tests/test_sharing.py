@@ -162,7 +162,7 @@ async def test_share_scene_and_collection(make_api: Callable[[], Api]) -> None:
         2,
         14,
     )
-    assert pv["kit"] == {"a": "#112233", "b": "#ffffff", "pattern": "uni"}
+    assert pv["kit"] == {"a": "#112233", "b": "#ffffff"}
     page = (await anon.get(f"/v1/share/{tok}")).json()
     assert page["kind"] == "collection" and page["collection"]["title"] == "Rückzug"
     assert [i["kind"] for i in page["collection"]["items"]] == ["note", "scene", "scene"]

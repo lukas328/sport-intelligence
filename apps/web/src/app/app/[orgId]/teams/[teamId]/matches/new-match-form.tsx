@@ -36,7 +36,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [kits, setKits] = useState(KIT_DEFAULTS);
-  // the opponent's colour counts as said only when somebody picked it (never a default, TRIKOT.md)
+  // the opponent's colour counts as said only when somebody picked it (never a default: unknown stays unknown)
   const [opponentPicked, setOpponentPicked] = useState(false);
   const [training, setTraining] = useState(false);
   const [away, setAway] = useState(false);

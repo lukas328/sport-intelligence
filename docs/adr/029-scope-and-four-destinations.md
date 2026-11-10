@@ -1,6 +1,6 @@
-# 029. Scope, four destinations, Trikot
+# 029. Scope, four destinations, hidden team features
 
-- Status: accepted (structure and data built; the look follows in phase 2)
+- Status: accepted (structure and data built; the look is still open)
 - Date: 2026-11-10
 - Supersedes: the navigation of ADR 023 and the identity "Die Halle" of ADR 024
 - Numbering: the brief for this work called it ADR 025; 025 to 028 were taken, so it is 029.
@@ -36,10 +36,11 @@ communication features that only work when everyone in the club uses the app.
 6. **Sammlung** is one object (scenes, plays, notes) instead of playlist, presentation and
    assignment. The older objects stay as data and are read as collections.
 7. **Consent through a link** without an account is the one thing players and parents must do.
-8. **The look is "Trikot"** (`docs/design/ux-reset/TRIKOT.md`): every match is two kits; colour
-   belongs to the teams, the app is neutral cloth and ink. The club kit is two colours and a
-   pattern; the opponent's colour comes from what somebody said for the match or for that club
-   and is never guessed; a clash shows the opponent in its second colour or in ink.
+8. **The look is not decided here.** It is decided in `docs/design/ux-reset/` and still open
+   (several directions are being explored). The data the screens need in any direction is built:
+   the club's first and second colour with their contrast values (`lib/color.ts`), and the
+   opponent's colour per match, remembered per opponent club and never guessed, with a rule for
+   colours too close to ours (second colour, then ink).
 
 ## Consequences
 
@@ -47,7 +48,7 @@ communication features that only work when everyone in the club uses the app.
   and the data the new screens need (kit, opponent colour, goals conceded by position, season
   themes, shared links for scenes and collections with Open Graph data, consent links,
   collections, demo data). Screens that did not exist are plain pages with the existing
-  components. Phase 2 builds the Trikot look on top.
+  components. The look follows once it is decided.
 - The workspace inside the Video tab still has its own tool tabs; they go in phase 2 (SPEC 7.3:
   no sub-tabs). Matrix and the data assistant stay as pages under Szenen until the search field
   answers questions itself.
@@ -60,4 +61,4 @@ communication features that only work when everyone in the club uses the app.
   hides them at no cost.
 - Keeping playlists and presentations as separate objects: rejected, the coach thinks in one
   thing to show the team; a read-only mapping keeps the data without a migration.
-- The direction "Halle" (hall floor, paper sheet, LED board): replaced by Trikot on 2026-11-10.
+- Recording a visual direction here: left out on purpose; it is still being explored.

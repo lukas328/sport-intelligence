@@ -3,7 +3,7 @@ stack (docker compose up, or scripts/local-stack.sh).
 
 A club from the Zürichsee region that shows the product the way a coach would use it:
 
-- Herren 1 with a confirmed squad (numbers, positions) and its kit (two colours, a pattern),
+- Herren 1 with a confirmed squad (numbers, positions) and its two club colours,
 - three matches with video (synthetic footage through the real pipeline) and their events: about
   50 shots per side with places and goal corners, 7 m, turnovers, so each match has its three
   things, a shot map, goals conceded by position and 30 or more scenes,
@@ -326,7 +326,6 @@ def main() -> None:
             "name": CLUB,
             "primary_color": "#0b3d91",
             "secondary_color": "#ffffff",
-            "kit_pattern": "hoops",
         },
     ).json()["id"]
     o = f"/v1/orgs/{org}"

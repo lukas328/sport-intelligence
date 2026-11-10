@@ -6,7 +6,6 @@ from typing import Any
 
 from sqlalchemy import (
     Boolean,
-    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
@@ -29,10 +28,6 @@ class Organization(Base, EntityMixin):
     __tablename__ = "organizations"
     __table_args__ = (
         UniqueConstraint("official_provider", "official_club_id", name="uq_organizations_official"),
-        CheckConstraint(
-            "kit_pattern IN ('uni', 'stripes', 'hoops', 'sash', 'halves')",
-            name="kit_pattern_values",
-        ),
     )
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -40,10 +35,6 @@ class Organization(Base, EntityMixin):
     logo_key: Mapped[str | None] = mapped_column(String(300))
     primary_color: Mapped[str] = mapped_column(String(7), nullable=False, default="#0b6bcb")
     secondary_color: Mapped[str] = mapped_column(String(7), nullable=False, default="#ffffff")
-    # kit pattern with the two colours above (TRIKOT.md, section 2)
-    kit_pattern: Mapped[str] = mapped_column(
-        String(10), nullable=False, default="uni", server_default="uni"
-    )
     plan: Mapped[Plan] = mapped_column(str_enum(Plan), nullable=False, default=Plan.FREE)
     data_region: Mapped[DataRegion] = mapped_column(
         str_enum(DataRegion), nullable=False, default=DataRegion.CH

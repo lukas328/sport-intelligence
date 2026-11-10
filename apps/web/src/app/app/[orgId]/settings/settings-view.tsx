@@ -11,8 +11,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
 import { Alert, EmptyState } from "@/components/ui/card";
-import { Input, Select } from "@/components/ui/field";
-import { KIT_PATTERNS, type KitPattern } from "@/lib/color";
+import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { FileField } from "@/components/ui/file-field";
@@ -40,7 +39,6 @@ export function ClubSection({ org }: { org: Org }) {
         name: String(f.get("name")),
         primary_color: String(f.get("primary_color")),
         secondary_color: String(f.get("secondary_color")),
-        kit_pattern: String(f.get("kit_pattern")) as KitPattern,
       },
     });
     const logo = f.get("logo");
@@ -76,13 +74,6 @@ export function ClubSection({ org }: { org: Org }) {
             <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue={org.primary_color} className="h-11 w-24 p-1" />
             <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue={org.secondary_color} className="h-11 w-24 p-1" />
           </div>
-          <Select label={t("settings.kitPattern")} name="kit_pattern" defaultValue={org.kit_pattern ?? "uni"}>
-            {KIT_PATTERNS.map((p) => (
-              <option key={p} value={p}>
-                {t(`settings.kitPattern_${p}`)}
-              </option>
-            ))}
-          </Select>
           <FileField label={t("onboarding.logo")} name="logo" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} button={t("file.choose")} empty={t("file.none")} />
           <Button type="submit" loading={busy}>
             {t("common.save")}

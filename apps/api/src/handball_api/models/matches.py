@@ -74,7 +74,7 @@ class Match(Base, EntityMixin, TenantMixin):
     # only when known (the user's choice): referees often wear black like many teams, and a guessed
     # referee colour takes those players away from their team (ADR 027 addendum)
     kit_referee: Mapped[str | None] = mapped_column(String(7))
-    # the opponent's shirt colour in this match as somebody said it (TRIKOT.md, section 2). The
+    # the opponent's shirt colour in this match as somebody said it (docs/design/ux-reset). The
     # kit_opponent above always holds a value for the pipeline; this one stays null while unknown.
     opponent_kit: Mapped[str | None] = mapped_column(String(7))
     score_own: Mapped[int | None] = mapped_column(SmallInteger)

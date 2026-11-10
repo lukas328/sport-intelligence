@@ -9577,7 +9577,7 @@
         "type": "object"
       },
       "OpponentColors": {
-        "description": "The opponent's colours for this match (TRIKOT.md, section 2). The web applies the clash rule\n(lib/color.ts, opponentShown); nothing here is guessed.",
+        "description": "The opponent's colours for this match (docs/design/ux-reset). The web applies the clash rule\n(lib/color.ts, opponentShown); nothing here is guessed.",
         "properties": {
           "color": {
             "anyOf": [
@@ -9901,18 +9901,6 @@
             "title": "Country",
             "type": "string"
           },
-          "kit_pattern": {
-            "default": "uni",
-            "enum": [
-              "uni",
-              "stripes",
-              "hoops",
-              "sash",
-              "halves"
-            ],
-            "title": "Kit Pattern",
-            "type": "string"
-          },
           "name": {
             "maxLength": 120,
             "minLength": 1,
@@ -9971,18 +9959,6 @@
           "id": {
             "format": "uuid",
             "title": "Id",
-            "type": "string"
-          },
-          "kit_pattern": {
-            "default": "uni",
-            "enum": [
-              "uni",
-              "stripes",
-              "hoops",
-              "sash",
-              "halves"
-            ],
-            "title": "Kit Pattern",
             "type": "string"
           },
           "my_role": {
@@ -10097,24 +10073,6 @@
               }
             ],
             "title": "Country"
-          },
-          "kit_pattern": {
-            "anyOf": [
-              {
-                "enum": [
-                  "uni",
-                  "stripes",
-                  "hoops",
-                  "sash",
-                  "halves"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kit Pattern"
           },
           "name": {
             "anyOf": [

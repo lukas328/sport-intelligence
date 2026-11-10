@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import EmailStr, Field, StringConstraints, model_validator
 
@@ -17,8 +17,6 @@ from handball_api.models.enums import (
 from handball_api.schemas.common import ApiModel, HexColor, Name
 
 Country = Annotated[str, StringConstraints(pattern=r"^[A-Z]{2}$")]
-# the club's kit (docs/design/ux-reset/TRIKOT.md, section 2): first and second colour plus pattern
-KitPattern = Literal["uni", "stripes", "hoops", "sash", "halves"]
 InviteeName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
 
 
@@ -27,7 +25,6 @@ class OrgCreate(ApiModel):
     country: Country = "CH"
     primary_color: HexColor = "#0b6bcb"
     secondary_color: HexColor = "#ffffff"
-    kit_pattern: KitPattern = "uni"
 
 
 class OrgUpdate(ApiModel):
@@ -35,7 +32,6 @@ class OrgUpdate(ApiModel):
     country: Country | None = None
     primary_color: HexColor | None = None
     secondary_color: HexColor | None = None
-    kit_pattern: KitPattern | None = None
 
 
 class OrgOut(ApiModel):
@@ -44,7 +40,6 @@ class OrgOut(ApiModel):
     country: str
     primary_color: str
     secondary_color: str
-    kit_pattern: KitPattern = "uni"
     has_logo: bool
     plan: Plan
     data_region: DataRegion

@@ -8065,7 +8065,7 @@ export interface components {
         };
         /**
          * OpponentColors
-         * @description The opponent's colours for this match (TRIKOT.md, section 2). The web applies the clash rule
+         * @description The opponent's colours for this match (docs/design/ux-reset). The web applies the clash rule
          *     (lib/color.ts, opponentShown); nothing here is guessed.
          */
         OpponentColors: {
@@ -8161,12 +8161,6 @@ export interface components {
              * @default CH
              */
             country?: string;
-            /**
-             * Kit Pattern
-             * @default uni
-             * @enum {string}
-             */
-            kit_pattern?: "uni" | "stripes" | "hoops" | "sash" | "halves";
             /** Name */
             name: string;
             /**
@@ -8202,12 +8196,6 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /**
-             * Kit Pattern
-             * @default uni
-             * @enum {string}
-             */
-            kit_pattern?: "uni" | "stripes" | "hoops" | "sash" | "halves";
             my_role: components["schemas"]["OrgRole"];
             /** Name */
             name: string;
@@ -8251,8 +8239,6 @@ export interface components {
         OrgUpdate: {
             /** Country */
             country?: string | null;
-            /** Kit Pattern */
-            kit_pattern?: ("uni" | "stripes" | "hoops" | "sash" | "halves") | null;
             /** Name */
             name?: string | null;
             /** Primary Color */

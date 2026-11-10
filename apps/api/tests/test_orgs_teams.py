@@ -35,23 +35,15 @@ async def test_org_validation(make_api: Callable[[], Api]) -> None:
     assert (await api.post("/v1/orgs", json={"name": ""})).status_code == 422
 
 
-async def test_club_kit(make_api: Callable[[], Api]) -> None:
-    """Two club colours and a pattern (TRIKOT.md, section 2); uni until chosen."""
+async def test_club_colours(make_api: Callable[[], Api]) -> None:
+    """The club's first and second colour (the kit; the opponent's colours are per match)."""
     api = make_api()
     ids = await setup_club(api)
     org = f"/v1/orgs/{ids['org']}"
-    assert (await api.get(org)).json()["kit_pattern"] == "uni"
-    r = await api.patch(
-        org, json={"primary_color": "#c8102e", "secondary_color": "#ffffff", "kit_pattern": "hoops"}
-    )
+    r = await api.patch(org, json={"primary_color": "#c8102e", "secondary_color": "#ffffff"})
     assert r.status_code == 200, r.text
-    body = r.json()
-    assert (body["primary_color"], body["secondary_color"], body["kit_pattern"]) == (
-        "#c8102e",
-        "#ffffff",
-        "hoops",
-    )
-    assert (await api.patch(org, json={"kit_pattern": "checks"})).status_code == 422
+    assert (r.json()["primary_color"], r.json()["secondary_color"]) == ("#c8102e", "#ffffff")
+    assert (await api.patch(org, json={"secondary_color": "white"})).status_code == 422
 
 
 async def test_update_org_and_logo(make_api: Callable[[], Api]) -> None:
