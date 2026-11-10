@@ -12,7 +12,7 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   // the title names the page, the team sits in the eyebrow above it
-  await expect(page.getByRole("heading", { level: 1, name: "Kader" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Team", exact: true })).toBeVisible();
   await expect(page.getByText("Team · U17")).toBeVisible();
   const teamUrl = page.url();
 
@@ -52,7 +52,7 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   // team assignments: a drill for everybody; without players the API explains why it cannot
   await page.goto(`${teamUrl}/assignments`);
   await page.getByLabel("Art").selectOption("drill");
-  await page.getByRole("button", { name: "Aufgabe geben" }).click();
+  await page.getByRole("button", { name: "Teilen", exact: true }).click();
   await expect(page.getByText(/Lade zuerst Spieler/)).toBeVisible();
   await expectAccessible(page);
 

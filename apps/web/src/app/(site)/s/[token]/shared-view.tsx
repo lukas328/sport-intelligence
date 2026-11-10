@@ -119,6 +119,7 @@ function MatchShare({ m, media, ts, format }: { m: NonNullable<Shared["match"]>;
 }
 
 function PlaylistShare({ p, media }: { p: NonNullable<Shared["playlist"]>; media: (v: string) => string }) {
+  const t = useTranslations("share");
   const clips = p.clips.filter((c) => c.video_id);
   const [i, setI] = useState(0);
   const clip = clips[i];
@@ -139,7 +140,7 @@ function PlaylistShare({ p, media }: { p: NonNullable<Shared["playlist"]>; media
         {clips.map((c, k) => (
           <li key={c.id}>
             <button onClick={() => setI(k)} aria-current={k === i ? "true" : undefined} className={cn("w-full rounded px-2 py-1.5 text-left", k === i ? "bg-accent text-accent-contrast" : "hover:bg-surface")}>
-              {k + 1}. {c.title ?? "Clip"}
+              {k + 1}. {c.title ?? t("scene")}
             </button>
           </li>
         ))}

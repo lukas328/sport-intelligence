@@ -1,7 +1,7 @@
 {
   "de-CH": {
     "labels": {
-      "report": "Matchreport",
+      "report": "Spielbericht",
       "generated": "Erstellt am {date}",
       "goals": "Tore",
       "shots": "Würfe",
@@ -17,7 +17,7 @@
       "timeline": "Spielverlauf",
       "players": "Spielerinnen und Spieler",
       "player": "Spieler/in",
-      "insights": "Erkenntnisse",
+      "insights": "Drei Dinge",
       "goalOwn": "Unsere Würfe aufs Tor",
       "goalOpp": "Würfe des Gegners aufs Tor",
       "comparison": "Kennzahlen",
@@ -119,7 +119,7 @@
       "obs_weak_zone": "Aus {zone} trafen wir {pct} ({shots} Würfe).",
       "none": "Zu wenig Daten für Beobachtungen.",
       "sample": "n = {n}",
-      "clips": "{n} Clips in der App",
+      "clips": "{n} Szenen in der App",
       "gkTitle": "Werfer-Karte",
       "gkHint": "Für die Trinkflasche: Nummer, Position, bevorzugte Torzonen",
       "few": "Zu wenig Würfe für eine Werfer-Karte."
@@ -155,7 +155,7 @@
       "timeline": "Score progression",
       "players": "Players",
       "player": "Player",
-      "insights": "Insights",
+      "insights": "Three things",
       "goalOwn": "Our shots on target",
       "goalOpp": "Opponent shots on target",
       "comparison": "Key numbers",
@@ -257,7 +257,7 @@
       "obs_weak_zone": "From {zone} we scored {pct} ({shots} shots).",
       "none": "Not enough data for observations.",
       "sample": "n = {n}",
-      "clips": "{n} clips in the app",
+      "clips": "{n} scenes in the app",
       "gkTitle": "Shooter card",
       "gkHint": "For the water bottle: number, position, preferred goal zones",
       "few": "Not enough shots for a shooter card."
@@ -277,7 +277,7 @@
   },
   "fr": {
     "labels": {
-      "report": "Rapport de match",
+      "report": "Feuille de match",
       "generated": "Créé le {date}",
       "goals": "Buts",
       "shots": "Tirs",
@@ -293,7 +293,7 @@
       "timeline": "Évolution du score",
       "players": "Joueurs",
       "player": "Joueur",
-      "insights": "Constats",
+      "insights": "Trois points",
       "goalOwn": "Nos tirs cadrés",
       "goalOpp": "Tirs cadrés adverses",
       "comparison": "Chiffres clés",
@@ -395,7 +395,7 @@
       "obs_weak_zone": "Depuis {zone}, nous avons marqué à {pct} ({shots} tirs).",
       "none": "Pas assez de données pour des observations.",
       "sample": "n = {n}",
-      "clips": "{n} clips dans l'app",
+      "clips": "{n} scènes dans l'app",
       "gkTitle": "Fiche des tireurs",
       "gkHint": "Pour la gourde : numéro, position, zones de but préférées",
       "few": "Pas assez de tirs pour une fiche des tireurs."

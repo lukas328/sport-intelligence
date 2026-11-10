@@ -120,7 +120,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // the coach gives the team a drill: who has done it, and who not yet, by name
   await page.goto(`/app/${orgId}/teams/${teamId}/assignments`);
   await page.getByLabel("Art").selectOption("drill");
-  await page.getByRole("button", { name: "Aufgabe geben" }).click();
+  await page.getByRole("button", { name: "Teilen", exact: true }).click();
   const assignment = page.getByTestId("team-assignments").getByRole("listitem").first();
   await expect(assignment.getByTestId("assignment-progress")).toHaveText("0 von 1 erledigt");
   await expect(assignment.getByTestId("assignment-open")).toHaveText("Noch offen: Mia Muster");
@@ -129,9 +129,9 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // the squad: Mia's account belongs to no entry yet; the coach links it, sees it, and unlinks it
   await page.goto(`/app/${orgId}/teams/${teamId}`);
   const unlinked = page.getByTestId("unlinked-accounts");
-  await expect(unlinked).toContainText("1 Konto ohne Kadereintrag");
+  await expect(unlinked).toContainText("1 Konto ohne Eintrag im Team");
   const linkForm = unlinked.getByRole("form", { name: "Mia Muster verknüpfen" });
-  await linkForm.getByLabel("Kadereintrag").selectOption({ label: "#9 Lea Beispiel" });
+  await linkForm.getByLabel("Eintrag im Team").selectOption({ label: "#9 Lea Beispiel" });
   await linkForm.getByRole("button", { name: "Verknüpfen" }).click();
   await expect(unlinked).toHaveCount(0);
   await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
@@ -149,7 +149,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // the invitation offers the free squad entry for a player
   await page.goto(`/app/${orgId}/club/teams`);
   const invite = page.getByRole("form", { name: "Person einladen" });
-  await expect(invite.getByLabel("Im Kader").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
+  await expect(invite.getByLabel("Im Team").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
 
   // Lea's season line from her name in the squad: no played match yet
   await page.goto(`/app/${orgId}/teams/${teamId}`);

@@ -79,13 +79,13 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByTestId("comments")).toContainText("Rückzug zu langsam");
 
   // clip with I and O keys
-  await page.getByRole("tab", { name: "Clips" }).click();
+  await page.getByRole("tab", { name: "Szenen", exact: true }).click();
   const seekTo = async (s: number) => {
     await video.evaluate((v: HTMLVideoElement, t: number) => (v.currentTime = t), s);
     await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => Math.round(v.currentTime))).toBe(s);
   };
   // the clip form (the event list may hold buttons with the same time)
-  const clipForm = page.getByRole("form", { name: "Clip speichern" });
+  const clipForm = page.getByRole("form", { name: "Szene speichern" });
   await seekTo(2);
   await clipForm.getByRole("button", { name: "Start setzen (I)" }).click();
   await expect(clipForm.getByRole("button", { name: "0:02" })).toBeVisible();
@@ -94,7 +94,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.keyboard.press("o"); // keyboard shortcut for the end mark
   await expect(clipForm.getByRole("button", { name: "0:06" })).toBeVisible();
   await page.getByLabel("Titel").fill("Gegenstoss");
-  await page.getByRole("button", { name: "Clip speichern" }).click();
+  await page.getByRole("button", { name: "Szene speichern" }).click();
   await expect(page.getByTestId("clips")).toContainText("Gegenstoss");
 
   // drawing
@@ -168,12 +168,12 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await openLibrary(page, "Playlists");
+  await openLibrary(page, "Sammlungen");
   await page.getByLabel("Name", { exact: true }).fill("Abwehr Training");
-  await page.getByRole("button", { name: "Neue Playlist" }).click();
+  await page.getByRole("button", { name: "Neue Sammlung" }).click();
   await expect(page.getByRole("heading", { name: "Abwehr Training" })).toBeVisible();
-  await expect(page.getByText(/Diese Playlist hat noch keine Clips/)).toBeVisible();
-  await page.getByRole("button", { name: "Mit Spielern teilen" }).click();
+  await expect(page.getByText(/Diese Sammlung hat noch keine Szenen/)).toBeVisible();
+  await page.getByRole("button", { name: "Teilen", exact: true }).click();
   await expect(page.getByText("Für Spieler sichtbar")).toBeVisible();
   await expectAccessible(page);
 });

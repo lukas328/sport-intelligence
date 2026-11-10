@@ -70,10 +70,10 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   );
   const asked: unknown[] = [];
   page.on("request", (r) => r.url().endsWith("/matrix") && r.method() === "POST" && asked.push(r.postDataJSON()));
-  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
-  await follow(page, page.getByRole("link", { name: "Saison", exact: true }), /\/season$/);
-  await follow(page, page.getByRole("link", { name: "Statistik-Matrix" }), /\/matrix$/);
-  await expect(page.getByRole("heading", { name: "Statistik-Matrix" })).toBeVisible();
+  // the matrix is the table tab of Szenen ("Als Tabelle", SPEC 7.6)
+  await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
+  await follow(page, page.getByRole("link", { name: "Tabelle", exact: true }).first(), /\/matrix$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Tabelle" })).toBeVisible();
   await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
   await page.getByTestId("matrix-seasons").selectOption(current.id);
   await expect.poll(() => asked.at(-1)).toMatchObject({ season_ids: [current.id] });
@@ -86,7 +86,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expectAccessible(page);
 
   // assistant: no model key in this stack, so the question gets an honest message
-  await follow(page, page.getByRole("link", { name: "Frag deine Daten" }), /\/assistant$/);
+  await page.goto(page.url().replace(/\/matrix$/, "/assistant"));
   await page.getByPlaceholder("Frage zu euren Spielen stellen").fill("Wie oft treffen wir nach einem Timeout?");
   await page.getByRole("button", { name: "Fragen", exact: true }).click();
   await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toBeVisible();

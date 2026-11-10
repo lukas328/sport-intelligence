@@ -156,7 +156,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
       <section aria-labelledby="roster-list" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-baseline gap-3">
-            {/* on the squad page the H1 already says "Kader": the count is enough here */}
+            {/* on the squad page the H1 already says "Team": the count is enough here */}
             <h2 id="roster-list" className={cn("text-lg font-semibold", !inline && "sr-only")}>
               {t("roster.title")}
             </h2>

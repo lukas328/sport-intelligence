@@ -45,10 +45,10 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
 }
 
-/** Team area: "Team" in the main navigation, then a section (Kader, Termine). */
-export async function openTeam(page: Page, section?: "Kader" | "Termine") {
+/** Team area: "Team" in the main navigation, then a tab (Termine needs Teamfunktionen). */
+export async function openTeam(page: Page, section?: "Team" | "Termine") {
   await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
-  if (!section || section === "Kader") return;
+  if (!section || section === "Team") return;
   await follow(page, page.getByRole("link", { name: section, exact: true }), /\/schedule$/);
 }
 
@@ -68,11 +68,12 @@ export async function openScenes(page: Page, tab?: "Szenen" | "Sammlungen" | "Sp
   await follow(page, page.getByRole("link", { name: tab, exact: true }).first(), new RegExp(`/${path}$`));
 }
 
-/** Library entry (Playlists, Präsentationen) under Sammlungen; the scene search is Szenen itself. */
-export async function openLibrary(page: Page, entry: "Playlists" | "Präsentationen" | "Szenensuche") {
-  if (entry === "Szenensuche") return openScenes(page);
+/** Under Sammlungen: the collections (playlists) and those to show (presentations); the scene
+ * search is Szenen itself. */
+export async function openLibrary(page: Page, entry: "Sammlungen" | "Zum Zeigen" | "Szenen") {
+  if (entry === "Szenen") return openScenes(page);
   await openScenes(page, "Sammlungen");
-  const path = { Playlists: "playlists", Präsentationen: "presentations" }[entry];
+  const path = { Sammlungen: "playlists", "Zum Zeigen": "presentations" }[entry];
   await follow(page, page.getByRole("link", { name: new RegExp(`^${entry}`) }), new RegExp(`/${path}$`));
 }
 
@@ -92,10 +93,11 @@ export async function openTraining(page: Page) {
 
 /** Match page: one level of tabs, Spiel · Video · Zahlen (SPEC 7.2 to 7.4). "Übersicht" is on
  * Spiel; the figure sheets are stacked on Zahlen, each under its heading. */
-export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Matchbericht") {
+export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Spielbericht") {
   if (section === "Übersicht") return page.getByRole("tab", { name: "Spiel", exact: true }).click();
   await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
-  await page.getByRole("heading", { name: section, exact: true }).scrollIntoViewIfNeeded();
+  const id = { Spielbericht: "report", Würfe: "shots", Torhüter: "keepers", Laufleistung: "physical" }[section];
+  await page.locator(`#numbers-${id}`).scrollIntoViewIfNeeded();
 }
 
 /** Match page: an entry of the "Mehr" menu. */

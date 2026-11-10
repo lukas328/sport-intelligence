@@ -74,7 +74,15 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
             <PaperView orgId={orgId} teamId={teamId} />
             <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
               {t("matches.reportFile")}
-              <PaperImport orgId={orgId} teamId={teamId} onWarnings={setWarnings} />
+              <PaperImport
+                orgId={orgId}
+                teamId={teamId}
+                onWarnings={(w) => {
+                  // imported: the dialog closes and the list shows the notes
+                  setWarnings(w);
+                  setReport(false);
+                }}
+              />
             </p>
           </div>
         </Dialog>
@@ -154,7 +162,15 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
             <PaperView orgId={orgId} teamId={teamId} />
             <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
               {t("matches.reportFile")}
-              <PaperImport orgId={orgId} teamId={teamId} onWarnings={setWarnings} />
+              <PaperImport
+                orgId={orgId}
+                teamId={teamId}
+                onWarnings={(w) => {
+                  // imported: the dialog closes and the list shows the notes
+                  setWarnings(w);
+                  setReport(false);
+                }}
+              />
             </p>
           </div>
         </Dialog>

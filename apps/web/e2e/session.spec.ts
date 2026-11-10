@@ -31,7 +31,7 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   }
 
   // own tags on the scene search page
-  await openLibrary(page, "Szenensuche");
+  await openLibrary(page, "Szenen");
   await expect(page.getByRole("heading", { name: "Szenen suchen" })).toBeVisible();
   const newSet = page.getByRole("form", { name: "Neues Tag-Set" });
   await newSet.getByLabel("Neues Tag-Set").fill("Abwehr");
@@ -51,9 +51,9 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   await expectAccessible(page);
 
   // presentation: text slide, presenter view, phone remote
-  await openLibrary(page, "Präsentationen");
+  await openLibrary(page, "Zum Zeigen");
   await page.getByLabel("Titel").fill("Video-Sitzung Dienstag");
-  await page.getByRole("button", { name: "Neue Präsentation" }).click();
+  await page.getByRole("button", { name: "Neue Sammlung zum Zeigen" }).click();
   await page.waitForURL(/\/presentations\/[^/]+$/);
   for (const title of ["Rückzug", "Abschluss"]) {
     const form = page.getByRole("form", { name: "Textfolie" });
@@ -64,10 +64,10 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   await expect(page.getByTestId("slides").getByRole("listitem")).toHaveCount(2);
   await expectAccessible(page);
   await page.getByTestId("present").click();
-  await expect(page.getByTestId("slide-counter")).toContainText("Folie 1 von 2");
+  await expect(page.getByTestId("slide-counter")).toContainText("Eintrag 1 von 2");
   await expect(page.getByTestId("stage")).toContainText("Rückzug");
   await page.keyboard.press("ArrowRight");
-  await expect(page.getByTestId("slide-counter")).toContainText("Folie 2 von 2");
+  await expect(page.getByTestId("slide-counter")).toContainText("Eintrag 2 von 2");
   await page.keyboard.press("ArrowLeft");
 
   await page.getByRole("button", { name: "Handy-Fernbedienung" }).click();
@@ -81,7 +81,7 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   await remote.goto(link!);
   const sent = Date.now();
   await remote.getByRole("button", { name: "Weiter" }).click();
-  await expect(page.getByTestId("slide-counter")).toContainText("Folie 2 von 2");
+  await expect(page.getByTestId("slide-counter")).toContainText("Eintrag 2 von 2");
   const roundTrip = Date.now() - sent;
   console.log(`phone remote round trip ${roundTrip} ms`);
   expect(roundTrip).toBeLessThan(2000); // UI round trip incl. two browsers; server latency shown below

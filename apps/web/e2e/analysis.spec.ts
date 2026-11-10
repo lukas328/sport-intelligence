@@ -18,7 +18,9 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
 
-  await page.getByTestId("paper-file").setInputFiles(REPORT);
+  // "Spielbericht hinzufügen" holds the photo and the file import
+  await page.getByTestId("add-report").first().click();
+  await page.getByTestId("report-dialog").getByTestId("paper-file").setInputFiles(REPORT);
   // goalkeeper zones carry one unknown shooter: the import reports it and stays on the list
   await expect(page.getByText("Hinweise")).toBeVisible();
   await page.getByRole("link", { name: /TV Papierdorf/ }).click();
@@ -42,20 +44,21 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
   await expectAccessible(page);
   // every number opens the events behind it
-  await expect(page.getByTestId("insights")).toContainText("Was auffällt");
+  await expect(page.getByTestId("insights")).toContainText("Drei Dinge");
   await table.getByRole("button", { name: "Tore Damen 1" }).click();
   await expect(page.getByTestId("event-list").getByRole("listitem")).toHaveCount(5);
 
-  await page.getByRole("tab", { name: "Matchbericht", exact: true }).click();
+  await openAnalysis(page, "Spielbericht");
   await expect(page.getByText("Anna Muster").first()).toBeVisible();
   await expectAccessible(page);
 
-  await page.getByRole("tab", { name: "Würfe" }).click();
-  await expect(page.getByTestId("goal-grid")).toBeVisible();
+  await openAnalysis(page, "Würfe");
+  // Zahlen stacks the sheets: the shots section has its own goal grid
+  await expect(page.getByRole("region", { name: "Würfe" }).getByTestId("goal-grid")).toBeVisible();
   await expectAccessible(page);
 
   // goalkeeper module: the sheet's keeper with saves and goals against by zone
-  await page.getByRole("tab", { name: "Torhüter" }).click();
+  await openAnalysis(page, "Torhüter");
   // one row per goalkeeper in a match-sheet table
   const keepers = page.getByTestId("keeper-table");
   await expect(keepers).toContainText("Paraden");

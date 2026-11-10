@@ -98,15 +98,15 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "onboarding_0": {
         "de-CH": (
             "Willkommen bei Handball AI",
-            "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Kader eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: Übersicht, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+            "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Spieler eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: die drei Dinge, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
             "Welcome to Handball AI",
-            "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the roster (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: overview, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+            "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the players (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: the three things, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
             "Bienvenue sur Handball AI",
-            "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir l'effectif (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : vue d'ensemble, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+            "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir les joueur·euse·s (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : les trois points, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
     "onboarding_1": {
@@ -126,15 +126,15 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "onboarding_3": {
         "de-CH": (
             "Die Videositzung in 5 Minuten",
-            "Hallo {name}\n\nmit Szenen-Suche und Präsentation stellst du die Videositzung schnell zusammen: Szenen filtern, mit eigenen Tags markieren, als Folien übernehmen, mit dem Handy weiterschalten.\n\nSo geht's:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+            "Hallo {name}\n\nunter Szenen stellst du die Videositzung schnell zusammen: Szenen suchen, mit eigenen Tags versehen, in eine Sammlung legen und am Bildschirm zeigen, mit dem Handy weiterschalten.\n\nSo geht's:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
             "The video session in 5 minutes",
-            "Hello {name}\n\nwith the scene search and presentations you build the video session quickly: filter scenes, mark them with your own tags, add them as slides, click through with your phone.\n\nHow it works:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+            "Hello {name}\n\nunder Scenes you build the video session quickly: search scenes, add your own tags, put them in a collection and show it on screen, click through with your phone.\n\nHow it works:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
             "La séance vidéo en 5 minutes",
-            "Bonjour {name}\n\navec la recherche de scènes et les présentations, la séance vidéo est vite prête : filtrer les scènes, les marquer avec vos tags, les reprendre en diapositives, avancer avec le téléphone.\n\nMode d'emploi :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+            "Bonjour {name}\n\nsous Scènes, la séance vidéo est vite prête : chercher des scènes, ajouter vos tags, les mettre dans une sélection et la montrer à l'écran, avancer avec le téléphone.\n\nMode d'emploi :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
     "onboarding_7": {

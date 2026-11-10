@@ -62,7 +62,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   const done = page.getByTestId("claim-done");
   await expect(done.getByRole("heading", { name: "HC Seeblick Herren 1 ist übernommen." })).toBeVisible();
   await expect(done).toContainText("18 Spiele, 3 Spieler/innen und 1 Spielbericht gefunden");
-  await expect(done.getByRole("link", { name: "Kader bestätigen" })).toHaveAttribute("href", `/app/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}/official`);
+  await expect(done.getByRole("link", { name: "Team bestätigen" })).toHaveAttribute("href", `/app/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}/official`);
   expect(claims.at(-1)).toEqual({ id: "71001", body: { club_id: 9001 } });
   await expectAccessible(page);
 });
@@ -113,7 +113,7 @@ test("suggestion inbox: squad with a doubled number, a report to import, the tab
   await squad.getByLabel("Rückennummer von Jonas Amrein").fill("17");
   await expect(page.getByTestId("take-squad")).toHaveText("2 Spieler/innen übernehmen");
   await page.getByTestId("take-squad").click();
-  await expect(page.getByText("2 Spieler/innen im Kader.")).toBeVisible();
+  await expect(page.getByText("2 Spieler/innen im Team.")).toBeVisible();
   expect(accepted.map((a) => a.body)).toEqual([{ jersey_number: 7 }, { jersey_number: 17 }]);
   await expect(squad.getByTestId("roster-suggestion")).toHaveCount(1);
 
