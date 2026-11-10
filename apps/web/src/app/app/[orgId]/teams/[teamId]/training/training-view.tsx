@@ -261,6 +261,10 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
   const today = new Date().toISOString().slice(0, 10);
   const all = sessions.data ?? [];
   const upcoming = all.filter((s) => s.on_date >= today);
+  const inFourWeeks = new Date(Date.now() + 28 * 86400_000).toISOString().slice(0, 10);
+  // at least the next unit, even when it is further away
+  const soon = upcoming.filter((s, i) => i === 0 || s.on_date <= inFourWeeks);
+  const [allUpcoming, setAllUpcoming] = useState(false);
   const past = all.filter((s) => s.on_date < today).reverse().slice(0, 10);
   const done = () => {
     setEditing(null);
@@ -333,7 +337,15 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
             {canPlan ? t("noneHint") : null}
           </EmptyState>
         ) : (
-          <ul className="border-t-2 border-foreground">{upcoming.map(item)}</ul>
+          <>
+            {/* units made for a whole season would fill the page: the next four weeks, the rest folded */}
+            <ul className="border-t-2 border-foreground">{(allUpcoming ? upcoming : soon).map(item)}</ul>
+            {upcoming.length > soon.length && (
+              <button type="button" className="min-h-9 text-sm font-medium underline underline-offset-2" onClick={() => setAllUpcoming((v) => !v)}>
+                {allUpcoming ? t("upcomingLess") : t("upcomingMore", { n: upcoming.length - soon.length })}
+              </button>
+            )}
+          </>
         )}
       </section>
       {past.length > 0 && (

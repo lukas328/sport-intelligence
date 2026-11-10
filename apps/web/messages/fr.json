@@ -2057,7 +2057,9 @@
     "noneHint": "Une séance avec exercices existe comme plan sur le téléphone et en PDF pour la salle.",
     "calendarTools": "S'abonner au calendrier et importer des dates",
     "outOnDay": "{n, plural, one {1 absent·e :} other {# absent·es :}}",
-    "deleteConfirm": "Supprimer « {title} » ?"
+    "deleteConfirm": "Supprimer « {title} » ?",
+    "upcomingMore": "{n, plural, one {Afficher 1 autre séance} other {Afficher les # autres séances}}",
+    "upcomingLess": "Seulement les quatre prochaines semaines"
   },
   "schedule": {
     "nav": "Mes rendez-vous",

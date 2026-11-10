@@ -2057,7 +2057,9 @@
     "noneHint": "Eine Einheit mit Übungen gibt es als Plan fürs Handy und als PDF für die Halle.",
     "calendarTools": "Kalender abonnieren und Termine importieren",
     "outOnDay": "{n, plural, one {1 fällt aus:} other {# fallen aus:}}",
-    "deleteConfirm": "«{title}» löschen?"
+    "deleteConfirm": "«{title}» löschen?",
+    "upcomingMore": "{n, plural, one {1 weitere Einheit zeigen} other {Alle # weiteren Einheiten zeigen}}",
+    "upcomingLess": "Nur die nächsten vier Wochen zeigen"
   },
   "schedule": {
     "nav": "Meine Termine",

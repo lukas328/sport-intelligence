@@ -32,7 +32,8 @@ export function ConsentOverview({ orgId, teamId, seasonId }: { orgId: string; te
   return (
     <details className="group text-sm" data-testid="consent-overview">
       <summary className="cursor-pointer font-medium underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-solid">{t("overviewOpen")}</summary>
-      <div className="mt-3 overflow-x-auto">
+      {/* scrolls sideways on phones: reachable with the keyboard too */}
+      <div className="mt-3 overflow-x-auto" tabIndex={0} role="region" aria-label={t("overviewTitle")}>
         <table className="w-full min-w-[34rem] text-sm">
           <caption className="sr-only">{t("overviewTitle")}</caption>
           <thead>

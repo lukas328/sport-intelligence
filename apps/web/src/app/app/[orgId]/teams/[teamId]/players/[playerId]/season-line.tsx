@@ -101,7 +101,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
       {l.matches.length === 0 ? (
         <p className="text-[0.9375rem] text-muted">{t("noMatches")}</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("matches")}>
           <table className="w-full min-w-[36rem] text-sm" data-testid="season-line-matches">
             <caption className="sr-only">{t("matches")}</caption>
             <thead>

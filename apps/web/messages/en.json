@@ -2057,7 +2057,9 @@
     "noneHint": "A session with drills comes as a plan on the phone and a PDF for the hall.",
     "calendarTools": "Subscribe to the calendar and import dates",
     "outOnDay": "{n, plural, one {1 is out:} other {# are out:}}",
-    "deleteConfirm": "Delete “{title}”?"
+    "deleteConfirm": "Delete “{title}”?",
+    "upcomingMore": "{n, plural, one {Show 1 more unit} other {Show all # more units}}",
+    "upcomingLess": "Only the next four weeks"
   },
   "schedule": {
     "nav": "My dates",
