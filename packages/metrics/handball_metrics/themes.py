@@ -53,6 +53,12 @@ def _value(theme: str, params: dict[str, Any], stats: dict[str, Any]) -> float |
         pos = theme.removeprefix("conceded_position_")
         total = own["goals_against"]
         return _ratio(opp.get("positions", {}).get(pos, {}).get("goals", 0), total)
+    if theme.startswith("keeper_"):
+        who = theme.removeprefix("keeper_")
+        for k in (stats.get("goalkeepers") or {}).values():
+            if who in (str(k.get("player_id")), str(k.get("number"))):
+                return _ratio(int(k.get("saves") or 0), int(k.get("faced") or 0))
+        return None
     if theme == "fast_breaks_against":
         return float(opp["fast_break_goals"])
     if theme == "powerplay":

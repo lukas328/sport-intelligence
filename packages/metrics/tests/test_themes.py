@@ -94,3 +94,32 @@ def test_match_insights_that_repeat_and_ranking() -> None:
     # three matches before two, then weaknesses first; info never becomes a theme
     assert [t["id"] for t in themes] == ["own_run", "seven_m"]
     assert themes[1]["matches"] == 2
+
+
+def test_keeper_theme_has_the_save_rate_per_match() -> None:
+    def keeper_match(i: int, saves: int, goals: int) -> dict[str, Any]:
+        events = [
+            Event(
+                id=f"{i}k{k}",
+                type=EventType.SHOT,
+                side=OPP,
+                outcome="save" if k < saves else "goal",
+                clock_s=30.0 * k,
+                attributes={"goalkeeper_id": "gk1"},
+            )
+            for k in range(saves + goals)
+        ]
+        return compute_match_stats(events)
+
+    item = {
+        "id": "keeper_gk1",
+        "kind": "strength",
+        "key": "insights.keeper_good",
+        "params": {},
+        "score": 0.5,
+        "evidence": {},
+    }
+    themes = season_themes(
+        [inp(1, keeper_match(1, 12, 18), [item]), inp(2, keeper_match(2, 15, 15), [item])]
+    )
+    assert [p["value"] for p in themes[0]["per_match"]] == [0.4, 0.5]

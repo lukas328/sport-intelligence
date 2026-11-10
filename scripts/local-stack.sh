@@ -63,6 +63,9 @@ start() { # name, command...
 stop() {
   if running "$1"; then
     pkill -f "$(pattern "$1")" || true
+    # uvicorn waits for open connections (SSE): give it ten seconds, then end it
+    for _ in $(seq 1 10); do running "$1" || break; sleep 1; done
+    pkill -9 -f "$(pattern "$1")" 2>/dev/null || true
     echo "$1 stopped"
   fi
 }
