@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="de-CH" class="fa g1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anlauf Handball AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400..800;1,400..600&family=IBM+Plex+Mono:wght@500;600&family=Kanit:ital,wght@0,600;0,700;0,800;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+/* ===== Anlauf: the result in the club's colour, the scene on the tactics camera, every line a measured way ===== */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #d6d8d9; color: #15171a; font-family: "Hanken Grotesk", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+:root { --d: "Kanit", sans-serif; --t: "Hanken Grotesk", sans-serif; --m: "IBM Plex Mono", monospace; --attn: #ffd23c; --win: #17703f; --loss: #a8261e; }
+/* type scale 13 15 17 20 26 34 48 60, numerals 72 to 210 ; spacing 4 8 12 16 24 32 48 */
+@media (prefers-reduced-motion: no-preference) {
+  .play .ln { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .7s cubic-bezier(.3, .6, .3, 1) forwards; animation-delay: calc(var(--i) * 140ms + .2s); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+}
+/* doc */
+.doc { max-width: 1280px; margin: 0 auto; padding: 48px 0 8px; }
+.doc .kick { font: 600 15px var(--t); color: #4e535a; margin: 0 0 10px; }
+.doc h1 { font: italic 900 104px/.86 var(--d); margin: 0 0 20px; letter-spacing: -0.02em; }
+.doc .idea { font: 700 26px/1.25 var(--t); max-width: 900px; margin: 0 0 14px; }
+.doc p { max-width: 900px; font-size: 17px; line-height: 1.5; color: #33373c; margin: 0 0 10px; }
+.ctl { position: sticky; top: 0; z-index: 9; background: #15171a; color: #f2f3f4; padding: 10px 16px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+.ctl .grp { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.ctl .grp > span { font: 600 12px var(--m); color: #9aa3ac; margin-right: 6px; }
+.ctl button { font: 700 14px var(--t); min-height: 36px; padding: 0 12px; background: transparent; color: #f2f3f4; border: 1.5px solid #4a5058; cursor: pointer; }
+.ctl button[aria-pressed="true"] { background: #f2f3f4; color: #15171a; border-color: #f2f3f4; }
+.ctl .sw { width: 36px; padding: 0; display: grid; place-items: center; } .ctl .sw i { width: 18px; height: 18px; display: block; border: 1px solid #8a9199; }
+.view { max-width: 1280px; margin: 56px auto 0; }
+.view > header { display: flex; gap: 16px; align-items: baseline; padding: 0 0 10px; border-bottom: 2px solid #15171a; margin-bottom: 16px; flex-wrap: wrap; }
+.view > header b { font: italic 800 24px var(--d); } .view > header span { font-size: 15px; color: #4e535a; }
+.pair { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+.trio { display: flex; gap: 55px; align-items: flex-start; }
+
+/* ===== app ===== */
+.app { background: var(--ground); color: var(--ink); position: relative; overflow: hidden; font-size: 17px; line-height: 1.45; }
+.app.desk { width: 1280px; } .app.phone { width: 390px; }
+.app :where(h1, h2, h3, h4, p, ul, ol, figure) { margin: 0; } .app ul, .app ol { padding: 0; list-style: none; }
+.app a { color: inherit; }
+/* type variants: A all oblique, B oblique only for numerals and the result */
+.d { font-family: var(--d); font-weight: 800; letter-spacing: -0.01em; }
+.fa .d { font-style: italic; } .fb .d { font-style: normal; font-weight: 700; }
+.n { font-family: var(--d); font-style: italic; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+/* grounds: all neutral, none tinted by the club */
+.g1 .app { --ground: #f4f3ef; --paper: #fbfaf7; --ink: #15171a; --ink-2: #53575d; --rule: #d9d6cf; }
+.g2 .app { --ground: #e7eaed; --paper: #ffffff; --ink: #14171a; --ink-2: #50565d; --rule: #d3d8dd; }
+.g3 .app { --ground: #eceae5; --paper: #f7f6f2; --ink: #16171a; --ink-2: #53565b; --rule: #d6d3cc;
+  background-image: radial-gradient(rgb(22 23 26 / .07) 0.7px, transparent 0.9px), radial-gradient(rgb(22 23 26 / .05) 0.7px, transparent 0.9px); background-size: 6px 6px, 6px 6px; background-position: 0 0, 3px 3px; }
+/* G1 «Kante»: each section opens with the slant of the head */
+.cut { display: none; height: 12px; margin: 0 32px 18px; background: var(--ink); clip-path: polygon(0 75%, 100% 0, 100% 25%, 0 100%); }
+.g1 .cut { display: block; } .g1 .cut + .things { border-top: 0; } .phone .cut { margin: 0 16px 14px; height: 9px; }
+/* G2 «Hallenlicht»: content on white panels, hard edges */
+.g2 .pan { background: var(--paper); }
+.g2 .pan.pad { padding: 20px 24px; } .g2 .phone .pan.pad { padding: 14px 14px; }
+
+/* frame */
+.top { display: flex; align-items: center; gap: 20px; height: 64px; padding: 0 32px; background: var(--ground); border-bottom: 2px solid var(--ink); }
+.crest { width: 34px; height: 38px; background: var(--club); color: var(--club-ink); display: grid; place-items: center; font: 800 12px var(--d); clip-path: polygon(0 0, 100% 0, 100% 74%, 50% 100%, 0 74%); box-shadow: inset 0 0 0 2px var(--club-edge); flex: none; }
+.club { display: flex; gap: 12px; align-items: center; font-size: 20px; line-height: 1; }
+.nav { display: flex; align-self: stretch; margin-left: 16px; }
+.nav a { display: flex; align-items: center; padding: 0 14px; font-weight: 700; text-decoration: none; color: var(--ink-2); position: relative; }
+.nav a[aria-current] { color: var(--ink); }
+.nav a[aria-current]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -2px; height: 6px; background: var(--club); box-shadow: inset 0 0 0 1px var(--club-edge); transform: skewX(-14deg); }
+.top .right { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+.app .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 20px; font: 700 16px var(--t); background: var(--ink); color: var(--ground); border: 2px solid var(--ink); text-decoration: none; white-space: nowrap; }
+.app .btn.line { background: transparent; color: var(--ink); }
+.app .btn.s { min-height: 44px; padding: 0 14px; font-size: 15px; } .app .btn small { font-weight: 500; opacity: .8; font-size: 13px; }
+.lnk { font-weight: 700; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
+.k { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.hh { display: flex; align-items: baseline; gap: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); margin-bottom: 14px; flex-wrap: wrap; }
+.hh b { font-size: 26px; line-height: 1; } .hh span { font-size: 15px; color: var(--ink-2); } .hh .lnk { margin-left: auto; font-size: 15px; }
+.ptop { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 16px; border-bottom: 2px solid var(--ink); background: var(--ground); }
+.ptop .club { font-size: 18px; flex: 1; } .ptop .crest { width: 30px; height: 34px; font-size: 11px; }
+.ibtn { width: 44px; height: 44px; display: grid; place-items: center; border: 2px solid var(--ink); background: transparent; color: var(--ink); }
+.ibtn.plus { background: var(--ink); color: var(--ground); } .ibtn svg { width: 20px; height: 20px; }
+.tabbar { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid var(--ink); background: var(--ground); }
+.tabbar a { min-height: 56px; display: grid; place-items: center; font-weight: 700; font-size: 15px; color: var(--ink-2); text-decoration: none; position: relative; }
+.tabbar a[aria-current] { color: var(--ink); }
+.tabbar a[aria-current]::before { content: ""; position: absolute; left: 18px; right: 18px; top: -2px; height: 6px; background: var(--club); box-shadow: inset 0 0 0 1px var(--club-edge); transform: skewX(-14deg); }
+
+/* ===== the Wurf head ===== */
+.wurf { position: relative; background: var(--club); color: var(--club-ink); clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%); box-shadow: inset 0 0 0 2px var(--club-edge); }
+.wurf.big { height: 450px; padding: 36px 32px 0; display: grid; grid-template-columns: 1fr 560px; gap: 24px; }
+.wurf .kick { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.wurf h1 { font-size: 58px; line-height: .96; text-wrap: balance; }
+.wurf .score { position: relative; text-align: right; font-size: 196px; line-height: .8; margin-top: 4px; white-space: nowrap; }
+.wurf .score span { display: block; }
+.wurf .score .e { position: absolute; right: 0; top: 0; color: transparent; -webkit-text-stroke: 1.5px var(--club-ink); opacity: .42; }
+.wurf .score .e1 { transform: translate(-20px, -4px); } .wurf .score .e2 { transform: translate(-40px, -8px); opacity: .22; }
+.wurf .score u { text-decoration: underline; text-decoration-color: var(--opp); text-decoration-thickness: .045em; text-underline-offset: .06em; text-decoration-skip-ink: none; }
+.wurf .names { display: flex; justify-content: flex-end; gap: 28px; font-size: 15px; font-weight: 600; margin-top: 14px; }
+.oc { display: inline-block; width: 12px; height: 12px; background: var(--opp); box-shadow: 0 0 0 1.5px var(--club-ink); margin-right: 8px; vertical-align: -1px; }
+.wurf svg.fl { position: absolute; left: 0; right: 0; bottom: 92px; width: 100%; }
+svg text.fw { font: 600 14px var(--t); fill: var(--club-ink); }
+.wurf .meta { font-size: 14px; font-weight: 600; margin-top: 18px; opacity: .92; }
+.actrow { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 22px 32px 0; }
+.phone .wurf.big { height: 400px; grid-template-columns: 1fr; padding: 20px 16px 0; gap: 0; clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%); }
+.phone .wurf h1 { font-size: 32px; } .phone .wurf .kick { font-size: 13px; margin-bottom: 8px; }
+.phone .wurf .score { font-size: 100px; text-align: left; margin-top: 18px; } .phone .wurf .score .e { left: 0; right: auto; }
+.phone .wurf .score .e1 { transform: translate(10px, -3px); } .phone .wurf .score .e2 { transform: translate(20px, -6px); }
+.phone .wurf .names { justify-content: flex-start; gap: 18px; font-size: 12px; margin-top: 8px; flex-wrap: wrap; }
+.phone .wurf svg.fl { bottom: 40px; } .phone .actrow { padding: 18px 16px 0; }
+/* the slim Wurf strip: the head of every sub-page of a match */
+.strip { position: relative; background: var(--club); color: var(--club-ink); clip-path: polygon(0 0, 100% 0, 100% 72%, 0 100%); height: 124px; padding: 20px 32px 0; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: inset 0 0 0 2px var(--club-edge); }
+.strip .nm { font-size: 24px; line-height: 1.05; } .strip .nm small { display: block; font: 500 13px var(--t); margin-top: 6px; }
+.strip .score { position: relative; font-size: 72px; line-height: .8; white-space: nowrap; }
+.strip .score .e { position: absolute; right: 0; top: 0; color: transparent; -webkit-text-stroke: 1.2px var(--club-ink); opacity: .4; transform: translate(-10px, -2px); }
+.strip .score u { text-decoration: underline; text-decoration-color: var(--opp); text-decoration-thickness: .08em; text-underline-offset: .06em; text-decoration-skip-ink: none; }
+.phone .strip { height: 104px; padding: 14px 16px 0; } .phone .strip .nm { font-size: 17px; } .phone .strip .nm small { font-size: 12px; } .phone .strip .score { font-size: 48px; }
+
+/* ===== tabs and sources ===== */
+.tabs { display: flex; padding: 0 32px; border-bottom: 2px solid var(--ink); margin-top: 8px; }
+.tabs a { min-height: 54px; display: flex; align-items: center; gap: 8px; padding: 0 18px; font-size: 20px; text-decoration: none; color: var(--ink-2); position: relative; }
+.tabs a[aria-current] { color: var(--ink); }
+.tabs a[aria-current]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -2px; height: 6px; background: var(--club); box-shadow: inset 0 0 0 1px var(--club-edge); transform: skewX(-14deg); }
+.tabs .q { margin-left: auto; color: var(--ink); } .tabs .q em { font-style: normal; background: var(--attn); color: #15171a; min-width: 30px; height: 30px; display: grid; place-items: center; font: 800 16px var(--t); }
+.tabs a.off { color: color-mix(in srgb, var(--ink-2) 55%, transparent); }
+.phone .tabs { padding: 0; } .phone .tabs a { padding: 0 10px; font-size: 17px; } .phone .tabs .q { padding-right: 12px; }
+.src { font-size: 15px; color: var(--ink-2); padding: 14px 32px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.src .lnk { color: var(--ink); } .phone .src { font-size: 13px; padding: 12px 16px; }
+
+/* ===== the three things as bundles ===== */
+.things { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0 32px; border-top: 2px solid var(--ink); }
+.things > li { padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 8px; }
+.things > li + li { border-left: 1px solid var(--rule); } .things > li:first-child { padding-left: 0; } .things > li:last-child { padding-right: 0; }
+.g2 .things { border-top: 0; gap: 16px; } .g2 .things > li { background: var(--paper); padding: 18px 20px 20px !important; border: 0 !important; }
+.no { display: flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
+.no em { font: 700 13px var(--m); font-style: normal; color: var(--ink-2); width: 100%; }
+.no b { font-size: 96px; line-height: .8; color: var(--club-text); }
+.no > span { font-size: 22px; color: var(--ink-2); }
+.things p { font-weight: 700; font-size: 20px; line-height: 1.22; text-wrap: balance; }
+.things small { font-size: 15px; color: var(--ink-2); } .up { color: var(--win) !important; font-weight: 700; }
+.fig { position: relative; margin: 6px 0; } .fig > svg { width: 100%; display: block; }
+.fig .inset { position: absolute; left: 0; bottom: 0; width: 52%; border: 2px solid var(--ink); background: #0f2333; }
+.fig .inset svg { display: block; width: 100%; }
+.fig .inset p { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: center; gap: 4px; background: rgb(10 13 17 / .88); color: #e9eef2; font: 600 11px var(--m); padding: 3px 4px 3px 7px; }
+.pause { font: 700 12px var(--t); min-height: 30px; min-width: 44px; padding: 0 8px; border: 1.5px solid #8d97a1; background: #0a0d11; color: #fff; cursor: pointer; }
+.key { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); align-items: center; }
+.key i { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--ink); vertical-align: middle; margin-right: 6px; }
+.key i.est { border-top-style: dashed; opacity: .6; }
+.things .btn { align-self: flex-start; margin-top: auto; }
+.phone .things { grid-template-columns: minmax(0, 1fr); margin: 0 16px; }
+.phone .things > li { display: grid; grid-template-columns: minmax(0, 1fr) 132px; gap: 4px 14px; padding: 16px 0 18px !important; border-left: 0 !important; border-bottom: 1px solid var(--rule); }
+.g2 .phone .things > li { padding: 14px !important; border-bottom: 0; margin-bottom: 10px; }
+.phone .things .no { grid-column: 1; } .phone .things .no b { font-size: 64px; } .phone .things .no > span { font-size: 16px; }
+.phone .things .fig { grid-column: 2; grid-row: 1 / span 3; margin: 0; } .phone .things p { font-size: 17px; grid-column: 1; } .phone .things small { grid-column: 1; font-size: 13px; }
+.phone .things .btn { grid-column: 1 / -1; margin-top: 8px; } .phone .things .key { grid-column: 1 / -1; }
+
+/* ===== tactics camera ===== */
+.stage { position: relative; background: #0f2333; }
+.stage svg { display: block; width: 100%; }
+.stage .bar { display: flex; align-items: center; gap: 10px; background: #0a0d11; color: #c7ced5; padding: 8px 12px; font: 600 13px var(--m); flex-wrap: wrap; }
+.stage .bar .clk { font: 600 20px var(--m); color: #fff; margin-left: auto; font-variant-numeric: tabular-nums; }
+.stage .bar .pause { min-height: 40px; }
+.stage .mode { display: flex; border: 1.5px solid #4a5058; } .stage .mode button { min-height: 40px; padding: 0 12px; font: 700 13px var(--t); background: transparent; color: #a8b1ba; border: 0; } .stage .mode button[aria-pressed="true"] { background: #e9eef2; color: #0a0d11; }
+.stage .cap { position: absolute; right: 16px; top: 16px; background: rgb(10 13 17 / .9); color: #eef2f5; padding: 8px 12px; font-weight: 700; font-size: 15px; max-width: 70%; }
+.stage .cap small { display: block; font: 500 12px var(--m); color: #a5b0bb; margin-top: 2px; }
+svg text.cn { font: 800 10px var(--d); fill: #fff; } svg text.cn.us { fill: var(--club-cam-ink); } svg text.cn.them { fill: var(--opp-cam-ink); }
+svg .ctag text { font: 700 13px var(--t); fill: #fff; }
+.camkey { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 8px; align-items: center; }
+.camkey i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 6px; }
+.camkey i.us { background: var(--club-cam); box-shadow: 0 0 0 1px var(--ink); } .camkey i.them { background: var(--opp-cam); box-shadow: inset 0 0 0 2.5px var(--opp-cam-edge), 0 0 0 1px var(--ink); } .camkey i.ref { background: #8d97a1; border-radius: 0; transform: rotate(45deg) scale(.8); }
+.phone .stage .cap { position: static; max-width: none; font-size: 14px; padding: 8px 12px; border-top: 1px solid #2a3440; }
+
+/* ===== lists ===== */
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; padding: 32px 32px 48px; }
+.game { display: grid; grid-template-columns: 64px 128px minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.game .when { font-size: 13px; line-height: 1.25; color: var(--ink-2); } .game .when b { display: block; color: var(--ink); font-size: 20px; }
+.game h4 { font-size: 22px; line-height: 1.1; } .game p { font-size: 15px; color: var(--ink-2); } .game p .lnk { color: var(--ink); }
+.mfz { position: relative; width: 128px; } .mfz svg { width: 128px; display: block; }
+.mfz em { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); font: 600 12px var(--t); font-style: normal; color: var(--ink); background: var(--ground); padding: 2px 6px; text-align: center; line-height: 1.2; white-space: nowrap; }
+.res { text-align: right; } .res b { font-size: 44px; line-height: .85; display: block; }
+.res small { display: block; font-weight: 700; font-size: 14px; margin-top: 6px; } .res.w small { color: var(--win); } .res.l small { color: var(--loss); }
+.pbar { height: 6px; background: var(--rule); margin-top: 8px; max-width: 240px; } .pbar i { display: block; height: 100%; background: var(--ink); }
+.side { display: flex; flex-direction: column; gap: 32px; }
+.next h3 { font-size: 36px; line-height: .95; margin: 4px 0 12px; }
+.facts li { padding: 10px 0; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 8px; align-items: center; min-height: 44px; font-size: 16px; }
+table.st { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+table.st th { font-size: 12px; font-weight: 600; color: var(--ink-2); text-align: right; padding: 0 0 8px 8px; } table.st th:first-child, table.st td:first-child { text-align: left; padding-left: 0; }
+table.st td { text-align: right; padding: 0 0 0 8px; height: 44px; border-top: 1px solid var(--rule); }
+table.st tr.me td { font-weight: 800; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+table.st tr.me td:first-child::before { content: ""; display: inline-block; width: 12px; height: 12px; background: var(--club); box-shadow: inset 0 0 0 1.5px var(--club-edge); margin-right: 8px; vertical-align: -1px; transform: skewX(-14deg); }
+.pgame { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.pgame .mfz, .pgame .mfz svg { width: 84px; }
+.pgame h4 { font-size: 17px; line-height: 1.1; } .pgame p { font-size: 13px; color: var(--ink-2); line-height: 1.3; }
+.pgame .res b { font-size: 28px; } .pgame .res small { font-size: 12px; margin-top: 4px; }
+.qline { display: flex; gap: 12px; align-items: center; padding: 14px 32px 0; font-size: 15px; } .phone .qline { padding: 14px 16px 0; }
+.tag { font-weight: 800; font-size: 13px; background: var(--attn); color: #15171a; padding: 3px 8px; }
+
+/* ===== Spiel / Zahlen ===== */
+.sp { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; padding: 28px 32px 40px; }
+.telegramm { font-size: 17px; line-height: 1.55; }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 2px solid var(--ink); }
+.kpi { padding: 12px 10px 12px 0; } .kpi + .kpi { padding-left: 10px; border-left: 1px solid var(--rule); }
+.kpi b { font-size: 44px; line-height: .9; display: block; } .kpi b small { font-size: 20px; }
+.kpi span { font-size: 13px; color: var(--ink-2); line-height: 1.3; display: block; margin-top: 8px; }
+.zf svg { width: 100%; display: block; }
+svg text.zc { font-family: var(--d); font-style: italic; font-weight: 900; fill: var(--ink); } svg text.zc.big { fill: var(--club-text); }
+svg text.zl { font: 600 11px var(--t); fill: var(--ink-2); }
+table.tb { width: 100%; border-collapse: collapse; font-size: 17px; font-variant-numeric: tabular-nums; background: var(--paper); }
+table.tb th { font-size: 13px; font-weight: 600; color: var(--ink-2); text-align: right; padding: 10px; border-bottom: 2px solid var(--ink); white-space: nowrap; background: var(--ground); }
+table.tb td { text-align: right; padding: 0 10px; height: 48px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.tb th:first-child, table.tb td:first-child { text-align: left; padding-left: 12px; }
+table.tb td:first-child b { display: inline-block; width: 36px; font-size: 21px; color: var(--club-text); }
+table.tb td a { font-weight: 600; text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, var(--ink) 40%, transparent); }
+table.tb .mk { color: var(--ink-2); }
+table.tb .ok svg { width: 18px; height: 18px; vertical-align: -3px; }
+.foot { font-size: 14px; color: var(--ink-2); margin-top: 10px; }
+.torg { display: grid; grid-template-columns: repeat(3, 1fr); border: 6px solid var(--ink); border-bottom: 0; background: var(--paper); max-width: 220px; }
+.torg span { height: 50px; display: grid; place-items: center; font-size: 22px; border: 1px solid var(--rule); }
+.phs li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 10px 0; border-top: 1px solid var(--rule); align-items: center; }
+.phs li b { font-size: 24px; } .phs li small { color: var(--ink-2); font-size: 13px; }
+.phs .pb { grid-column: 1 / -1; height: 8px; display: flex; gap: 3px; } .phs .pb i { display: block; height: 100%; }
+.rail svg { width: 100%; height: 92px; display: block; }
+.rail .ax { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+.scn li { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--rule); min-height: 44px; }
+.scn li b { font-size: 17px; } .scn li span { font-size: 15px; line-height: 1.35; } .scn li small { display: block; color: var(--ink-2); font-size: 13px; }
+.scn li.on { background: var(--attn); color: #15171a; margin: 0 -12px; padding: 10px 12px; border-top-color: transparent; } .scn li.on small { color: #15171a; }
+.note { font-style: italic; font-size: 17px; border-left: 4px solid var(--club); padding-left: 12px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.state { margin: 0 16px; padding: 18px 16px; border: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent); }
+.state p { font-size: 16px; } .state .btns { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.ask { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 10px; font-weight: 700; font-size: 14px; }
+.ask i { width: 26px; height: 26px; display: block; border: 1.5px solid var(--club-ink); }
+.ask button { all: unset; cursor: pointer; }
+</style>
+</head>
+<body>
+<header class="doc">
+  <p class="kick">Runde 5 · Synthese aus dem Mischpult: K3-D1-S3-G2-Z3-M1-blau-schwarz</p>
+  <h1>Anlauf</h1>
+  <p class="idea">Das Resultat steht schräg in der Vereinsfarbe, die Szene läuft auf der Taktikkamera, und jede Linie ist ein gemessener Weg.</p>
+  <p>Wurf ist der Kopf für das Resultat: gross auf Start und Spiel, als schmaler Streifen auf Video, Zahlen und Prüfen. Die Taktikkamera ist die Bühne einer Szene: im Video und wenn ein Ding geöffnet wird. Die Spur verbindet alles: der Verlauf im Kopf, die Anläufe der Torschützinnen in den Bündeln, dieselben Wege bewegt auf der Taktikkamera. Gezeigt wird nur, was die Analyse liefert: Positionen ja, Ball nein, Wurfposition nur für Tore und als Schätzung. Die Schalter oben wechseln Schrift, Grund und Vereinsfarbe.</p>
+</header>
+<nav class="ctl" aria-label="Varianten">
+  <div class="grp" role="group" aria-label="Schrift"><span>Schrift</span><button data-f="fa">A alles schräg</button><button data-f="fb">B schräg nur Ziffern</button></div>
+  <div class="grp" role="group" aria-label="Grund"><span>Grund</span><button data-g="g1">Kante</button><button data-g="g2">Hallenlicht</button><button data-g="g3">Stoff</button></div>
+  <div class="grp" role="group" aria-label="Vereinsfarbe"><span>Verein</span>
+    <button class="sw" data-c="blau" aria-label="Blau"><i style="background:#1f4fd6"></i></button><button class="sw" data-c="rot" aria-label="Rot"><i style="background:#d3202e"></i></button><button class="sw" data-c="gelb" aria-label="Gelb"><i style="background:#f6c500"></i></button><button class="sw" data-c="schwarz" aria-label="Schwarz"><i style="background:#17191c"></i></button><button class="sw" data-c="weiss" aria-label="Weiss"><i style="background:#fff"></i></button><button class="sw" data-c="gruen" aria-label="Grün"><i style="background:#12804a"></i></button></div>
+</nav>
+<main id="views"></main>
+<div style="height:64px"></div>
+<script>
+/* Shared drawing core: club colours, court geometry in metres, scenes from position data. */
+var CLUBS = { rot: "#d3202e", blau: "#1f4fd6", gelb: "#f6c500", schwarz: "#17191c" };
+function hex2rgb(h) { h = h.replace("#", ""); return [0, 2, 4].map(function (i) { return parseInt(h.substr(i, 2), 16); }); }
+function rgb2hex(c) { return "#" + c.map(function (v) { v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? "0" : "") + v.toString(16); }).join(""); }
+function lum(h) { return hex2rgb(h).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }).reduce(function (a, v, i) { return a + v * [0.2126, 0.7152, 0.0722][i]; }, 0); }
+function contrast(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function mix(a, b, t) { var p = hex2rgb(a), q = hex2rgb(b); return rgb2hex(p.map(function (v, i) { return v + (q[i] - v) * t; })); }
+/* shift a colour towards white (or black) until it reaches the contrast it needs on a ground */
+function reach(c, ground, need, to) { for (var t = 0; t <= 1; t += 0.02) { var m = mix(c, to, t); if (contrast(m, ground) >= need) return m; } return to; }
+function setClub(name, grounds) {
+  var c = CLUBS[name] || name, r = document.documentElement.style;
+  r.setProperty("--club", c);
+  r.setProperty("--club-ink", contrast(c, "#ffffff") >= 4.5 ? "#ffffff" : "#0c1015");
+  if (grounds.dark) r.setProperty("--club-on-dark", reach(c, grounds.dark, 3.2, "#ffffff"));
+  if (grounds.light) r.setProperty("--club-on-light", reach(c, grounds.light, 4.5, "#000000"));
+  document.querySelectorAll("[data-club]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.club === name ? "true" : "false"); });
+  try { localStorage.setItem("r2club", name); } catch (e) {}
+}
+
+/* ---------- court in metres: 40 x 20, goals at x = 0 and x = 40 ---------- */
+var NS = ' vector-effect="non-scaling-stroke"';
+function goalArea(r) {
+  var k = Math.sqrt(r * r - 8.5 * 8.5 > 0 ? r * r - 8.5 * 8.5 : 0), y0 = r > 8.5 ? 0 : 8.5 - r, x0 = r > 8.5 ? k : 0;
+  return "M" + x0.toFixed(3) + " " + y0.toFixed(3) + " A" + r + " " + r + " 0 0 1 " + r + " 8.5 L" + r + " 11.5 A" + r + " " + r + " 0 0 1 " + x0.toFixed(3) + " " + (20 - y0).toFixed(3);
+}
+function courtLines(o) {
+  o = o || {};
+  var L = o.line || "var(--court-line)", w = o.lw || 1.5, h = "";
+  if (o.floor) h += '<rect x="-3" y="-3" width="46" height="26" fill="' + o.floor + '"/>';
+  if (o.area) h += '<path d="' + goalArea(6) + ' Z" fill="' + o.area + '"/><path d="' + goalArea(6) + ' Z" fill="' + o.area + '" transform="matrix(-1 0 0 1 40 0)"/>';
+  h += '<g fill="none" stroke="' + L + '" stroke-width="' + w + '">';
+  h += '<rect x="0" y="0" width="40" height="20"' + NS + '/><path d="M20 0V20"' + NS + "/>";
+  [1, -1].forEach(function (s) {
+    var t = s < 0 ? ' transform="matrix(-1 0 0 1 40 0)"' : "";
+    h += "<g" + t + '><path d="' + goalArea(6) + '"' + NS + '/><path d="' + goalArea(9) + '" stroke-dasharray="5 4"' + NS + '/><path d="M7 9.5V10.5M4 9.85V10.15"' + NS + "/></g>";
+  });
+  h += "</g>";
+  h += '<rect x="-0.6" y="8.5" width="0.6" height="3" fill="' + (o.goal || L) + '"/><rect x="40" y="8.5" width="0.6" height="3" fill="' + (o.goal || L) + '"/>';
+  return h;
+}
+/* views: full court, or a half turned so its goal is at the top */
+var VIEWS = {
+  full: { box: [-1.2, -1.2, 42.4, 22.4], m: null, f: function (p) { return p; } },
+  halfL: { box: [-0.6, -0.9, 21.2, 14.2], m: "matrix(0 1 1 0 0 0)", f: function (p) { return [p[1], p[0]]; } },
+  halfR: { box: [-0.6, -0.9, 21.2, 14.2], m: "matrix(0 -1 -1 0 20 40)", f: function (p) { return [20 - p[1], 40 - p[0]]; } },
+  halfLdeep: { box: [-0.6, -0.9, 21.2, 18.6], m: "matrix(0 1 1 0 0 0)", f: function (p) { return [p[1], p[0]]; } },
+  leftWide: { box: [-1, -1, 23, 22], m: null, f: function (p) { return p; } }
+};
+function viewWrap(v, inner) { return v.m ? '<g transform="' + v.m + '">' + inner + "</g>" : inner; }
+
+/* ---------- curves ---------- */
+function cr(pts, n) { /* Catmull-Rom sampled */
+  if (pts.length < 2) return pts.slice();
+  var out = [], P = [pts[0]].concat(pts, [pts[pts.length - 1]]);
+  for (var i = 1; i < P.length - 2; i++) for (var k = 0; k < n; k++) {
+    var t = k / n, t2 = t * t, t3 = t2 * t, a = P[i - 1], b = P[i], c = P[i + 1], d = P[i + 2];
+    out.push([0, 1].map(function (j) { return 0.5 * (2 * b[j] + (-a[j] + c[j]) * t + (2 * a[j] - 5 * b[j] + 4 * c[j] - d[j]) * t2 + (-a[j] + 3 * b[j] - 3 * c[j] + d[j]) * t3); }));
+  }
+  out.push(pts[pts.length - 1]);
+  return out;
+}
+function upto(s, t) { var n = Math.max(1, Math.round((s.length - 1) * t)); return s.slice(0, n + 1); }
+function d(pts) { return pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(2) + " " + p[1].toFixed(2); }).join(""); }
+function rng(seed) { var s = seed >>> 0 || 1; return function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
+
+/* ---------- scenes in full-court metres (our goal on the left in defence scenes) ---------- */
+var SCENES = {
+  ra: { /* Gegentor ueber rechts aussen: our 7 steps out, the gap opens */
+    us: [[1, [[1.0, 11.2], [0.9, 10.2], [0.7, 9.1]]], [7, [[5.6, 2.2], [6.2, 2.9], [7.2, 3.8], [8.4, 5.0]]], [13, [[6.6, 7.2], [7.2, 7.0], [7.9, 7.3]]], [4, [[7.0, 10.6], [7.4, 9.8], [7.6, 9.6]]], [10, [[6.8, 12.4], [7.2, 11.4], [7.4, 10.8]]], [11, [[6.8, 14.8], [7.1, 13.8], [7.3, 13.1]]], [8, [[5.8, 17.6], [6.1, 16.9], [6.4, 16.2]]]],
+    them: [[5, [[1.2, 0.5], [0.7, 0.9], [1.4, 1.3], [2.7, 1.9], [3.9, 2.9]]], [9, [[15.2, 8.6], [14.0, 7.2], [12.2, 5.8], [10.5, 5.0]]], [14, [[14.6, 12.4], [13.4, 11.0], [12.1, 10.0]]], [22, [[13.0, 17.0], [11.8, 15.8], [10.9, 14.6]]], [3, [[0.8, 19.4], [1.2, 19.0], [1.6, 18.6]]], [18, [[6.2, 12.4], [6.4, 10.6], [6.7, 8.6], [6.6, 7.4]]]],
+    pass: [[[12.1, 10.0], [10.5, 5.0], 0.35], [[10.5, 5.0], [3.4, 2.4], 0.7]],
+    shot: [[3.9, 2.9], [0.15, 8.9]],
+    zone: "M0 0H7.6L5.2 4.6 1.6 6.2 0 6.4Z", zoneAt: [5.6, 1.2], zoneText: ["9 von 18", "Gegentoren hier"],
+    focus: 5, gap: [[6.6, 4.4], [7.2, 6.6]]
+  },
+  tv: { /* Gegenstoss nach Ballverlust: two run back, four watch */
+    us: [[1, [[1.6, 10], [2.2, 9.6], [2.6, 9.0]]], [10, [[31, 8], [26, 8.2], [20.5, 8.4]]], [4, [[33, 12.5], [29, 12.6], [25.5, 12.8]]], [11, [[34.5, 15], [33.4, 14.8], [32.6, 14.6]]], [13, [[36, 10], [35.6, 10], [35.2, 10]]], [7, [[37.5, 2.5], [37, 2.8], [36.6, 3.0]]], [8, [[34, 6], [33.5, 6.2], [33.2, 6.3]]]],
+    them: [[5, [[30.2, 4.2], [24, 4.2], [15, 4.8], [8, 6], [5.6, 6.8]]], [9, [[28.5, 12.5], [22, 12], [15, 11.2], [11.5, 10.8]]], [14, [[33, 9], [31, 9.2], [29.5, 9.4]]], [22, [[34, 17], [32, 16.5], [30.6, 16]]]],
+    pass: [[[30.6, 8.2], [14, 5.2], 0.55]],
+    shot: [[5.6, 6.8], [0.15, 9.3]],
+    loss: [31, 8], lossText: "Ballverlust 38:40",
+    focus: 5
+  },
+  kr: { /* Kreisanspiel: block and roll, pass from the middle */
+    us: [[7, [[38.6, 1.6], [38.4, 1.8], [38.2, 2.0]]], [10, [[30, 5], [30.6, 5.6], [31, 6.2]]], [4, [[28.2, 10.6], [28.8, 10.3], [29.2, 10.0]]], [11, [[30, 15], [30.4, 14.6], [30.7, 14.2]]], [13, [[38.6, 18.4], [38.4, 18.2], [38.2, 18.0]]], [8, [[34.2, 12.4], [34.1, 11.4], [34.4, 10.4], [34.8, 9.7]]]],
+    them: [[1, [[39.2, 10.4], [39.3, 10.1], [39.4, 9.9]]], [6, [[34, 3.6], [33.8, 3.8], [33.7, 4.0]]], [12, [[33.2, 6.8], [32.9, 7.2], [32.7, 7.4]]], [15, [[33, 9.2], [32.4, 9.6], [32.0, 9.9]]], [17, [[33, 11.2], [32.8, 11.4], [32.8, 11.6]]], [19, [[33.2, 13.6], [33.2, 13.4], [33.2, 13.2]]], [21, [[34, 16.6], [34, 16.4], [34, 16.2]]]],
+    pass: [[[29.2, 10.0], [34.7, 9.8], 0.6]],
+    shot: [[34.8, 9.7], [39.85, 10.9]],
+    focus: 8
+  }
+};
+
+/* ===== Abdruck: every match has a face made of its own data ===== */
+/* kits: first colour and trim, as on the shirt */
+var KITS = {
+  rot: ["#d3202e", "#ffffff"], blau: ["#1f4fd6", "#ffffff"], gelb: ["#f6c500", "#17191c"],
+  schwarz: ["#17191c", "#ffffff"], weiss: ["#ffffff", "#17191c"], gruen: ["#12804a", "#ffffff"],
+  thalwil: ["#0b7a8a", "#ffffff"], staefa: ["#5b2d8e", "#ffffff"], meilen: ["#e2731c", "#ffffff"], horgen: ["#17191c", "#f6c500"], waedenswil: ["#1d3a8a", "#ffffff"], rheinau: ["#6b2fa3", "#ffffff"]
+};
+var INK = "#15171a", GREY = "#646b73";
+function hue(h) { var c = hex2rgb(h).map(function (v) { return v / 255; }), mx = Math.max.apply(null, c), mn = Math.min.apply(null, c), dd = mx - mn; if (dd < 0.15) return -1; var x = mx === c[0] ? ((c[1] - c[2]) / dd) % 6 : mx === c[1] ? (c[2] - c[0]) / dd + 2 : (c[0] - c[1]) / dd + 4; return (x * 60 + 360) % 360; }
+function near(a, b) { var ha = hue(a), hb = hue(b); if (ha < 0 || hb < 0) return ha < 0 && hb < 0 && Math.abs(lum(a) - lum(b)) < 0.25; return Math.min(Math.abs(ha - hb), 360 - Math.abs(ha - hb)) < 45; }
+/* everything colour-related for one club against one opponent */
+function kit(club, opp) {
+  var c = KITS[club], o = opp && KITS[opp], k = {};
+  /* the ground carries a breath of the club: 6 % of its colour on cool white; light kits get a cool grey */
+  k.ground = "#eef0f2"; /* one cool ground for every club: the colour belongs to the head, the lines and the numerals */
+  k.rule = mix(k.ground, INK, 0.16);
+  k.club = c[0]; k.clubInk = contrast(c[0], "#ffffff") >= 3.2 ? "#ffffff" : INK;
+  /* a line in a light kit colour is piped with its trim, so it stays the kit's colour and still reads */
+  var lo = contrast(c[0], k.ground) < 2.4;
+  k.clubLine = lo ? c[0] : c[0]; k.clubPipe = lo ? (contrast(c[1], k.ground) >= 3 ? c[1] : INK) : "";
+  k.clubText = contrast(c[0], k.ground) >= 4.5 ? c[0] : INK;
+  k.clubEdge = contrast(c[0], k.ground) < 1.25 ? INK : c[0];
+  if (!o) { k.opp = GREY; k.oppInk = "#ffffff"; k.oppLine = GREY; k.oppPipe = ""; k.oppKnown = false; }
+  else {
+    var oc = near(o[0], c[0]) ? (near(o[1], c[0]) ? INK : o[1]) : o[0];
+    k.opp = oc; k.oppInk = contrast(oc, "#ffffff") >= 3.2 ? "#ffffff" : INK; k.oppKnown = true;
+    var olo = contrast(oc, k.ground) < 2.4; k.oppLine = oc; k.oppPipe = olo ? INK : "";
+  }
+  if (!k.oppKnown && lum(c[0]) < 0.05) { k.opp = "#8b9198"; k.oppInk = INK; k.oppLine = "#7a8087"; }
+  return k;
+}
+function applyKit(el, k) {
+  var s = el.style;
+  s.setProperty("--ground", k.ground); s.setProperty("--rule", k.rule);
+  s.setProperty("--club", k.club); s.setProperty("--club-ink", k.clubInk); s.setProperty("--club-line", k.clubLine); s.setProperty("--club-text", k.clubText); s.setProperty("--club-edge", k.clubEdge);
+  s.setProperty("--opp", k.opp); s.setProperty("--opp-ink", k.oppInk); s.setProperty("--opp-line", k.oppLine);
+  el._kit = k;
+}
+function kitOf(svg) { var a = svg.closest("[data-club]"); return a && a._kit; }
+/* a stroke that wears its kit: piped when the colour alone would vanish on the ground */
+function line(dd, col, pipe, w, op, extra) {
+  var o = "";
+  if (pipe && w >= 1.8) o += '<path d="' + dd + '" fill="none" stroke="' + pipe + '" stroke-width="' + (w + 2.4) + '" stroke-opacity="' + op + '" stroke-linecap="round" stroke-linejoin="round"' + NS + "/>";
+  return o + '<path d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-opacity="' + (pipe && w < 1.8 ? Math.min(1, op + 0.25) : op) + '" stroke-linecap="round" stroke-linejoin="round"' + NS + (extra || "") + "/>";
+}
+
+/* ---------- match data ---------- */
+var ZONES = {
+  la: { x: [0.8, 3.0], y: [0.8, 3.4], run: [1.3, -0.2] }, ra: { x: [0.8, 3.0], y: [16.6, 19.2], run: [1.3, 0.2] },
+  rl: { x: [8.6, 11.5], y: [3.6, 7.6], run: [1, 0.5] }, rm: { x: [8.8, 12], y: [8.2, 11.8], run: [1, 0] }, rr: { x: [8.6, 11.5], y: [12.4, 16.4], run: [1, -0.5] },
+  kr: { x: [6.0, 7.2], y: [8.0, 12.0], run: [0.4, 1] }, m7: { x: [7, 7], y: [10, 10], run: [0, 0] }, gs: { x: [5.0, 8.0], y: [5, 15], run: [1, 0], far: 1 }
+};
+function match(seed, own, opp) {
+  var R = rng(seed), list = [];
+  function side(spec, us) {
+    Object.keys(spec).forEach(function (z) {
+      var n = spec[z][0], g = spec[z][1];
+      for (var i = 0; i < n; i++) {
+        var Z = ZONES[z], x = Z.x[0] + R() * (Z.x[1] - Z.x[0]), y = Z.y[0] + R() * (Z.y[1] - Z.y[0]);
+        var len = Z.far ? 14 + R() * 10 : 2.5 + R() * 4, ax = Z.run[0] * len + (R() - 0.5) * 3, ay = Z.run[1] * len * 0.6 + (R() - 0.5) * 4;
+        if (Z.far) ay = (R() - 0.5) * 8;
+        var goal = i < g, gy = 8.7 + R() * 2.6, ty = goal ? gy : (R() < 0.5 ? 8.5 + R() * 3 : (R() < 0.5 ? 8.1 : 11.9)), tx = goal ? 0 : 0.6 + R() * 0.8;
+        var bend = (R() - 0.5) * 6;
+        var s = { us: us, zone: z, goal: goal, t: R() * 60, run: [[x + ax, y + ay], [x + ax * 0.5 + bend * 0.5, y + ay * 0.5 + bend], [x, y]], to: [tx, ty] };
+        if (z === "m7") s.run = [[x + 0.6, y], [x, y]];
+        list.push(s);
+      }
+    });
+  }
+  side(own, true); side(opp, false);
+  list.sort(function (a, b) { return a.t - b.t; });
+  return list;
+}
+/* home on the left as on any scoreboard: we score into the left goal, they into the right one */
+function place(p, us) { return us ? [p[0], 20 - p[1]] : [40 - p[0], p[1]]; }
+var M = {
+  thalwil: match(26, { la: [5, 3], ra: [5, 3], rl: [7, 3], rm: [6, 3], rr: [6, 3], kr: [8, 7], m7: [3, 2], gs: [5, 2] }, { la: [3, 1], ra: [11, 9], rl: [5, 3], rm: [4, 2], rr: [3, 1], kr: [2, 1], m7: [1, 0], gs: [5, 1] }),
+  staefa: match(31, { la: [3, 1], ra: [4, 2], rl: [10, 4], rm: [9, 4], rr: [6, 3], kr: [3, 2], m7: [3, 3], gs: [2, 0] }, { la: [4, 3], ra: [3, 2], rl: [6, 4], rm: [5, 3], rr: [6, 4], kr: [5, 4], m7: [2, 2], gs: [8, 4] }),
+  meilen: match(44, { la: [4, 2], ra: [3, 2], rl: [6, 3], rm: [8, 4], rr: [6, 3], kr: [6, 5], m7: [3, 2], gs: [4, 2] }, { la: [3, 2], ra: [4, 3], rl: [8, 5], rm: [7, 4], rr: [6, 3], kr: [5, 3], m7: [2, 2], gs: [2, 0] }),
+  rheinau: match(57, { la: [2, 1], ra: [4, 2], rl: [9, 5], rm: [8, 4], rr: [8, 4], kr: [4, 3], m7: [3, 3], gs: [3, 2] }, { la: [4, 3], ra: [3, 2], rl: [12, 8], rm: [7, 4], rr: [5, 3], kr: [5, 4], m7: [2, 2], gs: [2, 1] })
+};
+var FLOW = { /* goal difference over the minutes, from the match report */
+  thalwil: [[0, 0], [2, 1], [3, 0], [5, 1], [7, 0], [9, 1], [11, 2], [12, 1], [14, 2], [16, 1], [17, 2], [19, 3], [20, 2], [22, 3], [23, 2], [24, 3], [25, 2], [26, 3], [27, 4], [28, 3], [29, 4], [30, 4], [32, 5], [35, 6], [36, 7], [38.6, 6], [39.9, 5], [41, 4], [42, 3], [43.8, 2], [46, 3], [48, 4], [49, 3], [50, 4], [51, 5], [53, 6], [54, 7], [55, 6], [56, 7], [57, 8], [58, 9], [58.5, 8], [60, 8]],
+  staefa: [[0, 0], [4, -1], [8, 0], [12, -2], [18, -3], [24, -2], [30, -4], [36, -5], [42, -4], [48, -6], [54, -7], [60, -7]],
+  meilen: [[0, 0], [6, 2], [12, 1], [18, 3], [24, 2], [30, 1], [36, -1], [42, 0], [48, 2], [54, 0], [60, 1]],
+  horgen: [[0, 0], [6, 1], [12, 3], [18, 4], [24, 4], [30, 6], [36, 7], [42, 8], [48, 9], [54, 10], [60, 10]],
+  waedenswil: [[0, 0], [6, -1], [12, -2], [18, -1], [24, -1], [30, -1], [36, -2], [42, -1], [48, -2], [54, -2], [60, -3]],
+  rheinau: [[0, 0], [6, -1], [12, 0], [18, -2], [24, -1], [30, -2], [36, -3], [42, -1], [48, -2], [54, -4], [60, -3]]
+};
+function shotPath(s) {
+  var r = s.run.map(function (p) { return place(p, s.us); }), to = place(s.to, s.us);
+  var A = r[r.length - 1], S0 = r[0];
+  S0 = [Math.max(0.3, Math.min(39.7, S0[0])), Math.max(0.4, Math.min(19.6, S0[1]))];
+  var gx = A[0] - to[0], gy = A[1] - to[1], gl = Math.hypot(gx, gy) || 1, L = Math.hypot(S0[0] - A[0], S0[1] - A[1]);
+  var c = [A[0] + gx / gl * L * 0.55, A[1] + gy / gl * L * 0.55];
+  c = [Math.max(0.3, Math.min(39.7, c[0])), Math.max(0.4, Math.min(19.6, c[1]))];
+  var pts = []; for (var i = 0; i <= 18; i++) { var t = i / 18, u = 1 - t; pts.push([u * u * S0[0] + 2 * u * t * c[0] + t * t * A[0], u * u * S0[1] + 2 * u * t * c[1] + t * t * A[1]]); }
+  return pts.concat([to]);
+}
+
+/* ---------- the face: two kit fields, every throw in white, the run of the match through the score ---------- */
+function face(svg) {
+  var key = svg.dataset.match, list = M[key], W = +svg.dataset.w, H = +svg.dataset.h, small = W < 300 || H < 200, prog = svg.dataset.p ? +svg.dataset.p : 1;
+  var k = kitOf(svg), cw = Math.min(W, H * 2.1), s = cw / 42, ox = (W - cw) / 2, oy = (H - 22 * s) / 2;
+  var h = '<rect x="0" y="0" width="' + W / 2 + '" height="' + H + '" fill="var(--club)"/><rect x="' + W / 2 + '" y="0" width="' + W / 2 + '" height="' + H + '" fill="var(--opp)"/>';
+  if (k.clubEdge !== k.club) h += '<rect x="1" y="1" width="' + (W / 2 - 1) + '" height="' + (H - 2) + '" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+  if (contrast(k.opp, k.ground) < 1.25) h += '<rect x="' + (W / 2) + '" y="1" width="' + (W / 2 - 1) + '" height="' + (H - 2) + '" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+  h += '<g transform="translate(' + (ox + s) + " " + (oy + s) + ") scale(" + s + ')">';
+  if (!small && !svg.hasAttribute("data-noshots")) { var id = "c" + Math.random().toString(36).slice(2, 8); h += '<clipPath id="' + id + 'l"><rect x="-2" y="-2" width="22" height="24"/></clipPath><clipPath id="' + id + 'r"><rect x="20" y="-2" width="22" height="24"/></clipPath><g opacity=".24"><g clip-path="url(#' + id + 'l)">' + courtLines({ line: "var(--club-ink)", lw: 1 }) + '</g><g clip-path="url(#' + id + 'r)">' + courtLines({ line: "var(--opp-ink)", lw: 1 }) + "</g></g>"; }
+  if (svg.hasAttribute("data-seq")) { h += "</g>"; h += stairs(svg.dataset.seq, W, H); svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = h; return; }
+  var n = Math.round(list.length * prog);
+  /* the two goals, so the lines visibly end in something */
+  h += '<rect x="-0.9" y="8.5" width="0.9" height="3" fill="var(--club-ink)"/><rect x="40" y="8.5" width="0.9" height="3" fill="var(--opp-ink)"/>';
+  list.forEach(function (sh, i) {
+    if (i >= n || svg.hasAttribute("data-noshots")) return;
+    if ((W < 500 || svg.hasAttribute("data-quiet")) && !sh.goal) return;
+    var col = sh.us ? "var(--club-ink)" : "var(--opp-ink)", pts = shotPath(sh).slice(small ? 12 : 8);
+    pts = pts.map(function (p) { return [sh.us ? Math.min(p[0], 19.6) : Math.max(p[0], 20.4), p[1]]; });
+    var dd = d(pts);
+    h += '<path class="ln" style="--i:' + i + '" pathLength="1" d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + (svg.hasAttribute("data-quiet") ? 1 : sh.goal ? (small ? 1 : W < 500 ? 1.3 : 2.2) : 1) + '" stroke-opacity="' + (svg.hasAttribute("data-quiet") ? 0.32 : sh.goal ? (W < 500 ? 0.7 : 0.92) : 0.38) + '" stroke-linecap="round"' + NS + "/>";
+  });
+  h += "</g>";
+  if (svg.hasAttribute("data-flow")) h += svg.hasAttribute("data-quiet") ? quietFlow(FLOW[key], W, H) : flowLine(FLOW[key], W, H, svg.hasAttribute("data-phase"), small, W < 500);
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = h;
+}
+/* the run of the match: one line, left to right is minute 0 to 60, up is our lead */
+function flowLine(data, W, H, phase, small, compact) {
+  var pad = small ? 10 : compact ? 14 : 32, U = compact ? (H * 0.13) / 9 : (H * 0.46) / 9, mid = compact ? H * 0.9 : H * 0.8;
+  function x(m) { return pad + (W - 2 * pad) * m / 60; } function y(v) { return mid - v * U; }
+  var pts = []; data.forEach(function (p, i) { if (i) pts.push([x(p[0]), y(data[i - 1][1])]); pts.push([x(p[0]), y(p[1])]); });
+  var dd = d(pts), o = "", last = data[data.length - 1];
+  o += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + mid + '" y2="' + mid + '" stroke="#fff" stroke-opacity=".5" stroke-dasharray="2 5"/>';
+  o += '<path d="' + dd + '" fill="none" stroke="' + INK + '" stroke-opacity=".35" stroke-width="' + (small ? 3 : 7) + '" stroke-linejoin="round"/>';
+  o += '<path d="' + dd + '" fill="none" stroke="#fff" stroke-width="' + (small ? 1.6 : 3.5) + '" stroke-linejoin="round"/>';
+  if (phase) {
+    /* the marked phase is the stretch of the line itself, in signal yellow */
+    var seg = []; data.forEach(function (p, i) { if (p[0] >= 38 && p[0] <= 44.5) { if (i && data[i - 1][0] >= 37.9) seg.push([x(p[0]), y(data[i - 1][1])]); seg.push([x(p[0]), y(p[1])]); } });
+    seg.unshift([x(38), y(7)]); seg.push([x(44), y(2)]);
+    o += '<path d="' + d(seg) + '" fill="none" stroke="#ffd23c" stroke-width="' + (small ? 3 : 8) + '" stroke-linejoin="round"/>';
+    if (!small && !compact) o += '<g transform="translate(' + x(38) + " " + (y(9) - 30) + ')"><rect width="204" height="26" fill="#ffd23c"/><text x="8" y="18" class="ph">38. bis 44.: 5 Tore Thalwil</text></g>';
+  }
+  var ex = x(60), ey = y(last[1]);
+  o += '<circle cx="' + ex + '" cy="' + ey + '" r="' + (small ? 3 : 9) + '" fill="#fff" stroke="' + INK + '" stroke-width="' + (small ? 1 : 2) + '"/>';
+  if (!small && compact) o += '<text x="' + (ex - 14) + '" y="' + (ey - 8) + '" text-anchor="end" class="fl">' + (last[1] > 0 ? "+" : "") + last[1] + "</text>";
+  if (!small && !compact) {
+    o += '<text x="' + (ex - 16) + '" y="' + (ey - 16) + '" text-anchor="end" class="fl b">Schluss ' + (last[1] > 0 ? "+" : "") + last[1] + "</text>";
+  }
+  return o;
+}
+/* the quiet run: one hairline in the lower third, ending in a small ball, no words */
+function quietFlow(data, W, H) {
+  var pad = W < 500 ? 12 : 26, U = H * 0.16 / 9, mid = H * 0.9;
+  function x(m) { return pad + (W - 2 * pad) * m / 60; } function y(v) { return mid - v * U; }
+  var pts = []; data.forEach(function (p, i) { if (i) pts.push([x(p[0]), y(data[i - 1][1])]); pts.push([x(p[0]), y(p[1])]); });
+  var last = data[data.length - 1];
+  return '<path d="' + d(pts) + '" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.5" stroke-linejoin="round"/><circle cx="' + x(60) + '" cy="' + y(last[1]) + '" r="' + (W < 500 ? 3 : 4.5) + '" fill="#fff"/>';
+}
+/* without video: the goal sequence as a stair, nothing more */
+function stairs(seq, W, H) {
+  seq = seq.split(" ").map(function (p) { return p.split(":").map(Number); });
+  var last = seq[seq.length - 1], tot = last[0] + last[1], pad = 8, x = pad, mid = H / 2, a = 0, b = 0, U = H / 26, pa = "M" + pad + " " + mid;
+  seq.forEach(function (p) { while (a < p[0] || b < p[1]) { var us = (p[0] - a) >= (p[1] - b) && a < p[0]; if (us) a++; else b++; x += (W - 2 * pad) / tot; pa += "H" + x.toFixed(1) + "V" + (mid - (a - b) * U).toFixed(1); } });
+  return '<path d="' + pa + '" fill="none" stroke="#fff" stroke-width="1.6"/><path d="' + pa + '" fill="none" stroke="' + INK + '" stroke-opacity=".3" stroke-width="3.4" style="mix-blend-mode:multiply"/>';
+}
+
+/* ---------- the bundle behind one insight, on a half court with the goal at the top ---------- */
+function bundle(svg) {
+  var which = svg.dataset.bundle, k = kitOf(svg), W = +svg.dataset.w;
+  var V = which === "kr" ? { box: [-0.6, -0.9, 21.2, 14.2], m: "matrix(0 1 1 0 0 0)", f: function (p) { return [p[1], p[0]]; } } : { box: [-0.6, -0.9, 21.2, 14.2], m: "matrix(0 -1 -1 0 20 40)", f: function (p) { return [20 - p[1], 40 - p[0]]; } };
+  var kk = W / V.box[2], list = M.thalwil, h = viewWrap(V, '<g opacity=".35">' + courtLines({ line: INK, lw: 1 }) + "</g>");
+  var us = which === "kr", pick;
+  if (which === "ra") pick = list.filter(function (s) { return !s.us && s.zone === "ra"; });
+  else if (which === "kr") pick = list.filter(function (s) { return s.us && s.zone === "kr"; });
+  else pick = [0, 1, 2, 3, 4, 5].map(function (i) { var y = 3 + i * 2.6; return { us: false, goal: true, zone: "gs", run: [[30 - i * 1.5, 20 - y], [16 - i, 20 - y + (i % 2 ? 2.5 : -2.5)], [6.5 + i * 0.3, 20 - (y * 0.5 + 5)]], to: [0, 8.8 + i * 0.45] }; });
+  list.filter(function (s) { return s.us === us && pick.indexOf(s) < 0; }).forEach(function (s) { h += '<path d="' + d(shotPath(s).map(V.f)) + '" fill="none" stroke="' + INK + '" stroke-opacity=".12" stroke-width="1"' + NS + "/>"; });
+  var col = us ? k.clubLine : k.oppLine, pipe = us ? k.clubPipe : k.oppPipe;
+  pick.forEach(function (s) {
+    var pts = shotPath(s).map(V.f);
+    h += line(d(pts), col, pipe, s.goal ? 3 : 1.2, s.goal ? 1 : 0.7);
+    var e = pts[pts.length - 1];
+    if (s.goal) h += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="' + 3.6 / kk + '" fill="' + col + '"' + (pipe ? ' stroke="' + pipe + '" stroke-width="1.4"' + NS : "") + "/>";
+  });
+  svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
+}
+
+/* ---------- the tactics camera on light ground: one scene, numbers and ways ---------- */
+function taktik(svg) {
+  var S = SCENES[svg.dataset.scene], k = kitOf(svg), W = +svg.dataset.w;
+  var V = svg.dataset.scene === "kr" ? VIEWS.halfR : VIEWS.halfL, kk = W / V.box[2], r = 7 / kk;
+  /* in the face we score left; in the tactics camera our defence scenes stand at the left goal as in Einblendung */
+  var h = viewWrap(V, '<rect x="-3" y="-3" width="46" height="26" fill="var(--ground)"/>' + '<g opacity=".4">' + courtLines({ line: INK, lw: 1 }) + "</g>");
+  function tr(p, col, pipe) { var s = cr(p, 10).map(V.f); return line(d(s), col, pipe, 2.4, 0.85); }
+  S.them.forEach(function (p) { h += tr(p[1], k.oppLine, k.oppPipe); });
+  S.us.forEach(function (p) { h += tr(p[1], k.clubLine, k.clubPipe); });
+  (S.pass || []).forEach(function (q) { h += '<path d="' + d([V.f(q[0]), V.f(q[1])]) + '" stroke="' + INK + '" stroke-width="1.6" stroke-dasharray="1.5 4" stroke-linecap="round" fill="none"' + NS + "/>"; });
+  if (S.shot) { var a = V.f(S.shot[0]), b = V.f(S.shot[1]), dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, z = 9 / kk; h += '<path d="' + d([a, b]) + '" stroke="' + INK + '" stroke-width="2.6" fill="none"' + NS + '/><path d="M' + (b[0] - ux * z - uy * z * 0.55) + " " + (b[1] - uy * z + ux * z * 0.55) + "L" + b[0] + " " + b[1] + "L" + (b[0] - ux * z + uy * z * 0.55) + " " + (b[1] - uy * z - ux * z * 0.55) + 'z" fill="' + INK + '"/>'; }
+  function tok(p, us, n) {
+    var e = V.f(p[p.length - 1]), fill = us ? "var(--club)" : "var(--opp)", ink = us ? "var(--club-ink)" : "var(--opp-ink)";
+    return '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="' + r + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="1.2"' + NS + '/><text x="' + e[0] + '" y="' + (e[1] + r * 0.38) + '" text-anchor="middle" style="font-size:' + (r * 1.05).toFixed(3) + 'px;fill:' + ink + '" class="tok">' + n + "</text>";
+  }
+  S.them.forEach(function (p) { h += tok(p[1], false, p[0]); });
+  S.us.forEach(function (p) { h += tok(p[1], true, p[0]); });
+  svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
+}
+
+/* ---------- goals against: one stroke per position into our goal, width by count ---------- */
+function zonen(svg) {
+  var V = VIEWS.halfL, k = kitOf(svg), W = +svg.dataset.w, kk = W / V.box[2], h = viewWrap(V, '<g opacity=".35">' + courtLines({ line: INK, lw: 1 }) + "</g>");
+  var z = [["la", 2.2, 17.6, 2], ["rl", 9.6, 15.4, 3], ["rm", 10.6, 10, 2], ["rr", 9.6, 4.6, 1], ["ra", 2.0, 2.4, 9], ["kr", 6.6, 10, 1]];
+  z.forEach(function (q) {
+    var a = V.f([q[1], q[2]]), b = V.f([0.2, 10 + (q[2] - 10) * 0.08]), w = 2 + q[3] * 2.4, top = q[3] === 9, c = [(a[0] + b[0]) / 2 + (a[1] - b[1]) * 0.12, (a[1] + b[1]) / 2];
+    var dd = "M" + a[0] + " " + a[1] + "Q" + c[0] + " " + c[1] + " " + b[0] + " " + b[1];
+    h += top ? line(dd, k.oppLine, k.oppPipe, w, 1) : '<path d="' + dd + '" fill="none" stroke="' + INK + '" stroke-opacity=".28" stroke-width="' + w + '" stroke-linecap="round"' + NS + "/>";
+    h += '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="' + 13 / kk + '" fill="' + (top ? "var(--opp)" : "var(--ground)") + '" stroke="' + INK + '" stroke-width="' + (top ? 2 : 1.2) + '"' + NS + "/>";
+    h += '<text x="' + a[0] + '" y="' + (a[1] + 5.4 / kk) + '" style="font-size:' + (16 / kk).toFixed(3) + "px;fill:" + (top ? "var(--opp-ink)" : INK) + '" text-anchor="middle" class="zn">' + q[3] + "</text>";
+  });
+  svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
+}
+
+/* ---------- the camera stand-in for the video (light hall) ---------- */
+function kamera(svg) {
+  var C = [13, -15, 10.5], T = [12, 9, 0];
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function norm(a) { var l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; }
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  var f = norm(sub(T, C)), rr = norm([f[1], -f[0], 0]), u = [rr[1] * f[2] - rr[2] * f[1], rr[2] * f[0] - rr[0] * f[2], rr[0] * f[1] - rr[1] * f[0]]; if (u[2] < 0) u = u.map(function (v) { return -v; });
+  var W = 1000, H = 562, F = 760;
+  function P(x, y, z) { var v = sub([x, y, z || 0], C), dz = dot(v, f); return [W / 2 + F * dot(v, rr) / dz, H * 0.42 - F * dot(v, u) / dz]; }
+  function poly(pts, close) { return pts.map(function (p, i) { var q = P(p[0], p[1], p[2]); return (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); }).join("") + (close ? "Z" : ""); }
+  function arcPts(cx, cy, r, a0, a1) { var o = []; for (var i = 0; i <= 24; i++) { var a = a0 + (a1 - a0) * i / 24; o.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return o; }
+  function area(r, s) { var a = arcPts(0, 8.5, r, -Math.PI / 2, 0).filter(function (p) { return p[1] >= 0; }), b = arcPts(0, 11.5, r, 0, Math.PI / 2).filter(function (p) { return p[1] <= 20; }); var pts = a.concat(b); return s ? pts.map(function (p) { return [40 - p[0], p[1]]; }) : pts; }
+  var h = '<rect width="1000" height="562" fill="#3a3d40"/>';
+  h += '<path d="' + poly([[-6, 23, 0], [46, 23, 0], [46, 23, 4], [-6, 23, 4]], 1) + '" fill="#2f3235"/>';
+  h += '<path d="' + poly([[-4, -4], [44, -4], [44, 22.4], [-4, 22.4]], 1) + '" fill="#8a6f55"/>';
+  h += '<path d="' + poly([[0, 0], [40, 0], [40, 20], [0, 20]], 1) + '" fill="#a8865f"/>';
+  [0, 1].forEach(function (s) { h += '<path d="' + poly(area(6, s).concat([[s * 40, 17.5], [s * 40, 2.5]]), 1) + '" fill="#2f6e93"/>'; });
+  h += '<g fill="none" stroke="#f4f1ea" stroke-opacity=".9" stroke-width="1.6"><path d="' + poly([[0, 0], [40, 0], [40, 20], [0, 20]], 1) + '"/><path d="' + poly([[20, 0], [20, 20]]) + '"/>';
+  [0, 1].forEach(function (s) { h += '<path d="' + poly(area(6, s)) + '"/><path d="' + poly(area(9, s)) + '" stroke-dasharray="7 6"/>'; });
+  h += "</g>";
+  [0, 40].forEach(function (x) { h += '<path d="' + poly([[x, 8.5, 0], [x, 8.5, 2], [x, 11.5, 2], [x, 11.5, 0]]) + '" fill="none" stroke="#f3f3f0" stroke-width="3"/>'; });
+  var S = SCENES.tv, run = cr(S.them[0][1], 14);
+  h += '<path d="' + poly(run) + '" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".9"/><path class="draw" pathLength="1" d="' + poly(run) + '" fill="none" stroke="var(--opp)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>';
+  var pl = [];
+  S.us.forEach(function (p) { pl.push([p[1][p[1].length - 1], true]); });
+  S.them.forEach(function (p) { pl.push([p[1][p[1].length - 1], false]); });
+  pl.push([[16, 15.5], true]); pl.push([[12, 3.2], false]);
+  pl.sort(function (a, b) { return b[0][1] - a[0][1]; });
+  pl.forEach(function (q) {
+    var x = q[0][0], y = q[0][1], ft = P(x, y, 0), hd = P(x, y, 1.6), w = Math.abs(P(x + 0.5, y, 0)[0] - ft[0]), kn = P(x, y, 0.85), sh = P(x, y, 1.5);
+    h += '<ellipse cx="' + ft[0] + '" cy="' + ft[1] + '" rx="' + w * 0.9 + '" ry="' + w * 0.3 + '" fill="#000" opacity=".28"/>';
+    h += '<path d="M' + (ft[0] - w * 0.18) + " " + ft[1] + "L" + (kn[0] - w * 0.12) + " " + kn[1] + "M" + (ft[0] + w * 0.18) + " " + ft[1] + "L" + (kn[0] + w * 0.12) + " " + kn[1] + '" stroke="#2a2c30" stroke-width="' + w * 0.26 + '" stroke-linecap="round"/>';
+    h += '<path d="M' + kn[0] + " " + kn[1] + "L" + sh[0] + " " + sh[1] + '" stroke="' + (q[1] ? "var(--club)" : "var(--opp)") + '" stroke-width="' + w * 0.62 + '" stroke-linecap="round"/>';
+    h += '<circle cx="' + hd[0] + '" cy="' + (hd[1] - w * 0.1) + '" r="' + w * 0.2 + '" fill="#b88b6c"/>';
+  });
+  svg.setAttribute("viewBox", "0 0 1000 562"); svg.innerHTML = h;
+}
+/* timeline: every goal a short throw, ours up, theirs down */
+function zeit(svg) {
+  var k = kitOf(svg), W = 1000, base = 40, us = [2, 5, 9, 11, 14, 17, 19, 22, 24, 26, 27, 29, 29.5, 32, 35, 36, 46, 48, 50, 51, 53, 54, 56, 57, 58, 59.5], them = [3, 7, 12, 16, 20, 23, 25, 28, 30, 39, 40, 41, 42, 43, 44, 49, 55, 58.5];
+  function x(m) { return (m / 60) * W; }
+  var c = '<rect x="' + x(38) + '" y="0" width="' + (x(44) - x(38)) + '" height="80" fill="#ffd23c"/>';
+  c += '<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="' + INK + '" stroke-width="1.5"/><line x1="' + x(30) + '" x2="' + x(30) + '" y1="2" y2="78" stroke="' + INK + '" stroke-dasharray="2 4"/>';
+  us.forEach(function (m) { var a = x(m); c += line("M" + (a - 9) + " " + (base - 2) + "Q" + (a - 4) + " " + (base - 30) + " " + (a + 3) + " " + (base - 34), k.clubLine, k.clubPipe, 3, 1); });
+  them.forEach(function (m) { var a = x(m); c += line("M" + (a - 9) + " " + (base + 2) + "Q" + (a - 4) + " " + (base + 30) + " " + (a + 3) + " " + (base + 34), k.oppLine, k.oppPipe, 3, 1); });
+  c += '<line x1="' + x(41.2) + '" x2="' + x(41.2) + '" y1="-4" y2="84" stroke="' + INK + '" stroke-width="2.5"/><path d="M' + (x(41.2) - 7) + ' -10h14l-7 9z" fill="' + INK + '"/>';
+  svg.setAttribute("viewBox", "-10 -12 1020 100"); svg.setAttribute("preserveAspectRatio", "none"); svg.innerHTML = c;
+}
+/* weighted numerals: the side with more goals stands wider */
+function weigh(root) {
+  root.querySelectorAll("[data-score]").forEach(function (el) {
+    var p = el.dataset.score.split(":").map(Number), a = p[0], b = p[1], hi = Math.max(a, b, 1);
+    function w(v) { return (60 + 90 * Math.max(0, v / hi - 0.4) / 0.6).toFixed(0); }
+    if (el.hasAttribute("data-one")) { var v = +el.dataset.one; el.innerHTML = '<span style="font-stretch:' + w(v) + '%">' + v + "</span>"; return; }
+    el.innerHTML = '<span style="font-stretch:' + w(a) + '%">' + a + '</span><i aria-hidden="true">:</i><span style="font-stretch:' + w(b) + '%">' + b + "</span>";
+    el.setAttribute("aria-label", a + " zu " + b);
+  });
+}
+function drawAll(root) {
+  root.querySelectorAll("svg[data-match]").forEach(face);
+  root.querySelectorAll("svg[data-bundle]").forEach(bundle);
+  root.querySelectorAll("svg[data-taktik]").forEach(taktik);
+  root.querySelectorAll("svg[data-zonen]").forEach(zonen);
+  root.querySelectorAll("svg[data-kamera]").forEach(kamera);
+  root.querySelectorAll("svg[data-zeit]").forEach(zeit);
+  weigh(root);
+}
+
+/* ===== Mischpult: building blocks of all directions, re-drawn against one kit model ===== */
+var GROUNDS = {
+  1: { name: "kühl hell", ground: "#eef0f2", paper: "#ffffff", ink: "#15171a", ink2: "#545960", rule: "#d2d6da", dark: false, mfFloor: "#e2e6ea" },
+  2: { name: "warm hell", ground: "#f3efe6", paper: "#fffdf8", ink: "#16140f", ink2: "#5a554b", rule: "#dcd5c7", dark: false, mfFloor: "#e8e1d2" },
+  3: { name: "dunkel", ground: "#0e1114", paper: "#161a1e", ink: "#eef0f2", ink2: "#a2abb4", rule: "#2a3138", dark: true, mfFloor: "#1a1f25" },
+  4: { name: "Hallenboden", ground: "#fbfaf6", paper: "#ffffff", ink: "#15171a", ink2: "#545960", rule: "#dedbd2", dark: false, floor: "#2c6a93", mfFloor: "#cfe1ec" }
+};
+var OPPS = { petrol: ["#0b7a8a", "#ffffff"], blau: ["#1f4fd6", "#ffffff"], gelb: ["#f6c500", "#17191c"], schwarz: ["#17191c", "#ffffff"] };
+Object.keys(OPPS).forEach(function (k) { KITS["o-" + k] = OPPS[k]; });
+/* the kit for one club against one opponent on one ground */
+function kit(club, opp, G) {
+  G = G || GROUNDS[1];
+  var c = KITS[club], o = opp && KITS[opp];
+  /* a home kit that disappears into a dark ground plays in its second kit, as a team would */
+  if (G.dark && contrast(c[0], G.ground) < 1.4) c = [c[1], c[0]];
+  var k = { ground: G.ground, ink: G.ink, ink2: G.ink2, rule: G.rule, paper: G.paper, dark: G.dark };
+  k.club = c[0]; k.club2 = c[1]; k.clubInk = contrast(c[0], "#ffffff") >= 3.2 ? "#ffffff" : INK;
+  var lo = contrast(c[0], k.ground) < 2.4;
+  k.clubLine = c[0]; k.clubPipe = lo ? (contrast(c[1], k.ground) >= 3 ? c[1] : k.ink) : "";
+  k.clubText = contrast(c[0], k.ground) >= 4.5 ? c[0] : k.ink;
+  k.clubEdge = contrast(c[0], k.ground) < 1.3 ? k.ink : c[0];
+  k.clubDark = reach(c[0], "#0b0d10", 3.2, "#ffffff"); /* on a board or a dark court */
+  if (!o) { k.opp = G.dark ? "#5d656e" : "#646b73"; k.oppInk = "#ffffff"; k.oppKnown = false; k.opp2 = "#ffffff"; }
+  else {
+    var oc = near(o[0], c[0]) ? (near(o[1], c[0]) ? (G.dark ? "#eef0f2" : INK) : o[1]) : o[0];
+    k.opp = oc; k.opp2 = oc === o[0] ? o[1] : o[0]; k.oppInk = contrast(oc, "#ffffff") >= 3.2 ? "#ffffff" : INK; k.oppKnown = true;
+  }
+  if (!k.oppKnown && lum(c[0]) < 0.05) { k.opp = "#8b9198"; k.oppInk = INK; }
+  k.oppLine = k.opp; k.oppPipe = contrast(k.opp, k.ground) < 2.4 ? k.ink : "";
+  k.oppEdge = contrast(k.opp, k.ground) < 1.3 ? k.ink : k.opp;
+  k.oppDark = reach(k.opp, "#0b0d10", 3.2, "#ffffff");
+  /* marks on the mini court: the opponent's ring must read on the court's floor */
+  k.oppMark = contrast(k.opp, G.mfFloor) >= 2.5 ? k.opp : (contrast(k.opp2, G.mfFloor) >= 2.5 ? k.opp2 : k.ink);
+  k.clubLow = contrast(k.club, k.ground) < 2.4;
+  return k;
+}
+function applyKit(el, k) {
+  var s = el.style, set = function (n, v) { s.setProperty(n, v); };
+  set("--ground", k.ground); set("--paper", k.paper); set("--ink", k.ink); set("--ink-2", k.ink2); set("--rule", k.rule);
+  set("--club", k.club); set("--club-2", k.club2); set("--club-ink", k.clubInk); set("--club-line", k.clubLine); set("--club-text", k.clubText); set("--club-edge", k.clubEdge); set("--club-dark", k.clubDark);
+  set("--opp", k.opp); set("--opp-2", k.opp2); set("--opp-ink", k.oppInk); set("--opp-line", k.oppLine); set("--opp-edge", k.oppEdge); set("--opp-dark", k.oppDark); set("--opp-mark", k.oppMark);
+  el._kit = k;
+}
+
+/* ---------- mini court with magnets (Halle, Plakat, Wurf) ---------- */
+var D60 = [[34, 46], [60, 62], [88, 70], [112, 70], [140, 62], [166, 46]], ATT = [[100, 104], [52, 92], [150, 92], [14, 26], [187, 22], [104, 64]];
+var SC = {
+  ra: { us: D60, them: ATT, pass: [150, 92, 187, 22], shot: [187, 22, 112, 5], trail: [[196, 62], [192, 40], [187, 22]] },
+  tv: { us: [[156, 104], [118, 116], [58, 108]], them: [[100, 50], [66, 90], [38, 62]], pass: [66, 90, 100, 50], shot: [100, 50, 93, 5], trail: [[84, 122], [96, 84], [100, 50]] },
+  kr: { us: [[100, 104], [52, 92], [150, 92], [14, 26], [187, 22], [97, 64]], them: D60, pass: [52, 92, 97, 64], shot: [97, 64, 90, 5], trail: [[118, 80], [106, 70], [97, 64]], attack: true },
+  d60: { us: D60, them: ATT }, leer: { us: [], them: [] }
+};
+function mfHalf(dark) {
+  var fl = dark ? "#1a1f25" : "var(--mf-floor)", ar = dark ? "#232a32" : "var(--mf-area)", ln = dark ? "#8d97a1" : "var(--ink)";
+  return '<rect x="-2" y="-2" width="204" height="130" fill="' + fl + '"/>'
+    + '<path d="M40 0 A60 60 0 0 0 85 60 L115 60 A60 60 0 0 0 160 0 Z" fill="' + ar + '"/>'
+    + '<g fill="none" stroke="' + ln + '" stroke-width="1.5"><path d="M40 0 A60 60 0 0 0 85 60 L115 60 A60 60 0 0 0 160 0"/>'
+    + '<path d="M10 0 A90 90 0 0 0 85 90 L115 90 A90 90 0 0 0 190 0" stroke-dasharray="5 4"/>'
+    + '<path d="M95 70h10M97.5 40h5"/><path d="M0 1h200" stroke-width="2.2"/></g>'
+    + '<rect x="85" y="-1" width="30" height="4" fill="' + ln + '"/>';
+}
+function mf(svg) {
+  var c = SC[svg.dataset.mf] || SC.leer, dark = svg.hasAttribute("data-dark"), ink = dark ? "#eef0f2" : "var(--ink)", h = mfHalf(dark), ghost = svg.hasAttribute("data-ghost");
+  /* own team in its colour, the opponent as rings in theirs: a shape difference, not only a colour one */
+  var usF = dark ? "var(--club-dark)" : "var(--club)", thS = dark ? "var(--opp-dark)" : "var(--opp-mark)";
+  if (!ghost) {
+    if (c.trail && svg.hasAttribute("data-chrono")) [0.25, 0.45, 0.7].forEach(function (o, i) { var p = c.trail[i]; h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4" fill="' + ink + '" fill-opacity="' + o + '"/>'; });
+    if (c.pass) h += '<path d="M' + c.pass[0] + " " + c.pass[1] + "L" + c.pass[2] + " " + c.pass[3] + '" stroke="' + ink + '" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.5 5.5" fill="none"/>';
+    if (c.shot) { var a = c.shot, dx = a[2] - a[0], dy = a[3] - a[1], l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, x = a[2], y = a[3]; h += '<path d="M' + a[0] + " " + a[1] + "L" + x + " " + y + '" stroke="' + ink + '" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M' + (x - ux * 8 - uy * 4) + " " + (y - uy * 8 + ux * 4) + "L" + x + " " + y + "L" + (x - ux * 8 + uy * 4) + " " + (y - uy * 8 - ux * 4) + '" fill="none" stroke="' + ink + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  }
+  c.them.forEach(function (p) { h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="5" fill="' + (dark ? "#1a1f25" : "var(--paper)") + '" stroke="' + thS + '" stroke-width="2.6"' + (ghost ? ' opacity=".35"' : "") + "/>"; });
+  c.us.forEach(function (p) { h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="5.8" fill="' + usF + '" stroke="' + (dark ? "#0b0d10" : "var(--club-edge)") + '" stroke-width="1.4"' + (ghost ? ' opacity=".35"' : "") + "/>"; });
+  svg.setAttribute("viewBox", "0 0 200 124"); svg.innerHTML = h;
+}
+/* ---------- pictograms (Piktogramm, Plakat, Flutlicht) ---------- */
+var PICTO = {
+  fluegel: '<circle cx="70" cy="18" r="9" class="f"/><path d="M66 32 L52 56 M62 38 L84 30 L92 14 M62 38 L42 36 M52 56 L64 72 L60 94 M52 56 L34 70 L16 66"/><circle cx="94" cy="6" r="6" class="f"/>',
+  gegenstoss: '<circle cx="62" cy="18" r="9" class="f"/><circle cx="88" cy="48" r="6" class="f"/><path d="M58 33 L46 58 M57 37 L76 48 M57 37 L40 32 L34 44 M46 58 L62 70 L58 92 M46 58 L30 68 L12 62"/>',
+  kreis: '<circle cx="50" cy="20" r="9" class="f"/><path d="M50 34 V62 M50 40 L32 28 M50 40 L70 24 L76 10 M50 62 L38 92 M50 62 L62 92"/><circle cx="80" cy="6" r="6" class="f"/>'
+};
+function picto(name) { return '<svg class="picto" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter">' + PICTO[name].replace(/class="f"/g, 'fill="currentColor" stroke="none"') + "</g></svg>"; }
+
+/* ---------- seven segments, drawn (Konsole, Flutlicht): lit and ghost segments ---------- */
+var SEG = { 0: "abcdef", 1: "bc", 2: "abged", 3: "abgcd", 4: "fgbc", 5: "afgcd", 6: "afgedc", 7: "abc", 8: "abcdefg", 9: "abcdfg" };
+function seg7(str, h, lit, ghost) {
+  var w = h * 0.56, t = h * 0.13, g = t * 0.18, x = 0, o = "";
+  function seg(n, X) {
+    var L = X, R = X + w, T = 0, M = h / 2, B = h, s = t / 2;
+    var P = { a: [[L + s + g, T], [R - s - g, T], [R - t - g, T + t], [L + t + g, T + t]], d: [[L + t + g, B - t], [R - t - g, B - t], [R - s - g, B], [L + s + g, B]],
+      g: [[L + s + g, M], [L + t + g, M - s], [R - t - g, M - s], [R - s - g, M], [R - t - g, M + s], [L + t + g, M + s]],
+      f: [[L, T + s + g], [L + t, T + t + g], [L + t, M - s - g], [L, M - g]], b: [[R, T + s + g], [R, M - g], [R - t, M - s - g], [R - t, T + t + g]],
+      e: [[L, M + g], [L + t, M + s + g], [L + t, B - t - g], [L, B - s - g]], c: [[R, M + g], [R, B - s - g], [R - t, B - t - g], [R - t, M + s + g]] };
+    return '<path d="M' + P[n].map(function (p) { return p[0].toFixed(1) + " " + p[1].toFixed(1); }).join("L") + 'Z"/>';
+  }
+  str.split("").forEach(function (ch) {
+    if (ch === ":") { o += '<g fill="' + lit + '"><rect x="' + (x + t * 0.6) + '" y="' + h * 0.27 + '" width="' + t + '" height="' + t + '"/><rect x="' + (x + t * 0.6) + '" y="' + h * 0.64 + '" width="' + t + '" height="' + t + '"/></g>'; x += t * 2.4; return; }
+    var on = SEG[ch] || "";
+    o += '<g fill="' + ghost + '">' + "abcdefg".split("").filter(function (s) { return on.indexOf(s) < 0; }).map(function (s) { return seg(s, x); }).join("") + "</g>";
+    o += '<g fill="' + lit + '">' + on.split("").map(function (s) { return seg(s, x); }).join("") + "</g>";
+    x += w + t * 0.9;
+  });
+  return { svg: o, w: x - t * 0.9, h: h };
+}
+function seg7svg(el) {
+  var r = seg7(el.dataset.seg, 100, el.dataset.lit || "#ffb31a", el.dataset.ghostc || "#2a2416");
+  el.innerHTML = '<svg viewBox="-4 -4 ' + (r.w + 8) + " " + (r.h + 8) + '" aria-hidden="true"' + (el.dataset.glow ? ' style="filter:drop-shadow(0 0 ' + el.dataset.glow + "px " + (el.dataset.lit || "#ffb31a") + "66)\"" : "") + ">" + r.svg + "</svg>";
+}
+
+/* ---------- the tactics camera on its dark court (Einblendung) ---------- */
+function tscene(svg) {
+  var S = SCENES[svg.dataset.tscene], V = VIEWS[svg.dataset.view || "full"], W = +svg.dataset.w || 600, k = W / V.box[2], r = (+svg.dataset.r || 11) / k, labels = svg.hasAttribute("data-labels");
+  var C = { floor: "#0f2333", area: "rgb(255 255 255 / .06)", line: "rgb(226 236 244 / .55)", opp: "#e9eef2" };
+  var h = viewWrap(V, courtLines({ floor: C.floor, area: C.area, line: C.line, lw: 1.4 }));
+  if (S.zone && labels) h += viewWrap(V, '<path d="' + S.zone + '" fill="var(--club-dark)" fill-opacity=".22" stroke="var(--club-dark)" stroke-width="1.5" stroke-dasharray="3 3"' + NS + "/>");
+  function trail(p, col) { var s = cr(p, 12).map(V.f), n = s.length - 1, o = ""; for (var i = 0; i < n; i++) { var a = Math.pow((i + 1) / n, 1.7); o += '<path d="' + d([s[i], s[i + 1]]) + '" stroke="' + col + '" stroke-opacity="' + (0.18 + 0.8 * a).toFixed(2) + '" stroke-width="' + (1.4 + 3 * a).toFixed(2) + '" stroke-linecap="round" fill="none"' + NS + "/>"; } return { svg: o, end: s[n] }; }
+  var ends = [];
+  S.them.forEach(function (p) { var t = trail(p[1], "var(--opp-dark)"); h += t.svg; ends.push([p[0], t.end, false]); });
+  S.us.forEach(function (p) { var t = trail(p[1], "var(--club-dark)"); h += t.svg; ends.push([p[0], t.end, true]); });
+  (S.pass || []).forEach(function (q) { h += '<path d="' + d([V.f(q[0]), V.f(q[1])]) + '" stroke="#fff" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" fill="none"' + NS + "/>"; });
+  if (S.shot) { var a = V.f(S.shot[0]), b = V.f(S.shot[1]), dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, z = 13 / k; h += '<path d="' + d([a, b]) + '" stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"' + NS + '/><path d="M' + (b[0] - ux * z - uy * z * 0.55) + " " + (b[1] - uy * z + ux * z * 0.55) + "L" + b[0] + " " + b[1] + "L" + (b[0] - ux * z + uy * z * 0.55) + " " + (b[1] - uy * z - ux * z * 0.55) + 'z" fill="#fff"/>'; }
+  ends.forEach(function (e) {
+    var p = e[1];
+    h += e[2] ? '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="var(--club-dark)" stroke="#0a0d11" stroke-width="1.5"' + NS + "/>" : '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r * 0.92 + '" fill="' + C.floor + '" stroke="var(--opp-dark)" stroke-width="2"' + NS + "/>";
+    h += '<text x="' + p[0] + '" y="' + (p[1] + r * 0.36) + '" text-anchor="middle" style="font:800 ' + (r * 1.02).toFixed(3) + "px Archivo,sans-serif;fill:" + (e[2] ? (lum(svg._kit ? svg._kit.clubDark : "#fff") > 0.4 ? "#0a0d11" : "#fff") : "#fff") + '">' + e[0] + "</text>";
+    if (e[0] === S.focus && !e[2] && labels) h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r * 2.1 + '" fill="none" stroke="#fff" stroke-width="2.5"' + NS + "/>";
+  });
+  svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
+}
+/* ---------- Wurf: the run of the match as one smooth flight ending in the ball ---------- */
+function flight(svg) {
+  var data = FLOW.thalwil, W = +svg.dataset.w, H = +svg.dataset.h, pad = 24, U = (H - 40) / 10, base = H - 22;
+  function x(m) { return pad + (W - 2 * pad - 20) * m / 60; } function y(v) { return base - v * U; }
+  var pts = data.map(function (p) { return [x(p[0]), y(p[1])]; }), s = cr(pts, 6), o = "";
+  o += '<path d="' + d(s) + '" fill="none" stroke="var(--club-ink)" stroke-opacity=".55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  [10, 20, 30, 40, 50].forEach(function (m) { var p = data.filter(function (q) { return q[0] <= m; }).pop(); o += '<circle cx="' + x(m) + '" cy="' + y(p[1]) + '" r="3.5" fill="var(--club-ink)" fill-opacity=".75"/>'; });
+  var e = [x(60), y(8)];
+  o += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="11" fill="#fff" stroke="' + INK + '" stroke-width="1.5"/><path d="M' + (e[0] - 11) + " " + e[1] + "h22M" + e[0] + " " + (e[1] - 11) + "c-6 5 -6 17 0 22" + '" fill="none" stroke="' + INK + '" stroke-width="1.3"/>';
+  if (W > 500) o += '<text x="' + x(30) + '" y="' + (y(4) - 12) + '" text-anchor="middle" class="fw">Halbzeit +4</text><text x="' + (e[0] - 18) + '" y="' + (e[1] + 5) + '" text-anchor="end" class="fw">Schluss +8</text><text x="' + x(41) + '" y="' + (y(2) + 22) + '" text-anchor="middle" class="fw">38. bis 44.: drei Ballverluste</text>';
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = o;
+}
+/* ---------- Hallenlicht: the wooden floor seen from the stand, goal areas painted in both kits ---------- */
+function hallFloor(svg) {
+  var h = '<rect width="400" height="200" fill="#c8915a"/>';
+  for (var y = 0, i = 0; y < 200; y += 5, i++) {
+    var t = ((i * 37) % 11) / 11, o = 0.04 + t * 0.07;
+    h += '<rect x="0" y="' + y + '" width="400" height="5" fill="' + (i % 2 ? "#8a5a2e" : "#f0c08a") + '" opacity="' + o.toFixed(3) + '"/>';
+    for (var x = ((i * 53) % 90); x < 400; x += 90 + ((i * 17) % 40)) h += '<rect x="' + x + '" y="' + y + '" width=".5" height="5" fill="#6d4522" opacity=".25"/>';
+  }
+  h += '<rect x="-2" y="-2" width="404" height="204" fill="none" stroke="#2a2f34" stroke-width="12" opacity=".9"/>';
+  h += '<path d="M0 40 A60 60 0 0 1 60 85 L60 115 A60 60 0 0 1 0 160 Z" fill="var(--club)" opacity=".94"/><path d="M400 40 A60 60 0 0 0 340 85 L340 115 A60 60 0 0 0 400 160 Z" fill="var(--opp)" opacity=".94"/>';
+  h += '<g fill="none" stroke="#f6f2ea" stroke-width="1.6" opacity=".95"><rect x="2" y="2" width="396" height="196"/><path d="M200 2v196"/><circle cx="200" cy="100" r="12"/>'
+    + '<path d="M0 40 A60 60 0 0 1 60 85 L60 115 A60 60 0 0 1 0 160"/><path d="M400 40 A60 60 0 0 0 340 85 L340 115 A60 60 0 0 0 400 160"/>'
+    + '<path d="M0 10 A90 90 0 0 1 90 85 L90 115 A90 90 0 0 1 0 190" stroke-dasharray="6 5"/><path d="M400 10 A90 90 0 0 0 310 85 L310 115 A90 90 0 0 0 400 190" stroke-dasharray="6 5"/></g>';
+  h += '<rect x="-3" y="85" width="4" height="30" fill="#f6f2ea"/><rect x="399" y="85" width="4" height="30" fill="#f6f2ea"/>';
+  h += '<text x="186" y="124" text-anchor="end" class="hs">26</text><text x="214" y="124" text-anchor="start" class="hs">18</text>';
+  svg.setAttribute("viewBox", svg.closest(".strip7") ? "0 62 400 76" : "0 0 400 200"); svg.innerHTML = h;
+}
+
+/* ===== Anlauf: only what the analysis measures ===== */
+/* goals per team: zone, estimated shot spot, the scorer's run in the seconds before it, confirmed or estimated.
+   Coordinates are on a half court seen with the goal at the top: u across (0..20 m), v away from the goal line. */
+var ZN = {
+  la: { u: [0.7, 2.8], v: [0.8, 3.0] }, ra: { u: [17.2, 19.3], v: [0.8, 3.0] },
+  rl: { u: [3.8, 7.6], v: [8.6, 11.2] }, rm: { u: [8.4, 11.6], v: [8.8, 11.8] }, rr: { u: [12.4, 16.2], v: [8.6, 11.2] },
+  kr: { u: [8.0, 12.0], v: [6.0, 7.0] }, m7: { u: [10, 10], v: [7, 7] }, gs: { u: [6.5, 13.5], v: [4.5, 7.5] }
+};
+function goals(seed, spec, estN, phase) {
+  var R = rng(seed), out = [];
+  Object.keys(spec).forEach(function (z) {
+    for (var i = 0; i < spec[z]; i++) {
+      var Z = ZN[z], u = Z.u[0] + R() * (Z.u[1] - Z.u[0]), v = Z.v[0] + R() * (Z.v[1] - Z.v[0]), pts;
+      if (z === "la" || z === "ra") { var side = z === "la" ? -1 : 1; pts = [[u + side * (0.2 + R() * 0.6), v + 6 + R() * 4], [u + side * (0.6 + R()), v + 3 + R() * 1.5], [u - side * R() * 0.6, v + 1.2], [u, v]]; }
+      else if (z === "gs") { var u0 = 3 + R() * 14; pts = [[u0, 19.6], [u0 + (u - u0) * 0.35 + (R() - 0.5) * 2, 14 + R() * 2], [u + (R() - 0.5) * 1.5, v + 3.5], [u, v]]; }
+      else if (z === "kr") { var s = R() < 0.5 ? -1 : 1; pts = [[u + s * (2.5 + R() * 2), v + 0.4 + R() * 0.6], [u + s * (1.2 + R()), v + 0.2 + R() * 0.5], [u + s * 0.4, v + 0.1], [u, v]]; }
+      else if (z === "m7") { pts = [[u, v + 2.2], [u, v + 1.1], [u, v]]; }
+      else { var dx = (R() - 0.5) * 7; pts = [[u + dx, v + 4.5 + R() * 3], [u + dx * 0.55, v + 2.6 + R()], [u + dx * 0.15, v + 0.9], [u, v]]; }
+      pts = pts.map(function (p) { return [Math.max(0.3, Math.min(19.7, p[0])), Math.max(0.3, Math.min(19.8, p[1]))]; });
+      out.push({ zone: z, run: pts, shot: [u, v], aim: [8.8 + R() * 2.4, 0], est: false, t: phase && i < 3 ? 38 + R() * 6 : R() * 60 });
+    }
+  });
+  /* the estimated ones: shot spot only from tracking, not confirmed by the coach */
+  for (var e = 0; e < estN; e++) out[Math.floor(R() * out.length)].est = true;
+  return out;
+}
+var G = {
+  them: goals(31, { ra: 9, rl: 3, rm: 2, la: 2, rr: 1, kr: 1 }, 3),
+  us: goals(47, { kr: 7, la: 3, ra: 3, rl: 3, rm: 3, rr: 3, m7: 2, gs: 2 }, 3),
+  themGs: goals(53, { gs: 6 }, 2, true),
+  staefa: goals(61, { gs: 4, rl: 3 }, 1), rheinau: goals(71, { rl: 5, kr: 3 }, 1)
+};
+var VIEW_B = { box: [-0.6, -1.2, 21.2, 17.2] };
+VIEWS.camL = { box: [-1.2, -1.2, 34, 22.4], m: null, f: function (p) { return p; } };
+/* a bundle: every goal of one kind as the scorer's run, ending at the shot spot, then a thin straight line to the goal */
+function bundleR5(svg) {
+  var key = svg.dataset.b, k = svg.closest("[data-club]")._kit, W = +svg.dataset.w || 360, kk = W / VIEW_B.box[2], small = W < 160;
+  var list, col, pipe, others;
+  if (key === "ra") { list = G.them.filter(function (g) { return g.zone === "ra"; }); others = G.them.filter(function (g) { return g.zone !== "ra"; }); col = k.oppLine; pipe = k.oppPipe; }
+  else if (key === "gs") { list = G.themGs; others = G.them; col = k.oppLine; pipe = k.oppPipe; }
+  else if (key === "kr") { list = G.us.filter(function (g) { return g.zone === "kr"; }); others = G.us.filter(function (g) { return g.zone !== "kr"; }); col = k.clubLine; pipe = k.clubPipe; }
+  else if (key === "staefa") { list = G.staefa.filter(function (g) { return g.zone === "gs"; }); others = G.staefa.filter(function (g) { return g.zone !== "gs"; }); col = k.oppLine; pipe = k.oppPipe; }
+  else { list = G.rheinau.filter(function (g) { return g.zone === "rl"; }); others = G.rheinau.filter(function (g) { return g.zone !== "rl"; }); col = k.oppLine; pipe = k.oppPipe; }
+  var h = '<g opacity=".38">' + halfCourt(k.ink) + "</g>";
+  others.forEach(function (g) { h += '<path d="' + d(cr(g.run, 6)) + '" fill="none" stroke="' + k.ink + '" stroke-opacity=".13" stroke-width="1"' + NS + "/>"; });
+  list.forEach(function (g, i) {
+    var p = cr(g.run, 8), dd = d(p), w = small ? 1.6 : 2.6, est = g.est;
+    var cls = ' class="ln" style="--i:' + i + '" pathLength="1"';
+    if (pipe && !est) h += '<path d="' + dd + '" fill="none" stroke="' + pipe + '" stroke-width="' + (w + 2.4) + '" stroke-linecap="round"' + NS + "/>";
+    h += '<path' + cls + ' d="' + dd + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-opacity="' + (est ? 0.6 : 1) + '"' + (est ? ' stroke-dasharray="4 3.5"' : "") + ' stroke-linecap="round"' + NS + "/>";
+    h += '<path d="M' + g.shot[0] + " " + g.shot[1] + "L" + g.aim[0] + " " + g.aim[1] + '" stroke="' + k.ink + '" stroke-opacity="' + (est ? 0.3 : 0.55) + '" stroke-width="1"' + NS + "/>";
+    h += '<circle cx="' + g.shot[0] + '" cy="' + g.shot[1] + '" r="' + (small ? 2.4 : 3.6) / kk + '" fill="' + (est ? k.ground : col) + '" stroke="' + (pipe || col) + '" stroke-width="' + (est ? 1.5 : 1) + '"' + NS + "/>";
+  });
+  svg.setAttribute("viewBox", VIEW_B.box.join(" ")); svg.innerHTML = h;
+}
+/* half court, goal at the top, in metres */
+function halfCourt(ink) {
+  var g = '<g fill="none" stroke="' + ink + '" stroke-width="1.2">';
+  g += '<path d="M0 0H20V20H0Z"' + NS + "/>";
+  g += '<path d="M2.5 0 A6 6 0 0 0 8.5 6 L11.5 6 A6 6 0 0 0 17.5 0"' + NS + "/>";
+  g += '<path d="M0.47 0 A9 9 0 0 0 8.5 9 L11.5 9 A9 9 0 0 0 19.53 0" stroke-dasharray="4 3"' + NS + "/>";
+  g += '<path d="M9.5 7H10.5M9.85 4H10.15"' + NS + "/></g>";
+  return g + '<rect x="8.5" y="-0.7" width="3" height="0.7" fill="' + ink + '"/>';
+}
+/* the empty field: no video, or the analysis still running */
+function emptyField(svg) {
+  var k = svg.closest("[data-club]")._kit;
+  svg.setAttribute("viewBox", VIEW_B.box.join(" "));
+  svg.innerHTML = '<g opacity=".3">' + halfCourt(k.ink) + "</g>";
+}
+/* goals by position on the field: counts at the zones, measured shot spots as small dots */
+function zonesR5(svg) {
+  var k = svg.closest("[data-club]")._kit, W = +svg.dataset.w, kk = W / VIEW_B.box[2], who = svg.dataset.who, list = who === "us" ? G.us : G.them;
+  var col = who === "us" ? k.clubLine : k.oppLine, pipe = who === "us" ? k.clubPipe : k.oppPipe;
+  var h = '<g opacity=".38">' + halfCourt(k.ink) + "</g>", cnt = {};
+  list.forEach(function (g) { cnt[g.zone] = (cnt[g.zone] || 0) + 1; h += '<circle cx="' + g.shot[0] + '" cy="' + g.shot[1] + '" r="' + 3 / kk + '" fill="' + (g.est ? k.ground : col) + '" stroke="' + (pipe || col) + '" stroke-width="1.2"' + NS + "/>"; });
+  var at = { la: [3.2, 4.4], ra: [16.8, 4.4], rl: [4.2, 13.6], rm: [10, 14.4], rr: [15.8, 13.6], kr: [10, 3.2], m7: [13.4, 7.6], gs: [10, 11.8] }, names = { la: "LA", ra: "RA", rl: "RL", rm: "RM", rr: "RR", kr: "Kreis", m7: "7 m", gs: "Gegenstoss" };
+  var max = Math.max.apply(null, Object.keys(cnt).map(function (z) { return cnt[z]; }));
+  Object.keys(cnt).forEach(function (z) {
+    var p = at[z], big = cnt[z] === max;
+    h += '<text x="' + p[0] + '" y="' + p[1] + '" text-anchor="middle" style="font-size:' + (big ? 26 : 17) / kk + 'px" class="zc' + (big ? " big" : "") + '">' + cnt[z] + "</text>";
+    h += '<text x="' + p[0] + '" y="' + (p[1] + 13 / kk) + '" text-anchor="middle" style="font-size:' + 11 / kk + 'px" class="zl">' + names[z] + "</text>";
+  });
+  svg.setAttribute("viewBox", VIEW_B.box.join(" ")); svg.innerHTML = h;
+}
+
+/* ---------- the tactics camera: positions only, no ball. Players move; the scorer's way stays as a trace ---------- */
+/* scene: goal Thalwil over the right wing, 39:49 to 39:55, our goal on the left. Numbers only where they were read. */
+var CAM = {
+  ra: {
+    from: "39:49", to: "39:55", dur: 6,
+    us: [[1, [[1.0, 11.2], [0.9, 10.4], [0.8, 9.6], [0.7, 9.1]], 1], [7, [[5.4, 2.0], [5.8, 2.4], [6.6, 3.2], [7.6, 4.2], [8.4, 5.0]], 1], [13, [[6.6, 7.4], [6.9, 7.1], [7.4, 7.0], [7.9, 7.3]], 0], [4, [[7.0, 10.8], [7.2, 10.2], [7.5, 9.8], [7.6, 9.6]], 0], [10, [[6.8, 12.6], [7.0, 11.8], [7.3, 11.1], [7.4, 10.8]], 0], [11, [[6.8, 15.0], [7.0, 14.2], [7.2, 13.5], [7.3, 13.1]], 0], [8, [[5.8, 17.8], [5.9, 17.2], [6.2, 16.6], [6.4, 16.2]], 0]],
+    them: [[5, [[1.4, 0.5], [0.8, 0.8], [1.1, 1.2], [2.0, 1.6], [3.0, 2.2], [3.9, 2.9]], 1], [9, [[15.6, 9.0], [14.6, 7.8], [13.2, 6.5], [11.8, 5.6], [10.5, 5.0]], 0], [14, [[14.8, 12.8], [14.0, 11.6], [13.0, 10.6], [12.1, 10.0]], 0], [22, [[13.2, 17.4], [12.6, 16.4], [11.6, 15.3], [10.9, 14.6]], 1], [3, [[0.8, 19.5], [1.0, 19.2], [1.3, 18.9], [1.6, 18.6]], 0], [18, [[6.2, 12.6], [6.3, 11.4], [6.6, 9.8], [6.7, 8.4], [6.6, 7.4]], 0]],
+    ref: [[12.0, 1.6], [10.8, 1.4], [9.6, 1.5]],
+    scorer: 5, shot: [3.9, 2.9], aim: [0.15, 8.9], est: false, label: "Tor Thalwil 39:55"
+  }
+};
+function samplePath(pts, t) { var s = cr(pts, 10), n = s.length - 1, f = Math.max(0, Math.min(1, t)) * n, i = Math.floor(f), r = f - i; if (i >= n) return s[n]; return [s[i][0] + (s[i + 1][0] - s[i][0]) * r, s[i][1] + (s[i + 1][1] - s[i][1]) * r]; }
+function trailOf(pts, t, back) { var o = []; for (var j = 0; j <= 14; j++) { var tt = t - back + back * j / 14; if (tt >= 0) o.push(samplePath(pts, tt)); } return o; }
+/* draw one frame; t from 0 to 1 */
+function camFrame(svg, t) {
+  var S = CAM[svg.dataset.cam], V = VIEWS[svg.dataset.view || "full"], W = +svg.dataset.w, kk = W / V.box[2], r = (+svg.dataset.r || 12) / kk, k = svg.closest("[data-club]")._kit;
+  var unknownOpp = !k.oppKnown, oppFill = unknownOpp ? "#0f2333" : "var(--opp-cam)", oppStroke = unknownOpp ? "#9aa5b0" : "var(--opp-cam-edge)";
+  var h = viewWrap(V, courtLines({ floor: "#0f2333", area: "rgb(255 255 255 / .06)", line: "rgb(226 236 244 / .5)", lw: 1.3 }));
+  /* ways: the last two seconds of every player, the scorer's whole way */
+  function trail(pts, col, whole) {
+    var s = (whole ? trailOf(pts, t, t) : trailOf(pts, t, 0.33)).map(V.f), n = s.length - 1, o = "";
+    for (var i = 0; i < n; i++) { var a = Math.pow((i + 1) / n, 1.4); o += '<path d="' + d([s[i], s[i + 1]]) + '" stroke="' + col + '" stroke-opacity="' + ((whole ? 0.5 : 0.12) + (whole ? 0.5 : 0.7) * a).toFixed(2) + '" stroke-width="' + ((whole ? 2.4 : 1.2) + (whole ? 1.6 : 2) * a).toFixed(2) + '" stroke-linecap="round" fill="none"' + NS + "/>"; }
+    return o;
+  }
+  S.them.forEach(function (p) { h += trail(p[1], unknownOpp ? "#9aa5b0" : "var(--opp-cam-trail)", p[0] === S.scorer); });
+  S.us.forEach(function (p) { h += trail(p[1], "var(--club-cam)", false); });
+  var done = t >= 1;
+  if (done) {
+    var a = V.f(S.shot), b = V.f(S.aim);
+    h += '<path d="' + d([a, b]) + '" stroke="#fff" stroke-opacity=".75" stroke-width="1.4"' + NS + "/>";
+    h += '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="' + r * 1.9 + '" fill="none" stroke="#fff" stroke-width="1.6"' + (S.est ? ' stroke-dasharray="3 3"' : "") + NS + "/>";
+  }
+  var rf = V.f(samplePath(S.ref, t));
+  h += '<rect x="' + (rf[0] - r * 0.5) + '" y="' + (rf[1] - r * 0.5) + '" width="' + r + '" height="' + r + '" fill="#8d97a1" transform="rotate(45 ' + rf[0] + " " + rf[1] + ')"/>';
+  function dot(p, us, n, read) {
+    var e = V.f(samplePath(p, t)), o = "";
+    if (us) o += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="' + r + '" fill="var(--club-cam)" stroke="#0a0d11" stroke-width="1.4"' + NS + "/>";
+    else o += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="' + r * 0.92 + '" fill="' + oppFill + '" stroke="' + oppStroke + '" stroke-width="2.2"' + NS + "/>";
+    if (read) o += '<text x="' + e[0] + '" y="' + (e[1] + r * 0.38) + '" text-anchor="middle" class="cn' + (us ? " us" : unknownOpp ? "" : " them") + '" style="font-size:' + (r * 1.04).toFixed(3) + 'px">' + n + "</text>";
+    return o;
+  }
+  S.them.forEach(function (p) { h += dot(p[1], false, p[0], p[2]); });
+  S.us.forEach(function (p) { h += dot(p[1], true, p[0], p[2]); });
+  if (done && svg.hasAttribute("data-labels")) { var q = V.f(S.shot); h += '<g class="ctag"><rect x="' + (q[0] + r * 2.4) + '" y="' + (q[1] - 11 / kk) + '" width="' + 132 / kk + '" height="' + 22 / kk + '" fill="#0a0d11"/><text x="' + (q[0] + r * 2.4 + 8 / kk) + '" y="' + (q[1] + 4.5 / kk) + '" style="font-size:' + 13 / kk + 'px">' + S.label + "</text></g>"; }
+  svg.setAttribute("viewBox", V.box.join(" ")); svg.innerHTML = h;
+  var clk = svg.parentElement.querySelector(".clk"); if (clk) { var sec = 49 + Math.min(6, Math.floor(t * 6)); clk.textContent = "39:" + (sec < 10 ? "0" : "") + sec; }
+}
+/* the player: plays every camera once, holds, plays again; a pause key stops it; reduced motion shows the last frame */
+var CAMS = [];
+function camInit(root) {
+  root.querySelectorAll("svg[data-cam]").forEach(function (svg) {
+    var st = { svg: svg, t0: null, paused: false, t: 1 };
+    var btn = svg.parentElement.querySelector(".pause");
+    var still = /still/.test(location.search) || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still) { st.paused = true; if (btn) { btn.textContent = "Abspielen"; btn.setAttribute("aria-pressed", "true"); } }
+    if (btn) btn.onclick = function () { st.paused = !st.paused; btn.textContent = st.paused ? "Abspielen" : "Pause"; btn.setAttribute("aria-pressed", String(st.paused)); if (!st.paused) st.t0 = null; };
+    camFrame(svg, 1); CAMS.push(st);
+  });
+}
+function camLoop(ts) {
+  CAMS.forEach(function (st) {
+    if (st.paused || !st.svg.isConnected) return;
+    if (st.t0 == null) st.t0 = ts - (st.t >= 1 ? 0 : st.t * 6000);
+    var e = (ts - st.t0) / 1000, cyc = 7.6; e = e % cyc; st.t = Math.min(1, e / 6);
+    camFrame(st.svg, st.t);
+  });
+  requestAnimationFrame(camLoop);
+}
+requestAnimationFrame(camLoop);
+
+/* ---------- the Wurf head: the run of the match as one line, ours up ---------- */
+function flightR5(svg) {
+  var data = FLOW.thalwil, W = +svg.dataset.w, H = +svg.dataset.h, pad = W < 500 ? 16 : 32, U = (H - 34) / 10, base = H - 18, small = W < 500;
+  function x(m) { return pad + (W - 2 * pad - 14) * m / 60; } function y(v) { return base - v * U; }
+  var pts = []; data.forEach(function (p, i) { if (i) pts.push([x(p[0]), y(data[i - 1][1])]); pts.push([x(p[0]), y(p[1])]); });
+  var o = '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + base + '" y2="' + base + '" stroke="var(--club-ink)" stroke-opacity=".3" stroke-dasharray="2 5"/>';
+  o += '<path d="' + d(pts) + '" fill="none" stroke="var(--club-ink)" stroke-width="' + (small ? 2 : 2.6) + '" stroke-linejoin="round" stroke-opacity=".9"/>';
+  var e = [x(60), y(8)];
+  o += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="' + (small ? 4 : 6) + '" fill="var(--club-ink)"/>';
+  if (!small) o += '<text x="' + (x(30)) + '" y="' + (y(4) - 10) + '" text-anchor="middle" class="fw">Halbzeit +4</text><text x="' + (e[0] - 14) + '" y="' + (e[1] - 10) + '" text-anchor="end" class="fw">Schluss +8</text><text x="' + x(41) + '" y="' + (y(2) + 22) + '" text-anchor="middle" class="fw">38. bis 44.</text>';
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = o;
+}
+/* timeline under the stage: goals from the match report, ours up, theirs down, the marked phase */
+function railR5(svg) {
+  var k = svg.closest("[data-club]")._kit, W = 1000, base = 36, us = [2, 5, 9, 11, 14, 17, 19, 22, 24, 26, 27, 29, 29.5, 32, 35, 36, 46, 48, 50, 51, 53, 54, 56, 57, 58, 59.5], them = [3, 7, 12, 16, 20, 23, 25, 28, 30, 39, 40, 41, 42, 43, 44, 49, 55, 58.5];
+  function x(m) { return (m / 60) * W; }
+  var c = '<rect x="' + x(38) + '" y="0" width="' + (x(44) - x(38)) + '" height="72" fill="#ffd23c" fill-opacity=".85"/>';
+  c += '<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="' + k.ink + '" stroke-width="1.5"/><line x1="' + x(30) + '" x2="' + x(30) + '" y1="2" y2="70" stroke="' + k.ink + '" stroke-dasharray="2 4"/>';
+  us.forEach(function (m) { c += '<rect x="' + (x(m) - 2.5) + '" y="' + (base - 26) + '" width="5" height="24" fill="' + k.clubLine + '"' + (k.clubPipe ? ' stroke="' + k.clubPipe + '" stroke-width="1"' : "") + "/>"; });
+  them.forEach(function (m) { c += '<rect x="' + (x(m) - 2.5) + '" y="' + (base + 2) + '" width="5" height="24" fill="' + k.oppLine + '"' + (k.oppPipe ? ' stroke="' + k.oppPipe + '" stroke-width="1"' : "") + "/>"; });
+  c += '<line x1="' + x(39.9) + '" x2="' + x(39.9) + '" y1="-6" y2="78" stroke="' + k.ink + '" stroke-width="2.5"/><path d="M' + (x(39.9) - 7) + ' -10h14l-7 9z" fill="' + k.ink + '"/>';
+  svg.setAttribute("viewBox", "-10 -12 1020 92"); svg.setAttribute("preserveAspectRatio", "none"); svg.innerHTML = c;
+}
+
+/* ===== Anlauf: screens ===== */
+var ST5 = { club: "blau", opp: "schwarz" };
+var I5 = {
+  search: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l5 5"/></svg>',
+  plus: '<svg viewBox="0 0 20 20" stroke="currentColor" stroke-width="2.6"><path d="M10 3v14M3 10h14"/></svg>',
+  ok: '<svg viewBox="0 0 18 18" role="img" aria-label="bestätigt"><path d="M3 9.5l4 4 8-9" fill="none" stroke="var(--win)" stroke-width="2.6"/></svg>'
+};
+var TITLE5 = "Gewonnen. Und drei Dinge zum Mitnehmen.";
+function topD(on) { return '<header class="top"><span class="club d"><span class="crest">HCZ</span>HC Zürichsee</span><nav class="nav" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav><div class="right"><a class="lnk" href="#">Suchen</a><a class="btn" href="#">Video hochladen</a></div></header>'; }
+function topP() { return '<header class="ptop"><span class="club d"><span class="crest">HCZ</span>HC Zürichsee</span><button class="ibtn" aria-label="Suchen">' + I5.search + '</button><button class="ibtn plus" aria-label="Video hochladen">' + I5.plus + "</button></header>"; }
+function bar5() { return '<nav class="tabbar" aria-label="Hauptnavigation"><a href="#" aria-current="page">Spiele</a><a href="#">Szenen</a><a href="#">Saison</a><a href="#">Team</a></nav>'; }
+function scoreHTML(a, b) { return '<span class="e e2" aria-hidden="true">' + a + ":" + b + '</span><span class="e e1" aria-hidden="true">' + a + ":" + b + "</span><span>" + a + ":<u>" + b + "</u></span>"; }
+function oppName(short) { return short ? "Thalwil" : "TSV Thalwil"; }
+
+/* heads */
+function headStart(ph, W, unknown) {
+  return '<section class="wurf big"' + (ph && unknown ? ' style="height:460px"' : "") + '><div><p class="kick">' + (ph ? "Sa gegen TSV Thalwil · fertig seit So, 9:40" : "Samstag gegen TSV Thalwil · Analyse fertig seit Sonntag, 9:40") + '</p><h1 class="d">' + TITLE5 + "</h1></div>"
+    + '<div><div class="score n" role="img" aria-label="26 zu 18">' + scoreHTML(26, 18) + '</div><p class="names"><span>HC Zürichsee</span><span><i class="oc"></i>' + oppName() + (unknown ? ", Farbe offen" : ph ? "" : ", Rang 5") + "</span></p>"
+    + (unknown ? '<div class="ask">Welche Farbe trägt Thalwil? ' + ["#17191c", "#ffffff", "#0b7a8a", "#d3202e", "#12804a"].map(function (c) { return '<button aria-label="Farbe wählen"><i style="background:' + c + '"></i></button>'; }).join("") + "</div>" : "") + "</div>"
+    + '<svg class="fl" data-fl data-w="' + W + '" data-h="' + (ph ? 84 : 120) + '" role="img" aria-label="Verlauf der Tordifferenz: Halbzeit plus 4, Schluss plus 8, von der 38. bis zur 44. Minute minus 5"></svg></section>';
+}
+function headMatch(ph, W) {
+  return '<section class="wurf big" style="height:' + (ph ? 360 : 400) + 'px"><div><p class="kick">Samstag, 7. November · Halle Seefeld</p><h1 class="d" style="font-size:' + (ph ? 28 : 44) + 'px">HC Zürichsee gegen TSV Thalwil</h1><p class="meta">Halbzeit 13:9 · Time-outs 2 und 3 · Rang 5</p></div>'
+    + '<div><div class="score n" role="img" aria-label="26 zu 18"' + (ph ? ' style="font-size:88px;margin-top:10px"' : "") + ">" + scoreHTML(26, 18) + "</div></div>"
+    + '<svg class="fl" data-fl data-w="' + W + '" data-h="' + (ph ? 72 : 110) + '" role="img" aria-label="Verlauf der Tordifferenz"' + (ph ? ' style="bottom:30px"' : ' style="bottom:74px"') + "></svg></section>";
+}
+function strip5(ph, a, b, opp) {
+  a = a || 26; b = b || 18; opp = opp || "TSV Thalwil";
+  return '<section class="strip"><p class="nm d">HC Zürichsee<small>' + (ph ? "gegen " + opp : "gegen " + opp + " · Sa., 7. Nov. · Halle Seefeld") + '</small></p><div class="score n" role="img" aria-label="' + a + " zu " + b + '"><span class="e" aria-hidden="true">' + a + ":" + b + "</span><span>" + a + ":<u>" + b + "</u></span></div></section>";
+}
+function tabs5(on, noVideo) {
+  return '<nav class="tabs">' + ["Spiel", "Video", "Zahlen"].map(function (t) { return '<a class="d' + (noVideo && t === "Video" ? " off" : "") + '" href="#"' + (t === on ? ' aria-current="page"' : "") + ">" + t + "</a>"; }).join("") + (noVideo ? "" : '<a class="q d" href="#"><em>3</em>Prüfen</a>') + "</nav>";
+}
+/* the three things */
+var TH5 = [
+  { v: "9", unit: "von 18", p: "Gegentore über rechts aussen", s: "Saison bisher: jedes dritte über diese Seite", b: "ra", sc: "9 Szenen", t: "2:40", drill: "Abwehr gegen Flügel" },
+  { v: "6", unit: "Gegenstösse", p: "Tore nach eigenem Ballverlust", s: "3 davon zwischen der 38. und 44. Minute", b: "gs", sc: "6 Szenen", t: "1:55", drill: "Rückzug in die 5:1" },
+  { v: "7", unit: "von 26", p: "Tore vom Kreis", s: "bester Wert der Saison", up: 1, b: "kr", sc: "7 Szenen", t: "2:10" }
+];
+function things5(ph, opts) {
+  opts = opts || {};
+  var W = ph ? 132 : 380;
+  return '<ol class="things play">' + TH5.map(function (t, i) {
+    var inset = opts.preview && i === 0 && !ph ? '<div class="inset"><svg data-cam="ra" data-view="halfL" data-w="198" data-r="5" role="img" aria-label="Taktikkamera, Vorschau der Szene 39:55"></svg><p><span>Szene 39:55</span><button class="pause" aria-pressed="false">Pause</button></p></div>' : "";
+    return '<li><div class="no"><em>' + (i + 1) + ' von 3</em><b class="n">' + t.v + '</b><span class="d">' + t.unit + "</span></div><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + "</small>"
+      + (opts.drill && t.drill ? '<small>Dazu üben: <a class="lnk" href="#">' + t.drill + "</a></small>" : "")
+      + '<div class="fig"><svg data-b="' + t.b + '" data-w="' + W + '" role="img" aria-label="' + t.v + " " + t.unit + ': jeder Anlauf bis zur Wurfposition, dann der Strich zum Tor"></svg>' + inset + "</div>"
+      + '<a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></li>";
+  }).join("") + "</ol>";
+}
+function keyLine(ph) { return '<p class="key" style="padding:' + (ph ? "10px 16px 0" : "12px 32px 0") + '"><span><i></i>Anlauf bis zur Wurfposition, von dir bestätigt</span><span><i class="est"></i>geschätzt</span><span>dünner Strich: zum Tor</span></p>'; }
+/* the list: the mini field always shows the first thing of that match */
+var GAMES5 = [
+  { d: "31.10.", w: "auswärts", o: "BSV Stäfa", st: "done", r: [19, 26], sub: "2 Dinge · 33 Szenen", b: "staefa", first: "Gegenstösse" },
+  { d: "24.10.", w: "Heim", o: "HC Meilen", st: "run", r: [23, 22], sub: "Analyse läuft, noch etwa 25 Minuten" },
+  { d: "17.10.", w: "auswärts", o: "SG Horgen", st: "none", r: [29, 19], sub: "Nur Spielbericht" },
+  { d: "10.10.", w: "Heim", o: "TV Wädenswil", st: "none", r: [24, 27], sub: "Nur Spielbericht" }
+];
+function mini(g, w) {
+  if (g.st === "done") return '<span class="mfz"><svg data-b="' + g.b + '" data-w="' + w + '" role="img" aria-label="Punkt 1 dieses Spiels: ' + g.first + '"></svg></span>';
+  return '<span class="mfz"><svg data-empty data-w="' + w + '" aria-hidden="true"></svg><em>' + (g.st === "run" ? "Analyse läuft" : "kein Video") + "</em></span>";
+}
+function list5(ph) {
+  return GAMES5.map(function (g) {
+    var win = g.r[0] > g.r[1], sub = g.st === "none" ? 'Nur Spielbericht · <a class="lnk" href="#">Video hochladen</a>' : g.sub;
+    if (ph) return '<div class="pgame">' + mini(g, 84) + '<div><h4 class="d">' + g.o + "</h4><p>" + g.d + " · " + (g.st === "none" ? '<a class="lnk" href="#">Video hochladen</a>' : g.st === "run" ? "Analyse läuft" : "33 Szenen") + '</p></div><div class="res ' + (win ? "w" : "l") + '"><b class="n">' + g.r[0] + ":" + g.r[1] + "</b><small>" + (win ? "Sieg" : "Niederlage") + "</small></div></div>";
+    return '<div class="game"><div class="when">Sa<b class="d">' + g.d + "</b>" + g.w + "</div>" + mini(g, 128) + '<div><h4 class="d">' + g.o + "</h4><p>" + sub + (g.st === "done" ? " · Punkt 1: " + g.first : "") + "</p>" + (g.st === "run" ? '<div class="pbar"><i style="width:62%"></i></div>' : "") + '</div><div class="res ' + (win ? "w" : "l") + '"><b class="n">' + g.r[0] + ":" + g.r[1] + "</b><small>" + (win ? "Sieg" : "Niederlage") + "</small></div></div>";
+  }).join("");
+}
+function side5() {
+  return '<aside class="side"><section class="next"><span class="k">Nächster Gegner · So, 17:30</span><h3 class="d">bei HSG Rheinau</h3><div class="mfz" style="width:100%"><svg data-b="rheinau" data-w="340" role="img" aria-label="Hinspiel: Tore aus dem Rückraum links" style="width:100%"></svg></div><ul class="facts"><li>Hinspiel 24:27, 5 Tore aus dem Rückraum links</li><li><span>Rang 3, zuletzt drei Siege</span><a class="lnk" href="#">12 Szenen</a></li></ul></section>'
+    + '<section><div class="hh"><b class="d">Tabelle</b><span>3. Liga, Gruppe 2</span></div><table class="st"><thead><tr><th>Rang</th><th>Sp.</th><th>Diff.</th><th>Pkt.</th></tr></thead><tbody><tr><td>1 TV Talwiese</td><td>6</td><td>+21</td><td>10</td></tr><tr class="me"><td>2 HC Zürichsee</td><td>6</td><td>+14</td><td>9</td></tr><tr><td>3 HSG Rheinau</td><td>6</td><td>+9</td><td>8</td></tr></tbody></table></section></aside>';
+}
+
+/* ===== screens ===== */
+function startDesk(unknown) {
+  return topD() + headStart(false, 1280, unknown) + '<div class="actrow"><a class="btn" href="#">Spiel öffnen</a><a class="btn line" href="#">Fürs Team zusammenstellen</a><span class="tag">Prüfen</span><a class="lnk" href="#">3 Fragen offen, 1 Minute</a></div>'
+    + '<div style="margin-top:28px"></div><div class="cut"></div>' + things5(false, { preview: true }) + keyLine(false)
+    + '<div class="cols"><section><div class="cut" style="margin:0 0 18px"></div><div class="hh"><b class="d">Alle Spiele</b><span>2 von 5 ohne Video</span></div>' + list5(false) + "</section>" + side5() + "</div>";
+}
+function startPhone(unknown) {
+  return topP() + headStart(true, 390, unknown) + '<div class="actrow"><a class="btn" href="#">Spiel öffnen</a><a class="lnk" href="#">3 Fragen offen, 1 Minute</a></div>'
+    + '<div style="margin-top:24px"></div><div class="cut"></div>' + things5(true) + keyLine(true)
+    + '<section style="padding:24px 16px 0"><div class="hh"><b class="d" style="font-size:20px">Szene aus Punkt 1</b><span>39:55</span></div><div class="stage"><svg data-cam="ra" data-view="halfLdeep" data-w="358" data-r="9" role="img" aria-label="Taktikkamera 39:49 bis 39:55: Thalwil trifft über rechts aussen"></svg><div class="bar"><button class="pause" aria-pressed="false">Pause</button><span>Taktikkamera</span><span class="clk">39:55</span></div></div></section>'
+    + '<section style="padding:28px 16px 24px"><div class="cut" style="margin:0 0 14px"></div><div class="hh"><b class="d" style="font-size:22px">Alle Spiele</b><span>2 ohne Video</span></div>' + list5(true) + "</section>" + bar5();
+}
+function spielDesk() {
+  return topD() + headMatch(false, 1280) + tabs5("Spiel")
+    + '<p class="src"><span>Quellen: Video (60 von 60 Minuten) · Spielbericht von handball.ch · 21 von 24 Würfen von dir bestätigt</span><a class="lnk" href="#">Wie gerechnet?</a></p>'
+    + '<div class="cut"></div>' + things5(false, { drill: true }) + keyLine(false)
+    + '<div class="actrow"><a class="btn" href="#">Fürs Team zusammenstellen</a><a class="lnk" href="#">Highlights teilen</a><a class="lnk" href="#">Als Bild für den Chat</a></div>'
+    + '<div class="sp"><div style="min-width:0;display:flex;flex-direction:column;gap:32px">'
+    + '<section class="pan pad"><div class="hh"><b class="d">Punkt 1, geöffnet</b><span>Szene 3 von 9 auf der Taktikkamera</span></div><div class="stage"><svg data-cam="ra" data-view="camL" data-w="' + (796 - (document.documentElement.classList.contains("g2") ? 48 : 0)) + '" data-r="11" data-labels role="img" aria-label="Taktikkamera 39:49 bis 39:55"></svg><div class="bar"><button class="pause" aria-pressed="false">Pause</button><span>Thalwil trifft über rechts aussen</span><span class="clk">39:55</span></div></div><p class="camkey"><span><i class="us"></i>Zürichsee</span><span><i class="them"></i>Thalwil</span><span><i class="ref"></i>Schiri</span><span>Nummer nur, wo sie gelesen wurde</span></p></section>'
+    + '<section class="pan pad"><div class="hh"><b class="d">Telegramm</b><a class="lnk" href="#">Kopieren</a></div><p class="telegramm"><b>HC Zürichsee gegen TSV Thalwil 26:18 (13:9).</b> Halle Seefeld. Torfolge: 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18. Strafen: 3-mal 2 Minuten gegen Zürichsee, 4-mal 2 Minuten gegen Thalwil. Beste Werfer: Brunner 7, Graf 5/2, Schmid 4. Im Tor: Meier, 11 Paraden.</p></section></div>'
+    + '<aside class="side"><section class="pan pad zf"><div class="hh"><b class="d">Gegentore</b><span>nach Position</span></div><svg data-zones data-who="them" data-w="' + (document.documentElement.classList.contains("g2") ? 292 : 340) + '" role="img" aria-label="Gegentore nach Position: rechts aussen 9, Rückraum links 3, Rückraum Mitte 2, links aussen 2, Rückraum rechts 1, Kreis 1"></svg><p class="foot">Punkt: geschätzte Wurfposition, leer: noch nicht bestätigt.</p></section>'
+    + '<section class="pan pad zf"><div class="hh"><b class="d">Eigene Tore</b><span>nach Position</span></div><svg data-zones data-who="us" data-w="' + (document.documentElement.classList.contains("g2") ? 292 : 340) + '" role="img" aria-label="Eigene Tore nach Position: Kreis 7, je 3 von den Flügeln und aus dem Rückraum, 2 Siebenmeter, 2 Gegenstösse"></svg></section>'
+    + '<div class="kpis"><div class="kpi"><b class="n">11</b><span>Paraden Meier, von dir markiert</span></div><div class="kpi"><b class="n">11</b><span>Ballverluste, aus dem Spielbericht</span></div><div class="kpi"><b class="n">58<small>%</small></b><span>Wurfquote, 26 von 45, Würfe von dir markiert</span></div></div></aside></div>';
+}
+function spielPhone() {
+  return topP() + headMatch(true, 390) + tabs5("Spiel") + '<p class="src">Video 60 von 60 Minuten · Spielbericht von handball.ch · 21 von 24 Würfen bestätigt</p><div class="cut"></div>'
+    + things5(true, { drill: true }) + keyLine(true)
+    + '<div class="actrow" style="flex-direction:column;align-items:stretch"><a class="btn" href="#">Fürs Team zusammenstellen</a><div style="display:flex;gap:16px"><a class="lnk" href="#">Highlights teilen</a><a class="lnk" href="#">Als Bild für den Chat</a></div></div>'
+    + '<section class="zf" style="padding:28px 16px 0"><div class="hh"><b class="d" style="font-size:22px">Gegentore</b><span>nach Position</span></div><svg data-zones data-who="them" data-w="358" role="img" aria-label="Gegentore nach Position: rechts aussen 9"></svg></section>'
+    + '<div class="kpis" style="margin:20px 16px 24px"><div class="kpi"><b class="n">11</b><span>Paraden, von dir markiert</span></div><div class="kpi"><b class="n">11</b><span>Ballverluste, Spielbericht</span></div><div class="kpi"><b class="n">58<small>%</small></b><span>Wurfquote, 26 von 45</span></div></div>' + bar5();
+}
+var SCN5 = [["38:40", "Ballverlust, Fehlpass", "danach Gegenstoss, Tor Thalwil"], ["39:55", "Tor Thalwil über rechts aussen", "läuft gerade"], ["41:05", "Ballverlust, Schrittfehler", ""], ["42:30", "Parade Meier", "von dir markiert"], ["43:48", "Ballverlust, Stürmerfoul", "danach Gegenstoss, Tor Thalwil"]];
+function videoDesk() {
+  return topD() + strip5(false) + tabs5("Video")
+    + '<div class="sp" style="grid-template-columns:minmax(0,1fr) 320px"><div style="min-width:0">'
+    + '<div class="stage"><svg data-cam="ra" data-view="camL" data-w="848" data-r="12" data-labels role="img" aria-label="Taktikkamera 39:49 bis 39:55: Thalwil trifft über rechts aussen"></svg><p class="cap">Thalwil trifft über rechts aussen<small>Punkt 1 · Szene 3 von 9</small></p>'
+    + '<div class="bar"><button class="pause" aria-pressed="false">Pause</button><div class="mode" role="group" aria-label="Ansicht"><button aria-pressed="false">Video</button><button aria-pressed="true">Taktik</button></div><span>Positionen aus dem Video, 10 pro Sekunde</span><span class="clk">39:55</span></div></div>'
+    + '<p class="camkey"><span><i class="us"></i>Zürichsee</span><span><i class="them"></i>Thalwil</span><span><i class="ref"></i>Schiri</span><span>Nummer nur, wo sie gelesen wurde · kein Ball: der wird nicht erkannt</span></p>'
+    + '<div class="rail" style="margin-top:18px"><svg data-rail role="img" aria-label="Zeitleiste: Tore aus dem Spielbericht, Zürichsee oben, Thalwil unten, markierte Phase 38. bis 44. Minute"></svg><div class="ax"><span>Anwurf</span><span>Halbzeit</span><span>Schluss</span></div></div>'
+    + '<div class="tools" style="margin-top:16px"><a class="btn" href="#">Szene merken</a><a class="btn line" href="#">Zeichnen</a><a class="btn line" href="#">Spielerin hervorheben</a><a class="btn line" href="#">Teilen</a></div></div>'
+    + '<aside class="side"><section><div class="hh"><b class="d">38. bis 44.</b><span>5 Szenen</span></div><ul class="scn">' + SCN5.map(function (s, i) { return "<li" + (i === 1 ? ' class="on" aria-current="true"' : "") + '><b class="n">' + s[0] + "</b><span>" + s[1] + (s[2] ? "<small>" + s[2] + "</small>" : "") + "</span></li>"; }).join("") + "</ul></section>"
+    + '<section><div class="hh"><b class="d">Notizen</b></div><p class="note">39:55 Unsere 7 tritt heraus, die Lücke geht auf.</p><p class="k" style="margin-top:8px">Du · nur für dich, bis du die Szene teilst</p></section></aside></div>';
+}
+function videoPhone() {
+  return topP() + strip5(true) + tabs5("Video")
+    + '<div class="stage" style="margin-top:12px"><svg data-cam="ra" data-view="halfLdeep" data-w="390" data-r="10" data-labels role="img" aria-label="Taktikkamera 39:49 bis 39:55"></svg><div class="bar"><button class="pause" aria-pressed="false">Pause</button><div class="mode" role="group" aria-label="Ansicht"><button aria-pressed="false">Video</button><button aria-pressed="true">Taktik</button></div><span class="clk">39:55</span></div><p class="cap">Thalwil trifft über rechts aussen<small>Punkt 1 · Szene 3 von 9</small></p></div>'
+    + '<p class="camkey" style="padding:0 16px"><span><i class="us"></i>Zürichsee</span><span><i class="them"></i>Thalwil</span><span><i class="ref"></i>Schiri</span></p>'
+    + '<div class="rail" style="padding:14px 16px 0"><svg data-rail role="img" aria-label="Zeitleiste"></svg><div class="ax"><span>Anwurf</span><span>Halbzeit</span><span>Schluss</span></div></div>'
+    + '<section style="padding:20px 16px 24px"><div class="hh"><b class="d" style="font-size:22px">38. bis 44.</b><span>5 Szenen</span></div><ul class="scn">' + SCN5.map(function (s, i) { return "<li" + (i === 1 ? ' class="on" aria-current="true"' : "") + '><b class="n">' + s[0] + "</b><span>" + s[1] + (s[2] ? "<small>" + s[2] + "</small>" : "") + "</span></li>"; }).join("") + '</ul><a class="btn" href="#" style="width:100%;margin-top:16px">Szene merken</a></section>' + bar5();
+}
+var ROWS5 = [[4, "Levin Brunner", 7, "", "", 10, 1], [10, "Elias Graf", 5, "2/2", 1, 9, 1], [11, "Jonas Schmid", 4, "", "", 8, 1], [8, "Nico Meier", 4, "", 1, 5, 0], [7, "Luca Roth", 3, "", "", 6, 1], [13, "Jana Baumann", 2, "", 1, 4, 0], [6, "Rafael Brunner", 1, "", "", 3, 0]];
+function L5(v) { return v === "" ? "" : '<a href="#">' + v + "</a>"; }
+function zahlenDesk() {
+  var feld = ROWS5.map(function (r) { return '<tr><td><b class="n">' + r[0] + "</b>" + r[1] + "</td><td>" + L5(r[2]) + "</td><td>" + L5(r[3]) + "</td><td>" + L5(r[4]) + '</td><td class="mk">' + L5(r[5]) + '</td><td class="mk">' + Math.round(r[2] / r[5] * 100) + ' %</td><td class="ok">' + (r[6] ? I5.ok : "") + "</td></tr>"; }).join("");
+  return topD() + strip5(false) + tabs5("Zahlen") + '<p class="src">Jede Zahl führt zu ihren Szenen. Tore, 7 m und 2 Minuten aus dem Spielbericht; Würfe und Paraden von dir markiert; ein Haken heisst: von dir bestätigt.</p>'
+    + '<div class="sp"><div style="display:flex;flex-direction:column;gap:32px;min-width:0"><section><div class="cut" style="margin:0 0 18px"></div><div class="hh"><b class="d">Feld</b><span>nach Toren</span></div><table class="tb"><thead><tr><th>Nr. Name</th><th>Tore</th><th>7 m</th><th>2 Min</th><th>Würfe, markiert</th><th>Quote</th><th>Bestätigt</th></tr></thead><tbody>' + feld + '</tbody></table><p class="foot">Vier weitere ohne Tor. <a class="lnk" href="#">Alle zeigen</a></p></section>'
+    + '<section><div class="hh"><b class="d">Tor</b></div><table class="tb"><thead><tr><th>Nr. Name</th><th>Gegentore</th><th>Paraden, markiert</th><th>7 m gehalten</th><th>Bestätigt</th></tr></thead><tbody><tr><td><b class="n">1</b>Mia Meier</td><td>' + L5(18) + '</td><td class="mk">' + L5(11) + "</td><td>" + L5("1 von 3") + '</td><td class="ok">' + I5.ok + "</td></tr></tbody></table></section></div>"
+    + '<aside class="side"><section class="zf"><div class="hh"><b class="d" style="font-size:22px">Gegentore nach Position</b></div><svg data-zones data-who="them" data-w="340" role="img" aria-label="Gegentore nach Position: rechts aussen 9, Rückraum links 3"></svg><p class="foot">Aus den Positionen vor jedem Tor geschätzt, 15 von 18 bestätigt.</p></section>'
+    + '<section><div class="hh"><b class="d" style="font-size:22px">Ziel im Tor</b><span>von dir markiert</span></div><div class="torg" role="img" aria-label="Von dir markiert, 12 von 18 Toren: unten links 4">' + [2, 1, 1, 1, 0, 1, 4, 0, 2].map(function (v) { return '<span class="n"' + (v ? "" : ' style="color:var(--ink-2)"') + ">" + v + "</span>"; }).join("") + '</div><p class="foot">12 von 18 Toren markiert. <a class="lnk" href="#">Weiter markieren</a></p></section>'
+    + '<section><div class="hh"><b class="d" style="font-size:22px">Phasen</b></div><ul class="phs">'
+    + [["Überzahl, 8 Minuten", 5, 1, "aus den 2-Minuten-Strafen"], ["Unterzahl, 6 Minuten", 2, 3, "aus den 2-Minuten-Strafen"], ["Gegenstösse", 2, 6, "aus dem Video geschätzt"]].map(function (r) { return "<li><span>" + r[0] + "<small><br>" + r[3] + '</small></span><b class="n">' + r[1] + ":" + r[2] + '</b><span class="pb"><i style="flex:' + r[1] + ';background:var(--club);box-shadow:inset 0 0 0 1px var(--club-edge)"></i><i style="flex:' + r[2] + ';background:var(--opp);box-shadow:inset 0 0 0 1px var(--opp-edge)"></i></span></li>'; }).join("") + "</ul></section></aside></div>";
+}
+function zahlenPhone() {
+  var feld = ROWS5.map(function (r) { return '<tr><td><b class="n">' + r[0] + "</b>" + r[1].split(" ")[0] + " " + r[1].split(" ")[1][0] + ".</td><td>" + L5(r[2]) + "</td><td>" + L5(r[3]) + "</td><td>" + L5(r[4]) + '</td><td class="ok">' + (r[6] ? I5.ok : "") + "</td></tr>"; }).join("");
+  return topP() + strip5(true) + tabs5("Zahlen") + '<p class="src">Tore, 7 m und 2 Minuten aus dem Spielbericht.</p>'
+    + '<section style="padding:0 16px"><div class="hh"><b class="d" style="font-size:22px">Feld</b><span>nach Toren</span></div><table class="tb" style="font-size:15px"><thead><tr><th>Nr. Name</th><th>Tore</th><th>7 m</th><th>2 Min</th><th aria-label="Bestätigt">Best.</th></tr></thead><tbody>' + feld + "</tbody></table></section>"
+    + '<section class="zf" style="padding:28px 16px 0"><div class="hh"><b class="d" style="font-size:22px">Gegentore</b><span>nach Position</span></div><svg data-zones data-who="them" data-w="358" role="img" aria-label="Gegentore nach Position"></svg></section>'
+    + '<section style="padding:24px 16px"><div class="hh"><b class="d" style="font-size:22px">Phasen</b></div><ul class="phs">' + [["Überzahl, 8 Min.", 5, 1], ["Unterzahl, 6 Min.", 2, 3], ["Gegenstösse, geschätzt", 2, 6]].map(function (r) { return "<li><span>" + r[0] + '</span><b class="n">' + r[1] + ":" + r[2] + '</b><span class="pb"><i style="flex:' + r[1] + ';background:var(--club);box-shadow:inset 0 0 0 1px var(--club-edge)"></i><i style="flex:' + r[2] + ';background:var(--opp);box-shadow:inset 0 0 0 1px var(--opp-edge)"></i></span></li>'; }).join("") + "</ul></section>" + bar5();
+}
+/* states */
+function stateNoVideo() {
+  return topP() + '<section class="wurf big" style="height:340px"><div><p class="kick">Samstag, 17. Oktober · auswärts</p><h1 class="d" style="font-size:28px">HC Zürichsee bei SG Horgen</h1></div><div><div class="score n" style="font-size:88px;margin-top:4px" role="img" aria-label="29 zu 19">' + scoreHTML(29, 19) + '</div></div><svg class="fl" data-fl data-flow="horgen" data-w="390" data-h="56" style="bottom:26px" role="img" aria-label="Verlauf aus dem Spielbericht: von Anfang an vorn, am Schluss plus 10"></svg></section>'
+    + tabs5("Spiel", true) + '<p class="src">Quelle: Spielbericht von handball.ch. Der Verlauf kommt aus der Torfolge.</p>'
+    + '<div class="state"><div style="display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center"><span class="mfz" style="width:120px"><svg data-empty data-w="120" aria-hidden="true"></svg><em>kein Video</em></span><p>Lad das Video hoch. Nach etwa 40 Minuten bekommst du die drei Dinge und alle Szenen.</p></div><div class="btns"><a class="btn" href="#">Video wählen</a><a class="btn line" href="#">Link einfügen</a></div></div>'
+    + '<section style="padding:24px 16px"><div class="hh"><b class="d" style="font-size:22px">Telegramm</b><a class="lnk" href="#">Kopieren</a></div><p class="telegramm" style="font-size:15px"><b>SG Horgen gegen HC Zürichsee 19:29 (8:14).</b> Torfolge: 1:2, 4:5, 6:9, 8:14; 11:18, 14:22, 16:26, 19:29. Beste Werfer: Brunner 8, Graf 6/3. Im Tor: Meier.</p></section>' + bar5();
+}
+function stateField() {
+  return topP() + strip5(true) + tabs5("Video")
+    + '<div class="stage" style="margin-top:12px"><svg data-check data-w="390" role="img" aria-label="Videobild mit erkanntem Spielfeld, die vier Ecken sind markiert"></svg><p class="cap">Stimmt das Feld?<small>Die Taktikkamera braucht die Ecken.</small></p></div>'
+    + '<section style="padding:18px 16px 24px"><p style="font-size:16px">Wir haben die gelben Linien als Spielfeld erkannt. Erst wenn sie stimmen, rechnen wir die Positionen in Meter um und zeigen die Taktikkamera.</p><div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn" href="#">Ja, stimmt</a><a class="btn line" href="#">Ecken verschieben</a></div><p class="k" style="margin-top:12px">Bis dahin zeigt das Video nur das Video, ohne Wege und Positionen.</p></section>' + bar5();
+}
+
+/* ===== drawing and dressing ===== */
+function kit5(club, opp, root) {
+  var gk = root.closest(".g1") ? "g1" : document.documentElement.className.match(/g\d/)[0];
+  var cs = getComputedStyle(root), G = { ground: cs.getPropertyValue("--ground").trim() || "#f4f3ef", ink: "#15171a", ink2: "#53575d", rule: "#d9d6cf", paper: "#fbfaf7", dark: false, mfFloor: cs.getPropertyValue("--ground").trim() || "#f4f3ef" };
+  var k = kit(club, opp, G);
+  return k;
+}
+function dress5(app) {
+  var k = kit5(ST5.club, app.dataset.opp === "" ? "" : "o-" + (app.dataset.opp || ST5.opp), app);
+  var s = app.style;
+  s.setProperty("--club", k.club); s.setProperty("--club-ink", k.clubInk); s.setProperty("--club-text", k.clubText); s.setProperty("--club-edge", k.clubEdge);
+  s.setProperty("--opp", k.opp); s.setProperty("--opp-edge", k.oppEdge);
+  /* on the dark court: a team colour that vanishes plays in its second colour */
+  var dk = "#0f2333", cc = contrast(k.club, dk) >= 2.2 ? k.club : k.club2, oc = contrast(k.opp, dk) >= 2.2 ? k.opp : k.opp2;
+  /* two teams must never look alike on the court: the opponent steps back to grey rings */
+  var clash = contrast(cc, oc) < 1.6 || near(cc, oc);
+  s.setProperty("--club-cam", cc); s.setProperty("--club-cam-ink", contrast(cc, "#fff") >= 3 ? "#fff" : "#0a0d11");
+  s.setProperty("--opp-cam", clash ? dk : oc); s.setProperty("--opp-cam-ink", clash ? "#fff" : lum(oc) > 0.4 ? "#0a0d11" : "#fff"); s.setProperty("--opp-cam-edge", clash ? "#a3aeb8" : oc === "#ffffff" || lum(oc) > 0.5 ? "#e9eef2" : reach(oc, dk, 3, "#ffffff")); s.setProperty("--opp-cam-trail", clash ? "#a3aeb8" : reach(oc, dk, 3, "#ffffff"));
+  app.setAttribute("data-club", ST5.club); app._kit = k;
+  app.querySelectorAll("svg[data-b]").forEach(bundleR5);
+  app.querySelectorAll("svg[data-empty]").forEach(emptyField);
+  app.querySelectorAll("svg[data-zones]").forEach(zonesR5);
+  app.querySelectorAll("svg[data-fl]").forEach(function (sv) { if (sv.dataset.flow) { var keep = FLOW.thalwil; FLOW.thalwil = FLOW[sv.dataset.flow]; flightR5(sv); FLOW.thalwil = keep; } else flightR5(sv); });
+  app.querySelectorAll("svg[data-rail]").forEach(railR5);
+  app.querySelectorAll("svg[data-check]").forEach(function (sv) { sv.dataset.w = 390; kamCheck(sv); });
+}
+/* the field check: the camera picture with the detected lines and four corner handles */
+function kamCheck(svg) {
+  kamera(svg);
+  var html = svg.innerHTML;
+  /* before the field is confirmed there are no positions: no players, no ways */
+  var cut = html.indexOf('<path class="draw"'); if (cut > 0) html = html.slice(0, cut);
+  /* the same projection as the camera: the detected left half, its four corners as handles */
+  var C = [13, -15, 10.5], T = [12, 9, 0];
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function norm(a) { var l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; }
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  var f = norm(sub(T, C)), rr = norm([f[1], -f[0], 0]), u = [rr[1] * f[2] - rr[2] * f[1], rr[2] * f[0] - rr[0] * f[2], rr[0] * f[1] - rr[1] * f[0]]; if (u[2] < 0) u = u.map(function (v) { return -v; });
+  function P(x, y) { var v = sub([x, y, 0], C), dz = dot(v, f); return [500 + 760 * dot(v, rr) / dz, 562 * 0.42 - 760 * dot(v, u) / dz]; }
+  var cs = [[0, 0], [20, 0], [20, 20], [0, 20]].map(function (p) { return P(p[0], p[1]); });
+  html += '<path d="M' + cs.map(function (p) { return p[0].toFixed(1) + " " + p[1].toFixed(1); }).join("L") + 'Z" fill="#ffd23c" fill-opacity=".1" stroke="#ffd23c" stroke-width="3.5" stroke-dasharray="12 7"/>';
+  cs.forEach(function (p) { html += '<rect x="' + (p[0] - 13) + '" y="' + (p[1] - 13) + '" width="26" height="26" fill="#ffd23c" stroke="#15171a" stroke-width="3"/>'; });
+  svg.innerHTML = html;
+}
+var SCREENS = [
+  ["start-desk", "Start", "Desktop 1280 · Wurf-Kopf mit dem Resultat, Punkt 1 läuft klein auf der Taktikkamera", "desk", function () { return startDesk(false); }],
+  ["start-phone", "Start", "Handy 390", "phone", function () { return startPhone(false); }],
+  ["spiel-desk", "Spiel", "Desktop 1280 · Tab «Spiel», Punkt 1 geöffnet", "desk", spielDesk],
+  ["spiel-phone", "Spiel", "Handy 390", "phone", spielPhone],
+  ["video-desk", "Video", "Desktop 1280 · Taktikkamera als Bühne der Szene", "desk", videoDesk],
+  ["video-phone", "Video", "Handy 390", "phone", videoPhone],
+  ["zahlen-desk", "Zahlen", "Desktop 1280 · ruhig", "desk", zahlenDesk],
+  ["zahlen-phone", "Zahlen", "Handy 390", "phone", zahlenPhone],
+  ["zustand-ohne-video", "Zustand: kein Video", "Handy 390 · nur Spielbericht, Verlauf ja, Feld leer", "phone", stateNoVideo],
+  ["zustand-feld", "Zustand: Feld nicht bestätigt", "Handy 390 · die Taktikkamera fragt zuerst", "phone", stateField],
+  ["zustand-gegner", "Zustand: Gegnerfarbe unbekannt", "Handy 390 · Thalwil ohne Farbe, nie geraten", "phone", function () { return startPhone(true); }, ""]
+];
+function render5() {
+  CAMS.length = 0;
+  var v = document.getElementById("views"), h = "", i = 0;
+  while (i < SCREENS.length) {
+    var s = SCREENS[i], n = SCREENS[i + 1];
+    if (s[3] === "desk" && n && n[3] === "phone" && n[1] === s[1]) {
+      h += '<section class="view"><header><b>' + s[1] + "</b><span>" + s[2] + '</span></header><div class="pair"><div class="app desk" data-shot="' + s[0] + '"></div><div class="app phone" data-shot="' + n[0] + '"></div></div></section>'; i += 2;
+    } else { h += '<section class="view"><header><b>' + s[1] + "</b><span>" + s[2] + '</span></header><div class="app ' + s[3] + '" data-shot="' + s[0] + '"' + (s[5] !== undefined ? ' data-opp="' + s[5] + '"' : "") + "></div></section>"; i++; }
+  }
+  /* the three states side by side */
+  v.innerHTML = h;
+  SCREENS.forEach(function (s) { var a = v.querySelector('[data-shot="' + s[0] + '"]'); a.innerHTML = s[4](); dress5(a); });
+  var st = [].slice.call(v.querySelectorAll('[data-shot^="zustand"]')), sec = document.createElement("section");
+  sec.className = "view"; sec.innerHTML = '<header><b>Drei Zustände</b><span>Handy 390 · kein Video, Feld nicht bestätigt, Gegnerfarbe unbekannt</span></header><div class="trio"></div>';
+  st.forEach(function (a) { sec.querySelector(".trio").appendChild(a); });
+  v.querySelectorAll(".view").forEach(function (x) { if (!x.querySelector(".app")) x.remove(); });
+  v.appendChild(sec);
+  camInit(v);
+  if (/still/.test(location.search)) v.querySelectorAll(".play").forEach(function (e) { e.classList.remove("play"); });
+}
+function sync5() {
+  var c = document.documentElement.className;
+  document.querySelectorAll("[data-f]").forEach(function (b) { b.setAttribute("aria-pressed", String(c.indexOf(b.dataset.f) >= 0)); });
+  document.querySelectorAll("[data-g]").forEach(function (b) { b.setAttribute("aria-pressed", String(c.indexOf(b.dataset.g) >= 0)); });
+  document.querySelectorAll("[data-c]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.c === ST5.club)); });
+}
+(function () {
+  var q = new URLSearchParams(location.search), root = document.documentElement;
+  if (q.get("f")) root.className = root.className.replace(/f[ab]/, q.get("f"));
+  if (q.get("g")) root.className = root.className.replace(/g\d/, q.get("g"));
+  if (q.get("club")) ST5.club = q.get("club");
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".ctl button"); if (!b) return;
+    if (b.dataset.f) root.className = root.className.replace(/f[ab]/, b.dataset.f);
+    if (b.dataset.g) root.className = root.className.replace(/g\d/, b.dataset.g);
+    if (b.dataset.c) ST5.club = b.dataset.c;
+    render5(); sync5();
+  });
+  render5(); sync5();
+})();
+
+</script>
+</body>
+</html>
