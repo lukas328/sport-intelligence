@@ -1,58 +1,33 @@
 #!/usr/bin/env python3
-"""Builds the two self-contained pages of this folder from their sources.
+"""Builds zielbild.html, the target design «Anlauf», from its sources.
 
     python3 docs/design/ux-reset/build.py
 
-zielbild.html    the target design: src/page.html plus every template in src/screens
-richtungen.html  four alternative visual directions: richtungen/page.html plus the templates in
-                 richtungen/ and the current start screen for comparison
+src/zielbild.html          the page: idea, rules, «Was wir nicht tun», the colour switch
+assets/anlauf.css          tokens and components of the app            -> port to globals.css and components
+assets/anlauf-farbe.js     colour model: club, opponent, clash rule    -> port to lib/color.ts
+assets/anlauf-feld.js      court, bundles, zones, tactics camera, ...  -> port to the graphic components
+assets/anlauf-demo.js      demo data in the shape the API must deliver -> replaced by real data
+assets/anlauf-screens.js   every screen of SPEC.md section 7 as markup -> reference for the pages
+assets/zielbild.css/.js    the presentation page only                  -> not ported
 
-In a page source, `<!-- screens -->` is replaced by the templates. Stylesheets, the script and
-the scoreboard fonts are inlined, so each result can be opened in a browser or published as it is.
+`<!-- css -->` and `<!-- js -->` in the page are replaced by the inlined files, so the result opens in
+a browser as it is (fonts come from Google Fonts). The earlier direction «Halle» and its build live in
+archiv/halle/.
 """
-import base64
 import pathlib
 
 here = pathlib.Path(__file__).parent
+STYLES = ["assets/anlauf.css", "assets/zielbild.css"]
+SCRIPTS = ["assets/anlauf-farbe.js", "assets/anlauf-demo.js", "assets/anlauf-feld.js", "assets/anlauf-screens.js", "assets/zielbild.js"]
 
 
 def read(path: str) -> str:
     return (here / path).read_text(encoding="utf8")
 
 
-def face(family: str, file: str) -> str:
-    data = base64.b64encode((here / "assets/fonts" / file).read_bytes()).decode()
-    return (
-        '@font-face{font-family:"' + family + '";font-weight:700;font-display:block;'
-        + "src:url(data:font/woff2;base64," + data + ') format("woff2")}'
-    )
-
-
-def build(source: str, target: str, templates: list[str], styles: list[str], fonts: list[tuple[str, str]]) -> None:
-    page = read(source)
-    page = page.replace("<!-- screens -->", "\n".join(read(t) for t in templates))
-    css = "\n".join([face(f, n) for f, n in fonts] + [read(s) for s in styles])
-    page = page.replace("<!-- css -->", "<style>\n" + css + "\n</style>")
-    page = page.replace("<!-- js -->", "<script>\n" + read("assets/zielbild.js") + "\n</script>")
-    (here / target).write_text(page, encoding="utf8")
-    print(target + ":", len(page) // 1024, "kB,", page.count("<template"), "templates")
-
-
-def names(folder: str) -> list[str]:
-    return [str(p.relative_to(here)) for p in sorted((here / folder).glob("*.html")) if p.name != "page.html"]
-
-
-build(
-    "src/page.html",
-    "zielbild.html",
-    names("src/screens"),
-    ["assets/halle.css", "assets/zielbild.css"],
-    [("DSEG7", "DSEG7Classic-Bold.woff2")],
-)
-build(
-    "richtungen/page.html",
-    "richtungen.html",
-    ["src/screens/spiele.html"] + names("richtungen"),
-    ["assets/halle.css", "assets/zielbild.css", "richtungen/richtungen.css"],
-    [("DSEG7", "DSEG7Classic-Bold.woff2"), ("DSEG14", "DSEG14Classic-Bold.woff2")],
-)
+page = read("src/zielbild.html")
+page = page.replace("<!-- css -->", "<style>\n" + "\n".join(read(s) for s in STYLES) + "\n</style>")
+page = page.replace("<!-- js -->", "<script>\n" + "\n".join(read(s) for s in SCRIPTS) + "\n</script>")
+(here / "zielbild.html").write_text(page, encoding="utf8")
+print("zielbild.html:", len(page) // 1024, "kB")

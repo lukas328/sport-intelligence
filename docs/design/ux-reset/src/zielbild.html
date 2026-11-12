@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zielbild Anlauf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400..800;1,400..600&family=IBM+Plex+Mono:wght@500;600&family=Kanit:ital,wght@0,600;0,700;0,800;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<!-- css -->
+</head>
+<body>
+<header class="doc">
+  <p class="kick">Handball AI · Zielbild für die Umsetzung · Richtung entschieden am 12. November 2026</p>
+  <h1>Anlauf</h1>
+  <p class="idea">Das Resultat steht schräg in der Vereinsfarbe, die Szene läuft auf der Taktikkamera, und jede Linie ist ein gemessener Weg.</p>
+  <p>Alle Screens aus SPEC.md, Abschnitt 7, an Desktop 1280 und Handy 390, dazu die Zustände. Fest: Schrift A (Titel, Ziffern, Namen und Navigation schräg, alles andere aufrecht) und der Grund «Stoff». Umschaltbar ist nur die Vereinsfarbe. Die Regeln im Einzelnen stehen in <code>ANLAUF.md</code>, der Inhalt jedes Screens in <code>SPEC.md</code>.</p>
+  <nav class="toc" aria-label="Screens"><a href="#start">Spiele</a><a href="#spiel">Spiel</a><a href="#video">Video</a><a href="#zahlen">Zahlen</a><a href="#pruefen">Prüfen</a><a href="#szenen">Szenen</a><a href="#sammlung">Sammlung</a><a href="#geteilt">Geteilte Seite</a><a href="#saison">Saison</a><a href="#team">Team</a><a href="#spieltag">Spieltag</a><a href="#einstieg">Einstieg</a><a href="#zustaende">Zustände</a></nav>
+
+  <h2>Fünf Regeln</h2>
+  <ol class="rules">
+    <li><b>Jeder Kopf hat seinen Ort.</b> Der Wurf-Kopf trägt das Resultat: gross auf Spiele und im Tab «Spiel», als schmaler Streifen auf Video, Zahlen, Prüfen und Spieltag. Seiten ohne Spiel (Szenen, Sammlung, Saison, Team, Einstieg, geteilte Seite) haben den Seitenkopf: Titel auf dem Grund, darunter nur die schräge Kante als Keil in der Vereinsfarbe.</li>
+    <li><b>Eine Linie ist ein gemessener Weg.</b> Verlauf aus der Torfolge, Anläufe aus den Positionen, Wege auf der Taktikkamera. Kein Flug des Balls, keine Passlinie. Der Ball erscheint nur als kleiner Ball bei der Spielerin, die ihn hält, und nur dort, wo er im Bild erkannt wurde. Bestätigt durchgezogen, geschätzt gestrichelt.</li>
+    <li><b>Zwei Teams, zwei Farben, sonst Tinte.</b> Die Vereinsfarbe trägt den Kopf, den Keil, die aktive Marke, eigene Linien und Ziffern. Der Gegner erscheint als Strich unter seinen Toren, als Farbfeld bei seinem Namen und als Linie. Gelb heisst «schau hier». Knöpfe und Links sind Tinte.</li>
+    <li><b>Schräg sind nur Titel, Ziffern, Namen und Navigation.</b> Text, Tabellen, Formulare und Knöpfe stehen aufrecht. Auf Arbeitsseiten (Zahlen, Prüfen, Team) viel Luft und keine Farbfläche ausser dem Streifen.</li>
+    <li><b>Bewegung zeigt, was passiert ist.</b> Die Taktikkamera spielt die Szene ab, die Anläufe zeichnen sich beim Öffnen. Mit Pause-Knopf, und mit reduzierter Bewegung steht alles im letzten Bild.</li>
+  </ol>
+
+  <h2>Was wir nicht tun</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Muster</th><th>Stattdessen</th></tr></thead>
+    <tbody>
+      <tr><td>Wett-Look: Leuchtfarben, Quoten-Kacheln, Schwarz-Gelb als App-Farbe, alles schräg</td><td>Schräg nur Titel, Ziffern, Namen, Navigation. Neutraler Stoff, Tinte, zwei Teamfarben. Text aufrecht und ruhig.</td></tr>
+      <tr><td>Grafik, die mehr weiss als die Daten</td><td>Nur Gemessenes. Kein Ballflug, keine Passlinie, kein 3x3 aus dem Video. Wo etwas fehlt, steht es als Satz: «Ball in dieser Szene nicht erkannt».</td></tr>
+      <tr><td>Weisse Fläche, graue Seitenleiste, eine Akzentfarbe</td><td>Stoff als Grund, Navigation oben, Farbe gehört den zwei Teams.</td></tr>
+      <tr><td>Eine Rundung für alles</td><td>Keine Rundungen. Die Form des Systems ist die Schräge: Kopf, Keil, aktive Marke.</td></tr>
+      <tr><td>Karte mit Rahmen, Schatten, Tönung</td><td>Gliederung durch Abschnittskopf und Haarlinie. Flächen nur für Wurf-Kopf, Streifen und Taktikkamera.</td></tr>
+      <tr><td>Farbbalken an einer Seite</td><td>Die aktive Marke liegt als kurzes schräges Band unter dem Wort.</td></tr>
+      <tr><td>Markenfarbe auf allem</td><td>Vereinsfarbe nur im Kopf, im Keil, in der aktiven Marke, auf eigenen Linien und Ziffern.</td></tr>
+      <tr><td>Etikett in Grossbuchstaben mit Sperrung</td><td>Normale Schreibweise, ohne Sperrung.</td></tr>
+      <tr><td>Pfeil hinter jedem Link</td><td>Unterstrichenes Verb ohne Pfeil.</td></tr>
+      <tr><td>Pillen «Demo», «Neu», «Live»</td><td>Als Wort in der Zeile, und nur wenn es stimmt. Gelb nur für «schau hier».</td></tr>
+      <tr><td>Zahlenkacheln als Einstieg</td><td>Der Titel ist eine Aussage. Zahlen stehen dort, wo sie etwas erklären, mit ihrer Basis.</td></tr>
+      <tr><td>Symbol im farbigen Kreis, ein Fremd-Iconset</td><td>Wenige eigene Symbole in einer Strichstärke, nie im Kreis.</td></tr>
+      <tr><td>Schablonensatz</td><td>Titel aus echten Daten. Sonst keiner.</td></tr>
+      <tr><td>Runde erfundene Zahlen, Platzhalternamen</td><td>Krumme, plausible Zahlen und Namen aus der Region.</td></tr>
+      <tr><td>Bewegung als Schmuck</td><td>Bewegung nur, wenn sie zeigt, was passiert ist.</td></tr>
+      <tr><td>Fehlende Zustände</td><td>Kein Video, Analyse läuft, Feld nicht bestätigt, Gegnerfarbe unbekannt, Ball nicht erkannt, leer, Fehler: alle gestaltet.</td></tr>
+    </tbody>
+  </table></div>
+</header>
+<nav class="ctl" aria-label="Vereinsfarbe">
+  <div class="grp" role="group" aria-label="Vereinsfarbe"><span>Verein</span>
+    <button data-c="blau" aria-label="Blau"><i style="background:#1f4fd6"></i></button><button data-c="rot" aria-label="Rot"><i style="background:#d3202e"></i></button><button data-c="gelb" aria-label="Gelb"><i style="background:#f6c500"></i></button><button data-c="schwarz" aria-label="Schwarz"><i style="background:#17191c"></i></button><button data-c="weiss" aria-label="Weiss"><i style="background:#fff"></i></button><button data-c="gruen" aria-label="Grün"><i style="background:#12804a"></i></button></div>
+  <span class="note">Gegner: TSV Thalwil in Schwarz. <code>?still</code> zeigt alles ohne Bewegung, <code>?club=gelb</code> öffnet eine Farbe.</span>
+</nav>
+<main id="views"></main>
+<div style="height:64px"></div>
+<!-- js -->
+</body>
+</html>
