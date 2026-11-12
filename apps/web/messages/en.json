@@ -1370,7 +1370,15 @@
     "readOnly": "View only, valid until {date}",
     "scene": "Scene",
     "previewScenes": "{n, plural, one {# scene} other {# scenes}}",
-    "previewMinutes": "{n} min"
+    "previewMinutes": "{n} min",
+    "runKick": "{kind, select, collection {Collection} other {Scene}} · {n, plural, one {# scene} other {# scenes}}, {length}",
+    "viewOnly": "View only, no account",
+    "nextScene": "Next scene",
+    "allScenes": "All {n} scenes",
+    "run": "Running order",
+    "running": "playing",
+    "seen": "seen",
+    "onlyLink": "Visible only through this link, {days, plural, one {# more day} other {# more days}}. No account needed."
   },
   "ops": {
     "title": "Backoffice",
@@ -2161,7 +2169,16 @@
     "goalFor": "Goal {team}",
     "count": "{n, plural, one {# scene kept} other {# scenes kept}}",
     "lastAt": "last {label}, {time}",
-    "noneYet": "No scene kept yet."
+    "noneYet": "No scene kept yet.",
+    "top": "Match day · works without a connection",
+    "end": "Finish",
+    "goalUs": "Our goal",
+    "sofar": "{n} so far",
+    "subMark": "mark",
+    "subLater": "later in the video",
+    "perPlayer": "Capture per player",
+    "sofarTitle": "So far",
+    "newestFirst": "newest first"
   },
   "profile": {
     "title": "Public profile",
@@ -3190,5 +3207,36 @@
     "noFixtures": "No match scheduled.",
     "more": "More about the season",
     "moreNote": "Figures, bests, all matches in detail, runs and reports"
+  },
+  "numbersTab": {
+    "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
+    "field": "Court",
+    "byGoals": "by goals",
+    "numberName": "No. Name",
+    "goals": "Goals",
+    "sevenM": "7 m",
+    "twoMin": "2 min",
+    "shots": "Shots",
+    "rate": "Rate",
+    "more": "{n, plural, one {One more} other {# more}} without a goal.",
+    "showAll": "Show all",
+    "keeper": "Goal",
+    "against": "Conceded",
+    "saves": "Saves",
+    "sevenMSaved": "7 m saved",
+    "ofN": "{n} of {of}",
+    "target": "Target in goal",
+    "targetNote": "goals conceded, tagged by you",
+    "targetMarked": "{n} of {of} goals conceded tagged.",
+    "phases": "Phases",
+    "phase_power_play": "Power play, {m} minutes",
+    "phase_short_handed": "Short-handed, {m} minutes",
+    "phase_fast_break": "Fast breaks",
+    "fromSuspensions": "from the 2-minute suspensions",
+    "fromEvents": "from the events",
+    "fromVideo": "estimated from the video",
+    "allNumbers": "All figures",
+    "allNumbersNote": "Match report, shots, goalkeepers in detail, running figures",
+    "unknown": "no name"
   }
 }

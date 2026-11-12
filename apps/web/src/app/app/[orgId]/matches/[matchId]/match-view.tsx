@@ -32,6 +32,7 @@ import type { PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { KeepersView, PhysicalView } from "./m5-views";
+import { NumbersView } from "./numbers-view";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
@@ -153,7 +154,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const numberParts = counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "physical" && main);
   const showPhysical = () => {
     setView("numbers");
-    requestAnimationFrame(() => document.getElementById("numbers-physical")?.scrollIntoView({ block: "start" }));
+    requestAnimationFrame(() => {
+      document.querySelector("[data-testid=numbers-more]")?.setAttribute("open", "");
+      document.getElementById("numbers-physical")?.scrollIntoView({ block: "start" });
+    });
   };
   // a match with events but no video (paper report, demo, marks) opens on its analysis
   const opened = useRef(false);
@@ -498,7 +502,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       )}
 
       {view === "numbers" && (
-        <div className="animate-fade space-y-12">
+        <div className="animate-fade">
+          <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []}>
           {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} row />}
           {numberParts.length === 0 && (
             <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
@@ -532,6 +537,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               )}
             </section>
           ))}
+          </NumbersView>
         </div>
       )}
 

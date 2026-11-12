@@ -33,6 +33,7 @@ export default async function MatchdayPage({
       own={team?.name ?? ""}
       opp={match?.opponent?.name ?? ""}
       kickoffAt={match?.kickoff_at ?? null}
+      oppColor={match?.opponent_colors?.color ?? null}
     />
   );
 }

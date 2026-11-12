@@ -97,6 +97,7 @@ describe("design rules", () => {
       "app/app/[orgId]/collections/[collectionId]/page.tsx",
       // the key "Tor wir" of the Spieltag
       "app/app/[orgId]/matches/[matchId]/live/live-view.tsx",
+      "app/app/[orgId]/matches/[matchId]/marks/marks-view.tsx",
       ...CLUB_AREA_LEGACY,
     ]);
     const bad = sources.filter((f) => /(?<![\w-])bg-club(?![\w-])/.test(f.text) && !allowed.has(f.path.replaceAll("\\", "/")));

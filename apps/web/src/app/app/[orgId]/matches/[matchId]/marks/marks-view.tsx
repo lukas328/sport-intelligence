@@ -1,6 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import type { CSSProperties } from "react";
+import { SectionHead } from "@/components/anlauf/blocks";
+import { Strip } from "@/components/anlauf/heads";
+import { useShell } from "@/components/shell/context";
+import { matchStyle } from "@/lib/color";
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,7 +15,12 @@ import { flush, mark, pending } from "@handball/client-core";
 
 const SESSION_KEY = (matchId: string) => `hb.marks.session.${matchId}`;
 
-/** Big buttons for courtside marks with the phone's clock, offline first (addendum 01, 5.3). */
+/**
+ * Spieltag (SPEC 7.11, addendum 01, 5.3): big keys for courtside marks with the phone's clock,
+ * offline first; the head of the match with the score from the goal keys, at the side what was
+ * marked. Marks cannot be taken back yet (the API has no delete): a wrong one is ignored in the
+ * video. «Pro Spielerin erfassen» opens the detailed capture.
+ */
 export function MarksView({
   orgId,
   matchId,
@@ -17,6 +28,7 @@ export function MarksView({
   own,
   opp,
   kickoffAt,
+  oppColor = null,
 }: {
   orgId: string;
   matchId: string;
@@ -24,14 +36,23 @@ export function MarksView({
   own: string;
   opp: string;
   kickoffAt: string | null;
+  oppColor?: string | null;
 }) {
   const t = useTranslations("marks");
   const format = useFormatter();
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(0);
-  const [last, setLast] = useState<string | null>(null);
   const [half, setHalf] = useState(1);
   const session = useRef<string | null>(null);
+  // what was marked on this phone, newest first (the queue only holds what is not uploaded yet)
+  const [log, setLog] = useState<{ id: number; key: string; label: string; at: Date }[]>([]);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 15000);
+    return () => window.clearInterval(id);
+  }, []);
+  const { org } = useShell();
+  const style = matchStyle([org.primary_color, org.secondary_color ?? null], oppColor ? [oppColor] : null);
   const keys = useQuery({
     queryKey: ["mark-keys", teamId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/mark-keys", { params: { path: { org_id: orgId, team_id: teamId } } })).data ?? [],
@@ -78,7 +99,7 @@ export function MarksView({
   const tap = (key: string, label: string) => {
     mark(localStorage, matchId, key);
     if (key === "halftime") setHalf(2);
-    setLast(t("lastAt", { label, time: format.dateTime(new Date(), { hour: "2-digit", minute: "2-digit", second: "2-digit" }) }));
+    setLog((l) => [{ id: Date.now(), key, label, at: new Date() }, ...l]);
     setCount((n) => n + 1);
     setOpen(pending(localStorage, matchId).length);
     if (navigator.vibrate) navigator.vibrate(40);
@@ -86,56 +107,95 @@ export function MarksView({
   };
 
   const list = keys.data ?? [];
+  const labelOf = (k: { key: string; label?: string | null }) =>
+    k.label || (k.key === "goal_own" && own ? t("goalUs") : k.key === "goal_opp" && opp ? t("goalFor", { team: opp }) : t(`key_${k.key}` as "key_good"));
+  const sub = (key: string) => (key === "good" || key === "mistake" ? t("subMark") : key === "defence" || key === "review" ? t("subLater") : null);
+  const goals = list.filter((k) => k.key === "goal_own" || k.key === "goal_opp");
+  const rest = list.filter((k) => k.key !== "goal_own" && k.key !== "goal_opp");
+  const score = { own: log.filter((l) => l.key === "goal_own").length, opp: log.filter((l) => l.key === "goal_opp").length };
+  const time = (d: Date) => format.dateTime(d, { hour: "2-digit", minute: "2-digit" });
+  const back = `/app/${orgId}/matches/${matchId}`;
   return (
-    <div className="mx-auto max-w-xl space-y-4">
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold">{t("title")}</h1>
-        {/* which match, so a coach with two games in a day marks the right one */}
-        {opp && (
-          <p className="text-sm text-muted">
-            {[own && `${own} ${t("vs")} ${opp}`, kickoffAt && format.dateTime(new Date(kickoffAt), { weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }), t("half", { n: half })]
-              .filter(Boolean)
-              .join(" · ")}
+    <div style={style as CSSProperties} data-testid="marks">
+      {/* full screen: its own narrow top bar, the head of the match, the keys, what was marked */}
+      <div className="bleed-x -mt-6 flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8 lg:-mt-8">
+        <span className="text-[15px] font-bold">{t("top")}</span>
+        <Link href={back} className="inline-flex min-h-11 items-center border-2 border-ink px-3.5 text-[15px] font-bold text-ink no-underline">
+          {t("end")}
+        </Link>
+      </div>
+      <div className="bleed-x">
+        <Strip
+          name={<h1 className="m-0 text-[length:inherit] leading-[inherit]">{own}</h1>}
+          sub={[opp && `${t("vs")} ${opp}`, kickoffAt && format.dateTime(new Date(kickoffAt), { weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })].filter(Boolean).join(" · ")}
+          own={score.own}
+          opp={score.opp}
+        >
+          <p className="mt-3 flex items-baseline gap-2 font-sans not-italic">
+            <b className="font-num text-[26px] md:text-[34px]">{time(now)}</b>
+            <span className="text-[13px] font-semibold md:text-[15px]">{t("half", { n: half })}</span>
           </p>
-        )}
+        </Strip>
       </div>
-      {/* what the last tap did: a count, the last mark with its time, and the upload state */}
-      <p className="flex flex-wrap items-baseline justify-between gap-x-4 border-y border-foreground/15 py-2 text-sm" aria-live="polite">
-        <span>{count > 0 ? `${t("count", { n: count })} · ${last}` : t("noneYet")}</span>
-        <span className="text-muted">{count === 0 && open === 0 ? "" : open > 0 ? t("pending", { n: open }) : t("synced")}</span>
-      </p>
-      <p className="text-sm text-muted">{t("hint")}</p>
-      <div className="grid grid-cols-2 gap-3">
-        {list.map((k) => {
-          // the team's name instead of "wir" and "Gegner"
-          const label =
-            k.label ||
-            (k.key === "goal_own" && own ? t("goalFor", { team: own }) : k.key === "goal_opp" && opp ? t("goalFor", { team: opp }) : t(`key_${k.key}`));
-          return (
+      <div className="grid gap-x-10 gap-y-8 py-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0">
+          <div className="grid grid-cols-2 gap-2.5">
+            {goals.map((k) => (
+              <button
+                key={k.key}
+                type="button"
+                onClick={() => tap(k.key, labelOf(k))}
+                className={cn(
+                  "min-h-[72px] cursor-pointer border-2 px-3.5 py-2.5 text-left active:scale-[0.98] md:min-h-[88px]",
+                  k.key === "goal_own" ? "border-club-edge bg-club text-club-ink" : "border-ink bg-ink text-ground",
+                )}
+              >
+                <span className="font-slant block text-[22px] leading-tight md:text-[28px]">{labelOf(k)}</span>
+                <span className="text-[13px] font-semibold md:text-[15px]">{t("sofar", { n: k.key === "goal_own" ? score.own : score.opp })}</span>
+              </button>
+            ))}
+            {rest.map((k) => (
+              <button key={k.key} type="button" onClick={() => tap(k.key, labelOf(k))} className="min-h-[72px] cursor-pointer border-2 border-ink bg-transparent px-3.5 py-2.5 text-left text-ink active:scale-[0.98] md:min-h-[88px]">
+                <span className="font-slant block text-[20px] leading-tight md:text-[26px]">{labelOf(k)}</span>
+                {sub(k.key) && <span className="text-[13px] md:text-[15px]">{sub(k.key)}</span>}
+              </button>
+            ))}
             <button
-              key={k.key}
               type="button"
-              onClick={() => tap(k.key, label)}
-              // one ink outline for all; the word says the meaning, red only for a goal against
-              className={cn(
-                "min-h-24 border-2 border-foreground/25 px-3 text-lg font-semibold active:scale-[0.98] active:bg-surface",
-                k.key === "goal_opp" && "border-error/60 text-error",
-              )}
+              disabled={half === 2}
+              onClick={() => tap("halftime", t("halftime"))}
+              className="col-span-2 min-h-12 cursor-pointer border-2 border-ink bg-transparent text-[15px] font-bold disabled:cursor-default disabled:opacity-50"
             >
-              {label}
+              {half === 2 ? t("secondHalf") : t("halftime")}
             </button>
-          );
-        })}
+          </div>
+          <p className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 border-t-2 border-ink pt-3 text-[15px]" aria-live="polite">
+            <span>{log[0] ? `${time(log[0].at)} ${log[0].label}` : t("noneYet")}</span>
+            <a href={`/app/${orgId}/matches/${matchId}/matchday`} className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+              {t("perPlayer")}
+            </a>
+          </p>
+          <p className="mt-2 text-[13px] text-ink-2">{t("hint")}</p>
+        </div>
+        <aside className="min-w-0">
+          <SectionHead title={t("sofarTitle")} note={t("newestFirst")} />
+          {log.length === 0 ? (
+            <p className="text-[15px] text-ink-2">{t("noneYet")}</p>
+          ) : (
+            <ul className="m-0 list-none p-0" data-testid="marks-log">
+              {log.slice(0, 12).map((l) => (
+                <li key={l.id} className="flex min-h-11 items-center gap-3 border-b border-rule text-[15px]">
+                  <b className="font-num w-14">{time(l.at)}</b>
+                  {l.key === "goal_own" && <span aria-hidden className="inline-block h-2.5 w-3 -skew-x-12 bg-club-text" />}
+                  {l.key === "goal_opp" && <span aria-hidden className="inline-block h-2.5 w-3 -skew-x-12 bg-ink" />}
+                  {l.label}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-4 text-[13px] text-ink-2">{count === 0 && open === 0 ? "" : open > 0 ? t("pending", { n: open }) : t("synced")}</p>
+        </aside>
       </div>
-      <button
-        type="button"
-        disabled={half === 2}
-        onClick={() => tap("halftime", t("halftime"))}
-        className="w-full border border-border py-3 text-sm disabled:opacity-50"
-      >
-        {half === 2 ? t("secondHalf") : t("halftime")}
-      </button>
-
     </div>
   );
 }

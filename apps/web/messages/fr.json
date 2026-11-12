@@ -1370,7 +1370,15 @@
     "readOnly": "Lecture seule, valable jusqu'au {date}",
     "scene": "Scène",
     "previewScenes": "{n, plural, one {# scène} other {# scènes}}",
-    "previewMinutes": "{n} min"
+    "previewMinutes": "{n} min",
+    "runKick": "{kind, select, collection {Collection} other {Scène}} · {n, plural, one {# scène} other {# scènes}}, {length}",
+    "viewOnly": "Lecture seule, sans compte",
+    "nextScene": "Scène suivante",
+    "allScenes": "Les {n} scènes",
+    "run": "Déroulé",
+    "running": "en cours",
+    "seen": "vue",
+    "onlyLink": "Visible uniquement par ce lien, encore {days, plural, one {# jour} other {# jours}}. Aucun compte nécessaire."
   },
   "ops": {
     "title": "Backoffice",
@@ -2161,7 +2169,16 @@
     "goalFor": "But {team}",
     "count": "{n, plural, one {# scène retenue} other {# scènes retenues}}",
     "lastAt": "dernière : {label}, {time}",
-    "noneYet": "Pas encore de scène retenue."
+    "noneYet": "Pas encore de scène retenue.",
+    "top": "Jour de match · fonctionne aussi sans réseau",
+    "end": "Terminer",
+    "goalUs": "But pour nous",
+    "sofar": "{n} jusqu'ici",
+    "subMark": "noter",
+    "subLater": "plus tard dans la vidéo",
+    "perPlayer": "Saisir par joueuse",
+    "sofarTitle": "Jusqu'ici",
+    "newestFirst": "le plus récent d'abord"
   },
   "profile": {
     "title": "Profil public",
@@ -3190,5 +3207,36 @@
     "noFixtures": "Aucun match prévu.",
     "more": "Plus sur la saison",
     "moreNote": "Chiffres, records, tous les matchs en détail, séries et analyses"
+  },
+  "numbersTab": {
+    "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
+    "field": "Terrain",
+    "byGoals": "par buts",
+    "numberName": "N° Nom",
+    "goals": "Buts",
+    "sevenM": "7 m",
+    "twoMin": "2 min",
+    "shots": "Tirs",
+    "rate": "Taux",
+    "more": "{n, plural, one {Une autre personne} other {# autres}} sans but.",
+    "showAll": "Tout afficher",
+    "keeper": "But",
+    "against": "Encaissés",
+    "saves": "Arrêts",
+    "sevenMSaved": "7 m arrêtés",
+    "ofN": "{n} sur {of}",
+    "target": "Cible dans le but",
+    "targetNote": "buts encaissés, saisis par toi",
+    "targetMarked": "{n} sur {of} buts encaissés saisis.",
+    "phases": "Phases",
+    "phase_power_play": "Supériorité, {m} minutes",
+    "phase_short_handed": "Infériorité, {m} minutes",
+    "phase_fast_break": "Contre-attaques",
+    "fromSuspensions": "des exclusions de 2 minutes",
+    "fromEvents": "des événements",
+    "fromVideo": "estimé à partir de la vidéo",
+    "allNumbers": "Tous les chiffres",
+    "allNumbersNote": "Feuille de match, tirs, gardiens en détail, courses",
+    "unknown": "sans nom"
   }
 }
