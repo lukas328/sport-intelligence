@@ -63,6 +63,7 @@ export default async function Demo({ params }: Props) {
             selectable
             pickHint={t.pick}
             scenesOf={t.scenesOf}
+            timesOf={t.timesOf}
             estimated={t.estimated}
             noVideo={t.noVideo}
           />

@@ -43,6 +43,7 @@ const en: Messages = {
     pricing: "All prices",
     honest: "What it can do and what not",
     data: "Data and consent",
+    consent: "How consent works",
   },
   kit: {
     question: "What colour does your team wear?",
@@ -259,6 +260,7 @@ const en: Messages = {
     sources: "Sources: goals from the match report · paths from the video, estimated · shots and saves marked by hand",
     pick: "Tap a point to see its scenes.",
     scenesOf: "Scenes for point {i}",
+    timesOf: "Times for point {i}",
     sceneRow: "{clock} · number {number}",
     sceneRowNoNumber: "{clock} · number not read",
     estimated: "estimated",

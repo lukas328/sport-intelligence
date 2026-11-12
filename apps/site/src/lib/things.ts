@@ -102,7 +102,8 @@ export function demoView(m: Messages): DemoView {
       label: fmt(tx.turnLabel, { n: t.turnovers.n }),
       note: tx.turnNote,
       scenes: t.turnovers.list.map((x) => ({ clock: x.clock, text: fmt(m.demo.turnRow, { clock: x.clock }), estimated: false })),
-      scenesLabel: fmt(tx.scenes, { n: t.turnovers.n }),
+      // from the match report: times only, no scenes (ANLAUF.md section 10)
+      scenesLabel: "",
     },
   ];
   const sceneGoal = t.against.goals.find((g) => g.confirmed) ?? t.against.goals[0]!;

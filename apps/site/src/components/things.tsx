@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Bundle } from "@/components/anlauf/bundle";
+import { DemoLink } from "@/components/kit";
 import { cn } from "@/lib/cn";
 import type { ThingView } from "@/lib/things";
 
@@ -40,16 +41,21 @@ export function Things({
   selectable = false,
   pickHint,
   scenesOf,
+  timesOf,
   estimated,
   noVideo,
+  scenesHref,
 }: {
   things: ThingView[];
   legend: { solid: string; dashed: string; thin: string };
   selectable?: boolean;
   pickHint?: string;
   scenesOf?: string;
+  timesOf?: string;
   estimated?: string;
   noVideo?: string;
+  /** on the start page the scene count leads to the demo, where the scenes are listed */
+  scenesHref?: string;
 }) {
   const [open, setOpen] = useState(0);
   const chosen = things[open]!;
@@ -75,7 +81,14 @@ export function Things({
                 </span>
               </span>
               {t.note && <span className="mt-2 block text-base text-ink-2">{t.note}</span>}
-              <span className="mt-4 inline-flex min-h-12 items-center bg-ink px-4 text-[1.0625rem] font-bold text-ground">{t.scenesLabel}</span>
+              {t.scenesLabel &&
+                (scenesHref ? (
+                  <DemoLink href={scenesHref} className="btn btn-ink mt-4 min-h-12 px-4 text-[1.0625rem]">
+                    {t.scenesLabel}
+                  </DemoLink>
+                ) : (
+                  <span className="mt-4 inline-flex min-h-12 items-center bg-ink px-4 text-[1.0625rem] font-bold text-ground">{t.scenesLabel}</span>
+                ))}
             </>
           );
           const frame = cn(
@@ -113,7 +126,7 @@ export function Things({
       </p>
       {selectable && scenesOf && (
         <section aria-live="polite" className="mt-10">
-          <h3 className="font-slant section-head text-[1.5rem] md:text-[1.75rem]">{scenesOf.replace("{i}", String(open + 1))}</h3>
+          <h3 className="font-slant section-head text-[1.5rem] md:text-[1.75rem]">{(chosen.kind === "times" && timesOf ? timesOf : scenesOf).replace("{i}", String(open + 1))}</h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {chosen.scenes.map((s, i) => (
               <li key={i} className="flex min-h-14 items-center gap-3 border-b border-rule py-2 text-[1.0625rem]">
@@ -123,7 +136,8 @@ export function Things({
               </li>
             ))}
           </ul>
-          {noVideo && <p className="measure mt-4 text-[1.0625rem] text-ink-2">{noVideo}</p>}
+          {noVideo && chosen.kind === "bundle" && <p className="measure mt-4 text-[1.0625rem] text-ink-2">{noVideo}</p>}
+          {chosen.note && chosen.kind === "times" && <p className="measure mt-4 text-[1.0625rem] text-ink-2">{chosen.note}</p>}
         </section>
       )}
     </div>

@@ -41,6 +41,7 @@ const de = {
     pricing: "Alle Preise",
     honest: "Was es kann und was nicht",
     data: "Daten und Einwilligung",
+    consent: "So geht die Einwilligung",
   },
   kit: {
     question: "Welche Farbe trägt dein Team?",
@@ -257,6 +258,7 @@ const de = {
     sources: "Quellen: Tore aus dem Spielbericht · Laufwege aus dem Video, geschätzt · Würfe und Paraden von Hand markiert",
     pick: "Tipp auf einen Punkt, um seine Szenen zu sehen.",
     scenesOf: "Szenen zu Punkt {i}",
+    timesOf: "Zeitpunkte zu Punkt {i}",
     sceneRow: "{clock} · Nummer {number}",
     sceneRowNoNumber: "{clock} · Nummer nicht gelesen",
     estimated: "geschätzt",

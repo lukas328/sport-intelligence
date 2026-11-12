@@ -74,7 +74,7 @@ export default async function Home({ params }: Props) {
 
         <section aria-labelledby="things" className="mt-20">
           <SectionHead id="things" title={m.things.title} note={m.things.side} />
-          <Things things={v.things} legend={{ solid: m.things.legendSolid, dashed: m.things.legendDashed, thin: m.things.legendThin }} />
+          <Things things={v.things} legend={{ solid: m.things.legendSolid, dashed: m.things.legendDashed, thin: m.things.legendThin }} scenesHref={`/${locale}/demo/`} />
         </section>
 
         <section aria-labelledby="more" className="mt-20">
@@ -138,8 +138,8 @@ export default async function Home({ params }: Props) {
               <li key={b.title} className="border-b border-rule py-6 md:border-b-0 md:px-6 md:first:pl-0 md:[&+li]:border-l md:[&+li]:border-l-rule">
                 <h3 className="font-slant text-[1.5rem]">{b.title}</h3>
                 <p className="mt-1">{fmt(b.text, { price: team.price_chf_month })}</p>
-                <Link href={`/${locale}/${["preise", "daten", "daten"][i]}/`} className="link mt-1">
-                  {[m.cta.pricing, m.cta.data, m.cta.data][i]}
+                <Link href={`/${locale}/${["preise", "daten", "hilfe/einwilligungen"][i]}/`} className="link mt-1">
+                  {[m.cta.pricing, m.cta.data, m.cta.consent][i]}
                 </Link>
               </li>
             ))}

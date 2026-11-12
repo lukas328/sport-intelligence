@@ -20,7 +20,7 @@ export function DemoCamera({
         <TacticsCamera scene={scene} view={view} width={1000} dot={13} text={text} />
       </div>
       <div className="md:hidden">
-        <TacticsCamera scene={scene} view="halfB" width={358} dot={10} text={text} />
+        <TacticsCamera scene={scene} view="halfB" width={358} dot={10} text={text} showLabels={false} />
       </div>
       <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-base text-ink-2">
         <li className="inline-flex items-center gap-2">
