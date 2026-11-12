@@ -1,5 +1,6 @@
 """The brand page: the whole process from brief to recommendation, as one HTML file."""
 from marks import MARKS, WORD, lockup, mark_auge, svg, text
+from page2 import CSS2, section
 
 INK, STOFF, INK2, RULE = "#16171a", "#eceae5", "#53565b", "#d6d3cc"
 CLUBS = [("Blau", "#1f4fd6", "#ffffff"), ("Rot", "#d3202e", "#ffffff"), ("Gelb", "#f6c500", INK),
@@ -243,10 +244,10 @@ def page():
 <title>Marke Handball Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Kanit:ital,wght@1,700;1,800;1,900&display=swap" rel="stylesheet">
-<style>{CSS}</style></head><body><main>
+<style>{CSS}{CSS2}</style></head><body><main>
 <p class="kick">Handball Intelligence · Marke und Logo · Stand 12. November 2026 · Entscheid offen</p>
 <h1>Ein Zeichen für<br>Handball Intelligence</h1>
-<p class="lead">Der Weg von der Grundlage über 22 Skizzen zu fünf ausgearbeiteten Richtungen, mit Bewertung und Empfehlung. Alle Zeichen als SVG in <code>logos/</code>.</p>
+<p class="lead">Der Weg von der Grundlage über 22 Skizzen zu fünf ausgearbeiteten Richtungen, mit Bewertung und Empfehlung. Alle Zeichen als SVG in <code>logos/</code>. Die Verfeinerung steht weiter unten: <a href="#runde2">Runde 2</a>.</p>
 <div class="keil"></div>
 
 <h2>1 Grundlage</h2>
@@ -307,4 +308,5 @@ def page():
 <li><b>Dateien:</b> SVG, PNG für iOS (1024) und Android (adaptiv, 108 dp mit 66 dp Schutzzone), favicon.ico mit 16/32/48, Open-Graph-Bild 1200 x 630, ein Blatt Markenregeln (eine Seite).</li>
 <li><b>Umbenennung in der App:</b> «Handball AI» in <code>apps/web/messages/*.json</code>, Titel, Manifest, E-Mails, Store-Einträge und Open-Graph-Bild ersetzen; das Zeichen im Kopf links vor dem Vereinswappen, in Tinte oder der Vereinsfarbe. Erst nach dem Entscheid, in einer eigenen Session.</li>
 </ol>
+{section()}
 </main></body></html>'''

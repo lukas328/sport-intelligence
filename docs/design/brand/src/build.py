@@ -30,5 +30,22 @@ for key, fn in MARKS.items():
     for name, content in files.items():
         (HERE / "logos" / f"{key}-{name}.svg").write_text(content, encoding="utf8")
 
+from marks2 import PIX, pixsvg, wordmark  # noqa: E402
+from page2 import final  # noqa: E402
+
+wm = wordmark("title", INK, two=True)
+wm_vb = [float(v) for v in wm.split('viewBox="')[1].split('"')[0].split()]
+inner = wm.split(">", 1)[1].rsplit("</svg>", 1)[0]
+k = 48 / wm_vb[3]
+finals = {
+    "zeichen": svg(final(INK)), "zeichen-weiss": svg(final("#ffffff")),
+    "zweizeilig": svg(f'{final(INK)}<g transform="translate(60 0) scale({k:.4f})">{inner}</g>', 60 + wm_vb[2] * k, 48),
+    "wortmarke-zweizeilig": wm, "wortmarke-quer": wordmark("title", INK),
+    "app-icon": svg(f'<rect width="48" height="48" fill="{INK}"/><g transform="translate(10.8 10.8) scale(.55)">{final(STOFF)}</g>'),
+    "favicon-16": pixsvg(PIX["g16"], STOFF, INK), "favicon-32": pixsvg(PIX["g32"], STOFF, INK),
+}
+for name, content in finals.items():
+    (HERE / "logos" / f"final-{name}.svg").write_text(content, encoding="utf8")
+
 (HERE / "index.html").write_text(page(), encoding="utf8")
 print("index.html and", len(list((HERE / "logos").glob("*.svg"))), "logo files")
