@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de-CH" class="fa g1">
+<html lang="de-CH" class="fb g2">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -83,7 +83,7 @@ html, body { margin: 0; background: #d6d8d9; color: #15171a; font-family: "Hanke
 
 /* ===== the Wurf head ===== */
 .wurf { position: relative; background: var(--club); color: var(--club-ink); clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%); box-shadow: inset 0 0 0 2px var(--club-edge); }
-.wurf.big { height: 450px; padding: 36px 32px 0; display: grid; grid-template-columns: 1fr 560px; gap: 24px; }
+.wurf.big { height: 410px; padding: 36px 32px 0; display: grid; grid-template-columns: 1fr 560px; gap: 24px; }
 .wurf .kick { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
 .wurf h1 { font-size: 58px; line-height: .96; text-wrap: balance; }
 .wurf .score { position: relative; text-align: right; font-size: 196px; line-height: .8; margin-top: 4px; white-space: nowrap; }
@@ -93,7 +93,8 @@ html, body { margin: 0; background: #d6d8d9; color: #15171a; font-family: "Hanke
 .wurf .score u { text-decoration: underline; text-decoration-color: var(--opp); text-decoration-thickness: .045em; text-underline-offset: .06em; text-decoration-skip-ink: none; }
 .wurf .names { display: flex; justify-content: flex-end; gap: 28px; font-size: 15px; font-weight: 600; margin-top: 14px; }
 .oc { display: inline-block; width: 12px; height: 12px; background: var(--opp); box-shadow: 0 0 0 1.5px var(--club-ink); margin-right: 8px; vertical-align: -1px; }
-.wurf svg.fl { position: absolute; left: 0; right: 0; bottom: 92px; width: 100%; }
+.desk .wurf.big > div:nth-child(2) { display: flex; flex-direction: column; } .desk .wurf .names { order: -1; margin: 0 0 14px; }
+.wurf svg.fl { position: absolute; left: 0; right: 0; bottom: 34px; width: 100%; }
 svg text.fw { font: 600 14px var(--t); fill: var(--club-ink); }
 .wurf .meta { font-size: 14px; font-weight: 600; margin-top: 18px; opacity: .92; }
 .actrow { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 22px 32px 0; }
@@ -102,7 +103,9 @@ svg text.fw { font: 600 14px var(--t); fill: var(--club-ink); }
 .phone .wurf .score { font-size: 100px; text-align: left; margin-top: 18px; } .phone .wurf .score .e { left: 0; right: auto; }
 .phone .wurf .score .e1 { transform: translate(10px, -3px); } .phone .wurf .score .e2 { transform: translate(20px, -6px); }
 .phone .wurf .names { justify-content: flex-start; gap: 18px; font-size: 12px; margin-top: 8px; flex-wrap: wrap; }
-.phone .wurf svg.fl { bottom: 40px; } .phone .actrow { padding: 18px 16px 0; }
+.phone .wurf svg.fl { bottom: 40px; }
+.flip { display: flex; gap: 0; margin-top: 4px; } .flip button { font: 700 13px var(--t); min-height: 44px; padding: 0 12px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; } .flip button + button { border-left: 0; } .flip button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+.fig .scene .stage svg { width: 100%; } .phone .actrow { padding: 18px 16px 0; }
 /* the slim Wurf strip: the head of every sub-page of a match */
 .strip { position: relative; background: var(--club); color: var(--club-ink); clip-path: polygon(0 0, 100% 0, 100% 72%, 0 100%); height: 124px; padding: 20px 32px 0; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: inset 0 0 0 2px var(--club-edge); }
 .strip .nm { font-size: 24px; line-height: 1.05; } .strip .nm small { display: block; font: 500 13px var(--t); margin-top: 6px; }
@@ -814,6 +817,7 @@ var G = {
   staefa: goals(61, { gs: 4, rl: 3 }, 1), rheinau: goals(71, { rl: 5, kr: 3 }, 1)
 };
 var VIEW_B = { box: [-0.6, -1.2, 21.2, 17.2] };
+VIEWS.halfB = { box: [-0.6, -1.2, 21.2, 17.2], m: "matrix(0 1 1 0 0 0)", f: function (p) { return [p[1], p[0]]; } };
 VIEWS.camL = { box: [-1.2, -1.2, 34, 22.4], m: null, f: function (p) { return p; } };
 /* a bundle: every goal of one kind as the scorer's run, ending at the shot spot, then a thin straight line to the goal */
 function bundleR5(svg) {
@@ -946,7 +950,7 @@ function flightR5(svg) {
   o += '<path d="' + d(pts) + '" fill="none" stroke="var(--club-ink)" stroke-width="' + (small ? 2 : 2.6) + '" stroke-linejoin="round" stroke-opacity=".9"/>';
   var e = [x(60), y(8)];
   o += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="' + (small ? 4 : 6) + '" fill="var(--club-ink)"/>';
-  if (!small) o += '<text x="' + (x(30)) + '" y="' + (y(4) - 10) + '" text-anchor="middle" class="fw">Halbzeit +4</text><text x="' + (e[0] - 14) + '" y="' + (e[1] - 10) + '" text-anchor="end" class="fw">Schluss +8</text><text x="' + x(41) + '" y="' + (y(2) + 22) + '" text-anchor="middle" class="fw">38. bis 44.</text>';
+  if (!small) o += '<text x="' + (x(30)) + '" y="' + (y(4) - 10) + '" text-anchor="middle" class="fw">Halbzeit +4</text><text x="' + (e[0] + 4) + '" y="' + (e[1] + 24) + '" text-anchor="end" class="fw">Schluss +8</text>';
   svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.innerHTML = o;
 }
 /* timeline under the stage: goals from the match report, ours up, theirs down, the marked phase */
@@ -980,12 +984,12 @@ function headStart(ph, W, unknown) {
   return '<section class="wurf big"' + (ph && unknown ? ' style="height:460px"' : "") + '><div><p class="kick">' + (ph ? "Sa gegen TSV Thalwil · fertig seit So, 9:40" : "Samstag gegen TSV Thalwil · Analyse fertig seit Sonntag, 9:40") + '</p><h1 class="d">' + TITLE5 + "</h1></div>"
     + '<div><div class="score n" role="img" aria-label="26 zu 18">' + scoreHTML(26, 18) + '</div><p class="names"><span>HC Zürichsee</span><span><i class="oc"></i>' + oppName() + (unknown ? ", Farbe offen" : ph ? "" : ", Rang 5") + "</span></p>"
     + (unknown ? '<div class="ask">Welche Farbe trägt Thalwil? ' + ["#17191c", "#ffffff", "#0b7a8a", "#d3202e", "#12804a"].map(function (c) { return '<button aria-label="Farbe wählen"><i style="background:' + c + '"></i></button>'; }).join("") + "</div>" : "") + "</div>"
-    + '<svg class="fl" data-fl data-w="' + W + '" data-h="' + (ph ? 84 : 120) + '" role="img" aria-label="Verlauf der Tordifferenz: Halbzeit plus 4, Schluss plus 8, von der 38. bis zur 44. Minute minus 5"></svg></section>';
+    + '<svg class="fl" data-fl data-w="' + W + '" data-h="' + (ph ? 84 : 160) + '" role="img" aria-label="Verlauf der Tordifferenz: Halbzeit plus 4, Schluss plus 8, von der 38. bis zur 44. Minute minus 5"></svg></section>';
 }
 function headMatch(ph, W) {
-  return '<section class="wurf big" style="height:' + (ph ? 360 : 400) + 'px"><div><p class="kick">Samstag, 7. November · Halle Seefeld</p><h1 class="d" style="font-size:' + (ph ? 28 : 44) + 'px">HC Zürichsee gegen TSV Thalwil</h1><p class="meta">Halbzeit 13:9 · Time-outs 2 und 3 · Rang 5</p></div>'
+  return '<section class="wurf big" style="height:' + (ph ? 360 : 380) + 'px"><div><p class="kick">Samstag, 7. November · Halle Seefeld</p><h1 class="d" style="font-size:' + (ph ? 28 : 44) + 'px">HC Zürichsee gegen TSV Thalwil</h1><p class="meta">Halbzeit 13:9 · Time-outs 2 und 3 · Rang 5</p></div>'
     + '<div><div class="score n" role="img" aria-label="26 zu 18"' + (ph ? ' style="font-size:88px;margin-top:10px"' : "") + ">" + scoreHTML(26, 18) + "</div></div>"
-    + '<svg class="fl" data-fl data-w="' + W + '" data-h="' + (ph ? 72 : 110) + '" role="img" aria-label="Verlauf der Tordifferenz"' + (ph ? ' style="bottom:30px"' : ' style="bottom:74px"') + "></svg></section>";
+    + '<svg class="fl" data-fl data-w="' + W + '" data-h="' + (ph ? 72 : 150) + '" role="img" aria-label="Verlauf der Tordifferenz"' + (ph ? ' style="bottom:30px"' : ' style="bottom:30px"') + "></svg></section>";
 }
 function strip5(ph, a, b, opp) {
   a = a || 26; b = b || 18; opp = opp || "TSV Thalwil";
@@ -1004,9 +1008,11 @@ function things5(ph, opts) {
   opts = opts || {};
   var W = ph ? 132 : 380;
   return '<ol class="things play">' + TH5.map(function (t, i) {
-    var inset = opts.preview && i === 0 && !ph ? '<div class="inset"><svg data-cam="ra" data-view="halfL" data-w="198" data-r="5" role="img" aria-label="Taktikkamera, Vorschau der Szene 39:55"></svg><p><span>Szene 39:55</span><button class="pause" aria-pressed="false">Pause</button></p></div>' : "";
+    var sw = opts.preview && i === 0 && !ph;
+    var inset = sw ? '<div class="scene" hidden><div class="stage"><svg data-cam="ra" data-view="halfB" data-w="' + W + '" data-r="8" role="img" aria-label="Taktikkamera, Szene 39:55: Thalwil trifft über rechts aussen"></svg><div class="bar"><button class="pause" aria-pressed="false">Pause</button><span>Taktikkamera</span><span class="clk">39:55</span></div></div></div>' : "";
     return '<li><div class="no"><em>' + (i + 1) + ' von 3</em><b class="n">' + t.v + '</b><span class="d">' + t.unit + "</span></div><p>" + t.p + '</p><small class="' + (t.up ? "up" : "") + '">' + t.s + "</small>"
       + (opts.drill && t.drill ? '<small>Dazu üben: <a class="lnk" href="#">' + t.drill + "</a></small>" : "")
+      + (sw ? '<div class="flip" role="group" aria-label="Ansicht von Punkt 1"><button aria-pressed="true" data-flip="b">Alle 9</button><button aria-pressed="false" data-flip="s">Szene 39:55</button></div>' : "")
       + '<div class="fig"><svg data-b="' + t.b + '" data-w="' + W + '" role="img" aria-label="' + t.v + " " + t.unit + ': jeder Anlauf bis zur Wurfposition, dann der Strich zum Tor"></svg>' + inset + "</div>"
       + '<a class="btn s" href="#">' + t.sc + " <small>" + t.t + "</small></a></li>";
   }).join("") + "</ol>";
@@ -1159,7 +1165,8 @@ function kamCheck(svg) {
   var cs = [[0, 0], [20, 0], [20, 20], [0, 20]].map(function (p) { return P(p[0], p[1]); });
   html += '<path d="M' + cs.map(function (p) { return p[0].toFixed(1) + " " + p[1].toFixed(1); }).join("L") + 'Z" fill="#ffd23c" fill-opacity=".1" stroke="#ffd23c" stroke-width="3.5" stroke-dasharray="12 7"/>';
   cs.forEach(function (p) { html += '<rect x="' + (p[0] - 13) + '" y="' + (p[1] - 13) + '" width="26" height="26" fill="#ffd23c" stroke="#15171a" stroke-width="3"/>'; });
-  svg.innerHTML = html;
+  /* a slightly wider lens, so all four corners are in the picture */
+  svg.innerHTML = '<rect width="1000" height="562" fill="#1d2125"/><g transform="translate(50 28.1) scale(.9)">' + html + "</g>";
 }
 var SCREENS = [
   ["start-desk", "Start", "Desktop 1280 · Wurf-Kopf mit dem Resultat, Punkt 1 läuft klein auf der Taktikkamera", "desk", function () { return startDesk(false); }],
@@ -1200,6 +1207,12 @@ function sync5() {
   document.querySelectorAll("[data-g]").forEach(function (b) { b.setAttribute("aria-pressed", String(c.indexOf(b.dataset.g) >= 0)); });
   document.querySelectorAll("[data-c]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.c === ST5.club)); });
 }
+document.addEventListener("click", function (e) {
+  var b = e.target.closest("[data-flip]"); if (!b) return;
+  var li = b.closest("li"), scene = b.dataset.flip === "s";
+  li.querySelectorAll("[data-flip]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+  li.querySelector(".fig > svg").hidden = scene; li.querySelector(".scene").hidden = !scene;
+});
 (function () {
   var q = new URLSearchParams(location.search), root = document.documentElement;
   if (q.get("f")) root.className = root.className.replace(/f[ab]/, q.get("f"));
