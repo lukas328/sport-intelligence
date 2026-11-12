@@ -299,7 +299,8 @@
     "confirm": "Oui, continuer",
     "notMine": "Ce n'est pas mon équipe",
     "next": "Ensuite : téléverser la première vidéo ou regarder le match de démo.",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "stepTitle": "Premiers pas"
   },
   "roster": {
     "title": "Équipe",
@@ -3027,7 +3028,13 @@
     "goalCaption": "Temps de jeu {clock} · vidéo {video}",
     "progress": "{done} sur {total} répondues",
     "count": "{n, plural, one {1 question} other {# questions}}",
-    "questionOf": "Question {n} sur {total}"
+    "questionOf": "Question {n} sur {total}",
+    "personQuestion": "Qui est-ce ?",
+    "personWhy": "Les personnes le plus longtemps à l'image viennent en premier. Chaque réponse est enregistrée tout de suite et rend les chiffres plus précis.",
+    "personCaption": "Vidéo {video} · {s} secondes à l'image, {read, select, none {numéro jamais lu} other {numéro {read} lu}}",
+    "personOther": "Autres",
+    "personPick": "Autres de l'effectif",
+    "personKeys": "Touches : tapez le numéro du maillot, espace pour «Je ne sais pas»."
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

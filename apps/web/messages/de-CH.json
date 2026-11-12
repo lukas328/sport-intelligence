@@ -299,7 +299,8 @@
     "confirm": "Stimmt, weiter",
     "notMine": "Das ist nicht mein Team",
     "next": "Als Nächstes: das erste Video hochladen oder das Demo-Spiel ansehen.",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "stepTitle": "Einstieg"
   },
   "roster": {
     "title": "Team",
@@ -3027,7 +3028,13 @@
     "goalCaption": "Spielzeit {clock} · Video {video}",
     "progress": "{done} von {total} beantwortet",
     "count": "{n, plural, one {1 Frage} other {# Fragen}}",
-    "questionOf": "Frage {n} von {total}"
+    "questionOf": "Frage {n} von {total}",
+    "personQuestion": "Wer ist das?",
+    "personWhy": "Die Personen mit der längsten Zeit im Bild kommen zuerst. Jede Antwort ist sofort gespeichert und macht die Zahlen genauer.",
+    "personCaption": "Video {video} · {s} Sekunden im Bild, {read, select, none {Nummer nie gelesen} other {Nummer {read} gelesen}}",
+    "personOther": "Andere",
+    "personPick": "Andere aus dem Kader",
+    "personKeys": "Tasten: Rückennummer tippen, Leertaste für «Weiss nicht»."
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

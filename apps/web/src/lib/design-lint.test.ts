@@ -26,7 +26,7 @@ const COLOUR_FILES = new Set([
   "app/app/[orgId]/matches/[matchId]/workspace.tsx",
   "app/app/[orgId]/teams/[teamId]/matches/new-match-form.tsx",
   "app/app/[orgId]/presentations/[presId]/remote/remote.tsx",
-  "app/(site)/onboarding/wizard.tsx",
+  "app/(einstieg)/onboarding/wizard.tsx",
   "app/layout.tsx",
   "app/manifest.ts",
   "components/video/mini-court.tsx",

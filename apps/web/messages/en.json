@@ -299,7 +299,8 @@
     "confirm": "Yes, continue",
     "notMine": "That's not my team",
     "next": "Next: upload the first video or watch the demo match.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "stepTitle": "Getting started"
   },
   "roster": {
     "title": "Team",
@@ -3027,7 +3028,13 @@
     "goalCaption": "Match time {clock} · video {video}",
     "progress": "{done} of {total} answered",
     "count": "{n, plural, one {1 question} other {# questions}}",
-    "questionOf": "Question {n} of {total}"
+    "questionOf": "Question {n} of {total}",
+    "personQuestion": "Who is this?",
+    "personWhy": "The people longest in view come first. Every answer is saved at once and makes the numbers more precise.",
+    "personCaption": "Video {video} · {s} seconds in view, {read, select, none {number never read} other {number {read} read}}",
+    "personOther": "Others",
+    "personPick": "Others from the squad",
+    "personKeys": "Keys: type the shirt number, space for «Don't know»."
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

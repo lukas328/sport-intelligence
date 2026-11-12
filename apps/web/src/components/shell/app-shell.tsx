@@ -143,7 +143,7 @@ export function AppShell({
                 className="font-slant flex shrink-0 items-center gap-3 text-xl leading-none whitespace-nowrap text-ink no-underline"
               >
                 {/* the product in ink, then the club: the colours belong to the club */}
-                <AppMark size={24} className="-mr-0.5" />
+                <AppMark size={32} />
                 <ClubMark org={org} />
                 {org.name}
               </Link>
@@ -197,7 +197,7 @@ export function AppShell({
             {/* phone top bar */}
             <div className="flex h-[60px] items-center gap-3 px-4 lg:hidden">
               <Link href={home} aria-label={org.name} className="flex shrink-0 items-center gap-2">
-                <AppMark size={22} />
+                <AppMark size={28} />
                 <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
               </Link>
               <div className="min-w-0 flex-1">
