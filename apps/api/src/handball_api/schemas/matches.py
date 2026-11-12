@@ -526,3 +526,93 @@ class CalibrationIn(ApiModel):
 class PanoramaOut(ApiModel):
     width: int
     height: int
+
+
+# ---- the Anlauf graphics (docs/design/ux-reset/ANLAUF.md, section 10) -------------------------
+
+GraphicsSource = Literal["analysis", "demo"]
+
+
+class ReportGoalOut(ApiModel):
+    minute: float | None
+    team: Literal["own", "opp"]
+
+
+class GoalRunOut(ApiModel):
+    event_id: uuid.UUID
+    team: Literal["own", "opp"]
+    minute: float | None
+    number: int | None
+    zone: str | None = Field(description="la, ra, rl, rm, rr, kr, m7 or gs")
+    run: list[tuple[float, float]] = Field(
+        description="the scorer's way before the shot, half court (goal at the top, metres); "
+        "empty without tracking"
+    )
+    shot: tuple[float, float]
+    aim: tuple[float, float] | None
+    confirmed: bool = Field(description="false: the shot spot is estimated")
+    source: Literal["tracking", "marked", "demo"] | None
+    has_video: bool
+
+
+class PhaseOut(ApiModel):
+    kind: Literal["power_play", "short_handed", "fast_break"]
+    count: int
+    windows: list[tuple[float, float]] = Field(description="minutes")
+    goals_us: int
+    goals_them: int
+    estimated: bool
+
+
+class CheckOut(ApiModel):
+    id: uuid.UUID
+    kind: str
+    frame_ref: int = Field(description="video time in ms")
+    box: list[float] | None
+    seconds_in_view: float | None
+    suggested_side: str | None
+    candidates: list[dict[str, Any]]
+
+
+class MatchGraphicsOut(ApiModel):
+    has_video: bool
+    field_confirmed: bool | None = Field(description="null without a video")
+    report_goals: list[ReportGoalOut]
+    goals: list[GoalRunOut]
+    phases: list[PhaseOut]
+    checks: list[CheckOut]
+    source: GraphicsSource
+
+
+class SceneTrackOut(ApiModel):
+    team: Literal["own", "opp", "ref"]
+    number: int | None
+    xy: list[tuple[float, float]] = Field(description="court metres, the attacked goal at x = 0")
+
+
+class BallStretchOut(ApiModel):
+    from_s: float
+    to_s: float
+    team: Literal["own", "opp"]
+    number: int
+
+
+class ScorerOut(ApiModel):
+    team: Literal["own", "opp"]
+    number: int
+
+
+class SceneCameraOut(ApiModel):
+    event_id: uuid.UUID
+    clock_s: float | None
+    duration_s: float
+    field_confirmed: bool | None
+    tracks: list[SceneTrackOut]
+    ball: list[BallStretchOut] = Field(
+        description="who held the ball, only where it was found; empty until the analysis "
+        "delivers ball and holder"
+    )
+    scorer: ScorerOut | None
+    shot: tuple[float, float] | None
+    confirmed: bool
+    source: GraphicsSource

@@ -2006,6 +2006,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/graphics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Match Graphics
+         * @description Data of the match graphics (ANLAUF.md section 10): goal sequence of the report, each goal
+         *     as the scorer's run and shot spot, court confirmed, phases, open questions for Prüfen.
+         */
+        get: operations["match_graphics_v1_orgs__org_id__matches__match_id__graphics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
         parameters: {
             query?: never;
@@ -2275,6 +2296,27 @@ export interface paths {
          * @description Match report as a PDF for printing and sending.
          */
         get: operations["match_report_pdf_v1_orgs__org_id__matches__match_id__report_pdf_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/scenes/{event_id}/camera": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Scene Camera
+         * @description Positions of the 6 s before a goal for the tactics camera (only with a confirmed court);
+         *     `ball` stays empty until the analysis delivers the ball and its holder.
+         */
+        get: operations["scene_camera_v1_orgs__org_id__matches__match_id__scenes__event_id__camera_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5188,6 +5230,20 @@ export interface components {
             /** Y */
             y: number;
         };
+        /** BallStretchOut */
+        BallStretchOut: {
+            /** From S */
+            from_s: number;
+            /** Number */
+            number: number;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
+            /** To S */
+            to_s: number;
+        };
         /** BillingContact */
         BillingContact: {
             /**
@@ -5366,6 +5422,31 @@ export interface components {
             title: string;
             /** Values */
             values: number[];
+        };
+        /** CheckOut */
+        CheckOut: {
+            /** Box */
+            box: number[] | null;
+            /** Candidates */
+            candidates: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Frame Ref
+             * @description video time in ms
+             */
+            frame_ref: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Seconds In View */
+            seconds_in_view: number | null;
+            /** Suggested Side */
+            suggested_side: string | null;
         };
         /** ChecklistItem */
         ChecklistItem: {
@@ -6591,6 +6672,55 @@ export interface components {
             /** Status */
             status: ("confirmed" | "dismissed") | null;
         };
+        /** GoalRunOut */
+        GoalRunOut: {
+            /** Aim */
+            aim: [
+                number,
+                number
+            ] | null;
+            /**
+             * Confirmed
+             * @description false: the shot spot is estimated
+             */
+            confirmed: boolean;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Has Video */
+            has_video: boolean;
+            /** Minute */
+            minute: number | null;
+            /** Number */
+            number: number | null;
+            /**
+             * Run
+             * @description the scorer's way before the shot, half court (goal at the top, metres); empty without tracking
+             */
+            run: [
+                number,
+                number
+            ][];
+            /** Shot */
+            shot: [
+                number,
+                number
+            ];
+            /** Source */
+            source: ("tracking" | "marked" | "demo") | null;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
+            /**
+             * Zone
+             * @description la, ra, rl, rm, rr, kr, m7 or gs
+             */
+            zone: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -7316,6 +7446,29 @@ export interface components {
          * @enum {string}
          */
         MatchFormatKey: "adult_2x30" | "youth_2x25" | "youth_2x20" | "mini" | "tournament" | "custom";
+        /** MatchGraphicsOut */
+        MatchGraphicsOut: {
+            /** Checks */
+            checks: components["schemas"]["CheckOut"][];
+            /**
+             * Field Confirmed
+             * @description null without a video
+             */
+            field_confirmed: boolean | null;
+            /** Goals */
+            goals: components["schemas"]["GoalRunOut"][];
+            /** Has Video */
+            has_video: boolean;
+            /** Phases */
+            phases: components["schemas"]["PhaseOut"][];
+            /** Report Goals */
+            report_goals: components["schemas"]["ReportGoalOut"][];
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "analysis" | "demo";
+        };
         /** MatchMarks */
         MatchMarks: {
             /** Marks */
@@ -8390,6 +8543,30 @@ export interface components {
             /** Token */
             token: string;
         };
+        /** PhaseOut */
+        PhaseOut: {
+            /** Count */
+            count: number;
+            /** Estimated */
+            estimated: boolean;
+            /** Goals Them */
+            goals_them: number;
+            /** Goals Us */
+            goals_us: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "power_play" | "short_handed" | "fast_break";
+            /**
+             * Windows
+             * @description minutes
+             */
+            windows: [
+                number,
+                number
+            ][];
+        };
         /**
          * Plan
          * @enum {string}
@@ -9070,6 +9247,16 @@ export interface components {
             /** Item Ids */
             item_ids: string[];
         };
+        /** ReportGoalOut */
+        ReportGoalOut: {
+            /** Minute */
+            minute: number | null;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
+        };
         /** RosterEntryCreate */
         RosterEntryCreate: {
             /** Birth Year */
@@ -9163,6 +9350,40 @@ export interface components {
             name: string;
             query: components["schemas"]["SearchFilter"];
         };
+        /** SceneCameraOut */
+        SceneCameraOut: {
+            /**
+             * Ball
+             * @description who held the ball, only where it was found; empty until the analysis delivers ball and holder
+             */
+            ball: components["schemas"]["BallStretchOut"][];
+            /** Clock S */
+            clock_s: number | null;
+            /** Confirmed */
+            confirmed: boolean;
+            /** Duration S */
+            duration_s: number;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Field Confirmed */
+            field_confirmed: boolean | null;
+            scorer: components["schemas"]["ScorerOut"] | null;
+            /** Shot */
+            shot: [
+                number,
+                number
+            ] | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "analysis" | "demo";
+            /** Tracks */
+            tracks: components["schemas"]["SceneTrackOut"][];
+        };
         /** SceneOut */
         SceneOut: {
             /**
@@ -9181,6 +9402,24 @@ export interface components {
             start_ms: number;
             /** Title */
             title: string | null;
+        };
+        /** SceneTrackOut */
+        SceneTrackOut: {
+            /** Number */
+            number: number | null;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp" | "ref";
+            /**
+             * Xy
+             * @description court metres, the attacked goal at x = 0
+             */
+            xy: [
+                number,
+                number
+            ][];
         };
         /** ScheduleItem */
         ScheduleItem: {
@@ -9219,6 +9458,16 @@ export interface components {
             team: string;
             /** Title */
             title: string | null;
+        };
+        /** ScorerOut */
+        ScorerOut: {
+            /** Number */
+            number: number;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
         };
         /** ScoutingOut */
         ScoutingOut: {
@@ -14632,6 +14881,38 @@ export interface operations {
             };
         };
     };
+    match_graphics_v1_orgs__org_id__matches__match_id__graphics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchGraphicsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_reels_v1_orgs__org_id__matches__match_id__highlights_get: {
         parameters: {
             query?: never;
@@ -15165,6 +15446,39 @@ export interface operations {
                 };
                 content: {
                     "application/pdf": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    scene_camera_v1_orgs__org_id__matches__match_id__scenes__event_id__camera_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SceneCameraOut"];
                 };
             };
             /** @description Validation Error */

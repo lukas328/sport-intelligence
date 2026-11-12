@@ -231,3 +231,19 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   theme switch in the account menu was removed and the `hb_theme` cookie is ignored. Open: whether
   a dark scheme comes back (e.g. for the hall at night), and how the club colour and the cloth
   would work on it.
+- **Q-UX-15 Ball and holder in the API.** `handball_vision.ballpossession` finds stretches where
+  the ball is in the picture and who holds it, but the API does not consume it today. The tactics
+  camera and the Ball-Linie have their place (`SceneCameraOut.ball`, a marker at the holder);
+  until the analysis delivers it, `ball` is empty and the screen says «Ball in dieser Szene nicht
+  erkannt». Lukas: UI first, detection later; no ball detection is built in phase 2.
+- **Q-UX-16 Field detection in real halls.** The tactics camera needs a confirmed court
+  (`field_confirmed`); without it the screen asks «Stimmt das Feld?». How well the automatic
+  court fits in real club halls (lines of several sports, partial views, moving cameras) is
+  untested and not improved in phase 2.
+- **Q-UX-17 Runs and tactics camera with a real match video.** Runs (`goals[].run`, the
+  scorer's track in the 3 s before the goal, sampled at about 9 per second) and scene positions
+  are built from the tracking but only tested with stored test rows; the demo matches draw
+  invented positions (`source: "demo"`). A test with a recorded match is open.
+- **Q-UX-18 Smoothing of paths.** Runs are drawn with a Catmull-Rom curve through the measured
+  points (display only, nothing added). Whether the raw tracks need filtering (jitter, ID
+  switches) before they look like runs is open.

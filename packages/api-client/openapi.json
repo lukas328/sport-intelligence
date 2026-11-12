@@ -1074,6 +1074,38 @@
         "title": "BallIn",
         "type": "object"
       },
+      "BallStretchOut": {
+        "properties": {
+          "from_s": {
+            "title": "From S",
+            "type": "number"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "team": {
+            "enum": [
+              "own",
+              "opp"
+            ],
+            "title": "Team",
+            "type": "string"
+          },
+          "to_s": {
+            "title": "To S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "from_s",
+          "to_s",
+          "team",
+          "number"
+        ],
+        "title": "BallStretchOut",
+        "type": "object"
+      },
       "BillingContact": {
         "properties": {
           "attention": {
@@ -1526,6 +1558,79 @@
           "values"
         ],
         "title": "Chart",
+        "type": "object"
+      },
+      "CheckOut": {
+        "properties": {
+          "box": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Box"
+          },
+          "candidates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "frame_ref": {
+            "description": "video time in ms",
+            "title": "Frame Ref",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "seconds_in_view": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds In View"
+          },
+          "suggested_side": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Side"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "frame_ref",
+          "box",
+          "seconds_in_view",
+          "suggested_side",
+          "candidates"
+        ],
+        "title": "CheckOut",
         "type": "object"
       },
       "ChecklistItem": {
@@ -5191,6 +5296,150 @@
         "title": "GoalReviewIn",
         "type": "object"
       },
+      "GoalRunOut": {
+        "properties": {
+          "aim": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aim"
+          },
+          "confirmed": {
+            "description": "false: the shot spot is estimated",
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "has_video": {
+            "title": "Has Video",
+            "type": "boolean"
+          },
+          "minute": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minute"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "run": {
+            "description": "the scorer's way before the shot, half court (goal at the top, metres); empty without tracking",
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Run",
+            "type": "array"
+          },
+          "shot": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Shot",
+            "type": "array"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "tracking",
+                  "marked",
+                  "demo"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "team": {
+            "enum": [
+              "own",
+              "opp"
+            ],
+            "title": "Team",
+            "type": "string"
+          },
+          "zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "la, ra, rl, rm, rr, kr, m7 or gs",
+            "title": "Zone"
+          }
+        },
+        "required": [
+          "event_id",
+          "team",
+          "minute",
+          "number",
+          "zone",
+          "run",
+          "shot",
+          "aim",
+          "confirmed",
+          "source",
+          "has_video"
+        ],
+        "title": "GoalRunOut",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -7296,6 +7545,73 @@
         ],
         "title": "MatchFormatKey",
         "type": "string"
+      },
+      "MatchGraphicsOut": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckOut"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "field_confirmed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null without a video",
+            "title": "Field Confirmed"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalRunOut"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "has_video": {
+            "title": "Has Video",
+            "type": "boolean"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/components/schemas/PhaseOut"
+            },
+            "title": "Phases",
+            "type": "array"
+          },
+          "report_goals": {
+            "items": {
+              "$ref": "#/components/schemas/ReportGoalOut"
+            },
+            "title": "Report Goals",
+            "type": "array"
+          },
+          "source": {
+            "enum": [
+              "analysis",
+              "demo"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "has_video",
+          "field_confirmed",
+          "report_goals",
+          "goals",
+          "phases",
+          "checks",
+          "source"
+        ],
+        "title": "MatchGraphicsOut",
+        "type": "object"
       },
       "MatchMarks": {
         "properties": {
@@ -10487,6 +10803,63 @@
         "title": "PasswordResetIn",
         "type": "object"
       },
+      "PhaseOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "estimated": {
+            "title": "Estimated",
+            "type": "boolean"
+          },
+          "goals_them": {
+            "title": "Goals Them",
+            "type": "integer"
+          },
+          "goals_us": {
+            "title": "Goals Us",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "power_play",
+              "short_handed",
+              "fast_break"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "windows": {
+            "description": "minutes",
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Windows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "count",
+          "windows",
+          "goals_us",
+          "goals_them",
+          "estimated"
+        ],
+        "title": "PhaseOut",
+        "type": "object"
+      },
       "Plan": {
         "enum": [
           "free",
@@ -12257,6 +12630,35 @@
         "title": "ReorderIn",
         "type": "object"
       },
+      "ReportGoalOut": {
+        "properties": {
+          "minute": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minute"
+          },
+          "team": {
+            "enum": [
+              "own",
+              "opp"
+            ],
+            "title": "Team",
+            "type": "string"
+          }
+        },
+        "required": [
+          "minute",
+          "team"
+        ],
+        "title": "ReportGoalOut",
+        "type": "object"
+      },
       "RosterEntryCreate": {
         "properties": {
           "birth_year": {
@@ -12611,6 +13013,113 @@
         "title": "SavedFilterOut",
         "type": "object"
       },
+      "SceneCameraOut": {
+        "properties": {
+          "ball": {
+            "description": "who held the ball, only where it was found; empty until the analysis delivers ball and holder",
+            "items": {
+              "$ref": "#/components/schemas/BallStretchOut"
+            },
+            "title": "Ball",
+            "type": "array"
+          },
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "duration_s": {
+            "title": "Duration S",
+            "type": "number"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "field_confirmed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Confirmed"
+          },
+          "scorer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScorerOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shot": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shot"
+          },
+          "source": {
+            "enum": [
+              "analysis",
+              "demo"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/SceneTrackOut"
+            },
+            "title": "Tracks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "event_id",
+          "clock_s",
+          "duration_s",
+          "field_confirmed",
+          "tracks",
+          "ball",
+          "scorer",
+          "shot",
+          "confirmed",
+          "source"
+        ],
+        "title": "SceneCameraOut",
+        "type": "object"
+      },
       "SceneOut": {
         "properties": {
           "clip_id": {
@@ -12651,6 +13160,55 @@
           "title"
         ],
         "title": "SceneOut",
+        "type": "object"
+      },
+      "SceneTrackOut": {
+        "properties": {
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "team": {
+            "enum": [
+              "own",
+              "opp",
+              "ref"
+            ],
+            "title": "Team",
+            "type": "string"
+          },
+          "xy": {
+            "description": "court metres, the attacked goal at x = 0",
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Xy",
+            "type": "array"
+          }
+        },
+        "required": [
+          "team",
+          "number",
+          "xy"
+        ],
+        "title": "SceneTrackOut",
         "type": "object"
       },
       "ScheduleItem": {
@@ -12746,6 +13304,28 @@
           "response"
         ],
         "title": "ScheduleItem",
+        "type": "object"
+      },
+      "ScorerOut": {
+        "properties": {
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "team": {
+            "enum": [
+              "own",
+              "opp"
+            ],
+            "title": "Team",
+            "type": "string"
+          }
+        },
+        "required": [
+          "team",
+          "number"
+        ],
+        "title": "ScorerOut",
         "type": "object"
       },
       "ScoutingOut": {
@@ -22862,6 +23442,61 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/graphics": {
+      "get": {
+        "description": "Data of the match graphics (ANLAUF.md section 10): goal sequence of the report, each goal\nas the scorer's run and shot spot, court confirmed, phases, open questions for Pr\u00fcfen.",
+        "operationId": "match_graphics_v1_orgs__org_id__matches__match_id__graphics_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchGraphicsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Match Graphics",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
       "get": {
         "description": "Team reels and player reels the caller may see (created after every analysis).",
@@ -23807,6 +24442,71 @@
         "tags": [
           "events",
           "insights"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/scenes/{event_id}/camera": {
+      "get": {
+        "description": "Positions of the 6 s before a goal for the tactics camera (only with a confirmed court);\n`ball` stays empty until the analysis delivers the ball and its holder.",
+        "operationId": "scene_camera_v1_orgs__org_id__matches__match_id__scenes__event_id__camera_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Event Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SceneCameraOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Scene Camera",
+        "tags": [
+          "matches",
+          "analysis"
         ]
       }
     },
