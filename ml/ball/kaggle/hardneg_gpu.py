@@ -1,12 +1,15 @@
-"""Round 7's confident peaks on frames it never saw (picks from hardneg_pick.py, inserted as PICKS
-by hardneg_push.py): for every peak >= MIN_SCORE (at most TOP per frame) a crop of the three frames
-(c/<id>.jpg, 3 x 96 px side by side, 2x enlarged) and a context image of the centre frame with
-the peak circled (x/<id>.jpg, 640 wide), for a one-click "ball / no ball" labelling page."""
+"""A ball net's peaks on frames it never saw (picks from hardneg_pick.py; PICKS, MODEL, MIN_SCORE
+and SCENE_W inserted by hardneg_push.py): for every peak >= MIN_SCORE (at most TOP per frame) a crop
+of the three frames (c/<id>.jpg, 3 x 96 px side by side, 2x enlarged) and the centre frame
+(x/<id>.jpg, SCENE_W wide; at 640 the peak is circled, at 1280 the page draws the ring and the
+owner can click the true ball), for a one-click "ball / no ball" labelling page.
+"motion": mean absolute difference between the first and last frame around the peak (32 px box),
+so a labelling round can prefer balls in flight over balls held still."""
 import glob, json, os, time
 import cv2, numpy as np, torch, torch.nn as nn, torch.nn.functional as F, torchvision
 
 PICKS = json.loads(r'''__PICKS__''')
-MIN_SCORE = 0.4; TOP = 3; R = 48
+MODEL = "__MODEL__"; MIN_SCORE = float("__MIN_SCORE__"); SCENE_W = int("__SCENE_W__"); TOP = 3; R = 48
 IN = "/kaggle/input"; OUT = "/kaggle/working"
 os.makedirs(f"{OUT}/c", exist_ok=True); os.makedirs(f"{OUT}/x", exist_ok=True)
 dev = "cuda" if torch.cuda.is_available() else "cpu"
@@ -38,7 +41,7 @@ def peaks(hm, k=5):
 
 
 net = BallNet3()
-net.load_state_dict(torch.load(glob.glob(f"{IN}/**/ball_r7.pt", recursive=True)[0], map_location="cpu", weights_only=True))
+net.load_state_dict(torch.load(glob.glob(f"{IN}/**/{MODEL}", recursive=True)[0], map_location="cpu", weights_only=True))
 net.to(dev).eval()
 FILES = {os.path.basename(a): a for a in glob.glob(f"{IN}/**/*.mp4", recursive=True)}
 items = []; T0 = time.time()
@@ -74,10 +77,16 @@ for p in PICKS:
             pad = cv2.copyMakeBorder(im, R, R, R, R, cv2.BORDER_CONSTANT, value=(0, 0, 0))
             crops.append(cv2.resize(pad[py:py + 2 * R, px:px + 2 * R], (4 * R, 4 * R), interpolation=cv2.INTER_CUBIC))
         cv2.imwrite(f"{OUT}/c/{cid}.jpg", np.concatenate(crops, 1), [cv2.IMWRITE_JPEG_QUALITY, 85])
-        ctx = ims[1].copy(); cv2.circle(ctx, (int(px), int(py)), 22, (0, 230, 255), 3)
-        cv2.imwrite(f"{OUT}/x/{cid}.jpg", cv2.resize(ctx, (640, round(H * 640 / 1280))), [cv2.IMWRITE_JPEG_QUALITY, 70])
+        ctx = ims[1].copy()
+        if SCENE_W < 1280:
+            cv2.circle(ctx, (int(px), int(py)), 22, (0, 230, 255), 3)
+            ctx = cv2.resize(ctx, (SCENE_W, round(H * SCENE_W / 1280)))
+        cv2.imwrite(f"{OUT}/x/{cid}.jpg", ctx, [cv2.IMWRITE_JPEG_QUALITY, 70 if SCENE_W < 1280 else 78])
+        y0, y1, x0, x1 = max(0, py - 16), min(H, py + 16), max(0, px - 16), min(1280, px + 16)
+        motion = float(np.abs(ims[0][y0:y1, x0:x1].astype(np.int16) - ims[2][y0:y1, x0:x1].astype(np.int16)).mean())
         items.append({"id": cid, "frame_id": p["id"], "game": p["game"], "video": f"{p['dataset']}/{p['file']}",
                       "frame": fr, "gap": G, "x": round(float(px), 1), "y": round(float(py), 1), "score": round(s, 3),
-                      "rank": rank, "clock_running": p.get("clock_running")})
+                      "rank": rank, "clock_running": p.get("clock_running"),
+                      "motion": round(motion, 1), "model": MODEL})
 json.dump(items, open(f"{OUT}/items.json", "w"))
 print("done", len(items), "crops from", len(PICKS), "frames", f"{time.time() - T0:.0f}s")
