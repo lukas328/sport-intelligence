@@ -33,6 +33,8 @@ test("player: the match page leads to the own scenes, assessment first", async (
     headers: { "x-csrf-token": csrf },
     data: { first_name: "Lea", last_name: "Beispiel", jersey_number: 9 },
   });
+  // replies, the player area and the parent area are «Teamfunktionen», off for a new team (ADR 029)
+  await page.request.patch(`/v1/orgs/${orgId}/teams/${teamId}`, { headers: { "x-csrf-token": csrf }, data: { settings: { team_features: true } } });
   await page.reload();
   const attendance = page.getByTestId("match-attendance");
   await attendance.locator("summary").click();

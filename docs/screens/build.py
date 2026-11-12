@@ -20,12 +20,14 @@ MAX_HEIGHT = 6000  # very long pages keep the full width; the height is capped t
 GROUPS = {
     "1-einstieg": (
         "Einstieg",
-        "Anmelden, registrieren und der erste Start mit der Teamsuche auf handball.ch.",
+        "Anmelden, registrieren und der erste Start: Teamsuche auf handball.ch, Schritt 2 «Das "
+        "seid ihr, oder?», und der Weg von Hand, wenn nichts gefunden wird.",
     ),
     "2-trainer": (
         "Trainer/in",
-        "Demo-Verein mit analysierten Testvideos: Übersicht, Spiele, Match-Arbeitsplatz Schritt "
-        "für Schritt, Analyse, Bibliothek, Training, Team, Einstellungen.",
+        "Demo-Verein mit analysierten Testvideos: Spiele (Start), ein Spiel mit den Tabs Spiel, "
+        "Video und Zahlen, Prüfen, Spieltag, Saison, Szenen, Sammlungen, Training, Team, "
+        "Einstellungen. Die Werkbank liegt im Tab Video hinter «Mehr».",
     ),
     "3-spielerin": ("Spieler/in", "Ein Spielerkonto, mit dem Kadereintrag verknüpft."),
     "4-eltern": ("Eltern", "Ein Elternkonto für ein Kind im Kader."),
@@ -34,7 +36,8 @@ GROUPS = {
 HEADER = [
     "# Screenshots der App",
     "",
-    "Stand: 10. November 2026 (main nach PR 33). Lokaler Stack mit dem Demo-Verein aus",
+    "Stand: 12. November 2026 (Branch claude/trikot-ui, Look «Anlauf» auf «Stoff», Marke",
+    "«Handball Intelligence»). Lokaler Stack mit dem Demo-Verein aus",
     "`scripts/seed.py` (synthetische Testvideos), erfundene Namen. Offizielle Daten (handball.ch)",
     "und Wurf-Vorschläge kommen aus aufgezeichneten Testantworten, weil der lokale Stack",
     "handball.ch nicht erreicht.",
@@ -43,6 +46,10 @@ HEADER = [
     "laufendem Stack (`make up`, `make seed`) und Web-App:",
     "`cd apps/web && npx playwright test -c screens.config.ts`, dann",
     "`python3 docs/screens/build.py` (wandelt in JPEG und schreibt diese Seite).",
+    "Mails liest die Aufnahme über die Mailpit-Schnittstelle (Port 8025).",
+    "",
+    "Die Screens des Looks in allen sechs Prüffarben und die Vergleiche mit dem Zielbild",
+    "(links App, rechts Vorlage) liegen in [anlauf/](anlauf/) und [anlauf/vergleich/](anlauf/vergleich/).",
     "",
 ]
 

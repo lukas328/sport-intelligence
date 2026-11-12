@@ -54,6 +54,24 @@ test("screens", async ({ page, browser }, info) => {
   await page.getByLabel("Team oder Verein").fill("Seeblick");
   await expect(page.getByTestId("official-team").first()).toBeVisible();
   await snap(page, E, "onboarding-suchergebnis");
+  // step 2 «Das seid ihr, oder?» after taking a team over (answers recorded, invented names)
+  {
+    const p2 = await page.context().newPage();
+    const claimed = `**/v1/orgs/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}`;
+    await p2.route("**/v1/official/teams?*", (r) => r.fulfill(json(fx.searchHits)));
+    await p2.route("**/v1/official/teams/*/claim", (r) => r.fulfill(json(fx.claimed(fx.CLAIMED_ORG, fx.CLAIMED_TEAM), 201)));
+    await p2.route(`${claimed}/official`, (r) => r.fulfill(json(fx.link)));
+    await p2.route(`${claimed}/official/suggestions*`, (r) => r.fulfill(json(fx.suggestions)));
+    await p2.route(`${claimed}/matches`, (r) =>
+      r.fulfill(json([{ id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Thalwil", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null }])),
+    );
+    await go(p2, "/onboarding");
+    await p2.getByLabel("Team oder Verein").fill("Seeblick");
+    await p2.getByTestId("official-team").filter({ hasText: "HC Seeblick Herren 1" }).getByTestId("claim").click();
+    await expect(p2.getByTestId("claim-done")).toContainText("Timo Brunner");
+    await snap(p2, E, "onboarding-das-seid-ihr");
+    await p2.close();
+  }
   await page.getByTestId("manual-club").click();
   await snap(page, E, "onboarding-verein-von-hand");
   await page.getByLabel("Vereinsname").fill("HC Seeblick");
@@ -143,22 +161,10 @@ test("screens", async ({ page, browser }, info) => {
   await page.route("**/v1/orgs/*/matches/*/shot-candidates", (r) => r.fulfill(json(shotList())));
   await go(page, `/app/${org}/matches/${withVideo.id}`);
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 60_000 });
-  for (const [step, name] of [
-    ["step-court", "spiel-video-spielfeld"],
-    ["step-kickoff", "spiel-video-anwurf"],
-    ["step-goals", "spiel-video-tore-pruefen"],
-    ["step-players", "spiel-video-spieler-zuordnen"],
-    ["step-events", "spiel-video-ereignisse"],
-    ["step-shots", "spiel-video-wuerfe"],
-    ["step-formations", "spiel-video-abwehrsysteme"],
-    ["step-notes", "spiel-video-kommentare"],
-    ["step-feedback", "spiel-video-feedback"],
-  ] as const) {
-    if (!(await page.getByTestId(step).isVisible().catch(() => false))) continue;
-    await snap(page, T, name, () => tryClick(page, step));
-  }
-  if (await page.getByTestId("step-shots").isVisible().catch(() => false)) {
-    await page.getByTestId("step-shots").click();
+  // the tab Video: one stage (video or tactics camera), the workbench behind «Mehr»
+  await snap(page, T, "spiel-video");
+  await snap(page, T, "spiel-video-werkbank", () => tryClick(page, "bench-open"));
+  if (await page.getByTestId("shots-review-open").isVisible().catch(() => false)) {
     await page.getByTestId("shots-review-open").click();
     await snap(page, T, "spiel-wuerfe-vollbild");
     await page.keyboard.press("Escape");
@@ -171,6 +177,9 @@ test("screens", async ({ page, browser }, info) => {
     await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
   });
   await page.unroute("**/v1/orgs/*/matches/*/shot-candidates");
+  // Prüfen: one question at a time
+  await go(page, `/app/${org}/matches/${withVideo.id}/check`);
+  await snap(page, T, "spiel-pruefen");
   await go(page, `/app/${org}/matches/${upcoming.id}/matchday`);
   await snap(page, T, "spieltag");
   await go(page, `/app/${org}/matches/${upcoming.id}/matchday?mode=marks`);
@@ -194,6 +203,11 @@ test("screens", async ({ page, browser }, info) => {
   await snap(page, T, "szenen");
   await go(page, `${base}/collections`);
   await snap(page, T, "sammlungen");
+  const collections = (await (await page.request.get(`/v1/orgs/${org}/teams/${team.id}/collections`)).json()) as { id: string }[];
+  if (collections[0]) {
+    await go(page, `${base}/collections/${collections[0].id}`);
+    await snap(page, T, "sammlung");
+  }
   await go(page, `${base}/playlists`);
   await snap(page, T, "playlists");
   if (playlists[0]) {
@@ -219,7 +233,9 @@ test("screens", async ({ page, browser }, info) => {
   await go(page, `${base}/assignments`);
   await snap(page, T, "training-aufgaben");
   await go(page, base);
-  await snap(page, T, "team-kader", async () => {
+  await snap(page, T, "team-kader");
+  await go(page, `${base}?edit=1`);
+  await snap(page, T, "team-kader-bearbeiten", async () => {
     const d = page.getByTestId("consent-overview");
     if (await d.isVisible()) if (!(await d.evaluate((e) => (e as HTMLDetailsElement).open))) await d.locator("summary").click();
   });
