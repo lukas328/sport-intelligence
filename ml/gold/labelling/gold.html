@@ -1,0 +1,265 @@
+<title>Goldstandard Ball</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Gold standard: the ball in every keyframe (~0.1 s) of 8-second clips. Suggestion pre-filled,
+   the owner confirms (Space / H), clicks the true ball, or marks hidden / out of picture. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --ink: #17202b; --muted: #5a6675; --line: #d3d9e1;
+  --ball: #e8b100; --ball-ink: #1b1600; --held: #ff8a1f; --court: #2b6cb0; --good: #1f8a4c; --warn: #b25d00;
+  --sug: #33d1ff; --hidden: #8a63d2; --out: #7b8794;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+    --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --sug: #5fdcff; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+  --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --sug: #5fdcff; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; margin: 0;
+  padding: 14px max(16px, env(safe-area-inset-left, 0px)) 24px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 10px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--warn); }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; align-items: start; }
+@media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+canvas#stage { display: block; width: 100%; height: auto; background: #000; border-radius: 6px; cursor: crosshair; }
+.strip { display: flex; gap: 1px; margin-top: 8px; height: 16px; }
+.strip button { flex: 1 1 0; min-width: 0; padding: 0; border: 0; border-radius: 1px; background: var(--line); cursor: pointer; }
+.strip button.free { background: var(--ball); } .strip button.held { background: var(--held); }
+.strip button.hidden { background: var(--hidden); } .strip button.out { background: var(--out); }
+.strip button.cur { outline: 2px solid var(--court); outline-offset: 1px; }
+.strip button.shot { box-shadow: inset 0 -4px 0 #ff3b5c; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); font-family: var(--mono); }
+.meta b { color: var(--ink); }
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 10px; }
+canvas#zoom { width: 100%; aspect-ratio: 1; background: #000; border-radius: 4px; display: block; image-rendering: pixelated; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+button.k { font: 600 14px var(--body); padding: 9px 6px; min-height: 40px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); cursor: pointer; }
+button.k:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px solid currentColor; border-radius: 3px; opacity: .8; }
+.help { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 0; padding-left: 16px; }
+.toast { min-height: 18px; font-size: 13px; color: var(--good); }
+select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); width: 100%; }
+.legend span { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 4px 0 8px; vertical-align: -1px; }
+</style>
+
+<header>
+  <h1>Goldstandard Ball</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <span class="note" id="note" hidden></span>
+</header>
+<main>
+  <section>
+    <canvas id="stage" width="1280" height="720" role="img" aria-label="Aktuelles Bild des Clips"></canvas>
+    <div class="strip" id="strip" aria-label="Schlüsselbilder des Clips"></div>
+    <div class="meta" id="meta"></div>
+    <div class="meta legend"><span style="background:var(--ball)"></span>frei <span style="background:var(--held)"></span>in der Hand
+      <span style="background:var(--hidden)"></span>verdeckt <span style="background:var(--out)"></span>nicht im Bild <span style="background:var(--sug);border-radius:50%"></span>Vorschlag</div>
+  </section>
+  <aside>
+    <select id="clip" aria-label="Clip wählen"></select>
+    <canvas id="zoom" width="240" height="240" aria-label="Lupe"></canvas>
+    <div class="btns">
+      <button class="k" id="b-acc">Vorschlag frei <kbd>Leer</kbd></button>
+      <button class="k" id="b-held">Vorschlag Hand <kbd>H</kbd></button>
+      <button class="k" id="b-hid">Verdeckt <kbd>V</kbd></button>
+      <button class="k" id="b-out">Nicht im Bild <kbd>O</kbd></button>
+      <button class="k" id="b-shot">Wurf hier <kbd>W</kbd></button>
+      <button class="k" id="b-del">Löschen <kbd>⌫</kbd></button>
+      <button class="k" id="b-prev">← Zurück</button>
+      <button class="k" id="b-done">Clip fertig <kbd>Enter</kbd></button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <ul class="help">
+      <li><b>Klick</b> = Ball hier, frei (Flug, Boden, Prellen). <b>Shift+Klick</b> = Ball hier, in der Hand.</li>
+      <li><kbd>Leer</kbd> / <kbd>H</kbd> übernehmen den blauen Vorschlag als frei / in der Hand.</li>
+      <li><kbd>V</kbd> Ball im Bild, aber verdeckt (<b>Alt+Klick</b> davor merkt die geschätzte Stelle). <kbd>O</kbd> kein Spielball im Bild.</li>
+      <li><kbd>W</kbd> markiert den Moment, in dem der Ball beim Wurf die Hand verlässt.</li>
+      <li><kbd>←</kbd> <kbd>→</kbd> Schlüsselbilder (etwa alle 0.1 s), <kbd>,</kbd> <kbd>.</kbd> einzelne Bilder, zum Beispiel bei schnellen Würfen.</li>
+    </ul>
+  </aside>
+</main>
+<video id="vid" muted playsinline preload="auto" hidden></video>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const st = { clips: [], ci: 0, f: 0, docs: {}, db: null, mouse: null, pendingHidden: null, timers: {}, dirty: {} };
+const COL = { free: "--ball", held: "--held", hidden: "--hidden", out: "--out" };
+const NAMES = { free: "frei", held: "in der Hand", hidden: "verdeckt", out: "nicht im Bild" };
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function clip() { return st.clips[st.ci]; }
+function doc(c) { c = c || clip(); if (!st.docs[c.id]) st.docs[c.id] = { labels: {}, shots: [], done: false }; return st.docs[c.id]; }
+function keyframes(c) { const out = []; for (let f = 0; f < c.n; f += c.K) out.push(f); return out; }
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2200); }
+
+// --- video: frame f of the mp4 is frame f of the clip (seek to its middle)
+const vid = $("vid");
+let seekTo = null, seeking = false;
+function showFrame(f) {
+  st.f = Math.max(0, Math.min(clip().n - 1, f)); seekTo = st.f; pump(); render();
+}
+function pump() {
+  if (seeking || seekTo === null || !vid.src) return;
+  const f = seekTo; seekTo = null; seeking = true;
+  vid.currentTime = (f + 0.5) / clip().fps;
+}
+vid.addEventListener("seeked", () => { seeking = false; drawStage(); if (seekTo !== null) pump(); });
+function loadClip(i) {
+  st.ci = i; const c = clip(); $("clip").value = String(i);
+  vid.src = "clips/" + c.id + ".mp4";
+  vid.addEventListener("loadeddata", () => showFrame(firstOpen(c)), { once: true });
+  renderStrip(); render();
+}
+function firstOpen(c) { const L = doc(c).labels; for (const f of keyframes(c)) if (!L[f]) return f; return 0; }
+
+// --- labels: per frame {x, y, s}; interpolation between labelled frames for display only
+function interp(c, f) {
+  const L = doc(c).labels; let a = null, b = null;
+  for (let g = f - 1; g >= 0 && g >= f - 3 * c.K; g--) if (L[g] && L[g].x != null) { a = g; break; }
+  for (let g = f + 1; g < c.n && g <= f + 3 * c.K; g++) if (L[g] && L[g].x != null) { b = g; break; }
+  if (a === null || b === null) return null;
+  const t = (f - a) / (b - a); return { x: L[a].x + t * (L[b].x - L[a].x), y: L[a].y + t * (L[b].y - L[a].y) };
+}
+function setLabel(f, lab) {
+  const d = doc(); if (lab) d.labels[f] = lab; else delete d.labels[f];
+  persist(clip()); renderStrip(); render();
+}
+function next() {
+  const c = clip(), ks = keyframes(c), L = doc(c).labels;
+  const j = ks.findIndex((k) => k > st.f && !L[k]);
+  if (j >= 0) showFrame(ks[j]);
+  else { const k = ks.find((k) => k > st.f); if (k !== undefined) showFrame(k); else toast("Ende des Clips. Enter = Clip fertig."); }
+}
+function prevKey() { const ks = keyframes(clip()); const k = [...ks].reverse().find((k) => k < st.f); showFrame(k === undefined ? 0 : k); }
+function nextKey() { const k = keyframes(clip()).find((k) => k > st.f); if (k !== undefined) showFrame(k); }
+function accept(s) {
+  const sg = clip().sug[st.f];
+  if (!sg) { toast("Kein Vorschlag hier: Ball anklicken, V oder O."); return; }
+  setLabel(st.f, { x: sg[0], y: sg[1], s }); next();
+}
+function mark(s) {
+  const p = s === "hidden" ? st.pendingHidden : null;
+  setLabel(st.f, p ? { x: p.x, y: p.y, s } : { s }); st.pendingHidden = null; next();
+}
+function toggleShot() {
+  const d = doc(); const i = d.shots.indexOf(st.f);
+  if (i >= 0) d.shots.splice(i, 1); else d.shots.push(st.f);
+  d.shots.sort((a, b) => a - b); persist(clip()); renderStrip(); render(); toast(i >= 0 ? "Wurf entfernt" : "Wurf markiert");
+}
+function done() { const d = doc(); d.done = true; persist(clip()); toast("Clip fertig, danke!");
+  const j = st.clips.findIndex((c, i) => i > st.ci && !doc(c).done); if (j >= 0) loadClip(j); renderProgress(); }
+
+// --- storage: one document per clip, one write per pause
+function persist(c) {
+  if (!st.db) { $("note").hidden = false; $("note").textContent = "Nicht gespeichert: Speicher nicht erreichbar."; return; }
+  clearTimeout(st.timers[c.id]); st.dirty[c.id] = true;
+  st.timers[c.id] = setTimeout(async () => {
+    const d = doc(c);
+    try { await st.db.collection("gold").doc(c.id).set({ labels: d.labels, shots: d.shots, done: d.done, at: Date.now() }); }
+    catch (e) { toast("Speichern fehlgeschlagen: " + (e && e.message ? e.message : "unbekannt")); }
+    st.dirty[c.id] = false;
+  }, 600);
+}
+
+// --- drawing
+function ring(g, x, y, r, col, w, dash) { g.setLineDash(dash || []); g.strokeStyle = col; g.lineWidth = w; g.beginPath(); g.arc(x, y, r, 0, 2 * Math.PI); g.stroke(); g.setLineDash([]); }
+function drawStage() {
+  const c = clip(); if (!c) return; const cv = $("stage"), g = cv.getContext("2d");
+  cv.width = c.w; cv.height = c.h;
+  if (vid.readyState >= 2) g.drawImage(vid, 0, 0, c.w, c.h);
+  const L = doc(c).labels, sg = c.sug[st.f], lab = L[st.f];
+  // the path of the last second, faint
+  for (let g2 = Math.max(0, st.f - c.fps); g2 < st.f; g2++) { const l = L[g2]; if (l && l.x != null) { g.fillStyle = css(COL[l.s]); g.globalAlpha = 0.35; g.beginPath(); g.arc(l.x, l.y, 3, 0, 2 * Math.PI); g.fill(); g.globalAlpha = 1; } }
+  if (sg) ring(g, sg[0], sg[1], 16, css("--sug"), 2, [5, 4]);
+  if (lab && lab.x != null) ring(g, lab.x, lab.y, 13, css(COL[lab.s]), 3);
+  else if (!lab) { const ip = interp(c, st.f); if (ip) ring(g, ip.x, ip.y, 10, css("--ball"), 1.5, [2, 3]); }
+  if (st.pendingHidden) ring(g, st.pendingHidden.x, st.pendingHidden.y, 13, css("--hidden"), 3, [6, 3]);
+  drawZoom();
+}
+function drawZoom() {
+  const c = clip(); if (!c) return; const z = $("zoom"), g = z.getContext("2d"), cv = $("stage");
+  const lab = doc(c).labels[st.f], sg = c.sug[st.f];
+  const p = st.mouse || (lab && lab.x != null ? lab : sg ? { x: sg[0], y: sg[1] } : { x: c.w / 2, y: c.h / 2 });
+  const n = 60; g.imageSmoothingEnabled = false; g.fillStyle = "#000"; g.fillRect(0, 0, z.width, z.height);
+  g.drawImage(cv, p.x - n / 2, p.y - n / 2, n, n, 0, 0, z.width, z.height);
+  g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1; g.beginPath();
+  g.moveTo(z.width / 2 - 12, z.height / 2); g.lineTo(z.width / 2 + 12, z.height / 2);
+  g.moveTo(z.width / 2, z.height / 2 - 12); g.lineTo(z.width / 2, z.height / 2 + 12); g.stroke();
+}
+function renderStrip() {
+  const c = clip(); if (!c) return; const s = $("strip"), d = doc(c);
+  const ks = keyframes(c);
+  if (s.childElementCount !== ks.length) { s.innerHTML = ""; for (const k of ks) { const b = document.createElement("button"); b.dataset.f = k; b.title = "Bild " + k; b.onclick = () => showFrame(k); s.appendChild(b); } }
+  [...s.children].forEach((b, i) => {
+    const k = ks[i], l = d.labels[k];
+    b.className = (l ? l.s : "") + (k <= st.f && st.f < k + c.K ? " cur" : "") + (d.shots.some((f) => f >= k && f < k + c.K) ? " shot" : "");
+  });
+}
+function renderProgress() {
+  const done = st.clips.filter((c) => doc(c).done).length;
+  $("progress").textContent = `${done} von ${st.clips.length} Clips fertig`;
+}
+function render() {
+  const c = clip(); if (!c) return; const d = doc(c), lab = d.labels[st.f];
+  const ks = keyframes(c), nl = ks.filter((k) => d.labels[k]).length;
+  $("meta").innerHTML = `<span>Clip <b>${st.ci + 1}</b>/${st.clips.length}</span><span>Bild <b>${st.f}</b>/${c.n - 1} (${(st.f / c.fps).toFixed(2)} s)</span>`
+    + `<span>${nl}/${ks.length} Schlüsselbilder</span><span>${lab ? "<b>" + NAMES[lab.s] + "</b>" : "offen"}</span>`
+    + (d.shots.includes(st.f) ? "<span><b>Wurf</b></span>" : "") + (d.done ? "<span>fertig</span>" : "");
+  renderStrip(); renderProgress(); drawStage();
+}
+
+// --- input
+function pos(ev) { const b = $("stage").getBoundingClientRect(), c = clip(); return { x: Math.round((ev.clientX - b.left) / b.width * c.w * 10) / 10, y: Math.round((ev.clientY - b.top) / b.height * c.h * 10) / 10 }; }
+$("stage").addEventListener("click", (ev) => {
+  const p = pos(ev);
+  if (ev.altKey) { st.pendingHidden = p; drawStage(); toast("Stelle gemerkt: V = verdeckt hier"); return; }
+  setLabel(st.f, { x: p.x, y: p.y, s: ev.shiftKey ? "held" : "free" }); next();
+});
+$("stage").addEventListener("mousemove", (ev) => { st.mouse = pos(ev); drawZoom(); });
+$("stage").addEventListener("mouseleave", () => { st.mouse = null; drawZoom(); });
+$("b-acc").onclick = () => accept("free"); $("b-held").onclick = () => accept("held");
+$("b-hid").onclick = () => mark("hidden"); $("b-out").onclick = () => mark("out");
+$("b-shot").onclick = toggleShot; $("b-del").onclick = () => setLabel(st.f, null);
+$("b-prev").onclick = prevKey; $("b-done").onclick = done;
+$("clip").onchange = (ev) => loadClip(Number(ev.target.value));
+document.addEventListener("keydown", (ev) => {
+  if (ev.target.tagName === "SELECT") return;
+  const k = ev.key;
+  if (k === " ") { ev.preventDefault(); accept("free"); }
+  else if (k === "h" || k === "H") accept("held");
+  else if (k === "v" || k === "V") mark("hidden");
+  else if (k === "o" || k === "O") mark("out");
+  else if (k === "w" || k === "W") toggleShot();
+  else if (k === "Backspace") { ev.preventDefault(); setLabel(st.f, null); }
+  else if (k === "ArrowLeft") prevKey(); else if (k === "ArrowRight") nextKey();
+  else if (k === ",") showFrame(st.f - 1); else if (k === ".") showFrame(st.f + 1);
+  else if (k === "Enter") done();
+});
+
+async function start() {
+  try { st.clips = await (await fetch("clips.json")).json(); }
+  catch (e) { $("progress").textContent = "Clip-Liste konnte nicht geladen werden."; return; }
+  $("clip").innerHTML = st.clips.map((c, i) => `<option value="${i}">${i + 1}. ${c.id} (${c.fps} fps)</option>`).join("");
+  loadClip(0);
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
+  st.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Labels noch nicht erreichbar."; }, 10000);
+  let first = true;
+  db.collection("gold").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); $("note").hidden = true; }
+    for (const d of snap.docs) if (!st.dirty[d.id]) {
+      const v = d.data(); st.docs[d.id] = { labels: { ...(v.labels || {}) }, shots: [...(v.shots || [])], done: !!v.done };
+    }
+    if (first) { first = false; const j = st.clips.findIndex((c) => !doc(c).done); if (j > 0) { loadClip(j); return; } }
+    render();
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Labels konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>
