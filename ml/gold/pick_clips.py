@@ -8,7 +8,11 @@ labelling starts.
 
     python ml/gold/pick_clips.py LIBRARY_JSON [--dur 8] [--seed 2026]
 """
-import argparse, json, random, sys
+
+import argparse
+import json
+import random
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -47,15 +51,40 @@ def main() -> None:
             s, t = rnd.choice(opts)
             run = True
         else:
-            s = rnd.choice(g["segments"]); t = rnd.randrange(10000, 160000 - dur); run = False
-        clips.append({"id": f"g{len(clips):02d}", "game": n, "dataset": g["kaggle_dataset"], "file": s["file"],
-                      "start_ms": t, "dur_ms": dur, "fps": g["fps"], "width": g["width"], "height": g["height"],
-                      "clock_running": run})
+            s = rnd.choice(g["segments"])
+            t = rnd.randrange(10000, 160000 - dur)
+            run = False
+        clips.append(
+            {
+                "id": f"g{len(clips):02d}",
+                "game": n,
+                "dataset": g["kaggle_dataset"],
+                "file": s["file"],
+                "start_ms": t,
+                "dur_ms": dur,
+                "fps": g["fps"],
+                "width": g["width"],
+                "height": g["height"],
+                "clock_running": run,
+            }
+        )
     out = HERE / "gold_clips.json"
-    json.dump({"note": "gold standard clips, never in any training; see docs/plans/tracking-strategie.md",
-               "clips": clips}, open(out, "w"), indent=1)
-    print(out, len(clips), "clips;", sum(c["clock_running"] for c in clips), "with running clock;",
-          sorted({c["fps"] for c in clips}))
+    json.dump(
+        {
+            "note": "gold standard clips, never in any training; see docs/plans/tracking-strategie.md",
+            "clips": clips,
+        },
+        open(out, "w"),
+        indent=1,
+    )
+    print(
+        out,
+        len(clips),
+        "clips;",
+        sum(c["clock_running"] for c in clips),
+        "with running clock;",
+        sorted({c["fps"] for c in clips}),
+    )
 
 
 if __name__ == "__main__":
