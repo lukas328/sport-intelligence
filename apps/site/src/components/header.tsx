@@ -17,14 +17,9 @@ export function Header({ locale }: { locale: Locale }) {
         {t.skip}
       </a>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-        <Link href={`/${locale}/`} className="inline-flex items-center gap-2.5 text-[1.0625rem] font-bold [font-stretch:112%]">
-          <svg viewBox="0 0 32 32" aria-hidden className="size-7">
-            <rect width="32" height="32" rx="9" fill="currentColor" />
-            <path d="M7 9.5h18" stroke="var(--background)" strokeWidth="2.4" strokeLinecap="round" />
-            <path d="M8 9.5c0 8 3.6 13 8 13s8-5 8-13" fill="none" stroke="var(--background)" strokeWidth="2.4" strokeLinecap="round" />
-            <circle cx="16" cy="15" r="2.4" fill="var(--accent)" />
-          </svg>
-          Handball AI
+        {/* the two-coloured word mark: outside the app (docs/design/brand2/taktik/README.md) */}
+        <Link href={`/${locale}/`} className="inline-flex items-center">
+          <img src="/brand/wortmarke-quer.svg" alt="Handball Intelligence" width={231} height={55} className="h-[55px] w-auto" />
         </Link>
         <nav aria-label="Navigation" className="order-3 flex w-full flex-wrap gap-x-4 gap-y-1 text-sm sm:order-none sm:w-auto">
           {links.map(([path, label]) => (

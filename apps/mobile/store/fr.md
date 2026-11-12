@@ -1,10 +1,10 @@
 # Fiche store (fr)
 
-**Nom :** Handball AI
+**Nom :** Handball Intelligence
 **Sous-titre :** Analyse vidéo pour ton club
 
 **Description**
-Handball AI est l'app d'analyse vidéo de ton club de handball.
+Handball Intelligence est l'app d'analyse vidéo de ton club de handball.
 
 - Mes scènes : tes scènes de chaque match analysé, avec les commentaires du staff.
 - Rendez-vous : entraînements et matchs des prochaines semaines, réponse en un geste, aussi pour ton enfant.
@@ -13,7 +13,7 @@ Handball AI est l'app d'analyse vidéo de ton club de handball.
 - Marquer : de grands boutons au bord du terrain, même sans réseau ; les marques sont placées automatiquement dans la vidéo après l'analyse.
 - Piloter la présentation : le téléphone comme télécommande pendant la séance vidéo.
 
-L'app nécessite un compte dans un club qui utilise Handball AI.
+L'app nécessite un compte dans un club qui utilise Handball Intelligence.
 
 **Mots-clés :** handball, analyse vidéo, entraînement, club, statistiques, entraîneur
 **Catégorie :** Sport

@@ -1,7 +1,7 @@
 /** Site texts, de-CH (source of truth; fr and en must have the same shape). */
 const de = {
   meta: {
-    title: "Handball AI: Videoanalyse für Handballvereine",
+    title: "Handball Intelligence: Videoanalyse für Handballvereine",
     description:
       "Spielvideo hochladen, Analyse erhalten: Ereignisse, Kennzahlen, Szenen und Präsentationen für die Videositzung. Für Vereine in der Schweiz, mit QR-Rechnung.",
   },

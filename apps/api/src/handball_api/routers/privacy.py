@@ -32,7 +32,7 @@ async def export(auth: AuthedDep) -> Response:
     return Response(
         json.dumps(data, ensure_ascii=False, indent=2),
         media_type="application/json",
-        headers={"content-disposition": 'attachment; filename="handball-ai-daten.json"'},
+        headers={"content-disposition": 'attachment; filename="handball-intelligence-daten.json"'},
     )
 
 

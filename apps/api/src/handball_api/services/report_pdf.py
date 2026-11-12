@@ -245,7 +245,7 @@ def render(
         bottomMargin=16 * mm,
         title=f"{t['report']} {match['home']} - {match['away']}",
         author=org["name"],
-        creator="Handball AI",
+        creator="Handball Intelligence",
     )
     story: list[Any] = [
         Paragraph(f"{_esc(match['home'])} - {_esc(match['away'])}", s["h1"]),

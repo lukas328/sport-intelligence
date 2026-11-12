@@ -112,7 +112,7 @@ async def enqueue(ctx: Ctx, user_ids: list[uuid.UUID], kind: str, link: str | No
     for locale, tokens in by_locale.items():
         payload: dict[str, Any] = {
             "tokens": tokens,
-            "title": "Handball AI",
+            "title": "Handball Intelligence",
             "body": text_for(kind, locale),
             "data": {"kind": kind, "link": link},
         }

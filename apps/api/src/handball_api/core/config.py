@@ -105,7 +105,7 @@ class Settings(BaseSettings):
 
     # E-mail (ADR 009)
     email_backend: Literal["smtp", "memory", "console"] = "smtp"
-    email_from: str = "Handball AI <noreply@localhost>"
+    email_from: str = "Handball Intelligence <noreply@localhost>"
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_username: str | None = None

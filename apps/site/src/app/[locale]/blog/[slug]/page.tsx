@@ -40,7 +40,7 @@ export default async function BlogPost({ params }: Props) {
           datePublished: post.date,
           inLanguage: HTML_LANG[locale],
           url: pageUrl(locale, `blog/${slug}`),
-          publisher: { "@type": "Organization", name: "Handball AI" },
+          publisher: { "@type": "Organization", name: "Handball Intelligence" },
         }}
       />
       <p className="text-sm">

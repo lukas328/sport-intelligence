@@ -145,7 +145,7 @@ def create_app(
         log.info("shutdown")
 
     app = FastAPI(
-        title="Handball AI API",
+        title="Handball Intelligence API",
         version=__version__,
         lifespan=lifespan,
         openapi_url="/v1/openapi.json",

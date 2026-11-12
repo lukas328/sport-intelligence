@@ -1,6 +1,6 @@
 /** App texts in de-CH, fr and en; the language follows the account (P8). */
 const de = {
-  appName: "Handball AI",
+  appName: "Handball Intelligence",
   email: "E-Mail",
   password: "Passwort",
   signIn: "Anmelden",
@@ -68,7 +68,7 @@ export type Key = keyof typeof de;
 type Dict = Record<Key, string>;
 
 const fr: Dict = {
-  appName: "Handball AI",
+  appName: "Handball Intelligence",
   email: "E-mail",
   password: "Mot de passe",
   signIn: "Se connecter",
@@ -134,7 +134,7 @@ const fr: Dict = {
 };
 
 const en: Dict = {
-  appName: "Handball AI",
+  appName: "Handball Intelligence",
   email: "E-mail",
   password: "Password",
   signIn: "Sign in",

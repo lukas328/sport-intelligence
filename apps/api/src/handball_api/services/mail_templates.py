@@ -97,15 +97,15 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     },
     "onboarding_0": {
         "de-CH": (
-            "Willkommen bei Handball AI",
+            "Willkommen bei Handball Intelligence",
             "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Spieler eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: die drei Dinge, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
-            "Welcome to Handball AI",
+            "Welcome to Handball Intelligence",
             "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the players (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: the three things, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
-            "Bienvenue sur Handball AI",
+            "Bienvenue sur Handball Intelligence",
             "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir les joueur·euse·s (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : les trois points, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
@@ -154,15 +154,15 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "onboarding_14": {
         "de-CH": (
             "Wie läuft es?",
-            "Hallo {name}\n\nzwei Wochen mit Handball AI: Was hilft dir, was fehlt? Antworte einfach auf diese E-Mail oder nutze den Feedback-Knopf in der App. Wir lesen alles.\n\nZur App:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+            "Hallo {name}\n\nzwei Wochen mit Handball Intelligence: Was hilft dir, was fehlt? Antworte einfach auf diese E-Mail oder nutze den Feedback-Knopf in der App. Wir lesen alles.\n\nZur App:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
             "How is it going?",
-            "Hello {name}\n\ntwo weeks with Handball AI: what helps, what is missing? Just reply to this e-mail or use the feedback button in the app. We read everything.\n\nTo the app:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+            "Hello {name}\n\ntwo weeks with Handball Intelligence: what helps, what is missing? Just reply to this e-mail or use the feedback button in the app. We read everything.\n\nTo the app:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
             "Comment ça se passe ?",
-            "Bonjour {name}\n\ndeux semaines avec Handball AI : qu'est-ce qui vous aide, qu'est-ce qui manque ? Répondez simplement à cet e-mail ou utilisez le bouton de feedback dans l'app. Nous lisons tout.\n\nVers l'app :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+            "Bonjour {name}\n\ndeux semaines avec Handball Intelligence : qu'est-ce qui vous aide, qu'est-ce qui manque ? Répondez simplement à cet e-mail ou utilisez le bouton de feedback dans l'app. Nous lisons tout.\n\nVers l'app :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
 }

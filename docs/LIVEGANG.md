@@ -14,7 +14,7 @@ Legende: 🔴 blockiert den Livegang · 🟡 vor dem Pilot nötig · ⚪ kann wa
 
 | | Frage | Empfehlung | Warum es zählt |
 |---|---|---|---|
-| ☐ 🔴 | **Produktname** (Q-PROD-1) | Vor dem Domainkauf festlegen; "Handball AI" ist sehr nah an *handball.ai* (Markenrisiko) | Domain, App-IDs (`ch.handballai.app`), E-Mail-Absender und Store-Einträge hängen daran |
+| ☑ 🔴 | **Produktname** (Q-PROD-1) | Entschieden: «Handball Intelligence», Logo «Taktik» (docs/design/brand2/taktik). Offen: Domain und Markenrecherche | Domain, App-IDs (`ch.handballai.app`), E-Mail-Absender (`noreply@`, `support@handball-ai.ch`) hängen an der Domain und bleiben bis dahin |
 | ☐ 🔴 | **Firma** (GmbH, Einzelfirma?), MWST, Währungen CHF/EUR (Q-PROD-3, Q-ADD-3) | Firma vor dem ersten zahlenden Verein; Treuhand für MWST fragen | Impressum, Verträge, Stripe, QR-Rechnung (IBAN), Apple-Konto brauchen eine Firma |
 | ✅ | Hosting | Azure West Europe für App, Datenbank, Secrets, Monitoring; Cloudflare R2 (EU) für Videos (ADR 002) | |
 | ☐ 🟡 | **E-Mail-Anbieter** (Q-INFRA-3) | **Azure Communication Services** (alles in Azure, Daten in Europa, Kosten fast null) statt Postmark | Login-Links und Einladungen |

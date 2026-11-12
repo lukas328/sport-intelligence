@@ -123,7 +123,7 @@ async def test_onboarding_series_and_unsubscribe(
             return n
 
     before = len(outbox.outbox)
-    assert await run(0) == 1 and outbox.outbox[-1].subject == "Willkommen bei Handball AI"
+    assert await run(0) == 1 and outbox.outbox[-1].subject == "Willkommen bei Handball Intelligence"
     assert await run(0) == 0
     assert (
         await run(5) == 1 and "Videositzung" in outbox.outbox[-1].subject

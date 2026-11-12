@@ -38,7 +38,7 @@ export default async function HelpArticle({ params }: Props) {
           description: entry.summary[locale],
           inLanguage: HTML_LANG[locale],
           url: pageUrl(locale, `hilfe/${slug}`),
-          publisher: { "@type": "Organization", name: "Handball AI" },
+          publisher: { "@type": "Organization", name: "Handball Intelligence" },
         }}
       />
       <p className="text-sm">

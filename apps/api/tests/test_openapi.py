@@ -26,4 +26,4 @@ def test_openapi_export(tmp_path: Path, monkeypatch: object) -> None:
         export_main()
     finally:
         sys.argv = sys_argv
-    assert json.loads(out.read_text())["info"]["title"] == "Handball AI API"
+    assert json.loads(out.read_text())["info"]["title"] == "Handball Intelligence API"

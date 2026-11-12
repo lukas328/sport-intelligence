@@ -2,7 +2,7 @@ import type { Messages } from "./de";
 
 const fr: Messages = {
   meta: {
-    title: "Handball AI : analyse vidéo pour les clubs de handball",
+    title: "Handball Intelligence : analyse vidéo pour les clubs de handball",
     description:
       "Télécharge la vidéo du match, reçois l'analyse : événements, statistiques, scènes et présentations pour la séance vidéo. Pour les clubs en Suisse, avec QR-facture.",
   },

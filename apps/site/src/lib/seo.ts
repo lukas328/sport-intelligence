@@ -9,6 +9,6 @@ export function pageMeta(locale: string, path: string, title: string | undefined
     ...(title ? { title } : {}),
     description,
     alternates: { canonical: pageUrl(locale, path), languages: { ...languages, "x-default": pageUrl("de", path) } },
-    openGraph: { title: title ?? "Handball AI", description, url: pageUrl(locale, path) },
+    openGraph: { title: title ?? "Handball Intelligence", description, url: pageUrl(locale, path), images: [{ url: "/og.png", width: 1200, height: 630, alt: "Handball Intelligence" }] },
   };
 }

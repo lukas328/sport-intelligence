@@ -223,11 +223,11 @@ async def invite(ctx: Ctx, federation_id: uuid.UUID, email: str) -> dict[str, An
             to=email,
             subject=f"{f.name}: Lizenz für euren Verein / licence pour votre club / club licence",
             text=(
-                f"{f.name} lädt euren Verein ein, Handball AI mit dem {f.plan.capitalize()}-Plan "
+                f"{f.name} lädt euren Verein ein, Handball Intelligence mit dem {f.plan.capitalize()}-Plan "
                 f"zu nutzen. Eine Vereinsadministratorin oder ein Vereinsadministrator nimmt die "
                 f"Einladung hier an:\n{link}\n\n"
-                f"{f.name} invite votre club à utiliser Handball AI. Accepter : {link}\n\n"
-                f"{f.name} invites your club to use Handball AI. Accept: {link}\n\n"
+                f"{f.name} invite votre club à utiliser Handball Intelligence. Accepter : {link}\n\n"
+                f"{f.name} invites your club to use Handball Intelligence. Accept: {link}\n\n"
                 "Der Verband sieht die Nutzung und anonymisierte Kennzahlen, aber keine Videos "
                 "und keine Personen. / The federation sees usage and anonymised figures, never "
                 "videos or people."

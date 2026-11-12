@@ -67,6 +67,21 @@ The result in the club's colour, slanted; the scene on a tactics camera; every l
 
 One head per screen. Settings and forms get the Seitenkopf.
 
+## Product name and logo
+
+The product is **Handball Intelligence**; the logo is «Taktik» (rules and files in
+`docs/design/brand2/taktik/README.md`, files unchanged from `final/`).
+
+- **In the app** only ink: `AppMark` (`components/brand.tsx`, `favicon-32-tinte.svg` below 48 px,
+  `zeichen-tinte.svg` above) in front of the club crest, and the browser favicon
+  (`app/icon.svg`). The colours in the app belong to the teams.
+- **Outside the app** two colours, Markerblau `#1d47d1` and Markerrot `#e1251b`: the word mark
+  `wortmarke-quer.svg` on sign-in, onboarding and the website (at least 220 px wide), the app
+  icons (web manifest, iOS, Android adaptive and monochrome), the Open Graph image.
+- **On a club colour** always one colour (white on blue, red, black, green; ink on yellow, white).
+- Technical names stay: `handball-ai.ch` (domain, mail, deep links), `ch.handballai.app`, the
+  Expo slug, the Python package `handball_api`, User-Agent strings (Q-PROD-1).
+
 ## Visual language
 
 - **Ground:** cloth `#eceae5` with a dot mesh, paper `#f7f6f2` for fields, ink `#16171a`, ink-2

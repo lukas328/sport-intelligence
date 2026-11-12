@@ -23,10 +23,10 @@ export default async function Home({ params }: Props) {
         data={{
           "@context": "https://schema.org",
           "@graph": [
-            { "@type": "Organization", name: "Handball AI", url: SITE_URL, email: SUPPORT_EMAIL },
+            { "@type": "Organization", name: "Handball Intelligence", url: SITE_URL, email: SUPPORT_EMAIL },
             {
               "@type": "SoftwareApplication",
-              name: "Handball AI",
+              name: "Handball Intelligence",
               applicationCategory: "SportsApplication",
               operatingSystem: "Web",
               description: m.meta.description,

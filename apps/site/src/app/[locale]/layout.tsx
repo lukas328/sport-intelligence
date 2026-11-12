@@ -25,10 +25,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const t = messages(locale).meta;
   return {
     metadataBase: new URL(SITE_URL),
-    title: { default: t.title, template: `%s | Handball AI` },
+    title: { default: t.title, template: `%s | Handball Intelligence` },
     description: t.description,
-    icons: { icon: "/icon.png" },
-    openGraph: { siteName: "Handball AI", type: "website", locale: HTML_LANG[isLocale(locale) ? locale : "de"] },
+    icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/icon.png", sizes: "192x192" }], apple: "/apple-icon.png" },
+    openGraph: {
+      siteName: "Handball Intelligence",
+      type: "website",
+      locale: HTML_LANG[isLocale(locale) ? locale : "de"],
+      images: [{ url: "/og.png", width: 1200, height: 630, alt: "Handball Intelligence" }],
+    },
   };
 }
 

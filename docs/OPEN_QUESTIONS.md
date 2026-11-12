@@ -3,9 +3,12 @@
 Each question has the **assumption** I work with until it is answered. Status: open unless marked.
 
 ## Product and business
-- **Q-PROD-1 Product name and domain.** "Handball AI" is very close to the competitor *handball.ai*
-  named in the brief (trademark and confusion risk). *Assumption:* working title only; no domain hard-coded
-  (problem URIs use `urn:handball-platform:...`).
+- **Q-PROD-1 Product name and domain.** "Handball AI" was very close to the competitor
+  *handball.ai* named in the brief. *Decided 2026-11-12:* the product is called **Handball
+  Intelligence**, logo «Taktik» (docs/design/brand2/taktik). *Open:* the domain
+  (`handball-ai.ch` stays in config, mail addresses, deep links and the mobile bundle ids until a
+  new domain is registered), the legal entity name on invoices (`Handball AI GmbH`), and a
+  trademark search (Swissreg, EUIPO, classes 9, 41, 42).
 - **Q-PROD-2 Languages.** de-CH ("ss") first. Germany uses "ß". *Assumption:* v1 ships de-CH only, a de-DE
   variant can be added as a separate locale later.
 - **Q-PROD-3 Company entity, VAT and currencies for Stripe** (CHF only, or CHF + EUR). *Assumption:* CHF and EUR prices in config.

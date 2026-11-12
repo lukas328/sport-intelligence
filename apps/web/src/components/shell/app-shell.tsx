@@ -9,6 +9,7 @@ import { NotificationBell } from "@/components/training/bell";
 import { destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
 import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AppMark } from "@/components/brand";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
@@ -141,6 +142,8 @@ export function AppShell({
                 href={home}
                 className="font-slant flex shrink-0 items-center gap-3 text-xl leading-none whitespace-nowrap text-ink no-underline"
               >
+                {/* the product in ink, then the club: the colours belong to the club */}
+                <AppMark size={24} className="-mr-0.5" />
                 <ClubMark org={org} />
                 {org.name}
               </Link>
@@ -193,7 +196,8 @@ export function AppShell({
             </div>
             {/* phone top bar */}
             <div className="flex h-[60px] items-center gap-3 px-4 lg:hidden">
-              <Link href={home} aria-label={org.name} className="shrink-0">
+              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center gap-2">
+                <AppMark size={22} />
                 <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
               </Link>
               <div className="min-w-0 flex-1">
