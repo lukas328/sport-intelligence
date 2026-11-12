@@ -184,7 +184,8 @@
     "verifyOk": "Thanks, your e-mail address is confirmed.",
     "verifyBusy": "Confirming …",
     "toApp": "Open app",
-    "totpHint": "Code from the app or a recovery code"
+    "totpHint": "Code from the app or a recovery code",
+    "signedOut": "You are signed out."
   },
   "invite": {
     "title": "Invitation",
@@ -1378,7 +1379,8 @@
     "run": "Running order",
     "running": "playing",
     "seen": "seen",
-    "onlyLink": "Visible only through this link, {days, plural, one {# more day} other {# more days}}. No account needed."
+    "onlyLink": "Visible only through this link, {days, plural, one {# more day} other {# more days}}. No account needed.",
+    "sharedBy": "shared by {name}"
   },
   "ops": {
     "title": "Backoffice",
@@ -2840,7 +2842,28 @@
     "validUntil": "The link is valid until {date}.",
     "notShared": "Not shared yet.",
     "goalAgainst": "Goal conceded",
-    "goalFor": "Goal"
+    "goalFor": "Goal",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove",
+    "addNote": "Add a note",
+    "noteLabel": "Note",
+    "saveNote": "Save note",
+    "cancel": "Cancel",
+    "rename": "Rename",
+    "shareTitle": "Share",
+    "openedTimes": "{n, plural, one {time opened} other {times opened}}",
+    "linkLabel": "Link to view",
+    "oldLink": "This link was made before the change and cannot be shown again. Revoke it and share anew.",
+    "copyLink": "Copy link",
+    "copied": "Link copied",
+    "revokeLink": "Revoke link",
+    "revoked": "Link revoked. Whoever has it sees nothing any more.",
+    "shareLink": "Share link",
+    "presentOf": "{n} of {total}",
+    "fullscreen": "Full screen",
+    "prev": "Back",
+    "next": "Next"
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { LanguageSwitch } from "@/components/language-switch";
 
 /**
  * Einstieg (SPEC 7.12): a narrow head of its own, «Handball Intelligence · Einstieg» and
@@ -19,13 +20,17 @@ export default async function EinstiegLayout({ children }: { children: ReactNode
               {t("onboarding.stepTitle")}
             </span>
           </p>
+          <span className="flex items-center gap-3">
+          <LanguageSwitch className="max-sm:hidden" />
           <Link href="/" className="min-h-11 content-center text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
             {t("onboarding.cancel")}
           </Link>
+          </span>
         </div>
       </header>
       <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-16 sm:px-6 sm:pt-10">
         {children}
+        <LanguageSwitch className="mt-10 sm:hidden" />
       </main>
     </div>
   );

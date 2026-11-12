@@ -17,6 +17,7 @@ export interface Shared {
   title: string;
   team: string;
   expires_at: string;
+  shared_by?: string | null;
   play?: { name: string; category: string; formation: string | null; description: string | null; doc: PlayDoc };
   match?: {
     kickoff_at: string;
@@ -69,7 +70,7 @@ export function SharedView({ token, data, club = null, clubColour = null }: { to
           <ClubMark org={{ id: "", name: club ?? data.team, has_logo: false, primary_color: clubColour ?? "" }} className="h-[30px] w-[27px] text-[10px]" />
           <span className="truncate">{owner}</span>
         </span>
-        <span className="shrink-0 text-[13px] text-ink-2">{t("viewOnly")}</span>
+        <span className="shrink-0 text-[13px] text-ink-2">{data.shared_by ? t("sharedBy", { name: data.shared_by }) : t("viewOnly")}</span>
       </div>
       <PageHeader eyebrow={eyebrow} title={data.title} className="mt-6 md:mt-8" />
       {data.play && (

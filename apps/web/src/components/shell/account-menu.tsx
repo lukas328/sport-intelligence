@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { HelpCircle, LogOut, MessageSquare, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { HelpCircle, Languages, LogOut, MessageSquare, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { LANGUAGE_NAMES, setLanguage } from "@/components/language-switch";
+import { locales } from "@/i18n/config";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -77,11 +79,29 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
             {t("feedback")}
           </MenuItem>
           <MenuSeparator />
+          {/* the language, written out (UX test B06) */}
+          {locales.map((l) => (
+            <MenuItem
+              key={l}
+              icon={<Languages />}
+              onSelect={() => {
+                setLanguage(l);
+                router.refresh();
+              }}
+              testId={`lang-${l}`}
+            >
+              <span lang={l} className={l === locale ? "font-bold underline decoration-[1.5px] underline-offset-4" : undefined} aria-current={l === locale ? "true" : undefined}>
+                {LANGUAGE_NAMES[l]}
+              </span>
+            </MenuItem>
+          ))}
+          <MenuSeparator />
           <MenuItem
             icon={<LogOut />}
             onSelect={async () => {
               await api.POST("/v1/auth/logout");
-              router.push("/login");
+              // the sign-in page says it (UX test B54)
+              router.push("/login?out=1");
               router.refresh();
             }}
           >

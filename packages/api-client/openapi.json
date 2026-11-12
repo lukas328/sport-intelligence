@@ -4740,6 +4740,20 @@
       },
       "FromMatch": {
         "properties": {
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ItemIn"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items"
+          },
           "match_id": {
             "format": "uuid",
             "title": "Match Id",
@@ -14526,6 +14540,17 @@
           "title": {
             "title": "Title",
             "type": "string"
+          },
+          "token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token"
           },
           "views": {
             "title": "Views",
@@ -33726,7 +33751,7 @@
         ]
       },
       "post": {
-        "description": "Read-only link; the token is shown once.",
+        "description": "Read-only link; the token stays copyable for the team's staff (list).",
         "operationId": "create_v1_orgs__org_id__teams__team_id__share_links_post",
         "parameters": [
           {

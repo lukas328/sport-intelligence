@@ -82,7 +82,8 @@ async def test_share_links(make_api: Callable[[], Api]) -> None:
 
     listing = (await api.get(base)).json()
     assert {x["kind"]: x["views"] for x in listing} == {"play": 1, "match": 1, "playlist": 1}
-    assert "token" not in listing[0]
+    # the team's staff can copy the same link again (UX test B17): the token comes back decrypted
+    assert {x["kind"]: x["token"] for x in listing}["play"] == links["play"]["token"]
     assert (
         await api.delete(f"/v1/orgs/{org}/share-links/{links['play']['id']}")
     ).status_code == 204

@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { LanguageSwitch } from "@/components/language-switch";
 
 /** Sign-in and registration: the claim slanted with the Keil (Anlauf), the form beside it. */
 export default async function AuthLayout({ children }: { children: ReactNode }) {
@@ -13,7 +14,11 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
         <p className="mt-4 hidden max-w-[22rem] text-[17px] text-ink-2 lg:block">{t("description")}</p>
         <span aria-hidden data-keil="" className="absolute right-0 bottom-0 left-0 h-3.5 bg-club shadow-[inset_0_0_0_1.5px_var(--club-edge)] [clip-path:polygon(0_0,100%_78%,100%_100%,0_100%)] md:h-[22px]" />
       </section>
-      <div className="w-full max-w-[28rem] lg:self-center">{children}</div>
+      <div className="w-full max-w-[28rem] lg:self-center">
+        {children}
+        {/* on phones the language sits under the form (the head has no room) */}
+        <LanguageSwitch className="mt-6 sm:hidden" />
+      </div>
     </div>
   );
 }

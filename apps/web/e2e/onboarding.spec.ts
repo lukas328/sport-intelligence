@@ -11,7 +11,7 @@ test.describe.configure({ mode: "serial" });
 test("redirects to login without session", async ({ page }) => {
   await page.goto("/app");
   await expect(page).toHaveURL(/\/login\?next=%2Fapp/);
-  await expect(page.getByRole("heading", { name: "Anmelden" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Anmelden" })).toBeVisible();
   await expectAccessible(page);
 });
 
@@ -164,4 +164,15 @@ test("wrong password shows a clear message", async ({ page }) => {
   await page.getByLabel("Passwort").fill("wrong-password-1");
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await expect(page.getByText("E-Mail oder Passwort ist falsch.")).toBeVisible();
+});
+
+// UX test B06: the language can be changed where it is seen first, and in the account menu
+test("language: written out on sign-in, kept, and in the account menu", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByTestId("language-switch").filter({ visible: true }).getByRole("button", { name: "Français" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Connexion" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1, name: "Connexion" })).toBeVisible();
+  await page.getByTestId("language-switch").filter({ visible: true }).getByRole("button", { name: "Deutsch" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Anmelden" })).toBeVisible();
 });

@@ -32,6 +32,8 @@ const COLOUR_FILES = new Set([
   "components/video/mini-court.tsx",
   "components/anlauf/tactics-camera.tsx",
   "app/app/[orgId]/matches/[matchId]/video-stage.tsx",
+  // the big screen of a collection: the dark camera bar colours
+  "app/app/[orgId]/collections/[collectionId]/present/present-view.tsx",
   "app/app/[orgId]/matches/[matchId]/check/check-view.tsx",
   "app/app/[orgId]/collections/[collectionId]/page.tsx",
   "components/video/spotlight.tsx",

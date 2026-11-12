@@ -184,7 +184,8 @@
     "verifyOk": "Danke, deine E-Mail-Adresse ist bestätigt.",
     "verifyBusy": "Wird bestätigt …",
     "toApp": "Zur App",
-    "totpHint": "Code aus der App oder ein Wiederherstellungscode"
+    "totpHint": "Code aus der App oder ein Wiederherstellungscode",
+    "signedOut": "Du bist abgemeldet."
   },
   "invite": {
     "title": "Einladung",
@@ -1378,7 +1379,8 @@
     "run": "Ablauf",
     "running": "läuft",
     "seen": "gesehen",
-    "onlyLink": "Nur über diesen Link sichtbar, noch {days, plural, one {# Tag} other {# Tage}}. Kein Konto nötig."
+    "onlyLink": "Nur über diesen Link sichtbar, noch {days, plural, one {# Tag} other {# Tage}}. Kein Konto nötig.",
+    "sharedBy": "geteilt von {name}"
   },
   "ops": {
     "title": "Backoffice",
@@ -2840,7 +2842,28 @@
     "validUntil": "Der Link gilt bis {date}.",
     "notShared": "Noch nicht geteilt.",
     "goalAgainst": "Gegentor",
-    "goalFor": "Tor"
+    "goalFor": "Tor",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "remove": "Entfernen",
+    "addNote": "Notiz dazu",
+    "noteLabel": "Notiz",
+    "saveNote": "Notiz speichern",
+    "cancel": "Abbrechen",
+    "rename": "Titel ändern",
+    "shareTitle": "Teilen",
+    "openedTimes": "{n, plural, one {Mal geöffnet} other {Mal geöffnet}}",
+    "linkLabel": "Link zum Ansehen",
+    "oldLink": "Dieser Link wurde vor der Änderung erstellt und lässt sich nicht mehr anzeigen. Sperr ihn und teil neu.",
+    "copyLink": "Link kopieren",
+    "copied": "Link kopiert",
+    "revokeLink": "Link sperren",
+    "revoked": "Link gesperrt. Wer ihn hat, sieht nichts mehr.",
+    "shareLink": "Link teilen",
+    "presentOf": "{n} von {total}",
+    "fullscreen": "Vollbild",
+    "prev": "Zurück",
+    "next": "Weiter"
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",

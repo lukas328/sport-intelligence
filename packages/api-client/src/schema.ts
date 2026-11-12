@@ -4424,7 +4424,7 @@ export interface paths {
         put?: never;
         /**
          * Create
-         * @description Read-only link; the token is shown once.
+         * @description Read-only link; the token stays copyable for the team's staff (list).
          */
         post: operations["create_v1_orgs__org_id__teams__team_id__share_links_post"];
         delete?: never;
@@ -6510,6 +6510,8 @@ export interface components {
         };
         /** FromMatch */
         FromMatch: {
+            /** Items */
+            items?: components["schemas"]["ItemIn"][] | null;
             /**
              * Match Id
              * Format: uuid
@@ -9918,6 +9920,8 @@ export interface components {
             target_id: string;
             /** Title */
             title: string;
+            /** Token */
+            token?: string | null;
             /** Views */
             views: number;
         };

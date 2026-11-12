@@ -56,6 +56,7 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
   return (
     <Card className="space-y-5">
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{title}</h1>
+      {params.get("out") === "1" && !error && <Alert kind="success">{t("auth.signedOut")}</Alert>}
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
       {mode === "password" && oauth}
       {mode === "magic-sent" ? (

@@ -17,7 +17,7 @@ from sqlalchemy import select
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
-from handball_api.core.security import hash_token, new_token
+from handball_api.core.security import SecretBox, hash_token, new_token
 from handball_api.models import (
     Clip,
     Event,
@@ -30,6 +30,7 @@ from handball_api.models import (
     RosterEntry,
     ShareLink,
     Team,
+    User,
     VideoAsset,
 )
 from handball_api.models.enums import ConsentKind, ReelStatus
@@ -128,6 +129,7 @@ async def create(
         kind=kind,
         target_id=target_id,
         token_hash=hash_token(token),
+        token_enc=_box(ctx).encrypt(token),
         title=title[:200],
         expires_at=_now() + timedelta(days=days),
         created_by_id=ctx.user_id,
@@ -136,6 +138,15 @@ async def create(
     await ctx.db.flush()
     await audit.record(ctx, "share_link.created", target_type="share_link", target_id=link.id)
     return link, token
+
+
+def _box(ctx: Ctx) -> SecretBox:
+    return SecretBox(ctx.settings.encryption_key.get_secret_value())
+
+
+def token_of(ctx: Ctx, link: ShareLink) -> str | None:
+    """The link's token for its team's staff (links made before it was kept: None)."""
+    return _box(ctx).decrypt(link.token_enc) if link.token_enc else None
 
 
 async def list_links(ctx: Ctx, team_id: uuid.UUID) -> list[ShareLink]:
@@ -196,11 +207,14 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
     link = await _resolve(ctx, token)
     link.views += 1
     team = await ctx.db.get(Team, link.team_id)
+    by = await ctx.db.get(User, link.created_by_id) if link.created_by_id else None
     base: dict[str, Any] = {
         "kind": link.kind,
         "title": link.title,
         "team": team.name if team else "",
         "expires_at": link.expires_at.isoformat(),
+        # «geteilt von Sandra» (SPEC 7.8): the first name of who shared it, nothing more
+        "shared_by": by.name.split()[0] if by and by.name else None,
     }
     if link.kind == "play":
         play = await ctx.db.get(Play, link.target_id)

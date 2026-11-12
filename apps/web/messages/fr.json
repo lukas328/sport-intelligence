@@ -184,7 +184,8 @@
     "verifyOk": "Merci, votre adresse e-mail est confirmée.",
     "verifyBusy": "Confirmation …",
     "toApp": "Ouvrir l'app",
-    "totpHint": "Code de l'application ou code de récupération"
+    "totpHint": "Code de l'application ou code de récupération",
+    "signedOut": "Tu es déconnecté·e."
   },
   "invite": {
     "title": "Invitation",
@@ -1378,7 +1379,8 @@
     "run": "Déroulé",
     "running": "en cours",
     "seen": "vue",
-    "onlyLink": "Visible uniquement par ce lien, encore {days, plural, one {# jour} other {# jours}}. Aucun compte nécessaire."
+    "onlyLink": "Visible uniquement par ce lien, encore {days, plural, one {# jour} other {# jours}}. Aucun compte nécessaire.",
+    "sharedBy": "partagé par {name}"
   },
   "ops": {
     "title": "Backoffice",
@@ -2840,7 +2842,28 @@
     "validUntil": "Le lien est valable jusqu'au {date}.",
     "notShared": "Pas encore partagé.",
     "goalAgainst": "But encaissé",
-    "goalFor": "But"
+    "goalFor": "But",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "remove": "Retirer",
+    "addNote": "Ajouter une note",
+    "noteLabel": "Note",
+    "saveNote": "Enregistrer la note",
+    "cancel": "Annuler",
+    "rename": "Renommer",
+    "shareTitle": "Partager",
+    "openedTimes": "{n, plural, one {fois ouvert} other {fois ouvert}}",
+    "linkLabel": "Lien de consultation",
+    "oldLink": "Ce lien a été créé avant le changement et ne peut plus être affiché. Bloque-le et partage à nouveau.",
+    "copyLink": "Copier le lien",
+    "copied": "Lien copié",
+    "revokeLink": "Bloquer le lien",
+    "revoked": "Lien bloqué. Qui l'a ne voit plus rien.",
+    "shareLink": "Partager le lien",
+    "presentOf": "{n} sur {total}",
+    "fullscreen": "Plein écran",
+    "prev": "Retour",
+    "next": "Suivant"
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",
