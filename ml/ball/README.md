@@ -56,6 +56,7 @@ page "Ball-Testset: neue Hallen" (`labelling/testset.html`): 177 balls, 72 frame
 | round 3 (`ball_best.pt`) | 15 % | 29 % | 11 % | 8 % |
 | round 6 (`ball_r6.pt`) | 29 % | 51 % | 44 % | 43 % |
 | round 7 (`ball_r7.pt`, 2026-11-10) | 35 % | 53 % | 50 % | 54 % |
+| round 8 (`ball_r8.pt`, 2026-11-12) | 33 % | 50 % | 41 % | 44 % |
 
 - With 177 balls one ball is 0.6 points (standard error about 3.5 points): round 6 is clearly better
   than round 3 in new halls. The first test (40 balls, 7 halls also in training) showed a tie: it
@@ -249,6 +250,34 @@ Scripts in `verifier/`: `v2.py` (crop format, human crops, game split), `train_v
   into training with the tuning games kept; enlarge the tuning set to about 100 balls before
   trusting a choice. Beyond that the remaining frame-level misses are mostly the 47.5 % of balls
   not among the top 5 at all, which no re-scorer can fix.
+
+## Round 8: the owner's 1000 labelled peaks in training (2026-11-12)
+`kaggle/train_r8_push.py`: round 7 plus the two "Ball oder nicht?" rounds (273 balls, 720 no ball,
+from segments round 7 never saw) as 224 px native triplet tiles (986 tiles: 298 with a ball, 688
+hard negatives), every third game held out as the validation group "human", 30 000 steps from
+round 7 (3.7 h on a P100). Kept as `ball_r8.pt` in `handball-ball-models`.
+
+| Test set 2 (177 balls, 72 frames without) | round 7 | round 8 |
+|---|---|---|
+| Top peak on the ball | 35 % | 33 % |
+| Ball among top 5 | 53 % | 50 % |
+| No-ball frames with a peak >= 0.5 | 54 % | 44 % |
+| Top-1 hits at 10 % false alarms (threshold 0.83 / 0.78) | 16 % | 17 % |
+| Top-1 hits at 25 % false alarms (threshold 0.67 / 0.64) | 25 % | 25 % |
+
+- Paired on top 1: round 7 alone 12 balls, round 8 alone 8 (exact p = 0.50). **No measurable
+  gain.** At the same false-alarm rate both nets find the same share of balls; round 8 mostly gives
+  lower scores everywhere (fewer peaks >= 0.5, also at the ball: 41 % against 50 % with >= 0.3).
+- Held-out human games (tile level): at 0.5 the share of labelled false peaks still firing drops
+  from 38 % to 28 % while found balls drop from 75 % to 70 %; at 0.3 false peaks 67 % to 47 % with
+  balls unchanged (81 %). So the net learned those mistakes, but it does not carry over to frame
+  level in new halls.
+- Reading: the main loss on test set 2 is recall, not false alarms: about half of the balls are not
+  among the top 5 peaks at all. Labels of the net's own confident peaks (mostly held balls) cannot
+  fix that. Next labelling round (round 3, `labelling/build_crops.py`, `hardneg_pick.py
+  --clock-only`): moments of play only, half unsure peaks (0.2 to 0.5), moving peaks first, and a
+  click on the true ball when the ring misses it (state "elsewhere"), which gives the missed balls
+  as positives. In parallel: test set 2 at native resolution (ml/gpu/JOBS.md job 11).
 
 ## Findings
 - Most earlier "ball" labels from Möhlin were a fixed, ball-like spot on the wall; the three-frame
