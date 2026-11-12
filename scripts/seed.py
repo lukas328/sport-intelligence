@@ -136,11 +136,13 @@ def match_events(
     opp_from_right_wing: int,
     turnovers: int,
     keeper: str,
+    halftime: tuple[int, int],
+    focus: str,
 ) -> list[dict[str, Any]]:
     """One match as events. `players` maps a position to roster player ids."""
     own_weights = {"LA": 0.13, "RL": 0.2, "RM": 0.17, "RR": 0.18, "RA": 0.12, "KM": 0.2}
     # every match has one position that carries the attack (the third of the three things)
-    own_weights[rng.choice(list(own_weights))] = 0.75
+    own_weights[focus] = 0.45
     opp_weights = {"LA": 0.16, "RL": 0.2, "RM": 0.2, "RR": 0.16, "KM": 0.28}
     sevens_taken, sevens_scored = seven_m
     events: list[dict[str, Any]] = []
@@ -264,12 +266,29 @@ def match_events(
                 "number": rng.choice(opp_numbers),
             }
         )
+    # the halves: as many goals before the break as the half-time score says
     rng.shuffle(events)
+    goal = lambda e, side: e["side"] == side and e.get("outcome") == "goal"  # noqa: E731
+    first: list[dict[str, Any]] = []
+    second: list[dict[str, Any]] = []
+    left = {"own": halftime[0], "opponent": halftime[1]}
+    for e in events:
+        side = e["side"]
+        if goal(e, side):
+            (first if left[side] > 0 else second).append(e)
+            left[side] -= 1
+        else:
+            (first if rng.random() < 0.5 else second).append(e)
+    rng.shuffle(first)
+    rng.shuffle(second)
+    events = first + second
     # match time over two halves of 30 minutes; video time over the synthetic clip
     n = len(events)
     for i, e in enumerate(events):
-        clock = round(60 + i * (3480 / n) + rng.uniform(0, 20), 1)
-        e["period"] = 1 if clock < 1800 else 2
+        half = i < len(first)
+        k, m = (i, len(first)) if half else (i - len(first), len(second))
+        clock = round((60 if half else 1830) + k * (1710 / max(1, m)) + rng.uniform(0, 15), 1)
+        e["period"] = 1 if half else 2
         # match clock from the throw-off, 0 to 3600 s over both halves
         e["clock_s"] = clock
         e["t_ms"] = int(1500 + i * ((VIDEO_SECONDS - 3) * 1000 / n))
@@ -333,7 +352,7 @@ def main() -> None:
         "/v1/orgs",
         json={
             "name": CLUB,
-            "primary_color": "#0b3d91",
+            "primary_color": "#1f4fd6",
             "secondary_color": "#ffffff",
         },
     ).json()["id"]
@@ -387,8 +406,8 @@ def main() -> None:
 
     # two older matches with a match report only
     for days, opponent, home, own, opp in (
-        (40, "SG Horgen-Oberrieden", True, 27, 24),
-        (33, "HC Meilen-Herrliberg", False, 23, 25),
+        (33, "TV Au-Wädenswil", False, 24, 27),
+        (19, "SG Horgen-Oberrieden", True, 29, 19),
     ):
         report = paper_report(rng, now - timedelta(days=days), opponent, home, own, opp)
         c.post(
@@ -397,45 +416,53 @@ def main() -> None:
         )
 
     # three matches with video and events; the right wing stays open, 7 m are missed
+    # SPEC.md section 10: the last match is the one of the Zielbild, 26:18 (13:9) against TSV
+    # Thalwil in black; nine of their 18 goals over our right wing, our circle the strength
     analysed = [
         dict(
-            days=19,
-            opponent="TV Au-Wädenswil",
+            days=26,
+            opponent="TV Rüti",
             home=True,
             kit="#c8102e",
-            own=26,
-            opp=23,
-            misses=19,
-            saves=15,
-            seven=(5, 2),
-            wing=10,
+            own=27,
+            opp=22,
+            ht=(14, 10),
+            misses=18,
+            saves=14,
+            seven=(5, 3),
+            wing=6,
             turnovers=10,
+            focus="RL",
         ),
         dict(
             days=12,
             opponent="BSV Stäfa-Uerikon",
             home=False,
-            kit="#1b7a3e",
-            own=24,
-            opp=27,
+            kit="#5b2d8e",
+            own=19,
+            opp=26,
+            ht=(9, 13),
             misses=22,
-            saves=13,
+            saves=11,
             seven=(4, 1),
-            wing=11,
-            turnovers=12,
+            wing=9,
+            turnovers=15,
+            focus="RM",
         ),
         dict(
             days=5,
             opponent="TSV Thalwil-Gattikon",
             home=True,
-            kit="#ffd200",
-            own=29,
-            opp=25,
+            kit="#17191c",
+            own=26,
+            opp=18,
+            ht=(13, 9),
             misses=17,
             saves=16,
-            seven=(6, 3),
+            seven=(4, 2),
             wing=9,
-            turnovers=8,
+            turnovers=11,
+            focus="KM",
         ),
     ][: max(0, min(3, args.videos))]
     matches = []
@@ -448,7 +475,7 @@ def main() -> None:
                 "is_home": spec["home"],
                 "competition": "2. Liga Herren",
                 "venue": "Sporthalle Rotweg, Horgen" if spec["home"] else None,
-                "kit_own": "#0b3d91",
+                "kit_own": "#1f4fd6",
                 "kit_own_gk": "#f28c00",
                 "opponent_kit": spec["kit"],
                 "kit_opponent": spec["kit"],
@@ -467,6 +494,8 @@ def main() -> None:
             opp_from_right_wing=spec["wing"],
             turnovers=spec["turnovers"],
             keeper=by_position["TW"][0],
+            halftime=spec["ht"],
+            focus=spec["focus"],
         )
         for e in events:
             c.post(f"{o}/matches/{m['id']}/events", json=e)
