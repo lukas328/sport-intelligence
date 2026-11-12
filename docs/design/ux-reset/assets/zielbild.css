@@ -1,96 +1,30 @@
-/* Report chrome for zielbild.html. The app's own system is halle.css; the report sits on the
-   same paper and uses the same parts, so it only adds prose and layout. Single light theme on
-   purpose: the page presents a light design. */
-:root { color-scheme: light; }
-body { margin: 0; background: #fcfcfa; color: #14171a; }
-.rp { max-width: 1180px; margin: 0 auto; padding-block: 40px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); font-size: 17px; line-height: 1.55; }
-.rp a { color: inherit; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
-.rp :focus-visible { outline: 2.5px solid var(--ink); outline-offset: 2px; }
-
-/* head: laid out like the top of a match sheet */
-.rp .r-kopf { border-top: 3px solid var(--ink); padding-top: 16px; }
-.rp .r-kopf h1 { font: 800 clamp(40px, 7.4vw, 86px)/0.94 var(--f-display); font-stretch: 78%; letter-spacing: -0.025em; max-width: 13ch; text-wrap: balance; }
-.rp .r-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--rule); margin-top: 30px; }
-.rp .r-fields div { padding: 10px 16px 12px 0; min-width: 0; }
-.rp .r-fields small { display: block; font-size: 12.5px; color: var(--ink-3); }
-.rp .r-fields b { font: 700 16px/1.25 var(--f-display); font-stretch: 88%; }
-.rp .r-lead { font-size: 21px; line-height: 1.45; max-width: 62ch; margin-top: 30px; }
-
-.rp .r-sec { margin-top: 96px; }
-.rp .r-sec > h2 { font: 800 clamp(30px, 4.6vw, 50px)/1 var(--f-display); font-stretch: 80%; letter-spacing: -0.02em; max-width: 20ch; text-wrap: balance; }
-.rp .r-sec > .head { margin-bottom: 18px; }
-.rp .r-sub { margin-top: 56px; }
-.rp .r-sub > h3 { font: 750 24px/1.1 var(--f-display); font-stretch: 84%; margin-bottom: 10px; }
-.rp .r-prose { max-width: 66ch; display: grid; gap: 14px; margin-top: 18px; }
-.rp .r-prose ul { list-style: disc; padding-left: 1.2em; display: grid; gap: 7px; }
-.rp .r-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 56px; margin-top: 26px; }
-.rp .r-two > div { padding: 18px 0; border-top: 1px solid var(--rule); min-width: 0; }
-.rp .r-two h4 { font: 700 18px/1.2 var(--f-display); font-stretch: 86%; }
-.rp .r-two p { font-size: 15px; line-height: 1.5; color: var(--ink-2); margin-top: 6px; }
-
-/* materials */
-.rp .r-mat { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px 56px; padding: 30px 0; border-top: 1.5px solid var(--ink); align-items: start; }
-.rp .r-mat > * { min-width: 0; }
-.rp .r-mat h3 { font: 800 30px/1 var(--f-display); font-stretch: 80%; }
-.rp .r-mat h3 small { display: block; font: 400 14px/1.3 var(--f-text); color: var(--ink-3); margin-top: 8px; letter-spacing: 0; }
-.rp .r-mat .txt { display: grid; gap: 10px; font-size: 15.5px; line-height: 1.5; }
-.rp .r-mat .txt ul { list-style: disc; padding-left: 1.15em; display: grid; gap: 5px; color: var(--ink-2); }
-.rp .r-mat .spec { display: grid; gap: 18px; align-content: start; }
-.rp .r-row { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: center; }
-.rp .r-cap { font-size: 12.5px; color: var(--ink-3); margin-top: 6px; }
-@media (max-width: 800px) { .rp .r-mat { grid-template-columns: 1fr; } }
-
-.rp .r-sw { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 12px; margin-top: 22px; }
-.rp .r-sw div { font-size: 12.5px; line-height: 1.35; color: var(--ink-2); min-width: 0; }
-.rp .r-sw i { display: block; height: 54px; border-radius: 2px; margin-bottom: 7px; box-shadow: inset 0 0 0 1px rgba(20, 23, 26, 0.14); }
-.rp .r-sw b { display: block; color: var(--ink); font-size: 13.5px; }
-.rp .r-type { display: grid; gap: 0; margin-top: 22px; }
-.rp .r-type > div { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--rule); }
-.rp .r-type small { font-size: 12.5px; line-height: 1.35; color: var(--ink-3); }
-@media (max-width: 640px) { .rp .r-type > div { grid-template-columns: 1fr; gap: 6px; } }
-
-/* tables */
-.rp .r-tw { overflow-x: auto; margin-top: 22px; }
-.rp .r-t { border-collapse: collapse; width: 100%; min-width: 700px; font-size: 15px; line-height: 1.45; }
-.rp .r-t th { text-align: left; font: 600 12.5px/1.2 var(--f-text); color: var(--ink-3); padding: 0 18px 8px 0; border-bottom: 1.5px solid var(--ink); }
-.rp .r-t td { vertical-align: top; padding: 11px 18px 11px 0; border-bottom: 1px solid var(--rule); }
-.rp .r-t td:first-child { font-weight: 650; }
-.rp .r-t .no { color: var(--ink-3); text-decoration: line-through; text-decoration-thickness: 1px; }
-.rp .r-t .tag { display: inline-block; font: 700 12.5px/1 var(--f-display); padding: 4px 6px; border-radius: 2px; background: var(--paper-2); white-space: nowrap; }
-.rp .r-t .tag.y { background: var(--harz); }
-.rp .r-t .tag.k { background: var(--ink); color: var(--paper); }
-
-/* club picker */
-.rp .r-pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; color: var(--ink-2); margin-top: 20px; }
-.rp .r-pick button { font: 650 14px/1 var(--f-display); color: var(--ink); background: none; border: 0; box-shadow: inset 0 0 0 1px var(--rule); border-radius: 6px; padding: 8px 12px 8px 8px; display: inline-flex; gap: 8px; align-items: center; cursor: pointer; min-height: 40px; }
-.rp .r-pick button i { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(20, 23, 26, 0.3); }
-.rp .r-pick button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--ink); }
-
-/* screens */
-.rp .r-idx { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 22px; font-size: 15px; }
-.rp .r-idx a { font-weight: 600; }
-.rp .r-screen { margin-top: 72px; scroll-margin-top: 20px; }
-.rp .r-screen > .head b { font-size: 22px; }
-.rp .r-screen > .why { max-width: 66ch; margin: -2px 0 22px; }
-.rp .r-split { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px 56px; margin-top: 28px; align-items: start; }
-.rp .r-split.solo { grid-template-columns: 330px minmax(0, 1fr); }
-.rp .r-split > * { min-width: 0; }
-.rp .r-notes { display: grid; gap: 20px; font-size: 15px; line-height: 1.5; }
-.rp .r-notes h4 { font: 700 15px/1.2 var(--f-display); font-stretch: 88%; margin-bottom: 6px; }
-.rp .r-notes ul { list-style: disc; padding-left: 1.15em; display: grid; gap: 5px; color: var(--ink-2); }
-.rp code { font: 500 0.88em/1.3 ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: var(--paper-2); padding: 1px 4px; border-radius: 2px; overflow-wrap: anywhere; }
-.rp .r-states { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; margin-top: 26px; }
-.rp .r-states > div { min-width: 0; }
-@media (max-width: 800px) { .rp .r-split, .rp .r-split.solo { grid-template-columns: 1fr; } .rp .r-split > [data-tpl] { max-width: 330px; } }
-
-.fit { position: relative; overflow: hidden; }
-.frame { transform-origin: 0 0; background: var(--paper); box-sizing: content-box; }
-.frame.desk { border: 1.5px solid var(--ink); border-radius: 8px; overflow: hidden; }
-.frame.phone { border: 7px solid var(--ink); border-radius: 38px; overflow: hidden; }
-
-.rp .r-ask { border: 2px solid var(--ink); padding: 22px 24px 26px; margin-top: 26px; border-radius: 2px; }
-.rp .r-ask ol { list-style: decimal; padding-left: 1.3em; display: grid; gap: 12px; margin-top: 12px; max-width: 70ch; }
-.rp .r-src { font-size: 14px; line-height: 1.5; color: var(--ink-2); display: grid; gap: 6px; margin-top: 16px; max-width: 80ch; list-style: disc; padding-left: 1.15em; }
-@media (max-width: 560px) { .rp .spec .board:not(.s) { grid-template-columns: 1fr; text-align: center; gap: 10px; } .rp .spec .board:not(.s) .side.r { text-align: center; } .rp .spec .board:not(.s) .side:first-child { order: -1; } .rp .r-lead { font-size: 19px; } }
-.rp .r-notes ul > li, .rp .r-prose ul > li, .rp .r-mat .txt ul > li { min-width: 0; }
-.rp .r-ask ol > li, .rp .r-src > li { min-width: 0; overflow-wrap: anywhere; }
+/* ===== Zielbild: the presentation page around the screens (not part of the app) ===== */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #d6d8d9; color: #15171a; font-family: "Hanken Grotesk", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.doc { max-width: 1280px; margin: 0 auto; padding: 48px 16px 8px; }
+.doc .kick { font: 600 15px "Hanken Grotesk", sans-serif; color: #4e535a; margin: 0 0 10px; }
+.doc h1 { font: italic 900 112px/.86 "Kanit", sans-serif; margin: 0 0 20px; letter-spacing: -0.02em; }
+.doc .idea { font: 700 26px/1.25 "Hanken Grotesk", sans-serif; max-width: 900px; margin: 0 0 14px; }
+.doc p { max-width: 900px; font-size: 17px; line-height: 1.5; color: #33373c; margin: 0 0 10px; }
+.doc h2 { font: italic 800 30px "Kanit", sans-serif; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #15171a; }
+.doc ol.rules { max-width: 900px; padding-left: 22px; font-size: 17px; line-height: 1.5; } .doc ol.rules li { margin-bottom: 8px; }
+.doc .tw { overflow-x: auto; }
+.doc table { border-collapse: collapse; width: 100%; font-size: 15px; line-height: 1.4; min-width: 640px; }
+.doc th { text-align: left; font-size: 13px; color: #4e535a; padding: 8px 12px 8px 0; border-bottom: 2px solid #15171a; }
+.doc td { padding: 10px 12px 10px 0; border-bottom: 1px solid #b9bcbe; vertical-align: top; }
+.doc td:first-child { font-weight: 700; width: 30%; }
+.doc nav.toc { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 15px; margin-top: 18px; } .doc nav.toc a { color: inherit; font-weight: 700; }
+.ctl { position: sticky; top: 0; z-index: 9; background: #15171a; color: #f2f3f4; padding: 10px 16px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+.ctl .grp { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.ctl .grp > span { font: 600 13px "IBM Plex Mono", monospace; color: #9aa3ac; margin-right: 6px; }
+.ctl .note { font-size: 14px; color: #c3c9cf; }
+.ctl button { min-height: 44px; width: 44px; padding: 0; background: transparent; border: 1.5px solid #4a5058; cursor: pointer; display: grid; place-items: center; }
+.ctl button[aria-pressed="true"] { border-color: #f2f3f4; background: #2c3136; }
+.ctl button i { width: 20px; height: 20px; display: block; border: 1px solid #8a9199; }
+.view { max-width: 1280px; margin: 64px auto 0; }
+.view > header { display: flex; gap: 16px; align-items: baseline; padding: 0 0 10px; border-bottom: 2px solid #15171a; margin-bottom: 16px; flex-wrap: wrap; }
+.view > header b { font: italic 800 26px "Kanit", sans-serif; } .view > header span { font-size: 15px; color: #4e535a; }
+.pair { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+.app.desk { width: 1280px; } .app.phone { width: 390px; }
+.view .grid { display: grid; grid-template-columns: repeat(3, 390px); gap: 48px 55px; }
+.view figure { margin: 0; } .view figcaption { font: italic 800 20px "Kanit", sans-serif; margin-bottom: 8px; }

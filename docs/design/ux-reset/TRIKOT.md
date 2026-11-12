@@ -1,3 +1,5 @@
+> **Verworfen am 12. November 2026.** Ersetzt durch `ANLAUF.md`. Nur noch zum Nachlesen.
+
 # Trikot: the chosen look
 
 Decided on 10 November 2026: the app wears the kit. This file defines the visual system. It

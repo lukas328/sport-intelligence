@@ -1,9 +1,10 @@
-# Redesign spec: "Halle 2"
+# Redesign spec
 
-Binding reference for the UI rebuild of `apps/web`. The pictures are in `zielbild.html` (open it
-in a browser, or rebuild it with `python3 docs/design/ux-reset/build.py`); every screen named
-here has a mockup there at desktop and phone width, and its markup in `src/screens/`. The
-findings that led here are in `ASSESSMENT.md`.
+Binding reference for the UI rebuild of `apps/web`. The look is **Anlauf** (decided 12 November
+2026), defined in `ANLAUF.md`. The pictures are in `zielbild.html` (open it in a browser, or
+rebuild it with `python3 docs/design/ux-reset/build.py`); every screen named here has a mockup
+there at desktop and phone width, its markup in `assets/anlauf-screens.js`. The findings that led
+here are in `ASSESSMENT.md`.
 
 Where this spec and `docs/DESIGN.md` or ADR 023 / 024 disagree (four other destinations, the
 stage, Barlow, the tinted paper), this spec wins. Write ADR 025 for it and update `DESIGN.md` as
@@ -37,123 +38,47 @@ account.
 1. **Result before machine.** A screen shows what came out. Everything the analysis is unsure
    about goes into one queue ("Prüfen"). A page states once where its numbers come from.
 2. **Complete without manual work.** Every screen is useful when the coach has typed nothing.
-3. **Picture before text.** Every row that has video behind it shows a mini court (or a still).
-   Insights are also drawn: circles on the court, a marked phase on the chart. No sentence under
-   a page title explaining the page.
-4. **One word per thing** (section 9).
-5. **Each material has one job** (section 3).
+3. **Picture before text.** Every row that has video behind it shows a mini court with the
+   measured runs. Insights are also drawn: runs on the court, a marked phase on the timeline. No
+   sentence under a page title explaining the page.
+4. **Only what is measured.** Positions yes, ball flight and passes no; the ball only at the
+   player who holds it, where it was found. Estimated is dashed and says so.
+5. **One word per thing** (section 9).
 6. **One primary action per screen**, in ink. Destructive actions are never the primary button.
 
-## 3. Materials
+## 3. to 5. Look, tokens, components
 
-The app is a sheet of paper lying on a hall floor.
+Defined in **`ANLAUF.md`**: idea, colour model with club and opponent and the clash rules, zones
+(Wurf-Kopf, Streifen, Seitenkopf, Bühne / Taktikkamera, Ball, Spur, Minifeld), meaning colours,
+neutrals, type with licences, shapes, motion, the mapping from the earlier building blocks, the
+data source of every graphic, the quality bar. Tokens and blocks are in `assets/anlauf.css`, the
+colour model in `assets/anlauf-farbe.js`, the graphics in `assets/anlauf-feld.js`.
 
-| Material | Says | Where | Never |
-|---|---|---|---|
-| **Boden** (floor) | this is handball | the frame of the app (rail on desktop, top bar and tab bar on phones), the mini court, shot maps, plays, placeholders | as page background behind running text |
-| **Papier** | the system speaks | the content sheet, lists, tables, forms, automatic sentences. The **yellow sheet** is reserved for the three things (per match and per season) | cards with border + shadow + tint; yellow for anything else |
-| **LED** | score and clock | exactly one board per screen: score in amber, running clock in red | results in lists (those are printed numerals), decoration |
-| **Trikot** | the club | crest, stickers, own magnets on the court, own line and last bar in charts, the "Tor wir" key | surfaces, buttons, links, focus rings |
-| **Filzstift** (marker) | a person did this | notes at scenes, titles of collections (on tape), confirmed rows (tick), a figure the coach circled | automatic text or state; more than three marks per screen |
+Components in `apps/web/src/components`, in Anlauf terms:
 
-The floor carries line fragments of several sports (orange handball arcs, a white, a green and a
-navy line), as in any multi-purpose hall. The active destination lies on it as a strip of paper.
-Marker strokes are drawn with a seeded jitter (`assets/marker.js`): stable per record, never two
-alike. A tick at the end of a row means "confirmed by you"; a row without one is estimated. That
-is all the provenance marking there is.
+| Component | Replaces / changes |
+|---|---|
+| `Frame` (top navigation, tab bar, active marker) | rebuild `shell/app-shell.tsx`; drop the rail |
+| `WurfHead`, `Strip`, `PageHead` | rebuild `domain/scoreboard.tsx`, `domain/match-score.tsx`; drop `domain/stage.tsx`, `PageHeader` descriptions |
+| `Things` (three things with bundles) | replaces `analysis/insights.tsx` presentation |
+| `Bundle`, `MiniCourt`, `Zones` | restyle `video/mini-court.tsx`, `analysis/court-half.tsx`; no pass lines, no arrow heads |
+| `TacticsCamera`, `BallLine` | new, in the video view and in an opened thing |
+| `Rail`, `Flight`, `Series`, `DiffBars` | new |
+| `GoalGrid` | restyle `analysis/goal-grid.tsx`; hand-marked data only |
+| `SectionHead`, `Button`, `Tabs`, `Field`, `Chips`, `Sheet` | change `ui/button.tsx`, `ui/tabs.tsx`, `ui/field.tsx`; drop pill `Badge`, `ui/card.tsx` except dialogs |
 
-## 4. Tokens
-
-Light theme. `assets/halle.css` has them as CSS variables on `.halle`.
-
-| Token | Value | Use |
-|---|---|---|
-| `--floor` | `#bcd6dd` | app frame, court |
-| `--floor-area` | `#9fc3cd` | goal area, earlier bars in a series |
-| `--line` | `#e2560b` | handball lines; the edge between frame and sheet on phones |
-| `--line-white` / `--line-green` / `--line-navy` | `#f7fbfc` / `#2f8f5b` / `#27485a` | other sports' lines in the frame only |
-| `--paper` | `#fcfcfa` | the sheet |
-| `--paper-2` | `#f2f3ef` | chip, recessed cell |
-| `--sheet-yellow` | `#ffe57a` | the three things |
-| `--ink` | `#14171a` | text, primary button, firm rules |
-| `--ink-2` / `--ink-3` | `#4a5359` / `#69737a` | secondary, tertiary text (do not go lighter than ink-3) |
-| `--rule` | `#d8dcd6` | hairlines |
-| `--harz` | `#ffd23f` | the one signal colour: "Prüfen n", marked phase, largest circle, highlighter |
-| `--led` / `--led-red` / `--led-off` | `#ffb21f` / `#ff5a4d` / `#2a2521` | score, clock, unlit segments |
-| `--night` / `--night-2` / `--night-rule` | `#101316` / `#1b2024` / `#2b3237` | board, video page |
-| `--night-ink` / `--night-ink-2` | `#eef0ed` / `#9aa4a9` | text on night |
-| `--win` / `--loss` | `#1b7046` / `#b3261e` | Sieg / Niederlage, ok / error. Nothing else. |
-| `--club` / `--club-ink` | per club | raw club colour and the text on it |
-| `--club-text` | per club | club colour shifted to 4.5:1 on paper; yellow clubs get a dark ochre, white clubs ink |
-
-Dark theme, "Halle bei Nacht" (designed, not inverted): `--floor #1d3a44`, `--floor-area
-#16303a`, `--line #ff7a2f`, `--paper #0e1113`, `--paper-2 #171b1e`, `--sheet-yellow #3a3212` with
-`--harz` text for the rank numerals, `--ink #eef0ed`, `--ink-2 #b3bbbf`, `--ink-3 #8a9499`,
-`--rule #2a3136`, board `#050607` with a 1 px `--rule` edge, `--win #5ad17e`, `--loss #ff7b6e`.
-The video page is night in both themes.
-
-`lib/color.ts` keeps deriving the club values; `--deep`, the club-tinted paper, `--surface-l`,
-`--accent-*` and the stage colours go away. Buttons, links and focus rings are ink.
-
-**Radius by role:** sheet, court and yellow sheet 2 px, controls 6 px, board 5 px, sticker 3 px.
-No pills. **Shadows:** none, except the 2 px hard edge under a sticker.
-
-### Type
-
-| Role | Face | Setting |
-|---|---|---|
-| Titles | Bricolage Grotesque (variable: opsz, wdth 75 to 100, wght) | 800, width 80 %, tracking -0.02em, line-height 0.98; 44 px phone, 58 px desktop |
-| Heads, buttons, tabs | Bricolage Grotesque | 700, width 86 to 90 %; 15 to 26 px |
-| Text | Instrument Sans | 400 body 16 px / 1.45 (the mockups use 15 px to fit the frames), 600 for emphasis, 13 px secondary, 12 px minimum |
-| Counted things | Archivo, width 62 %, 900, digits only (subset `0-9 : % + - , . ' ?`) | list results 30 to 44 px, figures 40 to 56 px, tabular |
-| Board | DSEG7 Classic Bold (`assets/fonts`, OFL) | 17 / 26 / 46 / 60 px, with the unlit "8" segments behind (`data-ghost`) |
-| Hand | Mansalva | 17 px minimum, 21 px default; real notes only |
-
-All are SIL OFL; self-host them in `apps/web/src/fonts` with their licence files and remove
-Barlow, Barlow Condensed and Reenie Beanie. Labels are sentence case without letter-spacing. No
-all-caps anywhere.
-
-## 5. Components
-
-Existing components in `apps/web/src/components` to reuse, change or drop.
-
-| Component | Looks like | In the code |
-|---|---|---|
-| **Frame** (`.halle.app`, `.rail`, `.topbar`, `.tabbar`, `.main`) | floor-coloured shell with line fragments; content on a paper sheet (12 px gap, 2 px radius on desktop); on phones floor-coloured top and tab bar with a 3 px orange edge | rebuild `shell/app-shell.tsx` |
-| **FormHead** (`.head`) | bold label, 1.5 px ink rule to the edge, optional small text or link at the right | new; replaces `PageHeader` descriptions |
-| **YellowSheet** (`.gelb`) | yellow block with a form head and the ranked things | new; replaces `analysis/insights.tsx` presentation |
-| **Thing** (`.thing`) | rank numeral, mini court with total length, sentence, sub-line, optional "Dazu üben", "n Szenen" | new |
-| **Row** (`.game`, `.led-row`) | margin column with date in numerals, picture, content, result | new |
-| **Board** (`.board`, `.board.s`) | night panel, crests, DSEG7 score with ghost segments, time-out lamps | rebuild `domain/scoreboard.tsx`, `domain/match-score.tsx`; drop `domain/stage.tsx`, `domain/court-lines.tsx` |
-| **MiniCourt** (`svg.mf`) | half court 20 x 12.4 m, floor colours, own magnets in club colour with white ring, opponents white with ink ring, pass dotted, shot with arrow head | restyle `video/mini-court.tsx`, `analysis/court-half.tsx`, `domain/drill-court.tsx`, `tactics/board.tsx` to one look |
-| **Zones** (`svg.zonen`) | counts as circles on the court, area proportional to the count, largest in resin yellow | new |
-| **Series** (`svg.reihe`) | one bar per match, last one in club colour; signed variant in win / loss colour | new |
-| **GoalGrid** (`.tor`) | 3 x 3 goal with counts, most frequent cell in resin yellow | restyle `analysis/goal-grid.tsx` |
-| **Numerals** (`.n`, `.res`) | Archivo condensed black | new |
-| **Sticker** (`.sticker`, `.gap`) | white-edged card: club-colour picture with jersey shape, position code, big number; name and one line. `.gap` dashed and empty | new; replaces the roster rows in `roster/` |
-| **Mark**, **Tape** (`[data-mark]`, `.tape`) | circle, underline, highlight, tick; off-white strip with torn ends and marker text | new, from `assets/marker.js` |
-| **SharePreview** (`.chat`, `.bubble`) | how the link looks in a chat: mini court, title, club, length | new |
-| **Button** | ink solid, ink outline, underlined text link. 40 px high, 44 px touch targets. No trailing arrows. | change `ui/button.tsx` |
-| **Tabs** (`.tabs`) | text tabs, 2.5 px ink underline; "Prüfen n" as a resin-yellow tab at the right | change `ui/tabs.tsx` |
-| **Field, Chips** | 48 px field with 1.5 px ink outline; chips are 3 px rectangles, selected ink | restyle `ui/field.tsx`; drop pill `Badge` |
-| **Sheet** (`.sheet`) | match-sheet table: hairlines, firm rule under the head, figures right-aligned, optional tick column | keep |
-| **Timeline** (`svg.zeitleiste`) | own goals up in club colour, opponent goals down in white, defence system as a band, marked phase in resin yellow, playhead | new, in the video view |
-| **FlowChart** (`svg.flow`) | goal difference over time, one line in club colour, half-time rule, marked phase | new |
-| **Icons** | own set, one stroke weight (1.7), never in a circle; active item heavier stroke | extend `shell/icons.tsx` (see `ICONS` in `assets/zielbild.js`); Lucide only for close, chevrons |
-
-Drop as defaults: `ui/card.tsx` (keep only for dialogs), `ui/badge.tsx` pills, page descriptions,
-`support/checklist.tsx` and `shell/two-factor-banner.tsx` (both become a dot on the account).
+Drop as defaults: page descriptions, `support/checklist.tsx` and `shell/two-factor-banner.tsx`
+(both become a dot on the account).
 
 ## 6. Navigation
 
 Staff (coach, analyst, team manager, admin): **Spiele · Szenen · Saison · Team**. The start is
 Spiele.
 
-- Desktop: rail (212 px) on the floor: crest and team, the ink button "Video hochladen", the four
-  destinations (active one as a paper strip with a club-colour dot), at the bottom on a paper
-  strip "Suchen" and the account.
-- Phone: floor-coloured top bar (crest, team switcher, search, a square **+** = Video hochladen)
-  and tab bar with the four destinations.
+- Desktop: top bar: crest and team, the four destinations (slanted, active one with the club
+  marker), at the right "Suchen", the ink button "Video hochladen", the account.
+- Phone: top bar (crest, team switcher, search, a square **+** = Video hochladen) and tab bar
+  with the four destinations.
 - One level of tabs inside a destination, never two. A match: Spiel · Video · Zahlen, plus
   "Prüfen n".
 - **Ich** (Profil, Passwort, Geräte, Zwei-Faktor, Mitteilungen, meine Daten) and **Verein**
@@ -188,139 +113,167 @@ Old routes redirect. Update `lib/nav-model.ts` and `nav-model.test.ts`; update
 
 ## 7. Screens
 
-Mockup and markup: `zielbild.html`, `src/screens/<name>.html`.
+Mockups: `zielbild.html`, one section per screen (anchor = the id below), desktop and phone.
+Markup and wording: the function of the same name in `assets/anlauf-screens.js`. Which head a
+screen carries is fixed in `ANLAUF.md` section 3.
 
-### 7.1 Spiele, the start (`spiele.html`)
+### 7.1 Spiele, the start (`#start`, `startDesk`, `startPhone`)
 
-- **Title** from the state of the last match: "Gewonnen. Und drei Dinge zum Mitnehmen." (or
-  "Verloren. …", "Unentschieden. …"), "Gestern war Spiel." (no video), "Die Analyse läuft.",
-  "Willkommen." (no match). Line above: opponent and when the analysis finished.
-- **Board** of the last match, then the **yellow sheet** with the three things (rank numeral,
-  mini court with total length, sentence, sub-line, "n Szenen").
+- **Wurf-Kopf** of the last match. **Title** from its state: "Gewonnen. Und drei Dinge zum
+  Mitnehmen." (or "Verloren. …", "Unentschieden. …"), "Gestern war Spiel." (no video), "Die
+  Analyse läuft.", "Willkommen." (no match). Kick line: opponent and when the analysis finished.
+  Result with the opponent's underline, the names, the Verlauf from the goal sequence.
 - Actions: "Spiel öffnen" (primary), "Fürs Team zusammenstellen" (creates a collection draft),
-  and open check questions as a link with a duration ("3 Fragen offen, 1 Minute").
-- **Alle Spiele** as rows: date in the margin, mini court, opponent, one status line, result in
-  numerals with "Sieg" / "Niederlage". States: done ("n Szenen"), running (pale court, bar,
-  minutes left), no video (dashed slot, link "Video hochladen").
-- Side: **Nächster Gegner** (three facts from table and match reports, scenes from the last
-  meeting) and the top of the **table**.
+  the open check questions as a link with a duration ("3 Fragen offen, 1 Minute").
+- **Drei Dinge** in a row: index, numeral, unit, sentence, sub-line, the bundle of runs, "n
+  Szenen" with length. Desktop: Punkt 1 switches in the same frame between "Alle 9" (bundle) and
+  "Szene 39:55" (tactics camera). Phone: the scene of Punkt 1 as its own section below.
+- **Alle Spiele** as rows: date, Minifeld (bundle of that match's Punkt 1; empty with "Analyse
+  läuft" or "kein Video"), opponent, one status line, result with "Sieg" / "Niederlage". Running:
+  a bar and minutes left. No video: link "Video hochladen".
+- Side: **Nächster Gegner** (three facts from table and reports, the bundle of the last meeting,
+  its scenes) and the top of the **Tabelle**.
 - No calendar, no trainings, no RSVP.
 
-### 7.2 Spiel, tab "Spiel" (`spiel.html`)
+### 7.2 Spiel, tab "Spiel" (`#spiel`)
 
-- **Board** (stays above all three tabs): crests, names, score, half-time, date, hall, time-out
-  lamps. Tabs. **Source line**: "Quellen: Video (60 von 60 Minuten) · Spielbericht von
-  handball.ch · 21 von 24 Würfen von dir bestätigt"; details behind "Wie gerechnet?".
-- **Yellow sheet** with the three things; each may carry "Dazu üben: [drill]".
-- Actions: "Fürs Team zusammenstellen", "Highlights teilen", "Als Bild für den Chat" (board and
-  three things as an image).
-- **Verlauf**: goal difference; a marked phase links to the video at that time.
-- **Telegramm**: the newspaper form (result with half-time, hall, goal sequence, penalties, top
-  scorers, keeper), generated from the match report; copyable.
-- Side: **Gegentore** as zones on the court, **Eigene Würfe** as a shot map (dot = goal, cross =
-  no goal), three key figures (the coach can circle one).
-- Without video: Telegramm and figures from the match report plus the upload block. Before the
-  match: the opponent facts and "Spieltag starten" if no official report is expected.
+- **Wurf-Kopf** with both names as the title, date, hall, half time, time-outs, rank. Tabs
+  Spiel · Video · Zahlen and "Prüfen n". **Source line**: "Quellen: Video (60 von 60 Minuten) ·
+  Spielbericht von handball.ch · 21 von 24 Toren von dir bestätigt"; details behind "Wie
+  gerechnet?".
+- **Drei Dinge** with bundles; each may carry "Dazu üben: [drill]". Punkt 3 is "Tore vom Kreis"
+  (goals from the circle), not "Kreisanspiel": passes are not measured.
+- Actions: "Fürs Team zusammenstellen", "Highlights teilen", "Als Bild für den Chat".
+- **Punkt 1, geöffnet**: the tactics camera of the selected scene with the Ball-Linie and the
+  legend. **Telegramm**: the newspaper form from the report, copyable.
+- Side: **Gegentore** and **Eigene Tore** as zones, three figures with their source (Paraden
+  marked, Ballverluste from the report, Wurfquote from marked shots).
+- Without video: Telegramm and Verlauf from the report plus the upload block (state "Kein
+  Video"). Before the match: the opponent facts and "Spieltag starten" if no official report is
+  expected.
 
-### 7.3 Spiel, tab "Video" (`video.html`)
+### 7.3 Spiel, tab "Video" (`#video`)
 
-- Night page. Small board, tabs, then the video with the match clock as a small red LED.
-- **Zeitleiste** below the video; legend in one line.
+- **Streifen**, tabs, then the **Bühne**: tactics camera with the switch **Video | Taktik** in
+  the same frame (Taktik is the default when the field is confirmed), caption with the scene and
+  its thing, Pause, clock.
+- **Ball**: a small ball at the player who holds it, only where found; **Ball-Linie** under the
+  stage; legend "Ball, nur wo erkannt", "Nummer nur, wo sie gelesen wurde".
+- **Rail** below: goals from the report, marked phase, playhead.
 - Four tools: "Szene merken", "Zeichnen", "Spielerin hervorheben", "Teilen".
-- Side: scenes in the visible range (time in numerals, label, running one in resin yellow),
-  **Notizen** (handwriting; private until the scene is shared).
+- Side: scenes in the visible range (running one in yellow), **Notizen** (private until shared).
 - No sub-tabs.
 
-### 7.4 Spiel, tab "Zahlen" (`zahlen.html`)
+### 7.4 Spiel, tab "Zahlen" (`#zahlen`)
 
-- Sheets **Feld** and **Tor**; every figure opens its scenes. Last column: a tick when the
-  person's assignment is confirmed.
-- Side: **Wohin die Gegner trafen** (goal grid), **Phasen** (6 gegen 6, Überzahl, Unterzahl,
-  Gegenstösse with partial scores).
+- Streifen, tabs, one source line. Tables **Feld** (Tore, 7 m, 2 Min from the report; Würfe and
+  Quote only from marked shots) and **Tor** (Gegentore from the report, Paraden marked). Every
+  figure opens its scenes. Last column: tick when the person's assignment is confirmed.
+- Side: **Gegentore nach Position** (zones), **Ziel im Tor** (only hand-marked: "12 von 18
+  Toren markiert. Weiter markieren"), **Phasen** with their source.
 - Empty cells stay empty. Running distance appears only once tracks are assigned.
 
-### 7.5 Prüfen (`pruefen.html`)
+### 7.5 Prüfen (`#pruefen`)
 
-- Full screen. Head: "Prüfen · Frage 5 von 36", "Später weiter".
-- A crop of the frame with the subject boxed in resin yellow; caption with time and why it
-  matters.
+- Full screen without navigation: top line "Prüfen · …" and "Später weiter", then the
+  **Streifen** of the match.
+- A crop of the frame with the subject boxed in yellow; caption with time, seconds in view and
+  why ("Nummer nie gelesen").
 - The question as the title ("Wer ist das?", "Tor oder kein Tor?", "Ist das der Anwurf?", "Passt
-  das Spielfeld?"); answers as large keys, the most likely one first and filled; "Andere",
-  "Gegner", "Weiss nicht". Keyboard on desktop.
+  das Spielfeld?"); answers as large keys with the back number in numerals, the most likely one
+  first and filled; "Andere", "Gegner", "Weiss nicht". Keyboard on desktop. Progress as 36
+  segments.
 - Order by value: longest on screen first. Always leavable; each answer is saved at once.
 
-### 7.6 Szenen (`szenen.html`)
+### 7.6 Szenen (`#szenen`)
 
-- The search field is the page. It takes filters and questions; recognised filters appear as
-  chips; the answer is a figure with its base, then the scenes as mini-court tiles, "Alle n
-  abspielen", "In eine Sammlung", "Als Tabelle" (the matrix with this selection).
+- **Seitenkopf** ("152 Szenen aus drei Spielen."), then the search field as the page: filters
+  and questions; recognised filters as chips, offered ones dashed; the answer as a numeral with
+  its base ("19 von 66 Gegentoren über rechts aussen", "29 Prozent. Gegen Thalwil waren es 9 von
+  18."); "Alle 19 abspielen", "In eine Sammlung", "Als Tabelle".
+- Scene tiles: the run of that goal on a Minifeld, time, match, what was read ("Nummer 5
+  gelesen", "Wurfposition geschätzt"), length.
 - Empty query: newest scenes and four example searches from the team's own data.
-- **Sammlungen** (title on tape, one meta line) and **Highlights** (automatic per match,
+- Side: **Sammlungen** (slanted title, one meta line) and **Highlights** (automatic per match,
   landscape and portrait, people without consent left out).
 
-### 7.7 Sammlung (`sammlung.html`)
+### 7.7 Sammlung (`#sammlung`)
 
 - One object replaces playlist, presentation and assignment. Created from the three things with
   one tap, as a draft the coach trims.
-- Title on tape. "Link teilen" (primary) and "Am Bildschirm zeigen" (full screen with drawing).
-- **Ablauf**: ordered entries of three kinds: scene, play, note (handwriting).
-- Side: **So kommt es im Chat an** (the link preview), "Link kopieren", **Geöffnet** (a count,
-  validity, "sperren").
+- **Seitenkopf** with the title, "Link teilen" (primary) and "Am Bildschirm zeigen".
+- **Ablauf**: numbered entries of three kinds: scene (with its run), play (drawn), note (italic
+  with the club rule).
+- Side: **So kommt es im Chat an** (the link preview card), "Link kopieren", **Geöffnet** (a
+  count, validity, "Link sperren").
 - No recipients, no due dates, no per-person read state, no slide editor.
 
-### 7.8 Geteilt (`geteilt.html`)
+### 7.8 Geteilt (`#geteilt`)
 
-- The public page behind a shared link, phone first: floor-coloured head with crest and team,
-  title on tape, the video, the coach's note at the scene, "Nächste Szene", the list.
-- Same page for one scene, a collection and the highlights. No menu, no sign-in, no
-  registration prompt. Valid 30 days, unlisted, revocable; people without consent are blurred.
-- Open Graph preview: mini court image, title, club, length.
+- The public page behind a shared link, phone first: the club's name and crest, "von [Trainerin]",
+  **Seitenkopf** with the title, the video (Video | Taktik), the coach's note, "Nächste Szene",
+  the list with the running scene in yellow.
+- Same page for one scene, a collection and the highlights. No menu, no sign-in, no registration
+  prompt. Valid 30 days, unlisted, revocable; people without consent are blurred.
+- Open Graph preview: the slanted club-colour card with the title.
 
-### 7.9 Saison (`saison.html`)
+### 7.9 Saison (`#saison`)
 
-- Title: rank and the most persistent theme ("Rang 2. Und rechts aussen bleibt offen.").
-- **Yellow sheet "Was sich wiederholt"**: themes that appear in at least two matches with video,
-  each with a sentence, its scenes and a small series (one bar per match).
-- **Verlauf** (goal difference per match), **Wer trifft** (sheet), side: **Tabelle**, **Gegner**.
+- **Seitenkopf** with rank and the most persistent theme ("Rang 2. Und rechts aussen bleibt
+  offen.").
+- **Was sich wiederholt**: themes in at least two matches with video, each with a sentence, its
+  base, its scenes and a Series (one bar per match, the last in the team's colour).
+- **Verlauf** (DiffBars per match), **Wer trifft** (from the reports; no Quote unless shots are
+  marked). Side: the bundle of the main theme, **Tabelle**, **Gegner**.
 - A figure without data is left out, never shown as a dash, zero or record. Say from how many
   matches a theme comes.
 
-### 7.10 Team (`team.html`)
+### 7.10 Team (`#team`)
 
-- The squad from handball.ch as an album by position. Under each sticker one season figure; a
-  resin dot marks what is missing (consent, number). A dashed slot is a person without a number.
+- **Seitenkopf** ("14 im Kader. Bei dreien fehlt noch etwas."). The squad from handball.ch by
+  position (Tor, Rückraum, Flügel und Kreis): back number in the club colour, name slanted,
+  position, one season figure; what is missing as a yellow word ("Einwilligung fehlt", "Nummer
+  fehlt", the number then "?").
 - Side: **Einwilligungen** (count, one link for the team chat), **Trainerbank** (who can analyse;
-  invite an assistant or someone to film or check).
+  invite someone to film or check).
 - No availability, no player invitations.
 
-### 7.11 Spieltag (`spieltag.html`)
+### 7.11 Spieltag (`#spieltag`)
 
-- Phone, full screen, works offline. Night head with score (amber) and running clock (red).
-- Six large keys ("Tor wir" in club colour, "Tor [Gegner]" in ink, "Gute Aktion", "Fehler",
-  "Abwehr anschauen", "Später anschauen"), three small ("2 Minuten", "Time-out", "Halbzeit").
+- Full screen, works offline. Live **Streifen** with score and running clock.
+- Six large keys ("Tor wir" in the club colour, "Tor [Gegner]" in ink with the opponent's colour
+  as a band, "Gute Aktion", "Fehler", "Abwehr anschauen", "Später anschauen"), three small ("2
+  Minuten", "Time-out", "Halbzeit").
 - Last entry with "zurücknehmen". "Pro Spielerin erfassen" opens the detailed level. "Link
-  teilen" hands the screen to someone on the bench without an account.
+  teilen" hands the screen to someone on the bench without an account. Desktop adds the log.
 - Offered only when no official match report with a goal sequence is expected.
 
-### 7.12 Einstieg (`einstieg.html`)
+### 7.12 Einstieg (`#einstieg`)
 
-- Step 1: team search (as today). Step 2 "Das seid ihr, oder?": what handball.ch delivered with
-  ticks, the jersey colour as eight jerseys (choice circled), two stickers that take the colour
-  at once, "Stimmt, weiter". Then Spiele with one task: first video or demo match.
+- Step 1: team search (as today). Step 2 "Das seid ihr, oder?" (Seitenkopf): what handball.ch
+  delivered with ticks, the jersey colour as eight shirts, and a preview of the last match's head
+  and two squad rows that take the colour at once; "Stimmt, weiter", "Das ist nicht mein Team".
+  Then Spiele with one task: first video or demo match.
 - Manual squad entry only if nothing was found. Nobody is invited during onboarding.
-- Sign-in pages use the same floor, sheet and a board.
 
-### 7.13 States (`zustaende.html`)
+### 7.13 States (`#zustaende`)
 
 Every screen has designed empty, running and error states: say what is going on, show what will
 come, offer one action.
 
-- **No video yet**: dashed block with the small board, "Lad das Video hoch. Nach etwa 40 Minuten
-  bekommst du die drei Dinge und alle Szenen.", "Video wählen", "Link einfügen".
-- **Analysis running**: steps in words with "fertig / läuft / danach", a bar, minutes left, and
-  something useful to do meanwhile.
-- **Empty list**: one sentence, one or two actions, and the filled layout pale behind it.
-- **Error**: what failed, what to do; the loss colour only on the icon.
+- **Kein Video**: head with result and Verlauf from the report, tab Video greyed, dashed block
+  "Lad das Video hoch. Nach etwa 40 Minuten bekommst du die drei Dinge und alle Szenen.", "Video
+  wählen", "Link einfügen", the Telegramm.
+- **Analyse läuft**: "Die Analyse läuft." in the head with the result from the report, steps with
+  "fertig / läuft / danach", a bar, minutes left, something useful meanwhile, three empty fields.
+- **Feld nicht bestätigt**: the detected field dashed yellow with four corner handles, "Stimmt das
+  Feld?", "Ja, stimmt", "Ecken verschieben". Until then no ways, no positions.
+- **Gegnerfarbe unbekannt**: opponent grey with "Farbe offen", the head asks with five shirts,
+  grey rings on the camera.
+- **Ball nicht erkannt**: the scene plays without a ball; the Ball-Linie reads "Ball in dieser
+  Szene nicht erkannt".
+- **Leer**: one sentence, one or two actions, the filled layout pale behind.
+- **Fehler**: what failed, what is kept, what to do; the loss colour only on the icon.
 
 ## 8. Voice
 
@@ -360,41 +313,56 @@ numbers and regional names. No figure that is a dash, and no zero presented as a
 ## 11. Accessibility and performance
 
 Unchanged targets: WCAG 2.2 AA, 44 px touch targets, no horizontal scroll at 390 px,
-`prefers-reduced-motion`, the JavaScript and LCP budgets in `DESIGN.md`. Specific to this system:
+`prefers-reduced-motion`, the JavaScript and LCP budgets in `DESIGN.md`. Specific to Anlauf:
 
-- Ink on the floor colour and on the yellow sheet is above 7:1; secondary text on them is
-  `--ink-2`, never `--ink-3`.
-- LED text carries the plain value for screen readers (`aria-label="26 zu 18"`); the ghost
-  segments are decorative.
-- Marker strokes and the frame's line fragments are `aria-hidden`; what a mark means is also in
-  text ("bestätigt").
-- Handwriting is never below 17 px and never the only place a fact appears.
-- Resin yellow and the yellow sheet are backgrounds only; text on them is ink.
-- Win and loss always come with the word, never colour alone. Charts have text alternatives.
-- Motion: the board switching to a new score and a tick being drawn. Nothing else moves.
+- Text on the club colour and the club colour as text reach 4.5:1 (derived in `lib/color.ts`,
+  tested with blue, red, yellow, black, white, green); secondary text is `--ink-2` (6.1:1).
+- The result carries the plain value for screen readers (`aria-label="26 zu 18"`); the outline
+  echoes are `aria-hidden`.
+- Every graphic has a text alternative that says what it shows, including what is estimated and
+  where the ball was not found.
+- Yellow is a background only; text on it is ink, and it always comes with a word.
+- Win and loss always come with the word, never colour alone.
+- Motion: the tactics camera (with Pause) and bundles drawing once. With reduced motion both
+  show the last frame.
 
 ## 12. Lint rules to encode
 
-Replace the current design-lint rules with: no `rounded-*` above 6 px; no `shadow-*`; no
-`bg-club` on containers or buttons; no `uppercase` with tracking; the yellow sheet only in the
-insight components; marker classes only on user-authored data; one `Board` per route; no `→` in
-message files; page components without a description prop.
+Replace the current design-lint rules with:
+
+- no `rounded-*` and no `shadow-*`;
+- `bg-club` only in `WurfHead`, `Strip`, `PageHead` (the Keil), the active marker, the key "Tor
+  wir" and the share card; never on buttons, links, rows or containers of text;
+- the italic display face (`font-display italic`) only on headings, numerals, names, navigation
+  and tabs; never on `p`, `td`, `input`, `button` labels;
+- no `uppercase`, no `tracking-*` above 0;
+- `bg-attn` (yellow) only together with a text label;
+- no SVG path for a ball flight or a pass: the graphic components take tracks, goals and ball
+  stretches only (a type check, not a regex);
+- one `WurfHead` or `Strip` per route; no head on `PageHead` routes;
+- no `→` in message files; page components without a description prop.
 
 ## 13. Order of work
 
-1. **Foundation**: tokens, fonts, components of section 5, a `/dev/halle` page showing all of
-   them in both themes and five club colours.
+1. **Foundation**: tokens, fonts (self-hosted, OFL), the colour model in `lib/color.ts` with
+   tests for six club colours and an unknown opponent, the components of section 3 to 5, a
+   `/dev/anlauf` page showing all of them in six club colours.
 2. **Frame**: four destinations, upload action, search, Ich / Verein, the "Teamfunktionen"
    setting that hides player and team features, ADR 025, `DESIGN.md`.
-3. **Match**: Spiele start, board, three tabs, timeline, Prüfen, Spieltag, match-report dialog.
-4. **Szenen**: search field, Sammlung, the shared page and its link preview, redirects.
-5. **Saison, Team, Einstieg**.
-6. **Content**: vocabulary in three languages, demo data, new screenshots in `docs/screens`.
+3. **Data**: the API fields of `ANLAUF.md` section 10 (goal runs and shot spots, scene tracks,
+   ball stretches, field confirmation, opponent colour, themes per match, check queue).
+4. **Match**: Spiele start with the Wurf-Kopf, the three things with bundles, tab Spiel, tab
+   Video with the tactics camera and the Ball-Linie, tab Zahlen, Prüfen, Spieltag, the
+   match-report dialog, all states of 7.13.
+5. **Szenen**: search field, scene tiles, Sammlung, the shared page and its link preview,
+   redirects.
+6. **Saison, Team, Einstieg**.
+7. **Content**: vocabulary in three languages, demo data, new screenshots in `docs/screens`.
 
 Done when: no screen has two levels of tabs; no screen consists of one sentence; no list with
-video behind it lacks a picture; every screen is complete without manual coach input; a shared
-link looks in a chat like the mockup; the checks in section 12 pass; the Playwright flows and
-axe pass at 390 and 1440 px.
+video behind it lacks a picture; nothing is drawn that is not measured; every screen is complete
+without manual coach input; a shared link looks in a chat like the mockup; the checks in section
+12 pass; the Playwright flows and axe pass at 390 and 1440 px in six club colours.
 
 ## 14. Assumptions to confirm with Lukas
 
@@ -404,4 +372,4 @@ axe pass at 390 and 1440 px.
 3. Consent runs through a link without an account.
 4. Four destinations: Spiele, Szenen, Saison, Team.
 5. "Sammlung" instead of "Besprechung".
-6. Mini court as the default preview; stills only with consent. Ink buttons.
+6. Mini court with runs as the default preview; stills only with consent. Ink buttons.
