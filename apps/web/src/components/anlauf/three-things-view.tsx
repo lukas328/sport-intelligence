@@ -42,8 +42,9 @@ export function ThreeThingsView({
   matchId: string;
   graphics: MatchGraphics;
   oppName: string;
-  onScenes?: (thing: Thing) => void;
-  hrefScenes?: (thing: Thing) => string;
+  /** opens the scenes of a thing; `n` is its place (1 to 3), as in `?thing=n` */
+  onScenes?: (thing: Thing, n: number) => void;
+  hrefScenes?: (thing: Thing, n: number) => string;
 }) {
   const t = useTranslations("anlauf");
   const text = useThingText();
@@ -77,11 +78,11 @@ export function ThreeThingsView({
             </div>
             {(onScenes || hrefScenes) &&
               (hrefScenes ? (
-                <a href={hrefScenes(x)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
+                <a href={hrefScenes(x, i + 1)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
                   {t("scenes", { count: x.goals.length })}
                 </a>
               ) : (
-                <button type="button" onClick={() => onScenes?.(x)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
+                <button type="button" onClick={() => onScenes?.(x, i + 1)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
                   {t("scenes", { count: x.goals.length })}
                 </button>
               ))}

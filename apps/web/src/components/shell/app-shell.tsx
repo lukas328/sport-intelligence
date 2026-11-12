@@ -70,6 +70,7 @@ export function AppShell({
   // one action reachable from everywhere for staff (SPEC section 6)
   const upload = mode === "staff" ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
+  const searchHref = mode === "staff" && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
   useEffect(() => {
@@ -95,7 +96,7 @@ export function AppShell({
   // courtside and presentation tools use the whole screen, with one way back
   const tool = /\/(present|remote|live|marks|matchday|check)$/.test(path);
   // Prüfen and the Spieltag keys bring their own top line («Später weiter», «Beenden»)
-  const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") === "marks");
+  const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") !== "detail");
   if (tool) {
     const back = path.replace(/\/[^/]+$/, "");
     return (
@@ -175,14 +176,21 @@ export function AppShell({
                 })}
               </nav>
               <div className="ml-auto flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => setPalette(true)}
-                  className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
-                  data-testid="palette-open"
-                >
-                  {t("search")}
-                </button>
+                {/* «Suchen» is the scene search (SPEC 9); the palette stays on Ctrl+K */}
+                {searchHref ? (
+                  <Link href={searchHref} className="min-h-11 content-center font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="search-open">
+                    {t("search")}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setPalette(true)}
+                    className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
+                    data-testid="palette-open"
+                  >
+                    {t("search")}
+                  </button>
+                )}
                 {upload && (
                   <Link
                     href={upload}
@@ -205,14 +213,20 @@ export function AppShell({
               <div className="min-w-0 flex-1">
                 <TeamSwitcher compact />
               </div>
-              <button
-                type="button"
-                aria-label={t("search")}
-                onClick={() => setPalette(true)}
-                className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink"
-              >
-                <Search aria-hidden className="size-5" />
-              </button>
+              {searchHref ? (
+                <Link href={searchHref} aria-label={t("search")} className="grid size-11 place-items-center border-2 border-ink text-ink">
+                  <Search aria-hidden className="size-5" />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  aria-label={t("search")}
+                  onClick={() => setPalette(true)}
+                  className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink"
+                >
+                  <Search aria-hidden className="size-5" />
+                </button>
+              )}
               {upload && (
                 <Link
                   href={upload}

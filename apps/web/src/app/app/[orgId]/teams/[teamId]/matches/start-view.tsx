@@ -93,7 +93,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
           </span>
         )}
       </div>
-      {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={() => `${base}?tab=video`} />}
+      {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={(_, n) => `${base}?tab=video&thing=${n}`} />}
     </div>
   );
 }

@@ -2382,13 +2382,13 @@
     "newMatch": "Neues Spiel anlegen",
     "matrix": "Tabelle",
     "searchScenes": "Szenen",
-    "ask": "Suchen",
+    "ask": "Szenen",
     "go": "Gehe zu",
     "matches": "Spiele",
     "paper": "Spielbericht hinzufügen",
     "placeholder": "Suchen oder springen …",
     "teams": "Teams",
-    "askWith": "Suchen: «{q}»",
+    "askWith": "In den Szenen suchen: «{q}»",
     "actions": "Aktionen",
     "empty": "Nichts gefunden.",
     "title": "Schnellsuche"
@@ -3014,7 +3014,7 @@
     "kept": "Gemerkt",
     "keepScene": "Szene merken",
     "highlight": "Spielerin hervorheben",
-    "phaseTitle": "{from}. bis {to}.",
+    "phaseTitle": "Minute {from} bis {to}",
     "running": "läuft gerade",
     "notes": "Notizen",
     "noNotes": "Noch keine Notiz zu dieser Phase.",
@@ -3023,7 +3023,15 @@
     "benchClose": "Werkbank schliessen",
     "vsShort": "gegen",
     "noVideoAgainst": "Noch kein Spiel mit Video gegen {opponent}.",
-    "rowSummary": "{things, plural, =0 {Kein Ding} one {1 Ding} other {# Dinge}} · {scenes, plural, one {1 Szene} other {# Szenen}}{first, select, none {} other { · Punkt 1: {first}}}"
+    "rowSummary": "{things, plural, =0 {Kein Ding} one {1 Ding} other {# Dinge}} · {scenes, plural, one {1 Szene} other {# Szenen}}{first, select, none {} other { · Punkt 1: {first}}}",
+    "sceneOf": "Szene {n} von {total}",
+    "nextScene": "Nächste Szene",
+    "prevScene": "Vorherige",
+    "playAll": "Alle {n} abspielen",
+    "stopAll": "Anhalten",
+    "thingTitle": "Punkt {n}: {thing}",
+    "allGoalsShort": "Alle Tore",
+    "thingsHere": "Die drei Dinge"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3069,7 +3077,7 @@
       "back_right": "Rückraum rechts",
       "circle": "Kreis",
       "last_match": "letztes Spiel",
-      "last_3": "letzte 3 Spiele"
+      "last_3": "letzte 3 mit Video"
     },
     "answerOf": "von {base} {what} {where}",
     "answerScenes": "Szenen: {what}",

@@ -85,11 +85,16 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expect(page.getByRole("button", { name: "Paraden", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expectAccessible(page);
 
-  // assistant: no model key in this stack, so the question gets an honest message
-  await page.goto(page.url().replace(/\/matrix$/, "/assistant"));
-  await page.getByPlaceholder("Frage zu euren Spielen stellen").fill("Wie oft treffen wir nach einem Timeout?");
-  await page.getByRole("button", { name: "Fragen", exact: true }).click();
-  await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toBeVisible();
+  // «Suchen» is the scene search (UX test B02): the old assistant address hands the question
+  // over, its words become chips, nothing ends in «not set up»
+  await page.goto(`${page.url().replace(/\/matrix$/, "")}/assistant?q=${encodeURIComponent("Wie viele Gegentore über rechts aussen in den letzten drei Spielen?")}`);
+  await page.waitForURL(/\/scenes\?q=/);
+  for (const chip of ["Gegentor", "rechts aussen", "letzte 3 mit Video"]) await expect(page.getByRole("button", { name: chip, pressed: true })).toBeVisible();
+  await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toHaveCount(0);
+  // the button «Suchen» in the frame leads there too, with the field focused
+  await page.getByTestId("search-open").first().click();
+  await page.waitForURL(/\/scenes\?focus=1/);
+  await expect(page.getByTestId("scene-search")).toBeFocused();
   await expectAccessible(page);
 
   // my dates: the coach has no player profile, so the list is empty

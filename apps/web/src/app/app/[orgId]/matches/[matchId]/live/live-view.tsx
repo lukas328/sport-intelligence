@@ -218,10 +218,51 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
     { key: "two", label: t("oppTwo"), body: { type: "suspension_2min" } },
   ];
 
+  // what was captured before this page load comes from the server (UX test B03): the score and
+  // the list stay after a reload, and nobody captures the same goal twice
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    let off = false;
+    void api
+      .GET("/v1/orgs/{org_id}/matches/{match_id}/events", { params: { path } })
+      .then(({ data }) => {
+        if (off || !data) return;
+        const live = data.filter((e) => e.client_id && (e.type === "shot" || e.type === "turnover" || e.type === "suspension_2min"));
+        const labelOf = (e: (typeof live)[number]) => {
+          const list = e.side === "own" ? own : opp;
+          const hit = list.find((a) => a.body.type === e.type && (a.body.outcome == null || a.body.outcome === e.outcome));
+          const who = e.side === "own" ? playerLabel(e.player_id ?? null) : e.number != null ? `#${e.number}` : "";
+          return [hit?.label ?? e.type, who].filter(Boolean).join(" ");
+        };
+        const periodLen = match?.period_s ?? 1800;
+        const fromServer: Logged[] = live
+          .sort((a, b) => (b.clock_s ?? 0) - (a.clock_s ?? 0))
+          .map((e) => ({
+            client_id: e.client_id!,
+            id: e.id,
+            side: e.side as "own" | "opponent",
+            label: labelOf(e),
+            goal: e.type === "shot" && e.outcome === "goal",
+            clock: fmt(Math.max(0, (e.clock_s ?? 0) - ((e.period ?? 1) - 1) * periodLen)),
+            synced: true,
+          }));
+        setLog((l) => {
+          const known = new Set(l.map((x) => x.client_id));
+          return [...l, ...fromServer.filter((x) => !known.has(x.client_id))];
+        });
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+    return () => {
+      off = true;
+    };
+  }, [roster, match?.period_s]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div
       className="mx-auto max-w-xl space-y-4 pb-24"
       data-testid="live"
+      data-loaded={loaded ? "" : undefined}
       style={
         matchStyle(
           [shell?.org.primary_color ?? null, shell?.org.secondary_color ?? null],

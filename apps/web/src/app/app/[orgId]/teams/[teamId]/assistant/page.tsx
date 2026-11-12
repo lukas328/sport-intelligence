@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { AssistantView } from "./assistant-view";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("assistant"))("title") };
-}
-
-export default async function AssistantPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
+/**
+ * «Suchen» is the scene search (SPEC 9, UX test B02): the old assistant address leads there and
+ * hands the question over as text (its words become chips). AssistantView stays in the code for
+ * an installation with a language model.
+ */
+export default async function AssistantPage({ params, searchParams }: { params: Promise<{ orgId: string; teamId: string }>; searchParams: Promise<{ q?: string }> }) {
   const { orgId, teamId } = await params;
-  return <AssistantView orgId={orgId} teamId={teamId} />;
+  const { q } = await searchParams;
+  redirect(`/app/${orgId}/teams/${teamId}/scenes${q ? `?q=${encodeURIComponent(q)}` : "?focus=1"}`);
 }

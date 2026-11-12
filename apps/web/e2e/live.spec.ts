@@ -26,7 +26,10 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Halle");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
+  // Spieltag opens on the six big keys; the capture per player sits behind «Pro Spielerin erfassen»
   await page.getByTestId("live-link").click();
+  await expect(page.getByTestId("marks")).toBeVisible();
+  await page.getByTestId("per-player").click();
   await expect(page.getByTestId("live")).toBeVisible();
   await expect(page.getByTestId("live-score")).toHaveText("0:0");
   await expectAccessible(page);
@@ -37,6 +40,11 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
   await page.getByRole("button", { name: "Tor", exact: true }).click();
   await expect(page.getByTestId("live-score")).toHaveText("1:0");
   await expect(page.getByTestId("sync-state")).toHaveText("Alles gespeichert");
+  // a reload in the hall keeps the score and the list (UX test B03): nothing is captured twice
+  await page.reload();
+  await expect(page.locator("[data-testid=live][data-loaded]")).toBeVisible();
+  await expect(page.getByTestId("live-score")).toHaveText("1:0");
+  await expect(page.getByTestId("live-log").getByRole("listitem")).toHaveCount(1);
 
   // the hall Wi-Fi drops: events queue up, the page even reloads from the service worker
   await page.waitForFunction(async () => (await caches.open("hb-live-v1").then((c) => c.match(location.href))) !== undefined);

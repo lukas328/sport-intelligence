@@ -45,7 +45,29 @@ export function MarksView({
   const [half, setHalf] = useState(1);
   const session = useRef<string | null>(null);
   // what was marked on this phone, newest first (the queue only holds what is not uploaded yet)
-  const [log, setLog] = useState<{ id: number; key: string; label: string; at: Date }[]>([]);
+  const [log, setLog] = useState<{ id: string; key: string; label: string; at: Date }[]>([]);
+  // what was marked before this page load comes from the server and the offline queue (UX test
+  // B03): the score and «Bisher» stay after a reload
+  useEffect(() => {
+    let off = false;
+    const queued = pending(localStorage, matchId).map((q) => ({ id: q.client_id, key: q.key, label: "", at: new Date(q.device_time) }));
+    void api
+      .GET("/v1/orgs/{org_id}/matches/{match_id}/marks", { params: { path: { org_id: orgId, match_id: matchId } } })
+      .then(({ data }) => {
+        if (off) return;
+        const server = (data?.marks ?? []).map((m) => ({ id: m.id, key: m.key, label: m.label ?? "", at: new Date(m.device_time) }));
+        setLog((l) => {
+          const all = [...l, ...queued, ...server];
+          const seen = new Set<string>();
+          return all.filter((x) => (seen.has(x.id) ? false : (seen.add(x.id), true))).sort((a, b) => b.at.getTime() - a.at.getTime());
+        });
+        if (server.some((m) => m.key === "halftime") || queued.some((m) => m.key === "halftime")) setHalf(2);
+      })
+      .catch(() => setLog((l) => (l.length ? l : queued)));
+    return () => {
+      off = true;
+    };
+  }, [orgId, matchId]);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 15000);
@@ -97,9 +119,9 @@ export function MarksView({
   }, [matchId, sync]);
 
   const tap = (key: string, label: string) => {
-    mark(localStorage, matchId, key);
+    const item = mark(localStorage, matchId, key);
     if (key === "halftime") setHalf(2);
-    setLog((l) => [{ id: Date.now(), key, label, at: new Date() }, ...l]);
+    setLog((l) => [{ id: item.client_id, key, label, at: new Date() }, ...l]);
     setCount((n) => n + 1);
     setOpen(pending(localStorage, matchId).length);
     if (navigator.vibrate) navigator.vibrate(40);
@@ -113,6 +135,7 @@ export function MarksView({
   const goals = list.filter((k) => k.key === "goal_own" || k.key === "goal_opp");
   const rest = list.filter((k) => k.key !== "goal_own" && k.key !== "goal_opp");
   const score = { own: log.filter((l) => l.key === "goal_own").length, opp: log.filter((l) => l.key === "goal_opp").length };
+  const shown = (l: { key: string; label: string }) => l.label || (l.key === "halftime" ? t("halftime") : labelOf({ key: l.key }));
   const time = (d: Date) => format.dateTime(d, { hour: "2-digit", minute: "2-digit" });
   const back = `/app/${orgId}/matches/${matchId}`;
   return (
@@ -170,8 +193,8 @@ export function MarksView({
             </button>
           </div>
           <p className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 border-t-2 border-ink pt-3 text-[15px]" aria-live="polite">
-            <span>{log[0] ? `${time(log[0].at)} ${log[0].label}` : t("noneYet")}</span>
-            <a href={`/app/${orgId}/matches/${matchId}/matchday`} className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+            <span>{log[0] ? `${time(log[0].at)} ${shown(log[0])}` : t("noneYet")}</span>
+            <a href={`/app/${orgId}/matches/${matchId}/matchday?mode=detail`} data-testid="per-player" className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
               {t("perPlayer")}
             </a>
           </p>
@@ -188,7 +211,7 @@ export function MarksView({
                   <b className="font-num w-14">{time(l.at)}</b>
                   {l.key === "goal_own" && <span aria-hidden className="inline-block h-2.5 w-3 -skew-x-12 bg-club-text" />}
                   {l.key === "goal_opp" && <span aria-hidden className="inline-block h-2.5 w-3 -skew-x-12 bg-ink" />}
-                  {l.label}
+                  {shown(l)}
                 </li>
               ))}
             </ul>

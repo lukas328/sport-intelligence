@@ -5,7 +5,7 @@ import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
@@ -109,16 +109,37 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     return () => es.close();
   }, [orgId, initial.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ?tab=spiel|video|zahlen opens a tab directly
-  const [view, setView] = useState<View>("video");
+  // the tab and the thing live in the address (?tab=spiel|video|zahlen&thing=n): reload keeps
+  // them and «Zurück» goes back to the previous tab; a match opens on Spiel
+  const [view, setViewState] = useState<View>("game");
+  const [thing, setThingState] = useState<number | null>(null);
   const linkedView = useRef(false);
-  useEffect(() => {
-    const v = VIEW_PARAM[new URLSearchParams(window.location.search).get("tab") ?? ""];
-    if (v) {
-      linkedView.current = true;
-      setView(v);
-    }
+  const readAddress = useCallback(() => {
+    const q = new URLSearchParams(window.location.search);
+    const v = VIEW_PARAM[q.get("tab") ?? ""];
+    const n = Number(q.get("thing"));
+    if (v) linkedView.current = true;
+    setViewState(v ?? (q.get("t") ? "video" : "game"));
+    setThingState(Number.isInteger(n) && n >= 1 && n <= 3 ? n : null);
   }, []);
+  useEffect(() => {
+    readAddress();
+    window.addEventListener("popstate", readAddress);
+    return () => window.removeEventListener("popstate", readAddress);
+  }, [readAddress]);
+  const TAB_WORD: Record<View, string> = { game: "spiel", video: "video", numbers: "zahlen" };
+  const setView = useCallback((v: View, n: number | null = null) => {
+    // a tab the coach chose is not changed by the default afterwards
+    linkedView.current = true;
+    setViewState(v);
+    setThingState(n);
+    const q = new URLSearchParams(window.location.search);
+    q.set("tab", TAB_WORD[v]);
+    if (n != null) q.set("thing", String(n));
+    else q.delete("thing");
+    q.delete("t");
+    window.history.pushState(null, "", `${window.location.pathname}?${q.toString()}`);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [askPane, setAskPane] = useState<{ pane: "feedback" } | null>(null);
   const player = useRef<PlayerHandle | null>(null);
   // deep links (?t=ms), e.g. from a play drawn on a video moment
@@ -159,13 +180,14 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       document.getElementById("numbers-physical")?.scrollIntoView({ block: "start" });
     });
   };
-  // a match with events but no video (paper report, demo, marks) opens on its analysis
+  // a match opens on Spiel; one without video and events on Video, where the upload is
   const opened = useRef(false);
   const hasEvents = (stats.data?.own.shots ?? 0) + (stats.data?.opponent.shots ?? 0) > 0;
   useEffect(() => {
     if (opened.current || !stats.data) return;
     opened.current = true;
-    if (!main && hasEvents && !linkedView.current && !new URLSearchParams(window.location.search).get("t")) setView("game");
+    // without video and without events the upload is the only thing to do: it sits on Video
+    if (!linkedView.current && !new URLSearchParams(window.location.search).get("t")) setViewState(main || hasEvents ? "game" : "video");
   }, [stats.data, main, hasEvents]);
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
   const kickoff = new Date(match.kickoff_at);
@@ -286,7 +308,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             variant="underline"
             label={t("tabs.video")}
             value={view}
-            onChange={setView}
+            onChange={(v) => setView(v)}
             items={[
               { value: "game", label: t("tabs.game") },
               { value: "video", label: t("tabs.video") },
@@ -403,7 +425,18 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         {/* a player's own scenes of this match, one step away */}
         {!staff && <MyScenesLine orgId={orgId} matchId={match.id} />}
         {stage && main && graphics.data && (
-          <VideoStage orgId={orgId} match={match} video={main} graphics={graphics.data} oppName={oppName(match)} staff={staff} onBench={() => setBench(true)} />
+          <VideoStage
+            orgId={orgId}
+            match={match}
+            video={main}
+            graphics={graphics.data}
+            ownName={shell?.org.name ?? teamName}
+            oppName={oppName(match)}
+            staff={staff}
+            thing={thing}
+            onThing={(n) => setView("video", n)}
+            onBench={() => setBench(true)}
+          />
         )}
         {main ? (
           // with the stage, the workbench (events, defence systems, comments, feedback) is behind
@@ -438,7 +471,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         <div className="animate-fade space-y-10">
           {graphics.data && graphics.data.goals.length > 0 && (
             <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
-              <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? () => setView("video") : undefined} />
+              <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} />
               <MatchZones graphics={graphics.data} />
             </div>
           )}

@@ -2382,13 +2382,13 @@
     "newMatch": "Add a match",
     "matrix": "Table",
     "searchScenes": "Scenes",
-    "ask": "Search",
+    "ask": "Scenes",
     "go": "Go to",
     "matches": "Matches",
     "paper": "Add match report",
     "placeholder": "Search or jump to …",
     "teams": "Teams",
-    "askWith": "Search: “{q}”",
+    "askWith": "Search the scenes: «{q}»",
     "actions": "Actions",
     "empty": "Nothing found.",
     "title": "Quick search"
@@ -3014,7 +3014,7 @@
     "kept": "Kept",
     "keepScene": "Keep scene",
     "highlight": "Highlight a player",
-    "phaseTitle": "{from}. to {to}.",
+    "phaseTitle": "Minute {from} to {to}",
     "running": "playing now",
     "notes": "Notes",
     "noNotes": "No note on this phase yet.",
@@ -3023,7 +3023,15 @@
     "benchClose": "Close workbench",
     "vsShort": "against",
     "noVideoAgainst": "No match with video against {opponent} yet.",
-    "rowSummary": "{things, plural, =0 {No thing} one {1 thing} other {# things}} · {scenes, plural, one {1 scene} other {# scenes}}{first, select, none {} other { · Point 1: {first}}}"
+    "rowSummary": "{things, plural, =0 {No thing} one {1 thing} other {# things}} · {scenes, plural, one {1 scene} other {# scenes}}{first, select, none {} other { · Point 1: {first}}}",
+    "sceneOf": "Scene {n} of {total}",
+    "nextScene": "Next scene",
+    "prevScene": "Previous",
+    "playAll": "Play all {n}",
+    "stopAll": "Stop",
+    "thingTitle": "Point {n}: {thing}",
+    "allGoalsShort": "All goals",
+    "thingsHere": "The three things"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3069,7 +3077,7 @@
       "back_right": "right back",
       "circle": "circle",
       "last_match": "last match",
-      "last_3": "last 3 matches"
+      "last_3": "last 3 with video"
     },
     "answerOf": "of {base} {what} {where}",
     "answerScenes": "Scenes: {what}",

@@ -6,13 +6,14 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { type CSSProperties, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { Bundle, EmptyField } from "@/components/anlauf/bundle";
 import { clockOf } from "@/components/anlauf/three-things-view";
 import { useShell } from "@/components/shell/context";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
+import { chipsFromText } from "@/lib/scene-words";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
@@ -64,7 +65,10 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
   const t = useTranslations("scenesPage");
   const router = useRouter();
   // ?chips=conceded,wing_right opens a search from elsewhere (the season, a thing)
-  const asked = useSearchParams().get("chips");
+  const params = useSearchParams();
+  const asked = params.get("chips");
+  // ?q=a sentence (from «Suchen» or the palette): its words become chips, the rest stays text
+  const sentence = params.get("q");
   const withVideo = useMemo(() => matches.filter((m) => m.has_video).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at)), [matches]);
   const ctx = { lastMatch: withVideo[0]?.id ?? null, last3: withVideo.slice(0, 3).map((m) => m.id) };
   // the page opens on the first thing of the last match (as the start says it), over the last
@@ -73,13 +77,21 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
   const firstThing = lastGraphics.data ? threeThings(goalRuns(lastGraphics.data))[0] : undefined;
   const [picked, setActive] = useState<string[] | null>(() => {
     const keys = asked?.split(",").filter((k) => CHIPS.some((c) => c.key === k)) ?? [];
-    return keys.length ? keys : null;
+    if (keys.length) return keys;
+    if (sentence) return chipsFromText(sentence);
+    return null;
   });
   const start = firstThing
     ? [firstThing.team === "opp" ? "conceded" : "scored", ...(ZONE_CHIP[firstThing.zone ?? ""] ? [ZONE_CHIP[firstThing.zone ?? ""]!] : []), "last_3"]
     : [];
   const active = picked ?? start;
-  const [text, setText] = useState("");
+  // «Suchen» (?focus=1) and a sentence (?q=) put the cursor in the field, also when the page is open
+  const field = useRef<HTMLInputElement>(null);
+  const wantsFocus = params.get("focus") === "1" || sentence != null;
+  useEffect(() => {
+    if (wantsFocus) field.current?.focus();
+  }, [wantsFocus, params]);
+  const [text, setText] = useState(() => (sentence && chipsFromText(sentence).length === 0 ? sentence : ""));
   const [shown, setShown] = useState(TILES);
   const chips = CHIPS.filter((c) => active.includes(c.key));
   // without a filter: the newest scenes of the last match, never a raw list
@@ -142,8 +154,16 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && suggestions[0]) toggle(suggestions[0].key);
+              if (e.key !== "Enter") return;
+              // a sentence: its words become the chips; otherwise the first matching chip
+              const words = chipsFromText(text);
+              if (words.length) {
+                setActive(words);
+                setText("");
+                setShown(TILES);
+              } else if (suggestions[0]) toggle(suggestions[0].key);
             }}
+            ref={field}
             placeholder={chips.length ? chips.map(label).join(", ") : t("placeholder")}
             className="min-w-0 flex-1 bg-transparent font-semibold outline-none placeholder:text-ink"
             data-testid="scene-search"
