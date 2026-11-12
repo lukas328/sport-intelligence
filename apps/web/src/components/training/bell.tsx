@@ -38,13 +38,13 @@ export function NotificationBell({ orgId }: { orgId: string }) {
     <M.Root>
       <M.Trigger
         aria-label={t("open", { count: unread })}
-        className="relative grid size-10 shrink-0 place-items-center rounded-md text-muted hover:bg-surface hover:text-foreground"
+        className="relative grid size-11 shrink-0 cursor-pointer place-items-center text-ink"
         data-testid="bell"
       >
         <Bell aria-hidden className="size-5" strokeWidth={1.8} />
         {unread > 0 && (
           <span
-            className="absolute top-1 right-1 grid min-w-[1.125rem] place-items-center rounded-md bg-accent px-1 text-[0.625rem] font-bold leading-[1.125rem] text-accent-contrast ring-2 ring-background"
+            className="absolute top-1 right-1 grid min-w-[1.125rem] place-items-center bg-accent px-1 text-[0.625rem] font-bold leading-[1.125rem] text-accent-contrast ring-2 ring-background"
             data-testid="unread"
           >
             {unread}
@@ -57,7 +57,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
           sideOffset={6}
           collisionPadding={12}
           aria-label={t("title")}
-          className="club z-50 w-[22rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg bg-raised text-sm shadow-xl ring-1 ring-border animate-fade"
+          className="club z-50 w-[22rem] max-w-[calc(100vw-1.5rem)] overflow-hidden bg-raised text-sm ring-1 ring-border animate-fade"
         >
           <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
             <p className="font-semibold">{t("title")}</p>
@@ -74,7 +74,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
                 <Link
                   href={n.link ?? `/app/${orgId}`}
                   onClick={() => !n.read_at && read.mutate([n.id])}
-                  className={cn("flex gap-3 rounded-md px-3 py-2.5 outline-none data-[highlighted]:bg-surface", !n.read_at && "font-medium")}
+                  className={cn("flex gap-3 px-3 py-2.5 outline-none data-[highlighted]:bg-surface", !n.read_at && "font-medium")}
                 >
                   <span aria-hidden className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-accent")} />
                   <span className="min-w-0">

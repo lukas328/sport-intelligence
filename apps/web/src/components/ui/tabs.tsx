@@ -51,7 +51,7 @@ export function Segmented<T extends string>({
         className,
       )}
     >
-      <div role="tablist" aria-label={label} className={variant === "underline" ? (size === "sm" ? "inline-flex gap-5" : "inline-flex gap-7") : "inline-flex gap-0.5 rounded-md bg-surface p-1"}>
+      <div role="tablist" aria-label={label} className={variant === "underline" ? (size === "sm" ? "inline-flex gap-5" : "inline-flex gap-2") : "inline-flex"}>
         {items.map((it, i) => {
           const active = it.value === value;
           return (
@@ -74,20 +74,18 @@ export function Segmented<T extends string>({
                       "whitespace-nowrap transition-[color,box-shadow] duration-150",
                       // the second level is smaller and underlined in ink, so the main switch stays the main one
                       size === "sm"
-                        ? cn("pb-1.5 text-[0.9375rem] font-semibold", active ? "text-foreground shadow-[inset_0_-3px_0_var(--foreground)]" : "text-muted hover:text-foreground")
-                        : cn(
-                            "pt-1 pb-2 font-display text-xl uppercase tracking-wide",
-                            active ? "text-foreground shadow-[inset_0_-4px_0_var(--accent)]" : "text-muted hover:text-foreground hover:shadow-[inset_0_-4px_0_var(--border)]",
-                          ),
+                        ? cn("min-h-11 text-[15px] font-bold", active ? "text-ink shadow-[inset_0_-3px_0_var(--ink)]" : "text-ink-2 hover:text-ink")
+                        : cn("font-slant relative min-h-[54px] px-2.5 text-[17px] md:text-xl", active ? "text-ink" : "text-ink-2 hover:text-ink"),
                     )
                   : cn(
-                      "whitespace-nowrap rounded-[5px] font-semibold transition-[background,color] duration-150",
-                      size === "sm" ? "px-3 py-1 text-[0.8125rem]" : "px-4 py-1.5 text-sm",
-                      active ? "bg-foreground text-background" : "text-muted hover:bg-surface hover:text-foreground",
+                      "-ml-[1.5px] min-h-11 whitespace-nowrap border-[1.5px] border-ink font-bold transition-[background,color] duration-150 first:ml-0",
+                      size === "sm" ? "px-3 text-[13px]" : "px-4 text-[15px]",
+                      active ? "bg-ink text-ground" : "bg-transparent text-ink hover:bg-ink/5",
                     )
               }
             >
               {it.label}
+              {variant === "underline" && size !== "sm" && active && <span aria-hidden data-mark="" className="mark-band absolute right-2.5 -bottom-0.5 left-2.5 h-1.5" />}
             </button>
           );
         })}

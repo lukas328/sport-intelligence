@@ -123,7 +123,7 @@ export function CourtCalibration({
         aria-modal="true"
         aria-labelledby="calibrate-title"
         tabIndex={-1}
-        className="flex w-full max-w-7xl flex-col gap-3 overflow-hidden rounded-lg bg-raised p-4 shadow-xl outline-none"
+        className="flex w-full max-w-7xl flex-col gap-3 overflow-hidden bg-raised p-4 outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -143,7 +143,7 @@ export function CourtCalibration({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto rounded-md ring-1 ring-inset ring-border bg-black">
+        <div className="min-h-0 flex-1 overflow-auto ring-1 ring-inset ring-border bg-black">
           <div className="relative" style={fit ? { width: "100%" } : { width: pano.width }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image, not a static asset */}
             <img
@@ -191,7 +191,7 @@ export function CourtCalibration({
         <div className="grid gap-4 md:grid-cols-[minmax(0,22rem)_1fr]">
           <div className="space-y-2">
             <p className="text-sm font-medium">{t("pick", { name: t(`landmarks.${selected}` as "landmarks.cornerNearLeft") })}</p>
-            <svg viewBox={`-2 -2 ${COURT.length + 4} ${COURT.width + 4}`} className="w-full rounded-md" style={{ background: "var(--court)" }}>
+            <svg viewBox={`-2 -2 ${COURT.length + 4} ${COURT.width + 4}`} className="w-full" style={{ background: "var(--court)" }}>
               <title>{t("courtTitle")}</title>
               {Object.entries(COURT.lines).map(([name, pts]) => (
                 <path key={name} d={courtPath(pts)} fill="none" stroke="var(--court-line)" strokeWidth={0.12} />
@@ -235,7 +235,7 @@ export function CourtCalibration({
                 <li key={p.id}>
                   <button
                     type="button"
-                    className="rounded-md border border-border px-2 py-0.5 text-xs hover:bg-surface"
+                    className="border border-border px-2 py-0.5 text-xs hover:bg-surface"
                     onClick={() => setPoints((ps) => ps.filter((x) => x.id !== p.id))}
                     aria-label={t("remove", { name: t(`landmarks.${p.id}` as "landmarks.cornerNearLeft") })}
                   >
@@ -275,7 +275,7 @@ export function CourtPreview({ orgId, videoId, analysis, alt }: { orgId: string;
   const cal = analysis.calibration;
   if (!pano || !cal || cal.image_size[0] !== pano.width || cal.image_size[1] !== pano.height) return null;
   return (
-    <div className="relative overflow-hidden rounded-md bg-black ring-1 ring-inset ring-border" data-testid="court-preview">
+    <div className="relative overflow-hidden bg-black ring-1 ring-inset ring-border" data-testid="court-preview">
       {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image, not a static asset */}
       <img src={`/v1/orgs/${orgId}/videos/${videoId}/panorama`} alt={alt} width={pano.width} height={pano.height} className="block h-auto w-full" />
       <svg viewBox={`0 0 ${pano.width} ${pano.height}`} className="pointer-events-none absolute inset-0 size-full" aria-hidden>

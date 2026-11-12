@@ -469,7 +469,7 @@ export function Workspace({
         />
         {/* the match clock on the picture, as on a broadcast: what the coach talks about */}
         {mounted && spansFor && !drawing && (
-          <span aria-hidden className="pointer-events-none absolute left-2 top-2 z-10 rounded-xs bg-black/65 px-2 py-0.5 font-score text-base text-white tabular-nums">
+          <span aria-hidden className="pointer-events-none absolute left-2 top-2 z-10 bg-black/65 px-2 py-0.5 font-score text-base text-white tabular-nums">
             {gameAt(now)}
           </span>
         )}
@@ -483,10 +483,10 @@ export function Workspace({
             className={cn(
               "bg-black",
               multi.mode === "side"
-                ? "aspect-video w-full rounded"
+                ? "aspect-video w-full"
                 : autoCam && multi.mode === "single"
                   ? "pointer-events-none absolute inset-0 size-full object-contain"
-                  : "pointer-events-none absolute right-2 top-2 w-1/3 rounded border-2 border-white shadow-lg",
+                  : "pointer-events-none absolute right-2 top-2 w-1/3 border-2 border-white",
             )}
           />
         )}
@@ -524,11 +524,11 @@ export function Workspace({
           )}
           {/* keys teach only where there is a keyboard */}
           <details className="group relative pointer-coarse:hidden">
-            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
               <Keyboard aria-hidden className="size-4" />
               {t("player.shortcuts")}
             </summary>
-            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-md bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
+            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] bg-raised p-3 text-xs leading-relaxed text-muted ring-1 ring-border">{t("player.shortcutsList")}</p>
           </details>
         </div>
         {spot.ready && !offset && !reviewing && spotShown && (
@@ -678,8 +678,8 @@ export function Workspace({
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
               {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.emptyHint", { time: gameAt(now) })}</li>}
               {(comments.data ?? []).map((c) => (
-                <li key={c.id} className="rounded-md bg-surface px-3 py-2">
-                  <button className="rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
+                <li key={c.id} className="bg-surface px-3 py-2">
+                  <button className="bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
                     {gameAt(c.t_ms)}
                   </button>{" "}
                   <span className="text-xs text-muted">{c.author_name}</span>
@@ -748,7 +748,7 @@ export function Workspace({
               {(clips.data ?? []).length === 0 && <li className="text-muted">{t("clips.empty")}</li>}
               {(clips.data ?? []).map((c) => (
                 <li key={c.id}>
-                  <button className="w-full rounded px-2 py-1 text-left hover:bg-surface" onClick={() => {
+                  <button className="w-full px-2 py-1 text-left hover:bg-surface" onClick={() => {
                     player.current.seek(c.start_ms);
                     player.current.play();
                   }}>
@@ -777,7 +777,7 @@ export function Workspace({
                       key={k}
                       aria-pressed={tool === k}
                       onClick={() => setTool(k)}
-                      className={cn("rounded-md border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+                      className={cn("border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
                     >
                       {t(`draw.tool_${k}`)}
                     </button>
@@ -809,7 +809,7 @@ export function Workspace({
               {(annotations.data ?? []).length === 0 && <li className="text-muted">{t("draw.empty")}</li>}
               {(annotations.data ?? []).map((a) => (
                 <li key={a.id}>
-                  <button className="rounded px-2 py-1 font-score text-xs hover:bg-surface" onClick={() => {
+                  <button className="px-2 py-1 font-score text-xs hover:bg-surface" onClick={() => {
                     player.current.pause();
                     player.current.seek(a.t_ms + 100);
                   }}>
@@ -1067,7 +1067,7 @@ function IdentityPanel({
                 id={`track-${tr.track_no}`}
                 value={tr.player_id ?? ""}
                 onChange={(e) => void assign(tr.track_no, e.target.value)}
-                className="min-h-9 flex-1 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
+                className="min-h-9 flex-1 bg-raised ring-1 ring-inset ring-border px-2"
               >
                 <option value="">{t("none")}</option>
                 {(roster.data ?? [])
@@ -1123,7 +1123,7 @@ function CameraSwitch({
             key={c.id}
             aria-pressed={c.id === active.id}
             onClick={() => onSwitch(c.id)}
-            className={cn("rounded-md border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+            className={cn("border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
           >
             {t(c.role)}
           </button>
@@ -1158,7 +1158,7 @@ function CameraSwitch({
               step={10}
               defaultValue={active.time_offset_ms}
               key={active.id}
-              className="min-h-9 w-28 rounded-md bg-raised ring-1 ring-inset ring-border px-2 text-sm"
+              className="min-h-9 w-28 bg-raised ring-1 ring-inset ring-border px-2 text-sm"
             />
           </label>
           <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">
@@ -1199,7 +1199,7 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
               {segs.map((f) => (
                 <li key={`${f.start_ms}-${f.team}`}>
                   <button
-                    className="rounded bg-surface px-2 py-0.5 font-score text-xs hover:brightness-90"
+                    className="bg-surface px-2 py-0.5 font-score text-xs hover:brightness-90"
                     onClick={() => onSeek(f.start_ms)}
                     aria-label={t("jump", { formation: label(f.formation), time: formatClock(f.start_ms) })}
                   >

@@ -542,7 +542,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
         </div>
         <label className="flex items-center gap-2 text-sm">
           {t("filterOutcome")}
-          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="rounded-lg bg-raised ring-1 ring-inset ring-border px-2 py-1">
+          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="bg-raised ring-1 ring-inset ring-border px-2 py-1">
             <option value="">{t("all")}</option>
             {["goal", "save", "miss", "post", "blocked"].map((o) => (
               <option key={o} value={o}>

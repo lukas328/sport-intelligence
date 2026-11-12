@@ -43,7 +43,7 @@ export function ScheduleRow({ item: i, onReply }: { item: Item; onReply: (item: 
       aria-pressed={i.response === r}
       onClick={() => onReply(i, r)}
       className={cn(
-        "inline-flex min-h-10 items-center gap-1.5 rounded-md px-4 text-sm font-medium transition-colors",
+        "inline-flex min-h-10 items-center gap-1.5 px-4 text-sm font-medium transition-colors",
         i.response === r
           ? r === "yes"
             ? "bg-ok text-white"
@@ -59,7 +59,7 @@ export function ScheduleRow({ item: i, onReply }: { item: Item; onReply: (item: 
     <div className="flex flex-wrap items-center gap-4 px-4 py-3.5 sm:px-5">
       <span className="w-11 shrink-0 text-center leading-none">
         <span className="block text-lg font-bold font-wide tabular-nums">{format.dateTime(when, { day: "numeric" })}</span>
-        <span className="mt-1 block text-[0.6875rem] font-medium uppercase tracking-wide text-muted">{format.dateTime(when, { month: "short" })}</span>
+        <span className="mt-1 block text-[0.6875rem] font-medium text-muted">{format.dateTime(when, { month: "short" })}</span>
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-semibold">

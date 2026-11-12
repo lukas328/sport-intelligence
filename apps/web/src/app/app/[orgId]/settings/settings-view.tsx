@@ -290,7 +290,7 @@ export function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
           <form onSubmit={(e) => confirm(e, "/v1/me/totp/enable")} className="space-y-3">
             <p className="text-sm">{t("settings.twoFactorScan")}</p>
             {/* QR is generated locally from our own otpauth URI */}
-            <div className="w-fit rounded bg-white p-2" aria-hidden dangerouslySetInnerHTML={{ __html: qr }} />
+            <div className="w-fit bg-white p-2" aria-hidden dangerouslySetInnerHTML={{ __html: qr }} />
             <p className="text-sm">
               {t("settings.twoFactorSecret")}: <code className="break-all" data-testid="totp-secret">{setup.secret}</code>
             </p>
@@ -301,7 +301,7 @@ export function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
           </form>
         )}
         {codes && (
-          <div className="space-y-2 rounded-md bg-surface p-4" data-testid="recovery-codes">
+          <div className="space-y-2 bg-surface p-4" data-testid="recovery-codes">
             <p className="text-sm font-medium">{t("settings.recoveryTitle")}</p>
             <p className="text-sm text-muted">{t("settings.recoveryHint")}</p>
             <ul className="grid grid-cols-2 gap-1 font-mono text-sm sm:grid-cols-5">

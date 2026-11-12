@@ -113,7 +113,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
         </Button>
       </div>
       <div className={presenterView ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}>
-        <div ref={stage} className="relative rounded-lg bg-raised" data-testid="stage" aria-live="polite">
+        <div ref={stage} className="relative bg-raised" data-testid="stage" aria-live="polite">
           {slide ? (
             <SlideView orgId={orgId} slide={slide} paused={paused} extraShapes={remoteShapes} observationText={obsText} />
           ) : (

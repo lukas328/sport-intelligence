@@ -17,7 +17,7 @@ export function BackLink({ fallback, label }: { fallback: string; label?: string
     }
   }
   return (
-    <Link href={fallback} onClick={onClick} className="-ml-1 mb-3 inline-flex items-center gap-1 rounded-md py-1 pr-3 pl-1 text-sm font-medium text-muted hover:bg-surface hover:text-foreground">
+    <Link href={fallback} onClick={onClick} className="-ml-1 mb-3 inline-flex items-center gap-1 py-1 pr-3 pl-1 text-sm font-medium text-muted hover:bg-surface hover:text-foreground">
       <ChevronLeft aria-hidden className="size-4" />
       {label ?? t("back")}
     </Link>

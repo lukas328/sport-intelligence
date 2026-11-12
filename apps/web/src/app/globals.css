@@ -339,6 +339,15 @@
   .sheet tbody tr:last-child > * {
     border-bottom: 0;
   }
+  /* zones that reach the edges of the content column (Wurf head, Streifen, Seitenkopf) */
+  .bleed-x {
+    margin-inline: -1rem;
+  }
+  @media (min-width: 768px) {
+    .bleed-x {
+      margin-inline: -2rem;
+    }
+  }
   .bleed,
   .bleed-full {
     margin-inline: calc(50% - 50vw);

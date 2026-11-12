@@ -26,7 +26,7 @@ import { useShell } from "./context";
 import { DEST_ICON } from "./icons";
 
 const item =
-  "flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm outline-none data-[selected=true]:bg-surface [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted";
+  "flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm outline-none data-[selected=true]:bg-surface [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted";
 const group = "px-1.5 [&_[cmdk-group-heading]]:eyebrow [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:pb-1";
 
 /** ⌘K: jump anywhere, switch team, find a match, ask the data. */
@@ -64,7 +64,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Portal>
         <D.Overlay className="fixed inset-0 z-50 bg-[var(--overlay)] animate-fade" />
-        <D.Content className="club fixed inset-x-3 top-[12dvh] z-50 mx-auto max-w-xl overflow-hidden rounded-lg bg-raised shadow-2xl ring-1 ring-border animate-rise">
+        <D.Content className="club fixed inset-x-3 top-[12dvh] z-50 mx-auto max-w-xl overflow-hidden bg-raised ring-1 ring-border animate-rise">
           <D.Title className="sr-only">{t("palette.title")}</D.Title>
           <D.Description className="sr-only">{t("palette.placeholder")}</D.Description>
           <Command label={t("palette.title")} loop>

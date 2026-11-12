@@ -309,7 +309,7 @@ export function MatchRow({ orgId, m, demoTag = true, signal = false }: { orgId: 
           <span
             aria-hidden
             className={cn(
-              "grid size-8 place-items-center rounded-[4px] font-score text-lg text-background",
+              "grid size-8 place-items-center font-score text-lg text-background",
               result === "won" ? "bg-ok" : result === "lost" ? "bg-error" : "bg-muted",
             )}
           >

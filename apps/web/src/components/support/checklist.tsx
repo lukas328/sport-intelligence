@@ -72,7 +72,7 @@ export function OnboardingChecklist({ orgId, teamId }: { orgId: string; teamId: 
         <button
           type="button"
           aria-label={t("hide")}
-          className="grid size-8 shrink-0 place-items-center rounded-md text-muted hover:bg-surface hover:text-foreground"
+          className="grid size-8 shrink-0 place-items-center text-muted hover:bg-surface hover:text-foreground"
           onClick={() => {
             setHidden(true);
             try {

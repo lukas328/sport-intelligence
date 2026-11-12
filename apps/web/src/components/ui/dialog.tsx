@@ -31,8 +31,8 @@ export function DialogContent({
       <D.Content
         aria-describedby={description ? undefined : undefined}
         className={cn(
-          "club fixed z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden bg-raised shadow-2xl ring-1 ring-border animate-rise",
-          "inset-x-0 bottom-0 rounded-t-lg sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg",
+          "club fixed z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden bg-raised ring-1 ring-border animate-rise",
+          "inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2",
           wide ? "sm:max-w-3xl" : "sm:max-w-lg",
           className,
         )}
@@ -48,7 +48,7 @@ export function DialogContent({
           </div>
           <D.Close
             aria-label={t("close")}
-            className="-mr-2 -mt-1 grid size-9 shrink-0 place-items-center rounded-md text-muted hover:bg-surface hover:text-foreground"
+            className="-mr-2 -mt-1 grid size-9 shrink-0 place-items-center text-muted hover:bg-surface hover:text-foreground"
           >
             <X aria-hidden className="size-4" />
           </D.Close>

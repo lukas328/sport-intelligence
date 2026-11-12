@@ -102,7 +102,7 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <header className="club relative overflow-hidden rounded-lg bg-club px-6 pt-6 pb-5 text-club-ink transition-colors duration-300 sm:px-8 sm:pt-8" style={clubStyle(colour) as CSSProperties}>
+      <header className="club relative overflow-hidden bg-club px-6 pt-6 pb-5 text-club-ink transition-colors duration-300 sm:px-8 sm:pt-8" style={clubStyle(colour) as CSSProperties}>
         <CourtLines className="absolute right-0 bottom-0 hidden aspect-square h-full sm:block" />
         <div className="relative">
           {!joined && <p className="text-[0.9375rem] font-semibold">{t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}</p>}
@@ -111,7 +111,7 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
           <ol className="mt-6 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}>
             {STEPS.map((s, i) => (
               <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= shownStep ? "font-semibold" : "font-normal"}`}>
-                <span aria-hidden className={`block h-1 rounded-full ${i <= shownStep ? "bg-club-ink" : "bg-club-ink/30"}`} />
+                <span aria-hidden className={`block h-1 rounded-full ${i <= shownStep ?"bg-club-ink":"bg-club-ink/30"}`} />
                 {t(`onboarding.${s}`)}
               </li>
             ))}

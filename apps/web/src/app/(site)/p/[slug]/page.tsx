@@ -46,7 +46,7 @@ export default async function ProfilePage({ params }: Params) {
           <h2 id="stats" className="mb-2 text-lg font-semibold">{t("season")}</h2>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {Object.entries(data.stats).map(([k, v]) => (
-              <div key={k} className="rounded-lg bg-raised border border-border p-3">
+              <div key={k} className="bg-raised border border-border p-3">
                 <dt className="text-sm text-muted">{t(`stat_${k}`)}</dt>
                 <dd className="text-2xl font-semibold tabular-nums">{fmt(k, v)}</dd>
               </div>
@@ -58,7 +58,7 @@ export default async function ProfilePage({ params }: Params) {
         <section aria-labelledby="reels" className="space-y-3">
           <h2 id="reels" className="text-lg font-semibold">{t("highlights")}</h2>
           {data.reels.map((id) => (
-            <video key={id} controls preload="metadata" className="w-full rounded-lg bg-black" src={`/v1/public/profiles/${slug}/reels/${id}`}>
+            <video key={id} controls preload="metadata" className="w-full bg-black" src={`/v1/public/profiles/${slug}/reels/${id}`}>
               <track kind="captions" />
             </video>
           ))}

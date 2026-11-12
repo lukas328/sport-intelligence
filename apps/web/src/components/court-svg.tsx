@@ -10,7 +10,7 @@ export function CourtSvg({ label }: { label: string }) {
       viewBox={`-1 -1 ${COURT.length + 2} ${COURT.width + 2}`}
       role="img"
       aria-label={label}
-      className="w-full rounded-lg"
+      className="w-full"
       style={{ background: "var(--court)" }}
     >
       {Object.entries(COURT.lines).map(([name, pts]) => (

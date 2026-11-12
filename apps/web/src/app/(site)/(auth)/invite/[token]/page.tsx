@@ -37,7 +37,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         <div className="flex flex-col gap-2">
           <Link
             href={inv.account_exists ? `/login?next=/invite/${token}` : `/register?invite=${token}`}
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-contrast"
+            className="inline-flex min-h-10 items-center justify-center bg-accent px-4 py-2 text-sm font-medium text-accent-contrast"
           >
             {inv.account_exists ? t("invite.login") : t("invite.register")}
           </Link>

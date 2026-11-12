@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -73,3 +74,42 @@ export function ActiveMark({ className }: { className?: string }) {
 
 /** Inline text link: ink, underlined. */
 export const linkClass = "font-bold text-ink underline decoration-[1.5px] underline-offset-4";
+
+/**
+ * Tabs as links (second level of a destination, tabs of a match): slanted, a firm rule under the
+ * row, the active tab with the club band. `extra` sits at the right (e.g. Prüfen with a count).
+ */
+export function LinkTabs({
+  label,
+  items,
+  active,
+  extra,
+  className,
+}: {
+  label: string;
+  items: { key: string; href: string; label: ReactNode; testId?: string }[];
+  active: string | null;
+  extra?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <nav aria-label={label} className={cn("scrollbar-none flex overflow-x-auto border-b-2 border-ink", className)}>
+      {items.map((it) => {
+        const on = it.key === active;
+        return (
+          <Link
+            key={it.key}
+            href={it.href}
+            data-testid={it.testId}
+            aria-current={on ? "page" : undefined}
+            className={cn("font-slant relative flex min-h-[54px] shrink-0 items-center gap-2 px-2.5 text-[17px] whitespace-nowrap no-underline md:px-[18px] md:text-xl", on ? "text-ink" : "text-ink-2 hover:text-ink")}
+          >
+            {it.label}
+            {on && <ActiveMark className="right-2.5 -bottom-0.5 left-2.5" />}
+          </Link>
+        );
+      })}
+      {extra && <span className="ml-auto flex shrink-0 items-center pr-3 md:pr-0">{extra}</span>}
+    </nav>
+  );
+}

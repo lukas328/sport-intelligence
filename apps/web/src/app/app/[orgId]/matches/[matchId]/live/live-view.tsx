@@ -222,7 +222,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
           <Link href={`/app/${orgId}/matches/${matchId}`} className="text-sm underline">
             {t("back")}
           </Link>
-          <span className={cn("rounded-md px-2 py-0.5 text-xs", pending ? "border border-accent" : "bg-surface")} data-testid="sync-state" aria-live="polite">
+          <span className={cn("px-2 py-0.5 text-xs", pending ? "border border-accent" : "bg-surface")} data-testid="sync-state" aria-live="polite">
             {pending ? (online ? t("syncing", { count: pending }) : t("offline", { count: pending })) : t("synced")}
           </span>
         </div>
@@ -238,19 +238,19 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
           </div>
         </div>
         <div className="grid grid-cols-4 gap-1">
-          <button className="col-span-2 rounded-md bg-accent px-3 py-3 font-semibold text-accent-contrast" onClick={() => setClock(toggle(clock))}>
+          <button className="col-span-2 bg-accent px-3 py-3 font-semibold text-accent-contrast" onClick={() => setClock(toggle(clock))}>
             {clock.started_at !== null ? t("pause") : t("start")}
           </button>
-          <button className="rounded-md ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, -10))} aria-label={t("minus10")}>
+          <button className="ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, -10))} aria-label={t("minus10")}>
             −10 s
           </button>
-          <button className="rounded-md ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, 10))} aria-label={t("plus10")}>
+          <button className="ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, 10))} aria-label={t("plus10")}>
             +10 s
           </button>
         </div>
         {clock.period < (match?.periods ?? 2) && seconds >= 60 && (
           <button
-            className="w-full rounded-md ring-1 ring-inset ring-border py-2 text-sm"
+            className="w-full ring-1 ring-inset ring-border py-2 text-sm"
             onClick={() => setClock({ period: clock.period + 1, base_s: 0, started_at: null })}
           >
             {t("secondHalf")}
@@ -267,7 +267,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
               key={p.player_id}
               aria-pressed={player === p.player_id}
               onClick={() => setPlayer((cur) => (cur === p.player_id ? null : p.player_id))}
-              className={cn("min-h-14 rounded-md border py-2 text-sm", player === p.player_id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+              className={cn("min-h-14 border py-2 text-sm", player === p.player_id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
             >
               <span className="block text-lg font-bold tabular-nums">{p.jersey_number ?? "?"}</span>
               <span className="block truncate text-xs">{p.first_name}</span>
@@ -282,7 +282,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
             means a goal against) */}
         <div className="sticky bottom-2 z-10 grid grid-cols-3 gap-1 bg-background/95 py-1 backdrop-blur">
           {own.map((a) => (
-            <button key={a.key} onClick={() => record("own", a.label, a.body, a.goal)} className={cn("rounded-md py-4 text-base font-semibold", a.goal ? "bg-foreground text-background" : "border border-border bg-raised")}>
+            <button key={a.key} onClick={() => record("own", a.label, a.body, a.goal)} className={cn("py-4 text-base font-semibold", a.goal ? "bg-foreground text-background" : "border border-border bg-raised")}>
               {a.label}
             </button>
           ))}
@@ -293,14 +293,14 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
         <h2 className="font-semibold">{match ? oppName(match) : t("opponent")}</h2>
         <label className="flex items-center gap-2 text-sm">
           {te("opponentNumber")}
-          <input inputMode="numeric" value={oppNumber} onChange={(e) => setOppNumber(e.target.value.replace(/\D/g, "").slice(0, 2))} className="min-h-10 w-16 rounded-md bg-raised ring-1 ring-inset ring-border px-2" />
+          <input inputMode="numeric" value={oppNumber} onChange={(e) => setOppNumber(e.target.value.replace(/\D/g, "").slice(0, 2))} className="min-h-10 w-16 bg-raised ring-1 ring-inset ring-border px-2" />
         </label>
         <div className="grid grid-cols-3 gap-1">
           {opp.map((a) => (
             <button
               key={a.key}
               onClick={() => record("opponent", a.label, a.body, a.goal)}
-              className={cn("rounded-md py-4 text-base font-semibold ring-1 ring-inset", a.goal ? "text-error ring-error/60" : "ring-border")}
+              className={cn("py-4 text-base font-semibold ring-1 ring-inset", a.goal ? "text-error ring-error/60" : "ring-border")}
             >
               {a.label}
             </button>
@@ -311,7 +311,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
       <section aria-label={t("log")} className="space-y-2">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">{t("log")}</h2>
-          <button className="rounded-md ring-1 ring-inset ring-border px-3 py-2 text-sm" onClick={() => void undo()} disabled={log.length === 0}>
+          <button className="ring-1 ring-inset ring-border px-3 py-2 text-sm" onClick={() => void undo()} disabled={log.length === 0}>
             {t("undo")}
           </button>
         </div>
@@ -319,7 +319,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
         {log.length === 0 && <p className="text-sm text-muted">{t("logEmpty")}</p>}
         <ol className="space-y-1 text-sm" data-testid="live-log">
           {log.slice(0, 30).map((e) => (
-            <li key={e.client_id} className="flex justify-between gap-2 rounded bg-surface px-2 py-1.5">
+            <li key={e.client_id} className="flex justify-between gap-2 bg-surface px-2 py-1.5">
               <span>
                 <span className="mr-2 font-score text-xs text-muted tabular-nums">{e.clock}</span>
                 {e.label}

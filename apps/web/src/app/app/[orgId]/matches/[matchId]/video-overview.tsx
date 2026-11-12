@@ -91,7 +91,7 @@ export function VideoOverview({
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold">{t("timeline")}</p>
-              <div className="relative h-8 overflow-hidden rounded-[3px] bg-foreground/5" role="list" aria-label={t("timeline")}>
+              <div className="relative h-8 overflow-hidden bg-foreground/5" role="list" aria-label={t("timeline")}>
                 {phases.map((p) => (
                   <button
                     key={p.start_ms}
@@ -109,8 +109,8 @@ export function VideoOverview({
               <div className="flex justify-between text-xs text-muted tabular-nums">
                 <span>{at(0)}</span>
                 <span className="flex gap-4">
-                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 rounded-[2px] bg-accent" />{ownName}</span>
-                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 rounded-[2px] bg-foreground/60" />{oppName}</span>
+                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 bg-accent" />{ownName}</span>
+                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 bg-foreground/60" />{oppName}</span>
                 </span>
                 <span>{at(end)}</span>
               </div>
@@ -143,7 +143,7 @@ export function VideoOverview({
                           <button type="button" disabled={!onPlay} onClick={() => onPlay?.(p.start_ms)} className="flex min-h-11 w-full items-center gap-3 py-2 text-left text-sm hover:bg-surface disabled:hover:bg-transparent">
                             {/* the row plays the attack: said by the glyph, not by a sentence */}
                             {onPlay && <Play aria-hidden className="size-3 shrink-0 fill-current" />}
-                            <span aria-hidden className={cn("size-2.5 shrink-0 rounded-[2px]", p.side === "own" ? "bg-accent" : "bg-foreground/60")} />
+                            <span aria-hidden className={cn("size-2.5 shrink-0", p.side === "own" ? "bg-accent" : "bg-foreground/60")} />
                             <span className="w-28 shrink-0 font-semibold">{p.side === "own" ? ownName : oppName}</span>
                             <span className="tabular-nums text-muted">
                               <span className="font-score text-foreground">{at(p.start_ms)}</span> · {Math.round((p.end_ms - p.start_ms) / 1000)} s

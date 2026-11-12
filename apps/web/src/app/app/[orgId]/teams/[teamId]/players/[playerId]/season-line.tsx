@@ -84,9 +84,8 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
       <div>
         {back}
         <PageHeader
-          eyebrow={t("title")}
+          eyebrow={`${t("title")} · ${t("summary", { matches: l.totals.matches, involved: l.totals.matches_involved, present: l.totals.matches_present })}`}
           title={`${l.jersey_number != null ? `#${l.jersey_number} ` : ""}${l.first_name} ${l.last_name}`}
-          description={t("summary", { matches: l.totals.matches, involved: l.totals.matches_involved, present: l.totals.matches_present })}
         />
       </div>
       {/* the season in one printed row, every count leads to its scenes; nothing played: one sentence */}

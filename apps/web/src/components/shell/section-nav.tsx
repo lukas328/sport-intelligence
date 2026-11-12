@@ -7,34 +7,12 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { destOf, sectionOf, sectionsFor, type Dest, type Section } from "@/lib/nav-model";
-import { cn } from "@/lib/utils";
+import { LinkTabs } from "@/components/anlauf/blocks";
 import { useShell } from "./context";
 
-/** Second (and last) level of navigation: underline links below the page title, like the tabs. */
+/** Second (and last) level of navigation: slanted tabs below the page title, all widths. */
 export function SubNav({ label, items, active }: { label: string; items: { key: string; href: string; label: ReactNode }[]; active: string | null }) {
-  return (
-    <nav aria-label={label} className="scrollbar-none -mx-1 overflow-x-auto border-b border-foreground/15 px-1 lg:hidden">
-      <ul className="inline-flex gap-5">
-        {items.map((it) => {
-          const on = it.key === active;
-          return (
-            <li key={it.key}>
-              <Link
-                href={it.href}
-                aria-current={on ? "page" : undefined}
-                className={cn(
-                  "-mb-px block min-h-11 whitespace-nowrap border-b-2 pt-2.5 text-[0.9375rem] font-semibold transition-colors",
-                  on ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground",
-                )}
-              >
-                {it.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
+  return <LinkTabs label={label} items={items} active={active} />;
 }
 
 /** The current destination, its second level with labels and the active item. */
@@ -54,7 +32,7 @@ const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "scenesSections" | "t
   team: "teamSections",
 };
 
-/** Second level of the current destination on phones (the sidebar shows it on desktop). */
+/** Second level of the current destination (the top bar holds only the four destinations). */
 export function AreaSubNav() {
   const t = useTranslations("shell");
   const { dest, items, active } = useArea();
@@ -98,7 +76,7 @@ function BackLink({ href, parent }: { href: string; parent: Section }) {
   const t = useTranslations();
   const parentLabel = t(`shell.${parent}` as "shell.season");
   return (
-    <Link href={href} className="-mb-3 inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
+    <Link href={href} className="-mb-3 inline-flex min-h-11 items-center gap-1 text-[15px] font-bold text-ink">
       <ChevronLeft aria-hidden className="size-4" />
       {parentLabel}
     </Link>

@@ -51,7 +51,7 @@ export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId
         <div className="space-y-2">
           <p className="text-sm">{t("exportHint")}</p>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API download, not a page */}
-          <a href="/v1/me/export" className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" data-testid="export">
+          <a href="/v1/me/export" className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" data-testid="export">
             {t("export")}
           </a>
         </div>

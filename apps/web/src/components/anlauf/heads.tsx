@@ -98,6 +98,7 @@ export function WurfHead({
         {children}
       </div>
       <div className="flex min-w-0 flex-col">
+        <Score own={own} opp={opp} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
         <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[13px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
           <span>{ownName}</span>
           <span>
@@ -105,7 +106,6 @@ export function WurfHead({
             {oppName}
           </span>
         </p>
-        <Score own={own} opp={opp} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
       </div>
       {goals && goals.length > 0 && (
         <>

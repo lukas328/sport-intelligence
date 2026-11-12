@@ -4,17 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Plus, Search, X } from "lucide-react";
+import { ChevronLeft, Plus, Search } from "lucide-react";
 import { NotificationBell } from "@/components/training/bell";
-import { destOf, modeFor, navFor, sectionOf, sectionsFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
+import { destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
 import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
 import { ShellContext, setCookie, TEAM_COOKIE, type ShellOrg, type ShellTeam, type ShellValue } from "./context";
-import { DEST_ICON, IconUpload } from "./icons";
-import { NextUp } from "./next-up";
 import { TeamSwitcher } from "./team-switcher";
 
 export function AppShell({
@@ -88,14 +86,13 @@ export function AppShell({
     return (
       <ShellContext.Provider value={value}>
         <div className="flex min-h-dvh flex-col">
-          <header className="flex items-center gap-3 px-3 py-2 sm:px-5">
-            <Link href={back} aria-label={t("closeTool")} className="grid size-10 place-items-center rounded-md text-muted ring-1 ring-border hover:bg-surface hover:text-foreground">
-              <X aria-hidden className="size-5" />
+          <header className="flex h-[60px] items-center gap-3 border-b-2 border-ink px-4 md:px-8">
+            <Link href={back} className="flex min-h-11 flex-1 items-center gap-1.5 text-[15px] font-bold" aria-label={t("closeTool")}>
+              <ChevronLeft aria-hidden className="size-5" />
+              {team?.name ?? org.name}
             </Link>
-            <ClubMark org={org} className="size-7 rounded-lg" />
-            <span className="min-w-0 truncate text-sm font-semibold">{team?.name ?? org.name}</span>
           </header>
-          <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-6 sm:px-5">
+          <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-6 md:px-8">
             {children}
           </main>
         </div>
@@ -103,143 +100,88 @@ export function AppShell({
     );
   }
 
+  const navLink = (on: boolean) =>
+    cn("font-slant relative flex items-center text-ink-2 no-underline hover:text-ink", on && "text-ink");
+
   return (
     <ShellContext.Provider value={value}>
       <>
-        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:rounded-md focus:bg-raised focus:px-4 focus:py-2 focus:shadow-lg">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:bg-paper focus:px-4 focus:py-2 focus:outline-3 focus:outline-ink">
           {t("skip")}
         </a>
-        <div className="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
-          {/* desktop sidebar: the club's deep colour, a dark island in every theme */}
-          <aside className="on-deep sticky top-0 hidden h-dvh flex-col gap-7 bg-deep px-3 pt-5 pb-4 lg:flex">
-            <div className="space-y-3 px-1">
-              <Link href={home} className="flex items-center gap-3 rounded-md p-1 hover:bg-surface">
+        <div className="flex min-h-dvh flex-col">
+          {/* the frame (Anlauf): crest and club, four destinations, search and the one action */}
+          <header className="cloth sticky top-0 z-30 border-b-2 border-ink" data-frame="top">
+            <div className="mx-auto hidden h-16 max-w-[1440px] items-center gap-5 px-8 lg:flex">
+              <Link href={home} className="font-slant flex shrink-0 items-center gap-3 text-xl leading-none whitespace-nowrap text-ink no-underline">
                 <ClubMark org={org} />
-                <span className="min-w-0 text-[1.375rem] leading-[1.05] font-display break-words">{org.name}</span>
+                {org.name}
               </Link>
-              <TeamSwitcher />
-              {upload && (
-                <Link href={upload} className={buttonClass("primary", "md", "w-full")} data-testid="upload-video">
-                  <IconUpload />
-                  {t("upload")}
-                </Link>
-              )}
-            </div>
-            <nav aria-label={t("mainNav")} className="flex flex-col gap-0.5">
-              {items.map((it) => {
-                const Icon = DEST_ICON[it.key];
-                const on = active === it.key;
-                const subs = on ? sectionsFor(it.key, mode, org.id, team?.id ?? null, navOpts) : [];
-                const subOn = sectionOf(path);
-                const here = on && !subs.some((x) => x.key === subOn);
-                return (
-                  <div key={it.key}>
-                    <Link
-                      href={it.href}
-                      aria-current={here ? "page" : undefined}
-                      className={cn(
-                        "flex min-h-11 items-center gap-3 rounded-md px-3 text-[0.9375rem] font-medium transition-colors",
-                        on ? "text-foreground" : "text-muted hover:bg-surface hover:text-foreground",
-                        here && "bg-surface shadow-[inset_3px_0_0_var(--mark)]",
-                      )}
-                    >
-                      <Icon className="size-5 shrink-0" />
+              <div className="max-w-40 min-w-0 shrink">
+                <TeamSwitcher compact />
+              </div>
+              <nav aria-label={t("mainNav")} className="flex self-stretch">
+                {items.map((it) => {
+                  const on = active === it.key;
+                  return (
+                    <Link key={it.key} href={it.href} aria-current={on ? "page" : undefined} className={cn(navLink(on), "px-3.5 text-lg")}>
                       {t(it.key)}
+                      {on && <span aria-hidden data-mark="" className="mark-band absolute right-2.5 -bottom-0.5 left-2.5 h-1.5" />}
                     </Link>
-                    {subs.length > 0 && (
-                      <ul className="mt-0.5 mb-1.5 space-y-0.5">
-                        {subs.map((x) => (
-                          <li key={x.key}>
-                            <Link
-                              href={x.href}
-                              aria-current={x.key === subOn ? "page" : undefined}
-                              className={cn(
-                                "flex min-h-9 items-center rounded-md pr-2 pl-11 text-[0.9375rem] transition-colors",
-                                x.key === subOn ? "bg-surface font-semibold text-foreground shadow-[inset_3px_0_0_var(--mark)]" : "text-muted hover:bg-surface hover:text-foreground",
-                              )}
-                            >
-                              {t(x.key)}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
-            </nav>
-            <div className="mt-auto space-y-3">
-              <NextUp />
-              <button
-                type="button"
-                onClick={() => setPalette(true)}
-                className="flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-sm text-muted hover:bg-surface hover:text-foreground"
-                data-testid="palette-open"
-              >
-                <Search aria-hidden className="size-4" />
-                <span className="flex-1 text-left">{t("search")}</span>
-                <kbd className="rounded-sm px-1.5 py-0.5 font-sans text-[0.6875rem] text-muted ring-1 ring-border">⌘K</kbd>
-              </button>
-              <div className="flex items-center gap-1 border-t border-border px-1 pt-3">
-                <AccountMenu />
+                  );
+                })}
+              </nav>
+              <div className="ml-auto flex items-center gap-4">
+                <button type="button" onClick={() => setPalette(true)} className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4" data-testid="palette-open">
+                  {t("search")}
+                </button>
+                {upload && (
+                  <Link href={upload} className={buttonClass("primary", "md")} data-testid="upload-video">
+                    {t("upload")}
+                  </Link>
+                )}
                 <NotificationBell orgId={org.id} />
+                <AccountMenu compact />
               </div>
             </div>
-          </aside>
-
-          <div className="flex min-w-0 flex-col overflow-x-clip">
             {/* phone top bar */}
-            <header className="on-deep sticky top-0 z-30 flex items-center gap-2 bg-deep px-3 py-2 lg:hidden">
+            <div className="flex h-[60px] items-center gap-3 px-4 lg:hidden">
               <Link href={home} aria-label={org.name} className="shrink-0">
-                <ClubMark org={org} className="size-8 rounded-md" />
+                <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
               </Link>
               <div className="min-w-0 flex-1">
                 <TeamSwitcher compact />
               </div>
-              <button
-                type="button"
-                aria-label={t("search")}
-                onClick={() => setPalette(true)}
-                className="grid size-10 place-items-center rounded-md text-muted hover:bg-surface hover:text-foreground"
-              >
+              <button type="button" aria-label={t("search")} onClick={() => setPalette(true)} className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink">
                 <Search aria-hidden className="size-5" />
               </button>
               {upload && (
-                <Link href={upload} aria-label={t("upload")} className="grid size-10 place-items-center rounded-md text-muted ring-1 ring-border hover:bg-surface hover:text-foreground" data-testid="upload-video-compact">
-                  <Plus aria-hidden className="size-5" />
+                <Link href={upload} aria-label={t("upload")} className="grid size-11 place-items-center border-2 border-ink bg-ink text-ground" data-testid="upload-video-compact">
+                  <Plus aria-hidden className="size-5" strokeWidth={2.6} />
                 </Link>
               )}
-              <NotificationBell orgId={org.id} />
               <AccountMenu compact />
-            </header>
+            </div>
+          </header>
 
-            {banner}
-            <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1240px] flex-1 px-4 pt-5 pb-28 outline-none sm:px-6 lg:px-10 lg:pt-10 lg:pb-16">
-              {/* a short rise on every page change: the new content is clearly new */}
-              <div key={path} className="animate-rise">
-                {children}
-              </div>
-            </main>
-          </div>
+          {banner}
+          <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-28 outline-none md:px-8 lg:pt-8 lg:pb-16">
+            {/* a short rise on every page change: the new content is clearly new */}
+            <div key={path} className="animate-rise">
+              {children}
+            </div>
+          </main>
         </div>
 
-        {/* phone tab bar */}
-        <nav aria-label={t("mainNav")} className="on-deep fixed inset-x-0 bottom-0 z-30 bg-deep pb-[env(safe-area-inset-bottom)] lg:hidden">
-          <ul className="mx-auto flex max-w-md">
+        {/* phone tab bar: the four destinations, the active one with the club band on top */}
+        <nav aria-label={t("mainNav")} className="cloth fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink pb-[env(safe-area-inset-bottom)] lg:hidden" data-frame="tabbar">
+          <ul className="mx-auto grid max-w-md" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
             {items.map((it) => {
-              const Icon = DEST_ICON[it.key];
               const on = active === it.key;
               return (
-                <li key={it.key} className="flex-1">
-                  <Link
-                    href={it.href}
-                    aria-current={on ? "page" : undefined}
-                    className={cn(
-                      "flex flex-col items-center gap-1 pt-2.5 pb-2 text-xs font-medium",
-                      on ? "text-foreground shadow-[inset_0_3px_0_var(--mark)]" : "text-muted",
-                    )}
-                  >
-                    <Icon className="size-6" />
+                <li key={it.key}>
+                  <Link href={it.href} aria-current={on ? "page" : undefined} className={cn(navLink(on), "min-h-14 justify-center text-base")}>
+                    {on && <span aria-hidden data-mark="" className="mark-band absolute -top-0.5 right-[18px] left-[18px] h-1.5" />}
                     {t(it.key)}
                   </Link>
                 </li>

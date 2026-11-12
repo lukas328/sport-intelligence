@@ -32,7 +32,7 @@ function Chip({ on, children, onClick, color }: { on: boolean; children: React.R
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-3 py-1 text-sm",
+        "inline-flex min-h-8 shrink-0 items-center gap-1 whitespace-nowrap border px-3 py-1 text-sm",
         on ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface",
       )}
     >

@@ -106,7 +106,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
 
   if (link.isPending) return null;
   const l = link.data;
-  const header = <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={l?.linked ? [l.league, l.group_name].filter(Boolean).join(" · ") : undefined} />;
+  const header = <PageHeader eyebrow={[t("eyebrow"), ...(l?.linked ? [l.league, l.group_name] : [])].filter(Boolean).join(" · ")} title={t("title")} />;
   if (!l?.linked)
     return (
       <div className="space-y-6">
@@ -220,7 +220,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
                             maxLength={2}
                             aria-label={t("numberOf", { name: who(s) })}
                             aria-invalid={bad || undefined}
-                            className="h-9 w-14 rounded-sm bg-raised px-2 text-center font-score tabular-nums ring-1 ring-foreground/20 ring-inset focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-[invalid=true]:ring-error"
+                            className="h-9 w-14 bg-raised px-2 text-center font-score tabular-nums ring-1 ring-foreground/20 ring-inset focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-[invalid=true]:ring-error"
                           />
                         </td>
                         <td className="tabular-nums">{num(s.payload.appearances) ?? "-"}</td>

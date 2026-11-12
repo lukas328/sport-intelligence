@@ -55,7 +55,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
     <div className="space-y-6">
       <div>
         <BackToFixtures orgId={orgId} />
-        <PageHeader eyebrow={t("title")} title={p.opponent.name} description={t("record", p.record)} />
+        <PageHeader eyebrow={`${t("title")} · ${t("record", p.record)}`} title={p.opponent.name} />
       </div>
       {p.tagged_matches === 0 ? (
         <EmptyState title={t("none")} />

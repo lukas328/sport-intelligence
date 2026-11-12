@@ -41,11 +41,11 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
           aria-label={`${t("account")}: ${me.name}`}
           data-testid="account-menu"
           className={cn(
-            "flex min-w-0 items-center gap-3 rounded-md text-left hover:bg-surface",
-            compact ? "p-1" : "flex-1 px-2 py-1.5",
+            "flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-3 text-left",
+            !compact && "flex-1 px-2 py-1.5",
           )}
         >
-          <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-foreground text-[0.75rem] font-semibold text-background font-wide">
+          <span aria-hidden className="font-slant grid size-9 shrink-0 place-items-center bg-ink text-[13px] text-ground">
             {initials(me.name) || "?"}
           </span>
           {!compact && (

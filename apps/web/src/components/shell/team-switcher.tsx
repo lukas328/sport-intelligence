@@ -26,7 +26,7 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
     <MenuRoot>
       <MenuTrigger
         className={cn(
-          "flex w-full min-w-0 items-center gap-2 rounded-md text-left hover:bg-surface",
+          "flex w-full min-w-0 items-center gap-2 text-left hover:bg-surface",
           compact ? "px-1 py-1" : "px-2 py-1.5 border border-border",
         )}
         aria-label={`${t("shell.switchTeam")}: ${label}`}

@@ -72,7 +72,7 @@ export function SharedView({ token, data }: { token: string; data: Shared }) {
           preload="metadata"
           src={`/v1/share/${token}/reel.mp4`}
           aria-label={data.title}
-          className={data.highlight.format === "9x16" ? "mx-auto max-h-[80vh] rounded" : "w-full rounded"}
+          className={data.highlight.format === "9x16" ? "mx-auto max-h-[80vh]" : "w-full"}
         />
       )}
     </div>
@@ -153,7 +153,7 @@ function PlaylistShare({ p, media }: { p: NonNullable<Shared["playlist"]>; media
       <ol className="space-y-1 text-sm">
         {clips.map((c, k) => (
           <li key={c.id}>
-            <button onClick={() => setI(k)} aria-current={k === i ? "true" : undefined} className={cn("w-full rounded px-2 py-1.5 text-left", k === i ? "bg-accent text-accent-contrast" : "hover:bg-surface")}>
+            <button onClick={() => setI(k)} aria-current={k === i ? "true" : undefined} className={cn("w-full px-2 py-1.5 text-left", k === i ? "bg-accent text-accent-contrast" : "hover:bg-surface")}>
               {k + 1}. {c.title ?? t("scene")}
             </button>
           </li>

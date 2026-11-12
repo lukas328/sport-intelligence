@@ -74,7 +74,8 @@ export async function openLibrary(page: Page, entry: "Sammlungen" | "Zum Zeigen"
   if (entry === "Szenen") return openScenes(page);
   await openScenes(page, "Sammlungen");
   const path = { Sammlungen: "playlists", "Zum Zeigen": "presentations" }[entry];
-  await follow(page, page.getByRole("main").getByRole("link", { name: new RegExp(`^${entry}`) }).first(), new RegExp(`/${path}$`));
+  // the content link, not the tab of the same name (the tabs are visible on every width now)
+  await follow(page, page.locator("main a:not(nav a)").filter({ hasText: new RegExp(`^${entry}`) }).first(), new RegExp(`/${path}$`));
 }
 
 /** Plays: a tab of Szenen. */

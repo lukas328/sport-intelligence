@@ -32,7 +32,7 @@ interface Extraction {
   [key: string]: unknown;
 }
 const COUNTS = ["goals", "seven_m_goals", "misses", "seven_m_misses", "suspensions", "assists"] as const;
-const cell = "w-14 rounded border bg-background px-1 py-0.5 text-right tabular-nums";
+const cell = "w-14 border bg-background px-1 py-0.5 text-right tabular-nums";
 
 /** Review next to the photo (addendum 01, 5.9): the user confirms what the model read. */
 function Review({ orgId, upload, onDone }: { orgId: string; upload: Upload; onDone: () => void }) {
@@ -69,7 +69,7 @@ function Review({ orgId, upload, onDone }: { orgId: string; upload: Upload; onDo
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/v1/orgs/${orgId}/paper-photos/${upload.id}/photo`} alt={t("photoAlt")} className="w-full rounded-lg ring-1 ring-inset ring-border" />
+      <img src={`/v1/orgs/${orgId}/paper-photos/${upload.id}/photo`} alt={t("photoAlt")} className="w-full ring-1 ring-inset ring-border" />
       <form className="space-y-3 text-sm" onSubmit={(e: FormEvent) => e.preventDefault()} aria-label={t("review")}>
         <div className="flex flex-wrap gap-3">
           <label>
@@ -83,7 +83,7 @@ function Review({ orgId, upload, onDone }: { orgId: string; upload: Upload; onDo
         </div>
         <div className="flex flex-wrap gap-3">
           {(["score", "halftime"] as const).map((k) => (
-            <fieldset key={k} className={cn("rounded border p-2", flagged(k) ? "border-error" : "border-border")}>
+            <fieldset key={k} className={cn("border p-2", flagged(k) ? "border-error" : "border-border")}>
               <legend>{t(k)}</legend>
               <input aria-label={t(`${k}Own`)} className={cell} type="number" min={0} value={x[k]?.own ?? ""} onChange={(e) => score(k, "own", e.target.value)} />
               {" : "}

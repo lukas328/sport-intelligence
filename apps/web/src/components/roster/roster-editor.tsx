@@ -277,7 +277,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                   </span>
                   <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
                     {p.main_position && (
-                      <span className="text-xs font-bold tracking-wide text-foreground" title={t(`positions.${p.main_position}`)}>
+                      <span className="text-xs font-bold text-foreground" title={t(`positions.${p.main_position}`)}>
                         {p.main_position}
                       </span>
                     )}
@@ -402,8 +402,8 @@ function CsvImport({
       </a>
       <div className="space-y-1">
         <span className="block text-sm font-semibold">{t("roster.csvFile")}</span>
-        <label className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
-          <span className="ml-1 rounded-sm bg-surface px-3 py-1 text-sm font-semibold">{t("roster.csvChoose")}</span>
+        <label className="flex min-h-10 cursor-pointer items-center gap-3 px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
+          <span className="ml-1 bg-surface px-3 py-1 text-sm font-semibold">{t("roster.csvChoose")}</span>
           <span className="min-w-0 truncate text-muted">{file?.name ?? t("roster.csvNone")}</span>
           <input
             type="file"
@@ -429,7 +429,7 @@ function CsvImport({
         </Alert>
       )}
       {result && result.errors.length === 0 && (
-        <ul className="max-h-40 space-y-1 overflow-auto rounded-md bg-surface p-3 text-sm" data-testid="csv-preview">
+        <ul className="max-h-40 space-y-1 overflow-auto bg-surface p-3 text-sm" data-testid="csv-preview">
           {result.rows.map((r, i) => (
             <li key={i}>
               {r.jersey_number ?? ""} {r.first_name} {r.last_name} {r.main_position ?? ""}

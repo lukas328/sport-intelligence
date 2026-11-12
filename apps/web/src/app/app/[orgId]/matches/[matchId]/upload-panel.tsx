@@ -160,7 +160,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
         }}
         onDragLeave={() => setDrag(false)}
         onDrop={onDrop}
-        className={`flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center ${drag ? "border-accent bg-surface" : "border-border"}`}
+        className={`flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed p-6 text-center ${drag ?"border-accent bg-surface":"border-border"}`}
       >
         <span className="font-medium">{t("upload.drop")}</span>
         <span className="text-sm font-medium text-accent hover:underline">{t("upload.choose")}</span>
@@ -179,7 +179,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
       </label>
       {state.kind === "uploading" && (
         <div className="space-y-2" role="status">
-          <div className="h-2 overflow-hidden rounded bg-surface">
+          <div className="h-2 overflow-hidden bg-surface">
             <div className="h-full bg-accent transition-all" style={{ width: `${pct}%` }} />
           </div>
           <p className="text-sm tabular-nums" data-testid="upload-progress">

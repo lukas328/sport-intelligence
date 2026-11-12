@@ -126,7 +126,7 @@ function DrillForm({ orgId, teamId, initial, onDone }: { orgId: string; teamId: 
     await qc.invalidateQueries({ queryKey: ["team-drills"] });
     onDone();
   }
-  const area = "w-full rounded-sm bg-raised px-3 py-2 text-[0.9375rem] ring-1 ring-foreground/20 ring-inset focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none";
+  const area = "w-full bg-raised px-3 py-2 text-[0.9375rem] ring-1 ring-foreground/20 ring-inset focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none";
   return (
     <form onSubmit={submit} className="space-y-3 border-l-2 border-foreground/20 py-1 pl-4" aria-label={initial ? t("editTitle", { name: initial.name }) : t("new")} data-testid="drill-form">
       <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">

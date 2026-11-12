@@ -213,7 +213,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                             <span
                               aria-hidden
                               className={cn(
-                                "grid aspect-square w-full place-items-center rounded-[4px] font-score text-lg text-background transition-transform group-hover:-translate-y-0.5",
+                                "grid aspect-square w-full place-items-center font-score text-lg text-background transition-transform group-hover:-translate-y-0.5",
                                 r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted",
                               )}
                             >
@@ -358,7 +358,7 @@ function Scorers({ scorers, names, shirts, topGoals, t }: { scorers: Season["pla
               <span className="block font-score text-2xl leading-none">{p.goals}</span>
               <span className="block text-sm text-muted tabular-nums">{pct(p.shooting_pct)}</span>
             </span>
-            <span aria-hidden className="col-start-2 col-end-4 h-1.5 overflow-hidden rounded-[2px] bg-foreground/10">
+            <span aria-hidden className="col-start-2 col-end-4 h-1.5 overflow-hidden bg-foreground/10">
               <span className="block h-full bg-accent" style={{ width: `${(p.goals / topGoals) * 100}%` }} />
             </span>
           </li>
@@ -372,8 +372,8 @@ function Scorers({ scorers, names, shirts, topGoals, t }: { scorers: Season["pla
 function StatBar({ share, tick, focus }: { share: number | null; tick: number; focus?: boolean }) {
   const clamp = (v: number) => `${Math.max(0, Math.min(1, v)) * 100}%`;
   return (
-    <span aria-hidden className="relative col-span-2 block h-2.5 rounded-[2px] bg-foreground/10 sm:col-span-1">
-      {share != null && <span className={cn("absolute inset-y-0 left-0 rounded-[2px]", focus ? "bg-resin ring-1 ring-inset ring-foreground/25" : "bg-accent")} style={{ width: clamp(share) }} />}
+    <span aria-hidden className="relative col-span-2 block h-2.5 bg-foreground/10 sm:col-span-1">
+      {share != null && <span className={cn("absolute inset-y-0 left-0", focus ? "bg-ink" : "bg-ink/45")} style={{ width: clamp(share) }} />}
       <span className="absolute -top-1.5 -bottom-1.5 w-0.5 -translate-x-1/2 bg-foreground" style={{ left: clamp(tick) }} />
     </span>
   );

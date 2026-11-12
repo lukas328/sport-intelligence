@@ -118,7 +118,7 @@ export function MarksView({
               onClick={() => tap(k.key, label)}
               // one ink outline for all; the word says the meaning, red only for a goal against
               className={cn(
-                "min-h-24 rounded-md border-2 border-foreground/25 px-3 text-lg font-semibold active:scale-[0.98] active:bg-surface",
+                "min-h-24 border-2 border-foreground/25 px-3 text-lg font-semibold active:scale-[0.98] active:bg-surface",
                 k.key === "goal_opp" && "border-error/60 text-error",
               )}
             >
@@ -131,7 +131,7 @@ export function MarksView({
         type="button"
         disabled={half === 2}
         onClick={() => tap("halftime", t("halftime"))}
-        className="w-full rounded-md border border-border py-3 text-sm disabled:opacity-50"
+        className="w-full border border-border py-3 text-sm disabled:opacity-50"
       >
         {half === 2 ? t("secondHalf") : t("halftime")}
       </button>

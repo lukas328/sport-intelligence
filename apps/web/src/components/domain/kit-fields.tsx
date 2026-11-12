@@ -15,7 +15,7 @@ const TEAM_KITS = [
   ["opponent_gk", "matches.kitOppGk"],
 ] as const satisfies readonly (readonly [TeamKitKey, string])[];
 
-const SWATCH = "relative grid size-9 shrink-0 place-items-center rounded-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent";
+const SWATCH = "relative grid size-9 shrink-0 place-items-center has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent";
 
 /** A shirt in the kit's colour: the swatch looks like what it stands for. */
 function Shirt({ colour, empty = false }: { colour?: string; empty?: boolean }) {

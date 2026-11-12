@@ -2,6 +2,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { register, uniqueEmail } from "./helpers";
 
 async function noHorizontalScroll(page: Page) {
+  // old addresses redirect (settings to club): measure the page that stays
+  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(300);
   const { scroll, width } = await page.evaluate(() => ({
     scroll: document.documentElement.scrollWidth,

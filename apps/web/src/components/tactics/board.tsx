@@ -123,7 +123,7 @@ export function Board({ frame, live, court, editable = false, tool = "move", sel
       viewBox={`0 0 ${w} ${h}`}
       role="group"
       aria-label={label}
-      className={`max-h-[70vh] w-full touch-none select-none rounded-lg ${editable && tool !== "move" ? "cursor-crosshair" : ""} ${className ?? ""}`}
+      className={`max-h-[70vh] w-full touch-none select-none ${editable && tool !=="move"?"cursor-crosshair":""} ${className ??""}`}
       style={{ background: "var(--court)" }}
       onPointerDown={onDown}
       onPointerMove={onMove}

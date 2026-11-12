@@ -6,7 +6,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { AppShell } from "@/components/shell/app-shell";
 import { TwoFactorBanner } from "@/components/shell/two-factor-banner";
 import { serverApi } from "@/lib/api";
-import { clubStyle } from "@/lib/color";
+import { CHECK_KITS, clubStyle } from "@/lib/color";
 
 export default async function OrgLayout({ children, params }: { children: ReactNode; params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
@@ -19,7 +19,11 @@ export default async function OrgLayout({ children, params }: { children: ReactN
   ]);
   if (response.status === 401) redirect(`/login?next=/app/${orgId}`);
   if (!org || !me) notFound();
-  const savedTeam = (await cookies()).get("hb_team")?.value ?? null;
+  const jar = await cookies();
+  const savedTeam = jar.get("hb_team")?.value ?? null;
+  // development only: show the club in one of the six check colours (screenshots, SPEC.md 13)
+  const preview = process.env.NODE_ENV !== "production" ? CHECK_KITS[jar.get("hb_dev_kit")?.value as keyof typeof CHECK_KITS] : undefined;
+  const kitColours = preview ?? ([org.primary_color, org.secondary_color] as const);
   // only while the admin has not set it up yet
   // a club taken over from the official data and not confirmed yet: one quiet line for its admins
   const unverified = org.my_role === "org_admin" && org.verification === "unverified";
@@ -35,9 +39,9 @@ export default async function OrgLayout({ children, params }: { children: ReactN
       </p>
     ) : null;
   return (
-    <div className="club min-h-dvh" style={clubStyle(org.primary_color) as CSSProperties}>
+    <div className="club min-h-dvh" style={clubStyle(kitColours[0], kitColours[1]) as CSSProperties}>
       <AppShell
-        clubVars={clubStyle(org.primary_color)}
+        clubVars={clubStyle(kitColours[0], kitColours[1])}
         org={{ id: org.id, name: org.name, has_logo: org.has_logo, primary_color: org.primary_color, my_role: org.my_role }}
         orgs={me.organizations.map((o) => ({ id: o.id, name: o.name }))}
         teams={teams.map((x) => ({

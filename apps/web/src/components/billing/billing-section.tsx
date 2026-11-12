@@ -58,7 +58,7 @@ function Meter({ label, used, limit, unit = "", enforced }: { label: string; use
           {unit} / {limit == null ? "∞" : `${limit}${unit}`}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded bg-surface" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={limit ?? 0} aria-valuenow={used}>
+      <div className="h-2 overflow-hidden bg-surface" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={limit ?? 0} aria-valuenow={used}>
         <div className={cn("h-full", share >= 1 ? "bg-error" : "bg-foreground/70")} style={{ width: `${share * 100}%` }} />
       </div>
     </div>
@@ -149,7 +149,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
             max={20}
             value={goalkeepers}
             onChange={(e) => setGoalkeepers(Math.max(0, Math.min(20, Number(e.target.value) || 0)))}
-            className="min-h-9 w-20 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
+            className="min-h-9 w-20 bg-raised ring-1 ring-inset ring-border px-2"
           />
         </label>
         {!b.checkout_available && <p className="text-xs text-muted">{t("unavailable")}</p>}

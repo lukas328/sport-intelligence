@@ -192,8 +192,8 @@ export function Tagger({
   });
 
   const keyOf = Object.fromEntries(Object.entries(HOTKEYS).map(([k, v]) => [v, k.toUpperCase()]));
-  const field = "min-h-10 w-full rounded-md bg-raised px-2 ring-1 ring-inset ring-border";
-  const sectionTitle = "font-score text-[0.8125rem] uppercase tracking-wide text-muted";
+  const field = "min-h-10 w-full bg-raised px-2 ring-1 ring-inset ring-border";
+  const sectionTitle = "font-score text-[0.8125rem] text-muted";
   // laid out like a match sheet: who, what (one key each), details, then the rarer events
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto text-sm" data-testid="tagger">

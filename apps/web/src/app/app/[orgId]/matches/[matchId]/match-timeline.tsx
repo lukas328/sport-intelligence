@@ -83,7 +83,7 @@ export function MatchTimeline({
   const ticks = zoom === "game" ? [0, 0.25, 0.5, 0.75, 1].map((f) => total * f) : [0, 0.25, 0.5, 0.75, 1].map((f) => lo + (hi - lo) * f);
   const lane = (label: string, children: React.ReactNode, sided = false) => (
     <>
-      <span className="font-score text-[0.8125rem] uppercase tracking-wide text-muted">{label}</span>
+      <span className="font-score text-[0.8125rem] text-muted">{label}</span>
       <div className={cn("relative border-b border-foreground/15", sided ? "h-9" : "h-6")}>
         {spans.map((s) => (
           <span key={s.from} className="absolute inset-y-0 bg-foreground/5" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />

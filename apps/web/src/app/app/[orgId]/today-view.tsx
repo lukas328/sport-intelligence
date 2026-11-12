@@ -164,7 +164,7 @@ function MatchAhead({ orgId, m }: { orgId: string; m: Match }) {
   return (
     <Link href={`/app/${orgId}/matches/${m.id}`} className="group mb-1 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-5 border-b border-foreground/10 py-4">
       <span className="text-center leading-none">
-        <span className="block font-display text-sm uppercase text-muted">{format.dateTime(when, { weekday: "short" })}</span>
+        <span className="block font-display text-sm text-muted">{format.dateTime(when, { weekday: "short" })}</span>
         <span className="mt-1 block font-score text-[2.75rem] leading-[0.9]">{format.dateTime(when, { day: "2-digit", month: "2-digit" })}</span>
       </span>
       <span className="min-w-0">
@@ -330,8 +330,8 @@ function TopInsights({ orgId, m }: { orgId: string; m: Match }) {
             <span
               aria-hidden
               className={cn(
-                "mt-1.5 size-2.5 shrink-0 rounded-[2px]",
-                i.kind === "strength" ? "bg-ok" : i.id === focus ? "bg-signal ring-1 ring-foreground/30" : "bg-foreground/45",
+                "mt-1.5 size-2.5 shrink-0",
+                i.kind === "strength" ? "bg-ok" : i.id === focus ? "bg-ink" : "bg-foreground/45",
               )}
             />
             <span>
@@ -367,7 +367,7 @@ function AskBox({ base }: { base: string }) {
           {t("ask")}
         </label>
         <input id="today-ask" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("askPlaceholder")} maxLength={500} className={cn(control, "min-h-12 pr-14 pl-4 text-base")} />
-        <button type="submit" aria-label={t("ask")} disabled={q.trim().length < 3} className="absolute top-1.5 right-1.5 grid size-9 place-items-center rounded-md bg-accent text-accent-contrast disabled:opacity-40">
+        <button type="submit" aria-label={t("ask")} disabled={q.trim().length < 3} className="absolute top-1.5 right-1.5 grid size-9 place-items-center bg-accent text-accent-contrast disabled:opacity-40">
           <ArrowUp aria-hidden className="size-4" />
         </button>
       </form>
@@ -491,7 +491,7 @@ function PlayerToday({ orgId }: { orgId: string }) {
           </Block>
           {dates.length > 1 && (
             <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
-              <ul className="-mx-4 divide-y divide-foreground/10 overflow-hidden rounded-lg border border-border bg-raised sm:mx-0">
+              <ul className="-mx-4 divide-y divide-foreground/10 overflow-hidden border border-border bg-raised sm:mx-0">
                 {dates.slice(1, 4).map((i) => (
                   <li key={`${i.kind}-${i.id}-${i.player_id}`}>
                     <ScheduleRow item={i} onReply={schedule.reply} />
@@ -522,7 +522,7 @@ function FamilyToday({ orgId }: { orgId: string }) {
         ) : dates.length === 0 ? (
           <p className="text-[0.9375rem] text-muted">{t("today.noDates")}</p>
         ) : (
-          <ul className="divide-y divide-foreground/10 overflow-hidden rounded-lg border border-border bg-raised">
+          <ul className="divide-y divide-foreground/10 overflow-hidden border border-border bg-raised">
             {dates.map((i) => (
               <li key={`${i.kind}-${i.id}-${i.player_id}`}>
                 <ScheduleRow item={i} onReply={schedule.reply} />
