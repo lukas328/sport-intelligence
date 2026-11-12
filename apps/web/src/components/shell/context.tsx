@@ -46,7 +46,6 @@ export function useOptionalShell(): ShellValue | null {
 }
 
 export const TEAM_COOKIE = "hb_team";
-export const THEME_COOKIE = "hb_theme";
 
 export function setCookie(name: string, value: string) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`;

@@ -30,6 +30,7 @@ const COLOUR_FILES = new Set([
   "app/layout.tsx",
   "app/manifest.ts",
   "components/video/mini-court.tsx",
+  "components/anlauf/tactics-camera.tsx",
   "components/video/spotlight.tsx",
   "components/video/draw-layer.tsx",
   "components/video/shapes.ts",

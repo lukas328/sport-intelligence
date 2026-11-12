@@ -1,29 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Check, HelpCircle, LogOut, MessageSquare, Monitor, Moon, Settings, ShieldCheck, Sun, UserRound } from "lucide-react";
+import { HelpCircle, LogOut, MessageSquare, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FeedbackDialog } from "@/components/support/support-bar";
 import { helpUrl } from "@/components/support/help-map";
-import { MenuContent, MenuItem, MenuLabel, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
+import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
-import { setCookie, THEME_COOKIE, useShell } from "./context";
-
-type Theme = "system" | "light" | "dark";
-
-function currentTheme(): Theme {
-  const v = document.documentElement.dataset.theme;
-  return v === "light" || v === "dark" ? v : "system";
-}
-
-export function applyTheme(theme: Theme) {
-  if (theme === "system") delete document.documentElement.dataset.theme;
-  else document.documentElement.dataset.theme = theme;
-  setCookie(THEME_COOKIE, theme);
-}
+import { useShell } from "./context";
 
 export function initials(name: string): string {
   return name
@@ -44,16 +31,9 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
   const router = useRouter();
   const locale = useLocale();
   const path = usePathname();
-  const [theme, setTheme] = useState<Theme>("system");
   const [feedback, setFeedback] = useState(false);
-  useEffect(() => setTheme(currentTheme()), []);
   const cfg = useQuery({ queryKey: ["support-config"], queryFn: async () => (await api.GET("/v1/support/config")).data ?? null, staleTime: 3_600_000 });
   const base = `/app/${org.id}`;
-  const themes: [Theme, typeof Sun][] = [
-    ["system", Monitor],
-    ["light", Sun],
-    ["dark", Moon],
-  ];
   return (
     <>
       <MenuRoot>
@@ -89,23 +69,6 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
               {t("consents")}
             </MenuItem>
           )}
-          <MenuSeparator />
-          <MenuLabel>{t("appearance")}</MenuLabel>
-          {themes.map(([k, Icon]) => (
-            <MenuItem
-              key={k}
-              icon={<Icon />}
-              onSelect={() => {
-                applyTheme(k);
-                setTheme(k);
-              }}
-            >
-              <span className="flex items-center justify-between gap-2">
-                {t(`theme_${k}`)}
-                {theme === k && <Check aria-hidden className="!text-accent" />}
-              </span>
-            </MenuItem>
-          ))}
           <MenuSeparator />
           <MenuItem href={helpUrl(cfg.data?.help_url ?? "https://handball-ai.ch/hilfe", locale, path)} external icon={<HelpCircle />} testId="help-link">
             {t("help")}

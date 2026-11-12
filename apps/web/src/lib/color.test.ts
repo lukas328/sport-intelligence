@@ -1,69 +1,91 @@
 import { describe, expect, it } from "vitest";
-import { CLOTH, contrastRatio, KIT_INK, kitsClash, kitTheme, opponentShown, OPPONENT_UNKNOWN } from "./color";
+import { CHECK_KITS, contrastRatio, COURT, GROUND, INK, kit, kitVars, near, OPPONENT_UNKNOWN, OPPONENT_UNKNOWN_ON_BLACK } from "./color";
 
-// club colours to check every screen with
-const KITS = {
-  red: "#c8102e",
-  blue: "#0b3d91",
-  green: "#1b7a3e",
-  yellow: "#ffd200",
-  black: "#111111",
-  white: "#ffffff",
-  orange: "#f28c00",
-} as const;
-
-describe("kit theme", () => {
-  for (const [name, a] of Object.entries(KITS)) {
-    it(`keeps ${name} text readable on the cloth in both themes`, () => {
-      const k = kitTheme({ a, b: "#ffffff" });
-      // text on the shirt itself
-      expect(contrastRatio(k.ink, k.a)).toBeGreaterThanOrEqual(4.5);
-      for (const theme of ["light", "dark"] as const) {
-        const text = k.text[theme];
-        expect(contrastRatio(text.color, CLOTH[theme])).toBeGreaterThanOrEqual(4.5);
-        // a shadow only where the kit colour cannot carry the text; then the text is ink
-        if (text.shadow) {
-          expect(text.color).toBe(KIT_INK[theme]);
-          expect(text.shadow).toBe(k.a);
-        }
+describe("kit: the six check colours", () => {
+  for (const [name, colours] of Object.entries(CHECK_KITS)) {
+    it(`${name}: text on the club colour, the club colour as text and lines stay readable`, () => {
+      const k = kit(colours);
+      expect(contrastRatio(k.clubInk, k.club)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(k.clubText, GROUND)).toBeGreaterThanOrEqual(4.5);
+      // a line that is too faint on the ground carries a piping that is not
+      if (contrastRatio(k.clubLine, GROUND) < 2.4) {
+        expect(k.clubPipe).not.toBeNull();
+        expect(contrastRatio(k.clubPipe!, GROUND)).toBeGreaterThanOrEqual(3);
+      } else {
+        expect(k.clubPipe).toBeNull();
       }
+      // on the dark court the club stays visible
+      expect(contrastRatio(k.clubCam, COURT)).toBeGreaterThanOrEqual(2.2);
+      expect(contrastRatio(k.clubCamInk, k.clubCam)).toBeGreaterThanOrEqual(3);
     });
   }
 
-  it("falls back to ink with a kit-coloured shadow for white and yellow kits, and for black at night", () => {
-    expect(kitTheme({ a: KITS.white }).text.light.shadow).toBe(KITS.white);
-    expect(kitTheme({ a: KITS.yellow }).text.light.shadow).toBe(KITS.yellow);
-    expect(kitTheme({ a: KITS.black }).text.dark.shadow).toBe(KITS.black);
-    // strong colours keep their hue as text
-    expect(kitTheme({ a: KITS.red }).text.light.shadow).toBeNull();
-    expect(kitTheme({ a: KITS.blue }).text.light.shadow).toBeNull();
+  it("white gets an ink edge and ink text, yellow is shifted, blue stays itself", () => {
+    const white = kit(CHECK_KITS.weiss);
+    expect(white.clubEdge).toBe(INK);
+    expect(white.clubText).toBe(INK);
+    expect(white.clubInk).toBe(INK);
+    expect(white.clubPipe).toBe("#17191c");
+    expect(kit(CHECK_KITS.gelb).clubText).not.toBe("#f6c500");
+    expect(kit(CHECK_KITS.blau).clubText).toBe("#1f4fd6");
+    expect(kit(CHECK_KITS.blau).clubInk).toBe("#ffffff");
   });
 
-  it("defaults the second colour and rejects broken input", () => {
-    const k = kitTheme({ a: "not a colour" });
-    expect(k.b).toBe("#ffffff");
-    expect(k.a).toMatch(/^#[0-9a-f]{6}$/);
+  it("black plays in its second colour on the camera", () => {
+    expect(kit(CHECK_KITS.schwarz).clubCam).toBe("#ffffff");
   });
 });
 
-describe("opponent colour", () => {
+describe("kit: opponent", () => {
   it("never guesses an unknown colour", () => {
-    expect(opponentShown(KITS.red, null)).toEqual({ color: OPPONENT_UNKNOWN, ink: "#ffffff", source: "unknown" });
-    expect(opponentShown(KITS.red, undefined, KITS.blue).source).toBe("unknown");
+    for (const colours of Object.values(CHECK_KITS)) {
+      const k = kit(colours, null);
+      expect(k.oppKnown).toBe(false);
+      expect(k.oppSource).toBe("unknown");
+      // unknown opponents are grey rings on the camera
+      expect(k.oppCam).toBe(COURT);
+    }
+    expect(kit(CHECK_KITS.blau, null).opp).toBe(OPPONENT_UNKNOWN);
+    expect(kit(CHECK_KITS.schwarz, null).opp).toBe(OPPONENT_UNKNOWN_ON_BLACK);
+    expect(kit(CHECK_KITS.blau, ["nope", "#ffffff"]).oppKnown).toBe(false);
   });
 
-  it("shows the opponent in its colour when it differs from ours", () => {
-    expect(opponentShown(KITS.red, KITS.blue)).toMatchObject({ color: KITS.blue, source: "first" });
-    expect(opponentShown(KITS.white, KITS.black).source).toBe("first");
+  it("keeps a distinct opponent colour", () => {
+    const k = kit(CHECK_KITS.blau, ["#f6c500", "#17191c"]);
+    expect(k).toMatchObject({ opp: "#f6c500", oppSource: "first", camClash: false, oppCam: "#f6c500" });
   });
 
-  it("switches to the second colour, then to ink, when the colours clash (away kit rule)", () => {
-    expect(kitsClash("#c8102e", "#d0142f")).toBe(true);
-    expect(kitsClash(KITS.red, KITS.blue)).toBe(false);
-    expect(opponentShown(KITS.red, "#b5121b", KITS.white)).toMatchObject({ color: KITS.white, source: "second" });
-    expect(opponentShown(KITS.red, "#b5121b")).toMatchObject({ color: KIT_INK.light, source: "ink" });
-    expect(opponentShown(KITS.red, "#b5121b", "#cc0f2a").source).toBe("ink");
-    // white against white
-    expect(opponentShown(KITS.white, "#fafafa", KITS.green)).toMatchObject({ color: KITS.green, source: "second" });
+  it("clash rule: second colour, then ink", () => {
+    // navy against blue: hues within 45 degrees, the opponent plays white
+    expect(kit(CHECK_KITS.blau, ["#1d3a8a", "#ffffff"])).toMatchObject({ opp: "#ffffff", oppSource: "second" });
+    // both colours near ours: ink
+    expect(kit(CHECK_KITS.blau, ["#1d3a8a", "#2a5ad0"])).toMatchObject({ opp: INK, oppSource: "ink" });
+    // two blacks
+    expect(kit(CHECK_KITS.schwarz, ["#17191c", "#ffffff"])).toMatchObject({ opp: "#ffffff", oppSource: "second" });
+  });
+
+  it("steps back to grey rings when both teams would look alike on the court", () => {
+    // blue against red: different hues on the cloth, but the same lightness on the dark court
+    const k = kit(CHECK_KITS.blau, ["#d3202e", "#ffffff"]);
+    expect(k.opp).toBe("#d3202e");
+    expect(k.camClash).toBe(true);
+    expect(k.oppCam).toBe(COURT);
+    expect(k.oppCamEdge).toBe("#a3aeb8");
+  });
+
+  it("near(): hue and greys", () => {
+    expect(near("#1f4fd6", "#1d3a8a")).toBe(true);
+    expect(near("#1f4fd6", "#d3202e")).toBe(false);
+    expect(near("#ffffff", "#eeeeee")).toBe(true);
+    expect(near("#ffffff", "#17191c")).toBe(false);
+  });
+});
+
+describe("kitVars", () => {
+  it("sets every variable the components read", () => {
+    const v = kitVars(kit(CHECK_KITS.weiss));
+    expect(v["--club-pipe"]).toBe("#17191c");
+    expect(v["--opp-pipe"]).toBe("transparent");
+    expect(Object.keys(v)).toHaveLength(20);
   });
 });
