@@ -9,7 +9,7 @@ import { SectionHead, WurfHead } from "@/components/wurf-head";
 import { demoFigures } from "@/lib/demo";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { registerUrl } from "@/lib/site";
+import { startUrl } from "@/lib/site";
 import { demoView, MATCH } from "@/lib/things";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -139,7 +139,7 @@ export default async function Demo({ params }: Props) {
             {t.endTitle}
           </h2>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <a href={registerUrl(APP_LOCALE[locale])} className="btn btn-ink">
+            <a href={startUrl(APP_LOCALE[locale])} className="btn btn-ink">
               {m.cta.start}
             </a>
             <Link href={`/${locale}/so-funktioniert-es/`} className="btn btn-line">

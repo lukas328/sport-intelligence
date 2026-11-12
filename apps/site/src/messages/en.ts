@@ -37,7 +37,7 @@ const en: Messages = {
   cta: {
     start: "Start for free",
     demo: "See the demo match",
-    trial: "Everything free for 30 days, no credit card. Then you decide.",
+    trial: "Seeing your team needs no account.",
     how: "How it works",
     filming: "How to film well",
     pricing: "All prices",
@@ -114,6 +114,9 @@ const en: Messages = {
   },
   home: {
     title: "Your match. And three things to take home.",
+    teamLabel: "What is your team called?",
+    teamButton: "Show",
+    teamExample: "for example: HC Zürichsee Herren 1",
     lead: "You film the match with your phone and upload the video. The analysis shows you three things to take home, with the scenes behind them.",
     moreTitle: "And also",
     more: [
@@ -125,12 +128,12 @@ const en: Messages = {
     stepsTitle: "How you get there",
     steps: [
       { title: "Film", text: "Phone on a tripod, high up at the halfway line, the whole court in the picture." },
-      { title: "Upload", text: "Choose the video in the app. When the analysis is done, you get a message." },
+      { title: "Upload", text: "Choose the video in the app. The analysis runs by itself, you need not stay." },
       { title: "Check and share", text: "Where the analysis is unsure, it asks you briefly. Then you send the team the link." },
     ],
     boardTitle: "For the club board",
     board: [
-      { title: "What it costs", text: "From CHF {price} a month for one team. The first 30 days are free." },
+      { title: "What it costs", text: "From CHF {price} a month for one team, the first 30 days free. The prices are not final yet." },
       { title: "Where the data lives", text: "App and database on servers in Switzerland, videos in storage in the EU." },
       { title: "Who consents", text: "By link in the team chat, no account. For children, the parents decide." },
     ],
@@ -169,7 +172,7 @@ const en: Messages = {
       },
       {
         title: "The analysis works",
-        text: "It finds the court, follows the players, reads shirt numbers where it can and takes the goals from the match report. You do not have to wait: the app sends you a message when it is done.",
+        text: "It finds the court, follows the players, reads shirt numbers where it can and takes the goals from the match report. You need not stay: when it is done, you see it in the app.",
       },
       {
         title: "Check",
@@ -319,7 +322,7 @@ const en: Messages = {
     faqTitle: "Questions about price and subscription",
     faq: [
       { q: "What happens after the 30 days?", a: "You decide. Without a subscription your team moves to the free plan. Your matches and scenes stay." },
-      { q: "Do I need a credit card?", a: "Not for the 30 days. Later you pay monthly by card or yearly by QR bill, for example through the club's treasurer." },
+      { q: "How do I pay?", a: "Monthly by card or yearly by QR bill, for example through the club's treasurer." },
       { q: "Can I cancel?", a: "Yes. A monthly subscription at the end of the month, a yearly one at the end of its term." },
       { q: "Does an analysis count if it fails?", a: "No. An analysis that does not finish because of an error does not count." },
       { q: "Are there discounts for federations?", a: "Federations and partners can hand out vouchers. Write to us." },
@@ -333,7 +336,7 @@ const en: Messages = {
       { q: "Is my phone good enough?", a: "Yes. Any phone that films in Full HD (1080p) is enough. Where it stands matters more than the camera." },
       { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. The whole court must be in the picture, with both goal areas." },
       { q: "Which file can I upload?", a: "The video file as the phone saves it, usually MP4 or MOV. Several files work too, for example one per half, or a link to a camera platform." },
-      { q: "How long does the analysis take?", a: "That depends on the length of the video. You do not have to wait: the app sends you a message when the analysis is done." },
+      { q: "How long does the analysis take?", a: "That depends on the length of the video. You need not stay: when the analysis is done, you see it in the app." },
       { q: "Do I have to enter anything by hand?", a: "No. The three things and the scenes come without typing. Where the analysis is unsure, it asks you briefly. You mark saves and missed shots only if you want them." },
       { q: "What does it cost?", a: "One team costs CHF {month} a month or CHF {year} a year. The first 30 days are free. The prices are not final yet." },
       { q: "What happens to the video?", a: "It belongs to your club. Only the coaches can see it, unless you share a link. The original video is deleted after 90 days; a smaller version for the scenes stays until you delete it." },

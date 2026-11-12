@@ -5,7 +5,7 @@ import { KitScope } from "@/components/kit";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { registerUrl } from "@/lib/site";
+import { startUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -68,7 +68,7 @@ export default async function Pricing({ params }: Props) {
                   ) : (
                     <p className="font-num text-[3.5rem] leading-none">{t.free}</p>
                   )}
-                  <a href={registerUrl(APP_LOCALE[locale])} className={`btn mt-5 w-full md:w-auto ${p.plan === "team" ? "btn-ink" : "btn-line"}`}>
+                  <a href={startUrl(APP_LOCALE[locale])} className={`btn mt-5 w-full md:w-auto ${p.plan === "team" ? "btn-ink" : "btn-line"}`}>
                     {t.choose}
                   </a>
                   {p.trial_days > 0 && <p className="mt-2 text-[1.0625rem] text-ink-2">{fmt(t.trial, { days: p.trial_days })}</p>}

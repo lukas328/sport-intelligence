@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NavLinks } from "@/components/nav-links";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
-import { loginUrl, registerUrl } from "@/lib/site";
+import { loginUrl, startUrl } from "@/lib/site";
 
 /**
  * The top bar: the two-coloured word mark (outside the app, never on a club colour), five
@@ -25,10 +25,8 @@ export function Header({ locale }: { locale: Locale }) {
       </a>
       <div className="wrap flex min-h-[4.5rem] flex-wrap items-center gap-x-4 gap-y-2 py-2">
         <Link href={`/${locale}/`} className="inline-flex shrink-0 items-center py-1" aria-label={t.home}>
-          {/* docs/design/brand2/taktik/final/wortmarke-quer.svg; minimum width 220 px */}
-          <img src="/brand/wortmarke-quer.svg" alt="" width={2150} height={512} className="hidden h-[3.5rem] w-auto min-[420px]:block" />
-          {/* narrow phones: the two-line word mark (minimum width 140 px) */}
-          <img src="/brand/wortmarke-zweizeilig.svg" alt="" width={1456} height={512} className="block h-[3.5rem] w-auto min-[420px]:hidden" />
+          {/* docs/design/brand2/taktik/final/wortmarke-zweizeilig.svg: the sign about 45 px high, the words readable */}
+          <img src="/brand/wortmarke-zweizeilig.svg" alt="" width={1456} height={512} className="h-14 w-auto md:h-16" />
         </Link>
         <nav aria-label={t.main} className="hidden flex-1 min-[1280px]:block">
           <NavLinks locale={locale} links={links} />
@@ -37,11 +35,11 @@ export function Header({ locale }: { locale: Locale }) {
           <a href={loginUrl(app)} className="link">
             {t.login}
           </a>
-          <a href={registerUrl(app)} className="btn btn-ink">
+          <a href={startUrl(app)} className="btn btn-ink">
             {t.start}
           </a>
         </div>
-        <a href={registerUrl(app)} className="btn btn-ink ml-auto hidden md:max-[1279px]:inline-flex">
+        <a href={startUrl(app)} className="btn btn-ink ml-auto hidden md:max-[1279px]:inline-flex">
           {t.start}
         </a>
         <details className="group ml-auto md:ml-0 min-[1280px]:hidden">
@@ -50,7 +48,7 @@ export function Header({ locale }: { locale: Locale }) {
             <nav aria-label={t.main} className="wrap py-4">
               <NavLinks locale={locale} links={links} stacked />
               <div className="mt-4 flex flex-col gap-3 border-t-2 border-ink pt-4 sm:flex-row">
-                <a href={registerUrl(app)} className="btn btn-ink">
+                <a href={startUrl(app)} className="btn btn-ink">
                   {t.start}
                 </a>
                 <a href={loginUrl(app)} className="btn btn-line">

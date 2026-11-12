@@ -41,7 +41,8 @@ Fachwörter sagt, was mit dem Video passiert.
 | `/blog/` | (Fuss) Blog | bleibt: zwei echte Beiträge, beide zum Kern |
 | `/funktionen/` | | leitet auf `/so-funktioniert-es/` weiter (alte Links) |
 
-Rechts in der Kopfzeile: «Anmelden» (Textlink) und «Kostenlos starten» (Tinte). Sonst nichts:
+Rechts in der Kopfzeile: «Anmelden» (Textlink) und «Kostenlos starten» (Tinte, auf `/einstieg`
+der App). Die Wortmarke steht zweizeilig (Zeichen rund 45 px hoch), damit sie lesbar ist. Sonst nichts:
 keine Sprachkürzel als einzige Beschriftung (die Sprachwahl steht im Fuss mit ausgeschriebenen
 Namen), kein Blog in der Kopfzeile. Auf dem Handy: Logo, «Menü» (Wort, kein Symbol allein).
 
@@ -95,8 +96,12 @@ Szenen, Sammlung, Spielbericht, Prüfen, Spieltag, Teilen). fr und en stehen in
    - Resultat 25:24, Namen «HC Beispiel» und «TV Muster», Verlauf des Spiels als Linie.
    - Farbwahl: «Welche Farbe trägt dein Team?» Blau, Rot, Gelb, Schwarz, Weiss, Grün, Orange,
      Violett.
-2. **Zwei Knöpfe**: «Kostenlos starten» (Tinte), «Demo-Spiel ansehen» (Umriss). Darunter:
-   «30 Tage alles gratis, ohne Kreditkarte. Danach entscheidest du.»
+2. **Team-Feld im Kopf** (Nachtrag 13. November, aus `docs/ux-test/runde1/EINSTIEG.md`): «Wie
+   heisst dein Team?», ein Feld, Knopf «Zeigen», darunter «zum Beispiel: HC Zürichsee Herren 1».
+   Schickt per GET auf `<App-URL>/einstieg?q=…`, wo die App das Team aus den Verbandsdaten ohne
+   Konto zeigt. Am Handy im ersten Bildschirm, über der Farbwahl. Daneben «Demo-Spiel ansehen»
+   (Umriss), darunter «Dein Team ansehen geht ohne Konto.» «Kostenlos starten» in der Kopfzeile
+   führt auf `/einstieg` ohne Team.
 3. **Drei Dinge** (Abschnittskopf «Das bekommst du nach jedem Spiel»): drei Spalten mit Index,
    Zahl, Einheit, Satz, Unterzeile, Bündel; Legende «Durchgezogen: Anlauf bis zur Wurfposition, von
    dir bestätigt. Gestrichelt: geschätzt.»
@@ -207,5 +212,7 @@ Geschätztes ist gestrichelt und heisst «geschätzt».
 5. **Rechtliches**: Entwürfe, nicht geprüft (Q-LEGAL-1, Q-ADD-5).
 6. **Speicherort**: App und Datenbank Schweiz, Videos EU (ADR 025, ADR 002); Anbieter werden
    vor dem Start in der Datenschutzerklärung genannt.
-7. **Öffentliches Demo-Spiel in der App**: die App hat ein Demo-Spiel erst nach der Anmeldung.
-   Ohne Konto gibt es nur das erfundene Spiel der Website.
+7. **Öffentliches Demo-Spiel in der App**: die App hat keines. Ohne Konto gibt es nur das
+   erfundene Spiel der Website.
+8. **Testphase ohne Kreditkarte** und **Nachricht, wenn die Analyse fertig ist**: im Projekt nicht
+   belegt; die Seite sagt beides nicht mehr (Q-SITE-7, Q-SITE-8).

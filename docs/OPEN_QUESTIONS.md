@@ -280,10 +280,24 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
 - **Q-SITE-4 Storage location stated as fact.** The site says «App und Datenbank auf Servern in
   der Schweiz, Videos in einem Speicher in der EU» (ADR 025, ADR 002). *Open:* confirm before
   launch; the providers are named in the privacy policy (Q-LEGAL-1).
-- **Q-SITE-5 Public demo.** The app has a demo match only after sign-up. Without an account there
-  is the invented match of the website (`apps/site/public/demo/match.json`, marked «Erfundenes
-  Spiel»). *Open:* a public read-only demo in the app (a shared link of the demo club would do).
+- **Q-SITE-5 Public demo.** The app has no demo match at all (EINSTIEG.md on `claude/ux-test`).
+  Without an account there is the invented match of the website (`apps/site/public/demo/match.json`,
+  marked «Erfundenes Spiel»). *Open:* a public read-only demo in the app.
 - **Q-SITE-6 Help guides outside the core.** Guides for training, tactics board, assistant,
   presentation, player feed, scouting report, roles and the statistics matrix stay reachable
   (the app links to them, `help-map.ts`) but are not listed and carry a note. *Open:* update
   `help-map.ts` in the app to the new screens, then delete these guides.
+- **Q-SITE-7 Trial «30 Tage gratis, ohne Kreditkarte».** Only `trial_days: 30` in
+  `packages/plans` is documented; a new club starts on the free plan (no automatic analysis), a
+  trial comes from a Stripe subscription or a support action (`services/ops.py extend_trial`), and
+  nothing says it works without a card. The site therefore says «30 Tage gratis» only next to
+  the plans, always with «Die Preise sind noch nicht endgültig», and no longer «ohne Kreditkarte».
+  *Open:* how the trial starts, and whether a card is needed.
+- **Q-SITE-8 «Du bekommst eine Nachricht, wenn die Analyse fertig ist».** The app sends no mail and
+  has no bell on phones (EINSTIEG.md, H06). The site no longer promises a message («du musst nicht
+  dabeibleiben, wenn sie fertig ist, siehst du es in der App»). *Open:* the mail «Die drei Dinge
+  sind da»; then the site can say so again.
+- **Q-SITE-9 Team field on the start page.** «Wie heisst dein Team?» sends a GET to
+  `{NEXT_PUBLIC_APP_URL}/einstieg?q=…&lang=…`; «Kostenlos starten» leads to `/einstieg?lang=…`.
+  The page is built in the app (EINSTIEG.md, step 1 and 2). *Open:* whether the app also wants the
+  visitor's shirt colour (`farbe=`) from the site's colour picker.

@@ -1,4 +1,4 @@
-# Website: Test (12./13. November 2026)
+# Website: Test (12./13. November 2026, Nachtrag Team-Feld am 13. November)
 
 Geprüft: statischer Export von `apps/site` (`pnpm --filter @handball/site build`), ausgeliefert
 mit einem komprimierenden Server (`npx serve out`), alle Seiten in de, fr, en. Bilder in
@@ -18,7 +18,7 @@ in `shots/bestand/`.
 | Interne Links (92 verschiedene) | alle 200; Links in die App (`/register`, `/login` mit `?lang=`) nicht abgerufen |
 | Tastatur | Reihenfolge Sprunglink, Logo, Navigation, Anmelden, Starten, Inhalt; Fokus überall sichtbar (3 px); Farbwahl mit Pfeiltasten; «Menü» mit Enter; die drei Dinge im Demo als Knöpfe mit `aria-pressed` |
 | `prefers-reduced-motion` | Taktikkamera steht auf dem letzten Bild mit «Abspielen», Bündel sofort gezeichnet |
-| Lighthouse 12 (Handy, simuliert gedrosselt) | Start 95 / 100 / 100 / 100, Demo 98 / 100 / 100 / 100, So funktioniert es (en) 99 / 100 / 100 / 100, Filmen (fr) 98 / 100 / 100 / 100 (Leistung / Barrierefreiheit / Best Practices / SEO); LCP 2.1 bis 2.8 s, CLS 0 |
+| Lighthouse 12 (Handy, simuliert gedrosselt) | Start mit Team-Feld 96 / 100 / 100 / 100 (de und fr), Demo 98 / 100 / 100 / 100, So funktioniert es (en) 99 / 100 / 100 / 100, Filmen (fr) 98 / 100 / 100 / 100 (Leistung / Barrierefreiheit / Best Practices / SEO); LCP 2.1 bis 2.8 s, CLS 0 |
 | Metadaten | Titel, Beschreibung, kanonische Adresse und Sprachalternativen pro Seite; Open-Graph-Bild aus `brand2/taktik/final/open-graph.png`; Sitemap mit 25 Adressen (nicht gelistete Hilfe und `/funktionen/` ausgenommen, beide `noindex`); `/funktionen/` leitet weiter |
 
 Ohne komprimierenden Server (Python `http.server`) fällt die Leistung auf 85: die Seiten sind
@@ -28,13 +28,13 @@ ungepackt bis 200 KB gross. Jeder übliche Webserver oder CDN packt; das ist kei
 
 | Schritt | Was er sieht | Hängt er? |
 |---|---|---|
-| Seite öffnen | Logo, «Menü», im blauen Kopf «Dein Spiel. Und drei Dinge zum Mitnehmen.» und der Satz «Du filmst das Spiel mit dem Handy …» | Nein. In zehn Sekunden klar: filmen, hochladen, drei Dinge. Der Kicker «Erfundenes Beispielspiel» sagt, dass 25:24 nicht sein Spiel ist. |
+| Seite öffnen | Logo, «Menü», im blauen Kopf «Dein Spiel. Und drei Dinge zum Mitnehmen.», der Satz «Du filmst das Spiel mit dem Handy …» und, noch im ersten Bildschirm, «Wie heisst dein Team?» mit «Zeigen» | Nein. In zehn Sekunden klar: filmen, hochladen, drei Dinge. Er tippt seinen Teamnamen und landet in der App bei seinem Team, ohne Konto (die Seite `/einstieg` baut die App). |
 | Weiter nach unten | zwei grosse Knöpfe, «30 Tage alles gratis, ohne Kreditkarte», dann «Welche Farbe trägt dein Team?» | Die Farbwahl macht Spass und zeigt sofort, dass es um sein Team geht. |
 | Drei Dinge | «5 von 24 Gegentore aus dem Rückraum rechts», mit Anläufen | Die Zahl mit Basis versteht er. Die Linien brauchen die Legende darunter. **War ein Hänger:** «5 Szenen» sah aus wie ein Knopf und tat nichts. Jetzt führt es ins Demo-Spiel. |
 | Taktikkamera | spielt, mit «Pause» | Versteht «von oben». Der Satz «Den Ball erkennt die Analyse noch nicht» steht direkt darunter. |
 | So kommst du dahin | 1 Filmen, 2 Hochladen, 3 Prüfen und teilen | Klar. «So filmst du richtig» führt zum Hallenplan. |
 | Filmen | Hallenplan, Liste, Aushang zum Drucken | Er weiss, wo das Stativ hin muss und dass 10 GB frei sein sollen. |
-| Kostenlos starten | Registrierung in der App | Hier endet die Website. In der App: siehe Abstimmung unten (englische Fehlermeldungen, B25). |
+| Zeigen / Kostenlos starten | `/einstieg` der App, mit dem Teamnamen | Hier endet die Website. Die App zeigt das Team aus den Verbandsdaten und fragt erst beim Speichern nach der E-Mail. |
 
 Noch möglich, aber nicht behoben: Hans könnte «Prüfen» für eine Prüfung halten, bevor er es
 erlebt. Die Erklärung steht bei Schritt 3 und unter «So funktioniert es».
@@ -86,11 +86,30 @@ Was die App dafür tun sollte (an die Session der App, nicht hier umgesetzt):
 - Wörter, die beide gleich brauchen: «Kostenlos starten», «Demo-Spiel», «Prüfen», «Spielbericht»,
   «Taktikkamera», «geschätzt», «Ball in dieser Szene nicht erkannt».
 
+## Nachtrag 13. November: Team-Feld, Wortmarke, Belege
+
+Nach `docs/ux-test/runde1/EINSTIEG.md` und der Rückmeldung der App-Session:
+- «Wie heisst dein Team?» mit «Zeigen» im Kopf der Startseite (am Handy im ersten Bildschirm, über
+  der Farbwahl) und unten noch einmal; GET auf `<App-URL>/einstieg?q=…&lang=…`. «Kostenlos starten»
+  führt überall auf `/einstieg?lang=…`.
+- Wortmarke zweizeilig, Zeichen rund 45 px hoch.
+- Nicht belegt und darum entfernt: «ohne Kreditkarte» (Q-SITE-7) und «du bekommst eine Nachricht,
+  wenn die Analyse fertig ist» (Q-SITE-8). «Ab CHF 39» und «30 Tage gratis» stammen aus
+  `packages/plans/plans.json` (`price_chf_month`, `trial_days`) und stehen nur mit «Die Preise sind
+  noch nicht endgültig».
+- Speicherort «App und Datenbank in der Schweiz, Videos in der EU»: belegt in
+  `docs/adr/025-azure-app-hosting.md` (Punkt 1: Azure Switzerland North),
+  `infra/terraform/azure/variables.tf` (`location`, Vorgabe `switzerlandnorth`) und
+  `docs/adr/002-hosting-region.md` (Punkt 1: Cloudflare R2 mit EU-Jurisdiktion). Noch nicht in
+  Betrieb; Q-SITE-4 bleibt offen.
+- Wiederholt: axe 0, kein Überlauf (320 bis 1280, grosse Schrift), Tastatur (Feld und «Zeigen»
+  direkt nach der Kopfzeile), Lighthouse 96 / 100 / 100 / 100.
+
 ## Nicht geprüft
 
 - Echte Geräte (iPhone Safari, Android Chrome) und echte Bildschirmleser (VoiceOver, NVDA): nur
   Chromium mit Playwright und axe.
-- Die Links in die App gegen eine laufende App (`/register`, `/login`, `?lang=`).
+- Die Links in die App gegen eine laufende App (`/einstieg?q=`, `/login`, `?lang=`); `/einstieg` wird gerade gebaut.
 - Druck des Aushangs auf Papier (nur Druckansicht im Code: Kopf, Fuss und Rest ausgeblendet).
 - Die französischen und englischen Texte durch Muttersprachige.
 - Windows-Hochkontrastmodus.

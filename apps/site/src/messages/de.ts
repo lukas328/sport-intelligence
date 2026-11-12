@@ -35,7 +35,7 @@ const de = {
   cta: {
     start: "Kostenlos starten",
     demo: "Demo-Spiel ansehen",
-    trial: "30 Tage alles gratis, ohne Kreditkarte. Danach entscheidest du.",
+    trial: "Dein Team ansehen geht ohne Konto.",
     how: "So funktioniert es",
     filming: "So filmst du richtig",
     pricing: "Alle Preise",
@@ -112,6 +112,9 @@ const de = {
   },
   home: {
     title: "Dein Spiel. Und drei Dinge zum Mitnehmen.",
+    teamLabel: "Wie heisst dein Team?",
+    teamButton: "Zeigen",
+    teamExample: "zum Beispiel: HC Zürichsee Herren 1",
     lead: "Du filmst das Spiel mit dem Handy und lädst das Video hoch. Die Analyse zeigt dir drei Dinge zum Mitnehmen, mit den Szenen dazu.",
     moreTitle: "Und dazu",
     more: [
@@ -123,12 +126,12 @@ const de = {
     stepsTitle: "So kommst du dahin",
     steps: [
       { title: "Filmen", text: "Handy aufs Stativ, hoch oben an der Mittellinie, das ganze Feld im Bild." },
-      { title: "Hochladen", text: "Video in der App wählen. Wenn die Analyse fertig ist, bekommst du eine Nachricht." },
+      { title: "Hochladen", text: "Video in der App wählen. Die Analyse läuft von selbst, du musst nicht dabeibleiben." },
       { title: "Prüfen und teilen", text: "Wo die Analyse unsicher ist, fragt sie dich kurz. Dann schickst du dem Team den Link." },
     ],
     boardTitle: "Für den Vorstand",
     board: [
-      { title: "Was es kostet", text: "Ab CHF {price} im Monat für ein Team. Die ersten 30 Tage sind gratis." },
+      { title: "Was es kostet", text: "Ab CHF {price} im Monat für ein Team, die ersten 30 Tage gratis. Die Preise sind noch nicht endgültig." },
       { title: "Wo die Daten liegen", text: "App und Datenbank auf Servern in der Schweiz, Videos in einem Speicher in der EU." },
       { title: "Wer einwilligt", text: "Per Link im Teamchat, ohne Konto. Für Kinder entscheiden die Eltern." },
     ],
@@ -167,7 +170,7 @@ const de = {
       },
       {
         title: "Die Analyse rechnet",
-        text: "Sie findet das Spielfeld, verfolgt Spielerinnen und Spieler, liest Rückennummern, wo es geht, und übernimmt die Tore aus dem Spielbericht. Du musst nicht warten: die App schickt dir eine Nachricht, wenn sie fertig ist.",
+        text: "Sie findet das Spielfeld, verfolgt Spielerinnen und Spieler, liest Rückennummern, wo es geht, und übernimmt die Tore aus dem Spielbericht. Du musst nicht dabeibleiben: wenn sie fertig ist, siehst du es in der App.",
       },
       {
         title: "Prüfen",
@@ -317,7 +320,7 @@ const de = {
     faqTitle: "Fragen zu Preis und Abo",
     faq: [
       { q: "Was passiert nach den 30 Tagen?", a: "Du entscheidest. Ohne Abo wechselt dein Team in den Gratis-Plan. Deine Spiele und Szenen bleiben erhalten." },
-      { q: "Brauche ich eine Kreditkarte?", a: "Für die 30 Tage nicht. Bezahlen kannst du später monatlich per Karte oder jährlich per QR-Rechnung, zum Beispiel über die Kassierin des Vereins." },
+      { q: "Wie bezahle ich?", a: "Monatlich per Karte oder jährlich per QR-Rechnung, zum Beispiel über die Kassierin des Vereins." },
       { q: "Kann ich kündigen?", a: "Ja. Ein Monatsabo zum Monatsende, ein Jahresabo zum Ende der Laufzeit." },
       { q: "Zählt eine Analyse, die nicht klappt?", a: "Nein. Eine Analyse, die wegen eines Fehlers nicht fertig wird, zählt nicht." },
       { q: "Gibt es Rabatte für Verbände?", a: "Verbände und Partner können Gutscheine ausgeben. Schreib uns." },
@@ -331,7 +334,7 @@ const de = {
       { q: "Reicht mein Handy?", a: "Ja. Jedes Handy, das in Full HD (1080p) filmt, reicht. Wichtiger als die Kamera ist, wo sie steht." },
       { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Das ganze Feld muss im Bild sein, mit beiden Torräumen." },
       { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert, meist MP4 oder MOV. Auch mehrere Dateien, zum Beispiel eine pro Halbzeit, oder ein Link zu einer Kamera-Plattform." },
-      { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht warten: die App schickt dir eine Nachricht, wenn die Analyse fertig ist." },
+      { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht dabeibleiben: wenn die Analyse fertig ist, siehst du es in der App." },
       { q: "Muss ich etwas von Hand eintragen?", a: "Nein. Die drei Dinge und die Szenen kommen ohne Eintippen. Wo die Analyse unsicher ist, fragt sie dich kurz. Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
       { q: "Was kostet es?", a: "Ein Team kostet CHF {month} im Monat oder CHF {year} im Jahr. Die ersten 30 Tage sind gratis. Die Preise sind noch nicht endgültig." },
       { q: "Was passiert mit dem Video?", a: "Es gehört deinem Verein. Sehen kann es nur das Trainerteam, ausser du teilst einen Link. Das Originalvideo wird nach 90 Tagen gelöscht, eine kleinere Fassung für die Szenen bleibt, bis du sie löschst." },

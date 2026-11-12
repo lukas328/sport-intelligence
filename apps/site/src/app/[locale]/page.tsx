@@ -5,11 +5,12 @@ import { DemoCamera } from "@/components/demo-camera";
 import { Honest } from "@/components/honest";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, ShirtPicker } from "@/components/kit";
+import { TeamField } from "@/components/team-field";
 import { Things } from "@/components/things";
 import { SectionHead, WurfHead } from "@/components/wurf-head";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { SITE_URL, SUPPORT_EMAIL, registerUrl } from "@/lib/site";
+import { SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
 import { demoView } from "@/lib/things";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -25,7 +26,6 @@ export default async function Home({ params }: Props) {
   const t = m.home;
   const v = demoView(m);
   const team = plans.plans.find((p) => p.plan === "team")!;
-  const start = registerUrl(APP_LOCALE[locale]);
   return (
     <KitScope>
       <JsonLd
@@ -54,19 +54,16 @@ export default async function Home({ params }: Props) {
         scoreLabel={fmt(m.match.resultLabel, { own: v.own, opp: v.opp, a: v.final.own, b: v.final.opp })}
         goals={v.report}
         flightLabels={{ half: m.match.flightHalf, end: m.match.flightEnd }}
-      />
+      >
+        <TeamField id="team-top" label={t.teamLabel} button={t.teamButton} example={t.teamExample} appLocale={APP_LOCALE[locale]} onClub />
+      </WurfHead>
 
       <div className="wrap">
         <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] lg:items-start">
           <div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a href={start} className="btn btn-ink">
-                {m.cta.start}
-              </a>
-              <DemoLink href={`/${locale}/demo/`} className="btn btn-line">
-                {m.cta.demo}
-              </DemoLink>
-            </div>
+            <DemoLink href={`/${locale}/demo/`} className="btn btn-line">
+              {m.cta.demo}
+            </DemoLink>
             <p className="mt-3 text-[1.0625rem] text-ink-2">{m.cta.trial}</p>
           </div>
           <ShirtPicker question={m.kit.question} hint={m.kit.hint} names={m.kit.names} />
@@ -150,11 +147,9 @@ export default async function Home({ params }: Props) {
           <h2 id="final" className="text-[2.25rem] md:text-[3.25rem]">
             {t.finalTitle}
           </h2>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <a href={start} className="btn btn-ink">
-              {m.cta.start}
-            </a>
-            <DemoLink href={`/${locale}/demo/`} className="btn btn-line">
+          <div className="mt-8 grid grid-cols-1 items-end gap-8 md:grid-cols-[minmax(0,34rem)_auto]">
+            <TeamField id="team-end" label={t.teamLabel} button={t.teamButton} example={t.teamExample} appLocale={APP_LOCALE[locale]} />
+            <DemoLink href={`/${locale}/demo/`} className="btn btn-line md:mb-9">
               {m.cta.demo}
             </DemoLink>
           </div>

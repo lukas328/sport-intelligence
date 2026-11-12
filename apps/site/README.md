@@ -39,7 +39,7 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 | variable | default |
 |---|---|
 | `NEXT_PUBLIC_SITE_URL` | `https://handball-ai.ch` (canonical URLs, sitemap) |
-| `NEXT_PUBLIC_APP_URL` | `https://app.handball-ai.ch` (sign-up and log-in links, `?lang=` sets the app language) |
+| `NEXT_PUBLIC_APP_URL` | `https://app.handball-ai.ch` (the team field and «Kostenlos starten» go to `/einstieg?q=…`, «Anmelden» to `/login`; `?lang=` sets the app language) |
 | `NEXT_PUBLIC_SUPPORT_EMAIL` | `support@handball-ai.ch` |
 | `NEXT_PUBLIC_STATUS_URL` | empty (link hidden) |
 | `NEXT_PUBLIC_COMPANY_NAME`, `_ADDRESS`, `_UID` | empty (imprint says the details follow) |

@@ -6,7 +6,7 @@ import { KitScope } from "@/components/kit";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { registerUrl } from "@/lib/site";
+import { startUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -70,7 +70,7 @@ export default async function How({ params }: Props) {
         </section>
 
         <div className="mt-16 flex flex-col gap-3 border-t-2 border-ink pt-10 sm:flex-row sm:flex-wrap">
-          <a href={registerUrl(APP_LOCALE[locale])} className="btn btn-ink">
+          <a href={startUrl(APP_LOCALE[locale])} className="btn btn-ink">
             {m.cta.start}
           </a>
           <Link href={`/${locale}/demo/`} className="btn btn-line">
