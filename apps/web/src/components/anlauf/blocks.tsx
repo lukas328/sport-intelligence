@@ -72,6 +72,11 @@ export function ActiveMark({ className }: { className?: string }) {
   return <span aria-hidden data-mark="" className={cn("mark-band pointer-events-none absolute h-1.5", className)} />;
 }
 
+/** The own row in a table (the league table): a small slanted chip in the club colour. */
+export function OwnRowMark() {
+  return <span aria-hidden data-mark="" className="mr-2 inline-block h-3 w-3.5 -skew-x-12 bg-club align-middle shadow-[inset_0_0_0_1px_var(--club-edge)]" />;
+}
+
 /** Inline text link: ink, underlined. */
 export const linkClass = "font-bold text-ink underline decoration-[1.5px] underline-offset-4";
 

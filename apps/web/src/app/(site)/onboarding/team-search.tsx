@@ -24,7 +24,8 @@ export function OfficialTeamSearch({
   onJoinSent,
 }: {
   onManual: () => void;
-  onClaimed?: (club: string) => void;
+  /** the team was taken over: the onboarding shows step 2 «Das seid ihr, oder?» */
+  onClaimed?: (club: string, out: Claimed, team: OfficialTeam) => void;
   /** a player asked to join: the coach's steps (club, team, squad, invite) are not theirs */
   onJoinSent?: () => void;
 }) {
@@ -70,8 +71,8 @@ export function OfficialTeamSearch({
       setActing(null);
       return setSent(t("accessSent", { club: team.club.name }));
     }
+    if (onClaimed) return onClaimed(team.club.name, r.data, team);
     setClaimed({ team, out: r.data });
-    onClaimed?.(team.club.name);
   }
 
   async function join(e: FormEvent<HTMLFormElement>, team: OfficialTeam) {

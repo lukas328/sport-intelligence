@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
-import { clubStyle } from "@/lib/color";
+import { clubStyle, SHIRTS } from "@/lib/color";
 import { PageHeader } from "@/components/ui/page-header";
 import { useState, type FormEvent } from "react";
 import { InviteForm } from "@/components/people/invite-form";
@@ -14,11 +14,15 @@ import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { OfficialTeamSearch } from "./team-search";
+import { ConfirmTeam } from "./confirm-team";
+import type { OfficialTeam } from "@/lib/official-teams";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 
 type Org = Schemas["OrgOut"];
 type Team = Schemas["TeamOut"];
 const STEPS = ["stepClub", "stepTeam", "stepRoster", "stepInvite"] as const;
+// with the official data the onboarding is two steps: find the team, confirm it (SPEC 7.12)
+const OFFICIAL_STEPS = ["stepFind", "stepConfirm"] as const;
 const COUNTRIES = ["CH", "DE", "AT", "FR", "LI"] as const;
 
 export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
@@ -31,13 +35,15 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   // the club colour as it is being picked: the welcome band shows it right away
-  const [colour, setColour] = useState(existingOrg?.primary_color ?? "#0b6bcb");
+  const [colour, setColour] = useState(existingOrg?.primary_color ?? SHIRTS[0][1]);
   const [name, setName] = useState(existingOrg?.name ?? "");
   // a new coach first looks for the team in the official data; a club by hand on request
   const [manual, setManual] = useState(false);
-  // a team taken over from the official data: club and team are there, the squad is next
-  const [claimed, setClaimed] = useState(false);
-  const shownStep = claimed ? 2 : step;
+  // a team taken over from the official data: club and team are there, step 2 confirms them
+  const [claimed, setClaimed] = useState<{ out: Schemas["ClaimOut"]; team: OfficialTeam } | null>(null);
+  const official = step === 0 && !manual;
+  const steps: readonly string[] = official ? OFFICIAL_STEPS : STEPS;
+  const shownStep = official ? (claimed ? 1 : 0) : step;
   // a player who asked to join a team has no club steps ahead
   const [joined, setJoined] = useState(false);
 
@@ -101,16 +107,16 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <div className={claimed ? "space-y-8" : "mx-auto max-w-2xl space-y-8"}>
       {/* the Seitenkopf takes the club colour as it is picked: the Keil shows it right away */}
       <div className="club" style={clubStyle(colour) as CSSProperties}>
-        <PageHeader eyebrow={!joined ? t("onboarding.progress", { step: shownStep + 1, total: STEPS.length }) : undefined} title={name.trim() || t("onboarding.title")} />
-        {!joined && (
-          <ol className="-mt-2 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}>
-            {STEPS.map((s, i) => (
+        <PageHeader eyebrow={!joined ? t("onboarding.progress", { step: shownStep + 1, total: steps.length }) : undefined} title={claimed ? t("onboarding.confirmTitle") : name.trim() || t("onboarding.title")} />
+        {!joined && !claimed && (
+          <ol className="-mt-2 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: steps.length })}>
+            {steps.map((s, i) => (
               <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-[13px] ${i <= shownStep ? "font-bold text-ink" : "text-ink-2"}`}>
                 <span aria-hidden className={`block h-1.5 ${i <= shownStep ? "bg-ink" : "bg-rule"}`} />
-                {t(`onboarding.${s}`)}
+                {t(`onboarding.${s}` as "onboarding.stepClub")}
               </li>
             ))}
           </ol>
@@ -118,7 +124,17 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
       </div>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
 
-      {step === 0 && !manual && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club) => (setName(club), setClaimed(true))} onJoinSent={() => setJoined(true)} />}
+      {official && !claimed && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club, out, team) => (setName(club), setJoined(false), setClaimed({ out, team }))} onJoinSent={() => setJoined(true)} />}
+      {official && claimed?.out.organization_id && claimed.out.team_id && (
+        <ConfirmTeam
+          claimed={claimed.out}
+          teamName={claimed.team.name}
+          league={[claimed.team.league, claimed.team.group_name].filter(Boolean).join(", ")}
+          colour={colour}
+          onColour={setColour}
+          onNotMine={() => (setClaimed(null), setName(""))}
+        />
+      )}
 
       {step === 0 && manual && (
         <Card>

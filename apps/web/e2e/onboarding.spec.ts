@@ -68,9 +68,10 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await page.getByRole("button", { name: "Einladung senden" }).click();
   await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Team", exact: true })).toBeVisible();
-  await expect(page.getByText("Team · Herren 1")).toBeVisible();
-  await expect(page.getByTestId("roster-count")).toHaveText("4 Spieler");
+  // the squad page says the state of the squad in its title (SPEC 7.10)
+  await expect(page.getByRole("heading", { level: 1, name: /^4 im Kader\./ })).toBeVisible();
+  await expect(page.getByText(/^Herren 1 · /)).toBeVisible();
+  await expect(page.getByTestId("team-row")).toHaveCount(4);
 
   const elapsed = Date.now() - started;
   expect(elapsed, "onboarding must take under 5 minutes").toBeLessThan(5 * 60 * 1000);
@@ -93,9 +94,10 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   // "Teamfunktionen" is off for a new team: players see the start and the team only (ADR 029)
   await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(2);
   await player.getByRole("link", { name: "Team", exact: true }).click();
-  await expect(player.getByTestId("roster-row")).toHaveCount(4);
+  await expect(player.getByTestId("team-row")).toHaveCount(4);
   // players cannot edit the roster
   await expect(player.getByRole("form", { name: "Spieler hinzufügen" })).toHaveCount(0);
+  await expect(player.getByTestId("roster-edit")).toHaveCount(0);
   await ctx.close();
 
   // settings: pending invitations are empty now, members list shows the player

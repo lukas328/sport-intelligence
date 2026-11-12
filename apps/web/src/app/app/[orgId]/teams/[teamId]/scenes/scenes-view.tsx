@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { type CSSProperties, useMemo, useState } from "react";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
@@ -63,13 +63,18 @@ function combine(chips: Chip[], ctx: { lastMatch: string | null; last3: string[]
 export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; teamId: string; matches: Match[]; side: React.ReactNode }) {
   const t = useTranslations("scenesPage");
   const router = useRouter();
+  // ?chips=conceded,wing_right opens a search from elsewhere (the season, a thing)
+  const asked = useSearchParams().get("chips");
   const withVideo = useMemo(() => matches.filter((m) => m.has_video).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at)), [matches]);
   const ctx = { lastMatch: withVideo[0]?.id ?? null, last3: withVideo.slice(0, 3).map((m) => m.id) };
   // the page opens on the first thing of the last match (as the start says it), over the last
   // three matches: an answer, not a list
   const lastGraphics = useMatchGraphics(orgId, ctx.lastMatch ?? "");
   const firstThing = lastGraphics.data ? threeThings(goalRuns(lastGraphics.data))[0] : undefined;
-  const [picked, setActive] = useState<string[] | null>(null);
+  const [picked, setActive] = useState<string[] | null>(() => {
+    const keys = asked?.split(",").filter((k) => CHIPS.some((c) => c.key === k)) ?? [];
+    return keys.length ? keys : null;
+  });
   const start = firstThing
     ? [firstThing.team === "opp" ? "conceded" : "scored", ...(ZONE_CHIP[firstThing.zone ?? ""] ? [ZONE_CHIP[firstThing.zone ?? ""]!] : []), "last_3"]
     : [];

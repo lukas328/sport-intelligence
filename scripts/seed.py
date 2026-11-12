@@ -53,6 +53,22 @@ SQUAD = [
     (11, "Tim", "Baumann", "KM", "right", 1997),
     (22, "Noah", "Graf", "KM", "right", 2002),
 ]
+# shirt numbers without a consent for video analysis yet
+NO_CONSENT = {14, 19}
+
+
+def consent(c: Client, team_url: str, player_id: str, name: str) -> None:
+    c.post(
+        f"{team_url}/players/{player_id}/consents",
+        json={
+            "kind": "analysis",
+            "given_by": "self",
+            "given_by_name": name,
+            "given_at": datetime.now(UTC).isoformat(),
+        },
+    )
+
+
 YOUTH = [
     (1, "Lea", "Schmid", "TW"),
     (4, "Mia", "Weber", "LA"),
@@ -379,6 +395,15 @@ def main() -> None:
             },
         ).json()
         by_position.setdefault(pos, []).append(entry["player_id"])
+        # SPEC.md section 10: twelve of the squad consented by link, two still missing
+        if number not in NO_CONSENT:
+            consent(c, f"{o}/teams/{herren['id']}", entry["player_id"], f"{first} {last}")
+    # a new player whose shirt number is not known yet (Team: «Nummer fehlt»)
+    late = c.post(
+        roster_url,
+        json={"first_name": "Mattia", "last_name": "Rossi", "main_position": "RA", "birth_year": 2006},
+    ).json()
+    consent(c, f"{o}/teams/{herren['id']}", late["player_id"], "Mattia Rossi")
     u17 = c.post(
         f"{o}/teams",
         json={
@@ -522,7 +547,7 @@ def main() -> None:
     c.post(
         base,
         json={
-            "opponent_name": "TV Au-Wädenswil",
+            "opponent_name": "HSG Rheinau",
             "kickoff_at": (now + timedelta(days=4)).isoformat(),
             "is_home": False,
             "competition": "2. Liga Herren",

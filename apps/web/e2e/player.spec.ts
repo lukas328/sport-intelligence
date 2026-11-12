@@ -44,7 +44,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expectAccessible(page);
 
   // the squad: Lea is injured until next week, then fit again
-  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  await page.goto(`/app/${orgId}/teams/${teamId}?edit=1`);
   const lea = page.getByTestId("roster-row").filter({ hasText: "Lea" });
   await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
   const form = page.getByRole("form", { name: "Status von Lea Beispiel" });
@@ -66,7 +66,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await unit.getByLabel("Titel").fill("Abwehr 6:0");
   await unit.getByRole("button", { name: "Speichern" }).click();
   await expect(page.getByTestId("session-out")).toHaveText("1 fällt aus: Lea Beispiel (verletzt)");
-  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  await page.goto(`/app/${orgId}/teams/${teamId}?edit=1`);
   await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
   await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByLabel("Status").selectOption("fit");
   await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByRole("button", { name: "Speichern" }).click();
@@ -127,7 +127,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expectAccessible(page);
 
   // the squad: Mia's account belongs to no entry yet; the coach links it, sees it, and unlinks it
-  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  await page.goto(`/app/${orgId}/teams/${teamId}?edit=1`);
   const unlinked = page.getByTestId("unlinked-accounts");
   await expect(unlinked).toContainText("1 Konto ohne Eintrag im Team");
   const linkForm = unlinked.getByRole("form", { name: "Mia Muster verknüpfen" });

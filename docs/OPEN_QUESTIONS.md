@@ -248,9 +248,14 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   points (display only, nothing added). Whether the raw tracks need filtering (jitter, ID
   switches) before they look like runs is open.
 - **Q-UX-19 League table and rank.** Start (Tabelle), Saison (Rang in the Seitenkopf, Tabelle)
-  and Nächster Gegner (three facts from the table) need the league table; the API has none
-  today (the official data gives matches, not standings). *Assumption:* left out until the
-  federation feed delivers it; the screens show what they have.
+  and Nächster Gegner (three facts from the table) need the league table. Checked 2026-11-12:
+  the handball.ch integration delivers it (`standing` in `GET /teams/{id}/official`, refreshed
+  with the daily sync) once a team is linked to its official team; the Saison page shows rank
+  and table from it. Not linked (DHB/HLA teams, teams without an official league, the demo
+  club): no rank in the title («Fünf Spiele. Und rechts aussen bleibt offen.») and no table
+  block. *Open:* a table for teams without a federation feed (entered by hand, or from the
+  match reports of the whole group) is not planned; the demo club is not linked, so its
+  screenshots show the page without a table.
 - **Q-UX-20 Prüfen as questions.** SPEC 7.5 asks one question at a time with a boxed crop.
   The analysis delivers no box per person yet, so only goal and shot candidates are asked, in
   the existing review of the Video tab. *Assumption:* the question screen comes with the boxes.

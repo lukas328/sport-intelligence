@@ -11,9 +11,9 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
-  // the title names the page, the team sits in the eyebrow above it
-  await expect(page.getByRole("heading", { level: 1, name: "Team", exact: true })).toBeVisible();
-  await expect(page.getByText("Team · U17")).toBeVisible();
+  // the squad page says the state of the squad, the team sits in the eyebrow above it
+  await expect(page.getByRole("heading", { level: 1, name: "Noch niemand im Kader." })).toBeVisible();
+  await expect(page.getByText(/^U17 · /)).toBeVisible();
   const teamUrl = page.url();
 
   // the bell shows no unread notifications for a new coach

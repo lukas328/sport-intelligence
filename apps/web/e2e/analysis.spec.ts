@@ -70,7 +70,9 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   // report dialog the match was imported from)
   await openMatches(page, "Saison");
   // the number of matches is part of the stage line now, the strip holds the per-match figures
-  await expect(page.getByRole("main")).toContainText("nach 1 Spiel");
+  await expect(page.getByRole("main")).toContainText("nach einem Spiel");
+  // the figures, the bests and all matches sit behind «Mehr zur Saison»
+  await page.getByTestId("season-more").locator("summary").click();
   await expect(page.getByTestId("season-tiles")).toContainText("Tore pro Spiel");
   await expect(page.getByTestId("season-matches")).toContainText("TV Papierdorf");
   // one match: the trend chart waits for three matches and says so

@@ -93,6 +93,8 @@ export function TeamChrome() {
   // the season page opens with its own stage (one stage per screen, at the top); Szenen has its
   // own Seitenkopf with the count and no tabs (SPEC 7.6)
   if (/\/(season|scenes)$/.test(path)) return null;
+  // the squad has its own Seitenkopf with the state of the squad as title (SPEC 7.10)
+  if (/\/teams\/[^/]+$/.test(path)) return null;
   // the fixture list has its own title and actions
   if (active === "fixtures" && !/\/paper$/.test(path)) return <AreaSubNav />;
   return <AreaHeader />;

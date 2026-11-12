@@ -78,6 +78,18 @@ export const CHECK_KITS = {
 /** The shirts a coach picks an unknown opponent's colour from (SPEC 7.13). */
 export const ASK_SHIRTS = { red: "#d3202e", blue: "#1f4fd6", black: "#17191c", white: "#ffffff", yellow: "#f6c500" } as const;
 
+/** The eight shirt colours of the onboarding (SPEC 7.12): what a coach knows without a picker. */
+export const SHIRTS = [
+  ["blue", "#1f4fd6"],
+  ["red", "#d3202e"],
+  ["yellow", "#f6c500"],
+  ["black", "#17191c"],
+  ["white", "#ffffff"],
+  ["green", "#138a4b"],
+  ["orange", "#e8731a"],
+  ["purple", "#5b2d8e"],
+] as const;
+
 /** The opponent the check colours are shown against (the demo season's TV Thalwil): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
 
