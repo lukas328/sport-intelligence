@@ -52,3 +52,6 @@ backend.hcl
 
 # working copies of helper sessions
 .claude/worktrees/
+
+# raw captures of apps/web/screens, turned into JPEGs by docs/screens/build.py
+docs/screens/png/
