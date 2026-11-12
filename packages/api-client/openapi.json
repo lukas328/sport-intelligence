@@ -5403,6 +5403,18 @@
             ],
             "title": "Source"
           },
+          "t_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "video time of the goal",
+            "title": "T Ms"
+          },
           "team": {
             "enum": [
               "own",

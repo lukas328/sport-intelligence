@@ -1,33 +1,11 @@
-import { pathOf, type Pt } from "./geometry";
+import { pathOf } from "./geometry";
+import { flightLayout, signed, type FlightLabels, type ReportGoal } from "./flight-layout";
 
-/** A goal of the match report: minute and side. The order of the report is the order of play. */
-export interface ReportGoal {
-  minute: number;
-  team: "own" | "opp";
-}
-
-/** Running goal difference after each goal: [minute, difference], starting at [0, 0]. */
-export function flowOf(goals: readonly ReportGoal[]): [number, number][] {
-  const out: [number, number][] = [[0, 0]];
-  let v = 0;
-  for (const g of [...goals].sort((a, b) => a.minute - b.minute)) {
-    v += g.team === "own" ? 1 : -1;
-    out.push([g.minute, v]);
-  }
-  return out;
-}
-
-function diffAt(flow: readonly [number, number][], m: number): number {
-  let v = 0;
-  for (const p of flow) if (p[0] <= m) v = p[1];
-  return v;
-}
-
-const signed = (v: number) => `${v > 0 ? "+" : ""}${v}`;
+export { flightLayout, flowOf, floorAt, type FlightLabels, type ReportGoal } from "./flight-layout";
 
 /**
  * Flight: the run of the match in the Wurf head, the goal difference minute by minute, ours up.
- * Drawn in the ink on the club colour. `labels` carry "{v}" for the signed difference.
+ * Drawn in the ink on the club colour.
  */
 export function Flight({
   goals,
@@ -35,50 +13,32 @@ export function Flight({
   height,
   length = 60,
   labels,
+  slant = 0,
   className,
 }: {
   goals: readonly ReportGoal[];
   width: number;
   height: number;
   length?: number;
-  labels?: { half: string; end: string };
+  labels?: FlightLabels;
+  /** how far the slanted lower edge of the head rises over the width, in drawing units */
+  slant?: number;
   className?: string;
 }) {
-  const flow = flowOf(goals);
   const small = width < 500;
   const pad = small ? 16 : 32;
-  // the range the match covered: a match always ahead uses the whole height upwards
-  const lo = Math.min(0, ...flow.map((p) => p[1]));
-  const hi = Math.max(0, ...flow.map((p) => p[1]));
-  const U = (height - 34) / Math.max(10, hi - lo);
-  const base = height - 18 + lo * U;
-  const x = (m: number) => pad + ((width - 2 * pad - 14) * Math.min(m, length)) / length;
-  const y = (v: number) => base - v * U;
-  const pts: Pt[] = [];
-  flow.forEach((p, i) => {
-    if (i) pts.push([x(p[0]), y(flow[i - 1]![1])]);
-    pts.push([x(p[0]), y(p[1])]);
-  });
-  const end = diffAt(flow, length);
-  const half = diffAt(flow, length / 2);
-  pts.push([x(length), y(end)]);
-  const e: Pt = [x(length), y(end)];
+  const L = flightLayout(goals, width, height, length, small ? undefined : labels, slant);
   const text = { font: "600 14px var(--font-sans)", fill: "var(--club-ink)" };
   return (
     <svg viewBox={`0 0 ${width} ${height}`} aria-hidden className={className}>
-      <line x1={pad} x2={width - pad} y1={base} y2={base} stroke="var(--club-ink)" strokeOpacity={0.3} strokeDasharray="2 5" />
-      <path d={pathOf(pts)} fill="none" stroke="var(--club-ink)" strokeWidth={small ? 2 : 2.6} strokeLinejoin="round" strokeOpacity={0.9} />
-      <circle cx={e[0]} cy={e[1]} r={small ? 4 : 6} fill="var(--club-ink)" />
-      {!small && labels && (
-        <>
-          <text x={x(length / 2)} y={y(half) - 10} textAnchor="middle" style={text}>
-            {labels.half.replace("{v}", signed(half))}
-          </text>
-          <text x={e[0] + 4} y={e[1] + 24} textAnchor="end" style={text}>
-            {labels.end.replace("{v}", signed(end))}
-          </text>
-        </>
-      )}
+      <line x1={pad} x2={width - pad} y1={L.base} y2={L.base} stroke="var(--club-ink)" strokeOpacity={0.3} strokeDasharray="2 5" />
+      <path d={pathOf(L.pts)} fill="none" stroke="var(--club-ink)" strokeWidth={small ? 2 : 2.6} strokeLinejoin="round" strokeOpacity={0.9} />
+      <circle cx={L.end[0]} cy={L.end[1]} r={small ? 4 : 6} fill="var(--club-ink)" />
+      {L.labels.map((l) => (
+        <text key={l.text} x={l.x} y={l.y} textAnchor={l.anchor} style={text}>
+          {l.text}
+        </text>
+      ))}
     </svg>
   );
 }

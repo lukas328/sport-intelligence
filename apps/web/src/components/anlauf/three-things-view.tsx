@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { cameraScene, goalRuns, useSceneCamera, type MatchGraphics } from "@/lib/graphics";
 import { threeThings, type Thing } from "@/lib/three-things";
@@ -53,20 +53,28 @@ export function ThreeThingsView({
   }
   return (
     <div>
-      <ol className="m-0 grid list-none grid-cols-1 border-t-2 border-ink p-0 md:grid-cols-3" data-testid="three-things">
+      {/* one thing fills the row (figure and text left, the bundle large right), two share it */}
+      <ol className={cn("m-0 grid list-none grid-cols-1 border-t-2 border-ink p-0", things.length === 2 ? "md:grid-cols-2" : things.length >= 3 && "md:grid-cols-3")} data-testid="three-things">
         {things.map((x, i) => (
-          <li key={x.key} className={cn("flex flex-col gap-2 border-rule py-4 max-md:border-b md:px-[22px] md:pt-[18px] md:pb-[22px]", i > 0 && "md:border-l", i === 0 && "md:pl-0", i === things.length - 1 && "md:pr-0")}>
+          <li
+            key={x.key}
+            className={cn(
+              "flex flex-col gap-2 border-rule py-4 max-md:border-b md:px-[22px] md:pt-[18px] md:pb-[22px]",
+              i > 0 && "md:border-l",
+              i === 0 && "md:pl-0",
+              i === things.length - 1 && "md:pr-0",
+              things.length === 1 && "md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,480px)] md:content-start md:gap-x-12",
+            )}
+          >
             <p className="m-0 w-full font-mono text-[13px] font-bold text-ink-2">{t("index", { n: i + 1, total: things.length })}</p>
             <p className="m-0 flex flex-wrap items-baseline gap-x-2.5">
               <b className={cn("font-num text-[64px] leading-[.8] md:text-[96px]", x.team === "own" ? "text-club-text" : "text-ink")}>{x.value}</b>
               <span className="font-slant text-base text-ink-2 md:text-[22px]">{x.key === "conceded_fast_breaks" ? t("unitFastBreaks") : t("unitOf", { of: x.of ?? 0 })}</span>
             </p>
             <h3 className="m-0 text-[17px] leading-[1.22] font-bold md:text-xl">{text(x)}</h3>
-            {i === 0 ? (
-              <FirstThing orgId={orgId} matchId={matchId} thing={x} label={text(x)} oppName={oppName} />
-            ) : (
-              <ThingBundle thing={x} label={text(x)} />
-            )}
+            <div className={cn(things.length === 1 && "md:col-start-2 md:row-span-6 md:row-start-1")}>
+              {i === 0 ? <FirstThing orgId={orgId} matchId={matchId} thing={x} label={text(x)} oppName={oppName} /> : <ThingBundle thing={x} label={text(x)} />}
+            </div>
             {(onScenes || hrefScenes) &&
               (hrefScenes ? (
                 <a href={hrefScenes(x)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
@@ -140,7 +148,27 @@ function FirstThing({ orgId, matchId, thing, label, oppName }: { orgId: string; 
 }
 
 /** One scene on the tactics camera, or the empty field when nothing was measured. */
-export function SceneCamera({ orgId, matchId, eventId, label, view = "halfB", width = 340, caption }: { orgId: string; matchId: string; eventId: string; label: string; view?: "halfB" | "camL"; width?: number; caption?: string }) {
+export function SceneCamera({
+  orgId,
+  matchId,
+  eventId,
+  label,
+  view = "halfB",
+  width = 340,
+  caption,
+  captionSmall,
+  barExtra,
+}: {
+  orgId: string;
+  matchId: string;
+  eventId: string;
+  label: string;
+  view?: "halfB" | "camL";
+  width?: number;
+  caption?: string;
+  captionSmall?: string;
+  barExtra?: ReactNode;
+}) {
   const t = useTranslations("anlauf");
   const q = useSceneCamera(orgId, matchId, eventId);
   const scene = q.data ? cameraScene(q.data, label) : null;
@@ -159,7 +187,8 @@ export function SceneCamera({ orgId, matchId, eventId, label, view = "halfB", wi
       view={view}
       width={width}
       dot={view === "halfB" ? 16 : 12}
-      text={{ label: t("cameraLabel", { label }), pause: t("pause"), play: t("play"), notFound: t("ballNotFound"), noBall: t("noBall"), caption: caption ?? null, captionSmall: caption ? t("positionsFromVideo") : null }}
+      text={{ label: t("cameraLabel", { label }), pause: t("pause"), play: t("play"), notFound: t("ballNotFound"), noBall: t("noBall"), caption: caption ?? null, captionSmall: caption ? (captionSmall ?? t("positionsFromVideo")) : null }}
+      barExtra={barExtra}
     />
   );
 }

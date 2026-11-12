@@ -62,7 +62,7 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
               ownName="HC Zürichsee"
               oppName="TSV Thalwil"
               goals={DEMO_REPORT}
-              flightLabels={{ half: "Halbzeit {v}", end: "Schluss {v}" }}
+              flightLabels={{ half: "Halbzeit {v}", end: "Schluss {v}", halfLevel: "Halbzeit, Gleichstand", endLevel: "Schluss, Gleichstand" }}
             />
             <div className="mt-6 grid gap-8 px-4 md:grid-cols-2 md:px-8">
               <Strip name="HC Zürichsee gegen TSV Thalwil" sub="Samstag, Meisterschaft" own={DEMO_RESULT.own} opp={DEMO_RESULT.opp} />

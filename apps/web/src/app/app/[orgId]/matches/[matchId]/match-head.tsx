@@ -15,6 +15,7 @@ type Match = Schemas["MatchOut"];
  */
 export function MatchHead({ match, ownName, oppName, view, graphics, children }: { match: Match; ownName: string; oppName: string; view: "game" | "video" | "numbers"; graphics: MatchGraphics | null | undefined; children?: ReactNode }) {
   const t = useTranslations("anlauf");
+  const ta = t;
   const tm = useTranslations("matches");
   const format = useFormatter();
   const kickoff = new Date(match.kickoff_at);
@@ -40,7 +41,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           ownName={ownName}
           oppName={oppName}
           goals={graphics ? reportGoals(graphics) : null}
-          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }) }}
+          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") }}
           meta={
             <>
               {half}
@@ -51,7 +52,17 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           {children}
         </WurfHead>
       ) : (
-        <Strip name={<h1 className="m-0 text-[length:inherit] leading-[inherit]">{title}</h1>} sub={[when, half].filter(Boolean).join(" · ")} own={match.score_own} opp={match.score_opponent} />
+        <Strip
+          name={
+            <h1 className="m-0 text-[length:inherit] leading-[inherit]">
+              {ownName}
+              {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
+            </h1>
+          }
+          sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue].filter(Boolean).join(" · ")}
+          own={match.score_own}
+          opp={match.score_opponent}
+        />
       )}
     </div>
   );

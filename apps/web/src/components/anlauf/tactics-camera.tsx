@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { CourtLines } from "./court";
 import { inView, pathOf, type Pt, sampleAt, trailOf, VIEWS, type ViewName } from "./geometry";
 
@@ -188,6 +188,7 @@ export function TacticsCamera({
   still = false,
   showLabels = true,
   ballLine = true,
+  barExtra,
 }: {
   scene: CameraScene;
   view?: ViewName;
@@ -197,6 +198,8 @@ export function TacticsCamera({
   still?: boolean;
   showLabels?: boolean;
   ballLine?: boolean;
+  /** more controls in the bar, e.g. the switch Video | Taktik */
+  barExtra?: ReactNode;
 }) {
   const [t, setT] = useState(1);
   const [paused, setPaused] = useState(true);
@@ -242,6 +245,7 @@ export function TacticsCamera({
           >
             {paused ? text.play : text.pause}
           </button>
+          {barExtra}
           <span className="ml-auto font-mono text-xl font-semibold tabular-nums text-white" aria-live="off">
             {clockAt(scene, t)}
           </span>

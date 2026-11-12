@@ -6711,6 +6711,11 @@ export interface components {
             /** Source */
             source: ("tracking" | "marked" | "demo") | null;
             /**
+             * T Ms
+             * @description video time of the goal
+             */
+            t_ms?: number | null;
+            /**
              * Team
              * @enum {string}
              */

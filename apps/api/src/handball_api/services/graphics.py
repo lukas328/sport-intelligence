@@ -299,6 +299,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 "confirmed": not estimated_spot,
                 "source": source,
                 "has_video": e.t_ms is not None,
+                "t_ms": e.t_ms,
             }
         )
 
@@ -308,7 +309,14 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         "report_goals": report,
         "goals": runs,
         "phases": await _phases(ctx, match, goals),
-        "checks": await _checks(ctx, match),
+        # the court first: until it is confirmed the analysis draws no positions (demo matches
+        # show invented ones, the real court of their video is still asked)
+        "checks": (
+            [_field_check(asset)]
+            if asset is not None and tracking and confirmed_field is False
+            else []
+        )
+        + await _checks(ctx, match),
         "source": "demo" if demo else "analysis",
     }
 
@@ -359,6 +367,18 @@ async def _phases(ctx: Ctx, match: Match, goals: list[Event]) -> list[dict[str, 
             }
         )
     return out
+
+
+def _field_check(asset: VideoAsset) -> dict[str, Any]:
+    return {
+        "id": asset.id,
+        "kind": "field",
+        "frame_ref": 0,
+        "box": None,
+        "seconds_in_view": None,
+        "suggested_side": None,
+        "candidates": [],
+    }
 
 
 async def _checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:

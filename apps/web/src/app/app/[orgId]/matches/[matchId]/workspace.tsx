@@ -56,6 +56,7 @@ export function Workspace({
   setup,
   requestPane = null,
   handle,
+  checkSteps = true,
 }: {
   orgId: string;
   match: Match;
@@ -69,6 +70,8 @@ export function Workspace({
   /** a pane to open from outside; a new object each time */
   requestPane?: { pane: Pane } | null;
   handle?: Ref<PlayerHandle | null>;
+  /** the work steps (court, throw-off, goals, persons) in the rail; off where Prüfen asks them */
+  checkSteps?: boolean;
 }) {
   const t = useTranslations();
   const qc = useQueryClient();
@@ -417,7 +420,7 @@ export function Workspace({
           </Button>
         </div>
       ) : staff || tools.length > 1 ? (
-        <WorkRail steps={staff ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+        <WorkRail steps={staff && checkSteps ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
       ) : null}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}

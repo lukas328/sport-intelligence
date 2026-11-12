@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Flight, type ReportGoal } from "./charts";
+import { Flight, type FlightLabels, type ReportGoal } from "./charts";
 
 /**
  * The three heads of the Anlauf look. Per route there is one Wurf head or one Streifen
@@ -77,7 +77,7 @@ export function WurfHead({
   oppName: string;
   /** the goal sequence of the report; without it, no line */
   goals?: readonly ReportGoal[] | null;
-  flightLabels?: { half: string; end: string };
+  flightLabels?: FlightLabels;
   meta?: ReactNode;
   children?: ReactNode;
   /** before the first result: no club area, an ink outline instead */
@@ -110,7 +110,7 @@ export function WurfHead({
       </div>
       {goals && goals.length > 0 && (
         <>
-          <Flight goals={goals} width={1000} height={120} labels={flightLabels} className="absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
+          <Flight goals={goals} width={1000} height={120} labels={flightLabels} slant={48} className="absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
 
         </>
       )}

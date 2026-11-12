@@ -12,7 +12,14 @@ import { cn } from "@/lib/utils";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
-import { ShellContext, setCookie, TEAM_COOKIE, type ShellOrg, type ShellTeam, type ShellValue } from "./context";
+import {
+  ShellContext,
+  setCookie,
+  TEAM_COOKIE,
+  type ShellOrg,
+  type ShellTeam,
+  type ShellValue,
+} from "./context";
 import { TeamSwitcher } from "./team-switcher";
 
 export function AppShell({
@@ -38,7 +45,8 @@ export function AppShell({
   const path = usePathname();
   const [chosen, setChosen] = useState<string | null>(savedTeam);
   const urlTeam = teamInPath(path);
-  const teamId = [urlTeam, chosen, teams[0]?.id].find((id) => id && teams.some((x) => x.id === id)) ?? null;
+  const teamId =
+    [urlTeam, chosen, teams[0]?.id].find((id) => id && teams.some((x) => x.id === id)) ?? null;
   const team = teams.find((x) => x.id === teamId) ?? null;
   const mode = modeFor(org.my_role, team?.my_role);
   const setTeam = useCallback((id: string) => {
@@ -49,7 +57,10 @@ export function AppShell({
     if (urlTeam && urlTeam !== chosen) setTeam(urlTeam);
   }, [urlTeam]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const value = useMemo<ShellValue>(() => ({ org, orgs, teams, team, mode, me, setTeam }), [org, orgs, teams, team, mode, me, setTeam]);
+  const value = useMemo<ShellValue>(
+    () => ({ org, orgs, teams, team, mode, me, setTeam }),
+    [org, orgs, teams, team, mode, me, setTeam],
+  );
   const navOpts = { teamFunctions: team?.team_features ?? false };
   const items = navFor(mode, org.id, team?.id ?? null, navOpts);
   const active = destOf(path, mode);
@@ -80,18 +91,25 @@ export function AppShell({
   }, []);
 
   // courtside and presentation tools use the whole screen, with one way back
-  const tool = /\/(present|remote|live|marks|matchday)$/.test(path);
+  const tool = /\/(present|remote|live|marks|matchday|check)$/.test(path);
   if (tool) {
     const back = path.replace(/\/[^/]+$/, "");
     return (
       <ShellContext.Provider value={value}>
         <div className="flex min-h-dvh flex-col">
-          <header className="flex h-[60px] items-center gap-3 border-b-2 border-ink px-4 md:px-8">
-            <Link href={back} className="flex min-h-11 flex-1 items-center gap-1.5 text-[15px] font-bold" aria-label={t("closeTool")}>
-              <ChevronLeft aria-hidden className="size-5" />
-              {team?.name ?? org.name}
-            </Link>
-          </header>
+          {/* Prüfen brings its own top line («Prüfen · Thalwil», «Später weiter») */}
+          {!path.endsWith("/check") && (
+            <header className="flex h-[60px] items-center gap-3 border-b-2 border-ink px-4 md:px-8">
+              <Link
+                href={back}
+                className="flex min-h-11 flex-1 items-center gap-1.5 text-[15px] font-bold"
+                aria-label={t("closeTool")}
+              >
+                <ChevronLeft aria-hidden className="size-5" />
+                {team?.name ?? org.name}
+              </Link>
+            </header>
+          )}
           <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-6 md:px-8">
             {children}
           </main>
@@ -101,19 +119,28 @@ export function AppShell({
   }
 
   const navLink = (on: boolean) =>
-    cn("font-slant relative flex items-center text-ink-2 no-underline hover:text-ink", on && "text-ink");
+    cn(
+      "font-slant relative flex items-center text-ink-2 no-underline hover:text-ink",
+      on && "text-ink",
+    );
 
   return (
     <ShellContext.Provider value={value}>
       <>
-        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:bg-paper focus:px-4 focus:py-2 focus:outline-3 focus:outline-ink">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:bg-paper focus:px-4 focus:py-2 focus:outline-3 focus:outline-ink"
+        >
           {t("skip")}
         </a>
         <div className="flex min-h-dvh flex-col">
           {/* the frame (Anlauf): crest and club, four destinations, search and the one action */}
           <header className="cloth sticky top-0 z-30 border-b-2 border-ink" data-frame="top">
             <div className="mx-auto hidden h-16 max-w-[1440px] items-center gap-5 px-8 lg:flex">
-              <Link href={home} className="font-slant flex shrink-0 items-center gap-3 text-xl leading-none whitespace-nowrap text-ink no-underline">
+              <Link
+                href={home}
+                className="font-slant flex shrink-0 items-center gap-3 text-xl leading-none whitespace-nowrap text-ink no-underline"
+              >
                 <ClubMark org={org} />
                 {org.name}
               </Link>
@@ -124,19 +151,39 @@ export function AppShell({
                 {items.map((it) => {
                   const on = active === it.key;
                   return (
-                    <Link key={it.key} href={it.href} aria-current={on ? "page" : undefined} className={cn(navLink(on), "px-3.5 text-lg")}>
+                    <Link
+                      key={it.key}
+                      href={it.href}
+                      aria-current={on ? "page" : undefined}
+                      className={cn(navLink(on), "px-3.5 text-lg")}
+                    >
                       {t(it.key)}
-                      {on && <span aria-hidden data-mark="" className="mark-band absolute right-2.5 -bottom-0.5 left-2.5 h-1.5" />}
+                      {on && (
+                        <span
+                          aria-hidden
+                          data-mark=""
+                          className="mark-band absolute right-2.5 -bottom-0.5 left-2.5 h-1.5"
+                        />
+                      )}
                     </Link>
                   );
                 })}
               </nav>
               <div className="ml-auto flex items-center gap-4">
-                <button type="button" onClick={() => setPalette(true)} className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4" data-testid="palette-open">
+                <button
+                  type="button"
+                  onClick={() => setPalette(true)}
+                  className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
+                  data-testid="palette-open"
+                >
                   {t("search")}
                 </button>
                 {upload && (
-                  <Link href={upload} className={buttonClass("primary", "md")} data-testid="upload-video">
+                  <Link
+                    href={upload}
+                    className={buttonClass("primary", "md")}
+                    data-testid="upload-video"
+                  >
                     {t("upload")}
                   </Link>
                 )}
@@ -152,11 +199,21 @@ export function AppShell({
               <div className="min-w-0 flex-1">
                 <TeamSwitcher compact />
               </div>
-              <button type="button" aria-label={t("search")} onClick={() => setPalette(true)} className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink">
+              <button
+                type="button"
+                aria-label={t("search")}
+                onClick={() => setPalette(true)}
+                className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink"
+              >
                 <Search aria-hidden className="size-5" />
               </button>
               {upload && (
-                <Link href={upload} aria-label={t("upload")} className="grid size-11 place-items-center border-2 border-ink bg-ink text-ground" data-testid="upload-video-compact">
+                <Link
+                  href={upload}
+                  aria-label={t("upload")}
+                  className="grid size-11 place-items-center border-2 border-ink bg-ink text-ground"
+                  data-testid="upload-video-compact"
+                >
                   <Plus aria-hidden className="size-5" strokeWidth={2.6} />
                 </Link>
               )}
@@ -165,7 +222,11 @@ export function AppShell({
           </header>
 
           {banner}
-          <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-28 outline-none md:px-8 lg:pt-8 lg:pb-16">
+          <main
+            id="main"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-28 outline-none md:px-8 lg:pt-8 lg:pb-16"
+          >
             {/* a short rise on every page change: the new content is clearly new */}
             <div key={path} className="animate-rise">
               {children}
@@ -174,14 +235,31 @@ export function AppShell({
         </div>
 
         {/* phone tab bar: the four destinations, the active one with the club band on top */}
-        <nav aria-label={t("mainNav")} className="cloth fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink pb-[env(safe-area-inset-bottom)] lg:hidden" data-frame="tabbar">
-          <ul className="mx-auto grid max-w-md" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
+        <nav
+          aria-label={t("mainNav")}
+          className="cloth fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink pb-[env(safe-area-inset-bottom)] lg:hidden"
+          data-frame="tabbar"
+        >
+          <ul
+            className="mx-auto grid max-w-md"
+            style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+          >
             {items.map((it) => {
               const on = active === it.key;
               return (
                 <li key={it.key}>
-                  <Link href={it.href} aria-current={on ? "page" : undefined} className={cn(navLink(on), "min-h-14 justify-center text-base")}>
-                    {on && <span aria-hidden data-mark="" className="mark-band absolute -top-0.5 right-[18px] left-[18px] h-1.5" />}
+                  <Link
+                    href={it.href}
+                    aria-current={on ? "page" : undefined}
+                    className={cn(navLink(on), "min-h-14 justify-center text-base")}
+                  >
+                    {on && (
+                      <span
+                        aria-hidden
+                        data-mark=""
+                        className="mark-band absolute -top-0.5 right-[18px] left-[18px] h-1.5"
+                      />
+                    )}
                     {t(it.key)}
                   </Link>
                 </li>

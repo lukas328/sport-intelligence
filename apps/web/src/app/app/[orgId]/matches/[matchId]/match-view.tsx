@@ -15,9 +15,11 @@ import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { useMatchGraphics } from "@/lib/graphics";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
+import { EmptyField } from "@/components/anlauf/bundle";
 import { MatchHead } from "./match-head";
 import { AskColour } from "./ask-colour";
-import { MatchCamera, MatchZones } from "./match-graphics";
+import { MatchZones } from "./match-graphics";
+import { VideoStage } from "./video-stage";
 import type { Kits } from "@/lib/kit";
 import { playerLabel } from "@/lib/player-name";
 import { useOptionalShell } from "@/components/shell/context";
@@ -31,7 +33,6 @@ import { FromMatchButton } from "@/components/collections/from-match";
 import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { KeepersView, PhysicalView } from "./m5-views";
 import { Button, buttonClass } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -135,6 +136,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }, []);
   const stats = useStats(orgId, initial.id);
   const graphics = useMatchGraphics(orgId, initial.id);
+  const [bench, setBench] = useState(false);
   const ta = useTranslations("anlauf");
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(
@@ -213,6 +215,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
   function onPlay(ms: number) {
     setView("video");
+    setBench(true);
     // the player is kept mounted, so the seek works right after the switch
     requestAnimationFrame(() => {
       player.current?.seek(ms);
@@ -248,6 +251,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
   const oppKit = match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null;
   const checks = graphics.data?.checks.length ?? 0;
+  // the stage of the tab Video (SPEC 7.3) once there are goals to show on it
+  const stage = Boolean(main && graphics.data && graphics.data.goals.some((g) => g.has_video || g.source === "demo"));
   const confirmedGoals = graphics.data?.goals.filter((g) => g.confirmed).length ?? 0;
   const sourceParts = [
     main ? ta("sourceVideo") : null,
@@ -393,9 +398,25 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
         {!staff && <MyScenesLine orgId={orgId} matchId={match.id} />}
-        {main && graphics.data && graphics.data.goals.length > 0 && <MatchCamera orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} />}
+        {stage && main && graphics.data && (
+          <VideoStage orgId={orgId} match={match} video={main} graphics={graphics.data} oppName={oppName(match)} staff={staff} onBench={() => setBench(true)} />
+        )}
         {main ? (
-          <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} />
+          // with the stage, the workbench (events, defence systems, comments, feedback) is behind
+          // «Mehr»; it stays mounted, so jumps from the other tabs still reach its player
+          <section hidden={stage && !bench} aria-labelledby="bench-title" className={cn(stage && "border-t-2 border-ink pt-6")}>
+            {stage && (
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 id="bench-title" className="text-[26px]">
+                  {ta("bench")}
+                </h2>
+                <Button variant="secondary" size="sm" onClick={() => setBench(false)}>
+                  {ta("benchClose")}
+                </Button>
+              </div>
+            )}
+            <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={!stage} />
+          </section>
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
@@ -526,66 +547,56 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
 function Processing({ jobs, orgId, staff }: { jobs: Job[]; orgId: string; staff: boolean }) {
   const t = useTranslations("processing");
+  const ta = useTranslations("anlauf");
   const now = useNow({ updateInterval: 5000 });
+  const running = jobs.filter((j) => j.status !== "succeeded");
   return (
-    <Card className="space-y-5" aria-live="polite">
-      {jobs
-        .filter((j) => j.status !== "succeeded")
-        .map((j) => {
-          // the stages the worker reported, in its order (ingest and analysis have different ones)
-          const reported = Object.keys((j.stages ?? {}) as Record<string, unknown>);
-          const stages = reported.length > 0 ? reported : j.kind === "ingest" ? [...STAGES] : [];
-          const started = j.started_at ? new Date(j.started_at).getTime() : null;
-          const elapsed = started ? (now.getTime() - started) / 1000 : 0;
-          const etaMin =
-            j.status === "running" && j.progress > 0.05 && elapsed > 20
-              ? Math.max(1, Math.round(((elapsed / j.progress) * (1 - j.progress)) / 60))
-              : null;
-          return (
-            <div key={j.id} className="space-y-3" data-testid="job">
-              <h2 className="text-base font-semibold">{t(j.kind === "analysis" ? "titleAnalysis" : "title")}</h2>
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-medium">
-                  {t(j.status as "running")}
-                  {etaMin != null && <span className="font-normal text-muted"> · {t("eta", { minutes: etaMin })}</span>}
-                </span>
-                <span className="font-semibold tabular-nums">{Math.round(j.progress * 100)} %</span>
+    // Analyse läuft (SPEC 7.13): the steps with fertig / läuft / danach, a bar, the minutes left,
+    // something useful meanwhile and the three fields that will fill
+    <section className="space-y-8" aria-live="polite" data-orgid={orgId} data-staff={staff || undefined}>
+      {running.map((j) => {
+        const reported = Object.keys((j.stages ?? {}) as Record<string, unknown>);
+        const stages = reported.length > 0 ? reported : j.kind === "ingest" ? [...STAGES] : [];
+        const started = j.started_at ? new Date(j.started_at).getTime() : null;
+        const elapsed = started ? (now.getTime() - started) / 1000 : 0;
+        const etaMin = j.status === "running" && j.progress > 0.05 && elapsed > 20 ? Math.max(1, Math.round(((elapsed / j.progress) * (1 - j.progress)) / 60)) : null;
+        return (
+          <div key={j.id} className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" data-testid="job">
+            <div>
+              <h2 className="text-[26px]">{t(j.kind === "analysis" ? "titleAnalysis" : "title")}</h2>
+              <div className="mt-3 h-1.5 bg-rule" aria-hidden>
+                <div className={cn("h-full transition-all duration-500", j.status === "failed" ? "bg-loss" : "bg-ink")} style={{ width: `${j.progress * 100}%` }} />
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-surface">
-                <div className={cn("h-full rounded-full transition-all duration-500", j.status === "failed" ? "bg-error" : "bg-accent")} style={{ width: `${j.progress * 100}%` }} />
-              </div>
+              <p className="mt-2 text-[15px] font-bold">
+                {t(j.status as "running")} · {Math.round(j.progress * 100)} %{etaMin != null && <span className="font-normal text-ink-2"> · {ta("minutesLeft", { minutes: etaMin })}</span>}
+              </p>
               {stages.length > 0 && (
-                <ol className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                <ol className="mt-4 m-0 list-none p-0">
                   {stages.map((s) => {
                     const st = (j.stages as Record<string, { status?: string }>)[s]?.status ?? "pending";
+                    const word = st === "done" ? ta("stepDone") : st === "running" ? ta("stepRunning") : st === "failed" ? t("failed") : ta("stepNext");
                     return (
-                      <li key={s} className={cn("flex items-center gap-1.5", st === "done" ? "text-ok" : st === "running" ? "font-semibold text-foreground" : st === "failed" ? "text-error" : "text-muted")}>
-                        <span aria-hidden className={cn("size-1.5 rounded-full", st === "done" ? "bg-ok" : st === "running" ? "animate-pulse bg-accent" : st === "failed" ? "bg-error" : "bg-border")} />
+                      <li key={s} className={cn("grid min-h-11 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 border-t border-rule py-2.5 text-base", st === "pending" && "text-ink-2")}>
+                        <span className={cn("justify-self-start text-[13px] font-bold", st === "done" ? "text-win" : st === "running" ? "bg-attn px-1.5 py-0.5 text-attn-ink" : st === "failed" ? "text-loss" : "text-ink-2")}>{word}</span>
                         {t.has(`stage_${j.kind}_${s}`) ? t(`stage_${j.kind}_${s}` as "stage_download") : t.has(`stage_${s}`) ? t(`stage_${s}` as "stage_download") : s}
                       </li>
                     );
                   })}
                 </ol>
               )}
-              {j.kind === "analysis" && j.status === "running" && <p className="text-sm text-muted">{t("analysisHint")}</p>}
-            {j.error && <Alert>{j.error}</Alert>}
-            {j.status === "failed" && staff && j.video_asset_id && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() =>
-                  api.POST("/v1/orgs/{org_id}/videos/{video_id}/reprocess", {
-                    params: { path: { org_id: orgId, video_id: j.video_asset_id! } },
-                  })
-                }
-              >
-                {t("retry")}
-              </Button>
+              {j.kind === "analysis" && <p className="mt-4 text-[15px] text-ink-2">{ta("meanwhile")}</p>}
+            </div>
+            {j.kind === "analysis" && (
+              <div className="grid grid-cols-3 gap-3 self-start" aria-hidden>
+                {[0, 1, 2].map((i) => (
+                  <EmptyField key={i} />
+                ))}
+              </div>
             )}
           </div>
-          );
-        })}
-    </Card>
+        );
+      })}
+    </section>
   );
 }
 

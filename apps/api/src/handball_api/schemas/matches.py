@@ -553,6 +553,7 @@ class GoalRunOut(ApiModel):
     confirmed: bool = Field(description="false: the shot spot is estimated")
     source: Literal["tracking", "marked", "demo"] | None
     has_video: bool
+    t_ms: int | None = Field(default=None, description="video time of the goal")
 
 
 class PhaseOut(ApiModel):

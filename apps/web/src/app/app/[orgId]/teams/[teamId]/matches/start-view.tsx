@@ -119,7 +119,7 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     ownName: teamName,
     oppName: m.opponent_name,
     goals: g ? reportGoals(g) : null,
-    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }) },
+    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") },
   };
 }
 
