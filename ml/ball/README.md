@@ -176,6 +176,80 @@ people, crops), `train.py`, `eval.py`. Weights stay outside the repo.
   not see those tiles). A tuning set separate from test set 2 is needed before choosing how to
   combine the scores.
 
+## Verifier v2 with human-labelled hard peaks (test set 2, 2026-11-12)
+Scripts in `verifier/`: `v2.py` (crop format, human crops, game split), `train_v2.py`,
+`tune_v2.py` (choice on the tuning set), `eval_v2.py` (test set 2, run once). Weights outside the repo.
+
+- New data: 498 confident round 7 peaks (score >= 0.4, top 3 per frame) from 250 frames of 34 games,
+  segments not in round 7's training, test set 2 halls excluded; labelled by hand: 135 ball, 363 no
+  ball (2 unsure, dropped). Note: all 34 games also give OWL tiles (other segments) to round 7 and
+  to the v1 crops, so these are new segments, not new halls.
+- Split by game (seeded search for 1/3 of games with 1/3 of balls and of "no ball"): train 23 games
+  (90 ball, 242 no ball), tuning 11 games (45 ball, 121 no ball). Test set 2 was used for nothing
+  but the single final run.
+- One crop format: the human crops were cut as 96 px per frame at 1280 wide (black outside), 2x
+  bicubic, three frames side by side, JPEG 85. `v2.canon_frames` repeats that for the test set 2
+  triplets, then the verifier's preprocessing (area down to 96 px, centre 64); the v1 crops go
+  through the same 2x / JPEG / down round trip.
+- Candidates (fixed before looking at the tuning set): v1; fine-tune of v1 (lr 5e-4, 1 211 steps of
+  128, 6 min, batches 40 % human "no ball", 25 % human ball, 35 % v1 kinds); from scratch (5 060
+  steps, 25 min, 25 % human "no ball", 15 % human ball, 60 % v1 kinds); each at half and at the end
+  of training. Rules: net, verifier, s x v, s^0.25 v^0.75, s^0.75 v^0.25, a gate (v below the value
+  that keeps 90 % of the tuning balls: score x 0.1). Highest tuning AUC wins.
+- Tuning set (166 confident peaks; AUC with game-bootstrap 95 % interval; precision at 80 % / 90 %
+  recall of the balls):
+
+| Scorer | AUC | P@R80 | P@R90 |
+|---|---|---|---|
+| net alone | 0.670 [0.59, 0.75] | 0.34 | 0.29 |
+| v1, verifier alone | 0.762 | 0.41 | 0.38 |
+| v1, s^0.25 v^0.75 | 0.782 | 0.39 | 0.37 |
+| from scratch, s^0.25 v^0.75 | 0.759 | 0.38 | 0.35 |
+| fine-tune, verifier alone | 0.806 | 0.46 | 0.46 |
+| fine-tune, s x v | 0.811 | 0.51 | 0.48 |
+| **fine-tune, s^0.25 v^0.75 (chosen)** | **0.812 [0.73, 0.87]** | 0.46 | 0.46 |
+
+  Gain of the choice over the net on the tuning set: +0.14 AUC (95 % interval +0.07 to +0.21).
+  Even v1 already beats the net on confident peaks there; from scratch is worse than fine-tuning.
+- Learning curve (fine-tune, same 1 211 steps, share of the human train crops kept per game; one
+  seed each, so differences of 0.02 are noise):
+
+| Human train crops | Verifier alone AUC | s^0.25 v^0.75 AUC | P@R80 | P@R90 |
+|---|---|---|---|---|
+| 0 % (v1 crops only: control for format and extra steps) | 0.784 | 0.797 | 0.45 | 0.39 |
+| 25 % (17 ball / 66 no ball) | 0.758 | 0.773 | 0.41 | 0.39 |
+| 50 % (42 / 123) | 0.790 | 0.796 | 0.41 | 0.42 |
+| 100 % (90 / 242) | 0.806 | 0.812 | 0.46 | 0.46 |
+
+  Most of the step from v1 (0.762) comes from the fine-tune itself on the unified format (0.784
+  without any human crop); the 332 human crops add about +0.02 AUC and +0.07 precision at 90 %
+  recall, within the noise of 45 tuning balls. The curve rises from 25 % to 100 % but is not
+  conclusive.
+- Test set 2, one run with the frozen choice (same definitions as the v1 table):
+
+| Scorer | Top peak on the ball | Ball among top 5 | Score at the ball >= 0.3 | No-ball >= 0.5 | Found at FA 10 % | Found at FA 25 % | Top 1 vs net (gained / lost, McNemar p) |
+|---|---|---|---|---|---|---|---|
+| net alone (round 7) | 35.0 % | 52.5 % | 47.5 % | 54 % | 15.8 % | 25.4 % | |
+| v2 fine-tune, s^0.25 v^0.75 | 35.6 % | 52.5 % | 40.1 % | 62 % | 18.6 % | 27.7 % | +11 / -10, p = 1.00 |
+
+  Clock running (103 balls): top 1 39.8 % vs 37.9 %, FA 10 % 13.6 % vs 17.5 %; clock stopped (74):
+  top 1 29.7 % vs 31.1 %, FA 10 % 17.6 % vs 10.8 %.
+- Result: still no measurable gain on test set 2. Top 1 +0.6 points (+11 / -10), 5 more balls at
+  10 % false alarms (+2.8 points) and 4 more at 25 %, all within the noise of 177 balls; "no-ball >=
+  0.5" is worse only by scale (the rule pushes scores up). On the peak level the transfer is real
+  but small: among confident test peaks (>= 0.4; 73 hits, 358 false) AUC net 0.771, verifier 0.807,
+  rule 0.813 (v1: verifier 0.73 against the net 0.61 on its slightly different subset). Over all
+  top-5 peaks the verifier stays below the net (0.801 vs 0.832), and frame-level top 1 depends on
+  ranking the hit above the other four peaks of the same frame, many of them low and easy for the
+  net. On test set 2 the net itself separates confident peaks better (0.77) than on the tuning
+  games (0.67), so the tuning gain (+0.14) overstated what was left to win there.
+- Next: more labels only with a better design: label confident peaks from new halls (not only new
+  segments) and, per frame, all top-5 peaks, so the verifier learns the within-frame ranking that
+  top 1 needs; then repeat the curve with 2 to 3 seeds per point. A second batch of 500 should go
+  into training with the tuning games kept; enlarge the tuning set to about 100 balls before
+  trusting a choice. Beyond that the remaining frame-level misses are mostly the 47.5 % of balls
+  not among the top 5 at all, which no re-scorer can fix.
+
 ## Findings
 - Most earlier "ball" labels from Möhlin were a fixed, ball-like spot on the wall; the three-frame
   view shows it never moves. They taught the single-frame net the static-spot error.
