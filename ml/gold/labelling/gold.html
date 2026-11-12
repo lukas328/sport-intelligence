@@ -122,7 +122,7 @@ function startMode(mode) {
   if (st.mode) { stopMode(); return; }
   const c = clip(); if (!c || !vid.src) return;
   if (st.f >= c.n - 1) st.f = 0;
-  st.mode = mode; st.lastRec = null; seekTo = null;
+  st.mode = mode; st.lastRec = null; seekTo = null; st.recN = 0;
   if (mode === "follow") st.dirty[c.id] = true;  // no snapshot may replace the recording
   vid.playbackRate = Number($("speed").value);
   vid.currentTime = (st.f + 0.5) / c.fps;
@@ -141,7 +141,10 @@ function startMode(mode) {
 function stopMode() {
   const was = st.mode; st.mode = null; vid.pause(); st.keys = {};
   $("b-follow").innerHTML = "Verfolgen <kbd>F</kbd>";
-  if (was === "follow") { persist(clip()); toast("Aufgezeichnet. Jetzt P zum Prüfen."); }
+  if (was === "follow") {
+    if (st.recN) { persist(clip()); toast(st.recN + " Bilder aufgezeichnet. Jetzt P zum Prüfen."); }
+    else toast("Nichts aufgezeichnet: die Maus muss beim Verfolgen über dem Bild sein.");
+  }
   showFrame(st.f);
 }
 function record(c, f) {
@@ -157,7 +160,7 @@ function record(c, f) {
       L[g] = lab.x == null || a.lab.x == null ? { ...lab } : { x: Math.round((a.lab.x + t * (lab.x - a.lab.x)) * 10) / 10, y: Math.round((a.lab.y + t * (lab.y - a.lab.y)) * 10) / 10, s };
     }
   }
-  L[f] = lab; st.lastRec = { f, lab };
+  L[f] = lab; st.lastRec = { f, lab }; st.recN = (st.recN || 0) + 1;
 }
 function loadClip(i) {
   st.ci = i; const c = clip(); $("clip").value = String(i);
@@ -262,7 +265,8 @@ function renderProgress() {
 function renderMetaOnly() {
   const c = clip(), lab = doc(c).labels[st.f];
   $("meta").innerHTML = `<span>Clip <b>${st.ci + 1}</b>/${st.clips.length}</span><span>Bild <b>${st.f}</b>/${c.n - 1} (${(st.f / c.fps).toFixed(2)} s)</span>`
-    + `<span><b>${st.mode === "follow" ? "Aufnahme" : "Wiedergabe"}</b></span><span>${lab ? NAMES[lab.s] : ""}</span>`;
+    + `<span><b>${st.mode === "follow" ? "Aufnahme" : "Wiedergabe"}</b></span>`
+    + (st.mode === "follow" ? `<span>${st.mouse ? st.recN + " Bilder" : "Maus aufs Bild!"}</span>` : `<span>${lab ? NAMES[lab.s] : ""}</span>`);
 }
 function render() {
   const c = clip(); if (!c) return; const d = doc(c), lab = d.labels[st.f];
