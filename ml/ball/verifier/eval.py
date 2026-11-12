@@ -50,6 +50,34 @@ def mcnemar(b, c):
     return min(1.0, 2 * sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n)
 
 
+def frame_stats(r, f):
+    sc = f(r); i = int(sc.argmax()); o = {"top": float(sc[i])}
+    if r["state"] == "ball":
+        d = np.array(r["d"]); hit = d < R_HIT
+        o |= {"top1": bool(hit[i]), "top5": bool(hit.any()), "at_ball": float(sc[hit].max()) if hit.any() else 0.0}
+    return o
+
+
+def report(sel, title, scorers):
+    print(f"\n== {title}")
+    B = [r for r in sel if r["state"] == "ball"]; N = [r for r in sel if r["state"] == "none"]
+    print(f"{len(B)} balls, {len(N)} no-ball frames")
+    pct = lambda xs: f"{100 * np.mean(xs):5.1f} %" if len(xs) else "    -"
+    base = [frame_stats(r, scorers["net"]) for r in B]
+    print(f"{'scorer':9s} {'top1':>8s} {'top5':>8s} {'at ball>=0.3':>12s} {'no-ball>=0.5':>12s} {'found@FA10':>11s} {'found@FA25':>11s}"
+          f"   paired top1 vs net (gained/lost, McNemar p)")
+    for name, f in scorers.items():
+        sb = [frame_stats(r, f) for r in B]; sn = [frame_stats(r, f) for r in N]
+        tops_n = np.array([x["top"] for x in sn])
+        fa = []
+        for q in (0.10, 0.25):
+            t = np.quantile(tops_n, 1 - q, method="higher") + 1e-9 if len(tops_n) else 0.0
+            fa.append(pct([x["top1"] and x["top"] >= t for x in sb]) + f"({100 * np.mean(tops_n >= t):.0f})")
+        g = sum(x["top1"] and not y["top1"] for x, y in zip(sb, base)); lo = sum(y["top1"] and not x["top1"] for x, y in zip(sb, base))
+        print(f"{name:9s} {pct([x['top1'] for x in sb]):>8s} {pct([x['top5'] for x in sb]):>8s} {pct([x['at_ball'] >= 0.3 for x in sb]):>12s}"
+              f" {pct([x['top'] >= 0.5 for x in sn]):>12s} {fa[0]:>11s} {fa[1]:>11s}   +{g} / -{lo}, p = {mcnemar(g, lo):.3f}")
+
+
 def main():
     items_json, labels_dir, tdir, net_pt, ver_pt, cache = sys.argv[1:7]
     out = sys.argv[7] if len(sys.argv) > 7 else None
@@ -81,35 +109,9 @@ def main():
     scorers = {"net": lambda r: np.array(r["s"]), "verifier": lambda r: np.array(r["v"]),
                "product": lambda r: np.array(r["s"]) * np.array(r["v"]), "geo": lambda r: np.sqrt(np.array(r["s"]) * np.array(r["v"]))}
 
-    def frame_stats(r, f):
-        sc = f(r); i = int(sc.argmax()); o = {"top": float(sc[i])}
-        if r["state"] == "ball":
-            d = np.array(r["d"]); hit = d < R_HIT
-            o |= {"top1": bool(hit[i]), "top5": bool(hit.any()), "at_ball": float(sc[hit].max()) if hit.any() else 0.0}
-        return o
-
-    def report(sel, title):
-        print(f"\n== {title}")
-        B = [r for r in sel if r["state"] == "ball"]; N = [r for r in sel if r["state"] == "none"]
-        print(f"{len(B)} balls, {len(N)} no-ball frames")
-        pct = lambda xs: f"{100 * np.mean(xs):5.1f} %" if len(xs) else "    -"
-        base = [frame_stats(r, scorers["net"]) for r in B]
-        print(f"{'scorer':9s} {'top1':>8s} {'top5':>8s} {'at ball>=0.3':>12s} {'no-ball>=0.5':>12s} {'found@FA10':>11s} {'found@FA25':>11s}"
-              f"   paired top1 vs net (gained/lost, McNemar p)")
-        for name, f in scorers.items():
-            sb = [frame_stats(r, f) for r in B]; sn = [frame_stats(r, f) for r in N]
-            tops_n = np.array([x["top"] for x in sn])
-            fa = []
-            for q in (0.10, 0.25):
-                t = np.quantile(tops_n, 1 - q, method="higher") + 1e-9 if len(tops_n) else 0.0
-                fa.append(pct([x["top1"] and x["top"] >= t for x in sb]) + f"({100 * np.mean(tops_n >= t):.0f})")
-            g = sum(x["top1"] and not y["top1"] for x, y in zip(sb, base)); lo = sum(y["top1"] and not x["top1"] for x, y in zip(sb, base))
-            print(f"{name:9s} {pct([x['top1'] for x in sb]):>8s} {pct([x['top5'] for x in sb]):>8s} {pct([x['at_ball'] >= 0.3 for x in sb]):>12s}"
-                  f" {pct([x['top'] >= 0.5 for x in sn]):>12s} {fa[0]:>11s} {fa[1]:>11s}   +{g} / -{lo}, p = {mcnemar(g, lo):.3f}")
-
-    report(rows, "test set 2, all frames")
-    report([r for r in rows if r["clock"]], "clock running")
-    report([r for r in rows if not r["clock"]], "clock stopped or unknown")
+    report(rows, "test set 2, all frames", scorers)
+    report([r for r in rows if r["clock"]], "clock running", scorers)
+    report([r for r in rows if not r["clock"]], "clock stopped or unknown", scorers)
     # verifier probability by peak kind on the test set (how separable are hits and misses?)
     hits = [v for r in rows if r["state"] == "ball" for v, d in zip(r["v"], r["d"]) if d < R_HIT]
     miss = [v for r in rows for i, v in enumerate(r["v"]) if r["state"] == "none" or r["d"][i] > 20]
