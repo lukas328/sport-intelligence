@@ -2931,6 +2931,17 @@
       "black": "Black",
       "white": "White",
       "yellow": "Yellow"
-    }
+    },
+    "scenesTitle": "{count, plural, one {1 scene} other {# scenes}} from {matches, plural, one {one match} other {# matches}}.",
+    "scenesKick": "Scenes · {matches, plural, one {1 match} other {# matches}} with video",
+    "goalTiles": "Goals as scenes",
+    "goalTilesNote": "the last {count}",
+    "collections": "Collections",
+    "newCollection": "New collection",
+    "more": "More",
+    "plays": "Plays",
+    "matrix": "Table",
+    "open": "Open",
+    "allCollections": "All collections"
   }
 }

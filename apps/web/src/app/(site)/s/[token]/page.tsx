@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
+import { clubStyle } from "@/lib/color";
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/card";
 import { serverApi } from "@/lib/api";
@@ -21,7 +23,14 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
 export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const t = await getTranslations("share");
-  const res = await (await serverApi()).GET("/v1/share/{token}", { params: { path: { token } } });
+  const client = await serverApi();
+  const [res, preview] = await Promise.all([client.GET("/v1/share/{token}", { params: { path: { token } } }), client.GET("/v1/share/{token}/preview", { params: { path: { token } } })]);
   if (!res.data) return <EmptyState title={t("invalid")} />;
-  return <SharedView token={token} data={res.data as unknown as Shared} />;
+  // the club's colours carry the Keil of the shared page, as in the link preview
+  const kit = preview.data?.kit;
+  return (
+    <div style={clubStyle(kit?.a ?? null, kit?.b ?? null) as CSSProperties}>
+      <SharedView token={token} data={res.data as unknown as Shared} club={preview.data?.club ?? null} />
+    </div>
+  );
 }

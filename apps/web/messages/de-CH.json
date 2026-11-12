@@ -2931,6 +2931,17 @@
       "black": "Schwarz",
       "white": "Weiss",
       "yellow": "Gelb"
-    }
+    },
+    "scenesTitle": "{count, plural, one {1 Szene} other {# Szenen}} aus {matches, plural, one {einem Spiel} other {# Spielen}}.",
+    "scenesKick": "Szenen · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video",
+    "goalTiles": "Tore als Szenen",
+    "goalTilesNote": "die letzten {count}",
+    "collections": "Sammlungen",
+    "newCollection": "Neue Sammlung",
+    "more": "Mehr",
+    "plays": "Spielzüge",
+    "matrix": "Tabelle",
+    "open": "Öffnen",
+    "allCollections": "Alle Sammlungen"
   }
 }

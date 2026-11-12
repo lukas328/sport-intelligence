@@ -2931,6 +2931,17 @@
       "black": "Noir",
       "white": "Blanc",
       "yellow": "Jaune"
-    }
+    },
+    "scenesTitle": "{count, plural, one {1 scène} other {# scènes}} de {matches, plural, one {un match} other {# matchs}}.",
+    "scenesKick": "Scènes · {matches, plural, one {1 match} other {# matchs}} avec vidéo",
+    "goalTiles": "Les buts en scènes",
+    "goalTilesNote": "les {count} derniers",
+    "collections": "Sélections",
+    "newCollection": "Nouvelle sélection",
+    "more": "Plus",
+    "plays": "Systèmes",
+    "matrix": "Tableau",
+    "open": "Ouvrir",
+    "allCollections": "Toutes les sélections"
   }
 }

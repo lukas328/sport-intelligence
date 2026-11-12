@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { PlayEditor } from "@/components/tactics/play-editor";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { VideoPlayer } from "@/components/video/player";
 import { cn } from "@/lib/utils";
 
@@ -44,19 +45,17 @@ interface SharedRun {
 
 const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
 
-export function SharedView({ token, data }: { token: string; data: Shared }) {
+export function SharedView({ token, data, club = null }: { token: string; data: Shared; club?: string | null }) {
   const t = useTranslations("share");
   const ts = useTranslations("stats");
   const format = useFormatter();
   const media = (videoId: string) => `/v1/share/${token}/videos/${videoId}/media`;
   return (
     <div className="space-y-4" data-testid="shared">
-      <header>
-        <p className="text-sm text-muted">
-          {data.team} · {t("readOnly", { date: format.dateTime(new Date(data.expires_at), { dateStyle: "medium" }) })}
-        </p>
-        <h1 className="text-2xl font-bold sm:text-[1.75rem]">{data.title}</h1>
-      </header>
+      <PageHeader
+        eyebrow={`${[club, data.team].filter((x, i, a) => x && a.indexOf(x) === i).join(" ")} · ${t("readOnly", { date: format.dateTime(new Date(data.expires_at), { dateStyle: "medium" }) })}`}
+        title={data.title}
+      />
       {data.play && (
         <>
           {data.play.description && <p className="whitespace-pre-line text-sm">{data.play.description}</p>}

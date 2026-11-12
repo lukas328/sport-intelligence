@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 const time = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
 
-/** Sammlung (SPEC 7.7): the run of scenes, plays and notes. Plain page until the new look. */
+/** Sammlung (SPEC 7.7): the run of scenes, plays and notes, numbered, with their times. */
 export default async function CollectionPage({ params }: Params) {
   const { orgId, collectionId } = await params;
   const c = await load(orgId, collectionId);
@@ -37,6 +37,8 @@ export default async function CollectionPage({ params }: Params) {
       <PageHeader
         eyebrow={[t("title"), c.draft ? t("draft") : null, c.source !== "collection" ? t(`source_${c.source}`) : null].filter(Boolean).join(" · ")}
         title={c.title}
+        figure={c.items.length}
+        figureLabel={t("run")}
         actions={
           <>
             <ShareButton orgId={orgId} teamId={c.team_id} kind="collection" targetId={c.id} />
@@ -51,26 +53,34 @@ export default async function CollectionPage({ params }: Params) {
           </>
         }
       />
-      <section aria-labelledby="run" className="space-y-3">
-        <h2 id="run" className="text-lg font-bold">
+      <section aria-labelledby="run">
+        <h2 id="run" className="font-slant mb-3.5 border-b-2 border-ink pb-2.5 text-[22px] md:text-[26px]">
           {t("run")}
         </h2>
         {c.items.length === 0 ? (
-          <p className="text-sm text-muted">{t("empty")}</p>
+          <p className="text-[17px] text-ink-2">{t("empty")}</p>
         ) : (
-          <ol className="divide-y divide-foreground/10 border-y border-foreground/15" data-testid="collection-items">
-            {c.items.map((i) => (
-              <li key={i.position} className="py-3">
-                {i.scene ? (
-                  <Link href={`${org}/matches/${i.scene.match_id}?tab=video&t=${i.scene.start_ms}`} className="font-medium underline underline-offset-4">
-                    {i.scene.title || t("scene")} · {time(i.scene.start_ms)} {t("to")} {time(i.scene.end_ms)}
-                  </Link>
-                ) : i.play ? (
-                  <Link href={`${org}/plays/${i.play.id}`} className="font-medium underline underline-offset-4">
-                    {i.play.name}
-                  </Link>
-                ) : null}
-                {i.text && <p className={i.kind === "note" ? "whitespace-pre-line" : "text-sm text-muted"}>{i.text}</p>}
+          <ol className="m-0 list-none p-0" data-testid="collection-items">
+            {c.items.map((i, n) => (
+              <li key={i.position} className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-4 border-t border-rule py-3.5">
+                <b className="font-num text-[26px] text-ink-2">{n + 1}</b>
+                <div className="min-w-0">
+                  {i.scene ? (
+                    <Link href={`${org}/matches/${i.scene.match_id}?tab=video&t=${i.scene.start_ms}`} className="text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+                      {i.scene.title || t("scene")}
+                    </Link>
+                  ) : i.play ? (
+                    <Link href={`${org}/plays/${i.play.id}`} className="text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+                      {i.play.name}
+                    </Link>
+                  ) : null}
+                  {i.text && <p className={i.kind === "note" ? "m-0 text-[17px] whitespace-pre-line italic" : "m-0 text-[15px] text-ink-2"}>{i.text}</p>}
+                </div>
+                {i.scene && (
+                  <span className="font-mono text-[13px] font-semibold text-ink-2">
+                    {time(i.scene.start_ms)} {t("to")} {time(i.scene.end_ms)}
+                  </span>
+                )}
               </li>
             ))}
           </ol>

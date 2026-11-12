@@ -65,7 +65,9 @@ export async function openScenes(page: Page, tab?: "Szenen" | "Sammlungen" | "Sp
   await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
   if (!tab || tab === "Szenen") return;
   const path = { Sammlungen: "collections", Spielzüge: "plays", Tabelle: "matrix" }[tab];
-  await follow(page, page.getByRole("link", { name: tab, exact: true }).first(), new RegExp(`/${path}$`));
+  // Szenen has no tabs: the Sammlungen, plays and the table are links on the page
+  const name = tab === "Sammlungen" ? "Alle Sammlungen" : tab;
+  await follow(page, page.getByRole("link", { name, exact: true }).first(), new RegExp(`/${path}$`));
 }
 
 /** Under Sammlungen: the collections (playlists) and those to show (presentations); the scene
