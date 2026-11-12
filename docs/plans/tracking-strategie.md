@@ -51,10 +51,9 @@ was Trainerinnen und Trainer wirklich brauchen, festgelegt.
 4. **Auflösung und Bildrate dort, wo es zählt.** Kaskade wie im BRIEF 6.3: das ganze Spiel auf
    dem Analyse-Proxy, aber Würfe und Torlinien-Momente aus dem Original in voller Auflösung und
    Bildrate. Dafür muss das Original erhalten bleiben.
-5. **Aufnahme ist Teil des Produkts.** Eine feste Weitwinkel-Kamera auf erhöhter Position ist für
-   Tracking viel einfacher als eine schwenkende Übertragungskamera. Wir definieren einen
-   Aufnahme-Standard (Kameraposition, Auflösung, Bildrate) und unterstützen Übertragungsbilder
-   als "beste Bemühung".
+5. **Jede Aufnahme muss gehen.** Vereine filmen mit dem, was sie haben: schwenkende Kameras,
+   Zoom, 720p bis 4K (Entscheid 2). Die Modelle werden auf genau diese Vielfalt trainiert und
+   pro Kameraart und Auflösung gemessen. Mehr Auflösung hilft, ist aber keine Bedingung.
 6. **Nur saubere Lizenzen.** Code und Gewichte mit Apache-2.0, MIT oder BSD. Kein AGPL
    (zum Beispiel Ultralytics YOLO). Fremde Gewichte nur mit `weights_only=True`.
 
@@ -106,7 +105,7 @@ was Trainerinnen und Trainer wirklich brauchen, festgelegt.
 
 | Phase | Inhalt | Dauer (grob) | Entscheid am Ende |
 |---|---|---|---|
-| 0. Fundament | Anwendungsfälle und Zielwerte festlegen; Goldstandard-Clips auswählen und labeln (Werkzeug mit Modellvorschlägen); Lizenzprüfung der Kandidaten; Messung Auflösung (Job 11); Messung der heutigen Spieler-, Kalibrierungs- und Ballwerte auf dem Goldstandard | 1 bis 2 Wochen | Zielwerte, Aufnahme-Standard, wer labelt |
+| 0. Fundament | Anwendungsfälle und Zielwerte festlegen; Goldstandard-Clips auswählen und labeln (Werkzeug mit Modellvorschlägen); Lizenzprüfung der Kandidaten; Messung Auflösung (Job 11); Messung der heutigen Spieler-, Kalibrierungs- und Ballwerte auf dem Goldstandard | 1 bis 2 Wochen | Zielwerte, Label-Tempo |
 | 1. Ballmodell v2 | Mehrbild-Modell nach Stand der Technik, trainiert auf vorhandenen Daten plus geprüften Pseudo-Labels; Vergleich auf dem Goldstandard gegen heute und gegen OWLv2 | 2 bis 3 Wochen | Bauart fix, Datenmotor starten |
 | 2. Datenmotor | Label-Werkzeug für dichte Ballpfade mit Modellvorschlägen; wöchentliche Schleife: labeln, trainieren, messen | laufend | Ab wann reichen die Werte? |
 | 3. Fusion | Ball-Tracker mit Physik und Ballbesitz über die Spieler-Tracks; Kennzahlen pro Anwendungsfall | 2 bis 4 Wochen | Pässe und Ballbesitz produktreif? |
@@ -127,11 +126,19 @@ danach gezielt nachtrainieren).
   3. Pfad-Label-Werkzeug mit Modellvorschlägen bauen (Basis: `ml/ball/labelling/paths.html`).
   4. Heutige Werte von Spieler-Tracking und Kalibrierung auf diesen Clips messen.
 
-## 8. Offene Entscheide (Lukas)
+## 8. Entscheide (Lukas, 2026-11-12)
 
-1. **Zielwerte und Reihenfolge der Anwendungsfälle:** Stimmen die Vorschläge in Abschnitt 2?
-   Was zuerst: Torhüteranalyse, Taktiktafel oder Ballpfade?
-2. **Aufnahme-Standard:** Definieren wir eine empfohlene Kameraaufstellung (fest, erhöht,
-   Weitwinkel, mindestens 1080p mit 50 fps) und optional Torkameras?
-3. **Labeln:** nur Lukas, Helfer, oder ein bezahlter Dienst (Budget)?
-4. **Originale:** Speichern wir künftig Originalvideos (mehr Speicherkosten) statt nur des Proxys?
+1. **Reihenfolge:** offen, grösster Mehrwert bei Taktiktafel und Ballpfaden. Diese zwei zuerst,
+   die Torhüteranalyse danach (sie baut auf dem Ballpfad auf).
+2. **Kein Aufnahme-Standard:** Vereine filmen, wie sie filmen. 1080p ist gut zu haben, auf 720p
+   dürfen mehr Fehler passieren. Die Modelle müssen mit Schwenk, Zoom und schwacher Qualität
+   umgehen; der Goldstandard enthält darum alle Kameraarten und Auflösungen, und wir messen pro
+   Auflösung getrennt.
+3. **Labeln:** Lukas labelt selbst, etwa eine Stunde pro Tag. Alles wird vorgelabelt
+   (Modellvorschläge plus Prüfung durch die Hauptsitzung), Lukas klickt nur noch durch und
+   korrigiert. Ein Label-Dienst bleibt eine Option, falls es zu langsam geht (Offerte nötig;
+   Datenschutz: Spielvideos mit Minderjährigen nur mit Auftragsverarbeitungsvertrag und in
+   der Schweiz oder EU).
+4. **Originale:** ja, Originalvideos werden gespeichert, wenn es nötig ist.
+5. **Zeit:** Dauert eine Phase länger, dauert sie länger. Massstab ist der Goldstandard, nicht
+   der Kalender.
