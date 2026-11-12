@@ -4,10 +4,12 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
 import { xgLabel } from "@/lib/xg";
-import { Stage, stageButton, stageLink } from "@/components/domain/stage";
+import { linkClass, SectionHead } from "@/components/anlauf/blocks";
+import { DiffBars } from "@/components/anlauf/charts";
+import { buttonClass } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { AreaSubNav } from "@/components/shell/section-nav";
 import { SeasonThemes } from "@/components/season/season-themes";
-import { IconAsk } from "@/components/shell/icons";
 import { focusMetric, matchStatement, seasonStatement } from "@/lib/voice";
 import { cn } from "@/lib/utils";
 
@@ -60,11 +62,10 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const label = team.data?.current_season ? t("title") + " " + team.data.current_season.label : t("title");
   const tools = staff ? (
     <>
-      <Link href={`${base}/matrix`} className={stageButton("outline")}>
+      <Link href={`${base}/matrix`} className={buttonClass("secondary")}>
         {tp("matrix")}
       </Link>
-      <Link href={`${base}/assistant`} className={stageLink}>
-        <IconAsk />
+      <Link href={`${base}/assistant`} className={linkClass}>
         {tp("ask")}
       </Link>
     </>
@@ -78,12 +79,8 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
     return (
       <div className="space-y-8">
         <AreaSubNav />
-        <Stage pullMobile={false}>
-          <p className="text-[0.9375rem] font-semibold">{label}</p>
-          <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl">{tv("noMatchYet")}</h1>
-          <p className="mt-4 max-w-lg text-lg">{t("none")}</p>
-          {tools && <div className="mt-7 flex flex-wrap gap-3">{tools}</div>}
-        </Stage>
+        <PageHeader eyebrow={label} title={tv("noMatchYet")} actions={tools} />
+        <p className="max-w-lg text-[17px] text-ink-2">{t("none")}</p>
       </div>
     );
   }
@@ -128,40 +125,35 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
     <div className="space-y-12">
       <div className="space-y-5 lg:space-y-0">
       <AreaSubNav />
-      <Stage
-        pullMobile={false}
+      <PageHeader
         eyebrow={tv("afterMatches", { label, n })}
-        aside={
-          <div className="text-left xl:text-center">
-            <span className="block text-[0.9375rem] font-semibold">{tv("recordLabel")}</span>
-            <dl className="mt-1 flex gap-5 xl:justify-center" data-testid="season-record">
-              {([["won", wins], ["draw", draws], ["lost", losses]] as const).map(([k, v]) => (
-                <div key={k} className="flex flex-col-reverse items-center">
-                  <dt className="text-sm font-semibold">
-                    <span aria-hidden>{tm(k).charAt(0)}</span>
-                    <span className="sr-only">{tm(k)}</span>
-                  </dt>
-                  <dd className="font-score text-[4rem] leading-[0.9] xl:text-[clamp(3rem,3.8vw,4.25rem)]">{v}</dd>
-                </div>
-              ))}
-            </dl>
-            <Link href={`/app/${orgId}/matches/${last.match_id}`} className="mt-2 block text-[0.9375rem] hover:underline">
-              {tv("lastResult")}: {last.score_own}:{last.score_opponent} {last.opponent}
+        title={statement ? tv(statement.headline.key.replace("voice.", "") as "overXg", statement.headline.params as never) : lastResult ? tv(lastResult.headline.key.replace("voice.", "") as "won", lastResult.headline.params as never) : tv("neutralSeason")}
+        figure={`${wins}-${draws}-${losses}`}
+        figureLabel={tv("recordLabel")}
+        actions={
+          <>
+            <Link href={`${base}/scenes?type=shot&outcome=goal&side=own`} className={buttonClass("primary")}>
+              {tv("goalsAsClips")}
             </Link>
-          </div>
+            {tools}
+          </>
         }
-      >
-        <h1 className="mt-2 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-[4.25rem]">
-          {statement ? tv(statement.headline.key.replace("voice.", "") as "overXg", statement.headline.params as never) : lastResult ? tv(lastResult.headline.key.replace("voice.", "") as "won", lastResult.headline.params as never) : tv("neutralSeason")}
-        </h1>
-        {statement?.evidence && <p className="mt-4 max-w-xl text-lg">{tv(statement.evidence.key.replace("voice.", "") as "record", statement.evidence.params as never)}</p>}
-        <div className="mt-7 flex flex-wrap gap-3">
-          <Link href={`${base}/scenes?type=shot&outcome=goal&side=own`} className={stageButton("solid")}>
-            {tv("goalsAsClips")}
-          </Link>
-          {tools}
-        </div>
-      </Stage>
+      />
+      {/* the record in words for screen readers and the flows; the figure above is its short form */}
+      <dl className="sr-only" data-testid="season-record">
+        {([["won", wins], ["draw", draws], ["lost", losses]] as const).map(([k, v]) => (
+          <div key={k}>
+            <dt>{tm(k)}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {statement?.evidence && <p className="-mt-2 max-w-xl text-[17px] text-ink-2">{tv(statement.evidence.key.replace("voice.", "") as "record", statement.evidence.params as never)}</p>}
+      <p className="text-[15px]">
+        <Link href={`/app/${orgId}/matches/${last.match_id}`} className={linkClass}>
+          {tv("lastResult")}: {last.score_own}:{last.score_opponent} {last.opponent}
+        </Link>
+      </p>
       </div>
 
       {/* what repeats over the matches with video (SPEC 7.9) */}
@@ -169,7 +161,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-16">
         <section className="space-y-4">
-          <h2 className="text-2xl">{tv("inNumbers")}</h2>
+          <SectionHead title={tv("inNumbers")} />
           <ul className="border-y border-foreground/15" data-testid="season-tiles">
             {cells.map((c) => (
               <li key={c.key} className="border-t border-foreground/10 first:border-t-0">
@@ -180,7 +172,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   <span className="min-w-0">
                     <span className="block font-semibold group-hover:text-accent">{c.label}</span>
                     {c.focus && (
-                      <span className="mt-0.5 mb-1.5 block w-fit text-sm font-semibold underline decoration-resin decoration-[5px] underline-offset-[5px]">{tv("focus")}</span>
+                      <span className="mt-0.5 mb-1.5 block w-fit bg-attn px-2 py-[3px] text-[13px] font-extrabold text-attn-ink">{tv("focus")}</span>
                     )}
                     <span className="block text-sm text-muted">{c.refText}</span>
                   </span>
@@ -195,50 +187,19 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
         <div className="space-y-12">
           <section className="space-y-4">
-            <h2 className="text-2xl">{t("form")}</h2>
-            {(() => {
-              const recent = [...data.matches].sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at)).slice(-10);
-              return (
-                <>
-                  <ol className="flex gap-1">
-                    {recent.map((m) => {
-                      const r = m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "draw";
-                      return (
-                        <li key={m.match_id} className="min-w-0 max-w-12 flex-1">
-                          <Link
-                            href={`/app/${orgId}/matches/${m.match_id}`}
-                            title={`${format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })} ${m.opponent} ${m.score_own}:${m.score_opponent}`}
-                            className="group flex flex-col items-center gap-1"
-                          >
-                            <span
-                              aria-hidden
-                              className={cn(
-                                "grid aspect-square w-full place-items-center font-score text-lg text-background transition-transform group-hover:-translate-y-0.5",
-                                r === "won" ? "bg-ok" : r === "lost" ? "bg-error" : "bg-muted",
-                              )}
-                            >
-                              {tm(r).charAt(0)}
-                            </span>
-                            <span className="sr-only">
-                              {tm(r)} {m.score_own}:{m.score_opponent} {m.opponent}
-                            </span>
-                            <span aria-hidden className="font-score text-[0.8125rem] leading-none text-muted tabular-nums group-hover:text-foreground">
-                              {m.score_own}:{m.score_opponent}
-                            </span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                  <p className="text-sm text-muted">{t("formLast", { n: recent.length })}</p>
-                </>
-              );
-            })()}
+            <SectionHead title={t("form")} note={t("formLast", { n: Math.min(10, n) })} />
+            <DiffBars
+              matches={[...data.matches]
+                .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
+                .slice(-10)
+                .map((m) => ({ label: m.opponent.split(/[\s-]/).filter((w) => w.length > 3)[0] ?? m.opponent, diff: m.score_own - m.score_opponent }))}
+              label={t("chartLabel")}
+            />
           </section>
 
           {n > 1 && (
             <section className="space-y-4">
-              <h2 className="text-2xl">{t("best")}</h2>
+              <SectionHead title={t("best")} />
               <ul className="border-y border-foreground/15">
                 {bests.map((b) =>
                   b.row ? (
@@ -288,7 +249,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       {scorers.length > 0 && <Scorers scorers={scorers} names={names} shirts={shirts} topGoals={topGoals} t={t} />}
 
       <section className="space-y-3">
-        <h2 className="text-2xl">{t("allMatches")}</h2>
+        <SectionHead title={t("allMatches")} />
         <div className="sheet overflow-x-auto">
           <table className="w-full text-[0.9375rem]" data-testid="season-matches">
             <caption className="sr-only">{t("matches")}</caption>

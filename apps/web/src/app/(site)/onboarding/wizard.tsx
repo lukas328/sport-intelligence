@@ -4,8 +4,8 @@ import type { Schemas } from "@handball/api-client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
-import { CourtLines } from "@/components/domain/court-lines";
 import { clubStyle } from "@/lib/color";
+import { PageHeader } from "@/components/ui/page-header";
 import { useState, type FormEvent } from "react";
 import { InviteForm } from "@/components/people/invite-form";
 import { RosterEditor } from "@/components/roster/roster-editor";
@@ -102,23 +102,20 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <header className="club relative overflow-hidden bg-club px-6 pt-6 pb-5 text-club-ink transition-colors duration-300 sm:px-8 sm:pt-8" style={clubStyle(colour) as CSSProperties}>
-        <CourtLines className="absolute right-0 bottom-0 hidden aspect-square h-full sm:block" />
-        <div className="relative">
-          {!joined && <p className="text-[0.9375rem] font-semibold">{t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}</p>}
-          <h1 className="mt-1 text-[2.5rem] leading-[0.95] sm:text-5xl">{name.trim() || t("onboarding.title")}</h1>
-          {!joined && (
-          <ol className="mt-6 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}>
+      {/* the Seitenkopf takes the club colour as it is picked: the Keil shows it right away */}
+      <div className="club" style={clubStyle(colour) as CSSProperties}>
+        <PageHeader eyebrow={!joined ? t("onboarding.progress", { step: shownStep + 1, total: STEPS.length }) : undefined} title={name.trim() || t("onboarding.title")} />
+        {!joined && (
+          <ol className="-mt-2 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: STEPS.length })}>
             {STEPS.map((s, i) => (
-              <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-xs ${i <= shownStep ? "font-semibold" : "font-normal"}`}>
-                <span aria-hidden className={`block h-1 rounded-full ${i <= shownStep ?"bg-club-ink":"bg-club-ink/30"}`} />
+              <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-[13px] ${i <= shownStep ? "font-bold text-ink" : "text-ink-2"}`}>
+                <span aria-hidden className={`block h-1.5 ${i <= shownStep ? "bg-ink" : "bg-rule"}`} />
                 {t(`onboarding.${s}`)}
               </li>
             ))}
           </ol>
-          )}
-        </div>
-      </header>
+        )}
+      </div>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
 
       {step === 0 && !manual && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club) => (setName(club), setClaimed(true))} onJoinSent={() => setJoined(true)} />}

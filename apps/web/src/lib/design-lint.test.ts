@@ -46,7 +46,7 @@ const COLOUR_FILES = new Set([
 ]);
 
 // club-coloured areas of screens that are rebuilt in the following steps of SPEC.md section 13
-const CLUB_AREA_LEGACY = ["components/domain/stage.tsx", "app/(site)/(auth)/layout.tsx", "app/(site)/onboarding/wizard.tsx"];
+const CLUB_AREA_LEGACY = ["components/domain/stage.tsx"];
 
 describe("design rules", () => {
   it("uses the confirm dialog instead of window.confirm / alert / prompt", () => {
@@ -88,6 +88,8 @@ describe("design rules", () => {
       "components/anlauf/blocks.tsx",
       "components/ui/page-header.tsx",
       "components/shell/club-mark.tsx",
+      // the Keil beside the sign-in form
+      "app/(site)/(auth)/layout.tsx",
       // the key "Tor wir" of the Spieltag
       "app/app/[orgId]/matches/[matchId]/live/live-view.tsx",
       ...CLUB_AREA_LEGACY,

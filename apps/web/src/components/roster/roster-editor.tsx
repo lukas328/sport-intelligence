@@ -252,26 +252,26 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
               if (members.length === 0) return null;
               return (
                 <section key={g} aria-labelledby={`group-${g}`}>
-                  <h3 id={`group-${g}`} className="mb-1 flex items-baseline gap-2 text-lg">
+                  <h3 id={`group-${g}`} className="font-slant mb-1 flex items-baseline gap-2.5 pb-2 text-xl">
                     {t(`roster.group_${g}`)}
                     <span className="font-sans text-sm font-medium text-muted tabular-nums">{members.length}</span>
                   </h3>
-                  <ul className="grid border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-10 xl:grid-cols-3">
+                  <ul className="grid border-t-2 border-ink sm:grid-cols-2 sm:gap-x-8 xl:grid-cols-3">
                     {members.map((p) => (
               <li key={p.id} className={cn("group relative flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-foreground/15 py-3.5 pr-1", statusFor === p.player_id && "sm:col-span-2 xl:col-span-3")} data-testid="roster-row">
-                <span className={cn("w-14 shrink-0 text-center font-score text-[2.75rem] leading-none", p.status ? "text-muted" : "text-accent")} aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
+                <span className={cn("w-14 shrink-0 text-right font-num text-[48px] leading-[.8]", p.status ? "text-ink-2" : "text-club-text")} aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
                   {p.jersey_number ?? "–"}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[1.0625rem] font-semibold">
+                  <span className="font-slant block truncate text-xl leading-tight">
                     {/* staff open a player's season line from the name */}
                     {canEdit ? (
                       <Link href={`/app/${orgId}/teams/${teamId}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
-                        {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                        {p.first_name} {p.last_name}
                       </Link>
                     ) : (
                       <>
-                        {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                        {p.first_name} {p.last_name}
                       </>
                     )}
                   </span>
