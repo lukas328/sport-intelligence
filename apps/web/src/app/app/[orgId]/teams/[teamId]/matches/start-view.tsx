@@ -42,13 +42,15 @@ export function StartView({
   const withoutVideo = played.filter((m) => !m.has_video).length;
   return (
     <div className="space-y-8">
-      <LastMatch orgId={orgId} m={last} next={next} teamName={org.name} canWrite={canWrite} club={[org.primary_color, org.secondary_color ?? null]} actions={actions} />
+      <LastMatch orgId={orgId} m={last} next={next} teamName={org.name} canWrite={canWrite} club={[org.primary_color, org.secondary_color ?? null]} />
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section aria-labelledby="all-matches">
           <SectionHead
             title={<span id="all-matches">{t("allMatches")}</span>}
             note={withoutVideo > 0 ? t("withoutVideo", { count: withoutVideo, total: played.length }) : undefined}
           />
+          {/* a new match and a report are not actions on the last match: they belong to the list */}
+          {actions && <div className="-mt-1 mb-2 flex flex-wrap items-center gap-3">{actions}</div>}
           <ul className="m-0 list-none p-0" data-testid="match-list">
             {played.map((m) => (
               <li key={m.id}>
@@ -63,7 +65,7 @@ export function StartView({
   );
 }
 
-function LastMatch({ orgId, m, next, teamName, canWrite, club, actions }: { orgId: string; m: Match | null; next: Match | null; teamName: string; canWrite: boolean; club: [string, string | null]; actions?: ReactNode }) {
+function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string; m: Match | null; next: Match | null; teamName: string; canWrite: boolean; club: [string, string | null] }) {
   const t = useTranslations("anlauf");
   const g = useMatchGraphics(orgId, m?.id ?? "");
   const head = useHeadProps(m, next, g.data ?? null, teamName);
@@ -72,7 +74,9 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club, actions }: { orgI
   return (
     <div style={matchStyle(club, m?.opponent_color ? [m.opponent_color] : null) as CSSProperties} className="space-y-6">
       {/* no match played yet: the head waits (ink outline, no club area) and says what comes */}
-      <WurfHead {...head} />
+      <div className="bleed-x -mt-6 lg:-mt-8">
+        <WurfHead {...head} />
+      </div>
       <div className="flex flex-wrap items-center gap-3">
         {m && base && (
           <Link href={base} className={buttonClass("primary")} data-testid="open-match">
@@ -88,7 +92,6 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club, actions }: { orgI
             </Link>
           </span>
         )}
-        {actions}
       </div>
       {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={() => `${base}?tab=video`} />}
     </div>
@@ -147,6 +150,17 @@ function MiniField({ orgId, m, width = 128 }: { orgId: string; m: Match; width?:
   );
 }
 
+/** The second line of a match with video: its things, its scenes and Punkt 1. */
+function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
+  const t = useTranslations("anlauf");
+  const text = useThingText();
+  const g = useMatchGraphics(orgId, m.id);
+  if (!g.data) return <>{m.competition}</>;
+  const things = threeThings(goalRuns(g.data));
+  const scenes = g.data.goals.filter((x) => x.has_video || x.source === "demo").length;
+  return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
+}
+
 function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: boolean }) {
   const t = useTranslations("anlauf");
   const tm = useTranslations("matches");
@@ -188,7 +202,7 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
               )}
             </>
           ) : (
-            m.competition
+            <RowSummary orgId={orgId} m={m} />
           )}
         </p>
       </div>
@@ -213,9 +227,13 @@ function NextOpponent({ orgId, next, played }: { orgId: string; next: Match; pla
   const t = useTranslations("anlauf");
   const format = useFormatter();
   const date = new Date(next.kickoff_at);
-  const met = played.find((m) => m.opponent_name === next.opponent_name && m.score_own != null);
+  // the last duel with video: its Minifeld and a line; otherwise say there is none yet
+  const met = played.find((m) => m.opponent_name === next.opponent_name && m.score_own != null && m.has_video);
+  const g = useMatchGraphics(orgId, met?.id ?? "");
+  const text = useThingText();
+  const first = g.data ? threeThings(goalRuns(g.data))[0] : undefined;
   return (
-    <section>
+    <section data-testid="next-opponent">
       <p className="m-0 text-[13px] font-semibold text-ink-2">
         {t("nextOpponent")} · {format.dateTime(date, { weekday: "short", hour: "2-digit", minute: "2-digit" })}
       </p>
@@ -224,12 +242,20 @@ function NextOpponent({ orgId, next, played }: { orgId: string; next: Match; pla
           {next.is_home ? next.opponent_name : `${t("away")} ${next.opponent_name}`}
         </Link>
       </h3>
-      {met && (
+      {met ? (
         <>
           <Link href={`/app/${orgId}/matches/${met.id}`} aria-hidden tabIndex={-1} className="block">
             <MiniField orgId={orgId} m={met} width={340} />
           </Link>
-          <p className="mt-2 mb-0 border-t border-rule py-2.5 text-base">{t("lastMeeting", { score: `${met.score_own}:${met.score_opponent}` })}</p>
+          <p className="mt-2 mb-0 border-t border-rule py-2.5 text-base">
+            {t("lastMeeting", { score: `${met.score_own}:${met.score_opponent}` })}
+            {first && `, ${text(first)}`}
+          </p>
+        </>
+      ) : (
+        <>
+          <EmptyField />
+          <p className="mt-2 mb-0 border-t border-rule py-2.5 text-base text-ink-2">{t("noVideoAgainst", { opponent: next.opponent_name })}</p>
         </>
       )}
     </section>

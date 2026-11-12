@@ -3003,7 +3003,9 @@
     "writeNote": "Écrire une note",
     "bench": "Atelier",
     "benchClose": "Fermer l'atelier",
-    "vsShort": "contre"
+    "vsShort": "contre",
+    "noVideoAgainst": "Pas encore de match avec vidéo contre {opponent}.",
+    "rowSummary": "{things, plural, =0 {Aucun point} one {1 point} other {# points}} · {scenes, plural, one {1 scène} other {# scènes}}{first, select, none {} other { · Point 1 : {first}}}"
   },
   "check": {
     "top": "Vérifier · {opponent}",

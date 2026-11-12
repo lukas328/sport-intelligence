@@ -3003,7 +3003,9 @@
     "writeNote": "Notiz schreiben",
     "bench": "Werkbank",
     "benchClose": "Werkbank schliessen",
-    "vsShort": "gegen"
+    "vsShort": "gegen",
+    "noVideoAgainst": "Noch kein Spiel mit Video gegen {opponent}.",
+    "rowSummary": "{things, plural, =0 {Kein Ding} one {1 Ding} other {# Dinge}} · {scenes, plural, one {1 Szene} other {# Szenen}}{first, select, none {} other { · Punkt 1: {first}}}"
   },
   "check": {
     "top": "Prüfen · {opponent}",

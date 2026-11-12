@@ -3003,7 +3003,9 @@
     "writeNote": "Write a note",
     "bench": "Workbench",
     "benchClose": "Close workbench",
-    "vsShort": "against"
+    "vsShort": "against",
+    "noVideoAgainst": "No match with video against {opponent} yet.",
+    "rowSummary": "{things, plural, =0 {No thing} one {1 thing} other {# things}} · {scenes, plural, one {1 scene} other {# scenes}}{first, select, none {} other { · Point 1: {first}}}"
   },
   "check": {
     "top": "Check · {opponent}",
