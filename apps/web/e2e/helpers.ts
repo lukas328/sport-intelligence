@@ -100,6 +100,9 @@ export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" 
   if (section === "Übersicht") return page.getByRole("tab", { name: "Spiel", exact: true }).click();
   await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
   const id = { Spielbericht: "report", Würfe: "shots", Torhüter: "keepers", Laufleistung: "physical" }[section];
+  // the full report, shots, goalkeepers and running figures sit behind «Alle Zahlen»
+  const more = page.getByTestId("numbers-more");
+  if (!(await more.evaluate((d) => (d as HTMLDetailsElement).open))) await more.locator(":scope > summary").click();
   await page.locator(`#numbers-${id}`).scrollIntoViewIfNeeded();
 }
 

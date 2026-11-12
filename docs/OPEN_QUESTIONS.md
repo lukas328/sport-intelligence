@@ -259,9 +259,13 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   block. *Open:* a table for teams without a federation feed (entered by hand, or from the
   match reports of the whole group) is not planned; the demo club is not linked, so its
   screenshots show the page without a table.
-- **Q-UX-20 Prüfen as questions.** SPEC 7.5 asks one question at a time with a boxed crop.
-  The analysis delivers no box per person yet, so only goal and shot candidates are asked, in
-  the existing review of the Video tab. *Assumption:* the question screen comes with the boxes.
+- **Q-UX-20 Prüfen as questions.** Built 2026-11-12: the court first, then the goal candidates,
+  then, once the court is confirmed, the own tracks without a name (longest in view first, at
+  most six per video). The box around the person comes from the track's foot point and the court
+  homography (`personBox` in lib/spotlight.ts: image scale at the feet, fixed body height
+  1.85 m), shown as a crop of the running video. *Open:* the box is an estimate (only the ground
+  plane is calibrated); a detector box per person would be exact. «Gegner» as an answer needs
+  an API to mark a track as not ours; until then «Weiss nicht».
 
 ## Website (docs/site/KONZEPT.md, 2026-11-12)
 - **Q-SITE-1 Prices on the website.** The site shows the plan table of `packages/plans`

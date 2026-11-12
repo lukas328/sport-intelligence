@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ChevronLeft, Plus, Search } from "lucide-react";
@@ -44,6 +44,7 @@ export function AppShell({
 }) {
   const t = useTranslations("shell");
   const path = usePathname();
+  const search = useSearchParams();
   const [chosen, setChosen] = useState<string | null>(savedTeam);
   const urlTeam = teamInPath(path);
   const teamId =
@@ -93,13 +94,14 @@ export function AppShell({
 
   // courtside and presentation tools use the whole screen, with one way back
   const tool = /\/(present|remote|live|marks|matchday|check)$/.test(path);
+  // Prüfen and the Spieltag keys bring their own top line («Später weiter», «Beenden»)
+  const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") === "marks");
   if (tool) {
     const back = path.replace(/\/[^/]+$/, "");
     return (
       <ShellContext.Provider value={value}>
         <div className="flex min-h-dvh flex-col">
-          {/* Prüfen brings its own top line («Prüfen · Thalwil», «Später weiter») */}
-          {!path.endsWith("/check") && (
+          {!ownTop && (
             <header className="flex h-[60px] items-center gap-3 border-b-2 border-ink px-4 md:px-8">
               <Link
                 href={back}
@@ -143,7 +145,7 @@ export function AppShell({
                 className="font-slant flex shrink-0 items-center gap-3 text-xl leading-none whitespace-nowrap text-ink no-underline"
               >
                 {/* the product in ink, then the club: the colours belong to the club */}
-                <AppMark size={24} className="-mr-0.5" />
+                <AppMark size={32} />
                 <ClubMark org={org} />
                 {org.name}
               </Link>
@@ -197,7 +199,7 @@ export function AppShell({
             {/* phone top bar */}
             <div className="flex h-[60px] items-center gap-3 px-4 lg:hidden">
               <Link href={home} aria-label={org.name} className="flex shrink-0 items-center gap-2">
-                <AppMark size={22} />
+                <AppMark size={28} />
                 <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
               </Link>
               <div className="min-w-0 flex-1">

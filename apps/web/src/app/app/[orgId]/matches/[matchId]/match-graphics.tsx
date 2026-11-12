@@ -10,13 +10,13 @@ import { goalRuns, reportGoals, type MatchGraphics } from "@/lib/graphics";
 import { cn } from "@/lib/utils";
 
 /** Gegentore and eigene Tore by position: counts at the zones, the shot spots as dots. */
-export function MatchZones({ graphics, row = false }: { graphics: MatchGraphics; row?: boolean }) {
+export function MatchZones({ graphics, row = false, only }: { graphics: MatchGraphics; row?: boolean; only?: "opp" | "own" }) {
   const t = useTranslations("anlauf");
   const names = Object.fromEntries(["la", "ra", "rl", "rm", "rr", "kr", "m7", "gs"].map((z) => [z, t(`zoneShort.${z}` as "zoneShort.la")]));
   const sides = [
     { team: "opp" as const, title: t("conceded") },
     { team: "own" as const, title: t("scored") },
-  ];
+  ].filter((x) => !only || x.team === only);
   return (
     <aside className={cn("grid gap-10", row ? "md:grid-cols-2" : "content-start")}>
       {sides.map((s) => {

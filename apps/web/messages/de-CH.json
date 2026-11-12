@@ -299,7 +299,8 @@
     "confirm": "Stimmt, weiter",
     "notMine": "Das ist nicht mein Team",
     "next": "Als Nächstes: das erste Video hochladen oder das Demo-Spiel ansehen.",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "stepTitle": "Einstieg"
   },
   "roster": {
     "title": "Team",
@@ -1369,7 +1370,15 @@
     "readOnly": "Nur ansehen, gültig bis {date}",
     "scene": "Szene",
     "previewScenes": "{n, plural, one {# Szene} other {# Szenen}}",
-    "previewMinutes": "{n} min"
+    "previewMinutes": "{n} min",
+    "runKick": "{kind, select, collection {Sammlung} other {Szene}} · {n, plural, one {# Szene} other {# Szenen}}, {length}",
+    "viewOnly": "Nur ansehen, ohne Konto",
+    "nextScene": "Nächste Szene",
+    "allScenes": "Alle {n} Szenen",
+    "run": "Ablauf",
+    "running": "läuft",
+    "seen": "gesehen",
+    "onlyLink": "Nur über diesen Link sichtbar, noch {days, plural, one {# Tag} other {# Tage}}. Kein Konto nötig."
   },
   "ops": {
     "title": "Backoffice",
@@ -2144,8 +2153,8 @@
     "key_goal_opp": "Tor Gegner",
     "key_good": "Gute Aktion",
     "key_mistake": "Fehler",
-    "key_defence": "Abwehr prüfen",
-    "key_review": "Anschauen",
+    "key_defence": "Abwehr anschauen",
+    "key_review": "Später anschauen",
     "panel": "Am Spieltag gemerkt ({n})",
     "open": "Spieltag öffnen",
     "device": "Gerät",
@@ -2160,7 +2169,16 @@
     "goalFor": "Tor {team}",
     "count": "{n, plural, one {# Szene gemerkt} other {# Szenen gemerkt}}",
     "lastAt": "zuletzt {label}, {time}",
-    "noneYet": "Noch keine Szene gemerkt."
+    "noneYet": "Noch keine Szene gemerkt.",
+    "top": "Spieltag · funktioniert auch ohne Netz",
+    "end": "Beenden",
+    "goalUs": "Tor wir",
+    "sofar": "{n} bisher",
+    "subMark": "merken",
+    "subLater": "später im Video",
+    "perPlayer": "Pro Spielerin erfassen",
+    "sofarTitle": "Bisher",
+    "newestFirst": "neueste zuerst"
   },
   "profile": {
     "title": "Öffentliches Profil",
@@ -3027,7 +3045,13 @@
     "goalCaption": "Spielzeit {clock} · Video {video}",
     "progress": "{done} von {total} beantwortet",
     "count": "{n, plural, one {1 Frage} other {# Fragen}}",
-    "questionOf": "Frage {n} von {total}"
+    "questionOf": "Frage {n} von {total}",
+    "personQuestion": "Wer ist das?",
+    "personWhy": "Die Personen mit der längsten Zeit im Bild kommen zuerst. Jede Antwort ist sofort gespeichert und macht die Zahlen genauer.",
+    "personCaption": "Video {video} · {s} Sekunden im Bild, {read, select, none {Nummer nie gelesen} other {Nummer {read} gelesen}}",
+    "personOther": "Andere",
+    "personPick": "Andere aus dem Kader",
+    "personKeys": "Tasten: Rückennummer tippen, Leertaste für «Weiss nicht»."
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",
@@ -3183,5 +3207,36 @@
     "noFixtures": "Kein Spiel angesetzt.",
     "more": "Mehr zur Saison",
     "moreNote": "Zahlen, Bestwerte, alle Spiele im Detail, Läufe und Auswertungen"
+  },
+  "numbersTab": {
+    "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",
+    "field": "Feld",
+    "byGoals": "nach Toren",
+    "numberName": "Nr. Name",
+    "goals": "Tore",
+    "sevenM": "7 m",
+    "twoMin": "2 Min",
+    "shots": "Würfe",
+    "rate": "Quote",
+    "more": "{n, plural, one {Eine weitere Person} other {# weitere}} ohne Tor.",
+    "showAll": "Alle zeigen",
+    "keeper": "Tor",
+    "against": "Gegentore",
+    "saves": "Paraden",
+    "sevenMSaved": "7 m gehalten",
+    "ofN": "{n} von {of}",
+    "target": "Ziel im Tor",
+    "targetNote": "Gegentore, von dir markiert",
+    "targetMarked": "{n} von {of} Gegentoren markiert.",
+    "phases": "Phasen",
+    "phase_power_play": "Überzahl, {m} Minuten",
+    "phase_short_handed": "Unterzahl, {m} Minuten",
+    "phase_fast_break": "Gegenstösse",
+    "fromSuspensions": "aus den 2-Minuten-Strafen",
+    "fromEvents": "aus den Ereignissen",
+    "fromVideo": "aus dem Video geschätzt",
+    "allNumbers": "Alle Zahlen",
+    "allNumbersNote": "Spielbericht, Würfe, Torhüter im Detail, Laufwerte",
+    "unknown": "ohne Namen"
   }
 }
