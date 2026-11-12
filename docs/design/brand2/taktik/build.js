@@ -221,11 +221,15 @@ const out = {
   out[`wortmarke-${n}-negativ.svg`] = svg(w.vb, `<rect x="-2000" y="-2000" width="6000" height="6000" fill="${INK}"/>` + w.body);
   out[`wortmarke-${n}-weiss.svg`] = svg(w.vb, w.body);
 });
-/* open graph: 1200 x 630 */
+/* open graph: 1200 x 630, everything at least 60 px from every edge */
 {
-  const a = text(wmRec.font, "Handball", 640, 300, 118, { track: wmRec.track }), b = text(wmRec.font, "Intelligence", 640, 420, 118, { track: wmRec.track });
-  const t = text("Archivo-ExtraBold", "Spielanalyse für Handballtrainerinnen und -trainer", 640, 520, 30, { track: 0 });
-  out["open-graph.svg"] = svg("0 0 1200 630", `<rect width="1200" height="630" fill="${BOARD}"/><g transform="translate(70 70) scale(0.95)">${fin("two")}</g><path d="${a.d}" fill="${INK}"/><path d="${b.d}" fill="${BLUE}"/><path d="${t.d}" fill="#5a6068"/>`);
+  const M = 60, k = 1.12, mx = M - 24 * k, my = (630 - 415 * k) / 2 - 42 * k, x0 = M + 464 * k + 50, avail = 1200 - M - x0;
+  const w0 = text(wmRec.font, "Intelligence", 0, 0, 100, { track: wmRec.track }).w, size = Math.min(118, Math.floor(100 * avail / w0));
+  const t1 = "Spielanalyse für Handball-", t2 = "trainerinnen und -trainer", tw = Math.max(text("Archivo-ExtraBold", t1, 0, 0, 100).w, text("Archivo-ExtraBold", t2, 0, 0, 100).w), ts = Math.min(30, Math.floor(100 * avail / tw));
+  const block = size * 0.95 + size * 1.0 + 28 + ts * 2.4, top = (630 - block) / 2;
+  const a = text(wmRec.font, "Handball", x0, top + size * 0.95, size, { track: wmRec.track }), b = text(wmRec.font, "Intelligence", x0, top + size * 1.95, size, { track: wmRec.track });
+  const c1 = text("Archivo-ExtraBold", t1, x0, top + size * 1.95 + 28 + ts * 1.1, ts), c2 = text("Archivo-ExtraBold", t2, x0, top + size * 1.95 + 28 + ts * 2.4, ts);
+  out["open-graph.svg"] = svg("0 0 1200 630", `<rect width="1200" height="630" fill="${BOARD}"/><g transform="translate(${mx.toFixed(1)} ${my.toFixed(1)}) scale(${k})">${fin("two")}</g><path d="${a.d}" fill="${INK}"/><path d="${b.d}" fill="${BLUE}"/><path d="${c1.d}" fill="#5a6068"/><path d="${c2.d}" fill="#5a6068"/>`);
 }
 Object.keys(out).forEach((n) => W("final/" + n, out[n]));
 
