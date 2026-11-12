@@ -247,3 +247,10 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
 - **Q-UX-18 Smoothing of paths.** Runs are drawn with a Catmull-Rom curve through the measured
   points (display only, nothing added). Whether the raw tracks need filtering (jitter, ID
   switches) before they look like runs is open.
+- **Q-UX-19 League table and rank.** Start (Tabelle), Saison (Rang in the Seitenkopf, Tabelle)
+  and Nächster Gegner (three facts from the table) need the league table; the API has none
+  today (the official data gives matches, not standings). *Assumption:* left out until the
+  federation feed delivers it; the screens show what they have.
+- **Q-UX-20 Prüfen as questions.** SPEC 7.5 asks one question at a time with a boxed crop.
+  The analysis delivers no box per person yet, so only goal and shot candidates are asked, in
+  the existing review of the Video tab. *Assumption:* the question screen comes with the boxes.

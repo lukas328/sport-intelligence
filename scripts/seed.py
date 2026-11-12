@@ -139,6 +139,8 @@ def match_events(
 ) -> list[dict[str, Any]]:
     """One match as events. `players` maps a position to roster player ids."""
     own_weights = {"LA": 0.13, "RL": 0.2, "RM": 0.17, "RR": 0.18, "RA": 0.12, "KM": 0.2}
+    # every match has one position that carries the attack (the third of the three things)
+    own_weights[rng.choice(list(own_weights))] = 0.75
     opp_weights = {"LA": 0.16, "RL": 0.2, "RM": 0.2, "RR": 0.16, "KM": 0.28}
     sevens_taken, sevens_scored = seven_m
     events: list[dict[str, Any]] = []
@@ -202,6 +204,13 @@ def match_events(
                 ),
             }
         )
+    # the opponent's fast breaks after our turnovers (the second of the three things)
+    opp_goals_open = [e for e in events if e["side"] == "opponent" and e.get("outcome") == "goal"][
+        opp_from_right_wing:
+    ]
+    for e in opp_goals_open[: rng.randint(3, 6)]:
+        e["shot_type"] = "fast_break"
+        e["x"], e["y"] = round(rng.uniform(32, 35), 1), round(rng.uniform(7, 13), 1)
     for _ in range(keeper_saves):
         pos = pick_weighted(rng, {**opp_weights, "RA": 0.08})
         x, y = rng.choice(SPOTS[pos])

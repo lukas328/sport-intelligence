@@ -2851,7 +2851,7 @@
     "titleWon": "Won.",
     "titleLost": "Lost.",
     "titleDraw": "Draw.",
-    "titleThings": "{count, plural, one {And one thing to take away.} other {And # things to take away.}}",
+    "titleThings": "{count, plural, one {And one thing to take away.} =2 {And two things to take away.} =3 {And three things to take away.} other {And # things to take away.}}",
     "titleNoVideo": "The last match, no video yet.",
     "titleRunning": "The analysis is running.",
     "titleWelcome": "Welcome.",

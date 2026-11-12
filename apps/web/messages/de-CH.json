@@ -2851,7 +2851,7 @@
     "titleWon": "Gewonnen.",
     "titleLost": "Verloren.",
     "titleDraw": "Unentschieden.",
-    "titleThings": "{count, plural, one {Und ein Ding zum Mitnehmen.} other {Und # Dinge zum Mitnehmen.}}",
+    "titleThings": "{count, plural, one {Und ein Ding zum Mitnehmen.} =2 {Und zwei Dinge zum Mitnehmen.} =3 {Und drei Dinge zum Mitnehmen.} other {Und # Dinge zum Mitnehmen.}}",
     "titleNoVideo": "Das letzte Spiel, noch ohne Video.",
     "titleRunning": "Die Analyse läuft.",
     "titleWelcome": "Willkommen.",

@@ -2851,7 +2851,7 @@
     "titleWon": "Gagné.",
     "titleLost": "Perdu.",
     "titleDraw": "Match nul.",
-    "titleThings": "{count, plural, one {Et un point à retenir.} other {Et # points à retenir.}}",
+    "titleThings": "{count, plural, one {Et un point à retenir.} =2 {Et deux points à retenir.} =3 {Et trois points à retenir.} other {Et # points à retenir.}}",
     "titleNoVideo": "Le dernier match, encore sans vidéo.",
     "titleRunning": "L'analyse est en cours.",
     "titleWelcome": "Bienvenue.",
