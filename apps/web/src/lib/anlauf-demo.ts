@@ -92,14 +92,37 @@ export const DEMO_GOALS = {
   themFastBreaks: goals(53, "opp", { gs: 6 }, 2),
 };
 
-/** goal difference minute by minute of the Thalwil match, as the report delivers it */
-const FLOW: [number, number][] = [
-  [0, 0], [2, 1], [3, 0], [5, 1], [7, 0], [9, 1], [11, 2], [12, 1], [14, 2], [16, 1], [17, 2], [19, 3], [20, 2], [22, 3], [23, 2], [24, 3], [25, 2], [26, 3], [27, 4], [28, 3], [29, 4],
-  [32, 5], [35, 6], [36, 7], [38.6, 6], [39.9, 5], [41, 4], [42, 3], [43.8, 2], [46, 3], [48, 4], [49, 3], [50, 4], [51, 5], [53, 6], [54, 7], [55, 6], [56, 7], [57, 8], [58, 9], [58.5, 8],
+/**
+ * The demo match of SPEC.md section 10: HC Zürichsee against TSV Thalwil 26:18 (13:9), with the
+ * goal sequence of the report (Torfolge 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18).
+ */
+export const DEMO_RESULT = { own: 26, opp: 18, halftime: [13, 9] } as const;
+
+const SEQUENCE: [minute: number, own: number, opp: number][] = [
+  [0, 0, 0], [5, 2, 1], [11, 5, 4], [19, 9, 6], [30, 13, 9], [37, 15, 12], [44, 17, 15], [51, 21, 16], [60, 26, 18],
 ];
 
-/** report.goals[] of the demo match: one goal per step of the difference */
-export const DEMO_REPORT: ReportGoal[] = FLOW.slice(1).map((p, i) => ({ minute: p[0], team: p[1] > FLOW[i]![1] ? "own" : "opp" }));
+/** report.goals[]: the goals between two marks of the sequence, spread evenly, ours first */
+function reportOf(seq: typeof SEQUENCE): ReportGoal[] {
+  const out: ReportGoal[] = [];
+  for (let i = 1; i < seq.length; i++) {
+    const [m0, o0, t0] = seq[i - 1]!;
+    const [m1, o1, t1] = seq[i]!;
+    const n = o1 - o0 + (t1 - t0);
+    let own = o1 - o0;
+    let opp = t1 - t0;
+    for (let j = 0; j < n; j++) {
+      // keep the running share: ours when we are behind our share of this stretch
+      const team: ReportGoal["team"] = opp === 0 || (own > 0 && own / (own + opp) >= 0.5) ? "own" : "opp";
+      if (team === "own") own--;
+      else opp--;
+      out.push({ minute: Math.round((m0 + ((m1 - m0) * (j + 0.5)) / n) * 10) / 10, team });
+    }
+  }
+  return out;
+}
+
+export const DEMO_REPORT: ReportGoal[] = reportOf(SEQUENCE);
 
 export const DEMO_PHASE: [number, number] = [38, 44];
 

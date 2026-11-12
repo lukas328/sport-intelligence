@@ -7,7 +7,7 @@ import { DiffBars, Rail, Series } from "@/components/anlauf/charts";
 import { PageHead, Strip, WurfHead } from "@/components/anlauf/heads";
 import { TacticsCamera } from "@/components/anlauf/tactics-camera";
 import { Button } from "@/components/ui/button";
-import { DEMO_GOALS, DEMO_PHASE, DEMO_REPORT, DEMO_SCENE_KR, DEMO_SCENE_RA, DEMO_SEASON } from "@/lib/anlauf-demo";
+import { DEMO_GOALS, DEMO_PHASE, DEMO_REPORT, DEMO_RESULT, DEMO_SCENE_KR, DEMO_SCENE_RA, DEMO_SEASON } from "@/lib/anlauf-demo";
 import { CHECK_KITS, CHECK_OPPONENT, kit, kitVars } from "@/lib/color";
 
 export const metadata: Metadata = { title: "Anlauf", robots: { index: false } };
@@ -30,12 +30,14 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
   const { club, opp } = await searchParams;
   const names = (Object.keys(CHECK_KITS) as (keyof typeof CHECK_KITS)[]).filter((n) => !club || n === club);
   const against = opp === "unknown" ? null : CHECK_OPPONENT;
+  const inPhase = DEMO_REPORT.filter((g) => g.minute >= DEMO_PHASE[0] && g.minute <= DEMO_PHASE[1]);
+  const phaseText = `${DEMO_PHASE[0]}. bis ${DEMO_PHASE[1]}. Minute: ${inPhase.filter((g) => g.team === "own").length}:${inPhase.filter((g) => g.team === "opp").length}`;
   return (
     <main className="mx-auto max-w-[1280px] pb-24">
       <div className="px-4 py-6 md:px-8">
         <h1 className="text-[34px]">Anlauf: Bausteine</h1>
         <p className="mt-2 text-[15px] text-ink-2">
-          Sechs Vereinsfarben gegen TV Thalwil (schwarz und weiss){against ? "" : ", Gegner hier ohne bekannte Farbe"}. Alle Daten sind Demo-Daten.
+          Sechs Vereinsfarben gegen TSV Thalwil (schwarz und weiss){against ? "" : ", Gegner hier ohne bekannte Farbe"}. Alle Daten sind Demo-Daten.
         </p>
         <p className="mt-2 flex flex-wrap gap-3 text-[15px]">
           {Object.keys(CHECK_KITS).map((n) => (
@@ -53,23 +55,23 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
         return (
           <section key={n} data-club={n} style={kitVars(k) as CSSProperties} className="border-t-2 border-ink pt-8 pb-14" aria-label={`Verein ${n}`}>
             <WurfHead
-              kick="Meisterschaft, 7. November, Halle Rietwies"
-              title={<>Rechts aussen hat uns fast das Spiel gekostet</>}
-              own={34}
-              opp={26}
+              kick="Samstag gegen TSV Thalwil, Analyse fertig seit Sonntag, 9:40"
+              title="Gewonnen. Und drei Dinge zum Mitnehmen."
+              own={DEMO_RESULT.own}
+              opp={DEMO_RESULT.opp}
               ownName="HC Zürichsee"
-              oppName="TV Thalwil"
+              oppName="TSV Thalwil"
               goals={DEMO_REPORT}
               flightLabels={{ half: "Halbzeit {v}", end: "Schluss {v}" }}
             />
             <div className="mt-6 grid gap-8 px-4 md:grid-cols-2 md:px-8">
-              <Strip name="HC Zürichsee gegen TV Thalwil" sub="7. November, Meisterschaft" own={34} opp={26} />
+              <Strip name="HC Zürichsee gegen TSV Thalwil" sub="Samstag, Meisterschaft" own={DEMO_RESULT.own} opp={DEMO_RESULT.opp} />
               <PageHead kick="Herren 1" title="Szenen" figure={142} figureLabel="Szenen aus 3 Spielen" />
             </div>
 
             <div className="mt-8 grid gap-10 px-4 md:grid-cols-3 md:px-8">
               <div>
-                <SectionHead title="Gegentore rechts aussen" note="9 von 26" />
+                <SectionHead title="Gegentore rechts aussen" note="9 von 18" />
                 <Bundle goals={DEMO_GOALS.them.filter((g) => g.zone === "ra")} rest={DEMO_GOALS.them.filter((g) => g.zone !== "ra")} width={360} play label="Anläufe der Gegentore über rechts aussen" />
                 <LineKey
                   className="mt-2"
@@ -112,7 +114,7 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
                 <p className="mt-1 flex justify-between text-[13px] text-ink-2">
                   <span>0:00</span>
                   <span>
-                    <AttnTag>38. bis 44. Minute: 1:6</AttnTag>
+                    <AttnTag>{phaseText}</AttnTag>
                   </span>
                   <span>60:00</span>
                 </p>

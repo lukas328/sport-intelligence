@@ -62,6 +62,8 @@ export const OPPONENT_UNKNOWN = "#646b73";
 /** the unknown opponent next to a black club, which would swallow the grey */
 export const OPPONENT_UNKNOWN_ON_BLACK = "#8b9198";
 export const DEFAULT_CLUB = "#1f4fd6";
+/** below this contrast two colours of the same family read as the same team on the court */
+export const CAM_SAME_LIGHTNESS = 2.5;
 
 /** The six club colours every screen is checked with (SPEC.md), first and second colour. */
 export const CHECK_KITS = {
@@ -203,7 +205,10 @@ export function kit(
   // tactics camera: a colour that vanishes on the dark court plays in its second colour
   const cc = contrastRatio(c[0], COURT) >= 2.2 ? c[0] : c[1];
   const ocam = contrastRatio(o, COURT) >= 2.2 ? o : o2;
-  const camClash = known && (contrastRatio(cc, ocam) < 1.6 || near(cc, ocam));
+  // two teams must never look alike on the court: only the same colour family AND a similar
+  // lightness clash (blue against navy, red against orange, white against white). Blue against
+  // red does not: own dots are filled, the opponent's are rings, and the hues differ.
+  const camClash = known && near(cc, ocam) && contrastRatio(cc, ocam) < CAM_SAME_LIGHTNESS;
   const ring = !known || camClash;
   return {
     ground,

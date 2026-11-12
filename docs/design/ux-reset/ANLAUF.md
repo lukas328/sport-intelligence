@@ -48,8 +48,11 @@ Two tests for every element:
 - **Clash rule on the ground:** if the opponent's hue is within 45 degrees of the club's (or both
   are greys of similar lightness), the opponent shows its second colour; if that clashes too, ink.
 - **Clash rule on the court:** a colour below 2.2:1 on the court `#0f2333` plays in its second
-  colour (a black club shows white dots). If the two teams are then still alike (below 1.6:1 or
-  near hue), the opponents become grey rings with a light edge. The legend says so.
+  colour (a black club shows white dots). If the two teams are then still alike, the opponents
+  become grey rings with a light edge; the legend says so. Alike means the same colour family
+  (hue within 45 degrees, or two greys) **and** a similar lightness (below 2.5:1): blue against
+  navy, red against orange, white against white. Similar lightness alone is no clash: blue
+  against red, the most common pairing, keeps both colours (own dots filled, opponents rings).
 - Test with the six club colours blue, red, yellow, black, white, green (switch in the Zielbild)
   and an unknown opponent.
 

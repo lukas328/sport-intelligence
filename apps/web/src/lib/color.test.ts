@@ -64,13 +64,31 @@ describe("kit: opponent", () => {
     expect(kit(CHECK_KITS.schwarz, ["#17191c", "#ffffff"])).toMatchObject({ opp: "#ffffff", oppSource: "second" });
   });
 
-  it("steps back to grey rings when both teams would look alike on the court", () => {
-    // blue against red: different hues on the cloth, but the same lightness on the dark court
-    const k = kit(CHECK_KITS.blau, ["#d3202e", "#ffffff"]);
-    expect(k.opp).toBe("#d3202e");
-    expect(k.camClash).toBe(true);
-    expect(k.oppCam).toBe(COURT);
-    expect(k.oppCamEdge).toBe("#a3aeb8");
+  it("red against blue is no clash on the court: the hues differ, only the lightness is alike", () => {
+    for (const [club, opp] of [
+      [CHECK_KITS.blau, ["#d3202e", "#ffffff"]],
+      [CHECK_KITS.rot, ["#1f4fd6", "#ffffff"]],
+    ] as const) {
+      const k = kit(club, opp);
+      expect(k.camClash).toBe(false);
+      expect(k.oppCam).toBe(opp[0]);
+    }
+  });
+
+  it("steps back to grey rings only for the same colour family and a similar lightness", () => {
+    // red against orange
+    const ro = kit(CHECK_KITS.rot, ["#e2731c", "#e2731c"]);
+    expect(ro.oppSource).toBe("ink");
+    // the opponent is ink on the cloth; on the court ink falls back to orange: same family as red
+    expect(ro.camClash).toBe(true);
+    expect(ro.oppCam).toBe(COURT);
+    expect(ro.oppCamEdge).toBe("#a3aeb8");
+    // white against white: the opponent plays its second colour on the cloth, white again on the court
+    const ww = kit(CHECK_KITS.weiss, ["#ffffff", "#17191c"]);
+    expect(ww.opp).toBe("#17191c");
+    expect(ww.camClash).toBe(true);
+    // same family, clearly different lightness: no clash (blue against light blue)
+    expect(kit(CHECK_KITS.blau, ["#7fb2ff", "#7fb2ff"]).camClash).toBe(false);
   });
 
   it("near(): hue and greys", () => {

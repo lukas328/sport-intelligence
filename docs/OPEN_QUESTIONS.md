@@ -209,9 +209,11 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   colour only when somebody picked it; a match created through the API with an explicit
   `kit_opponent` counts as said. *Assumption:* that is the meaning of "aus den Trikotfarben des
   Spiels".
-- **Q-UX-7 Clash rule.** "Same hue family and similar lightness" is implemented with the
-  measure of the existing kit warnings (CIE76 delta E < 25). *Assumption:* good enough; tune with
-  real kits.
+- **Q-UX-7 Clash rule.** Since the Anlauf look (lib/color.ts `kit()`, ANLAUF.md): on the cloth
+  the opponent changes to its second colour (then ink) when its hue is within 45 degrees of
+  ours, or both are greys of similar lightness. On the tactics camera the opponents become grey
+  rings only for the same colour family and a similar lightness (below 2.5:1); blue against red
+  keeps both colours. *Assumption:* thresholds good enough; tune with real kits.
 - **Q-UX-8 Goals conceded by position.** Positions come from the shot zones (wings, backs incl.
   half distance, circle); 7 m, fast breaks, empty goal and long range have none.
 - **Q-UX-9 Season themes.** A theme repeats in at least two matches with video; positions count
@@ -225,3 +227,7 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   mitnehmen" (invites players, which is behind Teamfunktionen now) are left for phase 2.
 - **Q-UX-13 Share a single scene.** The API and the shared page support it; a share button per
   scene comes with the Video tab in phase 2.
+- **Q-UX-14 Dark scheme.** The Anlauf look has one light scheme (the cloth is the identity); the
+  theme switch in the account menu was removed and the `hb_theme` cookie is ignored. Open: whether
+  a dark scheme comes back (e.g. for the hall at night), and how the club colour and the cloth
+  would work on it.
