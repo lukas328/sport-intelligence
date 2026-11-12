@@ -240,7 +240,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
         // the statement leads to its scenes
         <p className="-mt-6 flex flex-wrap gap-x-4 text-sm">
           {decision.edges.map((e) => (
-            <button key={e} type="button" className="font-medium underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-solid" onClick={() => open(t(`edgeScenes_${e}`), edgeFilter[e]!)}>
+            <button key={e} type="button" className="min-h-11 font-medium underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-solid" onClick={() => open(t(`edgeScenes_${e}`), edgeFilter[e]!)}>
               {t(`edgeScenes_${e}`)}
             </button>
           ))}

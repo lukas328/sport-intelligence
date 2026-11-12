@@ -19,6 +19,8 @@ export interface ShellOrg {
   name: string;
   has_logo: boolean;
   primary_color: string;
+  /** the club's second colour (lib/color.ts kit) */
+  secondary_color?: string | null;
   my_role: string;
 }
 

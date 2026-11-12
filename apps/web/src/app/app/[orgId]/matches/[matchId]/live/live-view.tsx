@@ -5,10 +5,12 @@ import type { Schemas } from "@handball/api-client";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { api } from "@/lib/client";
 import { adjust, clockSeconds, enqueue, flush, load, remove, toggle, type Clock } from "@/lib/live-queue";
 import { cn } from "@/lib/utils";
 import { useOptionalShell } from "@/components/shell/context";
+import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
 
 type Match = Schemas["MatchOut"];
@@ -64,7 +66,8 @@ function useCached<T>(key: string, fetcher: () => Promise<T | undefined>, ready 
 export function LiveView({ orgId, matchId }: { orgId: string; matchId: string }) {
   const t = useTranslations("live");
   const oppName = useOpponentName();
-  const ownName = useOptionalShell()?.team?.name ?? null;
+  const shell = useOptionalShell();
+  const ownName = shell?.team?.name ?? null;
   const te = useTranslations("events");
   const path = { org_id: orgId, match_id: matchId };
   const match = useCached<Match>(`hb.live.match.${matchId}`, async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}", { params: { path } })).data);
@@ -216,7 +219,16 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
   ];
 
   return (
-    <div className="mx-auto max-w-xl space-y-4 pb-24" data-testid="live">
+    <div
+      className="mx-auto max-w-xl space-y-4 pb-24"
+      data-testid="live"
+      style={
+        matchStyle(
+          [shell?.org.primary_color ?? null, shell?.org.secondary_color ?? null],
+          match?.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null,
+        ) as CSSProperties
+      }
+    >
       <div className="sticky top-0 z-10 -mx-4 space-y-2 border-b border-border/70 bg-background/90 backdrop-blur-xl px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <Link href={`/app/${orgId}/matches/${matchId}`} className="text-sm underline">
@@ -238,13 +250,13 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
           </div>
         </div>
         <div className="grid grid-cols-4 gap-1">
-          <button className="col-span-2 bg-accent px-3 py-3 font-semibold text-accent-contrast" onClick={() => setClock(toggle(clock))}>
+          <button className="col-span-2 min-h-12 border-2 border-ink bg-ink px-3 font-bold text-ground" onClick={() => setClock(toggle(clock))}>
             {clock.started_at !== null ? t("pause") : t("start")}
           </button>
-          <button className="ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, -10))} aria-label={t("minus10")}>
+          <button className="min-h-12 border-2 border-ink font-bold" onClick={() => setClock(adjust(clock, -10))} aria-label={t("minus10")}>
             −10 s
           </button>
-          <button className="ring-1 ring-inset ring-border py-3" onClick={() => setClock(adjust(clock, 10))} aria-label={t("plus10")}>
+          <button className="min-h-12 border-2 border-ink font-bold" onClick={() => setClock(adjust(clock, 10))} aria-label={t("plus10")}>
             +10 s
           </button>
         </div>
@@ -282,7 +294,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
             means a goal against) */}
         <div className="sticky bottom-2 z-10 grid grid-cols-3 gap-1 bg-background/95 py-1 backdrop-blur">
           {own.map((a) => (
-            <button key={a.key} onClick={() => record("own", a.label, a.body, a.goal)} className={cn("py-4 text-base font-semibold", a.goal ? "bg-foreground text-background" : "border border-border bg-raised")}>
+            <button key={a.key} onClick={() => record("own", a.label, a.body, a.goal)} className={cn("min-h-[88px] border-2 px-3 text-base font-bold", a.goal ? "border-club-edge bg-club text-club-ink" : "border-ink bg-transparent text-ink")}>
               {a.label}
             </button>
           ))}
@@ -300,7 +312,11 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
             <button
               key={a.key}
               onClick={() => record("opponent", a.label, a.body, a.goal)}
-              className={cn("py-4 text-base font-semibold ring-1 ring-inset", a.goal ? "text-error ring-error/60" : "ring-border")}
+              className={cn(
+                "min-h-[88px] border-2 border-ink px-3 text-base font-bold",
+                // the opponent's goal in ink with its colour as a band (SPEC 7.11)
+                a.goal ? "bg-ink text-ground shadow-[inset_0_-10px_0_var(--opp),inset_0_-12px_0_var(--opp-edge)]" : "bg-transparent text-ink",
+              )}
             >
               {a.label}
             </button>

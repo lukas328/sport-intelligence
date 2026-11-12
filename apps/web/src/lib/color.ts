@@ -75,6 +75,9 @@ export const CHECK_KITS = {
   gruen: ["#12804a", "#ffffff"],
 } as const satisfies Record<string, readonly [string, string]>;
 
+/** The shirts a coach picks an unknown opponent's colour from (SPEC 7.13). */
+export const ASK_SHIRTS = { red: "#d3202e", blue: "#1f4fd6", black: "#17191c", white: "#ffffff", yellow: "#f6c500" } as const;
+
 /** The opponent the check colours are shown against (the demo season's TV Thalwil): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
 

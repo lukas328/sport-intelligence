@@ -106,11 +106,12 @@ export function WurfHead({
             {oppName}
           </span>
         </p>
+        {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
       </div>
       {goals && goals.length > 0 && (
         <>
           <Flight goals={goals} width={1000} height={120} labels={flightLabels} className="absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
-          <Flight goals={goals} width={390} height={90} className="absolute right-0 bottom-10 left-0 w-full md:hidden" />
+
         </>
       )}
     </header>

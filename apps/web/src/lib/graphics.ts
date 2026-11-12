@@ -52,6 +52,7 @@ export function cameraScene(s: SceneCamera, label?: string | null): CameraScene 
 export function useMatchGraphics(orgId: string, matchId: string) {
   return useQuery({
     queryKey: ["graphics", matchId],
+    enabled: matchId !== "",
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/graphics", { params: { path: { org_id: orgId, match_id: matchId } } })).data ?? null,
     staleTime: 60_000,
   });

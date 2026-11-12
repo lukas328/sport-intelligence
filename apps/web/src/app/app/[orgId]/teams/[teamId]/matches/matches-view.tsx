@@ -13,12 +13,13 @@ import { PageHeader } from "@/components/ui/page-header";
 import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { NewMatchForm } from "./new-match-form";
+import { StartView } from "./start-view";
 import { PaperImport } from "./paper-import";
 import { PaperView } from "../paper/paper-view";
 
 type Match = Schemas["MatchSummary"];
 
-export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: string; teamId: string; matches: Match[]; canWrite: boolean }) {
+export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: string; teamId: string; teamName?: string; matches: Match[]; canWrite: boolean }) {
   const t = useTranslations();
   const params = useSearchParams();
   const router = useRouter();
@@ -120,33 +121,42 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
     );
   }
 
+  const newMatch = canWrite && (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o && params.get("new")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+      }}
+      title={t("matches.new")}
+      wide
+      trigger={
+        <Button variant="secondary" data-testid="new-match">
+          <Plus aria-hidden />
+          {t("matches.newShort")}
+        </Button>
+      }
+    >
+      <NewMatchForm orgId={orgId} teamId={teamId} />
+    </Dialog>
+  );
+
   return (
     <div className="space-y-10">
-      <PageHeader
-        title={t("matches.title")}
+      <StartView
+        orgId={orgId}
+        played={played}
+        upcoming={upcoming}
+        canWrite={canWrite}
         actions={
           canWrite && (
-            <Dialog
-              open={open}
-              onOpenChange={(o) => {
-                setOpen(o);
-                if (!o && params.get("new")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
-              }}
-              title={t("matches.new")}
-              wide
-              trigger={
-                <Button data-testid="new-match">
-                  <Plus aria-hidden />
-                  {t("matches.newShort")}
-                </Button>
-              }
-            >
-              <NewMatchForm orgId={orgId} teamId={teamId} />
-            </Dialog>
+            <>
+              {newMatch}
+              {extra}
+            </>
           )
         }
       />
-      {canWrite && <div className="-mt-6">{extra}</div>}
       {notice}
       {canWrite && (
         <Dialog
@@ -188,21 +198,6 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
         />
       )}
 
-      {upcoming.length > 0 ? (
-        <MatchList title={t("matches.upcoming")} orgId={orgId} matches={upcoming} />
-      ) : (
-        // nothing scheduled is worth a line, with the way to change it
-        <p className="flex flex-wrap items-baseline gap-x-3 border-t-2 border-foreground pt-3">
-          <span className="text-2xl font-display">{t("matches.upcoming")}</span>
-          <span className="text-muted">{t("matches.noneUpcoming")}</span>
-          {canWrite && (
-            <Link href={`/app/${orgId}/teams/${teamId}/matches?new=1`} className="font-medium text-accent hover:underline" onClick={() => setOpen(true)}>
-              {t("matches.scheduleOne")}
-            </Link>
-          )}
-        </p>
-      )}
-      {played.length > 0 && <MatchList title={t("matches.played")} orgId={orgId} matches={played} countMissing={canWrite} />}
     </div>
   );
 }
@@ -240,31 +235,6 @@ function UploadPicker({ open, onOpenChange, orgId, teamId, matches }: { open: bo
         </section>
       </div>
     </Dialog>
-  );
-}
-
-function MatchList({ title, orgId, matches, countMissing = false }: { title: string; orgId: string; matches: Match[]; countMissing?: boolean }) {
-  const t = useTranslations();
-  // demo data said once, not on every row
-  const allDemo = matches.every((m) => m.is_demo);
-  // what is still open: played matches without a video; the newest of them carries the signal
-  const missing = matches.filter((m) => m.score_own != null && matchState(m).label === "matches.noVideoYet");
-  return (
-    <section className="space-y-3">
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <h2 className="text-2xl">{title}</h2>
-        {countMissing && missing.length > 0 && <p className="text-sm text-muted">{t("matches.withoutVideo", { n: missing.length, total: matches.length })}</p>}
-        {allDemo && <p className="text-sm text-muted">{t("matches.allDemo")}</p>}
-      </div>
-      {/* a fixture list on the hall's notice board: rules, no card */}
-      <ul className="border-t-2 border-foreground" data-testid="match-list">
-        {matches.map((m, i) => (
-          <li key={m.id} className={cn(i > 0 && "border-t border-foreground/10")}>
-            <MatchRow orgId={orgId} m={m} demoTag={!allDemo} signal={countMissing && m.id === missing[0]?.id} />
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 

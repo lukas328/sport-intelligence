@@ -5,18 +5,21 @@ import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { KitFields } from "@/components/domain/kit-fields";
 import { AttendancePanel } from "@/components/team/attendance-panel";
-import { useCountUp } from "@/components/domain/match-score";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
-import { DEFAULT_CLUB } from "@/lib/color";
+import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
+import { useMatchGraphics } from "@/lib/graphics";
+import { ThreeThingsView } from "@/components/anlauf/three-things-view";
+import { MatchHead } from "./match-head";
+import { AskColour } from "./ask-colour";
+import { MatchCamera, MatchZones } from "./match-graphics";
 import type { Kits } from "@/lib/kit";
 import { playerLabel } from "@/lib/player-name";
-import { Stage, StageTag } from "@/components/domain/stage";
 import { useOptionalShell } from "@/components/shell/context";
 import { EmptyState, Skeleton } from "@/components/ui/card";
 import { useConfirm } from "@/components/ui/confirm";
@@ -32,7 +35,6 @@ import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
-import { xgLabel } from "@/lib/xg";
 import { UploadPanel } from "./upload-panel";
 import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
@@ -132,6 +134,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     return () => (window.clearInterval(id), window.clearTimeout(stop));
   }, []);
   const stats = useStats(orgId, initial.id);
+  const graphics = useMatchGraphics(orgId, initial.id);
+  const ta = useTranslations("anlauf");
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(
     () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
@@ -158,10 +162,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     if (!main && hasEvents && !linkedView.current && !new URLSearchParams(window.location.search).get("t")) setView("game");
   }, [stats.data, main, hasEvents]);
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
-  const ourName = teamName;
-  const [home, away] = match.is_home ? [ourName, oppName(match)] : [oppName(match), ourName];
-  const [hs, as] = match.is_home ? [match.score_own, match.score_opponent] : [match.score_opponent, match.score_own];
-  const [hh, ah] = match.is_home ? [match.halftime_own, match.halftime_opponent] : [match.halftime_opponent, match.halftime_own];
   const kickoff = new Date(match.kickoff_at);
   const result = match.opponent && match.score_own != null && match.score_opponent != null ? (match.score_own > match.score_opponent ? "won" : match.score_own < match.score_opponent ? "lost" : "draw") : null;
   const soon = kickoff.getTime() > Date.now() - 3 * 3600_000;
@@ -245,88 +245,33 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       )}
     </>
   ) : null;
+  const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
+  const oppKit = match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null;
+  const checks = graphics.data?.checks.length ?? 0;
+  const confirmedGoals = graphics.data?.goals.filter((g) => g.confirmed).length ?? 0;
+  const sourceParts = [
+    main ? ta("sourceVideo") : null,
+    (graphics.data?.report_goals.length ?? 0) > 0 ? ta("sourceReport") : null,
+    graphics.data && graphics.data.goals.length > 0 ? ta("sourceMarked", { n: confirmedGoals, total: graphics.data.goals.length }) : null,
+  ].filter(Boolean);
   return (
-    <div className="space-y-8">
-      <Stage
-        compact
-        aside={
-          stats.data && hasEvents ? (
-            // phones, video view: the score is enough; the figures sit in the analysis
-            <div className={cn(view === "video" && "max-sm:hidden")}>
-            <table className="text-[0.9375rem]">
-              <caption className="sr-only">{t("stats.comparison")}</caption>
-              <thead>
-                <tr className="text-sm">
-                  <th scope="col" className="sr-only">
-                    {t("stats.comparison")}
-                  </th>
-                  <th scope="col" className="max-w-28 truncate px-3 pb-1 text-right font-semibold">{teamName}</th>
-                  <th scope="col" className="max-w-28 truncate pb-1 pl-3 text-right font-semibold opacity-80">{oppName(match)}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(stats.data.quality.attempts_known === false
-                  ? // only goals are known (score overlay): attacks and goals per attack; the score says the goals
-                    [
-                      [t("stats.possessions"), stats.data.own.possessions ?? "-", stats.data.opponent.possessions ?? "-"],
-                      [t("stats.efficiency"), pctLabel(stats.data.own.attack_efficiency), pctLabel(stats.data.opponent.attack_efficiency)],
-                    ]
-                  : [
-                      [t("stats.shootingPct"), pctLabel(stats.data.own.shooting_pct), pctLabel(stats.data.opponent.shooting_pct)],
-                      [t("stats.savePct"), pctLabel(stats.data.own.save_pct), pctLabel(stats.data.opponent.save_pct)],
-                      [t("stats.turnovers"), stats.data.own.turnovers, stats.data.opponent.turnovers],
-                      [t("stats.xg"), xgLabel(stats.data.own), xgLabel(stats.data.opponent)],
-                    ]
-                )
-                  // a row of dashes says nothing on the stage
-                  .filter(([, a, b]) => !(a === "-" && b === "-"))
-                  .map(([label, a, b]) => (
-                  <tr key={String(label)} className="border-t border-current/20">
-                    <th scope="row" className="py-1.5 pr-4 text-left font-medium">{label}</th>
-                    <td className="px-3 py-1.5 text-right font-score text-2xl leading-none">{a}</td>
-                    <td className="py-1.5 pl-3 text-right font-score text-2xl leading-none opacity-80">{b}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          ) : undefined
-        }
-      >
-        <p className="text-[0.9375rem] font-semibold">
-          {[format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "long", year: "numeric" }), format.dateTime(kickoff, { timeStyle: "short" }), match.competition, match.venue]
-            .filter(Boolean)
-            .join(" · ")}
+    <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
+      <MatchHead match={match} ownName={shell?.org.name ?? teamName} oppName={oppName(match)} view={view} graphics={graphics.data}>
+        {staff && match.opponent && !match.opponent_colors && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
+      </MatchHead>
+      {(justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
+        <p role="status" className="-mt-4 flex flex-wrap items-center gap-3 text-[15px] font-bold">
+          {justDone && (
+            <span className="inline-flex items-center gap-1.5">
+              <Check aria-hidden className="size-4" />
+              {t("processing.done")}
+            </span>
+          )}
+          {["uploading", "processing", "failed"].includes(match.status) && <span className={match.status === "failed" ? "text-loss" : undefined}>{t(`matches.status_${match.status}`)}</span>}
         </p>
-        <h1 className="sr-only">{match.opponent ? `${home} ${t("matches.vs")} ${away}` : `${t("matches.training")}: ${ourName}`}</h1>
-        {hs != null && as != null && <span className="sr-only" data-testid="score">{`${hs}:${as}`}</span>}
-        {match.opponent ? (
-          <ScoreRows home={home} away={away} hs={hs} as={as} ownHome={match.is_home} halftime={hh != null && ah != null ? `${hh}:${ah}` : null} halftimeLabel={t("matches.halftime")} />
-        ) : (
-          <p aria-hidden className="mt-2 text-[2.25rem] leading-[0.95] font-display sm:text-5xl">
-            {t("matches.training")}: {ourName}
-          </p>
-        )}
-        {(result || match.is_demo || justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-lg">
-            {result && <span className="font-semibold">{t(`matches.${result}`)}</span>}
-            {match.is_demo && (
-              <span data-testid="demo-badge">
-                <StageTag>{t("matches.demo")}</StageTag>
-              </span>
-            )}
-            {justDone && (
-              <span role="status" className="inline-flex items-center gap-1.5 font-semibold">
-                <Check aria-hidden className="size-4" />
-                {t("processing.done")}
-              </span>
-            )}
-            {["uploading", "processing", "failed"].includes(match.status) && <StageTag>{t(`matches.status_${match.status}`)}</StageTag>}
-          </div>
-        )}
-      </Stage>
+      )}
       <div className="space-y-6">
-        <div className="flex items-end justify-between gap-3 border-b border-foreground/15">
+        <div className="flex items-end justify-between gap-3 border-b-2 border-ink">
           <Segmented<View>
             className="min-w-0"
             variant="underline"
@@ -340,6 +285,12 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             ]}
           />
           <div className="flex items-center gap-2 pb-2.5">
+            {staff && checks > 0 && (
+              <Link href={`${base}/check`} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-link">
+                {ta("check")}
+                <em className="grid h-[30px] min-w-[30px] place-items-center bg-attn px-1 font-sans text-base font-extrabold text-attn-ink not-italic">{checks}</em>
+              </Link>
+            )}
             {liveFirst && (
               <Link href={`${base}/matchday`} className={buttonClass("primary")} data-testid="live-link">
                 <Radio aria-hidden />
@@ -415,6 +366,16 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         </div>
       </div>
 
+      {sourceParts.length > 0 && (
+        <div className="-mt-6 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-ink-2 md:text-[15px]" data-testid="source-line">
+          {ta("sources")}: {sourceParts.join(" · ")}
+          <details className="inline">
+            <summary className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">{ta("howCounted")}</summary>
+            <span className="mt-1 block max-w-[66ch] text-ink-2">{ta("howCountedText")}</span>
+          </details>
+        </div>
+      )}
+
       {/* who is coming: the players' replies, from before the match until shortly after it */}
       {staff && teamFeatures && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
         <details className="group border-y border-foreground/15 py-3" data-testid="match-attendance">
@@ -432,13 +393,15 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
         {!staff && <MyScenesLine orgId={orgId} matchId={match.id} />}
+        {main && graphics.data && graphics.data.goals.length > 0 && <MatchCamera orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} />}
         {main ? (
           <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} />
         ) : !(staff && match.source !== "paper_report") ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
         {staff && match.source !== "paper_report" && !main && (
-          <div id="upload" className="scroll-mt-24">
+          <div id="upload" className="scroll-mt-24 space-y-4 border-2 border-dashed border-ink/40 p-4 md:p-6">
+            <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
             <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </div>
         )}
@@ -448,6 +411,12 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "game" && (
         <div className="animate-fade space-y-10">
+          {graphics.data && graphics.data.goals.length > 0 && (
+            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+              <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? () => setView("video") : undefined} />
+              <MatchZones graphics={graphics.data} />
+            </div>
+          )}
           {staff && counted && match.opponent && (
             <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} />
           )}
@@ -509,6 +478,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "numbers" && (
         <div className="animate-fade space-y-12">
+          {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} row />}
           {numberParts.length === 0 && (
             <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
               {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
@@ -722,28 +692,4 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
 
 /** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
 // a share above 100 % means the sources disagree (e.g. goals from a report, attacks from a clip)
-const pctLabel = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Math.round(v * 100)} %`);
 
-function ScoreRows({ home, away, hs, as, ownHome, halftime, halftimeLabel }: { home: string; away: string; hs: number | null; as: number | null; ownHome: boolean; halftime: string | null; halftimeLabel: string }) {
-  const [h, a] = useCountUp(hs ?? 0, as ?? 0);
-  const scored = hs != null && as != null;
-  const row = (name: string, goals: number, own: boolean) => (
-    <>
-      <span className={cn("min-w-0 truncate text-[2rem] leading-[1.1] font-display sm:text-[2.75rem]", !own && "opacity-75")}>{name}</span>
-      {scored ? <span className={cn("text-right font-score text-[2.5rem] leading-[1.05] sm:text-[3.25rem]", !own && "opacity-75")}>{goals}</span> : <span />}
-    </>
-  );
-  return (
-    <div aria-hidden className="mt-3">
-      <div className="grid max-w-full grid-cols-[minmax(0,auto)_auto] items-baseline gap-x-8 sm:w-fit sm:gap-x-12">
-        {row(home, h, ownHome)}
-        {row(away, a, !ownHome)}
-      </div>
-      {halftime && (
-        <p className="pt-1 text-sm font-semibold">
-          {halftimeLabel} {halftime}
-        </p>
-      )}
-    </div>
-  );
-}

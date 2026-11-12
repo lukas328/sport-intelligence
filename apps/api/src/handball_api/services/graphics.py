@@ -10,8 +10,9 @@ the 2 to 4 s before the shot of the track that scores); without a confirmed cour
 positions. The ball is not detected here: `ball` stays empty until the ball and its holder come
 from the analysis (docs/OPEN_QUESTIONS.md, Q-UX-15).
 
-Demo matches (`is_demo`, seeded) have no tracking: their runs and positions are drawn from the
-marked events and a fixed seed, and every one of them says `source: "demo"`.
+Demo matches (`is_demo`, seeded) have no real tracking (their video is synthetic): their runs
+and positions are drawn from the marked events and a fixed seed, and every one of them says
+`source: "demo"`.
 """
 
 from __future__ import annotations
@@ -260,7 +261,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         else []
     )
     confirmed_field = await _field_confirmed(ctx, asset)
-    demo = match.is_demo and not tracking
+    demo = match.is_demo  # seeded: the synthetic video says nothing about the match
     goals = await _goals(ctx, match)
 
     report = [
@@ -396,7 +397,7 @@ async def scene_camera(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> di
         raise ProblemError(404, "not-found", "No such event")
     asset = await timeline_video(ctx, match.id)
     tracking = _has_tracking(asset)
-    demo = match.is_demo and not tracking
+    demo = match.is_demo  # seeded: the synthetic video says nothing about the match
     field = True if demo else await _field_confirmed(ctx, asset)
     clock = e.clock_s
     base: dict[str, Any] = {

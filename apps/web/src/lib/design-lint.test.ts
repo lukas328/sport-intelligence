@@ -88,6 +88,8 @@ describe("design rules", () => {
       "components/anlauf/blocks.tsx",
       "components/ui/page-header.tsx",
       "components/shell/club-mark.tsx",
+      // the key "Tor wir" of the Spieltag
+      "app/app/[orgId]/matches/[matchId]/live/live-view.tsx",
       ...CLUB_AREA_LEGACY,
     ]);
     const bad = sources.filter((f) => /(?<![\w-])bg-club(?![\w-])/.test(f.text) && !allowed.has(f.path.replaceAll("\\", "/")));
@@ -116,8 +118,11 @@ describe("design rules", () => {
     expect(bad.map((f) => f.path)).toEqual([]);
   });
 
-  it("has one match head per screen: no Wurf head and Streifen in the same component", () => {
-    const bad = sources.filter((f) => /<WurfHead\b/.test(f.text) && /<Strip\b/.test(f.text) && !f.path.startsWith("app/dev/"));
+  it("has one match head per screen", () => {
+    // a match switches between the Wurf head (tab Spiel) and the Streifen (Video, Zahlen) in one
+    // component (match-head.tsx); more than one of either in a file is two heads on a screen
+    const n = (text: string, tag: string) => (text.match(new RegExp(`<${tag}\\b`, "g")) ?? []).length;
+    const bad = sources.filter((f) => (n(f.text, "WurfHead") > 1 || n(f.text, "Strip") > 1) && !f.path.startsWith("app/dev/"));
     expect(bad.map((f) => f.path)).toEqual([]);
   });
 
