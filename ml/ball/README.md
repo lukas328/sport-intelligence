@@ -255,7 +255,7 @@ Scripts in `verifier/`: `v2.py` (crop format, human crops, game split), `train_v
 `kaggle/train_r8_push.py`: round 7 plus the two "Ball oder nicht?" rounds (273 balls, 720 no ball,
 from segments round 7 never saw) as 224 px native triplet tiles (986 tiles: 298 with a ball, 688
 hard negatives), every third game held out as the validation group "human", 30 000 steps from
-round 7 (3.7 h on a P100). Kept as `ball_r8.pt` in `handball-ball-models`.
+round 7 (3.7 h of training on Kaggle). Kept as `ball_r8.pt` in `handball-ball-models`.
 
 | Test set 2 (177 balls, 72 frames without) | round 7 | round 8 |
 |---|---|---|
