@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { HallPlan } from "@/components/hall-plan";
 import { Honest } from "@/components/honest";
-import { KitScope } from "@/components/kit";
+import { KitScope, StartLink } from "@/components/kit";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { startUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -70,9 +69,9 @@ export default async function How({ params }: Props) {
         </section>
 
         <div className="mt-16 flex flex-col gap-3 border-t-2 border-ink pt-10 sm:flex-row sm:flex-wrap">
-          <a href={startUrl(APP_LOCALE[locale])} className="btn btn-ink">
+          <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
             {m.cta.start}
-          </a>
+          </StartLink>
           <Link href={`/${locale}/demo/`} className="btn btn-line">
             {m.cta.demo}
           </Link>

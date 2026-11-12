@@ -287,17 +287,17 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   presentation, player feed, scouting report, roles and the statistics matrix stay reachable
   (the app links to them, `help-map.ts`) but are not listed and carry a note. *Open:* update
   `help-map.ts` in the app to the new screens, then delete these guides.
-- **Q-SITE-7 Trial «30 Tage gratis, ohne Kreditkarte».** Only `trial_days: 30` in
-  `packages/plans` is documented; a new club starts on the free plan (no automatic analysis), a
-  trial comes from a Stripe subscription or a support action (`services/ops.py extend_trial`), and
-  nothing says it works without a card. The site therefore says «30 Tage gratis» only next to
-  the plans, always with «Die Preise sind noch nicht endgültig», and no longer «ohne Kreditkarte».
-  *Open:* how the trial starts, and whether a card is needed.
-- **Q-SITE-8 «Du bekommst eine Nachricht, wenn die Analyse fertig ist».** The app sends no mail and
-  has no bell on phones (EINSTIEG.md, H06). The site no longer promises a message («du musst nicht
-  dabeibleiben, wenn sie fertig ist, siehst du es in der App»). *Open:* the mail «Die drei Dinge
-  sind da»; then the site can say so again.
-- **Q-SITE-9 Team field on the start page.** «Wie heisst dein Team?» sends a GET to
-  `{NEXT_PUBLIC_APP_URL}/einstieg?q=…&lang=…`; «Kostenlos starten» leads to `/einstieg?lang=…`.
-  The page is built in the app (EINSTIEG.md, step 1 and 2). *Open:* whether the app also wants the
-  visitor's shirt colour (`farbe=`) from the site's colour picker.
+- **Q-SITE-7 Trial «30 Tage gratis».** `trial_days: 30` stands in `packages/plans` and
+  `apps/api/src/handball_api/services/plans.py` (lines 55, 66), but a trial only starts through a
+  Stripe checkout (`services/billing.py`, lines 285 to 286 and 328: `trial_period_days`) or a
+  support action (`services/ops.py extend_trial`, lines 154 to 164); a new club gets none
+  automatically. The site names «30 Tage gratis» only on the pricing page next to the plan, with
+  «Die Preise sind noch nicht endgültig»; the start page just says «Kostenlos starten».
+  *Open:* the app session checks whether new clubs get the 30 days automatically.
+- **Q-SITE-8 Mail when the three things are ready.** The site says «Du bekommst eine Mail, wenn
+  die drei Dinge da sind» again; the app session is building that mail and the bell on phones
+  (2026-11-13). *Open:* if it is not there, the sentence comes out again.
+- **Q-SITE-9 Team field and colour.** Answered: «Wie heisst dein Team?» sends a GET to
+  `{NEXT_PUBLIC_APP_URL}/einstieg?q=…&farbe=…&lang=…`, «Kostenlos starten» to
+  `/einstieg?farbe=…&lang=…`; `farbe` (blau, rot, gelb, schwarz, weiss, gruen, orange, violett)
+  only once the visitor picked a colour. The app takes it over.

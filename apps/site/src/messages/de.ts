@@ -126,12 +126,12 @@ const de = {
     stepsTitle: "So kommst du dahin",
     steps: [
       { title: "Filmen", text: "Handy aufs Stativ, hoch oben an der Mittellinie, das ganze Feld im Bild." },
-      { title: "Hochladen", text: "Video in der App wählen. Die Analyse läuft von selbst, du musst nicht dabeibleiben." },
+      { title: "Hochladen", text: "Video in der App wählen. Du bekommst eine Mail, wenn die drei Dinge da sind." },
       { title: "Prüfen und teilen", text: "Wo die Analyse unsicher ist, fragt sie dich kurz. Dann schickst du dem Team den Link." },
     ],
     boardTitle: "Für den Vorstand",
     board: [
-      { title: "Was es kostet", text: "Ab CHF {price} im Monat für ein Team, die ersten 30 Tage gratis. Die Preise sind noch nicht endgültig." },
+      { title: "Was es kostet", text: "Ab CHF {price} im Monat für ein Team. Die Preise sind noch nicht endgültig." },
       { title: "Wo die Daten liegen", text: "App und Datenbank auf Servern in der Schweiz, Videos in einem Speicher in der EU." },
       { title: "Wer einwilligt", text: "Per Link im Teamchat, ohne Konto. Für Kinder entscheiden die Eltern." },
     ],
@@ -170,7 +170,7 @@ const de = {
       },
       {
         title: "Die Analyse rechnet",
-        text: "Sie findet das Spielfeld, verfolgt Spielerinnen und Spieler, liest Rückennummern, wo es geht, und übernimmt die Tore aus dem Spielbericht. Du musst nicht dabeibleiben: wenn sie fertig ist, siehst du es in der App.",
+        text: "Sie findet das Spielfeld, verfolgt Spielerinnen und Spieler, liest Rückennummern, wo es geht, und übernimmt die Tore aus dem Spielbericht. Du musst nicht dabeibleiben: du bekommst eine Mail, wenn die drei Dinge da sind.",
       },
       {
         title: "Prüfen",
@@ -334,9 +334,9 @@ const de = {
       { q: "Reicht mein Handy?", a: "Ja. Jedes Handy, das in Full HD (1080p) filmt, reicht. Wichtiger als die Kamera ist, wo sie steht." },
       { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Das ganze Feld muss im Bild sein, mit beiden Torräumen." },
       { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert, meist MP4 oder MOV. Auch mehrere Dateien, zum Beispiel eine pro Halbzeit, oder ein Link zu einer Kamera-Plattform." },
-      { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht dabeibleiben: wenn die Analyse fertig ist, siehst du es in der App." },
+      { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht dabeibleiben: du bekommst eine Mail, wenn die drei Dinge da sind." },
       { q: "Muss ich etwas von Hand eintragen?", a: "Nein. Die drei Dinge und die Szenen kommen ohne Eintippen. Wo die Analyse unsicher ist, fragt sie dich kurz. Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
-      { q: "Was kostet es?", a: "Ein Team kostet CHF {month} im Monat oder CHF {year} im Jahr. Die ersten 30 Tage sind gratis. Die Preise sind noch nicht endgültig." },
+      { q: "Was kostet es?", a: "Ein Team kostet CHF {month} im Monat oder CHF {year} im Jahr. Die Preise sind noch nicht endgültig." },
       { q: "Was passiert mit dem Video?", a: "Es gehört deinem Verein. Sehen kann es nur das Trainerteam, ausser du teilst einen Link. Das Originalvideo wird nach 90 Tagen gelöscht, eine kleinere Fassung für die Szenen bleibt, bis du sie löschst." },
       { q: "Müssen die Spielerinnen und Spieler einverstanden sein?", a: "Ja. Du schickst einen Link in den Teamchat, dort sagt jede und jeder für sich ja oder nein. Für Kinder unter 16 Jahren entscheiden die Eltern." },
       { q: "Brauchen die Spieler ein Konto?", a: "Nein. Was du teilst, öffnet sich mit einem Link im Browser, ohne Anmeldung. Ein geteilter Link läuft nach einer Weile ab, und du kannst ihn jederzeit sperren." },

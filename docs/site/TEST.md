@@ -93,8 +93,10 @@ Nach `docs/ux-test/runde1/EINSTIEG.md` und der Rückmeldung der App-Session:
   der Farbwahl) und unten noch einmal; GET auf `<App-URL>/einstieg?q=…&lang=…`. «Kostenlos starten»
   führt überall auf `/einstieg?lang=…`.
 - Wortmarke zweizeilig, Zeichen rund 45 px hoch.
-- Nicht belegt und darum entfernt: «ohne Kreditkarte» (Q-SITE-7) und «du bekommst eine Nachricht,
-  wenn die Analyse fertig ist» (Q-SITE-8). «Ab CHF 39» und «30 Tage gratis» stammen aus
+- Nicht belegt und darum entfernt: «ohne Kreditkarte» (Q-SITE-7). «30 Tage gratis» nur noch auf
+  der Preisseite beim Plan. «Du bekommst eine Mail, wenn die drei Dinge da sind» steht wieder: die
+  App baut diese Mail (Q-SITE-8). Alle Wege in die App tragen `farbe=` mit, sobald eine Farbe
+  gewählt ist (Q-SITE-9). «Ab CHF 39» und «30 Tage gratis» stammen aus
   `packages/plans/plans.json` (`price_chf_month`, `trial_days`) und stehen nur mit «Die Preise sind
   noch nicht endgültig».
 - Speicherort «App und Datenbank in der Schweiz, Videos in der EU»: belegt in

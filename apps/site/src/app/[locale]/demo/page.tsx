@@ -3,13 +3,12 @@ import Link from "next/link";
 import { Zones } from "@/components/anlauf/bundle";
 import { Rail } from "@/components/anlauf/charts";
 import { DemoCamera } from "@/components/demo-camera";
-import { KitScope, ShirtPicker } from "@/components/kit";
+import { KitScope, ShirtPicker, StartLink } from "@/components/kit";
 import { Things } from "@/components/things";
 import { SectionHead, WurfHead } from "@/components/wurf-head";
 import { demoFigures } from "@/lib/demo";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { startUrl } from "@/lib/site";
 import { demoView, MATCH } from "@/lib/things";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -139,9 +138,9 @@ export default async function Demo({ params }: Props) {
             {t.endTitle}
           </h2>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <a href={startUrl(APP_LOCALE[locale])} className="btn btn-ink">
+            <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
               {m.cta.start}
-            </a>
+            </StartLink>
             <Link href={`/${locale}/so-funktioniert-es/`} className="btn btn-line">
               {m.cta.how}
             </Link>

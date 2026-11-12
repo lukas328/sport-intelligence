@@ -128,12 +128,12 @@ const en: Messages = {
     stepsTitle: "How you get there",
     steps: [
       { title: "Film", text: "Phone on a tripod, high up at the halfway line, the whole court in the picture." },
-      { title: "Upload", text: "Choose the video in the app. The analysis runs by itself, you need not stay." },
+      { title: "Upload", text: "Choose the video in the app. You get an e-mail when the three things are ready." },
       { title: "Check and share", text: "Where the analysis is unsure, it asks you briefly. Then you send the team the link." },
     ],
     boardTitle: "For the club board",
     board: [
-      { title: "What it costs", text: "From CHF {price} a month for one team, the first 30 days free. The prices are not final yet." },
+      { title: "What it costs", text: "From CHF {price} a month for one team. The prices are not final yet." },
       { title: "Where the data lives", text: "App and database on servers in Switzerland, videos in storage in the EU." },
       { title: "Who consents", text: "By link in the team chat, no account. For children, the parents decide." },
     ],
@@ -172,7 +172,7 @@ const en: Messages = {
       },
       {
         title: "The analysis works",
-        text: "It finds the court, follows the players, reads shirt numbers where it can and takes the goals from the match report. You need not stay: when it is done, you see it in the app.",
+        text: "It finds the court, follows the players, reads shirt numbers where it can and takes the goals from the match report. You need not stay: you get an e-mail when the three things are ready.",
       },
       {
         title: "Check",
@@ -336,9 +336,9 @@ const en: Messages = {
       { q: "Is my phone good enough?", a: "Yes. Any phone that films in Full HD (1080p) is enough. Where it stands matters more than the camera." },
       { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. The whole court must be in the picture, with both goal areas." },
       { q: "Which file can I upload?", a: "The video file as the phone saves it, usually MP4 or MOV. Several files work too, for example one per half, or a link to a camera platform." },
-      { q: "How long does the analysis take?", a: "That depends on the length of the video. You need not stay: when the analysis is done, you see it in the app." },
+      { q: "How long does the analysis take?", a: "That depends on the length of the video. You need not stay: you get an e-mail when the three things are ready." },
       { q: "Do I have to enter anything by hand?", a: "No. The three things and the scenes come without typing. Where the analysis is unsure, it asks you briefly. You mark saves and missed shots only if you want them." },
-      { q: "What does it cost?", a: "One team costs CHF {month} a month or CHF {year} a year. The first 30 days are free. The prices are not final yet." },
+      { q: "What does it cost?", a: "One team costs CHF {month} a month or CHF {year} a year. The prices are not final yet." },
       { q: "What happens to the video?", a: "It belongs to your club. Only the coaches can see it, unless you share a link. The original video is deleted after 90 days; a smaller version for the scenes stays until you delete it." },
       { q: "Do the players have to agree?", a: "Yes. You send a link to the team chat, where each player says yes or no for themselves. For children under 16, the parents decide." },
       { q: "Do the players need an account?", a: "No. What you share opens with a link in the browser, without logging in. A shared link expires after a while, and you can block it at any time." },

@@ -128,12 +128,12 @@ const fr: Messages = {
     stepsTitle: "Comment y arriver",
     steps: [
       { title: "Filmer", text: "Téléphone sur trépied, en hauteur à la ligne médiane, tout le terrain dans l'image." },
-      { title: "Téléverser", text: "Choisir la vidéo dans l'app. L'analyse tourne toute seule, tu n'as pas besoin de rester." },
+      { title: "Téléverser", text: "Choisir la vidéo dans l'app. Tu reçois un e-mail quand les trois points sont prêts." },
       { title: "Vérifier et partager", text: "Là où l'analyse hésite, elle te pose une courte question. Ensuite tu envoies le lien à l'équipe." },
     ],
     boardTitle: "Pour le comité",
     board: [
-      { title: "Ce que ça coûte", text: "Dès CHF {price} par mois pour une équipe, les 30 premiers jours gratuits. Les prix ne sont pas encore définitifs." },
+      { title: "Ce que ça coûte", text: "Dès CHF {price} par mois pour une équipe. Les prix ne sont pas encore définitifs." },
       { title: "Où sont les données", text: "App et base de données sur des serveurs en Suisse, vidéos dans un stockage dans l'UE." },
       { title: "Qui consent", text: "Par lien dans le chat d'équipe, sans compte. Pour les enfants, les parents décident." },
     ],
@@ -172,7 +172,7 @@ const fr: Messages = {
       },
       {
         title: "L'analyse calcule",
-        text: "Elle trouve le terrain, suit les joueuses et joueurs, lit les numéros quand c'est possible et reprend les buts de la feuille de match. Pas besoin de rester : quand c'est prêt, tu le vois dans l'app.",
+        text: "Elle trouve le terrain, suit les joueuses et joueurs, lit les numéros quand c'est possible et reprend les buts de la feuille de match. Pas besoin de rester : tu reçois un e-mail quand les trois points sont prêts.",
       },
       {
         title: "Vérifier",
@@ -336,9 +336,9 @@ const fr: Messages = {
       { q: "Mon téléphone suffit-il ?", a: "Oui. Tout téléphone qui filme en Full HD (1080p) suffit. L'endroit compte plus que la caméra." },
       { q: "Où placer la caméra ?", a: "À hauteur de la ligne médiane, le plus haut possible, dès 3 mètres environ : tribune, galerie ou trépied haut. Tout le terrain doit être dans l'image, avec les deux zones de but." },
       { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre, en général MP4 ou MOV. Plusieurs fichiers vont aussi, par exemple un par mi-temps, ou un lien vers une plateforme de caméra." },
-      { q: "Combien de temps dure l'analyse ?", a: "Cela dépend de la durée de la vidéo. Pas besoin de rester : quand l'analyse est prête, tu le vois dans l'app." },
+      { q: "Combien de temps dure l'analyse ?", a: "Cela dépend de la durée de la vidéo. Pas besoin de rester : tu reçois un e-mail quand les trois points sont prêts." },
       { q: "Dois-je saisir quelque chose à la main ?", a: "Non. Les trois points et les scènes arrivent sans rien taper. Là où l'analyse hésite, elle te pose une courte question. Tu marques les arrêts et les tirs manqués seulement si tu les veux." },
-      { q: "Combien ça coûte ?", a: "Une équipe coûte CHF {month} par mois ou CHF {year} par an. Les 30 premiers jours sont gratuits. Les prix ne sont pas encore définitifs." },
+      { q: "Combien ça coûte ?", a: "Une équipe coûte CHF {month} par mois ou CHF {year} par an. Les prix ne sont pas encore définitifs." },
       { q: "Que devient la vidéo ?", a: "Elle appartient à ton club. Seul le staff peut la voir, sauf si tu partages un lien. La vidéo originale est supprimée après 90 jours ; une version plus légère pour les scènes reste jusqu'à ce que tu la supprimes." },
       { q: "Les joueuses et joueurs doivent-ils être d'accord ?", a: "Oui. Tu envoies un lien dans le chat d'équipe, où chacune et chacun dit oui ou non. Pour les enfants de moins de 16 ans, les parents décident." },
       { q: "Les joueurs ont-ils besoin d'un compte ?", a: "Non. Ce que tu partages s'ouvre avec un lien dans le navigateur, sans connexion. Un lien partagé expire après un moment, et tu peux le bloquer à tout moment." },

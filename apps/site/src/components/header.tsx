@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { StartLink } from "@/components/kit";
 import { NavLinks } from "@/components/nav-links";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
-import { loginUrl, startUrl } from "@/lib/site";
+import { loginUrl } from "@/lib/site";
 
 /**
  * The top bar: the two-coloured word mark (outside the app, never on a club colour), five
@@ -35,22 +36,22 @@ export function Header({ locale }: { locale: Locale }) {
           <a href={loginUrl(app)} className="link">
             {t.login}
           </a>
-          <a href={startUrl(app)} className="btn btn-ink">
+          <StartLink appLocale={app} className="btn btn-ink">
             {t.start}
-          </a>
+          </StartLink>
         </div>
-        <a href={startUrl(app)} className="btn btn-ink ml-auto hidden md:max-[1279px]:inline-flex">
+        <StartLink appLocale={app} className="btn btn-ink ml-auto hidden md:max-[1279px]:inline-flex">
           {t.start}
-        </a>
+        </StartLink>
         <details className="group ml-auto md:ml-0 min-[1280px]:hidden">
           <summary className="btn btn-line list-none px-5">{t.menu}</summary>
           <div className="absolute inset-x-0 top-full border-b-2 border-ink bg-ground">
             <nav aria-label={t.main} className="wrap py-4">
               <NavLinks locale={locale} links={links} stacked />
               <div className="mt-4 flex flex-col gap-3 border-t-2 border-ink pt-4 sm:flex-row">
-                <a href={startUrl(app)} className="btn btn-ink">
+                <StartLink appLocale={app} className="btn btn-ink">
                   {t.start}
-                </a>
+                </StartLink>
                 <a href={loginUrl(app)} className="btn btn-line">
                   {t.login}
                 </a>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createContext, type CSSProperties, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 import { kit, kitVars, SHIRTS } from "@/lib/color";
+import { startUrl } from "@/lib/site";
 
 /** The demo opponent: black with white (TV Muster). The clash rule decides how it shows. */
 export const DEMO_OPPONENT = ["#17191c", "#ffffff"] as const;
@@ -24,19 +25,36 @@ export function kitStyle(key: ShirtKey): CSSProperties {
   return kitVars(kit([hex, second(hex)], DEMO_OPPONENT)) as CSSProperties;
 }
 
-const Ctx = createContext<{ shirt: ShirtKey; setShirt: (k: ShirtKey) => void }>({ shirt: "blue", setShirt: () => {} });
+/** German names the app takes as `farbe=` on /einstieg (OPEN_QUESTIONS Q-SITE-9). */
+export const FARBE: Record<ShirtKey, string> = { blue: "blau", red: "rot", yellow: "gelb", black: "schwarz", white: "weiss", green: "gruen", orange: "orange", purple: "violett" };
+
+interface KitState {
+  shirt: ShirtKey;
+  /** true once the visitor picked a colour (or came with ?kit=): only then it goes to the app */
+  chosen: boolean;
+  setShirt: (k: ShirtKey) => void;
+  inScope: boolean;
+}
+const Ctx = createContext<KitState>({ shirt: "blue", chosen: false, setShirt: () => {}, inScope: false });
 
 /**
  * The visitor's colour for the demo match. Starts blue, or with `?kit=` from a link (the start
  * page hands the choice to the demo that way); nothing is stored in the browser.
  */
 export function KitScope({ children, className }: { children: ReactNode; className?: string }) {
-  const [shirt, setShirt] = useState<ShirtKey>("blue");
+  const outer = useContext(Ctx);
+  const [shirt, setShirtState] = useState<ShirtKey>("blue");
+  const [chosen, setChosen] = useState(false);
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get("kit");
-    if (isShirt(q)) setShirt(q);
+    if (isShirt(q)) {
+      setShirtState(q);
+      setChosen(true);
+    }
   }, []);
-  const value = useMemo(() => ({ shirt, setShirt }), [shirt]);
+  const value = useMemo(() => ({ shirt, chosen, inScope: true, setShirt: (k: ShirtKey) => (setShirtState(k), setChosen(true)) }), [shirt, chosen]);
+  // one scope for the whole page (the layout); a page's own scope only adds its class
+  if (outer.inScope) return className ? <div className={className}>{children}</div> : <>{children}</>;
   return (
     <Ctx.Provider value={value}>
       <div style={kitStyle(shirt)} className={className}>
@@ -89,10 +107,20 @@ function Shirt({ hex, on }: { hex: string; on: boolean }) {
 
 /** A link to the demo that carries the chosen colour along. */
 export function DemoLink({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
-  const { shirt } = useShirt();
+  const { shirt, chosen } = useShirt();
   return (
-    <Link href={shirt === "blue" ? href : `${href}?kit=${shirt}`} className={className}>
+    <Link href={chosen ? `${href}?kit=${shirt}` : href} className={className}>
       {children}
     </Link>
+  );
+}
+
+/** «Kostenlos starten»: the app's /einstieg with the language and, once picked, the colour. */
+export function StartLink({ appLocale, className, children }: { appLocale: string; className?: string; children: ReactNode }) {
+  const { shirt, chosen } = useShirt();
+  return (
+    <a href={startUrl(appLocale, undefined, chosen ? FARBE[shirt] : undefined)} className={className}>
+      {children}
+    </a>
   );
 }

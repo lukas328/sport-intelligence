@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { KitScope } from "@/components/kit";
 import { HTML_LANG, isLocale, localeParams, messages } from "@/lib/i18n";
 import { SITE_URL } from "@/lib/site";
 import localFont from "next/font/local";
@@ -60,11 +61,13 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   return (
     <html lang={HTML_LANG[locale]} className={`${kanit.variable} ${hanken.variable} ${plexMono.variable}`}>
       <body className="min-h-screen">
-        <Header locale={locale} />
-        <main id="main" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer locale={locale} />
+        <KitScope>
+          <Header locale={locale} />
+          <main id="main" tabIndex={-1} className="outline-none">
+            {children}
+          </main>
+          <Footer locale={locale} />
+        </KitScope>
       </body>
     </html>
   );
