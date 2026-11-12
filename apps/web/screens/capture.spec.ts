@@ -159,8 +159,9 @@ test("screens", async ({ page, browser }, info) => {
 
   // the match workspace, step by step (shot moments from the recorded fixture)
   await page.route("**/v1/orgs/*/matches/*/shot-candidates", (r) => r.fulfill(json(shotList())));
-  await go(page, `/app/${org}/matches/${withVideo.id}`);
-  await expect(page.getByTestId("player")).toBeVisible({ timeout: 60_000 });
+  // the match opens on the tab Spiel; the player stands on the tab Video
+  await go(page, `/app/${org}/matches/${withVideo.id}?tab=video`);
+  await expect(page.getByTestId("video-stage")).toBeVisible({ timeout: 60_000 });
   // the tab Video: one stage (video or tactics camera), the workbench behind «Mehr»
   await snap(page, T, "spiel-video");
   await snap(page, T, "spiel-video-werkbank", () => tryClick(page, "bench-open"));
