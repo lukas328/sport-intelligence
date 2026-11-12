@@ -35,6 +35,7 @@ class SceneOut(ApiModel):
     start_ms: int
     end_ms: int
     title: str | None
+    event_id: uuid.UUID | None = None
 
 
 class PlayRef(ApiModel):

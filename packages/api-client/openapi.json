@@ -13143,6 +13143,18 @@
             "title": "End Ms",
             "type": "integer"
           },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
           "match_id": {
             "format": "uuid",
             "title": "Match Id",

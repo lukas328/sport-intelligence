@@ -33,6 +33,7 @@ const COLOUR_FILES = new Set([
   "components/anlauf/tactics-camera.tsx",
   "app/app/[orgId]/matches/[matchId]/video-stage.tsx",
   "app/app/[orgId]/matches/[matchId]/check/check-view.tsx",
+  "app/app/[orgId]/collections/[collectionId]/page.tsx",
   "components/video/spotlight.tsx",
   "components/video/draw-layer.tsx",
   "components/video/shapes.ts",
@@ -92,6 +93,8 @@ describe("design rules", () => {
       "components/shell/club-mark.tsx",
       // the Keil beside the sign-in form
       "app/(site)/(auth)/layout.tsx",
+      // the share card (how a shared collection arrives in a chat)
+      "app/app/[orgId]/collections/[collectionId]/page.tsx",
       // the key "Tor wir" of the Spieltag
       "app/app/[orgId]/matches/[matchId]/live/live-view.tsx",
       ...CLUB_AREA_LEGACY,

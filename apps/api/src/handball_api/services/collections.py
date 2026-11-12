@@ -47,6 +47,8 @@ def _clip_out(c: Clip) -> dict[str, Any]:
         "start_ms": c.start_ms,
         "end_ms": c.end_ms,
         "title": c.title,
+        # the event the scene was made from (goal, turnover ...): the screens draw its run
+        "event_id": str(c.source_ref) if c.source == ClipSource.EVENT and c.source_ref else None,
     }
 
 

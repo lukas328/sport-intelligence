@@ -9398,6 +9398,8 @@ export interface components {
             clip_id: string;
             /** End Ms */
             end_ms: number;
+            /** Event Id */
+            event_id?: string | null;
             /**
              * Match Id
              * Format: uuid

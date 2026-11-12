@@ -30,8 +30,9 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
     });
   }
 
-  // own tags on the scene search page
+  // own tags and saved searches: behind «Mehr» on Szenen (the event list)
   await openLibrary(page, "Szenen");
+  await page.getByTestId("scenes-more").click();
   await expect(page.getByRole("heading", { name: "Szenen suchen" })).toBeVisible();
   const newSet = page.getByRole("form", { name: "Neues Tag-Set" });
   await newSet.getByLabel("Neues Tag-Set").fill("Abwehr");

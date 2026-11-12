@@ -10,7 +10,11 @@ export function ScenesHead({ orgId, teamId, matches }: { orgId: string; teamId: 
   const t = useTranslations("anlauf");
   const all = useQuery({
     queryKey: ["search-total", teamId],
-    queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path: { org_id: orgId, team_id: teamId } }, body: {} })).data?.total ?? null,
+    // a scene has a video time: events without one are figures, not scenes
+    queryFn: async () => {
+      const r = (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path: { org_id: orgId, team_id: teamId } }, body: { limit: 500 } })).data;
+      return r ? r.hits.filter((h) => h.video_id && h.t_ms != null).length : null;
+    },
   });
   return <PageHeader eyebrow={t("scenesKick", { matches })} title={all.data != null ? t("scenesTitle", { count: all.data, matches }) : " "} />;
 }
