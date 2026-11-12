@@ -180,6 +180,19 @@ test("screens", async ({ page, browser }, info) => {
   // Prüfen: one question at a time
   await go(page, `/app/${org}/matches/${withVideo.id}/check`);
   await snap(page, T, "spiel-pruefen");
+  // a person question: on a match with a confirmed court, after the goal questions
+  for (const m of matches.filter((x) => x.has_video)) {
+    await go(page, `/app/${org}/matches/${m.id}/check`);
+    for (let i = 0; i < 30 && !(await page.getByTestId("person-box").count()); i++) {
+      await page.keyboard.press("0");
+      await page.waitForTimeout(300);
+    }
+    if (await page.getByTestId("person-box").count()) {
+      await page.waitForTimeout(2500);
+      await snap(page, T, "spiel-pruefen-person");
+      break;
+    }
+  }
   await go(page, `/app/${org}/matches/${upcoming.id}/matchday`);
   await snap(page, T, "spieltag");
   await go(page, `/app/${org}/matches/${upcoming.id}/matchday?mode=marks`);
