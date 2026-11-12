@@ -66,6 +66,9 @@ select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px s
     <select id="clip" aria-label="Clip wählen"></select>
     <canvas id="zoom" width="240" height="240" aria-label="Lupe"></canvas>
     <div class="btns">
+      <button class="k" id="b-follow" style="grid-column:1/-1;background:var(--ball);color:var(--ball-ink);border-color:transparent">Verfolgen <kbd>F</kbd></button>
+      <select id="speed" aria-label="Tempo beim Verfolgen"><option value="0.25">Tempo 0.25×</option><option value="0.5" selected>Tempo 0.5×</option><option value="1">Tempo 1×</option></select>
+      <button class="k" id="b-play">Abspielen zum Prüfen <kbd>P</kbd></button>
       <button class="k" id="b-acc">Vorschlag frei <kbd>Leer</kbd></button>
       <button class="k" id="b-held">Vorschlag Hand <kbd>H</kbd></button>
       <button class="k" id="b-hid">Verdeckt <kbd>V</kbd></button>
@@ -77,6 +80,8 @@ select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px s
     </div>
     <div class="toast" id="toast" role="status"></div>
     <ul class="help">
+      <li><b>Schnellster Weg:</b> <kbd>F</kbd> startet den Clip langsam ab dem aktuellen Bild, du folgst dem Ball mit der Maus. Taste <kbd>H</kbd> gedrückt halten, solange er in der Hand ist, <kbd>V</kbd> solange er verdeckt ist, <kbd>O</kbd> wenn kein Spielball im Bild ist. Maus ausserhalb des Bildes = nichts aufzeichnen. <kbd>F</kbd> oder <kbd>Esc</kbd> stoppt.</li>
+      <li>Dann <kbd>P</kbd>: der Clip läuft mit deinen Punkten; wo es nicht passt, klicken (hält an) und korrigieren.</li>
       <li><b>Klick</b> = Ball hier, frei (Flug, Boden, Prellen). <b>Shift+Klick</b> = Ball hier, in der Hand.</li>
       <li><kbd>Leer</kbd> / <kbd>H</kbd> übernehmen den blauen Vorschlag als frei / in der Hand.</li>
       <li><kbd>V</kbd> Ball im Bild, aber verdeckt (<b>Alt+Klick</b> davor merkt die geschätzte Stelle). <kbd>O</kbd> kein Spielball im Bild.</li>
@@ -89,7 +94,8 @@ select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px s
 
 <script>
 const $ = (id) => document.getElementById(id);
-const st = { clips: [], ci: 0, f: 0, docs: {}, db: null, mouse: null, pendingHidden: null, timers: {}, dirty: {} };
+const st = { clips: [], ci: 0, f: 0, docs: {}, db: null, mouse: null, pendingHidden: null, timers: {}, dirty: {},
+  mode: null, keys: {}, lastRec: null };
 const COL = { free: "--ball", held: "--held", hidden: "--hidden", out: "--out" };
 const NAMES = { free: "frei", held: "in der Hand", hidden: "verdeckt", out: "nicht im Bild" };
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
@@ -109,7 +115,50 @@ function pump() {
   const f = seekTo; seekTo = null; seeking = true;
   vid.currentTime = (f + 0.5) / clip().fps;
 }
-vid.addEventListener("seeked", () => { seeking = false; drawStage(); if (seekTo !== null) pump(); });
+vid.addEventListener("seeked", () => { seeking = false; if (!st.mode) drawStage(); if (seekTo !== null) pump(); });
+
+// --- follow mode (record the pointer on every frame while the clip plays slowly) and check playback
+function startMode(mode) {
+  if (st.mode) { stopMode(); return; }
+  const c = clip(); if (!c || !vid.src) return;
+  if (st.f >= c.n - 1) st.f = 0;
+  st.mode = mode; st.lastRec = null; seekTo = null;
+  if (mode === "follow") st.dirty[c.id] = true;  // no snapshot may replace the recording
+  vid.playbackRate = Number($("speed").value);
+  vid.currentTime = (st.f + 0.5) / c.fps;
+  const step = (now, meta) => {
+    if (!st.mode) return;
+    const f = Math.min(c.n - 1, Math.max(0, Math.round(meta.mediaTime * c.fps)));
+    if (st.mode === "follow") record(c, f);
+    st.f = f; drawStage(); renderMetaOnly();
+    if (f >= c.n - 1 || vid.ended) { stopMode(); return; }
+    vid.requestVideoFrameCallback(step);
+  };
+  vid.requestVideoFrameCallback(step);
+  vid.play().catch(() => { st.mode = null; toast("Abspielen nicht möglich."); });
+  $("b-follow").textContent = mode === "follow" ? "Stopp (F)" : "Verfolgen (F)";
+}
+function stopMode() {
+  const was = st.mode; st.mode = null; vid.pause(); st.keys = {};
+  $("b-follow").innerHTML = "Verfolgen <kbd>F</kbd>";
+  if (was === "follow") { persist(clip()); toast("Aufgezeichnet. Jetzt P zum Prüfen."); }
+  showFrame(st.f);
+}
+function record(c, f) {
+  if (!st.mouse) { st.lastRec = null; return; }
+  const s = st.keys.o ? "out" : st.keys.v ? "hidden" : st.keys.h ? "held" : "free";
+  const lab = s === "out" ? { s } : { x: st.mouse.x, y: st.mouse.y, s };
+  const L = doc(c).labels;
+  // frames the browser skipped since the last recorded one: in between, same state
+  if (st.lastRec && f - st.lastRec.f > 1 && f - st.lastRec.f <= 4) {
+    const a = st.lastRec;
+    for (let g = a.f + 1; g < f; g++) {
+      const t = (g - a.f) / (f - a.f);
+      L[g] = lab.x == null || a.lab.x == null ? { ...lab } : { x: Math.round((a.lab.x + t * (lab.x - a.lab.x)) * 10) / 10, y: Math.round((a.lab.y + t * (lab.y - a.lab.y)) * 10) / 10, s };
+    }
+  }
+  L[f] = lab; st.lastRec = { f, lab };
+}
 function loadClip(i) {
   st.ci = i; const c = clip(); $("clip").value = String(i);
   vid.src = "clips/" + c.id + ".mp4";
@@ -173,10 +222,15 @@ function drawStage() {
   const c = clip(); if (!c) return; const cv = $("stage"), g = cv.getContext("2d");
   cv.width = c.w; cv.height = c.h;
   if (vid.readyState >= 2) g.drawImage(vid, 0, 0, c.w, c.h);
+  if (st.mode === "follow" && st.mouse) {  // the pointer as a crosshair, coloured by the held state
+    const s = st.keys.o ? "out" : st.keys.v ? "hidden" : st.keys.h ? "held" : "free";
+    ring(g, st.mouse.x, st.mouse.y, 14, css(COL[s]), 3);
+    drawZoom(); return;
+  }
   const L = doc(c).labels, sg = c.sug[st.f], lab = L[st.f];
   // the path of the last second, faint
   for (let g2 = Math.max(0, st.f - c.fps); g2 < st.f; g2++) { const l = L[g2]; if (l && l.x != null) { g.fillStyle = css(COL[l.s]); g.globalAlpha = 0.35; g.beginPath(); g.arc(l.x, l.y, 3, 0, 2 * Math.PI); g.fill(); g.globalAlpha = 1; } }
-  if (sg) ring(g, sg[0], sg[1], 16, css("--sug"), 2, [5, 4]);
+  if (sg && st.mode !== "play") ring(g, sg[0], sg[1], 16, css("--sug"), 2, [5, 4]);
   if (lab && lab.x != null) ring(g, lab.x, lab.y, 13, css(COL[lab.s]), 3);
   else if (!lab) { const ip = interp(c, st.f); if (ip) ring(g, ip.x, ip.y, 10, css("--ball"), 1.5, [2, 3]); }
   if (st.pendingHidden) ring(g, st.pendingHidden.x, st.pendingHidden.y, 13, css("--hidden"), 3, [6, 3]);
@@ -205,6 +259,11 @@ function renderProgress() {
   const done = st.clips.filter((c) => doc(c).done).length;
   $("progress").textContent = `${done} von ${st.clips.length} Clips fertig`;
 }
+function renderMetaOnly() {
+  const c = clip(), lab = doc(c).labels[st.f];
+  $("meta").innerHTML = `<span>Clip <b>${st.ci + 1}</b>/${st.clips.length}</span><span>Bild <b>${st.f}</b>/${c.n - 1} (${(st.f / c.fps).toFixed(2)} s)</span>`
+    + `<span><b>${st.mode === "follow" ? "Aufnahme" : "Wiedergabe"}</b></span><span>${lab ? NAMES[lab.s] : ""}</span>`;
+}
 function render() {
   const c = clip(); if (!c) return; const d = doc(c), lab = d.labels[st.f];
   const ks = keyframes(c), nl = ks.filter((k) => d.labels[k]).length;
@@ -217,6 +276,8 @@ function render() {
 // --- input
 function pos(ev) { const b = $("stage").getBoundingClientRect(), c = clip(); return { x: Math.round((ev.clientX - b.left) / b.width * c.w * 10) / 10, y: Math.round((ev.clientY - b.top) / b.height * c.h * 10) / 10 }; }
 $("stage").addEventListener("click", (ev) => {
+  if (st.mode === "play") { stopMode(); return; }
+  if (st.mode) return;
   const p = pos(ev);
   if (ev.altKey) { st.pendingHidden = p; drawStage(); toast("Stelle gemerkt: V = verdeckt hier"); return; }
   setLabel(st.f, { x: p.x, y: p.y, s: ev.shiftKey ? "held" : "free" }); next();
@@ -227,10 +288,20 @@ $("b-acc").onclick = () => accept("free"); $("b-held").onclick = () => accept("h
 $("b-hid").onclick = () => mark("hidden"); $("b-out").onclick = () => mark("out");
 $("b-shot").onclick = toggleShot; $("b-del").onclick = () => setLabel(st.f, null);
 $("b-prev").onclick = prevKey; $("b-done").onclick = done;
+$("b-follow").onclick = () => startMode("follow"); $("b-play").onclick = () => startMode("play");
+document.addEventListener("keyup", (ev) => { const k = ev.key.toLowerCase(); if (k in st.keys) delete st.keys[k]; });
 $("clip").onchange = (ev) => loadClip(Number(ev.target.value));
 document.addEventListener("keydown", (ev) => {
   if (ev.target.tagName === "SELECT") return;
   const k = ev.key;
+  if (st.mode) {  // while playing: H / V / O are held states, F / P / Esc stop
+    const l = k.toLowerCase();
+    if (["h", "v", "o"].includes(l)) { st.keys[l] = true; ev.preventDefault(); }
+    else if (l === "f" || l === "p" || k === "Escape" || k === " ") { ev.preventDefault(); stopMode(); }
+    return;
+  }
+  if (k === "f" || k === "F") { ev.preventDefault(); startMode("follow"); return; }
+  if (k === "p" || k === "P") { ev.preventDefault(); startMode("play"); return; }
   if (k === " ") { ev.preventDefault(); accept("free"); }
   else if (k === "h" || k === "H") accept("held");
   else if (k === "v" || k === "V") mark("hidden");
