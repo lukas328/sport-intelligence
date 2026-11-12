@@ -5,21 +5,28 @@ Gewählt von Lukas aus zwölf Ideen (12. November 2026), hier ausgearbeitet. `in
 kritische Durchgänge, Entscheid. Bilder der Abschnitte in `shots/`, die zehn Varianten als SVG in
 `varianten/`, die fertigen Dateien in `final/`.
 
-## Empfehlung
+## Die Fassung
 
-**Zeichen:** ein Durchbruch, auf die Taktiktafel gezeichnet. Torlinie mit Tor, der Handball-Torraum
-(Halbkreis mit gerader Mitte), die gepunktete 9-Meter-Linie, zwei Verteidiger als Kreuze vor dem
-Torraum, unsere Spielerin als Kreis, ihr Lauf als Pfeil durch die Lücke. Kreis und Kreuz sind
-geometrisch, der Pfeil ist von Hand gezogen. Die Feldlinien setzen um Spielerinnen und Pfeil aus,
-wie wenn man an der Tafel den Stift absetzt (`final/zeichen.svg`, Variante v10).
+Gewählt von Lukas am 12. November 2026: Variante v06 «Mischung · Wurf · Tor, Torraum, 9 m». Meine
+Empfehlung war der Durchbruch mit zwei Kreuzen (v10); sie ist damit vom Tisch.
 
-**Wortmarke:** «Handball Intelligence» in Kanit ExtraBold Italic, der Titelschrift der App
-«Anlauf», zweizeilig, «Intelligence» im Blau des Laufs (`final/wortmarke-zweizeilig.svg`).
+**Zeichen** (`final/zeichen.svg`): ein Spielzug auf der Taktiktafel. Oben Torlinie und Tor, der
+Handball-Torraum (Halbkreis mit gerader Mitte) und die gepunktete 9-Meter-Linie. Unten links unsere
+Spielerin als Kreis, rechts ein Verteidiger als Kreuz, und ihr Lauf als geschwungener Pfeil am
+Verteidiger vorbei über die 9-Meter-Linie zum Torraum. Kreis und Kreuz sind geometrisch, der Pfeil
+ist von Hand gezeichnet. Die Feldlinien setzen um Kreis, Kreuz und Pfeil aus.
 
-**Zweite Wahl:** dasselbe Zeichen ohne 9-Meter-Linie (v07): ruhiger und leichter zu sticken, aber
-weniger eindeutig Handball. Wortmarke dann in Archivo ExtraBold.
+Ausgearbeitet gegenüber v06, ohne den Charakter zu ändern (Vergleich oben auf der Seite):
+- Der Pfeil ist ein fester Pfad (`RUN` in `build.js`): zwei Bögen, die sich gegen Ende etwas mehr
+  biegen, Pfeilarme leicht ungleich lang. Kein Zufallsgenerator mehr.
+- Strichstärken optisch ausgeglichen: Kreis 24 statt 26 (Radius 33), Pfeil 24, Kreuz 26, Feld 10,
+  Tor 22 hoch (Einheiten im Raster 512).
+- Kreis und Kreuz 2 bis 4 Einheiten zur Mitte; die Feldlinien setzen mit 11 Einheiten Luft aus.
 
-Das sieht man: «Ein Durchbruch, wie die Trainerin ihn an die Tafel malt.»
+**Wortmarke** (`final/wortmarke-zweizeilig.svg`): «Handball Intelligence» in Kanit ExtraBold
+Italic, der Titelschrift der App, «Intelligence» im Blau des Laufs. Dazu quer und gestapelt.
+
+Das sieht man: «Ein Spielzug, wie die Trainerin ihn an die Tafel malt.»
 
 ## Farben
 
@@ -27,11 +34,11 @@ Das sieht man: «Ein Durchbruch, wie die Trainerin ihn an die Tafel malt.»
 |---|---|---|
 | Tinte | `#111316` | Feld, Wortmarke «Handball»; einfarbige Fassung |
 | Markerblau | `#1d47d1` | unsere Spielerin, der Lauf, «Intelligence» |
-| Markerrot | `#e1251b` | die zwei Verteidiger |
+| Markerrot | `#e1251b` | der Verteidiger |
 | Tafelweiss | `#f7f8f6` | Grund des App-Icons und des Teilen-Bilds |
 
-- **In der App:** nur die Tinten-Fassung (`zeichen-tinte.svg`, `favicon-32.svg`) oder Weiss auf
-  dunklem Grund. Die Farben gehören in der App den Teams; das Logo nimmt keine.
+- **In der App:** nur Tinte (`zeichen-tinte.svg`, `favicon-32-tinte.svg`, `favicon-16-tinte.svg`)
+  oder Weiss auf dunklem Grund (`zeichen-weiss.svg`, `favicon-32-weiss.svg`). Die Farben gehören in der App den Teams; das Logo nimmt keine.
 - **Ausserhalb der App** (App-Icon, Website, Teilen-Bild, Jacke, Banner): die zweifarbige Fassung.
 - **Auf einer Vereinsfarbe** immer einfarbig: Weiss auf Blau, Rot, Schwarz, Grün; Tinte auf Gelb
   und Weiss.
@@ -42,7 +49,8 @@ Das sieht man: «Ein Durchbruch, wie die Trainerin ihn an die Tafel malt.»
   Zeichens, 60 von 512 Einheiten, also knapp 12 % der Zeichenbreite). Bei der Wortmarke dieselbe
   Einheit, gemessen am Zeichen in der Wortmarke.
 - **Mindestgrösse:** das volle Zeichen ab 48 px oder 15 mm Breite. Darunter die eigene
-  32-px-Fassung (`favicon-32.svg`, bis 24 px), darunter die 16-px-Fassung. Die Wortmarke
+  32-px-Fassung (`favicon-32.svg`, bis 24 px; sie behält vier Punkte der 9-Meter-Linie), darunter
+  die 16-px-Fassung (ohne 9-Meter-Linie). Die Wortmarke
   zweizeilig ab 140 px oder 35 mm Breite, quer ab 220 px oder 55 mm.
 - **Stick:** einfarbig, ab 6 cm Breite das volle Zeichen, darunter die 32-px-Fassung.
 
@@ -52,8 +60,8 @@ Das sieht man: «Ein Durchbruch, wie die Trainerin ihn an die Tafel malt.»
 - Die Spielerinnen oder den Pfeil umfärben, zum Beispiel in die Vereinsfarbe.
 - Das Zeichen drehen, spiegeln oder den Pfeil nach unten zeigen lassen. Die quere Fassung (Feld um
   90 Grad gedreht) nur dort, wo die Höhe fehlt.
-- Weitere Spielerinnen, Ball, Schatten, Verläufe oder einen Rahmen dazufügen.
-- Den Pfeil glätten oder durch ein Pfeil-Symbol ersetzen. Er ist die Hand im Zeichen.
+- Weitere Spielerinnen oder Kreuze, Ball, Schatten, Verläufe oder einen Rahmen dazufügen.
+- Den Pfeil neu zeichnen, glätten oder durch ein Pfeil-Symbol ersetzen. Er ist die Hand im Zeichen und ein fester Pfad.
 - Ein Play-Dreieck in den Kreis setzen (Nähe zu «Once Sport»), das Zeichen «XO» nennen oder auf
   Rasengrün und Parkettbraun stellen (Nähe zu Playbook-Apps anderer Sportarten).
 - Die zweifarbige Fassung auf eine Vereinsfarbe legen.
@@ -64,7 +72,8 @@ Das sieht man: «Ein Durchbruch, wie die Trainerin ihn an die Tafel malt.»
 |---|---|
 | `zeichen.svg`, `zeichen-tinte.svg`, `zeichen-tinte-akzent.svg`, `zeichen-weiss.svg`, `zeichen-negativ.svg`, `zeichen-1024.png` | das Zeichen in allen Farben |
 | `wortmarke-quer*.svg`, `wortmarke-zweizeilig*.svg`, `wortmarke-gestapelt*.svg` | je farbig, `-einfarbig`, `-negativ` (auf Tinte) und `-weiss` (transparent); Schrift als Pfade |
-| `favicon-16.svg`, `favicon-16.png`, `favicon-32.svg`, `favicon-32.png` | eigene Zeichnungen auf dem Pixelraster |
+| `favicon-16.svg`, `favicon-16.png`, `favicon-32.svg`, `favicon-32.png` | eigene Zeichnungen auf dem Pixelraster, zweifarbig; 32 px mit vier 9-Meter-Punkten, 16 px ohne |
+| `favicon-32-tinte.svg`, `favicon-32-weiss.svg`, `favicon-16-tinte.svg` | dieselben für die App (Tinte, Weiss) |
 | `app-icon.svg`, `app-icon-1024.png`, `app-icon-512.png` | iOS: volle Fläche, ohne Ecken (iOS rundet selbst) |
 | `app-icon-maske.svg`, `app-icon-maske-1024.png`, `app-icon-maske-512.png` | Android adaptiv und Web-Manifest «maskable»: Zeichen in der sicheren Zone (Kreis mit 80 % Durchmesser) |
 | `app-icon-einfarbig.svg` | Android «Designs» (einfarbiges Symbol, transparent) |
@@ -92,10 +101,8 @@ in Swissreg und EUIPO, Klassen 9, 41 und 42.
 
 ## Was noch nicht sauber ist
 
-- Der gezogene Pfeil kommt aus einem Zufallsgenerator mit festem Startwert. Für die endgültige
-  Fassung sollte ihn ein Mensch einmal von Hand nachzeichnen und die Kurve festhalten.
-- Die 16-px-Fassung ist auf dem Raster gezeichnet, aber nicht in jedem Browser und jeder
-  Bildschirmdichte geprüft.
+- Die 16-px-Fassung ist auf dem Raster gezeichnet, aber nicht auf jedem Bildschirm und in jedem
+  Browser geprüft.
 - Die 9-Meter-Punkte sind beim Stick unter 6 cm Breite zu fein; dafür gibt es die 32-px-Fassung.
-- Die Wortmarke ist nur mit Kanit-Abständen gesetzt, nicht von Hand ausgeglichen (Kerning zwischen
-  «ll» und «In»).
+- Die Wortmarke ist mit den Abständen von Kanit gesetzt, nicht von Hand ausgeglichen.
+- Keine rechtliche Markenprüfung.

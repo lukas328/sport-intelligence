@@ -94,21 +94,30 @@ function arrow(c, col, w, hand, seed, dashed) {
 
 /* the plays: own players (O), defenders (X), the run (arrow) */
 const PLAYS = {
-  wurf: { name: "Wurf am Verteidiger vorbei", us: [[148, 414]], them: [[340, 330]], runs: [[[166, 372], [180, 300], [212, 252], [252, 214]]] },
+  wurf: { name: "Wurf am Verteidiger vorbei", us: [[150, 412]], them: [[338, 326]], runs: [[[166, 372], [180, 300], [212, 252], [252, 214]]] },
   durch: { name: "Durchbruch zwischen zwei Verteidigern", xh: 24, us: [[256, 432]], them: [[180, 222], [332, 222]], runs: [[[256, 390], [228, 340], [282, 290], [256, 206]]] },
   kreis: { name: "Lauf an den Kreis", us: [[118, 410]], them: [[250, 300]], runs: [[[156, 412], [290, 440], [372, 360], [366, 226]]] },
   kreuz: { name: "Kreuzen im Rückraum", us: [[150, 440], [362, 440]], them: [[256, 262]], runs: [[[172, 400], [200, 340], [300, 330], [350, 248]], [[340, 400], [312, 340], [212, 330], [162, 248], true]] }
 };
-const STYLES = { hand: { court: 10, w: 26, handO: true, handX: true, handA: true }, geo: { court: 10, w: 26 }, mix: { court: 10, w: 26, handA: true } };
+const STYLES = { hand: { court: 10, w: 26, handO: true, handX: true, handA: true }, geo: { court: 10, w: 26 }, mix: { court: 10, w: 26, handA: true },
+  /* the final drawing: the chosen variant v06 with a fixed, drawn run and optically balanced weights.
+     The ring reads heavier than the cross at the same width, so it is 2 units lighter; the run is
+     as light as the ring. */
+  final: { court: 10, w: 26, wO: 24, wA: 24, rO: 33, fixed: true } };
+/* the run of the final mark, drawn once: two curves that bend a little more towards the end, a
+   head with one arm slightly longer than the other, as a pen draws it */
+const RUN = { body: "M164 369 C 170 338, 181 310, 196 286 C 210 263, 229 238, 252 218", head: "M243 259 L252 218 L208 215" };
 
 let MID = 0;
 function mark(o) {
   const st = STYLES[o.stroke], pal = palette(o.color), pl = PLAYS[o.play], seed = o.seed || 7, X = pl.xh || 30;
   const players = (col, w, dashOff) => {
     let s = "";
+    const d = w - st.w; /* the mask passes a wider stroke; keep the differences */
     pl.them.forEach((p, i) => { s += cross(p[0], p[1], X, col.them, w, st.handX, seed + 11 * i); });
-    pl.us.forEach((p, i) => { s += circleO(p[0], p[1], 32, col.us, w, st.handO, seed + 31 * i); });
-    pl.runs.forEach((c, i) => { s += arrow(c, col.arrow, w, st.handA, seed + 97 * i, dashOff ? false : c[4]); });
+    pl.us.forEach((p, i) => { s += circleO(p[0], p[1], st.rO || 32, col.us, (st.wO || st.w) + d, st.handO, seed + 31 * i); });
+    if (st.fixed) s += `<path d="${RUN.body}" fill="none" stroke="${col.arrow}" stroke-width="${(st.wA || st.w) + d}" stroke-linecap="round"/><path d="${RUN.head}" fill="none" stroke="${col.arrow}" stroke-width="${(st.wA || st.w) + d}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    else pl.runs.forEach((c, i) => { s += arrow(c, col.arrow, w, st.handA, seed + 97 * i, dashOff ? false : c[4]); });
     return s;
   };
   /* the court lines stop short of every player and of the run, as a coach lifts the pen */
@@ -133,25 +142,28 @@ const V = [
   { id: "v10", label: "Mischung · Durchbruch · Tor, Torraum, 9 m", stroke: "mix", court: "d9", play: "durch" }
 ];
 /* the recommendation */
-const FINAL = { stroke: "mix", court: "d9", play: "durch", seed: 7 };
-const SECOND = { stroke: "mix", court: "d", play: "durch", seed: 7 };
+/* chosen by Lukas on 12 November 2026: v06, worked out as the final drawing */
+const FINAL = { stroke: "final", court: "d9", play: "wurf", seed: 7 };
+const CHOSEN = { stroke: "mix", court: "d9", play: "wurf", seed: 7 };
 
 /* ---------- small versions, drawn on the pixel grid ---------- */
-function px32(col, acc) {
-  const a = acc || col;
+/* the 32 px version keeps four of the 9 m dots; the 16 px version drops them */
+function px32(col, acc, red) {
+  const a = acc || col, r = red || col;
   return `<path d="M2 5H30" stroke="${col}" stroke-width="2" stroke-linecap="square"/><rect x="13" y="2" width="6" height="3" fill="${col}"/>`
-    + `<path d="M6 5A7 7 0 0 0 13 12H19A7 7 0 0 0 26 5" fill="none" stroke="${col}" stroke-width="2"/>`
-    + `<path d="M7 15L11 19M11 15L7 19M21 15L25 19M25 15L21 19" stroke="${col}" stroke-width="2.4" stroke-linecap="round"/>`
-    + `<circle cx="16" cy="26.5" r="3" fill="none" stroke="${a}" stroke-width="2.4"/>`
-    + `<path d="M16 22.5V15M13 17.5L16 14.5L19 17.5" fill="none" stroke="${a}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+    + `<path d="M6.5 5A6.5 6.5 0 0 0 13 11.5H19A6.5 6.5 0 0 0 25.5 5" fill="none" stroke="${col}" stroke-width="2"/>`
+    + [[4.3, 10.6], [7.6, 14.2], [25.6, 13.4], [28.2, 9.6]].map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="1" fill="${col}"/>`).join("")
+    + `<path d="M21.2 18.2L25.8 22.8M25.8 18.2L21.2 22.8" stroke="${r}" stroke-width="2.6" stroke-linecap="round"/>`
+    + `<circle cx="8.6" cy="26" r="3.1" fill="none" stroke="${a}" stroke-width="2.3"/>`
+    + `<path d="M10 22.4C10.6 19.8 12.2 17.2 15.4 14.6M11.4 14.4L15.6 14.4L15 18.4" fill="none" stroke="${a}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
-function px16(col, acc) {
-  const a = acc || col;
+function px16(col, acc, red) {
+  const a = acc || col, r = red || col;
   return `<path d="M1 2.5H15" stroke="${col}" stroke-width="1"/><rect x="6" y="1" width="4" height="2" fill="${col}"/>`
-    + `<path d="M3 3A3.5 3.5 0 0 0 6.5 6.5H9.5A3.5 3.5 0 0 0 13 3" fill="none" stroke="${col}" stroke-width="1.2"/>`
-    + `<path d="M3 8.5L5 10.5M5 8.5L3 10.5M11 8.5L13 10.5M13 8.5L11 10.5" stroke="${col}" stroke-width="1.3" stroke-linecap="round"/>`
-    + `<circle cx="8" cy="13.6" r="1.6" fill="none" stroke="${a}" stroke-width="1.3"/>`
-    + `<path d="M8 11.4V7.6M6.6 9L8 7.6L9.4 9" fill="none" stroke="${a}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    + `<path d="M3 3A3.4 3.4 0 0 0 6.4 6.4H9.6A3.4 3.4 0 0 0 13 3" fill="none" stroke="${col}" stroke-width="1.2"/>`
+    + `<path d="M10.6 8.6L13 11M13 8.6L10.6 11" stroke="${r}" stroke-width="1.4" stroke-linecap="round"/>`
+    + `<circle cx="4.4" cy="13.2" r="1.6" fill="none" stroke="${a}" stroke-width="1.3"/>`
+    + `<path d="M5.2 11.3C5.6 10.1 6.4 9 7.8 7.9M6 7.8H8L7.7 9.8" fill="none" stroke="${a}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
 
 /* ---------- wordmarks ---------- */
@@ -193,8 +205,11 @@ const out = {
   "zeichen-tinte-akzent.svg": svg("0 0 512 512", fin("accent")),
   "zeichen-negativ.svg": svg("0 0 512 512", `<rect width="512" height="512" fill="${INK}"/>` + mark(Object.assign({}, FINAL, { color: "#ffffff" }))),
   "zeichen-weiss.svg": svg("0 0 512 512", fin("#ffffff")),
-  "favicon-16.svg": svg("0 0 16 16", px16(INK, BLUE)),
-  "favicon-32.svg": svg("0 0 32 32", px32(INK, BLUE)),
+  "favicon-16.svg": svg("0 0 16 16", px16(INK, BLUE, RED)),
+  "favicon-16-tinte.svg": svg("0 0 16 16", px16(INK)),
+  "favicon-32.svg": svg("0 0 32 32", px32(INK, BLUE, RED)),
+  "favicon-32-tinte.svg": svg("0 0 32 32", px32(INK)),
+  "favicon-32-weiss.svg": svg("0 0 32 32", px32("#ffffff")),
   "app-icon.svg": svg("0 0 1024 1024", `<rect width="1024" height="1024" fill="${BOARD}"/><g transform="translate(-6 34) scale(2.02)">${fin("two")}</g>`),
   "app-icon-maske.svg": svg("0 0 1024 1024", `<rect width="1024" height="1024" fill="${BOARD}"/><g transform="translate(240 250) scale(1.0625)">${fin("two")}</g>`),
   "app-icon-einfarbig.svg": svg("0 0 1024 1024", `<g transform="translate(240 250) scale(1.0625)">${fin("#ffffff")}</g>`)
@@ -224,6 +239,8 @@ page.layout = {
 };
 page.wm = WM.map((w) => ({ id: w.id, name: w.name, why: w.why, quer: (() => { const l = lockup(w, "quer", FINAL); return svg(l.vb, l.body); })(), zwei: (() => { const l = lockup(w, "zweizeilig", FINAL); return svg(l.vb, l.body); })(), stapel: (() => { const l = lockup(w, "gestapelt", FINAL); return svg(l.vb, l.body); })() }));
 page.out = out;
-page.second = svg("0 0 512 512", mark(Object.assign({}, SECOND, { color: "two" })));
+page.chosen = svg("0 0 512 512", mark(Object.assign({}, CHOSEN, { color: "two" })));
+page.chosenInk = svg("0 0 512 512", mark(Object.assign({}, CHOSEN, { color: "ink" })));
+page.finalInk = svg("0 0 512 512", fin("ink"));
 fs.writeFileSync(path.join(here, "data.json"), JSON.stringify(page));
 console.log("ok", Object.keys(out).length, "final files,", V.length, "variants");

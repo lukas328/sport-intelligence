@@ -48,6 +48,10 @@ h1, h2, h3, p, figure, ul, ol { margin: 0; }
 .verdict b { font-weight: 800; }
 .box { background: var(--board); padding: 24px; display: grid; place-items: center; min-width: 0; }
 .box svg { max-width: 100%; height: auto; }
+.ovl { position: relative; width: 100%; }
+.ovl svg { display: block; width: 100%; height: auto; }
+.ovl svg:first-child { opacity: .3; }
+.ovl svg + svg { position: absolute; inset: 0; mix-blend-mode: multiply; opacity: .85; }
 .cap { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
 .wm { display: grid; gap: 16px; padding: 20px; background: var(--board); min-width: 0; }
 .wm.rec { box-shadow: inset 0 0 0 3px var(--ink); }
@@ -113,10 +117,74 @@ th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var
 <body>
 <div class="wrap">
 <header class="intro">
-  <p class="lab">Handball Intelligence · Logo · Richtung «Taktik»</p>
-  <h1>Ein Durchbruch, auf die Tafel gezeichnet</h1>
-  <p>Kreis, Kreuz und Pfeil vor dem Tor, ausgearbeitet: zehn Varianten zu Strich, Inhalt, Spielzug, Anordnung und Farbe, vier Wortmarken, eigene Fassungen für 16 und 32 px, ein Härtetest in echten Situationen und am Ende genau eine Empfehlung mit fertigen Dateien in <code>final/</code>.</p>
-  <nav aria-label="Abschnitte"><a href="#varianten">Varianten</a><a href="#anordnung">Anordnung</a><a href="#farbe">Farbe</a><a href="#wortmarke">Wortmarke</a><a href="#klein">Klein</a><a href="#haerte">Härtetest</a><a href="#durchgaenge">Durchgänge</a><a href="#entscheid">Entscheid</a></nav>
+  <p class="lab">Handball Intelligence · Logo · endgültige Fassung</p>
+  <h1>Ein Wurf am Verteidiger vorbei, auf die Tafel gezeichnet</h1>
+  <p>Lukas hat am 12. November 2026 «Mischung · Wurf · Tor, Torraum, 9 m» gewählt. Oben steht die ausgearbeitete Fassung mit allen Dateien und dem Härtetest, darunter der Weg dorthin: zehn Varianten, Anordnung, Farbe, Wortmarke, Kleinfassungen, Durchgänge.</p>
+  <nav aria-label="Abschnitte"><a href="#gewaehlt">Die Fassung</a><a href="#haerte">Härtetest</a><a href="#dateien">Dateien</a><a href="#weg">Der Weg dorthin</a><a href="#varianten">Varianten</a><a href="#anordnung">Anordnung</a><a href="#farbe">Farbe</a><a href="#wortmarke">Wortmarke</a><a href="#klein">Klein</a><a href="#durchgaenge">Durchgänge</a></nav>
+</header>
+
+<section class="sec" id="gewaehlt">
+  <h2>Die Fassung</h2>
+  <p class="lead">Das sieht man: einen Spielzug, wie die Trainerin ihn an die Tafel malt. Oben das Tor mit dem Torraum und der gepunkteten 9-Meter-Linie, unten unsere Spielerin als Kreis, rechts ein Verteidiger als Kreuz, und ihr Lauf als geschwungener Pfeil am Verteidiger vorbei zum Torraum.</p>
+  <div class="final"><div class="box rec">${fin("zeichen.svg", "", "Handball Intelligence, Zeichen")}</div><div class="box">${fin("wortmarke-zweizeilig.svg", "", "Handball Intelligence, Wortmarke zweizeilig")}</div></div>
+  <h3>Alt und neu: dasselbe Zeichen</h3>
+  <div class="grid3"><div><div class="box">${inl(D.chosen, "", "gewählte Variante v06")}</div><p class="cap">Gewählt: v06, wie sie auf der Seite stand.</p></div><div><div class="box">${fin("zeichen.svg", "", "ausgearbeitete Fassung")}</div><p class="cap">Ausgearbeitet: gleiche Anordnung, gleiche Linien, gleiche Farben.</p></div><div><div class="box"><div class="ovl">${inl(D.chosenInk, "", "v06 in Tinte")}${inl(D.finalInk, "", "neu in Tinte")}</div></div><p class="cap">Übereinandergelegt: alt hell, neu dunkel. Wo nur dunkel zu sehen ist, deckt sich beides.</p></div></div>
+  <ul class="list">
+    <li><b>Der Pfeil ist einmal gezeichnet:</b> ein fester Pfad aus zwei Bögen, der sich gegen Ende etwas mehr biegt, mit einem Pfeilkopf, dessen Arme leicht ungleich lang sind. Kein Zufallsgenerator mehr; er sieht in jeder Datei gleich aus.</li>
+    <li><b>Strichstärken optisch ausgeglichen:</b> Der Kreis wirkte bei gleicher Stärke schwerer als das Kreuz. Er ist jetzt 24 statt 26 Einheiten stark und dafür 1 Einheit grösser; der Pfeil hat die Stärke des Kreises. Feld 10, Tor 22 hoch.</li>
+    <li><b>Abstände:</b> Kreis und Kreuz um 2 bis 4 Einheiten zur Mitte gerückt, damit das Zeichen nicht links unten schwerer ist. Die Feldlinien setzen um Kreis, Kreuz und Pfeil mit 11 Einheiten Luft aus, wie beim Absetzen des Stifts.</li>
+  </ul>
+  <div class="grid3">
+    <div><div class="box">${fin("wortmarke-quer.svg", "", "Wortmarke quer")}</div><p class="cap">Quer</p></div>
+    <div><div class="box">${fin("wortmarke-gestapelt.svg", "", "Wortmarke gestapelt").replace("<svg ", '<svg style="max-height:260px" ')}</div><p class="cap">Gestapelt</p></div>
+    <div><div class="box" style="background:#111316">${fin("wortmarke-zweizeilig-weiss.svg", "", "Wortmarke weiss")}</div><p class="cap">Weiss auf Tinte</p></div>
+  </div>
+  <div class="verdict"><p><b>Farbregel:</b> In der App nur Tinte <code>#111316</code> (oder Weiss auf dunklem Grund), denn dort gehören die Farben den Teams. Ausserhalb der App Markerblau <code>#1d47d1</code> für unsere Spielerin, den Lauf und «Intelligence», Markerrot <code>#e1251b</code> für den Verteidiger, Tinte für Feld und «Handball», Tafelweiss <code>#f7f8f6</code> als Grund. Auf einer Vereinsfarbe immer einfarbig.</p></div>
+</section>
+
+<section class="sec" id="haerte">
+  <h2>Härtetest</h2>
+  <h3>Grössen</h3>
+  <div class="sizes">${[16, 24, 32, 64].map((s) => `<figure>${s <= 32 ? fin(s <= 16 ? "favicon-16.svg" : "favicon-32.svg", "", s + " px").replace("<svg ", `<svg style="width:${s}px;height:${s}px" `) : fin("zeichen.svg", "", "64 px").replace("<svg ", `<svg style="width:${s}px;height:${s}px" `)}<figcaption>${s} px</figcaption></figure>`).join("")}${[16, 24, 32, 64].map((s) => `<figure>${fin("zeichen-tinte.svg", "", s + " px einfarbig").replace("<svg ", `<svg style="width:${s}px;height:${s}px" `)}<figcaption>${s} px, grosses Zeichen einfarbig</figcaption></figure>`).join("")}</div>
+  <p class="cap">Links die eigenen Kleinfassungen (bei 16 px ohne 9-Meter-Punkte, bei 24 und 32 px mit vier Punkten), rechts das grosse Zeichen verkleinert: unter 48 px verliert es die Punkte und der Torraum wird dünn, darum die eigenen Fassungen.</p>
+  <h3>Auf Vereinsfarben</h3>
+  <div class="bgs">${[["Blau", "#1f4fbf", "#ffffff"], ["Rot", "#d3202e", "#ffffff"], ["Gelb", "#f6c500", "#111316"], ["Weiss", "#ffffff", "#111316"], ["Schwarz", "#15171a", "#ffffff"], ["Grün", "#0f7a46", "#ffffff"]].map((c) => `<div style="background:${c[1]};box-shadow:inset 0 0 0 1px var(--rule)">${(c[2] === "#ffffff" ? O["zeichen-weiss.svg"] : O["zeichen-tinte.svg"]).replace("<svg ", '<svg aria-hidden="true" ')}</div>`).join("")}</div>
+  <p class="cap">Auf Farbe immer einfarbig: Weiss auf Blau, Rot, Schwarz, Grün; Tinte auf Gelb und Weiss. Blau-Rot nie auf einer Vereinsfarbe.</p>
+  <h3>Neben anderen Apps</h3>
+  <div class="home"><div class="ph">${["#3a7bd5", "#2fb36e", "#f2a33a", "#8e5bd8", "#e0533c", null, "#5ac8fa", "#ffcc00", "#34c759", "#ff2d55", "#1c1c1e", "#af52de"].map((c) => c ? `<div class="app"><i style="background:${c}"></i>App</div>` : `<div class="app">${icon(O["app-icon.svg"], "")}Handball In…</div>`).join("")}</div></div>
+  <h3>Im Kopf der App, links neben dem Vereinswappen</h3>
+  <div class="bar"><span class="brand">${O["favicon-32-tinte.svg"].replace("<svg ", '<svg aria-hidden="true" style="width:32px;height:32px" ')}</span><span class="sep"></span><span class="crest" aria-hidden="true"></span><span class="team"><b>HC Zürichsee</b><small>Herren 1 · 3. Liga</small></span><nav><span class="on">Spiele</span><span>Szenen</span><span>Saison</span><span>Team</span></nav></div>
+  <div class="phonebar">${O["favicon-32-tinte.svg"].replace("<svg ", '<svg aria-hidden="true" ')}<span class="crest" aria-hidden="true"></span><span class="team">Herren 1<small>HC Zürichsee</small></span><span class="plus" aria-hidden="true">+</span></div>
+  <p class="cap">In der App steht nur das kleine Zeichen in Tinte vor dem Wappen des Vereins; die Farben gehören dort den Teams. Der Name der App steht nicht im Kopf: Die Trainerin weiss, wo sie ist; das Wappen ist wichtiger.</p>
+  <div class="grid3">
+    <div><div class="login"><div class="card">${O["wortmarke-gestapelt.svg"].replace("<svg ", '<svg role="img" aria-label="Handball Intelligence" ')}<label>E-Mail<span class="f"></span></label><label>Passwort<span class="f"></span></label><span class="btn">Anmelden</span></div></div><p class="cap">Anmeldeseite: die gestapelte Wortmarke.</p></div>
+    <div><div class="chat"><div class="bubble"><div class="prev">${O["open-graph.svg"].replace("<svg ", '<svg role="img" aria-label="Vorschaubild" ')}<p><b>Rückzug nach Ballverlust</b><small>handballintelligence.ch</small></p></div><p>Schaut euch das bis Dienstag an.</p></div></div><p class="cap">Vorschau eines geteilten Links im Teamchat (Open-Graph-Bild 1200 × 630).</p></div>
+    <div><div class="jacket"><div class="jk"><svg viewBox="0 0 400 300" aria-hidden="true"><path d="M110 20 L160 8 Q200 30 240 8 L290 20 L370 70 L340 300 L60 300 L30 70 Z" fill="#14213d"/><path d="M200 26 V300" stroke="#0a1328" stroke-width="4"/><path d="M160 8 Q200 30 240 8 L232 30 Q200 46 168 30 Z" fill="#0a1328"/></svg><div class="em">${O["zeichen-weiss.svg"].replace("<svg ", '<svg aria-hidden="true" ')}</div></div></div><p class="cap">Gestickt auf der Trainerjacke, einfarbig weiss.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="dateien">
+  <h2>Dateien</h2>
+  <p class="lead">Alles liegt in <code>docs/design/brand2/taktik/final/</code>. Regeln (Schutzraum, Mindestgrösse, Farben, was man nicht tut) im <code>README.md</code> daneben.</p>
+  <ul class="list">
+    <li>Zeichen: <code>zeichen.svg</code> (zweifarbig), <code>zeichen-tinte.svg</code>, <code>zeichen-tinte-akzent.svg</code> (Tinte, Pfeil blau), <code>zeichen-weiss.svg</code>, <code>zeichen-negativ.svg</code> (weiss auf Tinte), <code>zeichen-1024.png</code>.</li>
+    <li>Wortmarke in Kanit ExtraBold Italic, Schrift als Pfade: <code>wortmarke-quer</code>, <code>-zweizeilig</code>, <code>-gestapelt</code>, je <code>.svg</code> (farbig), <code>-einfarbig.svg</code>, <code>-negativ.svg</code>, <code>-weiss.svg</code>.</li>
+    <li>Favicon, eigene Zeichnungen auf dem Pixelraster: <code>favicon-32.svg</code> und <code>.png</code> (mit vier Punkten der 9-Meter-Linie), <code>favicon-16.svg</code> und <code>.png</code> (ohne 9-Meter-Linie), dazu <code>favicon-32-tinte.svg</code>, <code>favicon-32-weiss.svg</code>, <code>favicon-16-tinte.svg</code> für die App.</li>
+    <li>App-Icon: <code>app-icon-1024.png</code>, <code>app-icon-512.png</code> (iOS, volle Fläche ohne Ecken), <code>app-icon-maske-1024.png</code>, <code>app-icon-maske-512.png</code> (Android adaptiv und Web «maskable», Zeichen in der sicheren Zone), <code>app-icon-einfarbig.svg</code> (Android «Designs»).</li>
+    <li>Teilen: <code>open-graph.svg</code>, <code>open-graph.png</code> (1200 × 630).</li>
+  </ul>
+  <h3>Abstand zu bestehenden Zeichen</h3>
+  <ul class="list">
+    <li>Kreis, Kreuz und Pfeil sind die Sprache von Playbook-Apps im American Football und Basketball (zum Beispiel «Playmaker X», «X's & O's»). Darum nie ohne Handball-Feld, nie als «XO» geschrieben, nie auf Rasengrün oder Parkettbraun.</li>
+    <li>Die Videoanalyse «Once Sport» setzt ein Play-Dreieck in ein O. Darum nie ein Play-Symbol im Kreis, und der Pfeil bleibt ein gezogener Strich.</li>
+    <li>Keine rechtliche Prüfung. Vor einer Anmeldung als Marke: Recherche in Swissreg und EUIPO in den Klassen 9, 41 und 42.</li>
+  </ul>
+</section>
+
+<header class="intro" id="weg" style="margin-top:32px">
+  <p class="lab">Der Weg dorthin</p>
+  <h1 style="font-size:clamp(36px,6vw,72px)">Zehn Varianten und ein Entscheid</h1>
+  <p>So stand die Seite vor dem Entscheid, mit meinen damaligen Empfehlungen. Meine Empfehlung war der Durchbruch (v10); gewählt hat Lukas v06.</p>
 </header>
 
 <section class="sec" id="varianten">
@@ -130,7 +198,7 @@ th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var
   <div class="verdict"><p><b>Ergebnis Inhalt:</b> Der Torraum ist das Minimum. Die gestrichelte 9-Meter-Linie überlädt nicht, weil sie aus Punkten besteht und leicht wirkt, und sie ist das stärkste Handball-Signal. Bei 16 px fällt sie weg.</p></div>
   <h3>Der Spielzug</h3>
   <div class="grid5">${vcard("v07", "Durchbruch zwischen zwei Verteidigern: der Grundzug im Handball, jede Spielerin kennt ihn. Symmetrisch, ruhig, mit Richtung.")}${vcard("v08", "Lauf an den Kreis: erzählt viel, aber der Pfeil liegt quer und das Zeichen kippt nach rechts.")}${vcard("v09", "Kreuzen im Rückraum: zwei Läufe, ein Kreuz. Fachlich am schönsten, als Zeichen zu voll; bei 32 px ein Knäuel.")}${vcard("v10", "Durchbruch mit 9-Meter-Linie: der Lauf geht zwischen den beiden Verteidigern über die gepunktete Linie zum Torraum.")}</div>
-  <div class="verdict"><p><b>Ergebnis Spielzug:</b> Durchbruch. Zwei Kreuze sind eine Abwehr, kein einzelner Gegner; der Pfeil geht durch die Lücke, also durch das, was die Analyse findet. Er zeigt nicht nur nach oben, er sucht einen Weg.</p></div>
+  <div class="verdict"><p><b>Ergebnis Spielzug (meine damalige Empfehlung, nicht gewählt):</b> Durchbruch. Zwei Kreuze sind eine Abwehr, kein einzelner Gegner; der Pfeil geht durch die Lücke, also durch das, was die Analyse findet. Er zeigt nicht nur nach oben, er sucht einen Weg.</p></div>
 </section>
 
 <section class="sec" id="anordnung">
@@ -154,7 +222,7 @@ th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var
 
 <section class="sec" id="klein">
   <h2>Klein: eigene Fassungen für 16 und 32 px</h2>
-  <p class="lead">Das grosse Zeichen verkleinert reicht nicht: Der Torraum wird zur Linie, die Punkte verschwinden. Darum zwei eigene Zeichnungen auf dem Pixelraster: Tor, Torraum, zwei Kreuze, unsere Spielerin, ein gerader Pfeil. Die 9-Meter-Punkte und die Hand fallen weg.</p>
+  <p class="lead">Das grosse Zeichen verkleinert reicht nicht: Der Torraum wird zur Linie, die Punkte verschwinden. Darum zwei eigene Zeichnungen auf dem Pixelraster: Tor, Torraum, Kreuz, unsere Spielerin, der Pfeil mit nur einem Bogen. Bei 32 px bleiben vier Punkte der 9-Meter-Linie, bei 16 px fällt sie ganz weg.</p>
   <div class="sizes">
     <figure>${fin("favicon-32.svg", "pxgrid", "Favicon 32 px, vergrössert")}<figcaption>32 px, auf 6-fach vergrössert</figcaption></figure>
     <figure>${fin("favicon-16.svg", "pxgrid", "Favicon 16 px, vergrössert")}<figcaption>16 px, auf 12-fach vergrössert</figcaption></figure>
@@ -166,62 +234,19 @@ th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var
   </div>
 </section>
 
-<section class="sec" id="haerte">
-  <h2>Härtetest</h2>
-  <h3>Grössen</h3>
-  <div class="sizes">${[16, 24, 32, 64].map((s) => `<figure>${s <= 32 ? fin(s <= 16 ? "favicon-16.svg" : "favicon-32.svg", "", s + " px").replace("<svg ", `<svg style="width:${s}px;height:${s}px" `) : fin("zeichen.svg", "", "64 px").replace("<svg ", `<svg style="width:${s}px;height:${s}px" `)}<figcaption>${s} px</figcaption></figure>`).join("")}${[16, 24, 32, 64].map((s) => `<figure>${fin("zeichen-tinte.svg", "", s + " px einfarbig").replace("<svg ", `<svg style="width:${s}px;height:${s}px" `)}<figcaption>${s} px, grosses Zeichen einfarbig</figcaption></figure>`).join("")}</div>
-  <p class="cap">Links die eigenen Kleinfassungen, rechts das grosse Zeichen verkleinert: unter 32 px verliert es Torraum und Punkte, darum die eigenen Fassungen.</p>
-  <h3>Auf Vereinsfarben</h3>
-  <div class="bgs">${[["Blau", "#1f4fbf", "#ffffff"], ["Rot", "#d3202e", "#ffffff"], ["Gelb", "#f6c500", "#111316"], ["Weiss", "#ffffff", "#111316"], ["Schwarz", "#15171a", "#ffffff"], ["Grün", "#0f7a46", "#ffffff"]].map((c) => `<div style="background:${c[1]};box-shadow:inset 0 0 0 1px var(--rule)">${(c[2] === "#ffffff" ? O["zeichen-weiss.svg"] : O["zeichen-tinte.svg"]).replace("<svg ", '<svg aria-hidden="true" ')}</div>`).join("")}</div>
-  <p class="cap">Auf Farbe immer einfarbig: Weiss auf Blau, Rot, Schwarz, Grün; Tinte auf Gelb und Weiss. Blau-Rot nie auf einer Vereinsfarbe.</p>
-  <h3>Neben anderen Apps</h3>
-  <div class="home"><div class="ph">${["#3a7bd5", "#2fb36e", "#f2a33a", "#8e5bd8", "#e0533c", null, "#5ac8fa", "#ffcc00", "#34c759", "#ff2d55", "#1c1c1e", "#af52de"].map((c) => c ? `<div class="app"><i style="background:${c}"></i>App</div>` : `<div class="app">${icon(O["app-icon.svg"], "")}Handball In…</div>`).join("")}</div></div>
-  <h3>Im Kopf der App, links neben dem Vereinswappen</h3>
-  <div class="bar"><span class="brand">${O["favicon-32.svg"].replace("<svg ", '<svg aria-hidden="true" style="width:32px;height:32px" ')}</span><span class="sep"></span><span class="crest" aria-hidden="true"></span><span class="team"><b>HC Zürichsee</b><small>Herren 1 · 3. Liga</small></span><nav><span class="on">Spiele</span><span>Szenen</span><span>Saison</span><span>Team</span></nav></div>
-  <div class="phonebar">${O["favicon-32.svg"].replace("<svg ", '<svg aria-hidden="true" ')}<span class="crest" aria-hidden="true"></span><span class="team">Herren 1<small>HC Zürichsee</small></span><span class="plus" aria-hidden="true">+</span></div>
-  <p class="cap">In der App steht nur das kleine Zeichen in Tinte, mit Blau auf dem Pfeil, vor dem Wappen des Vereins. Der Name der App steht nicht im Kopf: Die Trainerin weiss, wo sie ist; das Wappen ist wichtiger.</p>
-  <div class="grid3">
-    <div><div class="login"><div class="card">${O["wortmarke-gestapelt.svg"].replace("<svg ", '<svg role="img" aria-label="Handball Intelligence" ')}<label>E-Mail<span class="f"></span></label><label>Passwort<span class="f"></span></label><span class="btn">Anmelden</span></div></div><p class="cap">Anmeldeseite: die gestapelte Wortmarke.</p></div>
-    <div><div class="chat"><div class="bubble"><div class="prev">${O["open-graph.svg"].replace("<svg ", '<svg role="img" aria-label="Vorschaubild" ')}<p><b>Rückzug nach Ballverlust</b><small>handballintelligence.ch</small></p></div><p>Schaut euch das bis Dienstag an.</p></div></div><p class="cap">Vorschau eines geteilten Links im Teamchat (Open-Graph-Bild 1200 × 630).</p></div>
-    <div><div class="jacket"><div class="jk"><svg viewBox="0 0 400 300" aria-hidden="true"><path d="M110 20 L160 8 Q200 30 240 8 L290 20 L370 70 L340 300 L60 300 L30 70 Z" fill="#14213d"/><path d="M200 26 V300" stroke="#0a1328" stroke-width="4"/><path d="M160 8 Q200 30 240 8 L232 30 Q200 46 168 30 Z" fill="#0a1328"/></svg><div class="em">${O["zeichen-weiss.svg"].replace("<svg ", '<svg aria-hidden="true" ')}</div></div></div><p class="cap">Gestickt auf der Trainerjacke, einfarbig weiss.</p></div>
-  </div>
-</section>
-
 <section class="sec" id="durchgaenge">
   <h2>Zwei kritische Durchgänge</h2>
   <div class="tw"><table>
     <thead><tr><th>Frage</th><th>Erster Durchgang</th><th>Zweiter Durchgang, nach den Änderungen</th></tr></thead>
     <tbody>
       <tr><td>Sieht es aus wie ein Clipart-Symbol für «Strategie»?</td><td>Ja, die geometrische Fassung ohne Feld (v02, v04): Kreis, Kreuz, Pfeil gibt es in jeder Symbolbibliothek.</td><td>Nein mehr: der gezogene Pfeil, der Handball-Torraum und die gepunktete 9-Meter-Linie. Ohne diese drei wird es wieder Clipart; sie bleiben Pflicht.</td></tr>
-      <tr><td>Was macht es zu unserem?</td><td>Zuerst nur der Pfeil von Hand, der aber zackig und kaputt aussah.</td><td>Der Spielzug: ein Durchbruch durch eine Zweier-Abwehr über die 9-Meter-Linie. Das zeichnet keine andere Sportart so, und es erzählt, was die App tut: die Lücke finden.</td></tr>
-      <tr><td>Würde ein Verein es auf eine Trainerjacke sticken?</td><td>Die zweifarbige Fassung mit dünnen Linien nicht: Stick braucht kräftige Striche.</td><td>Ja, einfarbig weiss. Die Feldlinien sind 10 Einheiten stark (2 mm bei 10 cm Breite), die Spielerinnen 26. Die 9-Meter-Punkte sind die Grenze; unter 6 cm Breite die 32-px-Fassung sticken.</td></tr>
-      <tr><td>Kann eine zwölfjährige Handballerin sagen, was das ist?</td><td>«Ein Spielzug» ja, «Handball» nur mit Torraum.</td><td>«Ein Durchbruch, wie die Trainerin ihn an die Tafel malt.»</td></tr>
+      <tr><td>Was macht es zu unserem?</td><td>Zuerst nur der Pfeil von Hand, der aber zackig und kaputt aussah.</td><td>Der Spielzug auf dem Handballfeld: ein Wurf am Verteidiger vorbei über die 9-Meter-Linie zum Torraum. Das zeichnet keine andere Sportart so.</td></tr>
+      <tr><td>Würde ein Verein es auf eine Trainerjacke sticken?</td><td>Die zweifarbige Fassung mit dünnen Linien nicht: Stick braucht kräftige Striche.</td><td>Ja, einfarbig weiss. Die Feldlinien sind 10 Einheiten stark (2 mm bei 10 cm Breite), Kreis und Pfeil 24, das Kreuz 26. Die 9-Meter-Punkte sind die Grenze; unter 6 cm Breite die 32-px-Fassung sticken.</td></tr>
+      <tr><td>Kann eine zwölfjährige Handballerin sagen, was das ist?</td><td>«Ein Spielzug» ja, «Handball» nur mit Torraum.</td><td>«Ein Spielzug, wie die Trainerin ihn an die Tafel malt.»</td></tr>
     </tbody>
   </table></div>
 </section>
 
-<section class="sec" id="entscheid">
-  <h2>Entscheid</h2>
-  <div class="final">
-    <div class="box rec">${fin("zeichen.svg", "", "Empfehlung")}<p class="cap"><b>Empfehlung:</b> Mischung, Durchbruch, Tor mit Torraum und 9-Meter-Linie (v10). Wortmarke Kanit ExtraBold Italic, zweizeilig.</p></div>
-    <div class="box">${inl(D.second, "", "Zweite Wahl")}<p class="cap"><b>Zweite Wahl:</b> dasselbe ohne 9-Meter-Linie (v07). Ruhiger und stickfreundlicher, aber weniger eindeutig Handball.</p></div>
-  </div>
-  <div class="box" style="place-items:start">${fin("wortmarke-zweizeilig.svg", "", "Wortmarke zweizeilig").replace("<svg ", '<svg style="width:min(640px,100%)" ')}</div>
-  <h3>Abstand zu bestehenden Zeichen</h3>
-  <ul class="list">
-    <li>Kreis, Kreuz und Pfeil sind die Sprache von Playbook-Apps im American Football und Basketball (zum Beispiel «Playmaker X», «X's & O's»). Darum nie ohne Handball-Feld, nie als «XO» geschrieben, nie auf Rasengrün oder Parkettbraun.</li>
-    <li>Die Videoanalyse «Once Sport» setzt ein Play-Dreieck in ein O. Darum nie ein Play-Symbol im Kreis, und der Pfeil bleibt ein gezogener Strich, kein Dreieck.</li>
-    <li>Keine rechtliche Prüfung. Vor der Anmeldung als Marke: Recherche in Swissreg und EUIPO in den Klassen 9, 41 und 42.</li>
-  </ul>
-  <h3>Dateien in <code>final/</code></h3>
-  <ul class="list">
-    <li>Zeichen: <code>zeichen.svg</code> (zweifarbig), <code>zeichen-tinte.svg</code>, <code>zeichen-tinte-akzent.svg</code>, <code>zeichen-weiss.svg</code>, <code>zeichen-negativ.svg</code>.</li>
-    <li>Wortmarke quer, zweizeilig und gestapelt, je farbig, einfarbig, negativ und weiss: <code>wortmarke-*.svg</code>. Schrift als Pfade.</li>
-    <li>Favicon: <code>favicon-16.svg</code>, <code>favicon-32.svg</code>, <code>favicon-16.png</code>, <code>favicon-32.png</code>.</li>
-    <li>App-Icon: <code>app-icon-1024.png</code>, <code>app-icon-512.png</code> (iOS, ohne Ecken), <code>app-icon-maske-1024.png</code>, <code>app-icon-maske-512.png</code> (Android und Web, Zeichen in der sicheren Zone), <code>app-icon-einfarbig.svg</code> (Android, Designs).</li>
-    <li>Open Graph: <code>open-graph.svg</code>, <code>open-graph.png</code> (1200 × 630).</li>
-  </ul>
-</section>
 </div>
 </body>
 </html>
