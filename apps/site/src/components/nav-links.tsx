@@ -45,7 +45,7 @@ export function LangLinks({ locale, names }: { locale: string; names: Record<str
             hrefLang={l}
             lang={l}
             aria-current={l === locale ? "true" : undefined}
-            className={cn("inline-flex min-h-12 items-center underline-offset-4", l === locale ? "font-bold underline" : "hover:underline")}
+            className={cn("inline-flex min-h-12 min-w-12 items-center underline-offset-4", l === locale ? "font-bold underline" : "hover:underline")}
           >
             {name}
           </Link>

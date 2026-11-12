@@ -63,7 +63,6 @@ const de = {
     resultLabel: "{own} {a} zu {b} {opp}",
     flightHalf: "Halbzeit {v}",
     flightEnd: "Schluss {v}",
-    flightLabel: "Spielverlauf: Tordifferenz Minute für Minute, nach oben führt {own}.",
   },
   things: {
     title: "Das bekommst du nach jedem Spiel",
@@ -106,8 +105,6 @@ const de = {
     noBall: "Ball in dieser Szene nicht erkannt",
     notFound: "nicht erkannt",
     goal: "Tor {opp} {clock}",
-    legendOwn: "{own}",
-    legendOpp: "{opp}",
     legendRef: "Schiedsrichter",
     legendNumber: "Nummer nur, wo sie gelesen wurde",
     legendBall: "Den Ball erkennt die Analyse noch nicht",
@@ -309,7 +306,7 @@ const de = {
       season: "Saison: was sich wiederholt",
       share_links: "Teilen per Link",
       club_stats: "Übersicht über alle Teams",
-      priority: "Analyse zuerst, Antwort zuerst",
+      priority: "Analyse und Antwort zuerst",
     },
     trial: "{days} Tage gratis",
     choose: "Kostenlos starten",
@@ -420,7 +417,6 @@ const de = {
     title: "Blog",
     head: "Aus der Werkstatt.",
     back: "Alle Beiträge",
-    readMore: "Weiterlesen",
   },
   legal: {
     draft: "Entwurf: Dieser Text ist noch nicht rechtlich geprüft und wird vor dem Start ersetzt.",

@@ -1,21 +1,25 @@
-After processing, the match page shows video, events and key figures side by side.
+What you see after the analysis and where it comes from.
 
-## Events
+## The three things
 
-The list contains shots, goals, turnovers, penalties and timeouts. A click jumps to that point in the video. Events have a source:
+For each match, three sentences with a number and its basis, for example "9 of 18 goals conceded via the right wing". Below them, the build-ups to these goals on half a court, and the matching scenes.
 
-- **Automatically detected:** from the video analysis. Uncertain events are marked and should be checked briefly.
-- **Tagged:** by you or your team, for example live courtside.
-- **Corrected:** you can change any event. Corrections feed into the key figures.
+- **Solid line:** build-up to the shooting position, confirmed by you.
+- **Dashed line:** estimated.
+- **Thin line:** to the goal. This is not a shot path: the analysis does not track the ball.
 
-## Key figures
+## The tactics camera
 
-Shooting percentage, save percentage, turnovers, shot charts by zone and the course of the match. **xG** (expected goals) estimates how many goals would be expected on average from the shooting positions. This is an estimate and is shown as such.
+The scene from above: players as dots, with their paths over the last two seconds. Shirt numbers only appear where they were read. The tactics camera needs a court that was detected or confirmed by you.
 
-## Insights
+## The numbers
 
-Under "Insights" you will find notable patterns compared with the other matches of the season. Only statements with a sufficiently large sample appear; each one links to the related scenes.
+Each number shows where it comes from:
 
-## Limits
+- **Match report:** goals, 7 m, penalties, turnovers.
+- **Marked by you:** shots, saves, missed shots. Without marking, the field stays empty instead of showing a zero.
+- **From the video, estimated:** running paths, shooting positions, fast breaks.
 
-Positions and running paths from a single camera are estimates. Values based on heuristics are labelled as such. If something is wrong, correct it or report it via "Feedback".
+## What it cannot do yet
+
+Track the ball. Detect saves and missed shots by itself. Detect goals from the picture alone when there is neither a match report nor a scoreboard. If something is wrong, correct it in Check or report it via "Help".

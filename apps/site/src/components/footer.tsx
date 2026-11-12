@@ -12,11 +12,11 @@ export function Footer({ locale }: { locale: Locale }) {
         {items.map(([href, label]) => (
           <li key={href}>
             {href.startsWith("http") || href.startsWith("mailto:") ? (
-              <a href={href} className="inline-flex min-h-12 items-center underline-offset-4 hover:underline">
+              <a href={href} className="inline-flex min-h-12 min-w-12 items-center underline-offset-4 hover:underline">
                 {label}
               </a>
             ) : (
-              <Link href={`/${locale}/${href}/`} className="inline-flex min-h-12 items-center underline-offset-4 hover:underline">
+              <Link href={`/${locale}/${href}/`} className="inline-flex min-h-12 min-w-12 items-center underline-offset-4 hover:underline">
                 {label}
               </Link>
             )}

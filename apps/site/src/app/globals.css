@@ -99,6 +99,8 @@
     font-family: var(--font-sans);
     font-size: 1.125rem;
     line-height: 1.5;
+    /* long German words must not push the page wide with large system text */
+    overflow-wrap: break-word;
     background-color: var(--ground);
     background-image:
       radial-gradient(rgb(22 23 26 / 0.07) 0.7px, transparent 0.9px),
@@ -205,6 +207,7 @@
     display: inline-flex;
     align-items: center;
     min-height: 3rem;
+    min-width: 3rem;
     font-weight: 700;
     text-decoration: underline;
     text-decoration-thickness: 2px;

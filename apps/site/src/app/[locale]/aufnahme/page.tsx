@@ -69,7 +69,7 @@ export default async function Filming({ params }: Props) {
           </div>
           <div className="mt-6 border-4 border-ink bg-paper px-6 py-12 text-center md:px-16 md:py-20">
             <img src="/brand/wortmarke-quer-einfarbig.svg" alt="Handball Intelligence" width={2150} height={512} className="mx-auto h-10 w-auto" />
-            <p className="font-slant mx-auto mt-8 max-w-[36rem] text-[2rem] leading-tight md:text-[2.75rem]">{t.notice}</p>
+            <p className="font-slant mx-auto mt-8 max-w-[36rem] text-[2rem] leading-tight hyphens-auto md:text-[2.75rem]">{t.notice}</p>
           </div>
           <PrintButton label={t.print} />
         </section>

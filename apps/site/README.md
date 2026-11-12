@@ -1,8 +1,16 @@
-# apps/site: marketing site and help centre
+# apps/site: the public website and help centre
 
-Static Next.js site (addendum 01, 4.13): start, features, pricing, demo analysis, recording guide,
-help centre, blog, contact, terms, privacy, imprint; German (de-CH), French and English under
-`/de/`, `/fr/`, `/en/`. `/` picks the browser language.
+Static Next.js site in the app's look «Anlauf» (concept and texts: `docs/site/KONZEPT.md`):
+start, So funktioniert es, Filmen, Demo-Spiel, Preise, Fragen (with the help guides), Daten und
+Einwilligung, Über uns und Kontakt, blog, terms, privacy, imprint; German (de-CH), French and
+English under `/de/`, `/fr/`, `/en/`. `/` picks the browser language. `/funktionen/` forwards to
+`/so-funktioniert-es/`.
+
+Set for older eyes: body text 19 px (18 on phones), nothing important under 16 px, targets 48 px,
+no symbol-only buttons, motion off with `prefers-reduced-motion`. Kanit, Hanken Grotesk and IBM
+Plex Mono are self-hosted (`src/fonts`, SIL OFL). The Anlauf building blocks (colour model, bundle,
+tactics camera, flight) are copies of `apps/web/src/components/anlauf` and `apps/web/src/lib/color.ts`
+in `src/components/anlauf` and `src/lib/color.ts`; keep them in step by hand.
 
 ```bash
 pnpm --filter @handball/site dev      # http://localhost:3000/de/
@@ -21,7 +29,11 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 - Prices: `@handball/plans` (`packages/plans/plans.json`), generated from the API plan table with
   `make plans`; CI fails when it is out of date.
 - Demo match: `public/demo/match.json`, a fictional match from `scripts/make_demo.py` (seeded random
-  events, statistics from `handball_metrics`); regenerate with `make plans`.
+  events, statistics from `handball_metrics`); regenerate with `make plans`. `src/lib/demo.ts` turns it
+  into what the pages draw (zones, invented runs, the three things, one scene without a ball); the
+  page says «Erfundenes Spiel» at the top. The visitor's colour comes in with `?kit=red` (no storage).
+- Help guides outside the core have `listed: false` in `content/help/index.ts`: reachable for the app's
+  links, not listed, not in the sitemap, `noindex`.
 
 ## Build variables
 | variable | default |
@@ -32,5 +44,5 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 | `NEXT_PUBLIC_STATUS_URL` | empty (link hidden) |
 | `NEXT_PUBLIC_COMPANY_NAME`, `_ADDRESS`, `_UID` | empty (imprint says the details follow) |
 
-The site sets no cookies and loads nothing from third parties. Lighthouse (mobile defaults, local
-static server): performance 92 to 98, accessibility 100, best practices 96, SEO 100.
+The site sets no cookies and loads nothing from third parties. Results of the last check are in
+`docs/site/TEST.md`.

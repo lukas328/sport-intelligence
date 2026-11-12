@@ -40,9 +40,20 @@ export function smooth(pts: readonly Pt[], n: number): Pt[] {
   return out;
 }
 
+// the camera samples the same tracks every frame: smooth each one once
+const SMOOTH10 = new WeakMap<readonly Pt[], Pt[]>();
+function smooth10(pts: readonly Pt[]): Pt[] {
+  let s = SMOOTH10.get(pts);
+  if (!s) {
+    s = smooth(pts, 10);
+    SMOOTH10.set(pts, s);
+  }
+  return s;
+}
+
 /** Point at t (0 to 1) along the smoothed path. */
 export function sampleAt(pts: readonly Pt[], t: number): Pt {
-  const s = smooth(pts, 10);
+  const s = smooth10(pts);
   const n = s.length - 1;
   const f = Math.max(0, Math.min(1, t)) * n;
   const i = Math.floor(f);

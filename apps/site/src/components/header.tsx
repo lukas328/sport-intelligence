@@ -23,10 +23,12 @@ export function Header({ locale }: { locale: Locale }) {
       <a href="#main" className="sr-only bg-ink px-4 py-3 font-bold text-ground focus:not-sr-only focus:absolute focus:top-2 focus:left-2">
         {t.skip}
       </a>
-      <div className="wrap flex min-h-[4.5rem] items-center gap-4 py-2">
+      <div className="wrap flex min-h-[4.5rem] flex-wrap items-center gap-x-4 gap-y-2 py-2">
         <Link href={`/${locale}/`} className="inline-flex shrink-0 items-center py-1" aria-label={t.home}>
           {/* docs/design/brand2/taktik/final/wortmarke-quer.svg; minimum width 220 px */}
-          <img src="/brand/wortmarke-quer.svg" alt="" width={2150} height={512} className="h-[3.5rem] w-auto" />
+          <img src="/brand/wortmarke-quer.svg" alt="" width={2150} height={512} className="hidden h-[3.5rem] w-auto min-[420px]:block" />
+          {/* narrow phones: the two-line word mark (minimum width 140 px) */}
+          <img src="/brand/wortmarke-zweizeilig.svg" alt="" width={1456} height={512} className="block h-[3.5rem] w-auto min-[420px]:hidden" />
         </Link>
         <nav aria-label={t.main} className="hidden flex-1 min-[1280px]:block">
           <NavLinks locale={locale} links={links} />

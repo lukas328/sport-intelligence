@@ -94,8 +94,8 @@ export default async function Demo({ params }: Props) {
         <div className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
           <section aria-labelledby="figures">
             <SectionHead id="figures" title={t.figuresTitle} />
-            <div className="overflow-x-auto">
-              <table className="sheet mt-2 min-w-[30rem]">
+            <div>
+              <table className="sheet mt-2">
                 <thead>
                   <tr>
                     <th scope="col">
@@ -103,7 +103,7 @@ export default async function Demo({ params }: Props) {
                     </th>
                     <th scope="col">{v.own}</th>
                     <th scope="col">{v.opp}</th>
-                    <th scope="col" className="text-left">
+                    <th scope="col" className="hidden text-left sm:table-cell">
                       {t.figuresSource}
                     </th>
                   </tr>
@@ -113,10 +113,11 @@ export default async function Demo({ params }: Props) {
                     <tr key={f.key}>
                       <th scope="row" className="font-semibold">
                         {t.figures[f.key]}
+                        <span className="block text-base font-normal text-ink-2 sm:hidden">{t.source[f.source]}</span>
                       </th>
                       <td className="font-num text-[1.5rem]">{f.key === "shootingPct" && f.own != null ? fmt(t.pct, { v: f.own }) : f.own}</td>
                       <td className="font-num text-[1.5rem]">{f.key === "shootingPct" && f.opp != null ? fmt(t.pct, { v: f.opp }) : f.opp}</td>
-                      <td className="!pl-6 text-left text-base text-ink-2">{t.source[f.source]}</td>
+                      <td className="hidden !pl-4 text-left text-base text-ink-2 sm:table-cell">{t.source[f.source]}</td>
                     </tr>
                   ))}
                 </tbody>

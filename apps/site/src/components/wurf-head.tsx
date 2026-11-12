@@ -67,7 +67,7 @@ export function WurfHead({
             {oppName}
           </span>
         </p>
-        <Score own={own} opp={opp} label={scoreLabel} className="mt-3 text-[6.5rem] md:text-right md:text-[12rem]" />
+        <Score own={own} opp={opp} label={scoreLabel} className="mt-3 text-[min(6.5rem,25vw)] md:text-right md:text-[min(12rem,16vw)]" />
         <Flight goals={goals} width={390} height={90} className="-mx-4 mt-6 w-[calc(100%+2rem)] md:hidden" />
       </div>
       <Flight goals={goals} width={1000} height={120} labels={flightLabels} slant={48} className="absolute right-0 bottom-[2.5rem] left-0 hidden w-full md:block" />

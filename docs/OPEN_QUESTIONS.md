@@ -262,3 +262,24 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
 - **Q-UX-20 Prüfen as questions.** SPEC 7.5 asks one question at a time with a boxed crop.
   The analysis delivers no box per person yet, so only goal and shot candidates are asked, in
   the existing review of the Video tab. *Assumption:* the question screen comes with the boxes.
+
+## Website (docs/site/KONZEPT.md, 2026-11-12)
+- **Q-SITE-1 Prices on the website.** The site shows the plan table of `packages/plans`
+  (CHF 0 / 39 / 199, yearly 10 monthly fees) with a visible line «Die Preise sind noch nicht
+  endgültig» (Q-PROD-4). The goalkeeper add-on (CHF 7) is not shown: outside the core.
+  *Open:* final prices, and whether «Gratis» (no automatic analysis) stays a plan.
+- **Q-SITE-2 Analysis duration.** The site promises no time («die App schickt dir eine
+  Nachricht»). The app's empty state says «Nach etwa 40 Minuten» (SPEC 7.13), the CPU path takes
+  about twice the video length (Q-INFRA-1). *Open:* one number for both, once the GPU is decided.
+- **Q-SITE-3 «Wer wir sind».** No text about the team exists; the page «Über uns und Kontakt»
+  shows a placeholder. *Open:* text and whether to name people.
+- **Q-SITE-4 Storage location stated as fact.** The site says «App und Datenbank auf Servern in
+  der Schweiz, Videos in einem Speicher in der EU» (ADR 025, ADR 002). *Open:* confirm before
+  launch; the providers are named in the privacy policy (Q-LEGAL-1).
+- **Q-SITE-5 Public demo.** The app has a demo match only after sign-up. Without an account there
+  is the invented match of the website (`apps/site/public/demo/match.json`, marked «Erfundenes
+  Spiel»). *Open:* a public read-only demo in the app (a shared link of the demo club would do).
+- **Q-SITE-6 Help guides outside the core.** Guides for training, tactics board, assistant,
+  presentation, player feed, scouting report, roles and the statistics matrix stay reachable
+  (the app links to them, `help-map.ts`) but are not listed and carry a note. *Open:* update
+  `help-map.ts` in the app to the new screens, then delete these guides.

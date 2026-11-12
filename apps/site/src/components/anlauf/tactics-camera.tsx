@@ -203,30 +203,46 @@ export function TacticsCamera({
 }) {
   const [t, setT] = useState(1);
   const [paused, setPaused] = useState(true);
+  // the website plays the scene only while it is on screen (and never while hidden)
+  const [seen, setSeen] = useState(false);
   const start = useRef<number | null>(null);
+  const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setPaused(still || reducedMotion());
   }, [still]);
 
   useEffect(() => {
-    if (paused) return;
+    const el = box.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setSeen(Boolean(e?.isIntersecting)), { rootMargin: "100px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (paused || !seen) return;
     let raf = 0;
+    let last = 0;
     start.current = null;
     const tick = (ts: number) => {
       if (start.current == null) start.current = ts;
-      const e = (ts - start.current) % CYCLE_MS;
-      setT(Math.min(1, e / PLAY_MS));
+      // 25 frames a second are enough for dots on a court and keep slow phones calm
+      if (ts - last >= 40) {
+        last = ts;
+        const e = (ts - start.current) % CYCLE_MS;
+        setT(Math.min(1, e / PLAY_MS));
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [paused]);
+  }, [paused, seen]);
 
   const V = VIEWS[view];
   return (
     <figure className="m-0">
-      <div className="relative bg-court">
+      <div ref={box} className="relative bg-court">
         <svg viewBox={V.box.join(" ")} role="img" aria-label={text.label} className="block w-full">
           <CameraFrame scene={scene} view={view} width={width} dot={dot} t={t} labels={showLabels} />
         </svg>
