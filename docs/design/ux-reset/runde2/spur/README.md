@@ -1,3 +1,5 @@
+> **Verworfener Kandidat.** Entschieden ist «Anlauf» (12. November 2026), siehe `../../ANLAUF.md` und `../../zielbild.html`.
+
 # Spur
 
 Runde 2, Richtung B. Feld: das Bild und die Bewegung. `index.html` im Browser öffnen (ohne Build,

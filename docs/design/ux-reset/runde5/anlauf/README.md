@@ -1,3 +1,5 @@
+> **Skizze, aus der das Zielbild wurde.** Entschieden ist «Anlauf» mit Schrift A und Grund «Stoff» (12. November 2026); verbindlich sind `../../ANLAUF.md` und `../../zielbild.html`.
+
 # Anlauf
 
 Runde 5, ausgearbeitete Synthese aus Lukas' Wahl im Mischpult (`K3-D1-S3-G2-Z3-M1-blau-schwarz`).

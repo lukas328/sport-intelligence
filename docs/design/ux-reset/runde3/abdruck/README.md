@@ -1,3 +1,5 @@
+> **Verworfener Kandidat.** Entschieden ist «Anlauf» (12. November 2026), siehe `../../ANLAUF.md` und `../../zielbild.html`.
+
 # Abdruck
 
 Runde 3, Schlussrunde. `index.html` im Browser öffnen (ohne Build, Google Fonts aus dem Netz). Die
