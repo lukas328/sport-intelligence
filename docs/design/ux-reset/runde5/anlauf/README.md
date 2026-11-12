@@ -2,7 +2,7 @@
 
 Runde 5, ausgearbeitete Synthese aus Lukas' Wahl im Mischpult (`K3-D1-S3-G2-Z3-M1-blau-schwarz`).
 `index.html` im Browser öffnen (ohne Build, Google Fonts aus dem Netz). Oben umschaltbar: Schrift
-A oder B, drei Gründe, sechs Vereinsfarben. `?still` zeigt alles ohne Bewegung (für Bilder),
+A oder B, drei Gründe, sechs Vereinsfarben. Voreinstellung beim Öffnen: Schrift B, Grund Hallenlicht. `?still` zeigt alles ohne Bewegung (für Bilder),
 `?f=fb&g=g2&club=rot` öffnet eine bestimmte Variante. Bilder in `shots/`: Einzelbilder, `bogen.jpg`,
 `farben.jpg` (sechs Vereinsfarben, Start und Taktikkamera), `varianten.jpg` (A mit Kante, B mit
 Hallenlicht, B mit Stoff).
@@ -93,9 +93,9 @@ Fehlwürfe vom Kreis gäbe es nur von Hand.
   Wett-Look. Meine Empfehlung ist B.
 - Grund: Hallenlicht mit weissen Flächen ist am klarsten, Kante am eigenständigsten, Stoff am
   wärmsten. Keiner ist schon ein Wow.
-- Die Vorschau am Start sitzt als kleines Bild in der Ecke von Punkt 1 und überdeckt dort einen
-  Teil des Bündels. Ein Umschalter «Alle 9 | Szene» wäre sauberer.
-- Beim Feld-Check liegt eine Ecke ausserhalb des Bildes, weil die Kamera mitschwenkt. In der
-  Umsetzung braucht es dafür einen Hinweis («Ecke ausserhalb des Bildes, schwenk dorthin»).
+- Am Start Desktop schaltet Punkt 1 im selben Rahmen zwischen «Alle 9» (Bündel) und «Szene 39:55»
+  (Taktikkamera); am Handy hat die Szene einen eigenen Abschnitt. Nie beides übereinander.
+- Beim Feld-Check zeigt das Bild etwas weiter, damit alle vier Ecken drin sind. Schwenkt die
+  Kamera im echten Video so, dass eine Ecke fehlt, braucht es einen Hinweis.
 - Kontrast: weisse Schrift auf Gelb und auf Weiss wird im Kopf auf Tinte umgestellt; die
   Vereinsfarbe als Text wird bei zu wenig Kontrast zu Tinte.
