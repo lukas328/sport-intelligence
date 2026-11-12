@@ -8,13 +8,30 @@ import { SITE_URL } from "@/lib/site";
 import localFont from "next/font/local";
 import "../globals.css";
 
-// same typeface as the app (SIL OFL, src/fonts/OFL.txt)
-const archivo = localFont({
-  src: "../../fonts/archivo-variable.woff2",
-  variable: "--font-archivo",
+// the app's typefaces (Anlauf), self-hosted, SIL OFL: src/fonts/OFL-*.txt
+const kanit = localFont({
+  src: [
+    { path: "../../fonts/kanit-latin-800-italic.woff2", weight: "800", style: "italic" },
+    { path: "../../fonts/kanit-latin-900-italic.woff2", weight: "900", style: "italic" },
+  ],
+  variable: "--font-kanit",
   display: "swap",
+});
+const hanken = localFont({
+  src: "../../fonts/hanken-grotesk-latin-wght-normal.woff2",
   weight: "100 900",
-  declarations: [{ prop: "font-stretch", value: "62% 125%" }],
+  style: "normal",
+  variable: "--font-hanken",
+  display: "swap",
+});
+const plexMono = localFont({
+  src: [
+    { path: "../../fonts/ibm-plex-mono-latin-500-normal.woff2", weight: "500" },
+    { path: "../../fonts/ibm-plex-mono-latin-600-normal.woff2", weight: "600" },
+  ],
+  variable: "--font-plex-mono",
+  display: "swap",
+  preload: false,
 });
 
 export const dynamicParams = false;
@@ -27,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     metadataBase: new URL(SITE_URL),
     title: { default: t.title, template: `%s | Handball Intelligence` },
     description: t.description,
-    icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/icon.png", sizes: "192x192" }], apple: "/apple-icon.png" },
+    icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/icon.png", sizes: "512x512" }], apple: "/apple-icon.png" },
     openGraph: {
       siteName: "Handball Intelligence",
       type: "website",
@@ -41,10 +58,10 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return (
-    <html lang={HTML_LANG[locale]} className={archivo.variable}>
-      <body className="min-h-screen antialiased">
+    <html lang={HTML_LANG[locale]} className={`${kanit.variable} ${hanken.variable} ${plexMono.variable}`}>
+      <body className="min-h-screen">
         <Header locale={locale} />
-        <main id="main" className="mx-auto max-w-6xl px-4 py-10">
+        <main id="main" tabIndex={-1} className="outline-none">
           {children}
         </main>
         <Footer locale={locale} />

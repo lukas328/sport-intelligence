@@ -1,88 +1,361 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
+/*
+ * The website in the app's look «Anlauf» (docs/design/ux-reset/ANLAUF.md), set larger for older
+ * eyes (docs/site/KONZEPT.md): body text 19 px, nothing important under 16 px, targets 48 px.
+ * Cloth ground, ink for text, buttons and links. The club colour is the visitor's (a tap on a
+ * shirt), set as custom properties by lib/color.ts; it appears only in the Wurf head, the Keil,
+ * own lines and numerals. Yellow means «schau hier» and always comes with a word.
+ */
 :root {
-  --background: #f7f7f4;
-  --raised: #ffffff;
-  --surface: #f2f2ee;
-  --border: #e3e3dd;
-  --foreground: #121411;
-  --muted: #5f635b;
-  --accent: #c93a0b;
-  --accent-contrast: #ffffff;
-  --ok: #1e7b3a;
-  --error: #b42318;
-  --court: #e7efe4;
-  --court-line: #1f2937;
+  --ground: #eceae5;
+  --paper: #f7f6f2;
+  --ink: #16171a;
+  --ink-2: #53565b;
+  --rule: #d6d3cc;
+  --attn: #ffd23c;
+  --win: #17703f;
+  --loss: #a8261e;
+  --court: #0f2333;
+  --court-bar: #0a0d11;
+  --court-text: #c7ced5;
+
+  /* blue club against the demo opponent (black and white), from lib/color.ts kit() */
+  --club: #1f4fd6;
+  --club-2: #ffffff;
+  --club-ink: #ffffff;
+  --club-edge: #1f4fd6;
+  --club-text: #1f4fd6;
+  --club-line: #1f4fd6;
+  --club-pipe: transparent;
+  --club-dot: #1f4fd6;
+  --opp: #17191c;
+  --opp-ink: #ffffff;
+  --opp-edge: #17191c;
+  --opp-line: #17191c;
+  --opp-pipe: transparent;
+  --opp-dot: #17191c;
+  --club-cam: #1f4fd6;
+  --club-cam-ink: #ffffff;
+  --opp-cam: #ffffff;
+  --opp-cam-ink: #0a0d11;
+  --opp-cam-edge: #e9eef2;
+  --opp-cam-trail: #ffffff;
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #0d0e0c;
-    --raised: #161815;
-    --surface: #1f221e;
-    --border: #2b2e29;
-    --foreground: #edeee9;
-    --muted: #a2a69d;
-    --accent: #ff7a45;
-    --accent-contrast: #0d0e0c;
-    --ok: #5ad17e;
-    --error: #ff7b6e;
-    --court: #13251a;
-    --court-line: #e5e7eb;
-    color-scheme: dark;
+@theme inline {
+  --color-ground: var(--ground);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-rule: var(--rule);
+  --color-attn: var(--attn);
+  --color-win: var(--win);
+  --color-loss: var(--loss);
+  --color-court: var(--court);
+  --color-court-bar: var(--court-bar);
+  --color-court-text: var(--court-text);
+  --color-club: var(--club);
+  --color-club-ink: var(--club-ink);
+  --color-club-text: var(--club-text);
+  --color-opp: var(--opp);
+  --color-opp-ink: var(--opp-ink);
+
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-kanit), var(--font-hanken), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-full: 0;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes appear {
+  to {
+    opacity: 1;
   }
 }
 
-:root[data-theme="dark"] {
-  --background: #0d0e0c;
-  --raised: #161815;
-  --surface: #1f221e;
-  --border: #2b2e29;
-  --foreground: #edeee9;
-  --muted: #a2a69d;
-  --accent: #ff7a45;
-  --accent-contrast: #0d0e0c;
-  --ok: #5ad17e;
-  --error: #ff7b6e;
-  --court: #13251a;
-  --court-line: #e5e7eb;
-  color-scheme: dark;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 1rem;
+  }
+  body {
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    background-color: var(--ground);
+    background-image:
+      radial-gradient(rgb(22 23 26 / 0.07) 0.7px, transparent 0.9px),
+      radial-gradient(rgb(22 23 26 / 0.05) 0.7px, transparent 0.9px);
+    background-size:
+      6px 6px,
+      6px 6px;
+    background-position:
+      0 0,
+      3px 3px;
+  }
+  @media (min-width: 768px) {
+    body {
+      font-size: 1.1875rem;
+    }
+  }
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    text-wrap: balance;
+  }
+  h3 {
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  p,
+  li {
+    text-wrap: pretty;
+  }
+  a {
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+  }
+  :focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .on-club :focus-visible,
+  .on-court :focus-visible {
+    outline-color: #ffffff;
+    box-shadow: 0 0 0 6px var(--ink);
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+  table th,
+  table td {
+    font-variant-numeric: tabular-nums;
+  }
+  summary {
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 1ms !important;
+    }
+  }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-raised: var(--raised);
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-surface: var(--surface);
-  --color-border: var(--border);
-  --color-accent: var(--accent);
-  --color-accent-contrast: var(--accent-contrast);
-  --color-ok: var(--ok);
-  --color-error: var(--error);
+/* components: utilities (hidden, w-full, margins) may override them */
+@layer components {
+  /* buttons: ink filled or ink outline, 56 px, label upright */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.5rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.2;
+    text-align: center;
+    border: 2px solid var(--ink);
+    text-decoration: none;
+  }
+  .btn-ink {
+    background: var(--ink);
+    color: var(--ground);
+  }
+  .btn-ink:hover {
+    background: #000;
+  }
+  .btn-line {
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-line:hover {
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+  /* a link that reads as a link: ink, underlined, at least 48 px to hit */
+  .link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
+  .link:hover {
+    text-decoration-thickness: 3px;
+  }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+@layer utilities {
+  .font-slant {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .font-num {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .score-echo {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--club-ink);
+  }
+  .mark-band {
+    background: var(--club);
+    box-shadow: inset 0 0 0 1px var(--club-edge);
+    transform: skewX(-14deg);
+  }
+  /* section head: slanted title over a firm rule */
+  .section-head {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 0.75rem;
+  }
+  .sheet {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .sheet th,
+  .sheet td {
+    padding: 0.75rem 0.5rem;
+    text-align: right;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: baseline;
+  }
+  .sheet thead th {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink-2);
+    border-bottom: 2px solid var(--ink);
+  }
+  .sheet th:first-child,
+  .sheet td:first-child,
+  .sheet .text-left {
+    text-align: left;
+    padding-left: 0;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .wrap {
+      padding-inline: 2rem;
+    }
+  }
+  .measure {
+    max-width: 40rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .play .ln {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw 0.7s cubic-bezier(0.3, 0.6, 0.3, 1) forwards;
+      animation-delay: calc(var(--i, 0) * 140ms + 0.2s);
+    }
+    .play .ln-e {
+      opacity: 0;
+      animation: appear 0.5s ease-out forwards;
+      animation-delay: calc(var(--i, 0) * 140ms + 0.4s);
+    }
+  }
 }
 
-h1, h2, h3 { font-stretch: 112%; letter-spacing: -0.018em; text-wrap: balance; }
-.font-score { font-stretch: 118%; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* help, blog and legal texts */
+.prose {
+  max-width: 40rem;
+}
+.prose h2 {
+  font-size: 1.75rem;
+  margin: 2.5rem 0 0.75rem;
+}
+.prose h3 {
+  font-size: 1.25rem;
+  margin: 1.75rem 0 0.5rem;
+}
+.prose p,
+.prose ul,
+.prose ol,
+.prose table {
+  margin: 0.875rem 0;
+  line-height: 1.6;
+}
+.prose ul {
+  list-style: square;
+  padding-left: 1.5rem;
+}
+.prose ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.prose li {
+  margin: 0.375rem 0;
+}
+.prose a {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+.prose strong {
+  font-weight: 700;
+}
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 1.0625rem;
+}
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  text-align: left;
+  vertical-align: top;
+}
+.prose th {
+  border-bottom: 2px solid var(--ink);
+}
 
-.prose h2 { font-size: 1.25rem; font-weight: 600; margin: 1.75rem 0 0.5rem; }
-.prose p, .prose ul, .prose table { margin: 0.75rem 0; line-height: 1.65; }
-.prose ul { list-style: disc; padding-left: 1.25rem; }
-.prose ol { list-style: decimal; padding-left: 1.25rem; }
-.prose a { color: var(--accent); text-decoration: underline; }
-.prose table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
-.prose th, .prose td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
-.prose th { background: var(--surface); }
-.prose table { border-radius: 12px; overflow: hidden; }
-@media print { header, footer, .no-print { display: none !important; } }
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

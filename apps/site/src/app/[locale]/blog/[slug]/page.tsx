@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { KitScope } from "@/components/kit";
+import { PageHead } from "@/components/wurf-head";
 import { JsonLd } from "@/components/json-ld";
 import { blogBody, mdxComponents } from "@/lib/content";
 import { HTML_LANG, LOCALES, messages, type Locale } from "@/lib/i18n";
@@ -30,7 +32,8 @@ export default async function BlogPost({ params }: Props) {
   const Body = await blogBody(locale, slug);
   const date = new Intl.DateTimeFormat(HTML_LANG[locale], { dateStyle: "long", timeZone: "Europe/Zurich" });
   return (
-    <article className="max-w-3xl">
+    <KitScope>
+    <article>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -43,14 +46,17 @@ export default async function BlogPost({ params }: Props) {
           publisher: { "@type": "Organization", name: "Handball Intelligence" },
         }}
       />
-      <p className="text-sm">
-        <Link href={`/${locale}/blog/`} className="text-accent underline">{t.back}</Link>
-      </p>
-      <h1 className="mt-4 text-3xl font-bold">{post.title[locale]}</h1>
-      <time dateTime={post.date} className="mt-2 block text-sm text-muted">{date.format(new Date(post.date))}</time>
-      <div className="prose mt-4">
-        <Body components={mdxComponents(locale, "blog")} />
+      <PageHead
+        kick={<Link href={`/${locale}/blog/`} className="link text-ink">{t.back}</Link>}
+        title={post.title[locale]}
+        lead={<time dateTime={post.date}>{date.format(new Date(post.date))}</time>}
+      />
+      <div className="wrap">
+        <div className="prose mt-10">
+          <Body components={mdxComponents(locale, "blog")} />
+        </div>
       </div>
     </article>
+    </KitScope>
   );
 }

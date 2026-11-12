@@ -4,6 +4,8 @@ export type HelpLocale = "de" | "fr" | "en";
 export interface HelpEntry {
   slug: string;
   group: "start" | "video" | "team" | "work" | "account";
+  /** false: a guide to a function outside the core (SPEC 1); reachable for the app's links, not listed */
+  listed?: boolean;
   title: Record<HelpLocale, string>;
   summary: Record<HelpLocale, string>;
   keywords: Record<HelpLocale, string>;
@@ -23,7 +25,7 @@ export const HELP: HelpEntry[] = [
   },
   {
     slug: "aufnahme",
-    group: "video",
+    group: "start",
     title: { de: "Spiel richtig filmen", fr: "Bien filmer un match", en: "Filming a match" },
     summary: {
       de: "Kamera, Position und Einstellungen für eine gute Analyse.",
@@ -34,7 +36,7 @@ export const HELP: HelpEntry[] = [
   },
   {
     slug: "video-hochladen",
-    group: "video",
+    group: "start",
     title: { de: "Video hochladen", fr: "Téléverser une vidéo", en: "Uploading a video" },
     summary: {
       de: "Upload, Kamera-Rollen, Import per Link und Speicherdauer.",
@@ -56,7 +58,7 @@ export const HELP: HelpEntry[] = [
   },
   {
     slug: "highlights",
-    group: "video",
+    group: "work",
     title: { de: "Highlights", fr: "Temps forts", en: "Highlights" },
     summary: {
       de: "Automatische Highlight-Videos für Team und Spieler.",
@@ -112,6 +114,7 @@ export const HELP: HelpEntry[] = [
   {
     slug: "praesentation",
     group: "work",
+    listed: false,
     title: { de: "Präsentation für die Videositzung", fr: "Présentation pour la séance vidéo", en: "Presentation for the video session" },
     summary: {
       de: "Clips, Zeichnungen, Handy als Fernbedienung, Export.",
@@ -123,6 +126,7 @@ export const HELP: HelpEntry[] = [
   {
     slug: "deine-szenen",
     group: "work",
+    listed: false,
     title: { de: "Meine Szenen", fr: "Mes scènes", en: "My scenes" },
     summary: {
       de: "Was Spielerinnen und Spieler sehen und wie sie kommentieren.",
@@ -134,6 +138,7 @@ export const HELP: HelpEntry[] = [
   {
     slug: "vorbereitungsbericht",
     group: "work",
+    listed: false,
     title: { de: "Vorbereitungsbericht", fr: "Rapport de préparation", en: "Scouting report" },
     summary: {
       de: "Was die Daten über den nächsten Gegner sagen.",
@@ -145,6 +150,7 @@ export const HELP: HelpEntry[] = [
   {
     slug: "taktiktafel",
     group: "work",
+    listed: false,
     title: { de: "Taktiktafel", fr: "Tableau tactique", en: "Tactics board" },
     summary: {
       de: "Spielzüge in Phasen zeichnen und animieren.",
@@ -155,7 +161,7 @@ export const HELP: HelpEntry[] = [
   },
   {
     slug: "live-erfassung",
-    group: "work",
+    group: "video",
     title: { de: "Live-Erfassung", fr: "Saisie en direct", en: "Live tagging" },
     summary: {
       de: "Ereignisse am Spielfeldrand erfassen, auch ohne Netz.",
@@ -167,6 +173,7 @@ export const HELP: HelpEntry[] = [
   {
     slug: "frag-deine-daten",
     group: "work",
+    listed: false,
     title: { de: "Frag deine Daten", fr: "Interroge tes données", en: "Ask your data" },
     summary: {
       de: "Fragen in normaler Sprache, Antworten nur aus euren Daten.",
@@ -177,7 +184,7 @@ export const HELP: HelpEntry[] = [
   },
   {
     slug: "statistik-matrix",
-    group: "work",
+    group: "video",
     title: { de: "Statistik-Matrix und Export", fr: "Matrice statistique et export", en: "Statistics matrix and export" },
     summary: {
       de: "Eigene Auswertungen, Excel, CSV und Sportscode-XML.",
@@ -189,6 +196,7 @@ export const HELP: HelpEntry[] = [
   {
     slug: "training-planen",
     group: "team",
+    listed: false,
     title: { de: "Training planen", fr: "Planifier l'entraînement", en: "Planning training" },
     summary: {
       de: "Einheiten, Anwesenheit, Kalender und Schwerpunkte aus Spielen.",
