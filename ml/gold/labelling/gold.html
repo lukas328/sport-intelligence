@@ -256,7 +256,8 @@ function drawStage() {
   const c = clip(); if (!c) return; const cv = $("stage"), g = cv.getContext("2d");
   cv.width = c.w; cv.height = c.h; computeView(c); const v = st.view;
   g.imageSmoothingEnabled = v.z < 2;
-  if (vid.readyState >= 2) g.drawImage(vid, v.sx, v.sy, c.w / v.z, c.h / v.z, 0, 0, c.w, c.h);
+  const k = vid.videoWidth ? vid.videoWidth / c.w : 1;  // proxy videos are smaller than the clip
+  if (vid.readyState >= 2) g.drawImage(vid, v.sx * k, v.sy * k, c.w / v.z * k, c.h / v.z * k, 0, 0, c.w, c.h);
   st.inset = null;
   if (st.mode === "follow") {
     if (st.mouse) { const s = st.keys.o ? "out" : st.keys.v ? "hidden" : st.keys.h ? "held" : "free"; ring(g, st.mouse.x, st.mouse.y, 14, css(COL[s]), 3); }
@@ -278,7 +279,7 @@ function drawStage() {
 }
 function drawInset(g, c) {  // overview bottom right with the zoom window; a click there re-centres
   const W = c.w / 5, H = c.h / 5, X = c.w - W - 12, Y = c.h - H - 12, v = st.view;
-  if (vid.readyState >= 2) { g.globalAlpha = 0.9; g.drawImage(vid, 0, 0, c.w, c.h, X, Y, W, H); g.globalAlpha = 1; }
+  if (vid.readyState >= 2) { g.globalAlpha = 0.9; g.drawImage(vid, 0, 0, vid.videoWidth || c.w, vid.videoHeight || c.h, X, Y, W, H); g.globalAlpha = 1; }
   g.strokeStyle = "#fff"; g.lineWidth = 2; g.strokeRect(X, Y, W, H);
   g.strokeStyle = css("--ball"); g.strokeRect(X + v.sx / 5, Y + v.sy / 5, c.w / v.z / 5, c.h / v.z / 5);
   st.inset = { X, Y, W, H };

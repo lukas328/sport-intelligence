@@ -5,7 +5,7 @@ The ball net's peaks and OWLv2's boxes per frame go into the product's ball path
 frame on the path gets its point as the suggestion, other frames none. Suggestions only save
 clicks: every gold label is the owner's decision.
 
-    python ml/gold/suggest.py PRE_JSON PUB_DIR    # writes PUB_DIR/clips.json
+    python ml/gold/suggest.py PRE_JSON PUB_DIR [--v2]   # writes PUB_DIR/clips.json; --v2: tracker v2
 """
 
 import json
@@ -13,6 +13,9 @@ import sys
 from pathlib import Path
 
 from handball_vision import balltrack
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+V2 = False
 
 
 def suggest(c: dict) -> list:
@@ -40,7 +43,16 @@ def suggest(c: dict) -> list:
     return sug
 
 
+def suggest_v2(c: dict) -> list:
+    """Tracker v2 (tracker.py): 69 % on gold v1 against 32 % for the product's ball path."""
+    from tracker import track_clip
+
+    return [[round(q[0], 1), round(q[1], 1), 1.0] if q else None for q in track_clip(c)]
+
+
 def main() -> None:
+    global V2
+    V2 = "--v2" in sys.argv
     pre = json.load(open(sys.argv[1]))["clips"]
     pub = Path(sys.argv[2])
     pub.mkdir(parents=True, exist_ok=True)
@@ -56,7 +68,7 @@ def main() -> None:
                 "K": max(1, round(fps / 10)),
                 "w": c["w"],
                 "h": c["h"],
-                "sug": suggest(c),
+                "sug": suggest_v2(c) if V2 else suggest(c),
                 # every frame's ball candidates (net peaks >= 0.15, OWLv2 boxes >= 0.08), so the page
                 # can snap a rough point (followed with the cursor) to the nearest real candidate
                 "cand": [
