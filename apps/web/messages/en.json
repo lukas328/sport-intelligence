@@ -558,7 +558,8 @@
     "chooseVideo": "Choose video",
     "more": "More: another camera, a link, technical details",
     "mayClose": "You can close the page. We send you an e-mail when the analysis is done.",
-    "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone."
+    "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone.",
+    "secondFile": "This match already has a video. A second file, such as the second half, is stored and plays; but only the first one is analysed (three things, scenes, check)."
   },
   "processing": {
     "title": "Processing",

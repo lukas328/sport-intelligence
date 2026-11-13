@@ -558,7 +558,8 @@
     "chooseVideo": "Video wählen",
     "more": "Mehr: andere Kamera, Link, Technik",
     "mayClose": "Du kannst die Seite schliessen. Wir schicken dir eine Mail, wenn die Analyse fertig ist.",
-    "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy."
+    "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy.",
+    "secondFile": "Dieses Spiel hat schon ein Video. Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt; ausgewertet (drei Dinge, Szenen, Prüfen) wird aber nur die erste."
   },
   "processing": {
     "title": "Verarbeitung",

@@ -274,7 +274,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             {t("upload.addCamera")}
           </summary>
           <div className="pt-3">
-            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            <UploadPanel orgId={orgId} matchId={match.id} hasMain onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </div>
         </details>
       )}

@@ -558,7 +558,8 @@
     "chooseVideo": "Choisir la vidéo",
     "more": "Plus : autre caméra, lien, technique",
     "mayClose": "Tu peux fermer la page. Nous t'envoyons un e-mail quand l'analyse est terminée.",
-    "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone."
+    "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone.",
+    "secondFile": "Ce match a déjà une vidéo. Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et lisible ; mais seul le premier est analysé (trois choses, scènes, vérifier)."
   },
   "processing": {
     "title": "Traitement",

@@ -299,3 +299,13 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   then had to start over (UX test round 2, N15). Now 24 hours, still single use and void once
   used (setting `magic_link_ttl_minutes`). Trade-off: a mailbox someone else can read stays a way
   in for longer. Alternative if that is too long: a six-digit code next to the link.
+- **Q-VIDEO-PARTS Two files for one match (Lukas to decide, product).** Many coaches stop the
+  recording at half-time. Today a match takes several main files, all stored and playable, but
+  the match's timeline and the whole analysis (three things, scenes, Prüfen, positions) use only
+  the first one (`timeline_video`): the second half in a second file is not analysed. The app
+  says so where a second file is added and in the upload tips; the website says the same
+  (UX test round 2, N28). To merge two files into one match: effort (one timeline across files
+  with an offset per file, or joining the files before the analysis), order (by upload or by the
+  recording time in the file, with a way to swap), the time axis (the break between the files is
+  unknown: from the throw-off of the second half, which Prüfen already asks for). Until then: one
+  file per match is the recommendation.
