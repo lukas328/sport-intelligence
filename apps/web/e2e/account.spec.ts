@@ -55,8 +55,6 @@ test("sign-in lands in the first club, server-rendered without errors", async ({
   await page.getByLabel("Vereinsname").fill("HC Anmeldung");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/app\/[^/]+\/teams\//);
   const orgId = page.url().match(/\/app\/([^/?#]+)/)![1]!;

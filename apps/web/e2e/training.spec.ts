@@ -8,8 +8,6 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.getByLabel("Vereinsname").fill("HC Training");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U17");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   // the squad page says the state of the squad, the team sits in the eyebrow above it
   await expect(page.getByRole("heading", { level: 1, name: "Noch niemand im Kader." })).toBeVisible();

@@ -15,15 +15,25 @@ export function Score({
   outlines = 2,
   phoneLeft = false,
   className,
+  pending,
 }: {
   own: number | null;
   opp: number | null;
   outlines?: 0 | 1 | 2;
+  /** before the game: date and time in place of a «-:-» placeholder (UX test B42) */
+  pending?: ReactNode;
   /** left-aligned on the phone: the outlines step to the right */
   phoneLeft?: boolean;
   className?: string;
 }) {
   const text = own == null || opp == null ? "-:-" : null;
+  if (text && pending) {
+    return (
+      <div className={cn("font-num whitespace-nowrap", className)} style={{ lineHeight: 0.9 }} data-testid="score-pending">
+        <span className="block text-[0.36em]">{pending}</span>
+      </div>
+    );
+  }
   const body = text ?? (
     <>
       {own}:<u className="decoration-opp [text-decoration-skip-ink:none] [text-decoration-thickness:.045em] [text-underline-offset:.06em]">{opp}</u>
@@ -68,6 +78,7 @@ export function WurfHead({
   meta,
   children,
   waiting = false,
+  pending,
 }: {
   kick?: ReactNode;
   title: ReactNode;
@@ -82,6 +93,7 @@ export function WurfHead({
   children?: ReactNode;
   /** before the first result: no club area, an ink outline instead */
   waiting?: boolean;
+  pending?: ReactNode;
 }) {
   return (
     <header
@@ -100,7 +112,7 @@ export function WurfHead({
         {children}
       </div>
       <div className="flex min-w-0 flex-col">
-        <Score own={own} opp={opp} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
+        <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
         <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[15px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
           <span>{ownName}</span>
           <span>
@@ -121,7 +133,7 @@ export function WurfHead({
 }
 
 /** Streifen: the slim head of every sub-page of a match (Video, Zahlen, Prüfen, Spieltag). */
-export function Strip({ name, sub, own, opp, children, live }: { name: ReactNode; sub?: ReactNode; own: number | null; opp: number | null; children?: ReactNode; live?: boolean }) {
+export function Strip({ name, sub, own, opp, children, live, pending }: { name: ReactNode; sub?: ReactNode; own: number | null; opp: number | null; children?: ReactNode; live?: boolean; pending?: ReactNode }) {
   return (
     <header
       data-zone="strip"
@@ -135,7 +147,7 @@ export function Strip({ name, sub, own, opp, children, live }: { name: ReactNode
         {sub && <small className="mt-1.5 block font-sans text-xs font-medium not-italic md:text-[15px]">{sub}</small>}
         {children}
       </div>
-      <Score own={own} opp={opp} outlines={1} className="text-[48px] md:text-[72px]" />
+      <Score own={own} opp={opp} pending={pending} outlines={1} className="text-[48px] md:text-[72px]" />
     </header>
   );
 }

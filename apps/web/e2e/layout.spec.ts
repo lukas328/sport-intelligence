@@ -19,8 +19,6 @@ test("no horizontal scrolling on phones", async ({ page }, info) => {
   await page.getByLabel("Vereinsname").fill("HC Schmal");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Junioren U15 Leistungsgruppe");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   const teamUrl = page.url().replace(/(\/teams\/[^/?#]+).*/, "$1");

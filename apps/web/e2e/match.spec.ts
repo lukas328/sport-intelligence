@@ -15,8 +15,6 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.getByLabel("Vereinsname").fill("HC Video");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
 
   // create a match
@@ -167,8 +165,6 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByLabel("Vereinsname").fill("HC Playlist");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U19");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await openLibrary(page, "Sammlungen");
   await page.getByLabel("Name", { exact: true }).fill("Abwehr Training");

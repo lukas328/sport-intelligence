@@ -8,8 +8,6 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
   await page.getByLabel("Vereinsname").fill("HC Live");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Damen 2");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   const teamUrl = page.url();

@@ -255,7 +255,7 @@
     "country": "Land",
     "primaryColor": "Hauptfarbe",
     "secondaryColor": "Zweitfarbe",
-    "logo": "Logo",
+    "logo": "Wappen",
     "logoHint": "PNG, JPEG oder WebP, höchstens 1 MB.",
     "teamIntro": "Welches Team analysierst du zuerst?",
     "teamName": "Teamname",
@@ -307,7 +307,10 @@
     "notMine": "Das ist nicht mein Team",
     "next": "Als Nächstes: das erste Video hochladen oder das Demo-Spiel ansehen.",
     "cancel": "Abbrechen",
-    "stepTitle": "Einstieg"
+    "stepTitle": "Einstieg",
+    "moreClub": "Mehr: Land, Wappen, eigene Farbe",
+    "ownColour": "Eigene Farbe",
+    "rosterLater": "Den Kader und die Einladungen machst du später auf der Teamseite."
   },
   "roster": {
     "title": "Team",
@@ -394,7 +397,11 @@
     "tab_club": "Verein",
     "tab_teams": "Teams und Rollen",
     "tab_billing": "Abo und Rechnungen",
-    "tab_federation": "Verband"
+    "tab_federation": "Verband",
+    "clubLook": "Name, Trikot und Wappen",
+    "clubPreview": "So sieht der Kopf eines Spiels aus",
+    "clubPreviewSub": "Vorschau",
+    "ownColours": "Eigene Farben statt Trikot"
   },
   "dashboard": {
     "teamsTitle": "Teams",

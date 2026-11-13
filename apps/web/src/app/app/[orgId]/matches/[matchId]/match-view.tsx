@@ -469,10 +469,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
         {staff && !main && (
-          <div id="upload" className="scroll-mt-24 space-y-4 border-2 border-dashed border-ink/40 p-4 md:p-6">
+          <section id="upload" className="scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
             <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
-          </div>
+          </section>
         )}
         <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
         {!main && match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
