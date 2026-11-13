@@ -54,23 +54,29 @@ export function Rail({
   goals,
   phase,
   at,
+  from = 0,
   length = 60,
   label,
 }: {
   goals: readonly ReportGoal[];
   phase?: readonly [number, number] | null;
   at?: number | null;
+  /** the first minute drawn: with `length` the stretch the video covers (span) */
+  from?: number;
   length?: number;
   label: string;
 }) {
   const W = 1000;
   const base = 36;
-  const x = (m: number) => (Math.min(m, length) / length) * W;
+  const x = (m: number) => (Math.max(0, Math.min(m - from, length)) / length) * W;
+  // the half-time line only where it falls inside the stretch
+  const mid = 30;
+  const half = from < mid && from + length > mid ? mid : null;
   return (
     <svg viewBox="-10 -12 1020 92" preserveAspectRatio="none" role="img" aria-label={label} className="block h-[92px] w-full">
       {phase && <rect x={x(phase[0])} y={0} width={x(phase[1]) - x(phase[0])} height={72} fill="var(--attn)" />}
       <line x1={0} x2={W} y1={base} y2={base} stroke="var(--ink)" strokeWidth={1.5} />
-      <line x1={x(length / 2)} x2={x(length / 2)} y1={2} y2={70} stroke="var(--ink)" strokeDasharray="2 4" />
+      {half != null && <line x1={x(half)} x2={x(half)} y1={2} y2={70} stroke="var(--ink)" strokeDasharray="2 4" />}
       {goals.map((g, i) =>
         g.team === "own" ? (
           <rect key={i} x={x(g.minute) - 2.5} y={base - 26} width={5} height={24} fill="var(--club-line)" stroke="var(--club-pipe)" strokeWidth={1} />

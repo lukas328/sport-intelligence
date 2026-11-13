@@ -350,9 +350,12 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             }
         )
 
+    job = await _analysis_job(ctx, asset)
     return {
         "has_video": asset is not None,
-        "analysis": await analysis_status(ctx, asset),
+        "analysis": _job_state(job),
+        # when the analysis was done: the start puts a fresh one in its head (second round)
+        "analysis_at": job.finished_at if job is not None and _job_state(job) == "ready" else None,
         # a match report brought goals (handball.ch, a paper report): «Spielbericht» only then
         # (real-video test F6; the course also carries the video's goals)
         "has_report": any(e.source in REPORT_SOURCES for e in goals),
@@ -369,17 +372,18 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     }
 
 
-async def analysis_status(ctx: Ctx, asset: VideoAsset | None) -> str:
-    """none, running, ready or failed: the latest analysis job of the video. «Analyse fertig» is
-    said only once it is ready (real-video test E06)."""
+async def _analysis_job(ctx: Ctx, asset: VideoAsset | None) -> ProcessingJob | None:
     if asset is None:
-        return "none"
-    job = await ctx.db.scalar(
+        return None
+    return await ctx.db.scalar(
         select(ProcessingJob)
         .where(ProcessingJob.video_asset_id == asset.id, ProcessingJob.kind == "analysis")
         .order_by(ProcessingJob.created_at.desc())
         .limit(1)
     )
+
+
+def _job_state(job: ProcessingJob | None) -> str:
     if job is None:
         return "none"
     return {
@@ -388,6 +392,12 @@ async def analysis_status(ctx: Ctx, asset: VideoAsset | None) -> str:
         "succeeded": "ready",
         "failed": "failed",
     }.get(str(job.status.value if hasattr(job.status, "value") else job.status), "none")
+
+
+async def analysis_status(ctx: Ctx, asset: VideoAsset | None) -> str:
+    """none, running, ready or failed: the latest analysis job of the video. «Analyse fertig» is
+    said only once it is ready (real-video test E06)."""
+    return _job_state(await _analysis_job(ctx, asset))
 
 
 def _span(match: Match, asset: VideoAsset | None) -> list[float] | None:

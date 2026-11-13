@@ -3196,7 +3196,10 @@
     "rowFailed": "Analyse nicht geklappt",
     "rowVideoOnly": "Video da, noch nicht ausgewertet",
     "rowGoals": "{n, plural, one {1 Tor} other {# Tore}} im Video",
-    "colourTip": "Tipp: Mit der Trikotfarbe von {opponent} trennt die Analyse die Teams sicherer."
+    "colourTip": "Tipp: Mit der Trikotfarbe von {opponent} trennt die Analyse die Teams sicherer.",
+    "minutesSpan": "noch etwa {low} bis {high} Minuten",
+    "answerChecks": "{n, plural, one {1 Frage beantworten} other {# Fragen beantworten}}",
+    "minuteAt": "Minute {n}"
   },
   "check": {
     "top": "Prüfen · {opponent}",

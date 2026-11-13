@@ -145,7 +145,9 @@ export function WurfHead({
       <div className="flex min-w-0 flex-col">
         <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
         {scoreNote && (
-          <p className="mt-1 text-[15px] font-semibold md:text-right" data-testid="score-note">
+          // on a wide screen above the score: under it the drawn course covered it (real-video
+          // test, second round, 1280 px)
+          <p className="mt-1 text-[15px] font-semibold md:order-[-1] md:mt-0 md:text-right" data-testid="score-note">
             {scoreNote}
           </p>
         )}

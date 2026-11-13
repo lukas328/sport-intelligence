@@ -324,6 +324,8 @@ async def test_one_question_per_moment_and_the_rest_offered(
     asked = {c["id"] for c in g["checks"]} | {c["id"] for c in g["more_checks"]}
     assert rows[66_000]["id"] not in asked and rows[63_000]["id"] not in asked
     assert g["analysis"] == "ready"
+    # when it finished: the start puts a fresh analysis in its head
+    assert g["analysis_at"] is not None
 
 
 def test_goals_twelve_seconds_apart_are_two_goals() -> None:
@@ -410,7 +412,7 @@ async def test_answers_survive_a_new_analysis_after_a_moved_court(
     r = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts})
     assert r.status_code == 202, r.text
     g = (await api.get(f"{base}/graphics")).json()
-    assert g["analysis"] == "running"
+    assert g["analysis"] == "running" and g["analysis_at"] is None
     await _finish(api, jobs.jobs[-1][2], result)
 
     rows = (await api.get(f"{base}/goal-candidates")).json()["candidates"]

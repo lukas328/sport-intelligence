@@ -589,6 +589,9 @@ class MatchGraphicsOut(ApiModel):
     analysis: Literal["none", "running", "ready", "failed"] = Field(
         default="none", description="the latest analysis of the timeline video"
     )
+    analysis_at: datetime | None = Field(
+        default=None, description="when the latest analysis finished; null unless ready"
+    )
     has_report: bool = Field(default=False, description="goals from a match report exist")
     span: tuple[float, float] | None = Field(
         default=None, description="match minutes the video covers; null without throw-off"

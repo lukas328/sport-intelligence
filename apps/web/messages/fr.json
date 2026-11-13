@@ -3196,7 +3196,10 @@
     "rowFailed": "L'analyse n'a pas fonctionné",
     "rowVideoOnly": "Vidéo là, pas encore analysée",
     "rowGoals": "{n, plural, one {1 but} other {# buts}} dans la vidéo",
-    "colourTip": "Conseil : avec la couleur du maillot de {opponent}, l'analyse sépare mieux les équipes."
+    "colourTip": "Conseil : avec la couleur du maillot de {opponent}, l'analyse sépare mieux les équipes.",
+    "minutesSpan": "encore environ {low} à {high} minutes",
+    "answerChecks": "{n, plural, one {Répondre à 1 question} other {Répondre à # questions}}",
+    "minuteAt": "Minute {n}"
   },
   "check": {
     "top": "Vérifier · {opponent}",

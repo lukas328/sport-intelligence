@@ -39,6 +39,7 @@ export function VideoStage({
   oppName,
   staff,
   thing,
+  scene = null,
   onThing,
   onBench,
 }: {
@@ -50,6 +51,8 @@ export function VideoStage({
   oppName: string;
   staff: boolean;
   thing: number | null;
+  /** a goal's scene to open at (?scene=eventId, from «Szene zeigen» in the Spiel tab) */
+  scene?: string | null;
   onThing: (n: number | null) => void;
   onBench: () => void;
 }) {
@@ -61,13 +64,17 @@ export function VideoStage({
   const chosen = thing != null ? (things[thing - 1] ?? null) : null;
   // the scenes of the thing, in the order of the match, each a goal with a video time
   const sequence: Goal[] = chosen ? thingSequence(graphics, thing!, things) : [];
-  const first = sequence[0]?.event_id ?? things[0]?.goals.find((g) => g.eventId)?.eventId ?? goals[0]?.event_id ?? null;
+  const asked = scene && goals.some((g) => g.event_id === scene) ? scene : null;
+  const first = asked ?? sequence[0]?.event_id ?? things[0]?.goals.find((g) => g.eventId)?.eventId ?? goals[0]?.event_id ?? null;
   const [eventId, setEventId] = useState<string | null>(first);
   // a new thing starts at its first scene
   useEffect(() => {
     if (sequence[0]) setEventId(sequence[0].event_id);
     setAll(false);
   }, [thing]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (asked) setEventId(asked);
+  }, [asked]);
   const goal = goals.find((g) => g.event_id === eventId) ?? null;
   // Taktik is the default once the court is confirmed (SPEC 7.3)
   const [mode, setMode] = useState<"video" | "taktik">(graphics.field_confirmed ? "taktik" : "video");
@@ -77,8 +84,13 @@ export function VideoStage({
   const player = useRef<PlayerHandle>(null);
   const [kept, setKept] = useState<string | null>(null);
   const minute = goal?.minute ?? 0;
-  const phase: [number, number] = [Math.max(0, Math.floor(minute - PHASE)), Math.min(60, Math.ceil(minute + PHASE))];
-  const inPhase = goals.filter((g) => g.minute != null && g.minute >= phase[0] && g.minute <= phase[1]);
+  // the minutes the video covers (span): a short video is one phase with all its goals, the Rail
+  // runs over these minutes, not over 60 (real-video test, second round)
+  const span = graphics.span ?? null;
+  const short = span ? span[1] - span[0] <= 2 * PHASE + 2 : goals.every((g) => g.minute == null);
+  const phase: [number, number] =
+    short && span ? [Math.floor(span[0]), Math.ceil(span[1])] : [Math.max(span ? Math.floor(span[0]) : 0, Math.floor(minute - PHASE)), Math.min(span ? Math.ceil(span[1]) : 60, Math.ceil(minute + PHASE))];
+  const inPhase = short ? goals : goals.filter((g) => g.minute != null && g.minute >= phase[0] && g.minute <= phase[1]);
   const list = chosen ? sequence : inPhase;
   const at = list.findIndex((g) => g.event_id === eventId);
   const team = (g: Goal) => (g.team === "opp" ? oppName : ownName);
@@ -164,12 +176,24 @@ export function VideoStage({
         <CameraKey us={ownName} them={oppName} referee={t("referee")} ball={t("ball")} />
         {graphics.report_goals.length > 0 && (
           <div className="mt-6">
-            <Rail goals={reportGoals(graphics)} phase={phase} at={goal?.minute ?? null} label={t("rail")} />
-            <p className="mt-1 flex justify-between text-[15px] text-ink-2">
-              <span>{t("throwOff")}</span>
-              <span>{t("halfTimeWord")}</span>
-              <span>{t("fullTime")}</span>
-            </p>
+            {span ? (
+              <>
+                <Rail goals={reportGoals(graphics)} phase={short ? null : phase} at={goal?.minute ?? null} from={span[0]} length={Math.max(1, span[1] - span[0])} label={t("rail")} />
+                <p className="mt-1 flex justify-between text-[15px] text-ink-2" data-testid="rail-span">
+                  <span>{t("minuteAt", { n: Math.floor(span[0]) })}</span>
+                  <span>{t("minuteAt", { n: Math.ceil(span[1]) })}</span>
+                </p>
+              </>
+            ) : (
+              <>
+                <Rail goals={reportGoals(graphics)} phase={phase} at={goal?.minute ?? null} label={t("rail")} />
+                <p className="mt-1 flex justify-between text-[15px] text-ink-2">
+                  <span>{t("throwOff")}</span>
+                  <span>{t("halfTimeWord")}</span>
+                  <span>{t("fullTime")}</span>
+                </p>
+              </>
+            )}
           </div>
         )}
         <div className="mt-6 flex flex-wrap gap-3" data-testid="stage-actions">
@@ -208,7 +232,7 @@ export function VideoStage({
             }
           />
         ) : (
-          <SectionHead title={t("phaseTitle", { from: phase[0], to: phase[1] })} note={t("scenes", { count: list.length })} />
+          <SectionHead title={short && !span ? t("scoreFromVideo") : t("phaseTitle", { from: phase[0], to: phase[1] })} note={t("scenes", { count: list.length })} />
         )}
         <ol className="m-0 list-none p-0" data-testid="stage-scenes">
           {list.map((g, i) => {

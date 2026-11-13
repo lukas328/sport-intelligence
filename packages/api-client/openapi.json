@@ -7618,6 +7618,19 @@
             "title": "Analysis",
             "type": "string"
           },
+          "analysis_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "when the latest analysis finished; null unless ready",
+            "title": "Analysis At"
+          },
           "checks": {
             "description": "the questions of Pr\u00fcfen, in order: what three things need (the one count)",
             "items": {

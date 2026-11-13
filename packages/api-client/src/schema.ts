@@ -7572,6 +7572,11 @@ export interface components {
              */
             analysis?: "none" | "running" | "ready" | "failed";
             /**
+             * Analysis At
+             * @description when the latest analysis finished; null unless ready
+             */
+            analysis_at?: string | null;
+            /**
              * Checks
              * @description the questions of Prüfen, in order: what three things need (the one count)
              */

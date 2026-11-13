@@ -13,6 +13,7 @@ import { KitFields } from "@/components/domain/kit-fields";
 import { AttendancePanel } from "@/components/team/attendance-panel";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
+import { markOpened } from "@/lib/fresh-match";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { ownName } from "@/lib/own-name";
@@ -76,6 +77,12 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const router = useRouter();
   const shell = useOptionalShell();
   const key = ["match", initial.id];
+  // opened after its analysis is done: the start's head goes back to the last match once the
+  // questions are answered (real-video test, second round)
+  const analysed = useMatchGraphics(orgId, initial.id).data?.analysis === "ready";
+  useEffect(() => {
+    if (analysed) markOpened(initial.id);
+  }, [analysed, initial.id]);
   const { data: match = initial } = useQuery({
     queryKey: key,
     initialData: initial,
@@ -115,6 +122,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   // them and «Zurück» goes back to the previous tab; a match opens on Spiel
   const [view, setViewState] = useState<View>("game");
   const [thing, setThingState] = useState<number | null>(null);
+  // one goal's scene from the Spiel tab (?scene=eventId): the Video tab opens at it
+  const [scene, setScene] = useState<string | null>(null);
   const linkedView = useRef(false);
   const readAddress = useCallback(() => {
     const q = new URLSearchParams(window.location.search);
@@ -123,6 +132,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     if (v) linkedView.current = true;
     setViewState(v ?? (q.get("t") ? "video" : "game"));
     setThingState(Number.isInteger(n) && n >= 1 && n <= 3 ? n : null);
+    setScene(q.get("scene"));
   }, []);
   useEffect(() => {
     readAddress();
@@ -130,15 +140,18 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     return () => window.removeEventListener("popstate", readAddress);
   }, [readAddress]);
   const TAB_WORD: Record<View, string> = { game: "spiel", video: "video", numbers: "zahlen" };
-  const setView = useCallback((v: View, n: number | null = null) => {
+  const setView = useCallback((v: View, n: number | null = null, sceneId: string | null = null) => {
     // a tab the coach chose is not changed by the default afterwards
     linkedView.current = true;
     setViewState(v);
     setThingState(n);
+    setScene(sceneId);
     const q = new URLSearchParams(window.location.search);
     q.set("tab", TAB_WORD[v]);
     if (n != null) q.set("thing", String(n));
     else q.delete("thing");
+    if (sceneId) q.set("scene", sceneId);
+    else q.delete("scene");
     q.delete("t");
     window.history.pushState(null, "", `${window.location.pathname}?${q.toString()}`);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -450,6 +463,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             oppName={oppName(match)}
             staff={staff}
             thing={thing}
+            scene={scene}
             onThing={(n) => setView("video", n)}
             onBench={() => setBench(true)}
           />
@@ -538,8 +552,18 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <Button onClick={() => setView("video")}>{ta("chooseVideo")}</Button>
             </section>
           )}
+          {/* right after the analysis, no goal in the video yet: one sentence and the next step,
+              not an empty tab (real-video test, second round) */}
+          {staff && graphics.data?.analysis === "ready" && !graphics.data.goals.some((x) => x.has_video) && graphics.data.checks.length > 0 && (
+            <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="game-next-step">
+              <p className="m-0 text-[19px] font-bold">{ta("nextStepChecks", { n: graphics.data.checks.length })}</p>
+              <Link href={`${base}/check`} className={buttonClass("primary")} data-testid="game-step">
+                {ta("answerChecks", { n: graphics.data.checks.length })}
+              </Link>
+            </section>
+          )}
           {graphics.data && (goalRuns(graphics.data).length > 0 || graphics.data.goals.some((x) => x.has_video)) && (
-            <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} />
+            <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} onScene={main ? (id) => setView("video", null, id) : undefined} />
           )}
           <GameActions
             collect={staff && counted && match.opponent ? <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} /> : null}
@@ -683,7 +707,11 @@ function Processing({ jobs, orgId, staff, onOtherFile, hasReport = false }: { jo
   shown.current = Math.max(shown.current, overall);
   const started = current?.started_at ? new Date(current.started_at).getTime() : null;
   const elapsed = started ? (now.getTime() - started) / 1000 : 0;
-  const etaMin = current && current.status === "running" && current.progress > 0.05 && elapsed > 20 ? Math.max(1, Math.round(((elapsed / current.progress) * (1 - current.progress)) / 60)) : null;
+  // the early estimate was far too low (real-video test, second round): only after the first
+  // quarter of the stage, and as a span upward
+  const etaRaw = current && current.status === "running" && current.progress >= 0.25 && elapsed > 20 ? ((elapsed / current.progress) * (1 - current.progress)) / 60 : null;
+  const etaMin = etaRaw != null ? Math.max(1, Math.round(etaRaw)) : null;
+  const etaMax = etaMin != null && etaRaw != null ? Math.max(etaMin + 1, Math.ceil(etaRaw * 1.5)) : null;
   if (failed) {
     // what failed, what stays, what to do (UX test B29)
     return (
@@ -709,7 +737,7 @@ function Processing({ jobs, orgId, staff, onOtherFile, hasReport = false }: { jo
         <div className="mt-3 h-1.5 bg-rule" aria-hidden>
           <div className="h-full bg-ink transition-all duration-500" style={{ width: `${shown.current * 100}%` }} />
         </div>
-        <p className="mt-2 text-[15px] font-bold">{etaMin != null ? ta("minutesLeft", { minutes: etaMin }) : t("etaSoon")}</p>
+        <p className="mt-2 text-[15px] font-bold">{etaMin != null && etaMax != null ? ta("minutesSpan", { low: etaMin, high: etaMax }) : t("etaSoon")}</p>
         <ol className="mt-4 m-0 list-none p-0">
           {steps.map(({ key, st }) => (
             <li key={key} className={cn("grid min-h-11 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 border-t border-rule py-2.5 text-base", st === "pending" && "text-ink-2")}>

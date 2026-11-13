@@ -1,11 +1,11 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import type { ComponentProps, CSSProperties, ReactNode } from "react";
+import { useEffect, useState, type ComponentProps, type CSSProperties, type ReactNode } from "react";
 import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { Bundle, EmptyField } from "@/components/anlauf/bundle";
 import { WurfHead } from "@/components/anlauf/heads";
@@ -18,6 +18,7 @@ import { ownName } from "@/lib/own-name";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { freshMatch, openedMatches } from "@/lib/fresh-match";
 import { matchState } from "@/lib/match-state";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
@@ -43,7 +44,10 @@ export function StartView({
   const t = useTranslations("anlauf");
   // the team's name in the head, the same as in the top bar (UX test H11: one club, one name)
   const { org, team } = useShell();
-  const last = played.find((m) => m.kind !== "training" && m.score_own != null) ?? played[0] ?? null;
+  // a freshly analysed match stands in the head until opened, or while it has open questions
+  // (real-video test, second round); otherwise the last match with a result
+  const fresh = useFreshMatch(orgId, played);
+  const last = played.find((m) => m.id === fresh) ?? played.find((m) => m.kind !== "training" && m.score_own != null) ?? played[0] ?? null;
   const next = upcoming.find((m) => m.kind !== "training") ?? null;
   const withoutVideo = played.filter((m) => !m.has_video).length;
   return (
@@ -69,6 +73,27 @@ export function StartView({
       </div>
     </div>
   );
+}
+
+/** The id of a freshly analysed match for the head, or null (see lib/fresh-match). */
+function useFreshMatch(orgId: string, played: Match[]): string | null {
+  const candidates = played.filter((m) => m.has_video && !m.is_demo).slice(0, 8);
+  const results = useQueries({
+    queries: candidates.map((m) => ({
+      queryKey: ["graphics", m.id],
+      queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/graphics", { params: { path: { org_id: orgId, match_id: m.id } } })).data ?? null,
+      staleTime: 60_000,
+    })),
+  });
+  // read after mount: the server render knows no storage
+  const [opened, setOpened] = useState<Set<string> | null>(null);
+  useEffect(() => setOpened(openedMatches()), []);
+  if (!opened) return null;
+  const infos = candidates.flatMap((m, i) => {
+    const d = results[i]?.data;
+    return d ? [{ id: m.id, analysis: d.analysis ?? "none", analysisAt: d.analysis_at ?? null, checks: d.checks.length }] : [];
+  });
+  return freshMatch(infos, opened, Date.now());
 }
 
 function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string; m: Match | null; next: Match | null; teamName: string; canWrite: boolean; club: [string, string | null] }) {

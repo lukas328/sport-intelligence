@@ -38,11 +38,14 @@ export function ThreeThingsView({
   oppName,
   onScenes,
   hrefScenes,
+  onScene,
 }: {
   orgId: string;
   matchId: string;
   graphics: MatchGraphics;
   oppName: string;
+  /** opens one goal's scene (the Video tab at that scene); without it the scene shows here */
+  onScene?: (eventId: string) => void;
   /** opens the scenes of a thing; `n` is its place (1 to 3), as in `?thing=n` */
   onScenes?: (thing: Thing, n: number) => void;
   hrefScenes?: (thing: Thing, n: number) => string;
@@ -53,7 +56,7 @@ export function ThreeThingsView({
   if (things.length === 0) {
     // confirmed goals, but not enough with a spot for three things: the goals themselves, as
     // scenes and on the tactics camera (real-video test E01)
-    if (graphics.goals.some((x) => x.has_video)) return <VideoGoals orgId={orgId} matchId={matchId} graphics={graphics} oppName={oppName} />;
+    if (graphics.goals.some((x) => x.has_video)) return <VideoGoals orgId={orgId} matchId={matchId} graphics={graphics} oppName={oppName} onScene={onScene} />;
     return <p className="border-t-2 border-ink pt-4 text-[17px] text-ink-2">{t("noThings")}</p>;
   }
   return (
@@ -219,7 +222,7 @@ const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms 
  * in the video), the team, «ohne Position» where no spot is known, and the scene on the tactics
  * camera (E01, E02).
  */
-export function VideoGoals({ orgId, matchId, graphics, oppName }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string }) {
+export function VideoGoals({ orgId, matchId, graphics, oppName, onScene }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string; onScene?: (eventId: string) => void }) {
   const t = useTranslations("anlauf");
   const goals = graphics.goals.filter((x) => x.has_video).sort((a, b) => (a.minute ?? Infinity) - (b.minute ?? Infinity) || (a.t_ms ?? 0) - (b.t_ms ?? 0));
   const playable = goals.filter((g) => g.has_video && g.t_ms != null);
@@ -242,7 +245,7 @@ export function VideoGoals({ orgId, matchId, graphics, oppName }: { orgId: strin
                 {g.shot == null && <span className="ml-2 text-[15px] text-ink-2">{t("noSpot")}</span>}
               </span>
               {g.has_video && g.t_ms != null && (
-                <button type="button" onClick={() => setOpen(g.event_id)} aria-pressed={open === g.event_id} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+                <button type="button" onClick={() => (onScene ? onScene(g.event_id) : setOpen(g.event_id))} aria-pressed={onScene ? undefined : open === g.event_id} data-testid="scene-show" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
                   {t("sceneShow")}
                 </button>
               )}

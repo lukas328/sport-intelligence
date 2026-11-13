@@ -31,8 +31,16 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
       data: { opponent_name: "TV Kandidat", kickoff_at: new Date(Date.now() - 86_400_000).toISOString(), kit_opponent: "#f2f2f2" },
     })
   ).json();
+  // a newer match: the start's head shows it unless a fresh analysis waits
+  await page.request.post(`/v1/orgs/${org}/teams/${team}/matches`, {
+    headers: { "x-csrf-token": csrf },
+    data: { opponent_name: "TV Neuer", kickoff_at: new Date(Date.now() - 7_200_000).toISOString() },
+  });
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
   await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await expect(page.getByTestId("plain-stage")).toBeVisible({ timeout: 240_000 });
+  // away from the match while the analysis runs: it is not opened after it
+  await page.goto(`/app/${org}/teams/${team}/matches`);
   await expect
     .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
     .toBe("ready");
@@ -46,7 +54,17 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
 
   // the start counts the court, the throw-off and the three goals: one count
   await page.goto(`/app/${org}/teams/${team}/matches`);
+  // the fresh analysis stands in the head, ahead of the newer match
   await expect(page.getByTestId("start-next-step")).toContainText("5 Fragen helfen");
+  await expect(page.locator("[data-zone=wurf]")).toContainText("TV Kandidat");
+
+  // the Spiel tab right after the analysis: the sentence and the step, not an empty tab (in a
+  // second browser, so this browser has not opened the match yet)
+  const second = await page.context().browser()!.newContext({ baseURL: info.project.use.baseURL, storageState: await page.context().storageState() });
+  const tab = await second.newPage();
+  await tab.goto(`/app/${org}/matches/${match.id}`);
+  await expect(tab.getByTestId("game-step")).toHaveText("5 Fragen beantworten");
+  await second.close();
 
   // Prüfen: the court as it is, the throw-off at the start, two goals for us, one for them
   await page.goto(`/app/${org}/matches/${match.id}/check`);
@@ -77,12 +95,25 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await expect(goals.getByRole("img", { name: /Positionen aus dem Video/ })).toBeVisible({ timeout: 30_000 });
   await expect(goals.getByTestId("camera-empty")).toHaveCount(0);
 
-  // the match: the same result and goals, the scenes in the Video tab
+  // the match: the same result and goals; «Szene zeigen» opens that scene in the Video tab
   await page.goto(`/app/${org}/matches/${match.id}`);
   await expect(page.locator("[data-zone=wurf]")).toContainText("2:1");
+  await expect(page.getByTestId("game-next-step")).toHaveCount(0);
   await expect(page.getByTestId("video-goals").getByTestId("video-goal")).toHaveCount(3);
-  await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
+  await page.getByTestId("video-goals").getByTestId("scene-show").nth(1).click();
+  await expect(page).toHaveURL(/tab=video.*scene=/);
   await expect(page.getByTestId("video-stage")).toBeVisible();
+  // a short video: all its goals in the list, the second one running; the Rail over its minutes
+  const scenes = page.getByTestId("stage-scenes").getByRole("button");
+  await expect(scenes).toHaveCount(3);
+  await expect(scenes.nth(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("rail-span")).toBeVisible();
+  await expect(page.getByTestId("rail-span")).not.toContainText("60");
+
+  // opened and answered: the head goes back to the newer match
+  await page.goto(`/app/${org}/teams/${team}/matches`);
+  await expect(page.locator("[data-zone=wurf]")).toContainText("TV Neuer");
+  await expect(page.locator("[data-zone=wurf]")).not.toContainText("TV Kandidat");
 });
 
 /**
