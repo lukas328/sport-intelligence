@@ -279,7 +279,7 @@ function sequenceOf(hits: Hit[], matches: Match[], title: string): Schemas["Coll
 function SceneTable({ scenes, matches, orgId }: { scenes: Hit[]; matches: Match[]; orgId: string }) {
   const t = useTranslations("scenesPage");
   const format = useFormatter();
-  const th = "py-2 text-left text-[13px] font-semibold text-ink-2";
+  const th = "py-2 text-left text-[15px] font-semibold text-ink-2";
   return (
     <table className="w-full border-collapse text-[15px]" data-testid="scene-table">
       <thead>
@@ -342,10 +342,10 @@ function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Matc
       {goal ? <Bundle goals={[goal]} width={200} label={what ?? ""} /> : <EmptyField />}
       {/* the match clock where the analysis knows it; otherwise the place in the video */}
       {goal?.minute != null ? <b className="font-num text-[17px] md:text-xl">{clockOf(goal.minute)}</b> : <b className="text-[15px] font-bold">{t("videoAt", { time: ms(hit.t_ms ?? hit.start_ms ?? 0) })}</b>}
-      <span className="text-[13px] leading-snug text-ink-2 md:text-[15px]">
+      <span className="text-[15px] leading-snug text-ink-2 md:text-[15px]">
         {format.dateTime(new Date(hit.kickoff_at), { day: "numeric", month: "numeric" })} {opp} · {what}
       </span>
-      <span className="font-mono text-[13px] font-semibold text-ink-2">{ms(Math.max(0, (hit.end_ms ?? 0) - (hit.start_ms ?? 0)))}</span>
+      <span className="font-mono text-[13px] font-semibold text-ink">{ms(Math.max(0, (hit.end_ms ?? 0) - (hit.start_ms ?? 0)))}</span>
     </Link>
   );
 }

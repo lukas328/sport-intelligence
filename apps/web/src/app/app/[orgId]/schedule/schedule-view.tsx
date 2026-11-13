@@ -59,14 +59,14 @@ export function ScheduleRow({ item: i, onReply }: { item: Item; onReply: (item: 
     <div className="flex flex-wrap items-center gap-4 px-4 py-3.5 sm:px-5">
       <span className="w-11 shrink-0 text-center leading-none">
         <span className="block text-lg font-bold font-wide tabular-nums">{format.dateTime(when, { day: "numeric" })}</span>
-        <span className="mt-1 block text-[0.6875rem] font-medium text-muted">{format.dateTime(when, { month: "short" })}</span>
+        <span className="mt-1 block text-[0.875rem] font-medium text-muted">{format.dateTime(when, { month: "short" })}</span>
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-semibold">
           {i.kind === "match" ? t("match", { opponent: i.title ?? "" }) : i.title || t("training")}
           {!self && <span className="font-normal text-muted"> {t("for", { name: i.player_name })}</span>}
         </p>
-        <p className="text-[0.8125rem] text-muted">
+        <p className="text-[0.9375rem] text-muted">
           {[i.team, format.dateTime(when, i.starts_at ? { weekday: "long", hour: "2-digit", minute: "2-digit" } : { weekday: "long" })].join(" · ")}
         </p>
       </div>

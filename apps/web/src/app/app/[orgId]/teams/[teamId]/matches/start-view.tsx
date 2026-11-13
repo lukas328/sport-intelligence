@@ -235,7 +235,7 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
   const base = `/app/${orgId}/matches/${m.id}`;
   return (
     <div className="grid grid-cols-[84px_minmax(0,1fr)_auto] items-center gap-3 border-b border-rule py-3 md:grid-cols-[64px_128px_minmax(0,1fr)_auto] md:gap-5">
-      <p className="m-0 text-[13px] leading-tight text-ink-2 max-md:hidden">
+      <p className="m-0 text-[15px] leading-tight text-ink-2 max-md:hidden">
         {format.dateTime(date, { weekday: "short" })}
         <b className="font-num block text-xl text-ink">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</b>
         {m.is_home ? t("home") : t("away")}
@@ -249,7 +249,7 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
             {m.kind === "training" ? tm("training") : m.opponent_name}
           </Link>
         </h3>
-        <p className="m-0 text-[13px] text-ink-2 md:text-[15px]">
+        <p className="m-0 text-[15px] text-ink-2 md:text-[15px]">
           <span className="md:hidden">{format.dateTime(date, { day: "2-digit", month: "2-digit" })} · </span>
           {["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) ? (
             tm(state.label.replace("matches.", "") as "status_processing")
@@ -276,7 +276,7 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
           <b className="font-num block text-[28px] leading-[.85] md:text-[44px]" aria-hidden>
             {m.score_own}:{m.score_opponent}
           </b>
-          <small aria-hidden className={cn("mt-1 block text-[13px] font-bold md:mt-1.5 md:text-sm", result === "win" ? "text-win" : result === "loss" ? "text-loss" : "text-ink-2")}>
+          <small aria-hidden className={cn("mt-1 block text-[15px] font-bold md:mt-1.5 md:text-sm", result === "win" ? "text-win" : result === "loss" ? "text-loss" : "text-ink-2")}>
             {/* «draw» is also the drawing tool: the result has its own word (UX test B50) */}
             {t(result === "draw" ? "drawResult" : result)}
           </small>
@@ -299,7 +299,7 @@ function NextOpponent({ orgId, next, played }: { orgId: string; next: Match; pla
   const first = g.data ? threeThings(goalRuns(g.data))[0] : undefined;
   return (
     <section data-testid="next-opponent">
-      <p className="m-0 text-[13px] font-semibold text-ink-2">
+      <p className="m-0 text-[15px] font-semibold text-ink-2">
         {t("nextOpponent")} · {format.dateTime(date, { weekday: "short", hour: "2-digit", minute: "2-digit" })}
       </p>
       <h3 className="mt-1 mb-3 text-[30px] leading-[.95] md:text-4xl">

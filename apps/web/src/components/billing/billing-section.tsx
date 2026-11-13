@@ -125,7 +125,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
             <li key={p.plan} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
               <span className="w-28 shrink-0">
                 <span className="block font-semibold">{t(`plan_${p.plan}`)}</span>
-                {p.plan === b.plan && <span className="block text-[0.8125rem] font-semibold text-muted">{t("current")}</span>}
+                {p.plan === b.plan && <span className="block text-[0.9375rem] font-semibold text-muted">{t("current")}</span>}
               </span>
               <span className="w-40 shrink-0 font-semibold tabular-nums">{t("price", { price: p.price_chf_month ?? 0 })}</span>
               <span className="min-w-48 flex-1 text-sm text-muted">

@@ -65,7 +65,7 @@ export function ShareBox({ orgId, teamId, collectionId, link }: { orgId: string;
           {link.token ? (
             <input readOnly value={url(link.token)} onFocus={(e) => e.currentTarget.select()} aria-label={t("linkLabel")} className="mt-3 w-full border-[1.5px] border-ink bg-transparent px-2 py-2 font-mono text-xs" data-testid="share-url" />
           ) : (
-            <p className="mt-3 text-[13px] text-ink-2">{t("oldLink")}</p>
+            <p className="mt-3 text-[15px] text-ink-2">{t("oldLink")}</p>
           )}
           <div className="mt-3 flex flex-wrap gap-2.5">
             {link.token && (
@@ -86,7 +86,7 @@ export function ShareBox({ orgId, teamId, collectionId, link }: { orgId: string;
           </Button>
         </>
       )}
-      <p role="status" className="mt-2 text-[13px] break-all text-ink-2">
+      <p role="status" className="mt-2 text-[15px] break-all text-ink-2">
         {said}
       </p>
     </div>

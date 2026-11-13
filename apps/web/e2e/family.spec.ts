@@ -59,8 +59,8 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   // coach: similar kits are flagged while creating a match
   await page.goto(`/app/${orgId}/teams/${teamId}/matches`);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Rot");
-  await page.getByText("Mehr: Wettbewerb, Halle, Spielformat, Trikots").click();
-  await expect(page.getByLabel("Spielformat")).toHaveValue("adult_2x30");
+  await page.getByText("Mehr: Wettbewerb, Halle, Spieldauer, Trikots").click();
+  await expect(page.getByLabel("Spieldauer")).toHaveValue("adult_2x30");
   await page.getByLabel("Gegner Feldspieler").fill("#0d6ccc");
   await expect(page.getByTestId("kit-warning")).toContainText("Eigenes Team / Gegner");
   await expectAccessible(page);

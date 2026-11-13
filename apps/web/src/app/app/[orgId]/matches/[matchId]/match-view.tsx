@@ -322,7 +322,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               { value: "numbers", label: t("tabs.numbers") },
             ]}
           />
-          <div className="flex items-center gap-2 pb-2.5">
+          <div className="flex flex-wrap items-center justify-end gap-2 pb-2.5">
             {staff && checks > 0 && (
               <Link href={`${base}/check`} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-link">
                 {ta("check")}
@@ -343,8 +343,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             )}
             {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="match" targetId={match.id} />}
             <MenuRoot>
-              <MenuTrigger className={buttonClass("secondary", "icon")} aria-label={t("common.more")} data-testid="match-menu">
+              {/* a word, not only the dots (UX test H09) */}
+              <MenuTrigger className={buttonClass("secondary")} data-testid="match-menu">
                 <MoreHorizontal aria-hidden />
+                {t("common.more")}
               </MenuTrigger>
               <MenuContent>
                 <MenuItem href={`/v1/orgs/${orgId}/matches/${match.id}/report.pdf?lang=${locale}`} external icon={<FileDown />} testId="pdf">
@@ -397,7 +399,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       </div>
 
       {sourceParts.length > 0 && (
-        <div className="-mt-6 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-ink-2 md:text-[15px]" data-testid="source-line">
+        <div className="-mt-6 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[15px] text-ink-2 md:text-[15px]" data-testid="source-line">
           {ta("sources")}: {sourceParts.join(" · ")}
           <details className="inline">
             <summary className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">{ta("howCounted")}</summary>
@@ -519,7 +521,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           <details ref={more} className="group border-t-2 border-ink pt-4" data-testid="game-more">
             <summary className="flex min-h-11 cursor-pointer list-none items-baseline gap-3 [&::-webkit-details-marker]:hidden">
               <span className="font-slant text-[22px]">{ta("moreGame")}</span>
-              <span className="text-[13px] text-ink-2 group-open:hidden">{ta("moreGameHint")}</span>
+              <span className="text-[15px] text-ink-2 group-open:hidden">{ta("moreGameHint")}</span>
             </summary>
             <div className="mt-8 space-y-10">
           {stats.data && stats.data.quality.events > 0 ? (
@@ -683,7 +685,7 @@ function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: s
         <ol className="mt-4 m-0 list-none p-0">
           {steps.map(({ key, st }) => (
             <li key={key} className={cn("grid min-h-11 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 border-t border-rule py-2.5 text-base", st === "pending" && "text-ink-2")}>
-              <span className={cn("justify-self-start text-[13px] font-bold", st === "done" ? "text-win" : st === "running" ? "bg-attn px-1.5 py-0.5 text-attn-ink" : "text-ink-2")}>
+              <span className={cn("justify-self-start text-[15px] font-bold", st === "done" ? "text-win" : st === "running" ? "bg-attn px-1.5 py-0.5 text-attn-ink" : "text-ink-2")}>
                 {st === "done" ? ta("stepDone") : st === "running" ? ta("stepRunning") : ta("stepNext")}
               </span>
               {t(`coach_${key}`)}
@@ -691,7 +693,7 @@ function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: s
           ))}
         </ol>
         <p className="mt-4 text-[15px] text-ink-2">{ta("meanwhile")}</p>
-        <details className="mt-3 text-[13px] text-ink-2">
+        <details className="mt-3 text-[15px] text-ink-2">
           <summary className="min-h-11 cursor-pointer content-center font-semibold">{t("technical")}</summary>
           {running.map((j) => (
             <ul key={j.id} className="m-0 list-none p-0">

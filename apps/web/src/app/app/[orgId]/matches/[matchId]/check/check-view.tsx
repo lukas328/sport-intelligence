@@ -71,7 +71,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     return q;
   }, [analysis.data, candidates.data, main]);
   const open = questions.filter((q) => !done.includes(id(q)));
-  const current = open[0] ?? null;
+  // what was answered in this round, to look at again and change (UX test H12)
+  const [answered, setAnswered] = useState<{ q: Question; label: string }[]>([]);
+  const [revisit, setRevisit] = useState<number | null>(null);
+  const current = revisit != null ? (answered[revisit]?.q ?? null) : (open[0] ?? null);
   const total = questions.length;
   const next = useCallback((q: Question) => setDone((d) => [...d, id(q)]), []);
 
@@ -136,8 +139,15 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   async function answer(a: Answer) {
     if (!current) return;
     await a.run();
+    if (revisit != null) {
+      setAnswered((list) => list.map((x, i) => (i === revisit ? { ...x, label: a.label } : x)));
+      setRevisit(null);
+      return;
+    }
+    setAnswered((list) => [...list, { q: current, label: a.label }]);
     next(current);
   }
+  const skip = (q: Question) => (revisit != null ? setRevisit(null) : next(q));
 
   // keys 1 to 3 answer, 0 is «Weiss nicht» (desktop); a person: type the shirt number, space is
   // «Weiss nicht»
@@ -187,6 +197,23 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         <div className="max-w-[60ch] space-y-4 py-10">
           <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>
           <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
+          {answered.length > 0 && (
+            <section aria-labelledby="answered" data-testid="check-answered">
+              <h2 id="answered" className="text-[22px]">{t("answered")}</h2>
+              <ul className="m-0 list-none border-t-2 border-ink p-0">
+                {answered.map((x, i) => (
+                  <li key={id(x.q)} className="flex min-h-12 items-center justify-between gap-3 border-b border-rule text-[17px]">
+                    <span>
+                      {x.q.kind === "field" ? t("fieldQuestion") : x.q.kind === "person" ? t("personQuestion") : t("goalQuestion")} <b>{x.label}</b>
+                    </span>
+                    <button type="button" onClick={() => setRevisit(i)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4">
+                      {t("change")}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           <Link href={back} className="inline-flex min-h-12 items-center border-2 border-ink bg-ink px-5 font-bold text-ground no-underline">
             {t("toMatch")}
           </Link>
@@ -231,7 +258,14 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             )}
           </figure>
           <div>
-            <p className="m-0 text-[13px] font-semibold text-ink-2">{t("questionOf", { n: total - open.length + 1, total })}</p>
+            <p className="m-0 flex flex-wrap items-center justify-between gap-3 text-[15px] font-semibold text-ink-2">
+              <span>{revisit != null ? t("changing", { answer: answered[revisit]?.label ?? "" }) : t("questionOf", { n: total - open.length + 1, total })}</span>
+              {answered.length > 0 && (revisit ?? answered.length) > 0 && (
+                <button type="button" onClick={() => setRevisit((revisit ?? answered.length) - 1)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline underline-offset-4" data-testid="check-back">
+                  {t("back")}
+                </button>
+              )}
+            </p>
             <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? t("fieldQuestion") : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
             <p className="mt-4 max-w-[54ch] text-[17px] text-ink-2">
               {current.kind === "field" ? t("fieldWhy") : current.kind === "person" ? t("personWhy") : t("goalWhy")}
@@ -255,7 +289,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               ))}
               {current.kind === "person" && (
                 <label className="col-span-2 block">
-                  <span className="mb-1 block text-[13px] font-semibold text-ink-2">{read ? t("personOther") : t("personPick")}</span>
+                  <span className="mb-1 block text-[15px] font-semibold text-ink-2">{read ? t("personOther") : t("personPick")}</span>
                   <select
                     value=""
                     onChange={(e) => {
@@ -276,17 +310,17 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 </label>
               )}
               {/* aligned like the other answers (UX test B45) */}
-              <button type="button" onClick={() => next(current)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-bold">
+              <button type="button" onClick={() => skip(current)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-bold">
                 {t("dontKnow")}
               </button>
             </div>
-            {current.kind === "person" && <p className="mt-4 text-[13px] text-ink-2 max-md:hidden">{t("personKeys")}</p>}
+            {current.kind === "person" && <p className="mt-4 text-[15px] text-ink-2 max-md:hidden">{t("personKeys")}</p>}
             <div className="mt-7 flex gap-[3px]" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={total - open.length} aria-label={t("progress", { done: total - open.length, total })}>
               {questions.map((q, i) => (
                 <i key={i} className={cn("block h-1.5 flex-1", done.includes(id(q)) ? "bg-ink" : "bg-rule")} />
               ))}
             </div>
-            <p className="mt-2 text-[13px] text-ink-2">{t("progress", { done: total - open.length, total })}</p>
+            <p className="mt-2 text-[15px] text-ink-2">{t("progress", { done: total - open.length, total })}</p>
           </div>
         </div>
       )}

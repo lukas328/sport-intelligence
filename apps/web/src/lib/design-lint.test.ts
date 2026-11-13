@@ -65,6 +65,22 @@ describe("design rules", () => {
     expect(bad.map((f) => f.path)).toEqual([]);
   });
 
+  it("sets nothing that is read under 14 px; only mono labels may be 13 px (UX test H08)", () => {
+    const css = readFileSync(join(SRC, "app", "globals.css"), "utf8");
+    // text-xs is 14 px in this app (the token), not Tailwind's 12 px
+    expect(css).toMatch(/--text-xs:\s*0\.875rem/);
+    const tiny = /text-\[(?:\d|1[0-2])px\]|text-\[0\.(?:[0-6]\d*|7[0-4]\d*)rem\]|text-\[0\.75rem\]|text-\[0\.6875rem\]/;
+    const thirteen = /text-\[13px\]|text-\[0\.8125rem\]/;
+    const bad: string[] = [];
+    for (const f of sources) {
+      for (const m of f.text.matchAll(/(["'`])([^"'`\n]*?text-\[[^"'`\n]*?)\1/g)) {
+        const cls = m[2]!;
+        if (tiny.test(cls) || (thirteen.test(cls) && !cls.includes("font-mono"))) bad.push(`${f.path}: ${cls.slice(0, 80)}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
   it("takes colours from tokens", () => {
     const hex = /["'`]#[0-9a-f]{3}(?:[0-9a-f]{3})?["'`]|#[0-9a-f]{6}\b/i;
     const bad = sources.filter((f) => hex.test(f.text) && !COLOUR_FILES.has(f.path.replaceAll("\\", "/")));

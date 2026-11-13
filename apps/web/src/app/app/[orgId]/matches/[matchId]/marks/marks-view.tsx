@@ -156,7 +156,7 @@ export function MarksView({
         >
           <p className="mt-3 flex items-baseline gap-2 font-sans not-italic">
             <b className="font-num text-[26px] md:text-[34px]">{time(now)}</b>
-            <span className="text-[13px] font-semibold md:text-[15px]">{t("half", { n: half })}</span>
+            <span className="text-[15px] font-semibold md:text-[15px]">{t("half", { n: half })}</span>
           </p>
         </Strip>
       </div>
@@ -174,13 +174,13 @@ export function MarksView({
                 )}
               >
                 <span className="font-slant block text-[22px] leading-tight md:text-[28px]">{labelOf(k)}</span>
-                <span className="text-[13px] font-semibold md:text-[15px]">{t("sofar", { n: k.key === "goal_own" ? score.own : score.opp })}</span>
+                <span className="text-[15px] font-semibold md:text-[15px]">{t("sofar", { n: k.key === "goal_own" ? score.own : score.opp })}</span>
               </button>
             ))}
             {rest.map((k) => (
               <button key={k.key} type="button" onClick={() => tap(k.key, labelOf(k))} className="min-h-[72px] cursor-pointer border-2 border-ink bg-transparent px-3.5 py-2.5 text-left text-ink active:scale-[0.98] md:min-h-[88px]">
                 <span className="font-slant block text-[20px] leading-tight md:text-[26px]">{labelOf(k)}</span>
-                {sub(k.key) && <span className="text-[13px] md:text-[15px]">{sub(k.key)}</span>}
+                {sub(k.key) && <span className="text-[15px] md:text-[15px]">{sub(k.key)}</span>}
               </button>
             ))}
             <button
@@ -198,7 +198,7 @@ export function MarksView({
               {t("perPlayer")}
             </a>
           </p>
-          <p className="mt-2 text-[13px] text-ink-2">{t("hint")}</p>
+          <p className="mt-2 text-[15px] text-ink-2">{t("hint")}</p>
         </div>
         <aside className="min-w-0">
           <SectionHead title={t("sofarTitle")} note={t("newestFirst")} />
@@ -216,7 +216,7 @@ export function MarksView({
               ))}
             </ul>
           )}
-          <p className="mt-4 text-[13px] text-ink-2">{count === 0 && open === 0 ? "" : open > 0 ? t("pending", { n: open }) : t("synced")}</p>
+          <p className="mt-4 text-[15px] text-ink-2">{count === 0 && open === 0 ? "" : open > 0 ? t("pending", { n: open }) : t("synced")}</p>
         </aside>
       </div>
     </div>

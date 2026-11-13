@@ -3141,7 +3141,11 @@
     "personCaption": "Video {video} · {s} seconds in view, {read, select, none {number never read} other {number {read} read}}",
     "personOther": "Others",
     "personPick": "Others from the squad",
-    "personKeys": "Keys: type the shirt number, space for «Don't know»."
+    "personKeys": "Keys: type the shirt number, space for «Don't know».",
+    "answered": "Answered",
+    "change": "Change answer",
+    "changing": "Changing the answer, so far: {answer}",
+    "back": "Back"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

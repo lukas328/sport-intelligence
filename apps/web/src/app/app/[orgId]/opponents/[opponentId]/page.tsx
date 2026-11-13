@@ -69,7 +69,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
               [t("turnoversPerMatch"), avg(p.totals.turnovers / n)],
             ].map(([label, value]) => (
               <div key={label}>
-                <dt className="text-[0.8125rem] text-muted">{label}</dt>
+                <dt className="text-[0.9375rem] text-muted">{label}</dt>
                 <dd className="mt-1 font-score text-[1.75rem] leading-none tabular-nums sm:text-3xl">{value}</dd>
               </div>
             ))}
@@ -109,7 +109,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
               </ul>
               <h3 className="pt-2 text-sm font-semibold">{t("goalZones")}</h3>
               {/* not every goal has a target point: say how many do */}
-              <p className="text-[0.8125rem] text-muted">
+              <p className="text-[0.9375rem] text-muted">
                 {t("goalZonesBasis", { n: Object.values(p.goal_zones).reduce((a, v) => a + v.goals, 0), total: p.totals.goals })}
               </p>
               <ul className="divide-y divide-foreground/10 border-t-2 border-foreground text-sm">

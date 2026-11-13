@@ -84,13 +84,13 @@ export default async function CollectionPage({ params }: Params) {
                 <div className="relative h-[150px] overflow-hidden bg-club p-3.5 text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_84%,0_100%)]">
                   <b className="font-slant block max-w-[80%] text-[26px] leading-[.95]">{c.title}</b>
                 </div>
-                <p className="m-0 px-1.5 pt-2 text-[13px]">
+                <p className="m-0 px-1.5 pt-2 text-[15px]">
                   <b className="block text-[15px]">{c.title}</b>
                   {[org?.name, team?.name].filter(Boolean).join(" ")} · {summary}
                 </p>
               </div>
             </div>
-            <p className="mt-2 text-[13px] text-ink-2">{t("chatHint")}</p>
+            <p className="mt-2 text-[15px] text-ink-2">{t("chatHint")}</p>
           </div>
           <ShareBox orgId={orgId} teamId={c.team_id} collectionId={c.id} link={link ?? null} />
         </aside>

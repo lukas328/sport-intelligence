@@ -12,7 +12,7 @@ export function PageHeader({ eyebrow, title, actions, figure, figureLabel, class
     <header data-zone="kopf" className={cn("bleed-x relative mb-6 px-4 pb-[30px] md:mb-8 md:px-8 md:pb-10", className)}>
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
         <div className="min-w-0">
-          {eyebrow && <p className="mb-1.5 text-[13px] font-semibold text-ink-2 md:mb-2.5 md:text-[15px]">{eyebrow}</p>}
+          {eyebrow && <p className="mb-1.5 text-[15px] font-semibold text-ink-2 md:mb-2.5 md:text-[15px]">{eyebrow}</p>}
           <h1 className="max-w-[920px] text-[34px] leading-[.96] md:text-[58px]">{title}</h1>
         </div>
         {figure != null && (

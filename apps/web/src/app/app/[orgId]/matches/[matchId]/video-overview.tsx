@@ -125,7 +125,7 @@ export function VideoOverview({
                       type="button"
                       aria-pressed={filter === f}
                       onClick={() => setFilter(f)}
-                      className={cn("min-h-8 border-b-2 px-1 text-[0.8125rem] font-semibold", filter === f ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
+                      className={cn("min-h-8 border-b-2 px-1 text-[0.9375rem] font-semibold", filter === f ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
                     >
                       {f === "own" ? ownName : f === "opponent" ? oppName : t(`filter_${f}`)}
                     </button>

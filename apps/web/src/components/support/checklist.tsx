@@ -86,7 +86,7 @@ export function OnboardingChecklist({ orgId, teamId }: { orgId: string; teamId: 
         </button>
       </div>
       <details className="group">
-        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[0.8125rem] font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[0.9375rem] font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
           {t("allSteps")}
           <ChevronDown aria-hidden className="size-4 transition-transform group-open:rotate-180" />
         </summary>

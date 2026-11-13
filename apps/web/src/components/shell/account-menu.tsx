@@ -49,7 +49,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
             !compact && "flex-1 px-2 py-1.5",
           )}
         >
-          <span aria-hidden className="font-slant relative grid size-9 shrink-0 place-items-center bg-ink text-[13px] text-ground">
+          <span aria-hidden className="font-slant relative grid size-9 shrink-0 place-items-center bg-ink text-[15px] text-ground">
             {initials(me.name) || "?"}
             {reminder.due && <span className="absolute -top-1 -right-1 size-3 border-2 border-ground bg-error" data-testid="account-dot" />}
           </span>

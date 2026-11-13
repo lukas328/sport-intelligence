@@ -336,7 +336,7 @@ function Example() {
       <ol className="m-0 grid list-none grid-cols-1 gap-8 p-0 md:grid-cols-3">
         {things.map((x, i) => (
           <li key={x.key} className="space-y-2">
-            <p className="m-0 font-mono text-[15px] font-bold text-ink-2">{ta("index", { n: i + 1, total: things.length })}</p>
+            <p className="m-0 font-mono text-[15px] font-bold text-ink">{ta("index", { n: i + 1, total: things.length })}</p>
             <p className="m-0 flex items-baseline gap-2">
               <b className="font-num text-[56px] leading-[.8]">{x.value}</b>
               <span className="font-slant text-[19px] text-ink-2">{x.key === "conceded_fast_breaks" ? ta("unitFastBreaks") : ta("unitOf", { of: x.of ?? 0 })}</span>

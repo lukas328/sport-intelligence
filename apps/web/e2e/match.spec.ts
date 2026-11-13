@@ -25,7 +25,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expectAccessible(page);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
   // the rest of the match details sits behind «Mehr» (UX test H07)
-  await page.getByText("Mehr: Wettbewerb, Halle, Spielformat, Trikots").click();
+  await page.getByText("Mehr: Wettbewerb, Halle, Spieldauer, Trikots").click();
   await page.getByLabel("Wettbewerb (optional)").fill("3. Liga");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
@@ -130,7 +130,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   // the overview counts it, the number opens the event, the event jumps into the video
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
-  await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("1");
+  await expect(table.getByRole("row", { name: /^Tore(?! pro)/ })).toContainText("1");
   await expect(table.getByRole("row", { name: /^Würfe/ })).toContainText("2");
   await table.getByRole("button", { name: "Tore Herren 1" }).click();
   const list = page.getByTestId("event-list");

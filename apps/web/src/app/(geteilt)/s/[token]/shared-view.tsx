@@ -67,10 +67,10 @@ export function SharedView({ token, data, club = null, clubColour = null }: { to
       {/* the club's own narrow head: who shared it, nothing of the app around it */}
       <div className="bleed-x flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
         <span className="font-slant flex min-w-0 items-center gap-2.5 text-[17px] md:text-xl">
-          <ClubMark org={{ id: "", name: club ?? data.team, has_logo: false, primary_color: clubColour ?? "" }} className="h-[30px] w-[27px] text-[10px]" />
+          <ClubMark org={{ id: "", name: club ?? data.team, has_logo: false, primary_color: clubColour ?? "" }} className="h-[30px] w-[27px] text-[14px]" />
           <span className="truncate">{owner}</span>
         </span>
-        <span className="shrink-0 text-[13px] text-ink-2">{data.shared_by ? t("sharedBy", { name: data.shared_by }) : t("viewOnly")}</span>
+        <span className="shrink-0 text-[15px] text-ink-2">{data.shared_by ? t("sharedBy", { name: data.shared_by }) : t("viewOnly")}</span>
       </div>
       <PageHeader eyebrow={eyebrow} title={data.title} className="mt-6 md:mt-8" />
       {data.play && (
@@ -225,7 +225,7 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
                   <EmptyField />
                   <span className="min-w-0 text-[15px] leading-snug font-semibold">
                     {i.scene!.title ?? t("scene")}
-                    <small className={cn("block text-[13px] font-normal", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : n < k ? t("seen") : ""}</small>
+                    <small className={cn("block text-[15px] font-normal", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : n < k ? t("seen") : ""}</small>
                   </span>
                   <span className="font-mono text-[13px]">{duration(len)}</span>
                 </button>
@@ -233,7 +233,7 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
             );
           })}
         </ol>
-        <p className="mt-4 text-[13px] text-ink-2">{t("onlyLink", { days })}</p>
+        <p className="mt-4 text-[15px] text-ink-2">{t("onlyLink", { days })}</p>
       </aside>
     </div>
   );

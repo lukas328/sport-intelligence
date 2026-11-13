@@ -150,6 +150,11 @@
   --font-display: var(--font-kanit), var(--font-hanken), ui-sans-serif, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
+  /* type sizes for older eyes (UX test H08): nothing that is read under 14 px; secondary text
+     15 px, body 17 px; only mono labels may be 13 px (ANLAUF.md, design-lint) */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.35;
+
   /* no rounded corners, no shadows: edges are cut, not soft */
   --radius-xs: 0;
   --radius-sm: 0;

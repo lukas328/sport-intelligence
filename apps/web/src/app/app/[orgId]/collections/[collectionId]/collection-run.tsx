@@ -42,7 +42,7 @@ export function CollectionRun({ orgId, items, edit }: { orgId: string; items: It
               {i.text && <p className="m-0 text-[15px] text-ink-2">{i.text}</p>}
               {tools(n)}
             </div>
-            <span className="font-mono text-[13px] font-semibold text-ink-2">{t("drawn")}</span>
+            <span className="font-mono text-[13px] font-semibold text-ink">{t("drawn")}</span>
           </li>
         ) : i.scene ? (
           <SceneRow key={i.position} orgId={orgId} n={n + 1} item={i} scene={i.scene} tools={tools(n)} />
@@ -54,7 +54,7 @@ export function CollectionRun({ orgId, items, edit }: { orgId: string; items: It
 
 function RowTools({ n, last, edit }: { n: number; last: number; edit: RunEdit }) {
   const t = useTranslations("collections");
-  const b = "min-h-11 cursor-pointer bg-transparent px-1 text-[13px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 disabled:cursor-default disabled:text-ink-2 disabled:no-underline";
+  const b = "min-h-11 cursor-pointer bg-transparent px-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 disabled:cursor-default disabled:text-ink-2 disabled:no-underline";
   return (
     <span className="mt-1 flex flex-wrap gap-x-3">
       <button type="button" className={b} disabled={n === 0} onClick={() => edit.move(n, -1)}>
@@ -90,7 +90,7 @@ function SceneRow({ orgId, n, item, scene, tools }: { orgId: string; n: number; 
         {item.text && <p className="m-0 text-[15px] text-ink-2">{item.text}</p>}
         {tools}
       </div>
-      <span className="font-mono text-[13px] font-semibold text-ink-2">{time(Math.max(0, scene.end_ms - scene.start_ms))}</span>
+      <span className="font-mono text-[13px] font-semibold text-ink">{time(Math.max(0, scene.end_ms - scene.start_ms))}</span>
     </li>
   );
 }

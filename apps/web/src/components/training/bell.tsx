@@ -49,7 +49,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
         <Bell aria-hidden className="size-5" strokeWidth={1.8} />
         {unread > 0 && (
           <span
-            className="absolute top-1 right-1 grid min-w-[1.125rem] place-items-center bg-accent px-1 text-[0.625rem] font-bold leading-[1.125rem] text-accent-contrast ring-2 ring-background"
+            className="absolute top-1 right-1 grid min-w-[1.375rem] place-items-center bg-accent px-1 font-mono text-[13px] font-bold leading-[1.375rem] text-accent-contrast ring-2 ring-background"
             data-testid="unread"
           >
             {unread}

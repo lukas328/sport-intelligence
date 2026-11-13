@@ -131,7 +131,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         <Input label={t("matches.kickoff")} name="kickoff" type="datetime-local" required defaultValue={localNow()} />
         {!training ? (
           <fieldset className="space-y-1">
-            <legend className="mb-1 block text-[0.8125rem] font-medium">{t("matches.homeAway")}</legend>
+            <legend className="mb-1 block text-[0.9375rem] font-medium">{t("matches.homeAway")}</legend>
             <div className="flex gap-0.5 bg-surface p-1">
               <label className={segment(!away)}>
                 <input type="radio" name="side" className="sr-only" checked={!away} onChange={() => setAway(false)} />
@@ -160,7 +160,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
               ))}
             </Select>
             <fieldset className="sm:col-span-2">
-              <legend className="mb-2 block text-[0.8125rem] font-medium">{t("matches.kits")}</legend>
+              <legend className="mb-2 block text-[0.9375rem] font-medium">{t("matches.kits")}</legend>
               <KitFields
                 kits={kits}
                 onChange={(next) => {

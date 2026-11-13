@@ -113,7 +113,7 @@ export function VideoStage({
           type="button"
           aria-pressed={mode === m}
           onClick={() => setMode(m)}
-          className={cn("min-h-11 cursor-pointer border-0 px-3 font-sans text-[13px] font-bold", mode === m ? "bg-[#e9eef2] text-court-bar" : "bg-transparent text-[#a8b1ba]")}
+          className={cn("min-h-11 cursor-pointer border-0 px-3 font-sans text-[15px] font-bold", mode === m ? "bg-[#e9eef2] text-court-bar" : "bg-transparent text-[#a8b1ba]")}
         >
           {t(m === "video" ? "modeVideo" : "modeTaktik")}
         </button>
@@ -165,7 +165,7 @@ export function VideoStage({
         {graphics.report_goals.length > 0 && (
           <div className="mt-6">
             <Rail goals={reportGoals(graphics)} phase={phase} at={goal?.minute ?? null} label={t("rail")} />
-            <p className="mt-1 flex justify-between text-[13px] text-ink-2">
+            <p className="mt-1 flex justify-between text-[15px] text-ink-2">
               <span>{t("throwOff")}</span>
               <span>{t("halfTimeWord")}</span>
               <span>{t("fullTime")}</span>
@@ -225,7 +225,7 @@ export function VideoStage({
                   <b className="font-num text-[17px]">{clockOf(g.minute)}</b>
                   <span className="text-[15px] leading-snug">
                     {label(g)}
-                    <small className={cn("block text-[13px]", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : where(g)}</small>
+                    <small className={cn("block text-[15px]", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : where(g)}</small>
                   </span>
                 </button>
               </li>
@@ -241,7 +241,7 @@ export function VideoStage({
                   <button type="button" onClick={() => onThing(i + 1)} className="flex min-h-11 w-full cursor-pointer items-baseline gap-3 border-t border-rule bg-transparent px-1 py-2 text-left text-[15px] text-ink hover:bg-ink/5">
                     <b className="font-num">{i + 1}</b>
                     <span className="min-w-0 flex-1">{text(x)}</span>
-                    <span className="text-[13px] text-ink-2">{t("scenes", { count: x.goals.length })}</span>
+                    <span className="text-[15px] text-ink-2">{t("scenes", { count: x.goals.length })}</span>
                   </button>
                 </li>
               ))}

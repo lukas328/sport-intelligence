@@ -79,7 +79,7 @@ export function Segmented<T extends string>({
                     )
                   : cn(
                       "-ml-[1.5px] min-h-11 whitespace-nowrap border-[1.5px] border-ink font-bold transition-[background,color] duration-150 first:ml-0",
-                      size === "sm" ? "px-3 text-[13px]" : "px-4 text-[15px]",
+                      size === "sm" ? "px-3 text-[15px]" : "px-4 text-[15px]",
                       active ? "bg-ink text-ground" : "bg-transparent text-ink hover:bg-ink/5",
                     )
               }

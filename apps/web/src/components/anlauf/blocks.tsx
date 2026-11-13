@@ -18,13 +18,13 @@ export function SectionHead({ title, note, action, as: Tag = "h2", className }: 
  * scene), always with a word: `children` is required.
  */
 export function AttnTag({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn("whitespace-nowrap bg-attn px-2 py-[3px] text-[13px] font-extrabold text-attn-ink", className)}>{children}</span>;
+  return <span className={cn("whitespace-nowrap bg-attn px-2 py-[3px] text-[15px] font-extrabold text-attn-ink", className)}>{children}</span>;
 }
 
 /** Legend of line styles: measured and confirmed solid, estimated dashed. */
 export function LineKey({ items, className }: { items: { label: ReactNode; estimated?: boolean; color?: string }[]; className?: string }) {
   return (
-    <p className={cn("flex flex-wrap items-center gap-3 text-[13px] text-ink-2", className)}>
+    <p className={cn("flex flex-wrap items-center gap-3 text-[15px] text-ink-2", className)}>
       {items.map((it, i) => (
         <span key={i}>
           <i
@@ -42,7 +42,7 @@ export function LineKey({ items, className }: { items: { label: ReactNode; estim
 /** Legend of the tactics camera: us, them, referee, ball. */
 export function CameraKey({ us, them, referee, ball }: { us: ReactNode; them: ReactNode; referee?: ReactNode; ball?: ReactNode }) {
   return (
-    <p className="mt-2 flex flex-wrap items-center gap-3.5 text-[13px] text-ink-2">
+    <p className="mt-2 flex flex-wrap items-center gap-3.5 text-[15px] text-ink-2">
       <span>
         <i aria-hidden className="mr-1.5 inline-block size-3 rounded-full bg-club-cam align-[-1px] shadow-[0_0_0_1px_var(--ink)]" />
         {us}

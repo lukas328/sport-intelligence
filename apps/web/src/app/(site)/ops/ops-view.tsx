@@ -70,7 +70,7 @@ export function OpsView() {
             [t("gpu"), o.gpu_minutes_24h],
           ].map(([label, value]) => (
             <div key={String(label)} className="bg-raised px-4 py-4 border border-border sm:px-5">
-              <dt className="text-[0.8125rem] text-muted">{label}</dt>
+              <dt className="text-[0.9375rem] text-muted">{label}</dt>
               <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{value}</dd>
             </div>
           ))}

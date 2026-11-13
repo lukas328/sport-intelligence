@@ -107,7 +107,7 @@ export function InsightsCard({
         <ul className="divide-y divide-border/70">
           {shown.map((i, n) => (
             <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
-              <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
+              <span className="flex shrink-0 items-center gap-2 pt-px text-[0.9375rem] font-semibold sm:w-24">
                 <span aria-hidden className={i.kind === "strength" ? "size-2.5 bg-ok" : i.kind === "weakness" ? (n === firstWeak ? "size-2.5 bg-ink" : "size-2.5 bg-foreground/45") : "size-2.5 bg-muted"} />
                 {t(i.kind)}
               </span>

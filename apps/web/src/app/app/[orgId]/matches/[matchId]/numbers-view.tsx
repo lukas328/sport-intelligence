@@ -44,11 +44,11 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
   const phases = graphics?.phases ?? [];
   // shots and rates only where misses were recorded: from goals alone every rate reads 100 %
   const shotsKnown = stats?.own.known?.shooting !== false;
-  const th = "py-2 text-right text-[13px] font-semibold text-ink-2";
+  const th = "py-2 text-right text-[15px] font-semibold text-ink-2";
   const td = "py-2.5 text-right tabular-nums";
   return (
     <div className="space-y-12">
-      <p className="max-w-[90ch] text-[13px] text-ink-2 md:text-[15px]">{t("intro")}</p>
+      <p className="max-w-[90ch] text-[15px] text-ink-2 md:text-[15px]">{t("intro")}</p>
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-12">
           {field.length > 0 && (
@@ -85,7 +85,7 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                 </tbody>
               </table>
               {!all && field.length > shown.length && (
-                <p className="mt-2 text-[13px] text-ink-2">
+                <p className="mt-2 text-[15px] text-ink-2">
                   {t("more", { n: field.length - shown.length })}{" "}
                   <button type="button" onClick={() => setAll(true)} className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">
                     {t("showAll")}
@@ -146,7 +146,7 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                   ))}
                 </tbody>
               </table>
-              <p className="mt-2 text-[13px] text-ink-2">{t("targetMarked", { n: marked, of: stats?.own.goals_against ?? marked })}</p>
+              <p className="mt-2 text-[15px] text-ink-2">{t("targetMarked", { n: marked, of: stats?.own.goals_against ?? marked })}</p>
             </section>
           )}
           {phases.length > 0 && (
@@ -161,7 +161,7 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                       <p className="m-0 flex items-baseline justify-between gap-3">
                         <span className="text-[15px]">
                           {t(`phase_${ph.kind}`, { m: minutes })}
-                          <small className="block text-[12px] text-ink-2">{ph.estimated ? t("fromVideo") : t(ph.kind === "fast_break" ? "fromEvents" : "fromSuspensions")}</small>
+                          <small className="block text-[14px] text-ink-2">{ph.estimated ? t("fromVideo") : t(ph.kind === "fast_break" ? "fromEvents" : "fromSuspensions")}</small>
                         </span>
                         <b className="font-num text-xl">
                           {ph.goals_us}:{ph.goals_them}

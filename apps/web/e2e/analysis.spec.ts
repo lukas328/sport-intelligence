@@ -46,7 +46,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await expect(page.getByTestId("game-actions")).toContainText("Als Bild für den Chat");
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
-  await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
+  await expect(table.getByRole("row", { name: /^Tore(?! pro)/ })).toContainText("5");
   // UX test B07: a report without goal times has no runs and no course; no xG, no possession
   const main = page.getByRole("main");
   await expect(main).not.toContainText("in Folge");

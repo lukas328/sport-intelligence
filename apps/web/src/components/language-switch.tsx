@@ -17,7 +17,7 @@ export function LanguageSwitch({ className }: { className?: string }) {
   const router = useRouter();
   const current = useLocale() as Locale;
   return (
-    <span className={cn("flex items-center gap-1 text-[13px]", className)} role="group" aria-label="Sprache · Langue · Language" data-testid="language-switch">
+    <span className={cn("flex items-center gap-1 text-[15px]", className)} role="group" aria-label="Sprache · Langue · Language" data-testid="language-switch">
       {locales.map((l) => (
         <button
           key={l}

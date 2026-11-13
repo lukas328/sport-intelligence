@@ -131,7 +131,7 @@ export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?
         {!joined && !claimed && (
           <ol className="-mt-2 flex max-w-md gap-2" aria-label={t("onboarding.progress", { step: shownStep + 1, total: steps.length })}>
             {steps.map((s, i) => (
-              <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-[13px] ${i <= shownStep ? "font-bold text-ink" : "text-ink-2"}`}>
+              <li key={s} aria-current={i === shownStep ? "step" : undefined} className={`flex-1 space-y-1.5 text-[15px] ${i <= shownStep ? "font-bold text-ink" : "text-ink-2"}`}>
                 <span aria-hidden className={`block h-1.5 ${i <= shownStep ? "bg-ink" : "bg-rule"}`} />
                 {t(`onboarding.${s}` as "onboarding.stepClub")}
               </li>

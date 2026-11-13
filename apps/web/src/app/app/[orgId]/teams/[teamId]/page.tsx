@@ -165,7 +165,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                           {p.status && <span>{t("out")}</span>}
                         </span>
                       </span>
-                      <abbr title={p.main_position ? tr(`positions.${p.main_position}`) : undefined} className="text-[13px] font-bold text-ink-2 no-underline">
+                      <abbr title={p.main_position ? tr(`positions.${p.main_position}`) : undefined} className="text-[15px] font-bold text-ink-2 no-underline">
                         {p.main_position}
                       </abbr>
                     </li>
@@ -204,7 +204,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                   {bench.map((m) => (
                     <li key={m.user_id} className="flex min-h-12 items-center justify-between gap-3 border-b border-rule text-[17px] font-medium">
                       {m.name}
-                      <span className="text-[13px] font-normal text-ink-2">{tr(`roles.${m.role}`)}</span>
+                      <span className="text-[15px] font-normal text-ink-2">{tr(`roles.${m.role}`)}</span>
                     </li>
                   ))}
                 </ul>

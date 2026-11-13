@@ -527,7 +527,7 @@ export function Workspace({
           )}
           {/* keys teach only where there is a keyboard */}
           <details className="group relative pointer-coarse:hidden">
-            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 px-3 text-[0.9375rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
               <Keyboard aria-hidden className="size-4" />
               {t("player.shortcuts")}
             </summary>

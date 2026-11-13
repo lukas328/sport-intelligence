@@ -94,14 +94,14 @@ export function WurfHead({
       )}
     >
       <div className="min-w-0">
-        {kick && <p className="mb-2 text-[13px] font-semibold md:mb-3.5 md:text-[15px]">{kick}</p>}
+        {kick && <p className="mb-2 text-[15px] font-semibold md:mb-3.5 md:text-[15px]">{kick}</p>}
         <h1 className="text-[32px] leading-[.96] md:text-[58px]">{title}</h1>
         {meta && <div className="mt-[18px] text-sm font-semibold">{meta}</div>}
         {children}
       </div>
       <div className="flex min-w-0 flex-col">
         <Score own={own} opp={opp} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
-        <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[13px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
+        <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[15px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
           <span>{ownName}</span>
           <span>
             <OppChip className="mr-2" />
@@ -132,7 +132,7 @@ export function Strip({ name, sub, own, opp, children, live }: { name: ReactNode
     >
       <div className="font-slant min-w-0 text-[17px] leading-[1.05] md:text-2xl">
         {name}
-        {sub && <small className="mt-1.5 block font-sans text-xs font-medium not-italic md:text-[13px]">{sub}</small>}
+        {sub && <small className="mt-1.5 block font-sans text-xs font-medium not-italic md:text-[15px]">{sub}</small>}
         {children}
       </div>
       <Score own={own} opp={opp} outlines={1} className="text-[48px] md:text-[72px]" />
@@ -147,7 +147,7 @@ export function Strip({ name, sub, own, opp, children, live }: { name: ReactNode
 export function PageHead({ kick, title, figure, figureLabel, actions }: { kick?: ReactNode; title: ReactNode; figure?: ReactNode; figureLabel?: ReactNode; actions?: ReactNode }) {
   return (
     <header data-zone="kopf" className="relative mb-6 px-4 pt-5 pb-[30px] md:mb-8 md:px-8 md:pt-[30px] md:pb-10">
-      {kick && <p className="mb-1.5 text-[13px] font-semibold text-ink-2 md:mb-2.5 md:text-[15px]">{kick}</p>}
+      {kick && <p className="mb-1.5 text-[15px] font-semibold text-ink-2 md:mb-2.5 md:text-[15px]">{kick}</p>}
       <h1 className="max-w-[920px] text-[34px] leading-[.96] md:text-[58px]">{title}</h1>
       {figure != null && (
         <div className="mt-3 flex items-baseline gap-2.5 md:absolute md:top-[26px] md:right-8 md:mt-0 md:block md:text-right">

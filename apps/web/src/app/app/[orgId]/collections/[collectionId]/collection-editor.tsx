@@ -82,7 +82,7 @@ export function CollectionEditor({ orgId, collection }: { orgId: string; collect
                 void save(items, { kind: "note", text: note.trim() }).then(() => setNote(null));
               }}
             >
-              <label className="block text-[13px] font-semibold text-ink-2" htmlFor="new-note">
+              <label className="block text-[15px] font-semibold text-ink-2" htmlFor="new-note">
                 {t("noteLabel")}
               </label>
               <textarea id="new-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={2000} autoFocus className="w-full border-2 border-ink bg-paper p-3 text-[17px]" />

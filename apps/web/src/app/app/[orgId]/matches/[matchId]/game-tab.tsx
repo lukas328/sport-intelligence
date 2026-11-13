@@ -89,7 +89,7 @@ export function Telegram({ match, stats, names }: { match: TelegramMatch; stats:
         action={
           <button
             type="button"
-            className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[13px] font-bold text-ink underline decoration-[1.5px] underline-offset-4"
+            className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4"
             onClick={async () => {
               await navigator.clipboard?.writeText(text).catch(() => undefined);
               setCopied(true);
@@ -161,7 +161,7 @@ export function ThreeFigures({ stats, names }: { stats: Stats; names: Record<str
             {f.value}
             {f.testid === "fig-shooting" && <span className="text-[20px]">%</span>}
           </dd>
-          <p className="m-0 mt-1.5 text-[13px] text-ink-2" aria-hidden>
+          <p className="m-0 mt-1.5 text-[15px] text-ink-2" aria-hidden>
             {f.label}
           </p>
         </div>

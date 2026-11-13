@@ -191,7 +191,7 @@ export function OfficialTeamSearch({
                               {t("claim")}
                             </Button>
                             {claiming === team.official_id && (
-                              <span className="text-[13px] text-ink-2" role="status">
+                              <span className="text-[15px] text-ink-2" role="status">
                                 {t("claiming")}
                               </span>
                             )}

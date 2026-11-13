@@ -209,7 +209,7 @@ export function AppShell({
             <div className="flex h-[60px] items-center gap-2 px-4 lg:hidden">
               {/* with large text the crest gives way, the team name stays (UX test H09) */}
               <Link href={home} aria-label={org.name} className="flex shrink-0 items-center max-[359px]:hidden">
-                <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
+                <ClubMark org={org} className="h-[34px] w-[30px] text-[14px]" />
               </Link>
               <div className="min-w-0 flex-1">
                 <TeamSwitcher compact />

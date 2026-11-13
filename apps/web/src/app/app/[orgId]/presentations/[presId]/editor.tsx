@@ -129,12 +129,12 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
           <Link href={`/app/${orgId}/presentations/${presId}/present`} className="bg-accent px-4 py-2 font-medium text-accent-contrast" data-testid="present">
             {t("present")}
           </Link>
-          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
+          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
             {t("pdf")}
           </a>
           {p.can_edit &&
             (p.export_status === "ready" ? (
-              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
+              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
                 {t("mp4Download")}
               </a>
             ) : (

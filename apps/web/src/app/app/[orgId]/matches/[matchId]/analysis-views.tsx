@@ -384,7 +384,7 @@ function ScoreChart({
   }
   return (
     <figure className="space-y-3">
-      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.8125rem]">
+      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.9375rem]">
         <span className="inline-flex items-center gap-2 font-medium">
           <span aria-hidden className="h-0.5 w-5 rounded-full bg-accent" />
           {own}
@@ -398,7 +398,7 @@ function ScoreChart({
         {grid.map((g) => (
           <g key={g}>
             <line x1={X(0)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke="var(--border)" strokeWidth={g === 0 ? 1.2 : 0.6} />
-            <text x={X(0) - 8} y={Y(g) + 3.5} fontSize="10" textAnchor="end" fill="var(--muted)">
+            <text x={X(0) - 8} y={Y(g) + 3.5} fontSize="13" textAnchor="end" fill="var(--muted)">
               {g}
             </text>
           </g>
@@ -407,7 +407,7 @@ function ScoreChart({
           <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={8} y2={h - 22} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
         ))}
         {ticks.map((m) => (
-          <text key={m} x={X(m * 60)} y={h - 6} fontSize="10" textAnchor="middle" fill="var(--muted)">
+          <text key={m} x={X(m * 60)} y={h - 6} fontSize="13" textAnchor="middle" fill="var(--muted)">
             {m}&apos;
           </text>
         ))}
@@ -415,10 +415,10 @@ function ScoreChart({
         {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />}
         {timed && (
           <>
-            <text x={X(maxT) + 6} y={yo + 4} fontSize="12" fontWeight="700" fill="var(--accent)">
+            <text x={X(maxT) + 6} y={yo + 4} fontSize="14" fontWeight="700" fill="var(--accent)">
               {last.own}
             </text>
-            <text x={X(maxT) + 6} y={yp + 4} fontSize="12" fontWeight="600" fill="var(--muted)">
+            <text x={X(maxT) + 6} y={yp + 4} fontSize="14" fontWeight="600" fill="var(--muted)">
               {last.opp}
             </text>
           </>

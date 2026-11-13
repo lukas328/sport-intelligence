@@ -213,12 +213,12 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                           {ta("scenes", { count: r.count })}
                         </Link>
                       ) : (
-                        <p className="mt-2 text-[13px] text-ink-2">{ta("fromReport")}</p>
+                        <p className="mt-2 text-[15px] text-ink-2">{ta("fromReport")}</p>
                       )}
                     </div>
                     <figure className="m-0">
                       <Series values={r.series} team={r.team} label={ts("seriesLabel", { what: r.title, values: withVideo.map((m, i) => `${m.label} ${r.series[i]}`).join(", ") })} />
-                      <figcaption aria-hidden className="flex w-[132px] justify-between text-[11px] text-ink-2">
+                      <figcaption aria-hidden className="flex w-[132px] justify-between text-[14px] text-ink-2">
                         {withVideo.map((m) => (
                           <span key={m.id} className="truncate">
                             {m.label}
@@ -260,7 +260,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
               <SectionHead title={ts("scorers")} note={ts("scorersNote", { n })} />
               <table className="w-full border-collapse text-[17px]" data-testid="season-players">
                 <thead>
-                  <tr className="border-b-2 border-ink text-left text-[13px] text-ink-2">
+                  <tr className="border-b-2 border-ink text-left text-[15px] text-ink-2">
                     <th scope="col" className="py-2 font-semibold">{ts("colNumberName")}</th>
                     <th scope="col" className="py-2 text-right font-semibold max-sm:hidden">{ts("colMatches")}</th>
                     <th scope="col" className="py-2 text-right font-semibold">{ts("colGoals")}</th>
@@ -312,7 +312,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
               <SectionHead title={ts("table")} note={official.data?.synced_at ? ts("tableNote", { when: format.relativeTime(new Date(official.data.synced_at), new Date()) }) : undefined} />
               <table className="w-full border-collapse text-[15px]" data-testid="season-standing">
                 <thead>
-                  <tr className="text-left text-[13px] text-ink-2">
+                  <tr className="text-left text-[15px] text-ink-2">
                     <th scope="col" className="py-2 font-semibold">{ts("colRank")}</th>
                     <th scope="col" className="py-2 text-right font-semibold">{ts("colGames")}</th>
                     <th scope="col" className="py-2 text-right font-semibold">{ts("colDiff")}</th>
@@ -352,11 +352,11 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                         {f.opponent_name}, {format.dateTime(new Date(f.kickoff_at), { weekday: "long" })}
                       </Link>
                       {before ? (
-                        <Link href={`/app/${orgId}/matches/${before.match_id}`} className={cn(linkClass, "text-[13px]")}>
+                        <Link href={`/app/${orgId}/matches/${before.match_id}`} className={cn(linkClass, "text-[15px]")}>
                           {ts("lastAgainst", { own: before.score_own, opp: before.score_opponent })}
                         </Link>
                       ) : (
-                        <span className="text-[13px] text-ink-2">{ts("noMatchYet")}</span>
+                        <span className="text-[15px] text-ink-2">{ts("noMatchYet")}</span>
                       )}
                     </li>
                   );
@@ -397,7 +397,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                       <span className="min-w-0">
                         <span className="block font-semibold group-hover:text-accent">{c.label}</span>
                         {c.focus && (
-                          <span className="mt-0.5 mb-1.5 block w-fit bg-attn px-2 py-[3px] text-[13px] font-extrabold text-attn-ink">{tv("focus")}</span>
+                          <span className="mt-0.5 mb-1.5 block w-fit bg-attn px-2 py-[3px] text-[15px] font-extrabold text-attn-ink">{tv("focus")}</span>
                         )}
                         <span className="block text-sm text-muted">{c.refText}</span>
                       </span>
@@ -585,10 +585,10 @@ function TrendChart({ rows, label, day, width = 1100 }: { rows: Row[]; label: st
           <g key={r.match_id}>
             <title>{`${r.opponent} ${r.score_own}:${r.score_opponent}`}</title>
             <rect x={x} y={y} width={bw} height={bh} rx={2} fill={fill} />
-            <text x={x + bw / 2} y={d >= 0 ? y - 6 : y + bh + 14} fontSize="12" fontWeight={700} textAnchor="middle" fill="var(--foreground)">
+            <text x={x + bw / 2} y={d >= 0 ? y - 6 : y + bh + 14} fontSize="14" fontWeight={700} textAnchor="middle" fill="var(--foreground)">
               {d > 0 ? `+${d}` : d}
             </text>
-            <text x={x + bw / 2} y={h - 8} fontSize="12" textAnchor="middle" fill="var(--muted)">
+            <text x={x + bw / 2} y={h - 8} fontSize="14" textAnchor="middle" fill="var(--muted)">
               {day(r.kickoff_at)}
             </text>
           </g>

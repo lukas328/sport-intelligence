@@ -95,7 +95,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
       <dl className="grid grid-cols-3 gap-x-6 gap-y-4 border-y-2 border-foreground py-4 sm:grid-cols-4 lg:grid-cols-7" data-testid="season-line-totals">
         {cols.map((c) => (
           <div key={c.key}>
-            <dt className="text-[0.8125rem] text-muted">{c.label}</dt>
+            <dt className="text-[0.9375rem] text-muted">{c.label}</dt>
             <dd className="mt-1 font-score text-[1.75rem] leading-none tabular-nums">{cell(c, tot)}</dd>
           </div>
         ))}
