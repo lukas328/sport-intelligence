@@ -98,10 +98,11 @@ export async function openTraining(page: Page) {
  * Spiel; the figure sheets are stacked on Zahlen, each under its heading. */
 export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Spielbericht") {
   if (section === "Übersicht") {
-    // the comparison and the rest of the old overview sit behind «Mehr zum Spiel» (UX test B08)
-    await page.getByRole("tab", { name: "Spiel", exact: true }).click();
-    const game = page.getByTestId("game-more");
-    if (!(await game.evaluate((d) => (d as HTMLDetailsElement).open))) await game.locator(":scope > summary").click();
+    // the comparison sits in Zahlen › Alle Zahlen; «Mehr zum Spiel» keeps the course (UX test B08)
+    await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
+    const all = page.getByTestId("numbers-more");
+    if (!(await all.evaluate((d) => (d as HTMLDetailsElement).open))) await all.locator(":scope > summary").click();
+    await page.locator("#numbers-overview").scrollIntoViewIfNeeded();
     return;
   }
   await page.getByRole("tab", { name: "Zahlen", exact: true }).click();

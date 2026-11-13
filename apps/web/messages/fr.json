@@ -2825,7 +2825,7 @@
     "home": "contre {opponent}",
     "away": "à l'extérieur chez {opponent}",
     "noMatches": "Pas encore de match cette saison.",
-    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies.",
+    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
     "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie.",
     "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, impliqué dans {involved}",
     "number": "Numéro"

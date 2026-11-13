@@ -33,7 +33,7 @@ import { Segmented } from "@/components/ui/tabs";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { GameActions, PointOpen, Telegram, ThreeFigures, chatPicture } from "./game-tab";
-import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
+import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { KeepersView, PhysicalView } from "./m5-views";
 import { NumbersView } from "./numbers-view";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -45,10 +45,9 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
-import { FeedbackSummary, MyScenesLine, TeamFeedView } from "./feed-views";
+import { MyScenesLine, TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
-import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
 
@@ -142,7 +141,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     q.delete("t");
     window.history.pushState(null, "", `${window.location.pathname}?${q.toString()}`);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const [askPane, setAskPane] = useState<{ pane: "feedback" } | null>(null);
+  const [askPane] = useState<{ pane: "feedback" } | null>(null);
   const player = useRef<PlayerHandle | null>(null);
   // deep links (?t=ms), e.g. from a play drawn on a video moment
   useEffect(() => {
@@ -179,13 +178,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   // Zahlen: the figure sheets stacked, one level; running distance only with a video
   // running figures only from the tracking of a video, and called estimated (UX test Z5)
   const numberParts = (counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "physical")).filter((v) => v !== "physical" || main);
-  const showPhysical = () => {
-    setView("numbers");
-    requestAnimationFrame(() => {
-      document.querySelector("[data-testid=numbers-more]")?.setAttribute("open", "");
-      document.getElementById("numbers-physical")?.scrollIntoView({ block: "start" });
-    });
-  };
   // a match opens on Spiel; one without video and events on Video, where the upload is
   const opened = useRef(false);
   const hasEvents = (stats.data?.own.shots ?? 0) + (stats.data?.opponent.shots ?? 0) > 0;
@@ -557,54 +549,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <span className="text-[15px] text-ink-2 group-open:hidden">{ta("moreGameHint")}</span>
             </summary>
             <div className="mt-8 space-y-10">
-          {stats.data && stats.data.quality.events > 0 ? (
-            <div className="space-y-10">
-              <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} />
-              <ConcededByPosition stats={stats.data} />
-              {/* what the video itself shows (possession, attacks) belongs to the match too */}
-              {main && (
-                <VideoOverview
-                  orgId={orgId}
-                  matchId={match.id}
-                  teamId={match.team_id}
-                  ownName={own}
-                  oppName={oppName(match)}
-                  durationMs={main.duration_s ? main.duration_s * 1000 : null}
-                  kickoff={match.kickoff_ms}
-                  periodS={match.period_s}
-                  onPlay={onPlay}
-                  onPhysical={showPhysical}
-                  staff={false}
-                  compact
-                />
-              )}
-            </div>
-          ) : stats.isLoading ? (
-            <Skeleton className="h-64" />
-          ) : main ? (
-            <VideoOverview
-              orgId={orgId}
-              matchId={match.id}
-              teamId={match.team_id}
-              ownName={own}
-              oppName={oppName(match)}
-              durationMs={main.duration_s ? main.duration_s * 1000 : null}
-              kickoff={match.kickoff_ms}
-              periodS={match.period_s}
-              onPlay={onPlay}
-              onPhysical={showPhysical}
-              staff={staff}
-            />
-          ) : (
-            <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
-              {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
-            </EmptyState>
-          )}
+          {/* only what the data carries and what is in scope (UX test B08): the course of the
+              match; the comparison sits in Zahlen, the three things above, possession and attacks
+              estimated from the video are not shown */}
+          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} />}
           <div className="space-y-8">
-            {staff && main && (
-              // feedback on the players' scenes happens beside the player in the video tab
-              <FeedbackSummary orgId={orgId} matchId={match.id} onOpen={() => (setView("video"), setAskPane({ pane: "feedback" }))} />
-            )}
             <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} /></div>
             {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
             {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
@@ -618,6 +567,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         <div className="animate-fade">
           <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
           {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} row />}
+          {stats.data && stats.data.quality.events > 0 && (
+            <section id="numbers-overview" className="scroll-mt-24">
+              <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />
+            </section>
+          )}
           {numberParts.length === 0 && (
             <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
               {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}

@@ -53,8 +53,9 @@ export function NumbersView({
   const cell = (value: string | number, label: string, filter: EventFilter) =>
     value === "" || value === 0 || !orgId ? value || "" : <N value={value} label={label} onClick={() => open(label, filter)} />;
   // «Bestätigt»: every goal of the player was marked or confirmed by a person, none estimated
-  const confirmed = (number: number | null) => {
-    const own = (graphics?.goals ?? []).filter((g) => g.team === "own" && number != null && g.number === number);
+  // the same rule as the source line «… von dir bestätigt» (UX test N12): by person, else by number
+  const confirmed = (playerId: string | null, number: number | null) => {
+    const own = (graphics?.goals ?? []).filter((g) => g.team === "own" && ((playerId != null && g.player_id === playerId) || (g.player_id == null && number != null && g.number === number)));
     return own.length > 0 && own.every((g) => g.confirmed);
   };
   const who = (id: string | null, number: number | null) => {
@@ -110,7 +111,7 @@ export function NumbersView({
                         {shotsKnown && <td className={cn(td, "max-sm:hidden")}>{cell(p.shots, `${t("shots")}: ${w.name}`, { ...(p.player_id ? { player_id: p.player_id } : { side: "own", number: p.number ?? undefined }), type: "shot" })}</td>}
                         {shotsKnown && <td className={cn(td, "text-ink-2")}>{p.shots > 0 ? pct(p.goals / p.shots) : ""}</td>}
                         <td className={cn(td, "max-sm:hidden")}>
-                          {confirmed(w.number ?? null) && (
+                          {confirmed(p.player_id ?? null, w.number ?? null) && (
                             <>
                               <Check aria-hidden className="ml-auto size-5 text-win" />
                               <span className="sr-only">{t("confirmedYes")}</span>

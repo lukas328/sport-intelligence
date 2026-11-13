@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { type CSSProperties, type FormEvent, useEffect, useState } from "react";
+import { type ComponentProps, type CSSProperties, type FormEvent, useEffect, useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
 import { Bundle } from "@/components/anlauf/bundle";
 import { WurfHead } from "@/components/anlauf/heads";
@@ -204,7 +204,7 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
     return (
       <div className="space-y-8" style={clubStyle(colour, SECOND(colour)) as CSSProperties} data-testid="entry-loading">
         <div className="bleed-x -mt-6 sm:-mt-10">
-          <WurfHead kick={known.league ?? undefined} title={known.name ?? "…"} own={null} opp={null} ownName={known.name ?? ""} oppName="" waiting />
+          <EntryHead kick={known.league ?? undefined} title={known.name ?? "…"} own={null} opp={null} ownName={known.name ?? ""} oppName="" waiting />
         </div>
         <p className="m-0 max-w-[50ch] text-[19px]" aria-live="polite" aria-busy={q.isLoading}>
           {q.isLoading ? (slow ? t("slow") : t("fetching")) : t("unavailableTeam")}
@@ -226,7 +226,7 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
   return (
     <div className="space-y-10" style={clubStyle(colour, SECOND(colour)) as CSSProperties} data-testid="entry-team">
       <div className="bleed-x -mt-6 sm:-mt-10">
-        <WurfHead
+        <EntryHead
           kick={last ? `${t("lastResult")} · ${t("vs", { opponent: last.opponent })} · ${format.dateTime(new Date(last.kickoff_at), { day: "numeric", month: "long" })}` : p.season}
           title={
             <>
@@ -272,6 +272,11 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
       </div>
     </div>
   );
+}
+
+/** One head for the team step, while loading (what the list knew) and loaded (one head per screen). */
+function EntryHead(props: ComponentProps<typeof WurfHead>) {
+  return <WurfHead {...props} />;
 }
 
 /** Table excerpt, scorers and next game of a team from the federation's data (also on Spiele

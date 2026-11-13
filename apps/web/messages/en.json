@@ -2825,7 +2825,7 @@
     "home": "vs {opponent}",
     "away": "away at {opponent}",
     "noMatches": "No matches this season yet.",
-    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded.",
+    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded. Shots without blocked ones.",
     "noMatchesYet": "No match played this season yet. The figures appear after the first match with a match report or tagging.",
     "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, involved in {involved}",
     "number": "Number"

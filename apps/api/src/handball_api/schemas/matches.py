@@ -543,6 +543,7 @@ class GoalRunOut(ApiModel):
     team: Literal["own", "opp"]
     minute: float | None
     number: int | None
+    player_id: uuid.UUID | None = None
     zone: str | None = Field(description="la, ra, rl, rm, rr, kr, m7 or gs")
     run: list[tuple[float, float]] = Field(
         description="the scorer's way before the shot, half court (goal at the top, metres); "

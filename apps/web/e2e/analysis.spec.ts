@@ -54,7 +54,8 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await expect(main).not.toContainText("Papierbericht");
   await expectAccessible(page);
   // every number opens the events behind it
-  await expect(page.getByTestId("insights")).toContainText("Drei Dinge");
+  // «Mehr zum Spiel» has no second list of three things any more (UX test B08)
+  await expect(page.getByTestId("insights")).toHaveCount(0);
   await table.getByRole("button", { name: "Tore Damen 1" }).click();
   await expect(page.getByTestId("event-list").getByRole("listitem")).toHaveCount(5);
 

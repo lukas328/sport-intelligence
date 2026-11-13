@@ -6779,6 +6779,8 @@ export interface components {
             minute: number | null;
             /** Number */
             number: number | null;
+            /** Player Id */
+            player_id?: string | null;
             /**
              * Run
              * @description the scorer's way before the shot, half court (goal at the top, metres); empty without tracking

@@ -5369,6 +5369,18 @@
             ],
             "title": "Number"
           },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
           "run": {
             "description": "the scorer's way before the shot, half court (goal at the top, metres); empty without tracking",
             "items": {

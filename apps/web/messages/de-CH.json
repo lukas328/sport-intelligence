@@ -2825,7 +2825,7 @@
     "home": "gegen {opponent}",
     "away": "auswärts bei {opponent}",
     "noMatches": "Noch keine Spiele in dieser Saison.",
-    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Spielminuten werden nicht erfasst.",
+    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Spielminuten werden nicht erfasst. Würfe ohne geblockte.",
     "noMatchesYet": "Noch kein gespieltes Spiel in dieser Saison. Die Zahlen erscheinen nach dem ersten Spiel mit Spielbericht oder Erfassung.",
     "summaryPlayed": "{matches, plural, one {1 Spiel} other {# Spiele}}, an {involved} beteiligt",
     "number": "Nummer"

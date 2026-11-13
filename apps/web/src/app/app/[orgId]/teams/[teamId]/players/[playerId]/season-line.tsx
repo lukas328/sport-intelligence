@@ -10,6 +10,7 @@ import { PageHead } from "@/components/anlauf/heads";
 import { useShell } from "@/components/shell/context";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
+import { lineRate, lineSevenM, lineShots } from "@/lib/season-line";
 
 type Line = Schemas["SeasonLine"];
 type Figures = Schemas["LineFigures"];
@@ -59,9 +60,10 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
       ]
     : [
         { key: "goals", label: t("goals"), value: (f) => String(f.goals), filter: "type=shot&outcome=goal" },
-        { key: "shots", label: t("shots"), value: (f) => String(f.goals + f.saved + f.misses + f.posts + f.blocked), filter: "type=shot" },
-        { key: "pct", label: t("shootingPct"), value: (_f, m) => pct(m ? m.shooting_pct : l.totals.shooting_pct) },
-        { key: "seven", label: t("sevenM"), value: (f) => `${f.seven_m_goals}/${f.seven_m_shots}` },
+        // one count for shots and rate: the attempts without blocked ones (UX test N12)
+        { key: "shots", label: t("shots"), value: (f) => String(lineShots(f)), filter: "type=shot" },
+        { key: "pct", label: t("shootingPct"), value: (f) => lineRate(f) },
+        { key: "seven", label: t("sevenM"), value: (f) => lineSevenM(f) },
         // no «Torvorlagen»: passes are not measured (UX test B34, Z5)
         { key: "turnovers", label: t("turnovers"), value: (f) => String(f.turnovers), filter: "type=turnover" },
         { key: "suspensions", label: t("suspensions"), value: (f) => String(f.suspensions), filter: "type=suspension_2min" },
