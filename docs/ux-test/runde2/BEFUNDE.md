@@ -5,8 +5,8 @@ Aufbau wie in `NACHPRUEFUNG.md`. Gewichte wie in Runde 1: **P1** blockiert eine 
 verliert Daten, **P2** verwirrt, kostet Zeit oder zeigt, was die Daten nicht hergeben, **P3**
 Schliff. Die alten Befunde und ihr Stand stehen in `NACHPRUEFUNG.md`.
 
-Lieferung 1: Teil 1 (Nachprüfung) und Teil 2 (erster Eindruck als Hans). Teil 3 (neues Suchen in
-allen Aufgaben und auf der Website) folgt als Nachtrag in dieser Datei.
+Lieferung 1: Teil 1 (Nachprüfung) und Teil 2 (erster Eindruck als Hans). Lieferung 2: Teil 3 (neues
+Suchen in allen Aufgaben und auf der Website), am Ende dieser Datei.
 
 ---
 
@@ -56,12 +56,12 @@ diese beiden Stellen schliesst, hat einen Einstieg, den ein skeptischer Trainer 
 
 ### Zahlen
 
-| Gewicht | Neue Befunde (Lieferung 1) |
+| Gewicht | Neue Befunde (beide Lieferungen) |
 |---|---|
 | P1 | 1 |
-| P2 | 16 |
-| P3 | 9 |
-| **Total** | **26** |
+| P2 | 18 |
+| P3 | 12 |
+| **Total** | **31** |
 
 Nachprüfung (Details `NACHPRUEFUNG.md`): 50 bestätigt behoben, 21 teilweise, 0 offen, 1 neu kaputt,
 4 nicht geprüft.
@@ -311,6 +311,60 @@ fünf Trikots im Kopf. `shots/n05-spiel-ohne-drei-dinge.jpg`
 
 ---
 
-## Teil 3: neues Suchen
+## Teil 3: neues Suchen (Nachtrag)
 
-Folgt als Nachtrag.
+Die zehn Aufgaben aus Runde 1 noch einmal zügig, Desktop und Handy, mit dem Demo-Konto und dem
+Konto von Hans; dazu alle Seiten der Website am Handy.
+
+| Aufgabe | Desktop | Handy | Was neu auffällt |
+|---|---|---|---|
+| 1 Erster Besuch | ja | ja | Weg über Website und Einstieg, siehe Teil 2 |
+| 2 Video hochladen, warten | ja | ja | N04, N05, N24 |
+| 3 Drei Dinge, Szenen zu Punkt 1, Video/Feld von oben | ja | ja | Szenenfolge mit «Nächste Szene»; Bündel zeigen ohne bestätigtes Feld nur Punkte, die Legende «Weg zum Wurf» steht trotzdem |
+| 4 Prüfen | ja | ja, Griffe klein | N13, N17 |
+| 5 Sammlung, Notiz, Link, als Spieler öffnen | ja | ja | Titel ändern, «Notiz dazu» › «Notiz speichern», Verschieben, Vollbild am Handy funktionieren (`shots/v04b-zeigen-handy.jpg`); «Entfernen» ohne Rückgängig (N30); N07 |
+| 6 Frage «Gegentore rechts aussen, letzte drei Spiele» | ja, 2 Schritte | ja, über den Reiter Szenen | N08; Gegner und Nummern werden nicht verstanden (B19) |
+| 7 Saison, Einwilligung | ja | ja | Einwilligung «Bitte wählen»; Team mit Aufgabe «Konto schützen» statt Banner |
+| 8 Spieltag am Handy | mit Mühe | mit Mühe | N01, N02, N14 |
+| 9 Farben, Team, Sprache, Abmelden | ja | ja | Sprache im Kontomenü wirkt sofort, Tab Spiel komplett auf Französisch; «Du bist abgemeldet.» |
+| 10 Fehler und Ränder | mit Mühe | mit Mühe | Textdatei weiter «Etwas ist schiefgelaufen» (B29); App-404 mit HTTP 200 (N18) |
+
+**Website (alle Seiten am Handy):** 15 Seiten in de, fr, en geladen, kein Überlauf, **keine Schrift
+unter 16 px**, 76 Links ohne einen kaputten. Für Hans gut: kurze Titel, «Ein Handy reicht» gleich
+oben in der Filmanleitung, Hallenplan, Preise mit «noch nicht endgültig», Demo mit gelbem Hinweis
+«Erfundenes Spiel». Versprechen gegen App: Mail bei fertiger Analyse (ja, aber siehe N05),
+Testphase 30 Tage (ja), Prüfen «eine Frage nach der anderen, jederzeit aufhören» (ja). Zwei
+Widersprüche und ein toter Weg:
+
+**N27 · P2 · Das Beispiel unter dem Suchfeld der Website findet nichts**
+- Route: Website `/de/` › «Wie heisst dein Team? … zum Beispiel: HC Zürichsee Herren 1». Gerät: beide.
+- Passiert: Wer das Beispiel tippt, bekommt in der App «Kein Team gefunden für «HC Zürichsee Herren
+  1»» (`/v1/public/teams` liefert `[]`): HC Zürichsee ist der erfundene Demo-Verein.
+- Screenshot: `shots/n27-website-beispiel.jpg`
+- Vorschlag: ein echtes Beispiel aus handball.ch («z. B. Pfadi Winterthur») oder «Name des Vereins
+  oder Ort».
+
+**N28 · P2 · Website und App widersprechen sich bei der Datei**
+- Route: Website `/de/hilfe/` gegen Upload-Block der App.
+- Passiert: Website: «Auch mehrere Dateien, zum Beispiel eine pro Halbzeit, oder ein Link zu einer
+  Kamera-Plattform.» App: «Das ganze Spiel in einer Datei (MP4, MOV oder MKV).»
+- Screenshot: `shots/n28-website-hilfe.jpg`
+- Vorschlag: eine Aussage für beide; wenn mehrere Dateien gehen, in der App «Eine Datei oder eine pro
+  Halbzeit».
+
+(Der dritte Punkt ist N06: Die Filmanleitung der App zeigt auf `/aufnahme/`, die Website hat
+`/de/aufnahme/`.)
+
+**N29 · P3 · Sammlung: neue Notiz landet ganz unten**
+- Route: `{o}/collections/<id>` › «Notiz dazu». Gerät: Handy.
+- Passiert: Das Notizfeld öffnet sich unter Eintrag 27, ganz am Ende einer langen Liste; danach muss
+  die Notiz mit «Nach oben» Schritt für Schritt an ihren Platz.
+- Screenshot: `shots/n29-sammlung-bearbeitet.jpg`
+- Vorschlag: «Notiz hier einfügen» zwischen den Einträgen, oder «Nach ganz oben».
+
+**N30 · P3 · «Entfernen» in der Sammlung ohne Rückgängig**: Ein Tipp entfernt die Szene sofort, ohne
+Rückfrage und ohne «Rückgängig». Am Handy liegen «Nach unten» und «Entfernen» direkt untereinander.
+Vorschlag: «Entfernt. Rückgängig» für einige Sekunden.
+
+**N31 · P3 · Szenen: «Mehr: Ereignisliste, gespeicherte Suchen, eigene Tags»**: «Tags» steht noch
+unten auf der Szenen-Seite (Wortliste H10).
