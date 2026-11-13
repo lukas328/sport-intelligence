@@ -486,8 +486,10 @@ def kickoff_missing(match: Match, length_ms: int | None) -> list[int]:
     video runs a break past the first half (the same rule as web lib/match-workflow.ts)."""
     k = match.kickoff_ms or {}
     first = k.get("1")
+    # «Der Anwurf ist nicht im Video» (G8): not asked again
+    absent = (match.report_extra or {}).get("kickoff_absent", [])
     if first is None:
-        return [1]
+        return [] if 1 in absent else [1]
     second = length_ms is not None and length_ms > int(first) + match.period_s * 1000 + 5 * 60_000
     return [2] if second and k.get("2") is None else []
 

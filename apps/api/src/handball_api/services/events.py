@@ -395,14 +395,32 @@ async def cache_put(
     )
 
 
+KICKOFF_ABSENT = "kickoff_absent"  # report_extra: halves whose throw-off is not in the video
+
+
 async def set_kickoff(
-    ctx: Ctx, match_id: uuid.UUID, period: int, t_ms: int, clock_s: float | None = None
+    ctx: Ctx,
+    match_id: uuid.UUID,
+    period: int,
+    t_ms: int,
+    clock_s: float | None = None,
+    *,
+    absent: bool = False,
 ) -> Match:
     """Store the video time of a half's throw-off and align events that only have a clock time.
 
     `clock_s`: the match clock shown at `t_ms` (any moment of the half); the throw-off then lies
-    before it, also before the video's start when the video begins mid-half (negative time)."""
+    before it, also before the video's start when the video begins mid-half (negative time).
+    `absent`: the throw-off is not in the video (third real-video test G8); without a clock
+    Prüfen stops asking and the video keeps its own time, with one the clock is set from it."""
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
+    extra = dict(match.report_extra or {})
+    gone = [p for p in extra.get(KICKOFF_ABSENT, []) if p != period]
+    if absent and clock_s is None:
+        match.report_extra = {**extra, KICKOFF_ABSENT: sorted({*gone, period})}
+        return match
+    if KICKOFF_ABSENT in extra:
+        match.report_extra = {**extra, KICKOFF_ABSENT: gone}
     if clock_s is not None:
         half_start = (period - 1) * match.period_s
         if not half_start <= clock_s <= half_start + match.period_s:

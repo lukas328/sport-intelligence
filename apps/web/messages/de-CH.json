@@ -3253,7 +3253,11 @@
     "leftOpen": "{n, plural, one {1 Moment bleibt offen.} other {# Momente bleiben offen.}} Bis sie beantwortet sind, ist das Resultat ein Zwischenstand.",
     "sameGoal": "Nein, dasselbe Tor",
     "anotherGoal": "Ja, noch ein Tor",
-    "sameGoalWhy": "In diesem Ausschnitt liegt das Tor von {time}, das du schon bestätigt hast. Fällt hier noch ein weiteres?"
+    "sameGoalWhy": "In diesem Ausschnitt liegt das Tor von {time}, das du schon bestätigt hast. Fällt hier noch ein weiteres?",
+    "kickoffAbsent": "Der Anwurf ist nicht im Video",
+    "kickoffStartMinute": "Welche Spielminute zeigt der Anfang?",
+    "kickoffStartMinuteHint": "Leer lassen geht auch: dann zählt die Zeit des Videos.",
+    "kickoffAbsentSave": "Weiter"
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

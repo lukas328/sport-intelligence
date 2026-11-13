@@ -3253,7 +3253,11 @@
     "leftOpen": "{n, plural, one {1 moment stays open.} other {# moments stay open.}} Until they are answered, the score is an interim one.",
     "sameGoal": "No, the same goal",
     "anotherGoal": "Yes, another goal",
-    "sameGoalWhy": "This clip holds the goal at {time} you already confirmed. Is there another one here?"
+    "sameGoalWhy": "This clip holds the goal at {time} you already confirmed. Is there another one here?",
+    "kickoffAbsent": "The throw-off is not in the video",
+    "kickoffStartMinute": "Which match minute does the start show?",
+    "kickoffStartMinuteHint": "You can leave it empty: then the video's time counts.",
+    "kickoffAbsentSave": "Continue"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

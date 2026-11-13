@@ -19,6 +19,7 @@ type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
 type Goal = MatchGraphics["goals"][number];
 
+const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
 const PHASE = 3; // minutes around the scene: the phase on the right and on the Rail
 const BEFORE = 8000; // a scene starts 8 s before its goal, as on the tactics camera (G3)
 const AFTER = 2000;
@@ -91,10 +92,13 @@ export function VideoStage({
   const phase: [number, number] =
     short && span ? [Math.floor(span[0]), Math.ceil(span[1])] : [Math.max(span ? Math.floor(span[0]) : 0, Math.floor(minute - PHASE)), Math.min(span ? Math.ceil(span[1]) : 60, Math.ceil(minute + PHASE))];
   const inPhase = short ? goals : goals.filter((g) => g.minute != null && g.minute >= phase[0] && g.minute <= phase[1]);
-  const list = chosen ? sequence : inPhase;
+  // one row per goal (G8: rows came twice without a throw-off)
+  const list = [...new Map((chosen ? sequence : inPhase).map((g) => [g.event_id, g])).values()];
   const at = list.findIndex((g) => g.event_id === eventId);
   const team = (g: Goal) => (g.team === "opp" ? oppName : ownName);
-  const label = (g: Goal) => t("goalOf", { team: team(g), clock: clockOf(g.minute) });
+  // without the throw-off the place in the video stands for the clock (G8)
+  const when = (g: Goal) => (g.minute != null ? clockOf(g.minute) : g.t_ms != null ? t("atVideo", { time: mmss(g.t_ms) }) : "");
+  const label = (g: Goal) => t("goalOf", { team: team(g), clock: when(g) });
   const where = (g: Goal) => (!g.zone ? "" : ["la", "ra", "rl", "rm", "rr", "kr"].includes(g.zone) ? tz(`zoneTitle.${g.zone}` as "zoneTitle.ra") : t(`zoneShort.${g.zone}` as "zoneShort.gs"));
   const notes = useQuery({
     queryKey: ["comments", match.id],
@@ -156,7 +160,7 @@ export function VideoStage({
           <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-[13px] font-semibold text-court-text">
             {toggle}
             {chosen && at >= 0 && <span>{t("sceneOf", { n: at + 1, total: list.length })}</span>}
-            {goal && <span className="ml-auto font-mono text-xl text-white">{clockOf(goal.minute)}</span>}
+            {goal && <span className="ml-auto font-mono text-xl text-white">{when(goal)}</span>}
           </div>
         </div>
         {mode === "taktik" && eventId && goal && (
@@ -174,7 +178,21 @@ export function VideoStage({
           />
         )}
         <CameraKey us={ownName} them={oppName} referee={t("referee")} ball={t("ball")} />
-        {graphics.report_goals.length > 0 && (
+        {/* no throw-off: the Rail over the video's own time, the goals at their place in it (G8) */}
+        {!span && goals.length > 0 && goals.every((g) => g.minute == null) && video.duration_s ? (
+          <div className="mt-6">
+            <Rail
+              goals={goals.filter((g) => g.t_ms != null).map((g) => ({ minute: g.t_ms! / 60_000, team: g.team === "opp" ? "opp" : "own" }))}
+              at={goal?.t_ms != null ? goal.t_ms / 60_000 : null}
+              length={Math.max(1, video.duration_s / 60)}
+              label={t("rail")}
+            />
+            <p className="mt-1 flex justify-between text-[15px] text-ink-2" data-testid="rail-video">
+              <span>{t("atVideo", { time: "0:00" })}</span>
+              <span>{t("atVideo", { time: mmss(video.duration_s * 1000) })}</span>
+            </p>
+          </div>
+        ) : graphics.report_goals.length > 0 && (
           <div className="mt-6">
             {span ? (
               <>
@@ -246,7 +264,7 @@ export function VideoStage({
                   className={cn("grid min-h-11 w-full cursor-pointer grid-cols-[28px_52px_minmax(0,1fr)] gap-2 border-t border-rule px-3 py-2.5 text-left", on ? "bg-attn text-attn-ink" : "bg-transparent text-ink hover:bg-ink/5")}
                 >
                   <b className="font-num text-[17px]">{chosen ? i + 1 : ""}</b>
-                  <b className="font-num text-[17px]">{clockOf(g.minute)}</b>
+                  <b className="font-num text-[17px]">{when(g)}</b>
                   <span className="text-[15px] leading-snug">
                     {label(g)}
                     <small className={cn("block text-[15px]", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : where(g)}</small>

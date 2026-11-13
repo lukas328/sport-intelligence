@@ -168,6 +168,38 @@ async def test_prufen_asks_for_the_throw_off_until_it_is_set(make_api: Callable[
     assert all(c["kind"] != "kickoff" for c in g["checks"])
 
 
+async def test_a_throw_off_not_in_the_video_is_not_asked_again(
+    make_api: Callable[[], Api],
+) -> None:
+    """Third real-video test G8: a clip without the throw-off left «Prüfen 1» standing with no
+    way out. «Der Anwurf ist nicht im Video» ends the question; the minute the video's start
+    shows, when given, sets the clock."""
+    from .test_themes import ready_video
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    base = f"/v1/orgs/{org}/matches"
+    m = await new_match(api, ids)
+    await ready_video(api, ids, m["id"])
+    r = await api.put(f"{base}/{m['id']}/kickoff", json={"period": 1, "t_ms": 0, "absent": True})
+    assert r.status_code == 204, r.text
+    g = (await api.get(f"{base}/{m['id']}/graphics")).json()
+    assert all(c["kind"] != "kickoff" for c in g["checks"])
+    assert (await api.get(f"{base}/{m['id']}")).json()["kickoff_ms"] is None
+    # another match: the start of the video shows minute 12
+    other = await new_match(api, ids, opponent_name="TV Spaeter")
+    await ready_video(api, ids, other["id"])
+    r = await api.put(
+        f"{base}/{other['id']}/kickoff",
+        json={"period": 1, "t_ms": 0, "absent": True, "clock_s": 720},
+    )
+    assert r.status_code == 204, r.text
+    assert (await api.get(f"{base}/{other['id']}")).json()["kickoff_ms"] == {"1": -720_000}
+    g = (await api.get(f"{base}/{other['id']}/graphics")).json()
+    assert all(c["kind"] != "kickoff" for c in g["checks"])
+
+
 async def test_a_goal_names_its_scorer_for_the_confirmed_column(
     make_api: Callable[[], Api],
 ) -> None:

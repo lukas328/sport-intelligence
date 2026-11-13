@@ -3253,7 +3253,11 @@
     "leftOpen": "{n, plural, one {1 moment reste ouvert.} other {# moments restent ouverts.}} Tant qu'ils ne sont pas répondus, le score est provisoire.",
     "sameGoal": "Non, le même but",
     "anotherGoal": "Oui, encore un but",
-    "sameGoalWhy": "Cet extrait contient le but de {time} que tu as déjà confirmé. Y en a-t-il un autre ici ?"
+    "sameGoalWhy": "Cet extrait contient le but de {time} que tu as déjà confirmé. Y en a-t-il un autre ici ?",
+    "kickoffAbsent": "L'engagement n'est pas dans la vidéo",
+    "kickoffStartMinute": "Quelle minute de jeu montre le début ?",
+    "kickoffStartMinuteHint": "Tu peux laisser vide : le temps de la vidéo compte alors.",
+    "kickoffAbsentSave": "Continuer"
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

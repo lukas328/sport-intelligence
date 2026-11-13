@@ -166,6 +166,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const getVideo = useCallback(() => player.current?.video() ?? null, []);
   // an answer counts only once it is saved; a refusal of the API is said, never swallowed (E03)
   const [failed, setFailed] = useState<string | null>(null);
+  // «Der Anwurf ist nicht im Video» and, if known, the minute the video's start shows (G8)
+  const [absent, setAbsent] = useState(false);
+  const [startMinute, setStartMinute] = useState("");
   const must = (r: { error?: unknown; response: Response }) => {
     if (r.error || !r.response.ok) {
       const p = r.error as { detail?: string; title?: string } | undefined;
@@ -492,6 +495,51 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   {a.label}
                 </button>
               ))}
+              {current.kind === "kickoff" && !absent && (
+                <button type="button" onClick={() => setAbsent(true)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-semibold" data-testid="kickoff-absent">
+                  {t("kickoffAbsent")}
+                </button>
+              )}
+              {current.kind === "kickoff" && absent && (
+                <form
+                  className="col-span-2 space-y-2 border-2 border-ink p-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const minute = startMinute.trim() === "" ? null : Number(startMinute);
+                    const period = current.period;
+                    void answer({
+                      key: "absent",
+                      label: t("kickoffAbsent"),
+                      run: async () => {
+                        const clock_s = minute != null && Number.isFinite(minute) ? (period - 1) * match.period_s + minute * 60 : undefined;
+                        must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period, t_ms: 0, absent: true, ...(clock_s != null ? { clock_s } : {}) } }));
+                        for (const key of ["match", "events", "stats", "official-goals", "goal-candidates", "graphics"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
+                        setAbsent(false);
+                        setStartMinute("");
+                        router.refresh();
+                      },
+                    });
+                  }}
+                >
+                  <label className="block">
+                    <span className="mb-1 block text-[17px] font-semibold">{t("kickoffStartMinute")}</span>
+                    <span className="mb-2 block text-[15px] text-ink-2">{t("kickoffStartMinuteHint")}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={Math.round((match.period_s * match.periods) / 60)}
+                      inputMode="numeric"
+                      value={startMinute}
+                      onChange={(e) => setStartMinute(e.target.value)}
+                      className="min-h-12 w-32 border-2 border-ink bg-transparent px-3 text-[17px]"
+                      data-testid="kickoff-start-minute"
+                    />
+                  </label>
+                  <button type="submit" className={buttonClass("primary")} data-testid="kickoff-absent-save">
+                    {t("kickoffAbsentSave")}
+                  </button>
+                </form>
+              )}
               {current.kind === "person" && (
                 <label className="col-span-2 block">
                   <span className="mb-1 block text-[15px] font-semibold text-ink-2">{read ? t("personOther") : t("personPick")}</span>

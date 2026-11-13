@@ -182,7 +182,22 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
   // afterwards the server's open question (the throw-off) is asked
   await expect(page.getByRole("button", { name: "Jetzt ist Anwurf" })).toBeVisible({ timeout: 240_000 });
   await expect(page.getByTestId("check-failed")).toHaveCount(0);
-  await page.getByRole("button", { name: "Jetzt ist Anwurf" }).click();
-  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
   expect(await analysis()).toBe("ready");
+  // a goal moment the new analysis found
+  const video = (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}`)).json()).videos[0].id as string;
+  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status, suggested_side) VALUES ('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', 14000, 12000, 9000, 15000, 3, 1, 0, 'open', 'own')`]);
+  // the clip has no throw-off (G8): said so, the minute left empty; no «Prüfen 1» stays
+  await page.getByTestId("kickoff-absent").click();
+  await expect(page.getByText("Welche Spielminute zeigt der Anfang?")).toBeVisible();
+  await page.getByTestId("kickoff-absent-save").click();
+  await page.getByRole("button", { name: "Tor HC Ecke" }).click();
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
+  const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
+  expect(g.checks.filter((c: { kind: string }) => c.kind === "kickoff")).toHaveLength(0);
+  // the Video tab without throw-off: the Rail over the video's time, the scene with its video time
+  await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
+  await expect(page.getByTestId("rail-video")).toContainText("Video 0:00");
+  const rows = page.getByTestId("stage-scenes").getByRole("button");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("Video 0:12");
 });

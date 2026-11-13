@@ -98,7 +98,9 @@ async def match_stats(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
 
 @router.put("/matches/{match_id}/kickoff", status_code=204)
 async def set_kickoff(match_id: uuid.UUID, data: KickoffIn, scope: OrgDep) -> None:
-    await service.set_kickoff(scope.ctx, match_id, data.period, data.t_ms, data.clock_s)
+    await service.set_kickoff(
+        scope.ctx, match_id, data.period, data.t_ms, data.clock_s, absent=data.absent
+    )
 
 
 @router.post("/matches/{match_id}/events/import", response_model=FeedImportResult)
