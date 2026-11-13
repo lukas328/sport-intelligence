@@ -71,4 +71,7 @@ Comparison images of the rebuilt screens: `docs/screens/anlauf/vergleich/ux1-*.j
   sharing (token in the listing).
 - e2e: `collection.spec` (new), `data.spec` (B02, B21), `live.spec` and `m11.spec` (B03), `analysis.spec`
   (B07, B08), `onboarding.spec` (B06), `training.spec` (team functions).
+- axe (WCAG 2.2 AA) after block 4: 11 pages (Spiele, Spiel/Video/Zahlen, Prüfen, Team, Saison,
+  Szenen, Sammlungen, Kader bearbeiten, Spieltag) in all six check colours at 1280 and 390 px: no
+  violations.
 - Red before this work and not touched: `apps/api/tests/test_official.py::test_daily_tick_syncs_and_imports_reports`.
