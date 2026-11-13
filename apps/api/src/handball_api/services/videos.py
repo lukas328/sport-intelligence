@@ -592,9 +592,14 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 await start_analysis(ctx, asset, match)
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
+            # the run after a court the coach corrected in Prüfen: Prüfen waits for it and asks
+            # anew, no second mail and no notice (third real-video test G4)
+            pending = (asset.analysis or {}).get(PENDING)
+            corrected = isinstance(pending, dict) and pending.get("job_id") == str(job.id)
             on_timeline = await _apply_analysis_result(ctx, asset, job, data.result)
-            kind, extra = await _ready_note(ctx, match)
-            await _tell_staff(ctx, match, kind, extra)
+            if not corrected:
+                kind, extra = await _ready_note(ctx, match)
+                await _tell_staff(ctx, match, kind, extra)
             if on_timeline:
                 await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
                 from handball_api.services import highlights  # imports this module (media paths)
@@ -658,6 +663,8 @@ async def start_analysis(
         # fails the automatic court again and the run would drop the tracks and identities
         clicked = meta[CLICKED]
         points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
+    opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
+    opponent_kit = match.opponent_kit or (opp.primary_color if opp is not None else None)
     refs: list[dict[str, Any]] = []
     if points is None:
         # the court clicked or confirmed on an earlier video of the same hall: the worker tries
@@ -675,9 +682,10 @@ async def start_analysis(
             {
                 "own": match.kit_own,
                 "own_gk": match.kit_own_gk,
-                # only a colour somebody said: the column's default red is no knowledge (E09)
-                "opponent": match.opponent_kit,
-                "opponent_gk": match.kit_opponent_gk if match.opponent_kit else None,
+                # only a colour somebody said, for this match or remembered for the opponent
+                # (third real-video test G5): the column's default red is no knowledge (E09)
+                "opponent": opponent_kit,
+                "opponent_gk": match.kit_opponent_gk if opponent_kit else None,
                 "referee": match.kit_referee,
             }
         ),

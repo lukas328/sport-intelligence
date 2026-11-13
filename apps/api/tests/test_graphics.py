@@ -414,11 +414,15 @@ async def test_answers_survive_a_new_analysis_after_a_moved_court(
     corners = [[100, 500], [1500, 500], [1300, 200], [300, 200]]
     court = [[0, 0], [40, 0], [40, 20], [0, 20]]
     pts = [{"image": i, "court": c} for i, c in zip(corners, court, strict=True)]
+    notes = lambda: api.get(f"/v1/orgs/{org}/me/notifications")  # noqa: E731
+    before = len((await notes()).json()["items"])
     r = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts})
     assert r.status_code == 202, r.text
     g = (await api.get(f"{base}/graphics")).json()
     assert g["analysis"] == "running" and g["analysis_at"] is None
     await _finish(api, jobs.jobs[-1][2], result)
+    # the run after the corrected court sends no second mail and no notice (G4)
+    assert len((await notes()).json()["items"]) == before
 
     rows = (await api.get(f"{base}/goal-candidates")).json()["candidates"]
     assert [r["goal_ms"] for r in rows if r["status"] == "confirmed"] == [first["goal_ms"]]
