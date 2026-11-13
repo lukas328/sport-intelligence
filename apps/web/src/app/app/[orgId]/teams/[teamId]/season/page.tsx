@@ -275,7 +275,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                       <th scope="row" className="py-3 text-left font-normal">
                         <b className="font-num mr-3 inline-block w-8 text-xl text-club-text">{shirts[p.player_id] ?? ""}</b>
                         {staff ? (
-                          <Link href={`${base}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
+                          <Link href={`${base}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                             {names[p.player_id] ?? t("unknownPlayer")}
                           </Link>
                         ) : (
@@ -350,7 +350,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   const before = [...data.matches].filter((m) => m.opponent === f.opponent_name).sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0];
                   return (
                     <li key={f.id} className="flex min-h-11 items-center justify-between gap-3 border-t border-rule py-2.5 text-[15px] first:border-t-0">
-                      <Link href={`/app/${orgId}/matches/${f.id}`} className="hover:underline hover:underline-offset-4">
+                      <Link href={`/app/${orgId}/matches/${f.id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                         {f.opponent_name}, {format.dateTime(new Date(f.kickoff_at), { weekday: "long" })}
                       </Link>
                       {before ? (

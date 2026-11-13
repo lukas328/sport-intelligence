@@ -158,7 +158,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                       <span className="min-w-0">
                         <span className="font-slant block text-[19px] leading-tight">
                           {staff ? (
-                            <Link href={`${base}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
+                            <Link href={`${base}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                               {name}
                             </Link>
                           ) : (

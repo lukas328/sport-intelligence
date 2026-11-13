@@ -117,9 +117,13 @@ export function Series({ values, team, label }: { values: readonly number[]; tea
 
 /** Goal difference per match: wins up in the club colour, losses down as a dashed ink outline. */
 export function DiffBars({ matches, width = 700, label }: { matches: readonly { label: string; diff: number }[]; width?: number; label: string }) {
-  const H = 190;
-  const mid = 96;
-  const U = 7;
+  // the scale fits the biggest difference, the height the bars and their numbers on both sides:
+  // a −20 keeps its bar and its number inside the picture (UX test A10)
+  const most = Math.max(0, ...matches.map((m) => m.diff));
+  const least = Math.max(0, ...matches.map((m) => -m.diff));
+  const U = Math.min(7, 84 / Math.max(1, most, least));
+  const mid = Math.max(30, most * U + 32);
+  const H = mid + Math.max(30, least * U + 32);
   const step = width / Math.max(1, matches.length);
   const bw = Math.min(64, step - 22);
   // a name never runs into its neighbour (UX test H14): cut to the slot, with a point
