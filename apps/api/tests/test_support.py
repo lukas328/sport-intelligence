@@ -155,3 +155,27 @@ def test_analysis_ready_mail_names_the_match() -> None:
     )
     assert mail.subject == "Die drei Dinge gegen TV T sind da"
     assert "HC Z gegen TV T" in mail.text and mail.text.endswith("x")
+
+
+def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
+    """UX test N05 and N20: without three things the mail says the analysis is done and how many
+    questions wait; an account without a name is greeted with «Hallo» alone."""
+    from handball_api.services.mail_templates import render
+
+    mail = render(
+        "analysis_questions",
+        "de-CH",
+        to="hans.p130@example.ch",
+        name="hans.p130",
+        team="HC Z",
+        opponent="TV T",
+        link="x",
+        questions=2,
+    )
+    assert mail.subject == "Die Analyse gegen TV T ist fertig"
+    assert "drei Dinge" not in mail.text and "2 Fragen an dich" in mail.text
+    assert mail.text.startswith("Hallo\n")
+    named = render(
+        "analysis_no_goals", "de-CH", to="a@b.ch", name="Hans", team="Z", opponent="T", link="x"
+    )
+    assert named.text.startswith("Hallo Hans\n") and "keine Tore" in named.text

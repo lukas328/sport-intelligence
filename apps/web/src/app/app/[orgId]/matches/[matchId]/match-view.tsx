@@ -30,7 +30,7 @@ import { useConfirm } from "@/components/ui/confirm";
 import { Dialog } from "@/components/ui/dialog";
 import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { Segmented } from "@/components/ui/tabs";
-import type { PlayerHandle } from "@/components/video/player";
+import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { GameActions, PointOpen, Telegram, ThreeFigures, chatPicture } from "./game-tab";
 import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
@@ -452,11 +452,31 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             onBench={() => setBench(true)}
           />
         )}
+        {main && !stage && !bench && (
+          // without goals on the stage: the video, one sentence, the way on; never the old capture
+          // workbench by default (UX test N04), it opens with one tap
+          <section className="space-y-4" data-testid="plain-stage">
+            <VideoPlayer src={`/v1/orgs/${orgId}/videos/${main.id}/media/hls/master.m3u8`} />
+            <p className="m-0 max-w-[60ch] text-[17px]">{staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
+            <div className="flex flex-wrap gap-3">
+              {staff && checks > 0 && (
+                <Link href={`${base}/check`} className={buttonClass("primary")}>
+                  {ta("plainToCheck")}
+                </Link>
+              )}
+              {(
+                <button type="button" onClick={() => setBench(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="open-bench">
+                  {staff ? ta("plainBench") : ta("plainComments")}
+                </button>
+              )}
+            </div>
+          </section>
+        )}
         {main ? (
-          // with the stage, the workbench (events, defence systems, comments, feedback) is behind
-          // «Mehr»; it stays mounted, so jumps from the other tabs still reach its player
-          <section hidden={stage && !bench} aria-labelledby="bench-title" className={cn(stage && "border-t-2 border-ink pt-6")}>
-            {stage && (
+          // the workbench (events, defence systems, comments, feedback) is behind one tap, with or
+          // without the stage; it stays mounted, so jumps from the other tabs still reach its player
+          <section hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
+            {(
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 id="bench-title" className="text-[26px]">
                   {ta("bench")}

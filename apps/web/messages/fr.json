@@ -578,7 +578,7 @@
     "videoStatus_processing": "Traitement",
     "videoStatus_ready": "Prête",
     "videoStatus_failed": "Erreur",
-    "done": "Analyse terminée. Statistiques et scènes sont prêtes.",
+    "done": "L'analyse est terminée.",
     "titleAnalysis": "Analyse du match",
     "stage_analysis_download": "Chargement de la vidéo",
     "stage_analysis_observe": "Caméra et joueurs",
@@ -1241,7 +1241,11 @@
     "analysis_ready_match": "Les trois choses contre {opponent} sont prêtes.",
     "analysis_failed_match": "La vidéo contre {opponent} n'a pas pu être analysée. Elle reste, tu peux en charger une autre.",
     "video_failed": "Une vidéo n'a pas pu être lue.",
-    "video_failed_match": "La vidéo contre {opponent} n'a pas pu être lue. Choisis un autre fichier."
+    "video_failed_match": "La vidéo contre {opponent} n'a pas pu être lue. Choisis un autre fichier.",
+    "analysis_questions": "L'analyse est terminée. Quelques questions pour toi, ensuite elle en montre plus.",
+    "analysis_questions_match": "L'analyse contre {opponent} est terminée. {questions} questions pour toi, ensuite elle en montre plus.",
+    "analysis_no_goals": "L'analyse est terminée. Elle n'a trouvé aucun but.",
+    "analysis_no_goals_match": "L'analyse contre {opponent} est terminée. Elle n'a trouvé aucun but."
   },
   "assignments": {
     "title": "Tâches",
@@ -3134,7 +3138,17 @@
     "tableRank": "Rang",
     "tableTeam": "Équipe",
     "tableGames": "Matchs",
-    "tablePoints": "Points"
+    "tablePoints": "Points",
+    "plainChecks": "L'analyse est terminée. Pas encore de buts : {n, plural, one {une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
+    "plainNoGoals": "L'analyse est terminée. Elle n'a trouvé aucun but dans cette vidéo.",
+    "plainToCheck": "Répondre aux questions",
+    "plainBench": "Événements et commentaires à la main",
+    "plainComments": "Commentaires sur la vidéo",
+    "nextStepTitle": "L'analyse est terminée, pas encore de trois choses.",
+    "nextStepChecks": "{n, plural, one {Une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
+    "nextStepReport": "Aucun but trouvé dans la vidéo. Avec la feuille de match, les buts et leurs temps arrivent.",
+    "nextStepNoGoals": "Aucun but trouvé dans la vidéo. Les buts de la feuille de match sont dans le match.",
+    "nextStepAddReport": "Ajouter la feuille de match"
   },
   "check": {
     "top": "Vérifier · {opponent}",

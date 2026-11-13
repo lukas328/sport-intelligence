@@ -115,6 +115,25 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       </div>
       {/* before the first video: what the federation's data already says (UX test H02) */}
       {!m?.has_video && m && <FromReport orgId={orgId} teamId={m.team_id} />}
+      {/* the analysis is done without three things: say so and name the next step (UX test N05) */}
+      {m?.has_video && g.data && base && !["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) && threeThings(goalRuns(g.data)).length === 0 && (
+        <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="start-next-step">
+          <p className="m-0 text-[19px] font-bold">{t("nextStepTitle")}</p>
+          <p className="m-0 text-[17px]">{checks > 0 ? t("nextStepChecks", { n: checks }) : g.data.report_goals.length === 0 ? t("nextStepReport") : t("nextStepNoGoals")}</p>
+          <div className="flex flex-wrap gap-3">
+            {canWrite && checks > 0 && (
+              <Link href={`${base}/check`} className={buttonClass("primary")}>
+                {t("plainToCheck")}
+              </Link>
+            )}
+            {canWrite && g.data.report_goals.length === 0 && (
+              <Link href={`/app/${orgId}/teams/${m.team_id}/matches?report=1`} className={buttonClass(checks > 0 ? "secondary" : "primary")}>
+                {t("nextStepAddReport")}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
       {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={(_, n) => `${base}?tab=video&thing=${n}`} />}
     </div>
   );

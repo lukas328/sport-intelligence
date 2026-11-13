@@ -578,7 +578,7 @@
     "videoStatus_processing": "Processing",
     "videoStatus_ready": "Ready",
     "videoStatus_failed": "Error",
-    "done": "Analysis done. Stats and scenes are ready.",
+    "done": "The analysis is done.",
     "titleAnalysis": "Match analysis",
     "stage_analysis_download": "Loading the video",
     "stage_analysis_observe": "Finding camera and players",
@@ -1241,7 +1241,11 @@
     "analysis_ready_match": "The three things against {opponent} are ready.",
     "analysis_failed_match": "The video against {opponent} could not be analysed. The video stays; you can upload another.",
     "video_failed": "A video could not be read.",
-    "video_failed_match": "The video against {opponent} could not be read. Choose another file."
+    "video_failed_match": "The video against {opponent} could not be read. Choose another file.",
+    "analysis_questions": "The analysis is done. A few questions for you, then it shows more.",
+    "analysis_questions_match": "The analysis against {opponent} is done. {questions} questions for you, then it shows more.",
+    "analysis_no_goals": "The analysis is done. It found no goals.",
+    "analysis_no_goals_match": "The analysis against {opponent} is done. It found no goals."
   },
   "assignments": {
     "title": "Assignments",
@@ -3134,7 +3138,17 @@
     "tableRank": "Rank",
     "tableTeam": "Team",
     "tableGames": "Games",
-    "tablePoints": "Points"
+    "tablePoints": "Points",
+    "plainChecks": "The analysis is done. No goals found yet: {n, plural, one {one question} other {# questions}} in Check, then it shows more.",
+    "plainNoGoals": "The analysis is done. It found no goals in this video.",
+    "plainToCheck": "Answer the questions",
+    "plainBench": "Events and comments by hand",
+    "plainComments": "Comments on the video",
+    "nextStepTitle": "The analysis is done, no three things yet.",
+    "nextStepChecks": "{n, plural, one {One question} other {# questions}} in Check, then it shows more.",
+    "nextStepReport": "No goals were found in the video. With the match report the goals and their times come in.",
+    "nextStepNoGoals": "No goals were found in the video. The goals from the report are in the match.",
+    "nextStepAddReport": "Add the match report"
   },
   "check": {
     "top": "Check · {opponent}",

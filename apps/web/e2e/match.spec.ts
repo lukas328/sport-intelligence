@@ -49,10 +49,15 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByText("Fertig hochgeladen.")).toBeVisible({ timeout: 60_000 });
 
   // processing runs in the worker; progress arrives via SSE
-  await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByTestId("player").filter({ visible: true })).toBeVisible({ timeout: 180_000 });
   // stages 2 to 5 run in the GPU worker (CPU locally): calibration, detection, tracking, teams;
   // the court is the first work step beside the player
   // the setup by hand sits behind one toggle; its questions are asked in Prüfen (UX test B10)
+  // a freshly analysed video without goals: the plain video and the way on, never the old
+  // capture tools (UX test N04)
+  await expect(page.getByTestId("plain-stage")).toBeVisible();
+  for (const old of ["Ereignis erfassen", "Tastenkürzel", "Abwehrsysteme"]) await expect(page.getByText(old).filter({ visible: true })).toHaveCount(0);
+  await page.getByTestId("open-bench").click();
   await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
   await expect(page.getByText("Videoqualität:")).toBeVisible();
@@ -64,12 +69,12 @@ test("match: create, upload with pause and resume, processing, player, comment, 
 
   // play: the HLS stream loads and time advances
   const video = page.getByTestId("video");
-  await page.getByTestId("player").getByRole("button", { name: "Abspielen" }).click();
+  await page.getByTestId("player").filter({ visible: true }).getByRole("button", { name: "Abspielen" }).click();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime), { timeout: 20_000 }).toBeGreaterThan(1);
-  await page.getByTestId("player").getByRole("button", { name: "Pause" }).click();
+  await page.getByTestId("player").filter({ visible: true }).getByRole("button", { name: "Pause" }).click();
 
   // keyboard: frame step and 5 s jumps
-  await page.getByTestId("player").focus();
+  await page.getByTestId("player").filter({ visible: true }).focus();
   const t0 = await video.evaluate((v: HTMLVideoElement) => v.currentTime);
   await page.keyboard.press("ArrowRight");
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(t0 + 4);
@@ -92,7 +97,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await clipForm.getByRole("button", { name: "Start setzen (I)" }).click();
   await expect(clipForm.getByRole("button", { name: "0:02" })).toBeVisible();
   await seekTo(6);
-  await page.getByTestId("player").focus();
+  await page.getByTestId("player").filter({ visible: true }).focus();
   await page.keyboard.press("o"); // keyboard shortcut for the end mark
   await expect(clipForm.getByRole("button", { name: "0:06" })).toBeVisible();
   await page.getByLabel("Titel").fill("Gegenstoss");
@@ -136,7 +141,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   const list = page.getByTestId("event-list");
   await expect(list).toContainText("1. HZ 0:08");
   await list.getByRole("button", { name: /Abspielen/ }).click();
-  await expect(page.getByTestId("player")).toBeVisible();
+  await expect(page.getByTestId("player").filter({ visible: true })).toBeVisible();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(3.5);
 
   // tracks can be assigned to players; physical load per track with heatmap

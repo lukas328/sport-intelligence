@@ -578,7 +578,7 @@
     "videoStatus_processing": "Wird verarbeitet",
     "videoStatus_ready": "Bereit",
     "videoStatus_failed": "Fehler",
-    "done": "Analyse fertig. Statistik und Szenen stehen bereit.",
+    "done": "Die Analyse ist fertig.",
     "titleAnalysis": "Spielanalyse",
     "stage_analysis_download": "Video laden",
     "stage_analysis_observe": "Kamera und Spieler erkennen",
@@ -1241,7 +1241,11 @@
     "analysis_ready_match": "Die drei Dinge gegen {opponent} sind da.",
     "analysis_failed_match": "Das Video gegen {opponent} liess sich nicht auswerten. Das Video bleibt, du kannst ein anderes hochladen.",
     "video_failed": "Ein Video liess sich nicht lesen.",
-    "video_failed_match": "Das Video gegen {opponent} liess sich nicht lesen. Wähl eine andere Datei."
+    "video_failed_match": "Das Video gegen {opponent} liess sich nicht lesen. Wähl eine andere Datei.",
+    "analysis_questions": "Die Analyse ist fertig. Ein paar Fragen an dich, dann zeigt sie mehr.",
+    "analysis_questions_match": "Die Analyse gegen {opponent} ist fertig. {questions} Fragen an dich, dann zeigt sie mehr.",
+    "analysis_no_goals": "Die Analyse ist fertig. Sie hat keine Tore gefunden.",
+    "analysis_no_goals_match": "Die Analyse gegen {opponent} ist fertig. Sie hat keine Tore gefunden."
   },
   "assignments": {
     "title": "Aufgaben",
@@ -3134,7 +3138,17 @@
     "tableRank": "Rang",
     "tableTeam": "Team",
     "tableGames": "Spiele",
-    "tablePoints": "Punkte"
+    "tablePoints": "Punkte",
+    "plainChecks": "Die Analyse ist fertig. Noch keine Tore gefunden: {n, plural, one {eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
+    "plainNoGoals": "Die Analyse ist fertig. Sie hat in diesem Video keine Tore gefunden.",
+    "plainToCheck": "Fragen beantworten",
+    "plainBench": "Ereignisse und Kommentare von Hand",
+    "plainComments": "Kommentare zum Video",
+    "nextStepTitle": "Die Analyse ist fertig, noch ohne drei Dinge.",
+    "nextStepChecks": "{n, plural, one {Eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
+    "nextStepReport": "Im Video wurden keine Tore gefunden. Mit dem Spielbericht kommen die Tore und ihre Zeiten dazu.",
+    "nextStepNoGoals": "Im Video wurden keine Tore gefunden. Die Tore aus dem Spielbericht stehen im Spiel.",
+    "nextStepAddReport": "Spielbericht hinzufügen"
   },
   "check": {
     "top": "Prüfen · {opponent}",
