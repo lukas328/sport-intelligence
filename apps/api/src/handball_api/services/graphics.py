@@ -447,6 +447,12 @@ async def scene_camera(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> di
     e = await ctx.db.get(Event, event_id)
     if e is None or e.match_id != match.id:
         raise ProblemError(404, "not-found", "No such event")
+    return await camera_of(ctx, match, e)
+
+
+async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
+    """The tactics camera of one goal, without the access check: for the caller that checked
+    access itself (the match page above, a share link for the shared scenes)."""
     asset = await timeline_video(ctx, match.id)
     tracking = _has_tracking(asset)
     demo = match.is_demo  # seeded: the synthetic video says nothing about the match

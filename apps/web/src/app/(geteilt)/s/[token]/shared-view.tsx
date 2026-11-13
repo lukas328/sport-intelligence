@@ -11,6 +11,10 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { VideoPlayer } from "@/components/video/player";
 import { cn } from "@/lib/utils";
+import type { Schemas } from "@handball/api-client";
+import { CameraFrame, TacticsCamera } from "@/components/anlauf/tactics-camera";
+import { VIEWS } from "@/components/anlauf/geometry";
+import { cameraScene } from "@/lib/graphics";
 
 export interface Shared {
   kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection";
@@ -43,7 +47,7 @@ interface SharedRun {
     kind: "scene" | "play" | "note";
     text: string | null;
     play: { id: string; name: string } | null;
-    scene: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null } | null;
+    scene: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null; camera?: Schemas["SceneCameraOut"] | null } | null;
   }[];
 }
 
@@ -185,16 +189,50 @@ function PlaylistShare({ p, media }: { p: NonNullable<Shared["playlist"]>; media
  */
 function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => string; days: number }) {
   const t = useTranslations("share");
+  const ta = useTranslations("anlauf");
   const scenes = run.items.filter((i) => i.scene?.video_id);
   const intro = run.items.find((i) => i.kind === "note" && i.text)?.text ?? null;
   const [k, setK] = useState(0);
+  const [mode, setMode] = useState<"video" | "taktik">("video");
   const cur = scenes[k];
   const next = () => setK((x) => Math.min(x + 1, scenes.length - 1));
+  // the positions before a goal, where the court was confirmed (UX test B15)
+  const camOf = (i: (typeof scenes)[number] | undefined) => (i?.scene?.camera ? cameraScene(i.scene.camera, i.scene.title) : null);
+  const cam = camOf(cur);
+  const shown = cam ? mode : "video";
+  const toggle = cam && (
+    <div role="group" aria-label={t("viewMode")} className="flex">
+      {(["video", "taktik"] as const).map((v) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={shown === v}
+          onClick={() => setMode(v)}
+          className={cn("min-h-11 cursor-pointer border-2 border-ink px-4 text-[15px] font-bold first:border-r-0", shown === v ? "bg-ink text-ground" : "bg-transparent text-ink")}
+        >
+          {ta(v === "video" ? "modeVideo" : "modeTaktik")}
+        </button>
+      ))}
+    </div>
+  );
   return (
     <div className="grid gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1fr)_300px]">
       <div className="min-w-0">
-        {cur && (
+        {toggle && <div className="mb-3">{toggle}</div>}
+        {cur && shown === "video" && (
           <VideoPlayer key={`${cur.scene!.id}-${k}`} src={`${media(cur.scene!.video_id!)}/hls/master.m3u8`} window={{ start_ms: cur.scene!.start_ms, end_ms: cur.scene!.end_ms }} onWindowEnd={next} autoPlay={k > 0} />
+        )}
+        {cam && shown === "taktik" && (
+          <div data-testid="shared-tactics">
+            <TacticsCamera
+              key={`cam-${k}`}
+              scene={cam}
+              view="halfB"
+              width={900}
+              dot={17}
+              text={{ label: ta("cameraLabel", { label: cur?.scene?.title ?? t("scene") }), pause: ta("pause"), play: ta("play"), notFound: ta("ballNotFound"), noBall: ta("noBall"), caption: null }}
+            />
+          </div>
         )}
         {cur?.text && <p className="mt-4 border-l-4 border-club-text pl-3 text-[17px] italic">{cur.text}</p>}
         <div className="mt-5 flex flex-wrap gap-3">
@@ -222,7 +260,17 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
                   className={cn("grid w-full cursor-pointer grid-cols-[28px_56px_minmax(0,1fr)_auto] items-center gap-2.5 border-b border-rule px-2 py-2.5 text-left", on ? "bg-attn text-attn-ink" : "bg-transparent text-ink hover:bg-ink/5")}
                 >
                   <b className="font-num text-xl">{n + 1}</b>
-                  <EmptyField />
+                  {(() => {
+                    const c = camOf(i);
+                    // the Minifeld: the last frame of the positions, or the empty field
+                    return c ? (
+                      <svg aria-hidden viewBox={VIEWS.halfB.box.join(" ")} className="block w-14 bg-court" data-testid="shared-mini">
+                        <CameraFrame scene={c} view="halfB" width={56} dot={22} t={1} />
+                      </svg>
+                    ) : (
+                      <EmptyField />
+                    );
+                  })()}
                   <span className="min-w-0 text-[15px] leading-snug font-semibold">
                     {i.scene!.title ?? t("scene")}
                     <small className={cn("block text-[15px] font-normal", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : n < k ? t("seen") : ""}</small>

@@ -158,7 +158,9 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // Lea's season line from her name in the squad: no played match yet
   await page.goto(`/app/${orgId}/teams/${teamId}`);
   await page.getByRole("link", { name: "Lea Beispiel" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "#9 Lea Beispiel" })).toBeVisible();
+  // the Seitenkopf: the name as title, the number as the figure (UX test B34)
+  await expect(page.getByRole("heading", { level: 1, name: "Lea Beispiel" })).toBeVisible();
+  await expect(page.locator("[data-zone=kopf]")).toContainText("9");
   await expect(page.getByTestId("season-line-empty")).toContainText("Noch kein gespieltes Spiel in dieser Saison.");
   await expectAccessible(page);
 });

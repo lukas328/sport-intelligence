@@ -1414,7 +1414,8 @@
     "running": "playing",
     "seen": "seen",
     "onlyLink": "Visible only through this link, {days, plural, one {# more day} other {# more days}}. No account needed.",
-    "sharedBy": "shared by {name}"
+    "sharedBy": "shared by {name}",
+    "viewMode": "View"
   },
   "ops": {
     "title": "Backoffice",

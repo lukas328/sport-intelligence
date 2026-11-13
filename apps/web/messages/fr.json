@@ -1414,7 +1414,8 @@
     "running": "en cours",
     "seen": "vue",
     "onlyLink": "Visible uniquement par ce lien, encore {days, plural, one {# jour} other {# jours}}. Aucun compte nécessaire.",
-    "sharedBy": "partagé par {name}"
+    "sharedBy": "partagé par {name}",
+    "viewMode": "Affichage"
   },
   "ops": {
     "title": "Backoffice",

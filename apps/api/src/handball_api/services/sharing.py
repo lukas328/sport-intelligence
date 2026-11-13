@@ -37,6 +37,7 @@ from handball_api.models.enums import ConsentKind, ReelStatus
 from handball_api.services import audit, billing, org_verification
 from handball_api.services import collections as collections_service
 from handball_api.services import events as events_service
+from handball_api.services import graphics as graphics_service
 from handball_api.services.context import Ctx
 from handball_api.services.highlights import rank
 from handball_api.services.matches import opponent_of, timeline_video
@@ -278,6 +279,7 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
         for item in scenes["items"]:
             sc = item.get("scene")
             video = await _main_video(ctx, uuid.UUID(sc["match_id"])) if sc else None
+            camera = await _camera(ctx, sc) if sc else None
             out.append(
                 {
                     "kind": item["kind"],
@@ -289,6 +291,9 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
                         "start_ms": sc["start_ms"],
                         "end_ms": sc["end_ms"],
                         "video_id": str(video.id) if video else None,
+                        # the tactics camera of the goal behind the scene (SPEC 7.8: Video |
+                        # Taktik and the Minifeld per scene); none without a confirmed court
+                        "camera": camera,
                     }
                     if sc
                     else None,
@@ -322,6 +327,21 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
     return {**base, "playlist": {"title": pl.title, "description": pl.description, "clips": clips}}
 
 
+async def _camera(ctx: Ctx, sc: dict[str, Any]) -> dict[str, Any] | None:
+    """Positions before the goal of a shared scene, as on the match page; None when the scene
+    is not a goal or nothing was measured (no confirmed court, no tracking)."""
+    if not sc.get("event_id"):
+        return None
+    event = await ctx.db.get(Event, uuid.UUID(sc["event_id"]))
+    match = await ctx.db.get(Match, uuid.UUID(sc["match_id"]))
+    if event is None or match is None or event.match_id != match.id:
+        return None
+    cam = await graphics_service.camera_of(ctx, match, event)
+    if not cam["field_confirmed"] or not cam["tracks"]:
+        return None
+    return {**cam, "event_id": str(cam["event_id"])}
+
+
 async def _scenes_of(ctx: Ctx, link: ShareLink) -> dict[str, Any]:
     """Entries of a shared scene or collection (the scene alone is a run of one)."""
     if link.kind == "scene":
@@ -334,6 +354,7 @@ async def _scenes_of(ctx: Ctx, link: ShareLink) -> dict[str, Any]:
             "start_ms": clip.start_ms,
             "end_ms": clip.end_ms,
             "title": clip.title,
+            "event_id": collections_service._clip_out(clip)["event_id"],
         }
         return {"items": [{"kind": "scene", "text": None, "play": None, "scene": scene}]}
     try:
