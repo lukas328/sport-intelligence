@@ -13,6 +13,7 @@ import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { AreaSubNav } from "@/components/shell/section-nav";
 import { SeasonThemes } from "@/components/season/season-themes";
+import { OfficialScorers } from "./official-scorers";
 import { focusMetric, matchStatement, seasonStatement } from "@/lib/voice";
 import { cn } from "@/lib/utils";
 
@@ -257,7 +258,11 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             </p>
           </section>
 
-          {top.length > 0 && (
+          <OfficialScorers
+            club={official.data?.linked ? (official.data.official_club_id ?? null) : null}
+            team={official.data?.linked ? (official.data.official_team_id ?? null) : null}
+            fallback={
+              top.length > 0 && (
             <section>
               <SectionHead title={ts("scorers")} note={ts("scorersNote", { n })} />
               <table className="w-full border-collapse text-[17px]" data-testid="season-players">
@@ -299,7 +304,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 </Link>
               </p>
             </section>
-          )}
+          )
+            }
+          />
         </div>
 
         <aside className="min-w-0 space-y-14">
