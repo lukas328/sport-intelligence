@@ -102,14 +102,14 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
 
   // settings: pending invitations are empty now, members list shows the player
   await page.getByTestId("account-menu").filter({ visible: true }).click();
-  await page.getByRole("menuitem", { name: "Verein" }).click();
+  await page.getByRole("menuitem", { name: "Verein", exact: true }).click();
   await page.getByRole("link", { name: "Teams und Rollen", exact: true }).click();
   await expect(page.getByText("Paul Spieler")).toBeVisible();
   await expectAccessible(page);
 
   // enable two-factor sign-in ("Ich", tab Sicherheit), sign out, sign in with code
   await page.getByTestId("account-menu").filter({ visible: true }).click();
-  await page.getByRole("menuitem", { name: "Ich" }).click();
+  await page.getByRole("menuitem", { name: "Ich", exact: true }).click();
   await page.getByRole("link", { name: "Sicherheit", exact: true }).click();
   await page.getByRole("button", { name: "Einrichten" }).click();
   const secret = (await page.getByTestId("totp-secret").textContent())!.trim();

@@ -164,7 +164,7 @@
     "registerTitle": "Create account",
     "name": "Full name",
     "passwordHint": "At least 10 characters.",
-    "terms": "I accept the terms of use and the privacy policy.",
+    "terms": "I accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>.",
     "submitRegister": "Create account",
     "haveAccount": "Already have an account?",
     "toLogin": "Sign in",
@@ -185,7 +185,11 @@
     "verifyBusy": "Confirming …",
     "toApp": "Open app",
     "totpHint": "Code from the app or a recovery code",
-    "signedOut": "You are signed out."
+    "signedOut": "You are signed out.",
+    "needName": "Please enter your name.",
+    "needEmail": "That is not an email address.",
+    "needPassword": "The password needs at least 10 characters.",
+    "needTerms": "Please accept the terms."
   },
   "invite": {
     "title": "Invitation",
@@ -564,7 +568,15 @@
     "stage_analysis_calibration": "Finding the court",
     "stage_analysis_tracking": "Computing paths",
     "stage_analysis_upload": "Saving",
-    "analysisHint": "Runs in the background. You can close this page; we will let you know when it is done."
+    "analysisHint": "Runs in the background. You can close this page; we will let you know when it is done.",
+    "failedTitle": "The video could not be read.",
+    "failedText": "This file is not a video we can read (MP4, MOV, MKV). The match report and everything you have entered stay.",
+    "otherFile": "Choose another file",
+    "etaSoon": "The minutes left show here once the analysis is under way.",
+    "coach_read": "Video read",
+    "coach_follow": "Players are being followed",
+    "coach_things": "Three things are being found",
+    "technical": "Single steps"
   },
   "quality": {
     "title": "Video quality",
@@ -2378,7 +2390,8 @@
     "matrix": "Table",
     "scenesSections": "Scene sections",
     "me": "Me",
-    "club": "Club"
+    "club": "Club",
+    "twoFactorDue": "Set up two-factor sign-in"
   },
   "palette": {
     "newMatch": "Add a match",
@@ -2609,7 +2622,7 @@
     "results": "Teams found",
     "noHits": "No team found for “{q}”.",
     "open": "Open",
-    "claim": "Take over",
+    "claim": "This is my team",
     "inApp": "already in the app",
     "askAccess": "Request access",
     "join": "Join as a player",
@@ -2634,7 +2647,8 @@
     "confirmSquad": "Confirm the team",
     "notFound": "Team not found or outside Switzerland?",
     "manual": "Create a club by hand",
-    "showAll": "Show all {n} teams of {club}"
+    "showAll": "Show all {n} teams of {club}",
+    "claiming": "We are fetching matches, squad and table from handball.ch. This takes about 15 seconds."
   },
   "official": {
     "eyebrow": "Official data",
@@ -2728,7 +2742,9 @@
     "via_federation": "federation licence",
     "via_operator": "support",
     "line": "The club is not confirmed yet: sharing and public profiles are off until then.",
-    "lineLink": "How to confirm"
+    "lineLink": "How to confirm",
+    "federationTitle": "Federation",
+    "notOfficial": "Your club is not linked to handball.ch. The link is made when you look up your team on handball.ch during setup and take it over."
   },
   "playerStatus": {
     "injured": "Injured",
@@ -2863,7 +2879,8 @@
     "presentOf": "{n} of {total}",
     "fullscreen": "Full screen",
     "prev": "Back",
-    "next": "Next"
+    "next": "Next",
+    "close": "Close"
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
@@ -2883,7 +2900,8 @@
     "status": "{n, plural, =0 {No answer yet} one {# answer} other {# answers}} · valid until {date}",
     "create": "Create a link for the team chat",
     "renew": "Create a new link",
-    "revoke": "Revoke link"
+    "revoke": "Revoke link",
+    "pick": "Please choose"
   },
   "anlauf": {
     "zoneFrom": {
@@ -3075,7 +3093,8 @@
     "moreGame": "More about the match",
     "moreGameHint": "Comparison, scorers, highlights, feedback, marks",
     "chatHeading": "The three things",
-    "noVideoTitle": "No video"
+    "noVideoTitle": "No video",
+    "drawResult": "Draw"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3166,7 +3185,16 @@
     "turnover": "Turnover",
     "videoAt": "Video {time}",
     "inLast": "Against {opponent} it was {n} of {base}.",
-    "sharePct": "{pct} percent."
+    "sharePct": "{pct} percent.",
+    "playTitle": "{n, plural, one {1 scene} other {# scenes}} from the search",
+    "asTiles": "As tiles",
+    "colMatch": "Match",
+    "colTime": "Time",
+    "colWhat": "What",
+    "colNumber": "Number",
+    "noHighlightsYet": "There are no highlights of the match against {opponent} yet.",
+    "makeHighlights": "Make them in the match",
+    "noneYet": "Scenes come with the first video."
   },
   "teamPage": {
     "kick": "{team} · {source}",

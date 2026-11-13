@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useOptionalShell } from "@/components/shell/context";
 import { useId, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { KitFields } from "@/components/domain/kit-fields";
@@ -38,6 +39,8 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [kits, setKits] = useState(KIT_DEFAULTS);
   // the opponent's colour counts as said only when somebody picked it (never a default: unknown stays unknown)
   const [opponentPicked, setOpponentPicked] = useState(false);
+  const shell = useOptionalShell();
+  const trainingAllowed = shell?.teams.find((x) => x.id === teamId)?.team_features ?? false;
   const [training, setTraining] = useState(false);
   const [away, setAway] = useState(false);
   const [format, setFormat] = useState<string | null>(null);
@@ -92,6 +95,8 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
     <div>
       {error && <Alert className="mb-4">{t(`errors.${error}`)}</Alert>}
       <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2" aria-label={t("matches.new")}>
+        {/* a training only with the team functions (UX test B37): the product's scope is the match */}
+        {trainingAllowed && (
         <fieldset className="sm:col-span-2">
           <legend className="sr-only">{t("matchForm.isTraining")}</legend>
           <div className="flex max-w-xs gap-0.5 bg-surface p-1">
@@ -105,6 +110,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
             </label>
           </div>
         </fieldset>
+        )}
         {!training && (
           <div className="sm:col-span-2">
             <Input

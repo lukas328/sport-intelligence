@@ -17,7 +17,7 @@ type Item = Schemas["ItemOut"];
  * Space or the right arrow key goes on, the left one back, Esc leaves; «Vollbild» uses the whole
  * screen.
  */
-export function PresentView({ orgId, collection }: { orgId: string; collection: Collection }) {
+export function PresentView({ orgId, collection, onClose }: { orgId: string; collection: Collection; onClose?: () => void }) {
   const t = useTranslations("collections");
   const router = useRouter();
   const items = collection.items;
@@ -27,15 +27,17 @@ export function PresentView({ orgId, collection }: { orgId: string; collection: 
   const next = useCallback(() => setK((x) => Math.min(x + 1, items.length - 1)), [items.length]);
   const prev = useCallback(() => setK((x) => Math.max(x - 1, 0)), []);
   const back = `/app/${orgId}/collections/${collection.id}`;
+  // a scene list played from the search closes in place; a collection goes back to its page
+  const leave = useCallback(() => (onClose ? onClose() : router.push(back)), [onClose, router, back]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") (e.preventDefault(), next());
       else if (e.key === "ArrowLeft" || e.key === "PageUp") (e.preventDefault(), prev());
-      else if (e.key === "Escape" && !document.fullscreenElement) router.push(back);
+      else if (e.key === "Escape" && !document.fullscreenElement) leave();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev, router, back]);
+  }, [next, prev, leave]);
   return (
     <div ref={box} className="flex min-h-[calc(100dvh-60px)] flex-col bg-court-bar text-court-text" data-testid="present-view">
       <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2 text-[15px] md:px-8">
@@ -44,6 +46,9 @@ export function PresentView({ orgId, collection }: { orgId: string; collection: 
           <span className="font-mono">{t("presentOf", { n: k + 1, total: items.length })}</span>
           <button type="button" onClick={() => void box.current?.requestFullscreen?.()} className="min-h-11 cursor-pointer border-[1.5px] border-[#4a5058] px-3 font-bold text-white">
             {t("fullscreen")}
+          </button>
+          <button type="button" onClick={leave} className="min-h-11 cursor-pointer border-[1.5px] border-[#4a5058] px-3 font-bold text-white" data-testid="present-close">
+            {t("close")}
           </button>
         </span>
       </div>

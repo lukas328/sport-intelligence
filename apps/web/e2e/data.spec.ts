@@ -72,7 +72,10 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   page.on("request", (r) => r.url().endsWith("/matrix") && r.method() === "POST" && asked.push(r.postDataJSON()));
   // the matrix is the table tab of Szenen ("Als Tabelle", SPEC 7.6)
   await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
-  await follow(page, page.getByRole("link", { name: "Tabelle", exact: true }).first(), /\/matrix$/);
+  // «Tabelle» shows the scene answer as rows in Szenen (UX test B21, B32); the pivot stays at ?pivot=1
+  await follow(page, page.getByRole("link", { name: "Tabelle", exact: true }).first(), /\/scenes\?view=table$/);
+  await expect(page.getByText("Szenen gibt es nach dem ersten Video.")).toBeVisible();
+  await page.goto(page.url().replace(/\/scenes\?view=table$/, "/matrix?pivot=1"));
   await expect(page.getByRole("heading", { level: 1, name: "Tabelle" })).toBeVisible();
   await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
   await page.getByTestId("matrix-seasons").selectOption(current.id);
@@ -87,7 +90,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
 
   // «Suchen» is the scene search (UX test B02): the old assistant address hands the question
   // over, its words become chips, nothing ends in «not set up»
-  await page.goto(`${page.url().replace(/\/matrix$/, "")}/assistant?q=${encodeURIComponent("Wie viele Gegentore über rechts aussen in den letzten drei Spielen?")}`);
+  await page.goto(`${page.url().replace(/\/matrix\?pivot=1$/, "")}/assistant?q=${encodeURIComponent("Wie viele Gegentore über rechts aussen in den letzten drei Spielen?")}`);
   await page.waitForURL(/\/scenes\?q=/);
   for (const chip of ["Gegentor", "rechts aussen", "letzte 3 mit Video"]) await expect(page.getByRole("button", { name: chip, pressed: true })).toBeVisible();
   await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toHaveCount(0);
@@ -97,9 +100,9 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expect(page.getByTestId("scene-search")).toBeFocused();
   await expectAccessible(page);
 
-  // my dates: the coach has no player profile, so the list is empty
+  // my dates are a team function (SPEC 6, UX test B32): without them the address leads to Spiele
   await page.goto(`/app/${orgId}/schedule`);
-  await expect(page.getByText("Keine Termine in den nächsten 30 Tagen.")).toBeVisible();
+  await page.waitForURL(/\/matches/);
   expect(teamId).toBeTruthy();
   expect((await context.cookies()).length).toBeGreaterThan(0);
 });

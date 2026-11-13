@@ -7,6 +7,7 @@ import { SceneCamera, clockOf, useThingText } from "@/components/anlauf/three-th
 import { buttonClass } from "@/components/ui/button";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings, type Thing } from "@/lib/three-things";
+import { usePhone } from "@/lib/use-phone";
 import { halfScore, mainKeeper, mainSource, scoreSequence, topScorers } from "@/lib/telegram";
 import type { Stats } from "./analysis-views";
 
@@ -43,6 +44,7 @@ export function PointOpen({ orgId, matchId, graphics, oppName }: { orgId: string
   const thing: Thing | undefined = threeThings(goalRuns(graphics))[0];
   const scenes = (thing?.goals ?? []).filter((g) => g.eventId);
   const [at, setAt] = useState(0);
+  const phone = usePhone();
   if (!thing || scenes.length === 0) return null;
   const goal = scenes[Math.min(at, scenes.length - 1)]!;
   const label = t("goalOf", { team: thing.team === "opp" ? oppName : t("us"), clock: clockOf(goal.minute) });
@@ -50,7 +52,7 @@ export function PointOpen({ orgId, matchId, graphics, oppName }: { orgId: string
   return (
     <section data-testid="point-open">
       <SectionHead title={t("pointOpen")} note={of} />
-      <SceneCamera key={goal.eventId} orgId={orgId} matchId={matchId} eventId={goal.eventId!} label={label} view="camL" width={900} caption={`${label} · ${text(thing)}`} />
+      <SceneCamera key={goal.eventId} orgId={orgId} matchId={matchId} eventId={goal.eventId!} label={label} view={phone ? "halfB" : "camL"} width={phone ? 390 : 900} caption={`${label} · ${text(thing)}`} />
       <div className="mt-2 flex flex-wrap gap-2.5">
         <button type="button" className={buttonClass("secondary", "sm")} disabled={at === 0} onClick={() => setAt((x) => Math.max(0, x - 1))}>
           {t("prevScene")}

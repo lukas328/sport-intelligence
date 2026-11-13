@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { HelpCircle, Languages, LogOut, MessageSquare, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { HelpCircle, Languages, LogOut, MessageSquare, Settings, ShieldAlert, ShieldCheck, UserRound } from "lucide-react";
 import { LANGUAGE_NAMES, setLanguage } from "@/components/language-switch";
 import { locales } from "@/i18n/config";
 import { usePathname, useRouter } from "next/navigation";
@@ -47,8 +47,9 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
             !compact && "flex-1 px-2 py-1.5",
           )}
         >
-          <span aria-hidden className="font-slant grid size-9 shrink-0 place-items-center bg-ink text-[13px] text-ground">
+          <span aria-hidden className="font-slant relative grid size-9 shrink-0 place-items-center bg-ink text-[13px] text-ground">
             {initials(me.name) || "?"}
+            {me.two_factor_due && <span className="absolute -top-1 -right-1 size-3 border-2 border-ground bg-error" data-testid="account-dot" />}
           </span>
           {!compact && (
             <span className="min-w-0">
@@ -61,6 +62,11 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
           <MenuItem href={`${base}/me`} icon={<UserRound />} testId="menu-me">
             {t("me")}
           </MenuItem>
+          {me.two_factor_due && (
+            <MenuItem href={`${base}/me/security`} icon={<ShieldAlert />} testId="menu-two-factor">
+              {t("twoFactorDue")}
+            </MenuItem>
+          )}
           {club && (
             <MenuItem href={`${base}/club`} icon={<Settings />} testId="menu-settings">
               {t("club")}

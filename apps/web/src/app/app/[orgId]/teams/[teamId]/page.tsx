@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
@@ -29,6 +30,12 @@ const BENCH = ["coach", "analyst", "goalkeeper_coach", "athletic_coach", "team_m
  * the team chat) and the bench. Editing the squad (add, import, status, accounts) moves to
  * «Kader bearbeiten» (?edit=1): nothing of it is lost.
  */
+export async function generateMetadata({ params }: { params: Promise<{ orgId: string; teamId: string }> }): Promise<Metadata> {
+  const { orgId, teamId } = await params;
+  const { data } = await (await serverApi()).GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } });
+  return { title: `${(await getTranslations("shell"))("team")}${data ? ` · ${data.name}` : ""}` };
+}
+
 export default async function TeamPage({ params, searchParams }: { params: Promise<{ orgId: string; teamId: string }>; searchParams: Promise<{ edit?: string }> }) {
   const { orgId, teamId } = await params;
   const { edit } = await searchParams;

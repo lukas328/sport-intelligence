@@ -16,6 +16,8 @@ import { api } from "@/lib/client";
 import { chipsFromText } from "@/lib/scene-words";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
+import { cn } from "@/lib/utils";
+import { PresentView } from "../../../collections/[collectionId]/present/present-view";
 import { threeThings } from "@/lib/three-things";
 
 type Match = Schemas["MatchSummary"];
@@ -93,6 +95,9 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
   }, [wantsFocus, params]);
   const [text, setText] = useState(() => (sentence && chipsFromText(sentence).length === 0 ? sentence : ""));
   const [shown, setShown] = useState(TILES);
+  // ?view=table (the old «Tabelle» route leads here) shows the answer as rows
+  const [table, setTable] = useState(() => params.get("view") === "table");
+  const [playing, setPlaying] = useState(false);
   const chips = CHIPS.filter((c) => active.includes(c.key));
   // without a filter: the newest scenes of the last match, never a raw list
   const scope = chips.length ? chips : CHIPS.filter((c) => c.key === "last_match");
@@ -111,6 +116,8 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
     queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path }, body: { ...combine(baseChips, ctx), limit: 500 } })).data ?? null,
   });
   const scenes = (result.data?.hits ?? []).filter((h) => h.video_id && h.t_ms != null).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at) || (b.t_ms ?? 0) - (a.t_ms ?? 0));
+  // played in the order of the matches and their clocks
+  const playable = [...scenes].reverse();
   const baseCount = (base.data?.hits ?? []).filter((h) => h.video_id && h.t_ms != null).length;
   const label = (c: Chip) => t(`chip.${c.key}` as "chip.conceded");
   // the same answer in the last match, as the base for a comparison
@@ -201,25 +208,30 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
           </div>
         )}
         <div className="mt-5 flex flex-wrap items-center gap-3">
-          {scenes[0] && (
-            <Link href={`/app/${orgId}/matches/${scenes[0].match_id}?tab=video&t=${scenes[0].start_ms ?? scenes[0].t_ms ?? 0}`} className={buttonClass("primary")}>
-              {t("playAll", { n: scenes.length })}
-            </Link>
+          {playable.length > 0 && (
+            // one sequence of all the scenes, across the matches (UX test B21)
+            <button type="button" onClick={() => setPlaying(true)} className={buttonClass("primary")} data-testid="scenes-play-all">
+              {t("playAll", { n: playable.length })}
+            </button>
           )}
           {scenes.length > 0 && (
             <button type="button" className={buttonClass("secondary")} onClick={() => collect.mutate()} disabled={collect.isPending}>
               {t("toCollection")}
             </button>
           )}
-          <Link href={`/app/${orgId}/teams/${teamId}/matrix`} className={linkClass}>
-            {t("asTable")}
-          </Link>
+          {/* the same answer as a table, in the same screen */}
+          <button type="button" onClick={() => setTable((x) => !x)} className={cn(linkClass, "cursor-pointer border-0 bg-transparent p-0")} aria-pressed={table} data-testid="scenes-as-table">
+            {table ? t("asTiles") : t("asTable")}
+          </button>
         </div>
 
         <section className="mt-10" aria-labelledby="scene-tiles">
           <SectionHead title={<span id="scene-tiles">{t("count", { n: scenes.length })}</span>} note={t("newestFirst")} />
           {scenes.length === 0 && result.data ? (
-            <p className="text-[17px] text-ink-2">{t("none")}</p>
+            // no filter to blame before the first video (UX test B28)
+            <p className="text-[17px] text-ink-2">{withVideo.length === 0 ? t("noneYet") : t("none")}</p>
+          ) : table ? (
+            <SceneTable scenes={scenes} matches={matches} orgId={orgId} />
           ) : (
             <ul className="m-0 grid list-none grid-cols-2 gap-x-3.5 gap-y-[18px] p-0 md:grid-cols-4 md:gap-x-5 md:gap-y-6" data-testid="scene-tiles">
               {scenes.slice(0, shown).map((h) => (
@@ -229,7 +241,7 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
               ))}
             </ul>
           )}
-          {scenes.length > shown && (
+          {!table && scenes.length > shown && (
             <button type="button" onClick={() => setShown((s) => s + TILES * 2)} className="mt-5 min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4">
               {t("more", { n: scenes.length - shown })}
             </button>
@@ -237,7 +249,75 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
         </section>
       </div>
       <aside className="flex min-w-0 flex-col gap-8">{side}</aside>
+      {playing && (
+        <div className="fixed inset-0 z-[80] overflow-auto bg-court-bar" role="dialog" aria-modal="true" aria-label={t("playTitle", { n: playable.length })}>
+          <PresentView orgId={orgId} collection={sequenceOf(playable, matches, t("playTitle", { n: playable.length }))} onClose={() => setPlaying(false)} />
+        </div>
+      )}
     </div>
+  );
+}
+
+/** The search's scenes as a collection for the big screen: each the 8 s before and 3 s after. */
+function sequenceOf(hits: Hit[], matches: Match[], title: string): Schemas["CollectionOut"] {
+  const items = hits.map((h, i) => {
+    const at = h.t_ms ?? h.start_ms ?? 0;
+    const opp = matches.find((m) => m.id === h.match_id)?.opponent_name ?? h.match_label;
+    return {
+      id: `${h.id}-${i}`,
+      kind: "scene",
+      position: i,
+      text: null,
+      play: null,
+      scene: { clip_id: h.id, match_id: h.match_id, start_ms: h.start_ms ?? Math.max(0, at - 8000), end_ms: h.end_ms ?? at + 3000, title: `${opp} · ${ms(at)}` },
+    };
+  });
+  return { id: "search", title, items } as unknown as Schemas["CollectionOut"];
+}
+
+/** The answer as rows: match, time, what, number (UX test B21: «Als Tabelle» in the same screen). */
+function SceneTable({ scenes, matches, orgId }: { scenes: Hit[]; matches: Match[]; orgId: string }) {
+  const t = useTranslations("scenesPage");
+  const format = useFormatter();
+  const th = "py-2 text-left text-[13px] font-semibold text-ink-2";
+  return (
+    <table className="w-full border-collapse text-[15px]" data-testid="scene-table">
+      <thead>
+        <tr className="border-b-2 border-ink">
+          <th scope="col" className={th}>{t("colMatch")}</th>
+          <th scope="col" className={th}>{t("colTime")}</th>
+          <th scope="col" className={th}>{t("colWhat")}</th>
+          <th scope="col" className={cn(th, "text-right")}>{t("colNumber")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {scenes.map((h) => (
+          <SceneRow key={h.id} hit={h} match={matches.find((x) => x.id === h.match_id)} orgId={orgId} />
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** One row: the match clock where the analysis knows it, else the place in the video. */
+function SceneRow({ hit: h, match: m, orgId }: { hit: Hit; match: Match | undefined; orgId: string }) {
+  const t = useTranslations("scenesPage");
+  const format = useFormatter();
+  const g = useMatchGraphics(orgId, h.match_id);
+  const goal = g.data && h.kind === "event" ? goalRuns(g.data).find((x) => x.eventId === h.id) : undefined;
+  return (
+    <tr className="border-b border-rule">
+      <td className="py-2.5">
+        <span className="text-ink-2 tabular-nums">{format.dateTime(new Date(h.kickoff_at), { day: "numeric", month: "numeric" })}</span> {m?.opponent_name ?? h.match_label}
+      </td>
+      <td className="py-2.5 tabular-nums">
+        <Link href={`/app/${orgId}/matches/${h.match_id}?tab=video&t=${h.start_ms ?? h.t_ms ?? 0}`} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-[1.5px] underline-offset-4">
+          {goal?.minute != null ? clockOf(goal.minute) : t("videoAt", { time: ms(h.t_ms ?? h.start_ms ?? 0) })}
+        </Link>
+      </td>
+      <td className="py-2.5">{h.type === "shot" ? (h.outcome === "goal" ? t("goal") : h.outcome === "save" ? t("save") : t("shot")) : h.type === "turnover" ? t("turnover") : (h.title ?? h.type)}</td>
+      <td className="py-2.5 text-right tabular-nums">{h.number ?? ""}</td>
+    </tr>
   );
 }
 

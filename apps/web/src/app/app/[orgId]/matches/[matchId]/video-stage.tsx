@@ -4,6 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { usePhone } from "@/lib/use-phone";
 import { CameraKey, SectionHead } from "@/components/anlauf/blocks";
 import { Rail } from "@/components/anlauf/charts";
 import { clockOf, SceneCamera, useThingText } from "@/components/anlauf/three-things-view";
@@ -70,6 +71,8 @@ export function VideoStage({
   const goal = goals.find((g) => g.event_id === eventId) ?? null;
   // Taktik is the default once the court is confirmed (SPEC 7.3)
   const [mode, setMode] = useState<"video" | "taktik">(graphics.field_confirmed ? "taktik" : "video");
+  // on a phone the attacked half fills the width, numbers stay readable (UX test B51)
+  const phone = usePhone();
   const [all, setAll] = useState(false);
   const player = useRef<PlayerHandle>(null);
   const [kept, setKept] = useState<string | null>(null);
@@ -151,8 +154,8 @@ export function VideoStage({
             matchId={match.id}
             eventId={eventId}
             label={label(goal)}
-            view="camL"
-            width={900}
+            view={phone ? "halfB" : "camL"}
+            width={phone ? 390 : 900}
             caption={chosen && at >= 0 ? `${label(goal)} · ${t("sceneOf", { n: at + 1, total: list.length })}` : label(goal)}
             captionSmall={t("positionsFromVideo")}
             barExtra={toggle}

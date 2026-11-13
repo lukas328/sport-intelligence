@@ -167,14 +167,14 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const top = [...data.players].filter((p) => p.goals > 0).sort((a, b) => b.goals - a.goals).slice(0, 5);
   const scenesHref = (chips: string[]) => `${base}/scenes?chips=${chips.join(",")}`;
   const ZONE_CHIP: Record<string, string> = { ra: "wing_right", la: "wing_left", rl: "back_left", rm: "back_centre", rr: "back_right", kr: "circle" };
-  const rows: { key: string; title: string; text: string; series: number[]; team: "own" | "opp"; count: number; href: string }[] = [];
+  const rows: { key: string; title: string; text: string; series: number[]; team: "own" | "opp"; count: number; href: string | null }[] = [];
   if (rep.conceded) {
     const c = rep.conceded;
     rows.push({ key: "conceded", title: ta("thing_conceded_zone", { zone: ta(`zoneFrom.${c.zone}` as "zoneFrom.ra") }), text: c.everyMatch ? ts("everyMatch", { n: c.value, of: c.of }) : ts("ofAll", { n: c.value, of: c.of }), series: c.series, team: "opp", count: c.value, href: scenesHref(["conceded", ...(ZONE_CHIP[c.zone] ? [ZONE_CHIP[c.zone]!] : [])]) });
   }
   if (rep.turnovers) {
     const tt = rep.turnovers;
-    rows.push({ key: "turnovers", title: ts("turnovers"), text: tt.outlier != null ? ts("turnoverOutlier", { opp: withVideo[tt.outlier]!.label, median: tt.median }) : ts("turnoverAround", { median: tt.median }), series: tt.series, team: "own", count: tt.total, href: scenesHref(["turnovers"]) });
+    rows.push({ key: "turnovers", title: ts("turnovers"), text: tt.outlier != null ? ts("turnoverOutlier", { opp: withVideo[tt.outlier]!.label, median: tt.median }) : ts("turnoverAround", { median: tt.median }), series: tt.series, team: "own", count: tt.total, href: null }); // from the report: no scenes behind them (ANLAUF 10, UX test B41)
   }
   if (rep.scored) {
     const c = rep.scored;
@@ -208,9 +208,13 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                     <div className="min-w-0 flex-1">
                       <h3 className="font-slant text-[22px] leading-tight md:text-2xl">{r.title}</h3>
                       <p className="mt-1 text-[17px] text-ink-2">{r.text}</p>
-                      <Link href={r.href} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center text-[15px]")}>
-                        {ta("scenes", { count: r.count })}
-                      </Link>
+                      {r.href ? (
+                        <Link href={r.href} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center text-[15px]")}>
+                          {ta("scenes", { count: r.count })}
+                        </Link>
+                      ) : (
+                        <p className="mt-2 text-[13px] text-ink-2">{ta("fromReport")}</p>
+                      )}
                     </div>
                     <figure className="m-0">
                       <Series values={r.series} team={r.team} label={ts("seriesLabel", { what: r.title, values: withVideo.map((m, i) => `${m.label} ${r.series[i]}`).join(", ") })} />

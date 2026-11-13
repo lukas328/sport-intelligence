@@ -57,7 +57,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   // the coach's steps (club, team, squad, invite) are not the player's
   await expect(page.getByText(/Schritt 1 von/)).toHaveCount(0);
 
-  // an available team is taken over: step 2 «Das seid ihr, oder?» shows what came with it
+  // an available team is taken over: step 2 «Ist das dein Team?» shows what came with it
   const claimedBase = `**/v1/orgs/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}`;
   const accepted: string[] = [];
   let patched: unknown = null;
@@ -79,11 +79,11 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
     return json(route, {});
   });
   await page.getByTestId("official-team").filter({ hasText: "HC Seeblick Herren 1" }).getByTestId("claim").click();
-  await expect(page.getByRole("heading", { level: 1, name: "Das seid ihr, oder?" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Ist das dein Team?" })).toBeVisible();
   await expect(page.getByText("Schritt 2 von 2")).toBeVisible();
   const done = page.getByTestId("claim-done");
   await expect(done.getByRole("heading", { name: "HC Seeblick Herren 1" })).toBeVisible();
-  await expect(done).toContainText("3 Spielerinnen und Spieler, mit Nummern");
+  await expect(done).toContainText("3 Personen im Kader, mit Nummern");
   await expect(done).toContainText("2 Spiele im Spielplan, 1 gespielt");
   await expect(done).toContainText("Tabelle: Rang 2");
   // the preview: the last match's head and two squad rows

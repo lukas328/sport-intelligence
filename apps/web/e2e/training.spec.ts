@@ -45,6 +45,13 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await expectAccessible(page);
   await expectAccessible(page);
 
+  // tasks are team functions (SPEC 6): without them the pages lead back to Spiele, so switch them on
+  const [, orgId, teamId] = teamUrl.match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  await page.goto(`/app/${orgId}/assignments`);
+  await page.waitForURL(/\/matches/);
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  await page.request.patch(`/v1/orgs/${orgId}/teams/${teamId}`, { headers: { "x-csrf-token": csrf }, data: { settings: { team_features: true } } });
+
   // my assignments: empty
   await page.goto(teamUrl.replace(/\/teams\/.*/, "/assignments"));
   await expect(page.getByText("Keine offenen Aufgaben.")).toBeVisible();

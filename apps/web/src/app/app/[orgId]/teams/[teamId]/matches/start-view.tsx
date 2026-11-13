@@ -1,7 +1,9 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
@@ -11,6 +13,7 @@ import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-
 import { FromMatchButton } from "@/components/collections/from-match";
 import { useShell } from "@/components/shell/context";
 import { buttonClass } from "@/components/ui/button";
+import { api } from "@/lib/client";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, reportGoals, useMatchGraphics, type MatchGraphics } from "@/lib/graphics";
 import { matchState } from "@/lib/match-state";
@@ -78,10 +81,24 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
         <WurfHead {...head} />
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        {m && base && (
-          <Link href={base} className={buttonClass("primary")} data-testid="open-match">
-            {t("openMatch")}
-          </Link>
+        {/* the last match without video: the task is the video, the demo shows what comes (UX test B26) */}
+        {m && base && canWrite && !m.has_video ? (
+          <>
+            <Link href={`${base}?tab=video#upload`} className={buttonClass("primary")} data-testid="start-upload">
+              {t("uploadVideo")}
+            </Link>
+            <DemoButton orgId={orgId} teamId={m.team_id} />
+            <Link href={base} className={linkClass} data-testid="open-match">
+              {t("openMatch")}
+            </Link>
+          </>
+        ) : (
+          m &&
+          base && (
+            <Link href={base} className={buttonClass("primary")} data-testid="open-match">
+              {t("openMatch")}
+            </Link>
+          )
         )}
         {m && canWrite && m.has_video && <FromMatchButton orgId={orgId} teamId={m.team_id} matchId={m.id} opponent={m.opponent_name} />}
         {canWrite && checks > 0 && base && (
@@ -95,6 +112,21 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       </div>
       {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={(_, n) => `${base}?tab=video&thing=${n}`} />}
     </div>
+  );
+}
+
+/** «Demo-Spiel ansehen»: a seeded match of this team, opened at once. */
+function DemoButton({ orgId, teamId }: { orgId: string; teamId: string }) {
+  const t = useTranslations("anlauf");
+  const router = useRouter();
+  const demo = useMutation({
+    mutationFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/demo-match", { params: { path: { org_id: orgId, team_id: teamId } } })).data,
+    onSuccess: (d) => d && router.push(`/app/${orgId}/matches/${d.id}`),
+  });
+  return (
+    <button type="button" className={buttonClass("secondary")} onClick={() => demo.mutate()} disabled={demo.isPending} data-testid="start-demo">
+      {t("demoMatch")}
+    </button>
   );
 }
 
@@ -195,7 +227,7 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
               {canWrite && m.score_own != null && (
                 <>
                   {" · "}
-                  <Link href={`${base}?tab=video`} className={linkClass}>
+                  <Link href={`${base}?tab=video`} className={cn(linkClass, "inline-flex min-h-11 items-center")}>
                     {t("uploadVideo")}
                   </Link>
                 </>
@@ -213,7 +245,8 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
             {m.score_own}:{m.score_opponent}
           </b>
           <small aria-hidden className={cn("mt-1 block text-[13px] font-bold md:mt-1.5 md:text-sm", result === "win" ? "text-win" : result === "loss" ? "text-loss" : "text-ink-2")}>
-            {t(result)}
+            {/* «draw» is also the drawing tool: the result has its own word (UX test B50) */}
+            {t(result === "draw" ? "drawResult" : result)}
           </small>
         </p>
       ) : (

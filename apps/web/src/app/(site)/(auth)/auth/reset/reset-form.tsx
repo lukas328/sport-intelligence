@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -28,7 +28,7 @@ export function ResetForm() {
   }
 
   return (
-    <Card className="space-y-5">
+    <div className="space-y-5 border-t-2 border-ink pt-6">
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("auth.resetTitle")}</h1>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
       <form onSubmit={submit} className="space-y-4">
@@ -46,6 +46,6 @@ export function ResetForm() {
           {t("auth.resetSubmit")}
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }

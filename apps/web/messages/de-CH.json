@@ -164,7 +164,7 @@
     "registerTitle": "Konto erstellen",
     "name": "Vor- und Nachname",
     "passwordHint": "Mindestens 10 Zeichen.",
-    "terms": "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung.",
+    "terms": "Ich akzeptiere die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy>.",
     "submitRegister": "Konto erstellen",
     "haveAccount": "Schon ein Konto?",
     "toLogin": "Anmelden",
@@ -185,7 +185,11 @@
     "verifyBusy": "Wird bestätigt …",
     "toApp": "Zur App",
     "totpHint": "Code aus der App oder ein Wiederherstellungscode",
-    "signedOut": "Du bist abgemeldet."
+    "signedOut": "Du bist abgemeldet.",
+    "needName": "Bitte gib deinen Namen ein.",
+    "needEmail": "Das ist keine E-Mail-Adresse.",
+    "needPassword": "Das Passwort braucht mindestens 10 Zeichen.",
+    "needTerms": "Bitte akzeptiere die Bedingungen."
   },
   "invite": {
     "title": "Einladung",
@@ -273,9 +277,9 @@
     },
     "stepFind": "Team finden",
     "stepConfirm": "Bestätigen",
-    "confirmTitle": "Das seid ihr, oder?",
+    "confirmTitle": "Ist das dein Team?",
     "fromOfficial": "Von handball.ch",
-    "players": "{n, plural, one {# Spielerin oder Spieler} other {# Spielerinnen und Spieler}}{numbers, select, all {, mit Nummern} other {}}",
+    "players": "{n, plural, one {# Person im Kader} other {# Personen im Kader}}{numbers, select, all {, mit Nummern} other {}}",
     "fixtures": "{n, plural, one {# Spiel} other {# Spiele}} im Spielplan, {played} gespielt",
     "rank": "Tabelle: Rang {rank}",
     "shirtTitle": "Welche Farbe hat euer Trikot?",
@@ -564,7 +568,15 @@
     "stage_analysis_calibration": "Spielfeld finden",
     "stage_analysis_tracking": "Laufwege berechnen",
     "stage_analysis_upload": "Speichern",
-    "analysisHint": "Läuft im Hintergrund. Du kannst die Seite schliessen, wir melden uns, wenn es fertig ist."
+    "analysisHint": "Läuft im Hintergrund. Du kannst die Seite schliessen, wir melden uns, wenn es fertig ist.",
+    "failedTitle": "Das Video liess sich nicht lesen.",
+    "failedText": "Diese Datei ist kein Video, das wir lesen können (MP4, MOV, MKV). Der Spielbericht und alles, was du schon erfasst hast, bleiben.",
+    "otherFile": "Andere Datei wählen",
+    "etaSoon": "Die Minuten bis fertig stehen hier, sobald die Analyse richtig läuft.",
+    "coach_read": "Video gelesen",
+    "coach_follow": "Spieler werden verfolgt",
+    "coach_things": "Drei Dinge werden gesucht",
+    "technical": "Einzelschritte"
   },
   "quality": {
     "title": "Videoqualität",
@@ -2378,7 +2390,8 @@
     "matrix": "Tabelle",
     "scenesSections": "Bereiche der Szenen",
     "me": "Ich",
-    "club": "Verein"
+    "club": "Verein",
+    "twoFactorDue": "Zwei-Faktor-Anmeldung einrichten"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",
@@ -2601,7 +2614,7 @@
     "report_outside": "ausserhalb des Videos"
   },
   "officialTeams": {
-    "title": "Mannschaft suchen",
+    "title": "Team suchen",
     "intro": "Such dein Team in den offiziellen Daten von handball.ch. Spiele, Resultate und Spieler kommen gleich mit.",
     "label": "Team oder Verein",
     "placeholder": "z. B. Thalwil",
@@ -2609,7 +2622,7 @@
     "results": "Gefundene Teams",
     "noHits": "Kein Team gefunden für «{q}».",
     "open": "Öffnen",
-    "claim": "Übernehmen",
+    "claim": "Das ist mein Team",
     "inApp": "schon in der App",
     "askAccess": "Zugang anfragen",
     "join": "Als Spieler/in beitreten",
@@ -2634,7 +2647,8 @@
     "confirmSquad": "Team bestätigen",
     "notFound": "Team nicht gefunden oder ausserhalb der Schweiz?",
     "manual": "Verein von Hand anlegen",
-    "showAll": "Alle {n} Teams von {club} zeigen"
+    "showAll": "Alle {n} Teams von {club} zeigen",
+    "claiming": "Wir holen Spiele, Kader und Tabelle von handball.ch. Das dauert etwa 15 Sekunden."
   },
   "official": {
     "eyebrow": "Offizielle Daten",
@@ -2728,7 +2742,9 @@
     "via_federation": "Verbandslizenz",
     "via_operator": "Support",
     "line": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile sind bis dahin aus.",
-    "lineLink": "So geht es"
+    "lineLink": "So geht es",
+    "federationTitle": "Verband",
+    "notOfficial": "Dein Verein ist nicht mit handball.ch verbunden. Die Verbindung entsteht, wenn du dein Team beim Einstieg über handball.ch suchst und übernimmst."
   },
   "playerStatus": {
     "injured": "Verletzt",
@@ -2863,7 +2879,8 @@
     "presentOf": "{n} von {total}",
     "fullscreen": "Vollbild",
     "prev": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "close": "Schliessen"
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",
@@ -2883,7 +2900,8 @@
     "status": "{n, plural, =0 {Noch keine Antwort} one {# Antwort} other {# Antworten}} · gültig bis {date}",
     "create": "Link für den Team-Chat erstellen",
     "renew": "Neuen Link erstellen",
-    "revoke": "Link sperren"
+    "revoke": "Link sperren",
+    "pick": "Bitte wählen"
   },
   "anlauf": {
     "zoneFrom": {
@@ -3037,7 +3055,7 @@
     "fullTime": "Schluss",
     "kept": "Gemerkt",
     "keepScene": "Szene merken",
-    "highlight": "Spielerin hervorheben",
+    "highlight": "Person hervorheben",
     "phaseTitle": "Minute {from} bis {to}",
     "running": "läuft gerade",
     "notes": "Notizen",
@@ -3075,7 +3093,8 @@
     "moreGame": "Mehr zum Spiel",
     "moreGameHint": "Vergleich, Torschützen, Highlights, Feedback, Marken",
     "chatHeading": "Die drei Dinge",
-    "noVideoTitle": "Kein Video"
+    "noVideoTitle": "Kein Video",
+    "drawResult": "Unentschieden"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3166,7 +3185,16 @@
     "turnover": "Ballverlust",
     "videoAt": "Video {time}",
     "inLast": "Gegen {opponent} waren es {n} von {base}.",
-    "sharePct": "{pct} Prozent."
+    "sharePct": "{pct} Prozent.",
+    "playTitle": "{n, plural, one {1 Szene} other {# Szenen}} aus der Suche",
+    "asTiles": "Als Kacheln",
+    "colMatch": "Spiel",
+    "colTime": "Zeit",
+    "colWhat": "Was",
+    "colNumber": "Nummer",
+    "noHighlightsYet": "Vom Spiel gegen {opponent} gibt es noch keine Highlights.",
+    "makeHighlights": "Im Spiel erstellen",
+    "noneYet": "Szenen gibt es nach dem ersten Video."
   },
   "teamPage": {
     "kick": "{team} · {source}",

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Check, ChevronDown, ImageDown, Binoculars, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { KitFields } from "@/components/domain/kit-fields";
 import { AttendancePanel } from "@/components/team/attendance-panel";
@@ -64,7 +64,6 @@ type Sub = "shots" | "keepers" | "physical" | "report";
 // the parts of Zahlen, in this order
 const SUBS: Sub[] = ["report", "shots", "keepers", "physical"];
 
-const STAGES = ["download", "probe", "quality", "transcode", "proxy", "thumbnails", "upload"] as const;
 
 export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; initial: Match; teamName: string; staff: boolean }) {
   const t = useTranslations();
@@ -306,9 +305,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         </p>
       )}
       <div className="space-y-6">
-        <div className="flex items-end justify-between gap-3 border-b-2 border-ink">
+        {/* on a phone the actions sit above the three tabs, so «Zahlen» is never cut off */}
+        <div className="flex flex-wrap-reverse items-end justify-between gap-x-3 border-b-2 border-ink">
           <Segmented<View>
-            className="min-w-0"
+            className="min-w-0 max-sm:w-full"
             variant="underline"
             label={t("tabs.video")}
             value={view}
@@ -347,24 +347,16 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 <MenuItem href={`/v1/orgs/${orgId}/matches/${match.id}/report.pdf?lang=${locale}`} external icon={<FileDown />} testId="pdf">
                   {t("matches.pdf")}
                 </MenuItem>
-                {staff && match.opponent && match.score_own != null && match.score_opponent != null && (
-                  <MenuItem icon={<ImageDown />} onSelect={() => void downloadCard()} testId="match-card">
-                    {t("matches.card")}
-                  </MenuItem>
-                )}
-                {staff && !liveFirst && (
+                {/* the match card is «Als Bild für den Chat» in Tab Spiel now; the Spieltag only
+                    before the result is in; the preparation lives in «Gegner» (UX test B35) */}
+                {staff && !liveFirst && match.score_own == null && (
                   <MenuItem href={`${base}/matchday`} icon={<Radio />} testId="live-link">
                     {t("live.open")}
                   </MenuItem>
                 )}
-                {staff && (
+                {staff && match.score_own == null && (
                   <MenuItem href={`${base}/matchday?mode=marks`} icon={<Hand />} testId="marks-link">
                     {t("marks.title")}
-                  </MenuItem>
-                )}
-                {staff && match.opponent && (
-                  <MenuItem href={`${base}/scouting`} icon={<Binoculars />} testId="scouting-link">
-                    {t("scouting.open")}
                   </MenuItem>
                 )}
                 {match.opponent && (
@@ -423,7 +415,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </div>
         </details>
       )}
-      {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} />}
+      {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
@@ -493,7 +485,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             onPicture={
               match.score_own != null && match.score_opponent != null
                 ? () =>
-                    chatPicture({
+                    staff && match.opponent
+                      ? void downloadCard()
+                      : chatPicture({
                       title: `${shell?.org.name ?? teamName} ${ta("vsShort")} ${oppName(match)}`,
                       sub: [format.dateTime(new Date(match.kickoff_at), { dateStyle: "long" }), match.venue].filter(Boolean).join(" · "),
                       score: `${match.score_own}:${match.score_opponent}`,
@@ -632,57 +626,81 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   );
 }
 
-function Processing({ jobs, orgId, staff }: { jobs: Job[]; orgId: string; staff: boolean }) {
+function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: string; staff: boolean; onOtherFile?: () => void }) {
   const t = useTranslations("processing");
   const ta = useTranslations("anlauf");
   const now = useNow({ updateInterval: 5000 });
   const running = jobs.filter((j) => j.status !== "succeeded");
+  const failed = running.find((j) => j.status === "failed");
+  const ingest = jobs.find((j) => j.kind === "ingest");
+  const analysis = jobs.find((j) => j.kind === "analysis");
+  // three steps in the coach's words (UX test B11): the video read, the players followed, the
+  // three things searched; the technical stages stay one step away
+  const state = (done: boolean, active: boolean) => (done ? "done" : active ? "running" : "pending");
+  const ingestDone = ingest?.status === "succeeded" || Boolean(analysis);
+  const followDone = analysis?.status === "succeeded" || (analysis?.progress ?? 0) >= 0.7;
+  const steps = [
+    { key: "read", st: state(ingestDone, Boolean(ingest) && !ingestDone) },
+    { key: "follow", st: state(followDone, Boolean(analysis) && !followDone) },
+    { key: "things", st: state(analysis?.status === "succeeded", followDone && analysis?.status !== "succeeded") },
+  ] as const;
+  const current = analysis && analysis.status !== "succeeded" ? analysis : (ingest ?? running[0]);
+  const started = current?.started_at ? new Date(current.started_at).getTime() : null;
+  const elapsed = started ? (now.getTime() - started) / 1000 : 0;
+  const etaMin = current && current.status === "running" && current.progress > 0.05 && elapsed > 20 ? Math.max(1, Math.round(((elapsed / current.progress) * (1 - current.progress)) / 60)) : null;
+  if (failed) {
+    // what failed, what stays, what to do (UX test B29)
+    return (
+      <section className="space-y-3 border-2 border-loss p-4 md:p-6" role="alert" data-testid="job-failed" data-orgid={orgId}>
+        <h2 className="text-[26px]">{t("failedTitle")}</h2>
+        <p className="m-0 max-w-[60ch] text-[17px]">{t("failedText")}</p>
+        {staff && onOtherFile && (
+          <button type="button" className={buttonClass("primary")} onClick={onOtherFile}>
+            {t("otherFile")}
+          </button>
+        )}
+      </section>
+    );
+  }
   return (
     // Analyse läuft (SPEC 7.13): the steps with fertig / läuft / danach, a bar, the minutes left,
     // something useful meanwhile and the three fields that will fill
-    <section className="space-y-8" aria-live="polite" data-orgid={orgId} data-staff={staff || undefined}>
-      {running.map((j) => {
-        const reported = Object.keys((j.stages ?? {}) as Record<string, unknown>);
-        const stages = reported.length > 0 ? reported : j.kind === "ingest" ? [...STAGES] : [];
-        const started = j.started_at ? new Date(j.started_at).getTime() : null;
-        const elapsed = started ? (now.getTime() - started) / 1000 : 0;
-        const etaMin = j.status === "running" && j.progress > 0.05 && elapsed > 20 ? Math.max(1, Math.round(((elapsed / j.progress) * (1 - j.progress)) / 60)) : null;
-        return (
-          <div key={j.id} className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" data-testid="job">
-            <div>
-              <h2 className="text-[26px]">{t(j.kind === "analysis" ? "titleAnalysis" : "title")}</h2>
-              <div className="mt-3 h-1.5 bg-rule" aria-hidden>
-                <div className={cn("h-full transition-all duration-500", j.status === "failed" ? "bg-loss" : "bg-ink")} style={{ width: `${j.progress * 100}%` }} />
-              </div>
-              <p className="mt-2 text-[15px] font-bold">
-                {t(j.status as "running")} · {Math.round(j.progress * 100)} %{etaMin != null && <span className="font-normal text-ink-2"> · {ta("minutesLeft", { minutes: etaMin })}</span>}
-              </p>
-              {stages.length > 0 && (
-                <ol className="mt-4 m-0 list-none p-0">
-                  {stages.map((s) => {
-                    const st = (j.stages as Record<string, { status?: string }>)[s]?.status ?? "pending";
-                    const word = st === "done" ? ta("stepDone") : st === "running" ? ta("stepRunning") : st === "failed" ? t("failed") : ta("stepNext");
-                    return (
-                      <li key={s} className={cn("grid min-h-11 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 border-t border-rule py-2.5 text-base", st === "pending" && "text-ink-2")}>
-                        <span className={cn("justify-self-start text-[13px] font-bold", st === "done" ? "text-win" : st === "running" ? "bg-attn px-1.5 py-0.5 text-attn-ink" : st === "failed" ? "text-loss" : "text-ink-2")}>{word}</span>
-                        {t.has(`stage_${j.kind}_${s}`) ? t(`stage_${j.kind}_${s}` as "stage_download") : t.has(`stage_${s}`) ? t(`stage_${s}` as "stage_download") : s}
-                      </li>
-                    );
-                  })}
-                </ol>
-              )}
-              {j.kind === "analysis" && <p className="mt-4 text-[15px] text-ink-2">{ta("meanwhile")}</p>}
-            </div>
-            {j.kind === "analysis" && (
-              <div className="grid grid-cols-3 gap-3 self-start" aria-hidden>
-                {[0, 1, 2].map((i) => (
-                  <EmptyField key={i} />
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
+    <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" aria-live="polite" data-testid="job" data-orgid={orgId} data-staff={staff || undefined}>
+      <div>
+        <h2 className="text-[26px]">{ta("titleRunning")}</h2>
+        <div className="mt-3 h-1.5 bg-rule" aria-hidden>
+          <div className="h-full bg-ink transition-all duration-500" style={{ width: `${(current?.progress ?? 0) * 100}%` }} />
+        </div>
+        <p className="mt-2 text-[15px] font-bold">{etaMin != null ? ta("minutesLeft", { minutes: etaMin }) : t("etaSoon")}</p>
+        <ol className="mt-4 m-0 list-none p-0">
+          {steps.map(({ key, st }) => (
+            <li key={key} className={cn("grid min-h-11 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 border-t border-rule py-2.5 text-base", st === "pending" && "text-ink-2")}>
+              <span className={cn("justify-self-start text-[13px] font-bold", st === "done" ? "text-win" : st === "running" ? "bg-attn px-1.5 py-0.5 text-attn-ink" : "text-ink-2")}>
+                {st === "done" ? ta("stepDone") : st === "running" ? ta("stepRunning") : ta("stepNext")}
+              </span>
+              {t(`coach_${key}`)}
+            </li>
+          ))}
+        </ol>
+        <p className="mt-4 text-[15px] text-ink-2">{ta("meanwhile")}</p>
+        <details className="mt-3 text-[13px] text-ink-2">
+          <summary className="min-h-11 cursor-pointer content-center font-semibold">{t("technical")}</summary>
+          {running.map((j) => (
+            <ul key={j.id} className="m-0 list-none p-0">
+              {Object.entries((j.stages ?? {}) as Record<string, { status?: string }>).map(([k, v]) => (
+                <li key={k}>
+                  {t.has(`stage_${j.kind}_${k}`) ? t(`stage_${j.kind}_${k}` as "stage_download") : t.has(`stage_${k}`) ? t(`stage_${k}` as "stage_download") : k}: {v?.status ?? "pending"}
+                </li>
+              ))}
+            </ul>
+          ))}
+        </details>
+      </div>
+      <div className="grid grid-cols-3 gap-3 self-start" aria-hidden>
+        {[0, 1, 2].map((i) => (
+          <EmptyField key={i} />
+        ))}
+      </div>
     </section>
   );
 }

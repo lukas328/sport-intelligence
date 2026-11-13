@@ -30,7 +30,7 @@ export interface ShellValue {
   teams: ShellTeam[];
   team: ShellTeam | null;
   mode: Mode;
-  me: { name: string; email: string };
+  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
   setTeam: (id: string) => void;
 }
 

@@ -26,7 +26,7 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
     <MenuRoot>
       <MenuTrigger
         className={cn(
-          "flex w-full min-w-0 items-center gap-2 text-left hover:bg-surface",
+          "flex min-h-11 w-full min-w-0 items-center gap-2 text-left hover:bg-surface",
           compact ? "px-1 py-1" : "px-2 py-1.5 border border-border",
         )}
         aria-label={`${t("shell.switchTeam")}: ${label}`}
@@ -48,7 +48,10 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
               setTeam(x.id);
               // stay on the same kind of page for the new team
               const here = window.location.pathname;
-              router.push(team && here.includes(`/teams/${team.id}`) ? here.replace(team.id, x.id) : here);
+              // a page of one match or collection belongs to the old team: go to the new team's
+              // matches (UX test B30)
+              const own = /\/app\/[^/]+\/(matches|collections|opponents|playlists|presentations)\//.test(here);
+              router.push(team && here.includes(`/teams/${team.id}`) ? here.replace(team.id, x.id) : own ? `/app/${org.id}/teams/${x.id}/matches` : here);
               router.refresh();
             }}
           >

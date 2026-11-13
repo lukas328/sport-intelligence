@@ -4,6 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { forgetClaim } from "./claim-storage";
 import { useFormatter, useTranslations } from "next-intl";
 import { type CSSProperties, useState } from "react";
 import { Strip } from "@/components/anlauf/heads";
@@ -80,6 +81,7 @@ export function ConfirmTeam({
     for (const s of adds.filter((x) => (num(x.payload.appearances) ?? 0) > 0)) {
       await api.POST("/v1/orgs/{org_id}/teams/{team_id}/official/suggestions/{suggestion_id}/accept", { params: { path: { org_id: org, team_id: team, suggestion_id: s.id } }, body: null });
     }
+    forgetClaim();
     router.push(`/app/${org}/teams/${team}/matches`);
     router.refresh();
   }

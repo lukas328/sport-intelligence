@@ -172,8 +172,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   return (
     <div style={matchStyle([org.primary_color, org.secondary_color ?? null], match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null) as CSSProperties} data-testid="check">
       <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
-        <span className="text-[15px] font-bold">{t("top", { opponent: `${org.name} ${ta("vsShort")} ${oppName}` })}</span>
-        <Link href={back} className="inline-flex min-h-11 items-center border-2 border-ink px-3.5 text-[15px] font-bold text-ink no-underline">
+        <span className="min-w-0 truncate text-[15px] font-bold">{t("top", { opponent: `${org.name} ${ta("vsShort")} ${oppName}` })}</span>
+        {/* one line on a phone too (UX test B45) */}
+        <Link href={back} className="inline-flex min-h-11 shrink-0 items-center border-2 border-ink px-3.5 text-[15px] font-bold whitespace-nowrap text-ink no-underline">
           {t("later")}
         </Link>
       </div>
@@ -274,7 +275,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   </select>
                 </label>
               )}
-              <button type="button" onClick={() => next(current)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent text-[17px] font-bold">
+              {/* aligned like the other answers (UX test B45) */}
+              <button type="button" onClick={() => next(current)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-bold">
                 {t("dontKnow")}
               </button>
             </div>

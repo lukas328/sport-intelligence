@@ -164,7 +164,7 @@
     "registerTitle": "Créer un compte",
     "name": "Prénom et nom",
     "passwordHint": "Au moins 10 caractères.",
-    "terms": "J'accepte les conditions d'utilisation et la politique de confidentialité.",
+    "terms": "J'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
     "submitRegister": "Créer un compte",
     "haveAccount": "Déjà un compte ?",
     "toLogin": "Se connecter",
@@ -185,7 +185,11 @@
     "verifyBusy": "Confirmation …",
     "toApp": "Ouvrir l'app",
     "totpHint": "Code de l'application ou code de récupération",
-    "signedOut": "Tu es déconnecté·e."
+    "signedOut": "Tu es déconnecté·e.",
+    "needName": "Indique ton nom.",
+    "needEmail": "Ce n'est pas une adresse e-mail.",
+    "needPassword": "Le mot de passe doit compter au moins 10 caractères.",
+    "needTerms": "Merci d'accepter les conditions."
   },
   "invite": {
     "title": "Invitation",
@@ -564,7 +568,15 @@
     "stage_analysis_calibration": "Recherche du terrain",
     "stage_analysis_tracking": "Calcul des déplacements",
     "stage_analysis_upload": "Enregistrement",
-    "analysisHint": "Tourne en arrière-plan. Tu peux fermer la page, nous te prévenons quand c'est prêt."
+    "analysisHint": "Tourne en arrière-plan. Tu peux fermer la page, nous te prévenons quand c'est prêt.",
+    "failedTitle": "La vidéo n'a pas pu être lue.",
+    "failedText": "Ce fichier n'est pas une vidéo lisible (MP4, MOV, MKV). La feuille de match et tout ce que tu as saisi restent.",
+    "otherFile": "Choisir un autre fichier",
+    "etaSoon": "Les minutes restantes s'affichent ici dès que l'analyse avance.",
+    "coach_read": "Vidéo lue",
+    "coach_follow": "Les joueurs sont suivis",
+    "coach_things": "Les trois choses sont cherchées",
+    "technical": "Étapes détaillées"
   },
   "quality": {
     "title": "Qualité vidéo",
@@ -2378,7 +2390,8 @@
     "matrix": "Tableau",
     "scenesSections": "Rubriques des scènes",
     "me": "Moi",
-    "club": "Club"
+    "club": "Club",
+    "twoFactorDue": "Activer la double authentification"
   },
   "palette": {
     "newMatch": "Ajouter un match",
@@ -2609,7 +2622,7 @@
     "results": "Équipes trouvées",
     "noHits": "Aucune équipe trouvée pour « {q} ».",
     "open": "Ouvrir",
-    "claim": "Reprendre",
+    "claim": "C'est mon équipe",
     "inApp": "déjà dans l'app",
     "askAccess": "Demander l'accès",
     "join": "Rejoindre comme joueur/euse",
@@ -2634,7 +2647,8 @@
     "confirmSquad": "Confirmer l'équipe",
     "notFound": "Équipe introuvable ou hors de Suisse ?",
     "manual": "Créer un club à la main",
-    "showAll": "Afficher les {n} équipes de {club}"
+    "showAll": "Afficher les {n} équipes de {club}",
+    "claiming": "Nous récupérons matchs, effectif et classement sur handball.ch. Cela prend environ 15 secondes."
   },
   "official": {
     "eyebrow": "Données officielles",
@@ -2728,7 +2742,9 @@
     "via_federation": "licence fédération",
     "via_operator": "support",
     "line": "Le club n'est pas encore confirmé : le partage et les profils publics sont désactivés d'ici là.",
-    "lineLink": "Comment faire"
+    "lineLink": "Comment faire",
+    "federationTitle": "Fédération",
+    "notOfficial": "Ton club n'est pas relié à handball.ch. Le lien se fait quand tu cherches ton équipe sur handball.ch lors de l'inscription et que tu la reprends."
   },
   "playerStatus": {
     "injured": "Blessé·e",
@@ -2863,7 +2879,8 @@
     "presentOf": "{n} sur {total}",
     "fullscreen": "Plein écran",
     "prev": "Retour",
-    "next": "Suivant"
+    "next": "Suivant",
+    "close": "Fermer"
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",
@@ -2883,7 +2900,8 @@
     "status": "{n, plural, =0 {Pas encore de réponse} one {# réponse} other {# réponses}} · valable jusqu’au {date}",
     "create": "Créer un lien pour le chat de l’équipe",
     "renew": "Créer un nouveau lien",
-    "revoke": "Bloquer le lien"
+    "revoke": "Bloquer le lien",
+    "pick": "Choisis"
   },
   "anlauf": {
     "zoneFrom": {
@@ -3075,7 +3093,8 @@
     "moreGame": "Plus sur le match",
     "moreGameHint": "Comparaison, buteurs, temps forts, feedback, marques",
     "chatHeading": "Les trois choses",
-    "noVideoTitle": "Pas de vidéo"
+    "noVideoTitle": "Pas de vidéo",
+    "drawResult": "Match nul"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3166,7 +3185,16 @@
     "turnover": "Perte de balle",
     "videoAt": "Vidéo {time}",
     "inLast": "Contre {opponent}, {n} sur {base}.",
-    "sharePct": "{pct} pour cent."
+    "sharePct": "{pct} pour cent.",
+    "playTitle": "{n, plural, one {1 scène} other {# scènes}} de la recherche",
+    "asTiles": "En vignettes",
+    "colMatch": "Match",
+    "colTime": "Temps",
+    "colWhat": "Quoi",
+    "colNumber": "Numéro",
+    "noHighlightsYet": "Pas encore de temps forts du match contre {opponent}.",
+    "makeHighlights": "Les créer dans le match",
+    "noneYet": "Les scènes arrivent avec la première vidéo."
   },
   "teamPage": {
     "kick": "{team} · {source}",

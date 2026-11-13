@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
 import { clubStyle, SHIRTS } from "@/lib/color";
 import { PageHeader } from "@/components/ui/page-header";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { InviteForm } from "@/components/people/invite-form";
 import { RosterEditor } from "@/components/roster/roster-editor";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { OfficialTeamSearch } from "./team-search";
+import { CLAIM_KEY, CONFIRM_COOKIE, forgetClaim } from "./claim-storage";
 import { ConfirmTeam } from "./confirm-team";
 import type { OfficialTeam } from "@/lib/official-teams";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
@@ -25,7 +26,7 @@ const STEPS = ["stepClub", "stepTeam", "stepRoster", "stepInvite"] as const;
 const OFFICIAL_STEPS = ["stepFind", "stepConfirm"] as const;
 const COUNTRIES = ["CH", "DE", "AT", "FR", "LI"] as const;
 
-export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
+export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?: Org; resume?: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const [step, setStep] = useState(existingOrg ? 1 : 0);
@@ -41,6 +42,22 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
   const [manual, setManual] = useState(false);
   // a team taken over from the official data: club and team are there, step 2 confirms them
   const [claimed, setClaimed] = useState<{ out: Schemas["ClaimOut"]; team: OfficialTeam } | null>(null);
+  useEffect(() => {
+    if (!resume) return;
+    try {
+      const saved = JSON.parse(window.sessionStorage.getItem(CLAIM_KEY) ?? "null") as { out: Schemas["ClaimOut"]; team: OfficialTeam; club: string } | null;
+      if (saved) {
+        setName(saved.club);
+        setClaimed({ out: saved.out, team: saved.team });
+        return;
+      }
+    } catch {
+      /* storage unavailable */
+    }
+    // nothing to resume from in this browser: on into the app
+    forgetClaim();
+    router.replace("/app");
+  }, [resume, router]);
   const official = step === 0 && !manual;
   const steps: readonly string[] = official ? OFFICIAL_STEPS : STEPS;
   const shownStep = official ? (claimed ? 1 : 0) : step;
@@ -124,7 +141,17 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
       </div>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
 
-      {official && !claimed && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club, out, team) => (setName(club), setJoined(false), setClaimed({ out, team }))} onJoinSent={() => setJoined(true)} />}
+      {official && !claimed && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club, out, team) => {
+            setName(club);
+            setJoined(false);
+            setClaimed({ out, team });
+            try {
+              window.sessionStorage.setItem(CLAIM_KEY, JSON.stringify({ out, team, club }));
+            } catch {
+              /* storage unavailable */
+            }
+            if (out.organization_id) document.cookie = `${CONFIRM_COOKIE}=${out.organization_id}; path=/; max-age=3600; samesite=lax`;
+          }} onJoinSent={() => setJoined(true)} />}
       {official && claimed?.out.organization_id && claimed.out.team_id && (
         <ConfirmTeam
           claimed={claimed.out}
@@ -132,7 +159,7 @@ export function OnboardingWizard({ existingOrg }: { existingOrg?: Org }) {
           league={[claimed.team.league, claimed.team.group_name].filter(Boolean).join(", ")}
           colour={colour}
           onColour={setColour}
-          onNotMine={() => (setClaimed(null), setName(""))}
+          onNotMine={() => (forgetClaim(), setClaimed(null), setName(""))}
         />
       )}
 

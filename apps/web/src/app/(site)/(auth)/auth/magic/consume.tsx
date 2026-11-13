@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { enterApp } from "@/lib/nav";
@@ -25,7 +25,7 @@ export function ConsumeMagicLink() {
   }, [token]);
 
   return (
-    <Card className="space-y-4">
+    <div className="space-y-4 border-t-2 border-ink pt-6">
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("auth.magicTitle")}</h1>
       {error ? (
         <>
@@ -39,6 +39,6 @@ export function ConsumeMagicLink() {
           {t("auth.magicConsuming")}
         </p>
       )}
-    </Card>
+    </div>
   );
 }
