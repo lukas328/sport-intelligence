@@ -211,13 +211,16 @@ export function AppShell({
               <Link href={home} aria-label={org.name} className="flex shrink-0 items-center max-[359px]:hidden">
                 <ClubMark org={org} className="h-[34px] w-[30px] text-[14px]" />
               </Link>
-              <div className="min-w-0 flex-1">
+              {/* the name keeps room for two lines; the rest of the bar gives way first (UX test A01) */}
+              <div className="min-w-[6.5rem] flex-1">
                 <TeamSwitcher compact />
               </div>
               <NotificationBell orgId={org.id} />
               {/* «Suchen» with its word on the phone too (SPEC 6, UX test B18/N08) */}
               {searchHref && (
-                <Link href={searchHref} className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="search-open-compact">
+                // below 360 px (large text) the magnifier gives way too: «Szenen» in the tab bar
+                // opens the same search with the cursor in it
+                <Link href={searchHref} className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 max-[359px]:hidden" data-testid="search-open-compact">
                   <Search aria-hidden className="size-4 max-[439px]:size-5" strokeWidth={2.6} />
                   {/* with very large text the word gives way to the team name, the magnifier stays */}
                   <span className="max-[439px]:sr-only">{t("search")}</span>
@@ -226,11 +229,15 @@ export function AppShell({
               {upload && (
                 <Link
                   href={upload}
-                  className="flex h-11 shrink-0 items-center gap-1 border-2 border-ink bg-ink px-2.5 text-[15px] font-bold text-ground no-underline"
+                  className="flex h-11 shrink-0 items-center justify-center gap-1 border-2 border-ink bg-ink px-2.5 text-[15px] font-bold text-ground no-underline max-[439px]:w-11 max-[439px]:px-0"
+                  aria-label={t("upload")}
                   data-testid="upload-video-compact"
                 >
-                  <Plus aria-hidden className="size-4" strokeWidth={2.6} />
-                  {t("uploadShort")}
+                  <Plus aria-hidden className="size-4 max-[439px]:size-5" strokeWidth={2.6} />
+                  {/* first to give way: the word, the plus stays */}
+                  <span aria-hidden className="max-[439px]:hidden">
+                    {t("uploadShort")}
+                  </span>
                 </Link>
               )}
               <AccountMenu compact />

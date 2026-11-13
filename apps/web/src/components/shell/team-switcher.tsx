@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { MenuContent, MenuItem, MenuLabel, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
+import { headName } from "@/lib/own-name";
 import { cn } from "@/lib/utils";
 import { useShell } from "./context";
 
@@ -13,11 +14,16 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
   const { teams, team, org, orgs, setTeam } = useShell();
   const router = useRouter();
   const label = team ? team.name : t("shell.noTeam");
+  // in the phone bar: without additions in brackets, and a line may break after «/» or «-»
+  // (UX test A01: «SG Wädenswil/Horgen», never «S / G.»)
+  const short = compact ? headName(label) : label;
   const sub = team?.season ?? null;
   if (teams.length <= 1 && orgs.length <= 1) {
     return (
       <div className={cn("min-w-0", compact ? "px-1" : "px-2")}>
-        <p className={cn("font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight break-words" : "truncate text-sm")}>{label}</p>
+        <p className={cn("font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight" : "truncate text-sm")} title={label}>
+          {short}
+        </p>
         {sub && !compact && <p className="truncate text-xs text-muted">{sub}</p>}
       </div>
     );
@@ -34,7 +40,7 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
       >
         <span className="min-w-0 flex-1">
           {/* on the phone two lines rather than «H…» (UX test H09) */}
-          <span className={cn("block font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight break-words" : "truncate text-sm")}>{label}</span>
+          <span className={cn("block font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight" : "truncate text-sm")}>{short}</span>
           {sub && !compact && <span className="block truncate text-xs text-muted">{sub}</span>}
         </span>
         <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted" />
@@ -76,3 +82,4 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
     </MenuRoot>
   );
 }
+
