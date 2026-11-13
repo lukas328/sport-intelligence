@@ -12,8 +12,12 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/client";
 import { flush, mark, pending } from "@handball/client-core";
+import { keepOffline, remember, remembered } from "@/lib/offline";
 
 const SESSION_KEY = (matchId: string) => `hb.marks.session.${matchId}`;
+const SERVER_KEY = (matchId: string) => `hb.marks.server.${matchId}`;
+const KEYS_KEY = (teamId: string) => `hb.marks.keys.${teamId}`;
+const LOG_KEY = (matchId: string) => `hb.marks.log.${matchId}`;
 
 /**
  * Spieltag (SPEC 7.11, addendum 01, 5.3): big keys for courtside marks with the phone's clock,
@@ -51,11 +55,17 @@ export function MarksView({
   useEffect(() => {
     let off = false;
     const queued = pending(localStorage, matchId).map((q) => ({ id: q.client_id, key: q.key, label: "", at: new Date(q.device_time) }));
+    // the phone's id merges a mark from the queue with the same mark on the server (UX test N02)
+    type Server = { id: string; client_id?: string | null; key: string; label?: string | null; device_time: string };
+    const merge = (marks: Server[]) => marks.map((m) => ({ id: m.client_id ?? m.id, key: m.key, label: m.label ?? "", at: new Date(m.device_time) }));
+    const last = remembered<Server[]>(SERVER_KEY(matchId));
+    if (last) setLog(merge([...last]));
     void api
       .GET("/v1/orgs/{org_id}/matches/{match_id}/marks", { params: { path: { org_id: orgId, match_id: matchId } } })
       .then(({ data }) => {
-        if (off) return;
-        const server = (data?.marks ?? []).map((m) => ({ id: m.id, key: m.key, label: m.label ?? "", at: new Date(m.device_time) }));
+        if (off || !data) throw new Error("offline");
+        remember(SERVER_KEY(matchId), data.marks);
+        const server = merge(data.marks);
         setLog((l) => {
           const all = [...l, ...queued, ...server];
           const seen = new Set<string>();
@@ -63,11 +73,23 @@ export function MarksView({
         });
         if (server.some((m) => m.key === "halftime") || queued.some((m) => m.key === "halftime")) setHalf(2);
       })
-      .catch(() => setLog((l) => (l.length ? l : queued)));
+      .catch(() => {
+        // without network: what this phone showed last, the last answer of the server and the queue
+        if (off) return;
+        const shown = (remembered<{ id: string; key: string; label: string; at: string }[]>(LOG_KEY(matchId)) ?? []).map((x) => ({ ...x, at: new Date(x.at) }));
+        const server = [...shown, ...merge(last ?? [])];
+        const seen = new Set<string>();
+        setLog([...queued, ...server].filter((x) => (seen.has(x.id) ? false : (seen.add(x.id), true))).sort((a, b) => b.at.getTime() - a.at.getTime()));
+        if ([...queued, ...server].some((m) => m.key === "halftime")) setHalf(2);
+      });
     return () => {
       off = true;
     };
   }, [orgId, matchId]);
+  // what the list shows is kept on the phone for a reload without network (UX test N01)
+  useEffect(() => {
+    if (log.length) remember(LOG_KEY(matchId), log);
+  }, [log, matchId]);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 15000);
@@ -77,11 +99,28 @@ export function MarksView({
   const style = matchStyle([org.primary_color, org.secondary_color ?? null], oppColor ? [oppColor] : null);
   const keys = useQuery({
     queryKey: ["mark-keys", teamId],
-    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/mark-keys", { params: { path: { org_id: orgId, team_id: teamId } } })).data ?? [],
+    // the keys of the last visit when there is no network (UX test N01)
+    queryFn: async () => {
+      const r = await api.GET("/v1/orgs/{org_id}/teams/{team_id}/mark-keys", { params: { path: { org_id: orgId, team_id: teamId } } }).catch(() => null);
+      if (r?.data) {
+        remember(KEYS_KEY(teamId), r.data);
+        return r.data;
+      }
+      return remembered<NonNullable<typeof r>["data"]>(KEYS_KEY(teamId)) ?? [];
+    },
     enabled: !!teamId,
+    retry: false,
   });
+  useEffect(() => keepOffline(), []);
 
+  // one upload at a time: a tap, the «online» event and the timer must not send the queue twice
+  const busy = useRef<Promise<void> | null>(null);
   const sync = useCallback(async () => {
+    if (busy.current) return busy.current;
+    busy.current = upload().finally(() => (busy.current = null));
+    return busy.current;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const upload = async () => {
     try {
       if (!session.current) session.current = localStorage.getItem(SESSION_KEY(matchId));
       if (!session.current) {
@@ -105,7 +144,7 @@ export function MarksView({
     } catch {
       setOpen(pending(localStorage, matchId).length);
     }
-  }, [orgId, matchId]);
+  };
 
   useEffect(() => {
     setOpen(pending(localStorage, matchId).length);

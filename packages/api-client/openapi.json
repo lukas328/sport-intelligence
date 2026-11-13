@@ -7100,6 +7100,18 @@
       },
       "MarkOut": {
         "properties": {
+          "client_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
           "device_time": {
             "format": "date-time",
             "title": "Device Time",

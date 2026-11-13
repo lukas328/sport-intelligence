@@ -1,5 +1,7 @@
 "use client";
 
+import { keepOffline } from "@/lib/offline";
+
 import { Check, Clock3 } from "lucide-react";
 import type { Schemas } from "@handball/api-client";
 import Link from "next/link";
@@ -20,15 +22,6 @@ type Action = { key: string; label: string; body: Record<string, unknown>; goal?
 
 /** The first visit happens before the service worker controls the page: cache this page and the
  * scripts it already loaded, so a reload in the hall works without connection. */
-async function precache(): Promise<void> {
-  if (!("caches" in window)) return;
-  const cache = await caches.open("hb-live-v1");
-  const assets = performance
-    .getEntriesByType("resource")
-    .map((e) => e.name)
-    .filter((u) => u.startsWith(`${location.origin}/_next/static/`));
-  await Promise.all([cache.add(location.href), ...assets.map((u) => cache.add(u).catch(() => undefined))]);
-}
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 const store = () => (typeof window === "undefined" ? { getItem: () => null, setItem: () => undefined } : window.localStorage);
@@ -153,13 +146,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
     const id = window.setInterval(() => void sync(), 5000);
     const on = () => void sync();
     window.addEventListener("online", on);
-    if ("serviceWorker" in navigator) {
-      void navigator.serviceWorker
-        .register("/sw.js")
-        .then(() => navigator.serviceWorker.ready)
-        .then(() => precache())
-        .catch(() => undefined);
-    }
+    keepOffline();
     return () => (window.clearInterval(id), window.removeEventListener("online", on));
   }, [sync]);
 

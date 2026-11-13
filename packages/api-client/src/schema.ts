@@ -7355,6 +7355,8 @@ export interface components {
         };
         /** MarkOut */
         MarkOut: {
+            /** Client Id */
+            client_id?: string | null;
             /**
              * Device Time
              * Format: date-time

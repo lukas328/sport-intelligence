@@ -76,12 +76,16 @@ async def _session(ctx: Ctx, session_id: uuid.UUID) -> tuple[LiveTagSession, Mat
 
 async def add(ctx: Ctx, session_id: uuid.UUID, items: list[MarkIn]) -> dict[str, Any]:
     s, match = await _session(ctx, session_id)
+    # one writer per match at a time: two uploads of the same queue (a tap and the «online» event,
+    # or a second session opened by a race) must not both store a mark (UX test N02)
+    await ctx.db.execute(select(Match.id).where(Match.id == match.id).with_for_update())
+    sessions = select(LiveTagSession.id).where(LiveTagSession.match_id == match.id)
     known = {
         t.client_id: t.id
         for t in (
             await ctx.db.scalars(
                 select(LiveTag).where(
-                    LiveTag.session_id == s.id,
+                    LiveTag.session_id.in_(sessions),
                     LiveTag.client_id.in_([i.client_id for i in items]),
                 )
             )
@@ -217,6 +221,7 @@ async def marks(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         items.append(
             {
                 "id": t.id,
+                "client_id": t.client_id,
                 "session_id": t.session_id,
                 "key": t.key,
                 "label": labels.get(t.key),
