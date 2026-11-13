@@ -192,7 +192,8 @@
     "needTerms": "Merci d'accepter les conditions.",
     "claim": "Ton match. Et trois choses à retenir.",
     "toSite": "Ce que fait l'app : {site}",
-    "newLink": "Envoyer un nouveau lien à {email}"
+    "newLink": "Envoyer un nouveau lien à {email}",
+    "backToTeam": "Retour au choix de l'équipe"
   },
   "invite": {
     "title": "Invitation",
@@ -558,7 +559,8 @@
     "chooseVideo": "Choisir la vidéo",
     "more": "Plus : autre caméra, lien, technique",
     "mayClose": "Tu peux fermer la page. Nous t'envoyons un e-mail quand l'analyse est terminée.",
-    "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone."
+    "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone.",
+    "secondFile": "Ce match a déjà une vidéo. Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et lisible ; mais seul le premier est analysé (trois choses, scènes, vérifier)."
   },
   "processing": {
     "title": "Traitement",
@@ -2433,7 +2435,8 @@
     "uploadShort": "Vidéo",
     "twoFactorLater": "Me le rappeler dans sept jours",
     "twoFactorTitle": "Protéger le compte",
-    "twoFactorWhy": "Il y a maintenant des vidéos et des personnes dans le club. Une deuxième étape à la connexion protège le compte."
+    "twoFactorWhy": "Il y a maintenant des vidéos et des personnes dans le club. Une deuxième étape à la connexion protège le compte.",
+    "olderArea": "Une partie de l'ancienne version de l'app. Tout reste ici; les nouveautés arrivent sous Scènes et Matchs."
   },
   "palette": {
     "newMatch": "Ajouter un match",
@@ -3045,7 +3048,7 @@
     "colourOpen": "couleur ouverte",
     "askColour": "Quelle couleur porte {opponent} ?",
     "colourSaved": "Enregistré",
-    "noVideoBlock": "Charge la vidéo. Tu reçois un e-mail quand les trois choses sont prêtes.",
+    "noVideoBlock": "Télécharge la vidéo. Tu reçois un e-mail quand l'analyse est terminée.",
     "chooseVideo": "Choisir la vidéo",
     "stepDone": "terminé",
     "stepRunning": "en cours",
@@ -3141,7 +3144,7 @@
     "figTurnovers": "Pertes de balle",
     "figShooting": "Réussite, {goals} sur {shots} tirs",
     "moreGame": "Plus sur le match",
-    "moreGameHint": "Comparaison, buteurs, temps forts, feedback, marques",
+    "moreGameHint": "Déroulement, temps forts, marques du jour de match",
     "chatHeading": "Les trois choses",
     "noVideoTitle": "Pas de vidéo",
     "drawResult": "Match nul",
@@ -3160,14 +3163,17 @@
     "plainBench": "Événements et commentaires à la main",
     "plainComments": "Commentaires sur la vidéo",
     "nextStepTitle": "L'analyse est terminée, pas encore de trois choses.",
-    "nextStepChecks": "{n, plural, one {Une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
-    "nextStepReport": "Aucun but trouvé dans la vidéo. Avec la feuille de match, les buts et leurs temps arrivent.",
-    "nextStepNoGoals": "Aucun but trouvé dans la vidéo. Les buts de la feuille de match sont dans le match.",
+    "nextStepChecks": "L'analyse n'a pas encore trouvé de but. {n, plural, one {1 question l'aide} other {# questions l'aident}} à avancer.",
+    "nextStepReport": "L'analyse n'a trouvé aucun but dans la vidéo. Avec la feuille de match, les buts et leurs temps arrivent.",
+    "nextStepNoGoals": "L'analyse n'a trouvé aucun but dans la vidéo. La vidéo et les buts de la feuille de match sont dans le match.",
     "nextStepAddReport": "Ajouter la feuille de match",
     "beforeTitle": "Avant le match",
     "beforeText": "Le jour du match, tu notes ce qui se passe avec de grandes touches. Tu télécharges la vidéo après le match.",
     "tgSeven": "({n} sur 7 m)",
-    "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image"
+    "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image",
+    "rowChecks": "Analyse terminée, {n, plural, one {1 question ouverte} other {# questions ouvertes}}",
+    "rowNoGoals": "Analyse terminée, pas encore de but trouvé",
+    "titleLast": "Le dernier match."
   },
   "check": {
     "top": "Vérifier · {opponent}",

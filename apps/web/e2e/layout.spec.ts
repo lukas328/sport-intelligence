@@ -38,3 +38,67 @@ test("no horizontal scrolling on phones", async ({ page }, info) => {
   await page.goto(teamUrl.replace(/\/teams\/.*/, "/settings"));
   await noHorizontalScroll(page);
 });
+
+test("large text at 300 px: the team name in the top bar stays readable (UX test A01)", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  await register(page, uniqueEmail("a01"), "Coach Gross");
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill("HC Wädenswil");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("SG Wädenswil/Horgen");
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  await page.setViewportSize({ width: 300, height: 700 });
+  await page.reload();
+  const bar = page.locator("[data-frame=top] .lg\\:hidden");
+  const name = bar.getByText(/SG Wädenswil/);
+  await expect(name).toBeVisible();
+  // the name has room: at least two words in a line, at most two lines
+  const box = (await name.boundingBox())!;
+  expect(box.width).toBeGreaterThanOrEqual(100);
+  expect(box.height).toBeLessThanOrEqual(45);
+  // the rest gave way: the word «Video» is gone, the plus stays as a 44 px button
+  const upload = bar.getByTestId("upload-video-compact");
+  if (await upload.count()) {
+    await expect(upload).toHaveAccessibleName("Video hochladen");
+    expect((await upload.boundingBox())!.width).toBeLessThanOrEqual(46);
+  }
+  await noHorizontalScroll(page);
+});
+
+test("unknown match, team and collection addresses answer 404 (UX test N18)", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  await register(page, uniqueEmail("n18"), "Coach Adresse");
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill("HC Adresse");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("Herren 1");
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  const org = page.url().match(/\/app\/([^/]+)/)![1];
+  const none = "00000000-0000-0000-0000-000000000000";
+  for (const path of [`matches/${none}`, "matches/kaputt", `collections/${none}`, `teams/${none}/matches`, "nichts"]) {
+    const res = await page.goto(`/app/${org}/${path}`);
+    expect(res?.status(), path).toBe(404);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Diese Seite gibt es nicht");
+  }
+  // the club start still opens
+  expect((await page.goto(`/app/${org}`))?.status()).toBe(200);
+});
+
+test("a club without video: Szenen says one sentence and the way to the video (UX test B28)", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  await register(page, uniqueEmail("b28"), "Coach Leer");
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill("HC Leer");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("Herren 1");
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  await page.goto(page.url().replace(/(\/teams\/[^/?#]+).*/, "$1/scenes"));
+  const empty = page.getByTestId("scenes-empty");
+  await expect(empty).toContainText("Szenen gibt es nach dem ersten Video.");
+  await expect(empty.getByRole("link", { name: "Video hochladen" })).toBeVisible();
+  await expect(page.getByTestId("scene-search")).toHaveCount(0);
+  await expect(page.getByText(/0 Szenen aus 0 Spielen/)).toHaveCount(0);
+});

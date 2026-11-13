@@ -266,7 +266,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                   <span className="font-slant block truncate text-xl leading-tight">
                     {/* staff open a player's season line from the name */}
                     {canEdit ? (
-                      <Link href={`/app/${orgId}/teams/${teamId}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
+                      <Link href={`/app/${orgId}/teams/${teamId}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                         {p.first_name} {p.last_name}
                       </Link>
                     ) : (

@@ -176,6 +176,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   // without counted events the record, shots and goalkeepers have nothing to show: no dead tabs
   // (the overview says how they come: the match report or marking courtside)
   const counted = (stats.data?.quality.events ?? 0) > 0;
+  // a match still to come without a score: nothing to share or look back on yet
+  const upcoming = !main && match.score_own == null && Date.parse(match.kickoff_at) > Date.now();
   // Zahlen: the figure sheets stacked, one level; running distance only with a video
   // running figures only from the tracking of a video, and called estimated (UX test Z5)
   const numberParts = (counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "physical")).filter((v) => v !== "physical" || main);
@@ -274,7 +276,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             {t("upload.addCamera")}
           </summary>
           <div className="pt-3">
-            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            <UploadPanel orgId={orgId} matchId={match.id} hasMain onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </div>
         </details>
       )}
@@ -504,7 +506,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       {view === "game" && (
         <div className="animate-fade space-y-10">
           {/* before the match: the opponent's facts and «Spieltag starten»; the video comes after (UX test N16) */}
-          {!main && Date.parse(match.kickoff_at) > Date.now() && match.opponent && (
+          {upcoming && match.opponent && (
             <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_340px]" data-testid="before-match">
               <div className="space-y-3">
                 <h2 className="text-[26px]">{ta("beforeTitle")}</h2>
@@ -532,7 +534,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           )}
           <GameActions
             collect={staff && counted && match.opponent ? <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} /> : null}
-            onHighlights={() => {
+            // before the match there is nothing to share yet (UX test A05)
+            onHighlights={upcoming ? undefined : () => {
               if (more.current) more.current.open = true;
               requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
             }}
@@ -566,7 +569,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               {stats.data && <ThreeFigures stats={stats.data} names={names} />}
             </div>
           </div>
-          {/* everything else of the match, as before, one step away (UX test B08) */}
+          {/* everything else of the match, as before, one step away (UX test B08); not before the
+              match, when there is nothing in it yet (UX test A05) */}
+          {!upcoming && (
           <details ref={more} className="group border-t-2 border-ink pt-4" data-testid="game-more">
             <summary className="flex min-h-11 cursor-pointer list-none items-baseline gap-3 [&::-webkit-details-marker]:hidden">
               <span className="font-slant text-[22px]">{ta("moreGame")}</span>
@@ -584,6 +589,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </div>
             </div>
           </details>
+          )}
         </div>
       )}
 

@@ -80,3 +80,13 @@ async def test_official_names_in_events_and_stats_follow_the_roster_rule(
     named, compared, pdf = await seen(player)
     assert named == compared == {ids[luca_or_other]}
     assert pdf & set(ids.values()) == {ids[luca_or_other]}
+
+
+def test_a_game_names_its_league_not_the_group_code() -> None:
+    """UX test N25/A04: «Männer 1. Liga», never «Hauptrunde - M1-01»; a cup keeps its name."""
+    from handball_api.integrations.handball_ch import _game
+
+    base = {"objectId": 1, "gameDateTime": "2026-10-10T18:00:00", "gameStatusId": 0}
+    g = _game({**base, "groupName": "Hauptrunde - M1-01", "leagueShortName": "Männer 1. Liga"})
+    assert g.competition == "Männer 1. Liga"
+    assert _game({**base, "groupName": "Schweizer Cup"}).competition == "Schweizer Cup"

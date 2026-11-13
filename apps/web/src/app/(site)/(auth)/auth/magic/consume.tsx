@@ -23,6 +23,9 @@ export function ConsumeMagicLink() {
   // the address the entry sent the link to, kept on this phone
   const [email] = useState(() => (typeof window === "undefined" ? undefined : remembered<string>(ENTRY_EMAIL)));
   const [sent, setSent] = useState(false);
+  // the way back into the entry: the team chosen there, or the search (UX test N22)
+  const choice = new URLSearchParams(next.split("?")[1] ?? "");
+  const back = next.startsWith("/einstieg") && choice.get("club") && choice.get("team") ? `/einstieg?${new URLSearchParams({ club: choice.get("club")!, team: choice.get("team")!, ...(choice.get("farbe") ? { farbe: choice.get("farbe")! } : {}) })}` : "/einstieg";
   async function again() {
     const r = await api.POST("/v1/auth/start", { body: { email: email!, locale: (document.documentElement.lang || "de-CH") as "de-CH", next } });
     if (!r.error) setSent(true);
@@ -35,7 +38,9 @@ export function ConsumeMagicLink() {
       if (error) {
         // opened a second time while signed in: straight on (UX test N22)
         if ((await api.GET("/v1/me")).data) return enterApp(next, { replace: true });
-        return setError(errorKey(error));
+        // a cut or mangled link is a bad link too, not a form to check (UX test N22)
+        const key = errorKey(error);
+        return setError(key === "rate-limited" ? key : "invalid-token");
       }
       enterApp(data.status === "totp_required" ? `/login?totp=1&next=${encodeURIComponent(next)}` : next, { replace: true });
     });
@@ -59,6 +64,9 @@ export function ConsumeMagicLink() {
               )}
             </div>
           )}
+          <Link href={back} className={buttonClass(email && !sent ? "secondary" : "primary")} data-testid="magic-back">
+            {t("auth.backToTeam")}
+          </Link>
           <Link href="/login" className="inline-flex min-h-11 items-center text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
             {t("auth.toLogin")}
           </Link>

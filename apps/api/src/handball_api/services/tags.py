@@ -345,6 +345,7 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
                 start_ms=window[0] if window else None,
                 end_ms=window[1] if window else None,
                 t_ms=e.t_ms,
+                clock_s=e.clock_s,
                 type=e.type,
                 side=e.side,
                 outcome=e.outcome,

@@ -46,10 +46,11 @@ export function NotificationBell({ orgId }: { orgId: string }) {
         className="relative grid size-11 shrink-0 cursor-pointer place-items-center text-ink"
         data-testid="bell"
       >
-        <Bell aria-hidden className="size-5" strokeWidth={1.8} />
+        {/* with a count the bell moves aside, so the number sits beside it, not over it (UX test A01) */}
+        <Bell aria-hidden className={cn("size-5", unread > 0 && "-translate-x-1 translate-y-1")} strokeWidth={1.8} />
         {unread > 0 && (
           <span
-            className="absolute top-1 right-1 grid min-w-[1.375rem] place-items-center bg-accent px-1 font-mono text-[13px] font-bold leading-[1.375rem] text-accent-contrast ring-2 ring-background"
+            className="absolute top-0 right-0 grid min-w-[1.375rem] place-items-center bg-accent px-1 font-mono text-[13px] font-bold leading-[1.375rem] text-accent-contrast ring-2 ring-background"
             data-testid="unread"
           >
             {unread}

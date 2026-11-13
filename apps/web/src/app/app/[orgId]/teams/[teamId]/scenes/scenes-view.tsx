@@ -295,7 +295,8 @@ function sequenceOf(hits: Hit[], matches: Match[], title: string): Schemas["Coll
       position: i,
       text: null,
       play: null,
-      scene: { clip_id: h.id, match_id: h.match_id, start_ms: h.start_ms ?? Math.max(0, at - 8000), end_ms: h.end_ms ?? at + 3000, title: `${opp} · ${ms(at)}` },
+      // the match clock like the tiles, the place in the video only without it (UX test A08)
+      scene: { clip_id: h.id, match_id: h.match_id, start_ms: h.start_ms ?? Math.max(0, at - 8000), end_ms: h.end_ms ?? at + 3000, title: `${opp} · ${h.clock_s != null ? clockOf(h.clock_s / 60) : ms(at)}` },
     };
   });
   return { id: "search", title, items } as unknown as Schemas["CollectionOut"];
@@ -304,7 +305,6 @@ function sequenceOf(hits: Hit[], matches: Match[], title: string): Schemas["Coll
 /** The answer as rows: match, time, what, number (UX test B21: «Als Tabelle» in the same screen). */
 function SceneTable({ scenes, matches, orgId }: { scenes: Hit[]; matches: Match[]; orgId: string }) {
   const t = useTranslations("scenesPage");
-  const format = useFormatter();
   const th = "py-2 text-left text-[15px] font-semibold text-ink-2";
   return (
     <table className="w-full border-collapse text-[15px]" data-testid="scene-table">

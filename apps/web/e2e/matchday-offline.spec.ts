@@ -74,6 +74,8 @@ test("matchday: match clock, small keys, take back", async ({ page, context }, i
   await page.getByRole("button", { name: "2 Minuten" }).click();
   await page.getByRole("button", { name: "Time-out" }).click();
   await expect(page.getByTestId("marks-log").getByRole("listitem")).toHaveCount(2);
+  // each entry with the game time of the clock, the phone's time only small (UX test A03)
+  await expect(page.getByTestId("marks-log").getByRole("listitem").first()).toContainText(/^00:0\d/);
   await expect(page.getByText("Alles hochgeladen")).toBeVisible({ timeout: 15_000 });
   await page.getByTestId("take-back").click();
   await expect(page.getByTestId("marks-log").getByRole("listitem")).toHaveCount(1);

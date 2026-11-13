@@ -1,5 +1,10 @@
 import { Skeleton } from "@/components/ui/card";
 
+/*
+ * The skeleton of the club start only. A skeleton for the whole club area would start the
+ * stream before a page could answer «not found», so unknown match, team and collection
+ * addresses answered 200 (UX test N18).
+ */
 export default function Loading() {
   return (
     <div className="space-y-8" aria-busy="true">

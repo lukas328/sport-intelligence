@@ -103,6 +103,8 @@ async def test_tags_search_and_smart_playlist(make_api: Callable[[], Api]) -> No
     res = (await api.post(search, json={"tags_any": [slow]})).json()
     assert [h["id"] for h in res["hits"]] == [goal_against["id"], other["id"]]
     assert res["hits"][0]["start_ms"] == 54_000 and res["hits"][0]["end_ms"] == 63_000
+    # a hit carries the match clock where it is known: the scene sequence shows it (UX test A08)
+    assert "clock_s" in res["hits"][0]
     assert res["facets"]["tags"] == {slow: 2, good: 1}
     both = (await api.post(search, json={"tags_all": [slow, good]})).json()
     assert [h["id"] for h in both["hits"]] == [other["id"]]

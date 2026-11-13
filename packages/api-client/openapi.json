@@ -7962,6 +7962,12 @@
             ],
             "title": "Competition"
           },
+          "has_report": {
+            "default": false,
+            "description": "events from a match report (handball.ch or paper) exist",
+            "title": "Has Report",
+            "type": "boolean"
+          },
           "has_video": {
             "title": "Has Video",
             "type": "boolean"
@@ -14043,6 +14049,18 @@
       },
       "SearchHit": {
         "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the match clock of an event, where it is known",
+            "title": "Clock S"
+          },
           "end_ms": {
             "anyOf": [
               {

@@ -7682,6 +7682,12 @@ export interface components {
         MatchSummary: {
             /** Competition */
             competition: string | null;
+            /**
+             * Has Report
+             * @description events from a match report (handball.ch or paper) exist
+             * @default false
+             */
+            has_report?: boolean;
             /** Has Video */
             has_video: boolean;
             /**
@@ -9786,6 +9792,11 @@ export interface components {
         };
         /** SearchHit */
         SearchHit: {
+            /**
+             * Clock S
+             * @description the match clock of an event, where it is known
+             */
+            clock_s?: number | null;
             /** End Ms */
             end_ms: number | null;
             /**

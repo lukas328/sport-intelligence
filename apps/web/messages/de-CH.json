@@ -192,7 +192,8 @@
     "needTerms": "Bitte akzeptiere die Bedingungen.",
     "claim": "Dein Spiel. Und drei Dinge zum Mitnehmen.",
     "toSite": "Was die App kann: {site}",
-    "newLink": "Neuen Link an {email} schicken"
+    "newLink": "Neuen Link an {email} schicken",
+    "backToTeam": "Zurück zur Teamwahl"
   },
   "invite": {
     "title": "Einladung",
@@ -558,7 +559,8 @@
     "chooseVideo": "Video wählen",
     "more": "Mehr: andere Kamera, Link, Technik",
     "mayClose": "Du kannst die Seite schliessen. Wir schicken dir eine Mail, wenn die Analyse fertig ist.",
-    "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy."
+    "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy.",
+    "secondFile": "Dieses Spiel hat schon ein Video. Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt; ausgewertet (drei Dinge, Szenen, Prüfen) wird aber nur die erste."
   },
   "processing": {
     "title": "Verarbeitung",
@@ -2433,7 +2435,8 @@
     "uploadShort": "Video",
     "twoFactorLater": "In sieben Tagen wieder erinnern",
     "twoFactorTitle": "Konto schützen",
-    "twoFactorWhy": "Jetzt sind Videos und Personen im Verein. Mit einem zweiten Schritt beim Anmelden bleibt das Konto sicher."
+    "twoFactorWhy": "Jetzt sind Videos und Personen im Verein. Mit einem zweiten Schritt beim Anmelden bleibt das Konto sicher.",
+    "olderArea": "Ein Bereich aus der früheren Version der App. Alles bleibt hier erreichbar, Neues kommt unter Szenen und Spiele."
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",
@@ -3045,7 +3048,7 @@
     "colourOpen": "Farbe offen",
     "askColour": "Welche Farbe trägt {opponent}?",
     "colourSaved": "Gespeichert",
-    "noVideoBlock": "Lad das Video hoch. Du bekommst eine Mail, wenn die drei Dinge da sind.",
+    "noVideoBlock": "Lad das Video hoch. Du bekommst eine Mail, wenn die Analyse fertig ist.",
     "chooseVideo": "Video wählen",
     "stepDone": "fertig",
     "stepRunning": "läuft",
@@ -3141,7 +3144,7 @@
     "figTurnovers": "Ballverluste",
     "figShooting": "Wurfquote, {goals} von {shots} Würfen",
     "moreGame": "Mehr zum Spiel",
-    "moreGameHint": "Vergleich, Torschützen, Highlights, Feedback, Marken",
+    "moreGameHint": "Spielverlauf, Highlights, Marken vom Spieltag",
     "chatHeading": "Die drei Dinge",
     "noVideoTitle": "Kein Video",
     "drawResult": "Unentschieden",
@@ -3160,14 +3163,17 @@
     "plainBench": "Ereignisse und Kommentare von Hand",
     "plainComments": "Kommentare zum Video",
     "nextStepTitle": "Die Analyse ist fertig, noch ohne drei Dinge.",
-    "nextStepChecks": "{n, plural, one {Eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
-    "nextStepReport": "Im Video wurden keine Tore gefunden. Mit dem Spielbericht kommen die Tore und ihre Zeiten dazu.",
-    "nextStepNoGoals": "Im Video wurden keine Tore gefunden. Die Tore aus dem Spielbericht stehen im Spiel.",
+    "nextStepChecks": "Die Analyse hat noch keine Tore gefunden. {n, plural, one {1 Frage hilft} other {# Fragen helfen}} ihr weiter.",
+    "nextStepReport": "Die Analyse hat im Video keine Tore gefunden. Mit dem Spielbericht kommen die Tore und ihre Zeiten dazu.",
+    "nextStepNoGoals": "Die Analyse hat im Video keine Tore gefunden. Das Video und die Tore aus dem Spielbericht stehen im Spiel.",
     "nextStepAddReport": "Spielbericht hinzufügen",
     "beforeTitle": "Vor dem Spiel",
     "beforeText": "Am Spieltag merkst du mit grossen Tasten, was passiert. Das Video lädst du nach dem Spiel hoch.",
     "tgSeven": "({n} vom 7-m)",
-    "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild"
+    "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild",
+    "rowChecks": "Analyse fertig, {n, plural, one {1 Frage} other {# Fragen}} offen",
+    "rowNoGoals": "Analyse fertig, noch keine Tore erkannt",
+    "titleLast": "Das letzte Spiel."
   },
   "check": {
     "top": "Prüfen · {opponent}",

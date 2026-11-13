@@ -7,7 +7,6 @@ import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { PageHead } from "@/components/anlauf/heads";
 import { RosterEditor } from "@/components/roster/roster-editor";
 import { AreaSubNav } from "@/components/shell/section-nav";
-import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -159,7 +158,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                       <span className="min-w-0">
                         <span className="font-slant block text-[19px] leading-tight">
                           {staff ? (
-                            <Link href={`${base}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
+                            <Link href={`${base}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                               {name}
                             </Link>
                           ) : (

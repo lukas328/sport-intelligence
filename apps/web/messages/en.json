@@ -192,7 +192,8 @@
     "needTerms": "Please accept the terms.",
     "claim": "Your match. And three things to take away.",
     "toSite": "What the app does: {site}",
-    "newLink": "Send a new link to {email}"
+    "newLink": "Send a new link to {email}",
+    "backToTeam": "Back to choosing the team"
   },
   "invite": {
     "title": "Invitation",
@@ -558,7 +559,8 @@
     "chooseVideo": "Choose video",
     "more": "More: another camera, a link, technical details",
     "mayClose": "You can close the page. We send you an e-mail when the analysis is done.",
-    "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone."
+    "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone.",
+    "secondFile": "This match already has a video. A second file, such as the second half, is stored and plays; but only the first one is analysed (three things, scenes, check)."
   },
   "processing": {
     "title": "Processing",
@@ -2433,7 +2435,8 @@
     "uploadShort": "Video",
     "twoFactorLater": "Remind me in seven days",
     "twoFactorTitle": "Protect the account",
-    "twoFactorWhy": "Now there are videos and people in the club. A second step at sign-in keeps the account safe."
+    "twoFactorWhy": "Now there are videos and people in the club. A second step at sign-in keeps the account safe.",
+    "olderArea": "An area from the earlier version of the app. Everything stays here; new things come under Scenes and Matches."
   },
   "palette": {
     "newMatch": "Add a match",
@@ -3045,7 +3048,7 @@
     "colourOpen": "colour open",
     "askColour": "What colour does {opponent} wear?",
     "colourSaved": "Saved",
-    "noVideoBlock": "Upload the video. You get an e-mail when the three things are ready.",
+    "noVideoBlock": "Upload the video. You get an e-mail when the analysis is done.",
     "chooseVideo": "Choose video",
     "stepDone": "done",
     "stepRunning": "running",
@@ -3141,7 +3144,7 @@
     "figTurnovers": "Turnovers",
     "figShooting": "Shooting, {goals} of {shots} shots",
     "moreGame": "More about the match",
-    "moreGameHint": "Comparison, scorers, highlights, feedback, marks",
+    "moreGameHint": "Course of the match, highlights, match-day marks",
     "chatHeading": "The three things",
     "noVideoTitle": "No video",
     "drawResult": "Draw",
@@ -3160,14 +3163,17 @@
     "plainBench": "Events and comments by hand",
     "plainComments": "Comments on the video",
     "nextStepTitle": "The analysis is done, no three things yet.",
-    "nextStepChecks": "{n, plural, one {One question} other {# questions}} in Check, then it shows more.",
-    "nextStepReport": "No goals were found in the video. With the match report the goals and their times come in.",
-    "nextStepNoGoals": "No goals were found in the video. The goals from the report are in the match.",
+    "nextStepChecks": "The analysis found no goals yet. {n, plural, one {1 question helps} other {# questions help}} it on.",
+    "nextStepReport": "The analysis found no goals in the video. With the match report the goals and their times come in.",
+    "nextStepNoGoals": "The analysis found no goals in the video. The video and the goals from the report are in the match.",
     "nextStepAddReport": "Add the match report",
     "beforeTitle": "Before the match",
     "beforeText": "On match day you note what happens with big keys. You upload the video after the match.",
     "tgSeven": "({n} from 7 m)",
-    "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture"
+    "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture",
+    "rowChecks": "Analysis done, {n, plural, one {1 question} other {# questions}} open",
+    "rowNoGoals": "Analysis done, no goals found yet",
+    "titleLast": "The last match."
   },
   "check": {
     "top": "Check · {opponent}",

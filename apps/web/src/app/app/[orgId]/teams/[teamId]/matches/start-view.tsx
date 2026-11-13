@@ -77,6 +77,11 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
   const head = useHeadProps(m, next, g.data ?? null, teamName);
   const checks = g.data?.checks.length ?? 0;
   const base = m ? `/app/${orgId}/matches/${m.id}` : null;
+  const running = m ? ["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) : false;
+  // the analysis is done without three things: one sentence and one next step, nothing else that
+  // says the same (UX test A02)
+  const quiet = Boolean(m?.has_video && g.data && !running && threeThings(goalRuns(g.data)).length === 0);
+  const scenes = g.data ? g.data.goals.filter((x) => x.has_video || x.source === "demo").length : 0;
   return (
     <div style={matchStyle(club, m?.opponent_color ? [m.opponent_color] : null) as CSSProperties} className="space-y-6">
       {/* no match played yet: the head waits (ink outline, no club area) and says what comes */}
@@ -97,14 +102,16 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
           </>
         ) : (
           m &&
-          base && (
+          base &&
+          !quiet && (
             <Link href={base} className={buttonClass("primary")} data-testid="open-match">
               {t("openMatch")}
             </Link>
           )
         )}
-        {m && canWrite && m.has_video && <FromMatchButton orgId={orgId} teamId={m.team_id} matchId={m.id} opponent={m.opponent_name} />}
-        {canWrite && checks > 0 && base && (
+        {/* a collection needs scenes: none, no button (UX test A02) */}
+        {m && canWrite && m.has_video && !quiet && scenes > 0 && <FromMatchButton orgId={orgId} teamId={m.team_id} matchId={m.id} opponent={m.opponent_name} />}
+        {canWrite && checks > 0 && base && !quiet && (
           <span className="flex items-center gap-2.5">
             <AttnTag>{t("check")}</AttnTag>
             <Link href={`${base}/check`} className={linkClass}>
@@ -117,25 +124,33 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       {/* before the first video: what the federation's data already says (UX test H02) */}
       {!m?.has_video && m && <FromReport orgId={orgId} teamId={m.team_id} hideNext={next != null} />}
       {/* the analysis is done without three things: say so and name the next step (UX test N05) */}
-      {m?.has_video && g.data && base && !["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) && threeThings(goalRuns(g.data)).length === 0 && (
+      {quiet && m && g.data && base && (
         <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="start-next-step">
-          <p className="m-0 text-[19px] font-bold">{t("nextStepTitle")}</p>
-          <p className="m-0 text-[17px]">{checks > 0 ? t("nextStepChecks", { n: checks }) : g.data.report_goals.length === 0 ? t("nextStepReport") : t("nextStepNoGoals")}</p>
-          <div className="flex flex-wrap gap-3">
-            {canWrite && checks > 0 && (
-              <Link href={`${base}/check`} className={buttonClass("primary")}>
+          <p className="m-0 text-[19px] font-bold">{checks > 0 ? t("nextStepChecks", { n: checks }) : g.data.report_goals.length === 0 ? t("nextStepReport") : t("nextStepNoGoals")}</p>
+          <div className="flex flex-wrap items-center gap-4">
+            {canWrite && checks > 0 ? (
+              <Link href={`${base}/check`} className={buttonClass("primary")} data-testid="start-step">
                 {t("plainToCheck")}
               </Link>
-            )}
-            {canWrite && g.data.report_goals.length === 0 && (
-              <Link href={`/app/${orgId}/teams/${m.team_id}/matches?report=1`} className={buttonClass(checks > 0 ? "secondary" : "primary")}>
+            ) : canWrite && g.data.report_goals.length === 0 ? (
+              <Link href={`/app/${orgId}/teams/${m.team_id}/matches?report=1`} className={buttonClass("primary")} data-testid="start-step">
                 {t("nextStepAddReport")}
+              </Link>
+            ) : (
+              <Link href={base} className={buttonClass("primary")} data-testid="start-step">
+                {t("openMatch")}
+              </Link>
+            )}
+            {/* the match stays one tap away, as a plain link beside the step */}
+            {(checks > 0 || g.data.report_goals.length === 0) && canWrite && (
+              <Link href={base} className={linkClass} data-testid="open-match">
+                {t("openMatch")}
               </Link>
             )}
           </div>
         </section>
       )}
-      {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={(_, n) => `${base}?tab=video&thing=${n}`} />}
+      {m?.has_video && g.data && base && !quiet && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={(_, n) => `${base}?tab=video&thing=${n}`} />}
     </div>
   );
 }
@@ -198,7 +213,8 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     ? t("titleRunning")
     : !m.has_video
       ? t("titleNoVideo")
-      : `${t(result === "win" ? "titleWon" : result === "loss" ? "titleLost" : "titleDraw")}${things.length ? ` ${t("titleThings", { count: things.length })}` : ""}`;
+      : // without a result no «Unentschieden»: the last match, plainly
+        `${t(result === "win" ? "titleWon" : result === "loss" ? "titleLost" : result === "draw" ? "titleDraw" : "titleLast")}${things.length ? ` ${t("titleThings", { count: things.length })}` : ""}`;
   return {
     kick: t("kickVs", { when: format.dateTime(new Date(m.kickoff_at), { weekday: "long" }), opponent: m.opponent_name }),
     title,
@@ -243,6 +259,8 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   if (!g.data) return <>{m.competition}</>;
   const things = threeThings(goalRuns(g.data));
   const scenes = g.data.goals.filter((x) => x.has_video || x.source === "demo").length;
+  // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)
+  if (things.length === 0) return <>{g.data.checks.length > 0 ? t("rowChecks", { n: g.data.checks.length }) : t("rowNoGoals")}</>;
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }
 

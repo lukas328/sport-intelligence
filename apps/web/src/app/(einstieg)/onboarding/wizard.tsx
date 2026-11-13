@@ -156,7 +156,7 @@ export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?
         <ConfirmTeam
           claimed={claimed.out}
           teamName={claimed.team.name}
-          league={[claimed.team.league, claimed.team.group_name].filter(Boolean).join(", ")}
+          league={claimed.team.league || claimed.team.group_name || ""}
           colour={colour}
           onColour={setColour}
           onNotMine={() => (forgetClaim(), setClaimed(null), setName(""))}

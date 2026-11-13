@@ -64,7 +64,7 @@ type State =
 
 
 
-export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; matchId: string; onUploaded: () => void }) {
+export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { orgId: string; matchId: string; onUploaded: () => void; hasMain?: boolean }) {
   const t = useTranslations();
   const [role, setRole] = useState<Role>("main");
   const [state, setState] = useState<State>({ kind: "idle" });
@@ -148,6 +148,13 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
   const pct = state.kind === "uploading" ? Math.floor((state.done / state.file.size) * 100) : 0;
   return (
     <div className="space-y-5">
+      {/* a second main file is stored and plays, but the analysis stays on the first: said right
+          here, before choosing (OPEN_QUESTIONS Q-VIDEO-PARTS) */}
+      {hasMain && role === "main" && (
+        <p className="m-0 max-w-[60ch] border-l-4 border-attn pl-3 text-[17px]" data-testid="second-file-note">
+          {t("upload.secondFile")}
+        </p>
+      )}
       {/* one thing first: the file; what to film in three plain lines (UX test H05) */}
       <ul className="m-0 list-none space-y-1.5 p-0 text-[17px]" data-testid="upload-tips">
         <li>{t("upload.tip1")}</li>

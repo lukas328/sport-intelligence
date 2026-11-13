@@ -226,6 +226,9 @@ class MatchSummary(ApiModel):
     opponent_color: str | None = Field(
         default=None, description="the opponent's colour for the kit chip; null while unknown"
     )
+    has_report: bool = Field(
+        default=False, description="events from a match report (handball.ch or paper) exist"
+    )
 
 
 class UploadCreate(ApiModel):

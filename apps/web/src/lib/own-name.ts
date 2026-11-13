@@ -8,3 +8,12 @@ export function ownName(team: string | null | undefined, club: string): string {
   const t = team?.trim();
   return t && !GENERIC.test(t) ? t : club;
 }
+
+/** A team name for the narrow phone bar: additions in brackets dropped, breaks after «/» and «-». */
+export function headName(name: string): string {
+  return name
+    .replace(/\s*\([^)]*\)/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/([/-])(?=\S)/g, "$1\u200b");
+}

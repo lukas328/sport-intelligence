@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/page-header";
+import { OlderArea } from "@/components/shell/section-nav";
 import { BackToFixtures } from "./back-to-fixtures";
 import Link from "next/link";
 import { OpponentPlayers } from "./opponent-players";
@@ -53,6 +54,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
       <div>
         <BackToFixtures orgId={orgId} />
         <PageHeader eyebrow={`${t("title")} · ${t("record", p.record)}`} title={p.opponent.name} />
+        <OlderArea />
       </div>
       {p.tagged_matches === 0 ? (
         <EmptyState title={t("none")} />

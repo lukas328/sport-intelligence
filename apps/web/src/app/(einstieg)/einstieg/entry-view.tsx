@@ -43,7 +43,6 @@ const SECOND = (hex: string) => (hex === SHIRTS[4][1] || hex === SHIRTS[2][1] ? 
  * already asked is not asked again.
  */
 export function EntryView() {
-  const t = useTranslations("entry");
   const params = useSearchParams();
   const router = useRouter();
   const club = Number(params.get("club")) || null;
@@ -53,7 +52,10 @@ export function EntryView() {
   const [colour, setColour] = useState(FARBE[params.get("farbe") ?? ""] ?? SHIRTS[0][1]);
   const go = (next: Record<string, string | null>) => {
     const u = new URLSearchParams(params.toString());
-    for (const [k, v] of Object.entries(next)) (v == null ? u.delete(k) : u.set(k, v));
+    for (const [k, v] of Object.entries(next)) {
+      if (v == null) u.delete(k);
+      else u.set(k, v);
+    }
     u.set("farbe", WORD_OF[colour] ?? "blau");
     router.push(`/einstieg?${u.toString()}`);
   };

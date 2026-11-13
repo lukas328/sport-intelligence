@@ -94,3 +94,16 @@ test("entry: a team already in the app, request and a way on", async ({ page, br
   await hans.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 90_000 });
   await ctx.close();
 });
+
+test("an invalid sign-in link leads back to the team choice (UX test N22)", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  const next = encodeURIComponent("/einstieg/speichern?club=330442&team=33555&farbe=rot");
+  await page.goto(`/auth/magic?token=kaputt&next=${next}`);
+  await expect(page.getByText("Der Link ist ungültig oder abgelaufen.")).toBeVisible();
+  const back = page.getByTestId("magic-back");
+  await expect(back).toHaveText("Zurück zur Teamwahl");
+  await expect(back).toHaveAttribute("href", "/einstieg?club=330442&team=33555&farbe=rot");
+  // without a team choice: the search
+  await page.goto("/auth/magic?token=kaputt");
+  await expect(page.getByTestId("magic-back")).toHaveAttribute("href", "/einstieg");
+});

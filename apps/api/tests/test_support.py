@@ -175,6 +175,19 @@ def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
     assert mail.subject == "Die Analyse gegen TV T ist fertig"
     assert "drei Dinge" not in mail.text and "2 Fragen an dich" in mail.text
     assert mail.text.startswith("Hallo\n")
+    # one question is «1 Frage», in every language (UX test A02)
+    for loc, word in (("de-CH", "1 Frage an"), ("en", "1 question for"), ("fr", "1 question pour")):
+        one = render(
+            "analysis_questions",
+            loc,
+            to="a@b.ch",
+            name="H",
+            team="Z",
+            opponent="T",
+            link="x",
+            questions=1,
+        )
+        assert word in one.text, one.text
     named = render(
         "analysis_no_goals", "de-CH", to="a@b.ch", name="Hans", team="Z", opponent="T", link="x"
     )
