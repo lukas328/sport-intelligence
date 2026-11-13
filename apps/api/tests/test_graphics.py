@@ -118,3 +118,28 @@ async def test_scene_of_another_match_is_not_found(make_api: Callable[[], Api]) 
     e = await event(api, org, a["id"], type="shot", side="own", outcome="goal", clock_s=60)
     r = await api.get(f"/v1/orgs/{org}/matches/{b['id']}/scenes/{e['id']}/camera")
     assert r.status_code == 404
+
+
+def test_a_read_number_is_shown_once_per_team() -> None:
+    from handball_api.services.graphics import unique_numbers
+
+    tracks = [
+        {"team": "own", "number": 15, "xy": [(0, 0), (1, 1)]},
+        {"team": "own", "number": 15, "xy": [(0, 0), (1, 1), (2, 2)]},
+        {"team": "opp", "number": 15, "xy": [(0, 0)]},
+        {"team": "own", "number": None, "xy": [(0, 0)]},
+    ]
+    out = unique_numbers(tracks)
+    assert [t["number"] for t in out] == [None, 15, 15, None]
+
+
+def test_demo_positions_wait_for_an_open_court_question() -> None:
+    from types import SimpleNamespace
+
+    from handball_api.services.graphics import _shown_field
+
+    video = SimpleNamespace()
+    assert _shown_field(True, None, False, None) is True  # demo without a video of its own
+    assert _shown_field(True, video, True, False) is False  # type: ignore[arg-type]  # court is still asked
+    assert _shown_field(True, video, True, True) is True  # type: ignore[arg-type]
+    assert _shown_field(False, video, True, False) is False  # type: ignore[arg-type]

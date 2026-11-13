@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
@@ -175,10 +176,23 @@ export function SceneCamera({
   const scene = q.data ? cameraScene(q.data, label) : null;
   if (q.isLoading) return <div className="aspect-[21/17] bg-court" aria-busy="true" />;
   if (!scene) {
+    // the court not confirmed yet: no positions, the question instead, and the way to answer it
+    const ask = q.data != null && q.data.field_confirmed === false;
     return (
-      <div className="relative my-1.5">
-        <EmptyField label={t("noCamera")} />
-        <p className="absolute inset-x-0 top-1/2 m-0 -translate-y-1/2 text-center text-[13px] font-semibold text-ink-2">{q.data && !q.data.field_confirmed ? t("fieldQuestion") : t("noCamera")}</p>
+      <div className="my-1.5" data-testid={ask ? "camera-field-question" : "camera-empty"}>
+        <div className="relative">
+          <EmptyField label={t("noCamera")} />
+          <div className="absolute top-1/2 left-1/2 w-[min(26rem,calc(100%-2rem))] -translate-x-1/2 -translate-y-1/2 bg-paper px-4 py-3 text-center">
+            <p className="m-0 text-[15px] font-bold text-ink">{ask ? t("fieldQuestion") : t("noCamera")}</p>
+            {ask && <p className="m-0 mt-1 text-[13px] text-ink-2">{t("fieldHint")}</p>}
+            {ask && (
+              <Link href={`/app/${orgId}/matches/${matchId}/check`} className="mt-2 inline-flex min-h-11 items-center font-semibold text-ink underline decoration-2 underline-offset-4" data-testid="camera-to-check">
+                {t("fieldCheck")}
+              </Link>
+            )}
+          </div>
+        </div>
+        {barExtra && <div className="flex items-center gap-2.5 bg-court-bar px-3 py-2">{barExtra}</div>}
       </div>
     );
   }

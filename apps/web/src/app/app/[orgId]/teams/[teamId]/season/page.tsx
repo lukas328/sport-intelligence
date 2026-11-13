@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
-import { xgLabel } from "@/lib/xg";
 import { linkClass, OwnRowMark, SectionHead } from "@/components/anlauf/blocks";
 import { Bundle, type GoalRun } from "@/components/anlauf/bundle";
 import { DiffBars, Series } from "@/components/anlauf/charts";
@@ -98,7 +97,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const names = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.first_name} ${r.last_name}`]));
   const shirts = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, r.jersey_number]));
   const n = data.totals.matches;
-  const statement = seasonStatement(data.matches, data.totals.xg_coverage);
+  const statement = seasonStatement(data.matches, data.totals.xg_coverage, false) // no xG statements (UX test B07);
   const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
   const lastResult = matchStatement({ own: last.score_own, opp: last.score_opponent, opponent: last.opponent });
   const focus = focusMetric({ save_pct: data.totals.save_pct, shooting_pct: data.totals.shooting_pct, turnovers_per_match: data.totals.turnovers / n });
@@ -482,8 +481,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                     <th scope="col">{t("shootingPct")}</th>
                     <th scope="col">{t("savePct")}</th>
                     <th scope="col">{t("turnovers")}</th>
-                    <th scope="col">{t("xg")}</th>
-                    <th scope="col">{t("xgAgainst")}</th>
                     {sevenM && <th scope="col">{t("sevenM")}</th>}
                   </tr>
                 </thead>
@@ -502,8 +499,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                       <td>{pct(m.shooting_pct)}</td>
                       <td>{pct(m.save_pct)}</td>
                       <td>{m.turnovers}</td>
-                      <td>{xgLabel(m)}</td>
-                      <td>{xgLabel({ xg: m.xg_against, xg_coverage: m.xg_against_coverage ?? null })}</td>
                       {sevenM && (
                         <td>
                           {m.seven_m[0]}/{m.seven_m[1]}
@@ -514,7 +509,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-muted">{t("xgNote")}</p>
           </section>
     
         </div>

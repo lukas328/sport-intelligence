@@ -305,3 +305,32 @@ def test_goals_conceded_by_position() -> None:
     # the penalty goal is in the total but has no position
     assert s["own"]["goals_against"] == 4
     assert s["own"]["positions"]["LA"]["goals"] == 1
+
+
+def test_goals_without_time_have_no_runs_and_no_course() -> None:
+    # a paper report: 29 own goals, no times; the order is unknown, so no "run of 29"
+    ev = [
+        Event(id=f"g{i}", type=EventType.SHOT, side=OWN, outcome="goal") for i in range(29)
+    ] + [Event(id=f"o{i}", type=EventType.SHOT, side=OPP, outcome="goal") for i in range(19)]
+    tl = compute_match_stats(ev)["timeline"]
+    assert tl["timed"] is False
+    assert tl["final"] == {"own": 29, "opp": 19}
+    assert tl["best_run"]["own"]["goals"] == 0 and tl["best_run"]["opponent"]["goals"] == 0
+    assert tl["longest_own_drought_s"]["seconds"] == 0
+    assert len(tl["score"]) == 1
+
+
+def test_ratios_need_attempts_in_their_own_direction() -> None:
+    # our keeper's saves are recorded, our misses are not: our save % is known, our shooting % and
+    # the opponent's save % are not (they would read 100 % and 0 %)
+    ev = [
+        shot(1, OWN, "goal", 60),
+        shot(2, OPP, "goal", 120),
+        shot(3, OPP, "save", 180),
+    ]
+    s = compute_match_stats(ev)
+    assert s["own"]["save_pct"] == 0.5
+    assert s["own"]["shooting_pct"] is None
+    assert s["opponent"]["save_pct"] is None
+    assert s["opponent"]["shooting_pct"] == 0.5
+    assert s["own"]["known"] == {"shooting": False, "saving": True, "turnovers": False}

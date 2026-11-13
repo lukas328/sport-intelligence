@@ -76,6 +76,17 @@ def _team(side: str) -> str:
     return "own" if side == "own" else "opp"
 
 
+def _shown_field(
+    demo: bool, asset: VideoAsset | None, tracking: bool, confirmed: bool | None
+) -> bool | None:
+    """Whether positions may be drawn. A demo match shows invented positions, but not while the
+    court of its video is still asked in Prüfen (UX test B12: «zeigen wir keine Positionen» must
+    hold); a real match only with a confirmed court."""
+    if not demo:
+        return confirmed
+    return not (asset is not None and tracking and confirmed is False)
+
+
 async def _field_confirmed(ctx: Ctx, asset: VideoAsset | None) -> bool | None:
     """None without a video; True once a person confirmed the court (or set it by hand)."""
     if asset is None:
@@ -180,7 +191,7 @@ def demo_scene(e: Event) -> list[dict[str, Any]]:
         tracks.append(
             {
                 "team": attack,
-                "number": r.choice([None, r.randint(2, 30)]),
+                "number": None,  # only the scorer's number is known (UX test B39)
                 "xy": drift(x, y, dx, dy),
             }
         )
@@ -191,19 +202,37 @@ def demo_scene(e: Event) -> list[dict[str, Any]]:
         tracks.append(
             {
                 "team": defence,
-                "number": r.choice([None, r.randint(2, 30)]),
+                "number": None,
                 "xy": drift(x, y, 0.3, (ball_y - y) * 0.12),
             }
         )
     tracks.append(
         {
             "team": defence,
-            "number": 1 if r.random() < 0.5 else None,
+            "number": None,
             "xy": drift(0.9, 10.0, 0.2, (ball_y - 10) * 0.15),
         }
     )
     tracks.append({"team": "ref", "number": None, "xy": drift(12.0, 1.6, -2.4, -0.1, 3)})
     return tracks
+
+
+def unique_numbers(tracks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """A read number is shown once per team and moment: the longest track keeps it, the others
+    lose it (two own players with a 15 on one camera, UX test B39)."""
+    keep: dict[tuple[str, int], int] = {}
+    for i, t in enumerate(tracks):
+        n = t.get("number")
+        if n is None:
+            continue
+        k = (str(t.get("team")), int(n))
+        if k not in keep or len(t.get("xy") or []) > len(tracks[keep[k]].get("xy") or []):
+            keep[k] = i
+    shown = set(keep.values())
+    return [
+        t if t.get("number") is None or i in shown else {**t, "number": None}
+        for i, t in enumerate(tracks)
+    ]
 
 
 # ---- the match --------------------------------------------------------------------------------
@@ -262,6 +291,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     )
     confirmed_field = await _field_confirmed(ctx, asset)
     demo = match.is_demo  # seeded: the synthetic video says nothing about the match
+    field = _shown_field(demo, asset, tracking, confirmed_field)
     goals = await _goals(ctx, match)
 
     report = [
@@ -275,9 +305,11 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         run: list[tuple[float, float]] = []
         shot = to_half(e.x, e.y) if e.x is not None and e.y is not None else None
         source = "marked" if shot else None
-        if demo:
+        if demo and field:
             run, shot = demo_run(e)
             source = "demo"
+        elif demo:
+            pass  # court not confirmed: no invented run, only a spot marked by hand
         elif tracking and asset is not None and confirmed_field:
             run = await _tracking_run(ctx, asset, tracks, e)
             if run:
@@ -305,7 +337,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
 
     return {
         "has_video": asset is not None,
-        "field_confirmed": True if demo else confirmed_field,
+        "field_confirmed": field,
         "report_goals": report,
         "goals": runs,
         "phases": await _phases(ctx, match, goals),
@@ -418,7 +450,7 @@ async def scene_camera(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> di
     asset = await timeline_video(ctx, match.id)
     tracking = _has_tracking(asset)
     demo = match.is_demo  # seeded: the synthetic video says nothing about the match
-    field = True if demo else await _field_confirmed(ctx, asset)
+    field = _shown_field(demo, asset, tracking, await _field_confirmed(ctx, asset))
     clock = e.clock_s
     base: dict[str, Any] = {
         "event_id": e.id,
@@ -434,12 +466,12 @@ async def scene_camera(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> di
         ),
         "source": "demo" if demo else "analysis",
     }
-    if demo:
-        tracks = demo_scene(e)
+    if demo and field:
+        tracks = unique_numbers(demo_scene(e))
         base["tracks"] = tracks
         base["shot"] = list(tracks[0]["xy"][-1])
         return base
-    if not field or not tracking or asset is None or e.t_ms is None:
+    if demo or not field or not tracking or asset is None or e.t_ms is None:
         return base
     rows = await _rows(ctx, asset, e.t_ms - SCENE_MS, e.t_ms)
     if not len(rows):
@@ -474,6 +506,7 @@ async def scene_camera(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> di
                 "xy": xy,
             }
         )
+    base["tracks"] = unique_numbers(base["tracks"])
     scorer = next(
         (
             t

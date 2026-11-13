@@ -42,6 +42,13 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
+  // UX test B07: a report without goal times has no runs and no course; no xG, no possession
+  const main = page.getByRole("main");
+  await expect(main).not.toContainText("in Folge");
+  await expect(main).not.toContainText("Bester Lauf");
+  await expect(main).not.toContainText("xG");
+  await expect(main).not.toContainText("Ballbesitz");
+  await expect(main).not.toContainText("Papierbericht");
   await expectAccessible(page);
   // every number opens the events behind it
   await expect(page.getByTestId("insights")).toContainText("Drei Dinge");
