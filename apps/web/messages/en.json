@@ -3201,7 +3201,8 @@
     "answerChecks": "{n, plural, one {Answer 1 question} other {Answer # questions}}",
     "minuteAt": "Minute {n}",
     "scoreSoFar": "confirmed so far · {n, plural, one {1 moment open} other {# moments open}}",
-    "positionsEstimated": "Positions estimated; people beside the court may be among them."
+    "positionsEstimated": "Positions estimated; people beside the court may be among them.",
+    "howCountedVideo": "The goals come from the video, as you confirmed them in Check. The runs are the scorer's ways in the three seconds before the goal, measured in the video. Estimated shot spots are dashed until you confirm them."
   },
   "check": {
     "top": "Check · {opponent}",

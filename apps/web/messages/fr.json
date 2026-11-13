@@ -3201,7 +3201,8 @@
     "answerChecks": "{n, plural, one {Répondre à 1 question} other {Répondre à # questions}}",
     "minuteAt": "Minute {n}",
     "scoreSoFar": "confirmé jusqu'ici · {n, plural, one {1 moment ouvert} other {# moments ouverts}}",
-    "positionsEstimated": "Positions estimées ; des personnes au bord du terrain peuvent en faire partie."
+    "positionsEstimated": "Positions estimées ; des personnes au bord du terrain peuvent en faire partie.",
+    "howCountedVideo": "Les buts viennent de la vidéo, tels que tu les as confirmés dans Vérifier. Les courses sont les trajets du tireur ou de la tireuse dans les trois secondes avant le but, mesurés dans la vidéo. Les positions de tir estimées sont en pointillé jusqu'à ce que tu les confirmes."
   },
   "check": {
     "top": "Vérifier · {opponent}",

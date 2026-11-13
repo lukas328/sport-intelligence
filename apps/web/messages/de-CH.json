@@ -3201,7 +3201,8 @@
     "answerChecks": "{n, plural, one {1 Frage beantworten} other {# Fragen beantworten}}",
     "minuteAt": "Minute {n}",
     "scoreSoFar": "bisher bestätigt · {n, plural, one {1 Moment offen} other {# Momente offen}}",
-    "positionsEstimated": "Positionen geschätzt; es können Personen neben dem Feld darunter sein."
+    "positionsEstimated": "Positionen geschätzt; es können Personen neben dem Feld darunter sein.",
+    "howCountedVideo": "Die Tore kommen aus dem Video, so wie du sie in Prüfen bestätigt hast. Die Anläufe sind die Wege der Werferin oder des Werfers in den drei Sekunden vor dem Tor, aus dem Video gemessen. Geschätzte Wurfpositionen sind gestrichelt, bis du sie bestätigst."
   },
   "check": {
     "top": "Prüfen · {opponent}",

@@ -431,7 +431,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           {ta("sources")}: {sourceParts.join(" · ")}
           <details className="inline">
             <summary className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">{ta("howCounted")}</summary>
-            <span className="mt-1 block max-w-[66ch] text-ink-2">{ta("howCountedText")}</span>
+            <span className="mt-1 block max-w-[66ch] text-ink-2" data-testid="how-counted">{graphics.data?.has_report ? ta("howCountedText") : ta("howCountedVideo")}</span>
           </details>
         </div>
       )}
@@ -614,7 +614,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           {/* only what the data carries and what is in scope (UX test B08): the course of the
               match; the comparison sits in Zahlen, the three things above, possession and attacks
               estimated from the video are not shown */}
-          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} />}
+          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={graphics.data && !graphics.data.has_report ? (graphics.data.span ?? null) : null} />}
           <div className="space-y-8">
             <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} /></div>
             {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
