@@ -9293,6 +9293,11 @@ export interface components {
             form: ("w" | "d" | "l")[];
             /** Group Name */
             group_name: string | null;
+            /**
+             * In App
+             * @default false
+             */
+            in_app?: boolean;
             last: components["schemas"]["PublicGame"] | null;
             /** League */
             league: string | null;

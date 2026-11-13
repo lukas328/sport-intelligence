@@ -1,5 +1,7 @@
 "use client";
 
+import { sitePage, useSiteConfig } from "@/lib/site-config";
+
 import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -26,7 +28,8 @@ export function RegisterForm({
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   // the legal pages live on the public site, per language
-  const legal = (page: string) => `https://handball-ai.ch${locale === "de-CH" ? "" : `/${locale}`}/${page}`;
+  const site = useSiteConfig();
+  const legal = (page: string) => (site ? sitePage(site.site_url, locale, page) : undefined);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

@@ -191,7 +191,7 @@
     "needPassword": "Das Passwort braucht mindestens 10 Zeichen.",
     "needTerms": "Bitte akzeptiere die Bedingungen.",
     "claim": "Dein Spiel. Und drei Dinge zum Mitnehmen.",
-    "toSite": "Was die App kann: handball-ai.ch"
+    "toSite": "Was die App kann: {site}"
   },
   "invite": {
     "title": "Einladung",
@@ -3438,7 +3438,7 @@
     "trial": "30 Tage alles gratis. Danach entscheidest du.",
     "send": "Speichern",
     "sent": "Schau in dein Postfach.",
-    "sentText": "Wir haben den Link an {email} geschickt. Er ist 15 Minuten gültig.",
+    "sentText": "Wir haben den Link an {email} geschickt. Er ist 24 Stunden gültig und funktioniert einmal.",
     "resend": "Nochmals schicken",
     "needEmail": "Das ist keine E-Mail-Adresse.",
     "haveAccount": "Schon ein Konto?",
@@ -3455,6 +3455,12 @@
     "unavailableTeam": "handball.ch antwortet gerade nicht. Du kannst dein Team trotzdem speichern: Die Zahlen kommen dazu, sobald der Verband wieder antwortet.",
     "saveAnyway": "Trotzdem speichern",
     "scorersLoading": "Die Torschützen kommen gleich.",
-    "tooMany": "Das waren viele Suchen in kurzer Zeit. Warte eine Minute, dann geht es weiter."
+    "tooMany": "Das waren viele Suchen in kurzer Zeit. Warte eine Minute, dann geht es weiter.",
+    "inAppPreview": "Dieses Team nutzt Handball Intelligence schon. Speichern schickt eine Anfrage an die Leute, die es dort verwalten.",
+    "accessTitle": "Anfrage gesendet.",
+    "accessText": "{team} ist schon in der App. Die Leute, die das Team dort verwalten, sehen deine Anfrage in der App. Stimmen sie zu, bist du beim nächsten Anmelden im Team.",
+    "accessTeam": "Dieses Team",
+    "accessOwnClub": "Bis dahin mit eigenem Team starten",
+    "accessOther": "Anderes Team wählen"
   }
 }

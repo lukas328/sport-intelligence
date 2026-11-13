@@ -98,7 +98,8 @@ class Settings(BaseSettings):
     csrf_cookie: str = "hb_csrf"
     session_ttl_hours: int = 24 * 14
     cookie_secure: bool = False
-    magic_link_ttl_minutes: int = 15
+    # the first sign-in from the entry is often read hours later (UX test N15): a day, once only
+    magic_link_ttl_minutes: int = 24 * 60
     invitation_ttl_days: int = 14
     org_admin_2fa_required: bool = True
     org_admin_2fa_grace_days: int = 14

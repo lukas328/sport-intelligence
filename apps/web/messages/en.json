@@ -191,7 +191,7 @@
     "needPassword": "The password needs at least 10 characters.",
     "needTerms": "Please accept the terms.",
     "claim": "Your match. And three things to take away.",
-    "toSite": "What the app does: handball-ai.ch"
+    "toSite": "What the app does: {site}"
   },
   "invite": {
     "title": "Invitation",
@@ -3438,7 +3438,7 @@
     "trial": "30 days all free. Then you decide.",
     "send": "Save",
     "sent": "Check your inbox.",
-    "sentText": "We sent the link to {email}. It is valid for 15 minutes.",
+    "sentText": "We sent the link to {email}. It is valid for 24 hours and works once.",
     "resend": "Send again",
     "needEmail": "That is not an e-mail address.",
     "haveAccount": "Already have an account?",
@@ -3455,6 +3455,12 @@
     "unavailableTeam": "handball.ch is not answering right now. You can save your team anyway: the figures come in once the federation answers again.",
     "saveAnyway": "Save anyway",
     "scorersLoading": "The scorers are on their way.",
-    "tooMany": "That was a lot of searches in a short time. Wait a minute, then go on."
+    "tooMany": "That was a lot of searches in a short time. Wait a minute, then go on.",
+    "inAppPreview": "This team already uses Handball Intelligence. Saving sends a request to the people who manage it there.",
+    "accessTitle": "Request sent.",
+    "accessText": "{team} is already in the app. The people who manage it see your request in the app. Once they agree, you are in the team the next time you sign in.",
+    "accessTeam": "This team",
+    "accessOwnClub": "Start with a team of your own meanwhile",
+    "accessOther": "Choose another team"
   }
 }

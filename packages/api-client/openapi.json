@@ -12639,6 +12639,11 @@
             ],
             "title": "Group Name"
           },
+          "in_app": {
+            "default": false,
+            "title": "In App",
+            "type": "boolean"
+          },
           "last": {
             "anyOf": [
               {

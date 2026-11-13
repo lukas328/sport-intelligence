@@ -15,12 +15,4 @@ export function useSiteConfig() {
   }).data ?? null;
 }
 
-/** A page of the website in the reader's language (German without prefix). */
-export function sitePage(site: string, locale: string, page: string): string {
-  return `${site}${locale === "de-CH" ? "" : `/${locale}`}/${page}`;
-}
-
-/** «This team is mine, but someone else has it»: a prepared mail to the support. */
-export function ownershipMail(email: string, subject: string, body: string): string {
-  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
+export { ownershipMail, sitePage } from "./site";

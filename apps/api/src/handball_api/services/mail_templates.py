@@ -155,19 +155,19 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "magic_link": {
         "de-CH": (
             "Dein Anmeldelink",
-            "Hallo {name}\n\nMit diesem Link meldest du dich an. Er ist {minutes} Minuten gültig "
+            "Hallo {name}\n\nMit diesem Link meldest du dich an. Er ist {valid} gültig "
             "und funktioniert nur einmal:\n\n{link}\n\nFalls du das nicht angefordert hast, "
             "kannst du diese E-Mail ignorieren.",
         ),
         "en": (
             "Your sign-in link",
-            "Hello {name}\n\nUse this link to sign in. It is valid for {minutes} minutes and "
+            "Hello {name}\n\nUse this link to sign in. It is valid for {valid} and "
             "works once:\n\n{link}\n\nIf you did not request it, ignore this e-mail.",
         ),
         "fr": (
             "Votre lien de connexion",
-            "Bonjour {name}\n\nUtilisez ce lien pour vous connecter. Il est valable {minutes} "
-            "minutes et ne fonctionne qu'une fois :\n\n{link}\n\nSi vous ne l'avez pas demandé, "
+            "Bonjour {name}\n\nUtilisez ce lien pour vous connecter. Il est valable {valid} "
+            "et ne fonctionne qu'une fois :\n\n{link}\n\nSi vous ne l'avez pas demandé, "
             "ignorez cet e-mail.",
         ),
     },
@@ -271,3 +271,14 @@ def render(template: str, locale: str, to: str, **values: object) -> Email:
     text = body.format(**values)
     first, _, rest = text.partition("\n")
     return Email(to=to, subject=subject.format(**values), text=f"{first.rstrip()}\n{rest}")
+
+
+def validity(minutes: int, locale: str) -> str:
+    """«24 Stunden» or «15 Minuten» in the reader's language, for the links' validity."""
+    hours = minutes // 60 if minutes >= 120 and minutes % 60 == 0 else None
+    words = {
+        "de-CH": ("Stunden", "Minuten"),
+        "en": ("hours", "minutes"),
+        "fr": ("heures", "minutes"),
+    }.get(locale, ("Stunden", "Minuten"))
+    return f"{hours} {words[0]}" if hours else f"{minutes} {words[1]}"

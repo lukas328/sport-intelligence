@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, linkFromMail, uniqueEmail } from "./helpers";
+import { expectAccessible, linkFromMail, register, uniqueEmail } from "./helpers";
 
 // UX test, second delivery: the public entry. The website sends «/?q=…&farbe=…»; the app shows
 // the team from handball.ch without an account, an example of the three things, and saves with
@@ -28,7 +28,7 @@ test("entry: from the website's question to Spiele, without a password", async (
   await page.getByLabel("Teamname").fill("HC Einstieg");
   await page.getByRole("button", { name: "Weiter" }).click();
   await expect(page.getByTestId("entry-mail")).toContainText("30 Tage alles gratis");
-  await expect(page.getByRole("link", { name: "Nutzungsbedingungen" })).toHaveAttribute("href", /handball-ai\.ch\/agb/);
+  await expect(page.getByRole("link", { name: "Nutzungsbedingungen" })).toHaveAttribute("href", /handball-ai\.ch\/de\/agb/);
   const email = uniqueEmail("entry");
   await page.getByLabel("E-Mail").fill(email);
   await page.getByTestId("entry-send").click();
@@ -62,4 +62,35 @@ test("entry: the wait for the team says what happens, slow federation offers sav
   await expect(page.getByRole("button", { name: "Trotzdem speichern" })).toBeVisible();
   await page.getByRole("button", { name: "Trotzdem speichern" }).click();
   await expect(page.getByTestId("entry-mail")).toBeVisible();
+});
+
+// UX test round 2, N09: a team already in the app says so in the preview; after the link the page
+// says what happens and offers a way on instead of a dead end.
+test("entry: a team already in the app, request and a way on", async ({ page, browser }, info) => {
+  test.skip(info.project.name !== "mobile", "the entry is for the phone");
+  test.setTimeout(240_000);
+  // someone else has taken the team over already
+  await register(page, uniqueEmail("owner"), "Andere Trainerin");
+  const hit = (await (await page.request.get("/v1/public/teams?q=Meilen")).json())[0];
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  const claim = await page.request.post(`/v1/official/teams/${hit.official_id}/claim`, { headers: { "x-csrf-token": csrf }, data: { club_id: hit.club.id } });
+  expect(claim.ok()).toBe(true);
+
+  const ctx = await browser.newContext({ ...info.project.use });
+  const hans = await ctx.newPage();
+  await hans.goto("/einstieg?q=Meilen&farbe=gelb");
+  await hans.getByTestId("entry-hits").getByRole("button").first().click({ timeout: 60_000 });
+  await expect(hans.getByTestId("entry-in-app")).toContainText("nutzt Handball Intelligence schon", { timeout: 60_000 });
+  await hans.getByTestId("entry-save").click();
+  const email = uniqueEmail("hans-taken");
+  await hans.getByLabel("E-Mail").fill(email);
+  await hans.getByTestId("entry-send").click();
+  const link = await linkFromMail(hans, email, "/auth/magic");
+  await hans.goto(link.replace(/^https?:\/\/[^/]+/, ""));
+  await expect(hans.getByRole("heading", { name: "Anfrage gesendet." })).toBeVisible({ timeout: 90_000 });
+  await expect(hans.getByTestId("entry-saving")).toContainText(hit.name);
+  await expect(hans.getByTestId("entry-access-ways").getByRole("link", { name: "Anderes Team wählen" })).toBeVisible();
+  await hans.getByRole("link", { name: "Bis dahin mit eigenem Team starten" }).click();
+  await hans.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 90_000 });
+  await ctx.close();
 });

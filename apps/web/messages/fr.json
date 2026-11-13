@@ -191,7 +191,7 @@
     "needPassword": "Le mot de passe doit compter au moins 10 caractères.",
     "needTerms": "Merci d'accepter les conditions.",
     "claim": "Ton match. Et trois choses à retenir.",
-    "toSite": "Ce que fait l'app : handball-ai.ch"
+    "toSite": "Ce que fait l'app : {site}"
   },
   "invite": {
     "title": "Invitation",
@@ -3438,7 +3438,7 @@
     "trial": "30 jours tout gratuit. Ensuite tu décides.",
     "send": "Enregistrer",
     "sent": "Regarde ta boîte mail.",
-    "sentText": "Nous avons envoyé le lien à {email}. Il est valable 15 minutes.",
+    "sentText": "Nous avons envoyé le lien à {email}. Il est valable 24 heures et fonctionne une fois.",
     "resend": "Renvoyer",
     "needEmail": "Ce n'est pas une adresse e-mail.",
     "haveAccount": "Déjà un compte ?",
@@ -3455,6 +3455,12 @@
     "unavailableTeam": "handball.ch ne répond pas pour le moment. Tu peux enregistrer ton équipe quand même : les chiffres arrivent dès que la fédération répond.",
     "saveAnyway": "Enregistrer quand même",
     "scorersLoading": "Les buteurs arrivent.",
-    "tooMany": "Beaucoup de recherches en peu de temps. Attends une minute, puis continue."
+    "tooMany": "Beaucoup de recherches en peu de temps. Attends une minute, puis continue.",
+    "inAppPreview": "Cette équipe utilise déjà Handball Intelligence. Enregistrer envoie une demande aux personnes qui la gèrent.",
+    "accessTitle": "Demande envoyée.",
+    "accessText": "{team} est déjà dans l'app. Les personnes qui gèrent l'équipe voient ta demande dans l'app. Si elles acceptent, tu es dans l'équipe à ta prochaine connexion.",
+    "accessTeam": "Cette équipe",
+    "accessOwnClub": "En attendant, commencer avec ta propre équipe",
+    "accessOther": "Choisir une autre équipe"
   }
 }

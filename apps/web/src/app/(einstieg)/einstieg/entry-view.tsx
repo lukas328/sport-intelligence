@@ -8,7 +8,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { type ComponentProps, type CSSProperties, type FormEvent, useEffect, useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
 import { Bundle } from "@/components/anlauf/bundle";
-import { WurfHead } from "@/components/anlauf/heads";
+import { Breakable, WurfHead } from "@/components/anlauf/heads";
 import { useThingText } from "@/components/anlauf/three-things-view";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
@@ -204,7 +204,7 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
     return (
       <div className="space-y-8" style={clubStyle(colour, SECOND(colour)) as CSSProperties} data-testid="entry-loading">
         <div className="bleed-x -mt-6 sm:-mt-10">
-          <EntryHead kick={known.league ?? undefined} title={known.name ?? "…"} own={null} opp={null} ownName={known.name ?? ""} oppName="" waiting />
+          <EntryHead kick={known.league ?? undefined} title={known.name ? <Breakable text={known.name} /> : "…"} own={null} opp={null} ownName={known.name ?? ""} oppName="" waiting />
         </div>
         <p className="m-0 max-w-[50ch] text-[19px]" aria-live="polite" aria-busy={q.isLoading}>
           {q.isLoading ? (slow ? t("slow") : t("fetching")) : t("unavailableTeam")}
@@ -230,7 +230,7 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
           kick={last ? `${t("lastResult")} · ${t("vs", { opponent: last.opponent })} · ${format.dateTime(new Date(last.kickoff_at), { day: "numeric", month: "long" })}` : p.season}
           title={
             <>
-              {p.name}
+              <Breakable text={p.name} />
               <span className="block text-[0.55em]">{standing}</span>
             </>
           }
@@ -252,6 +252,12 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
         </div>
         <p className="mt-2 mb-0 text-[15px] text-ink-2">{t("colourHint")}</p>
       </fieldset>
+      {/* a team already in the app: saving asks its administrators (UX test N09) */}
+      {p.in_app && (
+        <p className="m-0 max-w-[60ch] border-l-4 border-attn pl-4 text-[17px]" data-testid="entry-in-app">
+          {t("inAppPreview")}
+        </p>
+      )}
       {/* the one action right where the coach has seen his team; again at the end */}
       <button type="button" className={buttonClass("primary", "lg")} onClick={onSave}>
         {t("save")}
@@ -390,7 +396,9 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const farbe = WORD_OF[colour] ?? "blau";
-  const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}&farbe=${farbe}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}&farbe=${farbe}`;
+  // the team's name travels along: an occupied team's page names it and offers a club of one's own
+  const teamName = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("n");
+  const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}&farbe=${farbe}${teamName ? `&n=${encodeURIComponent(teamName)}` : ""}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}&farbe=${farbe}`;
   // the legal pages on the website, its address from the configuration
   const site = useSiteConfig();
   const legal = (page: string) => sitePage(site?.site_url ?? "", locale, page);
@@ -404,7 +412,7 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
   useEffect(() => setError(null), [sent]);
   if (sent) {
     return (
-      <section className="mx-auto max-w-xl space-y-4" role="status" data-testid="entry-sent">
+      <section className="mx-auto max-w-xl space-y-4 [overflow-wrap:anywhere]" role="status" data-testid="entry-sent">
         <h1 className="font-slant text-[34px] leading-tight md:text-[44px]">{t("sent")}</h1>
         <p className="text-[17px]">{t("sentText", { email: sent })}</p>
         <button type="button" className={buttonClass("secondary")} disabled={busy} onClick={() => void send(sent)}>

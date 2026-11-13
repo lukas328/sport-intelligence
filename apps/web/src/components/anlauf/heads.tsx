@@ -8,6 +8,25 @@ import { Flight, type FlightLabels, type ReportGoal } from "./charts";
  * here (and in the active marker, own lines and numerals).
  */
 
+/** A club name that may break after «/» («SG Wädenswil/<wbr>Horgen»), for large text (UX test N11). */
+export function Breakable({ text }: { text: string }) {
+  const parts = text.split("/");
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 && (
+            <>
+              /<wbr />
+            </>
+          )}
+        </span>
+      ))}
+    </>
+  );
+}
+
 /** The result: our goals, theirs underlined in the opponent's colour; two offset outlines behind. */
 export function Score({
   own,
@@ -108,7 +127,8 @@ export function WurfHead({
       {/* above the drawn line: the controls in the head stay reachable */}
       <div className="relative z-10 min-w-0">
         {kick && <p className="mb-2 text-[15px] font-semibold md:mb-3.5 md:text-[15px]">{kick}</p>}
-        <h1 className="text-[32px] leading-[.96] md:text-[58px]">{title}</h1>
+        {/* long club names («SG Wädenswil/Horgen») wrap instead of running out (UX test N11) */}
+        <h1 className="text-[32px] leading-[.96] [overflow-wrap:break-word] md:text-[58px]">{title}</h1>
         {meta && <div className="mt-[18px] text-sm font-semibold">{meta}</div>}
         {children}
       </div>
@@ -139,11 +159,12 @@ export function Strip({ name, sub, own, opp, children, live, pending }: { name: 
     <header
       data-zone="strip"
       className={cn(
-        "relative flex items-start justify-between gap-4 bg-club px-4 pt-3.5 text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_72%,0_100%)] md:px-8 md:pt-5",
-        live ? "h-[168px]" : "h-[104px] md:h-[124px]",
+        // with large text the score goes under the name instead of over it (UX test N11)
+        "relative flex flex-wrap items-start justify-between gap-x-4 gap-y-1 bg-club px-4 pt-3.5 pb-8 text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_72%,0_100%)] md:px-8 md:pt-5",
+        live ? "min-h-[168px]" : "min-h-[104px] md:min-h-[124px]",
       )}
     >
-      <div className="font-slant min-w-0 text-[17px] leading-[1.05] md:text-2xl">
+      <div className="font-slant min-w-0 flex-1 basis-[12ch] text-[17px] leading-[1.05] [overflow-wrap:anywhere] md:text-2xl">
         {name}
         {sub && <small className="mt-1.5 block font-sans text-xs font-medium not-italic md:text-[15px]">{sub}</small>}
         {children}

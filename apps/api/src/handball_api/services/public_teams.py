@@ -157,6 +157,18 @@ async def preview(
         if names[pid]
     ]
     rank = next((r.get("rank") for r in table if r.get("teamId") == team.id), None)
+    # a team already in the app: saving asks its administrators, say so before (UX test N09)
+    await enable_system_access(ctx.db, reason="public team preview: is the team in the app")
+    try:
+        in_app = (
+            await ctx.db.scalar(
+                select(Team.id)
+                .where(Team.official_provider == PROVIDER, Team.official_team_id == team.id)
+                .limit(1)
+            )
+        ) is not None
+    finally:
+        await disable_system_access(ctx.db)
     return {
         "official_id": team.id,
         "name": team.name,
@@ -183,4 +195,5 @@ async def preview(
         "played": len(played),
         "scorers": scorers,
         "scorer_games": counted,
+        "in_app": in_app,
     }

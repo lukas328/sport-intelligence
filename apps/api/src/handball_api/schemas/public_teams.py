@@ -71,3 +71,4 @@ class PublicTeamPreview(ApiModel):
     scorers: list[PublicScorer]
     # how many played games the scorers come from (the federation's player statistics)
     scorer_games: int
+    in_app: bool = False

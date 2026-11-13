@@ -15,6 +15,7 @@ import type { Schemas } from "@handball/api-client";
 import { CameraFrame, TacticsCamera } from "@/components/anlauf/tactics-camera";
 import { VIEWS } from "@/components/anlauf/geometry";
 import { cameraScene } from "@/lib/graphics";
+import { MINI } from "@/lib/mini-field";
 
 export interface Shared {
   kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection";
@@ -265,7 +266,7 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
                     // the Minifeld: the last frame of the positions, or the empty field
                     return c ? (
                       <svg aria-hidden viewBox={VIEWS.halfB.box.join(" ")} className="block w-14 bg-court" data-testid="shared-mini">
-                        <CameraFrame scene={c} view="halfB" width={56} dot={22} t={1} />
+                        <CameraFrame scene={c} view={MINI.view} width={MINI.width} dot={MINI.dot} t={1} />
                       </svg>
                     ) : (
                       <EmptyField />

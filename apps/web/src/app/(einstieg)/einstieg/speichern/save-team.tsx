@@ -78,7 +78,19 @@ export function SaveTeam() {
       {state === "saving" && <p className="text-[19px]">{t("saving")}</p>}
       {state === "access" && (
         <>
-          <p className="text-[19px]">{t("savedAccess")}</p>
+          <h1 className="font-slant text-[34px] leading-tight">{t("accessTitle")}</h1>
+          <p className="text-[19px]">{t("accessText", { team: params.get("n") ?? t("accessTeam") })}</p>
+          {/* not a dead end: another team, or a club of one's own by the team's name */}
+          <div className="flex flex-wrap gap-3" data-testid="entry-access-ways">
+            {params.get("n") && (
+              <a href={`/einstieg/speichern?name=${encodeURIComponent(params.get("n")!)}&farbe=${params.get("farbe") ?? "blau"}`} className={buttonClass("primary")}>
+                {t("accessOwnClub")}
+              </a>
+            )}
+            <a href="/einstieg" className={buttonClass(params.get("n") ? "secondary" : "primary")}>
+              {t("accessOther")}
+            </a>
+          </div>
           {/* the minimum until it is decided how ownership is checked (OPEN_QUESTIONS Q-AUTH-OWNER) */}
           {site && (
             <p className="text-[17px]">
