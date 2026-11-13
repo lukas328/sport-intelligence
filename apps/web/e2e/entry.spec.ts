@@ -40,3 +40,26 @@ test("entry: from the website's question to Spiele, without a password", async (
   await page.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 90_000 });
   await expect(page.getByRole("main")).toBeVisible();
 });
+
+// UX test round 2, N03: after tapping the team there is a sentence and the head at once; a slow
+// federation gets an honest state with «Trotzdem speichern».
+test("entry: the wait for the team says what happens, slow federation offers saving anyway", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile", "the entry is for the phone");
+  test.setTimeout(180_000);
+  await page.goto("/einstieg?q=Meilen&farbe=rot");
+  const hits = page.getByTestId("entry-hits");
+  await expect(hits.getByRole("button").first()).toBeVisible({ timeout: 60_000 });
+  const name = (await hits.getByRole("button").first().locator("span span").first().textContent())!.trim();
+  // hold the team's answer back: the federation is slow today
+  await page.route(/\/v1\/public\/clubs\/\d+\/teams\/\d+/, async (route) => {
+    await new Promise((r) => setTimeout(r, 12_000));
+    await route.continue().catch(() => undefined);
+  });
+  await hits.getByRole("button").first().click();
+  await expect(page.getByTestId("entry-loading")).toContainText("Wir holen die Spiele von handball.ch.", { timeout: 2_000 });
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(name);
+  await expect(page.getByTestId("entry-loading")).toContainText("handball.ch antwortet heute langsam", { timeout: 10_000 });
+  await expect(page.getByRole("button", { name: "Trotzdem speichern" })).toBeVisible();
+  await page.getByRole("button", { name: "Trotzdem speichern" }).click();
+  await expect(page.getByTestId("entry-mail")).toBeVisible();
+});

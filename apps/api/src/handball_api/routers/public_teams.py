@@ -15,7 +15,7 @@ from handball_api.services import public_teams as service
 
 router = APIRouter(prefix="/v1/public", tags=["public"])
 SEARCH_LIMIT = (20, 60)  # per IP and minute: a search may reach handball.ch
-PREVIEW_LIMIT = (10, 60)  # a preview asks for games, table and player statistics
+PREVIEW_LIMIT = (20, 60)  # per team view two calls: the team first, then its scorers
 
 
 def per_ip(scope: str, limit: tuple[int, int]) -> Any:
@@ -43,9 +43,12 @@ async def search_teams(
     response_model=PublicTeamPreview,
     dependencies=[per_ip("public-team-preview", PREVIEW_LIMIT)],
 )
-async def team_preview(ctx: CtxDep, club_id: int, official_id: int) -> dict[str, Any]:
-    """Last result, rank and table, form, scorers and next game of a team."""
-    return await service.preview(ctx, club_id, official_id)
+async def team_preview(
+    ctx: CtxDep, club_id: int, official_id: int, scorers: bool = True
+) -> dict[str, Any]:
+    """Last result, rank and table, form, scorers and next game of a team; `scorers=false`
+    answers fast without the scorers (the entry asks for them afterwards)."""
+    return await service.preview(ctx, club_id, official_id, with_scorers=scorers)
 
 
 class PublicConfig(ApiModel):

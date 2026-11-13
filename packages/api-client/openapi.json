@@ -35497,7 +35497,7 @@
     },
     "/v1/public/clubs/{club_id}/teams/{official_id}": {
       "get": {
-        "description": "Last result, rank and table, form, scorers and next game of a team.",
+        "description": "Last result, rank and table, form, scorers and next game of a team; `scorers=false`\nanswers fast without the scorers (the entry asks for them afterwards).",
         "operationId": "team_preview_v1_public_clubs__club_id__teams__official_id__get",
         "parameters": [
           {
@@ -35516,6 +35516,16 @@
             "schema": {
               "title": "Official Id",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scorers",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Scorers",
+              "type": "boolean"
             }
           }
         ],

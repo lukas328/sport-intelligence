@@ -57,8 +57,8 @@ export function EntryView() {
     router.push(`/einstieg?${u.toString()}`);
   };
   if (step === "mail" && (team || name)) return <SaveStep club={club} team={team} name={name} colour={colour} onBack={() => go({ step: null })} />;
-  if (club && team) return <TeamStep club={club} team={team} colour={colour} onColour={setColour} onSave={() => go({ step: "mail" })} onBack={() => go({ club: null, team: null })} />;
-  return <SearchStep initial={params.get("q") ?? ""} onPick={(h, q) => go({ club: String(h.club.id), team: String(h.official_id), q })} onName={(n) => go({ name: n, step: "mail", q: null })} />;
+  if (club && team) return <TeamStep club={club} team={team} known={{ name: params.get("n"), league: params.get("l") }} colour={colour} onColour={setColour} onSave={() => go({ step: "mail" })} onBack={() => go({ club: null, team: null })} />;
+  return <SearchStep initial={params.get("q") ?? ""} onPick={(h, q) => go({ club: String(h.club.id), team: String(h.official_id), q, n: h.name, l: h.league ?? null })} onName={(n) => go({ name: n, step: "mail", q: null })} />;
 }
 
 function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: Hit, q: string) => void; onName: (name: string) => void }) {
@@ -108,7 +108,7 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
         </p>
       </form>
       {hits.isFetching && <p className="text-[17px] text-ink-2" aria-busy="true">…</p>}
-      {hits.error && <p className="text-[17px]">{t("unavailable")}</p>}
+      {hits.error && <p className="text-[17px]">{(hits.error as { status?: number }).status === 429 ? t("tooMany") : t("unavailable")}</p>}
       {hits.data && hits.data.length === 0 && <p className="text-[17px]">{t("none", { q })}</p>}
       {hits.data && hits.data.length > 0 && (
         <ul className="m-0 list-none border-t-2 border-ink p-0" data-testid="entry-hits">
@@ -169,28 +169,54 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
   );
 }
 
-function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: number; team: number; colour: string; onColour: (c: string) => void; onSave: () => void; onBack: () => void }) {
+function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { club: number; team: number; known: { name: string | null; league: string | null }; colour: string; onColour: (c: string) => void; onSave: () => void; onBack: () => void }) {
   const t = useTranslations("entry");
   const tc = useTranslations("onboarding");
   const format = useFormatter();
-  const q = useQuery({
-    queryKey: ["public-team", club, team],
-    retry: false,
-    queryFn: async () => {
-      const r = await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club, official_id: team } } });
-      if (r.error) throw r.error;
-      return r.data as Preview;
-    },
-  });
+  // the team first (one request less per played game), the scorers fill in afterwards (UX test N03)
+  const fetchPreview = async (scorers: boolean) => {
+    const r = await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club, official_id: team }, query: { scorers } } });
+    if (r.error) throw Object.assign(new Error("preview"), { status: r.response.status });
+    return r.data as Preview;
+  };
+  const q = useQuery({ queryKey: ["public-team", club, team], retry: false, staleTime: 600_000, queryFn: () => fetchPreview(false) });
+  const full = useQuery({ queryKey: ["public-team-scorers", club, team], retry: false, staleTime: 600_000, enabled: q.isSuccess, queryFn: () => fetchPreview(true) });
   const standing = useStanding(q.data);
-  if (q.isLoading) return <p className="text-[17px] text-ink-2" aria-busy="true">…</p>;
-  if (!q.data) {
+  // a slow federation: after eight seconds say so and offer to save anyway
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!q.isLoading) return;
+    const id = window.setTimeout(() => setSlow(true), 8000);
+    return () => window.clearTimeout(id);
+  }, [q.isLoading]);
+  const saveAnyway = (
+    <div className="flex flex-wrap items-center gap-4">
+      <button type="button" className={buttonClass("primary")} onClick={onSave} data-testid="entry-save-anyway">
+        {t("saveAnyway")}
+      </button>
+      <button type="button" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" onClick={onBack}>
+        {t("back")}
+      </button>
+    </div>
+  );
+  if (q.isLoading || !q.data) {
+    // what is known from the list is drawn at once: name and league, the sentence what happens
     return (
-      <div className="space-y-4">
-        <p className="text-[17px]">{t("unavailable")}</p>
-        <button type="button" className={buttonClass("secondary")} onClick={onBack}>
-          {t("back")}
-        </button>
+      <div className="space-y-8" style={clubStyle(colour, SECOND(colour)) as CSSProperties} data-testid="entry-loading">
+        <div className="bleed-x -mt-6 sm:-mt-10">
+          <WurfHead kick={known.league ?? undefined} title={known.name ?? "…"} own={null} opp={null} ownName={known.name ?? ""} oppName="" waiting />
+        </div>
+        <p className="m-0 max-w-[50ch] text-[19px]" aria-live="polite" aria-busy={q.isLoading}>
+          {q.isLoading ? (slow ? t("slow") : t("fetching")) : t("unavailableTeam")}
+        </p>
+        {q.isLoading && !slow && (
+          <div aria-hidden className="space-y-3">
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="block h-6 animate-pulse bg-rule" style={{ width: `${80 - i * 12}%` }} />
+            ))}
+          </div>
+        )}
+        {(slow || !q.isLoading) && saveAnyway}
       </div>
     );
   }
@@ -230,7 +256,8 @@ function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: numb
       <button type="button" className={buttonClass("primary", "lg")} onClick={onSave}>
         {t("save")}
       </button>
-      <TeamFacts p={p} />
+      <TeamFacts p={full.data ? { ...p, scorers: full.data.scorers, scorer_games: full.data.scorer_games } : p} />
+      {full.isLoading && <p className="m-0 text-[15px] text-ink-2" aria-live="polite">{t("scorersLoading")}</p>}
       <p className="text-[15px] text-ink-2">{t("source")}</p>
       <Example />
       <div className="space-y-2 border-t-2 border-ink pt-5">

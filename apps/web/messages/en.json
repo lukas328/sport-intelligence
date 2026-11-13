@@ -3449,6 +3449,12 @@
     "retry": "Try again",
     "ownerLink": "This team is mine, but someone else already has it",
     "ownerSubject": "Our team is already taken",
-    "ownerBody": "Hello support\n\nThe team (handball.ch number {team}) is ours but was set up by someone else. I am:\n\nName:\nRole in the club:\n"
+    "ownerBody": "Hello support\n\nThe team (handball.ch number {team}) is ours but was set up by someone else. I am:\n\nName:\nRole in the club:\n",
+    "fetching": "We are fetching the games from handball.ch. This takes a moment.",
+    "slow": "handball.ch is slow today. You can wait or save your team anyway: the figures come in later.",
+    "unavailableTeam": "handball.ch is not answering right now. You can save your team anyway: the figures come in once the federation answers again.",
+    "saveAnyway": "Save anyway",
+    "scorersLoading": "The scorers are on their way.",
+    "tooMany": "That was a lot of searches in a short time. Wait a minute, then go on."
   }
 }

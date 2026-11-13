@@ -103,9 +103,12 @@ def _result(own: int | None, opp: int | None) -> str | None:
     return "w" if own > opp else "l" if own < opp else "d"
 
 
-async def preview(ctx: Ctx, club_id: int, official_id: int) -> dict[str, Any]:
+async def preview(
+    ctx: Ctx, club_id: int, official_id: int, with_scorers: bool = True
+) -> dict[str, Any]:
     """The team as the federation shows it: last result, rank and table, the form, the scorers,
-    the next game."""
+    the next game. Without the scorers it answers in a fraction of the time (one request per
+    played game less): the entry shows the team first and fills the scorers in (UX test N03)."""
     season, detail, team = await _official_team(ctx, club_id, official_id)
     try:
         games = await ch.team_games(ctx.db, team.id)
@@ -140,7 +143,7 @@ async def preview(ctx: Ctx, club_id: int, official_id: int) -> dict[str, Any]:
     names: dict[int, str] = {}
     counted = 0
     try:
-        for g in played[-SCORER_GAMES:]:
+        for g in played[-SCORER_GAMES:] if with_scorers else []:
             for p in await ch.game_players(ctx.db, g.id):
                 if p.team_id == team.id and p.goals:
                     goals[p.player_id] += p.goals

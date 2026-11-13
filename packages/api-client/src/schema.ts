@@ -4766,7 +4766,8 @@ export interface paths {
         };
         /**
          * Team Preview
-         * @description Last result, rank and table, form, scorers and next game of a team.
+         * @description Last result, rank and table, form, scorers and next game of a team; `scorers=false`
+         *     answers fast without the scorers (the entry asks for them afterwards).
          */
         get: operations["team_preview_v1_public_clubs__club_id__teams__official_id__get"];
         put?: never;
@@ -21688,7 +21689,9 @@ export interface operations {
     };
     team_preview_v1_public_clubs__club_id__teams__official_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                scorers?: boolean;
+            };
             header?: never;
             path: {
                 club_id: number;

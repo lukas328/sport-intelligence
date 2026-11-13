@@ -68,6 +68,13 @@ Comparison images of the rebuilt screens: `docs/screens/anlauf/vergleich/ux1-*.j
 Source: `docs/ux-test/runde1/EINSTIEG.md` on `claude/ux-test`. Sheet of the new way on the phone
 with large text and the numbers against today: `docs/screens/anlauf/einstieg-ablauf.jpg`.
 
+Correction (round 2, N03): the sheet's «0 s waiting without a sentence» was measured with the
+federation's answers already cached. Measured again with a cold cache (team not asked before,
+local stack, phone 390 px): before the change 9 to 16 s with only «…»; after it the sentence «Wir
+holen die Spiele von handball.ch.» and the head with name and league after 0.2 s, the team with
+rank and table after 2.0 s, the scorers after 9.3 s (they fill in while the coach reads). Warm:
+team after 0.5 s.
+
 | # | Befund | Status |
 |---|---|---|
 | H01 | Spieltag: Tasten über dem Spielerraster bei niedrigem Fenster | behoben (a6e9c4c): Kopf und Tasten kleben erst ab 600 px Höhe; e2e prüft 844×390 und 640×400 (fand vorher «Tor» über «11 Lina»). |

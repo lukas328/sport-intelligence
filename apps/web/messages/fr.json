@@ -3449,6 +3449,12 @@
     "retry": "Réessayer",
     "ownerLink": "Cette équipe est la mienne, mais quelqu'un d'autre l'a déjà",
     "ownerSubject": "Notre équipe est déjà prise",
-    "ownerBody": "Bonjour le support\n\nL'équipe (numéro handball.ch {team}) est la nôtre mais a été créée par quelqu'un d'autre. Je suis :\n\nNom :\nFonction au club :\n"
+    "ownerBody": "Bonjour le support\n\nL'équipe (numéro handball.ch {team}) est la nôtre mais a été créée par quelqu'un d'autre. Je suis :\n\nNom :\nFonction au club :\n",
+    "fetching": "Nous récupérons les matchs sur handball.ch. Cela prend un moment.",
+    "slow": "handball.ch répond lentement aujourd'hui. Tu peux attendre ou enregistrer ton équipe quand même : les chiffres arrivent plus tard.",
+    "unavailableTeam": "handball.ch ne répond pas pour le moment. Tu peux enregistrer ton équipe quand même : les chiffres arrivent dès que la fédération répond.",
+    "saveAnyway": "Enregistrer quand même",
+    "scorersLoading": "Les buteurs arrivent.",
+    "tooMany": "Beaucoup de recherches en peu de temps. Attends une minute, puis continue."
   }
 }

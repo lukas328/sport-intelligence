@@ -3449,6 +3449,12 @@
     "retry": "Nochmals versuchen",
     "ownerLink": "Dieses Team gehört mir, aber jemand anderes hat es schon",
     "ownerSubject": "Unser Team ist schon belegt",
-    "ownerBody": "Hallo Support\n\nDas Team (handball.ch-Nummer {team}) gehört zu uns, ist aber schon von jemand anderem angelegt. Ich bin:\n\nName:\nFunktion im Verein:\n"
+    "ownerBody": "Hallo Support\n\nDas Team (handball.ch-Nummer {team}) gehört zu uns, ist aber schon von jemand anderem angelegt. Ich bin:\n\nName:\nFunktion im Verein:\n",
+    "fetching": "Wir holen die Spiele von handball.ch. Das dauert einen Moment.",
+    "slow": "handball.ch antwortet heute langsam. Du kannst warten oder dein Team trotzdem speichern: Die Zahlen kommen später dazu.",
+    "unavailableTeam": "handball.ch antwortet gerade nicht. Du kannst dein Team trotzdem speichern: Die Zahlen kommen dazu, sobald der Verband wieder antwortet.",
+    "saveAnyway": "Trotzdem speichern",
+    "scorersLoading": "Die Torschützen kommen gleich.",
+    "tooMany": "Das waren viele Suchen in kurzer Zeit. Warte eine Minute, dann geht es weiter."
   }
 }
