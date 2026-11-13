@@ -107,6 +107,16 @@ Nach `docs/ux-test/runde1/EINSTIEG.md` und der Rückmeldung der App-Session:
 - Wiederholt: axe 0, kein Überlauf (320 bis 1280, grosse Schrift), Tastatur (Feld und «Zeigen»
   direkt nach der Kopfzeile), Lighthouse 96 / 100 / 100 / 100.
 
+## Nachtrag 13. November, morgens: Adressen ohne Sprache, 404 (Runde 2, N06)
+
+- `/aufnahme/` und alle anderen Inhaltsseiten ohne Sprachpfad leiten auf die Sprache des Browsers
+  (sonst de) weiter, mit `?query` und `#anker`: geprüft mit den Browsersprachen de-CH, fr-CH, en-GB
+  und it-CH (fällt auf de) für `/aufnahme/`, `/aufnahme`, `/hilfe/einwilligungen/` und
+  `/preise/?x=1#faq`.
+- Eigene 404-Seite mit Start, Demo-Spiel und Fragen, Sprache aus dem Pfad oder dem Browser,
+  Status 404 (mit `npx serve`); axe 0 Verstösse, kein Überlauf bei 390 und 1280.
+- Fürs echte Hosting: Server-Weiterleitung und `error_page`, siehe README, Abschnitt «Hosting».
+
 ## Nicht geprüft
 
 - Echte Geräte (iPhone Safari, Android Chrome) und echte Bildschirmleser (VoiceOver, NVDA): nur

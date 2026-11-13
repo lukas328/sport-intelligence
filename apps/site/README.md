@@ -35,6 +35,37 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 - Help guides outside the core have `listed: false` in `content/help/index.ts`: reachable for the app's
   links, not listed, not in the sitemap, `noindex`.
 
+## Hosting
+
+`pnpm build` runs `next build` and then `scripts/redirects.mjs`, which adds to `out/`:
+
+- a small page for every address without a language path (`/aufnahme/`, `/so-funktioniert-es/`,
+  `/demo/`, `/preise/`, `/hilfe/` and every guide, `/daten/`, `/kontakt/`, `/blog/` and posts, `/agb/`,
+  `/datenschutz/`, `/impressum/`, `/funktionen/`): it sends the visitor to the same page in the
+  browser's language (fr or en, otherwise de), keeping `?query` and `#hash`; without scripts a meta
+  refresh goes to `/de/…`. The app links to `/aufnahme/` from its upload, so keep that address.
+- `404.html` in the site's look with Start, Demo-Spiel and Fragen, in the language of the path or the
+  browser.
+
+On the real host, set this up as well (the fallback pages above only work with a script or after a
+second):
+
+- **Unknown paths** answer `404.html` with status 404 (`error_page 404 /404.html;` in nginx,
+  `handle_errors` in Caddy, `404.html` is picked up by Cloudflare Pages and Netlify by default).
+- **Addresses without a language** answer with a 302 to `/{lang}/…` from `Accept-Language`
+  (fr, en, else de), e.g. nginx:
+
+  ```nginx
+  map $http_accept_language $site_lang { default de; ~^fr fr; ~^en en; }
+  location ~ ^/(so-funktioniert-es|aufnahme|demo|preise|hilfe|daten|kontakt|blog|agb|datenschutz|impressum|funktionen)(/.*)?$ {
+    return 302 /$site_lang$request_uri;
+  }
+  ```
+
+  On Cloudflare Pages a `_redirects` file can only send them to `/de/…` (no language test); then
+  keep the fallback pages for fr and en.
+- `/` stays `public/index.html` (language choice by script, meta refresh to `/de/`).
+
 ## Build variables
 | variable | default |
 |---|---|
