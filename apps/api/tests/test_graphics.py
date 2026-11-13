@@ -264,17 +264,15 @@ def test_a_corner_outside_the_picture_is_accepted() -> None:
 
     from handball_api.schemas.matches import CalibrationIn
 
-    body = {
-        "space": "panorama",
-        "points": [
-            {"image": [-240.5, 1310.0], "court": [0, 0]},
-            {"image": [1720.0, 1250.0], "court": [40, 0]},
-            {"image": [1300.0, 210.0], "court": [40, 20]},
-            {"image": [290.0, 205.0], "court": [0, 20]},
-        ],
-    }
+    points: list[dict[str, Any]] = [
+        {"image": [-240.5, 1310.0], "court": [0, 0]},
+        {"image": [1720.0, 1250.0], "court": [40, 0]},
+        {"image": [1300.0, 210.0], "court": [40, 20]},
+        {"image": [290.0, 205.0], "court": [0, 20]},
+    ]
+    body = {"space": "panorama", "points": points}
     assert CalibrationIn.model_validate(body).points[0].image == (-240.5, 1310.0)
-    body["points"][0]["image"] = [-1e9, 0]
+    points[0]["image"] = [-1e9, 0]
     with pytest.raises(ValidationError):
         CalibrationIn.model_validate(body)
 
@@ -299,7 +297,7 @@ async def test_one_question_per_moment_and_the_rest_offered(
     await upload(api, ids, m["id"], b"v" * 100)
     jobs: MemoryJobQueue = api.app.state.jobs
     await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
-    found = {**FOUND, "candidates": [*FOUND["candidates"], _cand(70_000, 2)]}
+    found = {**FOUND, "candidates": [*list(FOUND["candidates"]), _cand(70_000, 2)]}  # type: ignore[call-overload]
     await _finish(
         api,
         jobs.jobs[-1][2],
