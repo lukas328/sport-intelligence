@@ -34,7 +34,8 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   const ask = page.getByTestId("upload-ask-colour");
   await expect(ask).toContainText("TV Testdorf");
   await ask.getByRole("button").first().click();
-  await expect(ask).toContainText("Gespeichert");
+  // answered: the question goes away, the colour stands in the head
+  await expect(ask).toHaveCount(0);
 
   // upload, pause after the first part, continue with the same file.
   // Parts 2 and 3 are held back on the first attempt so the pause happens mid-upload.
