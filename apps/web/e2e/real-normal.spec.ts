@@ -211,3 +211,58 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText("Video 0:12");
 });
+
+/**
+ * Third real-video test G9: the court question on a phone at 390 px, dragged with a finger:
+ * every corner's handle is on the screen and a touch drag moves it.
+ */
+test("the court question on a phone: the corners can be dragged with a finger", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile", "the phone");
+  test.setTimeout(300_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await register(page, uniqueEmail("handy"), "Coach Handy");
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill("HC Handy");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("Herren 1");
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  const [, org, team] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  const match = await (
+    await page.request.post(`/v1/orgs/${org}/teams/${team}/matches`, {
+      headers: { "x-csrf-token": csrf },
+      data: { opponent_name: "TV Finger", kickoff_at: new Date(Date.now() - 86_400_000).toISOString(), kit_opponent: "#f2f2f2" },
+    })
+  ).json();
+  await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
+  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await expect
+    .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
+    .toBe("ready");
+  await page.goto(`/app/${org}/matches/${match.id}/check`);
+  await expect(page.getByTestId("field-check")).toBeVisible({ timeout: 30_000 });
+  const vw = page.viewportSize()!.width;
+  // every handle on the screen, none beyond its edge
+  for (let i = 0; i < 4; i++) {
+    const b = (await page.getByTestId(`corner-${i}`).boundingBox())!;
+    expect(b.x + b.width / 2).toBeGreaterThanOrEqual(0);
+    expect(b.x + b.width / 2).toBeLessThanOrEqual(vw);
+  }
+  await expect(page.getByTestId("field-reset")).toBeDisabled();
+  // a finger drags the near left corner (touch events, as on the phone)
+  const corner = page.getByTestId("corner-0");
+  await corner.scrollIntoViewIfNeeded();
+  const box = (await corner.boundingBox())!;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+  for (let k = 1; k <= 6; k++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + k * 5, y: y - k * 2 }] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  // the corner moved: «Zurücksetzen» can be pressed, the page did not scroll instead
+  await expect(page.getByTestId("field-reset")).toBeEnabled();
+  const after = (await corner.boundingBox())!;
+  expect(Math.abs(after.x - box.x) + Math.abs(after.y - box.y)).toBeGreaterThan(10);
+  await page.screenshot({ path: info.outputPath("court-phone.png") });
+});
