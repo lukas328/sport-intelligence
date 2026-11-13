@@ -85,7 +85,7 @@ export const SHIRTS = [
   ["yellow", "#f6c500"],
   ["black", "#17191c"],
   ["white", "#ffffff"],
-  ["green", "#138a4b"],
+  ["green", "#12804a"],
   ["orange", "#e8731a"],
   ["purple", "#5b2d8e"],
 ] as const;

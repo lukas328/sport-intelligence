@@ -302,8 +302,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <i aria-hidden className="block size-5 border-[1.5px] border-club-ink" style={{ background: match.opponent_colors.color ?? undefined }} />
               {ta("changeColour", { opponent: oppName(match) })}
             </summary>
-            {/* on the club colour: the line of the match runs underneath */}
-            <div className="inline-block bg-club pr-3 pb-1">
+            {/* on the ground colour: the line of the match runs underneath */}
+            <div className="mt-1 inline-block bg-ground px-3 pb-1 text-ink">
               <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
             </div>
           </details>

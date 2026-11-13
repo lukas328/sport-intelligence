@@ -104,4 +104,12 @@ with large text and the numbers against today: `docs/screens/anlauf/einstieg-abl
 - axe (WCAG 2.2 AA) after block 4: 11 pages (Spiele, Spiel/Video/Zahlen, Prüfen, Team, Saison,
   Szenen, Sammlungen, Kader bearbeiten, Spieltag) in all six check colours at 1280 and 390 px: no
   violations.
+- axe (WCAG 2.2 AA) after block 6: 14 pages (Spiele, Spiel/Video/Zahlen, Prüfen, Team, Saison,
+  Szenen, Sammlungen, Kader bearbeiten, Spieltag, Nächstes Spiel, Verein, Spielerseite) in all six
+  check colours at 1280 and 390 px: 168 of 168 without violations. Public: Einstieg (team preview,
+  `?farbe=` in all six colours) and the club by hand (both steps) at 1280 and 390 px: no violations
+  after the shirt green was set to the checked green (#12804a; #138a4b gave 4.4:1 under white).
+- Screens of block 6: `docs/screens/anlauf/runde2/` (Prüfen with the court is shown on a stand-in
+  hall image: the local stack has no analysed video; the shared page shows the empty field because
+  the demo court is not yet confirmed, as in the app).
 - Red before this work and not touched: `apps/api/tests/test_official.py::test_daily_tick_syncs_and_imports_reports`.

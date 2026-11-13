@@ -63,7 +63,7 @@ export function FieldCheck({ src, alt, size, corners, onChange }: { src: string;
           <title>{alt}</title>
         </image>
         {lines.map((l, i) => (
-          <path key={i} d={pathOf(l)} fill="none" stroke="#ffffff" strokeOpacity={0.85} strokeWidth={r / 3} vectorEffect="non-scaling-stroke" />
+          <path key={i} d={pathOf(l)} fill="none" stroke="white" strokeOpacity={0.85} strokeWidth={r / 3} vectorEffect="non-scaling-stroke" />
         ))}
         <path d={`${pathOf(corners)} Z`} fill="rgb(246 197 0 / 0.12)" stroke="var(--attn)" strokeWidth={3} strokeDasharray="10 6" vectorEffect="non-scaling-stroke" />
         {corners.map(([x, y], i) => (
@@ -84,7 +84,7 @@ export function FieldCheck({ src, alt, size, corners, onChange }: { src: string;
           >
             {/* the touch target is larger than the drawn handle */}
             <circle cx={x} cy={y} r={r * 2.4} fill="transparent" />
-            <circle cx={x} cy={y} r={r} fill="var(--attn)" stroke="#111" strokeWidth={3} vectorEffect="non-scaling-stroke" />
+            <circle cx={x} cy={y} r={r} fill="var(--attn)" stroke="var(--ink)" strokeWidth={3} vectorEffect="non-scaling-stroke" />
           </g>
         ))}
       </svg>
