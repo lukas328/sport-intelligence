@@ -309,9 +309,9 @@ def test_goals_conceded_by_position() -> None:
 
 def test_goals_without_time_have_no_runs_and_no_course() -> None:
     # a paper report: 29 own goals, no times; the order is unknown, so no "run of 29"
-    ev = [
-        Event(id=f"g{i}", type=EventType.SHOT, side=OWN, outcome="goal") for i in range(29)
-    ] + [Event(id=f"o{i}", type=EventType.SHOT, side=OPP, outcome="goal") for i in range(19)]
+    ev = [Event(id=f"g{i}", type=EventType.SHOT, side=OWN, outcome="goal") for i in range(29)] + [
+        Event(id=f"o{i}", type=EventType.SHOT, side=OPP, outcome="goal") for i in range(19)
+    ]
     tl = compute_match_stats(ev)["timeline"]
     assert tl["timed"] is False
     assert tl["final"] == {"own": 29, "opp": 19}
