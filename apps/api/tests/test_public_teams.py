@@ -97,3 +97,12 @@ async def test_start_makes_an_account_without_password_and_mails_a_link(
     # a path to another site is refused
     r = await anon.post("/v1/auth/start", json={"email": "x@example.org", "next": "//evil.test"})
     assert r.status_code == 422
+
+
+def test_scorer_names_in_reading_order() -> None:
+    from handball_api.services.public_teams import display_name
+
+    assert display_name("KRAUSE Liam") == "Liam Krause"
+    assert display_name("SIGG Jean-Claude") == "Jean-Claude Sigg"
+    assert display_name("MÜLLER-HUBER Tim") == "Tim Müller-Huber"
+    assert display_name("Anna Muster") == "Anna Muster"

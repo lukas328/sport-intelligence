@@ -15,6 +15,7 @@ import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
+import { ownName } from "@/lib/own-name";
 import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-view";
 import { EmptyField } from "@/components/anlauf/bundle";
 import { MatchHead } from "./match-head";
@@ -162,6 +163,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const [bench, setBench] = useState(false);
   const ta = useTranslations("anlauf");
   const thingText = useThingText();
+  const own = ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(
@@ -290,7 +292,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   ].filter(Boolean);
   return (
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
-      <MatchHead match={match} ownName={shell?.org.name ?? teamName} oppName={oppName(match)} view={view} graphics={graphics.data}>
+      <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
         {staff && match.opponent && !match.opponent_colors && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
       </MatchHead>
       {(justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
@@ -426,7 +428,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             match={match}
             video={main}
             graphics={graphics.data}
-            ownName={shell?.org.name ?? teamName}
+            ownName={own}
             oppName={oppName(match)}
             staff={staff}
             thing={thing}
@@ -488,7 +490,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                     staff && match.opponent
                       ? void downloadCard()
                       : chatPicture({
-                      title: `${shell?.org.name ?? teamName} ${ta("vsShort")} ${oppName(match)}`,
+                      title: `${own} ${ta("vsShort")} ${oppName(match)}`,
                       sub: [format.dateTime(new Date(match.kickoff_at), { dateStyle: "long" }), match.venue].filter(Boolean).join(" · "),
                       score: `${match.score_own}:${match.score_opponent}`,
                       heading: ta("chatHeading"),
@@ -502,7 +504,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             <div className="min-w-0 space-y-10">
               {graphics.data && <PointOpen orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} />}
               <Telegram
-                match={{ own: shell?.org.name ?? teamName, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
+                match={{ own, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
                 stats={stats.data ?? null}
                 names={names}
               />
@@ -529,7 +531,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                   orgId={orgId}
                   matchId={match.id}
                   teamId={match.team_id}
-                  ownName={teamName}
+                  ownName={own}
                   oppName={oppName(match)}
                   durationMs={main.duration_s ? main.duration_s * 1000 : null}
                   kickoff={match.kickoff_ms}
@@ -548,7 +550,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               orgId={orgId}
               matchId={match.id}
               teamId={match.team_id}
-              ownName={teamName}
+              ownName={own}
               oppName={oppName(match)}
               durationMs={main.duration_s ? main.duration_s * 1000 : null}
               kickoff={match.kickoff_ms}

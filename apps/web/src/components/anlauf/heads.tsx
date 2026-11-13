@@ -87,7 +87,9 @@ export function WurfHead({
     <header
       data-zone="wurf"
       className={cn(
-        "relative grid min-h-[400px] grid-cols-1 px-4 pt-5 [clip-path:polygon(0_0,100%_0,100%_88%,0_100%)] md:h-[410px] md:grid-cols-[minmax(0,1fr)_minmax(0,560px)] md:gap-6 md:px-8 md:pt-9 md:[clip-path:polygon(0_0,100%_0,100%_80%,0_100%)]",
+        "relative grid grid-cols-1 px-4 pt-5 [clip-path:polygon(0_0,100%_0,100%_88%,0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,560px)] md:gap-6 md:px-8 md:pt-9 md:[clip-path:polygon(0_0,100%_0,100%_80%,0_100%)]",
+        // without a goal sequence there is no line: the slant follows right under title and score
+        goals && goals.length > 0 ? "min-h-[400px] md:h-[410px]" : "pb-14 md:pb-20",
         waiting ? "bg-transparent text-ink shadow-[inset_0_0_0_2px_var(--ink)]" : "bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)]",
       )}
     >

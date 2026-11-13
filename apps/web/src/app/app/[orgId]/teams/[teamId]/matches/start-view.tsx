@@ -1,7 +1,7 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
@@ -14,6 +14,8 @@ import { FromMatchButton } from "@/components/collections/from-match";
 import { useShell } from "@/components/shell/context";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
+import { ownName } from "@/lib/own-name";
+import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, reportGoals, useMatchGraphics, type MatchGraphics } from "@/lib/graphics";
 import { matchState } from "@/lib/match-state";
@@ -39,13 +41,14 @@ export function StartView({
   actions?: ReactNode;
 }) {
   const t = useTranslations("anlauf");
-  const { org } = useShell();
+  // the team's name in the head, the same as in the top bar (UX test H11: one club, one name)
+  const { org, team } = useShell();
   const last = played.find((m) => m.kind !== "training" && m.score_own != null) ?? played[0] ?? null;
   const next = upcoming.find((m) => m.kind !== "training") ?? null;
   const withoutVideo = played.filter((m) => !m.has_video).length;
   return (
     <div className="space-y-8">
-      <LastMatch orgId={orgId} m={last} next={next} teamName={org.name} canWrite={canWrite} club={[org.primary_color, org.secondary_color ?? null]} />
+      <LastMatch orgId={orgId} m={last} next={next} teamName={ownName(team?.name, org.name)} canWrite={canWrite} club={[org.primary_color, org.secondary_color ?? null]} />
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section aria-labelledby="all-matches">
           <SectionHead
@@ -110,8 +113,37 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
           </span>
         )}
       </div>
+      {/* before the first video: what the federation's data already says (UX test H02) */}
+      {!m?.has_video && m && <FromReport orgId={orgId} teamId={m.team_id} />}
       {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={(_, n) => `${base}?tab=video&thing=${n}`} />}
     </div>
+  );
+}
+
+/** Rank, form, table excerpt, scorers and next game from handball.ch for a linked team. */
+function FromReport({ orgId, teamId }: { orgId: string; teamId: string }) {
+  const t = useTranslations("entry");
+  const link = useQuery({
+    queryKey: ["official", teamId],
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/official", { params: { path: { org_id: orgId, team_id: teamId } } })).data ?? null,
+  });
+  const club = link.data?.official_club_id;
+  const team = link.data?.official_team_id;
+  const preview = useQuery({
+    queryKey: ["public-team", club, team],
+    enabled: Boolean(club && team),
+    retry: false,
+    staleTime: 3_600_000,
+    queryFn: async () => (await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club!, official_id: team! } } })).data ?? null,
+  });
+  const standing = useStanding(preview.data);
+  if (!preview.data) return null;
+  return (
+    <section className="space-y-6" data-testid="start-from-report">
+      {standing && <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{standing}</p>}
+      <TeamFacts p={preview.data} />
+      <p className="m-0 text-[15px] text-ink-2">{t("source")}</p>
+    </section>
   );
 }
 

@@ -79,6 +79,24 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
     return hits
 
 
+def display_name(official: str) -> str:
+    """«KRAUSE Liam» (the federation's order) as «Liam Krause»; other names as they are."""
+    parts = official.split()
+    last = [w for w in parts if w.isupper() and len(w) > 1]
+    if not last or len(last) == len(parts):
+        return official.strip()
+    first = [w for w in parts if w not in last]
+    return " ".join(
+        [
+            *first,
+            *(
+                w.capitalize() if "-" not in w else "-".join(x.capitalize() for x in w.split("-"))
+                for w in last
+            ),
+        ]
+    )
+
+
 def _result(own: int | None, opp: int | None) -> str | None:
     if own is None or opp is None:
         return None
@@ -131,7 +149,7 @@ async def preview(ctx: Ctx, club_id: int, official_id: int) -> dict[str, Any]:
     except ch.UpstreamUnavailableError:
         pass  # the preview stands without scorers
     scorers = [
-        {"name": names[pid], "goals": n}
+        {"name": display_name(names[pid]), "goals": n}
         for pid, n in sorted(goals.items(), key=lambda kv: -kv[1])[:5]
         if names[pid]
     ]

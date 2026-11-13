@@ -52,6 +52,13 @@ function originOf(url: string | undefined): string | undefined {
 
 export function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
+  // the app has no marketing page of its own (UX test Z1): signed in into the app, everybody
+  // else to the entry, with what the website handed over (q, farbe, lang)
+  if (pathname === "/") {
+    const url = req.nextUrl.clone();
+    url.pathname = req.cookies.get("hb_session") ? "/app" : "/einstieg";
+    return NextResponse.redirect(url);
+  }
   if (PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`)) && !req.cookies.get("hb_session")) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
