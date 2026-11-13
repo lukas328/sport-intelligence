@@ -153,7 +153,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       : lastResult
         ? tv(lastResult.headline.key.replace("voice.", "") as "won", lastResult.headline.params as never)
         : tv("neutralSeason");
-  const league = official.data?.linked ? [official.data.league, official.data.group_name].filter(Boolean).join(", ") : (team.data?.league ?? "");
+  const league = official.data?.linked ? official.data.league || official.data.group_name || "" : (team.data?.league ?? "");
   const season = `${t("title")} ${team.data?.current_season?.label ?? ""}`.trim();
   const kickBase = league ? ts("kick", { season, league, n }) : ts("kickNoLeague", { season, n });
   // the rank always stands in the head when the table is known (UX test B41), in the title or here

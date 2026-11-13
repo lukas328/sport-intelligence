@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { CollectionList } from "@/components/collections/collection-list";
+import { buttonClass } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
 import { SearchView } from "../search/search-view";
 import { ScenesHead } from "./scenes-head";
@@ -15,8 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
 /** Szenen (SPEC 7.6): the count in the Seitenkopf, the search with chips, the answer, the scenes
  * as tiles; Sammlungen and Highlights at the side. The event list, saved searches and own tags
  * are behind «Mehr»; plays and the table are links. */
-export default async function ScenesPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
+export default async function ScenesPage({ params, searchParams }: { params: Promise<{ orgId: string; teamId: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
   const { orgId, teamId } = await params;
+  // a question asked from elsewhere (?q, ?chips, ?view) still gets the search and its answer
+  const asked = Object.keys(await searchParams).some((k) => ["q", "chips", "view"].includes(k));
   const t = await getTranslations("scenesPage");
   const ta = await getTranslations("anlauf");
   const client = await serverApi();
@@ -87,6 +91,24 @@ export default async function ScenesPage({ params }: { params: Promise<{ orgId: 
       </p>
     </>
   );
+  // before the first video there is nothing to search: one sentence and the way to the video,
+  // not «0 Szenen aus 0 Spielen» with chips (UX test B28)
+  if (withVideo.length === 0 && !asked) {
+    const canWrite = team?.my_role === "coach" || team?.my_role === "analyst" || team?.my_role === "team_manager";
+    return (
+      <div>
+        <PageHeader title={(await getTranslations("shell"))("scenes")} />
+        <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
+          <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t("noneYet")}</p>
+          {canWrite && (
+            <Link href={`${base}/matches?upload=1`} className={buttonClass("primary")}>
+              {ta("uploadVideo")}
+            </Link>
+          )}
+        </section>
+      </div>
+    );
+  }
   return (
     <div>
       <ScenesHead orgId={orgId} teamId={teamId} matches={withVideo.length} />

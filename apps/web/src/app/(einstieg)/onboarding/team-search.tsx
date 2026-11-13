@@ -179,7 +179,7 @@ export function OfficialTeamSearch({
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{team.name}</span>
-                          <span className="block text-sm text-muted">{[team.league, team.group_name].filter(Boolean).join(" · ")}</span>
+                          <span className="block text-sm text-muted">{team.league || team.group_name}</span>
                         </span>
                         {team.status === "member" && team.organization_id && team.team_id ? (
                           <Link className={buttonClass("secondary", "sm")} href={`/app/${team.organization_id}/teams/${team.team_id}`}>

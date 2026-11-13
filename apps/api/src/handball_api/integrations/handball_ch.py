@@ -416,7 +416,9 @@ def _game(g: dict[str, Any]) -> OfficialGame:
         away_half=_int(g.get("awayTeamScoreInterval")) if played else None,
         played=played,
         venue=g.get("venueName") or None,
-        competition=group or league,
+        # the league a coach knows («Männer 1. Liga»), not the group's code («Hauptrunde -
+        # M1-01», UX test N25/A04); a cup has only its group name
+        competition=league or group,
         group_id=_int(g.get("gameGroupOrCupId")),
     )
 

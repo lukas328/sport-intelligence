@@ -85,3 +85,20 @@ test("unknown match, team and collection addresses answer 404 (UX test N18)", as
   // the club start still opens
   expect((await page.goto(`/app/${org}`))?.status()).toBe(200);
 });
+
+test("a club without video: Szenen says one sentence and the way to the video (UX test B28)", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  await register(page, uniqueEmail("b28"), "Coach Leer");
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill("HC Leer");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("Herren 1");
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  await page.goto(page.url().replace(/(\/teams\/[^/?#]+).*/, "$1/scenes"));
+  const empty = page.getByTestId("scenes-empty");
+  await expect(empty).toContainText("Szenen gibt es nach dem ersten Video.");
+  await expect(empty.getByRole("link", { name: "Video hochladen" })).toBeVisible();
+  await expect(page.getByTestId("scene-search")).toHaveCount(0);
+  await expect(page.getByText(/0 Szenen aus 0 Spielen/)).toHaveCount(0);
+});
