@@ -136,6 +136,16 @@ the tables above gives the tester's check of round 1 and what was done after it.
 
 ## Tests
 
+Round 2: API 350 passed; web unit tests 204 passed; e2e 46 passed (the rest are skips by project:
+phone-only or desktop-only flows). New tests: `test_a_mark_uploaded_twice_is_stored_once_per_match`,
+`test_the_last_mark_can_be_taken_back`, `test_prufen_asks_for_the_throw_off_until_it_is_set`,
+`test_after_the_analysis_the_mail_promises_only_what_is_there`, `test_a_goal_names_its_scorer_for_the_confirmed_column`,
+`test_a_shirt_number_finds_the_events_of_that_player`, `test_a_typo_is_a_letter_away`,
+`test_the_sign_in_link_lasts_a_day_and_says_so`, `test_public_config_gives_the_website_and_support_addresses`;
+web `season-line`, `mini-field`, `video-file`, `scene-words`, `telegram`, client-core `forget`; e2e
+`matchday-offline.spec` (network off, clock, take back), `phone-search.spec`, `entry.spec` (slow federation,
+occupied team), `match.spec` (new video: no old capture tools).
+
 - vitest: `thing-sequence`, `scene-words`, `telegram`, design lint and the rest.
 - pytest: metrics (`test_goals_without_time_have_no_runs_and_no_course`,
   `test_ratios_need_attempts_in_their_own_direction`), graphics (unique numbers, demo court rule),
