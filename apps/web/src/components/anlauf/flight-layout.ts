@@ -8,8 +8,8 @@ export interface ReportGoal {
 }
 
 /** Running goal difference after each goal: [minute, difference], starting at [0, 0]. */
-export function flowOf(goals: readonly ReportGoal[]): [number, number][] {
-  const out: [number, number][] = [[0, 0]];
+export function flowOf(goals: readonly ReportGoal[], from = 0): [number, number][] {
+  const out: [number, number][] = [[from, 0]];
   let v = 0;
   for (const g of [...goals].sort((a, b) => a.minute - b.minute)) {
     v += g.team === "own" ? 1 : -1;
@@ -66,13 +66,14 @@ export function floorAt(x: number, width: number, height: number, slant: number)
  * (`slant`: how far the edge rises over the width, in the drawing's units); every label keeps
  * LABEL_GAP from the line and from the edge: above the line where it fits, else below.
  */
-export function flightLayout(goals: readonly ReportGoal[], width: number, height: number, length = 60, labels?: FlightLabels, slant = 0): FlightLayout {
-  const flow = flowOf(goals);
+export function flightLayout(goals: readonly ReportGoal[], width: number, height: number, length = 60, labels?: FlightLabels, slant = 0, from = 0): FlightLayout {
+  // `from` to `length`: the minutes drawn, the whole match or only what a video covers (E10)
+  const flow = flowOf(goals, from);
   const pad = width < 500 ? 16 : 32;
   const top = labels ? LABEL_SIZE + LABEL_GAP + 6 : 10;
   const lo = Math.min(0, ...flow.map((p) => p[1]));
   const hi = Math.max(0, ...flow.map((p) => p[1]));
-  const x = (m: number) => pad + ((width - 2 * pad - 14) * Math.min(m, length)) / length;
+  const x = (m: number) => pad + ((width - 2 * pad - 14) * (Math.min(Math.max(m, from), length) - from)) / Math.max(1e-6, length - from);
   const steps: [number, number][] = [];
   flow.forEach((p, i) => {
     if (i) steps.push([x(p[0]), flow[i - 1]![1]]);
@@ -92,7 +93,7 @@ export function flightLayout(goals: readonly ReportGoal[], width: number, height
   const end: Pt = [x(length), y(endV)];
   const out: FlightLabel[] = [];
   if (labels) {
-    const half = diffAt(flow, length / 2);
+    const half = diffAt(flow, (from + length) / 2);
     const say = (tpl: string, level: string | undefined, v: number) => (v === 0 && level ? level : tpl.replace("{v}", signed(v)));
     const place = (text: string, cx: number, anchor: FlightLabel["anchor"]) => {
       const w = text.length * charWidth;
@@ -106,7 +107,7 @@ export function flightLayout(goals: readonly ReportGoal[], width: number, height
       const box: FlightLabel["box"] = [x0, baseline - LABEL_SIZE + 3, x1, baseline + 3];
       out.push({ text, x: cx, y: baseline, anchor, box });
     };
-    place(say(labels.half, labels.halfLevel, half), x(length / 2), "middle");
+    place(say(labels.half, labels.halfLevel, half), x((from + length) / 2), "middle");
     // the end label to the left of the end dot, clear of it
     place(say(labels.end, labels.endLevel, endV), end[0] - 12, "end");
   }

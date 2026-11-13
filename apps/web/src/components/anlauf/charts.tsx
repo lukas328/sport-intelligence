@@ -12,6 +12,7 @@ export function Flight({
   width,
   height,
   length = 60,
+  from = 0,
   labels,
   slant = 0,
   className,
@@ -20,6 +21,8 @@ export function Flight({
   width: number;
   height: number;
   length?: number;
+  /** the first minute drawn: a video that covers only part of the match starts there */
+  from?: number;
   labels?: FlightLabels;
   /** how far the slanted lower edge of the head rises over the width, in drawing units */
   slant?: number;
@@ -27,7 +30,7 @@ export function Flight({
 }) {
   const small = width < 500;
   const pad = small ? 16 : 32;
-  const L = flightLayout(goals, width, height, length, small ? undefined : labels, slant);
+  const L = flightLayout(goals, width, height, length, small ? undefined : labels, slant, from);
   const text = { font: "600 14px var(--font-sans)", fill: "var(--club-ink)" };
   return (
     <svg viewBox={`0 0 ${width} ${height}`} aria-hidden className={className}>

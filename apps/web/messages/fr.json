@@ -3174,7 +3174,15 @@
     "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image",
     "rowChecks": "Analyse terminée, {n, plural, one {1 question ouverte} other {# questions ouvertes}}",
     "rowNoGoals": "Analyse terminée, pas encore de but trouvé",
-    "titleLast": "Le dernier match."
+    "titleLast": "Le dernier match.",
+    "scoreFromVideo": "Buts dans la vidéo",
+    "goalBy": "But {team}",
+    "atVideo": "Vidéo {time}",
+    "noSpot": "sans position",
+    "sceneShow": "Voir la scène",
+    "videoGoalsTitle": "Buts dans la vidéo",
+    "noThingsGoals": "{n, plural, one {1 but est confirmé} other {# buts sont confirmés}}. Pour trois choses, il faut plus de buts avec position; les buts et leurs scènes sont ici.",
+    "videoShort": "Vidéo"
   },
   "check": {
     "top": "Vérifier · {opponent}",

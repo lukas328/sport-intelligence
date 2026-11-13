@@ -14,9 +14,14 @@ import { api } from "@/lib/client";
 export type MatchGraphics = Schemas["MatchGraphicsOut"];
 export type SceneCamera = Schemas["SceneCameraOut"];
 
+/**
+ * The goals that can be drawn: those with a shot spot. A confirmed goal without a spot counts in
+ * the score, the course and the goal list (`spotless`), not in bundles and Minifelder (real-video
+ * test E01).
+ */
 export function goalRuns(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { eventId: string })[] {
   return g.goals
-    .filter((x) => !team || x.team === team)
+    .filter((x): x is typeof x & { shot: [number, number] } => x.shot != null && (!team || x.team === team))
     .map((x) => ({
       eventId: x.event_id,
       team: x.team,
@@ -29,15 +34,36 @@ export function goalRuns(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { e
     }));
 }
 
+/** Goals without a shot spot: counted and listed, said honestly where drawings would be. */
+export function spotless(g: MatchGraphics, team?: "own" | "opp"): MatchGraphics["goals"] {
+  return g.goals.filter((x) => x.shot == null && (!team || x.team === team));
+}
+
+/** The score the video's goals give, when the match itself has none (real-video test E10). */
+export function videoScore(g: MatchGraphics): { own: number; opp: number } | null {
+  const seen = videoGoals(g);
+  if (seen.length === 0) return null;
+  return { own: seen.filter((x) => x.team === "own").length, opp: seen.filter((x) => x.team === "opp").length };
+}
+
+/** The goals that have a place in the video (confirmed there or pinned to it). */
+export function videoGoals(g: MatchGraphics): MatchGraphics["goals"] {
+  return g.goals.filter((x) => x.has_video);
+}
+
 export function reportGoals(g: MatchGraphics): ReportGoal[] {
   return g.report_goals.filter((x): x is { minute: number; team: "own" | "opp" } => x.minute != null);
 }
 
 /** The tactics camera's scene, or null when there is nothing measured to show. */
 export function cameraScene(s: SceneCamera, label?: string | null): CameraScene | null {
-  if (!s.field_confirmed || s.tracks.length === 0 || s.clock_s == null) return null;
+  // positions as soon as the court is confirmed and the scene has tracks; without the throw-off
+  // the clock is the video time (real-video test E02), never «no positions» when there are some
+  if (!s.field_confirmed || s.tracks.length === 0) return null;
+  const videoTime = s.clock_s == null;
   return {
-    clock: Math.round(s.clock_s),
+    clock: Math.round(s.clock_s ?? s.video_s ?? 0),
+    videoTime,
     duration: s.duration_s,
     tracks: s.tracks.map((t) => ({ team: t.team, number: t.number, xy: t.xy.map((p) => [p[0], p[1]] as Pt) })),
     ball: s.ball.map((b) => ({ from: b.from_s, to: b.to_s, team: b.team, number: b.number })),

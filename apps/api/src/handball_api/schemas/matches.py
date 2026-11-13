@@ -552,7 +552,9 @@ class GoalRunOut(ApiModel):
         description="the scorer's way before the shot, half court (goal at the top, metres); "
         "empty without tracking"
     )
-    shot: tuple[float, float]
+    shot: tuple[float, float] | None = Field(
+        description="the shot spot, half court; null for a goal without a known spot"
+    )
     aim: tuple[float, float] | None
     confirmed: bool = Field(description="false: the shot spot is estimated")
     source: Literal["tracking", "marked", "demo"] | None
@@ -581,6 +583,9 @@ class CheckOut(ApiModel):
 
 class MatchGraphicsOut(ApiModel):
     has_video: bool
+    span: tuple[float, float] | None = Field(
+        default=None, description="match minutes the video covers; null without throw-off"
+    )
     field_confirmed: bool | None = Field(description="null without a video")
     report_goals: list[ReportGoalOut]
     goals: list[GoalRunOut]
@@ -610,6 +615,9 @@ class ScorerOut(ApiModel):
 class SceneCameraOut(ApiModel):
     event_id: uuid.UUID
     clock_s: float | None
+    video_s: float | None = Field(
+        default=None, description="video time at the scene start, for scenes without a clock"
+    )
     duration_s: float
     field_confirmed: bool | None
     tracks: list[SceneTrackOut]

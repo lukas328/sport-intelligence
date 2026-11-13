@@ -65,6 +65,10 @@ def _snapshot(e: Event) -> dict[str, Any]:
     }
 
 
+# sources whose events carry the video time first; their match clock follows the throw-off
+VIDEO_TIMED = {"goal_candidate", "heuristic", "scoreboard_ocr"}
+
+
 def clock_from_video(match: Match, t_ms: int) -> tuple[int, float] | None:
     """(period, match clock in s) for a video time, using the stored throw-off times per half."""
     k = match.kickoff_ms or {}
@@ -419,6 +423,19 @@ async def set_kickoff(
             e.source in ("official_feed", "paper_report", "official_report") and not from_video
         ):
             e.t_ms = video_from_clock(match, period, e.clock_s or 0.0)
+    # events found in the video get their match clock from the throw-off, also those confirmed
+    # before it was set (real-video test E01: confirmed goals kept clock_s = null)
+    timed = (
+        await ctx.db.scalars(
+            select(Event).where(Event.match_id == match.id, Event.t_ms.is_not(None))
+        )
+    ).all()
+    for e in timed:
+        if e.clock_s is not None and e.source not in VIDEO_TIMED:
+            continue
+        derived = clock_from_video(match, int(e.t_ms or 0))
+        if derived is not None:
+            e.period, e.clock_s = derived
     return match
 
 

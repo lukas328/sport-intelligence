@@ -59,9 +59,12 @@ async def test_graphics_from_the_report_without_video(make_api: Callable[[], Api
         {"minute": 3.33, "team": "opp"},
         {"minute": 5.5, "team": "own"},
     ]
-    # only the goal with a spot is drawn: no run without tracking, the spot as marked
-    assert len(g["goals"]) == 1
-    goal = g["goals"][0]
+    # every goal is listed (E01); only the goal with a spot can be drawn: no run without
+    # tracking, the spot as marked
+    assert len(g["goals"]) == 3 and not any(x["has_video"] for x in g["goals"])
+    drawn = [x for x in g["goals"] if x["shot"] is not None]
+    assert len(drawn) == 1
+    goal = drawn[0]
     assert goal["run"] == [] and goal["source"] == "marked" and goal["confirmed"] is True
     assert goal["zone"] == "la"
     # half court: attacker's left is small u, the goal line is v = 0
@@ -194,3 +197,60 @@ async def test_a_goal_names_its_scorer_for_the_confirmed_column(
     )
     g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
     assert [x["player_id"] for x in g["goals"]] == [player["player_id"]]
+
+
+async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
+    make_api: Callable[[], Api], owner_conn: Any
+) -> None:
+    """Real-video test E01, E10: goals confirmed in Prüfen before the throw-off is set have no
+    spot, no number and no clock. They are goals all the same; once the throw-off is set they
+    get their match clock and stand in the course, which spans what the video covers."""
+    from handball_api.core.jobs import MemoryJobQueue
+
+    from .test_goal_candidates import FOUND
+    from .test_identity_sync import _finish, _ingest, _tracks
+    from .test_matches import upload
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    base = f"/v1/orgs/{org}/matches/{m['id']}"
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    # no automatic events: no throw-off, no goal of the analysis
+    await _finish(
+        api,
+        jobs.jobs[-1][2],
+        {"tracks": _tracks(), "detector": "heuristic", "goal_candidates": FOUND},
+    )
+    await owner_conn.execute("UPDATE video_assets SET duration_s = 330 WHERE id = $1", vid)
+    rows = (await api.get(f"{base}/goal-candidates")).json()["candidates"]
+    for c, side in zip(rows[:3], ("own", "opponent", "opponent"), strict=True):
+        r = await api.put(
+            f"{base}/goal-candidates/{c['id']}/review", json={"status": "confirmed", "side": side}
+        )
+        assert r.status_code == 200, r.text
+
+    g = (await api.get(f"{base}/graphics")).json()
+    assert len(g["goals"]) == 3
+    assert all(x["shot"] is None and x["minute"] is None for x in g["goals"])
+    assert all(x["has_video"] and x["t_ms"] is not None for x in g["goals"])
+    assert g["report_goals"] == [] and g["span"] is None
+
+    # the throw-off of the first half at 0:20 of the video
+    r = await api.put(f"{base}/kickoff", json={"period": 1, "t_ms": 20_000})
+    assert r.status_code == 204, r.text
+    g = (await api.get(f"{base}/graphics")).json()
+    minutes = sorted(x["minute"] for x in g["goals"])
+    assert minutes == [
+        round((61_500 - 20_000) / 60_000, 2),
+        round(128.5 / 60, 2),
+        round(178.5 / 60, 2),
+    ]
+    assert [x["team"] for x in g["report_goals"]] == ["own", "opp", "opp"]
+    assert g["span"] == [0.0, round(310 / 60, 2)]
+    # every event of the video has its clock now, the scene too
+    camera = (await api.get(f"{base}/scenes/{g['goals'][0]['event_id']}/camera")).json()
+    assert camera["clock_s"] is not None and camera["video_s"] is not None

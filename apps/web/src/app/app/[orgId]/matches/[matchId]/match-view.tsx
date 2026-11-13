@@ -529,7 +529,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <Button onClick={() => setView("video")}>{ta("chooseVideo")}</Button>
             </section>
           )}
-          {graphics.data && graphics.data.goals.length > 0 && (
+          {graphics.data && (goalRuns(graphics.data).length > 0 || graphics.data.goals.some((x) => x.has_video)) && (
             <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} />
           )}
           <GameActions
@@ -565,7 +565,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               />
             </div>
             <div className="space-y-10">
-              {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} />}
+              {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} />}
               {stats.data && <ThreeFigures stats={stats.data} names={names} />}
             </div>
           </div>
@@ -596,7 +596,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
       {view === "numbers" && (
         <div className="animate-fade">
           <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
-          {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} row />}
+          {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} row />}
           {stats.data && stats.data.quality.events > 0 && (
             <section id="numbers-overview" className="scroll-mt-24">
               <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />

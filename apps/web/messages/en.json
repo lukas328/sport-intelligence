@@ -3174,7 +3174,15 @@
     "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture",
     "rowChecks": "Analysis done, {n, plural, one {1 question} other {# questions}} open",
     "rowNoGoals": "Analysis done, no goals found yet",
-    "titleLast": "The last match."
+    "titleLast": "The last match.",
+    "scoreFromVideo": "Goals in the video",
+    "goalBy": "Goal {team}",
+    "atVideo": "Video {time}",
+    "noSpot": "no spot",
+    "sceneShow": "Show scene",
+    "videoGoalsTitle": "Goals in the video",
+    "noThingsGoals": "{n, plural, one {1 goal is confirmed} other {# goals are confirmed}}. Three things need more goals with a spot; the goals and their scenes are here.",
+    "videoShort": "Video"
   },
   "check": {
     "top": "Check · {opponent}",

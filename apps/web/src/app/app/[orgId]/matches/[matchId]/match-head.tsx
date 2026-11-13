@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
-import { reportGoals, type MatchGraphics } from "@/lib/graphics";
+import { reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
 
@@ -33,6 +33,10 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
       {format.dateTime(kickoff, { hour: "2-digit", minute: "2-digit" })}
     </>
   ) : undefined;
+  // no result of its own, but goals confirmed in the video: those, said as such (E10)
+  const fromVideo = match.score_own == null && graphics ? videoScore(graphics) : null;
+  const own = match.score_own ?? fromVideo?.own ?? null;
+  const opp = match.score_opponent ?? fromVideo?.opp ?? null;
   const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
@@ -45,9 +49,11 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <WurfHead
           kick={kick}
           title={<Breakable text={title} />}
-          own={match.score_own}
-          opp={match.score_opponent}
+          own={own}
+          opp={opp}
           pending={pending}
+          span={graphics?.span ?? null}
+          scoreNote={fromVideo ? t("scoreFromVideo") : undefined}
           ownName={ownName}
           oppName={oppName}
           goals={graphics ? reportGoals(graphics) : null}
@@ -70,8 +76,8 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
             </h1>
           }
           sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue].filter(Boolean).join(" · ")}
-          own={match.score_own}
-          opp={match.score_opponent}
+          own={own}
+          opp={opp}
           pending={pending}
         />
       )}

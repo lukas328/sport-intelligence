@@ -28,7 +28,8 @@ from sqlalchemy import select
 from handball_api.core.errors import ProblemError
 from handball_api.models import CameraCalibration, Event, GoalCandidate, Match, Track, VideoAsset
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match, timeline_video
+from handball_api.services.events import clock_from_video
+from handball_api.services.matches import duration_ms, get_match, timeline_video
 from handball_api.services.shot_positions import _rows
 
 LENGTH, WIDTH = 40.0, 20.0
@@ -315,8 +316,8 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             if run:
                 source = "tracking"
                 shot = shot or run[-1]
-        if shot is None:
-            continue
+        # a confirmed goal without a spot is still a goal: score, course, list, scene (real-video
+        # test E01); only the drawings need the spot and leave it out
         runs.append(
             {
                 "event_id": e.id,
@@ -338,6 +339,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
 
     return {
         "has_video": asset is not None,
+        "span": _span(match, asset),
         "field_confirmed": field,
         "report_goals": report,
         "goals": runs,
@@ -347,6 +349,23 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         "checks": await _open_checks(ctx, match, asset, tracking, confirmed_field),
         "source": "demo" if demo else "analysis",
     }
+
+
+def _span(match: Match, asset: VideoAsset | None) -> list[float] | None:
+    """The match minutes the video covers, once the throw-off is set: the course is drawn over
+    that stretch, not over a whole match (real-video test E10). Null without throw-off."""
+    if asset is None or match.is_demo:
+        return None
+    length = duration_ms(asset)
+    first = min((int(v) for v in (match.kickoff_ms or {}).values()), default=None)
+    if length is None or first is None:
+        return None
+    start = clock_from_video(match, max(0, 0 if first <= 0 else first))
+    end = clock_from_video(match, length)
+    if start is None or end is None:
+        return None
+    total = match.period_s * match.periods / 60
+    return [round(max(0.0, start[1] / 60), 2), round(min(total, end[1] / 60), 2)]
 
 
 async def _phases(ctx: Ctx, match: Match, goals: list[Event]) -> list[dict[str, Any]]:
@@ -499,6 +518,8 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
     base: dict[str, Any] = {
         "event_id": e.id,
         "clock_s": max(0.0, clock - SCENE_MS / 1000) if clock is not None else None,
+        # without the throw-off the scene still has its place in the video (E02)
+        "video_s": max(0.0, (e.t_ms - SCENE_MS) / 1000) if e.t_ms is not None else None,
         "duration_s": SCENE_MS / 1000,
         "field_confirmed": field,
         "tracks": [],

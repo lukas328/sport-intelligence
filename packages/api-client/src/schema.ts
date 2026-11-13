@@ -6809,11 +6809,14 @@ export interface components {
                 number,
                 number
             ][];
-            /** Shot */
+            /**
+             * Shot
+             * @description the shot spot, half court; null for a goal without a known spot
+             */
             shot: [
                 number,
                 number
-            ];
+            ] | null;
             /** Source */
             source: ("tracking" | "marked" | "demo") | null;
             /**
@@ -7581,6 +7584,14 @@ export interface components {
              * @enum {string}
              */
             source: "analysis" | "demo";
+            /**
+             * Span
+             * @description match minutes the video covers; null without throw-off
+             */
+            span?: [
+                number,
+                number
+            ] | null;
         };
         /** MatchMarks */
         MatchMarks: {
@@ -9630,6 +9641,11 @@ export interface components {
             source: "analysis" | "demo";
             /** Tracks */
             tracks: components["schemas"]["SceneTrackOut"][];
+            /**
+             * Video S
+             * @description video time at the scene start, for scenes without a clock
+             */
+            video_s?: number | null;
         };
         /** SceneOut */
         SceneOut: {

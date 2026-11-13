@@ -3174,7 +3174,15 @@
     "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild",
     "rowChecks": "Analyse fertig, {n, plural, one {1 Frage} other {# Fragen}} offen",
     "rowNoGoals": "Analyse fertig, noch keine Tore erkannt",
-    "titleLast": "Das letzte Spiel."
+    "titleLast": "Das letzte Spiel.",
+    "scoreFromVideo": "Tore im Video",
+    "goalBy": "Tor {team}",
+    "atVideo": "Video {time}",
+    "noSpot": "ohne Position",
+    "sceneShow": "Szene zeigen",
+    "videoGoalsTitle": "Tore im Video",
+    "noThingsGoals": "{n, plural, one {1 Tor ist bestätigt} other {# Tore sind bestätigt}}. Für drei Dinge braucht es mehr Tore mit Position; die Tore und ihre Szenen stehen hier.",
+    "videoShort": "Video"
   },
   "check": {
     "top": "Prüfen · {opponent}",

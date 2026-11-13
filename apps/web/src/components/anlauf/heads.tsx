@@ -100,6 +100,8 @@ export function WurfHead({
   children,
   waiting = false,
   pending,
+  span,
+  scoreNote,
 }: {
   kick?: ReactNode;
   title: ReactNode;
@@ -115,7 +117,13 @@ export function WurfHead({
   /** before the first result: no club area, an ink outline instead */
   waiting?: boolean;
   pending?: ReactNode;
+  /** the match minutes a video covers: the line runs over them only, without halftime labels */
+  span?: readonly [number, number] | null;
+  /** a word under the result when it is not the match's own («Tore im Video») */
+  scoreNote?: ReactNode;
 }) {
+  const from = span ? span[0] : 0;
+  const length = span ? span[1] : 60;
   return (
     <header
       data-zone="wurf"
@@ -136,6 +144,11 @@ export function WurfHead({
       </div>
       <div className="flex min-w-0 flex-col">
         <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
+        {scoreNote && (
+          <p className="mt-1 text-[15px] font-semibold md:text-right" data-testid="score-note">
+            {scoreNote}
+          </p>
+        )}
         <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[15px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
           <span>{ownName}</span>
           <span>
@@ -143,11 +156,11 @@ export function WurfHead({
             {oppName}
           </span>
         </p>
-        {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
+        {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} from={from} length={length} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
       </div>
       {goals && goals.length > 0 && (
         <>
-          <Flight goals={goals} width={1000} height={120} labels={flightLabels} slant={48} className="pointer-events-none absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
+          <Flight goals={goals} width={1000} height={120} labels={span ? undefined : flightLabels} from={from} length={length} slant={48} className="pointer-events-none absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
 
         </>
       )}

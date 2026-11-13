@@ -5400,18 +5400,26 @@
             "type": "array"
           },
           "shot": {
-            "maxItems": 2,
-            "minItems": 2,
-            "prefixItems": [
+            "anyOf": [
               {
-                "type": "number"
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
               },
               {
-                "type": "number"
+                "type": "null"
               }
             ],
-            "title": "Shot",
-            "type": "array"
+            "description": "the shot spot, half court; null for a goal without a known spot",
+            "title": "Shot"
           },
           "source": {
             "anyOf": [
@@ -7649,6 +7657,28 @@
             ],
             "title": "Source",
             "type": "string"
+          },
+          "span": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "match minutes the video covers; null without throw-off",
+            "title": "Span"
           }
         },
         "required": [
@@ -13606,6 +13636,18 @@
             },
             "title": "Tracks",
             "type": "array"
+          },
+          "video_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "video time at the scene start, for scenes without a clock",
+            "title": "Video S"
           }
         },
         "required": [

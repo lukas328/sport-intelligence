@@ -51,6 +51,9 @@ export function ThreeThingsView({
   const text = useThingText();
   const things = threeThings(goalRuns(graphics));
   if (things.length === 0) {
+    // confirmed goals, but not enough with a spot for three things: the goals themselves, as
+    // scenes and on the tactics camera (real-video test E01)
+    if (graphics.goals.some((x) => x.has_video)) return <VideoGoals orgId={orgId} matchId={matchId} graphics={graphics} oppName={oppName} />;
     return <p className="border-t-2 border-ink pt-4 text-[17px] text-ink-2">{t("noThings")}</p>;
   }
   return (
@@ -203,8 +206,51 @@ export function SceneCamera({
       view={view}
       width={width}
       dot={view === "halfB" ? 17 : 14}
-      text={{ label: t("cameraLabel", { label }), pause: t("pause"), play: t("play"), notFound: t("ballNotFound"), noBall: t("noBall"), caption: caption ?? null, captionSmall: caption ? (captionSmall ?? t("positionsFromVideo")) : null }}
+      text={{ label: t("cameraLabel", { label }), pause: t("pause"), play: t("play"), notFound: t("ballNotFound"), noBall: t("noBall"), caption: caption ?? null, captionSmall: caption ? (captionSmall ?? t("positionsFromVideo")) : null, clockPrefix: scene.videoTime ? t("videoShort") : null }}
       barExtra={barExtra}
     />
+  );
+}
+
+const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
+
+/**
+ * The goals of a match without three things yet: each with its time (match clock, else the place
+ * in the video), the team, «ohne Position» where no spot is known, and the scene on the tactics
+ * camera (E01, E02).
+ */
+export function VideoGoals({ orgId, matchId, graphics, oppName }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string }) {
+  const t = useTranslations("anlauf");
+  const goals = graphics.goals.filter((x) => x.has_video).sort((a, b) => (a.minute ?? Infinity) - (b.minute ?? Infinity) || (a.t_ms ?? 0) - (b.t_ms ?? 0));
+  const playable = goals.filter((g) => g.has_video && g.t_ms != null);
+  const [open, setOpen] = useState<string | null>(playable[0]?.event_id ?? null);
+  const shown = goals.find((g) => g.event_id === open);
+  const when = (g: (typeof goals)[number]) => (g.minute != null ? clockOf(g.minute) : g.t_ms != null ? t("atVideo", { time: mmss(g.t_ms) }) : "");
+  const who = (g: (typeof goals)[number]) => (g.team === "own" ? t("us") : oppName);
+  return (
+    <section className="border-t-2 border-ink pt-4" data-testid="video-goals">
+      <p className="m-0 max-w-[60ch] text-[17px] text-ink-2">{t("noThingsGoals", { n: goals.length })}</p>
+      <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
+        <ol className="m-0 list-none p-0" aria-label={t("videoGoalsTitle")}>
+          {goals.map((g) => (
+            <li key={g.event_id} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule py-2 text-[17px]" data-testid="video-goal">
+              <b className="font-num w-20 shrink-0">{when(g)}</b>
+              <span aria-hidden className={cn("inline-block h-2.5 w-3 -skew-x-12", g.team === "own" ? "bg-club-text" : "bg-ink")} />
+              <span className="min-w-0 flex-1">
+                {t("goalBy", { team: who(g) })}
+                {g.number != null && ` · #${g.number}`}
+                {g.shot == null && <span className="ml-2 text-[15px] text-ink-2">{t("noSpot")}</span>}
+              </span>
+              {g.has_video && g.t_ms != null && (
+                <button type="button" onClick={() => setOpen(g.event_id)} aria-pressed={open === g.event_id} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+                  {t("sceneShow")}
+                </button>
+              )}
+            </li>
+          ))}
+        </ol>
+        {shown && <SceneCamera key={shown.event_id} orgId={orgId} matchId={matchId} eventId={shown.event_id} label={`${who(shown)} ${when(shown)}`} view="halfB" width={520} />}
+      </div>
+    </section>
   );
 }

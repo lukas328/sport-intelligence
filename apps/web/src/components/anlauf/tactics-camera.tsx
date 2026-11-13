@@ -27,8 +27,10 @@ export interface BallStretch {
 }
 
 export interface CameraScene {
-  /** match clock at the scene start, seconds */
+  /** match clock at the scene start, seconds (the video time when `videoTime`) */
   clock: number;
+  /** the throw-off is not set: the clock shows the place in the video (E02) */
+  videoTime?: boolean;
   /** length in seconds */
   duration: number;
   tracks: readonly SceneTrack[];
@@ -171,6 +173,8 @@ export interface CameraText {
   noBall: string;
   caption?: string | null;
   captionSmall?: string | null;
+  /** said before the clock, e.g. «Video» when it is the video time */
+  clockPrefix?: string | null;
 }
 
 /**
@@ -247,6 +251,7 @@ export function TacticsCamera({
           </button>
           {barExtra}
           <span className="ml-auto font-mono text-xl font-semibold tabular-nums text-white" aria-live="off">
+            {text.clockPrefix ? `${text.clockPrefix} ` : ""}
             {clockAt(scene, t)}
           </span>
         </div>

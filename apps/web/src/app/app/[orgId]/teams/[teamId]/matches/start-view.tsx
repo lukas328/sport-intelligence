@@ -17,7 +17,7 @@ import { api } from "@/lib/client";
 import { ownName } from "@/lib/own-name";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
-import { goalRuns, reportGoals, useMatchGraphics, type MatchGraphics } from "@/lib/graphics";
+import { goalRuns, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
 import { matchState } from "@/lib/match-state";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
@@ -80,7 +80,8 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
   const running = m ? ["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) : false;
   // the analysis is done without three things: one sentence and one next step, nothing else that
   // says the same (UX test A02)
-  const quiet = Boolean(m?.has_video && g.data && !running && threeThings(goalRuns(g.data)).length === 0);
+  // with goals confirmed in the video the start shows them, also without three things (E01)
+  const quiet = Boolean(m?.has_video && g.data && !running && !g.data.goals.some((x) => x.has_video));
   const scenes = g.data ? g.data.goals.filter((x) => x.has_video || x.source === "demo").length : 0;
   return (
     <div style={matchStyle(club, m?.opponent_color ? [m.opponent_color] : null) as CSSProperties} className="space-y-6">
@@ -209,6 +210,8 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
   const running = ["matches.status_processing", "matches.status_uploading"].includes(state.label);
   const things = g ? threeThings(goalRuns(g)) : [];
   const result = resultOf(m);
+  // no result of its own: the goals confirmed in the video stand in the head, said as such (E10)
+  const fromVideo = m.score_own == null && g ? videoScore(g) : null;
   const title = running
     ? t("titleRunning")
     : !m.has_video
@@ -218,8 +221,10 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
   return {
     kick: t("kickVs", { when: format.dateTime(new Date(m.kickoff_at), { weekday: "long" }), opponent: m.opponent_name }),
     title,
-    own: m.score_own,
-    opp: m.score_opponent,
+    own: m.score_own ?? fromVideo?.own ?? null,
+    opp: m.score_opponent ?? fromVideo?.opp ?? null,
+    scoreNote: fromVideo ? t("scoreFromVideo") : undefined,
+    span: g?.span ?? null,
     ownName: teamName,
     oppName: m.opponent_name,
     goals: g ? reportGoals(g) : null,

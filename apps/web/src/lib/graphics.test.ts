@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cameraScene, goalRuns, reportGoals, type MatchGraphics, type SceneCamera } from "./graphics";
+import { cameraScene, goalRuns, reportGoals, spotless, videoScore, type MatchGraphics, type SceneCamera } from "./graphics";
 
 const G: MatchGraphics = {
   has_video: true,
@@ -46,5 +46,19 @@ describe("graphics data", () => {
     expect(cameraScene(S)).toMatchObject({ clock: 84, duration: 6, ball: [] });
     expect(cameraScene({ ...S, field_confirmed: false })).toBeNull();
     expect(cameraScene({ ...S, tracks: [] })).toBeNull();
+  });
+
+  it("keeps a confirmed goal without a spot: counted, listed, not drawn (real-video test E01, E10)", () => {
+    const g: MatchGraphics = { ...G, goals: [...G.goals, { event_id: "c", team: "opp", minute: null, number: null, zone: null, run: [], shot: null, aim: null, confirmed: true, source: null, has_video: true, t_ms: 90_000 }] };
+    expect(goalRuns(g).map((x) => x.eventId)).toEqual(["a", "b"]);
+    expect(spotless(g).map((x) => x.event_id)).toEqual(["c"]);
+    // the score counts the goals with a place in the video (b is a report goal without one)
+    expect(videoScore(g)).toEqual({ own: 1, opp: 1 });
+    expect(videoScore({ ...G, goals: [] })).toBeNull();
+  });
+
+  it("shows positions without a match clock, on the video time (real-video test E02)", () => {
+    expect(cameraScene({ ...S, clock_s: null, video_s: 312 })).toMatchObject({ clock: 312, videoTime: true });
+    expect(cameraScene(S)).toMatchObject({ videoTime: false });
   });
 });
