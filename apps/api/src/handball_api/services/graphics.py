@@ -47,7 +47,11 @@ from handball_api.services.shot_positions import _rows
 
 LENGTH, WIDTH = 40.0, 20.0
 RUN_MS = 3000  # the run before the shot: 2 to 4 s
-SCENE_MS = 6000  # a scene on the tactics camera
+# a scene on the tactics camera: before the goal, not the way back after it (third real-video
+# test G3): the candidate time lies 4 to 7 s after the goal, a confirmed goal has its own time
+SCENE_MS = 10000
+SCENE_AFTER_MS = 2000  # the scene ends this long after the goal time
+COURT_MARGIN = 1.0  # metres around the court still drawn; beyond: spectators, the bench
 SAMPLE_MS = 110  # about 9 positions per second
 ESTIMATED_SOURCES = {"heuristic", "scoreboard_ocr"}
 TEAM_OF_TRACK = {"home": "own", "home_gk": "own", "away": "opp", "away_gk": "opp", "referee": "ref"}
@@ -482,8 +486,10 @@ def kickoff_missing(match: Match, length_ms: int | None) -> list[int]:
     video runs a break past the first half (the same rule as web lib/match-workflow.ts)."""
     k = match.kickoff_ms or {}
     first = k.get("1")
+    # «Der Anwurf ist nicht im Video» (G8): not asked again
+    absent = (match.report_extra or {}).get("kickoff_absent", [])
     if first is None:
-        return [1]
+        return [] if 1 in absent else [1]
     second = length_ms is not None and length_ms > int(first) + match.period_s * 1000 + 5 * 60_000
     return [2] if second and k.get("2") is None else []
 
@@ -621,6 +627,49 @@ async def scene_camera(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> di
     return await camera_of(ctx, match, e)
 
 
+def scene_tracks(
+    rows: np.ndarray, teams: dict[int, tuple[str, int | None]], start: float, ours: bool
+) -> tuple[list[dict[str, Any]], bool]:
+    """The tracks of one scene from the position rows (t, track, x, y): only positions on the
+    court, about 9 per second, with their time in the scene; and whether the attack goes to
+    the goal at x = 40. Not mirrored: the court shows the goal on the side the video shows it
+    (third real-video test G3)."""
+    attack = "home" if ours else "away"
+    att = [r for r in rows if teams.get(int(r[1]), ("", None))[0].startswith(attack)]
+    right = bool(att) and float(np.mean([r[2] for r in att])) > LENGTH / 2
+    out: dict[int, list[tuple[float, float]]] = {}
+    times: dict[int, list[float]] = {}
+    last: dict[int, float] = {}
+    for t, no, x, y in rows[np.argsort(rows[:, 0])]:
+        n = int(no)
+        px, py = float(x), float(y)
+        # only what stands on the court: spectators and the bench in front are not players
+        if not on_court(px, py):
+            continue
+        if t - last.get(n, -1e9) < SAMPLE_MS:
+            continue
+        last[n] = float(t)
+        out.setdefault(n, []).append((round(px, 2), round(py, 2)))
+        # when in the scene (0 to 1): a track is drawn only while it exists (real-video test F5)
+        times.setdefault(n, []).append(round(min(1.0, max(0.0, (float(t) - start) / SCENE_MS)), 4))
+    tracks: list[dict[str, Any]] = []
+    for n, xy in out.items():
+        kind, number = teams.get(n, ("", None))
+        team = TEAM_OF_TRACK.get(kind)
+        if team is None or len(xy) < 2:
+            continue
+        tracks.append(
+            {"team": team, "number": number if team != "ref" else None, "xy": xy, "ts": times[n]}
+        )
+    return tracks, right
+
+
+def on_court(x: float, y: float) -> bool:
+    """A position on the court or just beside it (COURT_MARGIN)."""
+    m = COURT_MARGIN
+    return -m <= x <= LENGTH + m and -m <= y <= WIDTH + m
+
+
 async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
     """The tactics camera of one goal, without the access check: for the caller that checked
     access itself (the match page above, a share link for the shared scenes)."""
@@ -631,9 +680,15 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
     clock = e.clock_s
     base: dict[str, Any] = {
         "event_id": e.id,
-        "clock_s": max(0.0, clock - SCENE_MS / 1000) if clock is not None else None,
+        "clock_s": max(0.0, clock - (SCENE_MS - SCENE_AFTER_MS) / 1000)
+        if clock is not None
+        else None,
         # without the throw-off the scene still has its place in the video (E02)
-        "video_s": max(0.0, (e.t_ms - SCENE_MS) / 1000) if e.t_ms is not None else None,
+        "video_s": max(0.0, (e.t_ms - SCENE_MS + SCENE_AFTER_MS) / 1000)
+        if e.t_ms is not None
+        else None,
+        # the attack goes to the goal at x = 40: drawn on that side, as the video shows it (G3)
+        "right": False,
         "duration_s": SCENE_MS / 1000,
         "field_confirmed": field,
         "tracks": [],
@@ -652,44 +707,19 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
         return base
     if demo or not field or not tracking or asset is None or e.t_ms is None:
         return base
-    rows = await _rows(ctx, asset, e.t_ms - SCENE_MS, e.t_ms)
+    start = e.t_ms - SCENE_MS + SCENE_AFTER_MS
+    rows = await _rows(ctx, asset, start, start + SCENE_MS)
     if not len(rows):
         return base
     meta = {
         t.track_no: t
         for t in (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
     }
-    attack = "home" if e.side == "own" else "away"
-    att = [
-        r for r in rows if str(getattr(meta.get(int(r[1])), "team", "") or "").startswith(attack)
-    ]
-    flip = bool(att) and float(np.mean([r[2] for r in att])) > LENGTH / 2  # attack to the left half
-    out: dict[int, list[tuple[float, float]]] = {}
-    times: dict[int, list[float]] = {}
-    last: dict[int, float] = {}
-    start = e.t_ms - SCENE_MS
-    for t, no, x, y in rows[np.argsort(rows[:, 0])]:
-        n = int(no)
-        if t - last.get(n, -1e9) < SAMPLE_MS:
-            continue
-        last[n] = float(t)
-        px, py = (LENGTH - float(x), WIDTH - float(y)) if flip else (float(x), float(y))
-        out.setdefault(n, []).append((round(px, 2), round(py, 2)))
-        # when in the scene (0 to 1): a track is drawn only while it exists (real-video test F5)
-        times.setdefault(n, []).append(round(min(1.0, max(0.0, (float(t) - start) / SCENE_MS)), 4))
-    for n, xy in out.items():
-        tr = meta.get(n)
-        team = TEAM_OF_TRACK.get(str(getattr(tr, "team", "") or ""))
-        if team is None or len(xy) < 2:
-            continue
-        base["tracks"].append(
-            {
-                "team": team,
-                "number": getattr(tr, "number", None) if team != "ref" else None,
-                "xy": xy,
-                "ts": times[n],
-            }
-        )
+    teams = {
+        no: (str(getattr(t, "team", "") or ""), getattr(t, "number", None))
+        for no, t in meta.items()
+    }
+    base["tracks"], base["right"] = scene_tracks(rows, teams, start, e.side == "own")
     base["tracks"] = unique_numbers(base["tracks"])
     scorer = next(
         (

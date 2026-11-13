@@ -19,7 +19,8 @@ import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/ui/button";
-import { useMatchGraphics } from "@/lib/graphics";
+import { goalWindow, sameGoal } from "@/lib/goal-window";
+import { openMoments, useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
 
 type Match = Schemas["MatchOut"];
@@ -71,6 +72,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     if (!asked && graphics.data) setAsked({ first: graphics.data.checks, more: graphics.data.more_checks ?? [] });
   }, [asked, graphics.data]);
   const [wantMore, setWantMore] = useState(false);
+  const [wantPeople, setWantPeople] = useState(false);
   // the server's questions afresh: after a moved court the analysis runs again and writes new
   // candidates (real-video test F3); «Alles geprüft» only once the server has none left
   const [reloading, setReloading] = useState(false);
@@ -131,9 +133,14 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   );
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
-    return [...toQuestions(asked.first), ...(wantMore ? [...toQuestions(asked.more), ...people] : [])];
-  }, [asked, wantMore, toQuestions, people]);
-  const moreCount = asked ? toQuestions(asked.more).length + people.length : 0;
+    // the further goal moments with «Weiter prüfen», the people in the picture on their own
+    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more) : []), ...(wantPeople ? people : [])];
+  }, [asked, wantMore, wantPeople, toQuestions, people]);
+  const moreCount = people.length;
+  // goal moments beyond the most important ones: while any is open nothing looks final, «Alles
+  // geprüft» only without (third real-video test G1)
+  const moreGoals = asked ? toQuestions(asked.more).length : 0;
+  const stillOpen = graphics.data ? openMoments(graphics.data) : 0;
   const open = questions.filter((q) => !done.includes(id(q)));
   // what was answered in this round, to look at again and change (UX test H12)
   const [answered, setAnswered] = useState<{ q: Question; label: string }[]>([]);
@@ -159,6 +166,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const getVideo = useCallback(() => player.current?.video() ?? null, []);
   // an answer counts only once it is saved; a refusal of the API is said, never swallowed (E03)
   const [failed, setFailed] = useState<string | null>(null);
+  // «Der Anwurf ist nicht im Video» and, if known, the minute the video's start shows (G8)
+  const [absent, setAbsent] = useState(false);
+  const [startMinute, setStartMinute] = useState("");
   const must = (r: { error?: unknown; response: Response }) => {
     if (r.error || !r.response.ok) {
       const p = r.error as { detail?: string; title?: string } | undefined;
@@ -174,6 +184,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     void qc.invalidateQueries({ queryKey: ["analysis", main?.id] });
   }
 
+  // a goal already confirmed for the same side inside this question's clip: the same goal again
+  // is the likely answer (third real-video test G2)
+  const earlier = current?.kind === "goal" && graphics.data ? sameGoal(graphics.data.goals, current.c) : null;
   const answers: Answer[] = !current
     ? []
     : current.kind === "person"
@@ -221,6 +234,16 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               // a moved court runs the analysis again: wait for it, then ask what it found
               if (wasMoved) await reload(true);
             },
+          },
+        ]
+      : earlier
+      ? [
+          { key: "1", label: t("sameGoal"), numeral: "1", first: true, run: () => review(current.c, { status: "rejected" }) },
+          {
+            key: "2",
+            label: t("anotherGoal"),
+            numeral: "2",
+            run: () => review(current.c, { status: "confirmed", side: earlier.team === "own" ? "own" : "opponent", outcome: "goal" }),
           },
         ]
       : [
@@ -325,11 +348,42 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         </p>
       ) : !current ? (
         <div className="max-w-[60ch] space-y-4 py-10">
-          <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>
-          <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
-          {/* the rest, offered, not pressed on the coach (E07) */}
-          {!wantMore && moreCount > 0 && (
-            <button type="button" onClick={() => setWantMore(true)} className={buttonClass("secondary")} data-testid="check-more">
+          {!wantMore && moreGoals > 0 ? (
+            <div className="space-y-4" data-testid="check-main-done">
+              <h1 className="text-[40px] md:text-[58px]">{t("mainDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals })}</p>
+              <div className="flex flex-wrap items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVerified(false);
+                    setWantMore(true);
+                  }}
+                  className={buttonClass("primary")}
+                  data-testid="check-more"
+                >
+                  {t("goOn")}
+                </button>
+                <Link href={back} className="min-h-11 content-center font-bold text-ink underline underline-offset-4">
+                  {t("later")}
+                </Link>
+              </div>
+            </div>
+          ) : stillOpen > 0 ? (
+            // left with «Weiss nicht»: still open, said so, never «Alles geprüft»
+            <div className="space-y-4" data-testid="check-left-open">
+              <h1 className="text-[40px] md:text-[58px]">{t("roundDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("leftOpen", { n: stillOpen })}</p>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
+            </>
+          )}
+          {/* the people in the picture, offered, not pressed on the coach (E07) */}
+          {!wantPeople && moreGoals === 0 && stillOpen === 0 && moreCount > 0 && (
+            <button type="button" onClick={() => (setVerified(false), setWantPeople(true))} className={buttonClass("secondary")} data-testid="check-people">
               {t("more", { n: moreCount })}
             </button>
           )}
@@ -385,7 +439,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             ) : current.kind === "kickoff" && media ? (
               <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} />
             ) : current.kind === "goal" && media ? (
-              <VideoPlayer key={current.c.id} src={`${media}/hls/master.m3u8`} window={{ start_ms: current.c.start_ms, end_ms: current.c.end_ms }} autoPlay />
+              <VideoPlayer key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay />
             ) : null}
             {current.kind === "person" && (
               <figcaption className="bg-[rgb(10_13_17/0.9)] px-3 py-2 font-mono text-[13px] font-semibold text-[#eef2f5]">
@@ -417,7 +471,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             </p>
             <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? t("fieldQuestion") : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
             <p className="mt-4 max-w-[54ch] text-[17px] text-ink-2">
-              {current.kind === "field" ? t("fieldWhy") : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : t("goalWhy")}
+              {current.kind === "field" ? t("fieldWhy") : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : earlier ? t("sameGoalWhy", { time: clock(earlier.t_ms! / 1000) }) : t("goalWhy")}
             </p>
 
             {failed && (
@@ -441,6 +495,51 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   {a.label}
                 </button>
               ))}
+              {current.kind === "kickoff" && !absent && (
+                <button type="button" onClick={() => setAbsent(true)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-semibold" data-testid="kickoff-absent">
+                  {t("kickoffAbsent")}
+                </button>
+              )}
+              {current.kind === "kickoff" && absent && (
+                <form
+                  className="col-span-2 space-y-2 border-2 border-ink p-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const minute = startMinute.trim() === "" ? null : Number(startMinute);
+                    const period = current.period;
+                    void answer({
+                      key: "absent",
+                      label: t("kickoffAbsent"),
+                      run: async () => {
+                        const clock_s = minute != null && Number.isFinite(minute) ? (period - 1) * match.period_s + minute * 60 : undefined;
+                        must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period, t_ms: 0, absent: true, ...(clock_s != null ? { clock_s } : {}) } }));
+                        for (const key of ["match", "events", "stats", "official-goals", "goal-candidates", "graphics"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
+                        setAbsent(false);
+                        setStartMinute("");
+                        router.refresh();
+                      },
+                    });
+                  }}
+                >
+                  <label className="block">
+                    <span className="mb-1 block text-[17px] font-semibold">{t("kickoffStartMinute")}</span>
+                    <span className="mb-2 block text-[15px] text-ink-2">{t("kickoffStartMinuteHint")}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={Math.round((match.period_s * match.periods) / 60)}
+                      inputMode="numeric"
+                      value={startMinute}
+                      onChange={(e) => setStartMinute(e.target.value)}
+                      className="min-h-12 w-32 border-2 border-ink bg-transparent px-3 text-[17px]"
+                      data-testid="kickoff-start-minute"
+                    />
+                  </label>
+                  <button type="submit" className={buttonClass("primary")} data-testid="kickoff-absent-save">
+                    {t("kickoffAbsentSave")}
+                  </button>
+                </form>
+              )}
               {current.kind === "person" && (
                 <label className="col-span-2 block">
                   <span className="mb-1 block text-[15px] font-semibold text-ink-2">{read ? t("personOther") : t("personPick")}</span>

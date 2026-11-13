@@ -168,6 +168,38 @@ async def test_prufen_asks_for_the_throw_off_until_it_is_set(make_api: Callable[
     assert all(c["kind"] != "kickoff" for c in g["checks"])
 
 
+async def test_a_throw_off_not_in_the_video_is_not_asked_again(
+    make_api: Callable[[], Api],
+) -> None:
+    """Third real-video test G8: a clip without the throw-off left «Prüfen 1» standing with no
+    way out. «Der Anwurf ist nicht im Video» ends the question; the minute the video's start
+    shows, when given, sets the clock."""
+    from .test_themes import ready_video
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    base = f"/v1/orgs/{org}/matches"
+    m = await new_match(api, ids)
+    await ready_video(api, ids, m["id"])
+    r = await api.put(f"{base}/{m['id']}/kickoff", json={"period": 1, "t_ms": 0, "absent": True})
+    assert r.status_code == 204, r.text
+    g = (await api.get(f"{base}/{m['id']}/graphics")).json()
+    assert all(c["kind"] != "kickoff" for c in g["checks"])
+    assert (await api.get(f"{base}/{m['id']}")).json()["kickoff_ms"] is None
+    # another match: the start of the video shows minute 12
+    other = await new_match(api, ids, opponent_name="TV Spaeter")
+    await ready_video(api, ids, other["id"])
+    r = await api.put(
+        f"{base}/{other['id']}/kickoff",
+        json={"period": 1, "t_ms": 0, "absent": True, "clock_s": 720},
+    )
+    assert r.status_code == 204, r.text
+    assert (await api.get(f"{base}/{other['id']}")).json()["kickoff_ms"] == {"1": -720_000}
+    g = (await api.get(f"{base}/{other['id']}/graphics")).json()
+    assert all(c["kind"] != "kickoff" for c in g["checks"])
+
+
 async def test_a_goal_names_its_scorer_for_the_confirmed_column(
     make_api: Callable[[], Api],
 ) -> None:
@@ -257,6 +289,11 @@ async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
     # every event of the video has its clock now, the scene too
     camera = (await api.get(f"{base}/scenes/{g['goals'][0]['event_id']}/camera")).json()
     assert camera["clock_s"] is not None and camera["video_s"] is not None
+    # the scene lies before the goal, from 8 s before it to 2 s after (G3), not the way back
+    first = min(g["goals"], key=lambda x: x["t_ms"])
+    camera = (await api.get(f"{base}/scenes/{first['event_id']}/camera")).json()
+    assert camera["duration_s"] == 10.0
+    assert camera["video_s"] == (first["t_ms"] - 8000) / 1000
 
 
 def test_a_corner_outside_the_picture_is_accepted() -> None:
@@ -409,11 +446,18 @@ async def test_answers_survive_a_new_analysis_after_a_moved_court(
     corners = [[100, 500], [1500, 500], [1300, 200], [300, 200]]
     court = [[0, 0], [40, 0], [40, 20], [0, 20]]
     pts = [{"image": i, "court": c} for i, c in zip(corners, court, strict=True)]
+
+    async def notes() -> int:
+        return len((await api.get(f"/v1/orgs/{org}/me/notifications")).json()["items"])
+
+    before = await notes()
     r = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts})
     assert r.status_code == 202, r.text
     g = (await api.get(f"{base}/graphics")).json()
     assert g["analysis"] == "running" and g["analysis_at"] is None
     await _finish(api, jobs.jobs[-1][2], result)
+    # the run after the corrected court sends no second mail and no notice (G4)
+    assert await notes() == before
 
     rows = (await api.get(f"{base}/goal-candidates")).json()["candidates"]
     assert [r["goal_ms"] for r in rows if r["status"] == "confirmed"] == [first["goal_ms"]]
@@ -422,3 +466,27 @@ async def test_answers_survive_a_new_analysis_after_a_moved_court(
     asked = {c["frame_ref"] for c in g["checks"] + g["more_checks"] if c["kind"] == "goal"}
     assert first["goal_ms"] not in asked and len(asked) == 3
     assert len([e for e in g["goals"] if e["has_video"]]) == 1
+
+
+def test_scene_shows_only_the_court_unmirrored() -> None:
+    """Third real-video test G3: spectators and the bench beside the court are not drawn; the
+    attack on the goal at x = 40 stays there (right), not mirrored to x = 0."""
+    import numpy as np
+
+    from handball_api.services.graphics import SCENE_MS, scene_tracks
+
+    start = 100_000.0
+    rows = []
+    for k in range(10):
+        t = start + k * 500
+        rows.append((t, 1, 30.0 + k * 0.5, 10.0))  # our player running to the goal at x = 40
+        rows.append((t, 2, 35.0, 8.0))  # their defender
+        rows.append((t, 3, 20.0, -4.0))  # a spectator in red beside the court
+        rows.append((t, 4, 12.0, 22.5))  # the bench in white in front
+    teams = {1: ("home", 7), 2: ("away", 3), 3: ("away", None), 4: ("home", None)}
+    tracks, right = scene_tracks(np.array(rows, dtype=float), teams, start, ours=True)
+    assert right is True
+    assert sorted((t["team"], t["number"]) for t in tracks) == [("opp", 3), ("own", 7)]
+    ours = next(t for t in tracks if t["team"] == "own")
+    assert ours["xy"][0] == (30.0, 10.0) and ours["xy"][-1] == (34.5, 10.0)
+    assert ours["ts"][0] == 0.0 and ours["ts"][-1] == round(4500 / SCENE_MS, 4)

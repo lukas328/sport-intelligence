@@ -7197,6 +7197,12 @@ export interface components {
         /** KickoffIn */
         KickoffIn: {
             /**
+             * Absent
+             * @description the throw-off is not in the video (a clip, a recording that starts later): Prüfen stops asking; with clock_s the video start gets that match clock
+             * @default false
+             */
+            absent?: boolean;
+            /**
              * Clock S
              * @description match clock (s) shown at t_ms; default: the half's throw-off. A video that starts after the throw-off (a clip from mid-half) gets its clock this way.
              */
@@ -9654,6 +9660,12 @@ export interface components {
             event_id: string;
             /** Field Confirmed */
             field_confirmed: boolean | null;
+            /**
+             * Right
+             * @description the attack goes to the goal at x = 40, as the video shows it
+             * @default false
+             */
+            right?: boolean;
             scorer: components["schemas"]["ScorerOut"] | null;
             /** Shot */
             shot: [

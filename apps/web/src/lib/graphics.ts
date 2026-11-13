@@ -46,6 +46,19 @@ export function videoScore(g: MatchGraphics): { own: number; opp: number } | nul
   return { own: seen.filter((x) => x.team === "own").length, opp: seen.filter((x) => x.team === "opp").length };
 }
 
+/**
+ * Goal moments still open in Prüfen, the most important and the further ones: while there are
+ * any, the score from the video is an interim one (third real-video test G1).
+ */
+export function openMoments(g: MatchGraphics): number {
+  return g.checks.filter((c) => c.kind === "goal").length + (g.more_checks ?? []).length;
+}
+
+/** The count next to «Prüfen»: the most important questions, then the further moments. */
+export function checkCount(g: MatchGraphics): number {
+  return g.checks.length > 0 ? g.checks.length : (g.more_checks ?? []).length;
+}
+
 /** The goals that have a place in the video (confirmed there or pinned to it). */
 export function videoGoals(g: MatchGraphics): MatchGraphics["goals"] {
   return g.goals.filter((x) => x.has_video);
@@ -66,6 +79,7 @@ export function cameraScene(s: SceneCamera, label?: string | null): CameraScene 
     videoTime,
     duration: s.duration_s,
     tracks: s.tracks.map((t) => ({ team: t.team, number: t.number, xy: t.xy.map((p) => [p[0], p[1]] as Pt), ts: t.ts ?? null })),
+    right: s.right ?? false,
     ball: s.ball.map((b) => ({ from: b.from_s, to: b.to_s, team: b.team, number: b.number })),
     scorer: s.scorer,
     shot: s.shot ? ([s.shot[0], s.shot[1]] as Pt) : null,

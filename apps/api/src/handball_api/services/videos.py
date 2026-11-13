@@ -166,7 +166,7 @@ async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) 
                 team=team.name if team else "",
                 opponent=opponent,
                 link=f"{ctx.settings.web_base_url}{link}",
-                **{k: v for k, v in extra.items() if k == "questions"},
+                **{k: v for k, v in extra.items() if k in ("questions", "more_moments")},
             ),
             kind,
             user_id=str(u.id),
@@ -189,10 +189,18 @@ async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
     if (goals or 0) >= THREE_THINGS_MIN_GOALS:
         return "analysis_ready", {}
     # the same questions the start and Prüfen show (UX test A02: one count, not two)
-    from handball_api.services.graphics import open_checks
+    from handball_api.services.graphics import more_checks, open_checks
 
     questions = len(await open_checks(ctx, match))
-    return ("analysis_questions" if questions else "analysis_no_goals"), {"questions": questions}
+    # further moments after the most important ones (third real-video test G1); with none of
+    # the most important left, the other moments are the questions
+    more = len(await more_checks(ctx, match))
+    if questions == 0:
+        questions, more = more, 0
+    return ("analysis_questions" if questions else "analysis_no_goals"), {
+        "questions": questions,
+        "more_moments": more,
+    }
 
 
 def _uploading(asset: VideoAsset) -> str:
@@ -584,9 +592,14 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 await start_analysis(ctx, asset, match)
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
+            # the run after a court the coach corrected in Prüfen: Prüfen waits for it and asks
+            # anew, no second mail and no notice (third real-video test G4)
+            pending = (asset.analysis or {}).get(PENDING)
+            corrected = isinstance(pending, dict) and pending.get("job_id") == str(job.id)
             on_timeline = await _apply_analysis_result(ctx, asset, job, data.result)
-            kind, extra = await _ready_note(ctx, match)
-            await _tell_staff(ctx, match, kind, extra)
+            if not corrected:
+                kind, extra = await _ready_note(ctx, match)
+                await _tell_staff(ctx, match, kind, extra)
             if on_timeline:
                 await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
                 from handball_api.services import highlights  # imports this module (media paths)
@@ -650,6 +663,8 @@ async def start_analysis(
         # fails the automatic court again and the run would drop the tracks and identities
         clicked = meta[CLICKED]
         points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
+    opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
+    opponent_kit = match.opponent_kit or (opp.primary_color if opp is not None else None)
     refs: list[dict[str, Any]] = []
     if points is None:
         # the court clicked or confirmed on an earlier video of the same hall: the worker tries
@@ -667,9 +682,10 @@ async def start_analysis(
             {
                 "own": match.kit_own,
                 "own_gk": match.kit_own_gk,
-                # only a colour somebody said: the column's default red is no knowledge (E09)
-                "opponent": match.opponent_kit,
-                "opponent_gk": match.kit_opponent_gk if match.opponent_kit else None,
+                # only a colour somebody said, for this match or remembered for the opponent
+                # (third real-video test G5): the column's default red is no knowledge (E09)
+                "opponent": opponent_kit,
+                "opponent_gk": match.kit_opponent_gk if opponent_kit else None,
                 "referee": match.kit_referee,
             }
         ),

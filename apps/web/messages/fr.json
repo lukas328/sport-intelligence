@@ -3199,7 +3199,10 @@
     "colourTip": "Conseil : avec la couleur du maillot de {opponent}, l'analyse sépare mieux les équipes.",
     "minutesSpan": "encore environ {low} à {high} minutes",
     "answerChecks": "{n, plural, one {Répondre à 1 question} other {Répondre à # questions}}",
-    "minuteAt": "Minute {n}"
+    "minuteAt": "Minute {n}",
+    "scoreSoFar": "confirmé jusqu'ici · {n, plural, one {1 moment ouvert} other {# moments ouverts}}",
+    "positionsEstimated": "Positions estimées ; des personnes au bord du terrain peuvent en faire partie.",
+    "howCountedVideo": "Les buts viennent de la vidéo, tels que tu les as confirmés dans Vérifier. Les courses sont les trajets du tireur ou de la tireuse dans les trois secondes avant le but, mesurés dans la vidéo. Les positions de tir estimées sont en pointillé jusqu'à ce que tu les confirmes."
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3243,7 +3246,19 @@
     "zoomOut": "Réduire l'image",
     "cornerOutside": "Ce coin est hors de l'image; sa poignée est au bord, sur sa ligne.",
     "more": "Si tu veux: {n, plural, one {1 question de plus} other {# questions de plus}}",
-    "reloading": "Le terrain est repris et les questions recalculées. Un instant."
+    "reloading": "Le terrain est repris et les questions recalculées. Un instant.",
+    "mainDone": "Les moments les plus importants sont vérifiés.",
+    "mainDoneText": "{n, plural, one {1 autre moment pourrait être un but.} other {# autres pourraient être des buts.}}",
+    "goOn": "Continuer à vérifier",
+    "roundDone": "Vérifié pour aujourd'hui.",
+    "leftOpen": "{n, plural, one {1 moment reste ouvert.} other {# moments restent ouverts.}} Tant qu'ils ne sont pas répondus, le score est provisoire.",
+    "sameGoal": "Non, le même but",
+    "anotherGoal": "Oui, encore un but",
+    "sameGoalWhy": "Cet extrait contient le but de {time} que tu as déjà confirmé. Y en a-t-il un autre ici ?",
+    "kickoffAbsent": "L'engagement n'est pas dans la vidéo",
+    "kickoffStartMinute": "Quelle minute de jeu montre le début ?",
+    "kickoffStartMinuteHint": "Tu peux laisser vide : le temps de la vidéo compte alors.",
+    "kickoffAbsentSave": "Continuer"
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

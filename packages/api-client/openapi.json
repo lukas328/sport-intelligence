@@ -6611,6 +6611,12 @@
       },
       "KickoffIn": {
         "properties": {
+          "absent": {
+            "default": false,
+            "description": "the throw-off is not in the video (a clip, a recording that starts later): Pr\u00fcfen stops asking; with clock_s the video start gets that match clock",
+            "title": "Absent",
+            "type": "boolean"
+          },
           "clock_s": {
             "anyOf": [
               {
@@ -13630,6 +13636,12 @@
               }
             ],
             "title": "Field Confirmed"
+          },
+          "right": {
+            "default": false,
+            "description": "the attack goes to the goal at x = 40, as the video shows it",
+            "title": "Right",
+            "type": "boolean"
           },
           "scorer": {
             "anyOf": [

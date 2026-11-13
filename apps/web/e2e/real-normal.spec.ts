@@ -48,9 +48,12 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
 
   // three goal candidates, apart, the strongest rate
   const rows = [8000, 16000, 24000]
-    .map((ms, i) => `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', ${ms + 1500}, ${ms}, ${ms - 3000}, ${ms + 3000}, ${3 - i * 0.1}, 1, ${i}, 'open')`)
+    .map((ms, i) => `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', ${ms + 1500}, ${ms}, ${ms - 3000}, ${ms + 3000}, ${3 - i * 0.1}, 1, ${i}, 'open', '${i === 1 ? "opponent" : "own"}')`)
     .join(", ");
-  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status) VALUES ${rows}`]);
+  // and one weaker moment (29.6 s, apart from the goal at 24 s): not among the most important questions, but it could be a goal
+  const weak = `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', 29800, 29600, 26000, 30000, 1.0, 3, 3, 'open')`;
+  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status) VALUES ${weak}`]);
+  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status, suggested_side) VALUES ${rows}`]);
 
   // the start counts the court, the throw-off and the three goals: one count
   await page.goto(`/app/${org}/teams/${team}/matches`);
@@ -78,8 +81,26 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     else await expect(page.getByText("Frage 5 von 5")).toBeVisible();
     await page.getByRole("button", { name: who }).click();
   }
-  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible();
+  // one moment is still open: nothing looks final (third real-video test G1)
+  await expect(page.getByTestId("check-main-done")).toContainText("Die wichtigsten Momente sind geprüft.");
+  await expect(page.getByTestId("check-main-done")).toContainText("1 weiterer Moment könnte ein Tor sein.");
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toHaveCount(0);
   await expect(page.getByTestId("check-failed")).toHaveCount(0);
+  // the head says interim, the count stays (in a second browser: this one has not opened the
+  // match, so the start keeps it in its head below)
+  const third = await page.context().browser()!.newContext({ baseURL: info.project.use.baseURL, storageState: await page.context().storageState() });
+  const look = await third.newPage();
+  await look.goto(`/app/${org}/matches/${match.id}`);
+  await expect(look.getByTestId("score-note")).toHaveText("bisher bestätigt · 1 Moment offen");
+  await expect(look.getByTestId("check-link")).toContainText("1");
+  await third.close();
+  await page.reload();
+  await expect(page.getByTestId("check-main-done")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("check-more").click();
+  // its clip holds the goal at 0:24 already confirmed: the question says so (real-video test G2)
+  await expect(page.getByText("In diesem Ausschnitt liegt das Tor von 0:24, das du schon bestätigt hast.")).toBeVisible();
+  await page.getByRole("button", { name: "Nein, dasselbe Tor" }).click();
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
 
   // the start: the result of the video in the head, the course, the goals and their scene
   await page.goto(`/app/${org}/teams/${team}/matches`);
@@ -94,11 +115,23 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   // positions on the tactics camera: the court is confirmed and the scene has tracks
   await expect(goals.getByRole("img", { name: /Positionen aus dem Video/ })).toBeVisible({ timeout: 30_000 });
   await expect(goals.getByTestId("camera-empty")).toHaveCount(0);
+  // the honest sentence under the camera while the count of dots is not reliable (G3)
+  await expect(goals.getByTestId("camera-estimate")).toHaveText("Positionen geschätzt; es können Personen neben dem Feld darunter sein.");
 
   // the match: the same result and goals; «Szene zeigen» opens that scene in the Video tab
   await page.goto(`/app/${org}/matches/${match.id}`);
   await expect(page.locator("[data-zone=wurf]")).toContainText("2:1");
   await expect(page.getByTestId("game-next-step")).toHaveCount(0);
+  // no match report: «So rechnen wir» says the goals come from the video (E08, G9)
+  await page.getByTestId("source-line").getByText("So rechnen wir").click();
+  await expect(page.getByTestId("how-counted")).toContainText("Die Tore kommen aus dem Video");
+  await expect(page.getByTestId("how-counted")).not.toContainText("Spielbericht");
+  // «Mehr zum Spiel» > Spielverlauf over the minutes of the video, not 0 to 60 (E10, G9)
+  await page.getByTestId("game-more").locator("summary").first().click();
+  const course = page.getByRole("heading", { name: "Spielverlauf" }).locator("xpath=..").locator("svg");
+  await expect(course).toBeVisible();
+  await expect(course.getByText("30'", { exact: true })).toHaveCount(0);
+  await expect(course.getByText("0'", { exact: true })).toHaveCount(1);
   await expect(page.getByTestId("video-goals").getByTestId("video-goal")).toHaveCount(3);
   await page.getByTestId("video-goals").getByTestId("scene-show").nth(1).click();
   await expect(page).toHaveURL(/tab=video.*scene=/);
@@ -159,7 +192,77 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
   // afterwards the server's open question (the throw-off) is asked
   await expect(page.getByRole("button", { name: "Jetzt ist Anwurf" })).toBeVisible({ timeout: 240_000 });
   await expect(page.getByTestId("check-failed")).toHaveCount(0);
-  await page.getByRole("button", { name: "Jetzt ist Anwurf" }).click();
-  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
   expect(await analysis()).toBe("ready");
+  // a goal moment the new analysis found
+  const video = (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}`)).json()).videos[0].id as string;
+  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status, suggested_side) VALUES ('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', 14000, 12000, 9000, 15000, 3, 1, 0, 'open', 'own')`]);
+  // the clip has no throw-off (G8): said so, the minute left empty; no «Prüfen 1» stays
+  await page.getByTestId("kickoff-absent").click();
+  await expect(page.getByText("Welche Spielminute zeigt der Anfang?")).toBeVisible();
+  await page.getByTestId("kickoff-absent-save").click();
+  await page.getByRole("button", { name: "Tor HC Ecke" }).click();
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
+  const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
+  expect(g.checks.filter((c: { kind: string }) => c.kind === "kickoff")).toHaveLength(0);
+  // the Video tab without throw-off: the Rail over the video's time, the scene with its video time
+  await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
+  await expect(page.getByTestId("rail-video")).toContainText("Video 0:00");
+  const rows = page.getByTestId("stage-scenes").getByRole("button");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("Video 0:12");
+});
+
+/**
+ * Third real-video test G9: the court question on a phone at 390 px, dragged with a finger:
+ * every corner's handle is on the screen and a touch drag moves it.
+ */
+test("the court question on a phone: the corners can be dragged with a finger", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile", "the phone");
+  test.setTimeout(300_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await register(page, uniqueEmail("handy"), "Coach Handy");
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill("HC Handy");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("Herren 1");
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  const [, org, team] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  const match = await (
+    await page.request.post(`/v1/orgs/${org}/teams/${team}/matches`, {
+      headers: { "x-csrf-token": csrf },
+      data: { opponent_name: "TV Finger", kickoff_at: new Date(Date.now() - 86_400_000).toISOString(), kit_opponent: "#f2f2f2" },
+    })
+  ).json();
+  await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
+  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await expect
+    .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
+    .toBe("ready");
+  await page.goto(`/app/${org}/matches/${match.id}/check`);
+  await expect(page.getByTestId("field-check")).toBeVisible({ timeout: 30_000 });
+  const vw = page.viewportSize()!.width;
+  // every handle on the screen, none beyond its edge
+  for (let i = 0; i < 4; i++) {
+    const b = (await page.getByTestId(`corner-${i}`).boundingBox())!;
+    expect(b.x + b.width / 2).toBeGreaterThanOrEqual(0);
+    expect(b.x + b.width / 2).toBeLessThanOrEqual(vw);
+  }
+  await expect(page.getByTestId("field-reset")).toBeDisabled();
+  // a finger drags the near left corner (touch events, as on the phone)
+  const corner = page.getByTestId("corner-0");
+  await corner.scrollIntoViewIfNeeded();
+  const box = (await corner.boundingBox())!;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+  for (let k = 1; k <= 6; k++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + k * 5, y: y - k * 2 }] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  // the corner moved: «Zurücksetzen» can be pressed, the page did not scroll instead
+  await expect(page.getByTestId("field-reset")).toBeEnabled();
+  const after = (await corner.boundingBox())!;
+  expect(Math.abs(after.x - box.x) + Math.abs(after.y - box.y)).toBeGreaterThan(10);
+  await page.screenshot({ path: info.outputPath("court-phone.png") });
 });

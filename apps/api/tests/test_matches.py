@@ -843,3 +843,29 @@ async def test_a_new_match_takes_the_club_colour_and_no_invented_opponent(
     m = await new_match(api, ids, opponent_name="TV Ohnefarbe")
     assert m["kit_own"].lower() == str(org["primary_color"]).lower()
     assert m["opponent_colors"] is None or m["opponent_colors"].get("color") is None
+
+
+async def test_the_remembered_opponent_colour_goes_to_the_analysis(
+    make_api: Callable[[], Api],
+) -> None:
+    """Third real-video test G5: the second match against the same opponent asks nothing; the
+    colour remembered for the opponent goes to the analysis, not only the own kits."""
+
+    from .test_identity_sync import _ingest
+
+    api = make_api()
+    ids = await setup_club(api)
+    first = await new_match(api, ids, opponent_name="TV Blau", opponent_kit="#1144aa")
+    assert first["opponent_colors"]["color"] == "#1144aa"
+    r = await api.post(
+        f"/v1/orgs/{ids['org']}/teams/{ids['team']}/matches",
+        json={"opponent_id": first["opponent"]["id"], "kickoff_at": "2026-11-14T18:00:00+01:00"},
+    )
+    assert r.status_code == 201, r.text
+    second = r.json()
+    assert second["opponent_colors"]["color"] == "#1144aa"
+    await upload(api, ids, second["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    payload = jobs.jobs[-1][3]
+    assert payload["kits"]["away"] == "#1144aa", payload["kits"]

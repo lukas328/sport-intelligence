@@ -2,12 +2,12 @@
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { CourtLines } from "./court";
-import { inView, pathOf, positionAt, presence, type Pt, trailAt, VIEWS, type ViewName } from "./geometry";
+import { inView, pathOf, positionAt, presence, type Pt, sceneView, trailAt, viewMatrix, VIEWS, type ViewName } from "./geometry";
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
 const INK_DARK = "#0a0d11";
-const PLAY_MS = 6000;
-const CYCLE_MS = 7600;
+const PLAY_MS = 8000; // a scene of 10 s
+const CYCLE_MS = 9600;
 
 /** One tracked person of a scene, in court metres (40 x 20). */
 export interface SceneTrack {
@@ -45,7 +45,10 @@ export interface CameraScene {
   confirmed: boolean;
   /** label at the shot spot, e.g. "Tor Thalwil 39:55" */
   label?: string | null;
+  /** the attack goes to the goal at x = 40: drawn on that half, as in the video (G3) */
+  right?: boolean;
 }
+
 
 export function clockAt(scene: Pick<CameraScene, "clock" | "duration">, t: number): string {
   const s = scene.clock + Math.min(scene.duration, Math.floor(t * scene.duration));
@@ -58,7 +61,8 @@ function holderAt(scene: CameraScene, t: number): BallStretch | null {
 }
 
 /** One frame of the tactics camera at t (0 to 1). */
-export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }: { scene: CameraScene; view: ViewName; width: number; dot?: number; t: number; labels?: boolean }) {
+export function CameraFrame({ scene, view: asked, width, dot = 12, t, labels = false }: { scene: CameraScene; view: ViewName; width: number; dot?: number; t: number; labels?: boolean }) {
+  const view = sceneView(scene, asked);
   const V = VIEWS[view];
   const kk = width / V.box[2];
   const r = dot / kk;
@@ -93,7 +97,8 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
   const holder = hold ? players.find((x) => x.team === hold.team && x.number === hold.number) : undefined;
   const ballAt: Pt | null = holder ? f(positionAt(holder.xy, holder.ts, t)) : null;
   const done = t >= 1;
-  const tf = V.turn ? "matrix(0 1 1 0 0 0)" : undefined;
+  const mx = viewMatrix(view);
+  const tf = mx ? `matrix(${mx.join(" ")})` : undefined;
   return (
     <>
       <g transform={tf}>
@@ -183,7 +188,7 @@ export interface CameraText {
 
 /**
  * The tactics camera: positions from the video on a dark court, the ways of the last two
- * seconds, the scorer's whole way. Plays the scene once (6 s), holds, plays again; Pause stops,
+ * seconds, the scorer's whole way. Plays the scene once (8 s), holds, plays again; Pause stops,
  * reduced motion shows the last frame. The ball line underneath says who held the ball, only
  * where it was found.
  */
@@ -231,7 +236,7 @@ export function TacticsCamera({
     return () => cancelAnimationFrame(raf);
   }, [paused]);
 
-  const V = VIEWS[view];
+  const V = VIEWS[sceneView(scene, view)];
   return (
     <figure className="m-0">
       <div className="relative bg-court">
