@@ -8,6 +8,7 @@ import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import { SHIRTS } from "@/lib/color";
 import { FARBE } from "../entry-view";
+import { ownershipMail, useSiteConfig } from "@/lib/site-config";
 
 type Suggestion = Schemas["SuggestionOut"];
 const num = (v: unknown) => (typeof v === "number" ? v : null);
@@ -19,6 +20,7 @@ const num = (v: unknown) => (typeof v === "number" ? v : null);
  */
 export function SaveTeam() {
   const t = useTranslations("entry");
+  const site = useSiteConfig();
   const params = useSearchParams();
   const router = useRouter();
   const [state, setState] = useState<"saving" | "access" | "failed">("saving");
@@ -74,7 +76,19 @@ export function SaveTeam() {
   return (
     <section className="mx-auto max-w-xl space-y-4" aria-live="polite" data-testid="entry-saving">
       {state === "saving" && <p className="text-[19px]">{t("saving")}</p>}
-      {state === "access" && <p className="text-[19px]">{t("savedAccess")}</p>}
+      {state === "access" && (
+        <>
+          <p className="text-[19px]">{t("savedAccess")}</p>
+          {/* the minimum until it is decided how ownership is checked (OPEN_QUESTIONS Q-AUTH-OWNER) */}
+          {site && (
+            <p className="text-[17px]">
+              <a href={ownershipMail(site.support_email, t("ownerSubject"), t("ownerBody", { team: params.get("team") ?? params.get("name") ?? "" }))} className="font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="entry-owner">
+                {t("ownerLink")}
+              </a>
+            </p>
+          )}
+        </>
+      )}
       {state === "failed" && (
         <>
           <p className="text-[19px] font-bold">{t("savingFailed")}</p>

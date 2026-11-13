@@ -4777,6 +4777,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/public/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Public Config
+         * @description Addresses the pages link to (website, support), from the configuration: also before
+         *     sign-in, for the entry and its legal links.
+         */
+        get: operations["public_config_v1_public_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/profiles/{slug}": {
         parameters: {
             query?: never;
@@ -9130,6 +9151,13 @@ export interface components {
             id: number;
             /** Name */
             name: string;
+        };
+        /** PublicConfig */
+        PublicConfig: {
+            /** Site Url */
+            site_url: string;
+            /** Support Email */
+            support_email: string;
         };
         /** PublicConsentPage */
         PublicConsentPage: {
@@ -21684,6 +21712,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_config_v1_public_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicConfig"];
                 };
             };
         };

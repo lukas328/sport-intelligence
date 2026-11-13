@@ -3432,6 +3432,9 @@
     "saving": "Nous créons ton équipe et récupérons matchs, effectif et classement sur handball.ch. Cela prend environ 15 secondes.",
     "savedAccess": "Demande envoyée. Les gens du club répondront dans l'app.",
     "savingFailed": "Cela n'a pas fonctionné.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "ownerLink": "Cette équipe est la mienne, mais quelqu'un d'autre l'a déjà",
+    "ownerSubject": "Notre équipe est déjà prise",
+    "ownerBody": "Bonjour le support\n\nL'équipe (numéro handball.ch {team}) est la nôtre mais a été créée par quelqu'un d'autre. Je suis :\n\nNom :\nFonction au club :\n"
   }
 }

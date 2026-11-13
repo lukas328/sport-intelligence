@@ -3432,6 +3432,9 @@
     "saving": "Wir legen dein Team an und holen Spiele, Kader und Tabelle von handball.ch. Das dauert etwa 15 Sekunden.",
     "savedAccess": "Anfrage gesendet. Die Leute im Verein melden sich in der App.",
     "savingFailed": "Das hat nicht geklappt.",
-    "retry": "Nochmals versuchen"
+    "retry": "Nochmals versuchen",
+    "ownerLink": "Dieses Team gehört mir, aber jemand anderes hat es schon",
+    "ownerSubject": "Unser Team ist schon belegt",
+    "ownerBody": "Hallo Support\n\nDas Team (handball.ch-Nummer {team}) gehört zu uns, ist aber schon von jemand anderem angelegt. Ich bin:\n\nName:\nFunktion im Verein:\n"
   }
 }

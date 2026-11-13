@@ -16,6 +16,7 @@ import { clubStyle, SHIRTS } from "@/lib/color";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
+import { sitePage, useSiteConfig } from "@/lib/site-config";
 
 type Hit = Schemas["PublicTeamHit"];
 type Preview = Schemas["PublicTeamPreview"];
@@ -358,7 +359,9 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
   const [busy, setBusy] = useState(false);
   const farbe = WORD_OF[colour] ?? "blau";
   const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}&farbe=${farbe}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}&farbe=${farbe}`;
-  const legal = (page: string) => `https://handball-ai.ch${locale === "de-CH" ? "" : `/${locale}`}/${page}`;
+  // the legal pages on the website, its address from the configuration
+  const site = useSiteConfig();
+  const legal = (page: string) => sitePage(site?.site_url ?? "", locale, page);
   async function send(email: string) {
     setBusy(true);
     const r = await api.POST("/v1/auth/start", { body: { email, locale: (["de-CH", "fr", "en"].includes(locale) ? locale : "de-CH") as "de-CH", next } });

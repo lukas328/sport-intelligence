@@ -3432,6 +3432,9 @@
     "saving": "We are creating your team and fetching matches, squad and table from handball.ch. This takes about 15 seconds.",
     "savedAccess": "Request sent. The people of the club will answer in the app.",
     "savingFailed": "That did not work.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "ownerLink": "This team is mine, but someone else already has it",
+    "ownerSubject": "Our team is already taken",
+    "ownerBody": "Hello support\n\nThe team (handball.ch number {team}) is ours but was set up by someone else. I am:\n\nName:\nRole in the club:\n"
   }
 }

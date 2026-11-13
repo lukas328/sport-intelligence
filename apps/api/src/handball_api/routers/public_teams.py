@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from handball_api.core.errors import ProblemError
 from handball_api.routers.deps import CtxDep, client_ip
+from handball_api.schemas.common import ApiModel
 from handball_api.schemas.public_teams import PublicTeamHit, PublicTeamPreview
 from handball_api.services import public_teams as service
 
@@ -45,3 +46,16 @@ async def search_teams(
 async def team_preview(ctx: CtxDep, club_id: int, official_id: int) -> dict[str, Any]:
     """Last result, rank and table, form, scorers and next game of a team."""
     return await service.preview(ctx, club_id, official_id)
+
+
+class PublicConfig(ApiModel):
+    site_url: str
+    support_email: str
+
+
+@router.get("/config", response_model=PublicConfig)
+async def public_config(ctx: CtxDep) -> PublicConfig:
+    """Addresses the pages link to (website, support), from the configuration: also before
+    sign-in, for the entry and its legal links."""
+    s = ctx.settings
+    return PublicConfig(site_url=s.site_url.rstrip("/"), support_email=s.support_email)

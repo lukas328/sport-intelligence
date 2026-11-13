@@ -1,7 +1,8 @@
 "use client";
 
 import { track } from "@/lib/analytics";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { sitePage, useSiteConfig } from "@/lib/site-config";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
@@ -138,6 +139,8 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
     onUploaded();
   }
 
+  const site = useSiteConfig();
+  const locale = useLocale();
   const pct = state.kind === "uploading" ? Math.floor((state.done / state.file.size) * 100) : 0;
   return (
     <div className="space-y-5">
@@ -147,9 +150,10 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
         <li>{t("upload.tip2")}</li>
         <li>{t("upload.tip3")}</li>
       </ul>
-      <a href="https://handball-ai.ch/aufnahme/" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+      {/* the guide on the website, its address from the configuration */}
+      {site && <a href={sitePage(site.site_url, locale, "aufnahme/")} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
         {t("upload.guide")}
-      </a>
+      </a>}
       <label
         onDragOver={(e) => {
           e.preventDefault();

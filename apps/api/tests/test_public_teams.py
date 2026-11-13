@@ -106,3 +106,15 @@ def test_scorer_names_in_reading_order() -> None:
     assert display_name("SIGG Jean-Claude") == "Jean-Claude Sigg"
     assert display_name("MÜLLER-HUBER Tim") == "Tim Müller-Huber"
     assert display_name("Anna Muster") == "Anna Muster"
+
+
+async def test_public_config_gives_the_website_and_support_addresses(
+    make_api: Callable[[], Api],
+) -> None:
+    """The upload guide and the legal links take the website's address from the configuration."""
+    r = await make_api().get("/v1/public/config")
+    assert r.status_code == 200
+    assert r.json() == {
+        "site_url": "https://handball-ai.ch",
+        "support_email": "support@handball-ai.ch",
+    }

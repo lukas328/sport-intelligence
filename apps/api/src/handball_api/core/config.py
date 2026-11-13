@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     status_page_push_url: str | None = None  # provider webhook for component status
     status_page_token: SecretStr | None = None
     help_base_url: str = "https://handball-ai.ch/hilfe"
+    # the public website (apps/site): legal pages and guides such as /aufnahme/ link there; one
+    # setting, so a change of domain does not break links in the app
+    site_url: str = "https://handball-ai.ch"
     raw_video_days: int = 90  # originals reduced to the compressed version after this
     alert_cost_chf_per_match: float = 2.0
     alert_analysis_minutes: float = 45.0
