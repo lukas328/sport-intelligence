@@ -2819,7 +2819,9 @@
     "away": "away at {opponent}",
     "noMatches": "No matches this season yet.",
     "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded.",
-    "noMatchesYet": "No match played this season yet. The figures appear after the first match with a match report or tagging."
+    "noMatchesYet": "No match played this season yet. The figures appear after the first match with a match report or tagging.",
+    "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, involved in {involved}",
+    "number": "Number"
   },
   "slots": {
     "title": "Training times {season}",
@@ -3121,7 +3123,15 @@
     "chatHeading": "The three things",
     "noVideoTitle": "No video",
     "drawResult": "Draw",
-    "changeColour": "Change {opponent}'s colour"
+    "changeColour": "Change {opponent}'s colour",
+    "oppRank": "Rank {rank}, {points} points from {games} games",
+    "oppRecord": "{won} wins, {drawn} draws, {lost} losses",
+    "oppGoals": "Scores {scored} goals a game on average, concedes {conceded}",
+    "table": "Table",
+    "tableRank": "Rank",
+    "tableTeam": "Team",
+    "tableGames": "Games",
+    "tablePoints": "Points"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3320,7 +3330,8 @@
     "lastAgainst": "{own}:{opp} last time",
     "noFixtures": "No match scheduled.",
     "more": "More about the season",
-    "moreNote": "Figures, bests, all matches in detail, runs and reports"
+    "moreNote": "Figures, bests, all matches in detail, runs and reports",
+    "rankKick": "Rank {rank}, {points} points"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",

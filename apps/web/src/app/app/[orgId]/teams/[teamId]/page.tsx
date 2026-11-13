@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { Schemas } from "@handball/api-client";
 import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
+import { PageHead } from "@/components/anlauf/heads";
 import { RosterEditor } from "@/components/roster/roster-editor";
 import { AreaSubNav } from "@/components/shell/section-nav";
 import { buttonClass } from "@/components/ui/button";
@@ -67,7 +68,10 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
     return (
       <div className="space-y-6">
         <AreaSubNav />
-        <PageHeader eyebrow={kick} title={t("editTitle")} actions={<Link href={base} className={linkClass}>{t("back")}</Link>} />
+        {/* the Seitenkopf like every page (UX test B34) */}
+        <div className="bleed-x">
+          <PageHead kick={kick} title={t("editTitle")} actions={<Link href={base} className={linkClass}>{t("back")}</Link>} />
+        </div>
         {open > 0 && (
           <p className="text-sm" data-testid="official-open">
             <Link href={`${base}/official`} className={linkClass}>

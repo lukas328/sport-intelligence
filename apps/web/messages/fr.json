@@ -2807,7 +2807,7 @@
     "shootingPct": "Réussite",
     "sevenM": "7 m",
     "assists": "Passes déc.",
-    "turnovers": "Pertes",
+    "turnovers": "Pertes de balle",
     "suspensions": "2 min",
     "saves": "Arrêts",
     "faced": "Tirs cadrés",
@@ -2819,7 +2819,9 @@
     "away": "à l'extérieur chez {opponent}",
     "noMatches": "Pas encore de match cette saison.",
     "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies.",
-    "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie."
+    "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie.",
+    "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, impliqué dans {involved}",
+    "number": "Numéro"
   },
   "slots": {
     "title": "Horaires d'entraînement {season}",
@@ -3121,7 +3123,15 @@
     "chatHeading": "Les trois choses",
     "noVideoTitle": "Pas de vidéo",
     "drawResult": "Match nul",
-    "changeColour": "Changer la couleur de {opponent}"
+    "changeColour": "Changer la couleur de {opponent}",
+    "oppRank": "Rang {rank}, {points} points en {games} matchs",
+    "oppRecord": "{won} victoires, {drawn} nuls, {lost} défaites",
+    "oppGoals": "Marque {scored} buts par match en moyenne, en encaisse {conceded}",
+    "table": "Classement",
+    "tableRank": "Rang",
+    "tableTeam": "Équipe",
+    "tableGames": "Matchs",
+    "tablePoints": "Points"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3320,7 +3330,8 @@
     "lastAgainst": "{own}:{opp} la dernière fois",
     "noFixtures": "Aucun match prévu.",
     "more": "Plus sur la saison",
-    "moreNote": "Chiffres, records, tous les matchs en détail, séries et analyses"
+    "moreNote": "Chiffres, records, tous les matchs en détail, séries et analyses",
+    "rankKick": "Rang {rank}, {points} points"
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",

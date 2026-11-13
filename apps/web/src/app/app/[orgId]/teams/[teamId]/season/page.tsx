@@ -155,7 +155,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
         : tv("neutralSeason");
   const league = official.data?.linked ? [official.data.league, official.data.group_name].filter(Boolean).join(", ") : (team.data?.league ?? "");
   const season = `${t("title")} ${team.data?.current_season?.label ?? ""}`.trim();
-  const kick = league ? ts("kick", { season, league, n }) : ts("kickNoLeague", { season, n });
+  const kickBase = league ? ts("kick", { season, league, n }) : ts("kickNoLeague", { season, n });
+  // the rank always stands in the head when the table is known (UX test B41), in the title or here
+  const kick = ours?.rank && !(zoneNoun && ours.rank) ? `${kickBase} · ${ts("rankKick", { rank: ours.rank, points: ours.points ?? 0 })}` : kickBase;
   const goalsAgainstTotal = data.matches.reduce((sum, m) => sum + m.score_opponent, 0);
   const goalsForTotal = data.matches.reduce((sum, m) => sum + m.score_own, 0);
   const noVideo = data.matches.length - withVideo.length;
