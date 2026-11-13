@@ -228,3 +228,6 @@ async def test_shared_goal_scene_carries_its_tactics_camera(
     assert first["camera"]["field_confirmed"] is True and first["camera"]["tracks"]
     assert first["camera"]["event_id"] == goal["event_id"]
     assert second["camera"] is None
+    # the title parts as in the app (UX test B15): minute, side, position of the goal
+    assert first["goal"] == {"minute": goal["minute"], "team": goal["team"], "zone": goal["zone"]}
+    assert second["goal"] is None

@@ -280,6 +280,7 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
             sc = item.get("scene")
             video = await _main_video(ctx, uuid.UUID(sc["match_id"])) if sc else None
             camera = await _camera(ctx, sc) if sc else None
+            goal = await _goal(ctx, sc) if sc else None
             out.append(
                 {
                     "kind": item["kind"],
@@ -294,6 +295,9 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
                         # the tactics camera of the goal behind the scene (SPEC 7.8: Video |
                         # Taktik and the Minifeld per scene); none without a confirmed court
                         "camera": camera,
+                        # minute, side and position of the goal: the same title as in the
+                        # app («35:51 Gegentor über rechts aussen», UX test B15)
+                        "goal": goal,
                     }
                     if sc
                     else None,
@@ -340,6 +344,19 @@ async def _camera(ctx: Ctx, sc: dict[str, Any]) -> dict[str, Any] | None:
     if not cam["field_confirmed"] or not cam["tracks"]:
         return None
     return {**cam, "event_id": str(cam["event_id"])}
+
+
+async def _goal(ctx: Ctx, sc: dict[str, Any]) -> dict[str, Any] | None:
+    if not sc.get("event_id"):
+        return None
+    e = await ctx.db.get(Event, uuid.UUID(sc["event_id"]))
+    if e is None or e.type != "shot" or e.outcome != "goal":
+        return None
+    return {
+        "minute": graphics_service.minute_of(e),
+        "team": "own" if e.side == "own" else "opp",
+        "zone": graphics_service.zone_of(e),
+    }
 
 
 async def _scenes_of(ctx: Ctx, link: ShareLink) -> dict[str, Any]:

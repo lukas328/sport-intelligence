@@ -6,7 +6,7 @@
   },
   "nav": {
     "home": "Start",
-    "status": "Status der App",
+    "status": "Läuft alles? Störungen",
     "app": "Zur App",
     "login": "Anmelden",
     "assignments": "Aufgaben",
@@ -22,7 +22,7 @@
     "f1Title": "Automatisch zuerst",
     "f2Title": "Jede Zahl führt zum Video",
     "f3Title": "Für Amateurteams gemacht",
-    "f2": "Ein Klick auf eine Statistik zeigt die Szenen dahinter.",
+    "f2": "Ein Klick auf eine Zahl zeigt die Szenen dahinter.",
     "login": "Ich habe schon ein Konto",
     "f1": "Video hochladen, den Rest erledigt die Analyse: Würfe, Tore, Torhüter, Laufwege."
   },
@@ -1946,7 +1946,7 @@
     "historyNone": "Noch keine Gespräche."
   },
   "exchange": {
-    "title": "Daten exportieren und importieren",
+    "title": "Spieldaten als Datei",
     "sportscode": "Sportscode-XML herunterladen",
     "csv": "Ereignisse als CSV",
     "exportHint": "Die XML-Datei enthält alle Ereignisse mit Videozeit und alle Szenen mit ihren Tags. Sie lässt sich in Sportscode und kompatiblen Programmen öffnen.",
@@ -2341,7 +2341,7 @@
     "existingAuto": "Automatisch gefunden. Liegt das orange Feld auf den Hallenlinien und stehen die Tore richtig? Dann bestätigen, sonst Punkte setzen."
   },
   "today": {
-    "uploadHint": "Lade das Video hoch. Statistik, Szenen und drei Dinge entstehen danach automatisch.",
+    "uploadHint": "Lade das Video hoch. Zahlen, Szenen und drei Dinge entstehen danach von selbst.",
     "myTasks": "Zu erledigen",
     "prepare": "Vorbereiten",
     "inDays": "{n, plural, =0 {Heute} =1 {Morgen} other {In # Tagen}}",
@@ -2707,7 +2707,7 @@
     "nothingOpen": "Nichts offen. Neue Vorschläge kommen nach jedem Spiel.",
     "squad": "Team bestätigen",
     "squadHint": "Spieler/innen aus den offiziellen Spielberichten. Nummer prüfen, wer nicht dazugehört, abwählen.",
-    "showStats": "Statistik anzeigen",
+    "showStats": "Zahlen aus dem Spielbericht zeigen",
     "take": "Übernehmen",
     "takePlayer": "{name} übernehmen",
     "name": "Name",
@@ -2718,7 +2718,7 @@
     "sevenM": "7 m",
     "twoMin": "2'",
     "saves": "Paraden",
-    "noStatsYet": "Noch keine Spiele mit Statistik in dieser Saison.",
+    "noStatsYet": "Noch keine Spiele mit Zahlen in dieser Saison.",
     "takeSquad": "{n, plural, one {# Spieler/in übernehmen} other {# Spieler/innen übernehmen}}",
     "numberInvalid": "Rückennummern von 0 bis 99, oder leer lassen.",
     "squadTaken": "{n, plural, one {# Spieler/in im Team.} other {# Spieler/innen im Team.}}",
@@ -2926,7 +2926,8 @@
     "fullscreen": "Vollbild",
     "prev": "Zurück",
     "next": "Weiter",
-    "close": "Schliessen"
+    "close": "Schliessen",
+    "showTitle": "Am Bildschirm"
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",

@@ -117,7 +117,8 @@ export function N({ value, onClick, label }: { value: string | number; onClick?:
   if (value === 0 || value === "0") return <span className="tabular-nums text-muted">{value}</span>;
   if (!onClick) return <span className="tabular-nums">{value}</span>;
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums font-semibold underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-accent hover:decoration-solid">
+    // a 44 px target in the tables too (UX test B44): the row grows a little, the figure stays
+    <button type="button" onClick={onClick} aria-label={label} className="inline-flex min-h-11 min-w-11 items-center justify-end tabular-nums font-semibold underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-accent hover:decoration-solid">
       {value}
     </button>
   );

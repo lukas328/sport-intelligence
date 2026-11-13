@@ -6,7 +6,7 @@
   },
   "nav": {
     "home": "Accueil",
-    "status": "État du système",
+    "status": "Tout fonctionne ? Pannes",
     "app": "Ouvrir l'app",
     "login": "Connexion",
     "assignments": "Tâches",
@@ -1946,7 +1946,7 @@
     "historyNone": "Pas encore de conversation."
   },
   "exchange": {
-    "title": "Échanger des données",
+    "title": "Données du match en fichier",
     "sportscode": "Télécharger le XML Sportscode",
     "csv": "Événements en CSV",
     "exportHint": "Le fichier XML contient tous les événements avec un temps vidéo et toutes les scènes avec leurs tags. Il s'ouvre dans Sportscode et les programmes compatibles.",
@@ -2926,7 +2926,8 @@
     "fullscreen": "Plein écran",
     "prev": "Retour",
     "next": "Suivant",
-    "close": "Fermer"
+    "close": "Fermer",
+    "showTitle": "À l'écran"
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",

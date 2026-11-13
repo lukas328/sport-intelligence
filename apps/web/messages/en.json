@@ -6,7 +6,7 @@
   },
   "nav": {
     "home": "Home",
-    "status": "System status",
+    "status": "Is everything running? Outages",
     "app": "Open app",
     "login": "Sign in",
     "assignments": "Assignments",
@@ -1946,7 +1946,7 @@
     "historyNone": "No conversations yet."
   },
   "exchange": {
-    "title": "Exchange data",
+    "title": "Match data as a file",
     "sportscode": "Download Sportscode XML",
     "csv": "Events as CSV",
     "exportHint": "The XML file contains every event with video time and every scene with its tags. It opens in Sportscode and compatible programs.",
@@ -2926,7 +2926,8 @@
     "fullscreen": "Full screen",
     "prev": "Back",
     "next": "Next",
-    "close": "Close"
+    "close": "Close",
+    "showTitle": "On screen"
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
