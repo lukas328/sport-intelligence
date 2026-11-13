@@ -6,7 +6,8 @@ misses throws and bounces. It only tells where to look. A label is a precise poi
 - "sure": Claude's point (contact sheets, src "llm") lies within AGREE px of the owner's rough
   track in the same frame or one frame either side: two independent looks agree;
 - "track": a smooth run of Claude's points anchored to an owner/sure point (see promote_tracks);
-- "check": Claude's point without either; not used until the owner has confirmed it.
+- "check": Claude's point without either; not used until the owner has confirmed it
+  ("confirmed" after J on the review page, "rejected" after F; rejected points are dropped).
 States without a position ("out", "hidden" without a point) are kept with their tier.
 
     python ml/gold/export.py LABELS_DIR CLIPS_JSON OUT_JSON [--agree 60]
@@ -93,9 +94,21 @@ def main() -> None:
     ap.add_argument("clips_json", type=Path)
     ap.add_argument("out", type=Path)
     ap.add_argument("--agree", type=float, default=60.0)
+    ap.add_argument(
+        "--reviews",
+        type=Path,
+        nargs="*",
+        default=[],
+        help="Ball-oder-nicht exports of the check items",
+    )
     a = ap.parse_args()
     clips = {c["id"]: c for c in json.loads(a.clips_json.read_text())}
-    out, counts = {}, {"owner": 0, "sure": 0, "track": 0, "check": 0}
+    review = {}
+    for rd in a.reviews:
+        for q in rd.glob("*.json"):
+            v = json.loads(q.read_text())
+            review[q.stem] = v.get("data", v)["state"]
+    out, counts = {}, {"owner": 0, "sure": 0, "track": 0, "confirmed": 0, "check": 0, "rejected": 0}
     for p in sorted(a.labels_dir.glob("g*.json")):
         d = json.loads(p.read_text())
         d = d.get("data", d)
@@ -108,6 +121,10 @@ def main() -> None:
             t = tier(v, rough, f, a.agree)
             rows.append({"frame": f, "x": v.get("x"), "y": v.get("y"), "state": v["s"], "tier": t})
         promote_tracks(rows)
+        for r in rows:  # the owner's verdict on Claude's unconfirmed points
+            if r["tier"] == "check":
+                st = review.get(f"{p.stem}_{r['frame']}")
+                r["tier"] = {"ball": "confirmed", "none": "rejected"}.get(st, "check")
         for r in rows:
             counts[r["tier"]] += 1
         c = clips[p.stem]
@@ -117,7 +134,7 @@ def main() -> None:
             "w": c["w"],
             "h": c["h"],
             "shots": d.get("shots", []),
-            "labels": rows,
+            "labels": [r for r in rows if r["tier"] != "rejected"],
         }
     a.out.write_text(
         json.dumps({"agree_px": a.agree, "clips": out}, indent=None, separators=(",", ":"))
