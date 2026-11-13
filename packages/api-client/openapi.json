@@ -1584,6 +1584,19 @@
             "title": "Candidates",
             "type": "array"
           },
+          "copy_from": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "court question of a further part: the part whose court can be taken over",
+            "title": "Copy From"
+          },
           "frame_ref": {
             "description": "video time in ms",
             "title": "Frame Ref",
@@ -5486,6 +5499,49 @@
         "title": "GoalRunOut",
         "type": "object"
       },
+      "GraphicsPartOut": {
+        "properties": {
+          "analysis": {
+            "default": "none",
+            "enum": [
+              "none",
+              "running",
+              "ready",
+              "failed"
+            ],
+            "title": "Analysis",
+            "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "start_ms": {
+            "description": "where the part starts on the match timeline",
+            "title": "Start Ms",
+            "type": "integer"
+          },
+          "video_id": {
+            "format": "uuid",
+            "title": "Video Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "video_id",
+          "start_ms",
+          "duration_ms"
+        ],
+        "title": "GraphicsPartOut",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -7680,6 +7736,14 @@
               "$ref": "#/components/schemas/CheckOut"
             },
             "title": "More Checks",
+            "type": "array"
+          },
+          "parts": {
+            "description": "the files of the match on its timeline (two halves, a split recording)",
+            "items": {
+              "$ref": "#/components/schemas/GraphicsPartOut"
+            },
+            "title": "Parts",
             "type": "array"
           },
           "phases": {
@@ -10821,6 +10885,17 @@
           "source": {
             "title": "Source",
             "type": "string"
+          },
+          "start_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Ms"
           },
           "video_id": {
             "format": "uuid",
@@ -17363,6 +17438,18 @@
             "title": "Created At",
             "type": "string"
           },
+          "duplicate_of": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate Of"
+          },
           "duration_s": {
             "anyOf": [
               {
@@ -17427,6 +17514,28 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "part": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part"
+          },
+          "part_start_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part Start Ms"
           },
           "quality_report": {
             "anyOf": [
@@ -35024,6 +35133,63 @@
           "matches",
           "analysis"
         ]
+      },
+      "post": {
+        "description": "The analysis of this file again (the other parts of the match keep theirs).",
+        "operationId": "retry_analysis_v1_orgs__org_id__videos__video_id__analysis_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Retry Analysis V1 Orgs  Org Id  Videos  Video Id  Analysis Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retry Analysis",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
       }
     },
     "/v1/orgs/{org_id}/videos/{video_id}/calibration": {
@@ -35147,6 +35313,75 @@
           }
         },
         "summary": "Confirm Calibration",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/from/{source_id}": {
+      "post": {
+        "description": "The court of the match's other part for this part (camera at the same place).",
+        "operationId": "court_from_part_v1_orgs__org_id__videos__video_id__calibration_from__source_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Court From Part V1 Orgs  Org Id  Videos  Video Id  Calibration From  Source Id  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Court From Part",
         "tags": [
           "matches",
           "analysis"

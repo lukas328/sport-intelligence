@@ -288,6 +288,22 @@ async def calibrate(video_id: uuid.UUID, data: CalibrationIn, scope: OrgDep) -> 
     return {"job_id": str(job.id)}
 
 
+@router.post("/videos/{video_id}/calibration/from/{source_id}", status_code=202, tags=["analysis"])
+async def court_from_part(
+    video_id: uuid.UUID, source_id: uuid.UUID, scope: OrgDep
+) -> dict[str, str]:
+    """The court of the match's other part for this part (camera at the same place)."""
+    job = await videos.court_from_part(scope.ctx, video_id, source_id)
+    return {"job_id": str(job.id)}
+
+
+@router.post("/videos/{video_id}/analysis", status_code=202, tags=["analysis"])
+async def retry_analysis(video_id: uuid.UUID, scope: OrgDep) -> dict[str, str]:
+    """The analysis of this file again (the other parts of the match keep theirs)."""
+    job = await videos.retry_analysis(scope.ctx, video_id)
+    return {"job_id": str(job.id)}
+
+
 @router.post("/videos/{video_id}/calibration/confirm", tags=["analysis"])
 async def confirm_calibration(video_id: uuid.UUID, scope: OrgDep) -> dict[str, str]:
     """The automatic court fits: keep it as confirmed (no re-run)."""

@@ -19,6 +19,8 @@ class PartOut(ApiModel):
     video_id: uuid.UUID
     filename: str
     position: int
+    # where the part starts on the match timeline (None while a part before has no length)
+    start_ms: int | None = None
     duration_s: float | None
     recorded_at: datetime | None
     gap_before_ms: int | None

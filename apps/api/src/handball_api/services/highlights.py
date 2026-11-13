@@ -35,7 +35,12 @@ from handball_api.models.enums import ConsentKind, ReelFormat, ReelStatus
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.feed import _close_events, _importance, in_video
-from handball_api.services.matches import duration_ms, get_match, opponent_of, timeline_video
+from handball_api.services.matches import (
+    get_match,
+    opponent_of,
+    timeline_duration_ms,
+    timeline_video,
+)
 from handball_api.services.policies import Action, can
 from handball_api.services.roster import consented
 from handball_api.services.videos import media_prefix
@@ -130,7 +135,7 @@ async def build(
             )
         ).all()
     )
-    duration = duration_ms(video)
+    duration = await timeline_duration_ms(ctx, match.id)
     scenes = rank([e for e in events if in_video(e, duration)], match, player_id)
     featured = {s.player_id for s in scenes if s.player_id}
     allowed = await consented(ctx, list(featured), ConsentKind.HIGHLIGHTS_INTERNAL)

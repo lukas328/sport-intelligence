@@ -41,9 +41,11 @@ from handball_api.services.matches import (
     REPORT_SOURCES,
     duration_ms,
     get_match,
+    timeline_duration_ms,
     timeline_video,
 )
 from handball_api.services.shot_positions import _rows
+from handball_api.services.timeline import Files
 
 LENGTH, WIDTH = 40.0, 20.0
 RUN_MS = 3000  # the run before the shot: 2 to 4 s
@@ -269,19 +271,21 @@ async def _goals(ctx: Ctx, match: Match) -> list[Event]:
 
 
 async def _tracking_run(
-    ctx: Ctx, asset: VideoAsset, tracks: list[Track], e: Event
+    ctx: Ctx, asset: VideoAsset, tracks: list[Track], e: Event, local_ms: int | None = None
 ) -> list[tuple[float, float]]:
     """The scorer's track in the 3 s before the goal (the track with the scorer's number on the
-    attacking side), in half-court coordinates; empty when the tracking has no such track."""
+    attacking side), in half-court coordinates; empty when the tracking has no such track.
+    `local_ms`: the goal's time in this file (a part of the match), else its match time."""
     if e.t_ms is None or e.number is None:
         return []
+    t_ms = e.t_ms if local_ms is None else local_ms
     label = "home" if e.side == "own" else "away"
     nos = {
         t.track_no for t in tracks if t.number == e.number and str(t.team or "").startswith(label)
     }
     if not nos:
         return []
-    rows = await _rows(ctx, asset, e.t_ms - RUN_MS, e.t_ms)
+    rows = await _rows(ctx, asset, t_ms - RUN_MS, t_ms)
     mine = rows[np.isin(rows[:, 1].astype(int), list(nos))] if len(rows) else rows
     if len(mine) < 3:
         return []
@@ -302,11 +306,8 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     match = await get_match(ctx, match_id)
     asset = await timeline_video(ctx, match.id)
     tracking = _has_tracking(asset)
-    tracks = (
-        list((await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all())
-        if tracking and asset is not None
-        else []
-    )
+    files = await Files.of(ctx, match.id)
+    length = await timeline_duration_ms(ctx, match.id)
     confirmed_field = await _field_confirmed(ctx, asset)
     demo = match.is_demo  # seeded: the synthetic video says nothing about the match
     field = _shown_field(demo, asset, tracking, confirmed_field)
@@ -317,6 +318,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     ]
 
     runs: list[dict[str, Any]] = []
+    part_cache: dict[uuid.UUID, list[Track] | None] = {}
     for e in goals:
         attrs = e.attributes or {}
         estimated_spot = bool(attrs.get("position_source")) or e.source in ESTIMATED_SOURCES
@@ -328,8 +330,11 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             source = "demo"
         elif demo:
             pass  # court not confirmed: no invented run, only a spot marked by hand
-        elif tracking and asset is not None and confirmed_field:
-            run = await _tracking_run(ctx, asset, tracks, e)
+        elif (hit := files.at(e.t_ms) if e.t_ms is not None else None) is not None and (
+            await _part_tracking(ctx, hit[0], part_cache, files)
+        ):
+            # the goal's part of the match: its tracks, its court (Q-VIDEO-PARTS)
+            run = await _tracking_run(ctx, hit[0], part_cache[hit[0].id] or [], e, hit[1])
             if run:
                 source = "tracking"
                 shot = shot or run[-1]
@@ -355,15 +360,27 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         )
 
     job = await _analysis_job(ctx, asset)
+    parts = [
+        {
+            "video_id": a.id,
+            "start_ms": start,
+            "duration_ms": duration_ms(a),
+            "analysis": await analysis_status(ctx, a),
+        }
+        for a, start in (files.all() if len(files.parts) > 1 else [])
+    ]
+    state = _job_state(job)
+    if any(p["analysis"] == "running" for p in parts):
+        state = "running"  # a further part is still being analysed: the match is not done
     return {
         "has_video": asset is not None,
-        "analysis": _job_state(job),
+        "analysis": state,
         # when the analysis was done: the start puts a fresh one in its head (second round)
         "analysis_at": job.finished_at if job is not None and _job_state(job) == "ready" else None,
         # a match report brought goals (handball.ch, a paper report): «Spielbericht» only then
         # (real-video test F6; the course also carries the video's goals)
         "has_report": any(e.source in REPORT_SOURCES for e in goals),
-        "span": _span(match, asset),
+        "span": _span(match, asset, length),
         "field_confirmed": field,
         "report_goals": report,
         "goals": runs,
@@ -371,9 +388,28 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         # the court first: until it is confirmed the analysis draws no positions (demo matches
         # show invented ones, the real court of their video is still asked)
         "checks": await _open_checks(ctx, match, asset, tracking, confirmed_field),
+        # the files of the match (two halves, a split recording): where each starts (Q-VIDEO-PARTS)
+        "parts": parts,
         "more_checks": await more_checks(ctx, match),
         "source": "demo" if demo else "analysis",
     }
+
+
+async def _part_tracking(
+    ctx: Ctx, asset: VideoAsset, cache: dict[uuid.UUID, list[Track] | None], files: Files
+) -> bool:
+    """A part whose tracks may draw positions: tracking and a confirmed court; its tracks are
+    kept in `cache` (None: no positions from this part)."""
+    if asset.id not in cache:
+        ok = _has_tracking(asset) and bool(await _court_ok(ctx, asset, files))
+        cache[asset.id] = (
+            list(
+                (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
+            )
+            if ok
+            else None
+        )
+    return cache[asset.id] is not None
 
 
 async def _analysis_job(ctx: Ctx, asset: VideoAsset | None) -> ProcessingJob | None:
@@ -404,12 +440,12 @@ async def analysis_status(ctx: Ctx, asset: VideoAsset | None) -> str:
     return _job_state(await _analysis_job(ctx, asset))
 
 
-def _span(match: Match, asset: VideoAsset | None) -> list[float] | None:
-    """The match minutes the video covers, once the throw-off is set: the course is drawn over
-    that stretch, not over a whole match (real-video test E10). Null without throw-off."""
+def _span(match: Match, asset: VideoAsset | None, length: int | None) -> list[float] | None:
+    """The match minutes the video covers (all its parts), once the throw-off is set: the course
+    is drawn over that stretch, not over a whole match (real-video test E10). Null without
+    throw-off."""
     if asset is None or match.is_demo:
         return None
-    length = duration_ms(asset)
     first = min((int(v) for v in (match.kickoff_ms or {}).values()), default=None)
     if length is None or first is None:
         return None
@@ -473,6 +509,7 @@ def _field_check(asset: VideoAsset) -> dict[str, Any]:
     return {
         "id": asset.id,
         "kind": "field",
+        "copy_from": None,
         "frame_ref": 0,
         "box": None,
         "seconds_in_view": None,
@@ -494,7 +531,7 @@ def kickoff_missing(match: Match, length_ms: int | None) -> list[int]:
     return [2] if second and k.get("2") is None else []
 
 
-def _kickoff_check(match: Match, asset: VideoAsset | None = None) -> list[dict[str, Any]]:
+def _kickoff_check(match: Match, length_ms: int | None) -> list[dict[str, Any]]:
     """The throw-off, asked in Prüfen while it is not set (UX test B10): it ties the match clock
     to the video. `frame_ref` is the half."""
     return [
@@ -507,24 +544,55 @@ def _kickoff_check(match: Match, asset: VideoAsset | None = None) -> list[dict[s
             "suggested_side": None,
             "candidates": [],
         }
-        for period in kickoff_missing(match, duration_ms(asset) if asset is not None else None)
+        for period in kickoff_missing(match, length_ms)
     ]
 
 
 async def _open_checks(
     ctx: Ctx, match: Match, asset: VideoAsset | None, tracking: bool, confirmed_field: bool | None
 ) -> list[dict[str, Any]]:
-    """Every open question of Prüfen, in the order they are asked: the court, the throw-off,
-    then the goal and shot candidates."""
+    """Every open question of Prüfen, in the order they are asked: the court (of each part of
+    the match), the throw-off, then the goal and shot candidates."""
+    fields = (
+        [_field_check(asset)] if asset is not None and tracking and confirmed_field is False else []
+    )
+    files = await Files.of(ctx, match.id)
+    first_ok = confirmed_field is True
+    for a, _ in files.all()[1:]:
+        # a further part (the second half): asked only when its court was not carried over from
+        # the other part (the camera rarely stands exactly where it stood); the first part's
+        # court is offered
+        if not _has_tracking(a) or await _court_ok(ctx, a, files) is not False:
+            continue
+        check = _field_check(a)
+        check["copy_from"] = asset.id if asset is not None and first_ok else None
+        fields.append(check)
+    length = await timeline_duration_ms(ctx, match.id)
     return (
-        (
-            [_field_check(asset)]
-            if asset is not None and tracking and confirmed_field is False
-            else []
-        )
-        + (_kickoff_check(match, asset) if asset is not None and not match.is_demo else [])
+        fields
+        + (_kickoff_check(match, length) if asset is not None and not match.is_demo else [])
         + await _checks(ctx, match)
     )
+
+
+def _carried_over(asset: VideoAsset, siblings: set[str] | None = None) -> bool:
+    """The court of this file was carried over from another file of the same match whose court
+    a person set (the worker matched the two hall images)."""
+    info = (asset.analysis or {}).get("calibration_info")
+    if not isinstance(info, dict) or info.get("method") != "hall":
+        return False
+    ref = str(info.get("reference_video_id") or "")
+    return siblings is None or ref in siblings
+
+
+async def _court_ok(ctx: Ctx, asset: VideoAsset | None, files: Files) -> bool | None:
+    """_field_confirmed for one part of a match: also a court carried over from another part
+    whose court a person set."""
+    confirmed = await _field_confirmed(ctx, asset)
+    if confirmed is not False or asset is None:
+        return confirmed
+    others = {str(a.id) for a, _ in files.all() if a.id != asset.id}
+    return bool(others) and _carried_over(asset, others)
 
 
 async def open_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
@@ -673,10 +741,14 @@ def on_court(x: float, y: float) -> bool:
 async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
     """The tactics camera of one goal, without the access check: for the caller that checked
     access itself (the match page above, a share link for the shared scenes)."""
-    asset = await timeline_video(ctx, match.id)
+    # the goal's part of the match: its tracks and its court, times in that file (Q-VIDEO-PARTS)
+    files = await Files.of(ctx, match.id)
+    hit = files.at(e.t_ms) if e.t_ms is not None else None
+    asset = hit[0] if hit is not None else await timeline_video(ctx, match.id)
+    local = hit[1] if hit is not None else e.t_ms
     tracking = _has_tracking(asset)
     demo = match.is_demo  # seeded: the synthetic video says nothing about the match
-    field = _shown_field(demo, asset, tracking, await _field_confirmed(ctx, asset))
+    field = _shown_field(demo, asset, tracking, await _court_ok(ctx, asset, files))
     clock = e.clock_s
     base: dict[str, Any] = {
         "event_id": e.id,
@@ -705,9 +777,9 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
         base["tracks"] = tracks
         base["shot"] = list(tracks[0]["xy"][-1])
         return base
-    if demo or not field or not tracking or asset is None or e.t_ms is None:
+    if demo or not field or not tracking or asset is None or local is None:
         return base
-    start = e.t_ms - SCENE_MS + SCENE_AFTER_MS
+    start = local - SCENE_MS + SCENE_AFTER_MS
     rows = await _rows(ctx, asset, start, start + SCENE_MS)
     if not len(rows):
         return base

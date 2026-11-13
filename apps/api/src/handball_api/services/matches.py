@@ -13,6 +13,7 @@ from handball_api.core.errors import ProblemError
 from handball_api.models import (
     Event,
     Match,
+    MatchSegment,
     Opponent,
     OpponentPlayer,
     Organization,
@@ -44,8 +45,23 @@ from handball_api.services.policies import Action, authorize, is_staff_somewhere
 REPORT_SOURCES = ("official_feed", "paper_report", "official_report")
 
 
-def video_out(v: VideoAsset) -> VideoOut:
+DUPLICATE = "same-file:"  # error of a file that is already in the match: "same-file:<video id>"
+
+
+def duplicate_of(v: VideoAsset) -> uuid.UUID | None:
+    if v.error and v.error.startswith(DUPLICATE):
+        try:
+            return uuid.UUID(v.error[len(DUPLICATE) :])
+        except ValueError:
+            return None
+    return None
+
+
+def video_out(v: VideoAsset, part: Part | None = None) -> VideoOut:
     return VideoOut(
+        part=part.position + 1 if part is not None else None,
+        part_start_ms=part.offset_ms if part is not None else None,
+        duplicate_of=duplicate_of(v),
         id=v.id,
         role=v.role,
         status=v.status,
@@ -275,27 +291,105 @@ async def get_match(ctx: Ctx, match_id: uuid.UUID, action: Action = Action.MATCH
 
 
 # ---- the match timeline -----------------------------------------------------------------------
-# Event and clip times (t_ms) are times in ONE video: the first main video of the match (upload
-# order, failed uploads left out), the one the match workspace plays. A match can have several
-# main files (two halves, a recording split by the camera); the others have their own tracks but
-# do not move the match's events. Events aligned from the match clock or an official report can
-# lie before the video (clip starts mid-half: negative times) or after its end.
+# Event and clip times (t_ms) are times on the match timeline: the main files of the match (its
+# parts: two halves, a recording the phone split) one after the other, in the order of their
+# MatchSegment rows (camera clock, else upload order, or as a person swapped them). Part k starts
+# at the sum of the lengths of the parts before it. A match with one file has the file's own times.
+# Tracks, the court and the defence formations stay per file (times in that file); `locate` maps a
+# timeline time to the file and its time. Events aligned from the match clock or an official report
+# can lie before the video (clip starts mid-half: negative times) or after its end.
+# The first part is the timeline video: its player playlist joins all parts (services/timeline).
+
+
+@dataclass(frozen=True)
+class Part:
+    """One file of the match timeline. `offset_ms` is None while a part before it has no known
+    length (its times cannot be placed yet)."""
+
+    video_id: uuid.UUID
+    position: int
+    offset_ms: int | None
+    duration_ms: int | None
+    status: VideoStatus
+    filename: str
+    gap_before_ms: int | None = None
+
+    @property
+    def end_ms(self) -> int | None:
+        if self.offset_ms is None or self.duration_ms is None:
+            return None
+        return self.offset_ms + self.duration_ms
 
 
 def _timeline_query(match_ids: list[uuid.UUID]) -> Any:
+    """Main files that are not failed, the parts in their order first, then files without a
+    MatchSegment yet (still processing) in upload order."""
     return (
         select(VideoAsset)
+        .outerjoin(MatchSegment, MatchSegment.video_id == VideoAsset.id)
         .where(
             VideoAsset.match_id.in_(match_ids),
             VideoAsset.role == VideoRole.MAIN,
             VideoAsset.status != VideoStatus.FAILED,
         )
-        .order_by(VideoAsset.match_id, VideoAsset.created_at, VideoAsset.id)
+        .order_by(
+            VideoAsset.match_id,
+            MatchSegment.position.is_(None),
+            MatchSegment.position,
+            VideoAsset.created_at,
+            VideoAsset.id,
+        )
     )
 
 
+async def parts_of(ctx: Ctx, match_id: uuid.UUID) -> list[Part]:
+    """The parts of the match timeline in order, with their place on it."""
+    rows = (
+        await ctx.db.execute(
+            select(MatchSegment, VideoAsset)
+            .join(VideoAsset, VideoAsset.id == MatchSegment.video_id)
+            .where(
+                MatchSegment.match_id == match_id,
+                VideoAsset.role == VideoRole.MAIN,
+                VideoAsset.status != VideoStatus.FAILED,
+            )
+            .order_by(MatchSegment.position, VideoAsset.created_at)
+        )
+    ).all()
+    out: list[Part] = []
+    offset: int | None = 0
+    for i, (seg, v) in enumerate(rows):
+        length = duration_ms(v)
+        out.append(
+            Part(v.id, i, offset, length, v.status, v.filename, seg.gap_before_ms if i else None)
+        )
+        offset = None if offset is None or length is None else offset + length
+    return out
+
+
+def locate(parts: list[Part], t_ms: int) -> tuple[Part, int] | None:
+    """The part a timeline time lies in and the time in that file. Times before the first part
+    belong to it, times after the last part to the last one (as negative times always did)."""
+    placed = [p for p in parts if p.offset_ms is not None]
+    if not placed:
+        return None
+    hit = placed[0]
+    for p in placed:
+        if t_ms >= int(p.offset_ms or 0):
+            hit = p
+    return hit, t_ms - int(hit.offset_ms or 0)
+
+
+def timeline_length_ms(parts: list[Part]) -> int | None:
+    """Length of the whole timeline, None while a part's length is unknown."""
+    if not parts:
+        return None
+    return parts[-1].end_ms
+
+
 async def timeline_video(ctx: Ctx, match_id: uuid.UUID, ready: bool = False) -> VideoAsset | None:
-    """The main video the match's event times refer to; with `ready`, only once it plays."""
+    """The first part of the match timeline (its player plays all parts); with `ready`, only once
+    it plays."""
     v: VideoAsset | None = await ctx.db.scalar(_timeline_query([match_id]).limit(1))
     if v is not None and ready and v.status != VideoStatus.READY:
         return None
@@ -304,7 +398,8 @@ async def timeline_video(ctx: Ctx, match_id: uuid.UUID, ready: bool = False) -> 
 
 @dataclass(frozen=True)
 class TimelineVideo:
-    """What callers of timeline_videos need of a match's timeline video (not its analysis)."""
+    """What callers of timeline_videos need of a match's timeline video (not its analysis);
+    `duration_s` is the length of the whole timeline (all parts)."""
 
     id: uuid.UUID
     match_id: uuid.UUID
@@ -320,26 +415,70 @@ async def timeline_videos(
     if not match_ids:
         return {}
     first: dict[uuid.UUID, TimelineVideo] = {}
+    total: dict[uuid.UUID, float | None] = {}
     rows = await ctx.db.execute(
         _timeline_query(list(match_ids)).with_only_columns(
-            VideoAsset.id, VideoAsset.match_id, VideoAsset.status, VideoAsset.duration_s
+            VideoAsset.id,
+            VideoAsset.match_id,
+            VideoAsset.status,
+            VideoAsset.duration_s,
+            MatchSegment.id,
         )
     )
-    for vid, match_id, status, duration_s in rows.all():
-        first.setdefault(match_id, TimelineVideo(vid, match_id, status, duration_s))
-    return {m: v for m, v in first.items() if not ready or v.status == VideoStatus.READY}
+    for vid, match_id, status, duration_s, seg in rows.all():
+        if match_id not in first:
+            first[match_id] = TimelineVideo(vid, match_id, status, duration_s)
+            total[match_id] = duration_s
+        elif seg is not None:  # a further part on the timeline
+            sofar = total[match_id]
+            total[match_id] = None if sofar is None or duration_s is None else sofar + duration_s
+    return {
+        m: TimelineVideo(v.id, m, v.status, total[m])
+        for m, v in first.items()
+        if not ready or v.status == VideoStatus.READY
+    }
 
 
 async def video_formations(
     ctx: Ctx, video_ids: list[uuid.UUID]
 ) -> dict[uuid.UUID, list[dict[str, Any]]]:
-    """The defence formations the analysis found per video (only that part of the analysis)."""
+    """The defence formations the analysis found per video (only that part of the analysis);
+    for a timeline video, those of every part of its match, on the match timeline."""
     if not video_ids:
         return {}
     rows = await ctx.db.execute(
-        select(VideoAsset.id, VideoAsset.analysis["formations"]).where(VideoAsset.id.in_(video_ids))
+        select(VideoAsset.id, VideoAsset.match_id, VideoAsset.analysis["formations"]).where(
+            VideoAsset.id.in_(video_ids)
+        )
     )
-    return {vid: list(f) if isinstance(f, list) else [] for vid, f in rows.all()}
+    out: dict[uuid.UUID, list[dict[str, Any]]] = {}
+    for vid, match_id, f in rows.all():
+        parts = await parts_of(ctx, match_id)
+        if len(parts) < 2 or parts[0].video_id != vid:
+            out[vid] = list(f) if isinstance(f, list) else []
+            continue
+        out[vid] = await _formations_on_timeline(ctx, parts)
+    return out
+
+
+async def _formations_on_timeline(ctx: Ctx, parts: list[Part]) -> list[dict[str, Any]]:
+    placed = {p.video_id: int(p.offset_ms) for p in parts if p.offset_ms is not None}
+    rows = await ctx.db.execute(
+        select(VideoAsset.id, VideoAsset.analysis["formations"]).where(
+            VideoAsset.id.in_(list(placed))
+        )
+    )
+    out: list[dict[str, Any]] = []
+    for vid, f in rows.all():
+        for item in f if isinstance(f, list) else []:
+            if not isinstance(item, dict):
+                continue
+            shifted = dict(item)
+            for k in ("start_ms", "end_ms", "t_ms"):
+                if isinstance(shifted.get(k), int | float):
+                    shifted[k] = int(shifted[k]) + placed[vid]
+            out.append(shifted)
+    return sorted(out, key=lambda x: int(x.get("start_ms", x.get("t_ms", 0)) or 0))
 
 
 def duration_ms(video: VideoAsset | TimelineVideo | None) -> int | None:
@@ -347,8 +486,19 @@ def duration_ms(video: VideoAsset | TimelineVideo | None) -> int | None:
 
 
 async def video_duration_ms(ctx: Ctx, match: Match) -> int | None:
-    """Length of the match's timeline video, None while unknown."""
+    """Length of the match timeline (all parts), None while unknown."""
+    parts = await parts_of(ctx, match.id)
+    if parts:
+        return timeline_length_ms(parts)
     return duration_ms(await timeline_video(ctx, match.id))
+
+
+async def timeline_duration_ms(ctx: Ctx, match_id: uuid.UUID) -> int | None:
+    """video_duration_ms by match id."""
+    parts = await parts_of(ctx, match_id)
+    if parts:
+        return timeline_length_ms(parts)
+    return duration_ms(await timeline_video(ctx, match_id))
 
 
 def in_video(t_ms: int | None, duration: int | None) -> bool:
@@ -370,13 +520,18 @@ async def opponent_of(ctx: Ctx, match: Match) -> Opponent | None:
 
 async def match_out(ctx: Ctx, match: Match) -> MatchOut:
     opp = await opponent_of(ctx, match)
-    videos = (
-        await ctx.db.scalars(
-            select(VideoAsset)
-            .where(VideoAsset.match_id == match.id)
-            .order_by(VideoAsset.created_at)
-        )
-    ).all()
+    parts = {p.video_id: p for p in await parts_of(ctx, match.id)}
+    videos = sorted(
+        (
+            await ctx.db.scalars(
+                select(VideoAsset)
+                .where(VideoAsset.match_id == match.id)
+                .order_by(VideoAsset.created_at)
+            )
+        ).all(),
+        # the parts in their order first: the first ready main file is the first part
+        key=lambda v: (v.id not in parts, parts[v.id].position if v.id in parts else 0),
+    )
     jobs = (
         await ctx.db.scalars(
             select(ProcessingJob)
@@ -422,7 +577,7 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         is_demo=match.is_demo,
         kickoff_ms=match.kickoff_ms,
         report_extra=match.report_extra,
-        videos=[video_out(v) for v in videos],
+        videos=[video_out(v, parts.get(v.id)) for v in videos],
         jobs=[JobOut.model_validate(j) for j in jobs],
     )
 

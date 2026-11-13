@@ -63,8 +63,25 @@ async def hall_of(ctx: Ctx, match: Match) -> tuple[str | None, HallSource | None
     return spellings.most_common(1)[0][0], "home_matches"
 
 
+async def match_references(ctx: Ctx, asset: VideoAsset, only: Any = None) -> list[dict[str, Any]]:
+    """The other files of the same match (its other half) whose court a person clicked or
+    confirmed: tried first, whatever the hall is called (Q-VIDEO-PARTS). `only`: one file."""
+    return await _references(ctx, asset, None, MAX_REFERENCES, same_match=True, only=only)
+
+
 async def references(
     ctx: Ctx, asset: VideoAsset, hall: str | None, limit: int = MAX_REFERENCES
+) -> list[dict[str, Any]]:
+    return await _references(ctx, asset, hall, limit)
+
+
+async def _references(
+    ctx: Ctx,
+    asset: VideoAsset,
+    hall: str | None,
+    limit: int,
+    same_match: bool = False,
+    only: Any = None,
 ) -> list[dict[str, Any]]:
     """Earlier videos of the organisation in the same hall whose current court a person clicked
     or confirmed, newest first: what the worker needs to carry the court over (the hall image key
@@ -72,7 +89,7 @@ async def references(
     from handball_api.services.videos import media_prefix_of
 
     key = fold(hall)
-    if not key:
+    if not key and not same_match:
         return []
     # the newest court of each video is its court: one row per video from the database, with
     # only the columns needed (the hall image size, not the whole analysis)
@@ -101,12 +118,16 @@ async def references(
         )
         .join(VideoAsset, VideoAsset.id == cal.video_asset_id)
         .join(Match, Match.id == VideoAsset.match_id)
-        .where(cal.source == "user_correction", Match.venue.is_not(None))
+        .where(
+            cal.source == "user_correction",
+            VideoAsset.match_id == asset.match_id if same_match else Match.venue.is_not(None),
+            *([VideoAsset.id == only] if only is not None else []),
+        )
         .order_by(cal.created_at.desc())
     )
     out: list[dict[str, Any]] = []
     for video_id, match_id, venue, homography, image_size, width, height in rows.all():
-        if fold(venue) != key:
+        if not same_match and fold(venue) != key:
             continue
         # the court must be on that video's hall image (not on a single frame of it)
         if [width, height] != list(image_size):

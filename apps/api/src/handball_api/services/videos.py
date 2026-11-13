@@ -35,10 +35,10 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, auto_events, billing, feed, halls, segments, training
+from handball_api.services import audit, auto_events, billing, feed, halls, timeline, training
 from handball_api.services.context import Ctx
 from handball_api.services.mail_templates import render
-from handball_api.services.matches import get_match, timeline_video
+from handball_api.services.matches import DUPLICATE, Part, get_match, parts_of
 from handball_api.services.policies import Action
 from handball_api.services.roster import numbers as roster_numbers
 from handball_api.services.segments import parse_recorded
@@ -87,6 +87,18 @@ async def create_upload(
         raise ProblemError(413, "video-too-large", "The video is too large")
     if not VIDEO_EXT.search(data.filename):
         raise ProblemError(415, "unsupported-video", "Use MP4, MOV, MKV, AVI, MTS or WebM")
+    same = await ctx.db.scalar(
+        select(VideoAsset.id).where(
+            VideoAsset.match_id == match.id,
+            VideoAsset.role == data.role,
+            VideoAsset.filename == data.filename,
+            VideoAsset.size_bytes == data.size_bytes,
+            VideoAsset.status != VideoStatus.FAILED,
+        )
+    )
+    if same is not None:
+        # the same file twice (chosen again, or both halves picked as one): said, not stored
+        raise ProblemError(409, "same-file", "This file is already in the match")
     await billing.check_upload(ctx, match.organization_id, data.size_bytes)
     asset_id = uuid.uuid4()
     # S3 allows at most 10'000 parts; grow the part size for huge files.
@@ -267,14 +279,33 @@ async def complete_upload(ctx: Ctx, asset_id: uuid.UUID, data: UploadComplete) -
 
 
 async def abort_upload(ctx: Ctx, asset_id: uuid.UUID) -> None:
+    """Deletes a file of the match (an upload not finished, or a part): the parts after it move
+    up, and what the analysis found in it goes with it."""
     asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    match = await ctx.db.get(Match, asset.match_id)
+    before = await parts_of(ctx, asset.match_id)
+    placed = any(p.video_id == asset.id for p in before)
     if asset.upload_id:
         await ctx.storage.abort_multipart(
             ctx.settings.s3_bucket_videos, asset.storage_key, asset.upload_id
         )
     await ctx.storage.delete_prefix(ctx.settings.s3_bucket_videos, media_prefix(asset))
+    await ctx.storage.delete_prefix(ctx.settings.s3_bucket_artifacts, media_prefix(asset))
     await ctx.db.delete(asset)
+    await ctx.db.flush()
+    if match is not None and placed:
+        await timeline.settle(ctx, match, before)
+        await _whole_match(ctx, match)
     await audit.record(ctx, "video.deleted", target_type="video", target_id=asset_id)
+
+
+async def _whole_match(ctx: Ctx, match: Match) -> None:
+    """What looks at the whole match, again after its parts changed: «Deine Szenen» and the
+    reels (the result, the three things and the numbers are read live from the events)."""
+    await feed.generate(ctx, match)
+    from handball_api.services import highlights  # imports this module (media paths)
+
+    await highlights.auto(ctx, match)
 
 
 async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoAsset:
@@ -453,11 +484,18 @@ async def read_media(ctx: Ctx, asset_id: uuid.UUID, path: str) -> tuple[bytes, s
     return await read_media_object(ctx, asset, path)
 
 
-async def read_media_object(ctx: Ctx, asset: VideoAsset, path: str) -> tuple[bytes, str]:
+def _same_route(other: VideoAsset) -> str:
+    return f"{other.id}/media/"
+
+
+async def read_media_object(
+    ctx: Ctx, asset: VideoAsset, path: str, sibling: Any = _same_route
+) -> tuple[bytes, str]:
     """One file of a video's player media (HLS, poster, thumbnails) and its content type, for a
     caller that has already checked access. Originals and the analysis proxy are never served.
     A missing object is a 404; any other storage error propagates (a 500 the alerting sees, not a
-    silent 404)."""
+    silent 404). The first part of a match with several parts serves playlists and previews over
+    all parts (`sibling(part)`: the URL path from the videos folder to that part's media)."""
     if (
         not MEDIA_PATH.match(path)
         or ".." in path
@@ -465,6 +503,17 @@ async def read_media_object(ctx: Ctx, asset: VideoAsset, path: str) -> tuple[byt
         or path.startswith("original")
     ):
         raise ProblemError(404, "not-found", "Not found")
+
+    async def read(part: VideoAsset, p: str) -> bytes | None:
+        try:
+            data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(part) + p)
+        except ObjectNotFoundError:
+            return None
+        return bytes(data)
+
+    joined = await timeline.joined_playlist(ctx, asset, path, read, sibling)
+    if joined is not None:
+        return joined, MEDIA_TYPES[path.rsplit(".", 1)[1]]
     try:
         data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
     except ObjectNotFoundError as exc:
@@ -501,10 +550,17 @@ async def read_signed_media(
         raise ProblemError(404, "not-found", "Not found")
     await enable_system_access(ctx.db, reason="signed media")
     asset = await ctx.db.get(VideoAsset, asset_id)
-    await disable_system_access(ctx.db)
     if asset is None:
+        await disable_system_access(ctx.db)
         raise ProblemError(404, "not-found", "Not found")
-    return await read_media_object(ctx, asset, path)
+    await set_tenant(ctx.db, asset.organization_id)
+    await disable_system_access(ctx.db)
+
+    def signed(other: VideoAsset) -> str:
+        # each part has its own token; same expiry as the playlist's
+        return f"{other.id}/{exp_s}.{_media_sig(ctx, other.id, int(exp_s))}/"
+
+    return await read_media_object(ctx, asset, path, signed)
 
 
 # ---- worker callbacks (internal) ------------------------------------------------------------
@@ -569,9 +625,19 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         elif data.status == JobStatus.FAILED and job.kind == "sync":
             pass  # the camera stays usable with a manual offset
         elif data.status == JobStatus.FAILED:
+            before = await parts_of(ctx, match.id)
             asset.status = VideoStatus.FAILED
             asset.error = data.error
-            match.status = MatchStatus.FAILED
+            if any(p.video_id == asset.id for p in before):
+                await ctx.db.flush()
+                await timeline.settle(ctx, match, before)
+            # another part still plays: the match stays usable
+            match.status = (
+                MatchStatus.READY
+                if before
+                and any(p.video_id != asset.id and p.status == VideoStatus.READY for p in before)
+                else MatchStatus.FAILED
+            )
             if job.kind in ("ingest", "import"):
                 # what failed, with the match's name and the way out (UX test B29)
                 await _tell_staff(ctx, match, "video_failed", {})
@@ -580,17 +646,28 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
             asset.status = VideoStatus.UPLOADED
             await start_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "ingest" and data.result:
+            before = await parts_of(ctx, match.id)
             _apply_ingest_result(asset, data.result)
-            match.status = MatchStatus.READY
-            if asset.role == VideoRole.MAIN:
-                await segments.rebuild(ctx, match)
-            if (
-                asset.role == VideoRole.MAIN
-                and asset.proxy_key
-                and await billing.analysis_allowed(ctx, match.organization_id)
-            ):
-                await start_analysis(ctx, asset, match)
-            await _sync_after_ingest(ctx, asset)
+            twin = await _same_file(ctx, asset)
+            if twin is not None:
+                # the same file a second time (another name, a copy): not a part of the match
+                asset.status = VideoStatus.FAILED
+                asset.error = f"{DUPLICATE}{twin}"
+                await ctx.db.flush()
+                if any(p.video_id == asset.id for p in before):
+                    await timeline.settle(ctx, match, before)
+            else:
+                match.status = MatchStatus.READY
+                if asset.role == VideoRole.MAIN:
+                    await ctx.db.flush()
+                    await timeline.settle(ctx, match, before)
+                if (
+                    asset.role == VideoRole.MAIN
+                    and asset.proxy_key
+                    and await billing.analysis_allowed(ctx, match.organization_id)
+                ):
+                    await start_analysis(ctx, asset, match)
+                await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
             # the run after a court the coach corrected in Prüfen: Prüfen waits for it and asks
             # anew, no second mail and no notice (third real-video test G4)
@@ -610,6 +687,24 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
     await ctx.db.flush()
     await ctx.require_events().publish(f"match:{job.match_id}", job_event(job))
     return job
+
+
+async def _same_file(ctx: Ctx, asset: VideoAsset) -> uuid.UUID | None:
+    """Another file of the match with the same content (checksum), not failed."""
+    if not asset.checksum_sha256:
+        return None
+    twin: uuid.UUID | None = await ctx.db.scalar(
+        select(VideoAsset.id)
+        .where(
+            VideoAsset.match_id == asset.match_id,
+            VideoAsset.id != asset.id,
+            VideoAsset.checksum_sha256 == asset.checksum_sha256,
+            VideoAsset.status != VideoStatus.FAILED,
+        )
+        .order_by(VideoAsset.created_at)
+        .limit(1)
+    )
+    return twin
 
 
 def _apply_ingest_result(asset: VideoAsset, r: dict[str, object]) -> None:
@@ -646,6 +741,7 @@ async def start_analysis(
     points: list[dict[str, Any]] | None = None,
     space: str = "frame",
     frame_ms: int = 0,
+    references: list[dict[str, Any]] | None = None,
 ) -> ProcessingJob:
     job = await _new_job(ctx, asset, "analysis")
     meta = dict(asset.analysis or {})
@@ -665,11 +761,18 @@ async def start_analysis(
         points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
     opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
     opponent_kit = match.opponent_kit or (opp.primary_color if opp is not None else None)
-    refs: list[dict[str, Any]] = []
-    if points is None:
-        # the court clicked or confirmed on an earlier video of the same hall: the worker tries
-        # to carry it over before the automatic court
-        refs = await halls.references(ctx, asset, (await halls.hall_of(ctx, match))[0])
+    refs: list[dict[str, Any]] = list(references or [])
+    if points is None and references is None:
+        # the court of the match's other half first (the camera often stands where it stood),
+        # then the court clicked or confirmed on an earlier video of the same hall: the worker
+        # tries to carry it over before the automatic court
+        refs = await halls.match_references(ctx, asset)
+        seen = {r["video_id"] for r in refs}
+        refs += [
+            r
+            for r in await halls.references(ctx, asset, (await halls.hall_of(ctx, match))[0])
+            if r["video_id"] not in seen
+        ][: max(0, halls.MAX_REFERENCES - len(refs))]
     payload: dict[str, object] = {
         "job_id": str(job.id),
         "organization_id": str(asset.organization_id),
@@ -699,6 +802,10 @@ async def start_analysis(
         payload["rosters"] = rosters
     if refs:
         payload["hall_references"] = refs
+    hint = await timeline.side_hint_for(ctx, asset)
+    if hint is not None:
+        # the second half in a file of its own: the teams changed ends (Q-VIDEO-PARTS)
+        payload["side_hint"] = hint
     await ctx.enqueue(
         "gpu",
         ANALYSIS_FUNC,
@@ -735,13 +842,14 @@ async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
 async def _apply_analysis_result(
     ctx: Ctx, asset: VideoAsset, job: ProcessingJob, r: dict[str, object]
 ) -> bool:
-    """Stores the results; True when they are the match's (the video is its timeline video).
+    """Stores the results; True when they are the match's (the video is a part of its timeline).
 
-    Tracks and the court belong to the video. Events, possessions, the match clock and goal
-    candidates are the match's: only the timeline video sets them (a second file of the match, e.g.
-    the second half, must not replace the first file's events with times in another video)."""
-    timeline = await timeline_video(ctx, asset.match_id)
-    on_timeline = asset.role == VideoRole.MAIN and timeline is not None and timeline.id == asset.id
+    Tracks and the court belong to the video (times in the file). Events, possessions, the match
+    clock and goal candidates are the match's: they are placed on the match timeline at the part's
+    start and replace only what an earlier run found in this part. A part whose place is not known
+    yet (a part before it has no length) keeps its results to itself."""
+    part = await _part_of(ctx, asset)
+    on_timeline = asset.role == VideoRole.MAIN and part is not None and part.offset_ms is not None
     cal = r.get("calibration")
     before = dict(asset.analysis or {})
     pending = before.get(PENDING) if isinstance(before.get(PENDING), dict) else None
@@ -847,8 +955,23 @@ async def _apply_analysis_result(
     if isinstance(auto, dict) or overlay:
         auto = auto if isinstance(auto, dict) else {}
         match = await ctx.db.get(Match, asset.match_id)
-        if match is not None and on_timeline:
-            counts = await auto_events.apply(ctx, match, auto or None, overlay)
+        if match is not None and on_timeline and part is not None:
+            offset = int(part.offset_ms or 0)
+            layout = await parts_of(ctx, asset.match_id)
+            # the first part also owns the times before it, the last one those after it (one
+            # file: the whole match is this run's)
+            window = (
+                None if part.position == 0 else offset,
+                None if part.position == len(layout) - 1 else part.end_ms,
+            )
+            counts = await auto_events.apply(
+                ctx,
+                match,
+                timeline.shift_times(auto, offset, timeline.EVENT_TIMES) or None,
+                timeline.shift_times(overlay, offset, timeline.OVERLAY_TIMES),
+                window=window,
+                second_half=timeline.is_second_half(layout, part),
+            )
             # courtside marks with device time follow the new goals (5.3)
             from handball_api.services import marks
 
@@ -874,20 +997,26 @@ async def _apply_analysis_result(
                     ],
                 },
             }
-    if "goal_candidates" in r and on_timeline:
+    if "goal_candidates" in r and on_timeline and part is not None:
         # moments that are probably goals, for the coach to confirm (needs no court, so also
         # when the analysis waits for court points); after the automatic events: their
         # possessions suggest the side
         from handball_api.services import goal_candidates
 
         owner = await ctx.db.get(Match, asset.match_id)
-        found = r.get("goal_candidates")
+        found = timeline.shift_times(
+            r.get("goal_candidates"), int(part.offset_ms or 0), timeline.CANDIDATE_TIMES
+        )
         if owner is not None:
             counts = await goal_candidates.store(
                 ctx, owner, asset, found if isinstance(found, dict) else None, job.pipeline_version
             )
             asset.analysis = {**asset.analysis, "goal_candidates": counts}
     return on_timeline
+
+
+async def _part_of(ctx: Ctx, asset: VideoAsset) -> Part | None:
+    return next((p for p in await parts_of(ctx, asset.match_id) if p.video_id == asset.id), None)
 
 
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
@@ -1001,6 +1130,57 @@ async def calibrate_manually(
     return await start_analysis(ctx, asset, match, points, space, frame_ms)
 
 
+async def retry_analysis(ctx: Ctx, asset_id: uuid.UUID) -> ProcessingJob:
+    """The analysis of one file again (a part whose analysis failed, or one analysed before
+    parts were placed on the match timeline): the other parts keep theirs."""
+    asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    if asset.status != VideoStatus.READY or not asset.proxy_key:
+        raise ProblemError(409, "video-not-ready", "The video is still being processed")
+    running = await ctx.db.scalar(
+        select(ProcessingJob.id).where(
+            ProcessingJob.video_asset_id == asset.id,
+            ProcessingJob.kind == "analysis",
+            ProcessingJob.status.in_((JobStatus.QUEUED, JobStatus.RUNNING)),
+        )
+    )
+    if running is not None:
+        raise ProblemError(409, "analysis-running", "The analysis is already running")
+    match = await ctx.db.get(Match, asset.match_id)
+    assert match is not None
+    await audit.record(ctx, "video.analysis_retried", target_type="video", target_id=asset.id)
+    return await start_analysis(ctx, asset, match)
+
+
+async def court_from_part(ctx: Ctx, asset_id: uuid.UUID, source_id: uuid.UUID) -> ProcessingJob:
+    """The court of the match's other part for this part (the camera stood where it stood): its
+    clicked frame points as they are, or its confirmed court carried over by matching the hall
+    images. The analysis of this part runs again with it."""
+    asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    source = await get_asset(ctx, source_id)
+    if source.match_id != asset.match_id or source.id == asset.id:
+        raise ProblemError(422, "validation", "Give another file of the same match")
+    if asset.status != VideoStatus.READY or not asset.proxy_key:
+        raise ProblemError(409, "video-not-ready", "The video is still being processed")
+    match = await ctx.db.get(Match, asset.match_id)
+    assert match is not None
+    clicked = (source.analysis or {}).get(CLICKED)
+    await audit.record(
+        ctx,
+        "video.court_from_part",
+        target_type="video",
+        target_id=asset.id,
+        data={"from": str(source.id)},
+    )
+    if isinstance(clicked, dict) and clicked.get("space") == "frame":
+        return await start_analysis(
+            ctx, asset, match, clicked["points"], "frame", int(clicked.get("frame_ms") or 0)
+        )
+    refs = await halls.match_references(ctx, asset, only=source.id)
+    if not refs:
+        raise ProblemError(409, "no-calibration", "The other part has no confirmed court yet")
+    return await start_analysis(ctx, asset, match, references=refs)
+
+
 async def confirm_calibration(ctx: Ctx, asset_id: uuid.UUID) -> CameraCalibration:
     """A person checked the automatic court on the hall image and it fits: the same homography is
     stored again as a user correction (no re-run needed; analysis results stay valid)."""
@@ -1109,20 +1289,23 @@ def _merge_physical(items: list[dict[str, object]]) -> dict[str, object]:
 
 
 async def match_physical(ctx: Ctx, match_id: uuid.UUID) -> dict[str, object]:
-    """Physical load per identified player and per unidentified track of the main video."""
+    """Physical load per identified player and per unidentified track of the main video (over
+    all parts of the match: a player's distance of both halves adds up)."""
     match = await get_match(ctx, match_id)
-    main = await ctx.db.scalar(
-        select(VideoAsset).where(
-            VideoAsset.match_id == match.id,
-            VideoAsset.role == VideoRole.MAIN,
-            VideoAsset.status == VideoStatus.READY,
-        )
-    )
-    if main is None:
+    pairs = [
+        (a, o)
+        for a, o in (await timeline.Files.of(ctx, match.id)).all()
+        if a.status == VideoStatus.READY
+    ]
+    if not pairs:
         return {"video_id": None, "players": [], "tracks": [], "estimated": True}
+    main = pairs[0][0]
+    offsets = {a.id: o for a, o in pairs}
     tracks = (
         await ctx.db.scalars(
-            select(Track).where(Track.video_asset_id == main.id).order_by(Track.track_no)
+            select(Track)
+            .where(Track.video_asset_id.in_(list(offsets)))
+            .order_by(Track.video_asset_id, Track.track_no)
         )
     ).all()
     by_player: dict[uuid.UUID, list[Track]] = {}
@@ -1153,8 +1336,8 @@ async def match_physical(ctx: Ctx, match_id: uuid.UUID) -> dict[str, object]:
                 "track_no": t.track_no,
                 "team": t.team,
                 "number": t.number,
-                "first_ms": t.first_ms,
-                "last_ms": t.last_ms,
+                "first_ms": t.first_ms + offsets.get(t.video_asset_id, 0),
+                "last_ms": t.last_ms + offsets.get(t.video_asset_id, 0),
                 **_merge_physical([t.physical] if t.physical else []),
             }
             for t in loose

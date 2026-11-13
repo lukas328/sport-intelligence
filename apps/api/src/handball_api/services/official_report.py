@@ -72,11 +72,11 @@ from handball_api.integrations.official_reports.nuliga import (
     parse_nuliga_pdf,
 )
 from handball_api.models import Event, GoalCandidate, Match, Opponent
-from handball_api.services import audit, match_clock, org_verification
+from handball_api.services import audit, match_clock, org_verification, timeline
 from handball_api.services.auto_events import CANDIDATE, OVERLAY
 from handball_api.services.context import Ctx
 from handball_api.services.events import video_from_clock
-from handball_api.services.matches import get_match, timeline_video
+from handball_api.services.matches import get_match
 from handball_api.services.official_comparison import (
     AUTO_GOALS,
     MATCH_WINDOW_S,
@@ -220,9 +220,8 @@ def _words(name: str | None) -> set[str]:
 
 
 async def _analysis(ctx: Ctx, match: Match) -> dict[str, Any] | None:
-    """The analysis of the match's timeline video (its overlay clock maps the report)."""
-    video = await timeline_video(ctx, match.id)
-    return video.analysis if video is not None else None
+    """The analysis of the match's timeline (its overlay clock maps the report), over all parts."""
+    return await timeline.clock_analysis(ctx, match.id)
 
 
 def _clock_time(cm: match_clock.ClockMap, match: Match, period: int, clock: float) -> int | None:

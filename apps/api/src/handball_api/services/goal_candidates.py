@@ -45,7 +45,7 @@ from handball_api.core.clock import format_clock
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, GoalCandidate, Match, Possession, VideoAsset
 from handball_api.schemas.events import EventIn
-from handball_api.services import audit, match_clock, roster
+from handball_api.services import audit, match_clock, roster, timeline
 from handball_api.services import events as event_service
 from handball_api.services.auto_events import (
     CANDIDATE,
@@ -56,7 +56,7 @@ from handball_api.services.auto_events import (
 )
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video, video_from_clock
-from handball_api.services.matches import get_match
+from handball_api.services.matches import get_match, timeline_duration_ms
 from handball_api.services.policies import Action
 
 GOAL_SOURCE = CANDIDATE  # shot events confirmed from a candidate
@@ -354,11 +354,12 @@ async def _assets(ctx: Ctx, cands: list[GoalCandidate]) -> dict[uuid.UUID, Video
 
 
 async def _lengths(ctx: Ctx, cands: list[GoalCandidate]) -> dict[uuid.UUID, int | None]:
-    """Video length (ms) per asset of the candidates, None where unknown."""
-    return {
-        a.id: round(a.duration_s * 1000) if a.duration_s else None
-        for a in (await _assets(ctx, cands)).values()
-    }
+    """Length (ms) of the match timeline per asset of the candidates (their times are on it),
+    None where unknown."""
+    if not cands:
+        return {}
+    length = await timeline_duration_ms(ctx, cands[0].match_id)
+    return dict.fromkeys(await _assets(ctx, cands), length)
 
 
 async def _candidates(ctx: Ctx, match: Match, kind: str) -> list[GoalCandidate]:
@@ -378,13 +379,13 @@ async def _report(
 ) -> tuple[_Report, int | None]:
     """The report's shots and their suggestions for the open, uncovered candidates (`cands`:
     all of a kind; the newest analysed video's overlay clock maps the report)."""
+    # the candidates' times are on the match timeline: its length over all parts (Q-VIDEO-PARTS)
     assets = await _assets(ctx, cands)
-    asset = max(assets.values(), key=lambda a: a.created_at, default=None)
-    rep = _Report(match, asset.analysis if asset is not None else None, shots)
+    rep = _Report(match, await timeline.clock_analysis(ctx, match.id), shots)
     rep.visible = await roster.visible_players(ctx, match.team_id, match.season_id)
-    lengths = {a.id: round(a.duration_s * 1000) if a.duration_s else None for a in assets.values()}
+    length = await timeline_duration_ms(ctx, match.id) if assets else None
+    lengths: dict[uuid.UUID, int | None] = dict.fromkeys(assets, length)
     rep.suggest([c for c in cands if c.status == "open" and _covered(c, shots, lengths) is None])
-    length = round(asset.duration_s * 1000) if asset is not None and asset.duration_s else None
     return rep, length
 
 

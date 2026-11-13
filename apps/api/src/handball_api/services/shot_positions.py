@@ -10,6 +10,7 @@ attacked goal came closest to it in the 10 s before the goal. Same rule as the o
 from __future__ import annotations
 
 import math
+import uuid
 from typing import Any
 
 import numpy as np
@@ -18,7 +19,7 @@ from sqlalchemy import select
 from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import Event, Match, Track, VideoAsset
 from handball_api.services.context import Ctx
-from handball_api.services.matches import timeline_video
+from handball_api.services.timeline import Files
 
 WINDOW_MS = 10_000
 LENGTH, WIDTH = 40.0, 20.0
@@ -64,17 +65,24 @@ async def fill(ctx: Ctx, match: Match) -> int:
     ).all()
     if not goals:
         return 0
-    asset = await timeline_video(ctx, match.id)
-    if asset is None or not (asset.analysis or {}).get("chunks"):
-        return 0
-    tracks = (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
-    team_of = {t.track_no: str(t.team or "") for t in tracks}
-    number_of = {t.track_no: t.number for t in tracks}
+    files = await Files.of(ctx, match.id)
+    tracks_of: dict[uuid.UUID, list[Track]] = {}
     filled = 0
     for g in goals:
         assert g.t_ms is not None
+        # the goal's part of the match and the time in that file (Q-VIDEO-PARTS)
+        hit = files.at(g.t_ms)
+        if hit is None or not (hit[0].analysis or {}).get("chunks"):
+            continue
+        asset, local = hit
+        if asset.id not in tracks_of:
+            tracks_of[asset.id] = list(
+                (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
+            )
+        team_of = {t.track_no: str(t.team or "") for t in tracks_of[asset.id]}
+        number_of = {t.track_no: t.number for t in tracks_of[asset.id]}
         label = "home" if g.side == "own" else "away"  # the own kit is "home" in the analysis
-        rows = await _rows(ctx, asset, g.t_ms - WINDOW_MS, g.t_ms)
+        rows = await _rows(ctx, asset, local - WINDOW_MS, local)
         attackers = [r for r in rows if team_of.get(int(r[1])) == label]
         if not attackers:
             continue

@@ -4584,7 +4584,11 @@ export interface paths {
         /** Get Analysis */
         get: operations["get_analysis_v1_orgs__org_id__videos__video_id__analysis_get"];
         put?: never;
-        post?: never;
+        /**
+         * Retry Analysis
+         * @description The analysis of this file again (the other parts of the match keep theirs).
+         */
+        post: operations["retry_analysis_v1_orgs__org_id__videos__video_id__analysis_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4622,6 +4626,26 @@ export interface paths {
          * @description The automatic court fits: keep it as confirmed (no re-run).
          */
         post: operations["confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/from/{source_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Court From Part
+         * @description The court of the match's other part for this part (camera at the same place).
+         */
+        post: operations["court_from_part_v1_orgs__org_id__videos__video_id__calibration_from__source_id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5533,6 +5557,11 @@ export interface components {
             candidates: {
                 [key: string]: unknown;
             }[];
+            /**
+             * Copy From
+             * @description court question of a further part: the part whose court can be taken over
+             */
+            copy_from?: string | null;
             /**
              * Frame Ref
              * @description video time in ms
@@ -6835,6 +6864,27 @@ export interface components {
              */
             zone: string | null;
         };
+        /** GraphicsPartOut */
+        GraphicsPartOut: {
+            /**
+             * Analysis
+             * @default none
+             * @enum {string}
+             */
+            analysis?: "none" | "running" | "ready" | "failed";
+            /** Duration Ms */
+            duration_ms: number | null;
+            /**
+             * Start Ms
+             * @description where the part starts on the match timeline
+             */
+            start_ms: number;
+            /**
+             * Video Id
+             * Format: uuid
+             */
+            video_id: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -7607,6 +7657,11 @@ export interface components {
              * @description lower-ranked goal candidates, offered, not counted
              */
             more_checks?: components["schemas"]["CheckOut"][];
+            /**
+             * Parts
+             * @description the files of the match on its timeline (two halves, a split recording)
+             */
+            parts?: components["schemas"]["GraphicsPartOut"][];
             /** Phases */
             phases: components["schemas"]["PhaseOut"][];
             /** Report Goals */
@@ -8670,6 +8725,8 @@ export interface components {
             recorded_at: string | null;
             /** Source */
             source: string;
+            /** Start Ms */
+            start_ms?: number | null;
             /**
              * Video Id
              * Format: uuid
@@ -10966,6 +11023,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Duplicate Of */
+            duplicate_of?: string | null;
             /** Duration S */
             duration_s: number | null;
             /** Error */
@@ -10987,6 +11046,10 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Part */
+            part?: number | null;
+            /** Part Start Ms */
+            part_start_ms?: number | null;
             /** Quality Report */
             quality_report: {
                 [key: string]: unknown;
@@ -21440,6 +21503,40 @@ export interface operations {
             };
         };
     };
+    retry_analysis_v1_orgs__org_id__videos__video_id__analysis_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     calibrate_v1_orgs__org_id__videos__video_id__calibration_post: {
         parameters: {
             query?: never;
@@ -21492,6 +21589,41 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    court_from_part_v1_orgs__org_id__videos__video_id__calibration_from__source_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                source_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };

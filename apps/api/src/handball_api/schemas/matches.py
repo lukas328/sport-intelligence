@@ -153,6 +153,12 @@ class VideoOut(ApiModel):
     quality_report: dict[str, Any] | None
     error: str | None
     created_at: datetime
+    # a part of the match timeline (two halves, a recording the phone split): its number from 1
+    # and where it starts on the match timeline; None for other files and while not placed
+    part: int | None = None
+    part_start_ms: int | None = None
+    # the same file is already in the match (checksum): this copy is not used
+    duplicate_of: uuid.UUID | None = None
 
 
 class JobOut(ApiModel):
@@ -582,6 +588,17 @@ class CheckOut(ApiModel):
     seconds_in_view: float | None
     suggested_side: str | None
     candidates: list[dict[str, Any]]
+    copy_from: uuid.UUID | None = Field(
+        default=None,
+        description="court question of a further part: the part whose court can be taken over",
+    )
+
+
+class GraphicsPartOut(ApiModel):
+    video_id: uuid.UUID
+    start_ms: int = Field(description="where the part starts on the match timeline")
+    duration_ms: int | None
+    analysis: Literal["none", "running", "ready", "failed"] = "none"
 
 
 class MatchGraphicsOut(ApiModel):
@@ -607,6 +624,10 @@ class MatchGraphicsOut(ApiModel):
         default_factory=list, description="lower-ranked goal candidates, offered, not counted"
     )
     source: GraphicsSource
+    parts: list[GraphicsPartOut] = Field(
+        default_factory=list,
+        description="the files of the match on its timeline (two halves, a split recording)",
+    )
 
 
 class SceneTrackOut(ApiModel):

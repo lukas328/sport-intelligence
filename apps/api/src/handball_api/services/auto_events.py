@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import delete, select
+from sqlalchemy import and_, delete, select, true
 
 from handball_api.models import Correction, Event, Match, Possession
 from handball_api.services.context import Ctx
@@ -107,6 +107,21 @@ async def _carry_over(ctx: Ctx, decisions: _Decisions, created: list[Event]) -> 
     return dropped
 
 
+Window = tuple[int | None, int | None]
+WHOLE: Window = (None, None)
+
+
+def _within(col: Any, window: Window) -> Any:
+    """Rows of one part of the match timeline (Q-VIDEO-PARTS): [start, end), open where None."""
+    lo, hi = window
+    conds = []
+    if lo is not None:
+        conds.append(col >= lo)
+    if hi is not None:
+        conds.append(col < hi)
+    return and_(true(), *conds)
+
+
 def _side(team: object) -> str | None:
     return {"home": "own", "away": "opponent"}.get(str(team))
 
@@ -195,12 +210,20 @@ def align_goals(goals: list[Event], possessions: list[Possession]) -> int:
 
 
 async def apply_scoreboard(
-    ctx: Ctx, match: Match, overlay: dict[str, Any] | None, created_out: list[Event] | None = None
+    ctx: Ctx,
+    match: Match,
+    overlay: dict[str, Any] | None,
+    created_out: list[Event] | None = None,
+    window: Window = WHOLE,
 ) -> dict[str, int]:
     """Goals and match clock read from a broadcast overlay (BRIEF 7.2 stage 10). The left team of
     an overlay is the home team. The overlay clock sets the throw-off times nobody set yet, and the
     final score when the video reaches the end of the match and no result is stored."""
-    await ctx.db.execute(delete(Event).where(Event.match_id == match.id, Event.source == OVERLAY))
+    await ctx.db.execute(
+        delete(Event).where(
+            Event.match_id == match.id, Event.source == OVERLAY, _within(Event.t_ms, window)
+        )
+    )
     if not overlay:
         return {"overlay_goals": 0}
     left = "own" if match.is_home else "opponent"
@@ -302,19 +325,31 @@ async def apply(
     match: Match,
     payload: dict[str, Any] | None,
     overlay: dict[str, Any] | None = None,
+    window: Window = WHOLE,
+    second_half: bool = False,
 ) -> dict[str, int]:
     """Overlay first (exact goals and clock), then the position heuristics; a heuristic goal is
-    dropped when the overlay gave goals."""
+    dropped when the overlay gave goals. `window`: the stretch of the match timeline this run
+    covers (one part of several; times already on the match timeline): only automatic rows in it
+    are replaced. `second_half`: the part is the second half, its first throw-off opens it."""
     decisions = await _decisions(ctx, match)  # before the previous rows go
     overlay_goals: list[Event] = []
-    sb = await apply_scoreboard(ctx, match, overlay, overlay_goals)
+    sb = await apply_scoreboard(ctx, match, overlay, overlay_goals, window)
     if not payload:
         sb["overlay_goals"] -= await _carry_over(ctx, decisions, overlay_goals)
         await ctx.db.flush()
         return {"events": 0, "possessions": 0, **sb}
-    await ctx.db.execute(delete(Event).where(Event.match_id == match.id, Event.source == SOURCE))
     await ctx.db.execute(
-        delete(Possession).where(Possession.match_id == match.id, Possession.source == SOURCE)
+        delete(Event).where(
+            Event.match_id == match.id, Event.source == SOURCE, _within(Event.t_ms, window)
+        )
+    )
+    await ctx.db.execute(
+        delete(Possession).where(
+            Possession.match_id == match.id,
+            Possession.source == SOURCE,
+            _within(Possession.start_ms, window),
+        )
     )
     found = list(payload.get("events") or [])
     official_goals = await ctx.db.scalar(
@@ -332,7 +367,12 @@ async def apply(
     k = dict(match.kickoff_ms or {})
     side_changes = sorted(int(e["t_ms"]) for e in found if e.get("type") == "side_change")
     throw_offs = sorted(int(e["t_ms"]) for e in found if e.get("type") == "throw_off")
-    if "1" not in k and throw_offs:
+    if second_half:
+        # a file of its own for the second half: its first throw-off opens it (the clock runs on
+        # over the break, the break itself is not in any file)
+        if "2" not in k and throw_offs:
+            k["2"] = throw_offs[0]
+    elif "1" not in k and throw_offs:
         k["1"] = throw_offs[0]
     if "2" not in k and side_changes:
         after = [t for t in throw_offs if t >= side_changes[0] - 2000]

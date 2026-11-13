@@ -71,11 +71,12 @@ class AnalysisResult:
     detections_per_frame: float = 0.0
     extra: dict[str, Any] = field(default_factory=dict)
 
-    def detect_events(self) -> EventResult:
-        """Automatic event baseline from the tracks (throw-offs, goals, possession, sides)."""
+    def detect_events(self, side_hint: str | None = None) -> EventResult:
+        """Automatic event baseline from the tracks (throw-offs, goals, possession, sides);
+        `side_hint`: the side the home team is known to defend at the start (second half)."""
         labels = {tid: str(v["label"]) for tid, v in self.teams.items()}
         pts = [(round(p.frame * 1000 / self.fps), p.track_id, p.x, p.y) for p in self.points]
-        return detect_events(pts, labels)
+        return detect_events(pts, labels, side_hint)
 
     def tracks_table(self) -> pa.Table:
         p = self.points
