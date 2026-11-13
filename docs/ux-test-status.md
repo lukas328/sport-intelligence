@@ -206,6 +206,30 @@ numbers here). Commits: 8d4c92c (F4), 8aa9aa3 (F3, F6, track times in the API), 
 | Restzeit | Anfangs zu tief | behoben (68c7e3d): erst nach dem ersten Viertel der Stufe, als Spanne nach oben («noch etwa 4 bis 6 Minuten») |
 | Konsole | MISSING_MESSAGE search.type_yellow_card | behoben (86929b1): alle zwölf Ereignisarten der API in de-CH, en und fr; die Szenenliste übersetzt sie auch statt den Rohnamen zu zeigen |
 
+## Third real-video test (G1 to G9)
+
+Confirmed fixed on the real video in the third test: F3, F6, the start head, the step in the
+Spiel tab, the timeline, «Tore im Video», no preselected answer, «Szene zeigen», the mail link,
+the time left, MISSING_MESSAGE, and E01 to E07, E09, E11. Commits: 03cebf8 (G1), b0108c6 (G2),
+0ee59dc (G3), 57ab015 (G4, G5), 493534d (G6), e75bcee (G7), 3bbc512 (G8), d291be1 and 5fa23d2
+(G9).
+
+| # | Befund | Status |
+|---|---|---|
+| G1 | Echte Tore nur unter «Wenn du magst», Resultat und «Alles geprüft» sehen endgültig aus | behoben (03cebf8): solange Tor-Momente offen sind, kein «Alles geprüft»; nach den wichtigsten Fragen «Die wichtigsten Momente sind geprüft. n weitere könnten Tore sein.» mit «Weiter prüfen» als Hauptknopf und «Später». Kopf auf Start, Spiel und Video: «bisher bestätigt · n Momente offen», der Zähler «Prüfen n» bleibt; erst ohne offene Momente «Tore im Video». Die Mail nennt die wichtigsten Fragen und sagt, dass weitere Momente folgen können. Personenfragen gesondert. Tests `test_support` (Mail), e2e `real-normal.spec` |
+| G2 | Ein Tor in zwei Fragen, doppelt bestätigbar | behoben (b0108c6): liegt ein bestätigtes Tor derselben Seite im Ausschnitt der Frage, nennt die Frage es («In diesem Ausschnitt liegt das Tor von 2:06 …») mit «Nein, dasselbe Tor» als Hauptknopf und «Ja, noch ein Tor». Der Ausschnitt liegt enger: 10 s vor der Kandidatenzeit bis 2 s danach. vitest `goal-window`, e2e `real-normal.spec` |
+| G3 | Taktikkamera: Zuschauer und Bank als Spieler, Fenster nach dem Tor, gespiegelt | behoben (0ee59dc): nur Positionen im Feld (1 m Rand); die Szene läuft von 8 s vor dem Tor bis 2 s danach; nicht mehr gespiegelt, die rechte Hälfte hat eigene Ansichten (die Bündel bleiben normiert); unter der Kamera «Positionen geschätzt; es können Personen neben dem Feld darunter sein.». Q-REC-OFFCOURT notiert. Tests `test_scene_shows_only_the_court_unmirrored`, Fenster in `test_graphics`, vitest `camera-view`, e2e |
+| G4 | Zweite Mail nach jedem gespeicherten Feld | behoben (57ab015): der Lauf nach einer Feldkorrektur in Prüfen schickt weder Mail noch Mitteilung. Test `test_answers_survive_a_new_analysis_after_a_moved_court` |
+| G5 | Gemerkte Gegnerfarbe geht nicht an die Analyse | behoben (57ab015): die für den Gegner gemerkte Farbe geht als away-Kit an die Analyse. Test `test_the_remembered_opponent_colour_goes_to_the_analysis` |
+| G6 | «Wer trifft» der Saison zählt anders als der Start | behoben (493534d): mit Verknüpfung zu handball.ch zeigt die Saison dieselbe Zählung aus den Spielerstatistiken der Spielberichte wie der Start; ohne Verknüpfung die eigenen Ereignisse. e2e `season-scorers.spec` |
+| G7 | «Neues Spiel» füllt die Gegnerfarbe rot vor, Warnung «Ähnliche Farben» | behoben (e75bcee): die Gegnerfarbe bleibt leer (gestricheltes Trikot), bis jemand sie wählt, und wird bis dahin nicht verglichen. e2e `family.spec` |
+| G8 | Übergangener Anwurf bleibt als «Prüfen 1» ohne Ausweg | behoben (3bbc512): Antwort «Der Anwurf ist nicht im Video», danach optional «Welche Spielminute zeigt der Anfang?» (leer erlaubt); ohne Anwurf zeigt der Video-Tab den Zeitstrahl über die Videozeit und die Szenen mit Videozeiten, jede einmal. Tests `test_a_throw_off_not_in_the_video_is_not_asked_again`, e2e `real-normal.spec` «a moved corner» |
+| G9 | Reste: «So rechnen wir» nennt den Spielbericht ohne Bericht (E08); Spielverlauf 0 bis 60 (E10); Feldfrage am Handy | behoben (d291be1, 5fa23d2): ohne Bericht «Die Tore kommen aus dem Video …»; der Spielverlauf unter «Mehr zum Spiel» läuft über die Minuten des Videos; die Feldfrage bei 390 px selbst geprüft: alle Griffe auf dem Bildschirm, ein Finger zieht die Ecke (Touch-Ereignisse), die Seite scrollt dabei nicht. e2e `real-normal.spec` |
+
+Open (recognition, not interface): Q-REC-OFFCOURT (people beside the court, goalkeepers in
+another colour), Q-REC-SIDES, Q-REC-CANDTIME, Q-REC-SCOREBOARD, Q-REC-PERSONBOX (see
+OPEN_QUESTIONS.md).
+
 ## Tests
 
 Round 3: API 352 passed (3 deselected). Web unit tests 205 passed. ESLint clean again (11
