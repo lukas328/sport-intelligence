@@ -28,6 +28,10 @@ test("start after a first video without goals: one sentence, one step", async ({
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
   await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
   await expect(page.getByTestId("plain-stage")).toBeVisible({ timeout: 240_000 });
+  // the video plays before the analysis is done; the start speaks once it is (E06)
+  await expect
+    .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
+    .toBe("ready");
 
   await page.goto(`/app/${org}/teams/${team}/matches`);
   const step = page.getByTestId("start-next-step");

@@ -29,6 +29,13 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
   await expectAccessible(page);
 
+  // the analysis separates the teams by their shirts: the opponent's colour is asked before the
+  // upload (real-video test E09) and answered here, as the tip says
+  const ask = page.getByTestId("upload-ask-colour");
+  await expect(ask).toContainText("TV Testdorf");
+  await ask.getByRole("button").first().click();
+  await expect(ask).toContainText("Gespeichert");
+
   // upload, pause after the first part, continue with the same file.
   // Parts 2 and 3 are held back on the first attempt so the pause happens mid-upload.
   let slow = true;

@@ -59,7 +59,9 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   await page.getByLabel("Gegner", { exact: true }).fill("TV Rot");
   await page.getByText("Mehr: Wettbewerb, Halle, Spieldauer, Trikots").click();
   await expect(page.getByLabel("Spieldauer")).toHaveValue("adult_2x30");
-  await page.getByLabel("Gegner Feldspieler").fill("#0d6ccc");
+  // our shirts are the club's colour (real-video test E09): an opponent in nearly the same one
+  const own = await page.getByLabel("Eigene Feldspieler").inputValue();
+  await page.getByLabel("Gegner Feldspieler").fill(own);
   await expect(page.getByTestId("kit-warning")).toContainText("Eigenes Team / Gegner");
   await expectAccessible(page);
 });
