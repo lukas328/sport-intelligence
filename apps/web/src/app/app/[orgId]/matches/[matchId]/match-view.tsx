@@ -302,7 +302,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <i aria-hidden className="block size-5 border-[1.5px] border-club-ink" style={{ background: match.opponent_colors.color ?? undefined }} />
               {ta("changeColour", { opponent: oppName(match) })}
             </summary>
-            <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
+            {/* on the club colour: the line of the match runs underneath */}
+            <div className="inline-block bg-club pr-3 pb-1">
+              <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
+            </div>
           </details>
         )}
       </MatchHead>

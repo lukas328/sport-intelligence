@@ -105,7 +105,8 @@ export function WurfHead({
         waiting ? "bg-transparent text-ink shadow-[inset_0_0_0_2px_var(--ink)]" : "bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)]",
       )}
     >
-      <div className="min-w-0">
+      {/* above the drawn line: the controls in the head stay reachable */}
+      <div className="relative z-10 min-w-0">
         {kick && <p className="mb-2 text-[15px] font-semibold md:mb-3.5 md:text-[15px]">{kick}</p>}
         <h1 className="text-[32px] leading-[.96] md:text-[58px]">{title}</h1>
         {meta && <div className="mt-[18px] text-sm font-semibold">{meta}</div>}
@@ -124,7 +125,7 @@ export function WurfHead({
       </div>
       {goals && goals.length > 0 && (
         <>
-          <Flight goals={goals} width={1000} height={120} labels={flightLabels} slant={48} className="absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
+          <Flight goals={goals} width={1000} height={120} labels={flightLabels} slant={48} className="pointer-events-none absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
 
         </>
       )}
