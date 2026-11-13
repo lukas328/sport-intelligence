@@ -117,6 +117,9 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await page.getByTestId("account-menu").filter({ visible: true }).click();
   await page.getByRole("menuitem", { name: "Verein", exact: true }).click();
   await page.getByRole("link", { name: "Teams und Rollen", exact: true }).click();
+  // the reload must hit the page of teams and roles, not the club page the click is leaving
+  // (it raced the navigation and reloaded the club page, where the member is not listed)
+  await page.waitForURL(/\/club\/teams$/);
   // the invitation was sent from this very page: load it afresh
   await page.reload();
   await expect(page.getByText("Paul Spieler")).toBeVisible();

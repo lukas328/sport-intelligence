@@ -1,15 +1,36 @@
-import { expect, test } from "@playwright/test";
-import { expectAccessible, linkFromMail, register, uniqueEmail } from "./helpers";
+import { expect, test, type Page, type Route } from "@playwright/test";
+import * as fx from "./fixtures/entry";
+import { expectAccessible, linkFromMail, uniqueEmail } from "./helpers";
 
 // UX test, second delivery: the public entry. The website sends «/?q=…&farbe=…»; the app shows
 // the team from handball.ch without an account, an example of the three things, and saves with
-// an e-mail and a link. The search needs handball.ch (live or the local cache).
+// an e-mail and a link. The CI stack does not reach handball.ch: the federation's answers are
+// recorded with invented names (fixtures/entry.ts) and given to the browser; what runs on the
+// server (the account, the link, the club by name) needs no network.
+const json = (route: Route, body: unknown, status = 200) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
+
+async function federation(page: Page, opts: { delayMs?: number } = {}) {
+  await page.route("**/v1/public/teams?*", (route) => {
+    const q = new URL(route.request().url()).searchParams.get("q") ?? "";
+    return json(route, /rebhalde/i.test(q) ? [fx.TAKEN, ...fx.HITS] : /seeufer|uferweg/i.test(q) ? fx.HITS : []);
+  });
+  await page.route(/\/v1\/public\/clubs\/\d+\/teams\/\d+/, async (route) => {
+    const url = new URL(route.request().url());
+    const id = Number(url.pathname.split("/").at(-1));
+    const h = [fx.TAKEN, ...fx.HITS].find((x) => x.official_id === id);
+    if (!h) return json(route, { title: "Not found" }, 404);
+    if (opts.delayMs) await new Promise((r) => setTimeout(r, opts.delayMs));
+    return json(route, fx.preview(h, url.searchParams.get("scorers") !== "false")).catch(() => undefined);
+  });
+}
+
 test("entry: from the website's question to Spiele, without a password", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "the entry is for the phone");
   test.setTimeout(240_000);
-  await page.goto("/?q=W%C3%A4denswil&farbe=gelb");
+  await federation(page);
+  await page.goto("/?q=Seeufer&farbe=gelb");
   await page.waitForURL(/\/einstieg\?/);
-  await expect(page.getByLabel("Wie heisst dein Team?")).toHaveValue("Wädenswil");
+  await expect(page.getByLabel("Wie heisst dein Team?")).toHaveValue("Seeufer");
   const hits = page.getByTestId("entry-hits");
   await expect(hits.getByRole("button").first()).toBeVisible({ timeout: 60_000 });
   await expectAccessible(page);
@@ -46,15 +67,12 @@ test("entry: from the website's question to Spiele, without a password", async (
 test("entry: the wait for the team says what happens, slow federation offers saving anyway", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "the entry is for the phone");
   test.setTimeout(180_000);
-  await page.goto("/einstieg?q=Meilen&farbe=rot");
+  // the federation is slow today: the team's answer comes after 12 s
+  await federation(page, { delayMs: 12_000 });
+  await page.goto("/einstieg?q=Seeufer&farbe=rot");
   const hits = page.getByTestId("entry-hits");
   await expect(hits.getByRole("button").first()).toBeVisible({ timeout: 60_000 });
   const name = (await hits.getByRole("button").first().locator("span span").first().textContent())!.trim();
-  // hold the team's answer back: the federation is slow today
-  await page.route(/\/v1\/public\/clubs\/\d+\/teams\/\d+/, async (route) => {
-    await new Promise((r) => setTimeout(r, 12_000));
-    await route.continue().catch(() => undefined);
-  });
   await hits.getByRole("button").first().click();
   await expect(page.getByTestId("entry-loading")).toContainText("Wir holen die Spiele von handball.ch.", { timeout: 2_000 });
   await expect(page.getByRole("heading", { level: 1 })).toContainText(name);
@@ -65,20 +83,20 @@ test("entry: the wait for the team says what happens, slow federation offers sav
 });
 
 // UX test round 2, N09: a team already in the app says so in the preview; after the link the page
-// says what happens and offers a way on instead of a dead end.
-test("entry: a team already in the app, request and a way on", async ({ page, browser }, info) => {
+// says what happens and offers a way on instead of a dead end. The team was taken over by
+// someone else: the federation's answers say so (in_app), saving answers with an access request.
+test("entry: a team already in the app, request and a way on", async ({ browser }, info) => {
   test.skip(info.project.name !== "mobile", "the entry is for the phone");
   test.setTimeout(240_000);
-  // someone else has taken the team over already
-  await register(page, uniqueEmail("owner"), "Andere Trainerin");
-  const hit = (await (await page.request.get("/v1/public/teams?q=Meilen")).json())[0];
-  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
-  const claim = await page.request.post(`/v1/official/teams/${hit.official_id}/claim`, { headers: { "x-csrf-token": csrf }, data: { club_id: hit.club.id } });
-  expect(claim.ok()).toBe(true);
-
   const ctx = await browser.newContext({ ...info.project.use });
   const hans = await ctx.newPage();
-  await hans.goto("/einstieg?q=Meilen&farbe=gelb");
+  await federation(hans);
+  const claims: string[] = [];
+  await hans.route("**/v1/official/teams/*/claim", (route) => {
+    claims.push(route.request().url().split("/").at(-2)!);
+    return json(route, fx.accessRequested, 202);
+  });
+  await hans.goto("/einstieg?q=Rebhalde&farbe=gelb");
   await hans.getByTestId("entry-hits").getByRole("button").first().click({ timeout: 60_000 });
   await expect(hans.getByTestId("entry-in-app")).toContainText("nutzt Handball Intelligence schon", { timeout: 60_000 });
   await hans.getByTestId("entry-save").click();
@@ -88,7 +106,8 @@ test("entry: a team already in the app, request and a way on", async ({ page, br
   const link = await linkFromMail(hans, email, "/auth/magic");
   await hans.goto(link.replace(/^https?:\/\/[^/]+/, ""));
   await expect(hans.getByRole("heading", { name: "Anfrage gesendet." })).toBeVisible({ timeout: 90_000 });
-  await expect(hans.getByTestId("entry-saving")).toContainText(hit.name);
+  expect(claims).toEqual([String(fx.TAKEN.official_id)]);
+  await expect(hans.getByTestId("entry-saving")).toContainText(fx.TAKEN.name);
   await expect(hans.getByTestId("entry-access-ways").getByRole("link", { name: "Anderes Team wählen" })).toBeVisible();
   await hans.getByRole("link", { name: "Bis dahin mit eigenem Team starten" }).click();
   await hans.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 90_000 });
