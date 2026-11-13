@@ -3,22 +3,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Gold standard: the ball in every keyframe (~0.1 s) of 8-second clips. Suggestion pre-filled,
-   the owner confirms (Space / H), clicks the true ball, or marks hidden / out of picture. */
+/* Gold standard, precision mode: one click per keyframe (~0.1 s) on a 3x zoomed view that follows
+   the ball; fast passages get every frame automatically. Follow mode gives rough hints only. */
 :root {
   --bg: #eef1f4; --panel: #ffffff; --ink: #17202b; --muted: #5a6675; --line: #d3d9e1;
   --ball: #e8b100; --ball-ink: #1b1600; --held: #ff8a1f; --court: #2b6cb0; --good: #1f8a4c; --warn: #b25d00;
-  --sug: #33d1ff; --hidden: #8a63d2; --out: #7b8794;
+  --sug: #33d1ff; --hidden: #8a63d2; --out: #7b8794; --rough: #c9ced6;
   --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
-    --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --sug: #5fdcff; color-scheme: dark; }
+    --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --sug: #5fdcff; --rough: #4a5563; color-scheme: dark; }
 }
 :root[data-theme="dark"] { --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
-  --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --sug: #5fdcff; color-scheme: dark; }
+  --ball: #f2c230; --court: #6aa6e8; --good: #4cc27f; --warn: #f0a24a; --sug: #5fdcff; --rough: #4a5563; color-scheme: dark; }
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; margin: 0;
   padding: 14px max(16px, env(safe-area-inset-left, 0px)) 24px; }
 header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 10px; }
@@ -30,6 +30,7 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; al
 canvas#stage { display: block; width: 100%; height: auto; background: #000; border-radius: 6px; cursor: crosshair; }
 .strip { display: flex; gap: 1px; margin-top: 8px; height: 16px; }
 .strip button { flex: 1 1 0; min-width: 0; padding: 0; border: 0; border-radius: 1px; background: var(--line); cursor: pointer; }
+.strip button.rough { background: var(--rough); }
 .strip button.free { background: var(--ball); } .strip button.held { background: var(--held); }
 .strip button.hidden { background: var(--hidden); } .strip button.out { background: var(--out); }
 .strip button.cur { outline: 2px solid var(--court); outline-offset: 1px; }
@@ -37,11 +38,14 @@ canvas#stage { display: block; width: 100%; height: auto; background: #000; bord
 .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); font-family: var(--mono); }
 .meta b { color: var(--ink); }
 aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 10px; }
-canvas#zoom { width: 100%; aspect-ratio: 1; background: #000; border-radius: 4px; display: block; image-rendering: pixelated; }
+.state { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.state button { font: 700 15px var(--body); padding: 10px 6px; border-radius: 6px; border: 2px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+.state button.on.free { background: var(--ball); color: var(--ball-ink); border-color: transparent; }
+.state button.on.held { background: var(--held); color: #1b0d00; border-color: transparent; }
 .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 button.k { font: 600 14px var(--body); padding: 9px 6px; min-height: 40px; border-radius: 6px; border: 1px solid var(--line);
   background: var(--panel); color: var(--ink); cursor: pointer; }
-button.k:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+button.k:focus-visible, .state button:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
 kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border: 1px solid currentColor; border-radius: 3px; opacity: .8; }
 .help { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 0; padding-left: 16px; }
 .toast { min-height: 18px; font-size: 13px; color: var(--good); }
@@ -56,37 +60,40 @@ select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px s
 </header>
 <main>
   <section>
-    <canvas id="stage" width="1280" height="720" role="img" aria-label="Aktuelles Bild des Clips"></canvas>
+    <canvas id="stage" width="1280" height="720" role="img" aria-label="Aktuelles Bild des Clips, vergrössert um den Ball"></canvas>
     <div class="strip" id="strip" aria-label="Schlüsselbilder des Clips"></div>
     <div class="meta" id="meta"></div>
     <div class="meta legend"><span style="background:var(--ball)"></span>frei <span style="background:var(--held)"></span>in der Hand
-      <span style="background:var(--hidden)"></span>verdeckt <span style="background:var(--out)"></span>nicht im Bild <span style="background:var(--sug);border-radius:50%"></span>Vorschlag</div>
+      <span style="background:var(--hidden)"></span>verdeckt <span style="background:var(--out)"></span>nicht im Bild
+      <span style="background:var(--rough)"></span>grob (Verfolgen) <span style="background:var(--sug);border-radius:50%"></span>Vorschlag</div>
   </section>
   <aside>
     <select id="clip" aria-label="Clip wählen"></select>
-    <canvas id="zoom" width="240" height="240" aria-label="Lupe"></canvas>
+    <div class="state" role="group" aria-label="Zustand für den nächsten Klick">
+      <button id="s-free" class="free on">frei</button>
+      <button id="s-held" class="held">in der Hand <kbd>H</kbd></button>
+    </div>
     <div class="btns">
-      <button class="k" id="b-follow" style="grid-column:1/-1;background:var(--ball);color:var(--ball-ink);border-color:transparent">Verfolgen <kbd>F</kbd></button>
-      <select id="speed" aria-label="Tempo beim Verfolgen"><option value="0.25">Tempo 0.25×</option><option value="0.5" selected>Tempo 0.5×</option><option value="1">Tempo 1×</option></select>
-      <button class="k" id="b-play">Abspielen zum Prüfen <kbd>P</kbd></button>
-      <button class="k" id="b-acc">Vorschlag frei <kbd>Leer</kbd></button>
-      <button class="k" id="b-held">Vorschlag Hand <kbd>H</kbd></button>
       <button class="k" id="b-hid">Verdeckt <kbd>V</kbd></button>
       <button class="k" id="b-out">Nicht im Bild <kbd>O</kbd></button>
+      <button class="k" id="b-acc">Hinweis passt <kbd>Leer</kbd></button>
+      <button class="k" id="b-zoom">Ganzes Bild <kbd>Z</kbd></button>
       <button class="k" id="b-shot">Wurf hier <kbd>W</kbd></button>
       <button class="k" id="b-del">Löschen <kbd>⌫</kbd></button>
       <button class="k" id="b-prev">← Zurück</button>
       <button class="k" id="b-done">Clip fertig <kbd>Enter</kbd></button>
+      <button class="k" id="b-play">Abspielen <kbd>P</kbd></button>
+      <button class="k" id="b-follow">Grob verfolgen <kbd>F</kbd></button>
+      <select id="speed" aria-label="Tempo"><option value="0.1">Tempo 0.1×</option><option value="0.25" selected>Tempo 0.25×</option><option value="0.5">Tempo 0.5×</option><option value="1">Tempo 1×</option></select>
     </div>
     <div class="toast" id="toast" role="status"></div>
     <ul class="help">
-      <li><b>Schnellster Weg:</b> <kbd>F</kbd> startet den Clip langsam ab dem aktuellen Bild, du folgst dem Ball mit der Maus. Taste <kbd>H</kbd> gedrückt halten, solange er in der Hand ist, <kbd>V</kbd> solange er verdeckt ist, <kbd>O</kbd> wenn kein Spielball im Bild ist. Maus ausserhalb des Bildes = nichts aufzeichnen. <kbd>F</kbd> oder <kbd>Esc</kbd> stoppt.</li>
-      <li>Dann <kbd>P</kbd>: der Clip läuft mit deinen Punkten; wo es nicht passt, klicken (hält an) und korrigieren.</li>
-      <li><b>Klick</b> = Ball hier, frei (Flug, Boden, Prellen). <b>Shift+Klick</b> = Ball hier, in der Hand.</li>
-      <li><kbd>Leer</kbd> / <kbd>H</kbd> übernehmen den blauen Vorschlag als frei / in der Hand.</li>
-      <li><kbd>V</kbd> Ball im Bild, aber verdeckt (<b>Alt+Klick</b> davor merkt die geschätzte Stelle). <kbd>O</kbd> kein Spielball im Bild.</li>
-      <li><kbd>W</kbd> markiert den Moment, in dem der Ball beim Wurf die Hand verlässt.</li>
-      <li><kbd>←</kbd> <kbd>→</kbd> Schlüsselbilder (etwa alle 0.1 s), <kbd>,</kbd> <kbd>.</kbd> einzelne Bilder, zum Beispiel bei schnellen Würfen.</li>
+      <li><b>Klick genau auf den Ball</b>. Das Bild ist 3× vergrössert und folgt dem Ball; danach springt die Seite zum nächsten Bild.</li>
+      <li><kbd>H</kbd> schaltet um zwischen <b>frei</b> und <b>in der Hand</b>; der Zustand bleibt, bis du ihn wieder umschaltest.</li>
+      <li>Bewegt sich der Ball schnell (Pass, Wurf), zeigt die Seite <b>von selbst jedes einzelne Bild</b> dazwischen.</li>
+      <li>Ball nicht im Ausschnitt? <kbd>Z</kbd> zeigt das ganze Bild, oder klick in die kleine Übersicht unten rechts.</li>
+      <li><kbd>V</kbd> verdeckt (Maus auf die vermutete Stelle halten), <kbd>O</kbd> kein Spielball im Bild, <kbd>Leer</kbd> übernimmt den gestrichelten Hinweis, wenn er genau passt.</li>
+      <li><kbd>←</kbd> <kbd>→</kbd> Schlüsselbilder, <kbd>,</kbd> <kbd>.</kbd> einzelne Bilder, <kbd>P</kbd> spielt alles mit deinen Punkten ab.</li>
     </ul>
   </aside>
 </main>
@@ -94,21 +101,24 @@ select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px s
 
 <script>
 const $ = (id) => document.getElementById(id);
-const st = { clips: [], ci: 0, f: 0, docs: {}, db: null, mouse: null, pendingHidden: null, timers: {}, dirty: {},
-  mode: null, keys: {}, lastRec: null };
+const st = { clips: [], ci: 0, f: 0, docs: {}, db: null, mouse: null, timers: {}, dirty: {},
+  mode: null, keys: {}, recN: 0, state: "free", zoom: 3, center: null, view: { sx: 0, sy: 0, z: 1 }, inset: null };
 const COL = { free: "--ball", held: "--held", hidden: "--hidden", out: "--out" };
 const NAMES = { free: "frei", held: "in der Hand", hidden: "verdeckt", out: "nicht im Bild" };
+const FAST = 25;  // px between two precise points with a gap: fill every frame in between
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function clip() { return st.clips[st.ci]; }
-function doc(c) { c = c || clip(); if (!st.docs[c.id]) st.docs[c.id] = { labels: {}, shots: [], done: false }; return st.docs[c.id]; }
+function doc(c) { c = c || clip(); if (!st.docs[c.id]) st.docs[c.id] = { labels: {}, shots: [], done: false, pdone: false }; return st.docs[c.id]; }
 function keyframes(c) { const out = []; for (let f = 0; f < c.n; f += c.K) out.push(f); return out; }
-function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2200); }
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2400); }
+function precise(l) { return !!(l && l.p); }
+function hasPos(l) { return !!(l && l.x != null); }
 
 // --- video: frame f of the mp4 is frame f of the clip (seek to its middle)
 const vid = $("vid");
 let seekTo = null, seeking = false;
 function showFrame(f) {
-  st.f = Math.max(0, Math.min(clip().n - 1, f)); seekTo = st.f; pump(); render();
+  st.f = Math.max(0, Math.min(clip().n - 1, f)); st.center = null; seekTo = st.f; pump(); render();
 }
 function pump() {
   if (seeking || seekTo === null || !vid.src) return;
@@ -116,96 +126,111 @@ function pump() {
   vid.currentTime = (f + 0.5) / clip().fps;
 }
 vid.addEventListener("seeked", () => { seeking = false; if (!st.mode) drawStage(); if (seekTo !== null) pump(); });
+function loadClip(i) {
+  st.ci = i; const c = clip(); $("clip").value = String(i);
+  vid.src = "clips/" + c.id + ".mp4";
+  vid.addEventListener("loadeddata", () => showFrame(firstOpen(c)), { once: true });
+  render();
+}
+function firstOpen(c) { const L = doc(c).labels; for (const f of keyframes(c)) if (!precise(L[f])) return f; return 0; }
 
-// --- follow mode (record the pointer on every frame while the clip plays slowly) and check playback
+// --- where to look: the best guess of the ball in frame f (own label, a precise neighbour, the suggestion)
+function hint(c, f) {
+  const L = doc(c).labels;
+  if (hasPos(L[f])) return { x: L[f].x, y: L[f].y, rough: !precise(L[f]) };
+  for (let d = 1; d <= 3 * c.K; d++) {
+    for (const g of [f - d, f + d]) if (precise(L[g]) && hasPos(L[g])) return { x: L[g].x, y: L[g].y, near: true };
+  }
+  const sg = c.sug[f]; if (sg) return { x: sg[0], y: sg[1], sug: true };
+  return null;
+}
+function computeView(c) {
+  const z = st.mode ? 1 : st.zoom;
+  const h = st.center || hint(c, st.f) || { x: c.w / 2, y: c.h / 2 };
+  const w = c.w / z, hh = c.h / z;
+  st.view = { z, sx: Math.max(0, Math.min(c.w - w, h.x - w / 2)), sy: Math.max(0, Math.min(c.h - hh, h.y - hh / 2)) };
+}
+function toCanvas(x, y) { const v = st.view; return [(x - v.sx) * v.z, (y - v.sy) * v.z]; }
+
+// --- labels: per frame {x, y, s, p}; p = precise click, without p = rough (follow mode)
+function setLabel(f, lab) {
+  const d = doc(); if (lab) d.labels[f] = lab; else delete d.labels[f];
+  persist(clip()); render();
+}
+function next() {
+  const c = clip(), L = doc(c).labels;
+  // 1. a fast passage between two precise points: every frame in between, in order
+  const P = Object.keys(L).map(Number).filter((k) => precise(L[k])).sort((a, b) => a - b);
+  for (let i = 0; i + 1 < P.length; i++) {
+    const a = P[i], b = P[i + 1];
+    if (b - a > 1 && hasPos(L[a]) && hasPos(L[b]) && Math.hypot(L[b].x - L[a].x, L[b].y - L[a].y) > FAST) {
+      toast("Schnelle Bewegung: jedes Bild"); showFrame(a + 1); return;
+    }
+  }
+  // 2. the next keyframe without a precise label
+  const ks = keyframes(c);
+  const k = ks.find((k) => k > st.f && !precise(L[k])) ?? ks.find((k) => !precise(L[k]));
+  if (k !== undefined) showFrame(k); else toast("Alle Schlüsselbilder erledigt. Enter = Clip fertig.");
+}
+function prevKey() { const ks = keyframes(clip()); const k = [...ks].reverse().find((k) => k < st.f); showFrame(k === undefined ? 0 : k); }
+function nextKey() { const k = keyframes(clip()).find((k) => k > st.f); if (k !== undefined) showFrame(k); }
+function clickAt(p) { setLabel(st.f, { x: p.x, y: p.y, s: st.state, p: 1 }); next(); }
+function acceptHint() {
+  const h = hint(clip(), st.f);
+  if (!h || h.near) { toast("Kein Hinweis für dieses Bild: Ball anklicken."); return; }
+  clickAt(h);
+}
+function mark(s) {
+  const p = s === "hidden" && st.mouse ? { x: st.mouse.x, y: st.mouse.y } : null;
+  setLabel(st.f, p ? { ...p, s, p: 1 } : { s, p: 1 }); next();
+}
+function setState(s) { st.state = s; $("s-free").classList.toggle("on", s === "free"); $("s-held").classList.toggle("on", s === "held"); drawStage(); }
+function toggleShot() {
+  const d = doc(); const i = d.shots.indexOf(st.f);
+  if (i >= 0) d.shots.splice(i, 1); else d.shots.push(st.f);
+  d.shots.sort((a, b) => a - b); persist(clip()); render(); toast(i >= 0 ? "Wurf entfernt" : "Wurf markiert");
+}
+function done() {
+  const c = clip(), L = doc(c).labels, open = keyframes(c).filter((k) => !precise(L[k])).length;
+  if (open) { toast(open + " Schlüsselbilder fehlen noch."); next(); return; }
+  doc().pdone = true; persist(c); toast("Clip fertig, danke!");
+  const j = st.clips.findIndex((x, i) => i > st.ci && !doc(x).pdone); if (j >= 0) loadClip(j); render();
+}
+
+// --- follow mode (rough hints) and playback
 function startMode(mode) {
   if (st.mode) { stopMode(); return; }
   const c = clip(); if (!c || !vid.src) return;
   if (st.f >= c.n - 1) st.f = 0;
-  st.mode = mode; st.lastRec = null; seekTo = null; st.recN = 0;
-  if (mode === "follow") st.dirty[c.id] = true;  // no snapshot may replace the recording
+  st.mode = mode; seekTo = null; st.recN = 0;
+  if (mode === "follow") st.dirty[c.id] = true;
   vid.playbackRate = Number($("speed").value);
   vid.currentTime = (st.f + 0.5) / c.fps;
   const step = (now, meta) => {
     if (!st.mode) return;
     const f = Math.min(c.n - 1, Math.max(0, Math.round(meta.mediaTime * c.fps)));
     if (st.mode === "follow") record(c, f);
-    st.f = f; drawStage(); renderMetaOnly();
+    st.f = f; drawStage(); renderMeta();
     if (f >= c.n - 1 || vid.ended) { stopMode(); return; }
     vid.requestVideoFrameCallback(step);
   };
   vid.requestVideoFrameCallback(step);
   vid.play().catch(() => { st.mode = null; toast("Abspielen nicht möglich."); });
-  $("b-follow").textContent = mode === "follow" ? "Stopp (F)" : "Verfolgen (F)";
 }
 function stopMode() {
   const was = st.mode; st.mode = null; vid.pause(); st.keys = {};
-  $("b-follow").innerHTML = "Verfolgen <kbd>F</kbd>";
   if (was === "follow") {
-    if (st.recN) { persist(clip()); toast(st.recN + " Bilder aufgezeichnet. Jetzt P zum Prüfen."); }
-    else toast("Nichts aufgezeichnet: die Maus muss beim Verfolgen über dem Bild sein.");
+    if (st.recN) { persist(clip()); toast(st.recN + " grobe Punkte. Jetzt präzise klicken."); }
+    else toast("Nichts aufgezeichnet: die Maus muss über dem Bild sein.");
   }
-  showFrame(st.f);
+  showFrame(was === "follow" ? firstOpen(clip()) : st.f);
 }
 function record(c, f) {
-  if (!st.mouse) { st.lastRec = null; return; }
-  const s = st.keys.o ? "out" : st.keys.v ? "hidden" : st.keys.h ? "held" : "free";
-  const lab = s === "out" ? { s } : { x: st.mouse.x, y: st.mouse.y, s };
   const L = doc(c).labels;
-  // frames the browser skipped since the last recorded one: in between, same state
-  if (st.lastRec && f - st.lastRec.f > 1 && f - st.lastRec.f <= 4) {
-    const a = st.lastRec;
-    for (let g = a.f + 1; g < f; g++) {
-      const t = (g - a.f) / (f - a.f);
-      L[g] = lab.x == null || a.lab.x == null ? { ...lab } : { x: Math.round((a.lab.x + t * (lab.x - a.lab.x)) * 10) / 10, y: Math.round((a.lab.y + t * (lab.y - a.lab.y)) * 10) / 10, s };
-    }
-  }
-  L[f] = lab; st.lastRec = { f, lab }; st.recN = (st.recN || 0) + 1;
+  if (!st.mouse || precise(L[f])) return;
+  const s = st.keys.o ? "out" : st.keys.v ? "hidden" : st.keys.h ? "held" : "free";
+  L[f] = s === "out" ? { s } : { x: st.mouse.x, y: st.mouse.y, s }; st.recN++;
 }
-function loadClip(i) {
-  st.ci = i; const c = clip(); $("clip").value = String(i);
-  vid.src = "clips/" + c.id + ".mp4";
-  vid.addEventListener("loadeddata", () => showFrame(firstOpen(c)), { once: true });
-  renderStrip(); render();
-}
-function firstOpen(c) { const L = doc(c).labels; for (const f of keyframes(c)) if (!L[f]) return f; return 0; }
-
-// --- labels: per frame {x, y, s}; interpolation between labelled frames for display only
-function interp(c, f) {
-  const L = doc(c).labels; let a = null, b = null;
-  for (let g = f - 1; g >= 0 && g >= f - 3 * c.K; g--) if (L[g] && L[g].x != null) { a = g; break; }
-  for (let g = f + 1; g < c.n && g <= f + 3 * c.K; g++) if (L[g] && L[g].x != null) { b = g; break; }
-  if (a === null || b === null) return null;
-  const t = (f - a) / (b - a); return { x: L[a].x + t * (L[b].x - L[a].x), y: L[a].y + t * (L[b].y - L[a].y) };
-}
-function setLabel(f, lab) {
-  const d = doc(); if (lab) d.labels[f] = lab; else delete d.labels[f];
-  persist(clip()); renderStrip(); render();
-}
-function next() {
-  const c = clip(), ks = keyframes(c), L = doc(c).labels;
-  const j = ks.findIndex((k) => k > st.f && !L[k]);
-  if (j >= 0) showFrame(ks[j]);
-  else { const k = ks.find((k) => k > st.f); if (k !== undefined) showFrame(k); else toast("Ende des Clips. Enter = Clip fertig."); }
-}
-function prevKey() { const ks = keyframes(clip()); const k = [...ks].reverse().find((k) => k < st.f); showFrame(k === undefined ? 0 : k); }
-function nextKey() { const k = keyframes(clip()).find((k) => k > st.f); if (k !== undefined) showFrame(k); }
-function accept(s) {
-  const sg = clip().sug[st.f];
-  if (!sg) { toast("Kein Vorschlag hier: Ball anklicken, V oder O."); return; }
-  setLabel(st.f, { x: sg[0], y: sg[1], s }); next();
-}
-function mark(s) {
-  const p = s === "hidden" ? st.pendingHidden : null;
-  setLabel(st.f, p ? { x: p.x, y: p.y, s } : { s }); st.pendingHidden = null; next();
-}
-function toggleShot() {
-  const d = doc(); const i = d.shots.indexOf(st.f);
-  if (i >= 0) d.shots.splice(i, 1); else d.shots.push(st.f);
-  d.shots.sort((a, b) => a - b); persist(clip()); renderStrip(); render(); toast(i >= 0 ? "Wurf entfernt" : "Wurf markiert");
-}
-function done() { const d = doc(); d.done = true; persist(clip()); toast("Clip fertig, danke!");
-  const j = st.clips.findIndex((c, i) => i > st.ci && !doc(c).done); if (j >= 0) loadClip(j); renderProgress(); }
 
 // --- storage: one document per clip, one write per pause
 function persist(c) {
@@ -213,7 +238,7 @@ function persist(c) {
   clearTimeout(st.timers[c.id]); st.dirty[c.id] = true;
   st.timers[c.id] = setTimeout(async () => {
     const d = doc(c);
-    try { await st.db.collection("gold").doc(c.id).set({ labels: d.labels, shots: d.shots, done: d.done, at: Date.now() }); }
+    try { await st.db.collection("gold").doc(c.id).set({ labels: d.labels, shots: d.shots, done: d.done, pdone: d.pdone, at: Date.now() }); }
     catch (e) { toast("Speichern fehlgeschlagen: " + (e && e.message ? e.message : "unbekannt")); }
     st.dirty[c.id] = false;
   }, 600);
@@ -223,73 +248,79 @@ function persist(c) {
 function ring(g, x, y, r, col, w, dash) { g.setLineDash(dash || []); g.strokeStyle = col; g.lineWidth = w; g.beginPath(); g.arc(x, y, r, 0, 2 * Math.PI); g.stroke(); g.setLineDash([]); }
 function drawStage() {
   const c = clip(); if (!c) return; const cv = $("stage"), g = cv.getContext("2d");
-  cv.width = c.w; cv.height = c.h;
-  if (vid.readyState >= 2) g.drawImage(vid, 0, 0, c.w, c.h);
-  if (st.mode === "follow" && st.mouse) {  // the pointer as a crosshair, coloured by the held state
-    const s = st.keys.o ? "out" : st.keys.v ? "hidden" : st.keys.h ? "held" : "free";
-    ring(g, st.mouse.x, st.mouse.y, 14, css(COL[s]), 3);
-    drawZoom(); return;
+  cv.width = c.w; cv.height = c.h; computeView(c); const v = st.view;
+  g.imageSmoothingEnabled = v.z < 2;
+  if (vid.readyState >= 2) g.drawImage(vid, v.sx, v.sy, c.w / v.z, c.h / v.z, 0, 0, c.w, c.h);
+  st.inset = null;
+  if (st.mode === "follow") {
+    if (st.mouse) { const s = st.keys.o ? "out" : st.keys.v ? "hidden" : st.keys.h ? "held" : "free"; ring(g, st.mouse.x, st.mouse.y, 14, css(COL[s]), 3); }
+    return;
   }
-  const L = doc(c).labels, sg = c.sug[st.f], lab = L[st.f];
-  // the path of the last second, faint
-  for (let g2 = Math.max(0, st.f - c.fps); g2 < st.f; g2++) { const l = L[g2]; if (l && l.x != null) { g.fillStyle = css(COL[l.s]); g.globalAlpha = 0.35; g.beginPath(); g.arc(l.x, l.y, 3, 0, 2 * Math.PI); g.fill(); g.globalAlpha = 1; } }
-  if (sg && st.mode !== "play") ring(g, sg[0], sg[1], 16, css("--sug"), 2, [5, 4]);
-  if (lab && lab.x != null) ring(g, lab.x, lab.y, 13, css(COL[lab.s]), 3);
-  else if (!lab) { const ip = interp(c, st.f); if (ip) ring(g, ip.x, ip.y, 10, css("--ball"), 1.5, [2, 3]); }
-  if (st.pendingHidden) ring(g, st.pendingHidden.x, st.pendingHidden.y, 13, css("--hidden"), 3, [6, 3]);
-  drawZoom();
+  const L = doc(c).labels, lab = L[st.f], r = 7 * v.z;
+  // precise path of the last 0.7 s
+  for (let k = Math.max(0, st.f - Math.round(0.7 * c.fps)); k < st.f; k++) {
+    const l = L[k]; if (!precise(l) || !hasPos(l)) continue;
+    const [x, y] = toCanvas(l.x, l.y); g.fillStyle = css(COL[l.s]); g.globalAlpha = 0.5; g.beginPath(); g.arc(x, y, 2 + v.z, 0, 2 * Math.PI); g.fill(); g.globalAlpha = 1;
+  }
+  if (!st.mode) {
+    const h = hint(c, st.f);
+    if (h && !h.near && !precise(lab)) { const [x, y] = toCanvas(h.x, h.y); ring(g, x, y, r * 1.6, css(h.sug ? "--sug" : "--rough"), 2, [6, 5]); }
+  }
+  if (precise(lab) && hasPos(lab)) { const [x, y] = toCanvas(lab.x, lab.y); ring(g, x, y, r * 1.3, css(COL[lab.s]), 3); }
+  if (precise(lab) && !hasPos(lab)) { g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(12, 12, 260, 40); g.fillStyle = "#fff"; g.font = "bold 24px sans-serif"; g.fillText(NAMES[lab.s], 24, 42); }
+  if (v.z > 1) drawInset(g, c);
 }
-function drawZoom() {
-  const c = clip(); if (!c) return; const z = $("zoom"), g = z.getContext("2d"), cv = $("stage");
-  const lab = doc(c).labels[st.f], sg = c.sug[st.f];
-  const p = st.mouse || (lab && lab.x != null ? lab : sg ? { x: sg[0], y: sg[1] } : { x: c.w / 2, y: c.h / 2 });
-  const n = 60; g.imageSmoothingEnabled = false; g.fillStyle = "#000"; g.fillRect(0, 0, z.width, z.height);
-  g.drawImage(cv, p.x - n / 2, p.y - n / 2, n, n, 0, 0, z.width, z.height);
-  g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1; g.beginPath();
-  g.moveTo(z.width / 2 - 12, z.height / 2); g.lineTo(z.width / 2 + 12, z.height / 2);
-  g.moveTo(z.width / 2, z.height / 2 - 12); g.lineTo(z.width / 2, z.height / 2 + 12); g.stroke();
+function drawInset(g, c) {  // overview bottom right with the zoom window; a click there re-centres
+  const W = c.w / 5, H = c.h / 5, X = c.w - W - 12, Y = c.h - H - 12, v = st.view;
+  if (vid.readyState >= 2) { g.globalAlpha = 0.9; g.drawImage(vid, 0, 0, c.w, c.h, X, Y, W, H); g.globalAlpha = 1; }
+  g.strokeStyle = "#fff"; g.lineWidth = 2; g.strokeRect(X, Y, W, H);
+  g.strokeStyle = css("--ball"); g.strokeRect(X + v.sx / 5, Y + v.sy / 5, c.w / v.z / 5, c.h / v.z / 5);
+  st.inset = { X, Y, W, H };
 }
 function renderStrip() {
   const c = clip(); if (!c) return; const s = $("strip"), d = doc(c);
   const ks = keyframes(c);
-  if (s.childElementCount !== ks.length) { s.innerHTML = ""; for (const k of ks) { const b = document.createElement("button"); b.dataset.f = k; b.title = "Bild " + k; b.onclick = () => showFrame(k); s.appendChild(b); } }
+  if (s.childElementCount !== ks.length) { s.innerHTML = ""; for (const k of ks) { const b = document.createElement("button"); b.title = "Bild " + k; b.onclick = () => showFrame(k); s.appendChild(b); } }
   [...s.children].forEach((b, i) => {
     const k = ks[i], l = d.labels[k];
-    b.className = (l ? l.s : "") + (k <= st.f && st.f < k + c.K ? " cur" : "") + (d.shots.some((f) => f >= k && f < k + c.K) ? " shot" : "");
+    b.className = (precise(l) ? l.s : l ? "rough" : "") + (k <= st.f && st.f < k + c.K ? " cur" : "") + (d.shots.some((f) => f >= k && f < k + c.K) ? " shot" : "");
   });
 }
 function renderProgress() {
-  const done = st.clips.filter((c) => doc(c).done).length;
-  $("progress").textContent = `${done} von ${st.clips.length} Clips fertig`;
+  const n = st.clips.filter((c) => doc(c).pdone).length;
+  $("progress").textContent = `${n} von ${st.clips.length} Clips präzise fertig`;
 }
-function renderMetaOnly() {
-  const c = clip(), lab = doc(c).labels[st.f];
-  $("meta").innerHTML = `<span>Clip <b>${st.ci + 1}</b>/${st.clips.length}</span><span>Bild <b>${st.f}</b>/${c.n - 1} (${(st.f / c.fps).toFixed(2)} s)</span>`
-    + `<span><b>${st.mode === "follow" ? "Aufnahme" : "Wiedergabe"}</b></span>`
-    + (st.mode === "follow" ? `<span>${st.mouse ? st.recN + " Bilder" : "Maus aufs Bild!"}</span>` : `<span>${lab ? NAMES[lab.s] : ""}</span>`);
-}
-function render() {
+function renderMeta() {
   const c = clip(); if (!c) return; const d = doc(c), lab = d.labels[st.f];
-  const ks = keyframes(c), nl = ks.filter((k) => d.labels[k]).length;
+  const ks = keyframes(c), nl = ks.filter((k) => precise(d.labels[k])).length;
+  const mode = st.mode === "follow" ? `<span><b>Grob verfolgen</b> ${st.mouse ? st.recN + " Punkte" : "Maus aufs Bild!"}</span>` : st.mode === "play" ? "<span><b>Wiedergabe</b></span>" : "";
   $("meta").innerHTML = `<span>Clip <b>${st.ci + 1}</b>/${st.clips.length}</span><span>Bild <b>${st.f}</b>/${c.n - 1} (${(st.f / c.fps).toFixed(2)} s)</span>`
-    + `<span>${nl}/${ks.length} Schlüsselbilder</span><span>${lab ? "<b>" + NAMES[lab.s] + "</b>" : "offen"}</span>`
-    + (d.shots.includes(st.f) ? "<span><b>Wurf</b></span>" : "") + (d.done ? "<span>fertig</span>" : "");
-  renderStrip(); renderProgress(); drawStage();
+    + `<span>${nl}/${ks.length} Schlüsselbilder präzise</span>` + mode
+    + `<span>${precise(lab) ? "<b>" + NAMES[lab.s] + "</b>" : "offen"}</span>`
+    + (d.shots.includes(st.f) ? "<span><b>Wurf</b></span>" : "") + (d.pdone ? "<span>fertig</span>" : "");
 }
+function render() { if (!clip()) return; renderStrip(); renderProgress(); renderMeta(); drawStage(); }
 
 // --- input
-function pos(ev) { const b = $("stage").getBoundingClientRect(), c = clip(); return { x: Math.round((ev.clientX - b.left) / b.width * c.w * 10) / 10, y: Math.round((ev.clientY - b.top) / b.height * c.h * 10) / 10 }; }
+function canvasPos(ev) { const b = $("stage").getBoundingClientRect(), c = clip(); return { cx: (ev.clientX - b.left) / b.width * c.w, cy: (ev.clientY - b.top) / b.height * c.h }; }
+function framePos(ev) {
+  const { cx, cy } = canvasPos(ev), v = st.view;
+  return { x: Math.round((v.sx + cx / v.z) * 10) / 10, y: Math.round((v.sy + cy / v.z) * 10) / 10 };
+}
 $("stage").addEventListener("click", (ev) => {
   if (st.mode === "play") { stopMode(); return; }
   if (st.mode) return;
-  const p = pos(ev);
-  if (ev.altKey) { st.pendingHidden = p; drawStage(); toast("Stelle gemerkt: V = verdeckt hier"); return; }
-  setLabel(st.f, { x: p.x, y: p.y, s: ev.shiftKey ? "held" : "free" }); next();
+  const { cx, cy } = canvasPos(ev), I = st.inset;
+  if (I && cx >= I.X && cy >= I.Y && cx <= I.X + I.W && cy <= I.Y + I.H) {
+    st.center = { x: (cx - I.X) * 5, y: (cy - I.Y) * 5 }; drawStage(); return;
+  }
+  clickAt(framePos(ev));
 });
-$("stage").addEventListener("mousemove", (ev) => { st.mouse = pos(ev); drawZoom(); });
-$("stage").addEventListener("mouseleave", () => { st.mouse = null; drawZoom(); });
-$("b-acc").onclick = () => accept("free"); $("b-held").onclick = () => accept("held");
-$("b-hid").onclick = () => mark("hidden"); $("b-out").onclick = () => mark("out");
+$("stage").addEventListener("mousemove", (ev) => { st.mouse = framePos(ev); if (st.mode === "follow") drawStage(); });
+$("stage").addEventListener("mouseleave", () => { st.mouse = null; });
+$("s-free").onclick = () => setState("free"); $("s-held").onclick = () => setState("held");
+$("b-acc").onclick = acceptHint; $("b-hid").onclick = () => mark("hidden"); $("b-out").onclick = () => mark("out");
+$("b-zoom").onclick = () => { st.zoom = st.zoom > 1 ? 1 : 3; $("b-zoom").innerHTML = (st.zoom > 1 ? "Ganzes Bild" : "Vergrössern") + " <kbd>Z</kbd>"; drawStage(); };
 $("b-shot").onclick = toggleShot; $("b-del").onclick = () => setLabel(st.f, null);
 $("b-prev").onclick = prevKey; $("b-done").onclick = done;
 $("b-follow").onclick = () => startMode("follow"); $("b-play").onclick = () => startMode("play");
@@ -297,20 +328,20 @@ document.addEventListener("keyup", (ev) => { const k = ev.key.toLowerCase(); if 
 $("clip").onchange = (ev) => loadClip(Number(ev.target.value));
 document.addEventListener("keydown", (ev) => {
   if (ev.target.tagName === "SELECT") return;
-  const k = ev.key;
-  if (st.mode) {  // while playing: H / V / O are held states, F / P / Esc stop
-    const l = k.toLowerCase();
+  const k = ev.key, l = k.toLowerCase();
+  if (st.mode) {
     if (["h", "v", "o"].includes(l)) { st.keys[l] = true; ev.preventDefault(); }
     else if (l === "f" || l === "p" || k === "Escape" || k === " ") { ev.preventDefault(); stopMode(); }
     return;
   }
-  if (k === "f" || k === "F") { ev.preventDefault(); startMode("follow"); return; }
-  if (k === "p" || k === "P") { ev.preventDefault(); startMode("play"); return; }
-  if (k === " ") { ev.preventDefault(); accept("free"); }
-  else if (k === "h" || k === "H") accept("held");
-  else if (k === "v" || k === "V") mark("hidden");
-  else if (k === "o" || k === "O") mark("out");
-  else if (k === "w" || k === "W") toggleShot();
+  if (l === "f") { ev.preventDefault(); startMode("follow"); }
+  else if (l === "p") { ev.preventDefault(); startMode("play"); }
+  else if (k === " ") { ev.preventDefault(); acceptHint(); }
+  else if (l === "h") setState(st.state === "held" ? "free" : "held");
+  else if (l === "v") mark("hidden");
+  else if (l === "o") mark("out");
+  else if (l === "z") $("b-zoom").click();
+  else if (l === "w") toggleShot();
   else if (k === "Backspace") { ev.preventDefault(); setLabel(st.f, null); }
   else if (k === "ArrowLeft") prevKey(); else if (k === "ArrowRight") nextKey();
   else if (k === ",") showFrame(st.f - 1); else if (k === ".") showFrame(st.f + 1);
@@ -330,9 +361,13 @@ async function start() {
   db.collection("gold").onSnapshot((snap) => {
     if (!snap.metadata.fromCache) { clearTimeout(timer); $("note").hidden = true; }
     for (const d of snap.docs) if (!st.dirty[d.id]) {
-      const v = d.data(); st.docs[d.id] = { labels: { ...(v.labels || {}) }, shots: [...(v.shots || [])], done: !!v.done };
+      const v = d.data(); st.docs[d.id] = { labels: { ...(v.labels || {}) }, shots: [...(v.shots || [])], done: !!v.done, pdone: !!v.pdone };
     }
-    if (first) { first = false; const j = st.clips.findIndex((c) => !doc(c).done); if (j > 0) { loadClip(j); return; } }
+    if (first) {
+      first = false; const j = st.clips.findIndex((c) => !doc(c).pdone);
+      if (j > 0) { loadClip(j); return; }
+      if (j === 0 && vid.readyState >= 2) { showFrame(firstOpen(clip())); return; }
+    }
     render();
   }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Labels konnten nicht geladen werden (" + e.code + ")."; });
 }
