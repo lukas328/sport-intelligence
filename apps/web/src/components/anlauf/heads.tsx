@@ -53,6 +53,8 @@ export function Score({
       </div>
     );
   }
+  // no result (yet, or while it loads): the place stays empty, not a block of «-:-» (UX test A09)
+  if (text) return <div aria-hidden className={cn("font-num invisible whitespace-nowrap", className)} style={{ lineHeight: 0.8 }} data-testid="score-empty">0:0</div>;
   const body = text ?? (
     <>
       {own}:<u className="decoration-opp [text-decoration-skip-ink:none] [text-decoration-thickness:.045em] [text-underline-offset:.06em]">{opp}</u>

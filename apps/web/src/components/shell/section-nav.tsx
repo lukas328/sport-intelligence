@@ -41,9 +41,11 @@ export function AreaSubNav() {
 }
 
 /** Leaf pages one level below a section item, with a way back to it. */
-const LEAF: Record<string, { parent: Section; title: string; href?: string }> = {
-  playlists: { parent: "collections", title: "library.playlists", href: "collections" },
-  presentations: { parent: "collections", title: "library.presentations", href: "collections" },
+// older: an area from the earlier product, kept and reachable, said so in one line (UX test A07)
+const LEAF: Record<string, { parent: Section; title: string; href?: string; older?: boolean }> = {
+  playlists: { parent: "collections", title: "library.playlists", href: "collections", older: true },
+  presentations: { parent: "collections", title: "library.presentations", href: "collections", older: true },
+  plays: { parent: "scenes", title: "library.plays", href: "scenes", older: true },
   assistant: { parent: "scenes", title: "palette.ask" },
   paper: { parent: "fixtures", title: "paper.photoTitle", href: "matches" },
 };
@@ -66,6 +68,7 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
     <div className="space-y-5">
       {leaf && teamBase && <BackLink href={`${teamBase}/${leaf.href ?? leaf.parent}`} parent={leaf.parent} />}
       <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions} />
+      {leaf?.older && <OlderArea />}
       {dest && items.length > 0 && !leaf && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
     </div>
   );
@@ -105,4 +108,14 @@ export function AreaOrPageHeader({ title }: { title: string }) {
   const { mode, dest, team } = useArea();
   if (mode === "staff" && dest === "team" && team) return <AreaHeader title={title} />;
   return <PageHeader title={title} />;
+}
+
+/** One line on a page from the earlier product: it stays, new things come elsewhere (UX test A07). */
+export function OlderArea() {
+  const t = useTranslations("shell");
+  return (
+    <p className="m-0 max-w-[60ch] border-l-4 border-rule pl-3 text-[15px] text-ink-2" data-testid="older-area">
+      {t("olderArea")}
+    </p>
+  );
 }

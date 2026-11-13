@@ -18,6 +18,8 @@ const SESSION_KEY = (matchId: string) => `hb.marks.session.${matchId}`;
 const SERVER_KEY = (matchId: string) => `hb.marks.server.${matchId}`;
 const KEYS_KEY = (teamId: string) => `hb.marks.keys.${teamId}`;
 const LOG_KEY = (matchId: string) => `hb.marks.log.${matchId}`;
+// the match clock at each mark, kept on the phone that marked it (UX test A03)
+const AT_KEY = (matchId: string) => `hb.marks.at.${matchId}`;
 const CLOCK_KEY = (matchId: string) => `hb.marks.clock.${matchId}`;
 type Clock = { run: number | null; acc: number };
 const mmss = (ms: number) => `${String(Math.floor(ms / 60000)).padStart(2, "0")}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
@@ -99,11 +101,12 @@ export function MarksView({
   // the match clock, started and paused on the phone and kept for a reload (UX test N14)
   const [clock, setClock] = useState<Clock>(() => remembered<Clock>(CLOCK_KEY(matchId)) ?? { run: null, acc: 0 });
   const saveClock = (c: Clock) => (setClock(c), remember(CLOCK_KEY(matchId), c));
+  const [clockAt, setClockAt] = useState<Record<string, number>>(() => remembered<Record<string, number>>(AT_KEY(matchId)) ?? {});
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), clock.run ? 1000 : 15000);
     return () => window.clearInterval(id);
   }, [clock.run]);
-  const elapsed = clock.acc + (clock.run ? now.getTime() - clock.run : 0);
+  const elapsed = Math.max(0, clock.acc + (clock.run ? now.getTime() - clock.run : 0));
   const toggleClock = () => saveClock(clock.run ? { run: null, acc: elapsed } : { run: Date.now(), acc: clock.acc });
   const [copied, setCopied] = useState(false);
   async function share() {
@@ -192,6 +195,13 @@ export function MarksView({
 
   const tap = (key: string, label: string) => {
     const item = mark(localStorage, matchId, key);
+    // the game time of the mark, once the clock has been started
+    if (clock.run || clock.acc > 0) {
+      // measured now, not at the last tick of the display
+      const next = { ...clockAt, [item.client_id]: Math.max(0, clock.acc + (clock.run ? Date.now() - clock.run : 0)) };
+      setClockAt(next);
+      remember(AT_KEY(matchId), next);
+    }
     if (key === "halftime") {
       setHalf(2);
       saveClock({ run: null, acc: Math.max(elapsed, periodS * 1000) });
@@ -305,7 +315,15 @@ export function MarksView({
             <ul className="m-0 list-none p-0" data-testid="marks-log">
               {log.slice(0, 12).map((l) => (
                 <li key={l.id} className="flex min-h-11 items-center gap-3 border-b border-rule text-[15px]">
-                  <b className="font-num w-14">{time(l.at)}</b>
+                  {/* the game time like the clock above; the phone's time only small behind it */}
+                  {clockAt[l.id] != null ? (
+                    <span className="flex w-24 shrink-0 items-baseline gap-1.5">
+                      <b className="font-num">{mmss(clockAt[l.id]!)}</b>
+                      <small className="text-[14px] text-ink-2">{time(l.at)}</small>
+                    </span>
+                  ) : (
+                    <b className="font-num w-14">{time(l.at)}</b>
+                  )}
                   {l.key === "goal_own" && <span aria-hidden className="inline-block h-2.5 w-3 -skew-x-12 bg-club-text" />}
                   {l.key === "goal_opp" && <span aria-hidden className="inline-block h-2.5 w-3 -skew-x-12 bg-ink" />}
                   {shown(l)}

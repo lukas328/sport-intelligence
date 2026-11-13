@@ -9792,6 +9792,11 @@ export interface components {
         };
         /** SearchHit */
         SearchHit: {
+            /**
+             * Clock S
+             * @description the match clock of an event, where it is known
+             */
+            clock_s?: number | null;
             /** End Ms */
             end_ms: number | null;
             /**

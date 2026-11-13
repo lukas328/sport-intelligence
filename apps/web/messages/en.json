@@ -2435,7 +2435,8 @@
     "uploadShort": "Video",
     "twoFactorLater": "Remind me in seven days",
     "twoFactorTitle": "Protect the account",
-    "twoFactorWhy": "Now there are videos and people in the club. A second step at sign-in keeps the account safe."
+    "twoFactorWhy": "Now there are videos and people in the club. A second step at sign-in keeps the account safe.",
+    "olderArea": "An area from the earlier version of the app. Everything stays here; new things come under Scenes and Matches."
   },
   "palette": {
     "newMatch": "Add a match",
@@ -3143,7 +3144,7 @@
     "figTurnovers": "Turnovers",
     "figShooting": "Shooting, {goals} of {shots} shots",
     "moreGame": "More about the match",
-    "moreGameHint": "Comparison, scorers, highlights, feedback, marks",
+    "moreGameHint": "Course of the match, highlights, match-day marks",
     "chatHeading": "The three things",
     "noVideoTitle": "No video",
     "drawResult": "Draw",

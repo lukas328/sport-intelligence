@@ -295,7 +295,8 @@ function sequenceOf(hits: Hit[], matches: Match[], title: string): Schemas["Coll
       position: i,
       text: null,
       play: null,
-      scene: { clip_id: h.id, match_id: h.match_id, start_ms: h.start_ms ?? Math.max(0, at - 8000), end_ms: h.end_ms ?? at + 3000, title: `${opp} · ${ms(at)}` },
+      // the match clock like the tiles, the place in the video only without it (UX test A08)
+      scene: { clip_id: h.id, match_id: h.match_id, start_ms: h.start_ms ?? Math.max(0, at - 8000), end_ms: h.end_ms ?? at + 3000, title: `${opp} · ${h.clock_s != null ? clockOf(h.clock_s / 60) : ms(at)}` },
     };
   });
   return { id: "search", title, items } as unknown as Schemas["CollectionOut"];

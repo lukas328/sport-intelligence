@@ -13,6 +13,7 @@ import type { Pt } from "@/lib/court-calibration";
 import { PersonCrop } from "./person-box";
 import { Strip } from "@/components/anlauf/heads";
 import { useShell } from "@/components/shell/context";
+import { ownName } from "@/lib/own-name";
 import { api } from "@/lib/client";
 import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
@@ -45,7 +46,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const ta = useTranslations("anlauf");
   const qc = useQueryClient();
   const router = useRouter();
-  const { org } = useShell();
+  const { org, teams } = useShell();
+  // our side as everywhere else: the team's own name, the club's for «Herren 1» (UX test A06)
+  const own = ownName(teams.find((x) => x.id === match.team_id)?.name, org.name);
   const oppName = useOpponentName()(match);
   const main = match.videos.find((v) => v.role === "main" && v.status === "ready") ?? null;
   const path = { org_id: orgId, match_id: match.id };
@@ -155,7 +158,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       : [
           {
             key: "1",
-            label: t("goalOf", { team: org.name }),
+            label: t("goalOf", { team: own }),
             numeral: "1",
             first: current.c.suggested_side !== "opponent",
             run: () => review(current.c, { status: "confirmed", side: "own", outcome: "goal" }),
@@ -221,14 +224,14 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   return (
     <div style={matchStyle([org.primary_color, org.secondary_color ?? null], match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null) as CSSProperties} data-testid="check">
       <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
-        <span className="min-w-0 truncate text-[15px] font-bold">{t("top", { opponent: `${org.name} ${ta("vsShort")} ${oppName}` })}</span>
+        <span className="min-w-0 truncate text-[15px] font-bold">{t("top", { opponent: `${own} ${ta("vsShort")} ${oppName}` })}</span>
         {/* one line on a phone too (UX test B45) */}
         <Link href={back} className="inline-flex min-h-11 shrink-0 items-center border-2 border-ink px-3.5 text-[15px] font-bold whitespace-nowrap text-ink no-underline">
           {t("later")}
         </Link>
       </div>
       <div className="bleed-x">
-        <Strip name={org.name} sub={`${ta("vsShort")} ${oppName} · ${t("count", { n: total })}`} own={match.score_own} opp={match.score_opponent} />
+        <Strip name={own} sub={`${ta("vsShort")} ${oppName} · ${t("count", { n: total })}`} own={match.score_own} opp={match.score_opponent} />
       </div>
       {loading ? (
         <p className="py-10 text-ink-2">{t("loading")}</p>

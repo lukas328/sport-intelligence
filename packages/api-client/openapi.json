@@ -14049,6 +14049,18 @@
       },
       "SearchHit": {
         "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the match clock of an event, where it is known",
+            "title": "Clock S"
+          },
           "end_ms": {
             "anyOf": [
               {

@@ -309,3 +309,14 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   recording time in the file, with a way to swap), the time axis (the break between the files is
   unknown: from the throw-off of the second half, which Prüfen already asks for). Until then: one
   file per match is the recommendation.
+
+## UX test round 3 (2026-11-13)
+
+- **Q-OLD-AREAS Areas from the earlier product (Lukas to decide).** Spielzüge (with its own play
+  editor), the opponent profile with its manual player list, «Zum Zeigen» (presentations) and the
+  old playlists still work and are reachable (Szenen side links, the match «Mehr» menu, their
+  addresses). Since round 3 each says in one line that it comes from the earlier version and that
+  new things come under Szenen and Spiele, and Spielzüge no longer shows the second tab row (UX
+  test A07). Nothing was deleted. *Open:* rebuild them in the new look (plays on the tactics
+  board, the opponent from the federation's data), fold them into Sammlungen, or retire them
+  with a data export.
