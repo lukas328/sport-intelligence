@@ -3199,7 +3199,8 @@
     "colourTip": "Conseil : avec la couleur du maillot de {opponent}, l'analyse sépare mieux les équipes.",
     "minutesSpan": "encore environ {low} à {high} minutes",
     "answerChecks": "{n, plural, one {Répondre à 1 question} other {Répondre à # questions}}",
-    "minuteAt": "Minute {n}"
+    "minuteAt": "Minute {n}",
+    "scoreSoFar": "confirmé jusqu'ici · {n, plural, one {1 moment ouvert} other {# moments ouverts}}"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3243,7 +3244,12 @@
     "zoomOut": "Réduire l'image",
     "cornerOutside": "Ce coin est hors de l'image; sa poignée est au bord, sur sa ligne.",
     "more": "Si tu veux: {n, plural, one {1 question de plus} other {# questions de plus}}",
-    "reloading": "Le terrain est repris et les questions recalculées. Un instant."
+    "reloading": "Le terrain est repris et les questions recalculées. Un instant.",
+    "mainDone": "Les moments les plus importants sont vérifiés.",
+    "mainDoneText": "{n, plural, one {1 autre moment pourrait être un but.} other {# autres pourraient être des buts.}}",
+    "goOn": "Continuer à vérifier",
+    "roundDone": "Vérifié pour aujourd'hui.",
+    "leftOpen": "{n, plural, one {1 moment reste ouvert.} other {# moments restent ouverts.}} Tant qu'ils ne sont pas répondus, le score est provisoire."
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

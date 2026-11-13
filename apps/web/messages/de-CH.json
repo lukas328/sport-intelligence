@@ -3199,7 +3199,8 @@
     "colourTip": "Tipp: Mit der Trikotfarbe von {opponent} trennt die Analyse die Teams sicherer.",
     "minutesSpan": "noch etwa {low} bis {high} Minuten",
     "answerChecks": "{n, plural, one {1 Frage beantworten} other {# Fragen beantworten}}",
-    "minuteAt": "Minute {n}"
+    "minuteAt": "Minute {n}",
+    "scoreSoFar": "bisher bestätigt · {n, plural, one {1 Moment offen} other {# Momente offen}}"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3243,7 +3244,12 @@
     "zoomOut": "Bild verkleinern",
     "cornerOutside": "Diese Ecke liegt ausserhalb des Bildes; der Griff sitzt am Rand auf ihrer Linie.",
     "more": "Wenn du magst: {n, plural, one {1 weitere Frage} other {# weitere Fragen}}",
-    "reloading": "Das Feld wird übernommen und die Fragen werden neu gerechnet. Das dauert einen Moment."
+    "reloading": "Das Feld wird übernommen und die Fragen werden neu gerechnet. Das dauert einen Moment.",
+    "mainDone": "Die wichtigsten Momente sind geprüft.",
+    "mainDoneText": "{n, plural, one {1 weiterer Moment könnte ein Tor sein.} other {# weitere könnten Tore sein.}}",
+    "goOn": "Weiter prüfen",
+    "roundDone": "Für heute geprüft.",
+    "leftOpen": "{n, plural, one {1 Moment bleibt offen.} other {# Momente bleiben offen.}} Bis sie beantwortet sind, ist das Resultat ein Zwischenstand."
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

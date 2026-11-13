@@ -3199,7 +3199,8 @@
     "colourTip": "Tip: with the shirt colour of {opponent} the analysis separates the teams more surely.",
     "minutesSpan": "about {low} to {high} minutes left",
     "answerChecks": "{n, plural, one {Answer 1 question} other {Answer # questions}}",
-    "minuteAt": "Minute {n}"
+    "minuteAt": "Minute {n}",
+    "scoreSoFar": "confirmed so far · {n, plural, one {1 moment open} other {# moments open}}"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3243,7 +3244,12 @@
     "zoomOut": "Make the picture smaller",
     "cornerOutside": "This corner lies outside the picture; its handle sits at the edge on its line.",
     "more": "If you like: {n, plural, one {1 more question} other {# more questions}}",
-    "reloading": "The court is being taken over and the questions recalculated. This takes a moment."
+    "reloading": "The court is being taken over and the questions recalculated. This takes a moment.",
+    "mainDone": "The most important moments are checked.",
+    "mainDoneText": "{n, plural, one {1 more moment could be a goal.} other {# more could be goals.}}",
+    "goOn": "Keep checking",
+    "roundDone": "Checked for today.",
+    "leftOpen": "{n, plural, one {1 moment stays open.} other {# moments stay open.}} Until they are answered, the score is an interim one."
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

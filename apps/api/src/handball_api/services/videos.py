@@ -166,7 +166,7 @@ async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) 
                 team=team.name if team else "",
                 opponent=opponent,
                 link=f"{ctx.settings.web_base_url}{link}",
-                **{k: v for k, v in extra.items() if k == "questions"},
+                **{k: v for k, v in extra.items() if k in ("questions", "more_moments")},
             ),
             kind,
             user_id=str(u.id),
@@ -189,10 +189,18 @@ async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
     if (goals or 0) >= THREE_THINGS_MIN_GOALS:
         return "analysis_ready", {}
     # the same questions the start and Prüfen show (UX test A02: one count, not two)
-    from handball_api.services.graphics import open_checks
+    from handball_api.services.graphics import more_checks, open_checks
 
     questions = len(await open_checks(ctx, match))
-    return ("analysis_questions" if questions else "analysis_no_goals"), {"questions": questions}
+    # further moments after the most important ones (third real-video test G1); with none of
+    # the most important left, the other moments are the questions
+    more = len(await more_checks(ctx, match))
+    if questions == 0:
+        questions, more = more, 0
+    return ("analysis_questions" if questions else "analysis_no_goals"), {
+        "questions": questions,
+        "more_moments": more,
+    }
 
 
 def _uploading(asset: VideoAsset) -> str:

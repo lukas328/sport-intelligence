@@ -17,7 +17,7 @@ import { api } from "@/lib/client";
 import { ownName } from "@/lib/own-name";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
-import { goalRuns, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { checkCount, goalRuns, openMoments, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
 import { freshMatch, openedMatches } from "@/lib/fresh-match";
 import { matchState } from "@/lib/match-state";
 import { threeThings } from "@/lib/three-things";
@@ -91,7 +91,7 @@ function useFreshMatch(orgId: string, played: Match[]): string | null {
   if (!opened) return null;
   const infos = candidates.flatMap((m, i) => {
     const d = results[i]?.data;
-    return d ? [{ id: m.id, analysis: d.analysis ?? "none", analysisAt: d.analysis_at ?? null, checks: d.checks.length }] : [];
+    return d ? [{ id: m.id, analysis: d.analysis ?? "none", analysisAt: d.analysis_at ?? null, checks: checkCount(d) }] : [];
   });
   return freshMatch(infos, opened, Date.now());
 }
@@ -100,7 +100,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
   const t = useTranslations("anlauf");
   const g = useMatchGraphics(orgId, m?.id ?? "");
   const head = useHeadProps(m, next, g.data ?? null, teamName);
-  const checks = g.data?.checks.length ?? 0;
+  const checks = g.data ? checkCount(g.data) : 0;
   const base = m ? `/app/${orgId}/matches/${m.id}` : null;
   // the analysis runs after the video is ready: «running» until it is done too (E06)
   const running = m ? ["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) || g.data?.analysis === "running" : false;
@@ -249,7 +249,8 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     title,
     own: m.score_own ?? fromVideo?.own ?? null,
     opp: m.score_opponent ?? fromVideo?.opp ?? null,
-    scoreNote: fromVideo ? t("scoreFromVideo") : undefined,
+    // with goal moments still open the score is an interim one (third real-video test G1)
+    scoreNote: fromVideo && g ? (openMoments(g) > 0 ? t("scoreSoFar", { n: openMoments(g) }) : t("scoreFromVideo")) : undefined,
     span: g?.span ?? null,
     ownName: teamName,
     oppName: m.opponent_name,
@@ -295,7 +296,7 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   const scenes = g.data.goals.filter((x) => x.has_video || x.source === "demo").length;
   // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)
   if (things.length === 0 && g.data.analysis !== "ready") return <>{t("rowVideoOnly")}</>;
-  if (things.length === 0 && !g.data.goals.some((x) => x.has_video)) return <>{g.data.checks.length > 0 ? t("rowChecks", { n: g.data.checks.length }) : t("rowNoGoals")}</>;
+  if (things.length === 0 && !g.data.goals.some((x) => x.has_video)) return <>{checkCount(g.data) > 0 ? t("rowChecks", { n: checkCount(g.data) }) : t("rowNoGoals")}</>;
   if (things.length === 0) return <>{t("rowGoals", { n: g.data.goals.filter((x) => x.has_video).length })}</>;
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }

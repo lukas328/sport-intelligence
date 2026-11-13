@@ -19,7 +19,7 @@ import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/ui/button";
-import { useMatchGraphics } from "@/lib/graphics";
+import { openMoments, useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
 
 type Match = Schemas["MatchOut"];
@@ -71,6 +71,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     if (!asked && graphics.data) setAsked({ first: graphics.data.checks, more: graphics.data.more_checks ?? [] });
   }, [asked, graphics.data]);
   const [wantMore, setWantMore] = useState(false);
+  const [wantPeople, setWantPeople] = useState(false);
   // the server's questions afresh: after a moved court the analysis runs again and writes new
   // candidates (real-video test F3); «Alles geprüft» only once the server has none left
   const [reloading, setReloading] = useState(false);
@@ -131,9 +132,14 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   );
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
-    return [...toQuestions(asked.first), ...(wantMore ? [...toQuestions(asked.more), ...people] : [])];
-  }, [asked, wantMore, toQuestions, people]);
-  const moreCount = asked ? toQuestions(asked.more).length + people.length : 0;
+    // the further goal moments with «Weiter prüfen», the people in the picture on their own
+    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more) : []), ...(wantPeople ? people : [])];
+  }, [asked, wantMore, wantPeople, toQuestions, people]);
+  const moreCount = people.length;
+  // goal moments beyond the most important ones: while any is open nothing looks final, «Alles
+  // geprüft» only without (third real-video test G1)
+  const moreGoals = asked ? toQuestions(asked.more).length : 0;
+  const stillOpen = graphics.data ? openMoments(graphics.data) : 0;
   const open = questions.filter((q) => !done.includes(id(q)));
   // what was answered in this round, to look at again and change (UX test H12)
   const [answered, setAnswered] = useState<{ q: Question; label: string }[]>([]);
@@ -325,11 +331,42 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         </p>
       ) : !current ? (
         <div className="max-w-[60ch] space-y-4 py-10">
-          <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>
-          <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
-          {/* the rest, offered, not pressed on the coach (E07) */}
-          {!wantMore && moreCount > 0 && (
-            <button type="button" onClick={() => setWantMore(true)} className={buttonClass("secondary")} data-testid="check-more">
+          {!wantMore && moreGoals > 0 ? (
+            <div className="space-y-4" data-testid="check-main-done">
+              <h1 className="text-[40px] md:text-[58px]">{t("mainDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals })}</p>
+              <div className="flex flex-wrap items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVerified(false);
+                    setWantMore(true);
+                  }}
+                  className={buttonClass("primary")}
+                  data-testid="check-more"
+                >
+                  {t("goOn")}
+                </button>
+                <Link href={back} className="min-h-11 content-center font-bold text-ink underline underline-offset-4">
+                  {t("later")}
+                </Link>
+              </div>
+            </div>
+          ) : stillOpen > 0 ? (
+            // left with «Weiss nicht»: still open, said so, never «Alles geprüft»
+            <div className="space-y-4" data-testid="check-left-open">
+              <h1 className="text-[40px] md:text-[58px]">{t("roundDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("leftOpen", { n: stillOpen })}</p>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
+            </>
+          )}
+          {/* the people in the picture, offered, not pressed on the coach (E07) */}
+          {!wantPeople && moreGoals === 0 && stillOpen === 0 && moreCount > 0 && (
+            <button type="button" onClick={() => (setVerified(false), setWantPeople(true))} className={buttonClass("secondary")} data-testid="check-people">
               {t("more", { n: moreCount })}
             </button>
           )}

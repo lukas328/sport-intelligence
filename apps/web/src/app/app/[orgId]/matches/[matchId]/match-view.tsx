@@ -14,7 +14,7 @@ import { AttendancePanel } from "@/components/team/attendance-panel";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
-import { goalRuns, useMatchGraphics } from "@/lib/graphics";
+import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-view";
@@ -297,7 +297,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   ) : null;
   const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
   const oppKit = match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null;
-  const checks = graphics.data?.checks.length ?? 0;
+  const checks = graphics.data ? checkCount(graphics.data) : 0;
   // the stage of the tab Video (SPEC 7.3) once there are goals to show on it
   const stage = Boolean(main && graphics.data && graphics.data.goals.some((g) => g.has_video || g.source === "demo"));
   const confirmedGoals = graphics.data?.goals.filter((g) => g.confirmed).length ?? 0;

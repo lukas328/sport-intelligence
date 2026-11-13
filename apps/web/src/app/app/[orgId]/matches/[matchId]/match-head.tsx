@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
-import { reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { openMoments, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
 
@@ -37,6 +37,9 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const fromVideo = match.score_own == null && graphics ? videoScore(graphics) : null;
   const own = match.score_own ?? fromVideo?.own ?? null;
   const opp = match.score_opponent ?? fromVideo?.opp ?? null;
+  // with goal moments still open the score is an interim one (third real-video test G1)
+  const moments = graphics ? openMoments(graphics) : 0;
+  const note = fromVideo ? (moments > 0 ? t("scoreSoFar", { n: moments }) : t("scoreFromVideo")) : undefined;
   const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
@@ -53,7 +56,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           opp={opp}
           pending={pending}
           span={graphics?.span ?? null}
-          scoreNote={fromVideo ? t("scoreFromVideo") : undefined}
+          scoreNote={note}
           ownName={ownName}
           oppName={oppName}
           goals={graphics ? reportGoals(graphics) : null}
@@ -75,7 +78,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
               {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
             </h1>
           }
-          sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue].filter(Boolean).join(" · ")}
+          sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
           own={own}
           opp={opp}
           pending={pending}

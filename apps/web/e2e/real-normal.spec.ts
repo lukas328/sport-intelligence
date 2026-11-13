@@ -50,6 +50,9 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   const rows = [8000, 16000, 24000]
     .map((ms, i) => `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', ${ms + 1500}, ${ms}, ${ms - 3000}, ${ms + 3000}, ${3 - i * 0.1}, 1, ${i}, 'open')`)
     .join(", ");
+  // and one weaker moment (29.6 s, apart from the goal at 24 s): not among the most important questions, but it could be a goal
+  const weak = `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', 29800, 29600, 26000, 30000, 1.0, 3, 3, 'open')`;
+  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status) VALUES ${weak}`]);
   execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status) VALUES ${rows}`]);
 
   // the start counts the court, the throw-off and the three goals: one count
@@ -78,8 +81,24 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     else await expect(page.getByText("Frage 5 von 5")).toBeVisible();
     await page.getByRole("button", { name: who }).click();
   }
-  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible();
+  // one moment is still open: nothing looks final (third real-video test G1)
+  await expect(page.getByTestId("check-main-done")).toContainText("Die wichtigsten Momente sind geprüft.");
+  await expect(page.getByTestId("check-main-done")).toContainText("1 weiterer Moment könnte ein Tor sein.");
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toHaveCount(0);
   await expect(page.getByTestId("check-failed")).toHaveCount(0);
+  // the head says interim, the count stays (in a second browser: this one has not opened the
+  // match, so the start keeps it in its head below)
+  const third = await page.context().browser()!.newContext({ baseURL: info.project.use.baseURL, storageState: await page.context().storageState() });
+  const look = await third.newPage();
+  await look.goto(`/app/${org}/matches/${match.id}`);
+  await expect(look.getByTestId("score-note")).toHaveText("bisher bestätigt · 1 Moment offen");
+  await expect(look.getByTestId("check-link")).toContainText("1");
+  await third.close();
+  await page.reload();
+  await expect(page.getByTestId("check-main-done")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("check-more").click();
+  await page.getByRole("button", { name: "Kein Tor" }).click();
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
 
   // the start: the result of the video in the head, the course, the goals and their scene
   await page.goto(`/app/${org}/teams/${team}/matches`);

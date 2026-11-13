@@ -274,7 +274,9 @@ def render(template: str, locale: str, to: str, **values: object) -> Email:
         values = {
             **values,
             "questions": questions(n, locale),
-            "questions_sentence": questions_sentence(n, locale),
+            "questions_sentence": questions_sentence(
+                n, locale, more=int(str(values.get("more_moments") or 0))
+            ),
         }
     text = body.format(**values)
     first, _, rest = text.partition("\n")
@@ -291,8 +293,9 @@ def questions(n: int, locale: str) -> str:
     return f"{n} {one if n == 1 else many}"
 
 
-def questions_sentence(n: int, locale: str) -> str:
-    """The whole sentence about the open questions, singular and plural each written out."""
+def questions_sentence(n: int, locale: str, more: int = 0) -> str:
+    """The whole sentence about the open questions, singular and plural each written out. With
+    `more` further moments after these, it says so (third real-video test G1)."""
     one, many = {
         "de-CH": ("Eine Frage an dich hilft ihr weiter:", "{n} Fragen an dich helfen ihr weiter:"),
         "en": ("One question for you helps it on:", "{n} questions for you help it on:"),
@@ -301,7 +304,15 @@ def questions_sentence(n: int, locale: str) -> str:
             "{n} questions pour toi l'aident à avancer :",
         ),
     }.get(locale, ("Eine Frage an dich hilft ihr weiter:", "{n} Fragen an dich helfen ihr weiter:"))
-    return one if n == 1 else many.format(n=n)
+    text = one if n == 1 else many.format(n=n)
+    if more > 0:
+        tail = {
+            "de-CH": ", danach können weitere Momente folgen:",
+            "en": "; more moments can follow after that:",
+            "fr": " ; d'autres moments peuvent suivre ensuite :",
+        }.get(locale, ", danach können weitere Momente folgen:")
+        text = text.rstrip(": ") + tail
+    return text
 
 
 def validity(minutes: int, locale: str) -> str:

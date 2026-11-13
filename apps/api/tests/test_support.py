@@ -195,6 +195,19 @@ def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
             questions=n,
         )
         assert sentence in mail_n.text, mail_n.text
+    # further moments after the most important questions: the mail says so (real-video test G1)
+    more = render(
+        "analysis_questions",
+        "de-CH",
+        to="a@b.ch",
+        name="H",
+        team="Z",
+        opponent="T",
+        link="x",
+        questions=12,
+        more_moments=10,
+    )
+    assert "12 Fragen an dich helfen ihr weiter, danach können weitere Momente folgen:" in more.text
     named = render(
         "analysis_no_goals", "de-CH", to="a@b.ch", name="Hans", team="Z", opponent="T", link="x"
     )
