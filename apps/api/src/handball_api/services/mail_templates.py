@@ -59,6 +59,63 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
             "Ouvrir la tâche : {link}",
         ),
     },
+    "analysis_ready": {
+        "de-CH": (
+            "Die drei Dinge gegen {opponent} sind da",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Die drei "
+            "Dinge und die Szenen warten:\n\n{link}",
+        ),
+        "en": (
+            "The three things against {opponent} are ready",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. The three things "
+            "and the scenes are waiting:\n\n{link}",
+        ),
+        "fr": (
+            "Les trois choses contre {opponent} sont prêtes",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Les "
+            "trois choses et les scènes t'attendent :\n\n{link}",
+        ),
+    },
+    "analysis_failed": {
+        "de-CH": (
+            "Das Video gegen {opponent} liess sich nicht auswerten",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} hat nicht geklappt. "
+            "Das Video bleibt abspielbar, der Spielbericht und alles, was du erfasst hast, "
+            "bleiben. Du kannst ein anderes Video hochladen oder einfach auf diese Mail "
+            "antworten:\n\n{link}",
+        ),
+        "en": (
+            "The video against {opponent} could not be analysed",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} did not work. The video "
+            "stays playable; the match report and everything you entered stay. You can upload "
+            "another video or simply reply to this e-mail:\n\n{link}",
+        ),
+        "fr": (
+            "La vidéo contre {opponent} n'a pas pu être analysée",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} n'a pas fonctionné. "
+            "La vidéo reste lisible, la feuille de match et tout ce que tu as saisi restent. Tu "
+            "peux charger une autre vidéo ou simplement répondre à cet e-mail :\n\n{link}",
+        ),
+    },
+    "video_failed": {
+        "de-CH": (
+            "Das Video gegen {opponent} liess sich nicht lesen",
+            "Hallo {name}\n\nDie Datei zum Spiel {team} gegen {opponent} ist kein Video, das wir "
+            "lesen können (MP4, MOV, MKV). Der Spielbericht bleibt. Wähl eine andere "
+            "Datei:\n\n{link}",
+        ),
+        "en": (
+            "The video against {opponent} could not be read",
+            "Hello {name}\n\nThe file for {team} against {opponent} is not a video we can read "
+            "(MP4, MOV, MKV). The match report stays. Choose another file:\n\n{link}",
+        ),
+        "fr": (
+            "La vidéo contre {opponent} n'a pas pu être lue",
+            "Bonjour {name}\n\nLe fichier du match {team} contre {opponent} n'est pas une vidéo "
+            "lisible (MP4, MOV, MKV). La feuille de match reste. Choisis un autre "
+            "fichier :\n\n{link}",
+        ),
+    },
     "magic_link": {
         "de-CH": (
             "Dein Anmeldelink",

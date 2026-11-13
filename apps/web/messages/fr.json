@@ -1220,7 +1220,11 @@
     "access_approved": "Ton accès a été validé.",
     "official_suggestions": "{count, plural, one {# suggestion} other {# suggestions}} issues des données officielles pour ton équipe.",
     "official_report": "La feuille de match officielle est disponible.",
-    "other": "Nouvelle notification."
+    "other": "Nouvelle notification.",
+    "analysis_ready_match": "Les trois choses contre {opponent} sont prêtes.",
+    "analysis_failed_match": "La vidéo contre {opponent} n'a pas pu être analysée. Elle reste, tu peux en charger une autre.",
+    "video_failed": "Une vidéo n'a pas pu être lue.",
+    "video_failed_match": "La vidéo contre {opponent} n'a pas pu être lue. Choisis un autre fichier."
   },
   "assignments": {
     "title": "Tâches",
@@ -2391,7 +2395,8 @@
     "scenesSections": "Rubriques des scènes",
     "me": "Moi",
     "club": "Club",
-    "twoFactorDue": "Activer la double authentification"
+    "twoFactorDue": "Activer la double authentification",
+    "uploadShort": "Vidéo"
   },
   "palette": {
     "newMatch": "Ajouter un match",

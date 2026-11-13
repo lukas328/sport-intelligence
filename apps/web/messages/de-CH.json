@@ -1220,7 +1220,11 @@
     "access_approved": "Dein Zugang wurde freigegeben.",
     "official_suggestions": "{count, plural, one {# Vorschlag} other {# Vorschläge}} aus den offiziellen Daten für dein Team.",
     "official_report": "Der offizielle Spielbericht ist da.",
-    "other": "Neue Mitteilung."
+    "other": "Neue Mitteilung.",
+    "analysis_ready_match": "Die drei Dinge gegen {opponent} sind da.",
+    "analysis_failed_match": "Das Video gegen {opponent} liess sich nicht auswerten. Das Video bleibt, du kannst ein anderes hochladen.",
+    "video_failed": "Ein Video liess sich nicht lesen.",
+    "video_failed_match": "Das Video gegen {opponent} liess sich nicht lesen. Wähl eine andere Datei."
   },
   "assignments": {
     "title": "Aufgaben",
@@ -2391,7 +2395,8 @@
     "scenesSections": "Bereiche der Szenen",
     "me": "Ich",
     "club": "Verein",
-    "twoFactorDue": "Zwei-Faktor-Anmeldung einrichten"
+    "twoFactorDue": "Zwei-Faktor-Anmeldung einrichten",
+    "uploadShort": "Video"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",

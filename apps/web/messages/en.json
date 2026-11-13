@@ -1220,7 +1220,11 @@
     "access_approved": "Your access was approved.",
     "official_suggestions": "{count, plural, one {# suggestion} other {# suggestions}} from the official data for your team.",
     "official_report": "The official match report is in.",
-    "other": "New notification."
+    "other": "New notification.",
+    "analysis_ready_match": "The three things against {opponent} are ready.",
+    "analysis_failed_match": "The video against {opponent} could not be analysed. The video stays; you can upload another.",
+    "video_failed": "A video could not be read.",
+    "video_failed_match": "The video against {opponent} could not be read. Choose another file."
   },
   "assignments": {
     "title": "Assignments",
@@ -2391,7 +2395,8 @@
     "scenesSections": "Scene sections",
     "me": "Me",
     "club": "Club",
-    "twoFactorDue": "Set up two-factor sign-in"
+    "twoFactorDue": "Set up two-factor sign-in",
+    "uploadShort": "Video"
   },
   "palette": {
     "newMatch": "Add a match",

@@ -204,37 +204,24 @@ export function AppShell({
                 <AccountMenu compact />
               </div>
             </div>
-            {/* phone top bar */}
-            <div className="flex h-[60px] items-center gap-3 px-4 lg:hidden">
-              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center gap-2">
-                <AppMark size={28} />
+            {/* phone top bar (UX test H06, H09): the crest, the team name kept also with large
+                text, the bell, «Video» with its word, the account; the search is Szenen */}
+            <div className="flex h-[60px] items-center gap-2 px-4 lg:hidden">
+              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center">
                 <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
               </Link>
               <div className="min-w-0 flex-1">
                 <TeamSwitcher compact />
               </div>
-              {searchHref ? (
-                <Link href={searchHref} aria-label={t("search")} className="grid size-11 place-items-center border-2 border-ink text-ink">
-                  <Search aria-hidden className="size-5" />
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  aria-label={t("search")}
-                  onClick={() => setPalette(true)}
-                  className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink"
-                >
-                  <Search aria-hidden className="size-5" />
-                </button>
-              )}
+              <NotificationBell orgId={org.id} />
               {upload && (
                 <Link
                   href={upload}
-                  aria-label={t("upload")}
-                  className="grid size-11 place-items-center border-2 border-ink bg-ink text-ground"
+                  className="flex h-11 shrink-0 items-center gap-1 border-2 border-ink bg-ink px-2.5 text-[15px] font-bold text-ground no-underline"
                   data-testid="upload-video-compact"
                 >
-                  <Plus aria-hidden className="size-5" strokeWidth={2.6} />
+                  <Plus aria-hidden className="size-4" strokeWidth={2.6} />
+                  {t("uploadShort")}
                 </Link>
               )}
               <AccountMenu compact />
