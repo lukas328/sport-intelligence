@@ -1601,7 +1601,13 @@
     "shirt": "No. {n}",
     "noVideo": "no video",
     "noTime": "no video time",
-    "more": "Show {n} more ({shown} of {total})"
+    "more": "Show {n} more ({shown} of {total})",
+    "type_foul": "Foul",
+    "type_free_throw": "Free throw",
+    "type_yellow_card": "Yellow card",
+    "type_red_card": "Red card",
+    "type_throw_off": "Throw-off",
+    "type_substitution": "Substitution"
   },
   "feed": {
     "title": "Your scenes",

@@ -126,6 +126,8 @@ async def test_identity_and_physical(make_api: Callable[[], Api]) -> None:
     notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
     # no goals in this video: the note says the analysis is done and asks, no three things (N05)
     assert notes["items"][0]["kind"] == "analysis_questions"
+    # the note and the mail lead to Prüfen, the next step
+    assert notes["items"][0]["link"].endswith(f"/matches/{m['id']}/check")
     # the mail counts the same questions as the start and Prüfen (UX test A02)
     g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
     assert notes["items"][0]["params"]["questions"] == len(g["checks"]) > 0, notes["items"][0]

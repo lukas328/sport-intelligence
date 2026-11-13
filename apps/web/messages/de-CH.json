@@ -1601,7 +1601,13 @@
     "shirt": "Nr. {n}",
     "noVideo": "ohne Video",
     "noTime": "ohne Videozeit",
-    "more": "Weitere {n} anzeigen ({shown} von {total})"
+    "more": "Weitere {n} anzeigen ({shown} von {total})",
+    "type_foul": "Foul",
+    "type_free_throw": "Freiwurf",
+    "type_yellow_card": "Gelbe Karte",
+    "type_red_card": "Rote Karte",
+    "type_throw_off": "Anwurf",
+    "type_substitution": "Wechsel"
   },
   "feed": {
     "title": "Deine Szenen",

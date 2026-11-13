@@ -142,6 +142,9 @@ async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) 
     opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
     opponent = opp.name if opp else "Training"
     link = f"/app/{match.organization_id}/matches/{match.id}"
+    # the link leads to the next step: questions wait in Prüfen (real-video test, second round)
+    if kind == "analysis_questions":
+        link += "/check"
     staff = await training.staff_of(ctx, match.team_id)
     await training.notify(
         ctx,

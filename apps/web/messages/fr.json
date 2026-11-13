@@ -1601,7 +1601,13 @@
     "shirt": "N° {n}",
     "noVideo": "sans vidéo",
     "noTime": "sans temps vidéo",
-    "more": "Afficher {n} de plus ({shown} sur {total})"
+    "more": "Afficher {n} de plus ({shown} sur {total})",
+    "type_foul": "Faute",
+    "type_free_throw": "Jet franc",
+    "type_yellow_card": "Carton jaune",
+    "type_red_card": "Carton rouge",
+    "type_throw_off": "Engagement",
+    "type_substitution": "Changement"
   },
   "feed": {
     "title": "Tes scènes",

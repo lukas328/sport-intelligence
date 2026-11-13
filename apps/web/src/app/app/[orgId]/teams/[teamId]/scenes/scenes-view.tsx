@@ -305,6 +305,7 @@ function sequenceOf(hits: Hit[], matches: Match[], title: string): Schemas["Coll
 /** The answer as rows: match, time, what, number (UX test B21: «Als Tabelle» in the same screen). */
 function SceneTable({ scenes, matches, orgId }: { scenes: Hit[]; matches: Match[]; orgId: string }) {
   const t = useTranslations("scenesPage");
+  const ts = useTranslations("search");
   const th = "py-2 text-left text-[15px] font-semibold text-ink-2";
   return (
     <table className="w-full border-collapse text-[15px]" data-testid="scene-table">
@@ -328,6 +329,7 @@ function SceneTable({ scenes, matches, orgId }: { scenes: Hit[]; matches: Match[
 /** One row: the match clock where the analysis knows it, else the place in the video. */
 function SceneRow({ hit: h, match: m, orgId }: { hit: Hit; match: Match | undefined; orgId: string }) {
   const t = useTranslations("scenesPage");
+  const ts = useTranslations("search");
   const format = useFormatter();
   const g = useMatchGraphics(orgId, h.match_id);
   const goal = g.data && h.kind === "event" ? goalRuns(g.data).find((x) => x.eventId === h.id) : undefined;
@@ -341,7 +343,7 @@ function SceneRow({ hit: h, match: m, orgId }: { hit: Hit; match: Match | undefi
           {goal?.minute != null ? clockOf(goal.minute) : t("videoAt", { time: ms(h.t_ms ?? h.start_ms ?? 0) })}
         </Link>
       </td>
-      <td className="py-2.5">{h.type === "shot" ? (h.outcome === "goal" ? t("goal") : h.outcome === "save" ? t("save") : t("shot")) : h.type === "turnover" ? t("turnover") : (h.title ?? h.type)}</td>
+      <td className="py-2.5">{h.type === "shot" ? (h.outcome === "goal" ? t("goal") : h.outcome === "save" ? t("save") : t("shot")) : h.type === "turnover" ? t("turnover") : (h.title ?? (h.type ? ts(`type_${h.type}` as "type_shot") : ""))}</td>
       <td className="py-2.5 text-right tabular-nums">{h.number ?? ""}</td>
     </tr>
   );
@@ -352,12 +354,13 @@ const ms = (v: number) => `${Math.floor(v / 60000)}:${String(Math.round((v % 600
 /** One scene: the Minifeld with its run (goals) or empty, time, match, one line, length. */
 function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Match | undefined }) {
   const t = useTranslations("scenesPage");
+  const ts = useTranslations("search");
   const format = useFormatter();
   const { org } = useShell();
   const g = useMatchGraphics(orgId, hit.match_id);
   const goal = g.data && hit.kind === "event" ? goalRuns(g.data).find((x) => x.eventId === hit.id) : undefined;
   const opp = (match?.opponent_name ?? hit.match_label).split(/[\s-]/).find((w) => w.length > 3) ?? hit.match_label;
-  const kind = hit.type === "shot" ? (hit.outcome === "goal" ? t("goal") : hit.outcome === "save" ? t("save") : t("shot")) : hit.type === "turnover" ? t("turnover") : (hit.title ?? hit.type);
+  const kind = hit.type === "shot" ? (hit.outcome === "goal" ? t("goal") : hit.outcome === "save" ? t("save") : t("shot")) : hit.type === "turnover" ? t("turnover") : (hit.title ?? (hit.type ? ts(`type_${hit.type}` as "type_shot") : ""));
   const what = `${kind}${hit.number != null ? `, ${t("numberRead", { n: hit.number })}` : ""}${goal && !goal.confirmed ? `, ${t("spotEstimated")}` : ""}`;
   return (
     <Link
