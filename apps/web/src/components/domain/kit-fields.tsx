@@ -37,18 +37,22 @@ const PICKER = "absolute inset-0 size-full cursor-pointer opacity-0";
 
 /** The kit colours of a match as colour swatches: four team kits and the optional referee kit,
  * with the warning when two of them are hard to tell apart. Used by the new and the edit form. */
-export function KitFields({ kits, onChange }: { kits: Kits; onChange: (kits: Kits) => void }) {
+export function KitFields({ kits, onChange, unknown = [] }: { kits: Kits; onChange: (kits: Kits) => void; unknown?: readonly TeamKitKey[] }) {
   const t = useTranslations();
   const hintId = useId();
-  const similar = kitWarnings(kits);
+  // a kit nobody chose stays empty and is not compared (third real-video test G7: the form
+  // filled the opponent in red and warned of «Ähnliche Farben» for a red club)
+  const isOpen = (k: TeamKitKey) => unknown.includes(k);
+  const similar = kitWarnings({ ...kits, ...Object.fromEntries(unknown.map((k) => [k, null])) });
   const referee = `${t("matches.kitReferee")} (${t("common.optional")})`;
   return (
     <>
       <div className="flex flex-wrap gap-x-5 gap-y-3">
         {TEAM_KITS.map(([k, label]) => (
           <label key={k} className="flex cursor-pointer items-center gap-2 text-sm">
-            <span className={SWATCH}>
-              <Shirt colour={kits[k]} />
+            <span className={cn(SWATCH, isOpen(k) && "text-muted")} data-testid={`kit-${k}`} data-open={isOpen(k) || undefined}>
+              <Shirt colour={isOpen(k) ? undefined : kits[k]} empty={isOpen(k)} />
+              {isOpen(k) && <Plus aria-hidden className="absolute size-3.5" />}
               <input
                 aria-label={t(label)}
                 name={`kit_${k}`}

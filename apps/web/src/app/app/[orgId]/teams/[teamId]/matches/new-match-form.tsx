@@ -163,8 +163,9 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
               <legend className="mb-2 block text-[0.9375rem] font-medium">{t("matches.kits")}</legend>
               <KitFields
                 kits={kits}
+                unknown={opponentPicked ? [] : ["opponent", "opponent_gk"]}
                 onChange={(next) => {
-                  if (next.opponent !== kits.opponent) setOpponentPicked(true);
+                  if (next.opponent !== kits.opponent || next.opponent_gk !== kits.opponent_gk) setOpponentPicked(true);
                   setKits(next);
                 }}
               />
