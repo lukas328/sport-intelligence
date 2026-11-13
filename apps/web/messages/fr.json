@@ -2589,7 +2589,9 @@
     "clockCancel": "Annuler",
     "clockInvalid": "Saisir minutes et secondes, p. ex. 12:40.",
     "clockSaved": "{n}e mi-temps : chrono {clock} à {time} dans la vidéo.",
-    "shots": "Tirs"
+    "shots": "Tirs",
+    "setupOpen": "Configurer à la main : terrain, engagement, buts, personnes",
+    "setupClose": "Fermer la configuration"
   },
   "file": {
     "choose": "Choisir un fichier",
@@ -3144,7 +3146,7 @@
     "fieldQuestion": "Le terrain est-il juste ?",
     "fieldWhy": "Tant que le terrain n'est pas confirmé, nous ne montrons ni chemins ni positions.",
     "fieldAlt": "La salle avec le terrain détecté",
-    "fieldYes": "Oui, c'est juste",
+    "fieldYes": "C'est bon",
     "fieldCorners": "Déplacer les coins",
     "goalQuestion": "But ou pas but ?",
     "goalWhy": "Il s'est passé quelque chose au but ici ; le tableau d'affichage ne le dit pas avec certitude.",
@@ -3164,7 +3166,13 @@
     "answered": "Répondu",
     "change": "Modifier la réponse",
     "changing": "Modifier la réponse, jusqu'ici : {answer}",
-    "back": "Retour"
+    "back": "Retour",
+    "fieldReset": "Réinitialiser",
+    "fieldDrag": "Glisse les quatre points jaunes sur les coins du terrain.",
+    "fieldHandles": "Les quatre coins du terrain",
+    "kickoffQuestion": "Quand a lieu l'engagement de la {n}e mi-temps ?",
+    "kickoffWhy": "Pour que la feuille de match, les buts et la vidéo concordent. Avance la vidéo jusqu'à l'engagement, puis touche « Engagement maintenant ».",
+    "kickoffNow": "Engagement maintenant"
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

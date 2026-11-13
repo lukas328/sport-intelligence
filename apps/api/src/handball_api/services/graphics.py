@@ -348,6 +348,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             if asset is not None and tracking and confirmed_field is False
             else []
         )
+        + (_kickoff_check(match) if asset is not None and not demo else [])
         + await _checks(ctx, match),
         "source": "demo" if demo else "analysis",
     }
@@ -411,6 +412,24 @@ def _field_check(asset: VideoAsset) -> dict[str, Any]:
         "suggested_side": None,
         "candidates": [],
     }
+
+
+def _kickoff_check(match: Match) -> list[dict[str, Any]]:
+    """The throw-off of the first half, asked in Prüfen while it is not set (UX test B10): it
+    ties the match clock to the video. The second half is asked there once the first is set."""
+    if (match.kickoff_ms or {}).get("1") is not None:
+        return []
+    return [
+        {
+            "id": uuid.uuid5(match.id, "kickoff:1"),
+            "kind": "kickoff",
+            "frame_ref": 0,
+            "box": None,
+            "seconds_in_view": None,
+            "suggested_side": None,
+            "candidates": [],
+        }
+    ]
 
 
 async def _checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:

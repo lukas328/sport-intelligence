@@ -52,6 +52,8 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
   // stages 2 to 5 run in the GPU worker (CPU locally): calibration, detection, tracking, teams;
   // the court is the first work step beside the player
+  // the setup by hand sits behind one toggle; its questions are asked in Prüfen (UX test B10)
+  await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
   await expect(page.getByText("Videoqualität:")).toBeVisible();
   await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });

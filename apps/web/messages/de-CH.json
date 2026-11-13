@@ -2589,7 +2589,9 @@
     "clockCancel": "Abbrechen",
     "clockInvalid": "Als Minuten und Sekunden eintragen, z. B. 12:40.",
     "clockSaved": "{n}. Halbzeit: Spieluhr {clock} bei {time} im Video.",
-    "shots": "Würfe"
+    "shots": "Würfe",
+    "setupOpen": "Einrichten von Hand: Feld, Anwurf, Tore, Personen",
+    "setupClose": "Einrichten schliessen"
   },
   "file": {
     "choose": "Datei wählen",
@@ -3144,7 +3146,7 @@
     "fieldQuestion": "Passt das Spielfeld?",
     "fieldWhy": "Bis das Feld bestätigt ist, zeigen wir keine Wege und keine Positionen.",
     "fieldAlt": "Die Halle mit dem erkannten Spielfeld",
-    "fieldYes": "Ja, stimmt",
+    "fieldYes": "Passt",
     "fieldCorners": "Ecken verschieben",
     "goalQuestion": "Tor oder kein Tor?",
     "goalWhy": "Hier hat sich etwas am Tor getan, die Anzeigetafel sagt es nicht sicher.",
@@ -3164,7 +3166,13 @@
     "answered": "Beantwortet",
     "change": "Antwort ändern",
     "changing": "Antwort ändern, bisher: {answer}",
-    "back": "Zurück"
+    "back": "Zurück",
+    "fieldReset": "Zurücksetzen",
+    "fieldDrag": "Zieh die vier gelben Punkte auf die Ecken des Spielfelds.",
+    "fieldHandles": "Die vier Ecken des Spielfelds",
+    "kickoffQuestion": "Wann ist der Anwurf der {n}. Halbzeit?",
+    "kickoffWhy": "Damit Spielbericht, Tore und Video zusammenpassen. Spul im Video zum Anwurf und tipp dann auf «Jetzt ist Anwurf».",
+    "kickoffNow": "Jetzt ist Anwurf"
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

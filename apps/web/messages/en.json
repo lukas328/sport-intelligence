@@ -2589,7 +2589,9 @@
     "clockCancel": "Cancel",
     "clockInvalid": "Enter minutes and seconds, e.g. 12:40.",
     "clockSaved": "Half {n}: clock {clock} at {time} in the video.",
-    "shots": "Shots"
+    "shots": "Shots",
+    "setupOpen": "Set up by hand: court, throw-off, goals, people",
+    "setupClose": "Close set-up"
   },
   "file": {
     "choose": "Choose file",
@@ -3144,7 +3146,7 @@
     "fieldQuestion": "Is the court right?",
     "fieldWhy": "Until the court is confirmed we show no ways and no positions.",
     "fieldAlt": "The hall with the detected court",
-    "fieldYes": "Yes, it is",
+    "fieldYes": "Looks right",
     "fieldCorners": "Move the corners",
     "goalQuestion": "Goal or no goal?",
     "goalWhy": "Something happened at the goal here; the scoreboard does not say for sure.",
@@ -3164,7 +3166,13 @@
     "answered": "Answered",
     "change": "Change answer",
     "changing": "Changing the answer, so far: {answer}",
-    "back": "Back"
+    "back": "Back",
+    "fieldReset": "Reset",
+    "fieldDrag": "Drag the four yellow points onto the corners of the court.",
+    "fieldHandles": "The four corners of the court",
+    "kickoffQuestion": "When is the throw-off of half {n}?",
+    "kickoffWhy": "So the report, the goals and the video line up. Move the video to the throw-off, then tap «Throw-off now».",
+    "kickoffNow": "Throw-off now"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

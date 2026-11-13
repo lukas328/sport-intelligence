@@ -64,6 +64,8 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
 
   // court from the hall: one look at the orange lines, "Passt", and on to the next open step
+  // the setup by hand sits behind one toggle; its questions are asked in Prüfen (UX test B10)
+  await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
   await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Seefeld). Liegen die orangen Linien")).toBeVisible();
   await expect(page.getByTestId("court-preview")).toBeVisible();

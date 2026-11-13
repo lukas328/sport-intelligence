@@ -143,3 +143,22 @@ def test_demo_positions_wait_for_an_open_court_question() -> None:
     assert _shown_field(True, video, True, False) is False  # type: ignore[arg-type]  # court is still asked
     assert _shown_field(True, video, True, True) is True  # type: ignore[arg-type]
     assert _shown_field(False, video, True, False) is False  # type: ignore[arg-type]
+
+
+async def test_prufen_asks_for_the_throw_off_until_it_is_set(make_api: Callable[[], Api]) -> None:
+    """UX test B10: the throw-off is a question in Prüfen, not a setup step in the tab Video."""
+    from .test_themes import ready_video
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    await ready_video(api, ids, m["id"])
+    g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
+    assert [c["kind"] for c in g["checks"]].count("kickoff") == 1
+    r = await api.put(
+        f"/v1/orgs/{org}/matches/{m['id']}/kickoff", json={"period": 1, "t_ms": 12_000}
+    )
+    assert r.status_code < 300, r.text
+    g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
+    assert all(c["kind"] != "kickoff" for c in g["checks"])
