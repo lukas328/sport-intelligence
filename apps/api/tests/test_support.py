@@ -78,7 +78,7 @@ async def test_feedback_checklist_demo(
     assert r.status_code == 204
     mail = outbox.outbox[-1]
     assert (
-        mail.to == "support@handball-ai.ch"
+        mail.to == "support@handball-intelligence.com"
         and "page: /app/x/matches/y" in mail.text
         and "HC Test" in mail.text
     )
@@ -105,7 +105,7 @@ async def test_feedback_checklist_demo(
     assert steps["demo"] is True
     assert (await api.get(f"/v1/orgs/{org}/billing")).json()["usage"]["max_matches_per_season"] == 0
     cfg = (await api.get("/v1/support/config")).json()
-    assert cfg["chat"] is None and cfg["support_email"] == "support@handball-ai.ch"
+    assert cfg["chat"] is None and cfg["support_email"] == "support@handball-intelligence.com"
 
 
 async def test_onboarding_series_and_unsubscribe(

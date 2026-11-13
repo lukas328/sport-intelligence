@@ -9,7 +9,7 @@
 | Notifications only after a permission prompt, nothing essential depends on them | ✅ |
 | No hidden features, no external purchases (subscriptions are bought on the web by clubs; the app has no paywall or purchase links) | ✅ |
 | Privacy labels / Data safety form match the app (`store/*.md`) | ✅ texts ready |
-| Privacy policy URL | https://handball-ai.ch/de/datenschutz/ (draft, legal review pending: Q-ADD-5) |
+| Privacy policy URL | https://handball-intelligence.com/de/datenschutz/ (draft, legal review pending: Q-ADD-5) |
 | Content of minors: no public content in the app; youth protection rules of the API apply | ✅ |
 | Background activity: uploads continue only while the app is open or allowed by the system | ✅ |
 | Screenshots (6.7", 5.5", 12.9" iPad; Android phone and tablet) | to produce from a device build |

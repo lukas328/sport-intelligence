@@ -49,7 +49,7 @@ test("entry: from the website's question to Spiele, without a password", async (
   await page.getByLabel("Teamname").fill("HC Einstieg");
   await page.getByRole("button", { name: "Weiter" }).click();
   await expect(page.getByTestId("entry-mail")).toContainText("30 Tage alles gratis");
-  await expect(page.getByRole("link", { name: "Nutzungsbedingungen" })).toHaveAttribute("href", /handball-ai\.ch\/de\/agb/);
+  await expect(page.getByRole("link", { name: "Nutzungsbedingungen" })).toHaveAttribute("href", /handball-intelligence\.com\/de\/agb/);
   const email = uniqueEmail("entry");
   await page.getByLabel("E-Mail").fill(email);
   await page.getByTestId("entry-send").click();

@@ -7,6 +7,6 @@ describe("context help", () => {
     expect(helpSlug("/app/o/teams/t/matches")).toBe("video-hochladen");
     expect(helpSlug("/app/o/matches/m")).toBe("analyse-lesen");
     expect(helpSlug("/app/o")).toBe("erste-schritte");
-    expect(helpUrl("https://handball-ai.ch/hilfe", "fr", "/app/o/consents")).toBe("https://handball-ai.ch/fr/hilfe/einwilligungen");
+    expect(helpUrl("https://handball-intelligence.com/hilfe", "fr", "/app/o/consents")).toBe("https://handball-intelligence.com/fr/hilfe/einwilligungen");
   });
 });
