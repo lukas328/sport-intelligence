@@ -294,7 +294,7 @@ export function MarksView({
           </div>
           <p className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 border-t-2 border-ink pt-3 text-[15px]" aria-live="polite">
             <span className="flex flex-wrap items-baseline gap-x-3">
-              {log[0] ? `${time(log[0].at)} ${shown(log[0])}` : t("noneYet")}
+              {log[0] ? `${clockAt[log[0].id] != null ? mmss(clockAt[log[0].id]!) : time(log[0].at)} ${shown(log[0])}` : t("noneYet")}
               {log[0] && (
                 <button type="button" onClick={() => void takeBack()} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="take-back">
                   {t("takeBack")}
