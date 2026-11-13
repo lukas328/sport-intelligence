@@ -222,6 +222,12 @@ function stopMode() {
   if (was === "follow") {
     if (st.recN) { persist(clip()); toast(st.recN + " grobe Punkte. Jetzt präzise klicken."); }
     else toast("Nichts aufgezeichnet: die Maus muss über dem Bild sein.");
+    if (st.grob && st.recN) {
+      const c = clip(), ended = st.f >= c.n - 2, j = nextRough(st.ci);
+      renderGrob();
+      if (ended && j >= 0) { toast("Clip gespeichert. Nächster Clip: F drücken."); loadClip(j); return; }
+      if (ended) { toast("Alle Clips haben eine grobe Spur. Danke!"); }
+    }
   }
   showFrame(was === "follow" ? firstOpen(clip()) : st.f);
 }
@@ -299,7 +305,7 @@ function renderMeta() {
     + `<span>${precise(lab) ? "<b>" + NAMES[lab.s] + "</b>" : "offen"}</span>`
     + (d.shots.includes(st.f) ? "<span><b>Wurf</b></span>" : "") + (d.pdone ? "<span>fertig</span>" : "");
 }
-function render() { if (!clip()) return; renderStrip(); renderProgress(); renderMeta(); drawStage(); }
+function render() { if (!clip()) return; renderStrip(); renderProgress(); renderMeta(); renderGrob(); drawStage(); }
 
 // --- input
 function canvasPos(ev) { const b = $("stage").getBoundingClientRect(), c = clip(); return { cx: (ev.clientX - b.left) / b.width * c.w, cy: (ev.clientY - b.top) / b.height * c.h }; }
@@ -334,6 +340,7 @@ document.addEventListener("keydown", (ev) => {
     else if (l === "f" || l === "p" || k === "Escape" || k === " ") { ev.preventDefault(); stopMode(); }
     return;
   }
+  if (st.grob && l !== "f") return;  // rough-track mode: only F
   if (l === "f") { ev.preventDefault(); startMode("follow"); }
   else if (l === "p") { ev.preventDefault(); startMode("play"); }
   else if (k === " ") { ev.preventDefault(); acceptHint(); }
@@ -348,10 +355,42 @@ document.addEventListener("keydown", (ev) => {
   else if (k === "Enter") done();
 });
 
+// --- rough-track mode (#grob): only clips without a rough track, follow and go on
+function roughCount(c) { return Object.values(doc(c).labels).filter((l) => l.x != null || l.s === "out").length; }
+function needsRough(c) { return roughCount(c) < Math.min(40, c.n / 3); }
+function nextRough(after) {
+  for (let d = 1; d <= st.clips.length; d++) { const i = (after + d + st.clips.length) % st.clips.length; if (needsRough(st.clips[i])) return i; }
+  return -1;
+}
+function renderGrob() {
+  if (!st.grob) return;
+  const open = st.clips.filter(needsRough).length;
+  $("grob-left").textContent = `${st.clips.length - open} von ${st.clips.length} Clips mit Spur, noch ${open} offen`;
+}
+function setupGrob() {
+  st.grob = true; st.zoom = 1;
+  document.querySelector("h1").textContent = "Grobe Ballspur";
+  document.querySelector("aside").innerHTML = `
+    <div class="meta" id="grob-left" style="margin:0"></div>
+    <button class="k" id="b-follow" style="background:var(--ball);color:var(--ball-ink);border-color:transparent;font-size:16px">Start / Stopp <kbd>F</kbd></button>
+    <select id="speed" aria-label="Tempo"><option value="0.25">Tempo 0.25×</option><option value="0.5" selected>Tempo 0.5×</option><option value="1">Tempo 1×</option></select>
+    <select id="clip" aria-label="Clip wählen">${$("clip").innerHTML}</select>
+    <div class="toast" id="toast" role="status"></div>
+    <ul class="help">
+      <li><kbd>F</kbd> startet den Clip. Folge dem Ball einfach mit der Maus, ungenau ist in Ordnung.</li>
+      <li>Ball nicht zu sehen: Maus trotzdem ungefähr dorthin, wo er sein müsste. Kein Spielball im Bild: <kbd>O</kbd> gedrückt halten.</li>
+      <li>Am Ende des Clips wird gespeichert und der nächste Clip geladen. Wieder <kbd>F</kbd>.</li>
+    </ul>`;
+  $("b-follow").onclick = () => startMode("follow");
+  $("clip").onchange = (ev) => loadClip(Number(ev.target.value));
+  $("progress").hidden = true; renderGrob();
+}
+
 async function start() {
   try { st.clips = await (await fetch("clips.json")).json(); }
   catch (e) { $("progress").textContent = "Clip-Liste konnte nicht geladen werden."; return; }
   $("clip").innerHTML = st.clips.map((c, i) => `<option value="${i}">${i + 1}. ${c.id} (${c.fps} fps)</option>`).join("");
+  if (location.hash === "#grob") setupGrob();
   loadClip(0);
   const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
   if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
@@ -363,6 +402,7 @@ async function start() {
     for (const d of snap.docs) if (!st.dirty[d.id]) {
       const v = d.data(); st.docs[d.id] = { labels: { ...(v.labels || {}) }, shots: [...(v.shots || [])], done: !!v.done, pdone: !!v.pdone };
     }
+    if (first && st.grob) { first = false; const j = nextRough(-1); if (j >= 0) { loadClip(j); return; } toast("Alle Clips haben eine grobe Spur. Danke!"); }
     if (first) {
       first = false; const j = st.clips.findIndex((c) => !doc(c).pdone);
       if (j > 0) { loadClip(j); return; }
