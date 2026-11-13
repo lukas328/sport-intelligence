@@ -2,7 +2,7 @@
 
 Static Next.js site in the app's look «Anlauf» (concept and texts: `docs/site/KONZEPT.md`):
 start, So funktioniert es, Filmen, Demo-Spiel, Preise, Fragen (with the help guides), Daten und
-Einwilligung, Über uns und Kontakt, blog, terms, privacy, imprint; German (de-CH), French and
+Einwilligung, Über uns und Kontakt, Ratgeber (guides), Fakten auf einen Blick, blog, terms, privacy, imprint; German (de-CH), French and
 English under `/de/`, `/fr/`, `/en/`. `/` picks the browser language. `/funktionen/` forwards to
 `/so-funktioniert-es/`.
 
@@ -22,6 +22,15 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 (`apps/web/src/components/support/help-map.ts` must only use slugs that exist; a Vitest test checks it).
 
 ## Content
+- Guides (Ratgeber): `content/ratgeber/{locale}/{slug}.mdx`, index with the question, the answer, the
+  meta title, the description and the languages in `content/ratgeber/index.ts`. Every guide exists in
+  German; French and English where `locales` says so (tested). An MDX file may export `faq` and
+  `howto`; the page shows them and writes FAQPage and HowTo from the same data. Drawings for guides:
+  `src/components/figures.tsx` (labels come from the MDX file).
+- Search engines and AI assistants: `docs/site/SEO.md`. Titles and descriptions per page in
+  `messages.seo`, structured data in `src/lib/schema.ts`, `/llms.txt` and `/llms-full.txt` from
+  `src/lib/llms.ts`, the facts page from `messages.facts`. `PRICES_FINAL` in `src/lib/site.ts` keeps
+  prices out of structured data until the plan table is final.
 - Help articles: `content/help/{locale}/{slug}.mdx`, index with titles, summaries and search keywords in
   `content/help/index.ts`. Every article exists in all three languages (tested).
 - Blog: `content/blog`, legal drafts: `content/legal` (marked as not yet legally reviewed, Q-ADD-5).
@@ -40,7 +49,7 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 `pnpm build` runs `next build` and then `scripts/redirects.mjs`, which adds to `out/`:
 
 - a small page for every address without a language path (`/aufnahme/`, `/so-funktioniert-es/`,
-  `/demo/`, `/preise/`, `/hilfe/` and every guide, `/daten/`, `/kontakt/`, `/blog/` and posts, `/agb/`,
+  `/demo/`, `/preise/`, `/hilfe/` and every guide, `/ratgeber/` and every guide (German-only guides go to `/de/` in every language), `/fakten/`, `/daten/`, `/kontakt/`, `/blog/` and posts, `/agb/`,
   `/datenschutz/`, `/impressum/`, `/funktionen/`): it sends the visitor to the same page in the
   browser's language (fr or en, otherwise de), keeping `?query` and `#hash`; without scripts a meta
   refresh goes to `/de/…`. The app links to `/aufnahme/` from its upload, so keep that address.
@@ -57,7 +66,7 @@ second):
 
   ```nginx
   map $http_accept_language $site_lang { default de; ~^fr fr; ~^en en; }
-  location ~ ^/(so-funktioniert-es|aufnahme|demo|preise|hilfe|daten|kontakt|blog|agb|datenschutz|impressum|funktionen)(/.*)?$ {
+  location ~ ^/(so-funktioniert-es|aufnahme|demo|preise|hilfe|ratgeber|fakten|daten|kontakt|blog|agb|datenschutz|impressum|funktionen)(/.*)?$ {
     return 302 /$site_lang$request_uri;
   }
   ```
@@ -69,7 +78,7 @@ second):
 ## Build variables
 | variable | default |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | `https://handball-ai.ch` (canonical URLs, sitemap) |
+| `NEXT_PUBLIC_SITE_URL` | `https://handball-ai.ch` (canonical URLs, hreflang, sitemap, robots, structured data, llms.txt) |
 | `NEXT_PUBLIC_APP_URL` | `https://app.handball-ai.ch` (the team field and «Kostenlos starten» go to `/einstieg?q=…`, «Anmelden» to `/login`; `?lang=` sets the app language) |
 | `NEXT_PUBLIC_SUPPORT_EMAIL` | `support@handball-ai.ch` |
 | `NEXT_PUBLIC_STATUS_URL` | empty (link hidden) |

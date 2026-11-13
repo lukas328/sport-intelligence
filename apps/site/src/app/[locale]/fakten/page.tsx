@@ -54,15 +54,15 @@ export default async function Facts({ params }: Props) {
       <div className="wrap">
         <section aria-labelledby="fakten" className="mt-12">
           <SectionHead id="fakten" title={t.tableTitle} />
-          <table className="mt-2 w-full max-w-[56rem] border-collapse">
+          <table className="mt-2 block w-full max-w-[56rem] border-collapse md:table">
             <caption className="sr-only">{t.tableCaption}</caption>
-            <tbody>
+            <tbody className="block md:table-row-group">
               {rows.map((r) => (
-                <tr key={r.k} className="border-b border-rule align-top">
-                  <th scope="row" className="w-[34%] py-4 pr-4 text-left font-bold md:w-[14rem]">
+                <tr key={r.k} className="block border-b border-rule align-top md:table-row">
+                  <th scope="row" className="block pt-4 text-left font-bold md:table-cell md:w-[14rem] md:py-4 md:pr-4">
                     {r.k}
                   </th>
-                  <td className="py-4 leading-[1.55]">{r.v.includes("@") ? <a href={`mailto:${r.v}`} className="link">{r.v}</a> : r.v}</td>
+                  <td className="block pb-4 leading-[1.55] [overflow-wrap:anywhere] md:table-cell md:pt-4">{r.v.includes("@") ? <a href={`mailto:${r.v}`} className="link">{r.v}</a> : r.v}</td>
                 </tr>
               ))}
             </tbody>

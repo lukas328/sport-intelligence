@@ -34,14 +34,17 @@ export function NavLinks({ locale, links, stacked = false }: { locale: string; l
 }
 
 /** The same page in the other languages (names written out, not abbreviations). */
-export function LangLinks({ locale, names }: { locale: string; names: Record<string, string> }) {
+export function LangLinks({ locale, names, missing = {} }: { locale: string; names: Record<string, string>; missing?: Record<string, string[]> }) {
   const path = usePathname() ?? `/${locale}/`;
+  // a guide that does not exist in a language: that language's list of guides instead
+  const guide = path.match(/\/ratgeber\/([a-z0-9-]+)\/?$/)?.[1];
+  const target = (l: string) => (guide && missing[guide]?.includes(l) ? `/${l}/ratgeber/` : path.replace(new RegExp(`^/${locale}(?=/|$)`), `/${l}`));
   return (
     <ul className="mt-2">
       {Object.entries(names).map(([l, name]) => (
         <li key={l}>
           <Link
-            href={path.replace(new RegExp(`^/${locale}(?=/|$)`), `/${l}`)}
+            href={target(l)}
             hrefLang={l}
             lang={l}
             aria-current={l === locale ? "true" : undefined}

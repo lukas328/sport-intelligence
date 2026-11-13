@@ -89,7 +89,7 @@ export function PageHead({ kick, title, lead, figure, figureLabel, children }: {
   return (
     <header data-zone="kopf" className="relative pt-8 pb-10 md:pt-14 md:pb-14">
       <div className="wrap relative">
-        {kick && <p className="mb-2 text-[1.0625rem] font-semibold text-ink-2 md:mb-3">{kick}</p>}
+        {kick && <div className="mb-2 text-[1.0625rem] font-semibold text-ink-2 md:mb-3">{kick}</div>}
         <h1 className="max-w-[52rem] text-[2.5rem] leading-[.96] md:text-[4rem]">{title}</h1>
         {figure != null && (
           <p className="mt-4 flex items-baseline gap-3 md:absolute md:top-0 md:right-8 md:mt-0 md:block md:text-right">

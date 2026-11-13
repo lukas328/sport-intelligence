@@ -27,6 +27,7 @@ export const BLOG: BlogPost[] = [
   {
     slug: "warum-wir-unsicherheit-zeigen",
     date: "2026-11-03",
+    updated: "2026-11-13",
     title: {
       de: "Warum wir zeigen, wo die Analyse unsicher ist",
       fr: "Pourquoi nous montrons où l'analyse est incertaine",

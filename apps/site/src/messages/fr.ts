@@ -71,7 +71,7 @@ const fr: Messages = {
     flightEnd: "Fin {v}",
   },
   things: {
-    title: "Ce que tu reçois après chaque match",
+    title: "Trois points, tels que l'app les montre",
     side: "Trois points à retenir",
     index: "{i} sur 3",
     againstUnit: "sur {total}",
@@ -137,7 +137,7 @@ const fr: Messages = {
     boardTitle: "Pour le comité",
     board: [
       { title: "Ce que ça coûte", text: "Dès CHF {price} par mois pour une équipe. Les prix ne sont pas encore définitifs." },
-      { title: "Où sont les données", text: "App et base de données sur des serveurs en Suisse, vidéos dans un stockage dans l'UE." },
+      { title: "Où sont les données", text: "Prévu : app et base de données sur des serveurs en Suisse, vidéos dans un stockage dans l'UE." },
       { title: "Qui consent", text: "Par lien dans le chat d'équipe, sans compte. Pour les enfants, les parents décident." },
     ],
     finalTitle: "Essaie avec ton prochain match.",
@@ -393,7 +393,7 @@ const fr: Messages = {
       },
       {
         title: "Où sont les données",
-        text: "L'app et sa base de données tournent sur des serveurs en Suisse, les vidéos sont dans un stockage dans l'UE. Nous nommerons les fournisseurs dans la déclaration de protection des données avant le lancement. La loi suisse sur la protection des données s'applique et, si nécessaire, le RGPD.",
+        text: "Prévu : l'app et sa base de données tournent sur des serveurs en Suisse, les vidéos sont dans un stockage dans l'UE. Nous nommerons les fournisseurs dans la déclaration de protection des données avant le lancement. La loi suisse sur la protection des données s'applique et, si nécessaire, le RGPD.",
       },
       {
         title: "Combien de temps",

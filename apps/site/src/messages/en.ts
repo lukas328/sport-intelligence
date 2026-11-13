@@ -71,7 +71,7 @@ const en: Messages = {
     flightEnd: "Full time {v}",
   },
   things: {
-    title: "What you get after every match",
+    title: "Three things, as the app shows them",
     side: "Three things to take home",
     index: "{i} of 3",
     againstUnit: "of {total}",
@@ -137,7 +137,7 @@ const en: Messages = {
     boardTitle: "For the club board",
     board: [
       { title: "What it costs", text: "From CHF {price} a month for one team. The prices are not final yet." },
-      { title: "Where the data lives", text: "App and database on servers in Switzerland, videos in storage in the EU." },
+      { title: "Where the data lives", text: "Planned: app and database on servers in Switzerland, videos in storage in the EU." },
       { title: "Who consents", text: "By link in the team chat, no account. For children, the parents decide." },
     ],
     finalTitle: "Try it with your next match.",
@@ -393,7 +393,7 @@ const en: Messages = {
       },
       {
         title: "Where the data lives",
-        text: "The app and its database run on servers in Switzerland, the videos are kept in storage in the EU. We will name the providers in the privacy policy before launch. Swiss data protection law applies and, where needed, the GDPR.",
+        text: "Planned: the app and its database run on servers in Switzerland, the videos are kept in storage in the EU. We will name the providers in the privacy policy before launch. Swiss data protection law applies and, where needed, the GDPR.",
       },
       {
         title: "How long",

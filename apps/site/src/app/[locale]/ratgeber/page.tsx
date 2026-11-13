@@ -43,7 +43,7 @@ export default async function Guides({ params }: Props) {
       <JsonLd
         data={graph({
           ...webPage(locale, "ratgeber", t.metaTitle, t.description, latest, "CollectionPage"),
-          hasPart: own.map((g) => ({ "@type": "Article", headline: g.title[locale], url: pageUrl(locale, `ratgeber/${g.slug}`) })),
+          hasPart: own.map((g) => ({ "@id": `${pageUrl(locale, `ratgeber/${g.slug}`)}#artikel` })),
         })}
       />
       <PageHead kick={t.title} title={t.head} lead={t.lead}>

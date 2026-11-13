@@ -33,9 +33,17 @@ export async function guideModule(locale: Locale, slug: string): Promise<GuideMo
   return (await import(`../../content/ratgeber/${locale}/${slug}.mdx`)) as GuideModule;
 }
 
+const tableLabel: Record<Locale, string> = { de: "Tabelle, seitlich verschiebbar", fr: "Tableau, défilement horizontal", en: "Table, scrolls sideways" };
+
 export function mdxComponents(locale: Locale, folder: string): MDXComponents {
   return {
     ...figures,
+    // wide tables scroll inside their own box instead of widening the page
+    table: (props) => (
+      <div className="table-scroll" role="region" aria-label={tableLabel[locale]} tabIndex={0}>
+        <table {...props} />
+      </div>
+    ),
     a: ({ href = "", children }) => {
       const target = resolveHref(href, locale, folder);
       return target.startsWith("/") ? <Link href={target}>{children}</Link> : <a href={target}>{children}</a>;

@@ -69,7 +69,7 @@ const de = {
     flightEnd: "Schluss {v}",
   },
   things: {
-    title: "Das bekommst du nach jedem Spiel",
+    title: "Drei Dinge, so wie die App sie zeigt",
     side: "Drei Dinge zum Mitnehmen",
     index: "{i} von 3",
     againstUnit: "von {total}",
@@ -135,7 +135,7 @@ const de = {
     boardTitle: "Für den Vorstand",
     board: [
       { title: "Was es kostet", text: "Ab CHF {price} im Monat für ein Team. Die Preise sind noch nicht endgültig." },
-      { title: "Wo die Daten liegen", text: "App und Datenbank auf Servern in der Schweiz, Videos in einem Speicher in der EU." },
+      { title: "Wo die Daten liegen", text: "Vorgesehen: App und Datenbank auf Servern in der Schweiz, Videos in einem Speicher in der EU." },
       { title: "Wer einwilligt", text: "Per Link im Teamchat, ohne Konto. Für Kinder entscheiden die Eltern." },
     ],
     finalTitle: "Probier es mit deinem nächsten Spiel.",
@@ -391,7 +391,7 @@ const de = {
       },
       {
         title: "Wo die Daten liegen",
-        text: "Die App und ihre Datenbank laufen auf Servern in der Schweiz, die Videos liegen in einem Speicher in der EU. Die Anbieter nennen wir vor dem Start in der Datenschutzerklärung. Es gilt das Schweizer Datenschutzgesetz und, wo nötig, die DSGVO.",
+        text: "Vorgesehen ist: Die App und ihre Datenbank laufen auf Servern in der Schweiz, die Videos liegen in einem Speicher in der EU. Die Anbieter nennen wir vor dem Start in der Datenschutzerklärung. Es gilt das Schweizer Datenschutzgesetz und, wo nötig, die DSGVO.",
       },
       {
         title: "Wie lange",
