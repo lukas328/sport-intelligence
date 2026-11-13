@@ -7,6 +7,8 @@ const compat = new FlatCompat({ baseDirectory: dirname(fileURLToPath(import.meta
 const config = [
   { ignores: [".next/**", "out/**", "node_modules/**", "next-env.d.ts"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // static export with unoptimised images: next/image adds nothing here, plain <img> with sizes is right
+  { rules: { "@next/next/no-img-element": "off" } },
 ];
 
 export default config;

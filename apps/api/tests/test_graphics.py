@@ -126,7 +126,7 @@ async def test_scene_of_another_match_is_not_found(make_api: Callable[[], Api]) 
 def test_a_read_number_is_shown_once_per_team() -> None:
     from handball_api.services.graphics import unique_numbers
 
-    tracks = [
+    tracks: list[dict[str, Any]] = [
         {"team": "own", "number": 15, "xy": [(0, 0), (1, 1)]},
         {"team": "own", "number": 15, "xy": [(0, 0), (1, 1), (2, 2)]},
         {"team": "opp", "number": 15, "xy": [(0, 0)]},

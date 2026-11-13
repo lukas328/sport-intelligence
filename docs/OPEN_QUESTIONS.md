@@ -343,3 +343,39 @@ Weaknesses of the recognition, recorded here and not fixed in the interface work
 - **Q-REC-PERSONBOX Person boxes with a panning camera.** The box needs the homography of each
   frame (camera motion times court); the worker has it (`motion.CameraMotion`) but does not hand
   it out, so person questions are asked only with a fixed camera (E05).
+
+## Website (docs/site/KONZEPT.md, 2026-11-12)
+- **Q-SITE-1 Prices on the website.** The site shows the plan table of `packages/plans`
+  (CHF 0 / 39 / 199, yearly 10 monthly fees) with a visible line «Die Preise sind noch nicht
+  endgültig» (Q-PROD-4). The goalkeeper add-on (CHF 7) is not shown: outside the core.
+  *Open:* final prices, and whether «Gratis» (no automatic analysis) stays a plan.
+- **Q-SITE-2 Analysis duration.** The site promises no time («die App schickt dir eine
+  Nachricht»). The app's empty state says «Nach etwa 40 Minuten» (SPEC 7.13), the CPU path takes
+  about twice the video length (Q-INFRA-1). *Open:* one number for both, once the GPU is decided.
+- **Q-SITE-3 «Wer wir sind».** No text about the team exists; the page «Über uns und Kontakt»
+  shows a placeholder. *Open:* text and whether to name people.
+- **Q-SITE-4 Storage location stated as fact.** The site says «App und Datenbank auf Servern in
+  der Schweiz, Videos in einem Speicher in der EU» (ADR 025, ADR 002). *Open:* confirm before
+  launch; the providers are named in the privacy policy (Q-LEGAL-1).
+- **Q-SITE-5 Public demo.** The app has no demo match at all (EINSTIEG.md on `claude/ux-test`).
+  Without an account there is the invented match of the website (`apps/site/public/demo/match.json`,
+  marked «Erfundenes Spiel»). *Open:* a public read-only demo in the app.
+- **Q-SITE-6 Help guides outside the core.** Guides for training, tactics board, assistant,
+  presentation, player feed, scouting report, roles and the statistics matrix stay reachable
+  (the app links to them, `help-map.ts`) but are not listed and carry a note. *Open:* update
+  `help-map.ts` in the app to the new screens, then delete these guides.
+- **Q-SITE-7 Trial «30 Tage gratis».** `trial_days: 30` stands in `packages/plans` and
+  `apps/api/src/handball_api/services/plans.py` (lines 55, 66), but a trial only starts through a
+  Stripe checkout (`services/billing.py`, lines 285 to 286 and 328: `trial_period_days`) or a
+  support action (`services/ops.py extend_trial`, lines 154 to 164); a new club gets none
+  automatically. The site names «30 Tage gratis» only on the pricing page next to the plan, with
+  «Die Preise sind noch nicht endgültig»; the start page just says «Kostenlos starten».
+  *Update 2026-11-13:* the app now starts the trial for every new club (Q-BILL-TRIAL below);
+  the site keeps «30 Tage» on the pricing page only until Lukas confirms the rule.
+- **Q-SITE-8 Mail when the three things are ready.** The site says «Du bekommst eine Mail, wenn
+  die drei Dinge da sind» again; the app session is building that mail and the bell on phones
+  (2026-11-13). *Answered 2026-11-13:* mail built in the app and confirmed in the UX test.
+- **Q-SITE-9 Team field and colour.** Answered: «Wie heisst dein Team?» sends a GET to
+  `{NEXT_PUBLIC_APP_URL}/einstieg?q=…&farbe=…&lang=…`, «Kostenlos starten» to
+  `/einstieg?farbe=…&lang=…`; `farbe` (blau, rot, gelb, schwarz, weiss, gruen, orange, violett)
+  only once the visitor picked a colour. The app takes it over.

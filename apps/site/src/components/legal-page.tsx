@@ -1,3 +1,5 @@
+import { KitScope } from "@/components/kit";
+import { PageHead } from "@/components/wurf-head";
 import { legalBody, mdxComponents } from "@/lib/content";
 import { messages, type Locale } from "@/lib/i18n";
 import { COMPANY, SUPPORT_EMAIL } from "@/lib/site";
@@ -9,12 +11,14 @@ export async function LegalPage({ locale, page }: { locale: Locale; page: keyof 
   const m = messages(locale);
   const Body = await legalBody(locale, page);
   return (
-    <article className="max-w-3xl">
-      <h1 className="text-3xl font-bold">{m.footer[TITLE[page]]}</h1>
-      <p role="note" className="mt-4 rounded-xl ring-1 ring-inset ring-border bg-surface p-3 text-sm">{m.legal.draft}</p>
+    <KitScope>
+    <PageHead kick={m.footer.legal} title={m.footer[TITLE[page]]}>
+      <p role="note" className="mt-6 inline-block bg-attn px-3 py-1.5 text-[1.0625rem] font-semibold text-ink">{m.legal.draft}</p>
+    </PageHead>
+    <article className="wrap">
       {page === "impressum" ? (
-        <section className="mt-6">
-          <h2 className="text-xl font-semibold">{m.legal.company}</h2>
+        <section className="mt-10">
+          <h2 className="text-[1.75rem]">{m.legal.company}</h2>
           {COMPANY.name ? (
             <address className="mt-2 whitespace-pre-line not-italic">
               {COMPANY.name}
@@ -23,16 +27,17 @@ export async function LegalPage({ locale, page }: { locale: Locale; page: keyof 
               {COMPANY.uid ? `\n${m.legal.uid}: ${COMPANY.uid}` : ""}
             </address>
           ) : (
-            <p className="mt-2 text-muted">{m.legal.missing}</p>
+            <p className="mt-2 text-ink-2">{m.legal.missing}</p>
           )}
           <p className="mt-2">
-            {m.legal.contactLine}: <a href={`mailto:${SUPPORT_EMAIL}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
+            {m.legal.contactLine}: <a href={`mailto:${SUPPORT_EMAIL}`} className="font-bold underline decoration-2 underline-offset-4">{SUPPORT_EMAIL}</a>
           </p>
         </section>
       ) : null}
-      <div className="prose mt-4">
+      <div className="prose mt-10">
         <Body components={mdxComponents(locale, "legal")} />
       </div>
     </article>
+    </KitScope>
   );
 }

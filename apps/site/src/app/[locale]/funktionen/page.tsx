@@ -1,37 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { messages, type Locale } from "@/lib/i18n";
-import { pageMeta } from "@/lib/seo";
+import { pageUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
+/** The old features page moved to «So funktioniert es»; old links land there (static: meta refresh). */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).features;
-  return pageMeta(locale, "funktionen", t.title, t.lead);
+  return { title: messages(locale).moved.title, robots: { index: false }, alternates: { canonical: pageUrl(locale, "so-funktioniert-es") } };
 }
 
-export default async function Features({ params }: Props) {
+export default async function Moved({ params }: Props) {
   const { locale } = await params;
   const m = messages(locale);
-  const t = m.features;
+  const target = `/${locale}/so-funktioniert-es/`;
   return (
-    <>
-      <h1 className="text-3xl font-bold">{t.title}</h1>
-      <p className="mt-3 max-w-2xl text-lg text-muted">{t.lead}</p>
-      <div className="mt-8 grid gap-5 sm:grid-cols-2">
-        {t.items.map((f) => (
-          <section key={f.title} className="rounded-2xl bg-raised ring-1 ring-border/70 p-5">
-            <h2 className="font-semibold">{f.title}</h2>
-            <p className="mt-2 text-sm text-muted">{f.text}</p>
-          </section>
-        ))}
-      </div>
-      <p className="mt-10">
-        <Link href={`/${locale}/demo/`} className="font-semibold text-accent underline">
-          {m.home.ctaDemo}
-        </Link>
-      </p>
-    </>
+    <div className="wrap py-16">
+      <meta httpEquiv="refresh" content={`0; url=${target}`} />
+      <h1 className="text-[2.5rem]">{m.moved.title}</h1>
+      <Link href={target} className="link mt-4">
+        {m.moved.text.replace("{page}", m.nav.how)}
+      </Link>
+    </div>
   );
 }

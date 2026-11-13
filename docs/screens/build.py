@@ -49,7 +49,8 @@ HEADER = [
     "Mails liest die Aufnahme über die Mailpit-Schnittstelle (Port 8025).",
     "",
     "Die Screens des Looks in allen sechs Prüffarben und die Vergleiche mit dem Zielbild",
-    "(links App, rechts Vorlage) liegen in [anlauf/](anlauf/) und [anlauf/vergleich/](anlauf/vergleich/).",
+    "(links App, rechts Vorlage) liegen in [anlauf/](anlauf/) und "
+    "[anlauf/vergleich/](anlauf/vergleich/).",
     "",
 ]
 

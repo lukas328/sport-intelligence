@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
+import { KitScope } from "@/components/kit";
+import { MailLine } from "@/components/mail-line";
+import { PageHead } from "@/components/wurf-head";
 import { helpBody, mdxComponents } from "@/lib/content";
-import { fmt, HTML_LANG, LOCALES, messages, type Locale } from "@/lib/i18n";
+import { HTML_LANG, LOCALES, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { pageUrl, SUPPORT_EMAIL } from "@/lib/site";
+import { pageUrl } from "@/lib/site";
 import { HELP } from "../../../../../content/help";
 
 type Props = { params: Promise<{ locale: Locale; slug: string }> };
@@ -19,7 +22,10 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   const entry = HELP.find((h) => h.slug === slug);
-  return entry ? pageMeta(locale, `hilfe/${slug}`, entry.title[locale], entry.summary[locale]) : {};
+  if (!entry) return {};
+  const meta = pageMeta(locale, `hilfe/${slug}`, entry.title[locale], entry.summary[locale]);
+  // guides outside the core stay reachable for the app's links, but out of search engines
+  return entry.listed === false ? { ...meta, robots: { index: false } } : meta;
 }
 
 export default async function HelpArticle({ params }: Props) {
@@ -29,7 +35,7 @@ export default async function HelpArticle({ params }: Props) {
   const t = messages(locale).help;
   const Body = await helpBody(locale, slug);
   return (
-    <article className="max-w-3xl">
+    <KitScope>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -41,18 +47,20 @@ export default async function HelpArticle({ params }: Props) {
           publisher: { "@type": "Organization", name: "Handball Intelligence" },
         }}
       />
-      <p className="text-sm">
-        <Link href={`/${locale}/hilfe/`} className="text-accent underline">
-          {t.back}
-        </Link>
-      </p>
-      <h1 className="mt-4 text-3xl font-bold">{entry.title[locale]}</h1>
-      <div className="prose mt-4">
-        <Body components={mdxComponents(locale, "hilfe")} />
-      </div>
-      <p className="mt-10 border-t border-border pt-4 text-sm text-muted">
-        {t.more} {fmt(t.contact, { email: SUPPORT_EMAIL })}
-      </p>
-    </article>
+      <PageHead kick={<Link href={`/${locale}/hilfe/`} className="link text-ink">{t.back}</Link>} title={entry.title[locale]} lead={entry.summary[locale]} />
+      <article className="wrap">
+        {entry.listed === false && (
+          <p role="note" className="measure mt-10 border-l-4 border-ink pl-4 text-ink-2">
+            {t.aside}
+          </p>
+        )}
+        <div className="prose mt-10">
+          <Body components={mdxComponents(locale, "hilfe")} />
+        </div>
+        <p className="measure mt-12 border-t-2 border-ink pt-6">
+          <b>{t.more}</b> <MailLine template={t.contact} />
+        </p>
+      </article>
+    </KitScope>
   );
 }

@@ -18,6 +18,20 @@ alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from
   Kaggle-Dataset); das neue Dataset enthält dann alle 300 zusammen.
 - Dauer etwa 6.5 h, Kosten etwa 4.3 USD.
 
+### 11. Ball-Testset 2 in Originalauflösung (lokale Sitzung, kein GPU nötig), 2026-11-12
+- Frage von Lukas: Verlieren wir Bälle, weil wir zu stark verkleinern? Ingest skaliert jedes Segment
+  auf 1280 breit (crf 25), das Produkt erkennt auf 640×640. Viele Originale sind 1920×1080 oder mehr.
+- Auftrag: Für die 252 Bilder von Testset 2 (`ml/ball/testset_pick.py`, Liste `items.json` der
+  Hauptsitzung, Felder game, video, frame, gap) die drei Bilder (frame-gap, frame, frame+gap) aus dem
+  **Originalvideo** schneiden (Zeit = Segmentstart + frame/fps, Segmentstart aus `library.json`),
+  als PNG ohne neue Kompression. Dazu Breite, Höhe und fps des Originals pro Spiel notieren.
+- Ablage: Kaggle-Dataset `lukasde1000/handball-ball-testset2-native` (privat), Inhalt
+  `t/<id>_<0|1|2>.png` und `native.json` [{id, w, h, fps, t_s}]. Nur echte Testset-Spiele, nichts
+  anderes hochladen; die Spiele bleiben aus jedem Training (`ml/ball/test_games.json`).
+- Auswertung macht die Hauptsitzung (CPU): r7 auf 640 / 1280 / nativ, gleiche Labels skaliert.
+- Aufwand: ein paar Minuten CPU plus Upload von ~1 GB. Fehlt ein Original, Spiel in `native.json`
+  mit `"missing": true` aufführen statt raten.
+
 ## Stand 2026-11-09 nachts (Hauptsitzung)
 Ball-Testset 2 (177 Bälle, 42 neue Hallen, `ml/ball/README.md`) zeigt: Runde 6 mit den OWL-Labels
 ist in neuen Hallen klar besser als Runde 3 (29 % gegen 15 %). Die OWL-Labels helfen also; die
