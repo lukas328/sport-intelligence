@@ -29,6 +29,9 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+# the 32-px drawing: the full mark is too fine below 48 px
+MARK = Path(__file__).with_name("assets") / "favicon-32-tinte.png"
+
 TEXTS: dict[str, Any] = json.loads(
     (Path(__file__).with_name("report_texts.json")).read_text(encoding="utf-8")
 )
@@ -232,7 +235,9 @@ def render(
         canvas.drawRightString(width - 16 * mm, height - 11.5 * mm, t["report"])
         canvas.setFillColor(MUTED)
         canvas.setFont("Helvetica", 7.5)
-        canvas.drawString(16 * mm, 9 * mm, t["footer"])
+        # the product mark in ink next to the name (docs/design/brand2/taktik/README.md)
+        canvas.drawImage(str(MARK), 16 * mm, 7.2 * mm, 5.5 * mm, 5.5 * mm, mask="auto")
+        canvas.drawString(23 * mm, 9 * mm, t["footer"])
         canvas.drawRightString(width - 16 * mm, 9 * mm, t["page"].format(n=doc.page))
         canvas.restoreState()
 

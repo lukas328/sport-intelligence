@@ -84,3 +84,30 @@ export function nearestTrack(
   }
   return best?.id ?? null;
 }
+
+export const BODY_M = 1.85; // a fixed body height for the box around a person
+export const BODY_W_M = 0.8;
+
+/**
+ * A box around a person in normalised image coordinates (x, y top left, w, h), from the foot
+ * point of a track: the homography gives the image scale at the feet (pixels per court metre,
+ * the mean of both court axes), the box stands on the feet with a fixed body height. Only the
+ * ground plane is calibrated: the box is an estimate, good enough to show who is meant.
+ */
+export function personBox(h: Homography, x: number, y: number, size: [number, number], heightM = BODY_M, widthM = BODY_W_M): { x: number; y: number; w: number; h: number } | null {
+  const foot = project(h, x, y, size);
+  const ax = project(h, x + 0.5, y, size);
+  const ay = project(h, x, y + 0.5, size);
+  if (!foot || !ax || !ay) return null;
+  const px = (p: [number, number]): [number, number] => [p[0] * size[0], p[1] * size[1]];
+  const [fx, fy] = px(foot);
+  const scale = (Math.hypot(...sub(px(ax), [fx, fy])) + Math.hypot(...sub(px(ay), [fx, fy]))) / 2 / 0.5;
+  if (!Number.isFinite(scale) || scale <= 0) return null;
+  const bw = widthM * scale;
+  const bh = heightM * scale;
+  return { x: (fx - bw / 2) / size[0], y: (fy - bh) / size[1], w: bw / size[0], h: bh / size[1] };
+}
+
+function sub(a: [number, number], b: [number, number]): [number, number] {
+  return [a[0] - b[0], a[1] - b[1]];
+}

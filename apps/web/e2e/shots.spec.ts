@@ -55,8 +55,6 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await page.getByLabel("Vereinsname").fill("HC Würfe");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
@@ -66,6 +64,8 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
 
   // court from the hall: one look at the orange lines, "Passt", and on to the next open step
+  // the setup by hand sits behind one toggle; its questions are asked in Prüfen (UX test B10)
+  await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
   await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Seefeld). Liegen die orangen Linien")).toBeVisible();
   await expect(page.getByTestId("court-preview")).toBeVisible();

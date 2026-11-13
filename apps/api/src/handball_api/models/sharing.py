@@ -10,7 +10,8 @@ from handball_api.core.db import Base, EntityMixin, TenantMixin
 
 
 class ShareLink(Base, EntityMixin, TenantMixin):
-    """Read-only public link to a play, match report or playlist (M8). Only the hash is stored."""
+    """Read-only public link to a play, match report or playlist (M8). The hash finds the link;
+    the token itself is kept encrypted so the coach can copy the same link again (UX test B17)."""
 
     __tablename__ = "share_links"
 
@@ -20,6 +21,7 @@ class ShareLink(Base, EntityMixin, TenantMixin):
     kind: Mapped[str] = mapped_column(String(20), nullable=False)  # play, match, playlist
     target_id: Mapped[uuid.UUID] = mapped_column(nullable=False)
     token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    token_enc: Mapped[str | None] = mapped_column(String(300))
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -146,7 +146,11 @@ async def delete_match(match_id: uuid.UUID, scope: OrgDep) -> None:
 )
 async def create_upload(match_id: uuid.UUID, data: UploadCreate, scope: OrgDep) -> UploadOut:
     asset, part_size, count = await videos.create_upload(scope.ctx, match_id, data)
-    return UploadOut(video=service.video_out(asset), part_size=part_size, part_count=count)
+    out = UploadOut(video=service.video_out(asset), part_size=part_size, part_count=count)
+    # the request's transaction commits only after the response is sent; a client asking for the
+    # part URLs right away (the seed, a fast browser) would not find the video yet (UX test B54)
+    await scope.ctx.db.commit()
+    return out
 
 
 @router.post(

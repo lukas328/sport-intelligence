@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { serverApi } from "@/lib/api";
 import { CheckView } from "./check-view";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("anlauf"))("check") };
+}
 
 /** Prüfen (SPEC 7.5): full screen, one question at a time, each answer saved at once. */
 export default async function CheckPage({ params }: { params: Promise<{ orgId: string; matchId: string }> }) {

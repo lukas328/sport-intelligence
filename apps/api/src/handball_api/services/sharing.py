@@ -17,7 +17,7 @@ from sqlalchemy import select
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
-from handball_api.core.security import hash_token, new_token
+from handball_api.core.security import SecretBox, hash_token, new_token
 from handball_api.models import (
     Clip,
     Event,
@@ -30,12 +30,14 @@ from handball_api.models import (
     RosterEntry,
     ShareLink,
     Team,
+    User,
     VideoAsset,
 )
 from handball_api.models.enums import ConsentKind, ReelStatus
 from handball_api.services import audit, billing, org_verification
 from handball_api.services import collections as collections_service
 from handball_api.services import events as events_service
+from handball_api.services import graphics as graphics_service
 from handball_api.services.context import Ctx
 from handball_api.services.highlights import rank
 from handball_api.services.matches import opponent_of, timeline_video
@@ -128,6 +130,7 @@ async def create(
         kind=kind,
         target_id=target_id,
         token_hash=hash_token(token),
+        token_enc=_box(ctx).encrypt(token),
         title=title[:200],
         expires_at=_now() + timedelta(days=days),
         created_by_id=ctx.user_id,
@@ -136,6 +139,15 @@ async def create(
     await ctx.db.flush()
     await audit.record(ctx, "share_link.created", target_type="share_link", target_id=link.id)
     return link, token
+
+
+def _box(ctx: Ctx) -> SecretBox:
+    return SecretBox(ctx.settings.encryption_key.get_secret_value())
+
+
+def token_of(ctx: Ctx, link: ShareLink) -> str | None:
+    """The link's token for its team's staff (links made before it was kept: None)."""
+    return _box(ctx).decrypt(link.token_enc) if link.token_enc else None
 
 
 async def list_links(ctx: Ctx, team_id: uuid.UUID) -> list[ShareLink]:
@@ -196,11 +208,14 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
     link = await _resolve(ctx, token)
     link.views += 1
     team = await ctx.db.get(Team, link.team_id)
+    by = await ctx.db.get(User, link.created_by_id) if link.created_by_id else None
     base: dict[str, Any] = {
         "kind": link.kind,
         "title": link.title,
         "team": team.name if team else "",
         "expires_at": link.expires_at.isoformat(),
+        # «geteilt von Sandra» (SPEC 7.8): the first name of who shared it, nothing more
+        "shared_by": by.name.split()[0] if by and by.name else None,
     }
     if link.kind == "play":
         play = await ctx.db.get(Play, link.target_id)
@@ -264,6 +279,7 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
         for item in scenes["items"]:
             sc = item.get("scene")
             video = await _main_video(ctx, uuid.UUID(sc["match_id"])) if sc else None
+            camera = await _camera(ctx, sc) if sc else None
             out.append(
                 {
                     "kind": item["kind"],
@@ -275,6 +291,9 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
                         "start_ms": sc["start_ms"],
                         "end_ms": sc["end_ms"],
                         "video_id": str(video.id) if video else None,
+                        # the tactics camera of the goal behind the scene (SPEC 7.8: Video |
+                        # Taktik and the Minifeld per scene); none without a confirmed court
+                        "camera": camera,
                     }
                     if sc
                     else None,
@@ -308,6 +327,21 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
     return {**base, "playlist": {"title": pl.title, "description": pl.description, "clips": clips}}
 
 
+async def _camera(ctx: Ctx, sc: dict[str, Any]) -> dict[str, Any] | None:
+    """Positions before the goal of a shared scene, as on the match page; None when the scene
+    is not a goal or nothing was measured (no confirmed court, no tracking)."""
+    if not sc.get("event_id"):
+        return None
+    event = await ctx.db.get(Event, uuid.UUID(sc["event_id"]))
+    match = await ctx.db.get(Match, uuid.UUID(sc["match_id"]))
+    if event is None or match is None or event.match_id != match.id:
+        return None
+    cam = await graphics_service.camera_of(ctx, match, event)
+    if not cam["field_confirmed"] or not cam["tracks"]:
+        return None
+    return {**cam, "event_id": str(cam["event_id"])}
+
+
 async def _scenes_of(ctx: Ctx, link: ShareLink) -> dict[str, Any]:
     """Entries of a shared scene or collection (the scene alone is a run of one)."""
     if link.kind == "scene":
@@ -320,6 +354,7 @@ async def _scenes_of(ctx: Ctx, link: ShareLink) -> dict[str, Any]:
             "start_ms": clip.start_ms,
             "end_ms": clip.end_ms,
             "title": clip.title,
+            "event_id": collections_service._clip_out(clip)["event_id"],
         }
         return {"items": [{"kind": "scene", "text": None, "play": None, "scene": scene}]}
     try:

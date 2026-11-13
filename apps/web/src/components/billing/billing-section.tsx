@@ -96,10 +96,16 @@ export function BillingSection({ orgId }: { orgId: string }) {
           <p>
             <span className="font-semibold">{t(`plan_${b.plan as "free"}`)}</span>
             {b.status && <span className="ml-2 text-sm text-muted">{t(`status_${b.status as "active"}`)}</span>}
-            {b.trial_ends_at && b.status === "trialing" && (
+            {/* the trial at sign-up has no Stripe status: shown by its end (UX test Z8) */}
+            {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && (
               <span className="ml-2 text-sm">{t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at), { dateStyle: "medium" }) })}</span>
             )}
           </p>
+          {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && !b.status && (
+            <p className="m-0 w-full text-[15px] text-ink-2" data-testid="trial-after">
+              {t("trialAfter")}
+            </p>
+          )}
           {b.plan !== "free" && b.checkout_available && (
             <Button variant="secondary" onClick={() => void go("/v1/orgs/{org_id}/billing/portal")}>
               {t("portal")}
@@ -119,7 +125,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
             <li key={p.plan} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
               <span className="w-28 shrink-0">
                 <span className="block font-semibold">{t(`plan_${p.plan}`)}</span>
-                {p.plan === b.plan && <span className="block text-[0.8125rem] font-semibold text-muted">{t("current")}</span>}
+                {p.plan === b.plan && <span className="block text-[0.9375rem] font-semibold text-muted">{t("current")}</span>}
               </span>
               <span className="w-40 shrink-0 font-semibold tabular-nums">{t("price", { price: p.price_chf_month ?? 0 })}</span>
               <span className="min-w-48 flex-1 text-sm text-muted">

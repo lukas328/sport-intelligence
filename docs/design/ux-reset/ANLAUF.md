@@ -102,11 +102,17 @@ with the same model (club colours swap to their second colour where they vanish)
 |---|---|---|
 | Titles (page, head, section), names of teams and people, navigation, tab labels | **Kanit** italic 800 | 58 px desktop / 32 to 34 px phone for titles, section heads 26 / 22 px, nav 18 px, tabs 20 / 17 px; line-height .96 |
 | Numerals: result, figures, ranks, back numbers, times in lists | **Kanit** italic 900, tabular | result 196 / 100 px, strip 72 / 48 px, things 96 / 64 px, lists 44 / 28 px |
-| Text, tables, forms, buttons, the kick line | **Hanken Grotesk** 400 / 600 / 700, upright | body 17 px / 1.45, secondary 15 px, small 13 px minimum |
-| Times and hints on the tactics camera, the index of a thing | **IBM Plex Mono** 500 / 600 | 12 to 20 px |
+| Text, tables, forms, buttons, the kick line | **Hanken Grotesk** 400 / 600 / 700, upright | body 17 px / 1.45, secondary 15 px, nothing that is read under 14 px (`text-xs` is 14 px in the app) |
+| Times and hints on the tactics camera, the index of a thing | **IBM Plex Mono** 500 / 600 | 13 to 20 px, in full ink (no secondary grey) |
 
 Against the betting look: slanted only the four roles above. Sentences, tables, buttons and forms
-stand upright. No all-caps, no letter-spacing. Scale: 13 15 17 20 26 34 44 58, numerals 48 to 196.
+stand upright. No all-caps, no letter-spacing. Scale: 14 15 17 20 26 34 44 58, numerals 48 to 196.
+
+**For older eyes (UX test, second delivery, H08):** the reader is Hans, 58, reading glasses, large
+system text. Content text is never under 14 px, body text 17 px, secondary text 15 px; only mono
+labels (camera times, the index of a thing) may be 13 px, and then in full ink. Chart axes 13 px.
+Back numbers on the tactics camera at least 14 px (dot 14, 17 on the half court). Every button
+carries a word; a symbol alone is not enough. `design-lint.test.ts` refuses smaller sizes.
 
 **Licence and source:** all three are SIL Open Font License 1.1. The Zielbild loads them from
 Google Fonts; in the app self-host them in `apps/web/src/fonts` from the `@fontsource/kanit`,

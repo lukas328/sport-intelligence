@@ -9,6 +9,7 @@ import secrets
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
 
 import httpx
 from sqlalchemy import delete, select
@@ -282,7 +283,29 @@ async def logout(ctx: Ctx, session: AuthSession) -> None:
     await ctx.db.execute(delete(AuthSession).where(AuthSession.id == session.id))
 
 
-async def request_magic_link(ctx: Ctx, email: str) -> None:
+async def start(ctx: Ctx, email: str, locale: str, next_path: str | None) -> None:
+    """The passwordless start of the public entry: a new address gets an account without a
+    password (saving accepts the terms), every address gets a sign-in link that leads to
+    `next_path`. Same answer either way (no account enumeration)."""
+    user = await ctx.db.scalar(select(User).where(User.email == email))
+    if user is None:
+        user = User(
+            email=email,
+            # the name is asked later (Ich); until then the part before the @
+            name=email.split("@", 1)[0][:120] or email[:120],
+            locale=locale,
+            password_hash=None,
+            terms_accepted_at=_now(),
+        )
+        ctx.db.add(user)
+        await ctx.db.flush()
+        await audit.record(
+            ctx, "user.registered_passwordless", target_type="user", target_id=user.id
+        )
+    await request_magic_link(ctx, email, next_path)
+
+
+async def request_magic_link(ctx: Ctx, email: str, next_path: str | None = None) -> None:
     """Always succeeds (no account enumeration). Sends a link only if the account exists."""
     user = await ctx.db.scalar(select(User).where(User.email == email))
     if user is None:
@@ -298,6 +321,8 @@ async def request_magic_link(ctx: Ctx, email: str) -> None:
         )
     )
     link = f"{ctx.settings.web_base_url}/auth/magic?token={token}"
+    if next_path and next_path.startswith("/") and not next_path.startswith("//"):
+        link += f"&next={quote(next_path, safe='')}"
     # same answer either way (no account enumeration); a failure is logged
     await try_send(
         ctx.email,

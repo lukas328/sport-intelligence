@@ -81,9 +81,9 @@ export function VideoOverview({
                 <div key={side} className="space-y-1">
                   <p className="text-sm font-semibold">
                     {name}
-                    <span className="font-normal text-muted">{` · ${t("possession")}`}</span>
-                  </p>
-                  <p className="font-score text-[2.5rem] leading-none">{Math.round((s?.share ?? 0) * 100)} %</p>
+                    </p>
+                  {/* counted attacks, not a possession percentage: the phases are estimated */}
+                  <p className="font-score text-[2.5rem] leading-none">{s?.count ?? 0}</p>
                   <p className="text-sm text-muted">{t("attacks", { n: s?.count ?? 0, avg: Math.round(s?.avg_s ?? 0) })}</p>
                   {(s?.fast_breaks ?? 0) > 0 && <p className="text-sm text-muted">{t("fastBreaks", { n: s?.fast_breaks ?? 0 })}</p>}
                 </div>
@@ -125,7 +125,7 @@ export function VideoOverview({
                       type="button"
                       aria-pressed={filter === f}
                       onClick={() => setFilter(f)}
-                      className={cn("min-h-8 border-b-2 px-1 text-[0.8125rem] font-semibold", filter === f ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
+                      className={cn("min-h-8 border-b-2 px-1 text-[0.9375rem] font-semibold", filter === f ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
                     >
                       {f === "own" ? ownName : f === "opponent" ? oppName : t(`filter_${f}`)}
                     </button>
@@ -195,7 +195,7 @@ export function VideoOverview({
         <span className="font-semibold">{t("compactTitle")}</span>{" "}
         <span className="text-muted">
           {phases.length > 0
-            ? t("compactLine", { own: Math.round((own?.share ?? 0) * 100), opp: Math.round((opp?.share ?? 0) * 100), n: phases.length })
+            ? t("compactLine", { own: own?.count ?? 0, opp: opp?.count ?? 0 })
             : t("noPossessions")}
         </span>{" "}
         <span className="text-accent group-open:hidden">{t("compactOpen")}</span>

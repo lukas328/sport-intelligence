@@ -8,8 +8,6 @@ test("play library: template, edit on the board, animate, save, find", async ({ 
   await page.getByLabel("Vereinsname").fill("HC Taktik");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 2");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
 
   await openPlays(page);

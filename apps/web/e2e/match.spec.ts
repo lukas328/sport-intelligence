@@ -15,8 +15,6 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.getByLabel("Vereinsname").fill("HC Video");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
 
   // create a match
@@ -24,6 +22,8 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByText("Noch keine Spiele.")).toBeVisible();
   await expectAccessible(page);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
+  // the rest of the match details sits behind «Mehr» (UX test H07)
+  await page.getByText("Mehr: Wettbewerb, Halle, Spieldauer, Trikots").click();
   await page.getByLabel("Wettbewerb (optional)").fill("3. Liga");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
@@ -46,12 +46,14 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await input.setInputFiles(MATCH_VIDEO);
   // resumed: progress starts above zero because part 1 is already stored
   await expect(progress).toContainText(/^[1-9]\d* % hochgeladen/);
-  await expect(page.getByText("Upload fertig. Die Verarbeitung startet.")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("Fertig hochgeladen.")).toBeVisible({ timeout: 60_000 });
 
   // processing runs in the worker; progress arrives via SSE
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
   // stages 2 to 5 run in the GPU worker (CPU locally): calibration, detection, tracking, teams;
   // the court is the first work step beside the player
+  // the setup by hand sits behind one toggle; its questions are asked in Prüfen (UX test B10)
+  await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
   await expect(page.getByText("Videoqualität:")).toBeVisible();
   await expect(page.getByTestId("mini-court")).toBeVisible({ timeout: 180_000 });
@@ -128,7 +130,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   // the overview counts it, the number opens the event, the event jumps into the video
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
-  await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("1");
+  await expect(table.getByRole("row", { name: /^Tore(?! pro)/ })).toContainText("1");
   await expect(table.getByRole("row", { name: /^Würfe/ })).toContainText("2");
   await table.getByRole("button", { name: "Tore Herren 1" }).click();
   const list = page.getByTestId("event-list");
@@ -165,8 +167,6 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByLabel("Vereinsname").fill("HC Playlist");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U19");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await openLibrary(page, "Sammlungen");
   await page.getByLabel("Name", { exact: true }).fill("Abwehr Training");

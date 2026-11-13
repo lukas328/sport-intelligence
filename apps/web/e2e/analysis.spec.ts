@@ -13,8 +13,6 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByLabel("Vereinsname").fill("HC Papier");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Damen 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
 
@@ -39,9 +37,21 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("link", { name: "Zurück" }).click();
   await expect(page.getByTestId("score")).toHaveText("5:4");
 
+  // Tab Spiel below the three things (UX test B08): the telegram from the report, no video yet
+  await page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  await expect(page.getByTestId("telegram")).toContainText("5:4");
+  await expect(page.getByTestId("no-video")).toContainText("Kein Video");
+  await expect(page.getByTestId("game-actions")).toContainText("Als Bild für den Chat");
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
-  await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
+  await expect(table.getByRole("row", { name: /^Tore(?! pro)/ })).toContainText("5");
+  // UX test B07: a report without goal times has no runs and no course; no xG, no possession
+  const main = page.getByRole("main");
+  await expect(main).not.toContainText("in Folge");
+  await expect(main).not.toContainText("Bester Lauf");
+  await expect(main).not.toContainText("xG");
+  await expect(main).not.toContainText("Ballbesitz");
+  await expect(main).not.toContainText("Papierbericht");
   await expectAccessible(page);
   // every number opens the events behind it
   await expect(page.getByTestId("insights")).toContainText("Drei Dinge");

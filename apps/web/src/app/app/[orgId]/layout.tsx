@@ -1,10 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import type { CSSProperties, ReactNode } from "react";
 import { AppShell } from "@/components/shell/app-shell";
-import { TwoFactorBanner } from "@/components/shell/two-factor-banner";
 import { serverApi } from "@/lib/api";
 import { CHECK_KITS, clubStyle } from "@/lib/color";
 
@@ -25,19 +23,9 @@ export default async function OrgLayout({ children, params }: { children: ReactN
   const preview = process.env.NODE_ENV !== "production" ? CHECK_KITS[jar.get("hb_dev_kit")?.value as keyof typeof CHECK_KITS] : undefined;
   const kitColours = preview ?? ([org.primary_color, org.secondary_color] as const);
   // only while the admin has not set it up yet
-  // a club taken over from the official data and not confirmed yet: one quiet line for its admins
-  const unverified = org.my_role === "org_admin" && org.verification === "unverified";
-  const banner =
-    org.two_factor_required && !me.totp_enabled ? (
-      <TwoFactorBanner orgId={org.id} />
-    ) : unverified ? (
-      <p className="px-4 py-2 text-sm text-muted shadow-[inset_0_-1px_0_var(--border)] sm:px-6 lg:px-10" data-testid="unverified-line">
-        {t("verification.line")}{" "}
-        <Link href={`/app/${org.id}/club/federation`} className="font-medium text-foreground underline underline-offset-4">
-          {t("verification.lineLink")}
-        </Link>
-      </p>
-    ) : null;
+  // nothing pushes in on every page (UX test H13): two-factor is a point at the account, the
+  // club's verification is a task on the club page (Verein › Verband)
+  const banner = null;
   return (
     <div className="club min-h-dvh" style={clubStyle(kitColours[0], kitColours[1]) as CSSProperties}>
       <AppShell
@@ -53,7 +41,7 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           season_id: x.current_season?.id ?? null,
           team_features: x.settings.team_features ?? false,
         }))}
-        me={{ name: me.name, email: me.email }}
+        me={{ name: me.name, email: me.email, two_factor_due: Boolean(org.two_factor_required && !me.totp_enabled && org.something_to_protect) }}
         savedTeam={savedTeam}
         banner={banner}
       >

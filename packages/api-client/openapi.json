@@ -4740,6 +4740,20 @@
       },
       "FromMatch": {
         "properties": {
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ItemIn"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items"
+          },
           "match_id": {
             "format": "uuid",
             "title": "Match Id",
@@ -10318,6 +10332,11 @@
             "title": "Secondary Color",
             "type": "string"
           },
+          "something_to_protect": {
+            "default": false,
+            "title": "Something To Protect",
+            "type": "boolean"
+          },
           "two_factor_required": {
             "title": "Two Factor Required",
             "type": "boolean"
@@ -12116,6 +12135,36 @@
         "title": "ProvidersOut",
         "type": "object"
       },
+      "PublicClub": {
+        "properties": {
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city"
+        ],
+        "title": "PublicClub",
+        "type": "object"
+      },
       "PublicConsentPage": {
         "properties": {
           "club": {
@@ -12159,6 +12208,90 @@
           "expires_at"
         ],
         "title": "PublicConsentPage",
+        "type": "object"
+      },
+      "PublicGame": {
+        "properties": {
+          "half_opp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Half Opp"
+          },
+          "half_own": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Half Own"
+          },
+          "home": {
+            "title": "Home",
+            "type": "boolean"
+          },
+          "kickoff_at": {
+            "format": "date-time",
+            "title": "Kickoff At",
+            "type": "string"
+          },
+          "opp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opp"
+          },
+          "opponent": {
+            "title": "Opponent",
+            "type": "string"
+          },
+          "own": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Own"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue"
+          }
+        },
+        "required": [
+          "opponent",
+          "home",
+          "own",
+          "opp",
+          "half_own",
+          "half_opp",
+          "kickoff_at",
+          "venue"
+        ],
+        "title": "PublicGame",
         "type": "object"
       },
       "PublicPlayer": {
@@ -12269,6 +12402,306 @@
           "indexable"
         ],
         "title": "PublicProfileOut",
+        "type": "object"
+      },
+      "PublicRun": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "result": {
+            "enum": [
+              "w",
+              "d",
+              "l"
+            ],
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result",
+          "count"
+        ],
+        "title": "PublicRun",
+        "type": "object"
+      },
+      "PublicScorer": {
+        "properties": {
+          "goals": {
+            "title": "Goals",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "goals"
+        ],
+        "title": "PublicScorer",
+        "type": "object"
+      },
+      "PublicTableRow": {
+        "properties": {
+          "games": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Games"
+          },
+          "goal_difference": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Difference"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "own": {
+            "title": "Own",
+            "type": "boolean"
+          },
+          "points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Points"
+          },
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank"
+          }
+        },
+        "required": [
+          "rank",
+          "name",
+          "games",
+          "points",
+          "goal_difference",
+          "own"
+        ],
+        "title": "PublicTableRow",
+        "type": "object"
+      },
+      "PublicTeamHit": {
+        "properties": {
+          "club": {
+            "$ref": "#/components/schemas/PublicClub"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "in_app": {
+            "title": "In App",
+            "type": "boolean"
+          },
+          "league": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "League"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "official_id": {
+            "title": "Official Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "official_id",
+          "name",
+          "league",
+          "group_name",
+          "club",
+          "in_app"
+        ],
+        "title": "PublicTeamHit",
+        "type": "object"
+      },
+      "PublicTeamPreview": {
+        "properties": {
+          "club": {
+            "$ref": "#/components/schemas/PublicClub"
+          },
+          "form": {
+            "items": {
+              "enum": [
+                "w",
+                "d",
+                "l"
+              ],
+              "type": "string"
+            },
+            "title": "Form",
+            "type": "array"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "last": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicGame"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "league": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "League"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicGame"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "official_id": {
+            "title": "Official Id",
+            "type": "integer"
+          },
+          "played": {
+            "title": "Played",
+            "type": "integer"
+          },
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank"
+          },
+          "run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicRun"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scorer_games": {
+            "title": "Scorer Games",
+            "type": "integer"
+          },
+          "scorers": {
+            "items": {
+              "$ref": "#/components/schemas/PublicScorer"
+            },
+            "title": "Scorers",
+            "type": "array"
+          },
+          "season": {
+            "title": "Season",
+            "type": "string"
+          },
+          "table": {
+            "items": {
+              "$ref": "#/components/schemas/PublicTableRow"
+            },
+            "title": "Table",
+            "type": "array"
+          }
+        },
+        "required": [
+          "official_id",
+          "name",
+          "club",
+          "league",
+          "group_name",
+          "season",
+          "last",
+          "next",
+          "rank",
+          "table",
+          "form",
+          "run",
+          "played",
+          "scorers",
+          "scorer_games"
+        ],
+        "title": "PublicTeamPreview",
         "type": "object"
       },
       "PurposeState": {
@@ -14527,6 +14960,17 @@
             "title": "Title",
             "type": "string"
           },
+          "token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token"
+          },
           "views": {
             "title": "Views",
             "type": "integer"
@@ -14852,6 +15296,44 @@
           "sessions"
         ],
         "title": "SlotGenerateOut",
+        "type": "object"
+      },
+      "StartIn": {
+        "description": "\u00abDas ist mein Team. Speichern\u00bb: an e-mail, nothing else. Saving accepts the terms (the\nsentence says so); a password can be set later in Ich.",
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "locale": {
+            "default": "de-CH",
+            "enum": [
+              "de-CH",
+              "en",
+              "fr"
+            ],
+            "title": "Locale",
+            "type": "string"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "pattern": "^/[A-Za-z0-9_\\-?=&%.][A-Za-z0-9/_\\-?=&%.]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "StartIn",
         "type": "object"
       },
       "SubjectTeam": {
@@ -17700,6 +18182,46 @@
           }
         },
         "summary": "Register",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/start": {
+      "post": {
+        "description": "The public entry's \u00abSpeichern\u00bb: an account from an e-mail alone, a sign-in link by mail.",
+        "operationId": "start_v1_auth_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start",
         "tags": [
           "auth"
         ]
@@ -33726,7 +34248,7 @@
         ]
       },
       "post": {
-        "description": "Read-only link; the token is shown once.",
+        "description": "Read-only link; the token stays copyable for the team's staff (list).",
         "operationId": "create_v1_orgs__org_id__teams__team_id__share_links_post",
         "parameters": [
           {
@@ -34943,6 +35465,58 @@
         ]
       }
     },
+    "/v1/public/clubs/{club_id}/teams/{official_id}": {
+      "get": {
+        "description": "Last result, rank and table, form, scorers and next game of a team.",
+        "operationId": "team_preview_v1_public_clubs__club_id__teams__official_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "club_id",
+            "required": true,
+            "schema": {
+              "title": "Club Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "official_id",
+            "required": true,
+            "schema": {
+              "title": "Official Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicTeamPreview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Team Preview",
+        "tags": [
+          "public"
+        ]
+      }
+    },
     "/v1/public/profiles/{slug}": {
       "get": {
         "operationId": "show_v1_public_profiles__slug__get",
@@ -35030,6 +35604,55 @@
         "summary": "Reel",
         "tags": [
           "profiles"
+        ]
+      }
+    },
+    "/v1/public/teams": {
+      "get": {
+        "description": "Teams of the current season of clubs matching the name or town.",
+        "operationId": "search_teams_v1_public_teams_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 80,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PublicTeamHit"
+                  },
+                  "title": "Response Search Teams V1 Public Teams Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search Teams",
+        "tags": [
+          "public"
         ]
       }
     },

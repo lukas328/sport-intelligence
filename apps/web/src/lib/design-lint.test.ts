@@ -26,12 +26,14 @@ const COLOUR_FILES = new Set([
   "app/app/[orgId]/matches/[matchId]/workspace.tsx",
   "app/app/[orgId]/teams/[teamId]/matches/new-match-form.tsx",
   "app/app/[orgId]/presentations/[presId]/remote/remote.tsx",
-  "app/(site)/onboarding/wizard.tsx",
+  "app/(einstieg)/onboarding/wizard.tsx",
   "app/layout.tsx",
   "app/manifest.ts",
   "components/video/mini-court.tsx",
   "components/anlauf/tactics-camera.tsx",
   "app/app/[orgId]/matches/[matchId]/video-stage.tsx",
+  // the big screen of a collection: the dark camera bar colours
+  "app/app/[orgId]/collections/[collectionId]/present/present-view.tsx",
   "app/app/[orgId]/matches/[matchId]/check/check-view.tsx",
   "app/app/[orgId]/collections/[collectionId]/page.tsx",
   "components/video/spotlight.tsx",
@@ -61,6 +63,22 @@ describe("design rules", () => {
     const glyphs = /[▶◀►◄⏸⏵⏯⏮⏭✓✔✕✖↑↓⬇⬆★☆⚑⚠✎✏🗑⟲↺↻➜➔▲▼❚⛶🔇🔊]/u;
     const bad = sources.filter((f) => glyphs.test(f.text.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")));
     expect(bad.map((f) => f.path)).toEqual([]);
+  });
+
+  it("sets nothing that is read under 14 px; only mono labels may be 13 px (UX test H08)", () => {
+    const css = readFileSync(join(SRC, "app", "globals.css"), "utf8");
+    // text-xs is 14 px in this app (the token), not Tailwind's 12 px
+    expect(css).toMatch(/--text-xs:\s*0\.875rem/);
+    const tiny = /text-\[(?:\d|1[0-2])px\]|text-\[0\.(?:[0-6]\d*|7[0-4]\d*)rem\]|text-\[0\.75rem\]|text-\[0\.6875rem\]/;
+    const thirteen = /text-\[13px\]|text-\[0\.8125rem\]/;
+    const bad: string[] = [];
+    for (const f of sources) {
+      for (const m of f.text.matchAll(/(["'`])([^"'`\n]*?text-\[[^"'`\n]*?)\1/g)) {
+        const cls = m[2]!;
+        if (tiny.test(cls) || (thirteen.test(cls) && !cls.includes("font-mono"))) bad.push(`${f.path}: ${cls.slice(0, 80)}`);
+      }
+    }
+    expect(bad).toEqual([]);
   });
 
   it("takes colours from tokens", () => {
@@ -97,6 +115,7 @@ describe("design rules", () => {
       "app/app/[orgId]/collections/[collectionId]/page.tsx",
       // the key "Tor wir" of the Spieltag
       "app/app/[orgId]/matches/[matchId]/live/live-view.tsx",
+      "app/app/[orgId]/matches/[matchId]/marks/marks-view.tsx",
       ...CLUB_AREA_LEGACY,
     ]);
     const bad = sources.filter((f) => /(?<![\w-])bg-club(?![\w-])/.test(f.text) && !allowed.has(f.path.replaceAll("\\", "/")));

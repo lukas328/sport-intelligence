@@ -24,6 +24,15 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${match.halftime_own}:${match.halftime_opponent}` : null;
   const kick = [when, match.competition, match.venue].filter(Boolean).join(" · ");
   const scoreText = match.score_own != null && match.score_opponent != null ? t("scoreLabel", { own: match.score_own, opp: match.score_opponent }) : null;
+  // before the game the head shows when it starts instead of an empty result (UX test B42)
+  const upcoming = match.score_own == null && kickoff.getTime() > Date.now();
+  const pending = upcoming ? (
+    <>
+      {format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "short" })}
+      <br />
+      {format.dateTime(kickoff, { hour: "2-digit", minute: "2-digit" })}
+    </>
+  ) : undefined;
   const colourOpen = !match.opponent_colors && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
@@ -38,6 +47,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           title={title}
           own={match.score_own}
           opp={match.score_opponent}
+          pending={pending}
           ownName={ownName}
           oppName={oppName}
           goals={graphics ? reportGoals(graphics) : null}
@@ -62,6 +72,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue].filter(Boolean).join(" · ")}
           own={match.score_own}
           opp={match.score_opponent}
+          pending={pending}
         />
       )}
     </div>

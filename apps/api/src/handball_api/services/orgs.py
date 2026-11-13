@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import replace
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import func, select
 
@@ -12,7 +12,7 @@ from handball_api.core.db import disable_system_access, enable_system_access, se
 from handball_api.core.errors import ProblemError
 from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import Membership, Organization, OrgMembership, Season, Team, User
-from handball_api.models.enums import OrgRole, TeamRole
+from handball_api.models.enums import OrgRole, Plan, TeamRole
 from handball_api.schemas.orgs import (
     OrgCreate,
     OrgUpdate,
@@ -23,6 +23,7 @@ from handball_api.schemas.orgs import (
 )
 from handball_api.services import audit, billing
 from handball_api.services.context import Ctx
+from handball_api.services.plans import PLANS
 from handball_api.services.policies import Action, Actor, authorize, visible_team_ids
 
 LOGO_TYPES = {
@@ -48,6 +49,13 @@ async def create_org(ctx: Ctx, user: User, data: OrgCreate) -> Organization:
         primary_color=data.primary_color,
         secondary_color=data.secondary_color,
     )
+    if ctx.settings.trial_on_signup:
+        # the Team plan's trial from packages/plans; effective_plan falls back to Free after it
+        days = PLANS[Plan.TEAM].trial_days
+        if days:
+            org.plan = Plan.TEAM
+            org.trial_ends_at = datetime.now(UTC) + timedelta(days=days)
+            org.trial_used = True
     ctx.db.add(org)
     await ctx.db.flush()
     ctx.db.add(OrgMembership(organization_id=org.id, user_id=user.id, role=OrgRole.ORG_ADMIN))

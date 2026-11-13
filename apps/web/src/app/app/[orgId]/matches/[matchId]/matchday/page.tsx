@@ -9,9 +9,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Spieltag (SPEC 7.11): courtside capture, full screen. One address for both levels that exist
- * today: score and team events (default) and quick marks (?mode=marks). The old /live and /marks
- * routes redirect here.
+ * Spieltag (SPEC 7.11): courtside capture, full screen. The six big keys first (UX test B22);
+ * the capture per player behind «Pro Spielerin erfassen» (?mode=detail). The old /live and
+ * /marks routes redirect here.
  */
 export default async function MatchdayPage({
   params,
@@ -21,7 +21,7 @@ export default async function MatchdayPage({
   searchParams: Promise<{ mode?: string }>;
 }) {
   const { orgId, matchId } = await params;
-  if ((await searchParams).mode !== "marks") return <LiveClient orgId={orgId} matchId={matchId} />;
+  if ((await searchParams).mode === "detail") return <LiveClient orgId={orgId} matchId={matchId} />;
   const client = await serverApi();
   const { data: match } = await client.GET("/v1/orgs/{org_id}/matches/{match_id}", { params: { path: { org_id: orgId, match_id: matchId } } });
   const team = match ? (await client.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: match.team_id } } })).data : null;
@@ -33,6 +33,7 @@ export default async function MatchdayPage({
       own={team?.name ?? ""}
       opp={match?.opponent?.name ?? ""}
       kickoffAt={match?.kickoff_at ?? null}
+      oppColor={match?.opponent_colors?.color ?? null}
     />
   );
 }

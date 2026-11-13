@@ -10,13 +10,13 @@ import { goalRuns, reportGoals, type MatchGraphics } from "@/lib/graphics";
 import { cn } from "@/lib/utils";
 
 /** Gegentore and eigene Tore by position: counts at the zones, the shot spots as dots. */
-export function MatchZones({ graphics, row = false }: { graphics: MatchGraphics; row?: boolean }) {
+export function MatchZones({ graphics, row = false, only }: { graphics: MatchGraphics; row?: boolean; only?: "opp" | "own" }) {
   const t = useTranslations("anlauf");
   const names = Object.fromEntries(["la", "ra", "rl", "rm", "rr", "kr", "m7", "gs"].map((z) => [z, t(`zoneShort.${z}` as "zoneShort.la")]));
   const sides = [
     { team: "opp" as const, title: t("conceded") },
     { team: "own" as const, title: t("scored") },
-  ];
+  ].filter((x) => !only || x.team === only);
   return (
     <aside className={cn("grid gap-10", row ? "md:grid-cols-2" : "content-start")}>
       {sides.map((s) => {
@@ -55,11 +55,11 @@ export function MatchCamera({ orgId, matchId, graphics, oppName }: { orgId: stri
         <SectionHead title={<span id="camera-title">{t("cameraTitle")}</span>} note={goal ? clockOf(goal.minute) : undefined} action={goal ? <AttnTag>{label}</AttnTag> : undefined} />
         {eventId && <SceneCamera key={eventId} orgId={orgId} matchId={matchId} eventId={eventId} label={label} view="camL" width={900} caption={label} />}
         <CameraKey us={t("us")} them={oppName} referee={t("referee")} ball={t("ball")} />
-        <p className="mt-1 text-[13px] text-ink-2">{t("numberRead")}</p>
+        <p className="mt-1 text-[15px] text-ink-2">{t("numberRead")}</p>
         {graphics.report_goals.length > 0 && (
           <div className="mt-6">
             <Rail goals={reportGoals(graphics)} at={goal?.minute ?? null} label={t("rail")} />
-            <p className="mt-1 flex justify-between text-[13px] text-ink-2">
+            <p className="mt-1 flex justify-between text-[15px] text-ink-2">
               <span>0:00</span>
               <span>60:00</span>
             </p>
@@ -82,7 +82,7 @@ export function MatchCamera({ orgId, matchId, graphics, oppName }: { orgId: stri
                   <b className="font-num text-[17px]">{clockOf(g.minute)}</b>
                   <span className="text-[15px] leading-snug">
                     {t("goalOf", { team: g.team === "opp" ? oppName : t("us"), clock: "" }).trim()}
-                    {g.zone && <small className={cn("block text-[13px]", on ? "text-attn-ink" : "text-ink-2")}>{t(`zoneShort.${g.zone}` as "zoneShort.la")}</small>}
+                    {g.zone && <small className={cn("block text-[15px]", on ? "text-attn-ink" : "text-ink-2")}>{t(`zoneShort.${g.zone}` as "zoneShort.la")}</small>}
                   </span>
                 </button>
               </li>

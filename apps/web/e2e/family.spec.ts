@@ -9,8 +9,6 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   await page.getByLabel("Vereinsname").fill("HC Familie");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U13");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
@@ -59,7 +57,8 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   // coach: similar kits are flagged while creating a match
   await page.goto(`/app/${orgId}/teams/${teamId}/matches`);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Rot");
-  await expect(page.getByLabel("Spielformat")).toHaveValue("adult_2x30");
+  await page.getByText("Mehr: Wettbewerb, Halle, Spieldauer, Trikots").click();
+  await expect(page.getByLabel("Spieldauer")).toHaveValue("adult_2x30");
   await page.getByLabel("Gegner Feldspieler").fill("#0d6ccc");
   await expect(page.getByTestId("kit-warning")).toContainText("Eigenes Team / Gegner");
   await expectAccessible(page);

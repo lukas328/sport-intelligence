@@ -42,13 +42,13 @@ export function ShareButton({ orgId, teamId, kind, targetId }: { orgId: string; 
         <Button variant="secondary">
           <Share2 aria-hidden />
           {/* phones: the icon alone, so the main tabs keep their room */}
-          <span className="max-sm:sr-only">{t("button")}</span>
+          <span>{t("button")}</span>
         </Button>
       }
     >
       {!url ? (
         <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1 text-[0.8125rem] font-medium">
+          <label className="flex flex-col gap-1 text-[0.9375rem] font-medium">
             {t("valid")}
             <select value={days} onChange={(e) => setDays(Number(e.target.value))} className={cn(control, "w-40")}>
               {[1, 7, 14, 30, 90].map((d) => (
@@ -64,7 +64,7 @@ export function ShareButton({ orgId, teamId, kind, targetId }: { orgId: string; 
         </div>
       ) : (
         <div className="space-y-3">
-          <label className="flex flex-col gap-1 text-[0.8125rem] font-medium">
+          <label className="flex flex-col gap-1 text-[0.9375rem] font-medium">
             {t("link")}
             <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={cn(control, "font-mono text-xs")} data-testid="share-url" />
           </label>

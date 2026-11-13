@@ -49,6 +49,9 @@ class OrgOut(ApiModel):
     # official club link (federation onboarding): none | unverified | verified
     verification: str = "none"
     official_club_id: int | None = None
+    # a video uploaded or a second person in the club: from then on the two-factor reminder
+    # shows (UX test H13; the obligation itself is unchanged)
+    something_to_protect: bool = False
 
 
 class SeasonCreate(ApiModel):

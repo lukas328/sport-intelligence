@@ -8,7 +8,6 @@ import {
   BookOpen,
   Camera,
   Clapperboard,
-  Grid3x3,
   MessageCircleQuestion,
   Plus,
   ScanSearch,
@@ -81,7 +80,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   <Command.Item
                     value={`ask ${q}`}
                     forceMount
-                    onSelect={() => go(`${teamBase}/assistant?q=${encodeURIComponent(q.trim())}`)}
+                    onSelect={() => go(`${teamBase}/scenes?q=${encodeURIComponent(q.trim())}`)}
                     className={item}
                   >
                     <MessageCircleQuestion />
@@ -97,7 +96,6 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 })}
                 {teamBase && staff && row("collections", t("shell.collections"), <BookOpen />, `${teamBase}/collections`, ["playlists", "präsentationen", "presentations", "sammlung"])}
                 {teamBase && staff && row("plays", t("shell.plays"), <BookOpen />, `${teamBase}/plays`, ["spielzüge", "taktik", "tactics"])}
-                {teamBase && staff && row("matrix", t("palette.matrix"), <Grid3x3 />, `${teamBase}/matrix`)}
                 {row("me", t("shell.me"), <UserRound />, `${base}/me`, ["profil", "profile", "passwort", "password"])}
                 {(org.my_role === "org_admin" || teams.some((x) => x.my_role === "coach")) &&
                   row("club", t("shell.club"), <Settings />, `${base}/club`, ["einstellungen", "settings", "teamfunktionen"])}
@@ -106,7 +104,6 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 <Command.Group heading={t("palette.actions")} className={group}>
                   {row("upload", t("shell.upload"), <Upload />, `${teamBase}/matches?upload=1`, ["video"])}
                   {row("new-match", t("palette.newMatch"), <Plus />, `${teamBase}/matches?new=1`)}
-                  {row("ask", t("palette.ask"), <MessageCircleQuestion />, `${teamBase}/assistant`)}
                   {row("search", t("palette.searchScenes"), <ScanSearch />, `${teamBase}/scenes`)}
                   {row("paper", t("palette.paper"), <Camera />, `${teamBase}/matches?report=1`)}
                 </Command.Group>

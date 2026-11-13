@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ChevronLeft, Plus, Search } from "lucide-react";
@@ -37,13 +37,14 @@ export function AppShell({
   org: ShellOrg;
   orgs: { id: string; name: string }[];
   teams: ShellTeam[];
-  me: { name: string; email: string };
+  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
   savedTeam: string | null;
   banner?: ReactNode;
   children: ReactNode;
 }) {
   const t = useTranslations("shell");
   const path = usePathname();
+  const search = useSearchParams();
   const [chosen, setChosen] = useState<string | null>(savedTeam);
   const urlTeam = teamInPath(path);
   const teamId =
@@ -69,6 +70,7 @@ export function AppShell({
   // one action reachable from everywhere for staff (SPEC section 6)
   const upload = mode === "staff" ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
+  const searchHref = mode === "staff" && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
   useEffect(() => {
@@ -93,13 +95,14 @@ export function AppShell({
 
   // courtside and presentation tools use the whole screen, with one way back
   const tool = /\/(present|remote|live|marks|matchday|check)$/.test(path);
+  // Prüfen and the Spieltag keys bring their own top line («Später weiter», «Beenden»)
+  const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") !== "detail");
   if (tool) {
     const back = path.replace(/\/[^/]+$/, "");
     return (
       <ShellContext.Provider value={value}>
         <div className="flex min-h-dvh flex-col">
-          {/* Prüfen brings its own top line («Prüfen · Thalwil», «Später weiter») */}
-          {!path.endsWith("/check") && (
+          {!ownTop && (
             <header className="flex h-[60px] items-center gap-3 border-b-2 border-ink px-4 md:px-8">
               <Link
                 href={back}
@@ -143,7 +146,7 @@ export function AppShell({
                 className="font-slant flex shrink-0 items-center gap-3 text-xl leading-none whitespace-nowrap text-ink no-underline"
               >
                 {/* the product in ink, then the club: the colours belong to the club */}
-                <AppMark size={24} className="-mr-0.5" />
+                <AppMark size={32} />
                 <ClubMark org={org} />
                 {org.name}
               </Link>
@@ -173,14 +176,21 @@ export function AppShell({
                 })}
               </nav>
               <div className="ml-auto flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => setPalette(true)}
-                  className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
-                  data-testid="palette-open"
-                >
-                  {t("search")}
-                </button>
+                {/* «Suchen» is the scene search (SPEC 9); the palette stays on Ctrl+K */}
+                {searchHref ? (
+                  <Link href={searchHref} className="min-h-11 content-center font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="search-open">
+                    {t("search")}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setPalette(true)}
+                    className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
+                    data-testid="palette-open"
+                  >
+                    {t("search")}
+                  </button>
+                )}
                 {upload && (
                   <Link
                     href={upload}
@@ -194,31 +204,25 @@ export function AppShell({
                 <AccountMenu compact />
               </div>
             </div>
-            {/* phone top bar */}
-            <div className="flex h-[60px] items-center gap-3 px-4 lg:hidden">
-              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center gap-2">
-                <AppMark size={22} />
-                <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
+            {/* phone top bar (UX test H06, H09): the crest, the team name kept also with large
+                text, the bell, «Video» with its word, the account; the search is Szenen */}
+            <div className="flex h-[60px] items-center gap-2 px-4 lg:hidden">
+              {/* with large text the crest gives way, the team name stays (UX test H09) */}
+              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center max-[359px]:hidden">
+                <ClubMark org={org} className="h-[34px] w-[30px] text-[14px]" />
               </Link>
               <div className="min-w-0 flex-1">
                 <TeamSwitcher compact />
               </div>
-              <button
-                type="button"
-                aria-label={t("search")}
-                onClick={() => setPalette(true)}
-                className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink"
-              >
-                <Search aria-hidden className="size-5" />
-              </button>
+              <NotificationBell orgId={org.id} />
               {upload && (
                 <Link
                   href={upload}
-                  aria-label={t("upload")}
-                  className="grid size-11 place-items-center border-2 border-ink bg-ink text-ground"
+                  className="flex h-11 shrink-0 items-center gap-1 border-2 border-ink bg-ink px-2.5 text-[15px] font-bold text-ground no-underline"
                   data-testid="upload-video-compact"
                 >
-                  <Plus aria-hidden className="size-5" strokeWidth={2.6} />
+                  <Plus aria-hidden className="size-4" strokeWidth={2.6} />
+                  {t("uploadShort")}
                 </Link>
               )}
               <AccountMenu compact />

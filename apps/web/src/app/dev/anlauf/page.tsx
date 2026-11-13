@@ -111,7 +111,7 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
               <div className="md:col-span-2">
                 <SectionHead title="Spielverlauf" note="Tore aus dem Matchblatt" />
                 <Rail goals={DEMO_REPORT} phase={DEMO_PHASE} at={39.9} label="Tore im Spielverlauf" />
-                <p className="mt-1 flex justify-between text-[13px] text-ink-2">
+                <p className="mt-1 flex justify-between text-[15px] text-ink-2">
                   <span>0:00</span>
                   <span>
                     <AttnTag>{phaseText}</AttnTag>

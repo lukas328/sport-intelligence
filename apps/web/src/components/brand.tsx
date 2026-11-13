@@ -11,7 +11,15 @@ export function AppMark({ className, size = 24 }: { className?: string; size?: n
   return <img src={size < 48 ? "/brand/favicon-32-tinte.svg" : "/brand/zeichen-tinte.svg"} alt="" width={size} height={size} className={cn("shrink-0", className)} />;
 }
 
-/** The two-coloured word mark «Handball Intelligence», outside the app; at least 220 px wide. */
+/**
+ * The two-coloured word mark «Handball Intelligence», outside the app: across from 220 px wide,
+ * on phones the two-line version (from 140 px).
+ */
 export function BrandWordmark({ name, className }: { name: string; className?: string }) {
-  return <img src="/brand/wortmarke-quer.svg" alt={name} width={231} height={55} className={cn("h-[55px] w-auto", className)} />;
+  return (
+    <span className={cn("inline-flex shrink-0", className)}>
+      <img src="/brand/wortmarke-quer.svg" alt={name} width={231} height={55} className="h-[55px] w-auto max-sm:hidden" />
+      <img src="/brand/wortmarke-zweizeilig.svg" alt={name} width={145} height={51} className="h-[51px] w-auto sm:hidden" />
+    </span>
+  );
 }

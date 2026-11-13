@@ -30,8 +30,8 @@
     "insights": {
       "shooting_below": "Wurfquote {value} % ({k} aus {n}), sonst {baseline} % in dieser Saison.",
       "shooting_above": "Wurfquote {value} % ({k} aus {n}), deutlich über dem Saisonschnitt von {baseline} %.",
-      "saves_below": "Paradenquote {value} % ({k} von {n} Würfen aufs Tor), sonst {baseline} %.",
-      "saves_above": "Paradenquote {value} % ({k} von {n}), klar über dem Saisonschnitt von {baseline} %.",
+      "saves_below": "Gehaltene Würfe {value} % ({k} von {n} aufs Tor), sonst {baseline} %.",
+      "saves_above": "Gehaltene Würfe {value} % ({k} von {n}), klar über dem Saisonschnitt von {baseline} %.",
       "turnovers_high": "{value} Ballverluste, im Schnitt sonst {baseline}. Am häufigsten: {type} ({type_count}).",
       "seven_m_low": "Nur {k} von {n} Siebenmetern verwertet ({value} %).",
       "zone_weak": "Von {zone} nur {k} Tore aus {n} Würfen, das Team trifft sonst {avg} %.",

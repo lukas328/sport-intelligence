@@ -23,7 +23,6 @@ export const METRICS = [
   "on_target_pct",
   "saves",
   "save_pct",
-  "xg",
   "turnovers",
   "steals",
   "suspensions",

@@ -202,37 +202,45 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   );
 }
 
-/** The upload starts from a match: the played ones without a video first, or a new one. */
+/** The upload starts from a match (UX test H07): first only the list, the last played match on
+ * top and marked; a new match is a second step of its own. */
 function UploadPicker({ open, onOpenChange, orgId, teamId, matches }: { open: boolean; onOpenChange: (o: boolean) => void; orgId: string; teamId: string; matches: Match[] }) {
   const t = useTranslations();
   const format = useFormatter();
+  const [other, setOther] = useState(false);
   const now = Date.now();
   const candidates = matches
     .filter((m) => !m.has_video && m.kind !== "training" && new Date(m.kickoff_at).getTime() < now + 86_400_000)
     .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at))
     .slice(0, 5);
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title={t("matches.uploadVideo")} wide>
+    <Dialog open={open} onOpenChange={(o) => (setOther(false), onOpenChange(o))} title={t("matches.uploadVideo")} wide>
       <div className="space-y-6" data-testid="upload-picker">
-        {candidates.length > 0 && (
+        {!other && candidates.length > 0 && (
           <section className="space-y-2">
-            <h3 className="font-semibold">{t("matches.uploadFor")}</h3>
-            <ul className="border-t border-foreground/15">
-              {candidates.map((m) => (
-                <li key={m.id} className="border-b border-foreground/10">
-                  <Link href={`/app/${orgId}/matches/${m.id}`} className="flex min-h-11 items-center justify-between gap-3 px-1 py-2 hover:bg-surface">
-                    <span className="font-medium">{m.opponent_name}</span>
-                    <span className="text-sm text-muted">{format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "short" })}</span>
+            <h3 className="text-[17px] font-bold">{t("matches.uploadFor")}</h3>
+            <ul className="m-0 list-none border-t-2 border-ink p-0">
+              {candidates.map((m, i) => (
+                <li key={m.id} className="border-b border-rule">
+                  <Link href={`/app/${orgId}/matches/${m.id}?tab=video#upload`} className={cn("flex min-h-14 items-center justify-between gap-3 px-2 py-2 text-[17px] no-underline", i === 0 ? "bg-ink text-ground" : "text-ink hover:bg-surface")} data-testid={i === 0 ? "upload-last" : undefined}>
+                    <span className="font-bold">{m.opponent_name}</span>
+                    <span className={cn("text-[15px]", i === 0 ? "text-ground" : "text-ink-2")}>{format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "short" })}</span>
                   </Link>
                 </li>
               ))}
             </ul>
           </section>
         )}
-        <section className="space-y-3">
-          <h3 className="font-semibold">{candidates.length > 0 ? t("matches.uploadOther") : t("matches.new")}</h3>
-          <NewMatchForm orgId={orgId} teamId={teamId} />
-        </section>
+        {!other && candidates.length > 0 ? (
+          <button type="button" onClick={() => setOther(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" data-testid="upload-other">
+            {t("matches.uploadOther")}
+          </button>
+        ) : (
+          <section className="space-y-3">
+            <h3 className="text-[17px] font-bold">{t("matches.new")}</h3>
+            <NewMatchForm orgId={orgId} teamId={teamId} />
+          </section>
+        )}
       </div>
     </Dialog>
   );

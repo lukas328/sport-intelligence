@@ -87,10 +87,10 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
           )}
           {rep && (
             <>
-              <a className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/pdf?lang=${locale}`}>
+              <a className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/pdf?lang=${locale}`}>
                 {t("pdf")}
               </a>
-              <a className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/goalkeeper-card?lang=${locale}`}>
+              <a className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/goalkeeper-card?lang=${locale}`}>
                 {t("gkCard")}
               </a>
               <Button variant="secondary" loading={asPresentation.isPending} onClick={() => asPresentation.mutate(rep.id)}>
@@ -147,7 +147,7 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
                 <li key={s.number} className="flex gap-3 ring-1 ring-inset ring-border p-2 text-sm">
                   <div className="grid size-16 shrink-0 grid-cols-3 border border-error" aria-hidden>
                     {GRID.map((z) => (
-                      <span key={z} className="flex items-center justify-center text-[10px] tabular-nums" style={{ background: s.goal_zones[z] ? `rgba(220,38,38,${0.15 + 0.6 * (s.goal_zones[z]! / Math.max(...Object.values(s.goal_zones)))})` : undefined }}>
+                      <span key={z} className="flex items-center justify-center text-[14px] tabular-nums" style={{ background: s.goal_zones[z] ? `rgba(220,38,38,${0.15 + 0.6 * (s.goal_zones[z]! / Math.max(...Object.values(s.goal_zones)))})` : undefined }}>
                         {s.goal_zones[z] ?? ""}
                       </span>
                     ))}

@@ -259,6 +259,28 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   block. *Open:* a table for teams without a federation feed (entered by hand, or from the
   match reports of the whole group) is not planned; the demo club is not linked, so its
   screenshots show the page without a table.
-- **Q-UX-20 Prüfen as questions.** SPEC 7.5 asks one question at a time with a boxed crop.
-  The analysis delivers no box per person yet, so only goal and shot candidates are asked, in
-  the existing review of the Video tab. *Assumption:* the question screen comes with the boxes.
+- **Q-UX-20 Prüfen as questions.** Built 2026-11-12: the court first, then the goal candidates,
+  then, once the court is confirmed, the own tracks without a name (longest in view first, at
+  most six per video). The box around the person comes from the track's foot point and the court
+  homography (`personBox` in lib/spotlight.ts: image scale at the feet, fixed body height
+  1.85 m), shown as a crop of the running video. *Open:* the box is an estimate (only the ground
+  plane is calibrated); a detector box per person would be exact. «Gegner» as an answer needs
+  an API to mark a track as not ours; until then «Weiss nicht».
+
+## UX test round 1, second delivery (2026-11-13)
+
+- **Q-BILL-TRIAL Trial at sign-up (business rule, Lukas to confirm).** Checked 2026-11-13: with
+  `billing_enforce` on, a new club started on Free (`analysis: false`, no `tracking`), so its
+  first video was stored but never analysed, without a word; the 30 days of `trial_days` began
+  only through Stripe checkout or `ops.extend_trial`. Built: creating a club starts the Team
+  plan's trial from `packages/plans/plans.json` at once, without payment details
+  (`services/orgs.py` `create_org`, switch `trial_on_signup` in `core/config.py`, default on;
+  `trial_used` is set, so a later checkout starts no second trial). When it ends,
+  `billing.effective_plan` falls back to Free; nothing is deleted. Test
+  `test_billing.py::test_new_club_starts_the_trial_and_its_first_video_is_analysed`. *Open:*
+  confirm the rule (trial without card for every new club) and the wording «30 Tage alles
+  gratis. Danach entscheidest du.»
+- **Q-AUTH-2b Two-factor reminder later (Lukas to confirm).** The obligation itself is unchanged
+  (Q-AUTH-2). Only the reminder moved: no banner on every page; it appears once there is
+  something to protect (a first video uploaded or a second person invited), as a quiet task on
+  the team page and an entry with a dot in the account menu, dismissible for seven days.

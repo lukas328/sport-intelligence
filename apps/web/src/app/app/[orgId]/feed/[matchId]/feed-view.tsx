@@ -109,7 +109,7 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
               </button>
             ))}
           </fieldset>
-          <p className="flex max-w-[17rem] justify-between text-[0.8125rem] text-muted" aria-hidden>
+          <p className="flex max-w-[17rem] justify-between text-[0.9375rem] text-muted" aria-hidden>
             <span>{t("ratingLow")}</span>
             <span>{t("ratingHigh")}</span>
           </p>

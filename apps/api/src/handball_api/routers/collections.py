@@ -86,6 +86,9 @@ class CollectionPatch(ApiModel):
 class FromMatch(ApiModel):
     match_id: uuid.UUID
     title: str = Field(min_length=1, max_length=200)
+    # the three things as the app shows them (a note per thing, then its scenes); without them
+    # the server falls back to the match insights
+    items: list[ItemIn] | None = None
 
 
 def _items(items: list[ItemIn] | None) -> list[dict[str, Any]] | None:
@@ -109,7 +112,7 @@ async def create_collection(team_id: uuid.UUID, data: CollectionCreate, scope: O
 )
 async def collection_from_match(team_id: uuid.UUID, data: FromMatch, scope: OrgDep) -> Any:
     """'Fürs Team zusammenstellen': a draft with the scenes behind the three things of a match."""
-    c = await service.from_match(scope.ctx, team_id, data.match_id, data.title)
+    c = await service.from_match(scope.ctx, team_id, data.match_id, data.title, _items(data.items))
     return await service.get(scope.ctx, c.id)
 
 

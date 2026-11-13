@@ -13,7 +13,6 @@ import { Sheet, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { decided } from "@/lib/match-decided";
 import { cn } from "@/lib/utils";
-import { xgLabel, xgShown } from "@/lib/xg";
 import { useOpponentName } from "@/lib/opponent";
 
 type ZoneCount = Record<string, { shots: number; goals: number }>;
@@ -43,6 +42,8 @@ interface TeamStats {
   goal_zones: ZoneCount;
   by_situation: Record<string, { shots: number; goals: number; pct: number | null }>;
   xg: number;
+  /** what the sources recorded at all (metrics): a figure never recorded is empty, not 0 */
+  known?: { shooting: boolean; saving: boolean; turnovers: boolean };
 }
 interface PlayerRow {
   side: "own" | "opponent";
@@ -83,6 +84,8 @@ export interface Stats {
   players: Record<string, PlayerRow>;
   goalkeepers?: Record<string, KeeperRow>;
   timeline: {
+    /** false: goals without times (a paper report), so no order, no runs, no course */
+    timed?: boolean;
     score: { clock_s: number; own: number; opp: number }[];
     best_run: Record<string, { goals: number; from_s: number | null }>;
     longest_own_drought_s: { seconds: number };
@@ -99,6 +102,11 @@ export function useStats(orgId: string, matchId: string) {
         .data ?? null) as Stats | null,
   });
 }
+
+// a side's shots are known when one of its attempts was not a goal; its keeper's saves when one of
+// the other side's was (older stats without `known` count as recorded)
+const shotsKnown = (s: TeamStats) => s.known?.shooting !== false;
+const savesKnown = (s: TeamStats) => s.known?.saving !== false;
 
 // a share above 100 % means the sources disagree (goals from a report, attacks from a clip): no figure
 const pct = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Math.round(v * 100)} %`);
@@ -156,20 +164,29 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter; low?: boolean }[] = [
     { label: t("goals"), own: stats.own.goals, opp: stats.opponent.goals, filter: (s) => ({ side: s, type: "shot", outcome: "goal" }) },
     // goals alone (score overlay): shot counts and xG would only repeat the goals
-    ...(attempts ? [{ label: t("shots"), own: stats.own.shots, opp: stats.opponent.shots, filter: (s: "own" | "opponent") => ({ side: s, type: "shot" }) as EventFilter }] : []),
+    // per side: a count the sources never recorded reads "-", not 0
+    ...(attempts
+      ? [{ label: t("shots"), own: shotsKnown(stats.own) ? stats.own.shots : "-", opp: shotsKnown(stats.opponent) ? stats.opponent.shots : "-", filter: (s: "own" | "opponent") => ({ side: s, type: "shot" }) as EventFilter }]
+      : []),
     { label: t("shootingPct"), own: pct(stats.own.shooting_pct), opp: pct(stats.opponent.shooting_pct) },
-    ...(attempts ? [{ label: t("saves"), own: stats.own.saves, opp: stats.opponent.saves, filter: (s: "own" | "opponent") => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) as EventFilter }] : []),
+    ...(attempts
+      ? [{ label: t("saves"), own: savesKnown(stats.own) ? stats.own.saves : "-", opp: savesKnown(stats.opponent) ? stats.opponent.saves : "-", filter: (s: "own" | "opponent") => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) as EventFilter }]
+      : []),
     { label: t("savePct"), own: pct(stats.own.save_pct), opp: pct(stats.opponent.save_pct) },
-    { label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s) => ({ side: s, type: "turnover" }), low: true },
+    ...(stats.own.known?.turnovers === false
+      ? []
+      : [{ label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s: "own" | "opponent") => ({ side: s, type: "turnover" }) as EventFilter, low: true }]),
     ...(stats.own.seven_m_shots + stats.opponent.seven_m_shots > 0 ? [{ label: t("sevenM"), own: `${stats.own.seven_m_goals}/${stats.own.seven_m_shots}`, opp: `${stats.opponent.seven_m_goals}/${stats.opponent.seven_m_shots}` }] : []),
-    { label: t("fastBreakGoals"), own: stats.own.fast_break_goals, opp: stats.opponent.fast_break_goals, filter: (s) => ({ side: s, zone: "fast_break", outcome: "goal" }) },
+    ...(stats.own.fast_break_goals + stats.opponent.fast_break_goals > 0
+      ? [{ label: t("fastBreakGoals"), own: stats.own.fast_break_goals, opp: stats.opponent.fast_break_goals, filter: (s: "own" | "opponent") => ({ side: s, zone: "fast_break", outcome: "goal" }) as EventFilter }]
+      : []),
     ...(stats.own.suspensions + stats.opponent.suspensions > 0
       ? [{ label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s: "own" | "opponent") => ({ side: s, type: "suspension_2min" }) as EventFilter }]
       : []),
-    { label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) },
-    // xG only where most shots on target have a position (report and overlay goals have none)
-    ...(attempts && (xgShown(stats.own) || xgShown(stats.opponent))
-      ? [{ label: t("xg"), own: xgLabel(stats.own), opp: xgLabel(stats.opponent) }]
+    // attack efficiency only from counted attacks (tracking), never from estimated possessions;
+    // xG is not shown in the match (UX test B07: an estimate the data cannot carry)
+    ...(stats.possessions_source === "tracking"
+      ? [{ label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) }]
       : []),
   ];
   // the one signal of the overview: the counted row the opponent won most clearly (after a win
@@ -256,6 +273,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
         won={match.score_own != null && match.score_opponent != null && match.score_own > match.score_opponent}
       />
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
+        {stats.timeline.timed !== false && stats.timeline.score.length > 1 && (
         <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>
           <ScoreChart
@@ -272,6 +290,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             )}
           </ul>
         </Sheet>
+        )}
         <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("comparison")}</h2>
           <table className="w-full text-sm" data-testid="comparison">
@@ -301,7 +320,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               ))}
             </tbody>
           </table>
-          <p className="text-xs text-muted">{t(stats.possessions_source === "tracking" ? "possessionsTracked" : "possessionsHint")}</p>
+          {stats.possessions_source === "tracking" && <p className="text-xs text-muted">{t("possessionsTracked")}</p>}
         </Sheet>
       </div>
       {scorers.length > 0 && (
@@ -365,7 +384,7 @@ function ScoreChart({
   }
   return (
     <figure className="space-y-3">
-      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.8125rem]">
+      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.9375rem]">
         <span className="inline-flex items-center gap-2 font-medium">
           <span aria-hidden className="h-0.5 w-5 rounded-full bg-accent" />
           {own}
@@ -379,7 +398,7 @@ function ScoreChart({
         {grid.map((g) => (
           <g key={g}>
             <line x1={X(0)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke="var(--border)" strokeWidth={g === 0 ? 1.2 : 0.6} />
-            <text x={X(0) - 8} y={Y(g) + 3.5} fontSize="10" textAnchor="end" fill="var(--muted)">
+            <text x={X(0) - 8} y={Y(g) + 3.5} fontSize="13" textAnchor="end" fill="var(--muted)">
               {g}
             </text>
           </g>
@@ -388,7 +407,7 @@ function ScoreChart({
           <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={8} y2={h - 22} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
         ))}
         {ticks.map((m) => (
-          <text key={m} x={X(m * 60)} y={h - 6} fontSize="10" textAnchor="middle" fill="var(--muted)">
+          <text key={m} x={X(m * 60)} y={h - 6} fontSize="13" textAnchor="middle" fill="var(--muted)">
             {m}&apos;
           </text>
         ))}
@@ -396,10 +415,10 @@ function ScoreChart({
         {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />}
         {timed && (
           <>
-            <text x={X(maxT) + 6} y={yo + 4} fontSize="12" fontWeight="700" fill="var(--accent)">
+            <text x={X(maxT) + 6} y={yo + 4} fontSize="14" fontWeight="700" fill="var(--accent)">
               {last.own}
             </text>
-            <text x={X(maxT) + 6} y={yp + 4} fontSize="12" fontWeight="600" fill="var(--muted)">
+            <text x={X(maxT) + 6} y={yp + 4} fontSize="14" fontWeight="600" fill="var(--muted)">
               {last.opp}
             </text>
           </>

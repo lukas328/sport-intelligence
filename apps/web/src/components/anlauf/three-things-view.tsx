@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
@@ -42,8 +43,9 @@ export function ThreeThingsView({
   matchId: string;
   graphics: MatchGraphics;
   oppName: string;
-  onScenes?: (thing: Thing) => void;
-  hrefScenes?: (thing: Thing) => string;
+  /** opens the scenes of a thing; `n` is its place (1 to 3), as in `?thing=n` */
+  onScenes?: (thing: Thing, n: number) => void;
+  hrefScenes?: (thing: Thing, n: number) => string;
 }) {
   const t = useTranslations("anlauf");
   const text = useThingText();
@@ -66,7 +68,7 @@ export function ThreeThingsView({
               things.length === 1 && "md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,480px)] md:content-start md:gap-x-12",
             )}
           >
-            <p className="m-0 w-full font-mono text-[13px] font-bold text-ink-2">{t("index", { n: i + 1, total: things.length })}</p>
+            <p className="m-0 w-full font-mono text-[13px] font-bold text-ink">{t("index", { n: i + 1, total: things.length })}</p>
             <p className="m-0 flex flex-wrap items-baseline gap-x-2.5">
               <b className={cn("font-num text-[64px] leading-[.8] md:text-[96px]", x.team === "own" ? "text-club-text" : "text-ink")}>{x.value}</b>
               <span className="font-slant text-base text-ink-2 md:text-[22px]">{x.key === "conceded_fast_breaks" ? t("unitFastBreaks") : t("unitOf", { of: x.of ?? 0 })}</span>
@@ -77,11 +79,11 @@ export function ThreeThingsView({
             </div>
             {(onScenes || hrefScenes) &&
               (hrefScenes ? (
-                <a href={hrefScenes(x)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
+                <a href={hrefScenes(x, i + 1)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
                   {t("scenes", { count: x.goals.length })}
                 </a>
               ) : (
-                <button type="button" onClick={() => onScenes?.(x)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
+                <button type="button" onClick={() => onScenes?.(x, i + 1)} className={buttonClass("primary", "sm", "mt-auto self-start")}>
                   {t("scenes", { count: x.goals.length })}
                 </button>
               ))}
@@ -123,7 +125,7 @@ function FirstThing({ orgId, matchId, thing, label, oppName }: { orgId: string; 
           type="button"
           aria-pressed={scene == null}
           onClick={() => setScene(null)}
-          className={cn("min-h-11 cursor-pointer border-[1.5px] border-ink px-3 text-[13px] font-bold", scene == null ? "bg-ink text-ground" : "bg-transparent text-ink")}
+          className={cn("min-h-11 cursor-pointer border-[1.5px] border-ink px-3 text-[15px] font-bold", scene == null ? "bg-ink text-ground" : "bg-transparent text-ink")}
         >
           {t("all", { count: thing.goals.length })}
         </button>
@@ -132,7 +134,7 @@ function FirstThing({ orgId, matchId, thing, label, oppName }: { orgId: string; 
             type="button"
             aria-pressed={scene != null}
             onClick={() => setScene(first)}
-            className={cn("-ml-[1.5px] min-h-11 cursor-pointer border-[1.5px] border-ink px-3 text-[13px] font-bold", scene != null ? "bg-ink text-ground" : "bg-transparent text-ink")}
+            className={cn("-ml-[1.5px] min-h-11 cursor-pointer border-[1.5px] border-ink px-3 text-[15px] font-bold", scene != null ? "bg-ink text-ground" : "bg-transparent text-ink")}
           >
             {t("sceneAt", { clock: clockOf(goal?.minute) })}
           </button>
@@ -174,10 +176,23 @@ export function SceneCamera({
   const scene = q.data ? cameraScene(q.data, label) : null;
   if (q.isLoading) return <div className="aspect-[21/17] bg-court" aria-busy="true" />;
   if (!scene) {
+    // the court not confirmed yet: no positions, the question instead, and the way to answer it
+    const ask = q.data != null && q.data.field_confirmed === false;
     return (
-      <div className="relative my-1.5">
-        <EmptyField label={t("noCamera")} />
-        <p className="absolute inset-x-0 top-1/2 m-0 -translate-y-1/2 text-center text-[13px] font-semibold text-ink-2">{q.data && !q.data.field_confirmed ? t("fieldQuestion") : t("noCamera")}</p>
+      <div className="my-1.5" data-testid={ask ? "camera-field-question" : "camera-empty"}>
+        <div className="relative">
+          <EmptyField label={t("noCamera")} />
+          <div className="absolute top-1/2 left-1/2 w-[min(26rem,calc(100%-2rem))] -translate-x-1/2 -translate-y-1/2 bg-paper px-4 py-3 text-center">
+            <p className="m-0 text-[15px] font-bold text-ink">{ask ? t("fieldQuestion") : t("noCamera")}</p>
+            {ask && <p className="m-0 mt-1 text-[15px] text-ink-2">{t("fieldHint")}</p>}
+            {ask && (
+              <Link href={`/app/${orgId}/matches/${matchId}/check`} className="mt-2 inline-flex min-h-11 items-center font-semibold text-ink underline decoration-2 underline-offset-4" data-testid="camera-to-check">
+                {t("fieldCheck")}
+              </Link>
+            )}
+          </div>
+        </div>
+        {barExtra && <div className="flex items-center gap-2.5 bg-court-bar px-3 py-2">{barExtra}</div>}
       </div>
     );
   }
@@ -186,7 +201,7 @@ export function SceneCamera({
       scene={scene}
       view={view}
       width={width}
-      dot={view === "halfB" ? 16 : 12}
+      dot={view === "halfB" ? 17 : 14}
       text={{ label: t("cameraLabel", { label }), pause: t("pause"), play: t("play"), notFound: t("ballNotFound"), noBall: t("noBall"), caption: caption ?? null, captionSmall: caption ? (captionSmall ?? t("positionsFromVideo")) : null }}
       barExtra={barExtra}
     />

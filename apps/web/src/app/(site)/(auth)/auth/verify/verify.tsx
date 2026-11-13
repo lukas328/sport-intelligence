@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 
@@ -19,7 +19,7 @@ export function VerifyEmail() {
     api.POST("/v1/auth/email/verify", { body: { token } }).then(({ error }) => setState(error ? errorKey(error) : "ok"));
   }, [token]);
   return (
-    <Card className="space-y-4">
+    <div className="space-y-4 border-t-2 border-ink pt-6">
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("auth.verifyTitle")}</h1>
       {state === "busy" ? (
         <p role="status" className="text-muted">
@@ -33,6 +33,6 @@ export function VerifyEmail() {
       <Link href="/app" className="text-sm font-medium text-accent hover:underline">
         {t("auth.toApp")}
       </Link>
-    </Card>
+    </div>
   );
 }

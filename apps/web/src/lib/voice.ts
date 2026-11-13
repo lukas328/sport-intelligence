@@ -43,7 +43,7 @@ export function xgGap(goals: number, xg: number): "over" | "under" | null {
 
 /** `xgCoverage`: the share of our shots on target with a position (season totals); below
  * `XG_MIN_COVERAGE` the xG sum is mostly made of shots without one, so it says nothing. */
-export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null): Statement | null {
+export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null, useXg = true): Statement | null {
   if (rows.length === 0) return null;
   const sorted = [...rows].sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at));
   const results = sorted.map(result);
@@ -61,7 +61,7 @@ export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null): 
   const xg = sorted.reduce((s, r) => s + r.xg, 0);
   const against = sorted.reduce((s, r) => s + r.score_opponent, 0);
   const xga = sorted.reduce((s, r) => s + r.xg_against, 0);
-  const attack = xgCoverage === undefined || (xgCoverage != null && xgCoverage >= XG_MIN_COVERAGE) ? xgGap(goals, xg) : null;
+  const attack = !useXg ? null : xgCoverage === undefined || (xgCoverage != null && xgCoverage >= XG_MIN_COVERAGE) ? xgGap(goals, xg) : null;
   if (attack) {
     return {
       headline: { key: attack === "over" ? "voice.overXg" : "voice.underXg", params: {} },
@@ -70,7 +70,7 @@ export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null): 
   }
   // the same rule as for the attack: no statement from xG against that rests on few positions
   const defenceCovered = sorted.every((r) => r.xg_against_coverage === undefined || (r.xg_against_coverage != null && r.xg_against_coverage >= XG_MIN_COVERAGE));
-  const defence = defenceCovered ? xgGap(against, xga) : null;
+  const defence = useXg && defenceCovered ? xgGap(against, xga) : null;
   if (defence === "under") {
     return { headline: { key: "voice.defenceHeld", params: {} }, evidence: { key: "voice.xgaEvidence", params: { against, xga: round1(xga) } } };
   }

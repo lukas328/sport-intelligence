@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { BrandWordmark } from "@/components/brand";
+import { LanguageSwitch } from "@/components/language-switch";
 import { buttonClass } from "@/components/ui/button";
 
 /** Public pages, sign-in, onboarding and back office: a quiet header and centred content. */
@@ -17,6 +18,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             <BrandWordmark name={t("app.name")} />
           </Link>
           <div className="flex items-center gap-1 text-sm">
+            <LanguageSwitch className="max-sm:hidden" />
             <Link href="/status" className="px-3 py-2 text-muted hover:bg-surface hover:text-foreground">
               {t("nav.status")}
             </Link>

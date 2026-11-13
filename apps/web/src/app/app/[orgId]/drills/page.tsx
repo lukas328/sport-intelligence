@@ -50,7 +50,7 @@ export default async function DrillsPage({ params, searchParams }: { params: Pro
             <DrillCourt focus={d.focus.find((f) => f !== "finishing") ?? d.focus[0]!} className="w-full" />
             <div className="min-w-0 space-y-2">
               <h2 className="text-lg leading-tight">{d.name[lang] ?? d.name["de-CH"]}</h2>
-              <p className="text-[0.8125rem] text-muted">
+              <p className="text-[0.9375rem] text-muted">
                 {d.focus.map((f) => t(`focus_${f}`)).join(" · ")} · {t("minutes", { minutes: d.minutes })} · {t("players", { players: d.players })} · {t(`level_${d.level}`)}
               </p>
               <p className="text-sm">

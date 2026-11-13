@@ -122,6 +122,11 @@ export function DiffBars({ matches, width = 700, label }: { matches: readonly { 
   const U = 7;
   const step = width / Math.max(1, matches.length);
   const bw = Math.min(64, step - 22);
+  // a name never runs into its neighbour (UX test H14): cut to the slot, with a point
+  const fit = (s: string) => {
+    const room = Math.floor((step - 8) / 8);
+    return s.length <= room ? s : `${s.slice(0, Math.max(3, room - 1))}.`;
+  };
   return (
     <svg viewBox={`0 0 ${width} ${H}`} role="img" aria-label={label} className="block w-full">
       <line x1={0} x2={width} y1={mid} y2={mid} stroke="var(--ink)" strokeWidth={1.5} />
@@ -145,8 +150,9 @@ export function DiffBars({ matches, width = 700, label }: { matches: readonly { 
             <text x={x + bw / 2} y={up ? mid - h - 8 : mid + h + 22} textAnchor="middle" className="font-num" fill="var(--ink)" style={{ fontSize: 20 }}>
               {signed(v)}
             </text>
-            <text x={x + bw / 2} y={up ? mid + 20 : mid - 10} textAnchor="middle" fill="var(--ink-2)" style={{ font: "600 13px var(--font-sans)" }}>
-              {m.label}
+            <text x={x + bw / 2} y={up ? mid + 20 : mid - 10} textAnchor="middle" fill="var(--ink-2)" style={{ font: "600 14px var(--font-sans)" }}>
+              <title>{m.label}</title>
+              {fit(m.label)}
             </text>
           </g>
         );

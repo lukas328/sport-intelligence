@@ -57,6 +57,54 @@ SQUAD = [
 NO_CONSENT = {14, 19}
 
 
+ZONE_FROM = {
+    "la": "über links aussen",
+    "ra": "über rechts aussen",
+    "rl": "aus dem Rückraum links",
+    "rm": "aus dem Rückraum Mitte",
+    "rr": "aus dem Rückraum rechts",
+    "kr": "vom Kreis",
+}
+
+
+def thing_items(graphics: dict[str, Any]) -> list[dict[str, Any]]:
+    """The three things of a match (as lib/three-things.ts): a note per thing, then its scenes."""
+    goals = [g for g in graphics.get("goals", []) if g.get("t_ms") is not None]
+    opp = [g for g in goals if g["team"] == "opp"]
+    own = [g for g in goals if g["team"] == "own"]
+
+    def top(side: list[dict[str, Any]], skip: set[str]) -> tuple[str, list[dict[str, Any]]] | None:
+        by: dict[str, list[dict[str, Any]]] = {}
+        for g in side:
+            if g.get("zone") and g["zone"] not in skip:
+                by.setdefault(g["zone"], []).append(g)
+        if not by:
+            return None
+        zone, hits = sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0]))[0]
+        ok = len(hits) >= 3 and len(hits) / max(1, len(side)) >= 0.25
+        return (zone, hits) if ok else None
+
+    things: list[tuple[str, list[dict[str, Any]]]] = []
+    conceded = top(opp, {"m7", "gs"})
+    if conceded:
+        things.append((f"Gegentore {ZONE_FROM.get(conceded[0], '')}", conceded[1]))
+    breaks = [g for g in opp if g.get("zone") == "gs"]
+    if len(breaks) >= 3:
+        things.append(("Gegentore aus Gegenstössen", breaks))
+    scored = top(own, {"m7"})
+    if scored:
+        things.append((f"Tore {ZONE_FROM.get(scored[0], '')}", scored[1]))
+    items: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for n, (text, hits) in enumerate(things[:3], start=1):
+        items.append({"kind": "note", "text": f"Punkt {n}: {text}"})
+        for g in sorted(hits, key=lambda x: x["t_ms"]):
+            if g["event_id"] not in seen:
+                seen.add(g["event_id"])
+                items.append({"kind": "scene", "event_id": g["event_id"]})
+    return items
+
+
 def consent(c: Client, team_url: str, player_id: str, name: str) -> None:
     c.post(
         f"{team_url}/players/{player_id}/consents",
@@ -575,9 +623,15 @@ def main() -> None:
             print(f"uploaded synthetic video for match {mid}")
 
     if matches:
+        # the draft holds the three things as the app shows them: a note, then exactly the
+        # scenes of each thing, every scene once (UX test B16)
         coll = c.post(
             f"{o}/teams/{herren['id']}/collections/from-match",
-            json={"match_id": matches[-1], "title": "Rückzug und rechter Flügel"},
+            json={
+                "match_id": matches[-1],
+                "title": "Rückzug und rechter Flügel",
+                "items": thing_items(c.get(f"{o}/matches/{matches[-1]}/graphics").json()),
+            },
         ).json()
         c.patch(f"{o}/collections/{coll['id']}", json={"draft": False})
         print(f"collection with {len(coll['items'])} scenes")

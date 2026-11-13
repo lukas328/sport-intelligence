@@ -61,6 +61,14 @@ export default async function ScenesPage({ params }: { params: Promise<{ orgId: 
               </li>
             ))}
           </ul>
+        ) : last ? (
+          // a match with video is there, its highlights are not made yet (UX test B52)
+          <p className="text-[15px] text-ink-2">
+            {t("noHighlightsYet", { opponent: last.opponent_name ?? "" })}{" "}
+            <Link href={`/app/${orgId}/matches/${last.id}?tab=spiel`} className={linkClass}>
+              {t("makeHighlights")}
+            </Link>
+          </p>
         ) : (
           <p className="text-[15px] text-ink-2">{t("noHighlights")}</p>
         )}
@@ -72,7 +80,8 @@ export default async function ScenesPage({ params }: { params: Promise<{ orgId: 
         <Link href={`${base}/plays`} className={linkClass}>
           {ta("plays")}
         </Link>
-        <Link href={`${base}/matrix`} className={linkClass}>
+        {/* the pivot table, kept: «Als Tabelle» above shows the answer as rows */}
+        <Link href={`${base}/matrix?pivot=1`} className={linkClass}>
           {ta("matrix")}
         </Link>
       </p>

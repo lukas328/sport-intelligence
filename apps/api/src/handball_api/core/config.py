@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     operator_emails: list[str] = Field(default_factory=list)
     # billing (BRIEF 13): off in development and CI, on in production
     billing_enforce: bool = False
+    # a new club starts the trial of the Team plan at once, without payment details (UX test,
+    # second delivery): otherwise its first video is never analysed. After the trial the club
+    # falls back to Free; nothing is deleted. Business rule to confirm: OPEN_QUESTIONS Q-BILL-TRIAL
+    trial_on_signup: bool = True
     # annual subscription by Swiss QR bill (addendum 01, 4.10); creditor = the operating company
     # support (addendum 01, 4.11/4.12): adapters stay off without configuration
     support_email: str = "support@handball-ai.ch"

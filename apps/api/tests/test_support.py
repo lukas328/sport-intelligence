@@ -29,7 +29,9 @@ def test_failure_codes() -> None:
     assert support.failure_code(None) == "generic"
 
 
-async def test_failed_analysis_is_credited(make_api: Callable[[], Api]) -> None:
+async def test_failed_analysis_is_credited(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender
+) -> None:
     api = make_api()
     ids = await setup_club(api)
     org = ids["org"]
@@ -48,6 +50,11 @@ async def test_failed_analysis_is_credited(make_api: Callable[[], Api]) -> None:
     assert (a["status"], a["error_code"]) == ("failed", "calibration")
     notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()["items"]
     assert notes[0]["kind"] == "analysis_failed" and notes[0]["params"]["reason"] == "calibration"
+    # the coach also gets an e-mail naming the match and the way out (UX test H06, B29)
+    assert notes[0]["params"]["opponent"]
+    mail = outbox.outbox[-1]
+    assert notes[0]["params"]["opponent"] in mail.subject
+    assert "liess sich nicht auswerten" in mail.subject and f"/matches/{m['id']}" in mail.text
     usage = (await api.get(f"/v1/orgs/{org}/billing")).json()["usage"]
     assert usage["max_matches_per_season"] == 0  # the failed match does not count
 
@@ -138,3 +145,13 @@ async def test_onboarding_series_and_unsubscribe(
     assert (
         await api.http.get(f"/v1/onboarding/unsubscribe?u={user_id}&t=wrong")
     ).status_code == 404
+
+
+def test_analysis_ready_mail_names_the_match() -> None:
+    from handball_api.services.mail_templates import render
+
+    mail = render(
+        "analysis_ready", "de-CH", to="a@b.ch", name="Hans", team="HC Z", opponent="TV T", link="x"
+    )
+    assert mail.subject == "Die drei Dinge gegen TV T sind da"
+    assert "HC Z gegen TV T" in mail.text and mail.text.endswith("x")

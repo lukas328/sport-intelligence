@@ -11,15 +11,17 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await page.getByLabel("Vereinsname").fill("HC Szenen");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Damen 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  // invitations live in the club now, not in the onboarding (UX test B27)
+  const teamUrl0 = page.url();
+  await page.goto(`/app/${orgId}/club/teams`);
   const playerEmail = uniqueEmail("player-scenes");
   await page.getByLabel("E-Mail").fill(playerEmail);
   await page.getByRole("button", { name: "Einladung senden" }).click();
   await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
-  await page.getByRole("button", { name: "Zum Team" }).click();
-  await page.waitForURL(/\/teams\/[^/]+/);
-  const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  await page.goto(teamUrl0);
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
@@ -156,7 +158,9 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // Lea's season line from her name in the squad: no played match yet
   await page.goto(`/app/${orgId}/teams/${teamId}`);
   await page.getByRole("link", { name: "Lea Beispiel" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "#9 Lea Beispiel" })).toBeVisible();
+  // the Seitenkopf: the name as title, the number as the figure (UX test B34)
+  await expect(page.getByRole("heading", { level: 1, name: "Lea Beispiel" })).toBeVisible();
+  await expect(page.locator("[data-zone=kopf]")).toContainText("9");
   await expect(page.getByTestId("season-line-empty")).toContainText("Noch kein gespieltes Spiel in dieser Saison.");
   await expectAccessible(page);
 });

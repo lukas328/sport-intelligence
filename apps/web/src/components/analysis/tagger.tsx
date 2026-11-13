@@ -193,7 +193,7 @@ export function Tagger({
 
   const keyOf = Object.fromEntries(Object.entries(HOTKEYS).map(([k, v]) => [v, k.toUpperCase()]));
   const field = "min-h-10 w-full bg-raised px-2 ring-1 ring-inset ring-border";
-  const sectionTitle = "font-score text-[0.8125rem] text-muted";
+  const sectionTitle = "font-score text-[0.9375rem] text-muted";
   // laid out like a match sheet: who, what (one key each), details, then the rarer events
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto text-sm" data-testid="tagger">
@@ -269,7 +269,7 @@ export function Tagger({
           </label>
         </div>
         <label className="flex flex-col gap-1">
-          <span className="text-[0.8125rem] font-medium">{t("turnoverType")}</span>
+          <span className="text-[0.9375rem] font-medium">{t("turnoverType")}</span>
           <select value={turnoverType} onChange={(e) => setTurnoverType(e.target.value as (typeof TURNOVERS)[number])} className={field}>
             {TURNOVERS.map((k) => (
               <option key={k} value={k}>
@@ -311,13 +311,13 @@ export function Tagger({
         </summary>
         <div className="mt-3 space-y-3">
           <div className="space-y-1">
-            <p className="text-[0.8125rem] font-medium">{t("position")}</p>
+            <p className="text-[0.9375rem] font-medium">{t("position")}</p>
             <CourtHalf label={t("position")} onPick={(x, y) => setPos({ x, y })}>
               {pos && <ShotDot x={pos.x} y={pos.y} outcome="goal" />}
             </CourtHalf>
           </div>
           <div className="space-y-1">
-            <p className="text-[0.8125rem] font-medium">{t("goalZone")}</p>
+            <p className="text-[0.9375rem] font-medium">{t("goalZone")}</p>
             <GoalGrid mode="pick" selected={zone} onCell={(z) => setZone((cur) => (cur === z ? null : z))} />
           </div>
         </div>
@@ -328,7 +328,7 @@ export function Tagger({
         <div className="mt-3 space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <label className="flex flex-col gap-1">
-              <span className="text-[0.8125rem] font-medium">{tk("ownKeeper")}</span>
+              <span className="text-[0.9375rem] font-medium">{tk("ownKeeper")}</span>
               <select value={keepers.own} onChange={(e) => updateKeepers({ ...keepers, own: e.target.value })} className={field}>
                 <option value="">-</option>
                 {(roster.data ?? [])
@@ -343,12 +343,12 @@ export function Tagger({
               </select>
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[0.8125rem] font-medium">{tk("oppKeeper")}</span>
+              <span className="text-[0.9375rem] font-medium">{tk("oppKeeper")}</span>
               <input type="number" min={0} max={99} value={keepers.opp} onChange={(e) => updateKeepers({ ...keepers, opp: e.target.value })} className={field} />
             </label>
           </div>
           <label className="flex flex-col gap-1">
-            <span className="text-[0.8125rem] font-medium">{t("import")}</span>
+            <span className="text-[0.9375rem] font-medium">{t("import")}</span>
             <FileField accept=".csv,.json,text/csv,application/json" onChange={importFeed} button={tf("choose")} empty={tf("none")} />
           </label>
         </div>
