@@ -269,8 +269,8 @@ def render(template: str, locale: str, to: str, **values: object) -> Email:
     if values.get("name") and str(values["name"]) == to.split("@", 1)[0][:120]:
         values = {**values, "name": ""}
     # «1 Frage», «2 Fragen»: the count with the right word (UX test A02)
-    if isinstance(values.get("questions"), int):
-        n = int(values["questions"])
+    n = values.get("questions")
+    if isinstance(n, int):
         values = {
             **values,
             "questions": questions(n, locale),
