@@ -61,6 +61,47 @@ export function trailOf(pts: readonly Pt[], t: number, back: number): Pt[] {
   return out;
 }
 
+const FADE = 0.03; // share of the scene a track takes to appear or go
+
+/**
+ * How much of a track shows at t (0 to 1): 1 while it has data, fading in and out at its ends,
+ * 0 outside (real-video test F5: a track exists only while the analysis saw it). Without times
+ * (a drawn demo scene) a track shows for the whole scene.
+ */
+export function presence(ts: readonly number[] | null | undefined, t: number): number {
+  if (!ts || ts.length === 0) return 1;
+  const a = ts[0]!;
+  const b = ts[ts.length - 1]!;
+  if (t < a - FADE || t > b + FADE) return 0;
+  if (t < a) return (t - (a - FADE)) / FADE;
+  if (t > b) return (b + FADE - t) / FADE;
+  return 1;
+}
+
+/** Where a track is at t: by its own times when it has them, else spread over the scene. */
+export function positionAt(pts: readonly Pt[], ts: readonly number[] | null | undefined, t: number): Pt {
+  if (!ts || ts.length !== pts.length || pts.length === 0) return sampleAt(pts, t);
+  if (t <= ts[0]!) return pts[0]!;
+  const n = ts.length - 1;
+  if (t >= ts[n]!) return pts[n]!;
+  let i = 0;
+  while (i < n - 1 && ts[i + 1]! < t) i++;
+  const span = ts[i + 1]! - ts[i]!;
+  const r = span > 0 ? (t - ts[i]!) / span : 0;
+  return [pts[i]![0] + (pts[i + 1]![0] - pts[i]![0]) * r, pts[i]![1] + (pts[i + 1]![1] - pts[i]![1]) * r];
+}
+
+/** The way of the last `back` up to t, only where the track has data. */
+export function trailAt(pts: readonly Pt[], ts: readonly number[] | null | undefined, t: number, back: number): Pt[] {
+  if (!ts || ts.length !== pts.length) return trailOf(pts, t, back);
+  const out: Pt[] = [];
+  for (let j = 0; j <= 14; j++) {
+    const tt = t - back + (back * j) / 14;
+    if (tt >= 0 && tt >= ts[0]! && tt <= ts[ts.length - 1]!) out.push(positionAt(pts, ts, tt));
+  }
+  return out;
+}
+
 /** Court metres to the half the attack goes to (goal at x = 0 or x = 40). */
 export function toHalf(p: Pt, goalAtZero: boolean): Pt {
   return goalAtZero ? [p[1], p[0]] : [20 - p[1], 40 - p[0]];

@@ -2,7 +2,7 @@
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { CourtLines } from "./court";
-import { inView, pathOf, type Pt, sampleAt, trailOf, VIEWS, type ViewName } from "./geometry";
+import { inView, pathOf, positionAt, presence, type Pt, trailAt, VIEWS, type ViewName } from "./geometry";
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
 const INK_DARK = "#0a0d11";
@@ -15,6 +15,8 @@ export interface SceneTrack {
   /** shirt number, only where it was read */
   number?: number | null;
   xy: readonly Pt[];
+  /** when each point is (share of the scene); the track shows only while it has data (F5) */
+  ts?: readonly number[] | null;
 }
 
 /** A stretch where the ball was found in the picture and the analysis knows who holds it. */
@@ -64,7 +66,8 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
   const scorer = (tr: SceneTrack) => scene.scorer != null && tr.team === scene.scorer.team && tr.number === scene.scorer.number;
   const trail = (tr: SceneTrack, col: string, key: string) => {
     const whole = scorer(tr);
-    const s = (whole ? trailOf(tr.xy, t, t) : trailOf(tr.xy, t, 0.33)).map(f);
+    const s = (whole ? trailAt(tr.xy, tr.ts, t, t) : trailAt(tr.xy, tr.ts, t, 0.33)).map(f);
+    if (s.length < 2) return [];
     const n = s.length - 1;
     return s.slice(0, -1).map((p, i) => {
       const a = ((i + 1) / n) ** 1.4;
@@ -83,11 +86,12 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
       );
     });
   };
-  const players = scene.tracks.filter((x) => x.team !== "ref");
+  // only the tracks that exist at t: one dot per person seen then, not one per piece of track
+  const players = scene.tracks.filter((x) => x.team !== "ref" && presence(x.ts, t) > 0);
   const hold = holderAt(scene, t);
   // the ball only at the player who holds it, and only while it was found in the picture
   const holder = hold ? players.find((x) => x.team === hold.team && x.number === hold.number) : undefined;
-  const ballAt: Pt | null = holder ? f(sampleAt(holder.xy, t)) : null;
+  const ballAt: Pt | null = holder ? f(positionAt(holder.xy, holder.ts, t)) : null;
   const done = t >= 1;
   const tf = V.turn ? "matrix(0 1 1 0 0 0)" : undefined;
   return (
@@ -104,16 +108,16 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
         </>
       )}
       {scene.tracks
-        .filter((x) => x.team === "ref")
+        .filter((x) => x.team === "ref" && presence(x.ts, t) > 0)
         .map((x, i) => {
-          const p = f(sampleAt(x.xy, t));
-          return <rect key={`ref${i}`} x={p[0] - r * 0.5} y={p[1] - r * 0.5} width={r} height={r} fill="#8d97a1" transform={`rotate(45 ${p[0]} ${p[1]})`} />;
+          const p = f(positionAt(x.xy, x.ts, t));
+          return <rect key={`ref${i}`} x={p[0] - r * 0.5} y={p[1] - r * 0.5} width={r} height={r} fill="#8d97a1" opacity={presence(x.ts, t)} transform={`rotate(45 ${p[0]} ${p[1]})`} />;
         })}
       {[...players.filter((x) => x.team === "opp"), ...players.filter((x) => x.team === "own")].map((x, i) => {
         const us = x.team === "own";
-        const e = f(sampleAt(x.xy, t));
+        const e = f(positionAt(x.xy, x.ts, t));
         return (
-          <g key={`p${i}`}>
+          <g key={`p${i}`} opacity={presence(x.ts, t)}>
             {us ? (
               <circle cx={e[0]} cy={e[1]} r={r} fill="var(--club-cam)" stroke={INK_DARK} strokeWidth={1.4} {...NS} />
             ) : (
