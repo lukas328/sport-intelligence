@@ -2220,7 +2220,16 @@
     "subLater": "später im Video",
     "perPlayer": "Pro Spielerin erfassen",
     "sofarTitle": "Bisher",
-    "newestFirst": "neueste zuerst"
+    "newestFirst": "neueste zuerst",
+    "clockLabel": "Spielzeit",
+    "clockStart": "Uhr starten",
+    "clockPause": "Pause",
+    "clockGo": "Weiter",
+    "takeBack": "Zurücknehmen",
+    "key_two_min": "2 Minuten",
+    "key_timeout": "Time-out",
+    "shareLink": "Link teilen",
+    "copied": "Link kopiert"
   },
   "profile": {
     "title": "Öffentliches Profil",

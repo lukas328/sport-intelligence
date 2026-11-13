@@ -24564,6 +24564,63 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/marks/{client_id}": {
+      "delete": {
+        "description": "\u00abZur\u00fccknehmen\u00bb on the Spieltag: the mark with this phone id is removed (UX test N14).",
+        "operationId": "take_back_v1_orgs__org_id__matches__match_id__marks__client_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Client Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Take Back",
+        "tags": [
+          "marks"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
       "post": {
         "description": "Official match report (handball.ch match centre, DHB press report, nuLiga game report of the\nGerman associations on nuLiga and Austria, HLA report) as events: goals with scorer and shirt\nnumber, 7-metres, suspensions, time-outs. A re-import replaces the previous\none; automatic goals from the video within 20 s are merged with the official goal.",

@@ -11,19 +11,22 @@ import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/client";
-import { flush, mark, pending } from "@handball/client-core";
+import { flush, forget, mark, pending } from "@handball/client-core";
 import { keepOffline, remember, remembered } from "@/lib/offline";
 
 const SESSION_KEY = (matchId: string) => `hb.marks.session.${matchId}`;
 const SERVER_KEY = (matchId: string) => `hb.marks.server.${matchId}`;
 const KEYS_KEY = (teamId: string) => `hb.marks.keys.${teamId}`;
 const LOG_KEY = (matchId: string) => `hb.marks.log.${matchId}`;
+const CLOCK_KEY = (matchId: string) => `hb.marks.clock.${matchId}`;
+type Clock = { run: number | null; acc: number };
+const mmss = (ms: number) => `${String(Math.floor(ms / 60000)).padStart(2, "0")}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
 
 /**
  * Spieltag (SPEC 7.11, addendum 01, 5.3): big keys for courtside marks with the phone's clock,
  * offline first; the head of the match with the score from the goal keys, at the side what was
- * marked. Marks cannot be taken back yet (the API has no delete): a wrong one is ignored in the
- * video. «Pro Spielerin erfassen» opens the detailed capture.
+ * marked; the match clock with start and pause, «Zurücknehmen» for the last mark, the three small
+ * keys (UX test N14). «Pro Spielerin erfassen» opens the detailed capture.
  */
 export function MarksView({
   orgId,
@@ -33,6 +36,7 @@ export function MarksView({
   opp,
   kickoffAt,
   oppColor = null,
+  periodS = 1800,
 }: {
   orgId: string;
   matchId: string;
@@ -41,6 +45,7 @@ export function MarksView({
   opp: string;
   kickoffAt: string | null;
   oppColor?: string | null;
+  periodS?: number;
 }) {
   const t = useTranslations("marks");
   const format = useFormatter();
@@ -91,10 +96,38 @@ export function MarksView({
     if (log.length) remember(LOG_KEY(matchId), log);
   }, [log, matchId]);
   const [now, setNow] = useState(() => new Date());
+  // the match clock, started and paused on the phone and kept for a reload (UX test N14)
+  const [clock, setClock] = useState<Clock>(() => remembered<Clock>(CLOCK_KEY(matchId)) ?? { run: null, acc: 0 });
+  const saveClock = (c: Clock) => (setClock(c), remember(CLOCK_KEY(matchId), c));
   useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 15000);
+    const id = window.setInterval(() => setNow(new Date()), clock.run ? 1000 : 15000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [clock.run]);
+  const elapsed = clock.acc + (clock.run ? now.getTime() - clock.run : 0);
+  const toggleClock = () => saveClock(clock.run ? { run: null, acc: elapsed } : { run: Date.now(), acc: clock.acc });
+  const [copied, setCopied] = useState(false);
+  async function share() {
+    const url = window.location.href.replace(/\?.*$/, "");
+    try {
+      if (navigator.share) await navigator.share({ url, title: t("top") });
+      else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+      }
+    } catch {
+      /* the share sheet was closed */
+    }
+  }
+  async function takeBack() {
+    const last = log[0];
+    if (!last) return;
+    setLog((l) => l.slice(1));
+    if (last.key === "halftime") setHalf(1);
+    if (!forget(localStorage, matchId, last.id)) {
+      await api.DELETE("/v1/orgs/{org_id}/matches/{match_id}/marks/{client_id}", { params: { path: { org_id: orgId, match_id: matchId, client_id: last.id } } }).catch(() => undefined);
+    }
+    setOpen(pending(localStorage, matchId).length);
+  }
   const { org } = useShell();
   const style = matchStyle([org.primary_color, org.secondary_color ?? null], oppColor ? [oppColor] : null);
   const keys = useQuery({
@@ -159,7 +192,10 @@ export function MarksView({
 
   const tap = (key: string, label: string) => {
     const item = mark(localStorage, matchId, key);
-    if (key === "halftime") setHalf(2);
+    if (key === "halftime") {
+      setHalf(2);
+      saveClock({ run: null, acc: Math.max(elapsed, periodS * 1000) });
+    }
     setLog((l) => [{ id: item.client_id, key, label, at: new Date() }, ...l]);
     setCount((n) => n + 1);
     setOpen(pending(localStorage, matchId).length);
@@ -174,7 +210,7 @@ export function MarksView({
   const goals = list.filter((k) => k.key === "goal_own" || k.key === "goal_opp");
   const rest = list.filter((k) => k.key !== "goal_own" && k.key !== "goal_opp");
   const score = { own: log.filter((l) => l.key === "goal_own").length, opp: log.filter((l) => l.key === "goal_opp").length };
-  const shown = (l: { key: string; label: string }) => l.label || (l.key === "halftime" ? t("halftime") : labelOf({ key: l.key }));
+  const shown = (l: { key: string; label: string }) => l.label || (l.key === "halftime" ? t("halftime") : l.key === "two_min" || l.key === "timeout" ? t(`key_${l.key}`) : labelOf({ key: l.key }));
   const time = (d: Date) => format.dateTime(d, { hour: "2-digit", minute: "2-digit" });
   const back = `/app/${orgId}/matches/${matchId}`;
   return (
@@ -182,6 +218,9 @@ export function MarksView({
       {/* full screen: its own narrow top bar, the head of the match, the keys, what was marked */}
       <div className="bleed-x -mt-6 flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8 lg:-mt-8">
         <span className="text-[15px] font-bold">{t("top")}</span>
+        <button type="button" onClick={() => void share()} className="ml-auto min-h-11 cursor-pointer border-0 bg-transparent px-2 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="share-matchday">
+          {copied ? t("copied") : t("shareLink")}
+        </button>
         <Link href={back} className="inline-flex min-h-11 items-center border-2 border-ink px-3.5 text-[15px] font-bold text-ink no-underline">
           {t("end")}
         </Link>
@@ -193,9 +232,12 @@ export function MarksView({
           own={score.own}
           opp={score.opp}
         >
-          <p className="mt-3 flex items-baseline gap-2 font-sans not-italic">
-            <b className="font-num text-[26px] md:text-[34px]">{time(now)}</b>
+          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-sans not-italic">
+            <b className="font-num text-[26px] md:text-[34px]" data-testid="match-clock" aria-label={t("clockLabel")}>{mmss(elapsed)}</b>
             <span className="text-[15px] font-semibold md:text-[15px]">{t("half", { n: half })}</span>
+            <button type="button" onClick={toggleClock} className="min-h-11 cursor-pointer border-2 border-club-ink bg-transparent px-3 text-[15px] font-bold text-club-ink" data-testid="clock-toggle">
+              {clock.run ? t("clockPause") : elapsed > 0 ? t("clockGo") : t("clockStart")}
+            </button>
           </p>
         </Strip>
       </div>
@@ -222,17 +264,33 @@ export function MarksView({
                 {sub(k.key) && <span className="text-[15px] md:text-[15px]">{sub(k.key)}</span>}
               </button>
             ))}
-            <button
-              type="button"
-              disabled={half === 2}
-              onClick={() => tap("halftime", t("halftime"))}
-              className="col-span-2 min-h-12 cursor-pointer border-2 border-ink bg-transparent text-[15px] font-bold disabled:cursor-default disabled:opacity-50"
-            >
-              {half === 2 ? t("secondHalf") : t("halftime")}
-            </button>
+            {/* the three small keys (SPEC 7.11) */}
+            <div className="col-span-2 grid grid-cols-3 gap-2.5">
+              <button type="button" onClick={() => tap("two_min", t("key_two_min"))} className="min-h-12 cursor-pointer border-2 border-ink bg-transparent px-2 text-[15px] font-bold">
+                {t("key_two_min")}
+              </button>
+              <button type="button" onClick={() => tap("timeout", t("key_timeout"))} className="min-h-12 cursor-pointer border-2 border-ink bg-transparent px-2 text-[15px] font-bold">
+                {t("key_timeout")}
+              </button>
+              <button
+                type="button"
+                disabled={half === 2}
+                onClick={() => tap("halftime", t("halftime"))}
+                className="min-h-12 cursor-pointer border-2 border-ink bg-transparent px-2 text-[15px] font-bold disabled:cursor-default disabled:opacity-50"
+              >
+                {half === 2 ? t("secondHalf") : t("halftime")}
+              </button>
+            </div>
           </div>
           <p className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 border-t-2 border-ink pt-3 text-[15px]" aria-live="polite">
-            <span>{log[0] ? `${time(log[0].at)} ${shown(log[0])}` : t("noneYet")}</span>
+            <span className="flex flex-wrap items-baseline gap-x-3">
+              {log[0] ? `${time(log[0].at)} ${shown(log[0])}` : t("noneYet")}
+              {log[0] && (
+                <button type="button" onClick={() => void takeBack()} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="take-back">
+                  {t("takeBack")}
+                </button>
+              )}
+            </span>
             <a href={`/app/${orgId}/matches/${matchId}/matchday?mode=detail`} data-testid="per-player" className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
               {t("perPlayer")}
             </a>

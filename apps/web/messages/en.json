@@ -2220,7 +2220,16 @@
     "subLater": "later in the video",
     "perPlayer": "Capture per player",
     "sofarTitle": "So far",
-    "newestFirst": "newest first"
+    "newestFirst": "newest first",
+    "clockLabel": "Match time",
+    "clockStart": "Start clock",
+    "clockPause": "Pause",
+    "clockGo": "Resume",
+    "takeBack": "Take back",
+    "key_two_min": "2 minutes",
+    "key_timeout": "Time-out",
+    "shareLink": "Share link",
+    "copied": "Link copied"
   },
   "profile": {
     "title": "Public profile",

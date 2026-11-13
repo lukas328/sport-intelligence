@@ -52,3 +52,11 @@ export async function flush(store: Store, matchId: string, post: Post): Promise<
     return items.length;
   }
 }
+
+/** Takes a mark out of the queue before it went out («Zurücknehmen»); true when it was queued. */
+export function forget(store: Store, matchId: string, clientId: string): boolean {
+  const items = pending(store, matchId);
+  const rest = items.filter((i) => i.client_id !== clientId);
+  save(store, matchId, rest);
+  return rest.length !== items.length;
+}

@@ -113,6 +113,23 @@ async def add(ctx: Ctx, session_id: uuid.UUID, items: list[MarkIn]) -> dict[str,
     return {"stored": stored}
 
 
+async def take_back(ctx: Ctx, match_id: uuid.UUID, client_id: uuid.UUID) -> None:
+    """Removes a mark by the phone's id, from any session of the match; unknown ids are fine (the
+    mark may not have reached the server yet)."""
+    match = await get_match(ctx, match_id, Action.CLIP_WRITE)
+    tag = await ctx.db.scalar(
+        select(LiveTag).where(
+            LiveTag.session_id.in_(
+                select(LiveTagSession.id).where(LiveTagSession.match_id == match.id)
+            ),
+            LiveTag.client_id == client_id,
+        )
+    )
+    if tag is not None:
+        await ctx.db.delete(tag)
+        await ctx.db.flush()
+
+
 async def _main_video(ctx: Ctx, match_id: uuid.UUID) -> VideoAsset | None:
     return await timeline_video(ctx, match_id)
 

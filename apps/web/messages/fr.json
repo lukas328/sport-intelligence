@@ -2220,7 +2220,16 @@
     "subLater": "plus tard dans la vidéo",
     "perPlayer": "Saisir par joueuse",
     "sofarTitle": "Jusqu'ici",
-    "newestFirst": "le plus récent d'abord"
+    "newestFirst": "le plus récent d'abord",
+    "clockLabel": "Temps de jeu",
+    "clockStart": "Démarrer",
+    "clockPause": "Pause",
+    "clockGo": "Reprendre",
+    "takeBack": "Annuler",
+    "key_two_min": "2 minutes",
+    "key_timeout": "Temps mort",
+    "shareLink": "Partager le lien",
+    "copied": "Lien copié"
   },
   "profile": {
     "title": "Profil public",

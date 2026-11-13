@@ -46,6 +46,12 @@ async def add(session_id: uuid.UUID, body: MarksIn, scope: OrgDep) -> dict[str, 
     return await service.add(scope.ctx, session_id, body.marks)
 
 
+@router.delete("/matches/{match_id}/marks/{client_id}", status_code=204)
+async def take_back(match_id: uuid.UUID, client_id: uuid.UUID, scope: OrgDep) -> None:
+    """«Zurücknehmen» on the Spieltag: the mark with this phone id is removed (UX test N14)."""
+    await service.take_back(scope.ctx, match_id, client_id)
+
+
 @router.put("/mark-sessions/{session_id}/offset", response_model=MarkSessionOut)
 async def offset(session_id: uuid.UUID, body: OffsetIn, scope: OrgDep) -> LiveTagSession:
     return await service.set_offset(scope.ctx, session_id, body.offset_ms)

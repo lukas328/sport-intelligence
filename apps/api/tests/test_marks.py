@@ -147,3 +147,20 @@ async def test_a_mark_uploaded_twice_is_stored_once_per_match(
     assert await owner_conn.fetchval("SELECT count(*) FROM live_tags") == 1
     listed = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/marks")).json()["marks"]
     assert [x["client_id"] for x in listed] == [mark["client_id"]]
+
+
+async def test_the_last_mark_can_be_taken_back(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """UX test N14: «Zurücknehmen» removes a mark by the phone's id; a second call is harmless."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    s = (await api.post(f"/v1/orgs/{org}/matches/{m['id']}/mark-sessions", json={})).json()
+    mark = {"client_id": str(uuid.uuid4()), "device_time": RECORDED.isoformat(), "key": "two_min"}
+    await api.post(f"/v1/orgs/{org}/mark-sessions/{s['id']}/marks", json={"marks": [mark]})
+    url = f"/v1/orgs/{org}/matches/{m['id']}/marks/{mark['client_id']}"
+    assert (await api.delete(url)).status_code == 204
+    assert (await api.delete(url)).status_code == 204
+    assert await owner_conn.fetchval("SELECT count(*) FROM live_tags") == 0
