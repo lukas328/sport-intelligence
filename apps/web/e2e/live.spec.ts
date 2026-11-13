@@ -34,6 +34,17 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
   await expect(page.getByTestId("live-score")).toHaveText("0:0");
   await expectAccessible(page);
 
+  // UX test H01: in a low window (phone held sideways, 200 % zoom) no key lies over a player
+  for (const size of [{ width: 844, height: 390 }, { width: 640, height: 400 }]) {
+    await page.setViewportSize(size);
+    const lina = page.getByRole("button", { name: /11\s*Lina/ });
+    await lina.scrollIntoViewIfNeeded();
+    const box = (await lina.boundingBox())!;
+    const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x!, y!)?.closest("button")?.textContent ?? "", [box.x + box.width / 2, box.y + box.height / 2]);
+    expect(hit, `${size.width}x${size.height}`).toMatch(/11\s*Lina/);
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
+
   await page.getByRole("button", { name: "Start" }).click();
   await expect.poll(async () => page.getByTestId("live-clock").textContent()).not.toBe("0:00");
   await page.getByRole("button", { name: /11\s*Lina/ }).click();

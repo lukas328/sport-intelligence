@@ -270,7 +270,9 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
         ) as CSSProperties
       }
     >
-      <div className="sticky top-0 z-10 -mx-4 space-y-2 border-b border-border/70 bg-background/90 backdrop-blur-xl px-4 py-3">
+      {/* head and actions only stick where the window is tall enough for both and the players
+          between them (UX test H01: phone held sideways, 200 % zoom) */}
+      <div className="z-10 -mx-4 space-y-2 [@media(min-height:600px)]:sticky [@media(min-height:600px)]:top-0 border-b border-border/70 bg-background/90 backdrop-blur-xl px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <Link href={`/app/${orgId}/matches/${matchId}`} className="text-sm underline">
             {t("back")}
@@ -333,7 +335,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
         </label>
         {/* the actions stay at the thumb while the player grid scrolls; the own goal in ink (red
             means a goal against) */}
-        <div className="sticky bottom-2 z-10 grid grid-cols-3 gap-1 bg-background/95 py-1 backdrop-blur">
+        <div className="z-10 grid grid-cols-3 gap-1 bg-background/95 py-1 backdrop-blur [@media(min-height:600px)]:sticky [@media(min-height:600px)]:bottom-2">
           {own.map((a) => (
             <button key={a.key} onClick={() => record("own", a.label, a.body, a.goal)} className={cn("min-h-[88px] border-2 px-3 text-base font-bold", a.goal ? "border-club-edge bg-club text-club-ink" : "border-ink bg-transparent text-ink")}>
               {a.label}
