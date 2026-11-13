@@ -17,6 +17,7 @@ import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
 import { sitePage, useSiteConfig } from "@/lib/site-config";
+import { ENTRY_EMAIL, remember } from "@/lib/offline";
 
 type Hit = Schemas["PublicTeamHit"];
 type Preview = Schemas["PublicTeamPreview"];
@@ -110,6 +111,8 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
       {hits.isFetching && <p className="text-[17px] text-ink-2" aria-busy="true">…</p>}
       {hits.error && <p className="text-[17px]">{(hits.error as { status?: number }).status === 429 ? t("tooMany") : t("unavailable")}</p>}
       {hits.data && hits.data.length === 0 && <p className="text-[17px]">{t("none", { q })}</p>}
+      {/* found only with a letter's difference: say so (UX test N10) */}
+      {hits.data && hits.data.length > 0 && hits.data.every((h) => h.fuzzy) && <p className="m-0 text-[17px]" data-testid="entry-fuzzy">{t("fuzzy", { q })}</p>}
       {hits.data && hits.data.length > 0 && (
         <ul className="m-0 list-none border-t-2 border-ink p-0" data-testid="entry-hits">
           {hits.data.map((h) => (
@@ -404,6 +407,7 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
   const legal = (page: string) => sitePage(site?.site_url ?? "", locale, page);
   async function send(email: string) {
     setBusy(true);
+    remember(ENTRY_EMAIL, email);
     const r = await api.POST("/v1/auth/start", { body: { email, locale: (["de-CH", "fr", "en"].includes(locale) ? locale : "de-CH") as "de-CH", next } });
     setBusy(false);
     if (r.error) return setError(t("needEmail"));

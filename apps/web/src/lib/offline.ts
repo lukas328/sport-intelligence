@@ -41,3 +41,6 @@ export function remember(key: string, value: unknown): void {
     /* storage blocked: works while the page is open */
   }
 }
+
+/** The address the entry sent its sign-in link to: a new link without asking again (UX test N22). */
+export const ENTRY_EMAIL = "hb.entry.email";

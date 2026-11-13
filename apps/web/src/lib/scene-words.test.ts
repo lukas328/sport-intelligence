@@ -19,3 +19,14 @@ describe("chipsFromText (B02, B19)", () => {
     expect(chipsFromText("Wetter morgen")).toEqual([]);
   });
 });
+
+describe("opponents and numbers in a sentence (UX test B19)", () => {
+  it("finds the opponent among the team's opponents and a shirt number", async () => {
+    const { extrasFromText } = await import("./scene-words");
+    const opps = ["Handball Stäfa", "TV Thalwil-Gattikon"];
+    expect(extrasFromText("Paraden gegen Stäfa", opps)).toEqual({ opponent: "Handball Stäfa" });
+    expect(extrasFromText("Tore von Nummer 11", opps)).toEqual({ number: 11 });
+    expect(extrasFromText("Gegentore #7 gegen Thalwil", opps)).toEqual({ opponent: "TV Thalwil-Gattikon", number: 7 });
+    expect(extrasFromText("Gegentore über rechts aussen", opps)).toEqual({});
+  });
+});

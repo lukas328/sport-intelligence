@@ -57,11 +57,13 @@ export function SaveTeam() {
       return;
     }
     if (name) {
-      const o = await api.POST("/v1/orgs", { body: { name, country: "CH", primary_color: colour, secondary_color: second } });
-      if (o.error || !o.data) return setState("failed");
-      const tm = await api.POST("/v1/orgs/{org_id}/teams", { params: { path: { org_id: o.data.id } }, body: { name, gender: "mixed" } });
+      // the same address saves a second team into its club, not into a second club (UX test N21)
+      const own = me.data.organizations.filter((o) => o.role === "org_admin");
+      const orgId = own.length === 1 ? own[0]!.id : (await api.POST("/v1/orgs", { body: { name, country: "CH", primary_color: colour, secondary_color: second } })).data?.id;
+      if (!orgId) return setState("failed");
+      const tm = await api.POST("/v1/orgs/{org_id}/teams", { params: { path: { org_id: orgId } }, body: { name, gender: "mixed" } });
       if (tm.error || !tm.data) return setState("failed");
-      router.replace(`/app/${o.data.id}/teams/${tm.data.id}/matches`);
+      router.replace(`/app/${orgId}/teams/${tm.data.id}/matches`);
       return;
     }
     router.replace("/einstieg");

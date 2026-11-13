@@ -20,7 +20,9 @@ from handball_api.models import (
     Match,
     Opponent,
     Play,
+    RosterEntry,
     SavedFilter,
+    Season,
     Tag,
     TagSet,
     Team,
@@ -261,13 +263,21 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
         (Event.side, f.sides),
         (Event.outcome, f.outcomes),
         (Event.player_id, f.player_ids),
-        (Event.number, f.numbers),
         (Event.shot_zone, f.shot_zones),
         (Event.goal_zone, f.goal_zones),
         (Event.turnover_type, f.turnover_types),
     ):
         if values:
             eq = eq.where(col.in_(values))
+    if f.numbers:
+        # a shirt number: the event's number, or the team's player with that number in the
+        # season of the match (most events name the person, UX test B19)
+        wearers = (
+            select(RosterEntry.player_id)
+            .join(Season, Season.id == RosterEntry.season_id)
+            .where(Season.team_id == team.id, RosterEntry.jersey_number.in_(f.numbers))
+        )
+        eq = eq.where(or_(Event.number.in_(f.numbers), Event.player_id.in_(wearers)))
     eq = eq.where(*_tag_condition(f, Event.id))
     events = list((await ctx.db.scalars(eq)).all())
 

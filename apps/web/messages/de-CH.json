@@ -191,7 +191,8 @@
     "needPassword": "Das Passwort braucht mindestens 10 Zeichen.",
     "needTerms": "Bitte akzeptiere die Bedingungen.",
     "claim": "Dein Spiel. Und drei Dinge zum Mitnehmen.",
-    "toSite": "Was die App kann: {site}"
+    "toSite": "Was die App kann: {site}",
+    "newLink": "Neuen Link an {email} schicken"
   },
   "invite": {
     "title": "Einladung",
@@ -3272,7 +3273,9 @@
     "colNumber": "Nummer",
     "noHighlightsYet": "Vom Spiel gegen {opponent} gibt es noch keine Highlights.",
     "makeHighlights": "Im Spiel erstellen",
-    "noneYet": "Szenen gibt es nach dem ersten Video."
+    "noneYet": "Szenen gibt es nach dem ersten Video.",
+    "chipAgainst": "gegen {opponent}",
+    "chipNumber": "Nummer {n}"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3475,6 +3478,7 @@
     "accessText": "{team} ist schon in der App. Die Leute, die das Team dort verwalten, sehen deine Anfrage in der App. Stimmen sie zu, bist du beim nächsten Anmelden im Team.",
     "accessTeam": "Dieses Team",
     "accessOwnClub": "Bis dahin mit eigenem Team starten",
-    "accessOther": "Anderes Team wählen"
+    "accessOther": "Anderes Team wählen",
+    "fuzzy": "Kein Team genau wie «{q}». Meintest du eines von diesen?"
   }
 }

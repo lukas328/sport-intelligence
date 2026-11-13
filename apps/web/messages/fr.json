@@ -191,7 +191,8 @@
     "needPassword": "Le mot de passe doit compter au moins 10 caractères.",
     "needTerms": "Merci d'accepter les conditions.",
     "claim": "Ton match. Et trois choses à retenir.",
-    "toSite": "Ce que fait l'app : {site}"
+    "toSite": "Ce que fait l'app : {site}",
+    "newLink": "Envoyer un nouveau lien à {email}"
   },
   "invite": {
     "title": "Invitation",
@@ -3272,7 +3273,9 @@
     "colNumber": "Numéro",
     "noHighlightsYet": "Pas encore de temps forts du match contre {opponent}.",
     "makeHighlights": "Les créer dans le match",
-    "noneYet": "Les scènes arrivent avec la première vidéo."
+    "noneYet": "Les scènes arrivent avec la première vidéo.",
+    "chipAgainst": "contre {opponent}",
+    "chipNumber": "Numéro {n}"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3475,6 +3478,7 @@
     "accessText": "{team} est déjà dans l'app. Les personnes qui gèrent l'équipe voient ta demande dans l'app. Si elles acceptent, tu es dans l'équipe à ta prochaine connexion.",
     "accessTeam": "Cette équipe",
     "accessOwnClub": "En attendant, commencer avec ta propre équipe",
-    "accessOther": "Choisir une autre équipe"
+    "accessOther": "Choisir une autre équipe",
+    "fuzzy": "Aucune équipe exactement comme «{q}». Voulais-tu dire l'une de celles-ci ?"
   }
 }

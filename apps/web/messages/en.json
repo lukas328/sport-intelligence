@@ -191,7 +191,8 @@
     "needPassword": "The password needs at least 10 characters.",
     "needTerms": "Please accept the terms.",
     "claim": "Your match. And three things to take away.",
-    "toSite": "What the app does: {site}"
+    "toSite": "What the app does: {site}",
+    "newLink": "Send a new link to {email}"
   },
   "invite": {
     "title": "Invitation",
@@ -3272,7 +3273,9 @@
     "colNumber": "Number",
     "noHighlightsYet": "There are no highlights of the match against {opponent} yet.",
     "makeHighlights": "Make them in the match",
-    "noneYet": "Scenes come with the first video."
+    "noneYet": "Scenes come with the first video.",
+    "chipAgainst": "against {opponent}",
+    "chipNumber": "Number {n}"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3475,6 +3478,7 @@
     "accessText": "{team} is already in the app. The people who manage it see your request in the app. Once they agree, you are in the team the next time you sign in.",
     "accessTeam": "This team",
     "accessOwnClub": "Start with a team of your own meanwhile",
-    "accessOther": "Choose another team"
+    "accessOther": "Choose another team",
+    "fuzzy": "No team exactly like «{q}». Did you mean one of these?"
   }
 }

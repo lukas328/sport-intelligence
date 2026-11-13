@@ -29,7 +29,7 @@ async def test_public_search_needs_no_account_and_shows_no_app_data(
     first = next(h for h in r.json() if h["official_id"] == TEAM)
     assert first["club"] == {"id": CLUB, "name": "TV Thalwil", "city": "Thalwil"}
     # only the federation's data and whether the team is in the app: no ids of the app
-    assert set(first) == {"official_id", "name", "league", "group_name", "club", "in_app"}
+    assert set(first) == {"official_id", "name", "league", "group_name", "club", "in_app", "fuzzy"}
     assert first["in_app"] is False
     r = await anon.get("/v1/public/teams", params={"q": "th"})
     assert r.status_code == 422
@@ -119,3 +119,12 @@ async def test_public_config_gives_the_website_and_support_addresses(
         "site_url": "https://handball-ai.ch",
         "support_email": "support@handball-ai.ch",
     }
+
+
+def test_a_typo_is_a_letter_away() -> None:
+    """UX test N10: «Wädenswill» and «Thalwill» find their clubs."""
+    from handball_api.services.public_teams import _near
+
+    assert _near("wadenswill", "wadenswil") and _near("thalwill", "thalwil")
+    assert _near("staefa", "stafa") is False or _near("stafa", "stafa")
+    assert not _near("uster", "zuerich")

@@ -42,6 +42,14 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
             text = ch.fold(f"{c.name} {c.city or ''}")
             if all(t in text for t in tokens):
                 found.append((not ch.fold(c.name).startswith(tokens[0]), c.name, c))
+        fuzzy = False
+        if not found:
+            # a typo («Wädenswill», «Thalwill»): words one letter apart (UX test N10)
+            for c in await ch.clubs(ctx.db):
+                words = ch.fold(f"{c.name} {c.city or ''}").replace("/", " ").split()
+                if all(any(_near(t, w) for w in words) for t in tokens):
+                    found.append((not ch.fold(c.name).startswith(tokens[0][:3]), c.name, c))
+            fuzzy = bool(found)
         found.sort(key=lambda x: (x[0], x[1]))
         hits: list[dict[str, Any]] = []
         for _, _, c in found[:MAX_CLUBS]:
@@ -55,6 +63,7 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
                         "group_name": t.group_name,
                         "club": {"id": c.id, "name": c.name, "city": c.city},
                         "in_app": False,
+                        "fuzzy": fuzzy,
                     }
                 )
     except ch.UpstreamUnavailableError as exc:
@@ -77,6 +86,18 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
         for h in hits:
             h["in_app"] = h["official_id"] in linked
     return hits
+
+
+def _near(a: str, b: str) -> bool:
+    """One letter added, missing or different, for words of four letters or more."""
+    if a in b:
+        return True
+    if len(a) < 4 or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        return sum(x != y for x, y in zip(a, b, strict=True)) <= 1
+    short, long = (a, b) if len(a) < len(b) else (b, a)
+    return any(long[:i] + long[i + 1 :] == short for i in range(len(long)))
 
 
 def display_name(official: str) -> str:

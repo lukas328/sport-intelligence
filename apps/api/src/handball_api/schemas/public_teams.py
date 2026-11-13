@@ -22,6 +22,7 @@ class PublicTeamHit(ApiModel):
     club: PublicClub
     # the team is already in the app: saving asks that club's admins for access
     in_app: bool
+    fuzzy: bool = False  # found only with a letter's difference: «Meintest du …?»
 
 
 class PublicGame(ApiModel):

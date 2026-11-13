@@ -2,6 +2,8 @@ import { LOCALE_COOKIE, locales } from "@/i18n/config";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED = ["/app", "/onboarding", "/ops", "/federation"];
+// the first segments under /app/{org}/ that exist (app/app/[orgId]/*); everything else is a 404
+const APP_SEGMENTS = new Set(["assignments", "club", "collections", "consents", "drills", "feed", "matches", "me", "opponents", "playlists", "plays", "presentations", "profile", "schedule", "settings", "teams"]);
 
 /**
  * Content Security Policy, built at runtime so the storage origin for direct uploads can be
@@ -74,7 +76,10 @@ export function middleware(req: NextRequest) {
     redirect.cookies.set(LOCALE_COOKIE, lang, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
     return redirect;
   }
-  const res = NextResponse.next();
+  // an unknown address in the app shows the 404 in the frame and says 404, not 200 (UX test N18):
+  // the frame streams, so the page alone cannot set the status any more
+  const seg = pathname.match(/^\/app\/[^/]+\/([^/]+)/)?.[1];
+  const res = seg && !APP_SEGMENTS.has(seg) ? NextResponse.rewrite(req.nextUrl, { status: 404 }) : NextResponse.next();
   res.headers.set(
     "Content-Security-Policy",
     csp(originOf(process.env.HB_S3_PUBLIC_URL), process.env.NODE_ENV !== "production", thirdPartiesFromEnv(process.env)),

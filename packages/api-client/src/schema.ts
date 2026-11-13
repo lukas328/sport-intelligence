@@ -9295,6 +9295,11 @@ export interface components {
         /** PublicTeamHit */
         PublicTeamHit: {
             club: components["schemas"]["PublicClub"];
+            /**
+             * Fuzzy
+             * @default false
+             */
+            fuzzy?: boolean;
             /** Group Name */
             group_name: string | null;
             /** In App */

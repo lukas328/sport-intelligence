@@ -13,7 +13,7 @@ import { clockOf } from "@/components/anlauf/three-things-view";
 import { useShell } from "@/components/shell/context";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
-import { chipsFromText } from "@/lib/scene-words";
+import { chipsFromText, extrasFromText } from "@/lib/scene-words";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { cn } from "@/lib/utils";
@@ -101,7 +101,19 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
   const chips = CHIPS.filter((c) => active.includes(c.key));
   // without a filter: the newest scenes of the last match, never a raw list
   const scope = chips.length ? chips : CHIPS.filter((c) => c.key === "last_match");
-  const filter = combine(scope, ctx);
+  // the opponent and a shirt number from the sentence, as chips of their own (UX test B19)
+  const opponents = useMemo(() => [...new Set(withVideo.map((m) => m.opponent_name).filter((n): n is string => !!n))], [withVideo]);
+  const [extra, setExtra] = useState<{ opponent?: string; number?: number }>(() => (sentence ? extrasFromText(sentence, []) : {}));
+  useEffect(() => {
+    if (sentence && opponents.length) setExtra(extrasFromText(sentence, opponents));
+  }, [sentence, opponents]);
+  const againstIds = extra.opponent ? withVideo.filter((m) => m.opponent_name === extra.opponent).map((m) => m.id) : [];
+  const withExtra = (f: ReturnType<typeof combine>) => ({
+    ...f,
+    ...(extra.opponent ? { match_ids: againstIds } : {}),
+    ...(extra.number != null ? { numbers: [extra.number] } : {}),
+  });
+  const filter = withExtra(combine(scope, ctx));
   // the base of the answer: the same search without the position
   const baseChips = scope.filter((c) => c.group !== "position");
   const hasBase = baseChips.length !== scope.length;
@@ -111,13 +123,15 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
     queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path }, body: { ...filter, limit: 500 } })).data ?? null,
   });
   const base = useQuery({
-    queryKey: ["scenes", teamId, combine(baseChips, ctx)],
+    queryKey: ["scenes", teamId, withExtra(combine(baseChips, ctx))],
     enabled: hasBase,
-    queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path }, body: { ...combine(baseChips, ctx), limit: 500 } })).data ?? null,
+    queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path }, body: { ...withExtra(combine(baseChips, ctx)), limit: 500 } })).data ?? null,
   });
-  const scenes = (result.data?.hits ?? []).filter((h) => h.video_id && h.t_ms != null).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at) || (b.t_ms ?? 0) - (a.t_ms ?? 0));
+  // newest match first, within a match in the order of play; «Alle abspielen» plays exactly this
+  // order (UX test N23)
+  const scenes = (result.data?.hits ?? []).filter((h) => h.video_id && h.t_ms != null).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at) || (a.t_ms ?? 0) - (b.t_ms ?? 0));
   // played in the order of the matches and their clocks
-  const playable = [...scenes].reverse();
+  const playable = scenes;
   const baseCount = (base.data?.hits ?? []).filter((h) => h.video_id && h.t_ms != null).length;
   const label = (c: Chip) => t(`chip.${c.key}` as "chip.conceded");
   // the same answer in the last match, as the base for a comparison
@@ -164,8 +178,10 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
               if (e.key !== "Enter") return;
               // a sentence: its words become the chips; otherwise the first matching chip
               const words = chipsFromText(text);
-              if (words.length) {
-                setActive(words);
+              const more = extrasFromText(text, opponents);
+              if (more.opponent || more.number != null) setExtra(more);
+              if (words.length || more.opponent || more.number != null) {
+                if (words.length) setActive(words);
                 setText("");
                 setShown(TILES);
               } else if (suggestions[0]) toggle(suggestions[0].key);
@@ -177,6 +193,16 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
           />
         </label>
         <div className="mt-3 flex flex-wrap gap-2" aria-label={t("filters")}>
+          {extra.opponent && (
+            <button type="button" aria-pressed onClick={() => setExtra((x) => ({ ...x, opponent: undefined }))} className="inline-flex min-h-11 cursor-pointer items-center border-[1.5px] border-ink bg-ink px-3.5 text-[15px] font-semibold text-ground">
+              {t("chipAgainst", { opponent: extra.opponent })}
+            </button>
+          )}
+          {extra.number != null && (
+            <button type="button" aria-pressed onClick={() => setExtra((x) => ({ ...x, number: undefined }))} className="inline-flex min-h-11 cursor-pointer items-center border-[1.5px] border-ink bg-ink px-3.5 text-[15px] font-semibold text-ground">
+              {t("chipNumber", { n: extra.number })}
+            </button>
+          )}
           {chips.map((c) => (
             <button key={c.key} type="button" aria-pressed onClick={() => toggle(c.key)} className="inline-flex min-h-11 cursor-pointer items-center border-[1.5px] border-ink bg-ink px-3.5 text-[15px] font-semibold text-ground">
               {label(c)}
