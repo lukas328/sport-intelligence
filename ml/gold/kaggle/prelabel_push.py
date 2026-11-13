@@ -11,8 +11,10 @@ here = Path(__file__).resolve().parent
 ap = argparse.ArgumentParser()
 ap.add_argument("work", type=Path)
 ap.add_argument("--model", default="ball_r8.pt")
+ap.add_argument("--clips", type=Path, default=here.parent / "gold_clips.json")
+ap.add_argument("--id", default="lukasde1000/handball-gold-prelabel")
 a = ap.parse_args()
-clips = json.load(open(here.parent / "gold_clips.json"))["clips"]
+clips = json.load(open(a.clips))["clips"]
 a.work.mkdir(parents=True, exist_ok=True)
 src = (
     (here / "prelabel_gpu.py")
@@ -22,8 +24,8 @@ src = (
 )
 (a.work / "kaggle_gold_prelabel.py").write_text(src)
 meta = {
-    "id": "lukasde1000/handball-gold-prelabel",
-    "title": "handball gold prelabel",
+    "id": a.id,
+    "title": a.id.split("/")[1].replace("-", " "),
     "code_file": "kaggle_gold_prelabel.py",
     "language": "python",
     "kernel_type": "script",
