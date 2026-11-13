@@ -3249,7 +3249,10 @@
     "mainDoneText": "{n, plural, one {1 autre moment pourrait être un but.} other {# autres pourraient être des buts.}}",
     "goOn": "Continuer à vérifier",
     "roundDone": "Vérifié pour aujourd'hui.",
-    "leftOpen": "{n, plural, one {1 moment reste ouvert.} other {# moments restent ouverts.}} Tant qu'ils ne sont pas répondus, le score est provisoire."
+    "leftOpen": "{n, plural, one {1 moment reste ouvert.} other {# moments restent ouverts.}} Tant qu'ils ne sont pas répondus, le score est provisoire.",
+    "sameGoal": "Non, le même but",
+    "anotherGoal": "Oui, encore un but",
+    "sameGoalWhy": "Cet extrait contient le but de {time} que tu as déjà confirmé. Y en a-t-il un autre ici ?"
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

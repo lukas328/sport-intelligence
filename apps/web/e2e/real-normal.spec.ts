@@ -48,12 +48,12 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
 
   // three goal candidates, apart, the strongest rate
   const rows = [8000, 16000, 24000]
-    .map((ms, i) => `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', ${ms + 1500}, ${ms}, ${ms - 3000}, ${ms + 3000}, ${3 - i * 0.1}, 1, ${i}, 'open')`)
+    .map((ms, i) => `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', ${ms + 1500}, ${ms}, ${ms - 3000}, ${ms + 3000}, ${3 - i * 0.1}, 1, ${i}, 'open', '${i === 1 ? "opponent" : "own"}')`)
     .join(", ");
   // and one weaker moment (29.6 s, apart from the goal at 24 s): not among the most important questions, but it could be a goal
   const weak = `('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', 29800, 29600, 26000, 30000, 1.0, 3, 3, 'open')`;
   execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status) VALUES ${weak}`]);
-  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status) VALUES ${rows}`]);
+  execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status, suggested_side) VALUES ${rows}`]);
 
   // the start counts the court, the throw-off and the three goals: one count
   await page.goto(`/app/${org}/teams/${team}/matches`);
@@ -97,7 +97,9 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await page.reload();
   await expect(page.getByTestId("check-main-done")).toBeVisible({ timeout: 30_000 });
   await page.getByTestId("check-more").click();
-  await page.getByRole("button", { name: "Kein Tor" }).click();
+  // its clip holds the goal at 0:24 already confirmed: the question says so (real-video test G2)
+  await expect(page.getByText("In diesem Ausschnitt liegt das Tor von 0:24, das du schon bestätigt hast.")).toBeVisible();
+  await page.getByRole("button", { name: "Nein, dasselbe Tor" }).click();
   await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
 
   // the start: the result of the video in the head, the course, the goals and their scene

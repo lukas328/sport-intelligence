@@ -19,6 +19,7 @@ import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/ui/button";
+import { goalWindow, sameGoal } from "@/lib/goal-window";
 import { openMoments, useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
 
@@ -180,6 +181,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     void qc.invalidateQueries({ queryKey: ["analysis", main?.id] });
   }
 
+  // a goal already confirmed for the same side inside this question's clip: the same goal again
+  // is the likely answer (third real-video test G2)
+  const earlier = current?.kind === "goal" && graphics.data ? sameGoal(graphics.data.goals, current.c) : null;
   const answers: Answer[] = !current
     ? []
     : current.kind === "person"
@@ -227,6 +231,16 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               // a moved court runs the analysis again: wait for it, then ask what it found
               if (wasMoved) await reload(true);
             },
+          },
+        ]
+      : earlier
+      ? [
+          { key: "1", label: t("sameGoal"), numeral: "1", first: true, run: () => review(current.c, { status: "rejected" }) },
+          {
+            key: "2",
+            label: t("anotherGoal"),
+            numeral: "2",
+            run: () => review(current.c, { status: "confirmed", side: earlier.team === "own" ? "own" : "opponent", outcome: "goal" }),
           },
         ]
       : [
@@ -422,7 +436,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             ) : current.kind === "kickoff" && media ? (
               <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} />
             ) : current.kind === "goal" && media ? (
-              <VideoPlayer key={current.c.id} src={`${media}/hls/master.m3u8`} window={{ start_ms: current.c.start_ms, end_ms: current.c.end_ms }} autoPlay />
+              <VideoPlayer key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay />
             ) : null}
             {current.kind === "person" && (
               <figcaption className="bg-[rgb(10_13_17/0.9)] px-3 py-2 font-mono text-[13px] font-semibold text-[#eef2f5]">
@@ -454,7 +468,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             </p>
             <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? t("fieldQuestion") : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
             <p className="mt-4 max-w-[54ch] text-[17px] text-ink-2">
-              {current.kind === "field" ? t("fieldWhy") : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : t("goalWhy")}
+              {current.kind === "field" ? t("fieldWhy") : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : earlier ? t("sameGoalWhy", { time: clock(earlier.t_ms! / 1000) }) : t("goalWhy")}
             </p>
 
             {failed && (

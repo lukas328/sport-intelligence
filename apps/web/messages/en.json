@@ -3249,7 +3249,10 @@
     "mainDoneText": "{n, plural, one {1 more moment could be a goal.} other {# more could be goals.}}",
     "goOn": "Keep checking",
     "roundDone": "Checked for today.",
-    "leftOpen": "{n, plural, one {1 moment stays open.} other {# moments stay open.}} Until they are answered, the score is an interim one."
+    "leftOpen": "{n, plural, one {1 moment stays open.} other {# moments stay open.}} Until they are answered, the score is an interim one.",
+    "sameGoal": "No, the same goal",
+    "anotherGoal": "Yes, another goal",
+    "sameGoalWhy": "This clip holds the goal at {time} you already confirmed. Is there another one here?"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",
