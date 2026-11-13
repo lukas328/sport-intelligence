@@ -15,10 +15,22 @@ from typing import Any, Protocol
 
 from redis import Redis
 from redis.asyncio import Redis as AsyncRedis
+from redis.exceptions import RedisError
 from rq import Queue
+
+from handball_api.core.logging import get_logger
+
+log = get_logger("handball_api.jobs")
 
 QUEUES = ("default", "pipeline", "gpu")
 DEFAULT_TIMEOUT_S = 6 * 3600
+
+# Proxies between the containers (Azure Container Apps: a few minutes) drop idle TCP connections
+# without telling either side. A pooled connection then fails on its next use; with a health
+# check redis-py pings a connection idle for longer than this first and reconnects if it is gone.
+REDIS_OPTS: dict[str, Any] = {"health_check_interval": 30, "socket_keepalive": True}
+# a subscriber that hears nothing pings this often, so its connection never counts as idle
+SUBSCRIBE_PING_S = 60.0
 
 
 class JobQueue(Protocol):
@@ -57,7 +69,9 @@ class MemoryJobQueue:
 class RqJobQueue:
     def __init__(self, redis_url: str) -> None:
         # bounded: a hanging Redis must fail the request instead of blocking a worker thread
-        self._conn = Redis.from_url(redis_url, socket_timeout=5, socket_connect_timeout=5)
+        self._conn = Redis.from_url(
+            redis_url, socket_timeout=5, socket_connect_timeout=5, **REDIS_OPTS
+        )
 
     def enqueue(
         self,
@@ -112,18 +126,28 @@ class MemoryEventBus:
 class RedisEventBus:
     def __init__(self, redis_url: str) -> None:
         self._url = redis_url
-        self._redis = AsyncRedis.from_url(redis_url)
+        self._redis = AsyncRedis.from_url(redis_url, **REDIS_OPTS)
 
     async def publish(self, channel: str, event: dict[str, Any]) -> None:
-        await self._redis.publish(channel, json.dumps(event, default=str))
+        """Best effort: the state is already in Postgres and the browser gets a snapshot when it
+        reconnects, so a Redis hiccup must not fail (and roll back) the caller's transaction."""
+        try:
+            await self._redis.publish(channel, json.dumps(event, default=str))
+        except RedisError as e:
+            log.warning("event_publish_failed", channel=channel, error=str(e))
 
     async def subscribe(self, channel: str) -> AsyncIterator[dict[str, Any]]:
-        client = AsyncRedis.from_url(self._url)
+        client = AsyncRedis.from_url(self._url, **REDIS_OPTS)
         pubsub = client.pubsub()
         await pubsub.subscribe(channel)
         try:
-            async for message in pubsub.listen():
-                if message.get("type") == "message":
+            while True:
+                message = await pubsub.get_message(
+                    ignore_subscribe_messages=True, timeout=SUBSCRIBE_PING_S
+                )
+                if message is None:
+                    await pubsub.ping()
+                elif message.get("type") == "message":
                     yield json.loads(message["data"])
         finally:
             await pubsub.unsubscribe(channel)
