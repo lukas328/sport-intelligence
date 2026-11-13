@@ -63,6 +63,36 @@ Comparison images of the rebuilt screens: `docs/screens/anlauf/vergleich/ux1-*.j
 | B53 | 404 ohne Rahmen | behoben (e779fe1): unbekannte Adressen in der App zeigen den 404 im App-Rahmen mit Seitenkopf. |
 | B54 | Abmelden ohne Rückmeldung; Upload-Race im Seed | behoben (a3fab6c, e779fe1): «Du bist abgemeldet.»; das Anlegen des Videos committet jetzt vor der Antwort. Ursache vermutlich: die Transaktion der Anfrage endet erst nach dem Senden der Antwort, ein sofortiges `POST /videos/<id>/parts` fand das Video noch nicht. Lokal nicht nachgestellt. |
 
+## Second delivery: entry for older coaches (H01 to H14, Z1 to Z8)
+
+Source: `docs/ux-test/runde1/EINSTIEG.md` on `claude/ux-test`. Sheet of the new way on the phone
+with large text and the numbers against today: `docs/screens/anlauf/einstieg-ablauf.jpg`.
+
+| # | Befund | Status |
+|---|---|---|
+| H01 | Spieltag: Tasten über dem Spielerraster bei niedrigem Fenster | behoben (a6e9c4c): Kopf und Tasten kleben erst ab 600 px Höhe; e2e prüft 844×390 und 640×400 (fand vorher «Tor» über «11 Lina»). |
+| H02 | Kein Nutzen auf dem Start vor dem ersten Video | behoben (1fd89b2): Rang und Serie, Tabellenausschnitt, Torschützen aus den Spielberichten, nächster Gegner; Aufgabe «Video hochladen». |
+| H03 | App vor dem Konto nicht ansehbar, Demo-Spiel fehlt | behoben (0a0d447, 1fd89b2): öffentlicher Einstieg /einstieg mit dem eigenen Team und den drei Dingen eines Demo-Spiels als Beispiel; «Demo-Spiel ansehen» auf dem Start. |
+| H04 | Team beim ersten Besuch: alles fehlt | behoben (3b57453): vor dem ersten Video keine Fehlt-Aufnäher, «Von handball.ch.», eine Liste statt «Ohne Position», ein Satz zur Einwilligung. |
+| H05 | Erstes Video: keine einfache Anleitung, Beruhigung nie gezeigt | behoben (3b57453): drei Sätze offen und Link auf die Filmanleitung der Website, «Video wählen» am Handy, Kamera und Technik hinter «Mehr», nach dem Upload «Du kannst die Seite schliessen …», Balken nur vorwärts. |
+| H06 | Am Handy erfährt man nicht, dass die Analyse fertig ist | behoben (2cd4bf3): Glocke in der Handy-Kopfzeile; Mail und Mitteilung mit Spielnamen bei fertiger und gescheiterter Analyse und bei unlesbarer Datei. Test `test_support.py`. |
+| H07 | Upload-Dialog verlangt zwei Dinge auf einmal | behoben (3b57453): zuerst nur die Spiele, das letzte oben; «Anderes Spiel» als eigener Schritt mit Gegner und Datum, der Rest hinter «Mehr». |
+| H08 | Schrift zu klein | behoben (a76ae8e): `text-xs` 14 px, nichts Gelesenes unter 14 px, Mono-Beschriftungen 13 px in voller Tinte, Achsen 13 px, Rückennummern ab 14 px; ANLAUF.md 6 und design-lint. Gemessen auf dem Einstieg: 0 Textstellen unter 14 px. |
+| H09 | Nur-Symbol-Knöpfe; Teamname verschwindet | behoben (2cd4bf3, 3b57453, a76ae8e): «Video», «Teilen», «Mehr» mit Wort; Teamname zweizeilig, das Wappen weicht unter 360 px. Die Glocke bleibt ein Symbol mit Zahl. |
+| H10 | Wörter, die Hans nicht versteht | behoben (a76ae8e, frühere Blöcke): Wortliste abgearbeitet (Paradenquote, Angriffseffizienz, Belege anzeigen, Baustelle, Spielformat, Taktik, Quellen, Wie gerechnet, Anlauf bis zur Wurfposition, Daten austauschen, Mannschaft, Übernehmen, Systemstatus); Fachwörter der Technik stehen hinter «Mehr». Positionskürzel auf den Minifeldern (RA, RL) bleiben dort aus Platzgründen; ausgeschrieben in Listen und Titeln. |
+| H11 | Vereinsname uneinheitlich | behoben (1fd89b2): Kopf, Telegramm und Kamera nennen das Team wie die Kopfzeile (Teamname, ausser er ist generisch wie «Herren 1»). Test `own-name.test.ts`. |
+| H12 | Antwort in Prüfen nicht zurücknehmbar | behoben (a76ae8e): «Zurück» öffnet die letzte Antwort, «Beantwortet» mit «Antwort ändern». |
+| H13 | Was sich beim ersten Besuch vordrängt | behoben (1fd89b2, 3b57453): kein Banner mehr; Zwei-Faktor erst mit Video oder zweiter Person, als Aufgabe auf der Team-Seite und im Konto-Menü, sieben Tage wegklickbar (OPEN_QUESTIONS Q-AUTH-2b). |
+| H14 | Saison-Verlauf: Beschriftungen stossen zusammen | behoben (a76ae8e): Namen auf den Platz gekürzt, voller Name als Titel. |
+| Z1 | Alte Startseite der App | behoben (1fd89b2): «/» leitet Angemeldete in die App, alle anderen auf /einstieg (mit q, farbe, lang). Erledigt damit auch B38. |
+| Z2 | Linke Spalte Anmelden/Registrieren | behoben (1fd89b2): Logo, «Dein Spiel. Und drei Dinge zum Mitnehmen.», Link zur Website. |
+| Z3 | /einstieg übernimmt q, farbe, lang | behoben (1fd89b2): nichts wird zweimal gefragt; der Suchsatz erklärt das Produkt nicht neu. |
+| Z4 | Versprechen: Nachricht, Beispielspiel | behoben (2cd4bf3, 1fd89b2): Mail und Glocke; das Beispiel der drei Dinge gibt es wirklich, als Beispiel beschriftet. |
+| Z5 | Laufdistanzen, Pässe, Ball | behoben (9b12b32, 3b57453): xG und Ballbesitz ganz weg; Laufleistung nur aus Video, hinter «Alle Zahlen» und «geschätzt». Torvorlagen: siehe B34. |
+| Z6 | Dauer der Analyse | behoben (3b57453): keine «40 Minuten» mehr; Minuten nur gemessen am laufenden Job, sonst «Du bekommst eine Mail». |
+| Z7 | Eine Filmanleitung | behoben (3b57453): Link auf handball-ai.ch/aufnahme/, im Upload nur drei Sätze. |
+| Z8 | Testphase und Preis | behoben (d19b47f, 3b57453): neue Vereine starten die Testphase aus plans.json ohne Zahlungsdaten (Schalter `trial_on_signup`, OPEN_QUESTIONS Q-BILL-TRIAL); Verein › Abo zeigt «Testphase bis …» und was danach gilt. |
+
 ## Tests
 
 - vitest: `thing-sequence`, `scene-words`, `telegram`, design lint and the rest.
