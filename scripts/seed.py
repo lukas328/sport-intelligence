@@ -449,7 +449,12 @@ def main() -> None:
     # a new player whose shirt number is not known yet (Team: «Nummer fehlt»)
     late = c.post(
         roster_url,
-        json={"first_name": "Mattia", "last_name": "Rossi", "main_position": "RA", "birth_year": 2006},
+        json={
+            "first_name": "Mattia",
+            "last_name": "Rossi",
+            "main_position": "RA",
+            "birth_year": 2006,
+        },
     ).json()
     consent(c, f"{o}/teams/{herren['id']}", late["player_id"], "Mattia Rossi")
     u17 = c.post(

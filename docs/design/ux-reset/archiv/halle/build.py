@@ -10,6 +10,7 @@ richtungen.html  four alternative visual directions: richtungen/page.html plus t
 In a page source, `<!-- screens -->` is replaced by the templates. Stylesheets, the script and
 the scoreboard fonts are inlined, so each result can be opened in a browser or published as it is.
 """
+
 import base64
 import pathlib
 
@@ -23,12 +24,18 @@ def read(path: str) -> str:
 def face(family: str, file: str) -> str:
     data = base64.b64encode((here / "assets/fonts" / file).read_bytes()).decode()
     return (
-        '@font-face{font-family:"' + family + '";font-weight:700;font-display:block;'
-        + "src:url(data:font/woff2;base64," + data + ') format("woff2")}'
+        '@font-face{font-family:"'
+        + family
+        + '";font-weight:700;font-display:block;'
+        + "src:url(data:font/woff2;base64,"
+        + data
+        + ') format("woff2")}'
     )
 
 
-def build(source: str, target: str, templates: list[str], styles: list[str], fonts: list[tuple[str, str]]) -> None:
+def build(
+    source: str, target: str, templates: list[str], styles: list[str], fonts: list[tuple[str, str]]
+) -> None:
     page = read(source)
     page = page.replace("<!-- screens -->", "\n".join(read(t) for t in templates))
     css = "\n".join([face(f, n) for f, n in fonts] + [read(s) for s in styles])
@@ -39,7 +46,11 @@ def build(source: str, target: str, templates: list[str], styles: list[str], fon
 
 
 def names(folder: str) -> list[str]:
-    return [str(p.relative_to(here)) for p in sorted((here / folder).glob("*.html")) if p.name != "page.html"]
+    return [
+        str(p.relative_to(here))
+        for p in sorted((here / folder).glob("*.html"))
+        if p.name != "page.html"
+    ]
 
 
 build(
@@ -52,7 +63,7 @@ build(
 build(
     "richtungen/page.html",
     "richtungen.html",
-    ["src/screens/spiele.html"] + names("richtungen"),
+    ["src/screens/spiele.html", *names("richtungen")],
     ["assets/halle.css", "assets/zielbild.css", "richtungen/richtungen.css"],
     [("DSEG7", "DSEG7Classic-Bold.woff2"), ("DSEG14", "DSEG14Classic-Bold.woff2")],
 )
