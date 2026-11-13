@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CORNERS, cornersOf } from "./field-corners";
+import { CORNERS, cornersOf, handleAt } from "./field-corners";
 import { fitHomography, type Pt } from "./court-calibration";
 
 // UX test B13/B14: Prüfen draws the stored court back onto the hall image (court to image) and
@@ -28,5 +28,23 @@ describe("court corners in Prüfen", () => {
     const h = fitHomography([...CORNERS], moved);
     expect(h).not.toBeNull();
     expect(cornersOf(h, [1920, 1080])[2]![0]).toBeCloseTo(1515, 3);
+  });
+});
+
+describe("handleAt", () => {
+  it("keeps a corner inside the picture and puts one outside at the edge on its line (E04)", () => {
+    const corners: [number, number][] = [
+      [100, 500],
+      [1500, 500],
+      [1300, 200],
+      [300, 200],
+    ];
+    expect(handleAt([100, 500], corners, 1600, 900)).toEqual([100, 500]);
+    // the near left corner below the picture: the handle sits on the bottom edge
+    const out: [number, number][] = [[-200, 1300], ...corners.slice(1)] as [number, number][];
+    const [x, y] = handleAt(out[0]!, out, 1600, 900);
+    expect(y).toBeCloseTo(900);
+    expect(x).toBeGreaterThan(-200);
+    expect(x).toBeLessThan(800);
   });
 });

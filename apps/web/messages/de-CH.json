@@ -757,7 +757,8 @@
     "courtPreviewAlt": "Hallenbild mit dem übernommenen Spielfeld in Orange",
     "courtConfirmError": "Das Spielfeld konnte nicht bestätigt werden. Bitte nochmals versuchen.",
     "hallOnce": "Einmal pro Halle markieren: die nächsten Videos aus derselben Halle ({hall}) übernehmen das Spielfeld.",
-    "hallUnknown": "Den Spielort beim Spiel eintragen: dann übernehmen die nächsten Videos aus dieser Halle das Spielfeld."
+    "hallUnknown": "Den Spielort beim Spiel eintragen: dann übernehmen die nächsten Videos aus dieser Halle das Spielfeld.",
+    "confidenceUnmeasured": "Güte nicht gemessen, bitte in Prüfen bestätigen"
   },
   "tabs": {
     "video": "Video",
@@ -3220,7 +3221,11 @@
     "fieldHandles": "Die vier Ecken des Spielfelds",
     "kickoffQuestion": "Wann ist der Anwurf der {n}. Halbzeit?",
     "kickoffWhy": "Damit Spielbericht, Tore und Video zusammenpassen. Spul im Video zum Anwurf und tipp dann auf «Jetzt ist Anwurf».",
-    "kickoffNow": "Jetzt ist Anwurf"
+    "kickoffNow": "Jetzt ist Anwurf",
+    "saveFailed": "Das liess sich nicht speichern. Die Antwort ist noch nicht gezählt; versuch es noch einmal.",
+    "zoomIn": "Bild vergrössern",
+    "zoomOut": "Bild verkleinern",
+    "cornerOutside": "Diese Ecke liegt ausserhalb des Bildes; der Griff sitzt am Rand auf ihrer Linie."
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

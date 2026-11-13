@@ -757,7 +757,8 @@
     "courtPreviewAlt": "Hall image with the court taken over, in orange",
     "courtConfirmError": "The court could not be confirmed. Please try again.",
     "hallOnce": "Mark once per hall: the next videos from the same hall ({hall}) take the court over.",
-    "hallUnknown": "Enter the venue on the match: the next videos from this hall then take the court over."
+    "hallUnknown": "Enter the venue on the match: the next videos from this hall then take the court over.",
+    "confidenceUnmeasured": "quality not measured, please confirm in Check"
   },
   "tabs": {
     "video": "Video",
@@ -3220,7 +3221,11 @@
     "fieldHandles": "The four corners of the court",
     "kickoffQuestion": "When is the throw-off of half {n}?",
     "kickoffWhy": "So the report, the goals and the video line up. Move the video to the throw-off, then tap «Throw-off now».",
-    "kickoffNow": "Throw-off now"
+    "kickoffNow": "Throw-off now",
+    "saveFailed": "This could not be saved. The answer does not count yet; try again.",
+    "zoomIn": "Enlarge the picture",
+    "zoomOut": "Make the picture smaller",
+    "cornerOutside": "This corner lies outside the picture; its handle sits at the edge on its line."
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

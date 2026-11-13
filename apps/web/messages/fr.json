@@ -757,7 +757,8 @@
     "courtPreviewAlt": "Image de la salle avec le terrain repris, en orange",
     "courtConfirmError": "Le terrain n'a pas pu être confirmé. Réessaie.",
     "hallOnce": "Une fois par salle : les prochaines vidéos de la même salle ({hall}) reprennent le terrain.",
-    "hallUnknown": "Indique le lieu du match : les prochaines vidéos de cette salle reprendront alors le terrain."
+    "hallUnknown": "Indique le lieu du match : les prochaines vidéos de cette salle reprendront alors le terrain.",
+    "confidenceUnmeasured": "qualité non mesurée, à confirmer dans Vérifier"
   },
   "tabs": {
     "video": "Vidéo",
@@ -3220,7 +3221,11 @@
     "fieldHandles": "Les quatre coins du terrain",
     "kickoffQuestion": "Quand a lieu l'engagement de la {n}e mi-temps ?",
     "kickoffWhy": "Pour que la feuille de match, les buts et la vidéo concordent. Avance la vidéo jusqu'à l'engagement, puis touche « Engagement maintenant ».",
-    "kickoffNow": "Engagement maintenant"
+    "kickoffNow": "Engagement maintenant",
+    "saveFailed": "Impossible d'enregistrer. La réponse ne compte pas encore; réessaie.",
+    "zoomIn": "Agrandir l'image",
+    "zoomOut": "Réduire l'image",
+    "cornerOutside": "Ce coin est hors de l'image; sa poignée est au bord, sur sa ligne."
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

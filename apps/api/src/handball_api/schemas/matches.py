@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import uuid
 from datetime import datetime
 from typing import Any, Literal
@@ -514,8 +515,10 @@ class CalibrationPoint(ApiModel):
         x, y = self.court
         if not (-5 <= x <= 45 and -5 <= y <= 25):
             raise ValueError("court point outside the court area")
-        if self.image[0] < 0 or self.image[1] < 0:
-            raise ValueError("image point must be inside the frame")
+        # a corner may lie outside the picture: with a panning camera the near corners are
+        # often out of view (real-video test E03); only absurd values are refused
+        if not all(math.isfinite(v) and abs(v) <= 20_000 for v in self.image):
+            raise ValueError("image point too far outside the frame")
         return self
 
 

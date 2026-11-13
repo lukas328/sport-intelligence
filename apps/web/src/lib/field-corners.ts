@@ -26,3 +26,23 @@ export function cornersOf(h: Homography | null | undefined, size: [number, numbe
   ];
 }
 
+/**
+ * Where a corner's handle is drawn: the corner itself inside the picture, else the point where
+ * the line from the court's middle to it leaves the picture (E04: every handle reachable).
+ */
+export function handleAt(corner: Pt, corners: Pt[], w: number, h: number): Pt {
+  const [x, y] = corner;
+  if (x >= 0 && x <= w && y >= 0 && y <= h) return corner;
+  const cx = corners.reduce((a, c) => a + c[0], 0) / corners.length;
+  const cy = corners.reduce((a, c) => a + c[1], 0) / corners.length;
+  if (!(cx >= 0 && cx <= w && cy >= 0 && cy <= h))
+    return [Math.min(w, Math.max(0, x)), Math.min(h, Math.max(0, y))];
+  let t = 1;
+  const dx = x - cx;
+  const dy = y - cy;
+  if (dx > 0) t = Math.min(t, (w - cx) / dx);
+  if (dx < 0) t = Math.min(t, (0 - cx) / dx);
+  if (dy > 0) t = Math.min(t, (h - cy) / dy);
+  if (dy < 0) t = Math.min(t, (0 - cy) / dy);
+  return [cx + dx * t, cy + dy * t];
+}

@@ -994,7 +994,9 @@ function AnalysisPanel({
           {analysis.calibration && (
             <p>
               {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
-              {t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
+              {/* the automatic court's error is not measured yet (reprojection 0): no «100 %»,
+                  the court is asked in Prüfen (real-video test, Q-CAL-QUALITY) */}
+              {analysis.calibration.source !== "user_correction" && !analysis.calibration.reprojection_px ? t("confidenceUnmeasured") : t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
             </p>
           )}
           {analysis.tracks.length > 0 && <p>{t("tracks", { count: analysis.tracks.length })}</p>}

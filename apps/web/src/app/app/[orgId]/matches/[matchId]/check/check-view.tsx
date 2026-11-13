@@ -103,11 +103,20 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const player = useRef<PlayerHandle>(null);
   const getTime = useCallback(() => player.current?.time() ?? 0, []);
   const getVideo = useCallback(() => player.current?.video() ?? null, []);
+  // an answer counts only once it is saved; a refusal of the API is said, never swallowed (E03)
+  const [failed, setFailed] = useState<string | null>(null);
+  const must = (r: { error?: unknown; response: Response }) => {
+    if (r.error || !r.response.ok) {
+      const p = r.error as { detail?: string; title?: string } | undefined;
+      throw new Error(p?.detail || p?.title || String(r.response.status));
+    }
+  };
   async function identify(tr: Track, playerId: string) {
-    await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
+    const r = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
       params: { path: { org_id: orgId, video_id: main!.id, track_no: tr.track_no } },
       body: { player_id: playerId, number: null },
     });
+    must(r);
     void qc.invalidateQueries({ queryKey: ["analysis", main?.id] });
   }
 
@@ -125,7 +134,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             label: t("kickoffNow"),
             first: true,
             run: async () => {
-              await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period: current.period, t_ms: Math.round(getTime()) } });
+              must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period: current.period, t_ms: Math.round(getTime()) } }));
               for (const key of ["match", "events", "stats", "official-goals", "goal-candidates"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
               router.refresh();
             },
@@ -142,12 +151,14 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               // moved corners are a court of its own: saved as four points on the hall image;
               // otherwise the recognised court is confirmed as it is
               if (moved && panoSize) {
-                await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration", {
-                  ...vid,
-                  body: { space: "panorama", frame_ms: 0, points: moved.map((image, i) => ({ image, court: CORNERS[i]! })) },
-                });
+                must(
+                  await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration", {
+                    ...vid,
+                    body: { space: "panorama", frame_ms: 0, points: moved.map((image, i) => ({ image, court: CORNERS[i]! })) },
+                  }),
+                );
               } else {
-                await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", vid);
+                must(await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", vid));
               }
               setMoved(null);
               void qc.invalidateQueries({ queryKey: ["analysis"] });
@@ -174,13 +185,19 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         ];
 
   async function review(c: Candidate, body: Schemas["GoalCandidateReviewIn"]) {
-    await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review", { params: { path: { ...path, candidate_id: c.id } }, body });
+    must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review", { params: { path: { ...path, candidate_id: c.id } }, body }));
     void qc.invalidateQueries({ queryKey: ["graphics", match.id] });
   }
 
   async function answer(a: Answer) {
     if (!current) return;
-    await a.run();
+    try {
+      setFailed(null);
+      await a.run();
+    } catch (e) {
+      setFailed(e instanceof Error ? e.message : String(e));
+      return;
+    }
     if (revisit != null) {
       setAnswered((list) => list.map((x, i) => (i === revisit ? { ...x, label: a.label } : x)));
       setRevisit(null);
@@ -261,7 +278,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-5 py-6 md:grid-cols-[minmax(0,1fr)_420px] md:gap-14 md:py-10">
+        // the court gets the whole width: the hall image as large as possible (E04)
+        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
           <figure className="relative m-0 self-start bg-[#1d2125]">
             {current.kind === "field" && main && panoSize && corners ? (
               <FieldCheck src={`/v1/orgs/${orgId}/videos/${main.id}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
@@ -325,6 +343,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               {current.kind === "field" ? t("fieldWhy") : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : t("goalWhy")}
             </p>
 
+            {failed && (
+              <p role="alert" className="mt-4 max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
+                {t("saveFailed")} <span className="block text-[15px] font-normal text-ink-2">{failed}</span>
+              </p>
+            )}
             <div className="mt-6 grid grid-cols-2 gap-2.5">
               {answers.map((a) => (
                 <button

@@ -254,3 +254,26 @@ async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
     # every event of the video has its clock now, the scene too
     camera = (await api.get(f"{base}/scenes/{g['goals'][0]['event_id']}/camera")).json()
     assert camera["clock_s"] is not None and camera["video_s"] is not None
+
+
+def test_a_corner_outside_the_picture_is_accepted() -> None:
+    """Real-video test E03: with a panning camera the near corners lie outside the hall image;
+    the points are taken, only absurd ones are refused."""
+    import pytest
+    from pydantic import ValidationError
+
+    from handball_api.schemas.matches import CalibrationIn
+
+    body = {
+        "space": "panorama",
+        "points": [
+            {"image": [-240.5, 1310.0], "court": [0, 0]},
+            {"image": [1720.0, 1250.0], "court": [40, 0]},
+            {"image": [1300.0, 210.0], "court": [40, 20]},
+            {"image": [290.0, 205.0], "court": [0, 20]},
+        ],
+    }
+    assert CalibrationIn.model_validate(body).points[0].image == (-240.5, 1310.0)
+    body["points"][0]["image"] = [-1e9, 0]
+    with pytest.raises(ValidationError):
+        CalibrationIn.model_validate(body)
