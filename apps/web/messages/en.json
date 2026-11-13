@@ -3183,7 +3183,13 @@
     "sceneShow": "Show scene",
     "videoGoalsTitle": "Goals in the video",
     "noThingsGoals": "{n, plural, one {1 goal is confirmed} other {# goals are confirmed}}. Three things need more goals with a spot; the goals and their scenes are here.",
-    "videoShort": "Video"
+    "videoShort": "Video",
+    "plainRunning": "The analysis is still running. You get an e-mail when it is done.",
+    "plainVideoOnly": "The video is here; it is not analysed yet.",
+    "rowRunning": "Analysis running",
+    "rowFailed": "Analysis did not work",
+    "rowVideoOnly": "Video here, not analysed yet",
+    "rowGoals": "{n, plural, one {1 goal} other {# goals}} in the video"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3225,7 +3231,8 @@
     "saveFailed": "This could not be saved. The answer does not count yet; try again.",
     "zoomIn": "Enlarge the picture",
     "zoomOut": "Make the picture smaller",
-    "cornerOutside": "This corner lies outside the picture; its handle sits at the edge on its line."
+    "cornerOutside": "This corner lies outside the picture; its handle sits at the edge on its line.",
+    "more": "If you like: {n, plural, one {1 more question} other {# more questions}}"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

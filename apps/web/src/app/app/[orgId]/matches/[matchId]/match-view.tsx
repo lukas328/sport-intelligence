@@ -435,7 +435,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </div>
         </details>
       )}
-      {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
+      {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} hasReport={(graphics.data?.report_goals.length ?? 0) > 0} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
@@ -459,7 +459,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           // workbench by default (UX test N04), it opens with one tap
           <section className="space-y-4" data-testid="plain-stage">
             <VideoPlayer src={`/v1/orgs/${orgId}/videos/${main.id}/media/hls/master.m3u8`} />
-            <p className="m-0 max-w-[60ch] text-[17px]">{staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
+            {/* «fertig» only once the analysis is done, never while it runs (E06) */}
+            <p className="m-0 max-w-[60ch] text-[17px]">{graphics.data?.analysis === "running" ? ta("plainRunning") : graphics.data?.analysis !== "ready" ? ta("plainVideoOnly") : staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
             <div className="flex flex-wrap gap-3">
               {staff && checks > 0 && (
                 <Link href={`${base}/check`} className={buttonClass("primary")}>
@@ -648,7 +649,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   );
 }
 
-function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: string; staff: boolean; onOtherFile?: () => void }) {
+function Processing({ jobs, orgId, staff, onOtherFile, hasReport = false }: { jobs: Job[]; orgId: string; staff: boolean; onOtherFile?: () => void; hasReport?: boolean }) {
   const t = useTranslations("processing");
   const ta = useTranslations("anlauf");
   const now = useNow({ updateInterval: 5000 });
@@ -711,7 +712,8 @@ function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: s
             </li>
           ))}
         </ol>
-        <p className="mt-4 text-[15px] text-ink-2">{ta("meanwhile")}</p>
+        {/* only with a match report there are its goals to look at meanwhile (E08) */}
+        {hasReport && <p className="mt-4 text-[15px] text-ink-2">{ta("meanwhile")}</p>}
         <details className="mt-3 text-[15px] text-ink-2">
           <summary className="min-h-11 cursor-pointer content-center font-semibold">{t("technical")}</summary>
           {running.map((j) => (

@@ -277,3 +277,48 @@ def test_a_corner_outside_the_picture_is_accepted() -> None:
     body["points"][0]["image"] = [-1e9, 0]
     with pytest.raises(ValidationError):
         CalibrationIn.model_validate(body)
+
+
+async def test_one_question_per_moment_and_the_rest_offered(
+    make_api: Callable[[], Api], owner_conn: Any
+) -> None:
+    """Real-video test E07, E12: overlapping candidate windows are one moment, asked once; the
+    strongest candidates are the questions (the one count of mail, start and Prüfen), the weaker
+    ones are offered as more; a moment with a confirmed goal is not asked again."""
+    from handball_api.core.jobs import MemoryJobQueue
+
+    from .test_goal_candidates import FOUND, _cand
+    from .test_identity_sync import _finish, _ingest, _tracks
+    from .test_matches import upload
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    base = f"/v1/orgs/{org}/matches/{m['id']}"
+    await upload(api, ids, m["id"], b"v" * 100)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    found = {**FOUND, "candidates": [*FOUND["candidates"], _cand(70_000, 2)]}
+    await _finish(
+        api,
+        jobs.jobs[-1][2],
+        {"tracks": _tracks(), "detector": "heuristic", "goal_candidates": found},
+    )
+    rows = {r["t_ms"]: r for r in (await api.get(f"{base}/goal-candidates")).json()["candidates"]}
+    g = (await api.get(f"{base}/graphics")).json()
+    goals = [c["id"] for c in g["checks"] if c["kind"] == "goal"]
+    # 63 s and 70 s overlap: one question (the stronger, rate 1); 200 s (rate 4) is offered
+    assert goals == [rows[63_000]["id"], rows[150_000]["id"], rows[305_000]["id"]]
+    assert [c["id"] for c in g["more_checks"]] == [rows[200_000]["id"]]
+    assert {c["kind"] for c in g["checks"]} <= {"field", "kickoff", "goal"}
+    # once the goal at 63 s is confirmed, the overlapping 70 s is not asked again
+    r = await api.put(
+        f"{base}/goal-candidates/{rows[63_000]['id']}/review",
+        json={"status": "confirmed", "side": "own"},
+    )
+    assert r.status_code == 200, r.text
+    g = (await api.get(f"{base}/graphics")).json()
+    asked = {c["id"] for c in g["checks"]} | {c["id"] for c in g["more_checks"]}
+    assert rows[70_000]["id"] not in asked and rows[63_000]["id"] not in asked
+    assert g["analysis"] == "ready"

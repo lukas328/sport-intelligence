@@ -3183,7 +3183,13 @@
     "sceneShow": "Szene zeigen",
     "videoGoalsTitle": "Tore im Video",
     "noThingsGoals": "{n, plural, one {1 Tor ist bestätigt} other {# Tore sind bestätigt}}. Für drei Dinge braucht es mehr Tore mit Position; die Tore und ihre Szenen stehen hier.",
-    "videoShort": "Video"
+    "videoShort": "Video",
+    "plainRunning": "Die Analyse läuft noch. Du bekommst eine Mail, wenn sie fertig ist.",
+    "plainVideoOnly": "Das Video ist da; ausgewertet ist es noch nicht.",
+    "rowRunning": "Analyse läuft",
+    "rowFailed": "Analyse nicht geklappt",
+    "rowVideoOnly": "Video da, noch nicht ausgewertet",
+    "rowGoals": "{n, plural, one {1 Tor} other {# Tore}} im Video"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3225,7 +3231,8 @@
     "saveFailed": "Das liess sich nicht speichern. Die Antwort ist noch nicht gezählt; versuch es noch einmal.",
     "zoomIn": "Bild vergrössern",
     "zoomOut": "Bild verkleinern",
-    "cornerOutside": "Diese Ecke liegt ausserhalb des Bildes; der Griff sitzt am Rand auf ihrer Linie."
+    "cornerOutside": "Diese Ecke liegt ausserhalb des Bildes; der Griff sitzt am Rand auf ihrer Linie.",
+    "more": "Wenn du magst: {n, plural, one {1 weitere Frage} other {# weitere Fragen}}"
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

@@ -586,6 +586,9 @@ class CheckOut(ApiModel):
 
 class MatchGraphicsOut(ApiModel):
     has_video: bool
+    analysis: Literal["none", "running", "ready", "failed"] = Field(
+        default="none", description="the latest analysis of the timeline video"
+    )
     span: tuple[float, float] | None = Field(
         default=None, description="match minutes the video covers; null without throw-off"
     )
@@ -593,7 +596,12 @@ class MatchGraphicsOut(ApiModel):
     report_goals: list[ReportGoalOut]
     goals: list[GoalRunOut]
     phases: list[PhaseOut]
-    checks: list[CheckOut]
+    checks: list[CheckOut] = Field(
+        description="the questions of Prüfen, in order: what three things need (the one count)"
+    )
+    more_checks: list[CheckOut] = Field(
+        default_factory=list, description="lower-ranked goal candidates, offered, not counted"
+    )
     source: GraphicsSource
 
 

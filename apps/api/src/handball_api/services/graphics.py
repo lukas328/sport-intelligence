@@ -26,7 +26,15 @@ import numpy as np
 from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import CameraCalibration, Event, GoalCandidate, Match, Track, VideoAsset
+from handball_api.models import (
+    CameraCalibration,
+    Event,
+    GoalCandidate,
+    Match,
+    ProcessingJob,
+    Track,
+    VideoAsset,
+)
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video
 from handball_api.services.matches import duration_ms, get_match, timeline_video
@@ -339,6 +347,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
 
     return {
         "has_video": asset is not None,
+        "analysis": await analysis_status(ctx, asset),
         "span": _span(match, asset),
         "field_confirmed": field,
         "report_goals": report,
@@ -347,8 +356,30 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         # the court first: until it is confirmed the analysis draws no positions (demo matches
         # show invented ones, the real court of their video is still asked)
         "checks": await _open_checks(ctx, match, asset, tracking, confirmed_field),
+        "more_checks": await more_checks(ctx, match),
         "source": "demo" if demo else "analysis",
     }
+
+
+async def analysis_status(ctx: Ctx, asset: VideoAsset | None) -> str:
+    """none, running, ready or failed: the latest analysis job of the video. «Analyse fertig» is
+    said only once it is ready (real-video test E06)."""
+    if asset is None:
+        return "none"
+    job = await ctx.db.scalar(
+        select(ProcessingJob)
+        .where(ProcessingJob.video_asset_id == asset.id, ProcessingJob.kind == "analysis")
+        .order_by(ProcessingJob.created_at.desc())
+        .limit(1)
+    )
+    if job is None:
+        return "none"
+    return {
+        "queued": "running",
+        "running": "running",
+        "succeeded": "ready",
+        "failed": "failed",
+    }.get(str(job.status.value if hasattr(job.status, "value") else job.status), "none")
 
 
 def _span(match: Match, asset: VideoAsset | None) -> list[float] | None:
@@ -428,21 +459,31 @@ def _field_check(asset: VideoAsset) -> dict[str, Any]:
     }
 
 
-def _kickoff_check(match: Match) -> list[dict[str, Any]]:
-    """The throw-off of the first half, asked in Prüfen while it is not set (UX test B10): it
-    ties the match clock to the video. The second half is asked there once the first is set."""
-    if (match.kickoff_ms or {}).get("1") is not None:
-        return []
+def kickoff_missing(match: Match, length_ms: int | None) -> list[int]:
+    """The halves whose throw-off Prüfen asks: the first while it is not set, the second once the
+    video runs a break past the first half (the same rule as web lib/match-workflow.ts)."""
+    k = match.kickoff_ms or {}
+    first = k.get("1")
+    if first is None:
+        return [1]
+    second = length_ms is not None and length_ms > int(first) + match.period_s * 1000 + 5 * 60_000
+    return [2] if second and k.get("2") is None else []
+
+
+def _kickoff_check(match: Match, asset: VideoAsset | None = None) -> list[dict[str, Any]]:
+    """The throw-off, asked in Prüfen while it is not set (UX test B10): it ties the match clock
+    to the video. `frame_ref` is the half."""
     return [
         {
-            "id": uuid.uuid5(match.id, "kickoff:1"),
+            "id": uuid.uuid5(match.id, f"kickoff:{period}"),
             "kind": "kickoff",
-            "frame_ref": 0,
+            "frame_ref": period,
             "box": None,
             "seconds_in_view": None,
             "suggested_side": None,
             "candidates": [],
         }
+        for period in kickoff_missing(match, duration_ms(asset) if asset is not None else None)
     ]
 
 
@@ -457,7 +498,7 @@ async def _open_checks(
             if asset is not None and tracking and confirmed_field is False
             else []
         )
-        + (_kickoff_check(match) if asset is not None and not match.is_demo else [])
+        + (_kickoff_check(match, asset) if asset is not None and not match.is_demo else [])
         + await _checks(ctx, match)
     )
 
@@ -470,28 +511,69 @@ async def open_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
     return await _open_checks(ctx, match, asset, tracking, await _field_confirmed(ctx, asset))
 
 
-async def _checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
-    """Questions for Prüfen: the open goal and shot candidates of the video. A question about a
-    person needs a box in the picture, which the analysis does not deliver yet: not asked."""
+def _windows(rows: list[GoalCandidate]) -> list[list[GoalCandidate]]:
+    """Candidates whose clips overlap are one moment (real-video test E12): grouped, so a goal
+    is asked once and counted once."""
+    groups: list[list[GoalCandidate]] = []
+    for c in sorted(rows, key=lambda c: c.start_ms):
+        if groups and c.start_ms <= max(x.end_ms for x in groups[-1]):
+            groups[-1].append(c)
+        else:
+            groups.append([c])
+    return groups
+
+
+async def _goal_questions(
+    ctx: Ctx, match: Match
+) -> tuple[list[GoalCandidate], list[GoalCandidate]]:
+    """The goal candidates to ask: one per moment, none where a goal of that moment is already
+    confirmed. First those of the default rate (the strongest, what three things need), the
+    others as «Wenn du magst» (E07). Shot candidates are not asked in Prüfen and not counted."""
+    from handball_api.services.goal_candidates import DEFAULT_RATE
+
     rows = (
         await ctx.db.scalars(
-            select(GoalCandidate)
-            .where(GoalCandidate.match_id == match.id, GoalCandidate.status == "open")
-            .order_by(GoalCandidate.kind, GoalCandidate.rank, GoalCandidate.goal_ms)
+            select(GoalCandidate).where(
+                GoalCandidate.match_id == match.id,
+                GoalCandidate.kind == "goal",
+                GoalCandidate.status.in_(("open", "confirmed")),
+            )
         )
     ).all()
-    return [
-        {
-            "id": c.id,
-            "kind": c.kind,
-            "frame_ref": c.goal_ms,
-            "box": None,
-            "seconds_in_view": None,
-            "suggested_side": c.suggested_side,
-            "candidates": [],
-        }
-        for c in rows
-    ]
+    asked: list[GoalCandidate] = []
+    for group in _windows(list(rows)):
+        if any(c.status == "confirmed" for c in group):
+            continue
+        asked.append(min(group, key=lambda c: (c.rate, -c.score, c.rank)))
+    first = [c for c in asked if c.rate <= DEFAULT_RATE["goal"]]
+    more = [c for c in asked if c.rate > DEFAULT_RATE["goal"]]
+    order = lambda c: c.goal_ms  # noqa: E731
+    return sorted(first, key=order), sorted(more, key=order)
+
+
+def _check_of(c: GoalCandidate) -> dict[str, Any]:
+    return {
+        "id": c.id,
+        "kind": c.kind,
+        "frame_ref": c.goal_ms,
+        "box": None,
+        "seconds_in_view": None,
+        "suggested_side": c.suggested_side,
+        "candidates": [],
+    }
+
+
+async def _checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
+    """Questions for Prüfen: the goal candidates worth asking first. A question about a person
+    needs a box in the picture, which the analysis does not deliver yet: not asked here."""
+    first, _ = await _goal_questions(ctx, match)
+    return [_check_of(c) for c in first]
+
+
+async def more_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
+    """The goal candidates of a lower rank: offered as «Wenn du magst: n weitere», not counted."""
+    _, more = await _goal_questions(ctx, match)
+    return [_check_of(c) for c in more]
 
 
 # ---- one scene ------------------------------------------------------------------------------

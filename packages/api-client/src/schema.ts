@@ -7564,7 +7564,17 @@ export interface components {
         MatchFormatKey: "adult_2x30" | "youth_2x25" | "youth_2x20" | "mini" | "tournament" | "custom";
         /** MatchGraphicsOut */
         MatchGraphicsOut: {
-            /** Checks */
+            /**
+             * Analysis
+             * @description the latest analysis of the timeline video
+             * @default none
+             * @enum {string}
+             */
+            analysis?: "none" | "running" | "ready" | "failed";
+            /**
+             * Checks
+             * @description the questions of Prüfen, in order: what three things need (the one count)
+             */
             checks: components["schemas"]["CheckOut"][];
             /**
              * Field Confirmed
@@ -7575,6 +7585,11 @@ export interface components {
             goals: components["schemas"]["GoalRunOut"][];
             /** Has Video */
             has_video: boolean;
+            /**
+             * More Checks
+             * @description lower-ranked goal candidates, offered, not counted
+             */
+            more_checks?: components["schemas"]["CheckOut"][];
             /** Phases */
             phases: components["schemas"]["PhaseOut"][];
             /** Report Goals */

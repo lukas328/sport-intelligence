@@ -18,7 +18,8 @@ import { api } from "@/lib/client";
 import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
 import { cn } from "@/lib/utils";
-import { kickoffMissing } from "@/lib/match-workflow";
+import { buttonClass } from "@/components/ui/button";
+import { useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
 
 type Match = Schemas["MatchOut"];
@@ -62,24 +63,41 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates", { params: { path, query: { kind: "goal" } } })).data ?? null,
   });
   const [done, setDone] = useState<string[]>([]);
+  // one source for the questions: the server's list, as the mail and the start count them (E07);
+  // taken once when the screen opens, so answering does not shuffle the count
+  const graphics = useMatchGraphics(orgId, match.id);
+  const [asked, setAsked] = useState<{ first: Schemas["CheckOut"][]; more: Schemas["CheckOut"][] } | null>(null);
+  useEffect(() => {
+    if (!asked && graphics.data) setAsked({ first: graphics.data.checks, more: graphics.data.more_checks ?? [] });
+  }, [asked, graphics.data]);
+  const [wantMore, setWantMore] = useState(false);
+  const cal0 = analysis.data?.calibration;
+  // a person box needs the homography of the very frame: with a panning camera only the hall
+  // image's is known, so people are asked only with a fixed camera (E05)
+  const people = useMemo<Question[]>(() => {
+    if (!main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
+    return (analysis.data.tracks ?? [])
+      .filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id && tr.last_ms - tr.first_ms >= PERSON_MIN_MS)
+      .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
+      .slice(0, PERSON_MAX)
+      .sort((a, b) => a.first_ms - b.first_ms)
+      .map((tr) => ({ kind: "person" as const, tr, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) }));
+  }, [analysis.data, cal0, main]);
+  const toQuestions = useCallback(
+    (list: Schemas["CheckOut"][]): Question[] =>
+      list.flatMap((c): Question[] => {
+        if (c.kind === "field") return main ? [{ kind: "field", videoId: main.id }] : [];
+        if (c.kind === "kickoff") return [{ kind: "kickoff", period: c.frame_ref }];
+        const cand = candidates.data?.candidates.find((x) => x.id === c.id && x.status === "open");
+        return cand ? [{ kind: "goal", c: cand }] : [];
+      }),
+    [candidates.data, main],
+  );
   const questions = useMemo<Question[]>(() => {
-    const q: Question[] = [];
-    const cal = analysis.data?.calibration;
-    if (main && analysis.data?.status === "ready" && (!cal || cal.source !== "user_correction")) q.push({ kind: "field", videoId: main.id });
-    // the throw-off ties the match clock to the video: asked here, not as a setup step (UX test B10)
-    if (main) for (const period of kickoffMissing(match.kickoff_ms, match.period_s, main.duration_s ? main.duration_s * 1000 : null)) q.push({ kind: "kickoff", period });
-    for (const c of candidates.data?.candidates ?? []) if (c.status === "open") q.push({ kind: "goal", c });
-    // people only on a confirmed court: without it the box would sit in the wrong place
-    if (main && cal?.source === "user_correction" && analysis.data?.chunk_ms) {
-      const own = (analysis.data.tracks ?? [])
-        .filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id && tr.last_ms - tr.first_ms >= PERSON_MIN_MS)
-        .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
-        .slice(0, PERSON_MAX)
-        .sort((a, b) => a.first_ms - b.first_ms);
-      for (const tr of own) q.push({ kind: "person", tr, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) });
-    }
-    return q;
-  }, [analysis.data, candidates.data, main, match.kickoff_ms, match.period_s]);
+    if (!asked) return [];
+    return [...toQuestions(asked.first), ...(wantMore ? [...toQuestions(asked.more), ...people] : [])];
+  }, [asked, wantMore, toQuestions, people]);
+  const moreCount = asked ? toQuestions(asked.more).length + people.length : 0;
   const open = questions.filter((q) => !done.includes(id(q)));
   // what was answered in this round, to look at again and change (UX test H12)
   const [answered, setAnswered] = useState<{ q: Question; label: string }[]>([]);
@@ -237,7 +255,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
 
   const media = main ? `/v1/orgs/${orgId}/videos/${main.id}/media` : null;
   const back = `/app/${orgId}/matches/${match.id}`;
-  const loading = candidates.isLoading || (main != null && analysis.isLoading);
+  const loading = candidates.isLoading || graphics.isLoading || !asked || (main != null && analysis.isLoading);
   return (
     <div style={matchStyle([org.primary_color, org.secondary_color ?? null], match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null) as CSSProperties} data-testid="check">
       <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
@@ -256,6 +274,12 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         <div className="max-w-[60ch] space-y-4 py-10">
           <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>
           <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
+          {/* the rest, offered, not pressed on the coach (E07) */}
+          {!wantMore && moreCount > 0 && (
+            <button type="button" onClick={() => setWantMore(true)} className={buttonClass("secondary")} data-testid="check-more">
+              {t("more", { n: moreCount })}
+            </button>
+          )}
           {answered.length > 0 && (
             <section aria-labelledby="answered" data-testid="check-answered">
               <h2 id="answered" className="text-[22px]">{t("answered")}</h2>

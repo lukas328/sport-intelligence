@@ -77,7 +77,8 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
   const head = useHeadProps(m, next, g.data ?? null, teamName);
   const checks = g.data?.checks.length ?? 0;
   const base = m ? `/app/${orgId}/matches/${m.id}` : null;
-  const running = m ? ["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) : false;
+  // the analysis runs after the video is ready: «running» until it is done too (E06)
+  const running = m ? ["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) || g.data?.analysis === "running" : false;
   // the analysis is done without three things: one sentence and one next step, nothing else that
   // says the same (UX test A02)
   // with goals confirmed in the video the start shows them, also without three things (E01)
@@ -117,7 +118,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
             <AttnTag>{t("check")}</AttnTag>
             <Link href={`${base}/check`} className={linkClass}>
               {/* after the court come the people in the picture: say so instead of «1 Minute» (UX test N13) */}
-              {g.data?.checks.some((c) => c.kind === "field") ? t("checksThenPeople", { count: checks }) : t("checksOpen", { count: checks, minutes: Math.max(1, Math.round(checks / 3)) })}
+              {t("checksOpen", { count: checks, minutes: Math.max(1, Math.round(checks / 3)) })}
             </Link>
           </span>
         )}
@@ -207,7 +208,7 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     return { title: next ? t("titleNext", { opponent: next.opponent_name }) : t("titleWelcome"), own: null, opp: null, ownName: teamName, oppName: next?.opponent_name ?? "", waiting: true };
   }
   const state = matchState(m);
-  const running = ["matches.status_processing", "matches.status_uploading"].includes(state.label);
+  const running = ["matches.status_processing", "matches.status_uploading"].includes(state.label) || g?.analysis === "running";
   const things = g ? threeThings(goalRuns(g)) : [];
   const result = resultOf(m);
   // no result of its own: the goals confirmed in the video stand in the head, said as such (E10)
@@ -262,10 +263,15 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   const text = useThingText();
   const g = useMatchGraphics(orgId, m.id);
   if (!g.data) return <>{m.competition}</>;
+  // «Analyse fertig» only when it is (E06)
+  if (g.data.analysis === "running") return <>{t("rowRunning")}</>;
+  if (g.data.analysis === "failed") return <>{t("rowFailed")}</>;
   const things = threeThings(goalRuns(g.data));
   const scenes = g.data.goals.filter((x) => x.has_video || x.source === "demo").length;
   // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)
-  if (things.length === 0) return <>{g.data.checks.length > 0 ? t("rowChecks", { n: g.data.checks.length }) : t("rowNoGoals")}</>;
+  if (things.length === 0 && g.data.analysis !== "ready") return <>{t("rowVideoOnly")}</>;
+  if (things.length === 0 && !g.data.goals.some((x) => x.has_video)) return <>{g.data.checks.length > 0 ? t("rowChecks", { n: g.data.checks.length }) : t("rowNoGoals")}</>;
+  if (things.length === 0) return <>{t("rowGoals", { n: g.data.goals.filter((x) => x.has_video).length })}</>;
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }
 

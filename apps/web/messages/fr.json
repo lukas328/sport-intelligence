@@ -3183,7 +3183,13 @@
     "sceneShow": "Voir la scène",
     "videoGoalsTitle": "Buts dans la vidéo",
     "noThingsGoals": "{n, plural, one {1 but est confirmé} other {# buts sont confirmés}}. Pour trois choses, il faut plus de buts avec position; les buts et leurs scènes sont ici.",
-    "videoShort": "Vidéo"
+    "videoShort": "Vidéo",
+    "plainRunning": "L'analyse est encore en cours. Tu reçois un e-mail quand elle est terminée.",
+    "plainVideoOnly": "La vidéo est là; elle n'est pas encore analysée.",
+    "rowRunning": "Analyse en cours",
+    "rowFailed": "L'analyse n'a pas fonctionné",
+    "rowVideoOnly": "Vidéo là, pas encore analysée",
+    "rowGoals": "{n, plural, one {1 but} other {# buts}} dans la vidéo"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3225,7 +3231,8 @@
     "saveFailed": "Impossible d'enregistrer. La réponse ne compte pas encore; réessaie.",
     "zoomIn": "Agrandir l'image",
     "zoomOut": "Réduire l'image",
-    "cornerOutside": "Ce coin est hors de l'image; sa poignée est au bord, sur sa ligne."
+    "cornerOutside": "Ce coin est hors de l'image; sa poignée est au bord, sur sa ligne.",
+    "more": "Si tu veux: {n, plural, one {1 question de plus} other {# questions de plus}}"
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",
