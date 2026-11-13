@@ -11,6 +11,7 @@ from sqlalchemy import delete, func, select
 from handball_api.core.colors import kit_warnings
 from handball_api.core.errors import ProblemError
 from handball_api.models import (
+    Event,
     Match,
     Opponent,
     OpponentPlayer,
@@ -37,6 +38,9 @@ from handball_api.services import audit, billing, match_formats
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import current_seasons, get_team
 from handball_api.services.policies import Action, authorize, is_staff_somewhere, visible_team_ids
+
+# where events come from when a match report brought them (handball.ch, a paper report)
+REPORT_SOURCES = ("official_feed", "paper_report", "official_report")
 
 
 def video_out(v: VideoAsset) -> VideoOut:
@@ -213,8 +217,15 @@ async def list_matches(
     ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID | None = None
 ) -> list[MatchSummary]:
     await get_team(ctx, team_id, Action.MATCH_READ)
+    # a report is there once its events are (UX test A02: «Spielbericht hinzufügen» only without)
+    report = (
+        select(Event.id)
+        .where(Event.match_id == Match.id, Event.source.in_(REPORT_SOURCES))
+        .exists()
+        .correlate(Match)
+    )
     q = (
-        select(Match, Opponent.name, Opponent.primary_color, func.count(VideoAsset.id))
+        select(Match, Opponent.name, Opponent.primary_color, func.count(VideoAsset.id), report)
         .outerjoin(Opponent, Opponent.id == Match.opponent_id)
         .outerjoin(VideoAsset, VideoAsset.match_id == Match.id)
         .where(Match.team_id == team_id)
@@ -239,8 +250,9 @@ async def list_matches(
             is_demo=m.is_demo,
             has_video=count > 0,
             opponent_color=m.opponent_kit or remembered,
+            has_report=bool(has_report),
         )
-        for m, name, remembered, count in rows
+        for m, name, remembered, count, has_report in rows
     ]
 
 

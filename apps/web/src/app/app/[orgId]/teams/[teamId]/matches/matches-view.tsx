@@ -47,7 +47,8 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   const now = useNow({ updateInterval: 60_000 });
   const upcoming = matches.filter((m) => new Date(m.kickoff_at) > now && m.score_own == null).sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at));
   const played = matches.filter((m) => !upcoming.includes(m)).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at));
-  const extra = canWrite && (
+  // «Spielbericht hinzufügen» only while a played match has none (UX test A02)
+  const extra = canWrite && (played.length === 0 || played.some((m) => m.kind !== "training" && !m.has_report)) && (
     <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
       <Link href={`/app/${orgId}/teams/${teamId}/matches?report=1`} onClick={() => setReport(true)} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-accent" data-testid="add-report">
         <Camera aria-hidden className="size-4" />

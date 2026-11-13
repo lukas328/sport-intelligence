@@ -80,18 +80,18 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "analysis_questions": {
         "de-CH": (
             "Die Analyse gegen {opponent} ist fertig",
-            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. "
-            "{questions} Fragen an dich, dann zeigt sie mehr:\n\n{link}",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Sie hat "
+            "noch keine Tore gefunden. {questions} an dich helfen ihr weiter:\n\n{link}",
         ),
         "en": (
             "The analysis against {opponent} is done",
-            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. {questions} "
-            "questions for you, then it shows more:\n\n{link}",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. It found no "
+            "goals yet. {questions} for you help it on:\n\n{link}",
         ),
         "fr": (
             "L'analyse contre {opponent} est terminée",
-            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. "
-            "{questions} questions pour toi, ensuite elle en montre plus :\n\n{link}",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Elle "
+            "n'a pas encore trouvé de but. {questions} pour toi l'aident à avancer :\n\n{link}",
         ),
     },
     "analysis_no_goals": {
@@ -268,9 +268,22 @@ def render(template: str, locale: str, to: str, **values: object) -> Email:
     # (UX test N20)
     if values.get("name") and str(values["name"]) == to.split("@", 1)[0][:120]:
         values = {**values, "name": ""}
+    # «1 Frage», «2 Fragen»: the count with the right word (UX test A02)
+    if isinstance(values.get("questions"), int):
+        values = {**values, "questions": questions(int(values["questions"]), locale)}
     text = body.format(**values)
     first, _, rest = text.partition("\n")
     return Email(to=to, subject=subject.format(**values), text=f"{first.rstrip()}\n{rest}")
+
+
+def questions(n: int, locale: str) -> str:
+    """The number of open questions with its word in the reader's language."""
+    one, many = {
+        "de-CH": ("Frage", "Fragen"),
+        "en": ("question", "questions"),
+        "fr": ("question", "questions"),
+    }.get(locale, ("Frage", "Fragen"))
+    return f"{n} {one if n == 1 else many}"
 
 
 def validity(minutes: int, locale: str) -> str:

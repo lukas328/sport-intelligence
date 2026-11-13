@@ -344,13 +344,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         "phases": await _phases(ctx, match, goals),
         # the court first: until it is confirmed the analysis draws no positions (demo matches
         # show invented ones, the real court of their video is still asked)
-        "checks": (
-            [_field_check(asset)]
-            if asset is not None and tracking and confirmed_field is False
-            else []
-        )
-        + (_kickoff_check(match) if asset is not None and not demo else [])
-        + await _checks(ctx, match),
+        "checks": await _open_checks(ctx, match, asset, tracking, confirmed_field),
         "source": "demo" if demo else "analysis",
     }
 
@@ -431,6 +425,30 @@ def _kickoff_check(match: Match) -> list[dict[str, Any]]:
             "candidates": [],
         }
     ]
+
+
+async def _open_checks(
+    ctx: Ctx, match: Match, asset: VideoAsset | None, tracking: bool, confirmed_field: bool | None
+) -> list[dict[str, Any]]:
+    """Every open question of Prüfen, in the order they are asked: the court, the throw-off,
+    then the goal and shot candidates."""
+    return (
+        (
+            [_field_check(asset)]
+            if asset is not None and tracking and confirmed_field is False
+            else []
+        )
+        + (_kickoff_check(match) if asset is not None and not match.is_demo else [])
+        + await _checks(ctx, match)
+    )
+
+
+async def open_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
+    """The open questions of a match: the one count the mail, the start and Prüfen share (UX
+    test A02)."""
+    asset = await timeline_video(ctx, match.id)
+    tracking = _has_tracking(asset)
+    return await _open_checks(ctx, match, asset, tracking, await _field_confirmed(ctx, asset))
 
 
 async def _checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:

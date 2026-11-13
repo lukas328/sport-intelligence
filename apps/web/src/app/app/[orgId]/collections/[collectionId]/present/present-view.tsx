@@ -31,8 +31,13 @@ export function PresentView({ orgId, collection, onClose }: { orgId: string; col
   const leave = useCallback(() => (onClose ? onClose() : router.push(back)), [onClose, router, back]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") (e.preventDefault(), next());
-      else if (e.key === "ArrowLeft" || e.key === "PageUp") (e.preventDefault(), prev());
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault();
+        next();
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        prev();
+      }
       else if (e.key === "Escape" && !document.fullscreenElement) leave();
     };
     window.addEventListener("keydown", onKey);

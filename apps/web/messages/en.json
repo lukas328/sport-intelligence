@@ -3161,14 +3161,16 @@
     "plainBench": "Events and comments by hand",
     "plainComments": "Comments on the video",
     "nextStepTitle": "The analysis is done, no three things yet.",
-    "nextStepChecks": "{n, plural, one {One question} other {# questions}} in Check, then it shows more.",
-    "nextStepReport": "No goals were found in the video. With the match report the goals and their times come in.",
-    "nextStepNoGoals": "No goals were found in the video. The goals from the report are in the match.",
+    "nextStepChecks": "The analysis found no goals yet. {n, plural, one {1 question helps} other {# questions help}} it on.",
+    "nextStepReport": "The analysis found no goals in the video. With the match report the goals and their times come in.",
+    "nextStepNoGoals": "The analysis found no goals in the video. The video and the goals from the report are in the match.",
     "nextStepAddReport": "Add the match report",
     "beforeTitle": "Before the match",
     "beforeText": "On match day you note what happens with big keys. You upload the video after the match.",
     "tgSeven": "({n} from 7 m)",
-    "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture"
+    "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture",
+    "rowChecks": "Analysis done, {n, plural, one {1 question} other {# questions}} open",
+    "rowNoGoals": "Analysis done, no goals found yet"
   },
   "check": {
     "top": "Check · {opponent}",

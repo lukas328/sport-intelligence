@@ -23,7 +23,6 @@ from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     CameraCalibration,
     Event,
-    GoalCandidate,
     Match,
     Opponent,
     OpponentPlayer,
@@ -186,12 +185,10 @@ async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
     )
     if (goals or 0) >= THREE_THINGS_MIN_GOALS:
         return "analysis_ready", {}
-    questions = await ctx.db.scalar(
-        select(func.count())
-        .select_from(GoalCandidate)
-        .where(GoalCandidate.match_id == match.id, GoalCandidate.status == "open")
-    )
-    questions = (questions or 0) + (1 if (match.kickoff_ms or {}).get("1") is None else 0)
+    # the same questions the start and Prüfen show (UX test A02: one count, not two)
+    from handball_api.services.graphics import open_checks
+
+    questions = len(await open_checks(ctx, match))
     return ("analysis_questions" if questions else "analysis_no_goals"), {"questions": questions}
 
 

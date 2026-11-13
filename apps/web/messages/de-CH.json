@@ -3161,14 +3161,16 @@
     "plainBench": "Ereignisse und Kommentare von Hand",
     "plainComments": "Kommentare zum Video",
     "nextStepTitle": "Die Analyse ist fertig, noch ohne drei Dinge.",
-    "nextStepChecks": "{n, plural, one {Eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
-    "nextStepReport": "Im Video wurden keine Tore gefunden. Mit dem Spielbericht kommen die Tore und ihre Zeiten dazu.",
-    "nextStepNoGoals": "Im Video wurden keine Tore gefunden. Die Tore aus dem Spielbericht stehen im Spiel.",
+    "nextStepChecks": "Die Analyse hat noch keine Tore gefunden. {n, plural, one {1 Frage hilft} other {# Fragen helfen}} ihr weiter.",
+    "nextStepReport": "Die Analyse hat im Video keine Tore gefunden. Mit dem Spielbericht kommen die Tore und ihre Zeiten dazu.",
+    "nextStepNoGoals": "Die Analyse hat im Video keine Tore gefunden. Das Video und die Tore aus dem Spielbericht stehen im Spiel.",
     "nextStepAddReport": "Spielbericht hinzufügen",
     "beforeTitle": "Vor dem Spiel",
     "beforeText": "Am Spieltag merkst du mit grossen Tasten, was passiert. Das Video lädst du nach dem Spiel hoch.",
     "tgSeven": "({n} vom 7-m)",
-    "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild"
+    "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild",
+    "rowChecks": "Analyse fertig, {n, plural, one {1 Frage} other {# Fragen}} offen",
+    "rowNoGoals": "Analyse fertig, noch keine Tore erkannt"
   },
   "check": {
     "top": "Prüfen · {opponent}",

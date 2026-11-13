@@ -7,7 +7,6 @@ import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { PageHead } from "@/components/anlauf/heads";
 import { RosterEditor } from "@/components/roster/roster-editor";
 import { AreaSubNav } from "@/components/shell/section-nav";
-import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
 import { cn } from "@/lib/utils";

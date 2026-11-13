@@ -15,6 +15,7 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
     <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
       <section className="relative px-1 pt-2 pb-10 lg:min-h-[30rem] lg:pt-10">
         {/* the only place before the app that shows the brand: the word mark large, two-coloured */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG mark */}
         <img src="/brand/wortmarke-zweizeilig.svg" alt={t("name")} width={256} height={90} className="mb-8 h-[72px] w-auto sm:h-[90px]" />
         {/* one sentence and the way to the website; the product is explained there (UX test Z2) */}
         <p className="font-slant max-w-[22rem] text-[2.5rem] leading-[0.95] sm:text-[3.25rem]">{ta("claim")}</p>

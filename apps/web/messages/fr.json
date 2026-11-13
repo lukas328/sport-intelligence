@@ -3161,14 +3161,16 @@
     "plainBench": "Événements et commentaires à la main",
     "plainComments": "Commentaires sur la vidéo",
     "nextStepTitle": "L'analyse est terminée, pas encore de trois choses.",
-    "nextStepChecks": "{n, plural, one {Une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
-    "nextStepReport": "Aucun but trouvé dans la vidéo. Avec la feuille de match, les buts et leurs temps arrivent.",
-    "nextStepNoGoals": "Aucun but trouvé dans la vidéo. Les buts de la feuille de match sont dans le match.",
+    "nextStepChecks": "L'analyse n'a pas encore trouvé de but. {n, plural, one {1 question l'aide} other {# questions l'aident}} à avancer.",
+    "nextStepReport": "L'analyse n'a trouvé aucun but dans la vidéo. Avec la feuille de match, les buts et leurs temps arrivent.",
+    "nextStepNoGoals": "L'analyse n'a trouvé aucun but dans la vidéo. La vidéo et les buts de la feuille de match sont dans le match.",
     "nextStepAddReport": "Ajouter la feuille de match",
     "beforeTitle": "Avant le match",
     "beforeText": "Le jour du match, tu notes ce qui se passe avec de grandes touches. Tu télécharges la vidéo après le match.",
     "tgSeven": "({n} sur 7 m)",
-    "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image"
+    "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image",
+    "rowChecks": "Analyse terminée, {n, plural, one {1 question ouverte} other {# questions ouvertes}}",
+    "rowNoGoals": "Analyse terminée, pas encore de but trouvé"
   },
   "check": {
     "top": "Vérifier · {opponent}",

@@ -7962,6 +7962,12 @@
             ],
             "title": "Competition"
           },
+          "has_report": {
+            "default": false,
+            "description": "events from a match report (handball.ch or paper) exist",
+            "title": "Has Report",
+            "type": "boolean"
+          },
           "has_video": {
             "title": "Has Video",
             "type": "boolean"
