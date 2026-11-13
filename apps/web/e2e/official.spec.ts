@@ -131,7 +131,9 @@ test("suggestion inbox: squad with a doubled number, a report to import, the tab
 
   await page.goto(`/app/${orgId}/teams/${teamId}/official`);
   await expect(page.getByRole("heading", { level: 1, name: "Abgleich mit handball.ch" })).toBeVisible();
-  await expect(page.getByText("Herren 3. Liga · Gruppe 2")).toBeVisible();
+  // the league, not the group (UX test A04)
+  await expect(page.getByText("Herren 3. Liga").first()).toBeVisible();
+  await expect(page.getByText("Gruppe 2")).toHaveCount(0);
 
   // the squad: players with games are ticked, the one without is not; #7 is there twice
   const squad = page.getByTestId("official-squad");
