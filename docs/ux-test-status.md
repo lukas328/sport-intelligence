@@ -100,7 +100,7 @@ team after 0.5 s.
 | Z7 | Eine Filmanleitung | behoben (3b57453): Link auf handball-ai.ch/aufnahme/, im Upload nur drei Sätze. | Testerin: teilweise. Danach: behoben (3153fe3, N06). |
 | Z8 | Testphase und Preis | behoben (d19b47f, 3b57453): neue Vereine starten die Testphase aus plans.json ohne Zahlungsdaten (Schalter `trial_on_signup`, OPEN_QUESTIONS Q-BILL-TRIAL); Verein › Abo zeigt «Testphase bis …» und was danach gilt. | Testerin: behoben. |
 
-## Round 2 (UX test, delivery 1): N01 to N26
+## Round 2 (UX test): N01 to N31
 
 Source: `docs/ux-test/runde2/BEFUNDE.md` on `claude/ux-test` (171a47c). The column «Runde 2» in
 the tables above gives the tester's check of round 1 and what was done after it.
@@ -133,6 +133,12 @@ the tables above gives the tester's check of round 1 and what was done after it.
 | N24 | Alte Sätze nach der Analyse | behoben (729d38f, 140e4c5): «Die Analyse ist fertig.», Schliessen-Satz bleibt sichtbar |
 | N25 | Fachwörter «Hauptrunde - M1-01», «Frei 3/1» | behoben (140e4c5): Liga statt Gruppe, «3 (1 vom 7-m)»; Test |
 | N26 | Unbekannte Gegnerfarbe: leeres Kästchen | behoben (140e4c5): Frage mit fünf Trikots, auch wenn das Trikot ohne Farbe gespeichert ist |
+| N27 | Beispiel der Website findet nichts | Website-Sache (erfundener Demo-Verein im Beispiel, an die Website-Session gemeldet); in der App sucht «Wädenswil Herren 1» jetzt den Verein über den Ort, Teamwörter («Herren», «1», «U15») stören nicht mehr; Test |
+| N28 | Website und App widersprechen sich bei der Datei | geprüft: Ein Spiel kann mehrere Hauptdateien haben, Zeitleiste und Auswertung (drei Dinge, Szenen, Prüfen) laufen nur über die erste. App sagt das jetzt so; der Satz für die Website ist gemeldet |
+| N29 | Neue Notiz landet ganz unten | behoben: «Notiz danach» an jedem Eintrag, das Feld öffnet sich dort und speichert an dieser Stelle; e2e |
+| N30 | «Entfernen» ohne Rückgängig | behoben: «Entfernt. Rückgängig» für sieben Sekunden, «Entfernen» etwas abgesetzt; e2e |
+| N31 | «eigene Tags» auf der Szenen-Seite | behoben: «Stichwörter» statt «Tags» |
+| – | Legende «Weg zum Wurf» ohne gezeichneten Weg (Teil 3, Aufgabe 3) | behoben: die Legende zeigt nur, was gezeichnet ist |
 
 ## Tests
 

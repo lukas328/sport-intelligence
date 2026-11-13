@@ -3,7 +3,7 @@
 import type { Schemas } from "@handball/api-client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import { CollectionRun } from "./collection-run";
@@ -28,6 +28,15 @@ export function CollectionEditor({ orgId, collection }: { orgId: string; collect
   const router = useRouter();
   const [items, setItems] = useState<Item[]>(collection.items);
   const [note, setNote] = useState<string | null>(null);
+  // where a new note goes: after this entry, or at the end (UX test N29)
+  const [noteAt, setNoteAt] = useState<number | null>(null);
+  // the entry just removed, for «Rückgängig» during a few seconds (UX test N30)
+  const [undo, setUndo] = useState<{ item: Item; index: number } | null>(null);
+  useEffect(() => {
+    if (!undo) return;
+    const id = window.setTimeout(() => setUndo(null), 7000);
+    return () => window.clearTimeout(id);
+  }, [undo]);
   const [saving, setSaving] = useState(false);
   const path = { params: { path: { org_id: orgId, collection_id: collection.id } } };
 
@@ -35,10 +44,12 @@ export function CollectionEditor({ orgId, collection }: { orgId: string; collect
   // replaces the list (two quick taps never undo each other)
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const latest = useRef(0);
-  function save(next: Item[], extra?: ItemIn): Promise<unknown> {
+  function save(next: Item[], extra?: ItemIn, at = next.length): Promise<unknown> {
     const n = ++latest.current;
     setSaving(true);
-    const body = { items: [...next.map(toIn), ...(extra ? [extra] : [])] };
+    const list = next.map(toIn);
+    if (extra) list.splice(at, 0, extra);
+    const body = { items: list };
     queue.current = queue.current.then(async () => {
       const { data } = await api.PATCH("/v1/orgs/{org_id}/collections/{collection_id}", { ...path, body });
       if (n === latest.current) {
@@ -59,42 +70,67 @@ export function CollectionEditor({ orgId, collection }: { orgId: string; collect
     },
     remove: (i: number) => {
       const next = items.filter((_, k) => k !== i);
+      setUndo({ item: items[i]!, index: i });
       setItems(next);
       void save(next);
     },
+    noteAfter: (i: number) => {
+      setNoteAt(i + 1);
+      setNote("");
+    },
   };
+  function takeBack() {
+    if (!undo) return;
+    const next = [...items];
+    next.splice(undo.index, 0, undo.item);
+    setUndo(null);
+    setItems(next);
+    void save(next);
+  }
 
+  const form = (
+    <form
+      className="space-y-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!note?.trim()) return;
+        void save(items, { kind: "note", text: note.trim() }, noteAt ?? items.length).then(() => (setNote(null), setNoteAt(null)));
+      }}
+    >
+      <label className="block text-[15px] font-semibold text-ink-2" htmlFor="new-note">
+        {t("noteLabel")}
+      </label>
+      <textarea id="new-note" value={note ?? ""} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={2000} autoFocus className="w-full border-2 border-ink bg-paper p-3 text-[17px]" />
+      <div className="flex gap-2.5">
+        <Button type="submit" size="sm" loading={saving} disabled={!note?.trim()}>
+          {t("saveNote")}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => (setNote(null), setNoteAt(null))}>
+          {t("cancel")}
+        </Button>
+      </div>
+    </form>
+  );
+  const inline = note != null && noteAt != null && noteAt < items.length;
   return (
     <div aria-busy={saving} data-testid="collection-editor">
-      {items.length === 0 ? <p className="text-[17px] text-ink-2">{t("empty")}</p> : <CollectionRun orgId={orgId} items={items} edit={collection.editable ? edit : undefined} />}
+      {undo && (
+        <p role="status" className="sticky top-2 z-10 m-0 mb-3 flex flex-wrap items-center gap-3 border-2 border-ink bg-ground px-3 py-2 text-[17px]" data-testid="undo-remove">
+          {t("removed")}
+          <button type="button" onClick={takeBack} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+            {t("undo")}
+          </button>
+        </p>
+      )}
+      {items.length === 0 ? <p className="text-[17px] text-ink-2">{t("empty")}</p> : <CollectionRun orgId={orgId} items={items} edit={collection.editable ? edit : undefined} slot={inline ? { after: noteAt - 1, node: form } : null} />}
       {collection.editable && (
         <div className="mt-4">
           {note == null ? (
-            <Button variant="secondary" size="sm" onClick={() => setNote("")} data-testid="add-note">
+            <Button variant="secondary" size="sm" onClick={() => (setNoteAt(null), setNote(""))} data-testid="add-note">
               {t("addNote")}
             </Button>
-          ) : (
-            <form
-              className="space-y-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!note.trim()) return;
-                void save(items, { kind: "note", text: note.trim() }).then(() => setNote(null));
-              }}
-            >
-              <label className="block text-[15px] font-semibold text-ink-2" htmlFor="new-note">
-                {t("noteLabel")}
-              </label>
-              <textarea id="new-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={2000} autoFocus className="w-full border-2 border-ink bg-paper p-3 text-[17px]" />
-              <div className="flex gap-2.5">
-                <Button type="submit" size="sm" loading={saving} disabled={!note.trim()}>
-                  {t("saveNote")}
-                </Button>
-                <Button type="button" variant="ghost" size="sm" onClick={() => setNote(null)}>
-                  {t("cancel")}
-                </Button>
-              </div>
-            </form>
+          ) : inline ? null : (
+            form
           )}
         </div>
       )}

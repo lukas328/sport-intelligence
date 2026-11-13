@@ -7,6 +7,7 @@ is shown except whether a team is already in the app (so saving asks the club in
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Any
@@ -27,6 +28,10 @@ from handball_api.services.official import (
     _unavailable,
 )
 
+TEAM_WORD = re.compile(
+    r"\d+|u\d+|herren|damen|manner|frauen|junioren|juniorinnen|jugend|mixed|men|women|hommes|femmes|"
+    r"team|equipe|mannschaft|liga|ligue|league"
+)
 SCORER_GAMES = 12  # the scorers from at most the last twelve played games (one request each)
 
 
@@ -35,6 +40,10 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
     tokens = _tokens(q)
     if len("".join(tokens)) < MIN_QUERY:
         raise ProblemError(422, "query-too-short", "Type at least three letters")
+    # «Wädenswil Herren 1»: the team's words are not in the club's name; search the club by the
+    # rest (UX test N27), the team list of the club follows anyway
+    club_words = [t for t in tokens if not TEAM_WORD.fullmatch(t)]
+    tokens = club_words or tokens
     try:
         season = await ch.current_season(ctx.db)
         found = []

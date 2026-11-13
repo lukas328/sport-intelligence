@@ -128,3 +128,11 @@ def test_a_typo_is_a_letter_away() -> None:
     assert _near("wadenswill", "wadenswil") and _near("thalwill", "thalwil")
     assert _near("staefa", "stafa") is False or _near("stafa", "stafa")
     assert not _near("uster", "zuerich")
+
+
+def test_team_words_do_not_hide_the_club() -> None:
+    """UX test N27: «Wädenswil Herren 1» searches the club by «Wädenswil»."""
+    from handball_api.services.public_teams import TEAM_WORD
+
+    assert all(TEAM_WORD.fullmatch(w) for w in ("herren", "1", "u15", "damen"))
+    assert not TEAM_WORD.fullmatch("wadenswil")

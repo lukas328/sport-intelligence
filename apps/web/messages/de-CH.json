@@ -553,7 +553,7 @@
     "addCamera": "Weitere Kamera hinzufügen (Torkamera, zweiter Blickwinkel)",
     "tip1": "Ein Handy reicht.",
     "tip2": "Auf ein Stativ, hoch an der Mittellinie, das ganze Feld im Bild.",
-    "tip3": "Das ganze Spiel in einer Datei (MP4, MOV oder MKV).",
+    "tip3": "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste.",
     "guide": "Ausführliche Filmanleitung",
     "chooseVideo": "Video wählen",
     "more": "Mehr: andere Kamera, Link, Technik",
@@ -1567,13 +1567,13 @@
   "search": {
     "title": "Szenen suchen",
     "nav": "Szenen",
-    "tagSets": "Eigene Tags",
+    "tagSets": "Eigene Stichwörter",
     "newSet": "Neues Tag-Set",
     "newSetPlaceholder": "z. B. Abwehr",
     "newTag": "Neuer Tag",
     "add": "Hinzufügen",
     "addTagTo": "Tag zu {set} hinzufügen",
-    "ownTagsHint": "Eigene Tags ergänzen die automatischen Ereignisse. Sie verändern keine Kennzahlen.",
+    "ownTagsHint": "Eigene Stichwörter ergänzen die automatischen Ereignisse. Sie verändern keine Zahlen.",
     "smart": "gespeicherte Suchen",
     "smartNone": "Noch keine gespeicherten Filter.",
     "smartName": "Name der gespeicherten Suche",
@@ -1592,7 +1592,7 @@
     "none": "Keine Szenen für diesen Filter.",
     "clip": "Eigene Szene",
     "watch": "Ansehen",
-    "tagsOf": "Tags dieser Szene",
+    "tagsOf": "Stichwörter dieser Szene",
     "truncated": "Die ersten {n} Szenen werden angezeigt.",
     "type_timeout": "Timeout",
     "shirt": "Nr. {n}",
@@ -1953,7 +1953,7 @@
     "importLabel": "Sportscode-XML importieren",
     "importHint": "Jede Instanz wird eine Szene; Code und Labels werden eigene Tags. Ereignisse und Kennzahlen bleiben unverändert.",
     "import": "Importieren",
-    "imported": "{clips} Szenen importiert, {tags} neue Tags."
+    "imported": "{clips} Szenen importiert, {tags} neue Stichwörter."
   },
   "officialReport": {
     "label": "Offiziellen Spielbericht importieren",
@@ -2457,7 +2457,7 @@
     "playlistsHint": "Szenen sammeln und mit dem Team teilen.",
     "playsHint": "Auf dem Taktikboard zeichnen, aus dem Video übernehmen.",
     "back": "Zurück zu {name}",
-    "searchHint": "Alle Szenen der Saison nach Spieler, Aktion und Zone filtern, eigene Tags setzen und Suchen speichern.",
+    "searchHint": "Alle Szenen der Saison nach Spieler, Aktion und Zone filtern, eigene Stichwörter setzen und Suchen speichern.",
     "presentationsHint": "Für die Teamsitzung, mit Fernbedienung vom Handy.",
     "search": "Szenen",
     "title": "Sammlungen",
@@ -2927,7 +2927,10 @@
     "prev": "Zurück",
     "next": "Weiter",
     "close": "Schliessen",
-    "showTitle": "Am Bildschirm"
+    "showTitle": "Am Bildschirm",
+    "noteHere": "Notiz danach",
+    "removed": "Entfernt.",
+    "undo": "Rückgängig"
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",
@@ -3243,7 +3246,7 @@
     "highlightsNote": "nach jedem Spiel",
     "open": "Öffnen",
     "share": "Teilen",
-    "moreTools": "Mehr: Ereignisliste, gespeicherte Suchen, eigene Tags",
+    "moreTools": "Mehr: alle Ereignisse, gespeicherte Suchen, eigene Stichwörter",
     "highlightLine": "{n, plural, one {1 Szene} other {# Szenen}} · {format}",
     "noHighlights": "Nach dem nächsten Spiel mit Video.",
     "plural": {

@@ -553,7 +553,7 @@
     "addCamera": "Ajouter une caméra (caméra de but, autre angle)",
     "tip1": "Un téléphone suffit.",
     "tip2": "Sur un trépied, en hauteur à la ligne médiane, tout le terrain dans l'image.",
-    "tip3": "Tout le match dans un fichier (MP4, MOV ou MKV).",
+    "tip3": "Idéalement tout le match dans un seul fichier (MP4, MOV ou MKV). Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et lisible, mais seul le premier est analysé.",
     "guide": "Guide de tournage complet",
     "chooseVideo": "Choisir la vidéo",
     "more": "Plus : autre caméra, lien, technique",
@@ -2927,7 +2927,10 @@
     "prev": "Retour",
     "next": "Suivant",
     "close": "Fermer",
-    "showTitle": "À l'écran"
+    "showTitle": "À l'écran",
+    "noteHere": "Note après",
+    "removed": "Retiré.",
+    "undo": "Annuler"
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",

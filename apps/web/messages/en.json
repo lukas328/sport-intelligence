@@ -553,7 +553,7 @@
     "addCamera": "Add another camera (goal camera, second angle)",
     "tip1": "A phone is enough.",
     "tip2": "On a tripod, high at the centre line, the whole court in the picture.",
-    "tip3": "The whole match in one file (MP4, MOV or MKV).",
+    "tip3": "Best the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and plays, but only the first one is analysed.",
     "guide": "Full filming guide",
     "chooseVideo": "Choose video",
     "more": "More: another camera, a link, technical details",
@@ -2927,7 +2927,10 @@
     "prev": "Back",
     "next": "Next",
     "close": "Close",
-    "showTitle": "On screen"
+    "showTitle": "On screen",
+    "noteHere": "Note after",
+    "removed": "Removed.",
+    "undo": "Undo"
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
