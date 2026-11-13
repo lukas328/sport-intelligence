@@ -184,6 +184,28 @@ Plus: der Normalfall (Analyse findet kein Tor, Kandidaten vorhanden) als e2e `re
 hochladen, Analyse, Prüfen (Feld, Anwurf, drei Tore), danach Resultat, Verlauf, Torliste und
 Positionen.
 
+## Second real-video test (F3 to F6 and smaller findings)
+
+The report listed F3 to F6 by name; F1 and F2 were not part of it (nothing open under these
+numbers here). Commits: 8d4c92c (F4), 8aa9aa3 (F3, F6, track times in the API), 649256c (F5),
+86929b1, 68c7e3d (smaller findings).
+
+| # | Befund | Status |
+|---|---|---|
+| F4 | Drei von acht Toren nie gefragt (überlappende 14-s-Fenster als ein Moment, Ketten) | behoben (8d4c92c): derselbe Moment nur bei Torzeiten unter 5 s Abstand und derselben vorgeschlagenen Seite, gemessen am ersten Kandidaten der Gruppe; keine Ketten; jeder Kandidat steht in checks oder more_checks. Test `test_goals_twelve_seconds_apart_are_two_goals` mit den acht Zeiten |
+| F3 | Nach verschobener Ecke hält Prüfen die alte Liste, «Alles geprüft» trotz offener Fragen | behoben (8aa9aa3): nach dem Feld-Speichern wartet Prüfen sichtbar («Das Feld wird übernommen …»), lädt die Fragen des Servers neu; «Alles geprüft» nur, wenn der Server nichts mehr offen meldet. Antworten auf Tore überleben eine neue Analyse (neue Kandidaten im selben Moment werden nicht neu angelegt). Tests `test_answers_survive_a_new_analysis_after_a_moved_court`, e2e `real-normal.spec` «a moved corner» |
+| F5 | Taktikkamera zeigt mehr Punkte als gleichzeitig Spuren existieren | behoben (8aa9aa3, 649256c): der Szenen-Endpunkt liefert pro Spur Zeitstempel (ts); gezeichnet wird eine Spur nur, solange sie existiert, mit Ein- und Ausblenden. vitest `camera-presence` (zu keinem Zeitpunkt mehr Punkte als gleichzeitig existierende Spuren) |
+| F6 | Quellenzeile nennt «Spielbericht» ohne Spielbericht | behoben (8aa9aa3): die Grafik trägt has_report (Tore aus handball.ch oder Papierbericht); «Spielbericht» nur dann. Tests `test_graphics`, `test_events` |
+| Start | Nach fertiger Analyse gehört das Spiel in den Kopf | behoben (68c7e3d): die Grafik trägt analysis_at; ein Spiel mit frischer Analyse (bis 7 Tage) steht im Kopf, bis es geöffnet wurde, und solange es offene Fragen hat, mit Resultat aus dem Video und nächstem Schritt. vitest `fresh-match`, e2e `real-normal.spec` |
+| Spiel-Tab | Direkt nach der Analyse leer | behoben (68c7e3d): der eine Satz und «n Fragen beantworten». e2e `real-normal.spec` |
+| Video-Tab | Zeitstrahl über 60 Minuten, fünftes Tor fehlt in der Szenenliste | behoben (68c7e3d): der Zeitstrahl läuft über die Minuten des Videos (span, beschriftet «Minute a» und «Minute b»); ein kurzes Video ist eine Phase mit allen Toren. e2e `real-normal.spec` |
+| Kopf 1280 px | «Tore im Video» halb verdeckt | behoben (68c7e3d): auf breiten Schirmen über dem Resultat, nicht mehr unter ihm auf dem Verlauf |
+| Torfrage | Ohne suggested_side ein Knopf vorgewählt | behoben (8aa9aa3): ohne Vorschlag ist kein Knopf hervorgehoben |
+| Szene zeigen | Öffnete die Szene nicht im Video-Tab | behoben (68c7e3d): «Szene zeigen» im Spiel-Tab öffnet den Video-Tab an dieser Szene (?tab=video&scene=). e2e `real-normal.spec` |
+| Mail | Link aufs Spiel statt auf Prüfen | behoben (86929b1): bei offenen Fragen führt der Link nach Prüfen. Test `test_identity_sync` |
+| Restzeit | Anfangs zu tief | behoben (68c7e3d): erst nach dem ersten Viertel der Stufe, als Spanne nach oben («noch etwa 4 bis 6 Minuten») |
+| Konsole | MISSING_MESSAGE search.type_yellow_card | behoben (86929b1): alle zwölf Ereignisarten der API in de-CH, en und fr; die Szenenliste übersetzt sie auch statt den Rohnamen zu zeigen |
+
 ## Tests
 
 Round 3: API 352 passed (3 deselected). Web unit tests 205 passed. ESLint clean again (11

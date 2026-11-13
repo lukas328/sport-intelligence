@@ -305,7 +305,6 @@ function sequenceOf(hits: Hit[], matches: Match[], title: string): Schemas["Coll
 /** The answer as rows: match, time, what, number (UX test B21: «Als Tabelle» in the same screen). */
 function SceneTable({ scenes, matches, orgId }: { scenes: Hit[]; matches: Match[]; orgId: string }) {
   const t = useTranslations("scenesPage");
-  const ts = useTranslations("search");
   const th = "py-2 text-left text-[15px] font-semibold text-ink-2";
   return (
     <table className="w-full border-collapse text-[15px]" data-testid="scene-table">
