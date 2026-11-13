@@ -37,6 +37,7 @@ from handball_api.schemas.auth import (
     RecoveryCodesOut,
     RegisterIn,
     SessionOut,
+    StartIn,
     TokenIn,
     TotpCodeIn,
     TotpSetupOut,
@@ -117,6 +118,16 @@ async def logout(response: Response, ctx: CtxDep, found: OptionalSession) -> Non
 )
 async def magic_link(data: MagicLinkIn, ctx: CtxDep) -> None:
     await service.request_magic_link(ctx, data.email)
+
+
+@router.post(
+    "/auth/start",
+    status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[Depends(rate_limit("start"))],
+)
+async def start(data: StartIn, ctx: CtxDep) -> None:
+    """The public entry's «Speichern»: an account from an e-mail alone, a sign-in link by mail."""
+    await service.start(ctx, data.email, data.locale, data.next)
 
 
 @router.post(

@@ -225,6 +225,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start
+         * @description The public entry's «Speichern»: an account from an e-mail alone, a sign-in link by mail.
+         */
+        post: operations["start_v1_auth_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/calendar/{token}.ics": {
         parameters: {
             query?: never;
@@ -4737,6 +4757,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/public/clubs/{club_id}/teams/{official_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Team Preview
+         * @description Last result, rank and table, form, scorers and next game of a team.
+         */
+        get: operations["team_preview_v1_public_clubs__club_id__teams__official_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/profiles/{slug}": {
         parameters: {
             query?: never;
@@ -4763,6 +4803,26 @@ export interface paths {
         };
         /** Reel */
         get: operations["reel_v1_public_profiles__slug__reels__reel_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Teams
+         * @description Teams of the current season of clubs matching the name or town.
+         */
+        get: operations["search_teams_v1_public_teams_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -9057,6 +9117,15 @@ export interface components {
             /** Providers */
             providers: string[];
         };
+        /** PublicClub */
+        PublicClub: {
+            /** City */
+            city: string | null;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
         /** PublicConsentPage */
         PublicConsentPage: {
             /** Club */
@@ -9074,6 +9143,28 @@ export interface components {
             team: string;
             /** Youth */
             youth: boolean;
+        };
+        /** PublicGame */
+        PublicGame: {
+            /** Half Opp */
+            half_opp: number | null;
+            /** Half Own */
+            half_own: number | null;
+            /** Home */
+            home: boolean;
+            /**
+             * Kickoff At
+             * Format: date-time
+             */
+            kickoff_at: string;
+            /** Opp */
+            opp: number | null;
+            /** Opponent */
+            opponent: string;
+            /** Own */
+            own: number | null;
+            /** Venue */
+            venue: string | null;
         };
         /** PublicPlayer */
         PublicPlayer: {
@@ -9110,6 +9201,81 @@ export interface components {
             };
             /** Team */
             team: string;
+        };
+        /** PublicRun */
+        PublicRun: {
+            /** Count */
+            count: number;
+            /**
+             * Result
+             * @enum {string}
+             */
+            result: "w" | "d" | "l";
+        };
+        /** PublicScorer */
+        PublicScorer: {
+            /** Goals */
+            goals: number;
+            /** Name */
+            name: string;
+        };
+        /** PublicTableRow */
+        PublicTableRow: {
+            /** Games */
+            games: number | null;
+            /** Goal Difference */
+            goal_difference: number | null;
+            /** Name */
+            name: string | null;
+            /** Own */
+            own: boolean;
+            /** Points */
+            points: number | null;
+            /** Rank */
+            rank: number | null;
+        };
+        /** PublicTeamHit */
+        PublicTeamHit: {
+            club: components["schemas"]["PublicClub"];
+            /** Group Name */
+            group_name: string | null;
+            /** In App */
+            in_app: boolean;
+            /** League */
+            league: string | null;
+            /** Name */
+            name: string;
+            /** Official Id */
+            official_id: number;
+        };
+        /** PublicTeamPreview */
+        PublicTeamPreview: {
+            club: components["schemas"]["PublicClub"];
+            /** Form */
+            form: ("w" | "d" | "l")[];
+            /** Group Name */
+            group_name: string | null;
+            last: components["schemas"]["PublicGame"] | null;
+            /** League */
+            league: string | null;
+            /** Name */
+            name: string;
+            next: components["schemas"]["PublicGame"] | null;
+            /** Official Id */
+            official_id: number;
+            /** Played */
+            played: number;
+            /** Rank */
+            rank: number | null;
+            run: components["schemas"]["PublicRun"] | null;
+            /** Scorer Games */
+            scorer_games: number;
+            /** Scorers */
+            scorers: components["schemas"]["PublicScorer"][];
+            /** Season */
+            season: string;
+            /** Table */
+            table: components["schemas"]["PublicTableRow"][];
         };
         /**
          * PurposeState
@@ -10055,6 +10221,26 @@ export interface components {
              * @description Days left out because they are in skip_dates
              */
             skipped: number;
+        };
+        /**
+         * StartIn
+         * @description «Das ist mein Team. Speichern»: an e-mail, nothing else. Saving accepts the terms (the
+         *     sentence says so); a password can be set later in Ich.
+         */
+        StartIn: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /**
+             * Locale
+             * @default de-CH
+             * @enum {string}
+             */
+            locale?: "de-CH" | "en" | "fr";
+            /** Next */
+            next?: string | null;
         };
         /** SubjectTeam */
         SubjectTeam: {
@@ -11186,6 +11372,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LoginResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_v1_auth_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -21432,6 +21651,38 @@ export interface operations {
             };
         };
     };
+    team_preview_v1_public_clubs__club_id__teams__official_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                club_id: number;
+                official_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicTeamPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     show_v1_public_profiles__slug__get: {
         parameters: {
             query?: never;
@@ -21482,6 +21733,37 @@ export interface operations {
                 };
                 content: {
                     "video/mp4": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_teams_v1_public_teams_get: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicTeamHit"][];
                 };
             };
             /** @description Validation Error */
