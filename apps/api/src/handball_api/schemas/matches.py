@@ -589,6 +589,7 @@ class MatchGraphicsOut(ApiModel):
     analysis: Literal["none", "running", "ready", "failed"] = Field(
         default="none", description="the latest analysis of the timeline video"
     )
+    has_report: bool = Field(default=False, description="goals from a match report exist")
     span: tuple[float, float] | None = Field(
         default=None, description="match minutes the video covers; null without throw-off"
     )
@@ -609,6 +610,10 @@ class SceneTrackOut(ApiModel):
     team: Literal["own", "opp", "ref"]
     number: int | None
     xy: list[tuple[float, float]] = Field(description="court metres, the attacked goal at x = 0")
+    ts: list[float] | None = Field(
+        default=None,
+        description="when each point is, as a share of the scene (0 to 1); null for drawn scenes",
+    )
 
 
 class BallStretchOut(ApiModel):

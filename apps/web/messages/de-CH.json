@@ -3233,7 +3233,8 @@
     "zoomIn": "Bild vergrössern",
     "zoomOut": "Bild verkleinern",
     "cornerOutside": "Diese Ecke liegt ausserhalb des Bildes; der Griff sitzt am Rand auf ihrer Linie.",
-    "more": "Wenn du magst: {n, plural, one {1 weitere Frage} other {# weitere Fragen}}"
+    "more": "Wenn du magst: {n, plural, one {1 weitere Frage} other {# weitere Fragen}}",
+    "reloading": "Das Feld wird übernommen und die Fragen werden neu gerechnet. Das dauert einen Moment."
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

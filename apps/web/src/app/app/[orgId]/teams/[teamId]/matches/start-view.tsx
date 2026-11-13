@@ -128,13 +128,13 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       {/* the analysis is done without three things: say so and name the next step (UX test N05) */}
       {quiet && m && g.data && base && (
         <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="start-next-step">
-          <p className="m-0 text-[19px] font-bold">{checks > 0 ? t("nextStepChecks", { n: checks }) : g.data.report_goals.length === 0 ? t("nextStepReport") : t("nextStepNoGoals")}</p>
+          <p className="m-0 text-[19px] font-bold">{checks > 0 ? t("nextStepChecks", { n: checks }) : !g.data.has_report ? t("nextStepReport") : t("nextStepNoGoals")}</p>
           <div className="flex flex-wrap items-center gap-4">
             {canWrite && checks > 0 ? (
               <Link href={`${base}/check`} className={buttonClass("primary")} data-testid="start-step">
                 {t("plainToCheck")}
               </Link>
-            ) : canWrite && g.data.report_goals.length === 0 ? (
+            ) : canWrite && !g.data.has_report ? (
               <Link href={`/app/${orgId}/teams/${m.team_id}/matches?report=1`} className={buttonClass("primary")} data-testid="start-step">
                 {t("nextStepAddReport")}
               </Link>
@@ -144,7 +144,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
               </Link>
             )}
             {/* the match stays one tap away, as a plain link beside the step */}
-            {(checks > 0 || g.data.report_goals.length === 0) && canWrite && (
+            {(checks > 0 || !g.data.has_report) && canWrite && (
               <Link href={base} className={linkClass} data-testid="open-match">
                 {t("openMatch")}
               </Link>

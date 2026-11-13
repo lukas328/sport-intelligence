@@ -84,3 +84,51 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
   await expect(page.getByTestId("video-stage")).toBeVisible();
 });
+
+/**
+ * Real-video test F3: a moved corner runs the analysis again. Prüfen waits visibly, then asks what
+ * the server has open; it never says «Alles geprüft» while the server still has questions.
+ */
+test("a moved corner: Prüfen waits for the new analysis and asks what is open", async ({ page }, info) => {
+  test.skip(info.project.name !== "chromium", "runs once");
+  test.setTimeout(300_000);
+  await register(page, uniqueEmail("ecke"), "Coach Ecke");
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill("HC Ecke");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByLabel("Teamname").fill("Herren 1");
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  const [, org, team] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  const match = await (
+    await page.request.post(`/v1/orgs/${org}/teams/${team}/matches`, {
+      headers: { "x-csrf-token": csrf },
+      data: { opponent_name: "TV Ecke", kickoff_at: new Date(Date.now() - 86_400_000).toISOString(), kit_opponent: "#f2f2f2" },
+    })
+  ).json();
+  await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
+  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  const analysis = async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis;
+  await expect.poll(analysis, { timeout: 240_000, intervals: [2000] }).toBe("ready");
+
+  await page.goto(`/app/${org}/matches/${match.id}/check`);
+  await expect(page.getByText(/Frage 1 von \d+/)).toBeVisible({ timeout: 30_000 });
+  // drag the near left corner a little and take the court
+  const corner = page.getByTestId("corner-0");
+  const box = (await corner.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 30, box.y + box.height / 2 - 10, { steps: 5 });
+  await page.mouse.up();
+  await page.getByRole("button", { name: "Passt" }).click();
+  // the analysis runs again: Prüfen says so and waits, never «Alles geprüft» meanwhile
+  await expect(page.getByTestId("check-reloading")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toHaveCount(0);
+  // afterwards the server's open question (the throw-off) is asked
+  await expect(page.getByRole("button", { name: "Jetzt ist Anwurf" })).toBeVisible({ timeout: 240_000 });
+  await expect(page.getByTestId("check-failed")).toHaveCount(0);
+  await page.getByRole("button", { name: "Jetzt ist Anwurf" }).click();
+  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
+  expect(await analysis()).toBe("ready");
+});

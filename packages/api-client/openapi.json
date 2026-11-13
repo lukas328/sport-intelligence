@@ -7645,6 +7645,12 @@
             "title": "Goals",
             "type": "array"
           },
+          "has_report": {
+            "default": false,
+            "description": "goals from a match report exist",
+            "title": "Has Report",
+            "type": "boolean"
+          },
           "has_video": {
             "title": "Has Video",
             "type": "boolean"
@@ -13761,6 +13767,21 @@
             ],
             "title": "Team",
             "type": "string"
+          },
+          "ts": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "when each point is, as a share of the scene (0 to 1); null for drawn scenes",
+            "title": "Ts"
           },
           "xy": {
             "description": "court metres, the attacked goal at x = 0",

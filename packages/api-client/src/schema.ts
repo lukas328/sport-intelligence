@@ -7583,6 +7583,12 @@ export interface components {
             field_confirmed: boolean | null;
             /** Goals */
             goals: components["schemas"]["GoalRunOut"][];
+            /**
+             * Has Report
+             * @description goals from a match report exist
+             * @default false
+             */
+            has_report?: boolean;
             /** Has Video */
             has_video: boolean;
             /**
@@ -9692,6 +9698,11 @@ export interface components {
              * @enum {string}
              */
             team: "own" | "opp" | "ref";
+            /**
+             * Ts
+             * @description when each point is, as a share of the scene (0 to 1); null for drawn scenes
+             */
+            ts?: number[] | null;
             /**
              * Xy
              * @description court metres, the attacked goal at x = 0

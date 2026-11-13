@@ -3233,7 +3233,8 @@
     "zoomIn": "Agrandir l'image",
     "zoomOut": "Réduire l'image",
     "cornerOutside": "Ce coin est hors de l'image; sa poignée est au bord, sur sa ligne.",
-    "more": "Si tu veux: {n, plural, one {1 question de plus} other {# questions de plus}}"
+    "more": "Si tu veux: {n, plural, one {1 question de plus} other {# questions de plus}}",
+    "reloading": "Le terrain est repris et les questions recalculées. Un instant."
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

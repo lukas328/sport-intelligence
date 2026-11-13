@@ -3233,7 +3233,8 @@
     "zoomIn": "Enlarge the picture",
     "zoomOut": "Make the picture smaller",
     "cornerOutside": "This corner lies outside the picture; its handle sits at the edge on its line.",
-    "more": "If you like: {n, plural, one {1 more question} other {# more questions}}"
+    "more": "If you like: {n, plural, one {1 more question} other {# more questions}}",
+    "reloading": "The court is being taken over and the questions recalculated. This takes a moment."
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

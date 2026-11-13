@@ -71,6 +71,42 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     if (!asked && graphics.data) setAsked({ first: graphics.data.checks, more: graphics.data.more_checks ?? [] });
   }, [asked, graphics.data]);
   const [wantMore, setWantMore] = useState(false);
+  // the server's questions afresh: after a moved court the analysis runs again and writes new
+  // candidates (real-video test F3); «Alles geprüft» only once the server has none left
+  const [reloading, setReloading] = useState(false);
+  const [verified, setVerified] = useState(false);
+  // questions left with «Weiss nicht»: not asked again in this round
+  const skipped = useRef(new Set<string>());
+  const keyOf = (c: Schemas["CheckOut"]) => (c.kind === "field" ? (main ? `field:${main.id}` : "field") : c.kind === "kickoff" ? `kickoff:${c.frame_ref}` : c.id);
+  const fetchChecks = useCallback(async () => {
+    const r = await api.GET("/v1/orgs/{org_id}/matches/{match_id}/graphics", { params: { path: { org_id: orgId, match_id: match.id } } });
+    return r.data ?? null;
+  }, [orgId, match.id]);
+  const reload = useCallback(
+    async (waitForAnalysis: boolean) => {
+      setReloading(true);
+      try {
+        let g = await fetchChecks();
+        // the new analysis: wait until it is done (it rewrites the candidates)
+        for (let i = 0; waitForAnalysis && g?.analysis === "running" && i < 600; i++) {
+          await new Promise((r) => setTimeout(r, 3000));
+          g = await fetchChecks();
+        }
+        await qc.refetchQueries({ queryKey: ["goal-candidates", match.id] });
+        void qc.invalidateQueries({ queryKey: ["graphics", match.id] });
+        if (g) {
+          const left = (list: Schemas["CheckOut"][]) => list.filter((c) => !skipped.current.has(keyOf(c)));
+          setAsked({ first: left(g.checks), more: left(g.more_checks ?? []) });
+          setDone([]);
+          setVerified(left(g.checks).length === 0);
+        } else setVerified(true);
+        return g;
+      } finally {
+        setReloading(false);
+      }
+    },
+    [fetchChecks, qc, match.id], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const cal0 = analysis.data?.calibration;
   // a person box needs the homography of the very frame: with a panning camera only the hall
   // image's is known, so people are asked only with a fixed camera (E05)
@@ -178,9 +214,12 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               } else {
                 must(await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", vid));
               }
+              const wasMoved = Boolean(moved && panoSize);
               setMoved(null);
               void qc.invalidateQueries({ queryKey: ["analysis"] });
               void qc.invalidateQueries({ queryKey: ["graphics", match.id] });
+              // a moved court runs the analysis again: wait for it, then ask what it found
+              if (wasMoved) await reload(true);
             },
           },
         ]
@@ -189,7 +228,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             key: "1",
             label: t("goalOf", { team: own }),
             numeral: "1",
-            first: current.c.suggested_side !== "opponent",
+            // without a suggestion nothing is preselected
+            first: current.c.suggested_side === "own",
             run: () => review(current.c, { status: "confirmed", side: "own", outcome: "goal" }),
           },
           {
@@ -224,7 +264,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     setAnswered((list) => [...list, { q: current, label: a.label }]);
     next(current);
   }
-  const skip = (q: Question) => (revisit != null ? setRevisit(null) : next(q));
+  const skip = (q: Question) => {
+    if (revisit != null) return setRevisit(null);
+    skipped.current.add(id(q));
+    next(q);
+  };
 
   // keys 1 to 3 answer, 0 is «Weiss nicht» (desktop); a person: type the shirt number, space is
   // «Weiss nicht»
@@ -233,7 +277,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     const onKey = (e: KeyboardEvent) => {
       if (!current || e.metaKey || e.ctrlKey || (e.target as HTMLElement)?.closest("input, textarea, select")) return;
       if (current.kind === "person") {
-        if (e.key === " ") return (e.preventDefault(), next(current));
+        if (e.key === " ") return (e.preventDefault(), skip(current));
         if (!/^\d$/.test(e.key)) return;
         const buf = typed.current;
         buf.digits += e.key;
@@ -247,7 +291,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       }
       const a = answers.find((x) => x.key === e.key);
       if (a) void answer(a);
-      else if (e.key === "0") next(current);
+      else if (e.key === "0") skip(current);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -256,6 +300,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const media = main ? `/v1/orgs/${orgId}/videos/${main.id}/media` : null;
   const back = `/app/${orgId}/matches/${match.id}`;
   const loading = candidates.isLoading || graphics.isLoading || !asked || (main != null && analysis.isLoading);
+  // the list of this round is done: ask the server whether anything is left before saying so
+  const ended = !loading && !current;
+  useEffect(() => {
+    if (ended && !verified && !reloading) void reload(false);
+  }, [ended, verified, reloading, reload]);
   return (
     <div style={matchStyle([org.primary_color, org.secondary_color ?? null], match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null) as CSSProperties} data-testid="check">
       <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
@@ -270,6 +319,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       </div>
       {loading ? (
         <p className="py-10 text-ink-2">{t("loading")}</p>
+      ) : reloading || (!current && !verified) ? (
+        <p role="status" className="py-10 text-[17px] font-semibold" data-testid="check-reloading">
+          {t("reloading")}
+        </p>
       ) : !current ? (
         <div className="max-w-[60ch] space-y-4 py-10">
           <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>

@@ -53,6 +53,7 @@ async def test_graphics_from_the_report_without_video(make_api: Callable[[], Api
     assert r.status_code == 200, r.text
     g = r.json()
     assert g["has_video"] is False and g["field_confirmed"] is None and g["source"] == "analysis"
+    assert g["has_report"] is False  # goals entered by hand are no match report
     # the goal sequence of the report, in order, misses left out
     assert g["report_goals"] == [
         {"minute": 1.58, "team": "own"},
@@ -238,6 +239,8 @@ async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
     assert all(x["shot"] is None and x["minute"] is None for x in g["goals"])
     assert all(x["has_video"] and x["t_ms"] is not None for x in g["goals"])
     assert g["report_goals"] == [] and g["span"] is None
+    # the video's goals are no match report (real-video test F6)
+    assert g["has_report"] is False
 
     # the throw-off of the first half at 0:20 of the video
     r = await api.put(f"{base}/kickoff", json={"period": 1, "t_ms": 20_000})
@@ -370,3 +373,50 @@ def test_goals_twelve_seconds_apart_are_two_goals() -> None:
     assert next(g for g in groups if g[0].goal_ms == 47_900)[1:][0].goal_ms == 49_900
     # without a suggested side the same rule holds: different times stay apart
     assert len(_windows([cand(229.3, None), cand(241.1, None)])) == 2
+
+
+async def test_answers_survive_a_new_analysis_after_a_moved_court(
+    make_api: Callable[[], Api],
+) -> None:
+    """Real-video test F3: saving moved corners runs the analysis again and rewrites the open
+    candidates; a goal already confirmed keeps its answer and is not asked again, the others
+    come back as questions."""
+    from handball_api.core.jobs import MemoryJobQueue
+
+    from .test_goal_candidates import FOUND
+    from .test_identity_sync import _finish, _ingest, _tracks
+    from .test_matches import upload
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    base = f"/v1/orgs/{org}/matches/{m['id']}"
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    result = {"tracks": _tracks(), "detector": "heuristic", "goal_candidates": FOUND}
+    await _finish(api, jobs.jobs[-1][2], result)
+    first = (await api.get(f"{base}/goal-candidates")).json()["candidates"][0]
+    r = await api.put(
+        f"{base}/goal-candidates/{first['id']}/review", json={"status": "confirmed", "side": "own"}
+    )
+    assert r.status_code == 200, r.text
+
+    # the coach moves a corner: the analysis runs again and finds the same candidates
+    corners = [[100, 500], [1500, 500], [1300, 200], [300, 200]]
+    court = [[0, 0], [40, 0], [40, 20], [0, 20]]
+    pts = [{"image": i, "court": c} for i, c in zip(corners, court, strict=True)]
+    r = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts})
+    assert r.status_code == 202, r.text
+    g = (await api.get(f"{base}/graphics")).json()
+    assert g["analysis"] == "running"
+    await _finish(api, jobs.jobs[-1][2], result)
+
+    rows = (await api.get(f"{base}/goal-candidates")).json()["candidates"]
+    assert [r["goal_ms"] for r in rows if r["status"] == "confirmed"] == [first["goal_ms"]]
+    assert not any(r["status"] == "open" and r["goal_ms"] == first["goal_ms"] for r in rows)
+    g = (await api.get(f"{base}/graphics")).json()
+    asked = {c["frame_ref"] for c in g["checks"] + g["more_checks"] if c["kind"] == "goal"}
+    assert first["goal_ms"] not in asked and len(asked) == 3
+    assert len([e for e in g["goals"] if e["has_video"]]) == 1

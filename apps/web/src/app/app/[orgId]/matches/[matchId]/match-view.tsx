@@ -290,7 +290,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const confirmedGoals = graphics.data?.goals.filter((g) => g.confirmed).length ?? 0;
   const sourceParts = [
     main ? ta("sourceVideo") : null,
-    (graphics.data?.report_goals.length ?? 0) > 0 ? ta("sourceReport") : null,
+    graphics.data?.has_report ? ta("sourceReport") : null,
     graphics.data && graphics.data.goals.length > 0 ? ta("sourceMarked", { n: confirmedGoals, total: graphics.data.goals.length }) : null,
   ].filter(Boolean);
   return (
@@ -435,7 +435,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </div>
         </details>
       )}
-      {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} hasReport={(graphics.data?.report_goals.length ?? 0) > 0} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
+      {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} hasReport={graphics.data?.has_report ?? false} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}

@@ -61,6 +61,7 @@ from handball_api.services.policies import Action
 
 GOAL_SOURCE = CANDIDATE  # shot events confirmed from a candidate
 NMS_MS = 8000  # candidates are at least this far apart
+SAME_MOMENT_MS = 5000  # an answered goal and a new candidate this close are the same goal
 SIDE_BEFORE_MS = 12_000  # an attack that ended this long before the goal scored it
 KINDS = ("goal", "shot")
 RATES = {"goal": (1, 2, 4), "shot": (2, 4, 6)}
@@ -98,7 +99,7 @@ async def store(
     for c in (
         await ctx.db.scalars(select(GoalCandidate).where(GoalCandidate.video_asset_id == asset.id))
     ).all():
-        reviewed.setdefault(c.kind, []).append(c.t_ms)
+        reviewed.setdefault(c.kind, []).append(c.goal_ms)
     shots = (found or {}).get("shots")
     lists = {"goal": found, "shot": shots if isinstance(shots, dict) else None}
     counts = {"goal_candidates": 0, "shot_candidates": 0}
@@ -114,9 +115,12 @@ async def store(
         rates = RATES[kind]
         for r in _rows(part):
             t_ms = _int(r.get("t_ms"), -1)
-            if t_ms < 0 or any(abs(t_ms - t) <= NMS_MS for t in reviewed[kind]):
-                continue
             goal_ms = _int(r.get("goal_ms"), t_ms)
+            # a moment already answered keeps its answer when the analysis runs again (a moved
+            # court, real-video test F3): the same goal within 5 s is not asked a second time,
+            # a goal 6 s or more apart is (F4)
+            if t_ms < 0 or any(abs(goal_ms - t) < SAME_MOMENT_MS for t in reviewed[kind]):
+                continue
             rate = _int(r.get("rate"), max(rates))
             ctx.db.add(
                 GoalCandidate(

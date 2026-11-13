@@ -282,6 +282,9 @@ async def test_paper_report_import(make_api: Callable[[], Api]) -> None:
     assert lst[0]["opponent_name"] == "TV Papier"
     # the list knows the report is there (UX test A02)
     assert lst[0]["has_report"] is True
+    # so do the graphics: «Spielbericht» as a source only with one (real-video test F6)
+    g = (await api.get(f"/v1/orgs/{org}/matches/{lst[0]['id']}/graphics")).json()
+    assert g["has_report"] is True
     for bad in (
         {**REPORT, "schema": "x"},
         {**REPORT, "players": [{"number": 7, "technical_faults": {"fly": 1}}]},

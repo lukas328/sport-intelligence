@@ -37,7 +37,12 @@ from handball_api.models import (
 )
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video
-from handball_api.services.matches import duration_ms, get_match, timeline_video
+from handball_api.services.matches import (
+    REPORT_SOURCES,
+    duration_ms,
+    get_match,
+    timeline_video,
+)
 from handball_api.services.shot_positions import _rows
 
 LENGTH, WIDTH = 40.0, 20.0
@@ -348,6 +353,9 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     return {
         "has_video": asset is not None,
         "analysis": await analysis_status(ctx, asset),
+        # a match report brought goals (handball.ch, a paper report): «Spielbericht» only then
+        # (real-video test F6; the course also carries the video's goals)
+        "has_report": any(e.source in REPORT_SOURCES for e in goals),
         "span": _span(match, asset),
         "field_confirmed": field,
         "report_goals": report,
@@ -647,7 +655,9 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
     ]
     flip = bool(att) and float(np.mean([r[2] for r in att])) > LENGTH / 2  # attack to the left half
     out: dict[int, list[tuple[float, float]]] = {}
+    times: dict[int, list[float]] = {}
     last: dict[int, float] = {}
+    start = e.t_ms - SCENE_MS
     for t, no, x, y in rows[np.argsort(rows[:, 0])]:
         n = int(no)
         if t - last.get(n, -1e9) < SAMPLE_MS:
@@ -655,6 +665,8 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
         last[n] = float(t)
         px, py = (LENGTH - float(x), WIDTH - float(y)) if flip else (float(x), float(y))
         out.setdefault(n, []).append((round(px, 2), round(py, 2)))
+        # when in the scene (0 to 1): a track is drawn only while it exists (real-video test F5)
+        times.setdefault(n, []).append(round(min(1.0, max(0.0, (float(t) - start) / SCENE_MS)), 4))
     for n, xy in out.items():
         tr = meta.get(n)
         team = TEAM_OF_TRACK.get(str(getattr(tr, "team", "") or ""))
@@ -665,6 +677,7 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
                 "team": team,
                 "number": getattr(tr, "number", None) if team != "ref" else None,
                 "xy": xy,
+                "ts": times[n],
             }
         )
     base["tracks"] = unique_numbers(base["tracks"])
