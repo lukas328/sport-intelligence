@@ -97,3 +97,85 @@ Prüf-Fragen sagen «Spiel» und «Video» weiter «Noch keine Tore gefunden».
   Wurfposition und Spielzeit bekam. Der Weg über die Oberfläche wurde dafür nicht gefunden.
 - Wurf-Kandidaten und die Taktikkamera in Clip 2 wurden nicht geprüft.
 - Die Analysedauer gilt für vier Prozessorkerne ohne Grafikkarte und sagt wenig über den Betrieb.
+
+---
+
+# Zweiter und dritter Durchlauf (13. November 2026)
+
+Dieselben zwei Clips, nach den Korrekturen. Zweiter Durchlauf auf `claude/trikot-ui` @ 0c91404
+(nur Clip 1, dann von einem Nutzungslimit gestoppt), dritter Durchlauf auf @ 41cc31b (beide Clips,
+frischer Verein). Die Erkennung selbst ist unverändert.
+
+## Urteil
+
+**Clip 1: ja, mit einer Bedingung. Clip 2: teilweise.** Nach dem Prüfen sieht der Trainer auf
+Start, «Spiel» und «Video» ein Resultat, den Verlauf, die Tore als Szenen und Positionen auf dem
+Feld. Das Resultat stimmt aber nur, wenn er auch die freiwilligen Fragen beantwortet.
+
+## Korrektur der Zählung von Hand
+
+Clip 1 hat neun Tore, nicht acht: Horgen trifft schon bei 0:08 (die Anzeigetafel zeigt 7:7 bei
+0:00 und 8:7 bei 0:37). Wahr im Ausschnitt: Horgen 4, Stäfa 5.
+
+## Zahlen des dritten Durchlaufs
+
+| | Clip 1, Stäfa | Clip 2, Möhlin |
+|---|---|---|
+| Analyse | 19:25 Minuten, fertig | 21:55 Minuten, fertig |
+| Fragen laut Mail, Zähler, Prüfen | 12, 12, 12 | 12, 12, 12 |
+| Freiwillige Fragen danach | 10 | 10 |
+| Aufwand für alle 22 Fragen | etwa 6 bis 7 Minuten | etwa 6 bis 7 Minuten |
+| Vorschlag des Teams richtig (Pflichtfragen) | 7 von 9 | 3 von 6 |
+| Bestätigte Tore gegen die Zählung von Hand | 9 von 9 (7 nach den Pflichtfragen) | 3 von 3 (2 nach den Pflichtfragen) |
+| Gezeigtes Resultat | 4:5, stimmt (2:5 nach den Pflichtfragen) | 2:1, entspricht der Zählung (1:1 nach den Pflichtfragen) |
+| Feld | um 3 px korrigiert, gespeichert | automatisch etwa 3 m (links) und 1,5 m (rechts) daneben; durch Ziehen von drei Ecken korrigiert, die Positionen verschieben sich um mehrere Meter |
+
+## Die zwölf Fehler des ersten Durchlaufs
+
+Am echten Video gesehen, wenn nicht anders vermerkt.
+
+| Nr. | Stand | Bemerkung |
+|---|---|---|
+| 1, 10 | behoben | Resultat, Verlauf und Torliste stehen auf Start, «Spiel» und «Video»; unter «Mehr zum Spiel» läuft der Verlauf noch über 0 bis 60 Minuten |
+| 2 | behoben, Güte teilweise | Positionen erscheinen, auch ohne Spielzeit; die Anzahl der Punkte stimmt oft nicht |
+| 3 | behoben | Ecken ausserhalb des Bildes werden gespeichert; die Fehlermeldung wurde nur mit einem künstlich erzeugten Fehler gesehen |
+| 4 | behoben bei 1280 px | Hallenbild 1086 px breit, Linien 2 px, vier Griffe erreichbar; bei 390 px nicht geprüft |
+| 5 | durch Weglassen gelöst | bei schwenkender Kamera wird die Frage «Wer ist das?» nicht gestellt |
+| 6 | behoben | «Analyse läuft» überall, «fertig» nirgends, solange sie läuft |
+| 7 | behoben | Mail, Start, Liste, Zähler und Prüfen nennen dieselbe Zahl |
+| 8 | teilweise | der Satz ist weg; «So rechnen wir» nennt den Spielbericht aber noch ohne Bericht |
+| 9 | behoben für genannte Farben | Vereinsfarbe gilt, Gegnerfarbe wird vor dem Hochladen gefragt; die gemerkte Farbe eines Gegners geht beim zweiten Spiel nicht an die Analyse |
+| 11 | behoben | kein Hallenname mehr |
+| 12 | nicht robust | kein Kandidat wird doppelt gefragt, aber ein Tor ist in zwei Fragen sichtbar und lässt sich doppelt bestätigen |
+
+## Neue und offene Fehler nach dem dritten Durchlauf
+
+1. **Echte Tore stecken in den freiwilligen Fragen.** Wer bei «Alles geprüft» aufhört, sieht in
+   Clip 1 2:5 statt 4:5 und in Clip 2 1:1 statt 2:1.
+2. **Ein Tor in zwei Fragen:** in Clip 1 bei 2:06 und 2:15 sowie bei 2:33 und 2:42. Eine doppelte
+   Zählung ist möglich.
+3. **Die Taktikkamera zeigt zu viele Punkte:** bis 14 rote statt 7. Zuschauer in Rot und die Bank
+   in Weiss im Vordergrund werden als Spieler gezeichnet, ein blauer Torhüter als rot. Die Szene
+   zeigt die sechs Sekunden vor der Kandidatenzeit, also meist den Rückweg. Eigene Tore werden am
+   linken Tor gezeichnet, während das Video das rechte zeigt.
+4. Nach jedem gespeicherten Feld kommt eine zweite Mail «Die Analyse … ist fertig».
+5. Die gemerkte Gegnerfarbe geht nicht an die Analyse (im zweiten Durchlauf gesehen).
+6. Saison «Wer trifft · aus 12 Spielen» zeigt 6, 5, 4 Tore, der Start aus denselben Berichten 50,
+   44, 36.
+7. Das Formular «Neues Spiel» füllt die Gegnerfarbe rot vor.
+8. Ein übergangener Anwurf bleibt als offene Frage stehen; es gibt keine Antwort «nicht im Video».
+   Ohne Anwurf fehlt im Video-Tab der Zeitstrahl, und die Szenenliste hat keine Zeiten.
+
+Diese Punkte sind an die Bau-Session gegangen. Was danach behoben wird, ist nur noch durch
+automatische Tests abgesichert, nicht mehr mit den echten Clips.
+
+## Grenzen
+
+- Prüfen wurde nur bei 1280 px bedient; bei 390 px wurden Start, Tabs und die erste Frage
+  angesehen, aber keine Ecken gezogen.
+- Die Zählung für Clip 2 stammt aus Standbildern (Anwurfmuster), die Anzeigetafel ist dunkel.
+- Die Maschine startete während der Läufe dreimal neu; die Videos lagen im Arbeitsspeicher und
+  mussten jedes Mal neu hochgeladen werden.
+- handball.ch lieferte am Testtag ein Zertifikat ohne Zwischenzertifikat; die Teamsuche im
+  Einstieg antwortete mit 503, bis das Zwischenzertifikat lokal ergänzt wurde. Die Prüfung der
+  Zertifikate blieb eingeschaltet.
