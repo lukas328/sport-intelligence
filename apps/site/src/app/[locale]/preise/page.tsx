@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import plans from "@handball/plans";
 import { Faq } from "@/components/faq";
 import { KitScope, StartLink } from "@/components/kit";
+import { JsonLd } from "@/components/json-ld";
 import { PageHead, SectionHead } from "@/components/wurf-head";
+import { faqPage, graph } from "@/lib/schema";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 
@@ -10,8 +12,7 @@ type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).pricing;
-  return pageMeta(locale, "preise", t.title, `${t.head} ${t.draft}`);
+  return pageMeta(locale, "preise", messages(locale).seo.pricing.title, messages(locale).seo.pricing.description);
 }
 
 /**
@@ -27,7 +28,16 @@ export default async function Pricing({ params }: Props) {
   const team = plans.plans.find((p) => p.plan === "team")!;
   return (
     <KitScope>
-      <PageHead kick={t.title} title={t.head} figure={team.price_chf_month} figureLabel={t.figureLabel}>
+      <JsonLd
+        data={graph(
+          faqPage(
+            locale,
+            "preise",
+            t.faq.map((f) => ({ q: f.q, a: f.a })),
+          ),
+        )}
+      />
+      <PageHead kick={t.title} title={t.head} lead={fmt(t.lead, { month: team.price_chf_month, year: team.price_chf_year })} figure={team.price_chf_month} figureLabel={t.figureLabel}>
         <p className="mt-6 inline-block bg-attn px-3 py-1.5 text-[1.0625rem] font-semibold text-ink">{t.draft}</p>
       </PageHead>
       <div className="wrap">

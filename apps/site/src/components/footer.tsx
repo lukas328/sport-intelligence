@@ -44,6 +44,8 @@ export function Footer({ locale }: { locale: Locale }) {
           ["aufnahme", m.nav.filming],
           ["demo", m.nav.demo],
           ["preise", m.nav.pricing],
+          ["ratgeber", m.nav.guides],
+          ["fakten", m.nav.facts],
           ["blog", m.nav.blog],
         ])}
         {col(m.footer.support, support)}

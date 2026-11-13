@@ -4,7 +4,9 @@ import plans from "@handball/plans";
 import { Faq } from "@/components/faq";
 import { HelpSearch } from "@/components/help-search";
 import { KitScope } from "@/components/kit";
-import { PageHead, SectionHead } from "@/components/wurf-head";
+import { JsonLd } from "@/components/json-ld";
+import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
+import { faqPage, graph } from "@/lib/schema";
 import { fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { MailLine } from "@/components/mail-line";
@@ -14,8 +16,7 @@ type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).faq;
-  return pageMeta(locale, "hilfe", t.title, t.lead);
+  return pageMeta(locale, "hilfe", messages(locale).seo.faq.title, messages(locale).seo.faq.description);
 }
 
 /** Questions for the coach first, then the guides to the app (listed ones only) with search. */
@@ -32,7 +33,10 @@ export default async function Help({ params }: Props) {
   };
   return (
     <KitScope>
-      <PageHead kick={t.title} title={t.head} lead={t.lead} />
+      <JsonLd data={graph(faqPage(locale, "hilfe", t.items.map((f) => ({ q: f.q, a: fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year }) }))))} />
+      <PageHead kick={t.title} title={t.head} lead={t.lead}>
+        <Updated locale={locale} />
+      </PageHead>
       <div className="wrap">
         <div className="mt-12 max-w-[52rem]">
           <Faq

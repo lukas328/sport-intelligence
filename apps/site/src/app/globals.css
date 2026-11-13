@@ -333,6 +333,15 @@
   text-decoration: underline;
   text-decoration-thickness: 2px;
 }
+.prose blockquote {
+  margin: 1.25rem 0;
+  border-left: 4px solid var(--ink);
+  background: var(--paper);
+  padding: 0.5rem 1rem;
+}
+.prose code {
+  font-size: 0.95em;
+}
 .prose strong {
   font-weight: 700;
 }

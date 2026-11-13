@@ -1,0 +1,100 @@
+export const howto = {
+  name: "Filmer un match de handball avec un téléphone",
+  description: "De l'installation au téléversement : comment obtenir un enregistrement qu'on peut analyser.",
+  totalTime: "PT15M",
+  tools: ["Téléphone qui filme en Full HD (1080p)", "Trépied ou place en hauteur", "Batterie externe avec câble"],
+  steps: [
+    { name: "Arriver tôt", text: "Viens 20 minutes avant le coup d'envoi. Demande au concierge ou à l'équipe qui reçoit où tu peux filmer, et affiche l'avis sur la porte." },
+    { name: "Trouver la place", text: "À hauteur de la ligne médiane, le plus haut possible : tribune, galerie, balustrade ou grand trépied. Jamais dans une issue de secours." },
+    { name: "Régler le téléphone", text: "Mode avion activé, verrouillage de l'écran désactivé, 1080p, si possible 50 ou 60 images par seconde. Branche la batterie externe." },
+    { name: "Vérifier l'image", text: "Téléphone à l'horizontale. Les deux zones de but et les deux lignes de touche doivent être dans l'image, avec un peu de marge. Pas de zoom." },
+    { name: "Démarrer avant le coup d'envoi", text: "Lance l'enregistrement quand les équipes entrent sur le terrain, puis ne touche plus au téléphone." },
+    { name: "Laisser tourner à la pause", text: "N'arrête pas l'enregistrement à la mi-temps. Un match dans un seul fichier est plus simple ensuite." },
+    { name: "Arrêter après le coup de sifflet final", text: "Arrête l'enregistrement, vérifie que le fichier est complet et téléverse-le à la maison, en wifi." },
+  ],
+};
+
+export const faq = [
+  { q: "Quel trépied me faut-il ?", a: "Un trépied stable qui monte à au moins 2,5 ou 3 mètres, par exemple un pied d'éclairage avec un support pour téléphone. Un petit trépied de table ne suffit que si tu as une place haute dans la tribune." },
+  { q: "Un vieux téléphone suffit-il ?", a: "Le plus souvent, oui. Il doit filmer en Full HD (1080p), avoir assez de mémoire et tenir 90 minutes d'affilée, idéalement branché sur une batterie externe." },
+  { q: "Dois-je arrêter à la pause ?", a: "Non, laisse tourner. Deux fichiers compliquent l'analyse, et certains programmes n'analysent qu'un fichier par match." },
+  { q: "Puis-je filmer derrière le but ?", a: "Pour les scènes d'un but, oui ; pour analyser le match, non : l'autre moitié du terrain devient trop petite, et les positions sont presque impossibles à estimer." },
+  { q: "Portrait ou paysage ?", a: "Toujours à l'horizontale. Le terrain est deux fois plus long que large ; en portrait, les buts manquent." },
+];
+
+## Pourquoi l'emplacement compte plus que la caméra
+
+Sur une bonne vidéo de match, on voit à tout moment les douze joueurs de champ, les deux zones de but et les lignes. N'importe quel téléphone y arrive s'il est au bon endroit. S'il est trop bas ou dans un coin, même une caméra chère n'y change rien : les joueurs se cachent les uns les autres, et la moitié du terrain est loin.
+
+<HallCamera
+  label="Plan de la salle vu d'en haut : la caméra est en hauteur à la ligne médiane et voit tout le terrain. Derrière les buts, la place est barrée."
+  camera="caméra, à 3 mètres ou plus"
+  field="tout le terrain dans l'image"
+  avoid="derrière le but"
+  caption="La meilleure place : à la ligne médiane, sur le grand côté, le plus haut possible."
+/>
+
+## Où placer la caméra ?
+
+**À hauteur de la ligne médiane, sur le grand côté du terrain.** De là, les deux buts sont à la même distance, et tu n'as jamais besoin de pivoter. Quelques mètres à côté de la ligne médiane, ça va aussi, mais le centre reste le mieux.
+
+Les bonnes places : la tribune, une galerie, une balustrade à l'étage ou un grand trépied derrière le banc. Moins bonnes : les coins et derrière le but.
+
+## À quelle hauteur ?
+
+**Le plus haut possible, à partir d'environ 3 mètres.** Plus la caméra est haute, moins les joueurs se cachent, et mieux tu vois les distances dans la défense. À hauteur des yeux, tu vois surtout le dos des joueurs les plus proches.
+
+<CameraSide
+  label="La salle vue de côté : une caméra haute voit par-dessus les joueurs jusqu'à l'autre ligne de touche, une caméra basse voit surtout les joueurs les plus proches."
+  high="haut : 3 m et plus"
+  low="bas : masqué"
+  width="20 m jusqu'à l'autre côté"
+  caption="D'en haut, tu vois par-dessus les joueurs. À hauteur des yeux, ils se cachent."
+/>
+
+Sans tribune, un grand trépied aide. Place-le là où personne ne trébuche et sans bloquer d'issue de secours, et demande d'abord au concierge.
+
+## Ce qu'il te faut
+
+<Check
+  items={[
+    "Un téléphone qui filme en Full HD (1080p). Pas besoin d'un modèle récent.",
+    "Un trépied avec support pour téléphone, ou une place fixe en hauteur. À défaut, une pince sur la balustrade.",
+    "Une batterie externe et un câble assez long.",
+    "Assez de mémoire libre : plutôt 10 Go que 5 Go.",
+    "L'avis pour la salle, pour que chacun sache qu'on filme.",
+  ]}
+/>
+
+La place nécessaire dépend du téléphone. Beaucoup de téléphones indiquent dans les réglages de l'appareil photo combien pèse une minute de vidéo. En 1080p, c'est environ 40 à 100 Mo par minute selon le réglage, donc vite 5 à 9 Go pour un match avec la pause.
+
+## Quels réglages ?
+
+- **Résolution :** 1080p (Full HD). La 4K n'apporte presque rien à l'analyse et remplit la mémoire quatre fois plus vite.
+- **Images par seconde :** 50 ou 60 si le téléphone le permet. Les tirs rapides sont alors moins flous. 25 ou 30, ça va aussi.
+- **Mode avion activé :** sinon un appel peut arrêter l'enregistrement.
+- **Verrouillage de l'écran désactivé,** luminosité au minimum. Ça économise la batterie.
+- **Pas de zoom, pas de format portrait.**
+
+## Le jour du match, étape par étape
+
+<Steps items={howto.steps} />
+
+## Erreurs fréquentes
+
+<Check
+  items={[
+    "Enregistrement arrêté à la pause, puis oublié de relancer.",
+    "Filmé trop bas : les joueurs se cachent, l'autre moitié du terrain se voit à peine.",
+    "Pivoté ou zoomé : la vidéo bouge, et une analyse automatique trouve le terrain plus difficilement.",
+    "Une zone de but manque dans l'image, parce que le téléphone est trop près.",
+    "Batterie vide en deuxième mi-temps.",
+    "Contre-jour par de grandes fenêtres : si possible, choisir le côté qui a les fenêtres dans le dos.",
+  ]}
+/>
+
+## Ai-je le droit de filmer ?
+
+Avant le match, dis à l'adversaire, aux arbitres et à la salle que tu filmes, et affiche un avis sur la porte. Informe ta propre équipe à l'avance et demande de préférence son consentement, celui des parents pour les enfants. Comment faire : [Filmer au club : consentement, enfants, conservation](video-im-verein-einwilligung). L'avis à imprimer se trouve sur la page [Filmer](../aufnahme).
+
+Pour analyser la vidéo en peu de temps, il existe un guide en allemand : [Ein Spiel in 20 Minuten auswerten](/de/ratgeber/spiel-auswerten-20-minuten/).

@@ -3,7 +3,9 @@ import Link from "next/link";
 import { HallPlan } from "@/components/hall-plan";
 import { Honest } from "@/components/honest";
 import { KitScope, StartLink } from "@/components/kit";
-import { PageHead, SectionHead } from "@/components/wurf-head";
+import { JsonLd } from "@/components/json-ld";
+import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
+import { graph, howTo } from "@/lib/schema";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 
@@ -11,8 +13,8 @@ type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).how;
-  return pageMeta(locale, "so-funktioniert-es", t.title, t.lead);
+  const t = messages(locale).seo.how;
+  return pageMeta(locale, "so-funktioniert-es", t.title, t.description);
 }
 
 export default async function How({ params }: Props) {
@@ -21,11 +23,23 @@ export default async function How({ params }: Props) {
   const t = m.how;
   return (
     <KitScope>
-      <PageHead kick={t.title} title={t.head} lead={t.lead} />
+      <JsonLd
+        data={graph(
+          howTo(locale, "so-funktioniert-es", {
+            name: t.head,
+            description: t.lead,
+            tools: [m.filming.sections[0]!.items[0]!],
+            steps: t.steps.map((s) => ({ name: s.title, text: s.text })),
+          }),
+        )}
+      />
+      <PageHead kick={t.title} title={t.head} lead={t.lead}>
+        <Updated locale={locale} />
+      </PageHead>
       <div className="wrap">
         <ol className="mt-12">
           {t.steps.map((s, i) => (
-            <li key={s.title} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t-2 border-ink py-8 md:grid-cols-[7rem_minmax(0,1fr)_minmax(0,24rem)] md:gap-x-10">
+            <li key={s.title} id={`schritt-${i + 1}`} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t-2 border-ink py-8 md:grid-cols-[7rem_minmax(0,1fr)_minmax(0,24rem)] md:gap-x-10">
               <span aria-hidden className="font-num text-[4.5rem] leading-[.85] text-club-text md:text-[6.5rem]">
                 {i + 1}
               </span>

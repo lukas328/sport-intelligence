@@ -4,6 +4,22 @@ export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://app.handball
 export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@handball-ai.ch";
 export const STATUS_URL = process.env.NEXT_PUBLIC_STATUS_URL ?? "";
 
+/** The product's name, as it stands in titles, structured data and llms.txt. */
+export const SITE_NAME = "Handball Intelligence";
+
+/**
+ * Date of the last content review of the core pages («Stand» on the page, lastmod in the sitemap,
+ * dateModified in structured data). Change it when the texts are reviewed again.
+ */
+export const SITE_UPDATED = "2026-11-13";
+
+/**
+ * The plan table in packages/plans is a placeholder (OPEN_QUESTIONS Q-PROD-4, Q-SITE-1). While this
+ * is false, the pages say «noch nicht endgültig» and no price goes into structured data or llms.txt
+ * as a fixed offer.
+ */
+export const PRICES_FINAL = false;
+
 /** Operating company for the imprint; left empty until it is known (OPEN_QUESTIONS Q-ADD-3). */
 export const COMPANY = {
   name: process.env.NEXT_PUBLIC_COMPANY_NAME ?? "",

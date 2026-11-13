@@ -4,6 +4,7 @@ import type { HelpLocale } from "../help";
 export interface BlogPost {
   slug: string;
   date: string; // ISO date
+  updated?: string; // ISO date of the last change
   title: Record<HelpLocale, string>;
   summary: Record<HelpLocale, string>;
 }

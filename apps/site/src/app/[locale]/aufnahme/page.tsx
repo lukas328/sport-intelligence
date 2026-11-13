@@ -11,8 +11,7 @@ type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).filming;
-  return pageMeta(locale, "aufnahme", t.title, t.lead);
+  return pageMeta(locale, "aufnahme", messages(locale).seo.filming.title, messages(locale).seo.filming.description);
 }
 
 /** The filming guide with a plan of the hall and the printable notice (addendum 01, 8). */

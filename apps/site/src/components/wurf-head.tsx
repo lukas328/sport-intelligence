@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Flight, type FlightLabels, type ReportGoal } from "@/components/anlauf/charts";
 import { cn } from "@/lib/cn";
+import { HTML_LANG, fmt, messages, type Locale } from "@/lib/i18n";
+import { SITE_UPDATED } from "@/lib/site";
 
 /** The result: our goals, theirs underlined in the opponent's colour; two offset outlines behind. */
 export function Score({ own, opp, label, className }: { own: number; opp: number; label: string; className?: string }) {
@@ -104,6 +106,16 @@ export function PageHead({ kick, title, lead, figure, figureLabel, children }: {
         className="absolute right-0 bottom-0 left-0 h-3.5 bg-club shadow-[inset_0_0_0_1.5px_var(--club-edge)] [clip-path:polygon(0_0,100%_78%,100%_100%,0_100%)] md:h-[22px]"
       />
     </header>
+  );
+}
+
+/** «Stand: 13. November 2026»: the date of the last review of a page, visible under the lead. */
+export function Updated({ locale, date = SITE_UPDATED }: { locale: Locale; date?: string }) {
+  const text = new Intl.DateTimeFormat(HTML_LANG[locale], { dateStyle: "long", timeZone: "Europe/Zurich" }).format(new Date(date));
+  return (
+    <p className="mt-5 text-[1.0625rem] text-ink-2">
+      <time dateTime={date}>{fmt(messages(locale).guides.updated, { date: text })}</time>
+    </p>
   );
 }
 

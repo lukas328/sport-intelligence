@@ -7,7 +7,7 @@
 // the site's look with three ways on (Start, Demo-Spiel, Fragen).
 //
 // Real hosting should still answer these with a server redirect (see README, «Hosting»).
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,8 +15,15 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "out");
 
 const slugsOf = (file) => [...readFileSync(join(root, file), "utf8").matchAll(/slug: "([a-z0-9-]+)"/g)].map((m) => m[1]);
-const PAGES = ["so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum", "funktionen"];
-const paths = [...PAGES, ...slugsOf("content/help/index.ts").map((s) => `hilfe/${s}`), ...slugsOf("content/blog/index.ts").map((s) => `blog/${s}`)];
+const PAGES = ["so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum", "funktionen"];
+const paths = [
+  ...PAGES,
+  ...slugsOf("content/help/index.ts").map((s) => `hilfe/${s}`),
+  ...slugsOf("content/blog/index.ts").map((s) => `blog/${s}`),
+  ...slugsOf("content/ratgeber/index.ts").map((s) => `ratgeber/${s}`),
+];
+// absolute addresses for canonical and hreflang (search engines ignore relative ones)
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://handball-ai.ch").replace(/\/$/, "");
 
 // the built stylesheet(s) of the site, so these pages look like the rest without their own CSS
 const home = readFileSync(join(out, "de", "index.html"), "utf8");
@@ -40,13 +47,18 @@ const pick = `var l=(navigator.language||"de").slice(0,2).toLowerCase();l=(l==="
 
 function redirectPage(path) {
   const de = `/de/${path}/`;
+  // guides that exist only in German send every language there
+  const has = (l) => existsSync(join(out, l, path, "index.html"));
+  const langs = ["fr", "en"].filter(has);
+  const choose = `var ok=${JSON.stringify(["de", ...langs])};if(ok.indexOf(l)<0)l="de";`;
+  const others = langs.map((l) => ` · <a class="link" href="/${l}/${path}/">${l === "fr" ? "Continuer" : "Continue"}</a>`).join("");
   return `${head("Handball Intelligence", `
-<link rel="canonical" href="${de}">
+<link rel="canonical" href="${SITE}${de}">
 <meta http-equiv="refresh" content="1; url=${de}">
-<script>(function(){${pick}location.replace("/"+l+"/${path}/"+location.search+location.hash);})();</script>`)}
+<script>(function(){${pick}${choose}location.replace("/"+l+"/${path}/"+location.search+location.hash);})();</script>`)}
 <body>
 <main class="wrap py-16">
-<p><a class="link" href="${de}">Weiter</a> · <a class="link" href="/fr/${path}/">Continuer</a> · <a class="link" href="/en/${path}/">Continue</a></p>
+<p><a class="link" href="${de}">Weiter</a>${others}</p>
 </main>
 </body>
 </html>
@@ -106,4 +118,14 @@ for (const path of paths) {
   n++;
 }
 writeFileSync(join(out, "404.html"), notFoundPage());
+
+// the language choice at / (public/index.html): absolute canonical and hreflang, Swiss French
+const rootFile = join(out, "index.html");
+writeFileSync(
+  rootFile,
+  readFileSync(rootFile, "utf8")
+    .replace(/hreflang="fr"/g, 'hreflang="fr-CH"')
+    .replace(/(<link rel="(?:canonical|alternate)"[^>]*href=")\//g, `$1${SITE}/`)
+    .replace('<link rel="alternate" hreflang="en"', `<link rel="alternate" hreflang="x-default" href="${SITE}/de/">\n<link rel="alternate" hreflang="en"`),
+);
 console.log(`redirects: ${n} pages without a language path, 404.html`);

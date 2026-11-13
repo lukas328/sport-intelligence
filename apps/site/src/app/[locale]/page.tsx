@@ -10,7 +10,8 @@ import { Things } from "@/components/things";
 import { SectionHead, WurfHead } from "@/components/wurf-head";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
+import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
+import { SITE_UPDATED } from "@/lib/site";
 import { demoView } from "@/lib/things";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -29,19 +30,12 @@ export default async function Home({ params }: Props) {
   return (
     <KitScope>
       <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@graph": [
-            { "@type": "Organization", name: "Handball Intelligence", url: SITE_URL, email: SUPPORT_EMAIL },
-            {
-              "@type": "SoftwareApplication",
-              name: "Handball Intelligence",
-              applicationCategory: "SportsApplication",
-              operatingSystem: "Web",
-              description: m.meta.description,
-            },
-          ],
-        }}
+        data={graph(
+          organization(),
+          website(locale),
+          softwareApplication(locale, m.meta.description, m.pricing.plans),
+          webPage(locale, "", m.meta.title, m.meta.description, SITE_UPDATED),
+        )}
       />
       <WurfHead
         kick={m.match.fictional}
