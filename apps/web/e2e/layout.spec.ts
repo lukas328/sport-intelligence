@@ -63,6 +63,8 @@ test("large text at 300 px: the team name in the top bar stays readable (UX test
     await expect(upload).toHaveAccessibleName("Video hochladen");
     expect((await upload.boundingBox())!.width).toBeLessThanOrEqual(46);
   }
+  // the magnifier gave way: the tab Szenen is also the search, by its name
+  await expect(page.getByRole("link", { name: "Szenen und Suche" })).toBeVisible();
   await noHorizontalScroll(page);
 });
 

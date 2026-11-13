@@ -2436,7 +2436,8 @@
     "twoFactorLater": "In sieben Tagen wieder erinnern",
     "twoFactorTitle": "Konto schützen",
     "twoFactorWhy": "Jetzt sind Videos und Personen im Verein. Mit einem zweiten Schritt beim Anmelden bleibt das Konto sicher.",
-    "olderArea": "Ein Bereich aus der früheren Version der App. Alles bleibt hier erreichbar, Neues kommt unter Szenen und Spiele."
+    "olderArea": "Ein Bereich aus der früheren Version der App. Alles bleibt hier erreichbar, Neues kommt unter Szenen und Spiele.",
+    "scenesAndSearch": "Szenen und Suche"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",

@@ -175,9 +175,16 @@ def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
     assert mail.subject == "Die Analyse gegen TV T ist fertig"
     assert "drei Dinge" not in mail.text and "2 Fragen an dich" in mail.text
     assert mail.text.startswith("Hallo\n")
-    # one question is «1 Frage», in every language (UX test A02)
-    for loc, word in (("de-CH", "1 Frage an"), ("en", "1 question for"), ("fr", "1 question pour")):
-        one = render(
+    # singular and plural as whole sentences, in every language (UX test round 3, final check)
+    for loc, n, sentence in (
+        ("de-CH", 1, "Eine Frage an dich hilft ihr weiter:"),
+        ("de-CH", 2, "2 Fragen an dich helfen ihr weiter:"),
+        ("en", 1, "One question for you helps it on:"),
+        ("en", 2, "2 questions for you help it on:"),
+        ("fr", 1, "Une question pour toi l'aide à avancer :"),
+        ("fr", 2, "2 questions pour toi l'aident à avancer :"),
+    ):
+        mail_n = render(
             "analysis_questions",
             loc,
             to="a@b.ch",
@@ -185,9 +192,9 @@ def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
             team="Z",
             opponent="T",
             link="x",
-            questions=1,
+            questions=n,
         )
-        assert word in one.text, one.text
+        assert sentence in mail_n.text, mail_n.text
     named = render(
         "analysis_no_goals", "de-CH", to="a@b.ch", name="Hans", team="Z", opponent="T", link="x"
     )

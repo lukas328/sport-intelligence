@@ -2436,7 +2436,8 @@
     "twoFactorLater": "Remind me in seven days",
     "twoFactorTitle": "Protect the account",
     "twoFactorWhy": "Now there are videos and people in the club. A second step at sign-in keeps the account safe.",
-    "olderArea": "An area from the earlier version of the app. Everything stays here; new things come under Scenes and Matches."
+    "olderArea": "An area from the earlier version of the app. Everything stays here; new things come under Scenes and Matches.",
+    "scenesAndSearch": "Scenes and search"
   },
   "palette": {
     "newMatch": "Add a match",

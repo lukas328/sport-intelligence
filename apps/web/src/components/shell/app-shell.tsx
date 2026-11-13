@@ -284,7 +284,19 @@ export function AppShell({
                         className="mark-band absolute -top-0.5 right-[18px] left-[18px] h-1.5"
                       />
                     )}
-                    {t(it.key)}
+                    {it.key === "scenes" && searchHref ? (
+                      // below 360 px the magnifier is gone from the top bar: this tab is also the
+                      // search, and says so to screen readers (UX test round 3, final check)
+                      <>
+                        <span className="max-[359px]:hidden">{t(it.key)}</span>
+                        <span aria-hidden className="hidden max-[359px]:inline">
+                          {t(it.key)}
+                        </span>
+                        <span className="sr-only hidden max-[359px]:inline">{t("scenesAndSearch")}</span>
+                      </>
+                    ) : (
+                      t(it.key)
+                    )}
                   </Link>
                 </li>
               );
