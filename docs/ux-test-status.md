@@ -159,6 +159,31 @@ tester's check and what was done after it.
 | A09 | Platzhalter-Block beim Laden | behoben (c72f425): ohne Resultat bleibt die Stelle leer statt «-:-» |
 | A10 | Negativer Balken ohne Zahl | behoben (685a605): siehe H14 |
 
+## Real-video test (E01 to E12): the data-to-interface path
+
+Source: `docs/ux-test/echttest/BERICHT.md` on the test branch (two NLB clips, code @ 1b62a5c).
+Twelve «Fehler in Oberfläche und Datenweg», fixed without new recognition; the recognition's own
+weaknesses are in OPEN_QUESTIONS.md (Q-REC-*).
+
+| # | Befund | Status |
+|---|---|---|
+| E01 | Bestätigte Tore kommen nicht in «Spiel» und «Video» an | behoben (b573f30): die Grafik führt jedes bestätigte Tor, auch ohne Wurfposition und Nummer (shot = null); das Setzen des Anwurfs rechnet clock_s fürs ganze Video nach. Resultat, Verlauf, Torliste und Szene da; Bündel und Minifeld zeigen «ohne Position». Tests `test_a_confirmed_goal_without_spot…`, e2e `real-normal.spec` |
+| E02 | Taktikkamera sagt «keine Positionen», obwohl Spuren da sind | behoben (b573f30): Positionen, sobald das Feld bestätigt ist und die Szene Spuren hat; fehlt die Spielzeit, die Videozeit (video_s). vitest `cameraScene` |
+| E03 | Verschobene Feldecken lassen sich nicht speichern (422), Fehler verschluckt | behoben (d75afc2): die API nimmt Bildpunkte ausserhalb des Bildes; eine Antwort zählt nur, wenn gespeichert wurde; Fehler werden angezeigt. Solange reprojection_px 0 ist, gilt das Feld nie als sicher. Tests: Ecken ausserhalb, e2e |
+| E04 | Vierter Griff nicht erreichbar, Hallenbild klein, Linien dick | behoben (d75afc2): Feldfrage über die volle Breite, Bild zoombar, Linien 2 px halbtransparent; eine Ecke ausserhalb hat ihren Griff am Rand auf ihrer Linie. vitest `handleAt` |
+| E05 | «Wer ist das?» ohne Rahmen (Panorama-Homographie aufs bewegte Bild) | behoben (ad434ff): Personenfragen nur mit fester Kamera, wo die Bild-Homographie passt; bei schwenkender Kamera nicht gestellt. Offen: Rahmen mit Kamerabewegung (Q-REC-PERSONBOX) |
+| E06 | «Analyse fertig», während sie läuft | behoben (ad434ff): die Grafik trägt den Analysezustand; «fertig» nur bei ready, in Video-Tab, Start und Liste |
+| E07 | Zahl der Fragen widerspricht sich; Wurf-Kandidaten gezählt, nie gefragt | behoben (ad434ff): eine Quelle (die checks des Servers) für Mail, Zähler und Prüfen; Wurf-Kandidaten zählen nicht; 51 Fragen auf das Nötige gekürzt, der Rest «Wenn du magst: n weitere». Test `test_one_question_per_moment…` |
+| E08 | «Die Tore aus dem Spielbericht stehen schon im Verlauf» ohne Bericht | behoben (ad434ff): der Satz nur mit Spielbericht |
+| E09 | Trikotfarbe aus dem Einstieg gilt nicht fürs Spiel; erfundene Gegnerfarbe an die Analyse | behoben (e7fd773): neues Spiel nimmt die Vereinsfarbe; die Gegnerfarbe geht an die Analyse nur, wenn gesagt; sonst vor dem Hochladen abgefragt. Test `test_a_new_match_takes_the_club_colour…` |
+| E10 | Nach bestätigten Toren kein Resultat im Kopf; Achse 0 bis 60 | behoben (b573f30): die Tore im Video als Resultat («Tore im Video»); der Verlauf über die Minuten, die das Video abdeckt (span). e2e `real-normal.spec` |
+| E11 | Hallenname geraten («Horgen Waldegg») | behoben (e7fd773): die übliche Heimhalle hilft nur beim Übertragen des Feldes, wird nicht als Hallenname gezeigt. Test `test_halls` |
+| E12 | Überlappende Kandidatenfenster: ein Tor doppelt | behoben (ad434ff): überlappende Fenster sind ein Moment, einmal gefragt und gezählt; ein Moment mit bestätigtem Tor nicht erneut. Test `test_one_question_per_moment…` |
+
+Plus: der Normalfall (Analyse findet kein Tor, Kandidaten vorhanden) als e2e `real-normal.spec`:
+hochladen, Analyse, Prüfen (Feld, Anwurf, drei Tore), danach Resultat, Verlauf, Torliste und
+Positionen.
+
 ## Tests
 
 Round 3: API 352 passed (3 deselected). Web unit tests 205 passed. ESLint clean again (11
