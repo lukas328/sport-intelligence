@@ -33,6 +33,7 @@ from handball_api.schemas.matches import (
     CommentOut,
     LinkImport,
     MatchCreate,
+    MatchGraphicsOut,
     MatchOut,
     MatchSummary,
     MatchUpdate,
@@ -49,6 +50,7 @@ from handball_api.schemas.matches import (
     PlaylistOut,
     PlaylistUpdate,
     ReorderIn,
+    SceneCameraOut,
     TrackIdentity,
     TrackOut,
     UploadComplete,
@@ -59,7 +61,7 @@ from handball_api.schemas.matches import (
     VideoUpdate,
 )
 from handball_api.services import auth as auth_service
-from handball_api.services import events, media, videos
+from handball_api.services import events, graphics, media, videos
 from handball_api.services import matches as service
 from handball_api.services import orgs as org_service
 from handball_api.services.context import Ctx
@@ -144,7 +146,11 @@ async def delete_match(match_id: uuid.UUID, scope: OrgDep) -> None:
 )
 async def create_upload(match_id: uuid.UUID, data: UploadCreate, scope: OrgDep) -> UploadOut:
     asset, part_size, count = await videos.create_upload(scope.ctx, match_id, data)
-    return UploadOut(video=service.video_out(asset), part_size=part_size, part_count=count)
+    out = UploadOut(video=service.video_out(asset), part_size=part_size, part_count=count)
+    # the request's transaction commits only after the response is sent; a client asking for the
+    # part URLs right away (the seed, a fast browser) would not find the video yet (UX test B54)
+    await scope.ctx.db.commit()
+    return out
 
 
 @router.post(
@@ -240,6 +246,24 @@ async def set_track_identity(
     return await videos.set_track_identity(
         scope.ctx, video_id, track_no, data.player_id, data.number
     )
+
+
+@router.get("/matches/{match_id}/graphics", response_model=MatchGraphicsOut, tags=["analysis"])
+async def match_graphics(match_id: uuid.UUID, scope: OrgDep) -> dict[str, object]:
+    """Data of the match graphics (ANLAUF.md section 10): goal sequence of the report, each goal
+    as the scorer's run and shot spot, court confirmed, phases, open questions for Prüfen."""
+    return await graphics.match_graphics(scope.ctx, match_id)
+
+
+@router.get(
+    "/matches/{match_id}/scenes/{event_id}/camera", response_model=SceneCameraOut, tags=["analysis"]
+)
+async def scene_camera(
+    match_id: uuid.UUID, event_id: uuid.UUID, scope: OrgDep
+) -> dict[str, object]:
+    """Positions of the 6 s before a goal for the tactics camera (only with a confirmed court);
+    `ball` stays empty until the analysis delivers the ball and its holder."""
+    return await graphics.scene_camera(scope.ctx, match_id, event_id)
 
 
 @router.get("/matches/{match_id}/possessions", response_model=dict[str, Any], tags=["analysis"])

@@ -217,7 +217,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       ref={boxRef}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="group relative overflow-hidden rounded-lg bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="group relative overflow-hidden bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
       aria-label={t("shortcutsList")}
       data-testid="player"
     >
@@ -296,7 +296,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               title={m.label}
               className={cn(
                 // one ink on the scrubber, told apart by shape: a clip is wider, a drawing shorter
-                "pointer-events-none absolute bottom-0 -translate-x-1/2 rounded-[1px] bg-white",
+                "pointer-events-none absolute bottom-0 -translate-x-1/2 bg-white",
                 m.kind === "clip" ? "h-2.5 w-0.5" : m.kind === "drawing" ? "h-1.5 w-0.5" : "h-2 w-0.5",
               )}
               style={{ left: `${pct(m.t_ms)}%` }}
@@ -305,7 +305,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           {hover && thumb && (
             <div
               aria-hidden
-              className="pointer-events-none absolute bottom-7 -translate-x-1/2 overflow-hidden rounded border border-white/40"
+              className="pointer-events-none absolute bottom-7 -translate-x-1/2 overflow-hidden border border-white/40"
               style={{
                 left: hover.x,
                 width: thumb.w,
@@ -324,10 +324,10 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           </CtlButton>
           <CtlButton label={t("back5")} onClick={() => seekBy(-5)}>
             <RotateCcw className="size-4" />
-            <span className="text-[0.6875rem] font-semibold">5</span>
+            <span className="text-[0.875rem] font-semibold">5</span>
           </CtlButton>
           <CtlButton label={t("fwd5")} onClick={() => seekBy(5)}>
-            <span className="text-[0.6875rem] font-semibold">5</span>
+            <span className="text-[0.875rem] font-semibold">5</span>
             <RotateCw className="size-4" />
           </CtlButton>
           <CtlButton label={t("frameBack")} onClick={() => step(-1)} className="hidden sm:inline-grid">
@@ -346,7 +346,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             <select
               value={speed}
               onChange={(e) => setRate(Number(e.target.value))}
-              className="rounded-md bg-white/10 px-2 py-1 text-xs font-semibold"
+              className="bg-white/10 px-2 py-1 text-xs font-semibold"
               aria-label={t("speed")}
             >
               {SPEEDS.map((s) => (
@@ -378,7 +378,7 @@ function CtlButton({ label, onClick, children, className }: { label: string; onC
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={cn("inline-grid min-h-9 min-w-9 place-items-center rounded-md px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white", className)}
+      className={cn("inline-grid min-h-9 min-w-9 place-items-center px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white", className)}
     >
       <span aria-hidden className="inline-flex items-center gap-0.5">{children}</span>
     </button>

@@ -109,7 +109,7 @@ export function PlaylistView({ orgId, initial, staff }: { orgId: string; initial
           <Card className="p-3">
             <ol className="space-y-1 text-sm" data-testid="playlist-items">
               {pl.items.map((it, i) => (
-                <li key={it.id} className={cn("rounded p-2", i === index ? "bg-surface" : "")}>
+                <li key={it.id} className={cn("p-2", i === index ? "bg-surface" : "")}>
                   <button className="w-full text-left" onClick={() => (setAutoplay(true), setIndex(i))} aria-current={i === index}>
                     <span className="font-medium">{it.clip.title ?? `${t("play")} ${i + 1}`}</span>
                     <span className="block text-xs text-muted">

@@ -1403,7 +1403,59 @@
    },
    "goals": 24,
    "goals_against": 25,
+   "known": {
+    "saving": true,
+    "shooting": true,
+    "turnovers": true
+   },
    "misses": 1,
+   "positions": {
+    "KM": {
+     "goals": 2,
+     "shots": 6,
+     "zones": [
+      "circle_centre"
+     ]
+    },
+    "LA": {
+     "goals": 2,
+     "shots": 6,
+     "zones": [
+      "wing_left"
+     ]
+    },
+    "RA": {
+     "goals": 0,
+     "shots": 3,
+     "zones": [
+      "wing_right"
+     ]
+    },
+    "RL": {
+     "goals": 1,
+     "shots": 5,
+     "zones": [
+      "back_left",
+      "half_left"
+     ]
+    },
+    "RM": {
+     "goals": 3,
+     "shots": 6,
+     "zones": [
+      "back_centre",
+      "half_centre"
+     ]
+    },
+    "RR": {
+     "goals": 5,
+     "shots": 5,
+     "zones": [
+      "back_right",
+      "half_right"
+     ]
+    }
+   },
    "possessions": null,
    "posts": 10,
    "red_cards": 0,
@@ -1523,7 +1575,59 @@
    },
    "goals": 25,
    "goals_against": 24,
+   "known": {
+    "saving": true,
+    "shooting": true,
+    "turnovers": true
+   },
    "misses": 4,
+   "positions": {
+    "KM": {
+     "goals": 3,
+     "shots": 3,
+     "zones": [
+      "circle_centre"
+     ]
+    },
+    "LA": {
+     "goals": 2,
+     "shots": 6,
+     "zones": [
+      "wing_left"
+     ]
+    },
+    "RA": {
+     "goals": 0,
+     "shots": 3,
+     "zones": [
+      "wing_right"
+     ]
+    },
+    "RL": {
+     "goals": 3,
+     "shots": 7,
+     "zones": [
+      "back_left",
+      "half_left"
+     ]
+    },
+    "RM": {
+     "goals": 2,
+     "shots": 5,
+     "zones": [
+      "back_centre",
+      "half_centre"
+     ]
+    },
+    "RR": {
+     "goals": 2,
+     "shots": 4,
+     "zones": [
+      "back_right",
+      "half_right"
+     ]
+    }
+   },
    "possessions": null,
    "posts": 4,
    "red_cards": 0,
@@ -1917,10 +2021,11 @@
      "opp": 24,
      "own": 25
     }
-   ]
+   ],
+   "timed": true
   },
   "versions": {
-   "metrics": "0.4.0",
+   "metrics": "0.6.0",
    "xg": "prior-1"
   }
  }

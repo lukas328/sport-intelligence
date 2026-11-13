@@ -22,7 +22,7 @@ def messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         {
             "to": token,
-            "title": payload.get("title") or "Handball AI",
+            "title": payload.get("title") or "Handball Intelligence",
             "body": payload["body"],
             "data": payload.get("data") or {},
             "sound": "default",

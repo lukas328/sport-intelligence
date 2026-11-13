@@ -107,5 +107,5 @@ export function MiniCourt({
     return () => cancelAnimationFrame(raf);
   }, [baseUrl, chunkMs, chunks, colours, getTime]);
 
-  return <canvas ref={canvasRef} role="img" aria-label={label} className="aspect-[43/23] w-full rounded" data-testid="mini-court" />;
+  return <canvas ref={canvasRef} role="img" aria-label={label} className="aspect-[43/23] w-full" data-testid="mini-court" />;
 }

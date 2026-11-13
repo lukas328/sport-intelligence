@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, register, uniqueEmail, openTraining } from "./helpers";
 
 // M10: training planning (5.7), statistics matrix (5.4), assistant without a model key (5.1)
 test("coach plans a session, opens the matrix and the assistant", async ({ page, context }, info) => {
@@ -9,14 +9,12 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await page.getByLabel("Vereinsname").fill("HC Daten");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 2");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
 
   // training: a session with two library drills, then the PDF link
-  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
+  await openTraining(page);
   await page.getByRole("button", { name: "Neue Einheit" }).click();
   const form = page.getByRole("form", { name: "Neue Einheit" });
   const day = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
@@ -70,10 +68,13 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   );
   const asked: unknown[] = [];
   page.on("request", (r) => r.url().endsWith("/matrix") && r.method() === "POST" && asked.push(r.postDataJSON()));
-  await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
-  await follow(page, page.getByRole("link", { name: "Saison", exact: true }), /\/season$/);
-  await follow(page, page.getByRole("link", { name: "Statistik-Matrix" }), /\/matrix$/);
-  await expect(page.getByRole("heading", { name: "Statistik-Matrix" })).toBeVisible();
+  // the matrix is the table tab of Szenen ("Als Tabelle", SPEC 7.6)
+  await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
+  // «Tabelle» shows the scene answer as rows in Szenen (UX test B21, B32); the pivot stays at ?pivot=1
+  await follow(page, page.getByRole("link", { name: "Tabelle", exact: true }).first(), /\/scenes\?view=table$/);
+  await expect(page.getByText("Szenen gibt es nach dem ersten Video.")).toBeVisible();
+  await page.goto(page.url().replace(/\/scenes\?view=table$/, "/matrix?pivot=1"));
+  await expect(page.getByRole("heading", { level: 1, name: "Tabelle" })).toBeVisible();
   await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
   await page.getByTestId("matrix-seasons").selectOption(current.id);
   await expect.poll(() => asked.at(-1)).toMatchObject({ season_ids: [current.id] });
@@ -85,16 +86,21 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expect(page.getByRole("button", { name: "Paraden", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expectAccessible(page);
 
-  // assistant: no model key in this stack, so the question gets an honest message
-  await follow(page, page.getByRole("link", { name: "Frag deine Daten" }), /\/assistant$/);
-  await page.getByPlaceholder("Frage zu euren Spielen stellen").fill("Wie oft treffen wir nach einem Timeout?");
-  await page.getByRole("button", { name: "Fragen", exact: true }).click();
-  await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toBeVisible();
+  // «Suchen» is the scene search (UX test B02): the old assistant address hands the question
+  // over, its words become chips, nothing ends in «not set up»
+  await page.goto(`${page.url().replace(/\/matrix\?pivot=1$/, "")}/assistant?q=${encodeURIComponent("Wie viele Gegentore über rechts aussen in den letzten drei Spielen?")}`);
+  await page.waitForURL(/\/scenes\?q=/);
+  for (const chip of ["Gegentor", "rechts aussen", "letzte 3 mit Video"]) await expect(page.getByRole("button", { name: chip, pressed: true })).toBeVisible();
+  await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toHaveCount(0);
+  // the button «Suchen» in the frame leads there too, with the field focused
+  await page.getByTestId("search-open").first().click();
+  await page.waitForURL(/\/scenes\?focus=1/);
+  await expect(page.getByTestId("scene-search")).toBeFocused();
   await expectAccessible(page);
 
-  // my dates: the coach has no player profile, so the list is empty
+  // my dates are a team function (SPEC 6, UX test B32): without them the address leads to Spiele
   await page.goto(`/app/${orgId}/schedule`);
-  await expect(page.getByText("Keine Termine in den nächsten 30 Tagen.")).toBeVisible();
+  await page.waitForURL(/\/matches/);
   expect(teamId).toBeTruthy();
   expect((await context.cookies()).length).toBeGreaterThan(0);
 });

@@ -47,7 +47,7 @@ export function Scoreboard({
 /** Jersey number as a small badge, the way coaches name players. */
 export function Jersey({ n, className }: { n: number | null | undefined; className?: string }) {
   return (
-    <span className={cn("inline-grid min-w-7 place-items-center rounded-md bg-foreground px-1 py-0.5 text-xs font-bold text-background font-wide tabular-nums", className)}>
+    <span className={cn("inline-grid min-w-7 place-items-center bg-foreground px-1 py-0.5 text-xs font-bold text-background font-wide tabular-nums", className)}>
       {n ?? "–"}
     </span>
   );

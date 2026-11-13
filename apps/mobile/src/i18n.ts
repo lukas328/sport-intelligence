@@ -1,6 +1,6 @@
 /** App texts in de-CH, fr and en; the language follows the account (P8). */
 const de = {
-  appName: "Handball AI",
+  appName: "Handball Intelligence",
   email: "E-Mail",
   password: "Passwort",
   signIn: "Anmelden",
@@ -27,7 +27,7 @@ const de = {
   done: "Erledigt",
   open: "Öffnen",
   record: "Spiel filmen",
-  marks: "Markieren",
+  marks: "Spieltag",
   remote: "Präsentation steuern",
   offline: "Offline gespeichert",
   saveOffline: "Offline speichern",
@@ -68,7 +68,7 @@ export type Key = keyof typeof de;
 type Dict = Record<Key, string>;
 
 const fr: Dict = {
-  appName: "Handball AI",
+  appName: "Handball Intelligence",
   email: "E-mail",
   password: "Mot de passe",
   signIn: "Se connecter",
@@ -95,7 +95,7 @@ const fr: Dict = {
   done: "Terminé",
   open: "Ouvrir",
   record: "Filmer le match",
-  marks: "Marquer",
+  marks: "Jour de match",
   remote: "Piloter la présentation",
   offline: "Enregistré hors ligne",
   saveOffline: "Enregistrer hors ligne",
@@ -134,7 +134,7 @@ const fr: Dict = {
 };
 
 const en: Dict = {
-  appName: "Handball AI",
+  appName: "Handball Intelligence",
   email: "E-mail",
   password: "Password",
   signIn: "Sign in",
@@ -161,7 +161,7 @@ const en: Dict = {
   done: "Done",
   open: "Open",
   record: "Film a match",
-  marks: "Mark",
+  marks: "Matchday",
   remote: "Control a presentation",
   offline: "Saved offline",
   saveOffline: "Save offline",

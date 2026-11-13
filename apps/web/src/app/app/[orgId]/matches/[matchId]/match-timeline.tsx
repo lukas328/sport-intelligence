@@ -83,7 +83,7 @@ export function MatchTimeline({
   const ticks = zoom === "game" ? [0, 0.25, 0.5, 0.75, 1].map((f) => total * f) : [0, 0.25, 0.5, 0.75, 1].map((f) => lo + (hi - lo) * f);
   const lane = (label: string, children: React.ReactNode, sided = false) => (
     <>
-      <span className="font-score text-[0.8125rem] uppercase tracking-wide text-muted">{label}</span>
+      <span className="font-score text-[0.9375rem] text-muted">{label}</span>
       <div className={cn("relative border-b border-foreground/15", sided ? "h-9" : "h-6")}>
         {spans.map((s) => (
           <span key={s.from} className="absolute inset-y-0 bg-foreground/5" style={{ left: x(s.from), width: `calc(${x(s.to)} - ${x(s.from)})` }} />
@@ -93,8 +93,8 @@ export function MatchTimeline({
             where marks are rarest (the end of the game, or after the clip), and under them */}
         {sided && (
           <>
-            <span className="absolute top-0 right-1 max-w-[40%] truncate text-right text-[0.625rem] leading-tight text-muted">{ownName}</span>
-            <span className="absolute bottom-0 right-1 max-w-[40%] truncate text-right text-[0.625rem] leading-tight text-muted">{oppName}</span>
+            <span className="absolute top-0 right-1 max-w-[40%] truncate text-right text-[0.875rem] leading-tight text-muted">{ownName}</span>
+            <span className="absolute bottom-0 right-1 max-w-[40%] truncate text-right text-[0.875rem] leading-tight text-muted">{oppName}</span>
           </>
         )}
         {children}
@@ -110,7 +110,7 @@ export function MatchTimeline({
           {t("coverage", { clip })}
           {goals.length > 0 && ` ${t("coverageGoals", { inside: inVideo, total: goals.length })}`}
         </span>
-        {(goals.length > 0 || cands.length > 0) && <span className="text-[0.8125rem] text-muted">{t("legendSidesNamed", { own: ownName, opp: oppName })}</span>}
+        {(goals.length > 0 || cands.length > 0) && <span className="text-[0.9375rem] text-muted">{t("legendSidesNamed", { own: ownName, opp: oppName })}</span>}
         <span role="group" aria-label={t("zoom")} className="ml-auto flex gap-3 pr-1">
           {(["moment", "game"] as const).map((z) => (
             <button
@@ -119,7 +119,7 @@ export function MatchTimeline({
               aria-pressed={zoom === z}
               onClick={() => setZoom(z)}
               className={cn(
-                "min-h-6 border-b-2 text-[0.8125rem] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-accent",
+                "min-h-6 border-b-2 text-[0.9375rem] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-accent",
                 zoom === z ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground",
               )}
             >

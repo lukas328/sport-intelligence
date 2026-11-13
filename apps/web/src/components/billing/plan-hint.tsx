@@ -7,7 +7,7 @@ export async function PlanHint({ orgId }: { orgId: string }) {
   const t = await getTranslations();
   return (
     <EmptyState title={t("errors.plan-required")}>
-      <Link href={`/app/${orgId}/settings#billing`} className="underline underline-offset-4">
+      <Link href={`/app/${orgId}/club/billing`} className="underline underline-offset-4">
         {t("billing.title")}
       </Link>
     </EmptyState>

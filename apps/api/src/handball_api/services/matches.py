@@ -11,9 +11,11 @@ from sqlalchemy import delete, func, select
 from handball_api.core.colors import kit_warnings
 from handball_api.core.errors import ProblemError
 from handball_api.models import (
+    Event,
     Match,
     Opponent,
     OpponentPlayer,
+    Organization,
     ProcessingJob,
     Season,
     VideoAsset,
@@ -25,6 +27,7 @@ from handball_api.schemas.matches import (
     MatchOut,
     MatchSummary,
     MatchUpdate,
+    OpponentColors,
     OpponentCreate,
     OpponentOut,
     OpponentPlayerIn,
@@ -36,6 +39,9 @@ from handball_api.services import audit, billing, match_formats
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import current_seasons, get_team
 from handball_api.services.policies import Action, authorize, is_staff_somewhere, visible_team_ids
+
+# where events come from when a match report brought them (handball.ch, a paper report)
+REPORT_SOURCES = ("official_feed", "paper_report", "official_report")
 
 
 def video_out(v: VideoAsset) -> VideoOut:
@@ -177,6 +183,21 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
     values = data.model_dump(
         exclude={"season_id", "opponent_id", "opponent_name", "format", "period_s", "periods"}
     )
+    # the opponent's colour: said now (opponent_kit or an explicit kit_opponent), or remembered
+    said = data.opponent_kit or (
+        data.kit_opponent if "kit_opponent" in data.model_fields_set else None
+    )
+    values["opponent_kit"] = said if opp else None
+    # our own shirts: the club's colour unless the form said another (real-video test E09)
+    if "kit_own" not in data.model_fields_set:
+        org = await ctx.db.get(Organization, team.organization_id)
+        if org is not None and org.primary_color:
+            values["kit_own"] = org.primary_color
+    if opp and said:
+        opp.primary_color = said
+    elif opp and opp.primary_color and "kit_opponent" not in data.model_fields_set:
+        # the pipeline gets the remembered colour instead of the default
+        values["kit_opponent"] = opp.primary_color
     default = (
         MatchFormatKey(team.default_format)
         if team.default_format
@@ -202,12 +223,19 @@ async def list_matches(
     ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID | None = None
 ) -> list[MatchSummary]:
     await get_team(ctx, team_id, Action.MATCH_READ)
+    # a report is there once its events are (UX test A02: «Spielbericht hinzufügen» only without)
+    report = (
+        select(Event.id)
+        .where(Event.match_id == Match.id, Event.source.in_(REPORT_SOURCES))
+        .exists()
+        .correlate(Match)
+    )
     q = (
-        select(Match, Opponent.name, func.count(VideoAsset.id))
+        select(Match, Opponent.name, Opponent.primary_color, func.count(VideoAsset.id), report)
         .outerjoin(Opponent, Opponent.id == Match.opponent_id)
         .outerjoin(VideoAsset, VideoAsset.match_id == Match.id)
         .where(Match.team_id == team_id)
-        .group_by(Match.id, Opponent.name)
+        .group_by(Match.id, Opponent.name, Opponent.primary_color)
         .order_by(Match.kickoff_at.desc())
     )
     if season_id:
@@ -227,8 +255,10 @@ async def list_matches(
             status=m.status,
             is_demo=m.is_demo,
             has_video=count > 0,
+            opponent_color=m.opponent_kit or remembered,
+            has_report=bool(has_report),
         )
-        for m, name, count in rows
+        for m, name, remembered, count, has_report in rows
     ]
 
 
@@ -370,6 +400,7 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         kit_opponent=match.kit_opponent,
         kit_opponent_gk=match.kit_opponent_gk,
         kit_referee=match.kit_referee,
+        opponent_colors=opponent_colors(match, opp) if opp else None,
         kit_warnings=kit_warnings(
             {
                 "own": match.kit_own,
@@ -396,6 +427,17 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
     )
 
 
+def opponent_colors(match: Match, opp: Opponent) -> OpponentColors:
+    """Said for this match, else remembered for the opponent, else unknown (never guessed)."""
+    if match.opponent_kit:
+        return OpponentColors(color=match.opponent_kit, second=opp.secondary_color, source="match")
+    if opp.primary_color:
+        return OpponentColors(
+            color=opp.primary_color, second=opp.secondary_color, source="opponent"
+        )
+    return OpponentColors(color=None, second=opp.secondary_color, source=None)
+
+
 def _format(key: MatchFormatKey, period_s: int | None, periods: int | None) -> tuple[str, int, int]:
     try:
         return match_formats.resolve(key, period_s, periods)
@@ -415,9 +457,16 @@ async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Matc
             changes.get("period_s") or (match.period_s if keep else None),
             changes.get("periods") or (match.periods if keep else None),
         )
+    if "opponent_kit" not in changes and changes.get("kit_opponent"):
+        # a changed shirt colour is the opponent's colour in this match
+        changes["opponent_kit"] = changes["kit_opponent"]
     for k, v in changes.items():
         if k not in fmt_keys:
             setattr(match, k, v)
+    if changes.get("opponent_kit") and match.opponent_id:
+        opp = await ctx.db.get(Opponent, match.opponent_id)
+        if opp is not None:
+            opp.primary_color = changes["opponent_kit"]
     await audit.record(
         ctx,
         "match.updated",

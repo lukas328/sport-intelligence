@@ -81,9 +81,9 @@ export function VideoOverview({
                 <div key={side} className="space-y-1">
                   <p className="text-sm font-semibold">
                     {name}
-                    <span className="font-normal text-muted">{` · ${t("possession")}`}</span>
-                  </p>
-                  <p className="font-score text-[2.5rem] leading-none">{Math.round((s?.share ?? 0) * 100)} %</p>
+                    </p>
+                  {/* counted attacks, not a possession percentage: the phases are estimated */}
+                  <p className="font-score text-[2.5rem] leading-none">{s?.count ?? 0}</p>
                   <p className="text-sm text-muted">{t("attacks", { n: s?.count ?? 0, avg: Math.round(s?.avg_s ?? 0) })}</p>
                   {(s?.fast_breaks ?? 0) > 0 && <p className="text-sm text-muted">{t("fastBreaks", { n: s?.fast_breaks ?? 0 })}</p>}
                 </div>
@@ -91,7 +91,7 @@ export function VideoOverview({
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold">{t("timeline")}</p>
-              <div className="relative h-8 overflow-hidden rounded-[3px] bg-foreground/5" role="list" aria-label={t("timeline")}>
+              <div className="relative h-8 overflow-hidden bg-foreground/5" role="list" aria-label={t("timeline")}>
                 {phases.map((p) => (
                   <button
                     key={p.start_ms}
@@ -109,8 +109,8 @@ export function VideoOverview({
               <div className="flex justify-between text-xs text-muted tabular-nums">
                 <span>{at(0)}</span>
                 <span className="flex gap-4">
-                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 rounded-[2px] bg-accent" />{ownName}</span>
-                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 rounded-[2px] bg-foreground/60" />{oppName}</span>
+                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 bg-accent" />{ownName}</span>
+                  <span className="flex items-center gap-1.5"><span aria-hidden className="size-2.5 bg-foreground/60" />{oppName}</span>
                 </span>
                 <span>{at(end)}</span>
               </div>
@@ -125,7 +125,7 @@ export function VideoOverview({
                       type="button"
                       aria-pressed={filter === f}
                       onClick={() => setFilter(f)}
-                      className={cn("min-h-8 border-b-2 px-1 text-[0.8125rem] font-semibold", filter === f ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
+                      className={cn("min-h-8 border-b-2 px-1 text-[0.9375rem] font-semibold", filter === f ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
                     >
                       {f === "own" ? ownName : f === "opponent" ? oppName : t(`filter_${f}`)}
                     </button>
@@ -143,7 +143,7 @@ export function VideoOverview({
                           <button type="button" disabled={!onPlay} onClick={() => onPlay?.(p.start_ms)} className="flex min-h-11 w-full items-center gap-3 py-2 text-left text-sm hover:bg-surface disabled:hover:bg-transparent">
                             {/* the row plays the attack: said by the glyph, not by a sentence */}
                             {onPlay && <Play aria-hidden className="size-3 shrink-0 fill-current" />}
-                            <span aria-hidden className={cn("size-2.5 shrink-0 rounded-[2px]", p.side === "own" ? "bg-accent" : "bg-foreground/60")} />
+                            <span aria-hidden className={cn("size-2.5 shrink-0", p.side === "own" ? "bg-accent" : "bg-foreground/60")} />
                             <span className="w-28 shrink-0 font-semibold">{p.side === "own" ? ownName : oppName}</span>
                             <span className="tabular-nums text-muted">
                               <span className="font-score text-foreground">{at(p.start_ms)}</span> · {Math.round((p.end_ms - p.start_ms) / 1000)} s
@@ -175,7 +175,7 @@ export function VideoOverview({
           <p className="max-w-2xl text-sm text-muted">{t("moreText")}</p>
           <div className="flex flex-wrap gap-2">
             {/* after the match the sheet is the way to shots and saves; marking is for the next one */}
-            <Link href={`/app/${orgId}/teams/${teamId}/paper`} className={buttonClass("primary", "sm")}>
+            <Link href={`/app/${orgId}/teams/${teamId}/matches?report=1`} className={buttonClass("primary", "sm")}>
               {t("paper")}
             </Link>
             <Link href={`/app/${orgId}/matches/${matchId}/marks`} className={buttonClass("secondary", "sm")}>
@@ -195,7 +195,7 @@ export function VideoOverview({
         <span className="font-semibold">{t("compactTitle")}</span>{" "}
         <span className="text-muted">
           {phases.length > 0
-            ? t("compactLine", { own: Math.round((own?.share ?? 0) * 100), opp: Math.round((opp?.share ?? 0) * 100), n: phases.length })
+            ? t("compactLine", { own: own?.count ?? 0, opp: opp?.count ?? 0 })
             : t("noPossessions")}
         </span>{" "}
         <span className="text-accent group-open:hidden">{t("compactOpen")}</span>

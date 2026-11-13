@@ -29,7 +29,7 @@ def test_push_batches_and_tickets() -> None:
     assert result == {"sent": 130 - 13, "failed": 13}
     assert messages({"tokens": ["t"], "body": "b"})[0] == {
         "to": "t",
-        "title": "Handball AI",
+        "title": "Handball Intelligence",
         "body": "b",
         "data": {},
         "sound": "default",

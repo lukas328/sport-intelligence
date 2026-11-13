@@ -1,0 +1,520 @@
+/*
+ * Halle 2: design system for the redesign (docs/design/ux-reset/SPEC.md).
+ * Reference CSS for the mockups in zielbild.html. Tokens and component looks are meant to be
+ * ported to apps/web/src/app/globals.css and the React components, not copied class by class.
+ *
+ * Four materials, each with one job:
+ *   Papier     the system speaks: square sheets, hairline rules, a margin column, printed type
+ *   Filzstift  a person did this: handwriting, circles, ticks, strikes (never for machine output)
+ *   LED        the score and the clock: seven-segment digits on a dark board
+ *   Trikot     the club: its colour sits on crest, numerals and magnets, never on surfaces
+ * Plus the court: hall-blue floor with orange handball lines, the app's own colour.
+ */
+.halle {
+  /* paper */
+  --paper: #fcfcfa;
+  --paper-2: #f2f3ef;
+  --ink: #14171a;
+  --ink-2: #4a5359;
+  --ink-3: #69737a;
+  --rule: #d8dcd6;
+  /* court */
+  --floor: #bcd6dd;
+  --floor-area: #9fc3cd;
+  --line: #e2560b;
+  /* marker and LED */
+  --harz: #ffd23f;
+  --led: #ffb21f;
+  --led-off: #2a2521;
+  --night: #101316;
+  --night-2: #1b2024;
+  --night-rule: #2b3237;
+  --night-ink: #eef0ed;
+  --night-ink-2: #9aa4a9;
+  /* meaning */
+  --win: #1b7046;
+  --loss: #b3261e;
+  /* club (set per club, see lib/color.ts): raw colour, text on it, and a shade readable on paper */
+  --club: #c8102e;
+  --club-ink: #ffffff;
+  --club-text: #c8102e;
+  /* radius by role, not one value everywhere */
+  --r-paper: 2px;
+  --r-control: 6px;
+  --r-board: 5px;
+  /* type */
+  --f-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --f-text: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num: "Archivo", "Arial Narrow", "Bricolage Grotesque", sans-serif;
+  --f-hand: "Mansalva", "Bradley Hand", "Segoe Print", cursive;
+  --f-led: "DSEG7", "Courier New", monospace;
+
+  font: 400 15px/1.45 var(--f-text);
+  color: var(--ink);
+  background: var(--paper);
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+}
+.halle *, .halle *::before, .halle *::after { box-sizing: border-box; }
+.halle h1, .halle h2, .halle h3, .halle h4, .halle p, .halle ul, .halle ol, .halle figure { margin: 0; padding: 0; }
+.halle ul, .halle ol { list-style: none; }
+.halle b, .halle strong { font-weight: 650; }
+.halle svg { display: block; }
+
+/* ---------- type ---------- */
+.halle .h1 { font: 800 44px/0.98 var(--f-display); font-stretch: 80%; letter-spacing: -0.02em; text-wrap: balance; }
+.halle .h2 { font: 750 26px/1.05 var(--f-display); font-stretch: 82%; letter-spacing: -0.012em; }
+.halle .h3 { font: 700 17px/1.2 var(--f-display); font-stretch: 88%; }
+.halle .small { font-size: 13px; line-height: 1.4; color: var(--ink-2); }
+.halle .tiny { font-size: 12px; line-height: 1.35; color: var(--ink-3); }
+.halle .soft { color: var(--ink-2); }
+/* counted things: jersey numbers, goals, percentages */
+.halle .n { font-family: var(--f-num); font-weight: 900; font-stretch: 62%; font-variant-numeric: tabular-nums; line-height: 0.9; letter-spacing: 0.01em; }
+/* a person wrote this */
+.halle .hand { font: 400 21px/1.22 var(--f-hand); color: var(--ink); }
+.halle .hand.s { font-size: 17px; }
+.halle .who { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+
+/* ---------- form head: a label, then a rule to the edge ---------- */
+.halle .head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.halle .head b { font: 700 15px/1 var(--f-display); font-stretch: 88%; white-space: nowrap; }
+.halle .head::after { content: ""; flex: 1; border-top: 1.5px solid var(--ink); transform: translateY(-4px); order: 2; }
+.halle .head span { order: 3; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.halle .head a { order: 3; }
+
+/* ---------- controls ---------- */
+.halle .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: var(--r-control); background: var(--ink); color: var(--paper); font: 700 14px/1 var(--f-display); font-stretch: 90%; white-space: nowrap; border: 0; }
+.halle .btn.line { background: none; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.halle .btn.s { min-height: 32px; padding: 0 10px; font-size: 13px; }
+.halle .btn.wide { width: 100%; }
+.halle .btn.onnight { background: var(--night-ink); color: var(--night); }
+.halle .lnk { font-weight: 600; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.halle .tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--rule); }
+.halle .tabs span { padding: 10px 0 11px; font: 700 15px/1 var(--f-display); font-stretch: 88%; color: var(--ink-3); white-space: nowrap; }
+.halle .tabs span.on { color: var(--ink); box-shadow: inset 0 -2.5px 0 var(--ink); }
+.halle .tabs .todo { margin-left: auto; color: var(--ink); background: var(--harz); padding: 6px 9px; align-self: center; border-radius: 3px; font-size: 13.5px; }
+.halle .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-radius: var(--r-control); box-shadow: inset 0 0 0 1.5px var(--ink); overflow: hidden; }
+.halle .seg span { min-height: 44px; display: grid; place-items: center; font: 700 14px/1 var(--f-display); font-stretch: 90%; color: var(--ink-2); }
+.halle .seg span.on { background: var(--ink); color: var(--paper); }
+.halle .field { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border-radius: var(--r-control); box-shadow: inset 0 0 0 1.5px var(--ink); background: #fff; font-size: 15px; }
+.halle .field .ph { color: var(--ink-3); }
+.halle .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.halle .chip { padding: 7px 10px; border-radius: 3px; background: var(--paper-2); font-size: 13px; line-height: 1; white-space: nowrap; }
+.halle .chip.on { background: var(--ink); color: var(--paper); }
+
+/* ---------- LED board ---------- */
+.halle .led { position: relative; display: inline-block; font-family: var(--f-led); font-weight: 700; color: var(--led); white-space: nowrap; line-height: 1; text-shadow: 0 0 0.22em rgba(255, 160, 0, 0.42); }
+.halle .led::before { content: attr(data-ghost); position: absolute; left: 0; top: 0; color: var(--led-off); text-shadow: none; z-index: 0; }
+.halle .led i { position: relative; font-style: normal; z-index: 1; }
+.halle .board { background: var(--night); color: var(--night-ink); border-radius: var(--r-board); padding: 16px 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.halle .board .side b { display: block; font: 750 20px/1.05 var(--f-display); font-stretch: 82%; }
+.halle .board .side small { display: block; margin-top: 5px; font-size: 12px; color: var(--night-ink-2); }
+.halle .board .side.r { text-align: right; }
+.halle .board .mid { text-align: center; }
+.halle .board .mid .led { font-size: 46px; }
+.halle .board .mid small { display: block; margin-top: 9px; font-size: 12px; color: var(--night-ink-2); }
+.halle .board .lamps { display: inline-flex; gap: 4px; margin-left: 8px; vertical-align: 1px; }
+.halle .board .lamps i { width: 6px; height: 6px; border-radius: 50%; background: var(--led-off); }
+.halle .board .lamps i.on { background: var(--led); }
+.halle .board.s { padding: 10px 12px; grid-template-columns: auto minmax(0, 1fr); gap: 12px; }
+.halle .board.s .mid .led { font-size: 26px; }
+.halle .board.s .side b { font-size: 16px; }
+
+/* ---------- court ---------- */
+.halle .mf { width: 100%; height: auto; border-radius: var(--r-paper); background: var(--floor); }
+.halle .mf-wrap { position: relative; }
+.halle .mf-wrap .len { position: absolute; right: 4px; bottom: 4px; font: 600 11px/1 var(--f-text); background: var(--ink); color: var(--paper); padding: 3px 5px; border-radius: 2px; }
+
+/* ---------- jersey numerals ---------- */
+.halle .nums { display: flex; flex-wrap: wrap; gap: 3px 9px; }
+.halle .nums i { position: relative; font: 900 22px/1 var(--f-num); font-stretch: 62%; font-style: normal; color: var(--club-text); min-width: 14px; text-align: center; }
+.halle .nums i.out { color: var(--ink-3); }
+
+/* ---------- Sammelbild ---------- */
+.halle .sticker { position: relative; background: #fff; padding: 5px 5px 0; border-radius: 3px; box-shadow: 0 0 0 1px var(--rule), 0 2px 0 var(--rule); }
+.halle .sticker .pic { position: relative; aspect-ratio: 5 / 6; background: var(--club); color: var(--club-ink); overflow: hidden; border-radius: 1px; }
+.halle .sticker .pic .n { position: absolute; right: 6px; bottom: 2px; font-size: 64px; }
+.halle .sticker .pic .pos { position: absolute; left: 7px; top: 7px; font: 700 11px/1 var(--f-display); letter-spacing: 0.02em; }
+.halle .sticker .pic svg { position: absolute; left: -14%; bottom: -8%; width: 78%; opacity: 0.22; }
+.halle .sticker .cap { padding: 7px 2px 8px; }
+.halle .sticker .cap b { display: block; font: 700 14px/1.1 var(--f-display); font-stretch: 86%; }
+.halle .sticker .cap span { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
+.halle .sticker.gap { background: none; box-shadow: none; outline: 1.5px dashed var(--ink-3); outline-offset: -1px; }
+.halle .sticker.gap .pic { background: none; color: var(--ink-3); }
+.halle .sticker.gap .pic svg { display: none; }
+.halle .sticker .flag { position: absolute; left: -4px; top: 10px; }
+
+/* ---------- tape label (hand-labelled things only) ---------- */
+.halle .tape { display: inline-block; background: #efe9da; padding: 4px 14px 3px; font: 400 16px/1.1 var(--f-hand); color: var(--ink); transform: rotate(-1.2deg); clip-path: polygon(0 12%, 3% 0, 6% 14%, 9% 2%, 12% 12%, 100% 0, 97% 16%, 100% 34%, 97% 52%, 100% 70%, 97% 86%, 100% 100%, 0 100%, 3% 84%, 0 66%, 3% 50%, 0 32%); }
+
+/* ---------- marker overlays (drawn by marker.js) ---------- */
+.halle [data-mark] { position: relative; display: inline-block; }
+.halle .hand [data-mark] { line-height: 1; }
+.halle .mk { position: absolute; pointer-events: none; overflow: visible; }
+.halle .mk path { fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.halle .mk.harz path { stroke: var(--harz); stroke-width: 9; opacity: 0.9; }
+.halle .mk.under { left: -2%; bottom: -4px; height: 7px; width: 104%; }
+.halle .mk.hl { left: -3%; top: 12%; width: 106%; height: 80%; z-index: -1; }
+.halle .mk.circle { left: -45%; top: -30%; width: 190%; height: 160%; }
+.halle .mk.strike { left: -25%; top: 0; width: 150%; height: 100%; }
+.halle .mk.tick { left: 0; top: -10%; width: 100%; height: 110%; }
+.halle .tickbox { display: inline-block; position: relative; width: 17px; height: 17px; box-shadow: inset 0 0 0 1.5px var(--ink); border-radius: 2px; flex: none; vertical-align: -3px; }
+
+/* ---------- sheets (tables) ---------- */
+.halle .sheet { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.halle .sheet th { text-align: right; font: 600 12px/1.2 var(--f-text); color: var(--ink-3); padding: 0 0 7px 12px; border-bottom: 1.5px solid var(--ink); white-space: nowrap; }
+.halle .sheet td { text-align: right; padding: 9px 0 9px 12px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.halle .sheet th:first-child, .halle .sheet td:first-child { text-align: left; padding-left: 0; }
+.halle .sheet .me td { font-weight: 650; }
+
+/* =====================================================================
+   App shell. .is-phone is the default layout, .is-desk the wide one.
+   ===================================================================== */
+.halle.app { display: flex; flex-direction: column; min-height: 100%; }
+.halle .rail { display: none; }
+.halle .topbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px 10px; }
+.halle .crest { width: 28px; height: 32px; flex: none; display: grid; place-items: center; background: var(--club); color: var(--club-ink); font: 800 10px/1 var(--f-display); font-stretch: 80%; padding-bottom: 5px; clip-path: polygon(0 0, 100% 0, 100% 64%, 50% 100%, 0 64%); }
+.halle .topbar .team { flex: 1; min-width: 0; font: 700 15px/1.1 var(--f-display); font-stretch: 88%; }
+.halle .topbar .team small { display: block; font: 400 12px/1.2 var(--f-text); color: var(--ink-3); margin-top: 2px; }
+.halle .sq { width: 40px; height: 40px; border-radius: var(--r-control); display: grid; place-items: center; background: var(--ink); color: var(--paper); flex: none; }
+.halle .sq.line { background: none; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.halle .ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.halle .main { flex: 1; padding: 6px 16px 28px; display: grid; gap: 30px; align-content: start; min-width: 0; }
+.halle .main > * { min-width: 0; }
+.halle .tabbar { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-top: 1.5px solid var(--ink); background: var(--paper); position: sticky; bottom: 0; }
+.halle .tabbar span { display: grid; justify-items: center; gap: 4px; padding: 9px 0 11px; font: 650 11px/1 var(--f-display); font-stretch: 90%; color: var(--ink-3); }
+.halle .tabbar span.on { color: var(--ink); }
+.halle .tabbar span.on .ic { stroke-width: 2.3; }
+.halle .tabbar span.on::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--club); margin-top: -1px; }
+.halle .pagehead .date { font-size: 13px; color: var(--ink-2); margin-bottom: 6px; }
+.halle .pagehead .tape { margin-top: 6px; }
+.halle .desk-only { display: none; }
+
+.halle.is-desk.app { flex-direction: row; }
+.halle.is-desk .topbar, .halle.is-desk .tabbar, .halle.is-desk .phone-only { display: none !important; }
+.halle.is-phone .desk-only { display: none !important; }
+.halle.is-desk .desk-only { display: revert; }
+.halle.is-desk .btn.desk-only { display: inline-flex; }
+.halle.is-desk .rail { display: flex; flex-direction: column; gap: 2px; width: 212px; flex: none; padding: 22px 16px 18px; border-right: 1px solid var(--rule); }
+.halle .rail .club { display: flex; gap: 10px; align-items: center; margin-bottom: 26px; }
+.halle .rail .club b { display: block; font: 750 15px/1.1 var(--f-display); font-stretch: 86%; }
+.halle .rail .club small { display: block; font-size: 12px; color: var(--ink-3); margin-top: 3px; }
+.halle .rail .item { display: flex; align-items: center; gap: 11px; padding: 9px 6px; font: 650 15px/1 var(--f-display); font-stretch: 90%; color: var(--ink-2); }
+.halle .rail .item.on { color: var(--ink); font-weight: 800; }
+.halle .rail .item.on .ic { stroke-width: 2.3; }
+.halle .rail .item.on::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--club); margin-left: auto; }
+.halle .rail .foot { margin-top: auto; display: grid; gap: 2px; padding-top: 16px; }
+.halle .rail .count { margin-left: auto; font: 900 15px/1 var(--f-num); font-stretch: 62%; background: var(--harz); color: var(--ink); padding: 3px 6px 2px; border-radius: 2px; }
+.halle .rail .me { display: flex; gap: 10px; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 13px; }
+.halle.is-desk .main { padding: 30px 40px 48px; gap: 38px; }
+.halle.is-desk .h1 { font-size: 58px; }
+.halle.is-desk .h2 { font-size: 30px; }
+.halle.is-desk .pagehead { display: flex; align-items: flex-end; gap: 24px; }
+.halle.is-desk .pagehead > div:first-child { flex: 1; min-width: 0; }
+
+/* two-column page: content and a side column */
+.halle.is-desk .cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; align-items: start; }
+.halle .cols { display: grid; gap: 30px; }
+.halle .cols > * { min-width: 0; display: grid; gap: 34px; align-content: start; }
+.halle .cols > * > * { min-width: 0; }
+
+/* ledger: a margin column for day and time, content to the right */
+.halle .led-row { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 4px 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.halle .led-row:first-of-type { padding-top: 0; }
+.halle .led-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.halle .led-row .mg { font-size: 12.5px; line-height: 1.25; color: var(--ink-2); padding-top: 2px; }
+.halle .led-row .mg .n { display: block; font-size: 30px; color: var(--ink); margin-top: 2px; }
+.halle .led-row .mg .day { position: relative; display: inline-block; font-weight: 650; color: var(--ink); margin: 0 0 3px 6px; }
+.halle .led-row h4 { font: 700 17px/1.2 var(--f-display); font-stretch: 88%; }
+.halle .led-row .body > * + * { margin-top: 10px; }
+.halle.is-desk .led-row { grid-template-columns: 96px minmax(0, 1fr); gap: 4px 24px; padding: 18px 0; }
+.halle.is-desk .led-row .mg .n { font-size: 40px; }
+
+/* three things */
+.halle .things { counter-reset: t; }
+.halle .thing { counter-increment: t; display: grid; grid-template-columns: 20px 92px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.halle .thing::before { content: counter(t); font: 900 30px/0.9 var(--f-num); font-stretch: 62%; color: var(--club-text); }
+.halle .thing p { font-weight: 600; line-height: 1.3; }
+.halle .thing small { display: block; font-size: 12.5px; font-weight: 400; color: var(--ink-2); margin-top: 3px; }
+.halle .thing small.up { color: var(--win); }
+.halle .thing .act { display: none; }
+.halle.is-desk .thing { grid-template-columns: 26px 124px minmax(0, 1fr) auto; gap: 16px; }
+.halle.is-desk .thing .act { display: inline-flex; }
+.halle .actions { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+
+/* open list */
+.halle .todo-list li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 14px; line-height: 1.3; }
+.halle .todo-list li:last-child { border-bottom: 0; }
+.halle .todo-list li span:nth-child(2) { flex: 1; min-width: 0; }
+.halle .todo-list small { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
+.halle .note { background: var(--paper-2); padding: 16px 16px 14px; border-radius: var(--r-paper); }
+.halle .note .tape { margin: -26px 0 10px -6px; }
+
+/* =====================================================================
+   Screens
+   ===================================================================== */
+.halle .stack { display: grid; gap: 12px; align-content: start; }
+.halle .stack > * { min-width: 0; }
+.halle .res { font: 900 30px/0.9 var(--f-num); font-stretch: 62%; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.halle .res small { display: block; font: 650 12px/1 var(--f-text); margin-top: 5px; }
+.halle .res.w small { color: var(--win); }
+.halle .res.l small { color: var(--loss); }
+.halle .form { display: inline-flex; gap: 5px; font: 800 13px/1 var(--f-display); vertical-align: 1px; }
+.halle .form .w { color: var(--win); }
+.halle .form .l { color: var(--loss); }
+
+/* match list */
+.halle .game { display: grid; grid-template-columns: 62px 84px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.halle .game .mg { font-size: 12.5px; line-height: 1.25; color: var(--ink-2); }
+.halle .game .mg b { display: block; font: 900 22px/0.95 var(--f-num); font-stretch: 62%; color: var(--ink); }
+.halle .game h4 { font: 700 17px/1.2 var(--f-display); font-stretch: 88%; }
+.halle .game p { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+.halle .game .nov { aspect-ratio: 200 / 124; display: grid; place-items: center; outline: 1.5px dashed var(--ink-3); outline-offset: -1px; border-radius: var(--r-paper); font-size: 11.5px; color: var(--ink-3); text-align: center; line-height: 1.2; }
+.halle.is-desk .game { grid-template-columns: 96px 132px minmax(0, 1fr) auto; gap: 24px; padding: 14px 0; }
+.halle.is-desk .game .mg b { font-size: 30px; }
+.halle.is-desk .res { font-size: 44px; }
+.halle .bar { height: 6px; background: var(--rule); border-radius: 0; margin-top: 8px; max-width: 260px; }
+.halle .bar i { display: block; height: 100%; background: var(--ink); }
+
+/* match page */
+.halle .src { font-size: 12.5px; color: var(--ink-3); }
+.halle .chart text { font: 500 12px var(--f-text); fill: var(--ink-3); }
+.halle .chart text.big { font: 900 22px var(--f-num); font-stretch: 62%; fill: var(--ink); }
+.halle .chart text.on { fill: var(--ink); font-weight: 600; }
+.halle.is-phone .chart text { font-size: 17px; }
+.halle.is-phone .chart text.big { font-size: 26px; }
+.halle .kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.halle .kpi .n { font-size: 40px; display: inline-block; }
+.halle .kpi span { display: block; font-size: 12.5px; color: var(--ink-2); margin-top: 6px; line-height: 1.3; }
+.halle .telegramm { font-size: 14px; line-height: 1.55; color: var(--ink-2); max-width: 62ch; }
+.halle .telegramm b { color: var(--ink); }
+.halle .legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--ink-2); margin-top: 8px; align-items: center; }
+.halle .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--club); margin-right: 5px; vertical-align: -1px; }
+.halle .legend .x { font-weight: 800; color: var(--ink); margin-right: 4px; }
+.halle.is-phone .board { grid-template-columns: 1fr; gap: 10px; padding: 14px 16px; text-align: center; }
+.halle.is-phone .board .side.r { text-align: center; }
+.halle.is-phone .board .side:first-child { order: -1; }
+.halle.is-phone .board.s { grid-template-columns: auto 1fr; text-align: left; padding: 10px 12px; }
+.halle.is-phone .board .pair { display: flex; justify-content: space-between; gap: 12px; text-align: left; }
+.halle.is-phone .tabs { gap: 18px; }
+
+/* video: the page turns to night */
+.halle .nightpage { background: var(--night); color: var(--night-ink); }
+.halle .nightpage .tabs { border-color: var(--night-rule); }
+.halle .nightpage .tabs span { color: var(--night-ink-2); }
+.halle .nightpage .tabs span.on { color: var(--night-ink); box-shadow: inset 0 -2.5px 0 var(--night-ink); }
+.halle .nightpage .tabs .todo { color: var(--ink); box-shadow: none; }
+.halle .nightpage .small, .halle .nightpage .tiny, .halle .nightpage .soft { color: var(--night-ink-2); }
+.halle .nightpage .head::after { border-color: var(--night-ink-2); }
+.halle .nightpage .head span { color: var(--night-ink-2); }
+.halle .nightpage .btn { background: var(--night-ink); color: var(--night); }
+.halle .nightpage .btn.line { background: none; color: var(--night-ink); box-shadow: inset 0 0 0 1.5px var(--night-ink-2); }
+.halle .nightpage .hand { color: var(--night-ink); }
+.halle .vid { position: relative; background: #07090a; border-radius: var(--r-board); overflow: hidden; aspect-ratio: 16 / 9; display: grid; place-items: center; perspective: 700px; }
+.halle .vid svg { width: 96%; height: auto; transform: rotateX(52deg) translateY(4%); border-radius: 2px; }
+.halle .vid .clock { position: absolute; left: 12px; top: 12px; background: var(--night); padding: 6px 8px 5px; border-radius: 3px; }
+.halle .vid .clock .led { font-size: 17px; }
+.halle .vid .cap { position: absolute; left: 12px; bottom: 12px; right: 12px; font-size: 13px; color: #fff; text-shadow: 0 1px 2px #000; }
+.halle .tl { margin-top: 14px; }
+.halle .tl svg { width: 100%; height: 76px; }
+.halle .tl .ax { display: flex; justify-content: space-between; font-size: 12px; color: var(--night-ink-2); margin-top: 4px; }
+.halle .tl .key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--night-ink-2); margin-top: 10px; }
+.halle .tl .key i { display: inline-block; width: 9px; height: 9px; margin-right: 5px; vertical-align: -1px; }
+.halle .scn li { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--night-rule); font-size: 14px; line-height: 1.3; }
+.halle .scn li b { font: 900 17px/1 var(--f-num); font-stretch: 62%; padding-top: 2px; }
+.halle .scn li.on { color: var(--harz); }
+.halle .scn small { display: block; color: var(--night-ink-2); font-size: 12px; margin-top: 2px; }
+.halle .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+/* check queue */
+.halle .check { display: grid; gap: 18px; padding: 16px; min-height: 100%; align-content: start; }
+.halle .check .top { display: flex; align-items: center; gap: 12px; }
+.halle .check .top b { flex: 1; font: 700 15px/1 var(--f-display); font-stretch: 88%; }
+.halle .crop { position: relative; border-radius: var(--r-board); overflow: hidden; background: var(--floor); }
+.halle .crop svg { width: 100%; height: auto; }
+.halle .crop .t { position: absolute; left: 10px; top: 10px; background: var(--night); color: var(--night-ink); font-size: 12px; padding: 5px 7px; border-radius: 3px; }
+.halle .answers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.halle .ans { display: flex; align-items: center; gap: 9px; min-height: 56px; padding: 0 10px; border-radius: var(--r-control); box-shadow: inset 0 0 0 1.5px var(--ink); font: 650 14px/1.1 var(--f-display); font-stretch: 90%; }
+.halle .ans .n { font-size: 30px; color: var(--club-text); }
+.halle .ans.best { background: var(--ink); color: var(--paper); }
+.halle .ans.best .n { color: var(--paper); }
+.halle .ans.q { box-shadow: inset 0 0 0 1px var(--rule); color: var(--ink-2); justify-content: center; min-height: 44px; }
+.halle.is-desk .check { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px 48px; padding: 32px 48px; }
+.halle.is-desk .check .top { grid-column: 1 / -1; }
+
+/* scenes */
+.halle .answer { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
+.halle .answer .n { font-size: 56px; }
+.halle .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 12px; }
+.halle.is-desk .tiles { grid-template-columns: repeat(4, 1fr); gap: 20px 16px; }
+.halle .tile p { font-size: 13px; line-height: 1.3; margin-top: 6px; }
+.halle .tile p b { display: block; }
+.halle .reel { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.halle .reel .tape { font-size: 19px; justify-self: start; }
+.halle .reel p { grid-column: 1; font-size: 13px; color: var(--ink-2); }
+.halle .reel .btn { grid-row: 1 / span 2; grid-column: 2; }
+
+/* briefing */
+.halle .seq { counter-reset: s; }
+.halle .seq li { counter-increment: s; display: grid; grid-template-columns: 22px 100px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); align-items: start; }
+.halle .seq li::before { content: counter(s); font: 900 22px/1 var(--f-num); font-stretch: 62%; color: var(--ink-3); padding-top: 2px; }
+.halle .seq li.say { grid-template-columns: 22px minmax(0, 1fr); }
+.halle .seq p { font-size: 14px; line-height: 1.3; }
+.halle .seq p b { display: block; }
+.halle .seq .hand { margin-top: 6px; font-size: 19px; }
+.halle.is-desk .seq li { grid-template-columns: 26px 150px minmax(0, 1fr); gap: 18px; }
+.halle.is-desk .seq li.say { grid-template-columns: 26px minmax(0, 1fr); }
+.halle .qr { width: 104px; height: 104px; background: #fff; padding: 6px; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.halle .share { display: flex; gap: 14px; align-items: center; }
+.halle .share p { font-size: 13px; line-height: 1.35; color: var(--ink-2); }
+.halle .share b { display: block; color: var(--ink); font-size: 14px; word-break: break-all; }
+
+/* training */
+.halle .plan li { display: grid; grid-template-columns: 34px 84px minmax(0, 1fr); gap: 12px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.halle .plan li .n { font-size: 26px; }
+.halle .plan li .n small { font: 500 11px/1 var(--f-text); color: var(--ink-3); margin-left: 1px; }
+.halle .plan p { font-size: 14px; line-height: 1.3; }
+.halle .plan p b { display: block; }
+.halle .plan p span { color: var(--ink-2); font-size: 12.5px; }
+.halle .plan li.plain { grid-template-columns: 34px minmax(0, 1fr); }
+.halle.is-desk .plan li { grid-template-columns: 44px 110px minmax(0, 1fr); gap: 16px; }
+.halle.is-desk .plan li.plain { grid-template-columns: 44px minmax(0, 1fr); }
+.halle .kit { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 12px; }
+.halle .kit p { font-size: 13px; line-height: 1.3; margin-top: 6px; }
+.halle .kit p b { display: block; }
+.halle .kit p span { color: var(--ink-3); font-size: 12px; }
+
+/* team */
+.halle .album { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 10px; }
+.halle.is-desk .album { grid-template-columns: repeat(6, 1fr); gap: 18px 14px; }
+.halle .sticker .cap .warn { color: var(--ink); }
+.halle .sticker .cap .warn::before { content: ""; display: inline-block; width: 7px; height: 7px; background: var(--harz); border-radius: 50%; margin-right: 5px; }
+.halle .sticker.away .pic { filter: grayscale(1); opacity: 0.55; }
+
+/* courtside */
+.halle .side-top { background: var(--night); color: var(--night-ink); padding: 14px 16px 16px; display: grid; gap: 12px; }
+.halle .side-top .row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--night-ink-2); }
+.halle .side-top .clockrow { display: flex; justify-content: space-between; align-items: flex-end; }
+.halle .side-top .clockrow .led { font-size: 60px; }
+.halle .side-top .clockrow .led.t { font-size: 30px; }
+.halle .side-top .names { display: flex; justify-content: space-between; font: 700 15px/1 var(--f-display); font-stretch: 86%; }
+.halle .taps { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px 6px; }
+.halle .tap { min-height: 92px; border-radius: var(--r-control); box-shadow: inset 0 0 0 2px var(--ink); display: grid; place-items: center; text-align: center; font: 750 19px/1.1 var(--f-display); font-stretch: 86%; padding: 8px; }
+.halle .tap.us { background: var(--club); color: var(--club-ink); box-shadow: none; }
+.halle .tap.them { background: var(--ink); color: var(--paper); box-shadow: none; }
+.halle .tap.s { min-height: 52px; font-size: 15px; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.halle .taps.three { grid-template-columns: repeat(3, 1fr); padding-top: 4px; }
+.halle .undo { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px 16px; font-size: 13.5px; }
+
+/* player and parent */
+.halle .ask { background: var(--paper-2); padding: 14px; border-radius: var(--r-paper); display: grid; gap: 12px; }
+.halle .ask .crop { max-width: 100%; }
+.halle .ask .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.halle .mine { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.halle .consent li { display: grid; grid-template-columns: minmax(0, 1fr) 132px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.halle .consent p { font-size: 14px; line-height: 1.3; }
+.halle .consent p b { display: block; }
+.halle .consent p span { color: var(--ink-2); font-size: 12.5px; }
+.halle .consent .seg span { min-height: 38px; font-size: 13px; }
+.halle .okhand { font: 400 17px/1 var(--f-hand); white-space: nowrap; }
+
+/* onboarding */
+.halle .welcome { display: grid; gap: 26px; padding: 20px 16px 28px; align-content: start; }
+.halle .welcome .step { font-size: 13px; color: var(--ink-2); }
+.halle .found li { display: flex; gap: 10px; align-items: center; padding: 8px 0; font-size: 15px; }
+.halle .kits { display: flex; flex-wrap: wrap; gap: 8px 6px; }
+.halle .kits span { position: relative; width: 46px; height: 46px; display: grid; place-items: center; }
+.halle .kits svg { width: 36px; height: 36px; stroke: var(--ink); stroke-width: 1.2; stroke-linejoin: round; }
+.halle.is-desk .welcome { grid-template-columns: minmax(0, 1fr) 280px; gap: 30px 64px; padding: 48px 72px; max-width: 1060px; }
+.halle.is-desk .welcome > .full { grid-column: 1 / -1; }
+
+/* states */
+.halle .drop { outline: 2px dashed var(--ink); outline-offset: -2px; border-radius: var(--r-paper); padding: 22px 16px; display: grid; gap: 12px; justify-items: start; }
+.halle .steps li { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; font-size: 14px; }
+.halle .steps li.done { color: var(--ink-2); }
+.halle .steps li .st { width: 52px; flex: none; font-size: 12px; color: var(--ink-3); }
+.halle .steps li.now { font-weight: 650; }
+.halle .ghost { opacity: 0.32; filter: grayscale(1); pointer-events: none; }
+
+/* =====================================================================
+   Second pass: the hall is the frame. The app sits on the hall floor (blue, with the lines of
+   several sports crossing), the content is a sheet of paper lying on it. Insights are printed
+   on the yellow copy of the match sheet.
+   ===================================================================== */
+.halle { --sheet-yellow: #ffe57a; --led-red: #ff5a4d; --line-white: #f7fbfc; --line-green: #2f8f5b; --line-navy: #27485a; }
+.halle.app { background: var(--floor); }
+.halle .main { background: var(--paper); }
+.halle .topbar { background: var(--floor); border-bottom: 3px solid var(--line); }
+.halle .tabbar { background: var(--floor); border-top: 3px solid var(--line); }
+.halle .tabbar span { color: var(--ink-2); }
+.halle .tabbar span.on { color: var(--ink); }
+.halle .topbar .team small { color: var(--ink-2); }
+.halle.is-desk .rail { border-right: 0; padding: 22px 14px 14px 16px; background-repeat: no-repeat; background-position: left 0 bottom 150px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='212' height='330'%3E%3Cpath d='M-70 330 A270 270 0 0 1 212 96' fill='none' stroke='%23e2560b' stroke-width='5'/%3E%3Cpath d='M-70 250 A190 190 0 0 1 130 330' fill='none' stroke='%23e2560b' stroke-width='4' stroke-dasharray='16 12'/%3E%3Cpath d='M0 62 H212' stroke='%23f7fbfc' stroke-width='4'/%3E%3Cpath d='M168 0 V330' stroke='%2327485a' stroke-width='3'/%3E%3Cpath d='M0 204 H212' stroke='%232f8f5b' stroke-width='3'/%3E%3C/svg%3E"); }
+.halle.is-desk .main { margin: 12px 12px 12px 0; border-radius: 2px; padding: 28px 36px 44px; }
+.halle .rail .item { padding: 9px 8px; border-radius: 2px; color: var(--ink); }
+.halle .rail .item.on { background: var(--paper); }
+.halle .rail .club small { color: var(--ink-2); }
+.halle .rail .foot { background: var(--paper); padding: 6px 8px 10px; border-radius: 2px; }
+.halle .rail .me { margin-top: 6px; padding-top: 10px; }
+.halle .rail .up { margin: 0 0 18px; }
+
+/* the yellow sheet: the three things */
+.halle .gelb { background: var(--sheet-yellow); padding: 16px 18px 18px; border-radius: 2px; }
+.halle .gelb .head::after { border-color: var(--ink); }
+.halle .gelb .head span { color: var(--ink-2); }
+.halle .gelb .thing { border-color: rgba(20, 23, 26, 0.22); }
+.halle .gelb .thing:last-child { border-bottom: 0; }
+.halle .gelb .thing::before { color: var(--ink); }
+.halle .gelb .thing small { color: var(--ink-2); }
+.halle .gelb .thing small.up { color: #14603a; }
+.halle .gelb .btn.line { background: var(--paper); box-shadow: none; }
+.halle .gelb .mf { box-shadow: 0 0 0 1.5px var(--ink); }
+.halle .thing .drill { display: block; font-size: 12.5px; font-weight: 400; margin-top: 4px; }
+
+/* board with crests; the clock burns red like in the hall */
+.halle .led.red { color: var(--led-red); text-shadow: 0 0 0.22em rgba(255, 60, 40, 0.5); }
+.halle .board .side { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.halle .board .side.r { flex-direction: row-reverse; }
+.halle .board .side > div { min-width: 0; }
+.halle .board .crest { width: 30px; height: 35px; font-size: 10px; }
+.halle .crest.opp { background: #dfe5e3; color: var(--ink); }
+.halle.is-phone .board:not(.s) .side, .halle.is-phone .board:not(.s) .side.r { flex-direction: column; gap: 6px; }
+.halle .board.s .side { display: block; }
+
+/* zones: where it happened, as sized circles on the court */
+.halle svg.zonen { width: 100%; height: auto; border-radius: 2px; }
+.halle svg.zonen text { font: 900 15px var(--f-num); font-stretch: 62%; fill: var(--ink); text-anchor: middle; }
+.halle svg.zonen text.lab { font: 600 7.5px var(--f-text); font-stretch: 100%; fill: var(--ink); }
+
+/* small series: one value per match */
+.halle .trend { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 12px; align-items: end; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.halle .trend h4 { font: 700 16px/1.2 var(--f-display); font-stretch: 88%; }
+.halle .trend p { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+.halle svg.reihe { width: 100%; max-width: 230px; height: auto; overflow: visible; justify-self: end; }
+.halle svg.reihe text { font: 900 12px var(--f-num); font-stretch: 62%; fill: var(--ink-2); text-anchor: middle; }
+.halle svg.reihe text.now { fill: var(--ink); font-size: 15px; }
+.halle.is-desk .trend { grid-template-columns: minmax(0, 1fr) 190px; }
+
+/* goal grid */
+.halle .tor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; border: 4px solid var(--ink); border-bottom: 0; padding: 3px; max-width: 250px; background: var(--paper); }
+.halle .tor span { aspect-ratio: 5 / 3; display: grid; place-items: center; font: 900 20px/1 var(--f-num); font-stretch: 62%; background: var(--paper-2); }
+.halle .tor span small { font: 400 11px/1 var(--f-text); color: var(--ink-2); display: block; margin-top: 3px; }
+
+/* sharing: what lands in the team chat */
+.halle .chat { background: #e6ddd3; padding: 14px 12px; border-radius: 2px; }
+.halle .bubble { background: #d9fdd3; border-radius: 8px 8px 2px 8px; padding: 5px 5px 6px; max-width: 272px; margin-left: auto; font-size: 13.5px; line-height: 1.35; color: #111b21; }
+.halle .bubble .prev { background: #c9efc3; border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
+.halle .bubble .prev .mf { border-radius: 0; }
+.halle .bubble .prev p { padding: 7px 9px 8px; font-size: 13px; line-height: 1.3; }
+.halle .bubble .prev p b { display: block; }
+.halle .bubble .prev p span { color: #54656f; font-size: 12px; }
+.halle .bubble > p { padding: 0 5px; }
+.halle .bubble .t { display: block; text-align: right; font-size: 11px; color: #54656f; padding: 2px 5px 0; }
+.halle .shared-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--floor); border-bottom: 3px solid var(--line); }
+.halle .shared-top b { font: 700 15px/1.1 var(--f-display); font-stretch: 88%; }
+.halle .shared-top small { display: block; font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+
+/* onboarding and other bare screens lie on the floor too */
+.halle.app[data-bare] .welcome { background: var(--paper); margin: 12px; border-radius: 2px; }
+.halle.app[data-bare] .check, .halle.app[data-bare] .bare { background: var(--paper); }
+.halle .later { opacity: 1; }

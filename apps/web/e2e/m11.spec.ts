@@ -9,8 +9,6 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await page.getByLabel("Vereinsname").fill("HC Elf");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 3");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
@@ -24,26 +22,36 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
 
   // big buttons, marks go out right away when online
   await page.goto(`/app/${orgId}/matches/${match.id}/marks`);
-  // the buttons carry the team names; a status line counts and names the last mark
-  await page.getByRole("button", { name: "Tor Herren 3" }).click();
-  await page.getByRole("button", { name: "Gute Aktion" }).click();
-  await expect(page.getByText(/2 Markierungen · zuletzt Gute Aktion/)).toBeVisible();
+  // «Tor wir» and the opponent's goal count into the head; «Bisher» lists the marks, newest first
+  await page.getByRole("button", { name: /^Tor wir/ }).click();
+  await page.getByRole("button", { name: /^Gute Aktion/ }).click();
+  await expect(page.getByTestId("marks-log").getByRole("listitem")).toHaveCount(2);
+  await expect(page.getByTestId("marks-log").getByRole("listitem").first()).toContainText("Gute Aktion");
   await expect(page.getByText("Alles hochgeladen")).toBeVisible({ timeout: 15_000 });
+  // after a reload the marks and the score are still there (UX test B03)
+  await page.reload();
+  await expect(page.getByTestId("marks-log").getByRole("listitem")).toHaveCount(2);
+  await expect(page.getByRole("button", { name: /^Tor wir/ })).toContainText("1 bisher");
   await expectAccessible(page);
   await page.goto(`/app/${orgId}/matches/${match.id}`);
-  await page.getByRole("tab", { name: "Szenen", exact: true }).click();
-  await page.getByTestId("marks-panel").getByText(/Markiert während des Spiels \(2\)/).click();
+  await page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  // the marks sit behind «Mehr zum Spiel» (UX test B08)
+  await page.getByTestId("game-more").locator(":scope > summary").click();
+  await page.getByTestId("marks-panel").getByText(/Am Spieltag gemerkt \(2\)/).click();
   await expect(page.getByTestId("marks-panel")).toContainText("noch nicht mit dem Video abgeglichen");
 
-  // the coach has no player profile; the profile page explains it
+  // the coach has no player profile: "Ich" (the old /profile redirects there) leaves it out
   await page.goto(`/app/${orgId}/profile`);
-  await expect(page.getByRole("heading", { name: "Öffentliches Profil" })).toBeVisible();
+  await expect(page).toHaveURL(/\/me$/);
+  await expect(page.getByRole("heading", { name: "Öffentliches Profil" })).toHaveCount(0);
   await expectAccessible(page);
   await page.goto("/p/nobody-123456");
   await expect(page.getByText("Dieses Profil ist nicht öffentlich.")).toBeVisible();
 
-  // paper photos: without a model key the upload says so honestly
+  // paper photos (old /paper opens the dialog "Spielbericht hinzufügen"): without a model key
+  // the upload says so honestly
   await page.goto(`/app/${orgId}/teams/${teamId}/paper`);
+  await expect(page.getByTestId("report-dialog")).toBeVisible();
   await page.getByLabel("Foto").setInputFiles({ name: "bogen.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0x00]) });
   await page.getByRole("button", { name: "Auslesen" }).click();
   await expect(page.getByText("Das Auslesen von Fotos ist in dieser Installation nicht eingerichtet.")).toBeVisible();

@@ -1,0 +1,160 @@
+<title>Handball AI Richtungen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Instrument+Sans:wght@400..700&family=Mansalva&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62,900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&family=Big+Shoulders:opsz,wght@10..72,700..900&family=Sofia+Sans:wght@400;600;700&family=Schibsted+Grotesk:wght@400..900&family=VT323&family=Krona+One&family=Courier+Prime:wght@400;700&family=Rubik:wght@400;500&display=swap">
+<!-- css -->
+
+<div class="rp halle">
+
+<header class="r-kopf">
+  <h1>Vier Richtungen, ein Screen.</h1>
+  <div class="r-fields">
+    <div><small>Dokument</small><b>Gestaltungsrichtungen zum Abwägen</b></div>
+    <div><small>Stand</small><b>10. November 2026</b></div>
+    <div><small>Gezeigt</small><b>der Start, Desktop und Handy</b></div>
+    <div><small>Danach</small><b>eine wählen, dann umsetzen</b></div>
+  </div>
+  <p class="r-lead">Bevor irgendetwas gebaut wird: vier grundlegend verschiedene Arten, wie die App aussehen und sich anfühlen könnte. Inhalt und Aufbau sind überall gleich, nämlich der Start mit dem letzten Spiel, den drei Dingen und der Spielliste. Verschieden ist nur der Charakter. So vergleichst du Gleiches mit Gleichem.</p>
+  <nav class="r-idx" aria-label="Richtungen">
+    <a href="#r-konsole">1 Konsole</a><a href="#r-trikot">2 Trikot</a><a href="#r-piktogramm">3 Piktogramm</a><a href="#r-kassette">4 Kassette</a><a href="#r-halle">Bisher: Halle</a><a href="#vergleich">Vergleich</a><a href="#weiter">Wie es weitergeht</a>
+  </nav>
+  <div class="r-pick" role="group" aria-label="Vereinsfarbe für alle Skizzen">
+    <span>Vereinsfarbe ausprobieren:</span>
+    <button type="button" id="pick-rot" data-club="#c8102e" data-on="#ffffff" data-text="#c8102e" aria-pressed="true"><i style="background:#c8102e"></i>Rot</button>
+    <button type="button" id="pick-blau" data-club="#0b5cc7" data-on="#ffffff" data-text="#0b5cc7" aria-pressed="false"><i style="background:#0b5cc7"></i>Blau</button>
+    <button type="button" id="pick-gruen" data-club="#0e7a4f" data-on="#ffffff" data-text="#0e7a4f" aria-pressed="false"><i style="background:#0e7a4f"></i>Grün</button>
+    <button type="button" id="pick-gelb" data-club="#f4c20d" data-on="#14171a" data-text="#7a5d00" aria-pressed="false"><i style="background:#f4c20d"></i>Gelb</button>
+    <button type="button" id="pick-schwarz" data-club="#14171a" data-on="#ffffff" data-text="#14171a" aria-pressed="false"><i style="background:#14171a"></i>Schwarz</button>
+  </div>
+</header>
+
+<!-- ============ 1 KONSOLE ============ -->
+<section class="r-dir" id="r-konsole">
+  <div class="head"><b>Richtung 1</b><span>dunkel, technisch, greifbar</span></div>
+  <h2>Konsole</h2>
+  <p class="idea">Die App ist das Gerät, das am Zeitnehmertisch steht: dunkles Gehäuse, leuchtende Anzeigen, Tasten mit Kappen, Etiketten aus Prägeband.</p>
+  <div data-tpl="t-r1" data-w="desk"></div>
+  <div class="r-split">
+    <div data-tpl="t-r1" data-w="phone"></div>
+    <div class="r-card">
+      <div><h4>Woran man sie erkennt</h4><ul><li>Anzeigetafel mit Teamnamen in Segmentschrift, darunter die Lämpchen für Time-outs.</li><li>Statuslämpchen pro Spiel: grün heisst fertig, gelb läuft, aus heisst kein Video.</li><li>Überschriften auf Prägeband, Nebeninfos in einem grünlichen LCD-Feld.</li><li>Tasten mit Kontrolllampe als Navigation.</li></ul></div>
+      <div><h4>Stark</h4><ul><li>Video wirkt auf dunklem Grund am besten, und Video ist der Kern.</li><li>Der Zustand jedes Spiels ist ohne Lesen erkennbar.</li><li>Unverwechselbar. So sieht keine andere Sport-App aus.</li></ul></div>
+      <div><h4>Risiko</h4><ul><li>Dunkel ist anstrengend bei langen Tabellen und am Handy im hellen Hallenlicht.</li><li>Nachgebaute Hardware kippt schnell ins Verspielte, wenn sie nicht sehr sauber gemacht ist.</li><li>Am aufwendigsten zu bauen: jede Taste hat Kante, Schatten und Zustände.</li></ul></div>
+      <div><h4>Passt, wenn</h4><p>du das Produkt als Werkzeug siehst, das man gern in die Hand nimmt, und Video im Mittelpunkt steht.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 TRIKOT ============ -->
+<section class="r-dir" id="r-trikot">
+  <div class="head"><b>Richtung 2</b><span>laut, farbig, pro Verein anders</span></div>
+  <h2>Trikot</h2>
+  <p class="idea">Die App zieht das Trikot an. Jedes Spiel ist die Begegnung zweier Farben, jede Erkenntnis eine Rückennummer.</p>
+  <div data-tpl="t-r2" data-w="desk"></div>
+  <div class="r-split">
+    <div data-tpl="t-r2" data-w="phone"></div>
+    <div class="r-card">
+      <div><h4>Woran man sie erkennt</h4><ul><li>Geteilte Fläche in den Farben beider Teams, mit den Toren als Flock-Ziffern.</li><li>Die drei Dinge als Rückseite eines Trikots: Name oben, grosse Nummer.</li><li>Gestrichelte Naht als Rahmen und Trennlinie, aufgenähte Etiketten für Zustände.</li><li>Zweifarbige Quadrate in der Spielliste: eigene Farbe und Farbe des Gegners.</li></ul></div>
+      <div><h4>Stark</h4><ul><li>Die höchste Eigenständigkeit: Die App sieht für jeden Verein anders aus, und jedes Spiel sieht anders aus.</li><li>Sofort Sport, sofort Verein. Viel Farbe ohne Dekoration.</li><li>Macht Spass beim ersten Öffnen, weil man die eigenen Farben sieht.</li></ul></div>
+      <div><h4>Risiko</h4><ul><li>Hängt an den Vereinsfarben. Gelb, Weiss oder zwei ähnliche Farben brauchen Sonderregeln.</li><li>Die Farbe des Gegners muss man kennen. handball.ch liefert sie nicht.</li><li>Viel Farbe und Grossbuchstaben konkurrieren mit dem Video und ermüden bei täglicher Arbeit.</li></ul></div>
+      <div><h4>Passt, wenn</h4><p>die Identifikation mit dem eigenen Verein wichtiger ist als Ruhe beim Arbeiten.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 PIKTOGRAMM ============ -->
+<section class="r-dir" id="r-piktogramm">
+  <div class="head"><b>Richtung 3</b><span>klar, grafisch, schweizerisch</span></div>
+  <h2>Piktogramm</h2>
+  <p class="idea">Die Halle als Leitsystem: Farbfelder, riesige Ziffern, Piktogramme und Pfeile wie an der Hallenwand. Jeder Bereich hat eine Nummer und eine Farbe.</p>
+  <div data-tpl="t-r3" data-w="desk"></div>
+  <div class="r-split">
+    <div data-tpl="t-r3" data-w="phone"></div>
+    <div class="r-card">
+      <div><h4>Woran man sie erkennt</h4><ul><li>Eine eigene Familie von Piktogrammen für Handball: Abwehr, Gegenstoss, Wurf, später Parade, Sperre, Siebenmeter.</li><li>Vier Bereiche mit Nummer und Farbe: 1 Spiele gelb, 2 Szenen blau, 3 Saison grün, 4 Team rot.</li><li>Das Resultat als riesige Ziffern auf Signalgelb. Flächen stossen ohne Abstand aneinander.</li><li>Ein Pfeilschild für «weiter», gefüllte und leere Punkte für den Zustand.</li></ul></div>
+      <div><h4>Stark</h4><ul><li>Am schnellsten zu erfassen. Das Piktogramm ersetzt das Etikett, die grosse Zahl den Satz.</li><li>Farbig, ohne die Vereinsfarbe zu brauchen. Funktioniert für jeden Verein gleich gut.</li><li>Trägt durch alle Screens: Tabellen, Video und Zahlen passen in dasselbe Raster.</li><li>Wirkt gestaltet und zeitlos. Die Piktogramme sind ein Wert, den man auch auf Plakate und Shirts drucken kann.</li></ul></div>
+      <div><h4>Risiko</h4><ul><li>Braucht 20 bis 30 gut gezeichnete Piktogramme. Die hier sind erste Skizzen, die Familie ist Handarbeit.</li><li>Kann kühl wirken. Weniger Nostalgie und Wärme als Kassette oder Trikot.</li><li>Gelbe Vereine brauchen eine andere Signalfarbe für Bereich 1.</li></ul></div>
+      <div><h4>Passt, wenn</h4><p>Klarheit und ein eigener, professioneller Auftritt zählen, der auch in fünf Jahren noch stimmt.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 KASSETTE ============ -->
+<section class="r-dir" id="r-kassette">
+  <div class="head"><b>Richtung 4</b><span>warm, verspielt, erzählerisch</span></div>
+  <h2>Kassette</h2>
+  <p class="idea">Das Videoregal des Trainers. Jedes Spiel ist eine Kassette, das letzte läuft im Rekorder, und die drei Dinge stehen wie eine Titelliste auf der Einlegekarte.</p>
+  <div data-tpl="t-r4" data-w="desk"></div>
+  <div class="r-split">
+    <div data-tpl="t-r4" data-w="phone"></div>
+    <div class="r-card">
+      <div><h4>Woran man sie erkennt</h4><ul><li>Ein Bildschirm mit Einblendung: PLAY, Bandzähler, Resultat in Pixelschrift.</li><li>Die Einlegekarte mit Farbstreifen und Titelliste. Jede Erkenntnis hat eine Laufzeit.</li><li>Kassettenrücken in den Farben beider Teams. Eine leere Hülle heisst: kein Video.</li><li>Die Tasten des Rekorders als Navigation.</li></ul></div>
+      <div><h4>Stark</h4><ul><li>Handelt vom Video, also vom Kern. «Kein Video» erklärt sich von selbst.</li><li>Am meisten Charme. Das vergisst niemand, der es einmal gesehen hat.</li><li>Laufzeiten und Reihenfolge gehören natürlich dazu.</li></ul></div>
+      <div><h4>Risiko</h4><ul><li>Nostalgie, die jüngere Trainerinnen und Trainer nicht teilen.</li><li>Das Bild trägt nicht weit: Für Zahlen, Saison und Kader gibt es keine Entsprechung.</li><li>Schreibmaschinen- und Pixelschrift lesen sich schlechter. Die Grenze zum Gag ist nah.</li></ul></div>
+      <div><h4>Passt, wenn</h4><p>die App vor allem sympathisch und anders sein soll und man ihr das Augenzwinkern verzeiht.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BISHER ============ -->
+<section class="r-dir" id="r-halle">
+  <div class="head"><b>Zum Vergleich</b><span>die bisherige Richtung</span></div>
+  <h2>Halle</h2>
+  <p class="idea">Ein Blatt Papier auf dem Hallenboden: blauer Rahmen mit Linien, gelbes Blatt für die drei Dinge, Anzeigetafel, Handschrift nur für Menschen.</p>
+  <div data-tpl="t-spiele" data-w="desk"></div>
+  <div class="r-split">
+    <div data-tpl="t-spiele" data-w="phone"></div>
+    <div class="r-card">
+      <div><h4>Stark</h4><ul><li>Ruhig und gut lesbar, auch in langen Tabellen.</li><li>Die Regel «gedruckt ist das System, Filzstift ist ein Mensch» zeigt nebenbei, was geschätzt und was bestätigt ist.</li><li>Schon für zwölf Screens ausgearbeitet.</li></ul></div>
+      <div><h4>Risiko</h4><ul><li>Papier und Filzstift können brav wirken. Der Charakter ist leiser als bei den vier anderen.</li><li>Handschrift muss man mögen.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VERGLEICH ============ -->
+<section class="r-sec" id="vergleich">
+  <div class="head"><b>Vergleich</b></div>
+  <h2>Nebeneinander.</h2>
+  <div class="r-tw"><table class="r-t" style="min-width:920px">
+    <thead><tr><th></th><th>1 Konsole</th><th>2 Trikot</th><th>3 Piktogramm</th><th>4 Kassette</th><th>Halle</th></tr></thead>
+    <tbody>
+      <tr><td>Erster Eindruck</td><td>Gerät, ernst, stark</td><td>laut, sportlich</td><td>klar, selbstbewusst</td><td>charmant, überraschend</td><td>ruhig, freundlich</td></tr>
+      <tr><td>Arbeiten im Alltag</td><td>gut am Abend, schwer im Hallenlicht</td><td>unruhig bei viel Inhalt</td><td>am besten</td><td>mittel, Schrift bremst</td><td>gut</td></tr>
+      <tr><td>Eigen pro Verein</td><td>wenig</td><td>am stärksten</td><td>wenig, dafür eigene Marke</td><td>etwas, über die Farbstreifen</td><td>etwas, über Wappen und Sammelbilder</td></tr>
+      <tr><td>Trägt durch alle Screens</td><td>ja, Video am besten</td><td>teils: Tabellen und Video bleiben neutral</td><td>ja</td><td>nein, nur Spiele und Szenen</td><td>ja</td></tr>
+      <tr><td>Aufwand</td><td>hoch</td><td>mittel, plus Gegnerfarben</td><td>mittel, plus Piktogramme zeichnen</td><td>mittel</td><td>am geringsten, ist spezifiziert</td></tr>
+      <tr><td>Grösstes Risiko</td><td>wirkt verspielt, wenn nicht perfekt</td><td>bricht bei schwierigen Farben</td><td>wirkt kühl</td><td>wirkt wie ein Gag</td><td>wirkt brav</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="r-sub">
+    <h3>Meine Einschätzung</h3>
+    <div class="r-prose" style="margin-top:0">
+      <p><b>Piktogramm trägt am weitesten.</b> Es ist die einzige der vier neuen Richtungen, die auf jedem Screen funktioniert, farbig ist, ohne von der Vereinsfarbe abzuhängen, und dabei nach einer Entscheidung aussieht statt nach einer Vorlage. Der Preis ist die Piktogramm-Familie. Die muss jemand mit Sorgfalt zeichnen, und sie wird zum Gesicht des Produkts.</p>
+      <p><b>Trikot und Kassette haben am meisten Herz</b>, aber beide sind eher eine starke Startseite als ein System. Ihre besten Einfälle lassen sich mitnehmen: aus Trikot die zwei Teamfarben pro Spiel, aus Kassette die leere Hülle für «kein Video» und die Laufzeit an jeder Erkenntnis.</p>
+      <p><b>Konsole</b> ist die mutigste. Ich würde sie nur wählen, wenn die App im Kern ein Videoplayer sein soll und jemand die Zeit bekommt, sie makellos zu bauen.</p>
+      <p>Wenn ich wählen müsste: <b>Piktogramm als System, mit den zwei Teamfarben aus Trikot im Kopf jedes Spiels.</b> Mehr als zwei Welten zu mischen würde ich nicht, sonst entsteht wieder Beliebigkeit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WEITER ============ -->
+<section class="r-sec" id="weiter">
+  <div class="head"><b>Wie es weitergeht</b></div>
+  <h2>Du wählst, ich übergebe und prüfe.</h2>
+  <div class="r-ask">
+    <ol>
+      <li><b>Du sagst mir die Richtung.</b> Eine der vier, die bisherige, oder eine mit einem geliehenen Element aus einer anderen. Auch «keine davon, eher so …» hilft.</li>
+      <li><b>Ich arbeite sie für alle zwölf Screens aus</b> und schreibe die Spezifikation darauf um. Aufbau, Wörter und Umfang bleiben, wie sie im Zielbild stehen. Nur das Aussehen wechselt.</li>
+      <li><b>Ich starte die UI-Session selbst und gebe ihr den Auftrag.</b> Sie baut in sechs Schritten, jeder ein eigener Commit.</li>
+      <li><b>Ich prüfe nach jedem Schritt</b> die neuen Screenshots gegen das Zielbild und die Prüfliste und schicke zurück, was abweicht. Du bekommst von mir pro Schritt eine kurze Meldung mit Vorher und Nachher.</li>
+    </ol>
+  </div>
+  <p class="r-cap" style="margin-top:14px">Skizzen: Namen und Zahlen sind Beispiele. Jede Richtung ist nur für den Start gezeichnet, damit die Auswahl nicht mehr Aufwand kostet als nötig. Die Dateien liegen in <code>docs/design/ux-reset/richtungen/</code>.</p>
+</section>
+
+</div>
+
+<!-- screens -->
+<!-- js -->

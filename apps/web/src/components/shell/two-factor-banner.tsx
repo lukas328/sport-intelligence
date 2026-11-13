@@ -24,14 +24,14 @@ export function TwoFactorBanner({ orgId }: { orgId: string }) {
       <ShieldAlert aria-hidden className="size-4 shrink-0 text-accent" />
       <p className="min-w-0 flex-1 truncate py-2">
         {t("settings.twoFactorRequired")}{" "}
-        <Link href={`/app/${orgId}/settings#security`} className="font-semibold text-accent hover:underline">
+        <Link href={`/app/${orgId}/me/security`} className="font-semibold text-accent hover:underline">
           {t("settings.twoFactorStart")}
         </Link>
       </p>
       <button
         type="button"
         aria-label={t("common.close")}
-        className="grid size-8 shrink-0 place-items-center rounded-md text-muted hover:bg-surface hover:text-foreground"
+        className="grid size-8 shrink-0 place-items-center text-muted hover:bg-surface hover:text-foreground"
         onClick={() => {
           setClosed(true);
           try {

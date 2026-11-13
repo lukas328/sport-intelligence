@@ -440,7 +440,7 @@ export function ShotCandidatesPanel({
                 onKeyDown={(e) => onRowKey(e, c, i)}
                 onFocus={() => setFocus(i)}
                 className={cn(
-                  "relative flex flex-wrap items-center gap-x-3 gap-y-1 rounded-sm px-1.5 py-1.5 outline-none after:absolute after:inset-x-1.5 after:bottom-0 after:h-px after:bg-border/70 last:after:hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
+                  "relative flex flex-wrap items-center gap-x-3 gap-y-1 px-1.5 py-1.5 outline-none after:absolute after:inset-x-1.5 after:bottom-0 after:h-px after:bg-border/70 last:after:hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
                   i === active && "bg-surface",
                 )}
                 data-testid="shot-candidate-row"

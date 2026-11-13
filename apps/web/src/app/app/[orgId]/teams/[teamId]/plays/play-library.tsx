@@ -40,7 +40,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="min-h-10 w-64 rounded-md bg-raised ring-1 ring-inset ring-border px-3"
+            className="min-h-10 w-64 bg-raised ring-1 ring-inset ring-border px-3"
           />
         </label>
         <div role="group" aria-label={t("category")} className="flex flex-wrap gap-x-4">

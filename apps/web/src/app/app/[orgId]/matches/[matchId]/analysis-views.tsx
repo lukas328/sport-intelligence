@@ -13,7 +13,6 @@ import { Sheet, EmptyState } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { decided } from "@/lib/match-decided";
 import { cn } from "@/lib/utils";
-import { xgLabel, xgShown } from "@/lib/xg";
 import { useOpponentName } from "@/lib/opponent";
 
 type ZoneCount = Record<string, { shots: number; goals: number }>;
@@ -38,9 +37,13 @@ interface TeamStats {
   attack_efficiency: number | null;
   possessions?: number | null;
   zones: ZoneCount;
+  /** shots and goals by attacking position (metrics 0.5) */
+  positions?: Record<string, { shots: number; goals: number; zones: string[] }>;
   goal_zones: ZoneCount;
   by_situation: Record<string, { shots: number; goals: number; pct: number | null }>;
   xg: number;
+  /** what the sources recorded at all (metrics): a figure never recorded is empty, not 0 */
+  known?: { shooting: boolean; saving: boolean; turnovers: boolean };
 }
 interface PlayerRow {
   side: "own" | "opponent";
@@ -81,6 +84,8 @@ export interface Stats {
   players: Record<string, PlayerRow>;
   goalkeepers?: Record<string, KeeperRow>;
   timeline: {
+    /** false: goals without times (a paper report), so no order, no runs, no course */
+    timed?: boolean;
     score: { clock_s: number; own: number; opp: number }[];
     best_run: Record<string, { goals: number; from_s: number | null }>;
     longest_own_drought_s: { seconds: number };
@@ -98,6 +103,11 @@ export function useStats(orgId: string, matchId: string) {
   });
 }
 
+// a side's shots are known when one of its attempts was not a goal; its keeper's saves when one of
+// the other side's was (older stats without `known` count as recorded)
+const shotsKnown = (s: TeamStats) => s.known?.shooting !== false;
+const savesKnown = (s: TeamStats) => s.known?.saving !== false;
+
 // a share above 100 % means the sources disagree (goals from a report, attacks from a clip): no figure
 const pct = (v: number | null | undefined) => (v == null || v > 1 ? "-" : `${Math.round(v * 100)} %`);
 
@@ -107,7 +117,8 @@ export function N({ value, onClick, label }: { value: string | number; onClick?:
   if (value === 0 || value === "0") return <span className="tabular-nums text-muted">{value}</span>;
   if (!onClick) return <span className="tabular-nums">{value}</span>;
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums font-semibold underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-accent hover:decoration-solid">
+    // a 44 px target in the tables too (UX test B44): the row grows a little, the figure stays
+    <button type="button" onClick={onClick} aria-label={label} className="inline-flex min-h-11 min-w-11 items-center justify-end tabular-nums font-semibold underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-accent hover:decoration-solid">
       {value}
     </button>
   );
@@ -145,7 +156,12 @@ export function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: 
   );
 }
 
-export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false, videoNote = null }: ViewProps & { videoNote?: string | null }) {
+type OverviewPart = "basis" | "decided" | "insights" | "timeline" | "comparison" | "scorers";
+const ALL_PARTS: OverviewPart[] = ["basis", "decided", "insights", "timeline", "comparison", "scorers"];
+
+/** The old overview in parts: «Mehr zum Spiel» takes the course, Zahlen the comparison (UX test B08). */
+export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false, videoNote = null, parts = ALL_PARTS, span = null }: ViewProps & { videoNote?: string | null; parts?: OverviewPart[]; span?: readonly [number, number] | null }) {
+  const has = (p: OverviewPart) => parts.includes(p);
   const t = useTranslations("stats");
   const te = useTranslations("events");
   const oppName = useOpponentName();
@@ -154,20 +170,29 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const rows: { label: string; own: string | number; opp: string | number; filter?: (s: "own" | "opponent") => EventFilter; low?: boolean }[] = [
     { label: t("goals"), own: stats.own.goals, opp: stats.opponent.goals, filter: (s) => ({ side: s, type: "shot", outcome: "goal" }) },
     // goals alone (score overlay): shot counts and xG would only repeat the goals
-    ...(attempts ? [{ label: t("shots"), own: stats.own.shots, opp: stats.opponent.shots, filter: (s: "own" | "opponent") => ({ side: s, type: "shot" }) as EventFilter }] : []),
+    // per side: a count the sources never recorded reads "-", not 0
+    ...(attempts
+      ? [{ label: t("shots"), own: shotsKnown(stats.own) ? stats.own.shots : "-", opp: shotsKnown(stats.opponent) ? stats.opponent.shots : "-", filter: (s: "own" | "opponent") => ({ side: s, type: "shot" }) as EventFilter }]
+      : []),
     { label: t("shootingPct"), own: pct(stats.own.shooting_pct), opp: pct(stats.opponent.shooting_pct) },
-    ...(attempts ? [{ label: t("saves"), own: stats.own.saves, opp: stats.opponent.saves, filter: (s: "own" | "opponent") => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) as EventFilter }] : []),
+    ...(attempts
+      ? [{ label: t("saves"), own: savesKnown(stats.own) ? stats.own.saves : "-", opp: savesKnown(stats.opponent) ? stats.opponent.saves : "-", filter: (s: "own" | "opponent") => ({ side: s === "own" ? "opponent" : "own", type: "shot", outcome: "save" }) as EventFilter }]
+      : []),
     { label: t("savePct"), own: pct(stats.own.save_pct), opp: pct(stats.opponent.save_pct) },
-    { label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s) => ({ side: s, type: "turnover" }), low: true },
+    ...(stats.own.known?.turnovers === false
+      ? []
+      : [{ label: t("turnovers"), own: stats.own.turnovers, opp: stats.opponent.turnovers, filter: (s: "own" | "opponent") => ({ side: s, type: "turnover" }) as EventFilter, low: true }]),
     ...(stats.own.seven_m_shots + stats.opponent.seven_m_shots > 0 ? [{ label: t("sevenM"), own: `${stats.own.seven_m_goals}/${stats.own.seven_m_shots}`, opp: `${stats.opponent.seven_m_goals}/${stats.opponent.seven_m_shots}` }] : []),
-    { label: t("fastBreakGoals"), own: stats.own.fast_break_goals, opp: stats.opponent.fast_break_goals, filter: (s) => ({ side: s, zone: "fast_break", outcome: "goal" }) },
+    ...(stats.own.fast_break_goals + stats.opponent.fast_break_goals > 0
+      ? [{ label: t("fastBreakGoals"), own: stats.own.fast_break_goals, opp: stats.opponent.fast_break_goals, filter: (s: "own" | "opponent") => ({ side: s, zone: "fast_break", outcome: "goal" }) as EventFilter }]
+      : []),
     ...(stats.own.suspensions + stats.opponent.suspensions > 0
       ? [{ label: t("suspensions"), own: stats.own.suspensions, opp: stats.opponent.suspensions, filter: (s: "own" | "opponent") => ({ side: s, type: "suspension_2min" }) as EventFilter }]
       : []),
-    { label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) },
-    // xG only where most shots on target have a position (report and overlay goals have none)
-    ...(attempts && (xgShown(stats.own) || xgShown(stats.opponent))
-      ? [{ label: t("xg"), own: xgLabel(stats.own), opp: xgLabel(stats.opponent) }]
+    // attack efficiency only from counted attacks (tracking), never from estimated possessions;
+    // xG is not shown in the match (UX test B07: an estimate the data cannot carry)
+    ...(stats.possessions_source === "tracking"
+      ? [{ label: t("efficiency"), own: pct(stats.own.attack_efficiency), opp: pct(stats.opponent.attack_efficiency) }]
       : []),
   ];
   // the one signal of the overview: the counted row the opponent won most clearly (after a win
@@ -215,7 +240,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const who = (p: (typeof scorers)[number]) => (p.player_id && names[p.player_id]) || `#${p.number ?? "?"}`;
   return (
     <div className="space-y-10">
-      <div className="space-y-1 text-sm" data-testid="analysis-basis">
+      {has("basis") && <div className="space-y-1 text-sm" data-testid="analysis-basis">
         <p>
           {t("basis", { list: sources })}
           {videoNote && ` ${videoNote}`}
@@ -225,8 +250,8 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             {t("scoreMismatch", { events: `${stats.own.goals}:${stats.opponent.goals}`, score: `${match.score_own}:${match.score_opponent}` })}
           </p>
         )}
-      </div>
-      {decision && (
+      </div>}
+      {decision && has("decided") && (
         // the one statement of the tab: what decided the match, from the head-to-head figures
         <p className="max-w-3xl font-display text-2xl leading-tight sm:text-3xl" data-testid="decided">
           {t(decision.side === "own" ? "decidedOwn" : "decidedOpp", {
@@ -234,17 +259,17 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           })}
         </p>
       )}
-      {decision && (
+      {decision && has("decided") && (
         // the statement leads to its scenes
         <p className="-mt-6 flex flex-wrap gap-x-4 text-sm">
           {decision.edges.map((e) => (
-            <button key={e} type="button" className="font-medium underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-solid" onClick={() => open(t(`edgeScenes_${e}`), edgeFilter[e]!)}>
+            <button key={e} type="button" className="min-h-11 font-medium underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-solid" onClick={() => open(t(`edgeScenes_${e}`), edgeFilter[e]!)}>
               {t(`edgeScenes_${e}`)}
             </button>
           ))}
         </p>
       )}
-      <InsightsCard
+      {has("insights") && <InsightsCard
         noSignal={decision != null}
         orgId={orgId}
         matchId={match.id}
@@ -252,8 +277,9 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
         staff={staff}
         onEvidence={open}
         won={match.score_own != null && match.score_opponent != null && match.score_own > match.score_opponent}
-      />
+      />}
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
+        {has("timeline") && stats.timeline.timed !== false && stats.timeline.score.length > 1 && (
         <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>
           <ScoreChart
@@ -262,6 +288,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             opp={oppName(match)}
             periodS={match.period_s}
             periods={match.periods}
+            span={span}
           />
           <ul className="text-sm text-muted">
             {run && run.goals > 1 && <li>{t("bestRun", { goals: run.goals })}</li>}
@@ -270,7 +297,8 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             )}
           </ul>
         </Sheet>
-        <Sheet className="space-y-3">
+        )}
+        {has("comparison") && <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("comparison")}</h2>
           <table className="w-full text-sm" data-testid="comparison">
             <thead className="text-muted">
@@ -299,10 +327,10 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               ))}
             </tbody>
           </table>
-          <p className="text-xs text-muted">{t(stats.possessions_source === "tracking" ? "possessionsTracked" : "possessionsHint")}</p>
-        </Sheet>
+          {stats.possessions_source === "tracking" && <p className="text-xs text-muted">{t("possessionsTracked")}</p>}
+        </Sheet>}
       </div>
-      {scorers.length > 0 && (
+      {has("scorers") && scorers.length > 0 && (
         <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("scorers")}</h2>
           <ul className="grid gap-x-10 sm:grid-cols-2">
@@ -330,26 +358,31 @@ function ScoreChart({
   opp,
   periodS,
   periods,
+  span = null,
 }: {
   points: { clock_s: number; own: number; opp: number }[];
   own: string;
   opp: string;
   periodS: number;
   periods: number;
+  /** the match minutes a video covers: without a report the course runs over these, not 0 to 60 (E10, G9) */
+  span?: readonly [number, number] | null;
 }) {
   const w = 600;
   const h = 210;
   const right = 34;
-  const maxT = Math.max(periodS * periods, ...points.map((p) => p.clock_s));
-  const tickStep = maxT > 2400 ? 15 : 5;
-  const ticks = Array.from({ length: Math.floor(maxT / 60 / tickStep) + 1 }, (_, i) => i * tickStep);
+  const minT = span ? span[0] * 60 : 0;
+  const maxT = span ? Math.max(minT + 60, span[1] * 60) : Math.max(periodS * periods, ...points.map((p) => p.clock_s));
+  const range = maxT - minT;
+  const tickStep = range > 2400 ? 15 : range > 600 ? 5 : 1;
+  const ticks = Array.from({ length: Math.floor(maxT / 60 / tickStep) + 1 }, (_, i) => i * tickStep).filter((m) => m * 60 >= minT);
   const maxG = Math.max(5, ...points.map((p) => Math.max(p.own, p.opp)));
   const gridStep = maxG > 20 ? 10 : 5;
   const grid = Array.from({ length: Math.floor(maxG / gridStep) + 1 }, (_, i) => i * gridStep);
-  const X = (s: number) => 28 + (s / maxT) * (w - 28 - right);
+  const X = (s: number) => 28 + ((Math.min(maxT, Math.max(minT, s)) - minT) / range) * (w - 28 - right);
   const Y = (g: number) => h - 22 - (g / maxG) * (h - 34);
   const step = (key: "own" | "opp") =>
-    points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(0)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p[key])}`).join(" ") + ` H${X(maxT)}`;
+    points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(minT)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p[key])}`).join(" ") + ` H${X(maxT)}`;
   const timed = points.every((p) => p.clock_s > 0 || (p.own === 0 && p.opp === 0));
   const last = points.at(-1) ?? { own: 0, opp: 0 };
   // end labels: keep them apart when the score is close
@@ -363,7 +396,7 @@ function ScoreChart({
   }
   return (
     <figure className="space-y-3">
-      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.8125rem]">
+      <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.9375rem]">
         <span className="inline-flex items-center gap-2 font-medium">
           <span aria-hidden className="h-0.5 w-5 rounded-full bg-accent" />
           {own}
@@ -376,17 +409,19 @@ function ScoreChart({
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${own} ${last.own}, ${opp} ${last.opp}`} className="w-full">
         {grid.map((g) => (
           <g key={g}>
-            <line x1={X(0)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke="var(--border)" strokeWidth={g === 0 ? 1.2 : 0.6} />
-            <text x={X(0) - 8} y={Y(g) + 3.5} fontSize="10" textAnchor="end" fill="var(--muted)">
+            <line x1={X(minT)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke="var(--border)" strokeWidth={g === 0 ? 1.2 : 0.6} />
+            <text x={X(minT) - 8} y={Y(g) + 3.5} fontSize="13" textAnchor="end" fill="var(--muted)">
               {g}
             </text>
           </g>
         ))}
-        {Array.from({ length: periods - 1 }, (_, i) => (
-          <line key={i} x1={X((i + 1) * periodS)} x2={X((i + 1) * periodS)} y1={8} y2={h - 22} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
+        {Array.from({ length: periods - 1 }, (_, i) => (i + 1) * periodS)
+          .filter((at) => at > minT && at < maxT)
+          .map((at, i) => (
+          <line key={i} x1={X(at)} x2={X(at)} y1={8} y2={h - 22} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
         ))}
         {ticks.map((m) => (
-          <text key={m} x={X(m * 60)} y={h - 6} fontSize="10" textAnchor="middle" fill="var(--muted)">
+          <text key={m} x={X(m * 60)} y={h - 6} fontSize="13" textAnchor="middle" fill="var(--muted)">
             {m}&apos;
           </text>
         ))}
@@ -394,10 +429,10 @@ function ScoreChart({
         {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />}
         {timed && (
           <>
-            <text x={X(maxT) + 6} y={yo + 4} fontSize="12" fontWeight="700" fill="var(--accent)">
+            <text x={X(maxT) + 6} y={yo + 4} fontSize="14" fontWeight="700" fill="var(--accent)">
               {last.own}
             </text>
-            <text x={X(maxT) + 6} y={yp + 4} fontSize="12" fontWeight="600" fill="var(--muted)">
+            <text x={X(maxT) + 6} y={yp + 4} fontSize="14" fontWeight="600" fill="var(--muted)">
               {last.opp}
             </text>
           </>
@@ -540,7 +575,7 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
         </div>
         <label className="flex items-center gap-2 text-sm">
           {t("filterOutcome")}
-          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="rounded-lg bg-raised ring-1 ring-inset ring-border px-2 py-1">
+          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="bg-raised ring-1 ring-inset ring-border px-2 py-1">
             <option value="">{t("all")}</option>
             {["goal", "save", "miss", "post", "blocked"].map((o) => (
               <option key={o} value={o}>
@@ -590,5 +625,33 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
       </Sheet>
       <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />
     </div>
+  );
+}
+
+const POSITION_ORDER = ["LA", "RL", "RM", "RR", "RA", "KM"] as const;
+
+/**
+ * Gegentore nach Position (SPEC 7.2): the opponent's goals by the position they came from. Plain
+ * list for now; the court with circles comes with the new look. Left out when no goal has a place.
+ */
+export function ConcededByPosition({ stats }: { stats: Stats }) {
+  const t = useTranslations();
+  const pos = stats.opponent.positions;
+  if (!pos || POSITION_ORDER.every((p) => (pos[p]?.goals ?? 0) === 0)) return null;
+  return (
+    <section aria-labelledby="conceded-title" className="space-y-3" data-testid="conceded-by-position">
+      <h2 id="conceded-title" className="text-2xl">
+        {t("stats.concededByPosition")}
+      </h2>
+      <ul className="grid grid-cols-3 gap-px border-y border-foreground/15 sm:grid-cols-6">
+        {POSITION_ORDER.map((p) => (
+          <li key={p} className="py-3 text-center">
+            <span className="block font-score text-3xl tabular-nums">{pos[p]?.goals ?? 0}</span>
+            <span className="block text-sm text-muted">{t(`positions.${p}`)}</span>
+            <span className="block text-xs text-muted tabular-nums">{t("stats.ofShots", { n: pos[p]?.shots ?? 0 })}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

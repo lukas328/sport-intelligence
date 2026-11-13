@@ -1,10 +1,12 @@
 "use client";
 
 import { track } from "@/lib/analytics";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { looksLikeVideo } from "@/lib/video-file";
+import { sitePage, useSiteConfig } from "@/lib/site-config";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { connectionHint } from "@/lib/network";
@@ -58,9 +60,11 @@ type State =
   | { kind: "confirm"; file: File; hint: "mobile" | "slow" }
   | { kind: "offline"; file: File }
   | { kind: "done" }
-  | { kind: "error"; error: ErrorKey | "upload"; file?: File };
+  | { kind: "error"; error: ErrorKey | "upload" | "notVideo"; file?: File };
 
-export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; matchId: string; onUploaded: () => void }) {
+
+
+export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { orgId: string; matchId: string; onUploaded: () => void; hasMain?: boolean }) {
   const t = useTranslations();
   const [role, setRole] = useState<Role>("main");
   const [state, setState] = useState<State>({ kind: "idle" });
@@ -96,6 +100,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
   }
 
   async function start(file: File, confirmed = false) {
+    if (!looksLikeVideo(file)) return setState({ kind: "error", error: "notVideo" });
     if (!confirmed) return ask(file);
     ctrl.current = new AbortController();
     setState({ kind: "uploading", file, done: 0, resumed: false });
@@ -138,21 +143,28 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
     onUploaded();
   }
 
+  const site = useSiteConfig();
+  const locale = useLocale();
   const pct = state.kind === "uploading" ? Math.floor((state.done / state.file.size) * 100) : 0;
   return (
-    <Card className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="text-lg font-semibold">{t("upload.title")}</h2>
-        <div className="w-56">
-          <Select label={t("upload.role")} value={role} onChange={(e) => setRole(e.target.value as Role)} disabled={uploading}>
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {t(`upload.role_${r}`)}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </div>
+    <div className="space-y-5">
+      {/* a second main file is stored and plays, but the analysis stays on the first: said right
+          here, before choosing (OPEN_QUESTIONS Q-VIDEO-PARTS) */}
+      {hasMain && role === "main" && (
+        <p className="m-0 max-w-[60ch] border-l-4 border-attn pl-3 text-[17px]" data-testid="second-file-note">
+          {t("upload.secondFile")}
+        </p>
+      )}
+      {/* one thing first: the file; what to film in three plain lines (UX test H05) */}
+      <ul className="m-0 list-none space-y-1.5 p-0 text-[17px]" data-testid="upload-tips">
+        <li>{t("upload.tip1")}</li>
+        <li>{t("upload.tip2")}</li>
+        <li>{t("upload.tip3")}</li>
+      </ul>
+      {/* the guide on the website, its address from the configuration */}
+      {site && <a href={sitePage(site.site_url, locale, "aufnahme/")} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+        {t("upload.guide")}
+      </a>}
       <label
         onDragOver={(e) => {
           e.preventDefault();
@@ -160,10 +172,12 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
         }}
         onDragLeave={() => setDrag(false)}
         onDrop={onDrop}
-        className={`flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center ${drag ? "border-accent bg-surface" : "border-border"}`}
+        className={`flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 border-2 p-5 text-center sm:min-h-32 sm:border-dashed ${drag ? "border-ink bg-surface" : "border-ink"} max-sm:bg-ink max-sm:text-ground`}
       >
-        <span className="font-medium">{t("upload.drop")}</span>
-        <span className="text-sm font-medium text-accent hover:underline">{t("upload.choose")}</span>
+        {/* on a phone there is nothing to drag: «Video wählen» */}
+        <span className="text-[19px] font-bold sm:hidden">{t("upload.chooseVideo")}</span>
+        <span className="hidden text-[17px] font-bold sm:block">{t("upload.drop")}</span>
+        <span className="hidden text-[15px] font-semibold underline underline-offset-4 sm:block">{t("upload.choose")}</span>
         <input
           type="file"
           accept="video/*,.mts,.m2ts,.mkv"
@@ -179,7 +193,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
       </label>
       {state.kind === "uploading" && (
         <div className="space-y-2" role="status">
-          <div className="h-2 overflow-hidden rounded bg-surface">
+          <div className="h-2 overflow-hidden bg-surface">
             <div className="h-full bg-accent transition-all" style={{ width: `${pct}%` }} />
           </div>
           <p className="text-sm tabular-nums" data-testid="upload-progress">
@@ -214,10 +228,23 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
           </Button>
         </Alert>
       )}
-      {state.kind === "done" && <Alert kind="success">{t("upload.done")}</Alert>}
+      {state.kind === "done" && (
+        // the reassurance the coach needs on the phone (UX test H05, Z4)
+        <Alert kind="success" data-testid="upload-done">
+          <span className="block font-bold">{t("upload.done")}</span>
+          <span className="block">{t("upload.mayClose")}</span>
+        </Alert>
+      )}
       {state.kind === "error" && (
         <Alert>
-          <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
+          {state.error === "notVideo" ? (
+            <>
+              <span className="block font-bold">{t("processing.failedTitle")}</span>
+              <span className="block">{t("upload.notVideo")}</span>
+            </>
+          ) : (
+            <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
+          )}
           {state.file && (
             <Button variant="secondary" className="mt-2" onClick={() => void start(state.file!, true)}>
               {t("upload.resume")}
@@ -225,23 +252,32 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
           )}
         </Alert>
       )}
-      <details className="text-sm">
-        <summary className="cursor-pointer text-muted">{t("upload.link")}</summary>
-        <form onSubmit={importLink} className="mt-3 flex flex-wrap items-end gap-2">
-          <div className="min-w-64 flex-1">
-            <Input label={t("upload.linkLabel")} name="url" type="url" required pattern="https://.*" hint={t("upload.linkHint")} />
+      {/* the rest can wait: another camera, a link, the technical details */}
+      <details className="text-[15px]">
+        <summary className="min-h-11 cursor-pointer content-center font-semibold">{t("upload.more")}</summary>
+        <div className="mt-3 space-y-5">
+          <div className="max-w-xs">
+            <Select label={t("upload.role")} value={role} onChange={(e) => setRole(e.target.value as Role)} disabled={uploading}>
+              {ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {t(`upload.role_${r}`)}
+                </option>
+              ))}
+            </Select>
           </div>
-          <Button type="submit" variant="secondary">
-            {t("upload.import")}
-          </Button>
-        </form>
-        {linkMsg && <p className="mt-2 text-ok">{linkMsg}</p>}
-        {linkError && <Alert className="mt-2">{t(`errors.${linkError}`)}</Alert>}
+          <form onSubmit={importLink} className="flex flex-wrap items-end gap-2">
+            <div className="min-w-64 flex-1">
+              <Input label={t("upload.linkLabel")} name="url" type="url" required pattern="https://.*" hint={t("upload.linkHint")} />
+            </div>
+            <Button type="submit" variant="secondary">
+              {t("upload.import")}
+            </Button>
+          </form>
+          {linkMsg && <p className="mt-2 text-ok">{linkMsg}</p>}
+          {linkError && <Alert className="mt-2">{t(`errors.${linkError}`)}</Alert>}
+          <p className="m-0">{t("upload.tips")}</p>
+        </div>
       </details>
-      <details className="text-sm">
-        <summary className="cursor-pointer text-muted">{t("upload.tipsTitle")}</summary>
-        <p className="mt-2">{t("upload.tips")}</p>
-      </details>
-    </Card>
+    </div>
   );
 }

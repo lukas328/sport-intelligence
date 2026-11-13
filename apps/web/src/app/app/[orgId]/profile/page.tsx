@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { ProfileEditor } from "./profile-editor";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("profile"))("title") };
-}
-
+/** Old address of the own player profile: now part of "Ich" (SPEC section 6). */
 export default async function ProfilePage({ params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
-  return <ProfileEditor orgId={orgId} />;
+  redirect(`/app/${orgId}/me`);
 }

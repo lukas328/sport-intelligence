@@ -9,8 +9,6 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   await page.getByLabel("Vereinsname").fill("HC Familie");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U13");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
@@ -23,7 +21,7 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   });
 
   // coach invites a parent for Noah
-  await page.goto(`/app/${orgId}/settings`);
+  await page.goto(`/app/${orgId}/club/teams`);
   const parentEmail = uniqueEmail("parent");
   const invite = page.getByRole("form", { name: "Person einladen" });
   await invite.getByLabel("E-Mail").fill(parentEmail);
@@ -59,8 +57,14 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   // coach: similar kits are flagged while creating a match
   await page.goto(`/app/${orgId}/teams/${teamId}/matches`);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Rot");
-  await expect(page.getByLabel("Spielformat")).toHaveValue("adult_2x30");
-  await page.getByLabel("Gegner Feldspieler").fill("#0d6ccc");
+  await page.getByText("Mehr: Wettbewerb, Halle, Spieldauer, Trikots").click();
+  await expect(page.getByLabel("Spieldauer")).toHaveValue("adult_2x30");
+  // the opponent's colour stays empty until somebody picks it: no red, no warning (G7)
+  await expect(page.getByTestId("kit-opponent")).toHaveAttribute("data-open", "true");
+  await expect(page.getByTestId("kit-warning")).toHaveCount(0);
+  // our shirts are the club's colour (real-video test E09): an opponent in nearly the same one
+  const own = await page.getByLabel("Eigene Feldspieler").inputValue();
+  await page.getByLabel("Gegner Feldspieler").fill(own);
   await expect(page.getByTestId("kit-warning")).toContainText("Eigenes Team / Gegner");
   await expectAccessible(page);
 });

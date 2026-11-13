@@ -1,119 +1,133 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 /*
- * Design tokens (docs/DESIGN.md, "Die Halle"). Everything starts from the club colour
- * (lib/color.ts clubStyle): the stage is the raw club colour, the sidebar its deep shade, the
- * page a paper tinted towards it. Text is ink, one signal colour (resin yellow) marks the one
- * thing per screen that needs attention. Green and red only mean goal / no goal, ok / error.
- * The defaults below are the product colour (#0b6bcb) for pages outside a club.
+ * Design tokens: the Anlauf look (docs/design/ux-reset/ANLAUF.md and SPEC.md, ADR 030).
+ * Ground «Stoff»: a neutral cloth with a fine mesh, never tinted by the club. Ink for text,
+ * buttons and links. The club colour only in the Wurf head, the Streifen, the Keil, the active
+ * marker, our own lines and numerals; the opponent's colour only where the opponent is meant.
+ * Yellow (attn) only means «schau hier», always with a word. Green and red only win and loss,
+ * always with the word. One light theme: the cloth is the identity.
+ * Club and opponent values are set per scope by lib/color.ts (kitVars); the defaults below are
+ * the product colour for pages outside a club.
  */
 :root {
-  --club: #0b6bcb;
-  --club-ink: #ffffff;
-  --deep: #06213f;
-  --signal: #ffd23f;
-  --signal-ink: #10151c;
-  --mark: #ffffff;
-  /* resin yellow, fixed: the warning tint must not depend on the club colour */
-  --resin: #ffd23f;
-  --accent-l: #0a66c1;
-  --accent-l-contrast: #ffffff;
-  --paper-l: #eef5fb;
-  --surface-l: #e2edf8;
-  --accent-d: #4890d8;
-  --accent-d-contrast: #000000;
-  --paper-d: #07131f;
-  --surface-d: #0d2239;
-  --raised-d: #0d1d2e;
-  --ok: #166534;
-  --error: #b42318;
-  --warn: #8a5300;
-  --court: #e7efe4;
-  --court-line: #1f2937;
-}
+  --ground: #eceae5;
+  --paper: #f7f6f2;
+  --ink: #16171a;
+  --ink-2: #53565b;
+  --rule: #d6d3cc;
+  --attn: #ffd23c;
+  --attn-ink: #15171a;
+  --win: #17703f;
+  --loss: #a8261e;
+  --court: #0f2333;
+  --court-bar: #0a0d11;
+  --court-text: #c7ced5;
+  --court-ref: #8d97a1;
 
-/* light theme (also the base inside every club scope, so club values take effect) */
-:root,
-.club {
-  --background: var(--paper-l);
-  --raised: #ffffff;
-  --surface: var(--surface-l);
-  --foreground: #10151c;
-  --muted: #4a525e;
-  --border: color-mix(in srgb, #10151c 13%, var(--paper-l));
-  --accent: var(--accent-l);
-  --accent-contrast: var(--accent-l-contrast);
-  --overlay: rgb(10 14 20 / 0.5);
+  /* club and opponent (lib/color.ts kit(): blue club, unknown opponent) */
+  --club: #1f4fd6;
+  --club-2: #ffffff;
+  --club-ink: #ffffff;
+  --club-edge: #1f4fd6;
+  --club-text: #1f4fd6;
+  --club-line: #1f4fd6;
+  --club-pipe: transparent;
+  --club-dot: #1f4fd6;
+  --opp: #646b73;
+  --opp-ink: #ffffff;
+  --opp-edge: #646b73;
+  --opp-line: #646b73;
+  --opp-pipe: transparent;
+  --opp-dot: #646b73;
+  --club-cam: #1f4fd6;
+  --club-cam-ink: #ffffff;
+  --opp-cam: #0f2333;
+  --opp-cam-ink: #ffffff;
+  --opp-cam-edge: #a3aeb8;
+  --opp-cam-trail: #a3aeb8;
+
+  /* names the existing screens use, mapped onto the neutrals until each screen is rebuilt */
+  --background: var(--ground);
+  --raised: var(--paper);
+  --surface: #e3e0d9;
+  --foreground: var(--ink);
+  --muted: var(--ink-2);
+  --border: var(--rule);
+  --accent: var(--ink);
+  --accent-contrast: var(--ground);
+  --deep: var(--ink);
+  --mark: var(--club);
+  --signal: var(--attn);
+  --signal-ink: var(--attn-ink);
+  --resin: var(--attn);
+  --ok: var(--win);
+  --error: var(--loss);
+  --warn: #7a4a00;
+  --court-line: var(--ink);
+  --overlay: rgb(10 13 17 / 0.55);
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]),
-  :root:not([data-theme="light"]) .club {
-    --background: var(--paper-d);
-    --raised: var(--raised-d);
-    --surface: var(--surface-d);
-    --foreground: #eef1f5;
-    --muted: #a6aeb9;
-    --border: color-mix(in srgb, #eef1f5 14%, var(--paper-d));
-    --accent: var(--accent-d);
-    --accent-contrast: var(--accent-d-contrast);
-    --ok: #5ad17e;
-    --error: #ff7b6e;
-    --warn: #f2b84b;
-    --court: #13251a;
-    --court-line: #e5e7eb;
-    --overlay: rgb(0 0 0 / 0.6);
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"],
-:root[data-theme="dark"] .club {
-  --background: var(--paper-d);
-  --raised: var(--raised-d);
-  --surface: var(--surface-d);
-  --foreground: #eef1f5;
-  --muted: #a6aeb9;
-  --border: color-mix(in srgb, #eef1f5 14%, var(--paper-d));
-  --accent: var(--accent-d);
-  --accent-contrast: var(--accent-d-contrast);
-  --ok: #5ad17e;
-  --error: #ff7b6e;
-  --warn: #f2b84b;
-  --court: #13251a;
-  --court-line: #e5e7eb;
-  --overlay: rgb(0 0 0 / 0.6);
-  color-scheme: dark;
-}
-
-/* in the base layer: a club scope's paper must not win over a utility on the same element
-   (bg-club on the onboarding header, bg-raised on dialogs) */
+/* the cloth: neutral ground with a fine mesh of dots */
 @layer base {
+  .cloth,
+  body {
+    background-color: var(--ground);
+    background-image:
+      radial-gradient(rgb(22 23 26 / 0.07) 0.7px, transparent 0.9px),
+      radial-gradient(rgb(22 23 26 / 0.05) 0.7px, transparent 0.9px);
+    background-size:
+      6px 6px,
+      6px 6px;
+    background-position:
+      0 0,
+      3px 3px;
+  }
   .club {
-    background: var(--background);
     color: var(--foreground);
   }
 }
 
-/* the deep surface (sidebar, phone bars): light text on the club's dark colour in every theme */
+/* the ink surface (old sidebar and phone bars, until the frame is rebuilt) */
 .on-deep {
-  --background: var(--deep);
+  --background: var(--ink);
   --raised: rgb(255 255 255 / 0.06);
   --surface: rgb(255 255 255 / 0.09);
   --foreground: #ffffff;
   --muted: rgb(255 255 255 / 0.72);
   --border: rgb(255 255 255 / 0.14);
-  --accent: var(--mark);
-  --accent-contrast: #10151c;
-  background: var(--deep);
+  --accent: #ffffff;
+  --accent-contrast: var(--ink);
+  background: var(--ink);
   color: #ffffff;
-  color-scheme: dark;
 }
 
 @theme inline {
+  --color-ground: var(--ground);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-rule: var(--rule);
+  --color-attn: var(--attn);
+  --color-attn-ink: var(--attn-ink);
+  --color-win: var(--win);
+  --color-loss: var(--loss);
+  --color-court: var(--court);
+  --color-court-bar: var(--court-bar);
+  --color-court-text: var(--court-text);
+  --color-court-ref: var(--court-ref);
+  --color-club: var(--club);
+  --color-club-2: var(--club-2);
+  --color-club-ink: var(--club-ink);
+  --color-club-edge: var(--club-edge);
+  --color-club-text: var(--club-text);
+  --color-opp: var(--opp);
+  --color-opp-ink: var(--opp-ink);
+  --color-opp-edge: var(--opp-edge);
+  --color-club-cam: var(--club-cam);
+  --color-opp-cam: var(--opp-cam);
+
   --color-background: var(--background);
   --color-raised: var(--raised);
   --color-foreground: var(--foreground);
@@ -122,8 +136,6 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-contrast: var(--accent-contrast);
-  --color-club: var(--club);
-  --color-club-ink: var(--club-ink);
   --color-deep: var(--deep);
   --color-signal: var(--signal);
   --color-signal-ink: var(--signal-ink);
@@ -132,13 +144,30 @@
   --color-ok: var(--ok);
   --color-error: var(--error);
   --color-warn: var(--warn);
-  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-barlow-condensed), var(--font-barlow), ui-sans-serif, sans-serif;
-  --font-hand: var(--font-reenie), cursive;
-  --radius-xs: 3px;
-  --radius-sm: 5px;
-  --radius-md: 7px;
-  --radius-lg: 8px;
+
+  /* slanted: titles, numerals, names, navigation. Upright: everything else. Mono: camera times */
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-kanit), var(--font-hanken), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* type sizes for older eyes (UX test H08): nothing that is read under 14 px; secondary text
+     15 px, body 17 px; only mono labels may be 13 px (ANLAUF.md, design-lint) */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.35;
+
+  /* no rounded corners, no shadows: edges are cut, not soft */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --animate-rise: rise 220ms var(--ease-out-quint);
   --animate-fade: fade 160ms ease-out;
@@ -155,6 +184,16 @@
     opacity: 0;
   }
 }
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes appear {
+  to {
+    opacity: 1;
+  }
+}
 
 @layer base {
   html {
@@ -162,39 +201,38 @@
     text-rendering: optimizeLegibility;
   }
   body {
-    background: var(--background);
-    color: var(--foreground);
+    color: var(--ink);
     font-family: var(--font-sans);
-    font-size: 1rem;
-    line-height: 1.5;
-    font-feature-settings: "tnum" 0;
+    font-size: 1.0625rem;
+    line-height: 1.45;
   }
-  /* headings: the condensed cut, like the names on a match sheet */
+  /* titles: slanted */
   h1,
   h2 {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.005em;
-    line-height: 1.05;
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1;
     text-wrap: balance;
   }
   h3 {
-    font-weight: 600;
-    line-height: 1.25;
+    font-weight: 700;
+    line-height: 1.2;
     text-wrap: balance;
   }
   p {
     text-wrap: pretty;
   }
   ::selection {
-    background: color-mix(in srgb, var(--accent) 25%, transparent);
+    background: color-mix(in srgb, var(--ink) 18%, transparent);
   }
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 3px solid var(--ink);
     outline-offset: 2px;
   }
   a {
-    text-underline-offset: 3px;
+    text-underline-offset: 4px;
   }
   input[type="file"] {
     font-size: 0.8125rem;
@@ -202,17 +240,13 @@
   }
   input[type="file"]::file-selector-button {
     margin-right: 0.75rem;
-    border: 0;
-    border-radius: 5px;
-    background: var(--surface);
+    border: 2px solid var(--ink);
+    background: transparent;
     padding: 0.375rem 0.875rem;
     font: inherit;
-    font-weight: 500;
-    color: var(--foreground);
+    font-weight: 700;
+    color: var(--ink);
     cursor: pointer;
-  }
-  input[type="file"]::file-selector-button:hover {
-    background: var(--border);
   }
   input[type="color"] {
     min-height: 2.5rem;
@@ -224,7 +258,6 @@
   }
   input[type="color"]::-webkit-color-swatch {
     border: 0;
-    border-radius: 3px;
   }
   table th,
   table td {
@@ -241,81 +274,113 @@
 }
 
 @layer utilities {
-  /* figures that are read like a scoreboard */
-  .font-score {
+  /* slanted titles, names and navigation */
+  .font-slant,
+  .font-display,
+  .font-wide,
+  .font-narrow {
     font-family: var(--font-display);
+    font-style: italic;
     font-weight: 800;
-    font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
   }
-  /* the condensed display cut for names, dates and short labels */
-  .font-wide,
-  .font-narrow,
-  .font-display {
+  /* slanted numerals: results, counts, minutes */
+  .font-num,
+  .font-score {
     font-family: var(--font-display);
-    font-weight: 700;
+    font-style: italic;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
-  /* match-sheet table: hairline grid, figures right-aligned, a firm rule under the head */
-  /* a table like a printed match sheet: a strong rule on top, hairlines between rows, no card */
+  /* the active marker: a short slanted band in the club colour */
+  .mark-band {
+    background: var(--club);
+    box-shadow: inset 0 0 0 1px var(--club-edge);
+    transform: skewX(-14deg);
+  }
+  /* the outlines behind a result: the slant in depth */
+  .score-echo {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--club-ink);
+  }
+  /* small label above a block */
+  .eyebrow,
+  .kick {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink-2);
+  }
+  /* a table like a printed match sheet: firm rule under the head, hairlines between rows */
   .sheet {
-    border-top: 2px solid var(--foreground);
+    border-top: 2px solid var(--ink);
   }
   .sheet table {
     border-collapse: collapse;
   }
   .sheet th,
   .sheet td {
-    padding: 0.7rem 0.9rem;
+    padding: 0 0.625rem;
+    height: 3.25rem;
     text-align: right;
     white-space: nowrap;
-    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+    border-bottom: 1px solid var(--rule);
   }
   .sheet thead th {
+    height: auto;
+    padding-block: 0.625rem;
     font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--muted);
-    border-bottom: 2px solid color-mix(in srgb, var(--foreground) 75%, transparent);
+    color: var(--ink-2);
+    border-bottom: 2px solid var(--ink);
   }
   .sheet th:first-child,
   .sheet td:first-child,
   .sheet .text-left {
     text-align: left;
-  }
-  .sheet tbody tr:hover {
-    background: var(--surface);
+    padding-left: 0;
   }
   .sheet tbody tr:last-child > * {
     border-bottom: 0;
   }
-  /* full-bleed band inside the content column (the stage): reaches the column edges */
-  .bleed {
-    margin-inline: calc(50% - 50vw);
+  /* zones that reach the edges of the content column (Wurf head, Streifen, Seitenkopf) */
+  .bleed-x {
+    margin-inline: -1rem;
   }
-  @media (min-width: 1024px) {
-    .bleed {
-      margin-inline: calc(50% - (100vw - 16rem) / 2);
+  @media (min-width: 768px) {
+    .bleed-x {
+      margin-inline: -2rem;
     }
   }
+  .bleed,
   .bleed-full {
     margin-inline: calc(50% - 50vw);
   }
-  /* real coach notes only (never invented text) */
+  /* real coach notes only (never invented text): italic, with a club rule */
   .font-hand {
-    font-family: var(--font-hand);
-    font-size: 1.6rem;
-    line-height: 1.1;
-  }
-  /* small label above a title or a block: sentence case, quiet */
-  .eyebrow {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--muted);
+    font-style: italic;
+    font-size: 1.0625rem;
+    line-height: 1.4;
   }
   .scrollbar-none {
     scrollbar-width: none;
   }
   .scrollbar-none::-webkit-scrollbar {
     display: none;
+  }
+  /* graphics: lines draw themselves in order (--i), dashed estimates fade in */
+  @media (prefers-reduced-motion: no-preference) {
+    .play .ln {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw 0.7s cubic-bezier(0.3, 0.6, 0.3, 1) forwards;
+      animation-delay: calc(var(--i, 0) * 140ms + 0.2s);
+    }
+    .play .ln-e {
+      opacity: 0;
+      animation: appear 0.5s ease-out forwards;
+      animation-delay: calc(var(--i, 0) * 140ms + 0.4s);
+    }
   }
 }

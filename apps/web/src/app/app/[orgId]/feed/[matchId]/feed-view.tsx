@@ -109,14 +109,14 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
               </button>
             ))}
           </fieldset>
-          <p className="flex max-w-[17rem] justify-between text-[0.8125rem] text-muted" aria-hidden>
+          <p className="flex max-w-[17rem] justify-between text-[0.9375rem] text-muted" aria-hidden>
             <span>{t("ratingLow")}</span>
             <span>{t("ratingHigh")}</span>
           </p>
           <label className="block text-sm font-medium" htmlFor="assess-text">
             {t("sentence")}
           </label>
-          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full rounded-md bg-raised p-3 ring-1 ring-inset ring-border" />
+          <textarea id="assess-text" name="text" maxLength={500} rows={2} className="w-full bg-raised p-3 ring-1 ring-inset ring-border" />
           <Button type="submit" disabled={!rating} loading={assess.isPending}>
             {t("send")}
           </Button>

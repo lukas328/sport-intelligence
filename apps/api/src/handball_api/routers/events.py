@@ -98,7 +98,9 @@ async def match_stats(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
 
 @router.put("/matches/{match_id}/kickoff", status_code=204)
 async def set_kickoff(match_id: uuid.UUID, data: KickoffIn, scope: OrgDep) -> None:
-    await service.set_kickoff(scope.ctx, match_id, data.period, data.t_ms, data.clock_s)
+    await service.set_kickoff(
+        scope.ctx, match_id, data.period, data.t_ms, data.clock_s, absent=data.absent
+    )
 
 
 @router.post("/matches/{match_id}/events/import", response_model=FeedImportResult)
@@ -217,6 +219,16 @@ async def season_stats(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) 
     and `xg_coverage` = shots with xG / shots on target (null without shots), and
     shooting/save percentages only from matches with recorded misses or saves."""
     return await insights_service.season_stats(scope.ctx, team_id, season_id)
+
+
+@router.get(
+    "/teams/{team_id}/seasons/{season_id}/themes", response_model=dict[str, Any], tags=["insights"]
+)
+async def season_themes(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Themes that repeat over the season's matches with video (SPEC 7.9): empty below two such
+    matches. Each theme has `matches` (in how many it showed) of `of`, and `per_match` with the
+    value of its figure, whether it fired, and the scenes (events) behind it."""
+    return await insights_service.season_themes(scope.ctx, team_id, season_id)
 
 
 @router.get(

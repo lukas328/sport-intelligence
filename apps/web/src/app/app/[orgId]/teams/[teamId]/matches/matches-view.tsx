@@ -5,7 +5,7 @@ import { Camera, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -13,15 +13,23 @@ import { PageHeader } from "@/components/ui/page-header";
 import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { NewMatchForm } from "./new-match-form";
+import { StartView } from "./start-view";
 import { PaperImport } from "./paper-import";
+import { PaperView } from "../paper/paper-view";
 
 type Match = Schemas["MatchSummary"];
 
-export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: string; teamId: string; matches: Match[]; canWrite: boolean }) {
+export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: string; teamId: string; teamName?: string; matches: Match[]; canWrite: boolean }) {
   const t = useTranslations();
   const params = useSearchParams();
   const router = useRouter();
   const [open, setOpen] = useState(params.get("new") === "1");
+  // "Video hochladen" from the frame: pick the match the video belongs to, or create it
+  const [upload, setUpload] = useState(params.get("upload") === "1");
+  useEffect(() => setUpload(params.get("upload") === "1"), [params]);
+  // "Spielbericht hinzufügen": photo, file or link, one dialog (SPEC section 6)
+  const [report, setReport] = useState(params.get("report") === "1");
+  useEffect(() => setReport(params.get("report") === "1"), [params]);
   // kept here: the import refreshes the list, which swaps the layout below
   const [warnings, setWarnings] = useState<string[]>([]);
   const notice = warnings.length > 0 && (
@@ -39,13 +47,13 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   const now = useNow({ updateInterval: 60_000 });
   const upcoming = matches.filter((m) => new Date(m.kickoff_at) > now && m.score_own == null).sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at));
   const played = matches.filter((m) => !upcoming.includes(m)).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at));
-  const extra = canWrite && (
+  // «Spielbericht hinzufügen» only while a played match has none (UX test A02)
+  const extra = canWrite && (played.length === 0 || played.some((m) => m.kind !== "training" && !m.has_report)) && (
     <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
-      <Link href={`/app/${orgId}/teams/${teamId}/paper`} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-accent">
+      <Link href={`/app/${orgId}/teams/${teamId}/matches?report=1`} onClick={() => setReport(true)} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-accent" data-testid="add-report">
         <Camera aria-hidden className="size-4" />
-        {t("matches.photoSheet")}
+        {t("matches.addReport")}
       </Link>
-      <PaperImport orgId={orgId} teamId={teamId} onWarnings={setWarnings} />
     </p>
   );
 
@@ -54,6 +62,46 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
       <div className="space-y-8">
         <PageHeader title={t("matches.title")} />
         {notice}
+        {canWrite && (
+        <Dialog
+          open={report}
+          onOpenChange={(o) => {
+            setReport(o);
+            if (!o && params.get("report")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          title={t("matches.addReport")}
+          wide
+        >
+          <div className="space-y-8" data-testid="report-dialog">
+            <PaperView orgId={orgId} teamId={teamId} />
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
+              {t("matches.reportFile")}
+              <PaperImport
+                orgId={orgId}
+                teamId={teamId}
+                onWarnings={(w) => {
+                  // imported: the dialog closes and the list shows the notes
+                  setWarnings(w);
+                  setReport(false);
+                }}
+              />
+            </p>
+          </div>
+        </Dialog>
+      )}
+      {canWrite && (
+        <UploadPicker
+          open={upload}
+          onOpenChange={(o) => {
+            setUpload(o);
+            if (!o && params.get("upload")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          orgId={orgId}
+          teamId={teamId}
+          matches={matches}
+        />
+      )}
+
         <p className="sr-only">{t("matches.empty")}</p>
         {canWrite ? (
           <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
@@ -74,75 +122,128 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
     );
   }
 
+  const newMatch = canWrite && (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o && params.get("new")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+      }}
+      title={t("matches.new")}
+      wide
+      trigger={
+        <Button variant="secondary" data-testid="new-match">
+          <Plus aria-hidden />
+          {t("matches.newShort")}
+        </Button>
+      }
+    >
+      <NewMatchForm orgId={orgId} teamId={teamId} />
+    </Dialog>
+  );
+
   return (
     <div className="space-y-10">
-      <PageHeader
-        title={t("matches.title")}
+      <StartView
+        orgId={orgId}
+        played={played}
+        upcoming={upcoming}
+        canWrite={canWrite}
         actions={
           canWrite && (
-            <Dialog
-              open={open}
-              onOpenChange={(o) => {
-                setOpen(o);
-                if (!o && params.get("new")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
-              }}
-              title={t("matches.new")}
-              wide
-              trigger={
-                <Button data-testid="new-match">
-                  <Plus aria-hidden />
-                  {t("matches.newShort")}
-                </Button>
-              }
-            >
-              <NewMatchForm orgId={orgId} teamId={teamId} />
-            </Dialog>
+            <>
+              {newMatch}
+              {extra}
+            </>
           )
         }
       />
-      {canWrite && <div className="-mt-6">{extra}</div>}
       {notice}
-      {upcoming.length > 0 ? (
-        <MatchList title={t("matches.upcoming")} orgId={orgId} matches={upcoming} />
-      ) : (
-        // nothing scheduled is worth a line, with the way to change it
-        <p className="flex flex-wrap items-baseline gap-x-3 border-t-2 border-foreground pt-3">
-          <span className="text-2xl font-display">{t("matches.upcoming")}</span>
-          <span className="text-muted">{t("matches.noneUpcoming")}</span>
-          {canWrite && (
-            <Link href={`/app/${orgId}/teams/${teamId}/matches?new=1`} className="font-medium text-accent hover:underline" onClick={() => setOpen(true)}>
-              {t("matches.scheduleOne")}
-            </Link>
-          )}
-        </p>
+      {canWrite && (
+        <Dialog
+          open={report}
+          onOpenChange={(o) => {
+            setReport(o);
+            if (!o && params.get("report")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          title={t("matches.addReport")}
+          wide
+        >
+          <div className="space-y-8" data-testid="report-dialog">
+            <PaperView orgId={orgId} teamId={teamId} />
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
+              {t("matches.reportFile")}
+              <PaperImport
+                orgId={orgId}
+                teamId={teamId}
+                onWarnings={(w) => {
+                  // imported: the dialog closes and the list shows the notes
+                  setWarnings(w);
+                  setReport(false);
+                }}
+              />
+            </p>
+          </div>
+        </Dialog>
       )}
-      {played.length > 0 && <MatchList title={t("matches.played")} orgId={orgId} matches={played} countMissing={canWrite} />}
+      {canWrite && (
+        <UploadPicker
+          open={upload}
+          onOpenChange={(o) => {
+            setUpload(o);
+            if (!o && params.get("upload")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+          }}
+          orgId={orgId}
+          teamId={teamId}
+          matches={matches}
+        />
+      )}
+
     </div>
   );
 }
 
-function MatchList({ title, orgId, matches, countMissing = false }: { title: string; orgId: string; matches: Match[]; countMissing?: boolean }) {
+/** The upload starts from a match (UX test H07): first only the list, the last played match on
+ * top and marked; a new match is a second step of its own. */
+function UploadPicker({ open, onOpenChange, orgId, teamId, matches }: { open: boolean; onOpenChange: (o: boolean) => void; orgId: string; teamId: string; matches: Match[] }) {
   const t = useTranslations();
-  // demo data said once, not on every row
-  const allDemo = matches.every((m) => m.is_demo);
-  // what is still open: played matches without a video; the newest of them carries the signal
-  const missing = matches.filter((m) => m.score_own != null && matchState(m).label === "matches.noVideoYet");
+  const format = useFormatter();
+  const [other, setOther] = useState(false);
+  const now = Date.now();
+  const candidates = matches
+    .filter((m) => !m.has_video && m.kind !== "training" && new Date(m.kickoff_at).getTime() < now + 86_400_000)
+    .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at))
+    .slice(0, 5);
   return (
-    <section className="space-y-3">
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <h2 className="text-2xl">{title}</h2>
-        {countMissing && missing.length > 0 && <p className="text-sm text-muted">{t("matches.withoutVideo", { n: missing.length, total: matches.length })}</p>}
-        {allDemo && <p className="text-sm text-muted">{t("matches.allDemo")}</p>}
+    <Dialog open={open} onOpenChange={(o) => (setOther(false), onOpenChange(o))} title={t("matches.uploadVideo")} wide>
+      <div className="space-y-6" data-testid="upload-picker">
+        {!other && candidates.length > 0 && (
+          <section className="space-y-2">
+            <h3 className="text-[17px] font-bold">{t("matches.uploadFor")}</h3>
+            <ul className="m-0 list-none border-t-2 border-ink p-0">
+              {candidates.map((m, i) => (
+                <li key={m.id} className="border-b border-rule">
+                  <Link href={`/app/${orgId}/matches/${m.id}?tab=video#upload`} className={cn("flex min-h-14 items-center justify-between gap-3 px-2 py-2 text-[17px] no-underline", i === 0 ? "bg-ink text-ground" : "text-ink hover:bg-surface")} data-testid={i === 0 ? "upload-last" : undefined}>
+                    <span className="font-bold">{m.opponent_name}</span>
+                    <span className={cn("text-[15px]", i === 0 ? "text-ground" : "text-ink-2")}>{format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "short" })}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {!other && candidates.length > 0 ? (
+          <button type="button" onClick={() => setOther(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" data-testid="upload-other">
+            {t("matches.uploadOther")}
+          </button>
+        ) : (
+          <section className="space-y-3">
+            <h3 className="text-[17px] font-bold">{t("matches.new")}</h3>
+            <NewMatchForm orgId={orgId} teamId={teamId} />
+          </section>
+        )}
       </div>
-      {/* a fixture list on the hall's notice board: rules, no card */}
-      <ul className="border-t-2 border-foreground" data-testid="match-list">
-        {matches.map((m, i) => (
-          <li key={m.id} className={cn(i > 0 && "border-t border-foreground/10")}>
-            <MatchRow orgId={orgId} m={m} demoTag={!allDemo} signal={countMissing && m.id === missing[0]?.id} />
-          </li>
-        ))}
-      </ul>
-    </section>
+    </Dialog>
   );
 }
 
@@ -187,7 +288,7 @@ export function MatchRow({ orgId, m, demoTag = true, signal = false }: { orgId: 
           <span
             aria-hidden
             className={cn(
-              "grid size-8 place-items-center rounded-[4px] font-score text-lg text-background",
+              "grid size-8 place-items-center font-score text-lg text-background",
               result === "won" ? "bg-ok" : result === "lost" ? "bg-error" : "bg-muted",
             )}
           >

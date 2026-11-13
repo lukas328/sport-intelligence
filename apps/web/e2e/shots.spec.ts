@@ -55,17 +55,19 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await page.getByLabel("Vereinsname").fill("HC Würfe");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
   await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
-  await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByTestId("player").filter({ visible: true })).toBeVisible({ timeout: 180_000 });
 
   // court from the hall: one look at the orange lines, "Passt", and on to the next open step
+  // the setup by hand sits behind one toggle; its questions are asked in Prüfen (UX test B10)
+  // without goals on the stage the video tab shows the plain video first (UX test N04)
+  if (await page.getByTestId("open-bench").isVisible()) await page.getByTestId("open-bench").click();
+  await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
   await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Seefeld). Liegen die orangen Linien")).toBeVisible();
   await expect(page.getByTestId("court-preview")).toBeVisible();
@@ -80,13 +82,13 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(panel.getByRole("heading", { name: "Würfe prüfen" })).toBeVisible();
   // the report against the video as one row of counts
   const report = page.getByTestId("shot-candidates-report");
-  await expect(report).toContainText("Matchbericht: 24 Würfe");
+  await expect(report).toContainText("Spielbericht: 24 Würfe");
   for (const [label, n] of [["im Video bestätigt", "0"], ["vorgeschlagen", "1"], ["ohne Stelle im Video", "2"], ["ausserhalb des Videos", "21"]] as const) {
     await expect(report.locator("dl > div").filter({ has: page.getByText(label, { exact: true }) }).locator("dd")).toHaveText(n);
   }
   await expect(page.getByTestId("shot-accept")).toContainText("Parade, Wurf von #14 Kurt Beispiel (TV Testdorf)");
   // one count: the report's moment first, the other open ones after it
-  await expect(page.getByTestId("shot-candidate-focus")).toContainText("1 von 1 mit Matchbericht · 2 weitere offen");
+  await expect(page.getByTestId("shot-candidate-focus")).toContainText("1 von 1 mit Spielbericht · 2 weitere offen");
   // no throw-off yet: the times are the report's, one click leads to the throw-off step
   await expect(page.getByTestId("shot-candidates-kickoff")).toContainText("Der Anwurf fehlt noch");
   await expectAccessible(page);
@@ -96,7 +98,7 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(rows).toHaveCount(1);
   await rows.first().focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 12:45: Parade, Wurf von #14 Kurt Beispiel (TV Testdorf) aus dem Matchbericht.");
+  await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 12:45: Parade, Wurf von #14 Kurt Beispiel (TV Testdorf) aus dem Spielbericht.");
   expect(reviews.at(-1)).toEqual({ status: "confirmed" });
 
   // the report's moments are done: the open ones follow, and the video goes to the next one

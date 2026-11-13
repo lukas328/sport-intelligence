@@ -29,7 +29,9 @@ def test_failure_codes() -> None:
     assert support.failure_code(None) == "generic"
 
 
-async def test_failed_analysis_is_credited(make_api: Callable[[], Api]) -> None:
+async def test_failed_analysis_is_credited(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender
+) -> None:
     api = make_api()
     ids = await setup_club(api)
     org = ids["org"]
@@ -48,6 +50,11 @@ async def test_failed_analysis_is_credited(make_api: Callable[[], Api]) -> None:
     assert (a["status"], a["error_code"]) == ("failed", "calibration")
     notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()["items"]
     assert notes[0]["kind"] == "analysis_failed" and notes[0]["params"]["reason"] == "calibration"
+    # the coach also gets an e-mail naming the match and the way out (UX test H06, B29)
+    assert notes[0]["params"]["opponent"]
+    mail = outbox.outbox[-1]
+    assert notes[0]["params"]["opponent"] in mail.subject
+    assert "liess sich nicht auswerten" in mail.subject and f"/matches/{m['id']}" in mail.text
     usage = (await api.get(f"/v1/orgs/{org}/billing")).json()["usage"]
     assert usage["max_matches_per_season"] == 0  # the failed match does not count
 
@@ -123,7 +130,7 @@ async def test_onboarding_series_and_unsubscribe(
             return n
 
     before = len(outbox.outbox)
-    assert await run(0) == 1 and outbox.outbox[-1].subject == "Willkommen bei Handball AI"
+    assert await run(0) == 1 and outbox.outbox[-1].subject == "Willkommen bei Handball Intelligence"
     assert await run(0) == 0
     assert (
         await run(5) == 1 and "Videositzung" in outbox.outbox[-1].subject
@@ -138,3 +145,70 @@ async def test_onboarding_series_and_unsubscribe(
     assert (
         await api.http.get(f"/v1/onboarding/unsubscribe?u={user_id}&t=wrong")
     ).status_code == 404
+
+
+def test_analysis_ready_mail_names_the_match() -> None:
+    from handball_api.services.mail_templates import render
+
+    mail = render(
+        "analysis_ready", "de-CH", to="a@b.ch", name="Hans", team="HC Z", opponent="TV T", link="x"
+    )
+    assert mail.subject == "Die drei Dinge gegen TV T sind da"
+    assert "HC Z gegen TV T" in mail.text and mail.text.endswith("x")
+
+
+def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
+    """UX test N05 and N20: without three things the mail says the analysis is done and how many
+    questions wait; an account without a name is greeted with «Hallo» alone."""
+    from handball_api.services.mail_templates import render
+
+    mail = render(
+        "analysis_questions",
+        "de-CH",
+        to="hans.p130@example.ch",
+        name="hans.p130",
+        team="HC Z",
+        opponent="TV T",
+        link="x",
+        questions=2,
+    )
+    assert mail.subject == "Die Analyse gegen TV T ist fertig"
+    assert "drei Dinge" not in mail.text and "2 Fragen an dich" in mail.text
+    assert mail.text.startswith("Hallo\n")
+    # singular and plural as whole sentences, in every language (UX test round 3, final check)
+    for loc, n, sentence in (
+        ("de-CH", 1, "Eine Frage an dich hilft ihr weiter:"),
+        ("de-CH", 2, "2 Fragen an dich helfen ihr weiter:"),
+        ("en", 1, "One question for you helps it on:"),
+        ("en", 2, "2 questions for you help it on:"),
+        ("fr", 1, "Une question pour toi l'aide à avancer :"),
+        ("fr", 2, "2 questions pour toi l'aident à avancer :"),
+    ):
+        mail_n = render(
+            "analysis_questions",
+            loc,
+            to="a@b.ch",
+            name="H",
+            team="Z",
+            opponent="T",
+            link="x",
+            questions=n,
+        )
+        assert sentence in mail_n.text, mail_n.text
+    # further moments after the most important questions: the mail says so (real-video test G1)
+    more = render(
+        "analysis_questions",
+        "de-CH",
+        to="a@b.ch",
+        name="H",
+        team="Z",
+        opponent="T",
+        link="x",
+        questions=12,
+        more_moments=10,
+    )
+    assert "12 Fragen an dich helfen ihr weiter, danach können weitere Momente folgen:" in more.text
+    named = render(
+        "analysis_no_goals", "de-CH", to="a@b.ch", name="Hans", team="Z", opponent="T", link="x"
+    )
+    assert named.text.startswith("Hallo Hans\n") and "keine Tore" in named.text

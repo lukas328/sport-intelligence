@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Alert, Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { serverApi } from "@/lib/api";
 import { AcceptButton } from "./accept-button";
 
@@ -14,14 +14,14 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   ]);
   if (!inv) {
     return (
-      <Card>
+      <div className="border-t-2 border-ink pt-6">
         <Alert>{t("invite.notFound")}</Alert>
-      </Card>
+      </div>
     );
   }
   const role = inv.team_role ?? inv.org_role;
   return (
-    <Card className="space-y-4">
+    <div className="space-y-4 border-t-2 border-ink pt-6">
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("invite.title")}</h1>
       <p>{t("invite.intro", { org: inv.organization_name })}</p>
       <ul className="space-y-1 text-sm text-muted">
@@ -37,12 +37,12 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         <div className="flex flex-col gap-2">
           <Link
             href={inv.account_exists ? `/login?next=/invite/${token}` : `/register?invite=${token}`}
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-contrast"
+            className="inline-flex min-h-10 items-center justify-center bg-accent px-4 py-2 text-sm font-medium text-accent-contrast"
           >
             {inv.account_exists ? t("invite.login") : t("invite.register")}
           </Link>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

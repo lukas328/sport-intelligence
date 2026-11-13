@@ -10,6 +10,8 @@ export interface ShellTeam {
   is_youth: boolean;
   season: string | null;
   season_id: string | null;
+  /** "Teamfunktionen" (ADR 029): training, dates, RSVP, tasks, player and parent areas */
+  team_features: boolean;
 }
 
 export interface ShellOrg {
@@ -17,6 +19,8 @@ export interface ShellOrg {
   name: string;
   has_logo: boolean;
   primary_color: string;
+  /** the club's second colour (lib/color.ts kit) */
+  secondary_color?: string | null;
   my_role: string;
 }
 
@@ -26,7 +30,7 @@ export interface ShellValue {
   teams: ShellTeam[];
   team: ShellTeam | null;
   mode: Mode;
-  me: { name: string; email: string };
+  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
   setTeam: (id: string) => void;
 }
 
@@ -44,7 +48,6 @@ export function useOptionalShell(): ShellValue | null {
 }
 
 export const TEAM_COOKIE = "hb_team";
-export const THEME_COOKIE = "hb_theme";
 
 export function setCookie(name: string, value: string) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`;

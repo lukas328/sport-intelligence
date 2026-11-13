@@ -61,14 +61,14 @@ export function Stage({
 /** Buttons on the stage: solid in the stage's ink, or outlined. */
 export const stageButton = (variant: "solid" | "outline" = "solid") =>
   cn(
-    "inline-flex min-h-11 items-center gap-2 rounded-md px-5 text-[0.9375rem] font-semibold transition-[filter,background] duration-150 [&_svg]:size-4",
+    "inline-flex min-h-11 items-center gap-2 px-5 text-[0.9375rem] font-semibold transition-[filter,background] duration-150 [&_svg]:size-4",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current",
     variant === "solid" ? "bg-club-ink text-club hover:brightness-95" : "ring-2 ring-inset ring-current/60 hover:bg-club-ink/10",
   );
 
 /** Small label on the stage (demo data, estimates): outlined in the stage ink. */
 export function StageTag({ children }: { children: ReactNode }) {
-  return <span className="inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ring-current/50">{children}</span>;
+  return <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ring-current/50">{children}</span>;
 }
 
 /** A quiet text action on the stage, next to the buttons. */

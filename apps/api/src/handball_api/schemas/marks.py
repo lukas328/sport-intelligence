@@ -58,6 +58,7 @@ class SyncOut(ApiModel):
 
 class MarkOut(ApiModel):
     id: uuid.UUID
+    client_id: uuid.UUID | None = None
     session_id: uuid.UUID
     key: str
     label: str | None

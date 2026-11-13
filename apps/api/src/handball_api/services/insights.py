@@ -29,6 +29,8 @@ from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, visible_team_ids
 from handball_metrics.insights import VERSION, match_insights
 from handball_metrics.stats import METRICS_VERSION
+from handball_metrics.themes import THEMES_VERSION, MatchInput
+from handball_metrics.themes import season_themes as season_themes_of
 
 
 async def _matches_with_events(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> list[Match]:
@@ -464,3 +466,72 @@ async def match_pdf(ctx: Ctx, match_id: uuid.UUID, lang: str) -> tuple[bytes, st
     )
     filename = f"matchreport-{match.kickoff_at:%Y-%m-%d}-{opp}".lower().replace(" ", "-")
     return pdf, "".join(c for c in filename if c.isalnum() or c in "-_") + ".pdf"
+
+
+# ---- season themes (SPEC 7.9, "Was sich wiederholt") -----------------------------------------
+
+
+async def _matches_with_video(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> list[Match]:
+    out = []
+    for m in await _matches_with_events(ctx, team_id, season_id):
+        if await timeline_video(ctx, m.id, ready=True) is not None:
+            out.append(m)
+    return out
+
+
+async def _scenes(
+    ctx: Ctx, match_id: uuid.UUID, evidence: dict[str, Any], limit: int = 12
+) -> list[dict[str, Any]]:
+    """The events behind a theme in one match (the scenes), in match order."""
+    q = select(Event).where(Event.match_id == match_id)
+    for key, col in (
+        ("side", Event.side),
+        ("type", Event.type),
+        ("outcome", Event.outcome),
+        ("zone", Event.shot_zone),
+        ("goal_zone", Event.goal_zone),
+    ):
+        if evidence.get(key) is not None:
+            q = q.where(col == evidence[key])
+    if evidence.get("zones"):
+        q = q.where(Event.shot_zone.in_(evidence["zones"]))
+    q = q.order_by(Event.period, Event.clock_s.nulls_last(), Event.t_ms.nulls_last()).limit(limit)
+    return [
+        {"event_id": str(e.id), "t_ms": e.t_ms, "period": e.period, "clock_s": e.clock_s}
+        for e in (await ctx.db.scalars(q)).all()
+    ]
+
+
+async def season_themes(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> dict[str, Any]:
+    """Themes over the matches with video (two at least), each with a value and scenes per match."""
+    team = await get_team(ctx, team_id, Action.MATCH_READ)
+    await billing.require_feature(ctx, "insights", team.organization_id)
+    version = await _season_version(ctx, team.id, season_id) + f":{THEMES_VERSION}"
+    cached = await events_service.cache_get(ctx, "themes", season_id, version)
+    if cached is not None:
+        return cached
+    matches = await _matches_with_video(ctx, team.id, season_id)
+    inputs = []
+    for m in matches:
+        stats = await events_service.stats_for(ctx, m)
+        items = (await insights(ctx, m.id))["insights"] if stats["quality"]["events"] else []
+        inputs.append(MatchInput(match_id=str(m.id), stats=stats, insights=items))
+    themes = season_themes_of(inputs)
+    for t in themes:
+        for p in t["per_match"]:
+            p["scenes"] = await _scenes(ctx, uuid.UUID(p["match_id"]), p.pop("evidence"))
+    data = {
+        "version": THEMES_VERSION,
+        "matches_with_video": len(matches),
+        "matches": [
+            {
+                "match_id": str(m.id),
+                "kickoff_at": m.kickoff_at.isoformat(),
+                "opponent_id": str(m.opponent_id),
+            }
+            for m in matches
+        ],
+        "themes": themes,
+    }
+    await events_service.cache_put(ctx, team.organization_id, "themes", season_id, version, data)
+    return data

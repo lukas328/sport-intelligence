@@ -45,37 +45,72 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
 }
 
-/** Team area: "Team" in the main navigation, then a section (Kader, Termine). */
-export async function openTeam(page: Page, section?: "Kader" | "Termine") {
+/** Team area: "Team" in the main navigation, then a tab (Termine needs Teamfunktionen). */
+export async function openTeam(page: Page, section?: "Team" | "Termine") {
   await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
-  if (!section || section === "Kader") return;
+  if (!section || section === "Team") return;
   await follow(page, page.getByRole("link", { name: section, exact: true }), /\/schedule$/);
 }
 
-/** Matches area: "Spiele" in the main navigation, then a section (Spielplan, Saison, Bibliothek). */
+/** Spiele in the main navigation (the start for staff). Saison is a destination of its own;
+ * "Bibliothek" is the collections tab of Szenen (SPEC section 6). */
 export async function openMatches(page: Page, section?: "Spielplan" | "Saison" | "Bibliothek") {
+  if (section === "Saison") return follow(page, page.getByRole("link", { name: "Saison", exact: true }).first(), /\/season$/);
+  if (section === "Bibliothek") return openScenes(page, "Sammlungen");
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
-  if (!section || section === "Spielplan") return;
-  await follow(page, page.getByRole("link", { name: section, exact: true }), section === "Saison" ? /\/season$/ : /\/library$/);
 }
 
-/** Library entry (Playlists, Präsentationen, Szenensuche); plays sit in Training. */
-export async function openLibrary(page: Page, entry: "Playlists" | "Präsentationen" | "Szenensuche") {
-  await openMatches(page, "Bibliothek");
-  const path = { Playlists: "playlists", Präsentationen: "presentations", Szenensuche: "search" }[entry];
-  await follow(page, page.getByRole("link", { name: new RegExp(`^${entry}`) }), new RegExp(`/${path}$`));
+/** Szenen in the main navigation, then a tab (Szenen, Sammlungen, Spielzüge, Tabelle). */
+export async function openScenes(page: Page, tab?: "Szenen" | "Sammlungen" | "Spielzüge" | "Tabelle") {
+  await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
+  if (!tab || tab === "Szenen") return;
+  const path = { Sammlungen: "collections", Spielzüge: "plays", Tabelle: "matrix" }[tab];
+  // Szenen has no tabs: the Sammlungen, plays and the table are links on the page
+  const name = tab === "Sammlungen" ? "Alle Sammlungen" : tab;
+  await follow(page, page.getByRole("link", { name, exact: true }).first(), new RegExp(`/${path}$`));
 }
 
-/** Training area, then the plays. */
+/** Under Sammlungen: the collections (playlists) and those to show (presentations); the scene
+ * search is Szenen itself. */
+export async function openLibrary(page: Page, entry: "Sammlungen" | "Zum Zeigen" | "Szenen") {
+  if (entry === "Szenen") return openScenes(page);
+  await openScenes(page, "Sammlungen");
+  const path = { Sammlungen: "playlists", "Zum Zeigen": "presentations" }[entry];
+  // the content link, not the tab of the same name (the tabs are visible on every width now)
+  await follow(page, page.locator("main a:not(nav a)").filter({ hasText: new RegExp(`^${entry}`) }).first(), new RegExp(`/${path}$`));
+}
+
+/** Plays: a tab of Szenen. */
 export async function openPlays(page: Page) {
-  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
-  await follow(page, page.getByRole("link", { name: "Spielzüge", exact: true }), /\/plays$/);
+  await openScenes(page, "Spielzüge");
 }
 
-/** Match page: analysis view and one of its sections. */
-export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Matchbericht") {
-  await page.getByRole("tab", { name: "Analyse", exact: true }).click();
-  await page.getByRole("tab", { name: section, exact: true }).click();
+/** The training plan is out of the main navigation (SPEC section 1, "Next"); its route stays. */
+export async function openTraining(page: Page) {
+  const team = /\/app\/[^/]+\/teams\/[0-9a-f-]{36}/.exec(page.url())?.[0];
+  if (!team) await follow(page, page.getByRole("link", { name: "Team", exact: true }).first(), /\/teams\/[^/]+$/);
+  const base = /\/app\/[^/]+\/teams\/[0-9a-f-]{36}/.exec(page.url())![0];
+  await page.goto(`${base}/training`);
+  await page.waitForURL(/\/training$/);
+}
+
+/** Match page: one level of tabs, Spiel · Video · Zahlen (SPEC 7.2 to 7.4). "Übersicht" is on
+ * Spiel; the figure sheets are stacked on Zahlen, each under its heading. */
+export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Spielbericht") {
+  if (section === "Übersicht") {
+    // the comparison sits in Zahlen › Alle Zahlen; «Mehr zum Spiel» keeps the course (UX test B08)
+    await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
+    const all = page.getByTestId("numbers-more");
+    if (!(await all.evaluate((d) => (d as HTMLDetailsElement).open))) await all.locator(":scope > summary").click();
+    await page.locator("#numbers-overview").scrollIntoViewIfNeeded();
+    return;
+  }
+  await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
+  const id = { Spielbericht: "report", Würfe: "shots", Torhüter: "keepers", Laufleistung: "physical" }[section];
+  // the full report, shots, goalkeepers and running figures sit behind «Alle Zahlen»
+  const more = page.getByTestId("numbers-more");
+  if (!(await more.evaluate((d) => (d as HTMLDetailsElement).open))) await more.locator(":scope > summary").click();
+  await page.locator(`#numbers-${id}`).scrollIntoViewIfNeeded();
 }
 
 /** Match page: an entry of the "Mehr" menu. */

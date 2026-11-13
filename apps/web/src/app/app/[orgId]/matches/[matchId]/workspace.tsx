@@ -56,6 +56,7 @@ export function Workspace({
   setup,
   requestPane = null,
   handle,
+  checkSteps = true,
 }: {
   orgId: string;
   match: Match;
@@ -69,6 +70,8 @@ export function Workspace({
   /** a pane to open from outside; a new object each time */
   requestPane?: { pane: Pane } | null;
   handle?: Ref<PlayerHandle | null>;
+  /** the work steps (court, throw-off, goals, persons) in the rail; off where Prüfen asks them */
+  checkSteps?: boolean;
 }) {
   const t = useTranslations();
   const qc = useQueryClient();
@@ -319,7 +322,8 @@ export function Workspace({
   useEffect(() => {
     if (requestPane) setPane(requestPane.pane);
   }, [requestPane]);
-  const chosen: Pane = pane ?? (staff ? (firstOpen(stepList) ?? "notes") : "notes");
+  const [setupOpen, setSetupOpen] = useState(false);
+  const chosen: Pane = pane ?? (staff && (checkSteps || setupOpen) ? (firstOpen(stepList) ?? "notes") : staff ? "events" : "notes");
   // the first open step is shown once the lists are in; from then on the coach decides
   useEffect(() => {
     if (pane == null && loaded) setPane(chosen);
@@ -380,6 +384,21 @@ export function Workspace({
   const shown: Pane = reviewing ? reviewKind : chosen;
   const openNow = candidates.data?.counts.open_by_rate[String(rate)] ?? 0;
   const shotsOpen = shotCandidates.data?.counts.open_by_rate[String(shotCandidates.data.default_rate)] ?? 0;
+  // Prüfen (/matches/[m]/check) opens the full-screen review at once: goals first, then shots
+  const checkOpened = useRef(false);
+  useEffect(() => {
+    if (checkOpened.current || !staff || !candidates.data || !shotCandidates.data) return;
+    if (new URLSearchParams(window.location.search).get("check") !== "1") return;
+    checkOpened.current = true;
+    if (openNow > 0) {
+      setGoalList("candidates");
+      setReviewKind("goals");
+      setReviewing(true);
+    } else if (shotsOpen > 0) {
+      setReviewKind("shots");
+      setReviewing(true);
+    }
+  }, [staff, candidates.data, shotCandidates.data, openNow, shotsOpen]);
   return (
     <div
       className={cn("space-y-5", reviewing && "fixed inset-0 z-[60] !m-0 h-dvh overflow-y-auto bg-background p-4 sm:p-6 lg:px-10")}
@@ -402,7 +421,15 @@ export function Workspace({
           </Button>
         </div>
       ) : staff || tools.length > 1 ? (
-        <WorkRail steps={staff ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+        <div>
+          <WorkRail steps={staff && (checkSteps || setupOpen) ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+          {/* the questions live in Prüfen (UX test B10); the setup by hand stays one tap away */}
+          {staff && !checkSteps && (
+            <button type="button" onClick={() => setSetupOpen((v) => !v)} aria-expanded={setupOpen} className="mt-2 min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="setup-toggle">
+              {setupOpen ? t("workflow.setupClose") : t("workflow.setupOpen")}
+            </button>
+          )}
+        </div>
       ) : null}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}
@@ -454,7 +481,7 @@ export function Workspace({
         />
         {/* the match clock on the picture, as on a broadcast: what the coach talks about */}
         {mounted && spansFor && !drawing && (
-          <span aria-hidden className="pointer-events-none absolute left-2 top-2 z-10 rounded-xs bg-black/65 px-2 py-0.5 font-score text-base text-white tabular-nums">
+          <span aria-hidden className="pointer-events-none absolute left-2 top-2 z-10 bg-black/65 px-2 py-0.5 font-score text-base text-white tabular-nums">
             {gameAt(now)}
           </span>
         )}
@@ -468,10 +495,10 @@ export function Workspace({
             className={cn(
               "bg-black",
               multi.mode === "side"
-                ? "aspect-video w-full rounded"
+                ? "aspect-video w-full"
                 : autoCam && multi.mode === "single"
                   ? "pointer-events-none absolute inset-0 size-full object-contain"
-                  : "pointer-events-none absolute right-2 top-2 w-1/3 rounded border-2 border-white shadow-lg",
+                  : "pointer-events-none absolute right-2 top-2 w-1/3 border-2 border-white",
             )}
           />
         )}
@@ -509,11 +536,11 @@ export function Workspace({
           )}
           {/* keys teach only where there is a keyboard */}
           <details className="group relative pointer-coarse:hidden">
-            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 px-3 text-[0.9375rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
               <Keyboard aria-hidden className="size-4" />
               {t("player.shortcuts")}
             </summary>
-            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] rounded-md bg-raised p-3 text-xs leading-relaxed text-muted shadow-xl ring-1 ring-border">{t("player.shortcutsList")}</p>
+            <p className="absolute left-0 z-20 mt-1 w-80 max-w-[85vw] bg-raised p-3 text-xs leading-relaxed text-muted ring-1 ring-border">{t("player.shortcutsList")}</p>
           </details>
         </div>
         {spot.ready && !offset && !reviewing && spotShown && (
@@ -537,7 +564,7 @@ export function Workspace({
           oppName={oppName}
           events={staff ? events.data : null}
           notes={[...(comments.data ?? []).map((c) => c.t_ms), ...(clips.data ?? []).map((c) => c.start_ms), ...(annotations.data ?? []).map((x) => x.t_ms)]}
-          onSetKickoff={staff ? () => setPane("kickoff") : undefined}
+          onSetKickoff={staff ? () => (setSetupOpen(true), setPane("kickoff")) : undefined}
         />
         </div>
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
@@ -636,7 +663,7 @@ export function Workspace({
               onClip={playClip}
               onActive={setActiveShot}
               onSeek={seekPaused}
-              onSetKickoff={match.kickoff_ms?.["1"] == null ? () => setPane("kickoff") : undefined}
+              onSetKickoff={match.kickoff_ms?.["1"] == null ? () => (setSetupOpen(true), setPane("kickoff")) : undefined}
               focusMode={reviewing}
             />
           </div>
@@ -663,8 +690,8 @@ export function Workspace({
             <ul className="min-h-0 flex-1 space-y-2 overflow-auto text-sm" data-testid="comments">
               {(comments.data ?? []).length === 0 && <li className="text-muted">{t("comments.emptyHint", { time: gameAt(now) })}</li>}
               {(comments.data ?? []).map((c) => (
-                <li key={c.id} className="rounded-md bg-surface px-3 py-2">
-                  <button className="rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
+                <li key={c.id} className="bg-surface px-3 py-2">
+                  <button className="bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => player.current.seek(c.t_ms)}>
                     {gameAt(c.t_ms)}
                   </button>{" "}
                   <span className="text-xs text-muted">{c.author_name}</span>
@@ -733,7 +760,7 @@ export function Workspace({
               {(clips.data ?? []).length === 0 && <li className="text-muted">{t("clips.empty")}</li>}
               {(clips.data ?? []).map((c) => (
                 <li key={c.id}>
-                  <button className="w-full rounded px-2 py-1 text-left hover:bg-surface" onClick={() => {
+                  <button className="w-full px-2 py-1 text-left hover:bg-surface" onClick={() => {
                     player.current.seek(c.start_ms);
                     player.current.play();
                   }}>
@@ -762,7 +789,7 @@ export function Workspace({
                       key={k}
                       aria-pressed={tool === k}
                       onClick={() => setTool(k)}
-                      className={cn("rounded-md border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+                      className={cn("border px-2 py-1 text-xs", tool === k ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
                     >
                       {t(`draw.tool_${k}`)}
                     </button>
@@ -794,7 +821,7 @@ export function Workspace({
               {(annotations.data ?? []).length === 0 && <li className="text-muted">{t("draw.empty")}</li>}
               {(annotations.data ?? []).map((a) => (
                 <li key={a.id}>
-                  <button className="rounded px-2 py-1 font-score text-xs hover:bg-surface" onClick={() => {
+                  <button className="px-2 py-1 font-score text-xs hover:bg-surface" onClick={() => {
                     player.current.pause();
                     player.current.seek(a.t_ms + 100);
                   }}>
@@ -967,7 +994,9 @@ function AnalysisPanel({
           {analysis.calibration && (
             <p>
               {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
-              {t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
+              {/* the automatic court's error is not measured yet (reprojection 0): no «100 %»,
+                  the court is asked in Prüfen (real-video test, Q-CAL-QUALITY) */}
+              {analysis.calibration.source !== "user_correction" && !analysis.calibration.reprojection_px ? t("confidenceUnmeasured") : t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
             </p>
           )}
           {analysis.tracks.length > 0 && <p>{t("tracks", { count: analysis.tracks.length })}</p>}
@@ -1052,7 +1081,7 @@ function IdentityPanel({
                 id={`track-${tr.track_no}`}
                 value={tr.player_id ?? ""}
                 onChange={(e) => void assign(tr.track_no, e.target.value)}
-                className="min-h-9 flex-1 rounded-md bg-raised ring-1 ring-inset ring-border px-2"
+                className="min-h-9 flex-1 bg-raised ring-1 ring-inset ring-border px-2"
               >
                 <option value="">{t("none")}</option>
                 {(roster.data ?? [])
@@ -1108,7 +1137,7 @@ function CameraSwitch({
             key={c.id}
             aria-pressed={c.id === active.id}
             onClick={() => onSwitch(c.id)}
-            className={cn("rounded-md border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
+            className={cn("border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
           >
             {t(c.role)}
           </button>
@@ -1143,7 +1172,7 @@ function CameraSwitch({
               step={10}
               defaultValue={active.time_offset_ms}
               key={active.id}
-              className="min-h-9 w-28 rounded-md bg-raised ring-1 ring-inset ring-border px-2 text-sm"
+              className="min-h-9 w-28 bg-raised ring-1 ring-inset ring-border px-2 text-sm"
             />
           </label>
           <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">
@@ -1184,7 +1213,7 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
               {segs.map((f) => (
                 <li key={`${f.start_ms}-${f.team}`}>
                   <button
-                    className="rounded bg-surface px-2 py-0.5 font-score text-xs hover:brightness-90"
+                    className="bg-surface px-2 py-0.5 font-score text-xs hover:brightness-90"
                     onClick={() => onSeek(f.start_ms)}
                     aria-label={t("jump", { formation: label(f.formation), time: formatClock(f.start_ms) })}
                   >

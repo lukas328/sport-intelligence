@@ -2,6 +2,7 @@
 
 from handball_api.models.assistant import AssistantConversation, AssistantMessage
 from handball_api.models.audit import AuditLog
+from handball_api.models.collections import Collection, CollectionItem
 from handball_api.models.content import (
     ClipTag,
     HighlightReel,
@@ -63,7 +64,7 @@ from handball_api.models.sessions import (
     TrainingSession,
     TrainingSlot,
 )
-from handball_api.models.sharing import ShareLink
+from handball_api.models.sharing import ConsentLink, ShareLink
 from handball_api.models.tactics import Play
 from handball_api.models.tenancy import (
     Invitation,
@@ -90,8 +91,11 @@ __all__ = [
     "Clip",
     "ClipTag",
     "ClubDrill",
+    "Collection",
+    "CollectionItem",
     "Comment",
     "Consent",
+    "ConsentLink",
     "Correction",
     "DeviceToken",
     "Event",

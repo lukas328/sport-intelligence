@@ -60,6 +60,18 @@ export const IconDates = (p: P) => (
     <path d="M6.5 12h2M11.5 12h2" />
   </svg>
 );
+/** season: one bar per match */
+export const IconSeason = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M3 17h14M5 14v-3M8.5 14V8M12 14v-5M15.5 14V5" />
+  </svg>
+);
+/** upload: an arrow into a tray */
+export const IconUpload = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M10 13V3.5M6.5 7 10 3.5 13.5 7M3.5 12.5V16.5h13v-4" />
+  </svg>
+);
 /** goal: posts, crossbar and net */
 export const IconGoal = (p: P) => (
   <svg {...base(p)}>
@@ -79,7 +91,7 @@ export const DEST_ICON: Record<Dest, (p: P) => React.JSX.Element> = {
   today: IconOverview,
   matches: IconMatches,
   team: IconTeam,
-  training: IconTraining,
+  season: IconSeason,
   scenes: IconScenes,
   dates: IconDates,
 };

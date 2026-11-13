@@ -105,7 +105,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
                     {t("progress", { done: a.done, total: a.recipients })}
                   </span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-[2px] bg-foreground/10" aria-hidden>
+                <div className="h-1.5 overflow-hidden bg-foreground/10" aria-hidden>
                   <div className="h-full bg-foreground" style={{ width: `${a.recipients ? (a.done / a.recipients) * 100 : 0}%` }} />
                 </div>
                 {/* who still has to do it, by name: the coach's next message */}
@@ -125,7 +125,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
         <form onSubmit={create} className="space-y-3" aria-label={t("new")}>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{t("kind")}</span>
-            <select value={kind} onChange={(e) => setKind(e.target.value as Kind)} className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2">
+            <select value={kind} onChange={(e) => setKind(e.target.value as Kind)} className="min-h-10 bg-raised ring-1 ring-inset ring-border px-2">
               {KINDS.map((k) => (
                 <option key={k} value={k}>
                   {t(`kind_${k}`)}
@@ -135,7 +135,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{t("target")}</span>
-            <select name="target" required className="min-h-10 rounded-md bg-raised ring-1 ring-inset ring-border px-2">
+            <select name="target" required className="min-h-10 bg-raised ring-1 ring-inset ring-border px-2">
               {options.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}

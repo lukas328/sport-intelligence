@@ -126,15 +126,15 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
           <p className="text-sm text-muted">{t("slides", { n: slides.length })}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href={`/app/${orgId}/presentations/${presId}/present`} className="rounded-md bg-accent px-4 py-2 font-medium text-accent-contrast" data-testid="present">
+          <Link href={`/app/${orgId}/presentations/${presId}/present`} className="bg-accent px-4 py-2 font-medium text-accent-contrast" data-testid="present">
             {t("present")}
           </Link>
-          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
+          <a href={`/v1/orgs/${orgId}/presentations/${presId}/pdf?lang=${locale}`} className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
             {t("pdf")}
           </a>
           {p.can_edit &&
             (p.export_status === "ready" ? (
-              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-raised px-4 text-[0.8125rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
+              <a href={`/v1/orgs/${orgId}/presentations/${presId}/export.mp4`} className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface">
                 {t("mp4Download")}
               </a>
             ) : (
@@ -164,11 +164,11 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
             onDragStart={() => setDrag(s.id)}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => drag && drag !== s.id && move(drag, i)}
-            className={cn("rounded-lg bg-raised border border-border p-3", drag === s.id && "opacity-60")}
+            className={cn("bg-raised border border-border p-3", drag === s.id && "opacity-60")}
           >
             <div className="flex flex-wrap items-center gap-2">
               <span className="w-6 text-sm text-muted tabular-nums">{i + 1}</span>
-              <span className="rounded bg-surface px-2 py-0.5 text-xs">{t(`type_${s.type}` as "type_clip")}</span>
+              <span className="bg-surface px-2 py-0.5 text-xs">{t(`type_${s.type}` as "type_clip")}</span>
               <span className="flex-1 font-medium">{slideTitle(s, t as never)}</span>
               {p.can_edit && (
                 <>
@@ -278,7 +278,7 @@ export function PresentationEditor({ orgId, presId }: { orgId: string; presId: s
             </form>
             <p className="text-sm text-muted">
               {t("addClipsHint")}{" "}
-              <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/teams/${p.team_id}/search?presentation=${presId}`}>
+              <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/teams/${p.team_id}/scenes?presentation=${presId}`}>
                 {t("toSearch")}
               </Link>
             </p>

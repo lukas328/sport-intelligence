@@ -12,7 +12,7 @@ export default async function JoinRequestsPage({ params }: { params: Promise<{ o
   const t = await getTranslations("requests");
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow={t("eyebrow")} title={t("joinTitle")} description={t("joinHint")} />
+      <PageHeader eyebrow={`${t("eyebrow")} · ${t("joinHint")}`} title={t("joinTitle")} />
       <JoinRequests orgId={orgId} teamId={teamId} />
     </div>
   );

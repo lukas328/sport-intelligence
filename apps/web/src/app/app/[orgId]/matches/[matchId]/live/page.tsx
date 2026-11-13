@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { LiveClient } from "./client";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("live"))("title") };
-}
-
+/** Old address of the courtside capture: now Spieltag (SPEC section 6). */
 export default async function LivePage({ params }: { params: Promise<{ orgId: string; matchId: string }> }) {
   const { orgId, matchId } = await params;
-  return <LiveClient orgId={orgId} matchId={matchId} />;
+  redirect(`/app/${orgId}/matches/${matchId}/matchday?mode=detail`);
 }

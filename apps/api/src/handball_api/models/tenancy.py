@@ -126,6 +126,11 @@ class Team(Base, EntityMixin, TenantMixin):
     def players_see_team_stats(self) -> bool:
         return bool(self.settings.get("players_see_team_stats", not self.is_youth))
 
+    @property
+    def team_features(self) -> bool:
+        """Training, dates, RSVP, tasks, player and parent areas (ADR 029); off unless set."""
+        return bool(self.settings.get("team_features", False))
+
 
 class Season(Base, EntityMixin, TenantMixin):
     __tablename__ = "seasons"

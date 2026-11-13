@@ -3,9 +3,12 @@
 Each question has the **assumption** I work with until it is answered. Status: open unless marked.
 
 ## Product and business
-- **Q-PROD-1 Product name and domain.** "Handball AI" is very close to the competitor *handball.ai*
-  named in the brief (trademark and confusion risk). *Assumption:* working title only; no domain hard-coded
-  (problem URIs use `urn:handball-platform:...`).
+- **Q-PROD-1 Product name and domain.** "Handball AI" was very close to the competitor
+  *handball.ai* named in the brief. *Decided 2026-11-12:* the product is called **Handball
+  Intelligence**, logo «Taktik» (docs/design/brand2/taktik). *Open:* the domain
+  (`handball-ai.ch` stays in config, mail addresses, deep links and the mobile bundle ids until a
+  new domain is registered), the legal entity name on invoices (`Handball AI GmbH`), and a
+  trademark search (Swissreg, EUIPO, classes 9, 41, 42).
 - **Q-PROD-2 Languages.** de-CH ("ss") first. Germany uses "ß". *Assumption:* v1 ships de-CH only, a de-DE
   variant can be added as a separate locale later.
 - **Q-PROD-3 Company entity, VAT and currencies for Stripe** (CHF only, or CHF + EUR). *Assumption:* CHF and EUR prices in config.
@@ -192,3 +195,194 @@ video, open the scenes behind a number, reply to a training, change the club col
 ### Q-UX-2 Typeface in the Expo app
 The app uses the new colours; Archivo is not yet bundled in the Expo build (system font).
 **Default**: add it with `expo-font` together with the first device build (Q-M11-3).
+
+## Redesign phase 1 (ADR 029, 2026-11-10)
+- **Q-UX-1 ADR number.** The brief asked for "ADR 025"; 025 to 028 exist. *Assumption:* ADR 029.
+- **Q-UX-2 Matrix and data assistant.** SPEC routes both into Szenen. *Assumption:* until the
+  search field answers questions itself they stay as pages: the matrix is the tab "Tabelle",
+  the assistant a page under Szenen (palette "Suchen: …").
+- **Q-UX-3 Video tab tools.** The match workspace keeps its tool tabs (comments, scenes,
+  drawings) and step rail inside Video. *Assumption:* removed with the new look in phase 2.
+- **Q-UX-4 Spieltag.** One address (`matches/[m]/matchday`) for both existing levels: score and
+  team events by default, quick marks with `?mode=marks`. *Assumption:* merged into one screen
+  (SPEC 7.11) in phase 2.
+- **Q-UX-5 Prüfen.** `matches/[m]/check` opens the existing full-screen review (goals, then
+  shots). *Assumption:* the question-by-question screen (SPEC 7.5) comes in phase 2.
+- **Q-UX-6 Opponent colour from "Spiel anlegen".** The form now sends the opponent's shirt
+  colour only when somebody picked it; a match created through the API with an explicit
+  `kit_opponent` counts as said. *Assumption:* that is the meaning of "aus den Trikotfarben des
+  Spiels".
+- **Q-UX-7 Clash rule.** Since the Anlauf look (lib/color.ts `kit()`, ANLAUF.md): on the cloth
+  the opponent changes to its second colour (then ink) when its hue is within 45 degrees of
+  ours, or both are greys of similar lightness. On the tactics camera the opponents become grey
+  rings only for the same colour family and a similar lightness (below 2.5:1); blue against red
+  keeps both colours. *Assumption:* thresholds good enough; tune with real kits.
+- **Q-UX-8 Goals conceded by position.** Positions come from the shot zones (wings, backs incl.
+  half distance, circle); 7 m, fast breaks, empty goal and long range have none.
+- **Q-UX-9 Season themes.** A theme repeats in at least two matches with video; positions count
+  from six goals against and a share of 30 %. Values for themes without a clear figure stay empty.
+- **Q-UX-10 Consent link.** One link per team, 90 days, players listed as number, first name and
+  initial. *Assumption:* an adult player or a parent may answer for any player of the team; abuse
+  is limited by the link being in the team chat, rate limits and the audit log.
+- **Q-UX-11 Sammlungen of the old kinds** are read-only through the collections API (changed on
+  their old pages). *Assumption:* no data migration; a coach who edits one creates a collection.
+- **Q-UX-12 Onboarding in two steps** (SPEC 7.12) and the onboarding e-mail "Deine Spieler
+  mitnehmen" (invites players, which is behind Teamfunktionen now) are left for phase 2.
+- **Q-UX-13 Share a single scene.** The API and the shared page support it; a share button per
+  scene comes with the Video tab in phase 2.
+- **Q-UX-14 Dark scheme.** The Anlauf look has one light scheme (the cloth is the identity); the
+  theme switch in the account menu was removed and the `hb_theme` cookie is ignored. Open: whether
+  a dark scheme comes back (e.g. for the hall at night), and how the club colour and the cloth
+  would work on it.
+- **Q-UX-15 Ball and holder in the API.** `handball_vision.ballpossession` finds stretches where
+  the ball is in the picture and who holds it, but the API does not consume it today. The tactics
+  camera and the Ball-Linie have their place (`SceneCameraOut.ball`, a marker at the holder);
+  until the analysis delivers it, `ball` is empty and the screen says «Ball in dieser Szene nicht
+  erkannt». Lukas: UI first, detection later; no ball detection is built in phase 2.
+- **Q-UX-16 Field detection in real halls.** The tactics camera needs a confirmed court
+  (`field_confirmed`); without it the screen asks «Stimmt das Feld?». How well the automatic
+  court fits in real club halls (lines of several sports, partial views, moving cameras) is
+  untested and not improved in phase 2.
+- **Q-UX-17 Runs and tactics camera with a real match video.** Runs (`goals[].run`, the
+  scorer's track in the 3 s before the goal, sampled at about 9 per second) and scene positions
+  are built from the tracking but only tested with stored test rows; the demo matches draw
+  invented positions (`source: "demo"`). A test with a recorded match is open.
+- **Q-UX-18 Smoothing of paths.** Runs are drawn with a Catmull-Rom curve through the measured
+  points (display only, nothing added). Whether the raw tracks need filtering (jitter, ID
+  switches) before they look like runs is open.
+- **Q-UX-19 League table and rank.** Start (Tabelle), Saison (Rang in the Seitenkopf, Tabelle)
+  and Nächster Gegner (three facts from the table) need the league table. Checked 2026-11-12:
+  the handball.ch integration delivers it (`standing` in `GET /teams/{id}/official`, refreshed
+  with the daily sync) once a team is linked to its official team; the Saison page shows rank
+  and table from it. Not linked (DHB/HLA teams, teams without an official league, the demo
+  club): no rank in the title («Fünf Spiele. Und rechts aussen bleibt offen.») and no table
+  block. *Open:* a table for teams without a federation feed (entered by hand, or from the
+  match reports of the whole group) is not planned; the demo club is not linked, so its
+  screenshots show the page without a table.
+- **Q-UX-20 Prüfen as questions.** Built 2026-11-12: the court first, then the goal candidates,
+  then, once the court is confirmed, the own tracks without a name (longest in view first, at
+  most six per video). The box around the person comes from the track's foot point and the court
+  homography (`personBox` in lib/spotlight.ts: image scale at the feet, fixed body height
+  1.85 m), shown as a crop of the running video. *Open:* the box is an estimate (only the ground
+  plane is calibrated); a detector box per person would be exact. «Gegner» as an answer needs
+  an API to mark a track as not ours; until then «Weiss nicht».
+
+## UX test round 1, second delivery (2026-11-13)
+
+- **Q-BILL-TRIAL Trial at sign-up (business rule, Lukas to confirm).** Checked 2026-11-13: with
+  `billing_enforce` on, a new club started on Free (`analysis: false`, no `tracking`), so its
+  first video was stored but never analysed, without a word; the 30 days of `trial_days` began
+  only through Stripe checkout or `ops.extend_trial`. Built: creating a club starts the Team
+  plan's trial from `packages/plans/plans.json` at once, without payment details
+  (`services/orgs.py` `create_org`, switch `trial_on_signup` in `core/config.py`, default on;
+  `trial_used` is set, so a later checkout starts no second trial). When it ends,
+  `billing.effective_plan` falls back to Free; nothing is deleted. Test
+  `test_billing.py::test_new_club_starts_the_trial_and_its_first_video_is_analysed`. *Open:*
+  confirm the rule (trial without card for every new club) and the wording «30 Tage alles
+  gratis. Danach entscheidest du.»
+- **Q-AUTH-2b Two-factor reminder later (Lukas to confirm).** The obligation itself is unchanged
+  (Q-AUTH-2). Only the reminder moved: no banner on every page; it appears once there is
+  something to protect (a first video uploaded or a second person invited), as a quiet task on
+  the team page and an entry with a dot in the account menu, dismissible for seven days.
+- **Q-AUTH-OWNER Who does a team belong to? (Lukas to decide).** Saving a team from the public
+  entry with one e-mail address makes that person its first administrator. That keeps the entry
+  short, but a stranger could take a team before its real coach. A team that is already in the
+  app is not handed over: saving sends an access request to its administrators. Options to check
+  ownership: (a) «Das ist nicht dein Team?» with a hand-over by the support, (b) confirmation via
+  the address the federation has on file for the team or club, (c) a second person of the club
+  confirms. Built for now, the minimum only: on the «already in the app» answer a visible link
+  «Dieses Team gehört mir, aber jemand anderes hat es schon» opens a prepared mail to the support
+  (address from the configuration), next to the access request to the existing administrators.
+  No new verification procedure.
+- **Q-AUTH-LINK Sign-in link valid for a day (Lukas to confirm).** The e-mail link from the
+  entry and from «Link schicken» was valid for 15 minutes; coaches read such mails hours later and
+  then had to start over (UX test round 2, N15). Now 24 hours, still single use and void once
+  used (setting `magic_link_ttl_minutes`). Trade-off: a mailbox someone else can read stays a way
+  in for longer. Alternative if that is too long: a six-digit code next to the link.
+- **Q-VIDEO-PARTS Two files for one match (Lukas to decide, product).** Many coaches stop the
+  recording at half-time. Today a match takes several main files, all stored and playable, but
+  the match's timeline and the whole analysis (three things, scenes, Prüfen, positions) use only
+  the first one (`timeline_video`): the second half in a second file is not analysed. The app
+  says so where a second file is added and in the upload tips; the website says the same
+  (UX test round 2, N28). To merge two files into one match: effort (one timeline across files
+  with an offset per file, or joining the files before the analysis), order (by upload or by the
+  recording time in the file, with a way to swap), the time axis (the break between the files is
+  unknown: from the throw-off of the second half, which Prüfen already asks for). Until then: one
+  file per match is the recommendation.
+
+## UX test round 3 (2026-11-13)
+
+- **Q-OLD-AREAS Areas from the earlier product (Lukas to decide).** Spielzüge (with its own play
+  editor), the opponent profile with its manual player list, «Zum Zeigen» (presentations) and the
+  old playlists still work and are reachable (Szenen side links, the match «Mehr» menu, their
+  addresses). Since round 3 each says in one line that it comes from the earlier version and that
+  new things come under Szenen and Spiele, and Spielzüge no longer shows the second tab row (UX
+  test A07). Nothing was deleted. *Open:* rebuild them in the new look (plays on the tactics
+  board, the opponent from the federation's data), fold them into Sammlungen, or retire them
+  with a data export.
+
+## Real-video test (2026-11-13, two NLB clips; docs/ux-test/echttest/BERICHT.md on the test branch)
+
+Weaknesses of the recognition, recorded here and not fixed in the interface work (E01 to E12):
+
+- **Q-REC-SCOREBOARD The hall's scoreboard is not read.** In clip 1 the board (8:7 to 11:11) is
+  readable when the camera points left; the analysis finds no goal by itself.
+- **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
+  error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
+  interface never treats the court as sure and always asks for it (done, E03).
+- **Q-REC-SIDES The defended side flips.** In clip 2 the side the home team defends changes twice
+  although the teams never swap; the team split at one moment counted 9, 2, 3 instead of 7, 6, 2.
+- **Q-REC-CANDTIME Goal candidates come late.** Their times lie 4 to 7 s after the goal (the
+  throw-off after it), so «the way before the goal» would show the way back.
+- **Q-REC-CAMERA Tactics camera in a checked scene.** 8 red dots instead of 6, one referee instead
+  of two, and the attack drawn on the left goal while the video shows the right one (the
+  mirroring is gone since G3: the camera draws the half the video shows).
+- **Q-REC-OPPKIT The team split needs both shirt colours.** `teams.relabel_by_clusters` labels
+  the teams only with the home and the away kit; without the opponent's colour (no longer
+  invented, E09) it labels nothing, so the interface asks for it before the upload. Open: a
+  split by the two largest clusters that names only the own team.
+- **Q-REC-PERSONBOX Person boxes with a panning camera.** The box needs the homography of each
+  frame (camera motion times court); the worker has it (`motion.CameraMotion`) but does not hand
+  it out, so person questions are asked only with a fixed camera (E05).
+- **Q-REC-OFFCOURT People beside the court tracked as players.** Third real-video test: up to
+  14 red dots instead of 7 (spectators in red behind the court, the bench in white in front), and
+  goalkeepers in another colour. The interface now draws only positions on the court (1 m
+  margin) and says under the camera that positions are estimated and may include people beside
+  the court (G3). Open: separate players from spectators and bench in the recognition, and the
+  goalkeeper's kit as its own class.
+
+## Website (docs/site/KONZEPT.md, 2026-11-12)
+- **Q-SITE-1 Prices on the website.** The site shows the plan table of `packages/plans`
+  (CHF 0 / 39 / 199, yearly 10 monthly fees) with a visible line «Die Preise sind noch nicht
+  endgültig» (Q-PROD-4). The goalkeeper add-on (CHF 7) is not shown: outside the core.
+  *Open:* final prices, and whether «Gratis» (no automatic analysis) stays a plan.
+- **Q-SITE-2 Analysis duration.** The site promises no time («die App schickt dir eine
+  Nachricht»). The app's empty state says «Nach etwa 40 Minuten» (SPEC 7.13), the CPU path takes
+  about twice the video length (Q-INFRA-1). *Open:* one number for both, once the GPU is decided.
+- **Q-SITE-3 «Wer wir sind».** No text about the team exists; the page «Über uns und Kontakt»
+  shows a placeholder. *Open:* text and whether to name people.
+- **Q-SITE-4 Storage location stated as fact.** The site says «App und Datenbank auf Servern in
+  der Schweiz, Videos in einem Speicher in der EU» (ADR 025, ADR 002). *Open:* confirm before
+  launch; the providers are named in the privacy policy (Q-LEGAL-1).
+- **Q-SITE-5 Public demo.** The app has no demo match at all (EINSTIEG.md on `claude/ux-test`).
+  Without an account there is the invented match of the website (`apps/site/public/demo/match.json`,
+  marked «Erfundenes Spiel»). *Open:* a public read-only demo in the app.
+- **Q-SITE-6 Help guides outside the core.** Guides for training, tactics board, assistant,
+  presentation, player feed, scouting report, roles and the statistics matrix stay reachable
+  (the app links to them, `help-map.ts`) but are not listed and carry a note. *Open:* update
+  `help-map.ts` in the app to the new screens, then delete these guides.
+- **Q-SITE-7 Trial «30 Tage gratis».** `trial_days: 30` stands in `packages/plans` and
+  `apps/api/src/handball_api/services/plans.py` (lines 55, 66), but a trial only starts through a
+  Stripe checkout (`services/billing.py`, lines 285 to 286 and 328: `trial_period_days`) or a
+  support action (`services/ops.py extend_trial`, lines 154 to 164); a new club gets none
+  automatically. The site names «30 Tage gratis» only on the pricing page next to the plan, with
+  «Die Preise sind noch nicht endgültig»; the start page just says «Kostenlos starten».
+  *Update 2026-11-13:* the app now starts the trial for every new club (Q-BILL-TRIAL below);
+  the site keeps «30 Tage» on the pricing page only until Lukas confirms the rule.
+- **Q-SITE-8 Mail when the three things are ready.** The site says «Du bekommst eine Mail, wenn
+  die drei Dinge da sind» again; the app session is building that mail and the bell on phones
+  (2026-11-13). *Answered 2026-11-13:* mail built in the app and confirmed in the UX test.
+- **Q-SITE-9 Team field and colour.** Answered: «Wie heisst dein Team?» sends a GET to
+  `{NEXT_PUBLIC_APP_URL}/einstieg?q=…&farbe=…&lang=…`, «Kostenlos starten» to
+  `/einstieg?farbe=…&lang=…`; `farbe` (blau, rot, gelb, schwarz, weiss, gruen, orange, violett)
+  only once the visitor picked a colour. The app takes it over.

@@ -54,6 +54,24 @@ test("screens", async ({ page, browser }, info) => {
   await page.getByLabel("Team oder Verein").fill("Seeblick");
   await expect(page.getByTestId("official-team").first()).toBeVisible();
   await snap(page, E, "onboarding-suchergebnis");
+  // step 2 «Das seid ihr, oder?» after taking a team over (answers recorded, invented names)
+  {
+    const p2 = await page.context().newPage();
+    const claimed = `**/v1/orgs/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}`;
+    await p2.route("**/v1/official/teams?*", (r) => r.fulfill(json(fx.searchHits)));
+    await p2.route("**/v1/official/teams/*/claim", (r) => r.fulfill(json(fx.claimed(fx.CLAIMED_ORG, fx.CLAIMED_TEAM), 201)));
+    await p2.route(`${claimed}/official`, (r) => r.fulfill(json(fx.link)));
+    await p2.route(`${claimed}/official/suggestions*`, (r) => r.fulfill(json(fx.suggestions)));
+    await p2.route(`${claimed}/matches`, (r) =>
+      r.fulfill(json([{ id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Thalwil", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null }])),
+    );
+    await go(p2, "/onboarding");
+    await p2.getByLabel("Team oder Verein").fill("Seeblick");
+    await p2.getByTestId("official-team").filter({ hasText: "HC Seeblick Herren 1" }).getByTestId("claim").click();
+    await expect(p2.getByTestId("claim-done")).toContainText("Timo Brunner");
+    await snap(p2, E, "onboarding-das-seid-ihr");
+    await p2.close();
+  }
   await page.getByTestId("manual-club").click();
   await snap(page, E, "onboarding-verein-von-hand");
   await page.getByLabel("Vereinsname").fill("HC Seeblick");
@@ -126,10 +144,11 @@ test("screens", async ({ page, browser }, info) => {
   const upcoming = matches.find((m) => m.score_own == null && !m.has_video && Date.parse(m.kickoff_at) > Date.now()) ?? matches[0]!;
   const plays = await (await page.request.get(`/v1/orgs/${org}/teams/${team.id}/plays`)).json();
 
+  // staff start on Spiele (SPEC section 6): /app/<org> redirects there
   await go(page, `/app/${org}`);
-  await snap(page, T, "uebersicht");
-  await go(page, `${base}/matches`);
-  await snap(page, T, "spielplan");
+  await snap(page, T, "spiele");
+  await go(page, `${base}/matches?upload=1`);
+  await snap(page, T, "video-hochladen");
   await go(page, `${base}/matches?new=1`);
   await snap(page, T, "neues-spiel");
   await go(page, `/app/${org}/matches/${upcoming.id}`);
@@ -140,49 +159,49 @@ test("screens", async ({ page, browser }, info) => {
 
   // the match workspace, step by step (shot moments from the recorded fixture)
   await page.route("**/v1/orgs/*/matches/*/shot-candidates", (r) => r.fulfill(json(shotList())));
-  await go(page, `/app/${org}/matches/${withVideo.id}`);
-  await expect(page.getByTestId("player")).toBeVisible({ timeout: 60_000 });
-  for (const [step, name] of [
-    ["step-court", "spiel-video-spielfeld"],
-    ["step-kickoff", "spiel-video-anwurf"],
-    ["step-goals", "spiel-video-tore-pruefen"],
-    ["step-players", "spiel-video-spieler-zuordnen"],
-    ["step-events", "spiel-video-ereignisse"],
-    ["step-shots", "spiel-video-wuerfe"],
-    ["step-formations", "spiel-video-abwehrsysteme"],
-    ["step-notes", "spiel-video-kommentare"],
-    ["step-feedback", "spiel-video-feedback"],
-  ] as const) {
-    if (!(await page.getByTestId(step).isVisible().catch(() => false))) continue;
-    await snap(page, T, name, () => tryClick(page, step));
-  }
-  if (await page.getByTestId("step-shots").isVisible().catch(() => false)) {
-    await page.getByTestId("step-shots").click();
+  // the match opens on the tab Spiel; the player stands on the tab Video
+  await go(page, `/app/${org}/matches/${withVideo.id}?tab=video`);
+  await expect(page.getByTestId("video-stage")).toBeVisible({ timeout: 60_000 });
+  // the tab Video: one stage (video or tactics camera), the workbench behind «Mehr»
+  await snap(page, T, "spiel-video");
+  await snap(page, T, "spiel-video-werkbank", () => tryClick(page, "bench-open"));
+  if (await page.getByTestId("shots-review-open").isVisible().catch(() => false)) {
     await page.getByTestId("shots-review-open").click();
     await snap(page, T, "spiel-wuerfe-vollbild");
     await page.keyboard.press("Escape");
   }
-  await page.getByRole("tab", { name: "Analyse", exact: true }).click();
-  for (const sub of ["Übersicht", "Matchbericht", "Würfe", "Torhüter", "Laufleistung"]) {
-    const tab = page.getByRole("tab", { name: sub, exact: true });
-    if (!(await tab.isVisible().catch(() => false))) continue;
-    await snap(page, T, `spiel-analyse-${sub.toLowerCase().replace("ü", "ue")}`, async () => {
-      await page.getByRole("tab", { name: "Analyse", exact: true }).click();
-      await page.getByRole("tab", { name: sub, exact: true }).click();
-    });
-  }
-  await snap(page, T, "spiel-szenen", async () => {
-    await page.getByRole("tab", { name: "Szenen", exact: true }).click();
+  // one level of tabs: Spiel · Video · Zahlen
+  await snap(page, T, "spiel-spiel", async () => {
+    await page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  });
+  await snap(page, T, "spiel-zahlen", async () => {
+    await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
   });
   await page.unroute("**/v1/orgs/*/matches/*/shot-candidates");
-  await go(page, `/app/${org}/matches/${upcoming.id}/live`);
-  await snap(page, T, "spiel-live-erfassen");
-  await go(page, `/app/${org}/matches/${upcoming.id}/marks`);
-  await snap(page, T, "spiel-am-spielfeldrand-markieren");
+  // Prüfen: one question at a time
+  await go(page, `/app/${org}/matches/${withVideo.id}/check`);
+  await snap(page, T, "spiel-pruefen");
+  // a person question: on a match with a confirmed court, after the goal questions
+  for (const m of matches.filter((x) => x.has_video)) {
+    await go(page, `/app/${org}/matches/${m.id}/check`);
+    for (let i = 0; i < 30 && !(await page.getByTestId("person-box").count()); i++) {
+      await page.keyboard.press("0");
+      await page.waitForTimeout(300);
+    }
+    if (await page.getByTestId("person-box").count()) {
+      await page.waitForTimeout(2500);
+      await snap(page, T, "spiel-pruefen-person");
+      break;
+    }
+  }
+  await go(page, `/app/${org}/matches/${upcoming.id}/matchday`);
+  await snap(page, T, "spieltag");
+  await go(page, `/app/${org}/matches/${upcoming.id}/matchday?mode=marks`);
+  await snap(page, T, "spieltag-markieren");
   await go(page, `/app/${org}/matches/${upcoming.id}/scouting`);
   await snap(page, T, "spiel-scouting");
-  await go(page, `${base}/paper`);
-  await snap(page, T, "matchblatt-foto");
+  await go(page, `${base}/matches?report=1`);
+  await snap(page, T, "spielbericht-hinzufuegen");
   const opponent = matches.find((m) => m.opponent?.id)?.opponent?.id;
   if (opponent) {
     await go(page, `/app/${org}/opponents/${opponent}`);
@@ -194,8 +213,15 @@ test("screens", async ({ page, browser }, info) => {
   await snap(page, T, "statistik-matrix");
   await go(page, `${base}/assistant`);
   await snap(page, T, "assistent");
-  await go(page, `${base}/library`);
-  await snap(page, T, "bibliothek");
+  await go(page, `${base}/scenes`);
+  await snap(page, T, "szenen");
+  await go(page, `${base}/collections`);
+  await snap(page, T, "sammlungen");
+  const collections = (await (await page.request.get(`/v1/orgs/${org}/teams/${team.id}/collections`)).json()) as { id: string }[];
+  if (collections[0]) {
+    await go(page, `${base}/collections/${collections[0].id}`);
+    await snap(page, T, "sammlung");
+  }
   await go(page, `${base}/playlists`);
   await snap(page, T, "playlists");
   if (playlists[0]) {
@@ -208,8 +234,6 @@ test("screens", async ({ page, browser }, info) => {
     await go(page, `/app/${org}/presentations/${pres[0].id}`);
     await snap(page, T, "praesentation-bearbeiten");
   }
-  await go(page, `${base}/search`);
-  await snap(page, T, "szenensuche");
   await go(page, `${base}/training`);
   await snap(page, T, "training-plan");
   await go(page, `/app/${org}/drills`);
@@ -223,7 +247,9 @@ test("screens", async ({ page, browser }, info) => {
   await go(page, `${base}/assignments`);
   await snap(page, T, "training-aufgaben");
   await go(page, base);
-  await snap(page, T, "team-kader", async () => {
+  await snap(page, T, "team-kader");
+  await go(page, `${base}?edit=1`);
+  await snap(page, T, "team-kader-bearbeiten", async () => {
     const d = page.getByTestId("consent-overview");
     if (await d.isVisible()) if (!(await d.evaluate((e) => (e as HTMLDetailsElement).open))) await d.locator("summary").click();
   });
@@ -242,11 +268,18 @@ test("screens", async ({ page, browser }, info) => {
   );
   await go(page, `${base}/join-requests`);
   await snap(page, T, "team-beitrittsanfragen");
-  await go(page, `/app/${org}/settings`);
-  await snap(page, T, "einstellungen");
-  await go(page, `/app/${org}/profile`);
-  await snap(page, T, "profil");
-  await go(page, `/app/${org}`);
+  for (const [path, name] of [
+    ["me", "ich-profil"],
+    ["me/security", "ich-sicherheit"],
+    ["me/data", "ich-daten"],
+    ["club", "verein"],
+    ["club/teams", "verein-teams"],
+    ["club/billing", "verein-abo"],
+  ] as const) {
+    await go(page, `/app/${org}/${path}`);
+    await snap(page, T, name);
+  }
+  await go(page, `${base}/matches`);
   await snap(page, T, "mitteilungen", async () => {
     await page.keyboard.press("Escape");
     await page.getByTestId("bell").filter({ visible: true }).first().click({ timeout: 5000 });
@@ -292,8 +325,8 @@ test("screens", async ({ page, browser }, info) => {
     await snap(p, S, "spiel");
     await go(p, `/app/${org}/teams/${team.id}/players/${free[0].player_id}`);
     await snap(p, S, "mein-saisonverlauf");
-    await go(p, `/app/${org}/profile`);
-    await snap(p, S, "profil");
+    await go(p, `/app/${org}/me`);
+    await snap(p, S, "ich");
     await go(p, `/app/${org}/consents`);
     await snap(p, S, "einwilligungen");
     await ctx.close();

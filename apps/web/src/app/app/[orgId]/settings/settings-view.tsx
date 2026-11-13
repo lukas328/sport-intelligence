@@ -1,20 +1,20 @@
 "use client";
 
-import { BillingSection } from "@/components/billing/billing-section";
-import { PrivacySection } from "@/components/privacy/privacy-section";
+// Sections of "Ich" and "Verein" (me/, club/); the single settings page they came from redirects.
+
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import QRCode from "qrcode";
-import { useEffect, useState, type FormEvent } from "react";
-import { AccountSection } from "@/components/account-section";
-import { AccessRequests, Verification } from "@/components/official/requests";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { Strip } from "@/components/anlauf/heads";
+import { ShirtPicker } from "@/components/anlauf/shirt-picker";
+import { clubStyle } from "@/lib/color";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
 import { Alert, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
-import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { FileField } from "@/components/ui/file-field";
@@ -23,73 +23,14 @@ type Org = Schemas["OrgOut"];
 type Team = Schemas["TeamOut"];
 type Me = Schemas["MeOut"];
 
-export function SettingsView({ org, teams, me }: { org: Org; teams: Team[]; me: Me }) {
-  const t = useTranslations();
-  const isAdmin = org.my_role === "org_admin";
-  // a club taken over from the official data: its verification and access requests
-  const official = org.official_club_id != null;
-  const inviteTeams = teams.filter((tm) => isAdmin || tm.my_role === "coach").map((tm) => ({ id: tm.id, name: tm.name }));
-  const people = isAdmin || inviteTeams.length > 0;
-  const sections: [string, string][] = [
-    ...(isAdmin ? ([["club-section", t("settings.club")], ["billing", t("billing.title")]] as [string, string][]) : []),
-    ...(people ? ([["people-section", t("settings.people")]] as [string, string][]) : []),
-    ...(isAdmin && official ? ([["official-section", t("verification.section")]] as [string, string][]) : []),
-    ["account-section", t("account.title")],
-    ["security", t("settings.security")],
-    ["privacy", t("privacy.title")],
-  ];
-  return (
-    <div className="space-y-8">
-      <PageHeader title={t("settings.title")} />
-      <div className="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-10">
-        {/* jump links, not tabs: on phones they wrap instead of being cut at the edge */}
-        <nav aria-label={t("settings.title")} className="mb-6 border-b border-foreground/15 pb-3 lg:sticky lg:top-10 lg:mb-0 lg:self-start lg:border-0 lg:pb-0">
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1">
-            {sections.map(([id, label]) => (
-              <li key={id}>
-                <a href={`#${id}`} className="block min-h-8 whitespace-nowrap py-1.5 text-sm font-medium text-muted underline-offset-4 hover:text-foreground hover:underline lg:rounded-md lg:px-3.5 lg:hover:bg-surface lg:hover:no-underline">
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="min-w-0 space-y-12 [&>*]:scroll-mt-24">
-          {isAdmin && <div id="club-section"><ClubSection org={org} /></div>}
-          {isAdmin && <BillingSection orgId={org.id} />}
-          {people && (
-            <div id="people-section">
-              <PeopleSection orgId={org.id} isAdmin={isAdmin} teams={inviteTeams} allTeams={teams} />
-            </div>
-          )}
-          {isAdmin && official && (
-            <section id="official-section" aria-labelledby="official-title" className="space-y-3">
-              <h2 id="official-title" className="text-lg font-semibold">
-                {t("verification.section")}
-              </h2>
-              <div className="space-y-8 border-t border-foreground/15 pt-5">
-                <Verification orgId={org.id} />
-                <AccessRequests orgId={org.id} teams={teams.map((x) => ({ id: x.id, name: x.name }))} />
-              </div>
-            </section>
-          )}
-          <div id="account-section">
-            <AccountSection me={me} />
-          </div>
-          <SecuritySection me={me} isAdmin={isAdmin} />
-          <PrivacySection orgId={org.id} orgName={org.name} isAdmin={isAdmin} hasPassword={me.has_password ?? true} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ClubSection({ org }: { org: Org }) {
+export function ClubSection({ org }: { org: Org }) {
   const t = useTranslations();
   const router = useRouter();
   const [error, setError] = useState<ErrorKey | null>(null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [colour, setColour] = useState(org.primary_color);
+  const [second, setSecond] = useState(org.secondary_color);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -126,18 +67,29 @@ function ClubSection({ org }: { org: Org }) {
 
   return (
     <section aria-labelledby="club" className="space-y-3">
+      {/* «Verein» stands in the page head already: this section says what it holds (UX test B43) */}
       <h2 id="club" className="text-lg font-semibold">
-        {t("settings.club")}
+        {t("settings.clubLook")}
       </h2>
       <div className="border-t border-foreground/15 pt-5">
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-6">
           {error && <Alert>{t(`errors.${error}`)}</Alert>}
           {saved && <Alert kind="success">{t("common.saved")}</Alert>}
           <Input label={t("onboarding.clubName")} name="name" defaultValue={org.name} required />
-          <div className="grid grid-cols-2 gap-3">
-            <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue={org.primary_color} className="h-11 w-24 p-1" />
-            <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue={org.secondary_color} className="h-11 w-24 p-1" />
+          <ShirtPicker value={colour} onChange={setColour} legend={t("onboarding.shirtTitle")} />
+          <input type="hidden" name="primary_color" value={colour} />
+          {/* the preview: the head of a match in the picked colour */}
+          <div className="club" style={clubStyle(colour, second) as CSSProperties} data-testid="club-preview">
+            <p className="mb-2 text-[15px] font-semibold text-ink-2">{t("settings.clubPreview")}</p>
+            <Strip name={org.name} sub={t("settings.clubPreviewSub")} own={null} opp={null} pending={<>&nbsp;</>} />
           </div>
+          <details>
+            <summary className="min-h-11 cursor-pointer content-center text-[15px] font-bold underline decoration-[1.5px] underline-offset-4">{t("settings.ownColours")}</summary>
+            <div className="grid grid-cols-2 gap-3 pt-3">
+              <Input label={t("onboarding.primaryColor")} type="color" value={colour} onChange={(e) => setColour(e.target.value)} className="h-11 w-24 p-1" />
+              <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" value={second} onChange={(e) => setSecond(e.target.value)} className="h-11 w-24 p-1" />
+            </div>
+          </details>
           <FileField label={t("onboarding.logo")} name="logo" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} button={t("file.choose")} empty={t("file.none")} />
           <Button type="submit" loading={busy}>
             {t("common.save")}
@@ -148,7 +100,7 @@ function ClubSection({ org }: { org: Org }) {
   );
 }
 
-function PeopleSection({
+export function PeopleSection({
   orgId,
   isAdmin,
   teams,
@@ -288,7 +240,7 @@ function PeopleSection({
   );
 }
 
-function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
+export function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const [setup, setSetup] = useState<Schemas["TotpSetupOut"] | null>(null);
@@ -354,7 +306,7 @@ function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
           <form onSubmit={(e) => confirm(e, "/v1/me/totp/enable")} className="space-y-3">
             <p className="text-sm">{t("settings.twoFactorScan")}</p>
             {/* QR is generated locally from our own otpauth URI */}
-            <div className="w-fit rounded bg-white p-2" aria-hidden dangerouslySetInnerHTML={{ __html: qr }} />
+            <div className="w-fit bg-white p-2" aria-hidden dangerouslySetInnerHTML={{ __html: qr }} />
             <p className="text-sm">
               {t("settings.twoFactorSecret")}: <code className="break-all" data-testid="totp-secret">{setup.secret}</code>
             </p>
@@ -365,7 +317,7 @@ function SecuritySection({ me, isAdmin }: { me: Me; isAdmin: boolean }) {
           </form>
         )}
         {codes && (
-          <div className="space-y-2 rounded-md bg-surface p-4" data-testid="recovery-codes">
+          <div className="space-y-2 bg-surface p-4" data-testid="recovery-codes">
             <p className="text-sm font-medium">{t("settings.recoveryTitle")}</p>
             <p className="text-sm text-muted">{t("settings.recoveryHint")}</p>
             <ul className="grid grid-cols-2 gap-1 font-mono text-sm sm:grid-cols-5">

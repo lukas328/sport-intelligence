@@ -35,7 +35,7 @@ export function CourtHalf({
       viewBox={`0 0 ${w} ${h}`}
       role="img"
       aria-label={label}
-      className={`w-full rounded ${onPick ? "cursor-crosshair" : ""}`}
+      className={`w-full ${onPick ?"cursor-crosshair":""}`}
       style={{ background: "var(--court)" }}
       onClick={click}
       data-testid="court-half"

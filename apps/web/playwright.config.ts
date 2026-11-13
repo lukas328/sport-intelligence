@@ -14,6 +14,8 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL,
+    // the app follows the browser language without a choice (UX test B06): the tests read de-CH
+    locale: "de-CH",
     trace: "retain-on-failure",
     // page transitions fade in; axe must judge the final colours, not a frame of the fade
     reducedMotion: "reduce",

@@ -3,6 +3,7 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AccountLine, UnlinkedAccounts, useTeamMembers } from "./account-link";
+import { ConsentLinkBox } from "./consent-link";
 import { ConsentOverview } from "./consent-overview";
 import { useOptionalShell } from "@/components/shell/context";
 import { StatusEditor, StatusLine } from "./player-status";
@@ -156,7 +157,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
       <section aria-labelledby="roster-list" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-baseline gap-3">
-            {/* on the squad page the H1 already says "Kader": the count is enough here */}
+            {/* on the squad page the H1 already says "Team": the count is enough here */}
             <h2 id="roster-list" className={cn("text-lg font-semibold", !inline && "sr-only")}>
               {t("roster.title")}
             </h2>
@@ -245,37 +246,38 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
             {/* staff read it before filming (analysts too, read only); the API answers 403 for others
                 and the section stays hidden */}
             {staffView && <ConsentOverview orgId={orgId} teamId={teamId} seasonId={seasonId} />}
+            {staffView && <ConsentLinkBox orgId={orgId} teamId={teamId} />}
             {GROUPS.map(([g, positions]) => {
               const members = entries.filter((p) => (g === "other" ? !ALL_POSITIONS.includes(p.main_position ?? "") : (positions as readonly string[]).includes(p.main_position ?? "")));
               if (members.length === 0) return null;
               return (
                 <section key={g} aria-labelledby={`group-${g}`}>
-                  <h3 id={`group-${g}`} className="mb-1 flex items-baseline gap-2 text-lg">
+                  <h3 id={`group-${g}`} className="font-slant mb-1 flex items-baseline gap-2.5 pb-2 text-xl">
                     {t(`roster.group_${g}`)}
                     <span className="font-sans text-sm font-medium text-muted tabular-nums">{members.length}</span>
                   </h3>
-                  <ul className="grid border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-10 xl:grid-cols-3">
+                  <ul className="grid border-t-2 border-ink sm:grid-cols-2 sm:gap-x-8 xl:grid-cols-3">
                     {members.map((p) => (
               <li key={p.id} className={cn("group relative flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-foreground/15 py-3.5 pr-1", statusFor === p.player_id && "sm:col-span-2 xl:col-span-3")} data-testid="roster-row">
-                <span className={cn("w-14 shrink-0 text-center font-score text-[2.75rem] leading-none", p.status ? "text-muted" : "text-accent")} aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
+                <span className={cn("w-14 shrink-0 text-right font-num text-[48px] leading-[.8]", p.status ? "text-ink-2" : "text-club-text")} aria-label={`${t("roster.number")} ${p.jersey_number ?? ""}`}>
                   {p.jersey_number ?? "–"}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[1.0625rem] font-semibold">
+                  <span className="font-slant block truncate text-xl leading-tight">
                     {/* staff open a player's season line from the name */}
                     {canEdit ? (
-                      <Link href={`/app/${orgId}/teams/${teamId}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
-                        {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                      <Link href={`/app/${orgId}/teams/${teamId}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
+                        {p.first_name} {p.last_name}
                       </Link>
                     ) : (
                       <>
-                        {p.first_name} <span className="font-display text-[1.125rem]">{p.last_name}</span>
+                        {p.first_name} {p.last_name}
                       </>
                     )}
                   </span>
                   <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
                     {p.main_position && (
-                      <span className="text-xs font-bold tracking-wide text-foreground" title={t(`positions.${p.main_position}`)}>
+                      <span className="text-xs font-bold text-foreground" title={t(`positions.${p.main_position}`)}>
                         {p.main_position}
                       </span>
                     )}
@@ -400,8 +402,8 @@ function CsvImport({
       </a>
       <div className="space-y-1">
         <span className="block text-sm font-semibold">{t("roster.csvFile")}</span>
-        <label className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
-          <span className="ml-1 rounded-sm bg-surface px-3 py-1 text-sm font-semibold">{t("roster.csvChoose")}</span>
+        <label className="flex min-h-10 cursor-pointer items-center gap-3 px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
+          <span className="ml-1 bg-surface px-3 py-1 text-sm font-semibold">{t("roster.csvChoose")}</span>
           <span className="min-w-0 truncate text-muted">{file?.name ?? t("roster.csvNone")}</span>
           <input
             type="file"
@@ -427,7 +429,7 @@ function CsvImport({
         </Alert>
       )}
       {result && result.errors.length === 0 && (
-        <ul className="max-h-40 space-y-1 overflow-auto rounded-md bg-surface p-3 text-sm" data-testid="csv-preview">
+        <ul className="max-h-40 space-y-1 overflow-auto bg-surface p-3 text-sm" data-testid="csv-preview">
           {result.rows.map((r, i) => (
             <li key={i}>
               {r.jersey_number ?? ""} {r.first_name} {r.last_name} {r.main_position ?? ""}

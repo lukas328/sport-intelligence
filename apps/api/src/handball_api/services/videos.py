@@ -12,26 +12,32 @@ from datetime import UTC, datetime
 from pathlib import PurePosixPath
 from typing import Any
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
 from handball_api.core.colors import analysis_kits
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
 from handball_api.core.net import UnsafeUrlError, check_public_https_url
 from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     CameraCalibration,
+    Event,
     Match,
+    Opponent,
     OpponentPlayer,
     ProcessingJob,
     RosterEntry,
+    Team,
     Track,
+    User,
     VideoAsset,
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
 from handball_api.services import audit, auto_events, billing, feed, halls, segments, training
 from handball_api.services.context import Ctx
+from handball_api.services.mail_templates import render
 from handball_api.services.matches import get_match, timeline_video
 from handball_api.services.policies import Action
 from handball_api.services.roster import numbers as roster_numbers
@@ -124,6 +130,77 @@ async def get_asset(
         raise ProblemError(404, "not-found", "Video not found")
     await get_match(ctx, asset.match_id, action)
     return asset
+
+
+THREE_THINGS_MIN_GOALS = 3  # fewer goals in the video carry no three things
+
+
+async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) -> None:
+    """A note in the bell and an e-mail to the team's coaches and analysts, naming the match
+    (UX test H06, B29): on the phone the bell alone is easy to miss."""
+    team = await ctx.db.get(Team, match.team_id)
+    opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
+    opponent = opp.name if opp else "Training"
+    link = f"/app/{match.organization_id}/matches/{match.id}"
+    # the link leads to the next step: questions wait in Prüfen (real-video test, second round)
+    if kind == "analysis_questions":
+        link += "/check"
+    staff = await training.staff_of(ctx, match.team_id)
+    await training.notify(
+        ctx,
+        match.organization_id,
+        staff,
+        kind,
+        {"match_id": str(match.id), "opponent": opponent, **extra},
+        link,
+    )
+    users = (await ctx.db.scalars(select(User).where(User.id.in_(staff)))).all() if staff else []
+    for u in users:
+        await try_send(
+            ctx.email,
+            render(
+                kind,
+                u.locale,
+                to=u.email,
+                name=u.name,
+                team=team.name if team else "",
+                opponent=opponent,
+                link=f"{ctx.settings.web_base_url}{link}",
+                **{k: v for k, v in extra.items() if k in ("questions", "more_moments")},
+            ),
+            kind,
+            user_id=str(u.id),
+        )
+
+
+async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
+    """What the mail may promise after the analysis (UX test N05): the three things only with
+    goals placed in the video; otherwise that the analysis is done and how many questions wait."""
+    goals = await ctx.db.scalar(
+        select(func.count())
+        .select_from(Event)
+        .where(
+            Event.match_id == match.id,
+            Event.type == "shot",
+            Event.outcome == "goal",
+            Event.t_ms.is_not(None),
+        )
+    )
+    if (goals or 0) >= THREE_THINGS_MIN_GOALS:
+        return "analysis_ready", {}
+    # the same questions the start and Prüfen show (UX test A02: one count, not two)
+    from handball_api.services.graphics import more_checks, open_checks
+
+    questions = len(await open_checks(ctx, match))
+    # further moments after the most important ones (third real-video test G1); with none of
+    # the most important left, the other moments are the questions
+    more = len(await more_checks(ctx, match))
+    if questions == 0:
+        questions, more = more, 0
+    return ("analysis_questions" if questions else "analysis_no_goals"), {
+        "questions": questions,
+        "more_moments": more,
+    }
 
 
 def _uploading(asset: VideoAsset) -> str:
@@ -488,20 +565,16 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         if data.status == JobStatus.FAILED and job.kind == "analysis":
             # the video stays playable (tagging and imports still work); the match is credited
             match.quota_credit = True
-            await training.notify(
-                ctx,
-                match.organization_id,
-                await training.staff_of(ctx, match.team_id),
-                "analysis_failed",
-                {"match_id": str(match.id), "reason": failure_code(data.error)},
-                f"/app/{match.organization_id}/matches/{match.id}",
-            )
+            await _tell_staff(ctx, match, "analysis_failed", {"reason": failure_code(data.error)})
         elif data.status == JobStatus.FAILED and job.kind == "sync":
             pass  # the camera stays usable with a manual offset
         elif data.status == JobStatus.FAILED:
             asset.status = VideoStatus.FAILED
             asset.error = data.error
             match.status = MatchStatus.FAILED
+            if job.kind in ("ingest", "import"):
+                # what failed, with the match's name and the way out (UX test B29)
+                await _tell_staff(ctx, match, "video_failed", {})
         elif data.status == JobStatus.SUCCEEDED and job.kind == "import" and data.result:
             asset.size_bytes = int(data.result.get("size_bytes", 0))
             asset.status = VideoStatus.UPLOADED
@@ -519,15 +592,14 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 await start_analysis(ctx, asset, match)
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
+            # the run after a court the coach corrected in Prüfen: Prüfen waits for it and asks
+            # anew, no second mail and no notice (third real-video test G4)
+            pending = (asset.analysis or {}).get(PENDING)
+            corrected = isinstance(pending, dict) and pending.get("job_id") == str(job.id)
             on_timeline = await _apply_analysis_result(ctx, asset, job, data.result)
-            await training.notify(
-                ctx,
-                match.organization_id,
-                await training.staff_of(ctx, match.team_id),
-                "analysis_ready",
-                {"match_id": str(match.id)},
-                f"/app/{match.organization_id}/matches/{match.id}",
-            )
+            if not corrected:
+                kind, extra = await _ready_note(ctx, match)
+                await _tell_staff(ctx, match, kind, extra)
             if on_timeline:
                 await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
                 from handball_api.services import highlights  # imports this module (media paths)
@@ -591,6 +663,8 @@ async def start_analysis(
         # fails the automatic court again and the run would drop the tracks and identities
         clicked = meta[CLICKED]
         points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
+    opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
+    opponent_kit = match.opponent_kit or (opp.primary_color if opp is not None else None)
     refs: list[dict[str, Any]] = []
     if points is None:
         # the court clicked or confirmed on an earlier video of the same hall: the worker tries
@@ -608,8 +682,10 @@ async def start_analysis(
             {
                 "own": match.kit_own,
                 "own_gk": match.kit_own_gk,
-                "opponent": match.kit_opponent,
-                "opponent_gk": match.kit_opponent_gk,
+                # only a colour somebody said, for this match or remembered for the opponent
+                # (third real-video test G5): the column's default red is no knowledge (E09)
+                "opponent": opponent_kit,
+                "opponent_gk": match.kit_opponent_gk if opponent_kit else None,
                 "referee": match.kit_referee,
             }
         ),

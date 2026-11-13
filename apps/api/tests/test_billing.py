@@ -6,9 +6,11 @@ import hashlib
 import hmac
 import json
 import time
+import uuid
 from collections.abc import Callable, Iterator
 from typing import Any
 
+import asyncpg
 import pytest
 from fastapi import FastAPI
 
@@ -312,3 +314,30 @@ async def test_stripe_gateway_requests() -> None:
     await gw.checkout_url("cus_9", [("price_team", 1)], 0, "https://s", "https://c", "org-1")
     assert "trial_period_days" not in calls[-1]["subscription_data"]
     assert await gw.portal_url("cus_9", "https://r") == "https://stripe.test/x"
+
+
+async def test_new_club_starts_the_trial_and_its_first_video_is_analysed(
+    make_api: Callable[[], Api],
+    billing_on: FakeGateway,
+    db_app: FastAPI,
+    owner_conn: asyncpg.Connection,
+) -> None:
+    # UX test, second delivery: a club made at sign-up gets the Team plan's trial without payment
+    # details, so its first video is analysed; after the trial it falls back to Free
+    db_app.state.settings.trial_on_signup = True
+    api = make_api()
+    ids = await setup_club(api)
+    b = (await api.get(f"/v1/orgs/{ids['org']}/billing")).json()
+    assert (b["plan"], b["effective_plan"]) == ("team", "team")
+    assert b["trial_ends_at"] is not None
+    assert "tracking" in b["features"]
+    # the trial is used (a later checkout starts no second one); when it ends, Free again
+    assert await owner_conn.fetchval(
+        "SELECT trial_used FROM organizations WHERE id = $1", uuid.UUID(ids["org"])
+    )
+    await owner_conn.execute(
+        "UPDATE organizations SET trial_ends_at = now() - interval '1 day' WHERE id = $1",
+        uuid.UUID(ids["org"]),
+    )
+    b = (await api.get(f"/v1/orgs/{ids['org']}/billing")).json()
+    assert (b["plan"], b["effective_plan"]) == ("team", "free")

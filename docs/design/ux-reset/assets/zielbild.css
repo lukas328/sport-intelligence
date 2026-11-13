@@ -1,0 +1,30 @@
+/* ===== Zielbild: the presentation page around the screens (not part of the app) ===== */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #d6d8d9; color: #15171a; font-family: "Hanken Grotesk", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.doc { max-width: 1280px; margin: 0 auto; padding: 48px 16px 8px; }
+.doc .kick { font: 600 15px "Hanken Grotesk", sans-serif; color: #4e535a; margin: 0 0 10px; }
+.doc h1 { font: italic 900 112px/.86 "Kanit", sans-serif; margin: 0 0 20px; letter-spacing: -0.02em; }
+.doc .idea { font: 700 26px/1.25 "Hanken Grotesk", sans-serif; max-width: 900px; margin: 0 0 14px; }
+.doc p { max-width: 900px; font-size: 17px; line-height: 1.5; color: #33373c; margin: 0 0 10px; }
+.doc h2 { font: italic 800 30px "Kanit", sans-serif; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #15171a; }
+.doc ol.rules { max-width: 900px; padding-left: 22px; font-size: 17px; line-height: 1.5; } .doc ol.rules li { margin-bottom: 8px; }
+.doc .tw { overflow-x: auto; }
+.doc table { border-collapse: collapse; width: 100%; font-size: 15px; line-height: 1.4; min-width: 640px; }
+.doc th { text-align: left; font-size: 13px; color: #4e535a; padding: 8px 12px 8px 0; border-bottom: 2px solid #15171a; }
+.doc td { padding: 10px 12px 10px 0; border-bottom: 1px solid #b9bcbe; vertical-align: top; }
+.doc td:first-child { font-weight: 700; width: 30%; }
+.doc nav.toc { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 15px; margin-top: 18px; } .doc nav.toc a { color: inherit; font-weight: 700; }
+.ctl { position: sticky; top: 0; z-index: 9; background: #15171a; color: #f2f3f4; padding: 10px 16px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+.ctl .grp { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.ctl .grp > span { font: 600 13px "IBM Plex Mono", monospace; color: #9aa3ac; margin-right: 6px; }
+.ctl .note { font-size: 14px; color: #c3c9cf; }
+.ctl button { min-height: 44px; width: 44px; padding: 0; background: transparent; border: 1.5px solid #4a5058; cursor: pointer; display: grid; place-items: center; }
+.ctl button[aria-pressed="true"] { border-color: #f2f3f4; background: #2c3136; }
+.ctl button i { width: 20px; height: 20px; display: block; border: 1px solid #8a9199; }
+.view { max-width: 1280px; margin: 64px auto 0; }
+.view > header { display: flex; gap: 16px; align-items: baseline; padding: 0 0 10px; border-bottom: 2px solid #15171a; margin-bottom: 16px; flex-wrap: wrap; }
+.view > header b { font: italic 800 26px "Kanit", sans-serif; } .view > header span { font-size: 15px; color: #4e535a; }
+.pair { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+.app.desk { width: 1280px; } .app.phone { width: 390px; }
+.view .grid { display: grid; grid-template-columns: repeat(3, 390px); gap: 48px 55px; }
+.view figure { margin: 0; } .view figcaption { font: italic 800 20px "Kanit", sans-serif; margin-bottom: 8px; }

@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     operator_emails: list[str] = Field(default_factory=list)
     # billing (BRIEF 13): off in development and CI, on in production
     billing_enforce: bool = False
+    # a new club starts the trial of the Team plan at once, without payment details (UX test,
+    # second delivery): otherwise its first video is never analysed. After the trial the club
+    # falls back to Free; nothing is deleted. Business rule to confirm: OPEN_QUESTIONS Q-BILL-TRIAL
+    trial_on_signup: bool = True
     # annual subscription by Swiss QR bill (addendum 01, 4.10); creditor = the operating company
     # support (addendum 01, 4.11/4.12): adapters stay off without configuration
     support_email: str = "support@handball-ai.ch"
@@ -55,6 +59,9 @@ class Settings(BaseSettings):
     status_page_push_url: str | None = None  # provider webhook for component status
     status_page_token: SecretStr | None = None
     help_base_url: str = "https://handball-ai.ch/hilfe"
+    # the public website (apps/site): legal pages and guides such as /aufnahme/ link there; one
+    # setting, so a change of domain does not break links in the app
+    site_url: str = "https://handball-ai.ch"
     raw_video_days: int = 90  # originals reduced to the compressed version after this
     alert_cost_chf_per_match: float = 2.0
     alert_analysis_minutes: float = 45.0
@@ -91,7 +98,8 @@ class Settings(BaseSettings):
     csrf_cookie: str = "hb_csrf"
     session_ttl_hours: int = 24 * 14
     cookie_secure: bool = False
-    magic_link_ttl_minutes: int = 15
+    # the first sign-in from the entry is often read hours later (UX test N15): a day, once only
+    magic_link_ttl_minutes: int = 24 * 60
     invitation_ttl_days: int = 14
     org_admin_2fa_required: bool = True
     org_admin_2fa_grace_days: int = 14
@@ -105,7 +113,7 @@ class Settings(BaseSettings):
 
     # E-mail (ADR 009)
     email_backend: Literal["smtp", "memory", "console"] = "smtp"
-    email_from: str = "Handball AI <noreply@localhost>"
+    email_from: str = "Handball Intelligence <noreply@localhost>"
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_username: str | None = None

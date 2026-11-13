@@ -49,6 +49,9 @@ class OrgOut(ApiModel):
     # official club link (federation onboarding): none | unverified | verified
     verification: str = "none"
     official_club_id: int | None = None
+    # a video uploaded or a second person in the club: from then on the two-factor reminder
+    # shows (UX test H13; the obligation itself is unchanged)
+    something_to_protect: bool = False
 
 
 class SeasonCreate(ApiModel):
@@ -73,6 +76,14 @@ class SeasonOut(ApiModel):
 
 class TeamSettings(ApiModel):
     players_see_team_stats: bool
+    # "Teamfunktionen" (ADR 029): training, dates, RSVP, tasks and the player and parent areas.
+    # Off by default, also for teams created before the setting existed.
+    team_features: bool = False
+
+
+class TeamSettingsUpdate(ApiModel):
+    players_see_team_stats: bool | None = None
+    team_features: bool | None = None
 
 
 class TeamCreate(ApiModel):
@@ -88,7 +99,7 @@ class TeamUpdate(ApiModel):
     league: Name | None = None
     is_youth: bool | None = None
     gender: TeamGender | None = None
-    settings: TeamSettings | None = None
+    settings: TeamSettingsUpdate | None = None
     level: Name | None = None
     default_format: MatchFormatKey | None = None
 

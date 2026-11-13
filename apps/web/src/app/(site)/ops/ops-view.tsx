@@ -69,8 +69,8 @@ export function OpsView() {
             [t("storage"), gb(o.storage_bytes)],
             [t("gpu"), o.gpu_minutes_24h],
           ].map(([label, value]) => (
-            <div key={String(label)} className="rounded-lg bg-raised px-4 py-4 border border-border sm:px-5">
-              <dt className="text-[0.8125rem] text-muted">{label}</dt>
+            <div key={String(label)} className="bg-raised px-4 py-4 border border-border sm:px-5">
+              <dt className="text-[0.9375rem] text-muted">{label}</dt>
               <dd className="mt-1 font-score text-[1.75rem] leading-none sm:text-3xl">{value}</dd>
             </div>
           ))}
@@ -101,9 +101,9 @@ export function OpsView() {
       <section className="space-y-2" aria-label={t("organizations")}>
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">{t("search")}</span>
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} className="min-h-10 w-72 rounded-md bg-raised ring-1 ring-inset ring-border px-3" />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} className="min-h-10 w-72 bg-raised ring-1 ring-inset ring-border px-3" />
         </label>
-        <div className="overflow-x-auto rounded-lg bg-raised border border-border">
+        <div className="overflow-x-auto bg-raised border border-border">
           <table className="w-full text-sm" data-testid="ops-orgs">
             <caption className="sr-only">{t("organizations")}</caption>
             <thead className="text-xs text-muted">

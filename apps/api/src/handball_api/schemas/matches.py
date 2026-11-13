@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import uuid
 from datetime import datetime
 from typing import Any, Literal
@@ -76,6 +77,11 @@ class MatchCreate(ApiModel):
         description="referee shirt colour when known; left out of the analysis when it is close "
         "to a team's kit",
     )
+    opponent_kit: HexColor | None = Field(
+        default=None,
+        description="the opponent's shirt colour when somebody knows it; also taken from "
+        "kit_opponent when that is sent. Remembered for the opponent; never guessed",
+    )
     format: MatchFormatKey | None = Field(
         default=None, description="template; default adult_2x30, youth teams youth_2x25"
     )
@@ -107,6 +113,9 @@ class MatchUpdate(ApiModel):
     kit_opponent: HexColor | None = None
     kit_opponent_gk: HexColor | None = None
     kit_referee: HexColor | None = Field(default=None, description="null clears it (unknown)")
+    opponent_kit: HexColor | None = Field(
+        default=None, description="the opponent's shirt colour; null clears it (unknown)"
+    )
     format: MatchFormatKey | None = None
     period_s: int | None = Field(default=None, ge=60, le=3600)
     periods: int | None = Field(default=None, ge=1, le=4)
@@ -158,6 +167,17 @@ class JobOut(ApiModel):
     finished_at: datetime | None
 
 
+class OpponentColors(ApiModel):
+    """The opponent's colours for this match (docs/design/ux-reset). The web applies the clash rule
+    (lib/color.ts, opponentShown); nothing here is guessed."""
+
+    color: str | None = Field(description="first colour; null while nobody said it")
+    second: str | None = Field(description="second colour, for the clash rule")
+    source: Literal["match", "opponent"] | None = Field(
+        description="match: said for this match; opponent: remembered from an earlier match"
+    )
+
+
 class MatchOut(ApiModel):
     id: uuid.UUID
     team_id: uuid.UUID
@@ -174,6 +194,7 @@ class MatchOut(ApiModel):
     kit_opponent_gk: str
     kit_referee: str | None = Field(default=None, description="null: unknown")
     kit_warnings: list[str] = Field(description="kit pairs with similar colours, e.g. own/opponent")
+    opponent_colors: OpponentColors | None = Field(default=None, description="null for trainings")
     format: str
     period_s: int
     periods: int
@@ -203,6 +224,12 @@ class MatchSummary(ApiModel):
     status: MatchStatus
     is_demo: bool
     has_video: bool
+    opponent_color: str | None = Field(
+        default=None, description="the opponent's colour for the kit chip; null while unknown"
+    )
+    has_report: bool = Field(
+        default=False, description="events from a match report (handball.ch or paper) exist"
+    )
 
 
 class UploadCreate(ApiModel):
@@ -488,8 +515,10 @@ class CalibrationPoint(ApiModel):
         x, y = self.court
         if not (-5 <= x <= 45 and -5 <= y <= 25):
             raise ValueError("court point outside the court area")
-        if self.image[0] < 0 or self.image[1] < 0:
-            raise ValueError("image point must be inside the frame")
+        # a corner may lie outside the picture: with a panning camera the near corners are
+        # often out of view (real-video test E03); only absurd values are refused
+        if not all(math.isfinite(v) and abs(v) <= 20_000 for v in self.image):
+            raise ValueError("image point too far outside the frame")
         return self
 
 
@@ -503,3 +532,122 @@ class CalibrationIn(ApiModel):
 class PanoramaOut(ApiModel):
     width: int
     height: int
+
+
+# ---- the Anlauf graphics (docs/design/ux-reset/ANLAUF.md, section 10) -------------------------
+
+GraphicsSource = Literal["analysis", "demo"]
+
+
+class ReportGoalOut(ApiModel):
+    minute: float | None
+    team: Literal["own", "opp"]
+
+
+class GoalRunOut(ApiModel):
+    event_id: uuid.UUID
+    team: Literal["own", "opp"]
+    minute: float | None
+    number: int | None
+    player_id: uuid.UUID | None = None
+    zone: str | None = Field(description="la, ra, rl, rm, rr, kr, m7 or gs")
+    run: list[tuple[float, float]] = Field(
+        description="the scorer's way before the shot, half court (goal at the top, metres); "
+        "empty without tracking"
+    )
+    shot: tuple[float, float] | None = Field(
+        description="the shot spot, half court; null for a goal without a known spot"
+    )
+    aim: tuple[float, float] | None
+    confirmed: bool = Field(description="false: the shot spot is estimated")
+    source: Literal["tracking", "marked", "demo"] | None
+    has_video: bool
+    t_ms: int | None = Field(default=None, description="video time of the goal")
+
+
+class PhaseOut(ApiModel):
+    kind: Literal["power_play", "short_handed", "fast_break"]
+    count: int
+    windows: list[tuple[float, float]] = Field(description="minutes")
+    goals_us: int
+    goals_them: int
+    estimated: bool
+
+
+class CheckOut(ApiModel):
+    id: uuid.UUID
+    kind: str
+    frame_ref: int = Field(description="video time in ms")
+    box: list[float] | None
+    seconds_in_view: float | None
+    suggested_side: str | None
+    candidates: list[dict[str, Any]]
+
+
+class MatchGraphicsOut(ApiModel):
+    has_video: bool
+    analysis: Literal["none", "running", "ready", "failed"] = Field(
+        default="none", description="the latest analysis of the timeline video"
+    )
+    analysis_at: datetime | None = Field(
+        default=None, description="when the latest analysis finished; null unless ready"
+    )
+    has_report: bool = Field(default=False, description="goals from a match report exist")
+    span: tuple[float, float] | None = Field(
+        default=None, description="match minutes the video covers; null without throw-off"
+    )
+    field_confirmed: bool | None = Field(description="null without a video")
+    report_goals: list[ReportGoalOut]
+    goals: list[GoalRunOut]
+    phases: list[PhaseOut]
+    checks: list[CheckOut] = Field(
+        description="the questions of Prüfen, in order: what three things need (the one count)"
+    )
+    more_checks: list[CheckOut] = Field(
+        default_factory=list, description="lower-ranked goal candidates, offered, not counted"
+    )
+    source: GraphicsSource
+
+
+class SceneTrackOut(ApiModel):
+    team: Literal["own", "opp", "ref"]
+    number: int | None
+    xy: list[tuple[float, float]] = Field(description="court metres, the attacked goal at x = 0")
+    ts: list[float] | None = Field(
+        default=None,
+        description="when each point is, as a share of the scene (0 to 1); null for drawn scenes",
+    )
+
+
+class BallStretchOut(ApiModel):
+    from_s: float
+    to_s: float
+    team: Literal["own", "opp"]
+    number: int
+
+
+class ScorerOut(ApiModel):
+    team: Literal["own", "opp"]
+    number: int
+
+
+class SceneCameraOut(ApiModel):
+    event_id: uuid.UUID
+    clock_s: float | None
+    video_s: float | None = Field(
+        default=None, description="video time at the scene start, for scenes without a clock"
+    )
+    duration_s: float
+    right: bool = Field(
+        default=False, description="the attack goes to the goal at x = 40, as the video shows it"
+    )
+    field_confirmed: bool | None
+    tracks: list[SceneTrackOut]
+    ball: list[BallStretchOut] = Field(
+        description="who held the ball, only where it was found; empty until the analysis "
+        "delivers ball and holder"
+    )
+    scorer: ScorerOut | None
+    shot: tuple[float, float] | None
+    confirmed: bool
+    source: GraphicsSource

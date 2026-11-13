@@ -13,7 +13,7 @@ export function CourtHeatmap({ grid, label }: { grid?: number[][]; label: string
   const cols = grid?.[0]?.length ?? 0;
   const max = Math.max(0.0001, ...(grid ?? []).flat());
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className="w-full rounded" style={{ background: "var(--court)" }} data-testid="court-heatmap">
+    <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className="w-full" style={{ background: "var(--court)" }} data-testid="court-heatmap">
       {grid &&
         grid.map((row, r) =>
           row.map((v, c) =>

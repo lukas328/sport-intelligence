@@ -46,7 +46,7 @@ export function MyConsents({ orgId }: { orgId: string }) {
         const youth = s.teams.some((team) => team.is_youth) || s.minor === true;
         const childLocked = s.relation === "self" && s.minor === true;
         return (
-          <section key={s.player_id} className="space-y-3 rounded-lg bg-raised border border-border p-4" aria-labelledby={`subject-${s.player_id}`}>
+          <section key={s.player_id} className="space-y-3 bg-raised border border-border p-4" aria-labelledby={`subject-${s.player_id}`}>
             <div>
               <h2 id={`subject-${s.player_id}`} className="text-lg font-semibold">
                 {s.first_name} {s.last_name}

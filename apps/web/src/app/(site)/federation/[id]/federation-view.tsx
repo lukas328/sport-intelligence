@@ -63,7 +63,7 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
         >
           <label className="flex-1">
             <span className="sr-only">{t("email")}</span>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("email")} className="min-h-10 w-full rounded-md bg-raised ring-1 ring-inset ring-border px-3" />
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("email")} className="min-h-10 w-full bg-raised ring-1 ring-inset ring-border px-3" />
           </label>
           <Button type="submit" disabled={invite.isPending}>{t("send")}</Button>
         </form>
@@ -109,9 +109,9 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
         <h2 id="aggregate" className="mb-2 text-lg font-semibold">{t("aggregate")}</h2>
         {agg.matches_with_events != null ? (
           <dl className="grid grid-cols-3 gap-3">
-            <div className="rounded-lg ring-1 ring-inset ring-border p-3"><dt className="text-sm text-muted">{t("aggMatches")}</dt><dd className="text-2xl font-semibold">{agg.matches_with_events}</dd></div>
-            <div className="rounded-lg ring-1 ring-inset ring-border p-3"><dt className="text-sm text-muted">{t("aggGoals")}</dt><dd className="text-2xl font-semibold">{agg.goals_per_match ?? "-"}</dd></div>
-            <div className="rounded-lg ring-1 ring-inset ring-border p-3"><dt className="text-sm text-muted">{t("aggShooting")}</dt><dd className="text-2xl font-semibold">{agg.shooting_pct != null ? `${Math.round(agg.shooting_pct * 100)} %` : "-"}</dd></div>
+            <div className="ring-1 ring-inset ring-border p-3"><dt className="text-sm text-muted">{t("aggMatches")}</dt><dd className="text-2xl font-semibold">{agg.matches_with_events}</dd></div>
+            <div className="ring-1 ring-inset ring-border p-3"><dt className="text-sm text-muted">{t("aggGoals")}</dt><dd className="text-2xl font-semibold">{agg.goals_per_match ?? "-"}</dd></div>
+            <div className="ring-1 ring-inset ring-border p-3"><dt className="text-sm text-muted">{t("aggShooting")}</dt><dd className="text-2xl font-semibold">{agg.shooting_pct != null ? `${Math.round(agg.shooting_pct * 100)} %` : "-"}</dd></div>
           </dl>
         ) : (
           <p className="text-sm text-muted">{t("tooFew", { n: agg.clubs_with_data, min: agg.min_clubs })}</p>

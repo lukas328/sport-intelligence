@@ -16,5 +16,5 @@ export default async function MatchesPage({ params }: { params: Promise<{ orgId:
     client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
   ]);
   const canWrite = org.data?.my_role === "org_admin" || ["coach", "analyst", "team_manager"].includes(team.data?.my_role ?? "");
-  return <MatchesView orgId={orgId} teamId={teamId} matches={matches.data ?? []} canWrite={canWrite} />;
+  return <MatchesView orgId={orgId} teamId={teamId} teamName={team.data?.name ?? ""} matches={matches.data ?? []} canWrite={canWrite} />;
 }

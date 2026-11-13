@@ -131,4 +131,4 @@ async def test_onboarding_series_retries_failed_mail(
     mail_down()
     assert await run() == 0  # not marked as sent
     monkeypatch.undo()
-    assert await run() == 1 and outbox.outbox[-1].subject == "Willkommen bei Handball AI"
+    assert await run() == 1 and outbox.outbox[-1].subject == "Willkommen bei Handball Intelligence"

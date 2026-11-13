@@ -1,4 +1,5 @@
-"""Share links (M8): read-only public access to a play, a match report or a playlist.
+"""Share links (M8, SPEC 7.8): read-only public access to a play, a match report, a playlist, a
+scene, a collection or the highlights.
 
 Tokens are random, only their hash is stored; links expire (1 to 90 days), can be revoked and count
 views.
@@ -16,23 +17,27 @@ from sqlalchemy import select
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
-from handball_api.core.security import hash_token, new_token
+from handball_api.core.security import SecretBox, hash_token, new_token
 from handball_api.models import (
     Clip,
     Event,
     HighlightReel,
     Match,
+    Organization,
     Play,
     Playlist,
     PlaylistItem,
     RosterEntry,
     ShareLink,
     Team,
+    User,
     VideoAsset,
 )
 from handball_api.models.enums import ConsentKind, ReelStatus
 from handball_api.services import audit, billing, org_verification
+from handball_api.services import collections as collections_service
 from handball_api.services import events as events_service
+from handball_api.services import graphics as graphics_service
 from handball_api.services.context import Ctx
 from handball_api.services.highlights import rank
 from handball_api.services.matches import opponent_of, timeline_video
@@ -73,6 +78,21 @@ async def _target(ctx: Ctx, team: Team, kind: str, target_id: uuid.UUID) -> str:
                 403, "consent-missing", "Public sharing needs the public highlights consent"
             )
         return "Highlights"
+    if kind == "scene":
+        clip = await ctx.db.get(Clip, target_id)
+        match = await ctx.db.get(Match, clip.match_id) if clip else None
+        if clip is None or match is None or match.team_id != team.id:
+            raise ProblemError(404, "not-found", "Scene not found")
+        opp = await opponent_of(ctx, match)
+        return clip.title or (f"{team.name} - {opp.name}" if opp else team.name)
+    if kind == "collection":
+        try:
+            _, row = await collections_service.resolve(ctx, target_id)
+        except ProblemError:
+            row = None
+        if row is None or row.team_id != team.id:
+            raise ProblemError(404, "not-found", "Collection not found")
+        return str(row.title)
     if kind == "play":
         play = await ctx.db.get(Play, target_id)
         if play is None or play.team_id != team.id:
@@ -110,6 +130,7 @@ async def create(
         kind=kind,
         target_id=target_id,
         token_hash=hash_token(token),
+        token_enc=_box(ctx).encrypt(token),
         title=title[:200],
         expires_at=_now() + timedelta(days=days),
         created_by_id=ctx.user_id,
@@ -118,6 +139,15 @@ async def create(
     await ctx.db.flush()
     await audit.record(ctx, "share_link.created", target_type="share_link", target_id=link.id)
     return link, token
+
+
+def _box(ctx: Ctx) -> SecretBox:
+    return SecretBox(ctx.settings.encryption_key.get_secret_value())
+
+
+def token_of(ctx: Ctx, link: ShareLink) -> str | None:
+    """The link's token for its team's staff (links made before it was kept: None)."""
+    return _box(ctx).decrypt(link.token_enc) if link.token_enc else None
 
 
 async def list_links(ctx: Ctx, team_id: uuid.UUID) -> list[ShareLink]:
@@ -178,11 +208,14 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
     link = await _resolve(ctx, token)
     link.views += 1
     team = await ctx.db.get(Team, link.team_id)
+    by = await ctx.db.get(User, link.created_by_id) if link.created_by_id else None
     base: dict[str, Any] = {
         "kind": link.kind,
         "title": link.title,
         "team": team.name if team else "",
         "expires_at": link.expires_at.isoformat(),
+        # «geteilt von Sandra» (SPEC 7.8): the first name of who shared it, nothing more
+        "shared_by": by.name.split()[0] if by and by.name else None,
     }
     if link.kind == "play":
         play = await ctx.db.get(Play, link.target_id)
@@ -240,6 +273,37 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
         if reel is None or reel.status != ReelStatus.READY:
             raise ProblemError(404, "not-found", "Not found")
         return {**base, "highlight": {"format": reel.format, "scenes": len(reel.clip_ids)}}
+    if link.kind in ("scene", "collection"):
+        scenes = await _scenes_of(ctx, link)
+        out = []
+        for item in scenes["items"]:
+            sc = item.get("scene")
+            video = await _main_video(ctx, uuid.UUID(sc["match_id"])) if sc else None
+            camera = await _camera(ctx, sc) if sc else None
+            goal = await _goal(ctx, sc) if sc else None
+            out.append(
+                {
+                    "kind": item["kind"],
+                    "text": item["text"],
+                    "play": item["play"],
+                    "scene": {
+                        "id": sc["clip_id"],
+                        "title": sc["title"],
+                        "start_ms": sc["start_ms"],
+                        "end_ms": sc["end_ms"],
+                        "video_id": str(video.id) if video else None,
+                        # the tactics camera of the goal behind the scene (SPEC 7.8: Video |
+                        # Taktik and the Minifeld per scene); none without a confirmed court
+                        "camera": camera,
+                        # minute, side and position of the goal: the same title as in the
+                        # app («35:51 Gegentor über rechts aussen», UX test B15)
+                        "goal": goal,
+                    }
+                    if sc
+                    else None,
+                }
+            )
+        return {**base, link.kind: {"title": link.title, "items": out}}
     pl = await ctx.db.get(Playlist, link.target_id)
     if pl is None:
         raise ProblemError(404, "not-found", "Not found")
@@ -267,6 +331,93 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
     return {**base, "playlist": {"title": pl.title, "description": pl.description, "clips": clips}}
 
 
+async def _camera(ctx: Ctx, sc: dict[str, Any]) -> dict[str, Any] | None:
+    """Positions before the goal of a shared scene, as on the match page; None when the scene
+    is not a goal or nothing was measured (no confirmed court, no tracking)."""
+    if not sc.get("event_id"):
+        return None
+    event = await ctx.db.get(Event, uuid.UUID(sc["event_id"]))
+    match = await ctx.db.get(Match, uuid.UUID(sc["match_id"]))
+    if event is None or match is None or event.match_id != match.id:
+        return None
+    cam = await graphics_service.camera_of(ctx, match, event)
+    if not cam["field_confirmed"] or not cam["tracks"]:
+        return None
+    return {**cam, "event_id": str(cam["event_id"])}
+
+
+async def _goal(ctx: Ctx, sc: dict[str, Any]) -> dict[str, Any] | None:
+    if not sc.get("event_id"):
+        return None
+    e = await ctx.db.get(Event, uuid.UUID(sc["event_id"]))
+    if e is None or e.type != "shot" or e.outcome != "goal":
+        return None
+    return {
+        "minute": graphics_service.minute_of(e),
+        "team": "own" if e.side == "own" else "opp",
+        "zone": graphics_service.zone_of(e),
+    }
+
+
+async def _scenes_of(ctx: Ctx, link: ShareLink) -> dict[str, Any]:
+    """Entries of a shared scene or collection (the scene alone is a run of one)."""
+    if link.kind == "scene":
+        clip = await ctx.db.get(Clip, link.target_id)
+        if clip is None:
+            raise ProblemError(404, "not-found", "Not found")
+        scene = {
+            "clip_id": str(clip.id),
+            "match_id": str(clip.match_id),
+            "start_ms": clip.start_ms,
+            "end_ms": clip.end_ms,
+            "title": clip.title,
+            "event_id": collections_service._clip_out(clip)["event_id"],
+        }
+        return {"items": [{"kind": "scene", "text": None, "play": None, "scene": scene}]}
+    try:
+        source, row = await collections_service.resolve(ctx, link.target_id)
+    except ProblemError:
+        raise ProblemError(404, "not-found", "Not found") from None
+    return {"items": await collections_service.items_of(ctx, source, row)}
+
+
+async def preview(ctx: Ctx, token: str) -> dict[str, Any]:
+    """Open Graph data of a link: title, club, team, kit, number and length of the scenes."""
+    link = await _resolve(ctx, token)
+    team = await ctx.db.get(Team, link.team_id)
+    org = await ctx.db.get(Organization, link.organization_id)
+    scenes, duration = 0, None
+    if link.kind in ("scene", "collection", "playlist"):
+        if link.kind == "playlist":
+            items = await collections_service.items_of(
+                ctx, "playlist", await ctx.db.get(Playlist, link.target_id)
+            )
+        else:
+            items = (await _scenes_of(ctx, link))["items"]
+        windows = [i["scene"] for i in items if i.get("scene")]
+        scenes = len(windows)
+        duration = round(sum(w["end_ms"] - w["start_ms"] for w in windows) / 1000) or None
+    elif link.kind == "highlight":
+        reel = await ctx.db.get(HighlightReel, link.target_id)
+        scenes = len(reel.clip_ids) if reel else 0
+    elif link.kind == "match":
+        match = await ctx.db.get(Match, link.target_id)
+        duration = match.period_s * match.periods if match else None
+    return {
+        "kind": link.kind,
+        "title": link.title,
+        "club": org.name if org else "",
+        "team": team.name if team else "",
+        "scenes": scenes,
+        "duration_s": duration,
+        "kit": {
+            "a": org.primary_color if org else "#0b6bcb",
+            "b": org.secondary_color if org else "#ffffff",
+        },
+        "expires_at": link.expires_at,
+    }
+
+
 async def public_media(ctx: Ctx, token: str, video_id: uuid.UUID, path: str) -> tuple[bytes, str]:
     """Media of a shared match or of the clips of a shared playlist; nothing else."""
     link = await _resolve(ctx, token)
@@ -276,6 +427,11 @@ async def public_media(ctx: Ctx, token: str, video_id: uuid.UUID, path: str) -> 
     allowed = False
     if link.kind == "match":
         allowed = video.match_id == link.target_id
+    elif link.kind in ("scene", "collection"):
+        allowed = any(
+            i["scene"] and i["scene"]["match_id"] == str(video.match_id)
+            for i in (await _scenes_of(ctx, link))["items"]
+        )
     elif link.kind == "playlist":
         allowed = (
             await ctx.db.scalar(

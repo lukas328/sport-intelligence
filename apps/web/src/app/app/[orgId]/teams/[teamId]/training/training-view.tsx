@@ -5,6 +5,7 @@ import { DRILLS } from "@handball/tactics";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/ui/confirm";
@@ -18,7 +19,7 @@ import { errorKey, type ErrorKey } from "@/lib/errors";
 
 type Session = Schemas["TrainingSessionOut"];
 type Focus = Schemas["FocusOut"];
-const control = "min-h-9 rounded-md border border-border bg-background px-2 text-sm";
+const control = "min-h-9 border border-border bg-background px-2 text-sm";
 
 function SessionForm({
   orgId,
@@ -129,7 +130,7 @@ function SessionForm({
       </div>
       <label className="block text-sm">
         <span className="block font-medium">{t("notes")}</span>
-        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full rounded-md bg-raised ring-1 ring-inset ring-border p-2" />
+        <textarea name="notes" maxLength={5000} rows={2} defaultValue={initial?.notes ?? ""} className="w-full bg-raised ring-1 ring-inset ring-border p-2" />
       </label>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       <Button type="submit" disabled={save.isPending}>{t("save")}</Button>
@@ -316,6 +317,10 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="sr-only">{t("title")}</h2>
         <p className="max-w-xl text-sm text-muted">{t("hint")}</p>
+        {/* the drill library left the navigation with the training plan; this is its way in */}
+        <Link href={`/app/${orgId}/drills`} className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
+          {tr("shell.drills")}
+        </Link>
         {canPlan && (
           <Button onClick={() => setEditing(editing === "new" ? null : "new")}>
             <Plus aria-hidden />
@@ -378,8 +383,8 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
             <form onSubmit={importIcs} className="space-y-3">
               <h3 className="text-lg">{t("importTitle")}</h3>
               <p className="text-sm text-muted">{t("importHint")}</p>
-              <label className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
-                <span className="ml-1 rounded-sm bg-surface px-3 py-1 text-sm font-semibold">{tr("roster.csvChoose")}</span>
+              <label className="flex min-h-10 cursor-pointer items-center gap-3 px-1 text-[0.9375rem] ring-1 ring-inset ring-foreground/20 focus-within:ring-2 focus-within:ring-accent hover:ring-foreground/40">
+                <span className="ml-1 bg-surface px-3 py-1 text-sm font-semibold">{tr("roster.csvChoose")}</span>
                 <span className="min-w-0 truncate text-muted">{icsName ?? tr("roster.csvNone")}</span>
                 <input name="ics" type="file" accept=".ics,text/calendar" required className="sr-only" aria-label={t("importTitle")} onChange={(e) => setIcsName(e.currentTarget.files?.[0]?.name ?? null)} />
               </label>

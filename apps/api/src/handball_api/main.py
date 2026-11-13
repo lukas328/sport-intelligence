@@ -30,6 +30,8 @@ from handball_api.core.text import ClaudeTextGenerator, TextGenerator
 from handball_api.routers import assistant as assistant_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
+from handball_api.routers import collections as collections_router
+from handball_api.routers import consent_links as consent_links_router
 from handball_api.routers import devices as devices_router
 from handball_api.routers import drills as drills_router
 from handball_api.routers import events as events_router
@@ -46,6 +48,7 @@ from handball_api.routers import paper_vision as paper_router
 from handball_api.routers import presentations as presentations_router
 from handball_api.routers import privacy as privacy_router
 from handball_api.routers import profiles as profiles_router
+from handball_api.routers import public_teams as public_teams_router
 from handball_api.routers import scouting as scouting_router
 from handball_api.routers import segments as segments_router
 from handball_api.routers import sessions as sessions_router
@@ -143,7 +146,7 @@ def create_app(
         log.info("shutdown")
 
     app = FastAPI(
-        title="Handball AI API",
+        title="Handball Intelligence API",
         version=__version__,
         lifespan=lifespan,
         openapi_url="/v1/openapi.json",
@@ -221,6 +224,8 @@ def create_app(
     app.include_router(training_router.router)
     app.include_router(billing_router.router)
     app.include_router(sharing_router.router)
+    app.include_router(collections_router.router)
+    app.include_router(consent_links_router.router)
     app.include_router(official_router.router)
     app.include_router(ops_router.router)
     app.include_router(privacy_router.router)
@@ -245,6 +250,7 @@ def create_app(
     app.include_router(federation_router.club)
     app.include_router(devices_router.router)
     app.include_router(profiles_router.public)
+    app.include_router(public_teams_router.router)
     app.include_router(sessions_router.public)
     app.include_router(internal.router)
     return app

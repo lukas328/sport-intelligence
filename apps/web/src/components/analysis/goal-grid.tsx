@@ -47,7 +47,7 @@ export function GoalGrid({
       )}
       {/* the goal as it stands in the hall: red and white posts and crossbar, net cells inside */}
       <div className="relative px-2 pt-2" data-testid="goal-grid">
-        <span aria-hidden className="absolute inset-x-0 top-0 h-2 rounded-t-sm" style={{ background: "repeating-linear-gradient(90deg, #c8102e 0 22px, #ffffff 22px 44px)", boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.15)" }} />
+        <span aria-hidden className="absolute inset-x-0 top-0 h-2" style={{ background: "repeating-linear-gradient(90deg, #c8102e 0 22px, #ffffff 22px 44px)", boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.15)" }} />
         <span aria-hidden className="absolute top-0 bottom-0 left-0 w-2" style={{ background: "repeating-linear-gradient(180deg, #c8102e 0 22px, #ffffff 22px 44px)", boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.15)" }} />
         <span aria-hidden className="absolute top-0 right-0 bottom-0 w-2" style={{ background: "repeating-linear-gradient(180deg, #c8102e 0 22px, #ffffff 22px 44px)", boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.15)" }} />
       <div className="grid aspect-[3/2] grid-cols-3 gap-px bg-border">

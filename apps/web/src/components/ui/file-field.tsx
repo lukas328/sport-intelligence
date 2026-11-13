@@ -35,7 +35,7 @@ export function FileField({
         />
         <label
           htmlFor={id}
-          className="inline-flex min-h-10 cursor-pointer items-center rounded-md bg-raised px-4 text-sm font-medium ring-1 ring-inset ring-border hover:bg-surface peer-focus-visible:ring-2 peer-focus-visible:ring-accent"
+          className="inline-flex min-h-10 cursor-pointer items-center bg-raised px-4 text-sm font-medium ring-1 ring-inset ring-border hover:bg-surface peer-focus-visible:ring-2 peer-focus-visible:ring-accent"
         >
           {button}
         </label>

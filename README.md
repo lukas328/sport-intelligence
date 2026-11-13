@@ -1,4 +1,4 @@
-# Handball AI Plattform (working title)
+# Handball Intelligence
 
 Upload a match video, everything else happens automatically: match report, clips, statistics, plays on a tactics board, and insights with video evidence.
 

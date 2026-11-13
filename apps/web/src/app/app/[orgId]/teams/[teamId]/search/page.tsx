@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { serverApi } from "@/lib/api";
-import { SearchView } from "./search-view";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("search"))("title") };
-}
-
-export default async function SearchPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
+/** Old address of the scene search: now Szenen (SPEC section 6). Filters in the query stay. */
+export default async function SearchPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ orgId: string; teamId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { orgId, teamId } = await params;
-  const { data: team } = await (await serverApi()).GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } });
-  return <SearchView orgId={orgId} teamId={teamId} teamName={team?.name ?? ""} seasonId={team?.current_season?.id ?? null} />;
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(await searchParams)) for (const one of [v].flat()) if (one != null) q.append(k, one);
+  const qs = q.toString();
+  redirect(`/app/${orgId}/teams/${teamId}/scenes${qs ? `?${qs}` : ""}`);
 }

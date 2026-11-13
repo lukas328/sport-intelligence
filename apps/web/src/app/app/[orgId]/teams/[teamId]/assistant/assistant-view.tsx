@@ -30,8 +30,8 @@ function BarList({ chart }: { chart: Chart }) {
           return (
             <li key={`${label}-${i}`} className="grid grid-cols-[minmax(5rem,10rem)_1fr_3.5rem] items-center gap-2 text-sm" title={`${label}: ${fmt(v)}`}>
               <span className="truncate text-muted">{label}</span>
-              <span className="h-3 rounded-r bg-surface" aria-hidden>
-                <span className="block h-3 rounded-r bg-foreground" style={{ width: `${(Math.abs(v) / max) * 100}%` }} />
+              <span className="h-3 bg-surface" aria-hidden>
+                <span className="block h-3 bg-foreground" style={{ width: `${(Math.abs(v) / max) * 100}%` }} />
               </span>
               <span className="tabular-nums">{fmt(v)}</span>
             </li>
@@ -72,7 +72,7 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
                 <li key={c.event_id}>
                   <Link
                     href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}
-                    className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-sm font-semibold ring-1 ring-inset ring-foreground/20 hover:bg-surface"
+                    className="inline-flex min-h-9 items-center gap-1.5 px-3 text-sm font-semibold ring-1 ring-inset ring-foreground/20 hover:bg-surface"
                   >
                     <Play aria-hidden className="size-3 fill-current" /> {c.label}
                   </Link>
@@ -103,10 +103,10 @@ function AnswerCard({ m, orgId, onAsk }: { m: Message; orgId: string; onAsk: (q:
           {!m.validated && <p className="mt-1">{t("notValidated")}</p>}
         </details>
         <div className="flex items-center gap-2 text-sm" aria-label={t("rateLabel")}>
-          <button type="button" aria-pressed={rated === 1} className="rounded-md px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(1)}>
+          <button type="button" aria-pressed={rated === 1} className="px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(1)}>
             {t("good")}
           </button>
-          <button type="button" aria-pressed={rated === -1} className="rounded-md px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(-1)}>
+          <button type="button" aria-pressed={rated === -1} className="px-3 py-1 ring-1 ring-border hover:bg-surface aria-pressed:bg-foreground aria-pressed:text-background" onClick={() => rate.mutate(-1)}>
             {t("bad")}
           </button>
         </div>

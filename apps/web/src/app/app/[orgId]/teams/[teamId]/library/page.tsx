@@ -1,26 +1,7 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { serverApi } from "@/lib/api";
-import { LibraryView } from "./library-view";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("library"))("title") };
-}
-
+/** Old address of the library: now the collections tab of Szenen (SPEC section 6). */
 export default async function LibraryPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
   const { orgId, teamId } = await params;
-  const client = await serverApi();
-  const path = { params: { path: { org_id: orgId, team_id: teamId } } };
-  const [playlists, presentations] = await Promise.all([
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/playlists", path),
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/presentations", path),
-  ]);
-  return (
-    <LibraryView
-      base={`/app/${orgId}/teams/${teamId}`}
-      orgBase={`/app/${orgId}`}
-      playlists={playlists.data ?? []}
-      presentations={presentations.data ?? []}
-    />
-  );
+  redirect(`/app/${orgId}/teams/${teamId}/collections`);
 }

@@ -93,6 +93,10 @@ async def test_events_crud_filters_corrections_and_stats(
         stats["own"]["goals"] == 1 and stats["own"]["shots"] == 2 and stats["own"]["turnovers"] == 1
     )
     assert stats["opponent"]["goals"] == 1
+    # shots by attacking position: the pivot goal at 5.5 m is "KM"; the opponent's goal without a
+    # position on the court has none (goals conceded by position, SPEC 7.2)
+    assert stats["own"]["positions"]["KM"] == {"shots": 1, "goals": 1, "zones": ["circle_centre"]}
+    assert sum(v["goals"] for v in stats["opponent"]["positions"].values()) == 0
     assert stats["players"][f"p:{players[7]}"]["goals"] == 1
     assert stats["possessions_source"] == "heuristic_estimate"
     assert stats["own"]["possessions"] == 3
@@ -276,6 +280,11 @@ async def test_paper_report_import(make_api: Callable[[], Api]) -> None:
     assert stats["players"]["opponent#5"]["goals"] == 2
     lst = (await api.get(f"/v1/orgs/{org}/teams/{ids['team']}/matches")).json()
     assert lst[0]["opponent_name"] == "TV Papier"
+    # the list knows the report is there (UX test A02)
+    assert lst[0]["has_report"] is True
+    # so do the graphics: «Spielbericht» as a source only with one (real-video test F6)
+    g = (await api.get(f"/v1/orgs/{org}/matches/{lst[0]['id']}/graphics")).json()
+    assert g["has_report"] is True
     for bad in (
         {**REPORT, "schema": "x"},
         {**REPORT, "players": [{"number": 7, "technical_faults": {"fly": 1}}]},

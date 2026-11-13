@@ -122,7 +122,7 @@ class IcsTeamOps:
         lines = [
             "BEGIN:VCALENDAR",
             "VERSION:2.0",
-            "PRODID:-//Handball AI//Team calendar//DE",
+            "PRODID:-//Handball Intelligence//Team calendar//DE",
             f"X-WR-CALNAME:{_escape(name)}",
         ]
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")

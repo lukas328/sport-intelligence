@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 /** A white panel on the paper background. No heavy borders: a hairline and space do the work. */
 export function Card({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("rounded-lg border border-border bg-raised p-5 sm:p-6", className)} {...props} />;
+  return <div className={cn("border border-border bg-raised p-5 sm:p-6", className)} {...props} />;
 }
 
 /** An open section of a match sheet: a strong rule on top instead of a panel around it. */
@@ -31,7 +31,7 @@ export function Alert({
   return (
     <div
       role={kind === "error" ? "alert" : "status"}
-      className={cn("flex gap-3 rounded-md bg-surface px-4 py-3 text-sm", className)}
+      className={cn("flex gap-3 bg-surface px-4 py-3 text-sm", className)}
     >
       <Icon aria-hidden className={cn("mt-0.5 size-4 shrink-0", tone)} />
       <div className="min-w-0 flex-1">{children}</div>
@@ -97,5 +97,5 @@ export function Section({
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={cn("animate-pulse rounded-md bg-surface", className)} />;
+  return <div aria-hidden className={cn("animate-pulse bg-surface", className)} />;
 }

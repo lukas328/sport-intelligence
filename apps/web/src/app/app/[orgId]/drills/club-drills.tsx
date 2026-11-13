@@ -56,7 +56,7 @@ export function ClubDrills({ orgId, focus }: { orgId: string; focus: string[] })
             <li key={d.id} className="space-y-1.5 border-b border-foreground/15 py-4" data-testid="club-drill">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h3 className="text-lg leading-tight">{d.name}</h3>
-                <span className="text-[0.8125rem] text-muted">
+                <span className="text-[0.9375rem] text-muted">
                   {[...d.focus.filter((f) => (FOCI as readonly string[]).includes(f)).map((f) => t(`focus_${f as (typeof FOCI)[number]}`)), t("minutes", { minutes: d.minutes }), d.players && t("players", { players: d.players }), d.level && t(`level_${d.level}`)]
                     .filter(Boolean)
                     .join(" · ")}
@@ -126,7 +126,7 @@ function DrillForm({ orgId, teamId, initial, onDone }: { orgId: string; teamId: 
     await qc.invalidateQueries({ queryKey: ["team-drills"] });
     onDone();
   }
-  const area = "w-full rounded-sm bg-raised px-3 py-2 text-[0.9375rem] ring-1 ring-foreground/20 ring-inset focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none";
+  const area = "w-full bg-raised px-3 py-2 text-[0.9375rem] ring-1 ring-foreground/20 ring-inset focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none";
   return (
     <form onSubmit={submit} className="space-y-3 border-l-2 border-foreground/20 py-1 pl-4" aria-label={initial ? t("editTitle", { name: initial.name }) : t("new")} data-testid="drill-form">
       <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">

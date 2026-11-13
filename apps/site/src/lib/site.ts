@@ -12,9 +12,20 @@ export const COMPANY = {
 };
 
 /** The app reads ?lang= once and keeps it as its language cookie (apps/web/src/middleware.ts). */
-export function registerUrl(appLocale: string): string {
-  return `${APP_URL}/register?lang=${encodeURIComponent(appLocale)}`;
+/**
+ * The first step into the app starts here, without an account: «Wie heisst dein Team?» sends the
+ * name to the app's team preview (`/einstieg?q=`, built in apps/web). Without a name it opens the
+ * empty search; «Kostenlos starten» leads there too. `lang` keeps the visitor's language, `farbe`
+ * the shirt colour picked on the site (blau, rot, …), so the app does not ask again.
+ */
+export function startUrl(appLocale: string, team?: string, farbe?: string): string {
+  const q = team ? `q=${encodeURIComponent(team)}&` : "";
+  const f = farbe ? `farbe=${encodeURIComponent(farbe)}&` : "";
+  return `${APP_URL}/einstieg?${q}${f}lang=${encodeURIComponent(appLocale)}`;
 }
+
+/** Form target of the team field (GET; the query is added by the browser). */
+export const START_ACTION = `${APP_URL}/einstieg`;
 
 export function loginUrl(appLocale: string): string {
   return `${APP_URL}/login?lang=${encodeURIComponent(appLocale)}`;

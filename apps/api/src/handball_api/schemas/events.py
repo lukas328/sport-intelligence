@@ -140,6 +140,11 @@ class KickoffIn(ApiModel):
         description="match clock (s) shown at t_ms; default: the half's throw-off. A video that "
         "starts after the throw-off (a clip from mid-half) gets its clock this way.",
     )
+    absent: bool = Field(
+        default=False,
+        description="the throw-off is not in the video (a clip, a recording that starts later): "
+        "Prüfen stops asking; with clock_s the video start gets that match clock",
+    )
 
 
 class OfficialReportIn(ApiModel):

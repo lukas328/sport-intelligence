@@ -37,14 +37,14 @@ export default async function StatusPage() {
         data-testid="overall-status"
         data-state={view.state}
         role="status"
-        className="flex items-center gap-3 rounded-md border border-border bg-raised px-4 py-3 text-lg font-semibold"
+        className="flex items-center gap-3 border border-border bg-raised px-4 py-3 text-lg font-semibold"
       >
         <span aria-hidden className={cn("size-3 rounded-full", STATE_STYLE[view.state])} />
         {t(`overall_${view.state}`)}
       </p>
 
       {view.components.length > 0 && (
-        <div className="overflow-x-auto rounded-lg bg-raised border border-border">
+        <div className="overflow-x-auto bg-raised border border-border">
           <table className="w-full text-left text-sm">
             <thead className="text-xs text-muted">
               <tr>

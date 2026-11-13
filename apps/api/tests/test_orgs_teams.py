@@ -35,6 +35,17 @@ async def test_org_validation(make_api: Callable[[], Api]) -> None:
     assert (await api.post("/v1/orgs", json={"name": ""})).status_code == 422
 
 
+async def test_club_colours(make_api: Callable[[], Api]) -> None:
+    """The club's first and second colour (the kit; the opponent's colours are per match)."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = f"/v1/orgs/{ids['org']}"
+    r = await api.patch(org, json={"primary_color": "#c8102e", "secondary_color": "#ffffff"})
+    assert r.status_code == 200, r.text
+    assert (r.json()["primary_color"], r.json()["secondary_color"]) == ("#c8102e", "#ffffff")
+    assert (await api.patch(org, json={"secondary_color": "white"})).status_code == 422
+
+
 async def test_update_org_and_logo(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)
@@ -65,7 +76,7 @@ async def test_team_creation_defaults(make_api: Callable[[], Api]) -> None:
     ids = await setup_club(api)
     team = ids["team_obj"]
     assert team["my_role"] == "coach"
-    assert team["settings"] == {"players_see_team_stats": True}
+    assert team["settings"] == {"players_see_team_stats": True, "team_features": False}
     assert team["current_season"]["label"].count("/") == 1
     youth = (
         await api.post(
@@ -73,7 +84,7 @@ async def test_team_creation_defaults(make_api: Callable[[], Api]) -> None:
             json={"name": "U15", "gender": "mixed", "is_youth": True, "join_as_coach": False},
         )
     ).json()
-    assert youth["settings"] == {"players_see_team_stats": False}
+    assert youth["settings"] == {"players_see_team_stats": False, "team_features": False}
     assert youth["my_role"] is None
     teams = (await api.get(f"/v1/orgs/{ids['org']}/teams")).json()
     assert [t["name"] for t in teams] == ["Herren 1", "U15"]
@@ -105,6 +116,29 @@ async def test_update_and_delete_team(make_api: Callable[[], Api]) -> None:
     assert r.json()["settings"]["players_see_team_stats"] is False
     assert (await api.delete(base)).status_code == 204
     assert (await api.get(base)).status_code == 404
+
+
+async def test_team_features_setting(make_api: Callable[[], Api]) -> None:
+    """'Teamfunktionen' is off by default, also for teams stored before the setting existed, and
+    switching it leaves the other settings alone."""
+    api = make_api()
+    ids = await setup_club(api)
+    base = f"/v1/orgs/{ids['org']}/teams/{ids['team']}"
+    assert (await api.get(base)).json()["settings"]["team_features"] is False
+    r = await api.patch(base, json={"settings": {"team_features": True}})
+    assert r.status_code == 200, r.text
+    assert r.json()["settings"] == {"players_see_team_stats": True, "team_features": True}
+    r = await api.patch(base, json={"settings": {"players_see_team_stats": False}})
+    assert r.json()["settings"] == {"players_see_team_stats": False, "team_features": True}
+    r = await api.patch(base, json={"settings": {"team_features": False}})
+    assert r.json()["settings"]["team_features"] is False
+
+
+def test_team_features_default_for_existing_teams() -> None:
+    from handball_api.models.tenancy import Team
+
+    assert Team(settings={"players_see_team_stats": True}).team_features is False
+    assert Team(settings={"team_features": True}).team_features is True
 
 
 async def test_seasons(make_api: Callable[[], Api]) -> None:

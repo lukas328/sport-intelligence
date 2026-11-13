@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { TeamFeaturesGate } from "@/components/shell/team-features-gate";
 import { FeedList } from "./feed-list";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -8,5 +9,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FeedPage({ params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
-  return <FeedList orgId={orgId} />;
+  return (
+    <TeamFeaturesGate>
+      <FeedList orgId={orgId} />
+    </TeamFeaturesGate>
+  );
 }

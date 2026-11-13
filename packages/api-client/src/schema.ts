@@ -225,6 +225,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start
+         * @description The public entry's «Speichern»: an account from an e-mail alone, a sign-in link by mail.
+         */
+        post: operations["start_v1_auth_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/calendar/{token}.ics": {
         parameters: {
             query?: never;
@@ -239,6 +259,30 @@ export interface paths {
         get: operations["feed_v1_calendar__token__ics_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Public Page
+         * @description What the public consent page shows (no sign-in).
+         */
+        get: operations["public_page_v1_consent__token__get"];
+        put?: never;
+        /**
+         * Answer
+         * @description A player (adult) or a parent or guardian answers for one player.
+         */
+        post: operations["answer_v1_consent__token__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1347,6 +1391,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/collections/{collection_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Collection
+         * @description A collection, or a playlist, presentation or assignment read as one (by its id).
+         */
+        get: operations["get_collection_v1_orgs__org_id__collections__collection_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Collection */
+        delete: operations["delete_collection_v1_orgs__org_id__collections__collection_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Collection
+         * @description Title, draft state, entries (the whole ordered list). Older objects: 409 read-only-source.
+         */
+        patch: operations["update_collection_v1_orgs__org_id__collections__collection_id__patch"];
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/comments/{comment_id}": {
         parameters: {
             query?: never;
@@ -1957,6 +2026,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/graphics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Match Graphics
+         * @description Data of the match graphics (ANLAUF.md section 10): goal sequence of the report, each goal
+         *     as the scorer's run and shot spot, court confirmed, phases, open questions for Prüfen.
+         */
+        get: operations["match_graphics_v1_orgs__org_id__matches__match_id__graphics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/highlights": {
         parameters: {
             query?: never;
@@ -2084,6 +2174,26 @@ export interface paths {
         /** Sync */
         post: operations["sync_v1_orgs__org_id__matches__match_id__marks_sync_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/marks/{client_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Take Back
+         * @description «Zurücknehmen» on the Spieltag: the mark with this phone id is removed (UX test N14).
+         */
+        delete: operations["take_back_v1_orgs__org_id__matches__match_id__marks__client_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2226,6 +2336,27 @@ export interface paths {
          * @description Match report as a PDF for printing and sending.
          */
         get: operations["match_report_pdf_v1_orgs__org_id__matches__match_id__report_pdf_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/scenes/{event_id}/camera": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Scene Camera
+         * @description Positions of the 6 s before a goal for the tactics camera (only with a confirmed court);
+         *     `ball` stays empty until the analysis delivers the ball and its holder.
+         */
+        get: operations["scene_camera_v1_orgs__org_id__matches__match_id__scenes__event_id__camera_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3428,6 +3559,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/collections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Collections
+         * @description Collections of the team; playlists, presentations and assignments are listed as ones.
+         */
+        get: operations["list_collections_v1_orgs__org_id__teams__team_id__collections_get"];
+        put?: never;
+        /** Create Collection */
+        post: operations["create_collection_v1_orgs__org_id__teams__team_id__collections_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/collections/from-match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Collection From Match
+         * @description 'Fürs Team zusammenstellen': a draft with the scenes behind the three things of a match.
+         */
+        post: operations["collection_from_match_v1_orgs__org_id__teams__team_id__collections_from_match_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/consent-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Link
+         * @description The team's active consent link (without its token), or null.
+         */
+        get: operations["get_link_v1_orgs__org_id__teams__team_id__consent_link_get"];
+        put?: never;
+        /**
+         * Create Link
+         * @description A new link for the team chat (90 days); the previous one stops working.
+         */
+        post: operations["create_link_v1_orgs__org_id__teams__team_id__consent_link_post"];
+        /** Revoke Link */
+        delete: operations["revoke_link_v1_orgs__org_id__teams__team_id__consent_link_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
         parameters: {
             query?: never;
@@ -4153,6 +4350,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Season Themes
+         * @description Themes that repeat over the season's matches with video (SPEC 7.9): empty below two such
+         *     matches. Each theme has `matches` (in how many it showed) of `of`, and `per_match` with the
+         *     value of its figure, whether it fired, and the scenes (events) behind it.
+         */
+        get: operations["season_themes_v1_orgs__org_id__teams__team_id__seasons__season_id__themes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/training-slots": {
         parameters: {
             query?: never;
@@ -4245,7 +4464,7 @@ export interface paths {
         put?: never;
         /**
          * Create
-         * @description Read-only link; the token is shown once.
+         * @description Read-only link; the token stays copyable for the team's staff (list).
          */
         post: operations["create_v1_orgs__org_id__teams__team_id__share_links_post"];
         delete?: never;
@@ -4558,6 +4777,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/public/clubs/{club_id}/teams/{official_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Team Preview
+         * @description Last result, rank and table, form, scorers and next game of a team; `scorers=false`
+         *     answers fast without the scorers (the entry asks for them afterwards).
+         */
+        get: operations["team_preview_v1_public_clubs__club_id__teams__official_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Public Config
+         * @description Addresses the pages link to (website, support), from the configuration: also before
+         *     sign-in, for the entry and its legal links.
+         */
+        get: operations["public_config_v1_public_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/profiles/{slug}": {
         parameters: {
             query?: never;
@@ -4592,6 +4853,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/public/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Teams
+         * @description Teams of the current season of clubs matching the name or town.
+         */
+        get: operations["search_teams_v1_public_teams_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/share/{token}": {
         parameters: {
             query?: never;
@@ -4604,6 +4885,26 @@ export interface paths {
          * @description Public, read-only content of a share link (no sign-in).
          */
         get: operations["public_v1_share__token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/share/{token}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview
+         * @description Data for the link preview (title, club, length); does not count as an opening.
+         */
+        get: operations["preview_v1_share__token__preview_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5031,6 +5332,20 @@ export interface components {
             /** Y */
             y: number;
         };
+        /** BallStretchOut */
+        BallStretchOut: {
+            /** From S */
+            from_s: number;
+            /** Number */
+            number: number;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
+            /** To S */
+            to_s: number;
+        };
         /** BillingContact */
         BillingContact: {
             /**
@@ -5210,6 +5525,31 @@ export interface components {
             /** Values */
             values: number[];
         };
+        /** CheckOut */
+        CheckOut: {
+            /** Box */
+            box: number[] | null;
+            /** Candidates */
+            candidates: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Frame Ref
+             * @description video time in ms
+             */
+            frame_ref: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Seconds In View */
+            seconds_in_view: number | null;
+            /** Suggested Side */
+            suggested_side: string | null;
+        };
         /** ChecklistItem */
         ChecklistItem: {
             /** Done */
@@ -5386,6 +5726,83 @@ export interface components {
             /** Start Ms */
             start_ms: number;
         };
+        /** CollectionCreate */
+        CollectionCreate: {
+            /** Items */
+            items?: components["schemas"]["ItemIn"][];
+            /** Title */
+            title: string;
+        };
+        /** CollectionOut */
+        CollectionOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Draft */
+            draft: boolean;
+            /**
+             * Editable
+             * @description only collections; older objects change where they are
+             */
+            editable: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Items */
+            items: components["schemas"]["ItemOut"][];
+            /** Match Id */
+            match_id: string | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "collection" | "playlist" | "presentation" | "assignment";
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Title */
+            title: string;
+        };
+        /** CollectionPatch */
+        CollectionPatch: {
+            /** Draft */
+            draft?: boolean | null;
+            /** Items */
+            items?: components["schemas"]["ItemIn"][] | null;
+            /** Title */
+            title?: string | null;
+        };
+        /** CollectionSummary */
+        CollectionSummary: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Draft */
+            draft: boolean;
+            /** Entries */
+            entries: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Source
+             * @description collection, or the older object read as one
+             * @enum {string}
+             */
+            source: "collection" | "playlist" | "presentation" | "assignment";
+            /** Title */
+            title: string;
+        };
         /** CommentCreate */
         CommentCreate: {
             /** Body */
@@ -5437,6 +5854,22 @@ export interface components {
              */
             status: "ok" | "error";
         };
+        /** ConsentAnswer */
+        ConsentAnswer: {
+            /**
+             * Agreed
+             * @description purposes agreed to; the others asked are withdrawn
+             */
+            agreed?: components["schemas"]["ConsentKind"][];
+            given_by: components["schemas"]["ConsentGivenBy"];
+            /** Given By Name */
+            given_by_name: string;
+            /**
+             * Player Id
+             * Format: uuid
+             */
+            player_id: string;
+        };
         /** ConsentCreate */
         ConsentCreate: {
             /** Document Ref */
@@ -5462,6 +5895,57 @@ export interface components {
          * @enum {string}
          */
         ConsentKind: "analysis" | "highlights_internal" | "highlights_public" | "public_profile" | "training_data";
+        /** ConsentLinkCreated */
+        ConsentLinkCreated: {
+            /**
+             * Answers
+             * @description consents that came in through the link
+             */
+            answers: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Token
+             * @description shown once; the page is /einwilligung/<token>
+             */
+            token: string;
+        };
+        /** ConsentLinkOut */
+        ConsentLinkOut: {
+            /**
+             * Answers
+             * @description consents that came in through the link
+             */
+            answers: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** ConsentOut */
         ConsentOut: {
             /** Document Ref */
@@ -6126,6 +6610,18 @@ export interface components {
             /** Tokens */
             tokens: components["schemas"]["handball_api__schemas__tactics__TokenIn"][];
         };
+        /** FromMatch */
+        FromMatch: {
+            /** Items */
+            items?: components["schemas"]["ItemIn"][] | null;
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Title */
+            title: string;
+        };
         /** GoalCandidateCounts */
         GoalCandidateCounts: {
             /** Confirmed */
@@ -6279,6 +6775,65 @@ export interface components {
             event_id: string;
             /** Status */
             status: ("confirmed" | "dismissed") | null;
+        };
+        /** GoalRunOut */
+        GoalRunOut: {
+            /** Aim */
+            aim: [
+                number,
+                number
+            ] | null;
+            /**
+             * Confirmed
+             * @description false: the shot spot is estimated
+             */
+            confirmed: boolean;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Has Video */
+            has_video: boolean;
+            /** Minute */
+            minute: number | null;
+            /** Number */
+            number: number | null;
+            /** Player Id */
+            player_id?: string | null;
+            /**
+             * Run
+             * @description the scorer's way before the shot, half court (goal at the top, metres); empty without tracking
+             */
+            run: [
+                number,
+                number
+            ][];
+            /**
+             * Shot
+             * @description the shot spot, half court; null for a goal without a known spot
+             */
+            shot: [
+                number,
+                number
+            ] | null;
+            /** Source */
+            source: ("tracking" | "marked" | "demo") | null;
+            /**
+             * T Ms
+             * @description video time of the goal
+             */
+            t_ms?: number | null;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
+            /**
+             * Zone
+             * @description la, ra, rl, rm, rr, kr, m7 or gs
+             */
+            zone: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -6497,6 +7052,44 @@ export interface components {
             /** Vat Cents */
             vat_cents: number;
         };
+        /** ItemIn */
+        ItemIn: {
+            /** Clip Id */
+            clip_id?: string | null;
+            /** End Ms */
+            end_ms?: number | null;
+            /** Event Id */
+            event_id?: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "scene" | "play" | "note";
+            /** Match Id */
+            match_id?: string | null;
+            /** Play Id */
+            play_id?: string | null;
+            /** Start Ms */
+            start_ms?: number | null;
+            /** Text */
+            text?: string | null;
+            /** Title */
+            title?: string | null;
+        };
+        /** ItemOut */
+        ItemOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "scene" | "play" | "note";
+            play: components["schemas"]["PlayRef"] | null;
+            /** Position */
+            position: number;
+            scene: components["schemas"]["SceneOut"] | null;
+            /** Text */
+            text: string | null;
+        };
         /** JobOut */
         JobOut: {
             /** Error */
@@ -6603,6 +7196,12 @@ export interface components {
         };
         /** KickoffIn */
         KickoffIn: {
+            /**
+             * Absent
+             * @description the throw-off is not in the video (a clip, a recording that starts later): Prüfen stops asking; with clock_s the video start gets that match clock
+             * @default false
+             */
+            absent?: boolean;
             /**
              * Clock S
              * @description match clock (s) shown at t_ms; default: the half's throw-off. A video that starts after the throw-off (a clip from mid-half) gets its clock this way.
@@ -6788,6 +7387,8 @@ export interface components {
         };
         /** MarkOut */
         MarkOut: {
+            /** Client Id */
+            client_id?: string | null;
             /**
              * Device Time
              * Format: date-time
@@ -6944,6 +7545,11 @@ export interface components {
             kit_referee?: string | null;
             /** Opponent Id */
             opponent_id?: string | null;
+            /**
+             * Opponent Kit
+             * @description the opponent's shirt colour when somebody knows it; also taken from kit_opponent when that is sent. Remembered for the opponent; never guessed
+             */
+            opponent_kit?: string | null;
             /** Opponent Name */
             opponent_name?: string | null;
             /** Period S */
@@ -6962,6 +7568,63 @@ export interface components {
          * @enum {string}
          */
         MatchFormatKey: "adult_2x30" | "youth_2x25" | "youth_2x20" | "mini" | "tournament" | "custom";
+        /** MatchGraphicsOut */
+        MatchGraphicsOut: {
+            /**
+             * Analysis
+             * @description the latest analysis of the timeline video
+             * @default none
+             * @enum {string}
+             */
+            analysis?: "none" | "running" | "ready" | "failed";
+            /**
+             * Analysis At
+             * @description when the latest analysis finished; null unless ready
+             */
+            analysis_at?: string | null;
+            /**
+             * Checks
+             * @description the questions of Prüfen, in order: what three things need (the one count)
+             */
+            checks: components["schemas"]["CheckOut"][];
+            /**
+             * Field Confirmed
+             * @description null without a video
+             */
+            field_confirmed: boolean | null;
+            /** Goals */
+            goals: components["schemas"]["GoalRunOut"][];
+            /**
+             * Has Report
+             * @description goals from a match report exist
+             * @default false
+             */
+            has_report?: boolean;
+            /** Has Video */
+            has_video: boolean;
+            /**
+             * More Checks
+             * @description lower-ranked goal candidates, offered, not counted
+             */
+            more_checks?: components["schemas"]["CheckOut"][];
+            /** Phases */
+            phases: components["schemas"]["PhaseOut"][];
+            /** Report Goals */
+            report_goals: components["schemas"]["ReportGoalOut"][];
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "analysis" | "demo";
+            /**
+             * Span
+             * @description match minutes the video covers; null without throw-off
+             */
+            span?: [
+                number,
+                number
+            ] | null;
+        };
         /** MatchMarks */
         MatchMarks: {
             /** Marks */
@@ -7021,6 +7684,8 @@ export interface components {
             kit_warnings: string[];
             /** @description null for trainings */
             opponent: components["schemas"]["OpponentOut"] | null;
+            /** @description null for trainings */
+            opponent_colors?: components["schemas"]["OpponentColors"] | null;
             /** Period S */
             period_s: number;
             /** Periods */
@@ -7060,6 +7725,12 @@ export interface components {
         MatchSummary: {
             /** Competition */
             competition: string | null;
+            /**
+             * Has Report
+             * @description events from a match report (handball.ch or paper) exist
+             * @default false
+             */
+            has_report?: boolean;
             /** Has Video */
             has_video: boolean;
             /**
@@ -7078,6 +7749,11 @@ export interface components {
             kickoff_at: string;
             /** Kind */
             kind: string;
+            /**
+             * Opponent Color
+             * @description the opponent's colour for the kit chip; null while unknown
+             */
+            opponent_color?: string | null;
             /**
              * Opponent Name
              * @description empty for trainings
@@ -7131,6 +7807,11 @@ export interface components {
              * @description null clears it (unknown)
              */
             kit_referee?: string | null;
+            /**
+             * Opponent Kit
+             * @description the opponent's shirt colour; null clears it (unknown)
+             */
+            opponent_kit?: string | null;
             /** Period S */
             period_s?: number | null;
             /** Periods */
@@ -7697,6 +8378,28 @@ export interface components {
             /** Verified */
             verified: boolean;
         };
+        /**
+         * OpponentColors
+         * @description The opponent's colours for this match (docs/design/ux-reset). The web applies the clash rule
+         *     (lib/color.ts, opponentShown); nothing here is guessed.
+         */
+        OpponentColors: {
+            /**
+             * Color
+             * @description first colour; null while nobody said it
+             */
+            color: string | null;
+            /**
+             * Second
+             * @description second colour, for the clash rule
+             */
+            second: string | null;
+            /**
+             * Source
+             * @description match: said for this match; opponent: remembered from an earlier match
+             */
+            source: ("match" | "opponent") | null;
+        };
         /** OpponentCreate */
         OpponentCreate: {
             /** Name */
@@ -7818,6 +8521,11 @@ export interface components {
             primary_color: string;
             /** Secondary Color */
             secondary_color: string;
+            /**
+             * Something To Protect
+             * @default false
+             */
+            something_to_protect?: boolean;
             /** Two Factor Required */
             two_factor_required: boolean;
             /**
@@ -8002,6 +8710,30 @@ export interface components {
             /** Token */
             token: string;
         };
+        /** PhaseOut */
+        PhaseOut: {
+            /** Count */
+            count: number;
+            /** Estimated */
+            estimated: boolean;
+            /** Goals Them */
+            goals_them: number;
+            /** Goals Us */
+            goals_us: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "power_play" | "short_handed" | "fast_break";
+            /**
+             * Windows
+             * @description minutes
+             */
+            windows: [
+                number,
+                number
+            ][];
+        };
         /**
          * Plan
          * @enum {string}
@@ -8090,6 +8822,16 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** PlayRef */
+        PlayRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
         };
         /** PlaySource */
         PlaySource: {
@@ -8475,6 +9217,75 @@ export interface components {
             /** Providers */
             providers: string[];
         };
+        /** PublicClub */
+        PublicClub: {
+            /** City */
+            city: string | null;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /** PublicConfig */
+        PublicConfig: {
+            /** Site Url */
+            site_url: string;
+            /** Support Email */
+            support_email: string;
+        };
+        /** PublicConsentPage */
+        PublicConsentPage: {
+            /** Club */
+            club: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Players */
+            players: components["schemas"]["PublicPlayer"][];
+            /** Purposes */
+            purposes: components["schemas"]["ConsentKind"][];
+            /** Team */
+            team: string;
+            /** Youth */
+            youth: boolean;
+        };
+        /** PublicGame */
+        PublicGame: {
+            /** Half Opp */
+            half_opp: number | null;
+            /** Half Own */
+            half_own: number | null;
+            /** Home */
+            home: boolean;
+            /**
+             * Kickoff At
+             * Format: date-time
+             */
+            kickoff_at: string;
+            /** Opp */
+            opp: number | null;
+            /** Opponent */
+            opponent: string;
+            /** Own */
+            own: number | null;
+            /** Venue */
+            venue: string | null;
+        };
+        /** PublicPlayer */
+        PublicPlayer: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Label
+             * @description number, first name, initial; never a last name
+             */
+            label: string;
+        };
         /** PublicProfileOut */
         PublicProfileOut: {
             /** Bio */
@@ -8497,6 +9308,91 @@ export interface components {
             };
             /** Team */
             team: string;
+        };
+        /** PublicRun */
+        PublicRun: {
+            /** Count */
+            count: number;
+            /**
+             * Result
+             * @enum {string}
+             */
+            result: "w" | "d" | "l";
+        };
+        /** PublicScorer */
+        PublicScorer: {
+            /** Goals */
+            goals: number;
+            /** Name */
+            name: string;
+        };
+        /** PublicTableRow */
+        PublicTableRow: {
+            /** Games */
+            games: number | null;
+            /** Goal Difference */
+            goal_difference: number | null;
+            /** Name */
+            name: string | null;
+            /** Own */
+            own: boolean;
+            /** Points */
+            points: number | null;
+            /** Rank */
+            rank: number | null;
+        };
+        /** PublicTeamHit */
+        PublicTeamHit: {
+            club: components["schemas"]["PublicClub"];
+            /**
+             * Fuzzy
+             * @default false
+             */
+            fuzzy?: boolean;
+            /** Group Name */
+            group_name: string | null;
+            /** In App */
+            in_app: boolean;
+            /** League */
+            league: string | null;
+            /** Name */
+            name: string;
+            /** Official Id */
+            official_id: number;
+        };
+        /** PublicTeamPreview */
+        PublicTeamPreview: {
+            club: components["schemas"]["PublicClub"];
+            /** Form */
+            form: ("w" | "d" | "l")[];
+            /** Group Name */
+            group_name: string | null;
+            /**
+             * In App
+             * @default false
+             */
+            in_app?: boolean;
+            last: components["schemas"]["PublicGame"] | null;
+            /** League */
+            league: string | null;
+            /** Name */
+            name: string;
+            next: components["schemas"]["PublicGame"] | null;
+            /** Official Id */
+            official_id: number;
+            /** Played */
+            played: number;
+            /** Rank */
+            rank: number | null;
+            run: components["schemas"]["PublicRun"] | null;
+            /** Scorer Games */
+            scorer_games: number;
+            /** Scorers */
+            scorers: components["schemas"]["PublicScorer"][];
+            /** Season */
+            season: string;
+            /** Table */
+            table: components["schemas"]["PublicTableRow"][];
         };
         /**
          * PurposeState
@@ -8641,6 +9537,16 @@ export interface components {
             /** Item Ids */
             item_ids: string[];
         };
+        /** ReportGoalOut */
+        ReportGoalOut: {
+            /** Minute */
+            minute: number | null;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
+        };
         /** RosterEntryCreate */
         RosterEntryCreate: {
             /** Birth Year */
@@ -8734,6 +9640,95 @@ export interface components {
             name: string;
             query: components["schemas"]["SearchFilter"];
         };
+        /** SceneCameraOut */
+        SceneCameraOut: {
+            /**
+             * Ball
+             * @description who held the ball, only where it was found; empty until the analysis delivers ball and holder
+             */
+            ball: components["schemas"]["BallStretchOut"][];
+            /** Clock S */
+            clock_s: number | null;
+            /** Confirmed */
+            confirmed: boolean;
+            /** Duration S */
+            duration_s: number;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Field Confirmed */
+            field_confirmed: boolean | null;
+            /**
+             * Right
+             * @description the attack goes to the goal at x = 40, as the video shows it
+             * @default false
+             */
+            right?: boolean;
+            scorer: components["schemas"]["ScorerOut"] | null;
+            /** Shot */
+            shot: [
+                number,
+                number
+            ] | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "analysis" | "demo";
+            /** Tracks */
+            tracks: components["schemas"]["SceneTrackOut"][];
+            /**
+             * Video S
+             * @description video time at the scene start, for scenes without a clock
+             */
+            video_s?: number | null;
+        };
+        /** SceneOut */
+        SceneOut: {
+            /**
+             * Clip Id
+             * Format: uuid
+             */
+            clip_id: string;
+            /** End Ms */
+            end_ms: number;
+            /** Event Id */
+            event_id?: string | null;
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Start Ms */
+            start_ms: number;
+            /** Title */
+            title: string | null;
+        };
+        /** SceneTrackOut */
+        SceneTrackOut: {
+            /** Number */
+            number: number | null;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp" | "ref";
+            /**
+             * Ts
+             * @description when each point is, as a share of the scene (0 to 1); null for drawn scenes
+             */
+            ts?: number[] | null;
+            /**
+             * Xy
+             * @description court metres, the attacked goal at x = 0
+             */
+            xy: [
+                number,
+                number
+            ][];
+        };
         /** ScheduleItem */
         ScheduleItem: {
             /**
@@ -8771,6 +9766,16 @@ export interface components {
             team: string;
             /** Title */
             title: string | null;
+        };
+        /** ScorerOut */
+        ScorerOut: {
+            /** Number */
+            number: number;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
         };
         /** ScoutingOut */
         ScoutingOut: {
@@ -8846,6 +9851,11 @@ export interface components {
         };
         /** SearchHit */
         SearchHit: {
+            /**
+             * Clock S
+             * @description the match clock of an event, where it is known
+             */
+            clock_s?: number | null;
             /** End Ms */
             end_ms: number | null;
             /**
@@ -9139,14 +10149,14 @@ export interface components {
         ShareCreate: {
             /**
              * Days
-             * @default 14
+             * @default 30
              */
             days?: number;
             /**
              * Kind
              * @enum {string}
              */
-            kind: "play" | "match" | "playlist" | "highlight";
+            kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection";
             /**
              * Target Id
              * Format: uuid
@@ -9214,8 +10224,37 @@ export interface components {
             target_id: string;
             /** Title */
             title: string;
+            /** Token */
+            token?: string | null;
             /** Views */
             views: number;
+        };
+        /**
+         * SharePreview
+         * @description What a chat shows for the link (Open Graph): no names of people, nothing behind a login.
+         */
+        SharePreview: {
+            /** Club */
+            club: string;
+            /** Duration S */
+            duration_s: number | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Kind */
+            kind: string;
+            /** Kit */
+            kit: {
+                [key: string]: string;
+            };
+            /** Scenes */
+            scenes: number;
+            /** Team */
+            team: string;
+            /** Title */
+            title: string;
         };
         /**
          * SlideIn
@@ -9320,6 +10359,26 @@ export interface components {
              * @description Days left out because they are in skip_dates
              */
             skipped: number;
+        };
+        /**
+         * StartIn
+         * @description «Das ist mein Team. Speichern»: an e-mail, nothing else. Saving accepts the terms (the
+         *     sentence says so); a password can be set later in Ich.
+         */
+        StartIn: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /**
+             * Locale
+             * @default de-CH
+             * @enum {string}
+             */
+            locale?: "de-CH" | "en" | "fr";
+            /** Next */
+            next?: string | null;
         };
         /** SubjectTeam */
         SubjectTeam: {
@@ -9538,6 +10597,18 @@ export interface components {
         TeamSettings: {
             /** Players See Team Stats */
             players_see_team_stats: boolean;
+            /**
+             * Team Features
+             * @default false
+             */
+            team_features?: boolean;
+        };
+        /** TeamSettingsUpdate */
+        TeamSettingsUpdate: {
+            /** Players See Team Stats */
+            players_see_team_stats?: boolean | null;
+            /** Team Features */
+            team_features?: boolean | null;
         };
         /** TeamUpdate */
         TeamUpdate: {
@@ -9551,7 +10622,7 @@ export interface components {
             level?: string | null;
             /** Name */
             name?: string | null;
-            settings?: components["schemas"]["TeamSettings"] | null;
+            settings?: components["schemas"]["TeamSettingsUpdate"] | null;
         };
         /** TemplateIn */
         TemplateIn: {
@@ -10452,6 +11523,39 @@ export interface operations {
             };
         };
     };
+    start_v1_auth_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     feed_v1_calendar__token__ics_get: {
         parameters: {
             query?: never;
@@ -10470,6 +11574,74 @@ export interface operations {
                 };
                 content: {
                     "text/calendar": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_page_v1_consent__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicConsentPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    answer_v1_consent__token__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentAnswer"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -12532,6 +13704,104 @@ export interface operations {
             };
         };
     };
+    get_collection_v1_orgs__org_id__collections__collection_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_collection_v1_orgs__org_id__collections__collection_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_collection_v1_orgs__org_id__collections__collection_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollectionPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     delete_comment_v1_orgs__org_id__comments__comment_id__delete: {
         parameters: {
             query?: never;
@@ -13979,6 +15249,38 @@ export interface operations {
             };
         };
     };
+    match_graphics_v1_orgs__org_id__matches__match_id__graphics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchGraphicsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_reels_v1_orgs__org_id__matches__match_id__highlights_get: {
         parameters: {
             query?: never;
@@ -14253,6 +15555,37 @@ export interface operations {
             };
         };
     };
+    take_back_v1_orgs__org_id__matches__match_id__marks__client_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                client_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     import_official_report_v1_orgs__org_id__matches__match_id__official_report_post: {
         parameters: {
             query?: never;
@@ -14512,6 +15845,39 @@ export interface operations {
                 };
                 content: {
                     "application/pdf": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    scene_camera_v1_orgs__org_id__matches__match_id__scenes__event_id__camera_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SceneCameraOut"];
                 };
             };
             /** @description Validation Error */
@@ -17405,6 +18771,204 @@ export interface operations {
             };
         };
     };
+    list_collections_v1_orgs__org_id__teams__team_id__collections_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_collection_v1_orgs__org_id__teams__team_id__collections_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollectionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    collection_from_match_v1_orgs__org_id__teams__team_id__collections_from_match_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromMatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_link_v1_orgs__org_id__teams__team_id__consent_link_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentLinkOut"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_link_v1_orgs__org_id__teams__team_id__consent_link_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentLinkCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_link_v1_orgs__org_id__teams__team_id__consent_link_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     demo_match_v1_orgs__org_id__teams__team_id__demo_match_post: {
         parameters: {
             query?: never;
@@ -19263,6 +20827,41 @@ export interface operations {
             };
         };
     };
+    season_themes_v1_orgs__org_id__teams__team_id__seasons__season_id__themes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                season_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     slots_v1_orgs__org_id__teams__team_id__seasons__season_id__training_slots_get: {
         parameters: {
             query?: never;
@@ -20221,6 +21820,60 @@ export interface operations {
             };
         };
     };
+    team_preview_v1_public_clubs__club_id__teams__official_id__get: {
+        parameters: {
+            query?: {
+                scorers?: boolean;
+            };
+            header?: never;
+            path: {
+                club_id: number;
+                official_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicTeamPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_config_v1_public_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicConfig"];
+                };
+            };
+        };
+    };
     show_v1_public_profiles__slug__get: {
         parameters: {
             query?: never;
@@ -20284,6 +21937,37 @@ export interface operations {
             };
         };
     };
+    search_teams_v1_public_teams_get: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicTeamHit"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     public_v1_share__token__get: {
         parameters: {
             query?: never;
@@ -20304,6 +21988,37 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_v1_share__token__preview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SharePreview"];
                 };
             };
             /** @description Validation Error */

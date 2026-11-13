@@ -107,8 +107,8 @@ export function InsightsCard({
         <ul className="divide-y divide-border/70">
           {shown.map((i, n) => (
             <li key={i.id} className="flex flex-wrap items-start gap-x-4 gap-y-1.5 py-3 text-sm">
-              <span className="flex shrink-0 items-center gap-2 pt-px text-[0.8125rem] font-semibold sm:w-24">
-                <span aria-hidden className={i.kind === "strength" ? "size-2.5 rounded-[2px] bg-ok" : i.kind === "weakness" ? (n === firstWeak ? "size-2.5 rounded-[2px] bg-signal ring-1 ring-foreground/30" : "size-2.5 rounded-[2px] bg-foreground/45") : "size-2.5 rounded-[2px] bg-muted"} />
+              <span className="flex shrink-0 items-center gap-2 pt-px text-[0.9375rem] font-semibold sm:w-24">
+                <span aria-hidden className={i.kind === "strength" ? "size-2.5 bg-ok" : i.kind === "weakness" ? (n === firstWeak ? "size-2.5 bg-ink" : "size-2.5 bg-foreground/45") : "size-2.5 bg-muted"} />
                 {t(i.kind)}
               </span>
               <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">{text(i)}</span>
@@ -134,7 +134,7 @@ export function InsightsCard({
         </button>
       )}
       {data.summary && (
-        <div className="space-y-1 rounded-md bg-surface p-4 text-sm" data-testid="summary">
+        <div className="space-y-1 bg-surface p-4 text-sm" data-testid="summary">
           <p className="whitespace-pre-line">{data.summary.text}</p>
           <p className="text-xs text-muted">{t("summaryGenerated")}</p>
         </div>
@@ -190,7 +190,7 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
       </button>
     );
   return (
-    <div className="mt-2 w-full space-y-3 rounded-md bg-surface p-4" role="group" aria-label={t("trainTitle")}>
+    <div className="mt-2 w-full space-y-3 bg-surface p-4" role="group" aria-label={t("trainTitle")}>
       <p className="font-medium">{t("trainTitle")}</p>
       {create.data ? (
         <p className="text-sm">
@@ -203,7 +203,7 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
         <>
           <label className="block text-sm">
             {t("trainDate")}{" "}
-            <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="rounded-lg bg-raised px-2 py-1 ring-1 ring-border" />
+            <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="bg-raised px-2 py-1 ring-1 ring-border" />
           </label>
           <fieldset className="text-sm">
             <legend>{t("trainDrills")}</legend>

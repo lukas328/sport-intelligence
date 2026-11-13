@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, linkFromMail, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, linkFromMail, register, uniqueEmail, openTraining } from "./helpers";
 
 // The player's side of a match: the way to their own scenes, before and after the
 // self-assessment. Scenes come from the analysis; the list of the player's feeds is answered
@@ -11,15 +11,17 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await page.getByLabel("Vereinsname").fill("HC Szenen");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Damen 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/teams\/[^/]+/);
+  const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  // invitations live in the club now, not in the onboarding (UX test B27)
+  const teamUrl0 = page.url();
+  await page.goto(`/app/${orgId}/club/teams`);
   const playerEmail = uniqueEmail("player-scenes");
   await page.getByLabel("E-Mail").fill(playerEmail);
   await page.getByRole("button", { name: "Einladung senden" }).click();
   await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
-  await page.getByRole("button", { name: "Zum Team" }).click();
-  await page.waitForURL(/\/teams\/[^/]+/);
-  const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  await page.goto(teamUrl0);
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
@@ -33,6 +35,8 @@ test("player: the match page leads to the own scenes, assessment first", async (
     headers: { "x-csrf-token": csrf },
     data: { first_name: "Lea", last_name: "Beispiel", jersey_number: 9 },
   });
+  // replies, the player area and the parent area are «Teamfunktionen», off for a new team (ADR 029)
+  await page.request.patch(`/v1/orgs/${orgId}/teams/${teamId}`, { headers: { "x-csrf-token": csrf }, data: { settings: { team_features: true } } });
   await page.reload();
   const attendance = page.getByTestId("match-attendance");
   await attendance.locator("summary").click();
@@ -44,7 +48,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expectAccessible(page);
 
   // the squad: Lea is injured until next week, then fit again
-  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  await page.goto(`/app/${orgId}/teams/${teamId}?edit=1`);
   const lea = page.getByTestId("roster-row").filter({ hasText: "Lea" });
   await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
   const form = page.getByRole("form", { name: "Status von Lea Beispiel" });
@@ -59,14 +63,14 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expectAccessible(page);
 
   // a unit in two days: the plan says who is out that day
-  await follow(page, page.getByRole("link", { name: "Training", exact: true }), /\/training$/);
+  await openTraining(page);
   await page.getByRole("button", { name: "Neue Einheit" }).click();
   const unit = page.getByRole("form", { name: "Neue Einheit" });
   await unit.getByLabel("Datum").fill(new Date(Date.now() + 2 * 86400_000).toISOString().slice(0, 10));
   await unit.getByLabel("Titel").fill("Abwehr 6:0");
   await unit.getByRole("button", { name: "Speichern" }).click();
   await expect(page.getByTestId("session-out")).toHaveText("1 fällt aus: Lea Beispiel (verletzt)");
-  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  await page.goto(`/app/${orgId}/teams/${teamId}?edit=1`);
   await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
   await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByLabel("Status").selectOption("fit");
   await page.getByRole("form", { name: "Status von Lea Beispiel" }).getByRole("button", { name: "Speichern" }).click();
@@ -120,18 +124,18 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // the coach gives the team a drill: who has done it, and who not yet, by name
   await page.goto(`/app/${orgId}/teams/${teamId}/assignments`);
   await page.getByLabel("Art").selectOption("drill");
-  await page.getByRole("button", { name: "Aufgabe geben" }).click();
+  await page.getByRole("button", { name: "Teilen", exact: true }).click();
   const assignment = page.getByTestId("team-assignments").getByRole("listitem").first();
   await expect(assignment.getByTestId("assignment-progress")).toHaveText("0 von 1 erledigt");
   await expect(assignment.getByTestId("assignment-open")).toHaveText("Noch offen: Mia Muster");
   await expectAccessible(page);
 
   // the squad: Mia's account belongs to no entry yet; the coach links it, sees it, and unlinks it
-  await page.goto(`/app/${orgId}/teams/${teamId}`);
+  await page.goto(`/app/${orgId}/teams/${teamId}?edit=1`);
   const unlinked = page.getByTestId("unlinked-accounts");
-  await expect(unlinked).toContainText("1 Konto ohne Kadereintrag");
+  await expect(unlinked).toContainText("1 Konto ohne Eintrag im Team");
   const linkForm = unlinked.getByRole("form", { name: "Mia Muster verknüpfen" });
-  await linkForm.getByLabel("Kadereintrag").selectOption({ label: "#9 Lea Beispiel" });
+  await linkForm.getByLabel("Eintrag im Team").selectOption({ label: "#9 Lea Beispiel" });
   await linkForm.getByRole("button", { name: "Verknüpfen" }).click();
   await expect(unlinked).toHaveCount(0);
   await lea.getByRole("button", { name: "Status: Lea Beispiel" }).click();
@@ -147,14 +151,16 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await expectAccessible(page);
 
   // the invitation offers the free squad entry for a player
-  await page.goto(`/app/${orgId}/settings`);
+  await page.goto(`/app/${orgId}/club/teams`);
   const invite = page.getByRole("form", { name: "Person einladen" });
-  await expect(invite.getByLabel("Im Kader").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
+  await expect(invite.getByLabel("Im Team").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
 
   // Lea's season line from her name in the squad: no played match yet
   await page.goto(`/app/${orgId}/teams/${teamId}`);
   await page.getByRole("link", { name: "Lea Beispiel" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "#9 Lea Beispiel" })).toBeVisible();
+  // the Seitenkopf: the name as title, the number as the figure (UX test B34)
+  await expect(page.getByRole("heading", { level: 1, name: "Lea Beispiel" })).toBeVisible();
+  await expect(page.locator("[data-zone=kopf]")).toContainText("9");
   await expect(page.getByTestId("season-line-empty")).toContainText("Noch kein gespieltes Spiel in dieser Saison.");
   await expectAccessible(page);
 });

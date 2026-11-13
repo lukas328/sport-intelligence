@@ -47,7 +47,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
                 <button
                   key={delta}
                   type="button"
-                  className="rounded-md bg-surface px-2.5 py-0.5 text-xs font-medium text-foreground hover:bg-border"
+                  className="bg-surface px-2.5 py-0.5 text-xs font-medium text-foreground hover:bg-border"
                   onClick={() => shift.mutate({ id: s.id, offset: (s.offset_ms ?? 0) + delta })}
                 >
                   {delta > 0 ? "+" : "-"}
@@ -71,7 +71,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
                 {items.map((m) => (
                   <li key={m.id} className="flex items-center gap-2">
                     {m.t_ms != null && onPlay ? (
-                      <button type="button" className="inline-flex items-center gap-1 rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => onPlay(m.t_ms!)}>
+                      <button type="button" className="inline-flex items-center gap-1 bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/20" onClick={() => onPlay(m.t_ms!)}>
                         <Play aria-hidden className="size-3 fill-current" /> {mmss(m.t_ms)}
                       </button>
                     ) : (

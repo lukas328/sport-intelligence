@@ -59,22 +59,115 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
             "Ouvrir la tâche : {link}",
         ),
     },
+    "analysis_ready": {
+        "de-CH": (
+            "Die drei Dinge gegen {opponent} sind da",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Die drei "
+            "Dinge und die Szenen warten:\n\n{link}",
+        ),
+        "en": (
+            "The three things against {opponent} are ready",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. The three things "
+            "and the scenes are waiting:\n\n{link}",
+        ),
+        "fr": (
+            "Les trois choses contre {opponent} sont prêtes",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Les "
+            "trois choses et les scènes t'attendent :\n\n{link}",
+        ),
+    },
+    # the analysis is done, but there are no three things yet (UX test N05): say what is there
+    "analysis_questions": {
+        "de-CH": (
+            "Die Analyse gegen {opponent} ist fertig",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Sie hat "
+            "noch keine Tore gefunden. {questions_sentence}\n\n{link}",
+        ),
+        "en": (
+            "The analysis against {opponent} is done",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. It found no "
+            "goals yet. {questions_sentence}\n\n{link}",
+        ),
+        "fr": (
+            "L'analyse contre {opponent} est terminée",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Elle "
+            "n'a pas encore trouvé de but. {questions_sentence}\n\n{link}",
+        ),
+    },
+    "analysis_no_goals": {
+        "de-CH": (
+            "Die Analyse gegen {opponent} ist fertig",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Sie hat "
+            "im Video keine Tore gefunden. Das Video und die Szenen von Hand sind da:\n\n{link}",
+        ),
+        "en": (
+            "The analysis against {opponent} is done",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. It found no goals "
+            "in the video. The video and the scenes by hand are there:\n\n{link}",
+        ),
+        "fr": (
+            "L'analyse contre {opponent} est terminée",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Elle "
+            "n'a trouvé aucun but dans la vidéo. La vidéo et les scènes à la main sont là :"
+            "\n\n{link}",
+        ),
+    },
+    "analysis_failed": {
+        "de-CH": (
+            "Das Video gegen {opponent} liess sich nicht auswerten",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} hat nicht geklappt. "
+            "Das Video bleibt abspielbar, der Spielbericht und alles, was du erfasst hast, "
+            "bleiben. Du kannst ein anderes Video hochladen oder einfach auf diese Mail "
+            "antworten:\n\n{link}",
+        ),
+        "en": (
+            "The video against {opponent} could not be analysed",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} did not work. The video "
+            "stays playable; the match report and everything you entered stay. You can upload "
+            "another video or simply reply to this e-mail:\n\n{link}",
+        ),
+        "fr": (
+            "La vidéo contre {opponent} n'a pas pu être analysée",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} n'a pas fonctionné. "
+            "La vidéo reste lisible, la feuille de match et tout ce que tu as saisi restent. Tu "
+            "peux charger une autre vidéo ou simplement répondre à cet e-mail :\n\n{link}",
+        ),
+    },
+    "video_failed": {
+        "de-CH": (
+            "Das Video gegen {opponent} liess sich nicht lesen",
+            "Hallo {name}\n\nDie Datei zum Spiel {team} gegen {opponent} ist kein Video, das wir "
+            "lesen können (MP4, MOV, MKV). Der Spielbericht bleibt. Wähl eine andere "
+            "Datei:\n\n{link}",
+        ),
+        "en": (
+            "The video against {opponent} could not be read",
+            "Hello {name}\n\nThe file for {team} against {opponent} is not a video we can read "
+            "(MP4, MOV, MKV). The match report stays. Choose another file:\n\n{link}",
+        ),
+        "fr": (
+            "La vidéo contre {opponent} n'a pas pu être lue",
+            "Bonjour {name}\n\nLe fichier du match {team} contre {opponent} n'est pas une vidéo "
+            "lisible (MP4, MOV, MKV). La feuille de match reste. Choisis un autre "
+            "fichier :\n\n{link}",
+        ),
+    },
     "magic_link": {
         "de-CH": (
             "Dein Anmeldelink",
-            "Hallo {name}\n\nMit diesem Link meldest du dich an. Er ist {minutes} Minuten gültig "
+            "Hallo {name}\n\nMit diesem Link meldest du dich an. Er ist {valid} gültig "
             "und funktioniert nur einmal:\n\n{link}\n\nFalls du das nicht angefordert hast, "
             "kannst du diese E-Mail ignorieren.",
         ),
         "en": (
             "Your sign-in link",
-            "Hello {name}\n\nUse this link to sign in. It is valid for {minutes} minutes and "
+            "Hello {name}\n\nUse this link to sign in. It is valid for {valid} and "
             "works once:\n\n{link}\n\nIf you did not request it, ignore this e-mail.",
         ),
         "fr": (
             "Votre lien de connexion",
-            "Bonjour {name}\n\nUtilisez ce lien pour vous connecter. Il est valable {minutes} "
-            "minutes et ne fonctionne qu'une fois :\n\n{link}\n\nSi vous ne l'avez pas demandé, "
+            "Bonjour {name}\n\nUtilisez ce lien pour vous connecter. Il est valable {valid} "
+            "et ne fonctionne qu'une fois :\n\n{link}\n\nSi vous ne l'avez pas demandé, "
             "ignorez cet e-mail.",
         ),
     },
@@ -97,16 +190,16 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     },
     "onboarding_0": {
         "de-CH": (
-            "Willkommen bei Handball AI",
-            "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Kader eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: Übersicht, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+            "Willkommen bei Handball Intelligence",
+            "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Spieler eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: die drei Dinge, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
-            "Welcome to Handball AI",
-            "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the roster (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: overview, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+            "Welcome to Handball Intelligence",
+            "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the players (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: the three things, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
-            "Bienvenue sur Handball AI",
-            "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir l'effectif (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : vue d'ensemble, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+            "Bienvenue sur Handball Intelligence",
+            "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir les joueur·euse·s (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : les trois points, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
     "onboarding_1": {
@@ -126,15 +219,15 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "onboarding_3": {
         "de-CH": (
             "Die Videositzung in 5 Minuten",
-            "Hallo {name}\n\nmit Szenen-Suche und Präsentation stellst du die Videositzung schnell zusammen: Szenen filtern, mit eigenen Tags markieren, als Folien übernehmen, mit dem Handy weiterschalten.\n\nSo geht's:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+            "Hallo {name}\n\nunter Szenen stellst du die Videositzung schnell zusammen: Szenen suchen, mit eigenen Tags versehen, in eine Sammlung legen und am Bildschirm zeigen, mit dem Handy weiterschalten.\n\nSo geht's:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
             "The video session in 5 minutes",
-            "Hello {name}\n\nwith the scene search and presentations you build the video session quickly: filter scenes, mark them with your own tags, add them as slides, click through with your phone.\n\nHow it works:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+            "Hello {name}\n\nunder Scenes you build the video session quickly: search scenes, add your own tags, put them in a collection and show it on screen, click through with your phone.\n\nHow it works:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
             "La séance vidéo en 5 minutes",
-            "Bonjour {name}\n\navec la recherche de scènes et les présentations, la séance vidéo est vite prête : filtrer les scènes, les marquer avec vos tags, les reprendre en diapositives, avancer avec le téléphone.\n\nMode d'emploi :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+            "Bonjour {name}\n\nsous Scènes, la séance vidéo est vite prête : chercher des scènes, ajouter vos tags, les mettre dans une sélection et la montrer à l'écran, avancer avec le téléphone.\n\nMode d'emploi :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
     "onboarding_7": {
@@ -154,15 +247,15 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "onboarding_14": {
         "de-CH": (
             "Wie läuft es?",
-            "Hallo {name}\n\nzwei Wochen mit Handball AI: Was hilft dir, was fehlt? Antworte einfach auf diese E-Mail oder nutze den Feedback-Knopf in der App. Wir lesen alles.\n\nZur App:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+            "Hallo {name}\n\nzwei Wochen mit Handball Intelligence: Was hilft dir, was fehlt? Antworte einfach auf diese E-Mail oder nutze den Feedback-Knopf in der App. Wir lesen alles.\n\nZur App:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
             "How is it going?",
-            "Hello {name}\n\ntwo weeks with Handball AI: what helps, what is missing? Just reply to this e-mail or use the feedback button in the app. We read everything.\n\nTo the app:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+            "Hello {name}\n\ntwo weeks with Handball Intelligence: what helps, what is missing? Just reply to this e-mail or use the feedback button in the app. We read everything.\n\nTo the app:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
             "Comment ça se passe ?",
-            "Bonjour {name}\n\ndeux semaines avec Handball AI : qu'est-ce qui vous aide, qu'est-ce qui manque ? Répondez simplement à cet e-mail ou utilisez le bouton de feedback dans l'app. Nous lisons tout.\n\nVers l'app :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+            "Bonjour {name}\n\ndeux semaines avec Handball Intelligence : qu'est-ce qui vous aide, qu'est-ce qui manque ? Répondez simplement à cet e-mail ou utilisez le bouton de feedback dans l'app. Nous lisons tout.\n\nVers l'app :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
 }
@@ -171,4 +264,63 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
 def render(template: str, locale: str, to: str, **values: object) -> Email:
     texts = _T[template]
     subject, body = texts.get(locale, texts["de-CH"])
-    return Email(to=to, subject=subject.format(**values), text=body.format(**values))
+    # an account from the entry has no name yet, only the part before the @: then just «Hallo»
+    # (UX test N20)
+    if values.get("name") and str(values["name"]) == to.split("@", 1)[0][:120]:
+        values = {**values, "name": ""}
+    # «1 Frage», «2 Fragen»: the count with the right word (UX test A02)
+    n = values.get("questions")
+    if isinstance(n, int):
+        values = {
+            **values,
+            "questions": questions(n, locale),
+            "questions_sentence": questions_sentence(
+                n, locale, more=int(str(values.get("more_moments") or 0))
+            ),
+        }
+    text = body.format(**values)
+    first, _, rest = text.partition("\n")
+    return Email(to=to, subject=subject.format(**values), text=f"{first.rstrip()}\n{rest}")
+
+
+def questions(n: int, locale: str) -> str:
+    """The number of open questions with its word in the reader's language."""
+    one, many = {
+        "de-CH": ("Frage", "Fragen"),
+        "en": ("question", "questions"),
+        "fr": ("question", "questions"),
+    }.get(locale, ("Frage", "Fragen"))
+    return f"{n} {one if n == 1 else many}"
+
+
+def questions_sentence(n: int, locale: str, more: int = 0) -> str:
+    """The whole sentence about the open questions, singular and plural each written out. With
+    `more` further moments after these, it says so (third real-video test G1)."""
+    one, many = {
+        "de-CH": ("Eine Frage an dich hilft ihr weiter:", "{n} Fragen an dich helfen ihr weiter:"),
+        "en": ("One question for you helps it on:", "{n} questions for you help it on:"),
+        "fr": (
+            "Une question pour toi l'aide à avancer :",
+            "{n} questions pour toi l'aident à avancer :",
+        ),
+    }.get(locale, ("Eine Frage an dich hilft ihr weiter:", "{n} Fragen an dich helfen ihr weiter:"))
+    text = one if n == 1 else many.format(n=n)
+    if more > 0:
+        tail = {
+            "de-CH": ", danach können weitere Momente folgen:",
+            "en": "; more moments can follow after that:",
+            "fr": " ; d'autres moments peuvent suivre ensuite :",
+        }.get(locale, ", danach können weitere Momente folgen:")
+        text = text.rstrip(": ") + tail
+    return text
+
+
+def validity(minutes: int, locale: str) -> str:
+    """«24 Stunden» or «15 Minuten» in the reader's language, for the links' validity."""
+    hours = minutes // 60 if minutes >= 120 and minutes % 60 == 0 else None
+    words = {
+        "de-CH": ("Stunden", "Minuten"),
+        "en": ("hours", "minutes"),
+        "fr": ("heures", "minutes"),
+    }.get(locale, ("Stunden", "Minuten"))
+    return f"{hours} {words[0]}" if hours else f"{minutes} {words[1]}"

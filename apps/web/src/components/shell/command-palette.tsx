@@ -8,11 +8,11 @@ import {
   BookOpen,
   Camera,
   Clapperboard,
-  Grid3x3,
   MessageCircleQuestion,
   Plus,
   ScanSearch,
   Settings,
+  Upload,
   UserRound,
   Users,
 } from "lucide-react";
@@ -25,7 +25,7 @@ import { useShell } from "./context";
 import { DEST_ICON } from "./icons";
 
 const item =
-  "flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm outline-none data-[selected=true]:bg-surface [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted";
+  "flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm outline-none data-[selected=true]:bg-surface [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted";
 const group = "px-1.5 [&_[cmdk-group-heading]]:eyebrow [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:pb-1";
 
 /** ⌘K: jump anywhere, switch team, find a match, ask the data. */
@@ -63,7 +63,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Portal>
         <D.Overlay className="fixed inset-0 z-50 bg-[var(--overlay)] animate-fade" />
-        <D.Content className="club fixed inset-x-3 top-[12dvh] z-50 mx-auto max-w-xl overflow-hidden rounded-lg bg-raised shadow-2xl ring-1 ring-border animate-rise">
+        <D.Content className="club fixed inset-x-3 top-[12dvh] z-50 mx-auto max-w-xl overflow-hidden bg-raised ring-1 ring-border animate-rise">
           <D.Title className="sr-only">{t("palette.title")}</D.Title>
           <D.Description className="sr-only">{t("palette.placeholder")}</D.Description>
           <Command label={t("palette.title")} loop>
@@ -80,7 +80,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   <Command.Item
                     value={`ask ${q}`}
                     forceMount
-                    onSelect={() => go(`${teamBase}/assistant?q=${encodeURIComponent(q.trim())}`)}
+                    onSelect={() => go(`${teamBase}/scenes?q=${encodeURIComponent(q.trim())}`)}
                     className={item}
                   >
                     <MessageCircleQuestion />
@@ -90,23 +90,22 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 </Command.Group>
               )}
               <Command.Group heading={t("palette.go")} className={group}>
-                {navFor(mode, org.id, team?.id ?? null).map((it) => {
+                {navFor(mode, org.id, team?.id ?? null, { teamFunctions: team?.team_features ?? false }).map((it) => {
                   const Icon = DEST_ICON[it.key];
                   return row(it.key, t(`shell.${it.key}`), <Icon />, it.href);
                 })}
-                {teamBase && staff && row("season", t("shell.season"), <Grid3x3 />, `${teamBase}/season`, ["statistik", "stats"])}
-                {teamBase && staff && row("matrix", t("palette.matrix"), <Grid3x3 />, `${teamBase}/matrix`)}
-                {teamBase && staff && row("library", t("shell.library"), <BookOpen />, `${teamBase}/library`, ["playlists", "präsentationen", "presentations"])}
+                {teamBase && staff && row("collections", t("shell.collections"), <BookOpen />, `${teamBase}/collections`, ["playlists", "präsentationen", "presentations", "sammlung"])}
                 {teamBase && staff && row("plays", t("shell.plays"), <BookOpen />, `${teamBase}/plays`, ["spielzüge", "taktik", "tactics"])}
-                {row("profile", t("shell.profile"), <UserRound />, `${base}/profile`)}
-                {row("settings", t("shell.settings"), <Settings />, `${base}/settings`)}
+                {row("me", t("shell.me"), <UserRound />, `${base}/me`, ["profil", "profile", "passwort", "password"])}
+                {(org.my_role === "org_admin" || teams.some((x) => x.my_role === "coach")) &&
+                  row("club", t("shell.club"), <Settings />, `${base}/club`, ["einstellungen", "settings", "teamfunktionen"])}
               </Command.Group>
               {staff && teamBase && (
                 <Command.Group heading={t("palette.actions")} className={group}>
+                  {row("upload", t("shell.upload"), <Upload />, `${teamBase}/matches?upload=1`, ["video"])}
                   {row("new-match", t("palette.newMatch"), <Plus />, `${teamBase}/matches?new=1`)}
-                  {row("ask", t("palette.ask"), <MessageCircleQuestion />, `${teamBase}/assistant`)}
-                  {row("search", t("palette.searchScenes"), <ScanSearch />, `${teamBase}/search`)}
-                  {row("paper", t("palette.paper"), <Camera />, `${teamBase}/paper`)}
+                  {row("search", t("palette.searchScenes"), <ScanSearch />, `${teamBase}/scenes`)}
+                  {row("paper", t("palette.paper"), <Camera />, `${teamBase}/matches?report=1`)}
                 </Command.Group>
               )}
               {(matches.data ?? []).length > 0 && (

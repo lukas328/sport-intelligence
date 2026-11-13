@@ -1,5 +1,5 @@
 import { COURT } from "@handball/court";
-import { clubTheme } from "./color";
+import { kit } from "./color";
 
 export interface MatchCardData {
   club: string;
@@ -46,10 +46,11 @@ export function drawMatchCard(canvas: HTMLCanvasElement, d: MatchCardData): HTML
   canvas.height = H;
   const ctx = canvas.getContext("2d");
   if (!ctx) return canvas;
-  const theme = clubTheme(d.colour);
+  const k = kit([d.colour]);
+  const theme = { club: k.club, clubInk: k.clubInk };
   const ink = theme.clubInk;
-  const display = fontVar("--font-barlow-condensed", "'Arial Narrow', sans-serif");
-  const text = fontVar("--font-barlow", "Arial, sans-serif");
+  const display = fontVar("--font-display", "'Arial Narrow', sans-serif");
+  const text = fontVar("--font-sans", "Arial, sans-serif");
 
   ctx.fillStyle = theme.club;
   ctx.fillRect(0, 0, W, H);

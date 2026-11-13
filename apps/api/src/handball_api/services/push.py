@@ -25,6 +25,8 @@ TEXTS: dict[str, dict[str, str]] = {
         "assignment_done": "Eine Aufgabe wurde erledigt",
         "feed_ready": "Neue Szenen von dir sind da",
         "analysis_ready": "Die Analyse ist fertig",
+        "analysis_questions": "Die Analyse ist fertig, ein paar Fragen warten",
+        "analysis_no_goals": "Die Analyse ist fertig",
         "analysis_failed": "Die Analyse hat nicht geklappt",
         "scouting_ready": "Der Vorbereitungsbericht ist bereit",
         "join_request": "Neue Beitrittsanfrage für dein Team",
@@ -40,6 +42,8 @@ TEXTS: dict[str, dict[str, str]] = {
         "assignment_done": "Une tâche a été terminée",
         "feed_ready": "De nouvelles scènes de toi sont là",
         "analysis_ready": "L'analyse est prête",
+        "analysis_questions": "L'analyse est prête, quelques questions attendent",
+        "analysis_no_goals": "L'analyse est prête",
         "analysis_failed": "L'analyse n'a pas abouti",
         "scouting_ready": "Le rapport de préparation est prêt",
         "join_request": "Nouvelle demande d'adhésion à ton équipe",
@@ -55,6 +59,8 @@ TEXTS: dict[str, dict[str, str]] = {
         "assignment_done": "An assignment was completed",
         "feed_ready": "New scenes of you are ready",
         "analysis_ready": "The analysis is ready",
+        "analysis_questions": "The analysis is ready, a few questions wait",
+        "analysis_no_goals": "The analysis is ready",
         "analysis_failed": "The analysis did not work",
         "scouting_ready": "The scouting report is ready",
         "join_request": "New request to join your team",
@@ -112,7 +118,7 @@ async def enqueue(ctx: Ctx, user_ids: list[uuid.UUID], kind: str, link: str | No
     for locale, tokens in by_locale.items():
         payload: dict[str, Any] = {
             "tokens": tokens,
-            "title": "Handball AI",
+            "title": "Handball Intelligence",
             "body": text_for(kind, locale),
             "data": {"kind": kind, "link": link},
         }

@@ -23,7 +23,6 @@ export const METRICS = [
   "on_target_pct",
   "saves",
   "save_pct",
-  "xg",
   "turnovers",
   "steals",
   "suspensions",
@@ -128,7 +127,7 @@ export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: strin
     const p = (roster.data ?? []).find((r) => r.jersey_number === n);
     return p ? `${n} ${p.first_name} ${p.last_name}` : label.replace("#", t("shirtPrefix"));
   };
-  const select = "min-h-9 rounded-md border border-border bg-background px-2 text-sm";
+  const select = "min-h-9 border border-border bg-background px-2 text-sm";
 
   const seasonLabel = seasonChoice === "" ? null : seasonChoice === "all" ? t("seasonsAll") : seasons.data?.find((x) => x.id === seasonChoice)?.label;
   const summary = [
@@ -215,7 +214,7 @@ export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: strin
                 type="button"
                 aria-pressed={spec.metrics.includes(m)}
                 onClick={() => toggleMetric(m)}
-                className="min-h-8 rounded-md border border-border px-3 py-1 text-sm aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background"
+                className="min-h-8 border border-border px-3 py-1 text-sm aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background"
               >
                 {t(`m_${m}`)}
               </button>
@@ -304,7 +303,7 @@ export function MatrixView({ orgId, teamId, teamName, seasonId }: { orgId: strin
             <ul className="flex flex-wrap gap-2">
               {open.cell.clips.map((c, i) => (
                 <li key={c.event_id}>
-                  <Link className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-sm font-semibold ring-1 ring-inset ring-foreground/20 hover:bg-surface" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
+                  <Link className="inline-flex min-h-9 items-center gap-1.5 px-3 text-sm font-semibold ring-1 ring-inset ring-foreground/20 hover:bg-surface" href={`/app/${orgId}/matches/${c.match_id}?t=${c.t_ms ?? 0}`}>
                     <Play aria-hidden className="size-3 fill-current" /> {i + 1}
                   </Link>
                 </li>

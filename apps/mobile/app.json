@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Handball AI",
+    "name": "Handball Intelligence",
     "slug": "handball-ai",
     "scheme": "handball",
     "version": "0.1.0",
@@ -19,6 +19,7 @@
     },
     "android": {
       "package": "ch.handballai.app",
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "monochromeImage": "./assets/monochrome-icon.png", "backgroundColor": "#f7f8f6" },
       "permissions": ["CAMERA", "RECORD_AUDIO", "POST_NOTIFICATIONS"],
       "intentFilters": [
         {

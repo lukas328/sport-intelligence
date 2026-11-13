@@ -11,11 +11,11 @@ test.describe.configure({ mode: "serial" });
 test("redirects to login without session", async ({ page }) => {
   await page.goto("/app");
   await expect(page).toHaveURL(/\/login\?next=%2Fapp/);
-  await expect(page.getByRole("heading", { name: "Anmelden" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Anmelden" })).toBeVisible();
   await expectAccessible(page);
 });
 
-test("new club: club, team and roster in under 5 minutes, then invite a player", async ({ page, browser }, info) => {
+test("new club: club and team in two steps, roster from the team page, then invite a player", async ({ page, browser }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   const started = Date.now();
   const coachEmail = uniqueEmail("coach");
@@ -24,20 +24,27 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expect(page).toHaveURL(/\/onboarding/);
   await expectAccessible(page);
 
-  // step 1: club
+  // step 1: club, name and shirt; country, crest and an own colour behind «Mehr» (UX test B27)
   await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC E2E Zürich");
-  await page.getByLabel("Logo (optional)").setInputFiles(path.join(fixtures, "logo.png"));
+  await page.getByRole("radio", { name: "Rot" }).check({ force: true });
+  await page.getByText("Mehr: Land, Wappen, eigene Farbe").click();
+  await page.getByLabel("Wappen (optional)").setInputFiles(path.join(fixtures, "logo.png"));
+  await expect(page.getByText("Schritt 1 von 2").first()).toBeVisible();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
 
-  // step 2: team
+  // step 2: team, and done: no roster step, nobody is invited here
   await expect(page.getByLabel("Teamname")).toBeVisible();
   await expectAccessible(page);
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByLabel("Liga (optional)").fill("3. Liga");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await expect(page.getByLabel("E-Mail")).toHaveCount(0);
+  await page.getByRole("button", { name: "Zum Team" }).click();
+  await page.waitForURL(/\/app\/[^/]+\/teams\/[^/?#]+$/);
+  const teamUrl = page.url();
 
-  // step 3: roster by hand
+  // the roster later, from the team page: by hand
+  await page.goto(`${teamUrl}?edit=1`);
   const form = page.getByRole("form", { name: "Spieler hinzufügen" });
   await expect(form).toBeVisible();
   await form.getByLabel("Nr.").fill("7");
@@ -46,13 +53,19 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await form.getByLabel("Position").selectOption("RA");
   await form.getByRole("button", { name: "Hinzufügen" }).click();
   await expect(page.getByText("Lena Meier wurde hinzugefügt.")).toBeVisible();
+  // with a first player the list takes the page and adding moves into a dialog: wait for the
+  // list before looking for the form (it was checked once while the page switched)
+  await expect(page.getByRole("button", { name: "Entfernen: Lena Meier" })).toBeVisible();
+  if (!(await form.isVisible())) await page.getByRole("button", { name: "Spieler hinzufügen" }).click();
   await form.getByLabel("Nr.").fill("7");
   await form.getByLabel("Vorname").fill("Mia");
   await form.getByLabel("Nachname").fill("Doppel");
   await form.getByRole("button", { name: "Hinzufügen" }).click();
-  await expect(page.getByText("Diese Rückennummer ist in der Saison schon vergeben.")).toBeVisible();
+  await expect(page.getByText("Diese Rückennummer ist in der Saison schon vergeben.").last()).toBeVisible();
 
-  // step 3: roster by CSV
+  // and by CSV
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "CSV importieren" }).click();
   await page.getByLabel("CSV-Datei").setInputFiles(path.join(fixtures, "kader.csv"));
   await page.getByRole("button", { name: "Prüfen" }).click();
   await expect(page.getByTestId("csv-preview")).toContainText("Noah Keller");
@@ -60,17 +73,20 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expect(page.getByText("3 Spieler importiert.")).toBeVisible();
   await expect(page.getByTestId("roster-row")).toHaveCount(4);
   await expectAccessible(page);
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
 
-  // step 4: invite a player
+  // the squad page says the state of the squad in its title (SPEC 7.10)
+  await page.goto(teamUrl);
+  await expect(page.getByRole("heading", { level: 1, name: /^4 im Kader\./ })).toBeVisible();
+  await expect(page.getByText(/^Herren 1 · /)).toBeVisible();
+  await expect(page.getByTestId("team-row")).toHaveCount(4);
+
+  // invite a player from the club (Teams und Rollen)
+  const orgId = teamUrl.match(/\/app\/([^/]+)/)![1]!;
+  await page.goto(`/app/${orgId}/club/teams`);
   const playerEmail = uniqueEmail("player");
   await page.getByLabel("E-Mail").fill(playerEmail);
   await page.getByRole("button", { name: "Einladung senden" }).click();
   await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
-  await page.getByRole("button", { name: "Zum Team" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Kader" })).toBeVisible();
-  await expect(page.getByText("Team · Herren 1")).toBeVisible();
-  await expect(page.getByTestId("roster-count")).toHaveText("4 Spieler");
 
   const elapsed = Date.now() - started;
   expect(elapsed, "onboarding must take under 5 minutes").toBeLessThan(5 * 60 * 1000);
@@ -90,21 +106,31 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
   await expect(player.getByRole("main")).toContainText("Paul");
-  // players see four places: today, clips, dates, team
-  await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(4);
+  // "Teamfunktionen" is off for a new team: players see the start and the team only (ADR 029)
+  await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(2);
   await player.getByRole("link", { name: "Team", exact: true }).click();
-  await expect(player.getByTestId("roster-row")).toHaveCount(4);
+  await expect(player.getByTestId("team-row")).toHaveCount(4);
   // players cannot edit the roster
   await expect(player.getByRole("form", { name: "Spieler hinzufügen" })).toHaveCount(0);
+  await expect(player.getByTestId("roster-edit")).toHaveCount(0);
   await ctx.close();
 
   // settings: pending invitations are empty now, members list shows the player
   await page.getByTestId("account-menu").filter({ visible: true }).click();
-  await page.getByRole("menuitem", { name: "Einstellungen" }).click();
+  await page.getByRole("menuitem", { name: "Verein", exact: true }).click();
+  await page.getByRole("link", { name: "Teams und Rollen", exact: true }).click();
+  // the reload must hit the page of teams and roles, not the club page the click is leaving
+  // (it raced the navigation and reloaded the club page, where the member is not listed)
+  await page.waitForURL(/\/club\/teams$/);
+  // the invitation was sent from this very page: load it afresh
+  await page.reload();
   await expect(page.getByText("Paul Spieler")).toBeVisible();
   await expectAccessible(page);
 
-  // enable two-factor sign-in, sign out, sign in with code
+  // enable two-factor sign-in ("Ich", tab Sicherheit), sign out, sign in with code
+  await page.getByTestId("account-menu").filter({ visible: true }).click();
+  await page.getByRole("menuitem", { name: "Ich", exact: true }).click();
+  await page.getByRole("link", { name: "Sicherheit", exact: true }).click();
   await page.getByRole("button", { name: "Einrichten" }).click();
   const secret = (await page.getByTestId("totp-secret").textContent())!.trim();
   const totp = new TOTP({ secret: Secret.fromBase32(secret) });
@@ -122,7 +148,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await expect(page.getByRole("heading", { name: "Zwei-Faktor-Code" })).toBeVisible();
   await page.getByLabel("Code").fill(totp.generate());
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("main")).toContainText("Sandra");
+  // staff start on Spiele (SPEC section 6)
+  await page.waitForURL(/\/teams\/[^/]+\/matches$/);
 
   // lost phone: a recovery code works once
   await page.getByTestId("account-menu").filter({ visible: true }).click();
@@ -132,7 +159,8 @@ test("new club: club, team and roster in under 5 minutes, then invite a player",
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await page.getByLabel("Code").fill(recovery);
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await expect(page.getByRole("main")).toContainText("Sandra");
+  // staff start on Spiele (SPEC section 6)
+  await page.waitForURL(/\/teams\/[^/]+\/matches$/);
 });
 
 test("magic link sign-in", async ({ page }, info) => {
@@ -156,4 +184,15 @@ test("wrong password shows a clear message", async ({ page }) => {
   await page.getByLabel("Passwort").fill("wrong-password-1");
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await expect(page.getByText("E-Mail oder Passwort ist falsch.")).toBeVisible();
+});
+
+// UX test B06: the language can be changed where it is seen first, and in the account menu
+test("language: written out on sign-in, kept, and in the account menu", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByTestId("language-switch").filter({ visible: true }).getByRole("button", { name: "Français" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Connexion" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1, name: "Connexion" })).toBeVisible();
+  await page.getByTestId("language-switch").filter({ visible: true }).getByRole("button", { name: "Deutsch" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Anmelden" })).toBeVisible();
 });
