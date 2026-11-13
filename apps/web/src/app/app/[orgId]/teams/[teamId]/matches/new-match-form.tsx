@@ -36,10 +36,11 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [error, setError] = useState<ErrorKey | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  const [kits, setKits] = useState(KIT_DEFAULTS);
+  const shell = useOptionalShell();
+  // our shirts in the club's colour (real-video test E09: a red club got blue against red)
+  const [kits, setKits] = useState<Kits>(() => ({ ...KIT_DEFAULTS, own: shell?.org.primary_color ?? KIT_DEFAULTS.own }));
   // the opponent's colour counts as said only when somebody picked it (never a default: unknown stays unknown)
   const [opponentPicked, setOpponentPicked] = useState(false);
-  const shell = useOptionalShell();
   const trainingAllowed = shell?.teams.find((x) => x.id === teamId)?.team_features ?? false;
   const [training, setTraining] = useState(false);
   const [away, setAway] = useState(false);
@@ -72,8 +73,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         venue: optional("venue"),
         kit_own: kits.own,
         kit_own_gk: kits.own_gk,
-        ...(opponentPicked ? { kit_opponent: kits.opponent } : {}),
-        kit_opponent_gk: kits.opponent_gk,
+        ...(opponentPicked ? { kit_opponent: kits.opponent, kit_opponent_gk: kits.opponent_gk } : {}),
         kit_referee: kits.referee,
         format: chosenFormat as (typeof FORMATS)[number],
       },

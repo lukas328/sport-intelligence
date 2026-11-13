@@ -664,8 +664,9 @@ async def start_analysis(
             {
                 "own": match.kit_own,
                 "own_gk": match.kit_own_gk,
-                "opponent": match.kit_opponent,
-                "opponent_gk": match.kit_opponent_gk,
+                # only a colour somebody said: the column's default red is no knowledge (E09)
+                "opponent": match.opponent_kit,
+                "opponent_gk": match.kit_opponent_gk if match.opponent_kit else None,
                 "referee": match.kit_referee,
             }
         ),

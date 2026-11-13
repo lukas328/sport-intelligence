@@ -3189,7 +3189,8 @@
     "rowRunning": "Analyse en cours",
     "rowFailed": "L'analyse n'a pas fonctionné",
     "rowVideoOnly": "Vidéo là, pas encore analysée",
-    "rowGoals": "{n, plural, one {1 but} other {# buts}} dans la vidéo"
+    "rowGoals": "{n, plural, one {1 but} other {# buts}} dans la vidéo",
+    "colourTip": "Conseil : avec la couleur du maillot de {opponent}, l'analyse sépare mieux les équipes."
   },
   "check": {
     "top": "Vérifier · {opponent}",

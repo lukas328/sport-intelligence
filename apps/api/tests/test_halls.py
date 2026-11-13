@@ -110,11 +110,9 @@ async def test_the_clicked_court_of_a_hall_is_offered_to_its_later_videos(
     third, _, home = await _video(api, ids, kickoff_at="2026-11-28T18:00:00+01:00")
     assert [r["video_id"] for r in home["hall_references"]] == [first]
     a3 = (await api.get(f"/v1/orgs/{org}/videos/{third}/analysis")).json()
-    assert a3["hall"] == {
-        "name": "Sporthalle Untermosen",
-        "source": "home_matches",
-        "calibrated_videos": 1,
-    }
+    # the usual home hall helps carry the court over, but its name is not shown as the match's
+    # hall: it is a guess (real-video test E11)
+    assert a3["hall"] == {"name": None, "source": None, "calibrated_videos": 0}
 
     # once the coach confirms the carried-over court, that video is a reference too (newest first)
     assert (

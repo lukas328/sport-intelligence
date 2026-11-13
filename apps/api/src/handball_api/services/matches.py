@@ -15,6 +15,7 @@ from handball_api.models import (
     Match,
     Opponent,
     OpponentPlayer,
+    Organization,
     ProcessingJob,
     Season,
     VideoAsset,
@@ -187,6 +188,11 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
         data.kit_opponent if "kit_opponent" in data.model_fields_set else None
     )
     values["opponent_kit"] = said if opp else None
+    # our own shirts: the club's colour unless the form said another (real-video test E09)
+    if "kit_own" not in data.model_fields_set:
+        org = await ctx.db.get(Organization, team.organization_id)
+        if org is not None and org.primary_color:
+            values["kit_own"] = org.primary_color
     if opp and said:
         opp.primary_color = said
     elif opp and opp.primary_color and "kit_opponent" not in data.model_fields_set:

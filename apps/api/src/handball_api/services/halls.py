@@ -130,5 +130,9 @@ async def summary(ctx: Ctx, asset: VideoAsset, match: Match) -> dict[str, Any]:
     """What the analysis view shows about the hall: its name, where the name comes from and how
     many earlier videos of it have a court to carry over."""
     name, source = await hall_of(ctx, match)
+    # the team's usual home hall is a guess for carrying a court over (the hall images are
+    # compared before anything is taken), not a name to show (real-video test E11)
+    if source == "home_matches":
+        name, source = None, None
     refs = await references(ctx, asset, name, limit=50) if name else []
     return {"name": name, "source": source, "calibrated_videos": len(refs)}

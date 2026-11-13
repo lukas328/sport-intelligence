@@ -3189,7 +3189,8 @@
     "rowRunning": "Analyse läuft",
     "rowFailed": "Analyse nicht geklappt",
     "rowVideoOnly": "Video da, noch nicht ausgewertet",
-    "rowGoals": "{n, plural, one {1 Tor} other {# Tore}} im Video"
+    "rowGoals": "{n, plural, one {1 Tor} other {# Tore}} im Video",
+    "colourTip": "Tipp: Mit der Trikotfarbe von {opponent} trennt die Analyse die Teams sicherer."
   },
   "check": {
     "top": "Prüfen · {opponent}",

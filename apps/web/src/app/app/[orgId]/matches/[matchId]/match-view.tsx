@@ -497,6 +497,14 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         {staff && !main && (
           <section id="upload" className="scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
+            {/* the analysis separates the teams by their shirts: without the opponent's colour it
+                guesses worse, so it is asked before the upload, with the reason (E09) */}
+            {match.opponent && !match.opponent_colors?.color && (
+              <div className="max-w-[60ch] border-l-4 border-attn pl-3" data-testid="upload-ask-colour">
+                <p className="m-0 text-[15px]">{ta("colourTip", { opponent: oppName(match) })}</p>
+                <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
+              </div>
+            )}
             <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </section>
         )}

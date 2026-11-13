@@ -432,6 +432,9 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     assert (queue, func) == ("gpu", "handball_gpu_worker.analysis.run_analysis")
     assert payload["kits"]["home"] == "#2828c8"
     assert "referee" not in payload["kits"]  # no referee colour guessed
+    # no opponent colour said: none invented for the analysis (real-video test E09)
+    if not match_out_opponent_kit(m):
+        assert "away" not in payload["kits"]
     assert payload["calibration_points"] is None
     assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()["status"] == "running"
     storage: MemoryStorage = api.app.state.storage
@@ -824,3 +827,19 @@ async def test_opponent_colour_is_said_remembered_never_guessed(
         await api.post(base, json={"kind": "training", "kickoff_at": "2026-12-02T18:00:00+01:00"})
     ).json()
     assert training["opponent_colors"] is None
+
+
+def match_out_opponent_kit(m: dict[str, Any]) -> str | None:
+    return (m.get("opponent_colors") or {}).get("color") if m.get("opponent_colors") else None
+
+
+async def test_a_new_match_takes_the_club_colour_and_no_invented_opponent(
+    make_api: Callable[[], Api],
+) -> None:
+    """Real-video test E09: the club is red, a new match was blue against red (form defaults)."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = (await api.get(f"/v1/orgs/{ids['org']}")).json()
+    m = await new_match(api, ids, opponent_name="TV Ohnefarbe")
+    assert m["kit_own"].lower() == str(org["primary_color"]).lower()
+    assert m["opponent_colors"] is None or m["opponent_colors"].get("color") is None
