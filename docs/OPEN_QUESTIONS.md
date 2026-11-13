@@ -320,3 +320,26 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   test A07). Nothing was deleted. *Open:* rebuild them in the new look (plays on the tactics
   board, the opponent from the federation's data), fold them into Sammlungen, or retire them
   with a data export.
+
+## Real-video test (2026-11-13, two NLB clips; docs/ux-test/echttest/BERICHT.md on the test branch)
+
+Weaknesses of the recognition, recorded here and not fixed in the interface work (E01 to E12):
+
+- **Q-REC-SCOREBOARD The hall's scoreboard is not read.** In clip 1 the board (8:7 to 11:11) is
+  readable when the camera points left; the analysis finds no goal by itself.
+- **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
+  error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
+  interface never treats the court as sure and always asks for it (done, E03).
+- **Q-REC-SIDES The defended side flips.** In clip 2 the side the home team defends changes twice
+  although the teams never swap; the team split at one moment counted 9, 2, 3 instead of 7, 6, 2.
+- **Q-REC-CANDTIME Goal candidates come late.** Their times lie 4 to 7 s after the goal (the
+  throw-off after it), so «the way before the goal» would show the way back.
+- **Q-REC-CAMERA Tactics camera in a checked scene.** 8 red dots instead of 6, one referee instead
+  of two, and the attack drawn on the left goal while the video shows the right one.
+- **Q-REC-OPPKIT The team split needs both shirt colours.** `teams.relabel_by_clusters` labels
+  the teams only with the home and the away kit; without the opponent's colour (no longer
+  invented, E09) it labels nothing, so the interface asks for it before the upload. Open: a
+  split by the two largest clusters that names only the own team.
+- **Q-REC-PERSONBOX Person boxes with a panning camera.** The box needs the homography of each
+  frame (camera motion times court); the worker has it (`motion.CameraMotion`) but does not hand
+  it out, so person questions are asked only with a fixed camera (E05).
