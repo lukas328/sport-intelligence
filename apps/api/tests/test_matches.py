@@ -850,7 +850,6 @@ async def test_the_remembered_opponent_colour_goes_to_the_analysis(
 ) -> None:
     """Third real-video test G5: the second match against the same opponent asks nothing; the
     colour remembered for the opponent goes to the analysis, not only the own kits."""
-    from handball_api.core.jobs import MemoryJobQueue
 
     from .test_identity_sync import _ingest
 
