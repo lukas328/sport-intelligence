@@ -53,7 +53,9 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await form.getByLabel("Position").selectOption("RA");
   await form.getByRole("button", { name: "Hinzufügen" }).click();
   await expect(page.getByText("Lena Meier wurde hinzugefügt.")).toBeVisible();
-  // with a first player the list takes the page and adding moves into a dialog
+  // with a first player the list takes the page and adding moves into a dialog: wait for the
+  // list before looking for the form (it was checked once while the page switched)
+  await expect(page.getByRole("button", { name: "Entfernen: Lena Meier" })).toBeVisible();
   if (!(await form.isVisible())) await page.getByRole("button", { name: "Spieler hinzufügen" }).click();
   await form.getByLabel("Nr.").fill("7");
   await form.getByLabel("Vorname").fill("Mia");

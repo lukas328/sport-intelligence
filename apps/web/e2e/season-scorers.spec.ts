@@ -27,7 +27,9 @@ test("season and start: one count of the scorers", async ({ page }, info) => {
   await page.waitForURL(/\/teams\/[^/]+/);
   const [, org, team] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
   // the team as linked to handball.ch (what taking it over from the official data stores)
-  execFileSync("psql", [DB, "-qc", `UPDATE teams SET official_provider = 'handball_ch', official_team_id = ${h.official_id}, official_club_id = ${h.club.id} WHERE id = '${team}'`]);
+  // a fresh official id per run: the link is unique per provider and team
+  const officialId = 900_000 + Math.floor(Math.random() * 99_000);
+  execFileSync("psql", [DB, "-qc", `UPDATE teams SET official_provider = 'handball_ch', official_team_id = ${officialId}, official_club_id = ${h.club.id} WHERE id = '${team}'`]);
   const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
   const m = await (
     await page.request.post(`/v1/orgs/${org}/teams/${team}/matches`, {
