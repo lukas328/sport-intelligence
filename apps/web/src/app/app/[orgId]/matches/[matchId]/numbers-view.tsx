@@ -4,7 +4,6 @@ import type { Schemas } from "@handball/api-client";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
-import { GoalGrid } from "@/components/analysis/goal-grid";
 import type { MatchGraphics } from "@/lib/graphics";
 import { cn } from "@/lib/utils";
 import type { Stats } from "./analysis-views";
@@ -20,6 +19,12 @@ const pct = (v: number | null) => (v == null || v > 1 ? "" : `${Math.round(v * 1
  * side the goals conceded by position, the goal target and the phases. The full report, shots,
  * goalkeepers in detail and the running figures stay one click away («Alle Zahlen»).
  */
+const TARGET_ROWS = [
+  ["TL", "TC", "TR"],
+  ["ML", "MC", "MR"],
+  ["BL", "BC", "BR"],
+] as const;
+
 export function NumbersView({ stats, graphics, roster, children }: { stats: Stats | null; graphics: MatchGraphics | null; roster: Entry[]; children: React.ReactNode }) {
   const t = useTranslations("numbersTab");
   const [all, setAll] = useState(false);
@@ -37,6 +42,8 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
   const zones = stats?.opponent.goal_zones ?? {};
   const marked = Object.values(zones).reduce((n, z) => n + z.goals, 0);
   const phases = graphics?.phases ?? [];
+  // shots and rates only where misses were recorded: from goals alone every rate reads 100 %
+  const shotsKnown = stats?.own.known?.shooting !== false;
   const th = "py-2 text-right text-[13px] font-semibold text-ink-2";
   const td = "py-2.5 text-right tabular-nums";
   return (
@@ -54,8 +61,8 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                     <th scope="col" className={th}>{t("goals")}</th>
                     <th scope="col" className={th}>{t("sevenM")}</th>
                     <th scope="col" className={th}>{t("twoMin")}</th>
-                    <th scope="col" className={cn(th, "max-sm:hidden")}>{t("shots")}</th>
-                    <th scope="col" className={th}>{t("rate")}</th>
+                    {shotsKnown && <th scope="col" className={cn(th, "max-sm:hidden")}>{t("shots")}</th>}
+                    {shotsKnown && <th scope="col" className={th}>{t("rate")}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -70,8 +77,8 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                         <td className={td}>{p.goals || ""}</td>
                         <td className={td}>{p.seven_m_shots > 0 ? `${p.seven_m_goals}/${p.seven_m_shots}` : ""}</td>
                         <td className={td}>{p.suspensions || ""}</td>
-                        <td className={cn(td, "max-sm:hidden")}>{p.shots || ""}</td>
-                        <td className={cn(td, "text-ink-2")}>{p.shots > 0 ? pct(p.goals / p.shots) : ""}</td>
+                        {shotsKnown && <td className={cn(td, "max-sm:hidden")}>{p.shots || ""}</td>}
+                        {shotsKnown && <td className={cn(td, "text-ink-2")}>{p.shots > 0 ? pct(p.goals / p.shots) : ""}</td>}
                       </tr>
                     );
                   })}
@@ -124,9 +131,21 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
           {marked > 0 && (
             <section>
               <SectionHead as="h3" title={t("target")} note={t("targetNote")} />
-              <div className="max-w-[240px]">
-                <GoalGrid data={zones} />
-              </div>
+              {/* goals per corner from the shooter's view, a plain frame (UX test B23: no foreign colours) */}
+              <table className="w-[220px] border-collapse border-x-[6px] border-t-[6px] border-ink" data-testid="target-grid">
+                <caption className="sr-only">{t("target")}</caption>
+                <tbody>
+                  {TARGET_ROWS.map((row) => (
+                    <tr key={row.join()}>
+                      {row.map((z) => (
+                        <td key={z} className="h-[50px] border border-rule text-center font-num text-xl">
+                          {zones[z]?.goals ?? 0}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               <p className="mt-2 text-[13px] text-ink-2">{t("targetMarked", { n: marked, of: stats?.own.goals_against ?? marked })}</p>
             </section>
           )}

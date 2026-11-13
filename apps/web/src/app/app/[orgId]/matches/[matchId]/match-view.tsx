@@ -13,8 +13,9 @@ import { KitFields } from "@/components/domain/kit-fields";
 import { AttendancePanel } from "@/components/team/attendance-panel";
 import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
-import { useMatchGraphics } from "@/lib/graphics";
-import { ThreeThingsView } from "@/components/anlauf/three-things-view";
+import { goalRuns, useMatchGraphics } from "@/lib/graphics";
+import { threeThings } from "@/lib/three-things";
+import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-view";
 import { EmptyField } from "@/components/anlauf/bundle";
 import { MatchHead } from "./match-head";
 import { AskColour } from "./ask-colour";
@@ -30,6 +31,7 @@ import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/c
 import { Segmented } from "@/components/ui/tabs";
 import type { PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
+import { GameActions, PointOpen, Telegram, ThreeFigures, chatPicture } from "./game-tab";
 import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { KeepersView, PhysicalView } from "./m5-views";
 import { NumbersView } from "./numbers-view";
@@ -160,6 +162,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const graphics = useMatchGraphics(orgId, initial.id);
   const [bench, setBench] = useState(false);
   const ta = useTranslations("anlauf");
+  const thingText = useThingText();
+  const more = useRef<HTMLDetailsElement>(null);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(
     () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
@@ -454,10 +458,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             )}
             <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={!stage} />
           </section>
-        ) : !(staff && match.source !== "paper_report") ? (
+        ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
-        {staff && match.source !== "paper_report" && !main && (
+        {staff && !main && (
           <div id="upload" className="scroll-mt-24 space-y-4 border-2 border-dashed border-ink/40 p-4 md:p-6">
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
             <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
@@ -469,15 +473,58 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "game" && (
         <div className="animate-fade space-y-10">
+          {/* a match without video: the report's facts below, the way to the video on top */}
+          {!main && staff && (
+            <section className="space-y-3 border-2 border-dashed border-ink/40 p-4 md:p-6" data-testid="no-video">
+              <h2 className="text-[26px]">{ta("noVideoTitle")}</h2>
+              <p className="m-0 max-w-[60ch] text-[17px]">{ta("noVideoBlock")}</p>
+              <Button onClick={() => setView("video")}>{ta("chooseVideo")}</Button>
+            </section>
+          )}
           {graphics.data && graphics.data.goals.length > 0 && (
-            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
-              <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} />
-              <MatchZones graphics={graphics.data} />
+            <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} />
+          )}
+          <GameActions
+            collect={staff && counted && match.opponent ? <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} /> : null}
+            onHighlights={() => {
+              if (more.current) more.current.open = true;
+              requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+            }}
+            onPicture={
+              match.score_own != null && match.score_opponent != null
+                ? () =>
+                    chatPicture({
+                      title: `${shell?.org.name ?? teamName} ${ta("vsShort")} ${oppName(match)}`,
+                      sub: [format.dateTime(new Date(match.kickoff_at), { dateStyle: "long" }), match.venue].filter(Boolean).join(" · "),
+                      score: `${match.score_own}:${match.score_opponent}`,
+                      heading: ta("chatHeading"),
+                      things: graphics.data ? threeThings(goalRuns(graphics.data)).map((x) => ({ value: x.value, text: thingText(x) })) : [],
+                      file: `${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"),
+                    })
+                : undefined
+            }
+          />
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="min-w-0 space-y-10">
+              {graphics.data && <PointOpen orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} />}
+              <Telegram
+                match={{ own: shell?.org.name ?? teamName, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
+                stats={stats.data ?? null}
+                names={names}
+              />
             </div>
-          )}
-          {staff && counted && match.opponent && (
-            <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} />
-          )}
+            <div className="space-y-10">
+              {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} />}
+              {stats.data && <ThreeFigures stats={stats.data} names={names} />}
+            </div>
+          </div>
+          {/* everything else of the match, as before, one step away (UX test B08) */}
+          <details ref={more} className="group border-t-2 border-ink pt-4" data-testid="game-more">
+            <summary className="flex min-h-11 cursor-pointer list-none items-baseline gap-3 [&::-webkit-details-marker]:hidden">
+              <span className="font-slant text-[22px]">{ta("moreGame")}</span>
+              <span className="text-[13px] text-ink-2 group-open:hidden">{ta("moreGameHint")}</span>
+            </summary>
+            <div className="mt-8 space-y-10">
           {stats.data && stats.data.quality.events > 0 ? (
             <div className="space-y-10">
               <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} />
@@ -521,16 +568,17 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
             </EmptyState>
           )}
-          {/* the scenes of this match: feedback per player, the highlights to share, marks */}
           <div className="space-y-8">
             {staff && main && (
               // feedback on the players' scenes happens beside the player in the video tab
               <FeedbackSummary orgId={orgId} matchId={match.id} onOpen={() => (setView("video"), setAskPane({ pane: "feedback" }))} />
             )}
-            <HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} />
+            <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} /></div>
             {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
             {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
           </div>
+            </div>
+          </details>
         </div>
       )}
 

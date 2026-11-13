@@ -37,6 +37,8 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await expectAccessible(page);
   await page.goto(`/app/${orgId}/matches/${match.id}`);
   await page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  // the marks sit behind «Mehr zum Spiel» (UX test B08)
+  await page.getByTestId("game-more").locator(":scope > summary").click();
   await page.getByTestId("marks-panel").getByText(/Am Spieltag gemerkt \(2\)/).click();
   await expect(page.getByTestId("marks-panel")).toContainText("noch nicht mit dem Video abgeglichen");
 

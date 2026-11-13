@@ -39,6 +39,11 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("link", { name: "Zurück" }).click();
   await expect(page.getByTestId("score")).toHaveText("5:4");
 
+  // Tab Spiel below the three things (UX test B08): the telegram from the report, no video yet
+  await page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  await expect(page.getByTestId("telegram")).toContainText("5:4");
+  await expect(page.getByTestId("no-video")).toContainText("Kein Video");
+  await expect(page.getByTestId("game-actions")).toContainText("Als Bild für den Chat");
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
   await expect(table.getByRole("row", { name: /^Tore/ })).toContainText("5");
