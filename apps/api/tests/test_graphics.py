@@ -257,6 +257,11 @@ async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
     # every event of the video has its clock now, the scene too
     camera = (await api.get(f"{base}/scenes/{g['goals'][0]['event_id']}/camera")).json()
     assert camera["clock_s"] is not None and camera["video_s"] is not None
+    # the scene lies before the goal, from 8 s before it to 2 s after (G3), not the way back
+    first = min(g["goals"], key=lambda x: x["t_ms"])
+    camera = (await api.get(f"{base}/scenes/{first['event_id']}/camera")).json()
+    assert camera["duration_s"] == 10.0
+    assert camera["video_s"] == (first["t_ms"] - 8000) / 1000
 
 
 def test_a_corner_outside_the_picture_is_accepted() -> None:
@@ -422,3 +427,27 @@ async def test_answers_survive_a_new_analysis_after_a_moved_court(
     asked = {c["frame_ref"] for c in g["checks"] + g["more_checks"] if c["kind"] == "goal"}
     assert first["goal_ms"] not in asked and len(asked) == 3
     assert len([e for e in g["goals"] if e["has_video"]]) == 1
+
+
+def test_scene_shows_only_the_court_unmirrored() -> None:
+    """Third real-video test G3: spectators and the bench beside the court are not drawn; the
+    attack on the goal at x = 40 stays there (right), not mirrored to x = 0."""
+    import numpy as np
+
+    from handball_api.services.graphics import SCENE_MS, scene_tracks
+
+    start = 100_000.0
+    rows = []
+    for k in range(10):
+        t = start + k * 500
+        rows.append((t, 1, 30.0 + k * 0.5, 10.0))  # our player running to the goal at x = 40
+        rows.append((t, 2, 35.0, 8.0))  # their defender
+        rows.append((t, 3, 20.0, -4.0))  # a spectator in red beside the court
+        rows.append((t, 4, 12.0, 22.5))  # the bench in white in front
+    teams = {1: ("home", 7), 2: ("away", 3), 3: ("away", None), 4: ("home", None)}
+    tracks, right = scene_tracks(np.array(rows, dtype=float), teams, start, ours=True)
+    assert right is True
+    assert sorted((t["team"], t["number"]) for t in tracks) == [("opp", 3), ("own", 7)]
+    ours = next(t for t in tracks if t["team"] == "own")
+    assert ours["xy"][0] == (30.0, 10.0) and ours["xy"][-1] == (34.5, 10.0)
+    assert ours["ts"][0] == 0.0 and ours["ts"][-1] == round(4500 / SCENE_MS, 4)

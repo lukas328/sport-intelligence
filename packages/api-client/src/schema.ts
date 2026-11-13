@@ -9654,6 +9654,12 @@ export interface components {
             event_id: string;
             /** Field Confirmed */
             field_confirmed: boolean | null;
+            /**
+             * Right
+             * @description the attack goes to the goal at x = 40, as the video shows it
+             * @default false
+             */
+            right?: boolean;
             scorer: components["schemas"]["ScorerOut"] | null;
             /** Shot */
             shot: [

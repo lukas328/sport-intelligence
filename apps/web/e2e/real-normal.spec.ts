@@ -115,6 +115,8 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   // positions on the tactics camera: the court is confirmed and the scene has tracks
   await expect(goals.getByRole("img", { name: /Positionen aus dem Video/ })).toBeVisible({ timeout: 30_000 });
   await expect(goals.getByTestId("camera-empty")).toHaveCount(0);
+  // the honest sentence under the camera while the count of dots is not reliable (G3)
+  await expect(goals.getByTestId("camera-estimate")).toHaveText("Positionen geschätzt; es können Personen neben dem Feld darunter sein.");
 
   // the match: the same result and goals; «Szene zeigen» opens that scene in the Video tab
   await page.goto(`/app/${org}/matches/${match.id}`);

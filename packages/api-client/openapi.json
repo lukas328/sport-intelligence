@@ -13631,6 +13631,12 @@
             ],
             "title": "Field Confirmed"
           },
+          "right": {
+            "default": false,
+            "description": "the attack goes to the goal at x = 40, as the video shows it",
+            "title": "Right",
+            "type": "boolean"
+          },
           "scorer": {
             "anyOf": [
               {

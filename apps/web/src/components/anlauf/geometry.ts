@@ -122,12 +122,31 @@ export const VIEWS = {
   /** left half turned, goal at the top (phone, tiles) */
   halfB: { box: [-0.6, -1.2, 21.2, 17.2], turn: true },
   halfDeep: { box: [-0.6, -0.9, 21.2, 18.6], turn: true },
-} as const satisfies Record<string, { box: readonly [number, number, number, number]; turn: boolean }>;
+  /** the right half wide: the attack on the goal at x = 40, as the video shows it (G3) */
+  camR: { box: [7.2, -1.2, 34, 22.4], turn: false },
+  /** the right half turned, its goal at the top (a rotation, not a mirror) */
+  halfBR: { box: [-0.6, -1.2, 21.2, 17.2], turn: false, m: [0, -1, -1, 0, 20, 40] },
+} as const satisfies Record<string, { box: readonly [number, number, number, number]; turn: boolean; m?: readonly [number, number, number, number, number, number] }>;
 
 export type ViewName = keyof typeof VIEWS;
 
+/** The view of the other half: a scene whose attack goes to x = 40 is drawn there, unmirrored. */
+export const RIGHT_OF: Partial<Record<ViewName, ViewName>> = { camL: "camR", halfB: "halfBR", halfDeep: "halfBR" };
+
+/** The view a scene is drawn in: the half of its attack. */
+export function sceneView(scene: { right?: boolean }, view: ViewName): ViewName {
+  return scene.right ? (RIGHT_OF[view] ?? view) : view;
+}
+
+/** The SVG matrix of a view (court metres to the view), or null for none. */
+export function viewMatrix(view: ViewName): readonly number[] | null {
+  const v = VIEWS[view] as { turn: boolean; m?: readonly number[] };
+  return v.m ?? (v.turn ? [0, 1, 1, 0, 0, 0] : null);
+}
+
 export function inView(view: ViewName, p: Pt): Pt {
-  return VIEWS[view].turn ? [p[1], p[0]] : p;
+  const m = viewMatrix(view);
+  return m ? [m[0]! * p[0] + m[2]! * p[1] + m[4]!, m[1]! * p[0] + m[3]! * p[1] + m[5]!] : p;
 }
 
 /** Zone anchors on the half court, where the count of a zone stands. */

@@ -638,6 +638,9 @@ class SceneCameraOut(ApiModel):
         default=None, description="video time at the scene start, for scenes without a clock"
     )
     duration_s: float
+    right: bool = Field(
+        default=False, description="the attack goes to the goal at x = 40, as the video shows it"
+    )
     field_confirmed: bool | None
     tracks: list[SceneTrackOut]
     ball: list[BallStretchOut] = Field(

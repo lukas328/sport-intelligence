@@ -3200,7 +3200,8 @@
     "minutesSpan": "encore environ {low} à {high} minutes",
     "answerChecks": "{n, plural, one {Répondre à 1 question} other {Répondre à # questions}}",
     "minuteAt": "Minute {n}",
-    "scoreSoFar": "confirmé jusqu'ici · {n, plural, one {1 moment ouvert} other {# moments ouverts}}"
+    "scoreSoFar": "confirmé jusqu'ici · {n, plural, one {1 moment ouvert} other {# moments ouverts}}",
+    "positionsEstimated": "Positions estimées ; des personnes au bord du terrain peuvent en faire partie."
   },
   "check": {
     "top": "Vérifier · {opponent}",

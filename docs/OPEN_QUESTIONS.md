@@ -335,7 +335,8 @@ Weaknesses of the recognition, recorded here and not fixed in the interface work
 - **Q-REC-CANDTIME Goal candidates come late.** Their times lie 4 to 7 s after the goal (the
   throw-off after it), so «the way before the goal» would show the way back.
 - **Q-REC-CAMERA Tactics camera in a checked scene.** 8 red dots instead of 6, one referee instead
-  of two, and the attack drawn on the left goal while the video shows the right one.
+  of two, and the attack drawn on the left goal while the video shows the right one (the
+  mirroring is gone since G3: the camera draws the half the video shows).
 - **Q-REC-OPPKIT The team split needs both shirt colours.** `teams.relabel_by_clusters` labels
   the teams only with the home and the away kit; without the opponent's colour (no longer
   invented, E09) it labels nothing, so the interface asks for it before the upload. Open: a
@@ -343,6 +344,12 @@ Weaknesses of the recognition, recorded here and not fixed in the interface work
 - **Q-REC-PERSONBOX Person boxes with a panning camera.** The box needs the homography of each
   frame (camera motion times court); the worker has it (`motion.CameraMotion`) but does not hand
   it out, so person questions are asked only with a fixed camera (E05).
+- **Q-REC-OFFCOURT People beside the court tracked as players.** Third real-video test: up to
+  14 red dots instead of 7 (spectators in red behind the court, the bench in white in front), and
+  goalkeepers in another colour. The interface now draws only positions on the court (1 m
+  margin) and says under the camera that positions are estimated and may include people beside
+  the court (G3). Open: separate players from spectators and bench in the recognition, and the
+  goalkeeper's kit as its own class.
 
 ## Website (docs/site/KONZEPT.md, 2026-11-12)
 - **Q-SITE-1 Prices on the website.** The site shows the plan table of `packages/plans`

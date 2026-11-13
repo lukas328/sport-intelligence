@@ -204,14 +204,22 @@ export function SceneCamera({
     );
   }
   return (
-    <TacticsCamera
-      scene={scene}
-      view={view}
-      width={width}
-      dot={view === "halfB" ? 17 : 14}
-      text={{ label: t("cameraLabel", { label }), pause: t("pause"), play: t("play"), notFound: t("ballNotFound"), noBall: t("noBall"), caption: caption ?? null, captionSmall: caption ? (captionSmall ?? t("positionsFromVideo")) : null, clockPrefix: scene.videoTime ? t("videoShort") : null }}
-      barExtra={barExtra}
-    />
+    <>
+      <TacticsCamera
+        scene={scene}
+        view={view}
+        width={width}
+        dot={view === "halfB" ? 17 : 14}
+        text={{ label: t("cameraLabel", { label }), pause: t("pause"), play: t("play"), notFound: t("ballNotFound"), noBall: t("noBall"), caption: caption ?? null, captionSmall: caption ? (captionSmall ?? t("positionsFromVideo")) : null, clockPrefix: scene.videoTime ? t("videoShort") : null }}
+        barExtra={barExtra}
+      />
+      {/* the count of dots is not reliable yet: said plainly (G3, Q-REC-OFFCOURT) */}
+      {q.data?.source === "analysis" && (
+        <p className="m-0 mt-1.5 text-[15px] text-ink-2" data-testid="camera-estimate">
+          {t("positionsEstimated")}
+        </p>
+      )}
+    </>
   );
 }
 

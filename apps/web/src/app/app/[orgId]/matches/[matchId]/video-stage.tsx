@@ -20,7 +20,7 @@ type Video = Schemas["VideoOut"];
 type Goal = MatchGraphics["goals"][number];
 
 const PHASE = 3; // minutes around the scene: the phase on the right and on the Rail
-const BEFORE = 6000; // a scene starts 6 s before its goal
+const BEFORE = 8000; // a scene starts 8 s before its goal, as on the tactics camera (G3)
 const AFTER = 2000;
 
 /**

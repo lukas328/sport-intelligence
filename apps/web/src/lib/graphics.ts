@@ -79,6 +79,7 @@ export function cameraScene(s: SceneCamera, label?: string | null): CameraScene 
     videoTime,
     duration: s.duration_s,
     tracks: s.tracks.map((t) => ({ team: t.team, number: t.number, xy: t.xy.map((p) => [p[0], p[1]] as Pt), ts: t.ts ?? null })),
+    right: s.right ?? false,
     ball: s.ball.map((b) => ({ from: b.from_s, to: b.to_s, team: b.team, number: b.number })),
     scorer: s.scorer,
     shot: s.shot ? ([s.shot[0], s.shot[1]] as Pt) : null,

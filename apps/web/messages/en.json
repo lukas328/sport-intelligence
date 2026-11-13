@@ -3200,7 +3200,8 @@
     "minutesSpan": "about {low} to {high} minutes left",
     "answerChecks": "{n, plural, one {Answer 1 question} other {Answer # questions}}",
     "minuteAt": "Minute {n}",
-    "scoreSoFar": "confirmed so far · {n, plural, one {1 moment open} other {# moments open}}"
+    "scoreSoFar": "confirmed so far · {n, plural, one {1 moment open} other {# moments open}}",
+    "positionsEstimated": "Positions estimated; people beside the court may be among them."
   },
   "check": {
     "top": "Check · {opponent}",
