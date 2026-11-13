@@ -161,6 +161,18 @@ tester's check and what was done after it.
 
 ## Tests
 
+Round 3: API 352 passed (3 deselected). Web unit tests 205 passed. ESLint clean again (11
+warnings from before removed). e2e: the full run had 6 failures; 5 came from this round's
+changes (Szenen before the first video hid «Mehr», the side links and the asked search; the inbox
+test expected the group) and are fixed; `shots.spec` failed once in the full run and passed in the
+rerun with the other five (11 passed), so it looks timing-dependent, not changed here. New tests:
+e2e `first-video.spec` (A02), `layout.spec` (A01 at 300 px, N18 404s, B28), `entry.spec` (N22),
+`matchday-offline.spec` (game time, A03); pytest mail plural and one count (`test_support`,
+`test_identity_sync`), `has_report` (`test_events`), league name (`test_official_names`),
+`clock_s` in search hits (`test_tags`); vitest `headName`. axe (WCAG 2.2 AA): 15 app pages incl.
+Spielzüge in two kit colours at 1280 and 390 px, 60 of 60 clean; sign-in, registration, the
+invalid link page and the public entry clean.
+
 Round 2: API 350 passed; web unit tests 204 passed; e2e 46 passed (the rest are skips by project:
 phone-only or desktop-only flows). New tests: `test_a_mark_uploaded_twice_is_stored_once_per_match`,
 `test_the_last_mark_can_be_taken_back`, `test_prufen_asks_for_the_throw_off_until_it_is_set`,
