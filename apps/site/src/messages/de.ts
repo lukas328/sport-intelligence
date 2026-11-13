@@ -114,7 +114,7 @@ const de = {
     title: "Dein Spiel. Und drei Dinge zum Mitnehmen.",
     teamLabel: "Wie heisst dein Team?",
     teamButton: "Zeigen",
-    teamExample: "zum Beispiel: HC Zürichsee Herren 1",
+    teamExample: "Der Vereinsname oder der Ort reicht.",
     lead: "Du filmst das Spiel mit dem Handy und lädst das Video hoch. Die Analyse zeigt dir drei Dinge zum Mitnehmen, mit den Szenen dazu.",
     moreTitle: "Und dazu",
     more: [
@@ -228,14 +228,14 @@ const de = {
         title: "Während dem Spiel",
         items: [
           "Nicht schwenken und nicht zoomen. Einfach laufen lassen.",
-          "Auch in der Pause weiterfilmen oder für die zweite Halbzeit neu starten. Beides geht.",
+          "Auch in der Pause weiterfilmen: so bleibt das ganze Spiel in einer Datei.",
         ],
       },
       {
         title: "Danach",
         items: [
           "In der App das Spiel öffnen und die Datei hochladen, MP4 oder MOV.",
-          "Mehrere Dateien gehen auch, zum Beispiel eine pro Halbzeit.",
+          "Am einfachsten ist das ganze Spiel in einer Datei.",
           "Oder einen Link einfügen, zum Beispiel von einer Kamera-Plattform.",
         ],
       },
@@ -333,7 +333,7 @@ const de = {
     items: [
       { q: "Reicht mein Handy?", a: "Ja. Jedes Handy, das in Full HD (1080p) filmt, reicht. Wichtiger als die Kamera ist, wo sie steht." },
       { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Das ganze Feld muss im Bild sein, mit beiden Torräumen." },
-      { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert, meist MP4 oder MOV. Auch mehrere Dateien, zum Beispiel eine pro Halbzeit, oder ein Link zu einer Kamera-Plattform." },
+      { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert, meist MP4 oder MOV. Am einfachsten ist das ganze Spiel in einer Datei. Ein Link zu einer Kamera-Plattform geht auch." },
       { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht dabeibleiben: du bekommst eine Mail, wenn die drei Dinge da sind." },
       { q: "Muss ich etwas von Hand eintragen?", a: "Nein. Die drei Dinge und die Szenen kommen ohne Eintippen. Wo die Analyse unsicher ist, fragt sie dich kurz. Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
       { q: "Was kostet es?", a: "Ein Team kostet CHF {month} im Monat oder CHF {year} im Jahr. Die Preise sind noch nicht endgültig." },

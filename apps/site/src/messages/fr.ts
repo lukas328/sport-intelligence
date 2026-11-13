@@ -116,7 +116,7 @@ const fr: Messages = {
     title: "Ton match. Et trois points à retenir.",
     teamLabel: "Comment s'appelle ton équipe ?",
     teamButton: "Afficher",
-    teamExample: "par exemple : HC Zürichsee Herren 1",
+    teamExample: "Le nom du club ou la localité suffit.",
     lead: "Tu filmes le match avec ton téléphone et tu téléverses la vidéo. L'analyse te montre trois points à retenir, avec les scènes.",
     moreTitle: "Et aussi",
     more: [
@@ -230,14 +230,14 @@ const fr: Messages = {
         title: "Pendant le match",
         items: [
           "Ne pas faire de panoramique ni zoomer. Laisser tourner.",
-          "Continuer à filmer pendant la pause ou relancer pour la deuxième mi-temps. Les deux vont.",
+          "Continuer à filmer pendant la pause : ainsi tout le match reste dans un seul fichier.",
         ],
       },
       {
         title: "Après",
         items: [
           "Ouvrir le match dans l'app et téléverser le fichier, MP4 ou MOV.",
-          "Plusieurs fichiers vont aussi, par exemple un par mi-temps.",
+          "Le plus simple : tout le match dans un seul fichier.",
           "Ou coller un lien, par exemple d'une plateforme de caméra.",
         ],
       },
@@ -335,7 +335,7 @@ const fr: Messages = {
     items: [
       { q: "Mon téléphone suffit-il ?", a: "Oui. Tout téléphone qui filme en Full HD (1080p) suffit. L'endroit compte plus que la caméra." },
       { q: "Où placer la caméra ?", a: "À hauteur de la ligne médiane, le plus haut possible, dès 3 mètres environ : tribune, galerie ou trépied haut. Tout le terrain doit être dans l'image, avec les deux zones de but." },
-      { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre, en général MP4 ou MOV. Plusieurs fichiers vont aussi, par exemple un par mi-temps, ou un lien vers une plateforme de caméra." },
+      { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre, en général MP4 ou MOV. Le plus simple : tout le match dans un seul fichier. Un lien vers une plateforme de caméra va aussi." },
       { q: "Combien de temps dure l'analyse ?", a: "Cela dépend de la durée de la vidéo. Pas besoin de rester : tu reçois un e-mail quand les trois points sont prêts." },
       { q: "Dois-je saisir quelque chose à la main ?", a: "Non. Les trois points et les scènes arrivent sans rien taper. Là où l'analyse hésite, elle te pose une courte question. Tu marques les arrêts et les tirs manqués seulement si tu les veux." },
       { q: "Combien ça coûte ?", a: "Une équipe coûte CHF {month} par mois ou CHF {year} par an. Les prix ne sont pas encore définitifs." },

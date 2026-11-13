@@ -116,7 +116,7 @@ const en: Messages = {
     title: "Your match. And three things to take home.",
     teamLabel: "What is your team called?",
     teamButton: "Show",
-    teamExample: "for example: HC Zürichsee Herren 1",
+    teamExample: "The club name or the town is enough.",
     lead: "You film the match with your phone and upload the video. The analysis shows you three things to take home, with the scenes behind them.",
     moreTitle: "And also",
     more: [
@@ -230,14 +230,14 @@ const en: Messages = {
         title: "During the match",
         items: [
           "Do not pan and do not zoom. Just let it run.",
-          "Keep filming through half time, or start again for the second half. Both work.",
+          "Keep filming through half time: then the whole match is in one file.",
         ],
       },
       {
         title: "Afterwards",
         items: [
           "Open the match in the app and upload the file, MP4 or MOV.",
-          "Several files work too, for example one per half.",
+          "The simplest is the whole match in one file.",
           "Or paste a link, for example from a camera platform.",
         ],
       },
@@ -335,7 +335,7 @@ const en: Messages = {
     items: [
       { q: "Is my phone good enough?", a: "Yes. Any phone that films in Full HD (1080p) is enough. Where it stands matters more than the camera." },
       { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. The whole court must be in the picture, with both goal areas." },
-      { q: "Which file can I upload?", a: "The video file as the phone saves it, usually MP4 or MOV. Several files work too, for example one per half, or a link to a camera platform." },
+      { q: "Which file can I upload?", a: "The video file as the phone saves it, usually MP4 or MOV. The simplest is the whole match in one file. A link to a camera platform works too." },
       { q: "How long does the analysis take?", a: "That depends on the length of the video. You need not stay: you get an e-mail when the three things are ready." },
       { q: "Do I have to enter anything by hand?", a: "No. The three things and the scenes come without typing. Where the analysis is unsure, it asks you briefly. You mark saves and missed shots only if you want them." },
       { q: "What does it cost?", a: "One team costs CHF {month} a month or CHF {year} a year. The prices are not final yet." },

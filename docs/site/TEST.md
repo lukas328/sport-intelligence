@@ -117,6 +117,13 @@ Nach `docs/ux-test/runde1/EINSTIEG.md` und der Rückmeldung der App-Session:
   Status 404 (mit `npx serve`); axe 0 Verstösse, kein Überlauf bei 390 und 1280.
 - Fürs echte Hosting: Server-Weiterleitung und `error_page`, siehe README, Abschnitt «Hosting».
 
+## Nachtrag 13. November, Teil 3 der Testerin (N27, N28)
+
+- N27: Unter dem Team-Feld steht statt des erfundenen Vereins «Der Vereinsname oder der Ort reicht.»
+- N28: Datei überall neutral «Am einfachsten ist das ganze Spiel in einer Datei.» (Fragen, Filmen,
+  Anleitung «Video hochladen»), bis die App-Session den einen richtigen Satz bestätigt.
+- Wiederholt: axe 0, kein Überlauf, grosse Schrift, Links.
+
 ## Nicht geprüft
 
 - Echte Geräte (iPhone Safari, Android Chrome) und echte Bildschirmleser (VoiceOver, NVDA): nur
