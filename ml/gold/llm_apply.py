@@ -14,7 +14,14 @@ from pathlib import Path
 Z = 1.5
 
 
+KEEP_LLM = False
+
+
 def main() -> None:
+    global KEEP_LLM
+    if "--keep-llm" in sys.argv:  # second pass: add to the first pass's labels
+        sys.argv.remove("--keep-llm")
+        KEEP_LLM = True
     sheets, clip, answers, out = (
         Path(sys.argv[1]),
         sys.argv[2],
@@ -28,7 +35,7 @@ def main() -> None:
         d = json.loads(Path(sys.argv[5]).read_text())
         doc |= d.get("data", d)
     # keep the owner's rough points and own precise clicks; earlier llm labels are replaced
-    labels = {k: v for k, v in doc["labels"].items() if v.get("src") != "llm"}
+    labels = {k: v for k, v in doc["labels"].items() if KEEP_LLM or v.get("src") != "llm"}
     n = 0
     for r in meta:
         a = ans.get(str(r["row"]), "?").strip()
