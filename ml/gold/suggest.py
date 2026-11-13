@@ -57,6 +57,13 @@ def main() -> None:
                 "w": c["w"],
                 "h": c["h"],
                 "sug": suggest(c),
+                # every frame's ball candidates (net peaks >= 0.15, OWLv2 boxes >= 0.08), so the page
+                # can snap a rough point (followed with the cursor) to the nearest real candidate
+                "cand": [
+                    [[p[0], p[1]] for p in r["net"] if p[2] >= 0.15]
+                    + [[round(o[0]), round(o[1])] for o in r.get("owl", []) if o[4] >= 0.08]
+                    for r in c["pre"]
+                ],
             }
         )
     json.dump(out, open(pub / "clips.json", "w"), separators=(",", ":"))
