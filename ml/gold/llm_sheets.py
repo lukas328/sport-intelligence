@@ -30,6 +30,11 @@ def main() -> None:
     ap.add_argument("clip")
     ap.add_argument("out", type=Path)
     ap.add_argument("--step", type=int, default=6)
+    ap.add_argument(
+        "--only-rough",
+        action="store_true",
+        help="only keyframes with a rough point within 2 frames (the crop elsewhere is a guess)",
+    )
     a = ap.parse_args()
     c = next(x for x in json.loads(a.clips_json.read_text()) if x["id"] == a.clip)
     lp = a.labels_dir / f"{a.clip}.json"
@@ -49,6 +54,8 @@ def main() -> None:
     keys = list(range(0, n, a.step))
     rows, meta = [], []
     for k in keys:
+        if a.only_rough and not any(k + d in rough for d in (-2, -1, 0, 1, 2)):
+            continue
         g = rough.get(k + 1) or rough.get(k)
         if g:
             cx, cy = g["x"], g["y"]
