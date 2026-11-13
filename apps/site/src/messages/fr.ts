@@ -154,6 +154,7 @@ const fr: Messages = {
       "Reconnaître les arrêts et les tirs manqués. Tu les marques à la main si tu les veux.",
       "Reconnaître les buts à partir de l'image seule, sans feuille de match ni affichage du score.",
       "Mesurer exactement les distances parcourues. Avec une seule caméra, ce sont des estimations.",
+      "Analyser un match composé de deux fichiers.",
     ],
     note: "Ce qui est estimé est dessiné en pointillé et marqué « estimé ».",
   },
@@ -168,7 +169,7 @@ const fr: Messages = {
       },
       {
         title: "Téléverser",
-        text: "Dans l'app, tu choisis le fichier vidéo tel que le téléphone l'a enregistré, en général MP4 ou MOV. Si la connexion coupe, l'envoi reprend la fois suivante là où il s'était arrêté. Les gros fichiers passent mieux en wifi.",
+        text: "Dans l'app, tu choisis le fichier vidéo idéalement tout le match dans un seul fichier (MP4, MOV ou MKV). Si la connexion coupe, l'envoi reprend la fois suivante là où il s'était arrêté. Les gros fichiers passent mieux en wifi.",
       },
       {
         title: "L'analyse calcule",
@@ -230,15 +231,15 @@ const fr: Messages = {
         title: "Pendant le match",
         items: [
           "Ne pas faire de panoramique ni zoomer. Laisser tourner.",
-          "Continuer à filmer pendant la pause : ainsi tout le match reste dans un seul fichier.",
+          "Continue à filmer pendant la pause. Si tu arrêtes, un deuxième fichier se crée, et la deuxième mi-temps n'est pas analysée.",
         ],
       },
       {
         title: "Après",
         items: [
-          "Ouvrir le match dans l'app et téléverser le fichier, MP4 ou MOV.",
-          "Le plus simple : tout le match dans un seul fichier.",
-          "Ou coller un lien, par exemple d'une plateforme de caméra.",
+          "Ouvrir le match dans l'app et téléverser le fichier.",
+          "Le mieux : tout le match dans un seul fichier (MP4, MOV ou MKV). Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et peut être lu, mais seul le premier est analysé.",
+          "Un lien direct vers un fichier vidéo va aussi, par exemple le lien de téléchargement de Veo ou de Spiideo.",
         ],
       },
       {
@@ -335,7 +336,7 @@ const fr: Messages = {
     items: [
       { q: "Mon téléphone suffit-il ?", a: "Oui. Tout téléphone qui filme en Full HD (1080p) suffit. L'endroit compte plus que la caméra." },
       { q: "Où placer la caméra ?", a: "À hauteur de la ligne médiane, le plus haut possible, dès 3 mètres environ : tribune, galerie ou trépied haut. Tout le terrain doit être dans l'image, avec les deux zones de but." },
-      { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre, en général MP4 ou MOV. Le plus simple : tout le match dans un seul fichier. Un lien vers une plateforme de caméra va aussi." },
+      { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre. Le mieux : tout le match dans un seul fichier (MP4, MOV ou MKV). Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et peut être lu, mais seul le premier est analysé. Un lien direct vers un fichier vidéo va aussi, par exemple le lien de téléchargement de Veo ou de Spiideo." },
       { q: "Combien de temps dure l'analyse ?", a: "Cela dépend de la durée de la vidéo. Pas besoin de rester : tu reçois un e-mail quand les trois points sont prêts." },
       { q: "Dois-je saisir quelque chose à la main ?", a: "Non. Les trois points et les scènes arrivent sans rien taper. Là où l'analyse hésite, elle te pose une courte question. Tu marques les arrêts et les tirs manqués seulement si tu les veux." },
       { q: "Combien ça coûte ?", a: "Une équipe coûte CHF {month} par mois ou CHF {year} par an. Les prix ne sont pas encore définitifs." },

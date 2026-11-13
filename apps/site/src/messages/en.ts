@@ -154,6 +154,7 @@ const en: Messages = {
       "Detect saves and missed shots. You mark them by hand if you want them.",
       "Detect goals from the picture alone when there is neither a match report nor a score display.",
       "Measure running distances exactly. From one camera they are estimates.",
+      "Analyse a match made of two files.",
     ],
     note: "What is estimated, we draw dashed and label \"estimated\".",
   },
@@ -168,7 +169,7 @@ const en: Messages = {
       },
       {
         title: "Upload",
-        text: "In the app you choose the video file as the phone saved it, usually MP4 or MOV. If the connection drops, the upload continues where it stopped next time. Large files are best uploaded over wifi.",
+        text: "In the app you choose the video file ideally the whole match in one file (MP4, MOV or MKV). If the connection drops, the upload continues where it stopped next time. Large files are best uploaded over wifi.",
       },
       {
         title: "The analysis works",
@@ -230,15 +231,15 @@ const en: Messages = {
         title: "During the match",
         items: [
           "Do not pan and do not zoom. Just let it run.",
-          "Keep filming through half time: then the whole match is in one file.",
+          "Keep filming through half time. If you stop, a second file is made, and the second half is not analysed.",
         ],
       },
       {
         title: "Afterwards",
         items: [
-          "Open the match in the app and upload the file, MP4 or MOV.",
-          "The simplest is the whole match in one file.",
-          "Or paste a link, for example from a camera platform.",
+          "Open the match in the app and upload the file.",
+          "Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed.",
+          "A direct link to a video file works too, for example the download link from Veo or Spiideo.",
         ],
       },
       {
@@ -335,7 +336,7 @@ const en: Messages = {
     items: [
       { q: "Is my phone good enough?", a: "Yes. Any phone that films in Full HD (1080p) is enough. Where it stands matters more than the camera." },
       { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. The whole court must be in the picture, with both goal areas." },
-      { q: "Which file can I upload?", a: "The video file as the phone saves it, usually MP4 or MOV. The simplest is the whole match in one file. A link to a camera platform works too." },
+      { q: "Which file can I upload?", a: "The video file as the phone saves it. Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed. A direct link to a video file works too, for example the download link from Veo or Spiideo." },
       { q: "How long does the analysis take?", a: "That depends on the length of the video. You need not stay: you get an e-mail when the three things are ready." },
       { q: "Do I have to enter anything by hand?", a: "No. The three things and the scenes come without typing. Where the analysis is unsure, it asks you briefly. You mark saves and missed shots only if you want them." },
       { q: "What does it cost?", a: "One team costs CHF {month} a month or CHF {year} a year. The prices are not final yet." },

@@ -124,6 +124,14 @@ Nach `docs/ux-test/runde1/EINSTIEG.md` und der Rückmeldung der App-Session:
   Anleitung «Video hochladen»), bis die App-Session den einen richtigen Satz bestätigt.
 - Wiederholt: axe 0, kein Überlauf, grosse Schrift, Links.
 
+## Nachtrag 13. November, Dateien
+
+Der von der App bestätigte Satz steht jetzt bei den Fragen, auf der Filmseite und in den Anleitungen
+«Spiel richtig filmen» und «Video hochladen»: «Am besten das ganze Spiel in einer Datei (MP4, MOV
+oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet
+wird aber nur die erste.» Dazu «Film in der Pause weiter …», der direkte Link auf eine Videodatei
+(Veo, Spiideo) und unter «Das noch nicht»: «Ein Spiel aus zwei Dateien auswerten.»
+
 ## Nicht geprüft
 
 - Echte Geräte (iPhone Safari, Android Chrome) und echte Bildschirmleser (VoiceOver, NVDA): nur

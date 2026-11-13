@@ -199,6 +199,8 @@ den Prinzipien). «Wer wir sind» als Platzhalter «folgt vor dem Start» (offen
 - Paraden und Fehlwürfe erkennen. Die markierst du von Hand, wenn du sie willst.
 - Tore allein aus dem Bild erkennen, wenn es weder Spielbericht noch Anzeige gibt.
 - Laufdistanzen genau messen. Aus einer Kamera sind es Schätzungen.
+- Ein Spiel aus zwei Dateien auswerten (Nachtrag 13. November: die zweite Datei wird gespeichert
+  und abgespielt, ausgewertet wird nur die erste; so steht es in der App).
 
 Geschätztes ist gestrichelt und heisst «geschätzt».
 
