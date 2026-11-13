@@ -7,7 +7,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import QRCode from "qrcode";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { Strip } from "@/components/anlauf/heads";
+import { ShirtPicker } from "@/components/anlauf/shirt-picker";
+import { clubStyle } from "@/lib/color";
 import { InviteForm } from "@/components/people/invite-form";
 import { Button } from "@/components/ui/button";
 import { Alert, EmptyState } from "@/components/ui/card";
@@ -26,6 +29,8 @@ export function ClubSection({ org }: { org: Org }) {
   const [error, setError] = useState<ErrorKey | null>(null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [colour, setColour] = useState(org.primary_color);
+  const [second, setSecond] = useState(org.secondary_color);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -62,18 +67,29 @@ export function ClubSection({ org }: { org: Org }) {
 
   return (
     <section aria-labelledby="club" className="space-y-3">
+      {/* «Verein» stands in the page head already: this section says what it holds (UX test B43) */}
       <h2 id="club" className="text-lg font-semibold">
-        {t("settings.club")}
+        {t("settings.clubLook")}
       </h2>
       <div className="border-t border-foreground/15 pt-5">
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-6">
           {error && <Alert>{t(`errors.${error}`)}</Alert>}
           {saved && <Alert kind="success">{t("common.saved")}</Alert>}
           <Input label={t("onboarding.clubName")} name="name" defaultValue={org.name} required />
-          <div className="grid grid-cols-2 gap-3">
-            <Input label={t("onboarding.primaryColor")} name="primary_color" type="color" defaultValue={org.primary_color} className="h-11 w-24 p-1" />
-            <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue={org.secondary_color} className="h-11 w-24 p-1" />
+          <ShirtPicker value={colour} onChange={setColour} legend={t("onboarding.shirtTitle")} />
+          <input type="hidden" name="primary_color" value={colour} />
+          {/* the preview: the head of a match in the picked colour */}
+          <div className="club" style={clubStyle(colour, second) as CSSProperties} data-testid="club-preview">
+            <p className="mb-2 text-[15px] font-semibold text-ink-2">{t("settings.clubPreview")}</p>
+            <Strip name={org.name} sub={t("settings.clubPreviewSub")} own={null} opp={null} pending={<>&nbsp;</>} />
           </div>
+          <details>
+            <summary className="min-h-11 cursor-pointer content-center text-[15px] font-bold underline decoration-[1.5px] underline-offset-4">{t("settings.ownColours")}</summary>
+            <div className="grid grid-cols-2 gap-3 pt-3">
+              <Input label={t("onboarding.primaryColor")} type="color" value={colour} onChange={(e) => setColour(e.target.value)} className="h-11 w-24 p-1" />
+              <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" value={second} onChange={(e) => setSecond(e.target.value)} className="h-11 w-24 p-1" />
+            </div>
+          </details>
           <FileField label={t("onboarding.logo")} name="logo" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} button={t("file.choose")} empty={t("file.none")} />
           <Button type="submit" loading={busy}>
             {t("common.save")}

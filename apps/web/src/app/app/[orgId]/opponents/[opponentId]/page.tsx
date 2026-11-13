@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/page-header";
+import { OlderArea } from "@/components/shell/section-nav";
 import { BackToFixtures } from "./back-to-fixtures";
 import Link from "next/link";
 import { OpponentPlayers } from "./opponent-players";
@@ -8,7 +9,6 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/card";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
-import { xgBasis } from "@/lib/xg";
 
 interface Profile {
   opponent: { id: string; name: string };
@@ -49,13 +49,12 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
   if (!p) notFound();
   const n = Math.max(1, p.tagged_matches);
   const fTotal = Object.values(p.formations_ms).reduce((a, b) => a + b, 0);
-  // xG only where most shots on target have a position; otherwise say why it is missing
-  const xg = xgBasis(p.totals);
   return (
     <div className="space-y-6">
       <div>
         <BackToFixtures orgId={orgId} />
         <PageHeader eyebrow={`${t("title")} · ${t("record", p.record)}`} title={p.opponent.name} />
+        <OlderArea />
       </div>
       {p.tagged_matches === 0 ? (
         <EmptyState title={t("none")} />
@@ -63,22 +62,20 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
         <>
           <p className="text-sm text-muted">{t("tagged", { count: p.tagged_matches })}</p>
           {/* one line of the match sheet, not five tiles; averages say so and drop a ".0" */}
-          <dl className={`grid grid-cols-2 gap-x-8 gap-y-4 border-t-2 border-foreground pt-4 ${xg?.shown ? "sm:grid-cols-3 lg:grid-cols-6" : "sm:grid-cols-5"}`} data-testid="opponent-tiles">
+          <dl className={`grid grid-cols-2 gap-x-8 gap-y-4 border-t-2 border-foreground pt-4 sm:grid-cols-5`} data-testid="opponent-tiles">
             {[
               [t("goalsPerMatch"), avg(p.totals.goals / n)],
               [t("shootingPct"), pct(p.totals.shooting_pct)],
               [t("sevenM"), `${p.totals.seven_m_goals}/${p.totals.seven_m_shots}`],
               [t("fastBreakPerMatch"), avg(p.totals.fast_break_goals / n)],
               [t("turnoversPerMatch"), avg(p.totals.turnovers / n)],
-              ...(xg?.shown ? [[t("xgPerMatch"), (p.totals.xg / n).toFixed(1)]] : []),
             ].map(([label, value]) => (
               <div key={label}>
-                <dt className="text-[0.8125rem] text-muted">{label}</dt>
+                <dt className="text-[0.9375rem] text-muted">{label}</dt>
                 <dd className="mt-1 font-score text-[1.75rem] leading-none tabular-nums sm:text-3xl">{value}</dd>
               </div>
             ))}
           </dl>
-          {xg && !xg.shown && <p className="text-[0.8125rem] text-muted" data-testid="opponent-xg-thin">{t("xgThin", { n: xg.n, of: xg.of })}</p>}
           {/* three open columns on rules, not cards */}
           <div className="grid gap-8 md:grid-cols-3">
             <section className="space-y-2">
@@ -114,7 +111,7 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
               </ul>
               <h3 className="pt-2 text-sm font-semibold">{t("goalZones")}</h3>
               {/* not every goal has a target point: say how many do */}
-              <p className="text-[0.8125rem] text-muted">
+              <p className="text-[0.9375rem] text-muted">
                 {t("goalZonesBasis", { n: Object.values(p.goal_zones).reduce((a, v) => a + v.goals, 0), total: p.totals.goals })}
               </p>
               <ul className="divide-y divide-foreground/10 border-t-2 border-foreground text-sm">

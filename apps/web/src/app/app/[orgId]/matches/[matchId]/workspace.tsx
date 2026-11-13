@@ -322,7 +322,8 @@ export function Workspace({
   useEffect(() => {
     if (requestPane) setPane(requestPane.pane);
   }, [requestPane]);
-  const chosen: Pane = pane ?? (staff ? (firstOpen(stepList) ?? "notes") : "notes");
+  const [setupOpen, setSetupOpen] = useState(false);
+  const chosen: Pane = pane ?? (staff && (checkSteps || setupOpen) ? (firstOpen(stepList) ?? "notes") : staff ? "events" : "notes");
   // the first open step is shown once the lists are in; from then on the coach decides
   useEffect(() => {
     if (pane == null && loaded) setPane(chosen);
@@ -420,7 +421,15 @@ export function Workspace({
           </Button>
         </div>
       ) : staff || tools.length > 1 ? (
-        <WorkRail steps={staff && checkSteps ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+        <div>
+          <WorkRail steps={staff && (checkSteps || setupOpen) ? stepList : []} tools={tools} value={shown} onChange={setPane} idPrefix={paneId} />
+          {/* the questions live in Prüfen (UX test B10); the setup by hand stays one tap away */}
+          {staff && !checkSteps && (
+            <button type="button" onClick={() => setSetupOpen((v) => !v)} aria-expanded={setupOpen} className="mt-2 min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="setup-toggle">
+              {setupOpen ? t("workflow.setupClose") : t("workflow.setupOpen")}
+            </button>
+          )}
+        </div>
       ) : null}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}
@@ -527,7 +536,7 @@ export function Workspace({
           )}
           {/* keys teach only where there is a keyboard */}
           <details className="group relative pointer-coarse:hidden">
-            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 px-3 text-[0.8125rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 px-3 text-[0.9375rem] font-medium text-muted hover:bg-surface hover:text-foreground [&::-webkit-details-marker]:hidden">
               <Keyboard aria-hidden className="size-4" />
               {t("player.shortcuts")}
             </summary>
@@ -555,7 +564,7 @@ export function Workspace({
           oppName={oppName}
           events={staff ? events.data : null}
           notes={[...(comments.data ?? []).map((c) => c.t_ms), ...(clips.data ?? []).map((c) => c.start_ms), ...(annotations.data ?? []).map((x) => x.t_ms)]}
-          onSetKickoff={staff ? () => setPane("kickoff") : undefined}
+          onSetKickoff={staff ? () => (setSetupOpen(true), setPane("kickoff")) : undefined}
         />
         </div>
         {failure && <Alert className="py-2">{t(`errors.${failure}`)}</Alert>}
@@ -654,7 +663,7 @@ export function Workspace({
               onClip={playClip}
               onActive={setActiveShot}
               onSeek={seekPaused}
-              onSetKickoff={match.kickoff_ms?.["1"] == null ? () => setPane("kickoff") : undefined}
+              onSetKickoff={match.kickoff_ms?.["1"] == null ? () => (setSetupOpen(true), setPane("kickoff")) : undefined}
               focusMode={reviewing}
             />
           </div>

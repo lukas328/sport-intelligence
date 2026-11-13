@@ -2,12 +2,13 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useTranslations } from "next-intl";
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
-import { GoalGrid } from "@/components/analysis/goal-grid";
 import type { MatchGraphics } from "@/lib/graphics";
 import { cn } from "@/lib/utils";
-import type { Stats } from "./analysis-views";
+import { Drill, N, type Stats, useDrill } from "./analysis-views";
+import type { EventFilter } from "@/components/analysis/event-list";
 import { MatchZones } from "./match-graphics";
 
 type Entry = Schemas["RosterEntryOut"];
@@ -20,9 +21,43 @@ const pct = (v: number | null) => (v == null || v > 1 ? "" : `${Math.round(v * 1
  * side the goals conceded by position, the goal target and the phases. The full report, shots,
  * goalkeepers in detail and the running figures stay one click away («Alle Zahlen»).
  */
-export function NumbersView({ stats, graphics, roster, children }: { stats: Stats | null; graphics: MatchGraphics | null; roster: Entry[]; children: React.ReactNode }) {
+const TARGET_ROWS = [
+  ["TL", "TC", "TR"],
+  ["ML", "MC", "MR"],
+  ["BL", "BC", "BR"],
+] as const;
+
+export function NumbersView({
+  stats,
+  graphics,
+  roster,
+  children,
+  orgId,
+  match,
+  names = {},
+  onPlay,
+}: {
+  stats: Stats | null;
+  graphics: MatchGraphics | null;
+  roster: Entry[];
+  children: React.ReactNode;
+  orgId?: string;
+  match?: Schemas["MatchOut"];
+  names?: Record<string, string>;
+  onPlay?: (t: number) => void;
+}) {
   const t = useTranslations("numbersTab");
   const [all, setAll] = useState(false);
+  // every figure leads to its scenes (UX test B23): the events behind it open below the table
+  const { drill, open, close } = useDrill();
+  const cell = (value: string | number, label: string, filter: EventFilter) =>
+    value === "" || value === 0 || !orgId ? value || "" : <N value={value} label={label} onClick={() => open(label, filter)} />;
+  // «Bestätigt»: every goal of the player was marked or confirmed by a person, none estimated
+  // the same rule as the source line «… von dir bestätigt» (UX test N12): by person, else by number
+  const confirmed = (playerId: string | null, number: number | null) => {
+    const own = (graphics?.goals ?? []).filter((g) => g.team === "own" && ((playerId != null && g.player_id === playerId) || (g.player_id == null && number != null && g.number === number)));
+    return own.length > 0 && own.every((g) => g.confirmed);
+  };
   const who = (id: string | null, number: number | null) => {
     const r = roster.find((x) => x.player_id === id) ?? (number != null ? roster.find((x) => x.jersey_number === number) : undefined);
     return { number: r?.jersey_number ?? number, name: r ? `${r.first_name} ${r.last_name}` : t("unknown") };
@@ -37,11 +72,13 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
   const zones = stats?.opponent.goal_zones ?? {};
   const marked = Object.values(zones).reduce((n, z) => n + z.goals, 0);
   const phases = graphics?.phases ?? [];
-  const th = "py-2 text-right text-[13px] font-semibold text-ink-2";
+  // shots and rates only where misses were recorded: from goals alone every rate reads 100 %
+  const shotsKnown = stats?.own.known?.shooting !== false;
+  const th = "py-2 text-right text-[15px] font-semibold text-ink-2";
   const td = "py-2.5 text-right tabular-nums";
   return (
     <div className="space-y-12">
-      <p className="max-w-[90ch] text-[13px] text-ink-2 md:text-[15px]">{t("intro")}</p>
+      <p className="max-w-[90ch] text-[15px] text-ink-2 md:text-[15px]">{t("intro")}</p>
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-12">
           {field.length > 0 && (
@@ -54,8 +91,9 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                     <th scope="col" className={th}>{t("goals")}</th>
                     <th scope="col" className={th}>{t("sevenM")}</th>
                     <th scope="col" className={th}>{t("twoMin")}</th>
-                    <th scope="col" className={cn(th, "max-sm:hidden")}>{t("shots")}</th>
-                    <th scope="col" className={th}>{t("rate")}</th>
+                    {shotsKnown && <th scope="col" className={cn(th, "max-sm:hidden")}>{t("shots")}</th>}
+                    {shotsKnown && <th scope="col" className={th}>{t("rate")}</th>}
+                    <th scope="col" className={cn(th, "max-sm:hidden")}>{t("confirmed")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -67,18 +105,26 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                           <b className="font-num mr-3 inline-block w-8 text-lg text-club-text">{w.number ?? ""}</b>
                           {w.name}
                         </th>
-                        <td className={td}>{p.goals || ""}</td>
-                        <td className={td}>{p.seven_m_shots > 0 ? `${p.seven_m_goals}/${p.seven_m_shots}` : ""}</td>
-                        <td className={td}>{p.suspensions || ""}</td>
-                        <td className={cn(td, "max-sm:hidden")}>{p.shots || ""}</td>
-                        <td className={cn(td, "text-ink-2")}>{p.shots > 0 ? pct(p.goals / p.shots) : ""}</td>
+                        <td className={td}>{cell(p.goals, `${t("goals")}: ${w.name}`, { ...(p.player_id ? { player_id: p.player_id } : { side: "own", number: p.number ?? undefined }), type: "shot", outcome: "goal" })}</td>
+                        <td className={td}>{p.seven_m_shots > 0 ? cell(`${p.seven_m_goals}/${p.seven_m_shots}`, `${t("sevenM")}: ${w.name}`, { ...(p.player_id ? { player_id: p.player_id } : { side: "own", number: p.number ?? undefined }), type: "shot", zone: "penalty" }) : ""}</td>
+                        <td className={td}>{cell(p.suspensions, `${t("twoMin")}: ${w.name}`, { ...(p.player_id ? { player_id: p.player_id } : { side: "own", number: p.number ?? undefined }), type: "suspension_2min" })}</td>
+                        {shotsKnown && <td className={cn(td, "max-sm:hidden")}>{cell(p.shots, `${t("shots")}: ${w.name}`, { ...(p.player_id ? { player_id: p.player_id } : { side: "own", number: p.number ?? undefined }), type: "shot" })}</td>}
+                        {shotsKnown && <td className={cn(td, "text-ink-2")}>{p.shots > 0 ? pct(p.goals / p.shots) : ""}</td>}
+                        <td className={cn(td, "max-sm:hidden")}>
+                          {confirmed(p.player_id ?? null, w.number ?? null) && (
+                            <>
+                              <Check aria-hidden className="ml-auto size-5 text-win" />
+                              <span className="sr-only">{t("confirmedYes")}</span>
+                            </>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
               {!all && field.length > shown.length && (
-                <p className="mt-2 text-[13px] text-ink-2">
+                <p className="mt-2 text-[15px] text-ink-2">
                   {t("more", { n: field.length - shown.length })}{" "}
                   <button type="button" onClick={() => setAll(true)} className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">
                     {t("showAll")}
@@ -108,8 +154,8 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                           <b className="font-num mr-3 inline-block w-8 text-lg text-club-text">{w.number ?? ""}</b>
                           {w.name}
                         </th>
-                        <td className={td}>{k.goals_against}</td>
-                        <td className={td}>{k.saves}</td>
+                        <td className={td}>{cell(k.goals_against, `${t("against")}: ${w.name}`, { side: "opponent", type: "shot", outcome: "goal" })}</td>
+                        <td className={td}>{cell(k.saves, `${t("saves")}: ${w.name}`, { side: "opponent", type: "shot", outcome: "save" })}</td>
                         <td className={td}>{k.seven_m.faced > 0 ? t("ofN", { n: k.seven_m.saves, of: k.seven_m.faced }) : ""}</td>
                       </tr>
                     );
@@ -118,16 +164,29 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
               </table>
             </section>
           )}
+          {drill && orgId && match && <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />}
         </div>
         <aside className="min-w-0 space-y-12">
           {graphics && graphics.goals.some((g) => g.team === "opp") && <MatchZones graphics={graphics} only="opp" />}
           {marked > 0 && (
             <section>
               <SectionHead as="h3" title={t("target")} note={t("targetNote")} />
-              <div className="max-w-[240px]">
-                <GoalGrid data={zones} />
-              </div>
-              <p className="mt-2 text-[13px] text-ink-2">{t("targetMarked", { n: marked, of: stats?.own.goals_against ?? marked })}</p>
+              {/* goals per corner from the shooter's view, a plain frame (UX test B23: no foreign colours) */}
+              <table className="w-[220px] border-collapse border-x-[6px] border-t-[6px] border-ink" data-testid="target-grid">
+                <caption className="sr-only">{t("target")}</caption>
+                <tbody>
+                  {TARGET_ROWS.map((row) => (
+                    <tr key={row.join()}>
+                      {row.map((z) => (
+                        <td key={z} className="h-[50px] border border-rule text-center font-num text-xl">
+                          {zones[z]?.goals ?? 0}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-2 text-[15px] text-ink-2">{t("targetMarked", { n: marked, of: stats?.own.goals_against ?? marked })}</p>
             </section>
           )}
           {phases.length > 0 && (
@@ -142,7 +201,7 @@ export function NumbersView({ stats, graphics, roster, children }: { stats: Stat
                       <p className="m-0 flex items-baseline justify-between gap-3">
                         <span className="text-[15px]">
                           {t(`phase_${ph.kind}`, { m: minutes })}
-                          <small className="block text-[12px] text-ink-2">{ph.estimated ? t("fromVideo") : t(ph.kind === "fast_break" ? "fromEvents" : "fromSuspensions")}</small>
+                          <small className="block text-[14px] text-ink-2">{ph.estimated ? t("fromVideo") : t(ph.kind === "fast_break" ? "fromEvents" : "fromSuspensions")}</small>
                         </span>
                         <b className="font-num text-xl">
                           {ph.goals_us}:{ph.goals_them}

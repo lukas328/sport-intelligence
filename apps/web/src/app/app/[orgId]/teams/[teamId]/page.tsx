@@ -1,15 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { Schemas } from "@handball/api-client";
 import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
+import { PageHead } from "@/components/anlauf/heads";
 import { RosterEditor } from "@/components/roster/roster-editor";
 import { AreaSubNav } from "@/components/shell/section-nav";
-import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ConsentCopy } from "./consent-copy";
+import { TwoFactorTask } from "./two-factor-task";
 
 type Entry = Schemas["RosterEntryOut"];
 
@@ -29,6 +31,12 @@ const BENCH = ["coach", "analyst", "goalkeeper_coach", "athletic_coach", "team_m
  * the team chat) and the bench. Editing the squad (add, import, status, accounts) moves to
  * «Kader bearbeiten» (?edit=1): nothing of it is lost.
  */
+export async function generateMetadata({ params }: { params: Promise<{ orgId: string; teamId: string }> }): Promise<Metadata> {
+  const { orgId, teamId } = await params;
+  const { data } = await (await serverApi()).GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: teamId } } });
+  return { title: `${(await getTranslations("shell"))("team")}${data ? ` · ${data.name}` : ""}` };
+}
+
 export default async function TeamPage({ params, searchParams }: { params: Promise<{ orgId: string; teamId: string }>; searchParams: Promise<{ edit?: string }> }) {
   const { orgId, teamId } = await params;
   const { edit } = await searchParams;
@@ -59,7 +67,10 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
     return (
       <div className="space-y-6">
         <AreaSubNav />
-        <PageHeader eyebrow={kick} title={t("editTitle")} actions={<Link href={base} className={linkClass}>{t("back")}</Link>} />
+        {/* the Seitenkopf like every page (UX test B34) */}
+        <div className="bleed-x">
+          <PageHead kick={kick} title={t("editTitle")} actions={<Link href={base} className={linkClass}>{t("back")}</Link>} />
+        </div>
         {open > 0 && (
           <p className="text-sm" data-testid="official-open">
             <Link href={`${base}/official`} className={linkClass}>
@@ -73,17 +84,28 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   }
 
   const seasonPath = { params: { path: { org_id: orgId, team_id: teamId, season_id: season.id } } };
-  const [roster, stats] = await Promise.all([
+  const [roster, stats, matchList] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", seasonPath),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats", seasonPath),
+    client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", path),
   ]);
+  // before the first video nothing is missing yet (UX test H04): consents matter once scenes
+  // are shared, numbers once scenes are named
+  const firstVideo = (matchList.data ?? []).some((m) => m.has_video);
   const entries: Entry[] = roster.data ?? [];
   const players = ((stats.data as unknown as { players?: { player_id: string; goals: number; saves: number }[] } | undefined)?.players ?? []).reduce<Record<string, { goals: number; saves: number }>>((m, p) => ((m[p.player_id] = p), m), {});
   // what is missing: the consent is staff business, the number everyone sees
-  const consentOpen = (p: Entry) => staff && !p.consent_complete;
-  const missing = entries.filter((p) => consentOpen(p) || p.jersey_number == null).length;
+  // after the first video the consents stand once, at the side (count and the link to ask for
+  // them), not as a badge in every row and not in the title (UX test H04: no alarm right after
+  // the first success); a missing number stays a badge, everyone sees it
+  const missing = firstVideo ? entries.filter((p) => p.jersey_number == null).length : 0;
   const consents = entries.filter((p) => p.consent_complete).length;
-  const title = entries.length === 0 ? t("empty") : `${t("title", { n: entries.length })} ${missing > 0 ? t("missing", { k: missing }) : t("allThere")}`;
+  const title =
+    entries.length === 0
+      ? t("empty")
+      : !firstVideo
+        ? `${t("title", { n: entries.length })}${linked ? ` ${t("fromHandball")}` : ""}`
+        : `${t("title", { n: entries.length })} ${missing > 0 ? t("missing", { k: missing }) : t("allThere")}`;
   const figure = (p: Entry) => {
     const s = players[p.player_id];
     if (!s) return null;
@@ -94,7 +116,9 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   const groups = [
     ...GROUPS.map(([g, ps]) => ({ key: g, rows: entries.filter((p) => (ps as readonly string[]).includes(p.main_position ?? "")).sort(sort) })),
     { key: "other" as const, rows: entries.filter((p) => !known.includes(p.main_position ?? "")).sort(sort) },
-  ].filter((g) => g.rows.length > 0 || g.key !== "other");
+  ].filter((g) => g.rows.length > 0);
+  // without positions there are no position groups: one list, «Ohne Position» is no shortcoming
+  const onlyOther = groups.length === 1 && groups[0]!.key === "other";
   const bench = (members.data ?? []).filter((m) => BENCH.includes(m.role));
 
   return (
@@ -105,7 +129,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
         title={title}
         actions={
           canEdit ? (
-            <Link href={`${base}?edit=1`} className={buttonClass("secondary")} data-testid="roster-edit">
+            <Link href={`${base}?edit=1`} className={linkClass} data-testid="roster-edit">
               {t("edit")}
             </Link>
           ) : undefined
@@ -116,7 +140,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
           {groups.map((g) => (
             <section key={g.key} aria-labelledby={`group-${g.key}`} className={cn(g.key === "other" && "md:col-span-3")}>
               <h2 id={`group-${g.key}`} className="font-slant mb-3 flex items-baseline gap-2.5 border-b border-rule pb-3 text-xl">
-                {t(`group_${g.key}`)}
+                {onlyOther ? t("group_all") : t(`group_${g.key}`)}
                 <span className="font-sans text-[15px] font-medium text-ink-2 tabular-nums">{g.rows.length}</span>
               </h2>
               <ul className="m-0 list-none p-0">
@@ -134,7 +158,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                       <span className="min-w-0">
                         <span className="font-slant block text-[19px] leading-tight">
                           {staff ? (
-                            <Link href={`${base}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
+                            <Link href={`${base}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                               {name}
                             </Link>
                           ) : (
@@ -142,11 +166,11 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                           )}
                         </span>
                         <span className="mt-1 flex flex-wrap items-center gap-1.5 text-[15px] text-ink-2">
-                          {consentOpen(p) ? <AttnTag>{t("consentMissing")}</AttnTag> : p.jersey_number == null ? <AttnTag>{t("numberMissing")}</AttnTag> : fig}
+                          {firstVideo && p.jersey_number == null ? <AttnTag>{t("numberMissing")}</AttnTag> : fig}
                           {p.status && <span>{t("out")}</span>}
                         </span>
                       </span>
-                      <abbr title={p.main_position ? tr(`positions.${p.main_position}`) : undefined} className="text-[13px] font-bold text-ink-2 no-underline">
+                      <abbr title={p.main_position ? tr(`positions.${p.main_position}`) : undefined} className="text-[15px] font-bold text-ink-2 no-underline">
                         {p.main_position}
                       </abbr>
                     </li>
@@ -158,13 +182,22 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
         </div>
         {staff && (
           <aside className="space-y-12">
+            <TwoFactorTask orgId={orgId} />
             <section aria-labelledby="consents">
               <SectionHead as="h2" title={<span id="consents">{t("consents")}</span>} />
-              <p className="m-0 flex items-baseline gap-3" data-testid="roster-consents">
-                <b className="font-num text-[64px] leading-[.85]">{consents}</b>
-                <span className="font-slant text-[22px] text-ink-2">{t("ofTotal", { total: entries.length })}</span>
-              </p>
-              <p className="mt-3 text-[15px] leading-snug">{t("consentText")}</p>
+              {firstVideo ? (
+                <>
+                  <p className="m-0 flex items-baseline gap-3" data-testid="roster-consents">
+                    <b className="font-num text-[64px] leading-[.85]">{consents}</b>
+                    <span className="font-slant text-[22px] text-ink-2">{t("ofTotal", { total: entries.length })}</span>
+                  </p>
+                  <p className="mt-3 text-[15px] leading-snug">{t("consentText")}</p>
+                </>
+              ) : (
+                <p className="m-0 text-[17px] leading-snug" data-testid="roster-consents-later">
+                  {t("consentLater")}
+                </p>
+              )}
               <ConsentCopy orgId={orgId} teamId={teamId} />
             </section>
             <section aria-labelledby="bench">
@@ -176,7 +209,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                   {bench.map((m) => (
                     <li key={m.user_id} className="flex min-h-12 items-center justify-between gap-3 border-b border-rule text-[17px] font-medium">
                       {m.name}
-                      <span className="text-[13px] font-normal text-ink-2">{tr(`roles.${m.role}`)}</span>
+                      <span className="text-[15px] font-normal text-ink-2">{tr(`roles.${m.role}`)}</span>
                     </li>
                   ))}
                 </ul>

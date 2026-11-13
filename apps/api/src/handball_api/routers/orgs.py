@@ -4,8 +4,9 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, File, Query, Response, UploadFile, status
+from sqlalchemy import func, select
 
-from handball_api.models import Invitation, Organization
+from handball_api.models import Invitation, Organization, OrgMembership, VideoAsset
 from handball_api.routers.deps import AuthedDep, CtxDep, OrgDep, OrgScope
 from handball_api.schemas.common import ApiModel
 from handball_api.schemas.orgs import (
@@ -57,7 +58,18 @@ async def create_org(data: OrgCreate, auth: AuthedDep) -> OrgOut:
 
 @router.get("/orgs/{org_id}", response_model=OrgOut)
 async def get_org(scope: OrgDep) -> OrgOut:
-    return org_out(scope)
+    out = org_out(scope)
+    db = scope.ctx.db
+    videos = await db.scalar(
+        select(func.count(VideoAsset.id)).where(VideoAsset.organization_id == scope.org.id)
+    )
+    people = await db.scalar(
+        select(func.count(OrgMembership.user_id)).where(
+            OrgMembership.organization_id == scope.org.id
+        )
+    )
+    out.something_to_protect = bool(videos) or (people or 0) > 1
+    return out
 
 
 @router.patch("/orgs/{org_id}", response_model=OrgOut)

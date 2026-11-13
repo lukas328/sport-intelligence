@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
-import { xgLabel } from "@/lib/xg";
 import { linkClass, OwnRowMark, SectionHead } from "@/components/anlauf/blocks";
 import { Bundle, type GoalRun } from "@/components/anlauf/bundle";
 import { DiffBars, Series } from "@/components/anlauf/charts";
@@ -98,7 +97,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const names = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `${r.first_name} ${r.last_name}`]));
   const shirts = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, r.jersey_number]));
   const n = data.totals.matches;
-  const statement = seasonStatement(data.matches, data.totals.xg_coverage);
+  const statement = seasonStatement(data.matches, data.totals.xg_coverage, false) // no xG statements (UX test B07);
   const last = [...data.matches].sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0]!;
   const lastResult = matchStatement({ own: last.score_own, opp: last.score_opponent, opponent: last.opponent });
   const focus = focusMetric({ save_pct: data.totals.save_pct, shooting_pct: data.totals.shooting_pct, turnovers_per_match: data.totals.turnovers / n });
@@ -154,9 +153,11 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
       : lastResult
         ? tv(lastResult.headline.key.replace("voice.", "") as "won", lastResult.headline.params as never)
         : tv("neutralSeason");
-  const league = official.data?.linked ? [official.data.league, official.data.group_name].filter(Boolean).join(", ") : (team.data?.league ?? "");
+  const league = official.data?.linked ? official.data.league || official.data.group_name || "" : (team.data?.league ?? "");
   const season = `${t("title")} ${team.data?.current_season?.label ?? ""}`.trim();
-  const kick = league ? ts("kick", { season, league, n }) : ts("kickNoLeague", { season, n });
+  const kickBase = league ? ts("kick", { season, league, n }) : ts("kickNoLeague", { season, n });
+  // the rank always stands in the head when the table is known (UX test B41), in the title or here
+  const kick = ours?.rank && !(zoneNoun && ours.rank) ? `${kickBase} · ${ts("rankKick", { rank: ours.rank, points: ours.points ?? 0 })}` : kickBase;
   const goalsAgainstTotal = data.matches.reduce((sum, m) => sum + m.score_opponent, 0);
   const goalsForTotal = data.matches.reduce((sum, m) => sum + m.score_own, 0);
   const noVideo = data.matches.length - withVideo.length;
@@ -168,14 +169,14 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const top = [...data.players].filter((p) => p.goals > 0).sort((a, b) => b.goals - a.goals).slice(0, 5);
   const scenesHref = (chips: string[]) => `${base}/scenes?chips=${chips.join(",")}`;
   const ZONE_CHIP: Record<string, string> = { ra: "wing_right", la: "wing_left", rl: "back_left", rm: "back_centre", rr: "back_right", kr: "circle" };
-  const rows: { key: string; title: string; text: string; series: number[]; team: "own" | "opp"; count: number; href: string }[] = [];
+  const rows: { key: string; title: string; text: string; series: number[]; team: "own" | "opp"; count: number; href: string | null }[] = [];
   if (rep.conceded) {
     const c = rep.conceded;
     rows.push({ key: "conceded", title: ta("thing_conceded_zone", { zone: ta(`zoneFrom.${c.zone}` as "zoneFrom.ra") }), text: c.everyMatch ? ts("everyMatch", { n: c.value, of: c.of }) : ts("ofAll", { n: c.value, of: c.of }), series: c.series, team: "opp", count: c.value, href: scenesHref(["conceded", ...(ZONE_CHIP[c.zone] ? [ZONE_CHIP[c.zone]!] : [])]) });
   }
   if (rep.turnovers) {
     const tt = rep.turnovers;
-    rows.push({ key: "turnovers", title: ts("turnovers"), text: tt.outlier != null ? ts("turnoverOutlier", { opp: withVideo[tt.outlier]!.label, median: tt.median }) : ts("turnoverAround", { median: tt.median }), series: tt.series, team: "own", count: tt.total, href: scenesHref(["turnovers"]) });
+    rows.push({ key: "turnovers", title: ts("turnovers"), text: tt.outlier != null ? ts("turnoverOutlier", { opp: withVideo[tt.outlier]!.label, median: tt.median }) : ts("turnoverAround", { median: tt.median }), series: tt.series, team: "own", count: tt.total, href: null }); // from the report: no scenes behind them (ANLAUF 10, UX test B41)
   }
   if (rep.scored) {
     const c = rep.scored;
@@ -209,13 +210,17 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                     <div className="min-w-0 flex-1">
                       <h3 className="font-slant text-[22px] leading-tight md:text-2xl">{r.title}</h3>
                       <p className="mt-1 text-[17px] text-ink-2">{r.text}</p>
-                      <Link href={r.href} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center text-[15px]")}>
-                        {ta("scenes", { count: r.count })}
-                      </Link>
+                      {r.href ? (
+                        <Link href={r.href} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center text-[15px]")}>
+                          {ta("scenes", { count: r.count })}
+                        </Link>
+                      ) : (
+                        <p className="mt-2 text-[15px] text-ink-2">{ta("fromReport")}</p>
+                      )}
                     </div>
                     <figure className="m-0">
                       <Series values={r.series} team={r.team} label={ts("seriesLabel", { what: r.title, values: withVideo.map((m, i) => `${m.label} ${r.series[i]}`).join(", ") })} />
-                      <figcaption aria-hidden className="flex w-[132px] justify-between text-[11px] text-ink-2">
+                      <figcaption aria-hidden className="flex w-[132px] justify-between text-[14px] text-ink-2">
                         {withVideo.map((m) => (
                           <span key={m.id} className="truncate">
                             {m.label}
@@ -257,7 +262,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
               <SectionHead title={ts("scorers")} note={ts("scorersNote", { n })} />
               <table className="w-full border-collapse text-[17px]" data-testid="season-players">
                 <thead>
-                  <tr className="border-b-2 border-ink text-left text-[13px] text-ink-2">
+                  <tr className="border-b-2 border-ink text-left text-[15px] text-ink-2">
                     <th scope="col" className="py-2 font-semibold">{ts("colNumberName")}</th>
                     <th scope="col" className="py-2 text-right font-semibold max-sm:hidden">{ts("colMatches")}</th>
                     <th scope="col" className="py-2 text-right font-semibold">{ts("colGoals")}</th>
@@ -270,7 +275,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                       <th scope="row" className="py-3 text-left font-normal">
                         <b className="font-num mr-3 inline-block w-8 text-xl text-club-text">{shirts[p.player_id] ?? ""}</b>
                         {staff ? (
-                          <Link href={`${base}/players/${p.player_id}`} className="hover:underline hover:underline-offset-4">
+                          <Link href={`${base}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                             {names[p.player_id] ?? t("unknownPlayer")}
                           </Link>
                         ) : (
@@ -309,7 +314,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
               <SectionHead title={ts("table")} note={official.data?.synced_at ? ts("tableNote", { when: format.relativeTime(new Date(official.data.synced_at), new Date()) }) : undefined} />
               <table className="w-full border-collapse text-[15px]" data-testid="season-standing">
                 <thead>
-                  <tr className="text-left text-[13px] text-ink-2">
+                  <tr className="text-left text-[15px] text-ink-2">
                     <th scope="col" className="py-2 font-semibold">{ts("colRank")}</th>
                     <th scope="col" className="py-2 text-right font-semibold">{ts("colGames")}</th>
                     <th scope="col" className="py-2 text-right font-semibold">{ts("colDiff")}</th>
@@ -345,15 +350,15 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   const before = [...data.matches].filter((m) => m.opponent === f.opponent_name).sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0];
                   return (
                     <li key={f.id} className="flex min-h-11 items-center justify-between gap-3 border-t border-rule py-2.5 text-[15px] first:border-t-0">
-                      <Link href={`/app/${orgId}/matches/${f.id}`} className="hover:underline hover:underline-offset-4">
+                      <Link href={`/app/${orgId}/matches/${f.id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                         {f.opponent_name}, {format.dateTime(new Date(f.kickoff_at), { weekday: "long" })}
                       </Link>
                       {before ? (
-                        <Link href={`/app/${orgId}/matches/${before.match_id}`} className={cn(linkClass, "text-[13px]")}>
+                        <Link href={`/app/${orgId}/matches/${before.match_id}`} className={cn(linkClass, "text-[15px]")}>
                           {ts("lastAgainst", { own: before.score_own, opp: before.score_opponent })}
                         </Link>
                       ) : (
-                        <span className="text-[13px] text-ink-2">{ts("noMatchYet")}</span>
+                        <span className="text-[15px] text-ink-2">{ts("noMatchYet")}</span>
                       )}
                     </li>
                   );
@@ -394,7 +399,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                       <span className="min-w-0">
                         <span className="block font-semibold group-hover:text-accent">{c.label}</span>
                         {c.focus && (
-                          <span className="mt-0.5 mb-1.5 block w-fit bg-attn px-2 py-[3px] text-[13px] font-extrabold text-attn-ink">{tv("focus")}</span>
+                          <span className="mt-0.5 mb-1.5 block w-fit bg-attn px-2 py-[3px] text-[15px] font-extrabold text-attn-ink">{tv("focus")}</span>
                         )}
                         <span className="block text-sm text-muted">{c.refText}</span>
                       </span>
@@ -482,8 +487,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                     <th scope="col">{t("shootingPct")}</th>
                     <th scope="col">{t("savePct")}</th>
                     <th scope="col">{t("turnovers")}</th>
-                    <th scope="col">{t("xg")}</th>
-                    <th scope="col">{t("xgAgainst")}</th>
                     {sevenM && <th scope="col">{t("sevenM")}</th>}
                   </tr>
                 </thead>
@@ -502,8 +505,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                       <td>{pct(m.shooting_pct)}</td>
                       <td>{pct(m.save_pct)}</td>
                       <td>{m.turnovers}</td>
-                      <td>{xgLabel(m)}</td>
-                      <td>{xgLabel({ xg: m.xg_against, xg_coverage: m.xg_against_coverage ?? null })}</td>
                       {sevenM && (
                         <td>
                           {m.seven_m[0]}/{m.seven_m[1]}
@@ -514,7 +515,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-muted">{t("xgNote")}</p>
           </section>
     
         </div>
@@ -587,10 +587,10 @@ function TrendChart({ rows, label, day, width = 1100 }: { rows: Row[]; label: st
           <g key={r.match_id}>
             <title>{`${r.opponent} ${r.score_own}:${r.score_opponent}`}</title>
             <rect x={x} y={y} width={bw} height={bh} rx={2} fill={fill} />
-            <text x={x + bw / 2} y={d >= 0 ? y - 6 : y + bh + 14} fontSize="12" fontWeight={700} textAnchor="middle" fill="var(--foreground)">
+            <text x={x + bw / 2} y={d >= 0 ? y - 6 : y + bh + 14} fontSize="14" fontWeight={700} textAnchor="middle" fill="var(--foreground)">
               {d > 0 ? `+${d}` : d}
             </text>
-            <text x={x + bw / 2} y={h - 8} fontSize="12" textAnchor="middle" fill="var(--muted)">
+            <text x={x + bw / 2} y={h - 8} fontSize="14" textAnchor="middle" fill="var(--muted)">
               {day(r.kickoff_at)}
             </text>
           </g>

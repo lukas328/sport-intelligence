@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { MenuContent, MenuItem, MenuLabel, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
+import { headName } from "@/lib/own-name";
 import { cn } from "@/lib/utils";
 import { useShell } from "./context";
 
@@ -13,11 +14,16 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
   const { teams, team, org, orgs, setTeam } = useShell();
   const router = useRouter();
   const label = team ? team.name : t("shell.noTeam");
+  // in the phone bar: without additions in brackets, and a line may break after «/» or «-»
+  // (UX test A01: «SG Wädenswil/Horgen», never «S / G.»)
+  const short = compact ? headName(label) : label;
   const sub = team?.season ?? null;
   if (teams.length <= 1 && orgs.length <= 1) {
     return (
       <div className={cn("min-w-0", compact ? "px-1" : "px-2")}>
-        <p className="truncate text-sm font-semibold">{label}</p>
+        <p className={cn("font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight" : "truncate text-sm")} title={label}>
+          {short}
+        </p>
         {sub && !compact && <p className="truncate text-xs text-muted">{sub}</p>}
       </div>
     );
@@ -26,14 +32,15 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
     <MenuRoot>
       <MenuTrigger
         className={cn(
-          "flex w-full min-w-0 items-center gap-2 text-left hover:bg-surface",
+          "flex min-h-11 w-full min-w-0 items-center gap-2 text-left hover:bg-surface",
           compact ? "px-1 py-1" : "px-2 py-1.5 border border-border",
         )}
         aria-label={`${t("shell.switchTeam")}: ${label}`}
         data-testid="team-switcher"
       >
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold">{label}</span>
+          {/* on the phone two lines rather than «H…» (UX test H09) */}
+          <span className={cn("block font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight" : "truncate text-sm")}>{short}</span>
           {sub && !compact && <span className="block truncate text-xs text-muted">{sub}</span>}
         </span>
         <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted" />
@@ -48,7 +55,10 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
               setTeam(x.id);
               // stay on the same kind of page for the new team
               const here = window.location.pathname;
-              router.push(team && here.includes(`/teams/${team.id}`) ? here.replace(team.id, x.id) : here);
+              // a page of one match or collection belongs to the old team: go to the new team's
+              // matches (UX test B30)
+              const own = /\/app\/[^/]+\/(matches|collections|opponents|playlists|presentations)\//.test(here);
+              router.push(team && here.includes(`/teams/${team.id}`) ? here.replace(team.id, x.id) : own ? `/app/${org.id}/teams/${x.id}/matches` : here);
               router.refresh();
             }}
           >
@@ -72,3 +82,4 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
     </MenuRoot>
   );
 }
+

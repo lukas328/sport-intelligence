@@ -9,8 +9,6 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await page.getByLabel("Vereinsname").fill("HC Elf");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 3");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
@@ -30,9 +28,15 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await expect(page.getByTestId("marks-log").getByRole("listitem")).toHaveCount(2);
   await expect(page.getByTestId("marks-log").getByRole("listitem").first()).toContainText("Gute Aktion");
   await expect(page.getByText("Alles hochgeladen")).toBeVisible({ timeout: 15_000 });
+  // after a reload the marks and the score are still there (UX test B03)
+  await page.reload();
+  await expect(page.getByTestId("marks-log").getByRole("listitem")).toHaveCount(2);
+  await expect(page.getByRole("button", { name: /^Tor wir/ })).toContainText("1 bisher");
   await expectAccessible(page);
   await page.goto(`/app/${orgId}/matches/${match.id}`);
   await page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  // the marks sit behind «Mehr zum Spiel» (UX test B08)
+  await page.getByTestId("game-more").locator(":scope > summary").click();
   await page.getByTestId("marks-panel").getByText(/Am Spieltag gemerkt \(2\)/).click();
   await expect(page.getByTestId("marks-panel")).toContainText("noch nicht mit dem Video abgeglichen");
 

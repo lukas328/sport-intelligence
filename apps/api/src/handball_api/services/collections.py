@@ -268,6 +268,35 @@ async def _native(ctx: Ctx, collection_id: uuid.UUID) -> Collection:
     return row  # type: ignore[no-any-return]
 
 
+_ZONE_WORDS = {
+    "wing_right": "über rechts aussen",
+    "wing_left": "über links aussen",
+    "back_left": "aus dem Rückraum links",
+    "half_left": "aus dem Rückraum links",
+    "back_centre": "aus dem Rückraum Mitte",
+    "half_centre": "aus dem Rückraum Mitte",
+    "back_right": "aus dem Rückraum rechts",
+    "half_right": "aus dem Rückraum rechts",
+    "circle_left": "vom Kreis",
+    "circle_centre": "vom Kreis",
+    "circle_right": "vom Kreis",
+}
+
+
+def _event_title(event: Event) -> str | None:
+    """A scene made from a goal says what it is: «7:46 Gegentor über rechts aussen» (UX test
+    B15; the shared page and the collection show it instead of «Szene»)."""
+    if event.type != "shot" or event.outcome != "goal":
+        return None
+    clock = ""
+    if event.clock_s is not None:
+        s = int(event.clock_s)
+        clock = f"{s // 60}:{s % 60:02d} "
+    what = "Gegentor" if event.side == "opponent" else "Tor"
+    zone = _ZONE_WORDS.get(event.shot_zone or "")
+    return f"{clock}{what}{f' {zone}' if zone else ''}"
+
+
 async def _scene_clip(ctx: Ctx, team_id: uuid.UUID, item: dict[str, Any]) -> uuid.UUID:
     """The clip of a scene entry: given, or made from a match window or an event."""
     if item.get("clip_id"):
@@ -297,7 +326,7 @@ async def _scene_clip(ctx: Ctx, team_id: uuid.UUID, item: dict[str, Any]) -> uui
         match_id=match.id,
         start_ms=start,
         end_ms=end,
-        title=item.get("title"),
+        title=item.get("title") or (_event_title(event) if event is not None else None),
         source=source,
         source_ref=event.id if event else None,
         created_by_id=ctx.user_id,
@@ -386,12 +415,30 @@ async def delete(ctx: Ctx, collection_id: uuid.UUID) -> None:
     await audit.record(ctx, "collection.deleted", target_type="collection", target_id=c.id)
 
 
-async def from_match(ctx: Ctx, team_id: uuid.UUID, match_id: uuid.UUID, title: str) -> Collection:
+async def from_match(
+    ctx: Ctx,
+    team_id: uuid.UUID,
+    match_id: uuid.UUID,
+    title: str,
+    given: list[dict[str, Any]] | None = None,
+) -> Collection:
     """'Fürs Team zusammenstellen': a draft from the three things of a match, the scenes behind
-    each, for the coach to trim."""
+    each, for the coach to trim. With `given` (a note per thing and its scenes, as the app shows
+    the things) those are taken, each scene once (UX test B16)."""
     match = await ctx.db.get(Match, match_id)
     if match is None or match.team_id != team_id:
         raise ProblemError(404, "not-found", "Match not found")
+    if given is not None:
+        seen: set[Any] = set()
+        kept: list[dict[str, Any]] = []
+        for item in given:
+            key = item.get("event_id") or item.get("clip_id")
+            if item.get("kind") == "scene" and key is not None:
+                if key in seen:
+                    continue
+                seen.add(key)
+            kept.append(item)
+        return await create(ctx, team_id, title, kept, draft=True, match_id=match_id)
     things = (await insights(ctx, match_id))["insights"][:3]
     items: list[dict[str, Any]] = []
     for thing in things:

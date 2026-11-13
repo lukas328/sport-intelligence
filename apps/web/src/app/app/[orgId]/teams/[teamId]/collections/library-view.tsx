@@ -96,7 +96,7 @@ function Row({ href, title, meta }: { href: string; title: string; meta: (string
       <Link href={href} className="group flex items-center gap-3 py-3">
         <span className="min-w-0 flex-1">
           <span className="block truncate font-medium group-hover:underline group-hover:underline-offset-4">{title}</span>
-          <span className="block truncate text-[0.8125rem] text-muted">{meta.filter(Boolean).join(" · ")}</span>
+          <span className="block truncate text-[0.9375rem] text-muted">{meta.filter(Boolean).join(" · ")}</span>
         </span>
         <ArrowRight aria-hidden className="size-4 shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
       </Link>

@@ -267,6 +267,60 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   plane is calibrated); a detector box per person would be exact. «Gegner» as an answer needs
   an API to mark a track as not ours; until then «Weiss nicht».
 
+## UX test round 1, second delivery (2026-11-13)
+
+- **Q-BILL-TRIAL Trial at sign-up (business rule, Lukas to confirm).** Checked 2026-11-13: with
+  `billing_enforce` on, a new club started on Free (`analysis: false`, no `tracking`), so its
+  first video was stored but never analysed, without a word; the 30 days of `trial_days` began
+  only through Stripe checkout or `ops.extend_trial`. Built: creating a club starts the Team
+  plan's trial from `packages/plans/plans.json` at once, without payment details
+  (`services/orgs.py` `create_org`, switch `trial_on_signup` in `core/config.py`, default on;
+  `trial_used` is set, so a later checkout starts no second trial). When it ends,
+  `billing.effective_plan` falls back to Free; nothing is deleted. Test
+  `test_billing.py::test_new_club_starts_the_trial_and_its_first_video_is_analysed`. *Open:*
+  confirm the rule (trial without card for every new club) and the wording «30 Tage alles
+  gratis. Danach entscheidest du.»
+- **Q-AUTH-2b Two-factor reminder later (Lukas to confirm).** The obligation itself is unchanged
+  (Q-AUTH-2). Only the reminder moved: no banner on every page; it appears once there is
+  something to protect (a first video uploaded or a second person invited), as a quiet task on
+  the team page and an entry with a dot in the account menu, dismissible for seven days.
+- **Q-AUTH-OWNER Who does a team belong to? (Lukas to decide).** Saving a team from the public
+  entry with one e-mail address makes that person its first administrator. That keeps the entry
+  short, but a stranger could take a team before its real coach. A team that is already in the
+  app is not handed over: saving sends an access request to its administrators. Options to check
+  ownership: (a) «Das ist nicht dein Team?» with a hand-over by the support, (b) confirmation via
+  the address the federation has on file for the team or club, (c) a second person of the club
+  confirms. Built for now, the minimum only: on the «already in the app» answer a visible link
+  «Dieses Team gehört mir, aber jemand anderes hat es schon» opens a prepared mail to the support
+  (address from the configuration), next to the access request to the existing administrators.
+  No new verification procedure.
+- **Q-AUTH-LINK Sign-in link valid for a day (Lukas to confirm).** The e-mail link from the
+  entry and from «Link schicken» was valid for 15 minutes; coaches read such mails hours later and
+  then had to start over (UX test round 2, N15). Now 24 hours, still single use and void once
+  used (setting `magic_link_ttl_minutes`). Trade-off: a mailbox someone else can read stays a way
+  in for longer. Alternative if that is too long: a six-digit code next to the link.
+- **Q-VIDEO-PARTS Two files for one match (Lukas to decide, product).** Many coaches stop the
+  recording at half-time. Today a match takes several main files, all stored and playable, but
+  the match's timeline and the whole analysis (three things, scenes, Prüfen, positions) use only
+  the first one (`timeline_video`): the second half in a second file is not analysed. The app
+  says so where a second file is added and in the upload tips; the website says the same
+  (UX test round 2, N28). To merge two files into one match: effort (one timeline across files
+  with an offset per file, or joining the files before the analysis), order (by upload or by the
+  recording time in the file, with a way to swap), the time axis (the break between the files is
+  unknown: from the throw-off of the second half, which Prüfen already asks for). Until then: one
+  file per match is the recommendation.
+
+## UX test round 3 (2026-11-13)
+
+- **Q-OLD-AREAS Areas from the earlier product (Lukas to decide).** Spielzüge (with its own play
+  editor), the opponent profile with its manual player list, «Zum Zeigen» (presentations) and the
+  old playlists still work and are reachable (Szenen side links, the match «Mehr» menu, their
+  addresses). Since round 3 each says in one line that it comes from the earlier version and that
+  new things come under Szenen and Spiele, and Spielzüge no longer shows the second tab row (UX
+  test A07). Nothing was deleted. *Open:* rebuild them in the new look (plays on the tactics
+  board, the opponent from the federation's data), fold them into Sammlungen, or retire them
+  with a data export.
+
 ## Website (docs/site/KONZEPT.md, 2026-11-12)
 - **Q-SITE-1 Prices on the website.** The site shows the plan table of `packages/plans`
   (CHF 0 / 39 / 199, yearly 10 monthly fees) with a visible line «Die Preise sind noch nicht
@@ -293,10 +347,11 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   support action (`services/ops.py extend_trial`, lines 154 to 164); a new club gets none
   automatically. The site names «30 Tage gratis» only on the pricing page next to the plan, with
   «Die Preise sind noch nicht endgültig»; the start page just says «Kostenlos starten».
-  *Open:* the app session checks whether new clubs get the 30 days automatically.
+  *Update 2026-11-13:* the app now starts the trial for every new club (Q-BILL-TRIAL below);
+  the site keeps «30 Tage» on the pricing page only until Lukas confirms the rule.
 - **Q-SITE-8 Mail when the three things are ready.** The site says «Du bekommst eine Mail, wenn
   die drei Dinge da sind» again; the app session is building that mail and the bell on phones
-  (2026-11-13). *Open:* if it is not there, the sentence comes out again.
+  (2026-11-13). *Answered 2026-11-13:* mail built in the app and confirmed in the UX test.
 - **Q-SITE-9 Team field and colour.** Answered: «Wie heisst dein Team?» sends a GET to
   `{NEXT_PUBLIC_APP_URL}/einstieg?q=…&farbe=…&lang=…`, «Kostenlos starten» to
   `/einstieg?farbe=…&lang=…`; `farbe` (blau, rot, gelb, schwarz, weiss, gruen, orange, violett)

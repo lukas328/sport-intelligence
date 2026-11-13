@@ -117,11 +117,20 @@ export function Series({ values, team, label }: { values: readonly number[]; tea
 
 /** Goal difference per match: wins up in the club colour, losses down as a dashed ink outline. */
 export function DiffBars({ matches, width = 700, label }: { matches: readonly { label: string; diff: number }[]; width?: number; label: string }) {
-  const H = 190;
-  const mid = 96;
-  const U = 7;
+  // the scale fits the biggest difference, the height the bars and their numbers on both sides:
+  // a −20 keeps its bar and its number inside the picture (UX test A10)
+  const most = Math.max(0, ...matches.map((m) => m.diff));
+  const least = Math.max(0, ...matches.map((m) => -m.diff));
+  const U = Math.min(7, 84 / Math.max(1, most, least));
+  const mid = Math.max(30, most * U + 32);
+  const H = mid + Math.max(30, least * U + 32);
   const step = width / Math.max(1, matches.length);
   const bw = Math.min(64, step - 22);
+  // a name never runs into its neighbour (UX test H14): cut to the slot, with a point
+  const fit = (s: string) => {
+    const room = Math.floor((step - 8) / 8);
+    return s.length <= room ? s : `${s.slice(0, Math.max(3, room - 1))}.`;
+  };
   return (
     <svg viewBox={`0 0 ${width} ${H}`} role="img" aria-label={label} className="block w-full">
       <line x1={0} x2={width} y1={mid} y2={mid} stroke="var(--ink)" strokeWidth={1.5} />
@@ -145,8 +154,9 @@ export function DiffBars({ matches, width = 700, label }: { matches: readonly { 
             <text x={x + bw / 2} y={up ? mid - h - 8 : mid + h + 22} textAnchor="middle" className="font-num" fill="var(--ink)" style={{ fontSize: 20 }}>
               {signed(v)}
             </text>
-            <text x={x + bw / 2} y={up ? mid + 20 : mid - 10} textAnchor="middle" fill="var(--ink-2)" style={{ font: "600 13px var(--font-sans)" }}>
-              {m.label}
+            <text x={x + bw / 2} y={up ? mid + 20 : mid - 10} textAnchor="middle" fill="var(--ink-2)" style={{ font: "600 14px var(--font-sans)" }}>
+              <title>{m.label}</title>
+              {fit(m.label)}
             </text>
           </g>
         );

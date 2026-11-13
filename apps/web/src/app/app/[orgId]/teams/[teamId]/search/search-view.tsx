@@ -192,7 +192,7 @@ export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: strin
     <div className="space-y-3">
       {/* labelled groups; on phones each group is one scrolling row */}
       <div className="scrollbar-none -mx-1 flex items-center gap-1 overflow-x-auto px-1 sm:flex-wrap" role="group" aria-label={t("types")}>
-        <span className="mr-1 shrink-0 text-[0.8125rem] font-semibold text-muted">{t("types")}</span>
+        <span className="mr-1 shrink-0 text-[0.9375rem] font-semibold text-muted">{t("types")}</span>
         {TYPES.map((ty) => (
           <Chip key={ty} on={(filter.types ?? []).includes(ty)} onClick={() => setFilter((f) => ({ ...f, types: toggle(f.types, ty) }))}>
             {t(`type_${ty}`)}
@@ -200,7 +200,7 @@ export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: strin
         ))}
       </div>
       <div className="scrollbar-none -mx-1 flex items-center gap-1 overflow-x-auto px-1 sm:flex-wrap" role="group" aria-label={t("outcomes")}>
-        <span className="mr-1 shrink-0 text-[0.8125rem] font-semibold text-muted">{t("outcomes")}</span>
+        <span className="mr-1 shrink-0 text-[0.9375rem] font-semibold text-muted">{t("outcomes")}</span>
         {OUTCOMES.map((o) => (
           <Chip key={o} on={(filter.outcomes ?? []).includes(o)} onClick={() => setFilter((f) => ({ ...f, outcomes: toggle(f.outcomes, o) }))}>
             {te(o)}
@@ -243,7 +243,7 @@ export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: strin
             return (
               <li key={`${h.kind}-${h.id}`} className={cn("py-2.5", first && i > 0 && "mt-4 border-t-2 border-t-foreground/30")}>
                 {first && (
-                  <p className="pb-1.5 text-[0.8125rem] font-semibold text-muted">
+                  <p className="pb-1.5 text-[0.9375rem] font-semibold text-muted">
                     {format.dateTime(new Date(h.kickoff_at), { dateStyle: "medium" })} · {h.match_label}
                   </p>
                 )}

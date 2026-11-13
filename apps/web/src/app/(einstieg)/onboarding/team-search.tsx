@@ -39,6 +39,8 @@ export function OfficialTeamSearch({
   const [sent, setSent] = useState<string | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
   const [busy, setBusy] = useState(false);
+  // only the chosen team's button turns, a sentence says what is being fetched (UX test B24)
+  const [claiming, setClaiming] = useState<number | null>(null);
   const [unfolded, setUnfolded] = useState<number[]>([]);
 
   // search as the coach types, a moment after the last key
@@ -60,12 +62,14 @@ export function OfficialTeamSearch({
 
   async function claim(team: OfficialTeam, message?: string) {
     setBusy(true);
+    setClaiming(team.official_id);
     setError(null);
     const r = await api.POST("/v1/official/teams/{official_id}/claim", {
       params: { path: { official_id: team.official_id } },
       body: { club_id: team.club.id, ...(message ? { message } : {}) },
     });
     setBusy(false);
+    setClaiming(null);
     if (r.error || !r.data) return setError(errorKey(r.error));
     if (r.data.status === "access_requested") {
       setActing(null);
@@ -175,16 +179,23 @@ export function OfficialTeamSearch({
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{team.name}</span>
-                          <span className="block text-sm text-muted">{[team.league, team.group_name].filter(Boolean).join(" · ")}</span>
+                          <span className="block text-sm text-muted">{team.league || team.group_name}</span>
                         </span>
                         {team.status === "member" && team.organization_id && team.team_id ? (
                           <Link className={buttonClass("secondary", "sm")} href={`/app/${team.organization_id}/teams/${team.team_id}`}>
                             {t("open")}
                           </Link>
                         ) : team.status === "available" ? (
-                          <Button size="sm" variant="secondary" loading={busy && open == null} onClick={() => void claim(team)} data-testid="claim">
-                            {t("claim")}
-                          </Button>
+                          <span className="flex flex-col items-end gap-1">
+                            <Button size="sm" variant="secondary" loading={claiming === team.official_id} disabled={claiming != null && claiming !== team.official_id} onClick={() => void claim(team)} data-testid="claim">
+                              {t("claim")}
+                            </Button>
+                            {claiming === team.official_id && (
+                              <span className="text-[15px] text-ink-2" role="status">
+                                {t("claiming")}
+                              </span>
+                            )}
+                          </span>
                         ) : (
                           // in the app already: its people decide
                           <span className="flex flex-wrap gap-2">

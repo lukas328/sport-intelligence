@@ -83,6 +83,9 @@ class SearchHit(ApiModel):
     start_ms: int | None
     end_ms: int | None
     t_ms: int | None
+    clock_s: float | None = Field(
+        default=None, description="the match clock of an event, where it is known"
+    )
     type: str | None = None
     side: str | None = None
     outcome: str | None = None

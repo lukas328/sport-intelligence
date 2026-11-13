@@ -57,7 +57,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   // the coach's steps (club, team, squad, invite) are not the player's
   await expect(page.getByText(/Schritt 1 von/)).toHaveCount(0);
 
-  // an available team is taken over: step 2 «Das seid ihr, oder?» shows what came with it
+  // an available team is taken over: step 2 «Ist das dein Team?» shows what came with it
   const claimedBase = `**/v1/orgs/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}`;
   const accepted: string[] = [];
   let patched: unknown = null;
@@ -79,11 +79,11 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
     return json(route, {});
   });
   await page.getByTestId("official-team").filter({ hasText: "HC Seeblick Herren 1" }).getByTestId("claim").click();
-  await expect(page.getByRole("heading", { level: 1, name: "Das seid ihr, oder?" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Ist das dein Team?" })).toBeVisible();
   await expect(page.getByText("Schritt 2 von 2")).toBeVisible();
   const done = page.getByTestId("claim-done");
   await expect(done.getByRole("heading", { name: "HC Seeblick Herren 1" })).toBeVisible();
-  await expect(done).toContainText("3 Spielerinnen und Spieler, mit Nummern");
+  await expect(done).toContainText("3 Personen im Kader, mit Nummern");
   await expect(done).toContainText("2 Spiele im Spielplan, 1 gespielt");
   await expect(done).toContainText("Tabelle: Rang 2");
   // the preview: the last match's head and two squad rows
@@ -108,8 +108,6 @@ async function coachWithTeam(page: Page) {
   await page.getByLabel("Vereinsname").fill("HC Seeblick");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("Herren 1");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/app\/[^/]+\/teams\/[^/?#]+/);
   const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
@@ -133,7 +131,9 @@ test("suggestion inbox: squad with a doubled number, a report to import, the tab
 
   await page.goto(`/app/${orgId}/teams/${teamId}/official`);
   await expect(page.getByRole("heading", { level: 1, name: "Abgleich mit handball.ch" })).toBeVisible();
-  await expect(page.getByText("Herren 3. Liga · Gruppe 2")).toBeVisible();
+  // the league, not the group (UX test A04)
+  await expect(page.getByText("Herren 3. Liga").first()).toBeVisible();
+  await expect(page.getByText("Gruppe 2")).toHaveCount(0);
 
   // the squad: players with games are ticked, the one without is not; #7 is there twice
   const squad = page.getByTestId("official-squad");

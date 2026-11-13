@@ -11,7 +11,7 @@ from handball_metrics.model import Event, EventType, Side
 from handball_metrics.xg import VERSION as XG_VERSION
 from handball_metrics.xg import expected_goal
 
-METRICS_VERSION = "0.5.0"  # bump on any change of definitions: invalidates stats caches
+METRICS_VERSION = "0.6.0"  # bump on any change of definitions: invalidates stats caches
 
 SUSPENSION_S = 120
 # GSAx needs positions for most saves and for most goals: overlay, tracking and report goals often
@@ -187,7 +187,9 @@ def _team_block(
     theirs = [e for e in events if e.side is side.other]
     # goals alone (score overlay, throw-off heuristic) say nothing about shooting or saving: the
     # ratios need at least one recorded miss, save, post or block in the match
-    attempts_known = any(e.is_shot and e.outcome != "goal" for e in events)
+    # per direction: our shooting needs one of our misses/saved shots, our saving one of theirs
+    shooting_known = any(e.is_shot and e.outcome != "goal" for e in mine)
+    saving_known = any(e.is_shot and e.outcome != "goal" for e in theirs)
     shots = [e for e in mine if e.is_shot]
     on_target_shots = [e for e in shots if e.outcome != "blocked"]
     goals = [e for e in shots if e.outcome == "goal"]
@@ -221,9 +223,9 @@ def _team_block(
         "shots_blocked": len(shots) - len(on_target_shots),
         "misses": sum(e.outcome == "miss" for e in shots),
         "posts": sum(e.outcome == "post" for e in shots),
-        "shooting_pct": _ratio(len(goals), len(on_target_shots)) if attempts_known else None,
+        "shooting_pct": _ratio(len(goals), len(on_target_shots)) if shooting_known else None,
         "saves": len(saves),
-        "save_pct": _ratio(len(saves), len(saves) + len(goals_against)) if attempts_known else None,
+        "save_pct": _ratio(len(saves), len(saves) + len(goals_against)) if saving_known else None,
         "goals_against": len(goals_against),
         "turnovers": len(turnovers),
         "turnovers_by_type": dict(Counter(e.turnover_type or "other" for e in turnovers)),
@@ -251,6 +253,12 @@ def _team_block(
         # goals of the shots with xG: the like-for-like figure to set against `xg`
         "xg_goals": sum(e.outcome == "goal" for e, _ in with_xg),
         "xg_coverage": _ratio(len(xgs), len(on_target_shots)),
+        # what the sources recorded at all: a figure that was never recorded is shown empty, not 0
+        "known": {
+            "shooting": shooting_known,
+            "saving": saving_known,
+            "turnovers": any(e.type is EventType.TURNOVER for e in events),
+        },
     }
 
 
@@ -504,6 +512,8 @@ def _timeline(events: list[Event]) -> dict[str, Any]:
     run_len = 0
     best: dict[Side, tuple[int, float | None]] = {Side.OWN: (0, None), Side.OPPONENT: (0, None)}
     run_start: float | None = None
+    # goals without a time (a paper report) have no order: no runs, no droughts, no course
+    timed = all(e.clock_s is not None or e.t_ms is not None for e in ordered if e.is_goal)
     last_own: float = 0.0
     longest_drought = (0.0, 0.0, 0.0)  # seconds, from, to
     for e in ordered:
@@ -524,7 +534,16 @@ def _timeline(events: list[Event]) -> dict[str, Any]:
             run_side, run_len, run_start = e.side, 1, t
         if run_len > best[e.side][0]:
             best[e.side] = (run_len, run_start)
+    if not timed:
+        return {
+            "timed": False,
+            "score": [points[0]],
+            "final": {"own": own, "opp": opp},
+            "best_run": {s.value: {"goals": 0, "from_s": None} for s in best},
+            "longest_own_drought_s": {"seconds": 0.0, "from_s": 0.0, "to_s": 0.0},
+        }
     return {
+        "timed": True,
         "score": points,
         "final": {"own": own, "opp": opp},
         "best_run": {s.value: {"goals": n, "from_s": start} for s, (n, start) in best.items()},

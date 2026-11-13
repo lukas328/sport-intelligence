@@ -1034,6 +1034,13 @@ async def test_daily_tick_syncs_and_imports_reports(
     api = await coach(make_api)
     c = await claim(api)
     token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    # the recorded fixtures carry real dates: a game of the last days (10 Nov 2026 fell into the
+    # report window from that day on) has no recorded report yet. The importer rightly waits for
+    # it; here it waits a day, so the first tick does not depend on today's date
+    await owner_conn.execute(
+        "UPDATE matches SET official_report_retry_at = now() + interval '1 day' "
+        "WHERE kickoff_at > now() - interval '7 days' AND official_game_id <> 509192"
+    )
     r = await api.http.post("/internal/official/sync", headers=token)
     assert r.json() == {
         "teams": 0,

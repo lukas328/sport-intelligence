@@ -106,7 +106,7 @@ export function OfficialInbox({ orgId, teamId }: { orgId: string; teamId: string
 
   if (link.isPending) return null;
   const l = link.data;
-  const header = <PageHeader eyebrow={[t("eyebrow"), ...(l?.linked ? [l.league, l.group_name] : [])].filter(Boolean).join(" · ")} title={t("title")} />;
+  const header = <PageHeader eyebrow={[t("eyebrow"), ...(l?.linked ? [l.league || l.group_name] : [])].filter(Boolean).join(" · ")} title={t("title")} />;
   if (!l?.linked)
     return (
       <div className="space-y-6">

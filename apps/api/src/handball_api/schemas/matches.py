@@ -226,6 +226,9 @@ class MatchSummary(ApiModel):
     opponent_color: str | None = Field(
         default=None, description="the opponent's colour for the kit chip; null while unknown"
     )
+    has_report: bool = Field(
+        default=False, description="events from a match report (handball.ch or paper) exist"
+    )
 
 
 class UploadCreate(ApiModel):
@@ -543,6 +546,7 @@ class GoalRunOut(ApiModel):
     team: Literal["own", "opp"]
     minute: float | None
     number: int | None
+    player_id: uuid.UUID | None = None
     zone: str | None = Field(description="la, ra, rl, rm, rr, kr, m7 or gs")
     run: list[tuple[float, float]] = Field(
         description="the scorer's way before the shot, half court (goal at the top, metres); "

@@ -324,10 +324,10 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           </CtlButton>
           <CtlButton label={t("back5")} onClick={() => seekBy(-5)}>
             <RotateCcw className="size-4" />
-            <span className="text-[0.6875rem] font-semibold">5</span>
+            <span className="text-[0.875rem] font-semibold">5</span>
           </CtlButton>
           <CtlButton label={t("fwd5")} onClick={() => seekBy(5)}>
-            <span className="text-[0.6875rem] font-semibold">5</span>
+            <span className="text-[0.875rem] font-semibold">5</span>
             <RotateCw className="size-4" />
           </CtlButton>
           <CtlButton label={t("frameBack")} onClick={() => step(-1)} className="hidden sm:inline-grid">

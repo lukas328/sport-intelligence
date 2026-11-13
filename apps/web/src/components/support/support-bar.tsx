@@ -81,12 +81,12 @@ export function FeedbackDialog({ orgId, open, onOpenChange, chat }: { orgId: str
         <form onSubmit={submit} className="space-y-4">
           {error && <Alert>{t("failed")}</Alert>}
           <div className="space-y-1">
-            <label className="block text-[0.8125rem] font-medium" htmlFor="feedback-message">
+            <label className="block text-[0.9375rem] font-medium" htmlFor="feedback-message">
               {t("message")}
             </label>
             <textarea id="feedback-message" name="message" required minLength={3} maxLength={4000} rows={4} className={cn(control, "min-h-24")} />
           </div>
-          <label className="block text-[0.8125rem] font-medium">
+          <label className="block text-[0.9375rem] font-medium">
             {t("screenshot")}
             <FileField name="shot" accept="image/png" className="mt-1" button={tf("choose")} empty={tf("none")} />
           </label>

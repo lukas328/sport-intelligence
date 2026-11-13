@@ -168,6 +168,8 @@ def db_settings(test_db: str) -> Settings:
         rate_limit_backend="memory",
         web_base_url="http://web.test",
         cors_origins=["http://web.test"],
+        # the plan tests start from Free; the trial at sign-up has its own test
+        trial_on_signup=False,
     )
 
 

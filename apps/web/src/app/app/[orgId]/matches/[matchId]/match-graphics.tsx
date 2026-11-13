@@ -55,11 +55,11 @@ export function MatchCamera({ orgId, matchId, graphics, oppName }: { orgId: stri
         <SectionHead title={<span id="camera-title">{t("cameraTitle")}</span>} note={goal ? clockOf(goal.minute) : undefined} action={goal ? <AttnTag>{label}</AttnTag> : undefined} />
         {eventId && <SceneCamera key={eventId} orgId={orgId} matchId={matchId} eventId={eventId} label={label} view="camL" width={900} caption={label} />}
         <CameraKey us={t("us")} them={oppName} referee={t("referee")} ball={t("ball")} />
-        <p className="mt-1 text-[13px] text-ink-2">{t("numberRead")}</p>
+        <p className="mt-1 text-[15px] text-ink-2">{t("numberRead")}</p>
         {graphics.report_goals.length > 0 && (
           <div className="mt-6">
             <Rail goals={reportGoals(graphics)} at={goal?.minute ?? null} label={t("rail")} />
-            <p className="mt-1 flex justify-between text-[13px] text-ink-2">
+            <p className="mt-1 flex justify-between text-[15px] text-ink-2">
               <span>0:00</span>
               <span>60:00</span>
             </p>
@@ -82,7 +82,7 @@ export function MatchCamera({ orgId, matchId, graphics, oppName }: { orgId: stri
                   <b className="font-num text-[17px]">{clockOf(g.minute)}</b>
                   <span className="text-[15px] leading-snug">
                     {t("goalOf", { team: g.team === "opp" ? oppName : t("us"), clock: "" }).trim()}
-                    {g.zone && <small className={cn("block text-[13px]", on ? "text-attn-ink" : "text-ink-2")}>{t(`zoneShort.${g.zone}` as "zoneShort.la")}</small>}
+                    {g.zone && <small className={cn("block text-[15px]", on ? "text-attn-ink" : "text-ink-2")}>{t(`zoneShort.${g.zone}` as "zoneShort.la")}</small>}
                   </span>
                 </button>
               </li>

@@ -31,7 +31,7 @@ export function ConsentCopy({ orgId, teamId }: { orgId: string; teamId: string }
       <Button onClick={() => void copy()} loading={state === "busy"}>
         {state === "copied" ? t("copied") : t("copyLink")}
       </Button>
-      <p role="status" className="text-[13px] text-ink-2">
+      <p role="status" className="text-[15px] text-ink-2">
         {state === "shown" && t("copyFailed")}
       </p>
       {state === "shown" && url && (

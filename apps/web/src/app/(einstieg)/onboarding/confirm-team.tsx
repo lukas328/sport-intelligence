@@ -4,6 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { forgetClaim } from "./claim-storage";
 import { useFormatter, useTranslations } from "next-intl";
 import { type CSSProperties, useState } from "react";
 import { Strip } from "@/components/anlauf/heads";
@@ -80,6 +81,7 @@ export function ConfirmTeam({
     for (const s of adds.filter((x) => (num(x.payload.appearances) ?? 0) > 0)) {
       await api.POST("/v1/orgs/{org_id}/teams/{team_id}/official/suggestions/{suggestion_id}/accept", { params: { path: { org_id: org, team_id: team, suggestion_id: s.id } }, body: null });
     }
+    forgetClaim();
     router.push(`/app/${org}/teams/${team}/matches`);
     router.refresh();
   }
@@ -106,7 +108,7 @@ export function ConfirmTeam({
   return (
     <div className="grid gap-x-16 gap-y-10 md:grid-cols-[minmax(0,1fr)_minmax(0,460px)]" data-testid="claim-done">
       <div className="min-w-0">
-        <p className="text-[13px] font-semibold text-ink-2">{t("fromOfficial")}</p>
+        <p className="text-[15px] font-semibold text-ink-2">{t("fromOfficial")}</p>
         <h2 className="mt-1 text-[30px] leading-tight md:text-[34px]">{teamName}</h2>
         {league && <p className="mt-1 text-[15px] text-ink-2">{league}</p>}
         <ul className="mt-4 mb-10 list-none p-0" aria-live="polite">
@@ -129,21 +131,21 @@ export function ConfirmTeam({
               </label>
             ))}
           </div>
-          <p className="mt-3 text-[13px] text-ink-2">{t("crestLater")}</p>
+          <p className="mt-3 text-[15px] text-ink-2">{t("crestLater")}</p>
         </fieldset>
         <div className="mt-8 max-md:hidden">
           {actions}
-          <p className="mt-4 text-[13px] text-ink-2">{t("next")}</p>
+          <p className="mt-4 text-[15px] text-ink-2">{t("next")}</p>
         </div>
       </div>
 
       {/* the preview takes the picked colour at once: the head of the last match, two rows */}
       <div className="club min-w-0" style={clubStyle(colour) as CSSProperties}>
-        <p className="mb-2 text-[13px] font-semibold text-ink-2">{last ? t("previewTitle") : t("previewNone")}</p>
+        <p className="mb-2 text-[15px] font-semibold text-ink-2">{last ? t("previewTitle") : t("previewNone")}</p>
         <Strip
           name={
             <>
-              <small className="mb-2 block font-sans text-[13px] font-semibold not-italic">
+              <small className="mb-2 block font-sans text-[15px] font-semibold not-italic">
                 {last ? t("previewAgainst", { day: format.dateTime(new Date(last.kickoff_at), { weekday: "long" }), opp: last.opponent_name ?? "" }) : teamName}
               </small>
               {result}
@@ -160,7 +162,7 @@ export function ConfirmTeam({
                 <span className="font-slant block text-[19px] leading-tight">{`${str(s.payload.first_name)} ${str(s.payload.last_name)}`}</span>
                 {num(s.payload.appearances) != null && <span className="text-[15px] text-ink-2">{t("appearances", { n: num(s.payload.appearances)! })}</span>}
               </span>
-              <span className="text-[13px] font-bold text-ink-2">{str(s.payload.position)}</span>
+              <span className="text-[15px] font-bold text-ink-2">{str(s.payload.position)}</span>
             </li>
           ))}
         </ul>

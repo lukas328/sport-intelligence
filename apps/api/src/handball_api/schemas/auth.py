@@ -38,6 +38,18 @@ class MagicLinkIn(ApiModel):
     email: EmailStr
 
 
+class StartIn(ApiModel):
+    """«Das ist mein Team. Speichern»: an e-mail, nothing else. Saving accepts the terms (the
+    sentence says so); a password can be set later in Ich."""
+
+    email: EmailStr
+    locale: Locale = "de-CH"
+    # where the link leads after signing in: an app path such as /einstieg/speichern?team=…
+    next: str | None = Field(
+        default=None, max_length=300, pattern=r"^/[A-Za-z0-9_\-?=&%.][A-Za-z0-9/_\-?=&%.]*$"
+    )
+
+
 class TokenIn(ApiModel):
     token: str = Field(min_length=10, max_length=200)
 

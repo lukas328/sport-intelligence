@@ -29,7 +29,9 @@ def test_failure_codes() -> None:
     assert support.failure_code(None) == "generic"
 
 
-async def test_failed_analysis_is_credited(make_api: Callable[[], Api]) -> None:
+async def test_failed_analysis_is_credited(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender
+) -> None:
     api = make_api()
     ids = await setup_club(api)
     org = ids["org"]
@@ -48,6 +50,11 @@ async def test_failed_analysis_is_credited(make_api: Callable[[], Api]) -> None:
     assert (a["status"], a["error_code"]) == ("failed", "calibration")
     notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()["items"]
     assert notes[0]["kind"] == "analysis_failed" and notes[0]["params"]["reason"] == "calibration"
+    # the coach also gets an e-mail naming the match and the way out (UX test H06, B29)
+    assert notes[0]["params"]["opponent"]
+    mail = outbox.outbox[-1]
+    assert notes[0]["params"]["opponent"] in mail.subject
+    assert "liess sich nicht auswerten" in mail.subject and f"/matches/{m['id']}" in mail.text
     usage = (await api.get(f"/v1/orgs/{org}/billing")).json()["usage"]
     assert usage["max_matches_per_season"] == 0  # the failed match does not count
 
@@ -138,3 +145,50 @@ async def test_onboarding_series_and_unsubscribe(
     assert (
         await api.http.get(f"/v1/onboarding/unsubscribe?u={user_id}&t=wrong")
     ).status_code == 404
+
+
+def test_analysis_ready_mail_names_the_match() -> None:
+    from handball_api.services.mail_templates import render
+
+    mail = render(
+        "analysis_ready", "de-CH", to="a@b.ch", name="Hans", team="HC Z", opponent="TV T", link="x"
+    )
+    assert mail.subject == "Die drei Dinge gegen TV T sind da"
+    assert "HC Z gegen TV T" in mail.text and mail.text.endswith("x")
+
+
+def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
+    """UX test N05 and N20: without three things the mail says the analysis is done and how many
+    questions wait; an account without a name is greeted with «Hallo» alone."""
+    from handball_api.services.mail_templates import render
+
+    mail = render(
+        "analysis_questions",
+        "de-CH",
+        to="hans.p130@example.ch",
+        name="hans.p130",
+        team="HC Z",
+        opponent="TV T",
+        link="x",
+        questions=2,
+    )
+    assert mail.subject == "Die Analyse gegen TV T ist fertig"
+    assert "drei Dinge" not in mail.text and "2 Fragen an dich" in mail.text
+    assert mail.text.startswith("Hallo\n")
+    # one question is «1 Frage», in every language (UX test A02)
+    for loc, word in (("de-CH", "1 Frage an"), ("en", "1 question for"), ("fr", "1 question pour")):
+        one = render(
+            "analysis_questions",
+            loc,
+            to="a@b.ch",
+            name="H",
+            team="Z",
+            opponent="T",
+            link="x",
+            questions=1,
+        )
+        assert word in one.text, one.text
+    named = render(
+        "analysis_no_goals", "de-CH", to="a@b.ch", name="Hans", team="Z", opponent="T", link="x"
+    )
+    assert named.text.startswith("Hallo Hans\n") and "keine Tore" in named.text

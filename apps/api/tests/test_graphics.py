@@ -118,3 +118,79 @@ async def test_scene_of_another_match_is_not_found(make_api: Callable[[], Api]) 
     e = await event(api, org, a["id"], type="shot", side="own", outcome="goal", clock_s=60)
     r = await api.get(f"/v1/orgs/{org}/matches/{b['id']}/scenes/{e['id']}/camera")
     assert r.status_code == 404
+
+
+def test_a_read_number_is_shown_once_per_team() -> None:
+    from handball_api.services.graphics import unique_numbers
+
+    tracks = [
+        {"team": "own", "number": 15, "xy": [(0, 0), (1, 1)]},
+        {"team": "own", "number": 15, "xy": [(0, 0), (1, 1), (2, 2)]},
+        {"team": "opp", "number": 15, "xy": [(0, 0)]},
+        {"team": "own", "number": None, "xy": [(0, 0)]},
+    ]
+    out = unique_numbers(tracks)
+    assert [t["number"] for t in out] == [None, 15, 15, None]
+
+
+def test_demo_positions_wait_for_an_open_court_question() -> None:
+    from types import SimpleNamespace
+
+    from handball_api.services.graphics import _shown_field
+
+    video = SimpleNamespace()
+    assert _shown_field(True, None, False, None) is True  # demo without a video of its own
+    assert _shown_field(True, video, True, False) is False  # type: ignore[arg-type]  # court is still asked
+    assert _shown_field(True, video, True, True) is True  # type: ignore[arg-type]
+    assert _shown_field(False, video, True, False) is False  # type: ignore[arg-type]
+
+
+async def test_prufen_asks_for_the_throw_off_until_it_is_set(make_api: Callable[[], Api]) -> None:
+    """UX test B10: the throw-off is a question in Prüfen, not a setup step in the tab Video."""
+    from .test_themes import ready_video
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    await ready_video(api, ids, m["id"])
+    g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
+    assert [c["kind"] for c in g["checks"]].count("kickoff") == 1
+    r = await api.put(
+        f"/v1/orgs/{org}/matches/{m['id']}/kickoff", json={"period": 1, "t_ms": 12_000}
+    )
+    assert r.status_code < 300, r.text
+    g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
+    assert all(c["kind"] != "kickoff" for c in g["checks"])
+
+
+async def test_a_goal_names_its_scorer_for_the_confirmed_column(
+    make_api: Callable[[], Api],
+) -> None:
+    """UX test N12: the column «Bestätigt» in Zahlen follows the goals of a person; a goal knows
+    its scorer by person, not only by shirt number."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    team = (await api.get(f"/v1/orgs/{org}/teams/{ids['team']}")).json()
+    player = (
+        await api.post(
+            f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{team['current_season']['id']}/roster",
+            json={"first_name": "Tim", "last_name": "Baumann", "jersey_number": 11},
+        )
+    ).json()
+    m = await new_match(api, ids)
+    await event(
+        api,
+        org,
+        m["id"],
+        type="shot",
+        side="own",
+        outcome="goal",
+        clock_s=95,
+        x=38.5,
+        y=18.5,
+        player_id=player["player_id"],
+    )
+    g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
+    assert [x["player_id"] for x in g["goals"]] == [player["player_id"]]

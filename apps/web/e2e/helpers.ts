@@ -97,7 +97,14 @@ export async function openTraining(page: Page) {
 /** Match page: one level of tabs, Spiel · Video · Zahlen (SPEC 7.2 to 7.4). "Übersicht" is on
  * Spiel; the figure sheets are stacked on Zahlen, each under its heading. */
 export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Spielbericht") {
-  if (section === "Übersicht") return page.getByRole("tab", { name: "Spiel", exact: true }).click();
+  if (section === "Übersicht") {
+    // the comparison sits in Zahlen › Alle Zahlen; «Mehr zum Spiel» keeps the course (UX test B08)
+    await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
+    const all = page.getByTestId("numbers-more");
+    if (!(await all.evaluate((d) => (d as HTMLDetailsElement).open))) await all.locator(":scope > summary").click();
+    await page.locator("#numbers-overview").scrollIntoViewIfNeeded();
+    return;
+  }
   await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
   const id = { Spielbericht: "report", Würfe: "shots", Torhüter: "keepers", Laufleistung: "physical" }[section];
   // the full report, shots, goalkeepers and running figures sit behind «Alle Zahlen»

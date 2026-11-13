@@ -76,12 +76,16 @@ async def _session(ctx: Ctx, session_id: uuid.UUID) -> tuple[LiveTagSession, Mat
 
 async def add(ctx: Ctx, session_id: uuid.UUID, items: list[MarkIn]) -> dict[str, Any]:
     s, match = await _session(ctx, session_id)
+    # one writer per match at a time: two uploads of the same queue (a tap and the «online» event,
+    # or a second session opened by a race) must not both store a mark (UX test N02)
+    await ctx.db.execute(select(Match.id).where(Match.id == match.id).with_for_update())
+    sessions = select(LiveTagSession.id).where(LiveTagSession.match_id == match.id)
     known = {
         t.client_id: t.id
         for t in (
             await ctx.db.scalars(
                 select(LiveTag).where(
-                    LiveTag.session_id == s.id,
+                    LiveTag.session_id.in_(sessions),
                     LiveTag.client_id.in_([i.client_id for i in items]),
                 )
             )
@@ -107,6 +111,23 @@ async def add(ctx: Ctx, session_id: uuid.UUID, items: list[MarkIn]) -> dict[str,
     if s.offset_ms is None and await _main_video(ctx, match.id):
         await sync_match(ctx, match.id, authorised=True)
     return {"stored": stored}
+
+
+async def take_back(ctx: Ctx, match_id: uuid.UUID, client_id: uuid.UUID) -> None:
+    """Removes a mark by the phone's id, from any session of the match; unknown ids are fine (the
+    mark may not have reached the server yet)."""
+    match = await get_match(ctx, match_id, Action.CLIP_WRITE)
+    tag = await ctx.db.scalar(
+        select(LiveTag).where(
+            LiveTag.session_id.in_(
+                select(LiveTagSession.id).where(LiveTagSession.match_id == match.id)
+            ),
+            LiveTag.client_id == client_id,
+        )
+    )
+    if tag is not None:
+        await ctx.db.delete(tag)
+        await ctx.db.flush()
 
 
 async def _main_video(ctx: Ctx, match_id: uuid.UUID) -> VideoAsset | None:
@@ -217,6 +238,7 @@ async def marks(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         items.append(
             {
                 "id": t.id,
+                "client_id": t.client_id,
                 "session_id": t.session_id,
                 "key": t.key,
                 "label": labels.get(t.key),

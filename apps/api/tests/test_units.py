@@ -151,6 +151,7 @@ def test_mail_templates_have_no_long_dashes() -> None:
                 name="N",
                 link="L",
                 minutes=15,
+                valid="24 Stunden",
                 inviter="I",
                 org="O",
                 team="",
@@ -159,6 +160,19 @@ def test_mail_templates_have_no_long_dashes() -> None:
             assert "\u2014" not in mail.text
             assert "\u2013" not in mail.text
             assert "ß" not in mail.text
+
+
+def test_the_sign_in_link_lasts_a_day_and_says_so() -> None:
+    """UX test N15: the first sign-in is often read hours later."""
+    from handball_api.core.config import Settings
+    from handball_api.services.mail_templates import validity
+
+    assert Settings().magic_link_ttl_minutes == 24 * 60
+    mail = render(
+        "magic_link", "de-CH", to="a@b.ch", name="N", link="L", valid=validity(1440, "de-CH")
+    )
+    assert "24 Stunden gültig und funktioniert nur einmal" in mail.text
+    assert validity(15, "fr") == "15 minutes"
 
 
 def test_production_refuses_dev_secrets() -> None:

@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
-import { Strip, WurfHead } from "@/components/anlauf/heads";
+import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
 import { reportGoals, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
@@ -24,7 +24,16 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${match.halftime_own}:${match.halftime_opponent}` : null;
   const kick = [when, match.competition, match.venue].filter(Boolean).join(" · ");
   const scoreText = match.score_own != null && match.score_opponent != null ? t("scoreLabel", { own: match.score_own, opp: match.score_opponent }) : null;
-  const colourOpen = !match.opponent_colors && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
+  // before the game the head shows when it starts instead of an empty result (UX test B42)
+  const upcoming = match.score_own == null && kickoff.getTime() > Date.now();
+  const pending = upcoming ? (
+    <>
+      {format.dateTime(kickoff, { weekday: "short", day: "numeric", month: "short" })}
+      <br />
+      {format.dateTime(kickoff, { hour: "2-digit", minute: "2-digit" })}
+    </>
+  ) : undefined;
+  const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
       {scoreText && (
@@ -35,9 +44,10 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
       {view === "game" ? (
         <WurfHead
           kick={kick}
-          title={title}
+          title={<Breakable text={title} />}
           own={match.score_own}
           opp={match.score_opponent}
+          pending={pending}
           ownName={ownName}
           oppName={oppName}
           goals={graphics ? reportGoals(graphics) : null}
@@ -55,13 +65,14 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <Strip
           name={
             <h1 className="m-0 text-[length:inherit] leading-[inherit]">
-              {ownName}
+              <Breakable text={ownName} />
               {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
             </h1>
           }
           sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue].filter(Boolean).join(" · ")}
           own={match.score_own}
           opp={match.score_opponent}
+          pending={pending}
         />
       )}
     </div>

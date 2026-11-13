@@ -39,10 +39,21 @@ export function ConsentForm({ token, data }: { token: string; data: Page }) {
     setDone(String(res.player ?? ""));
   }
 
-  if (done != null) return <Alert kind="success">{t("thanks", { player: done })}</Alert>;
+  // the name and number confirmed large: whoever sent it sees for whom (UX test B33)
+  if (done != null)
+    return (
+      <div className="space-y-3" role="status" data-testid="consent-done">
+        <p className="font-slant m-0 text-[34px] leading-none md:text-[44px]">{done}</p>
+        <Alert kind="success">{t("thanks", { player: done })}</Alert>
+      </div>
+    );
   return (
     <form onSubmit={submit} className="space-y-5" aria-label={t("form")}>
-      <Select label={t("player")} name="player" required>
+      {/* nobody preselected: one picks oneself (UX test B33) */}
+      <Select label={t("player")} name="player" required defaultValue="">
+        <option value="" disabled>
+          {t("pick")}
+        </option>
         {data.players.map((p) => (
           <option key={p.id} value={p.id}>
             {p.label}
@@ -60,6 +71,7 @@ export function ConsentForm({ token, data }: { token: string; data: Page }) {
         {data.purposes.map((k) => (
           <div key={k}>
             <Checkbox
+              className="mt-0 size-6 accent-[var(--accent)]"
               label={tc(`purpose_${k}` as "purpose_analysis")}
               checked={agreed.includes(k)}
               onChange={(e) => setAgreed((a) => (e.currentTarget.checked ? [...a, k] : a.filter((x) => x !== k)))}

@@ -30,6 +30,8 @@ class ShareOut(ApiModel):
     revoked_at: datetime | None
     views: int
     created_at: datetime
+    # the token for the team's staff, to copy the same link again (None for older links)
+    token: str | None = None
 
 
 class ShareCreated(ShareOut):
@@ -40,7 +42,7 @@ class ShareCreated(ShareOut):
     "/v1/orgs/{org_id}/teams/{team_id}/share-links", response_model=ShareCreated, status_code=201
 )
 async def create(team_id: uuid.UUID, data: ShareCreate, scope: OrgDep) -> ShareCreated:
-    """Read-only link; the token is shown once."""
+    """Read-only link; the token stays copyable for the team's staff (list)."""
     link, token = await service.create(scope.ctx, team_id, data.kind, data.target_id, data.days)
     return ShareCreated.model_validate(
         {**ShareOut.model_validate(link, from_attributes=True).model_dump(), "token": token}
@@ -49,7 +51,14 @@ async def create(team_id: uuid.UUID, data: ShareCreate, scope: OrgDep) -> ShareC
 
 @router.get("/v1/orgs/{org_id}/teams/{team_id}/share-links", response_model=list[ShareOut])
 async def list_links(team_id: uuid.UUID, scope: OrgDep) -> list[Any]:
-    return await service.list_links(scope.ctx, team_id)
+    links = await service.list_links(scope.ctx, team_id)
+    return [
+        {
+            **ShareOut.model_validate(x, from_attributes=True).model_dump(),
+            "token": service.token_of(scope.ctx, x),
+        }
+        for x in links
+    ]
 
 
 @router.delete("/v1/orgs/{org_id}/share-links/{link_id}", status_code=204)

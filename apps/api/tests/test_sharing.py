@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import Callable
 from datetime import date
 
+import asyncpg
 import pytest
 
 from handball_api.core.storage import MemoryStorage
@@ -82,7 +84,8 @@ async def test_share_links(make_api: Callable[[], Api]) -> None:
 
     listing = (await api.get(base)).json()
     assert {x["kind"]: x["views"] for x in listing} == {"play": 1, "match": 1, "playlist": 1}
-    assert "token" not in listing[0]
+    # the team's staff can copy the same link again (UX test B17): the token comes back decrypted
+    assert {x["kind"]: x["token"] for x in listing}["play"] == links["play"]["token"]
     assert (
         await api.delete(f"/v1/orgs/{org}/share-links/{links['play']['id']}")
     ).status_code == 204
@@ -188,3 +191,43 @@ async def test_share_scene_and_collection(make_api: Callable[[], Api]) -> None:
     await api.delete(f"{o}/share-links/{listing['collection']['id']}")
     assert (await anon.get(f"/v1/share/{tok}")).status_code == 404
     assert (await anon.get(f"/v1/share/{tok}/preview")).status_code == 404
+
+
+async def test_shared_goal_scene_carries_its_tactics_camera(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """UX test B15: the shared page shows Video | Taktik and a Minifeld per goal scene; the
+    positions come along with the page, a scene without a goal has none."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, team = ids["org"], ids["team"]
+    o = f"/v1/orgs/{org}"
+    demo = (await api.post(f"{o}/teams/{team}/demo-match")).json()
+    goal = (await api.get(f"{o}/matches/{demo['id']}/graphics")).json()["goals"][0]
+    # the demo match has no video of its own: give the goal a place in time for the scene
+    await owner_conn.execute(
+        "UPDATE events SET t_ms = 600000 WHERE id = $1", uuid.UUID(goal["event_id"])
+    )
+    coll = await api.post(
+        f"{o}/teams/{team}/collections",
+        json={
+            "title": "Tore",
+            "items": [
+                {"kind": "scene", "event_id": goal["event_id"]},
+                {"kind": "scene", "match_id": demo["id"], "start_ms": 20_000, "end_ms": 26_000},
+            ],
+        },
+    )
+    assert coll.status_code == 201, coll.text
+    link = await api.post(
+        f"{o}/teams/{team}/share-links", json={"kind": "collection", "target_id": coll.json()["id"]}
+    )
+    assert link.status_code == 201, link.text
+    page = (await make_api().get(f"/v1/share/{link.json()['token']}")).json()
+    first, second = (i["scene"] for i in page["collection"]["items"])
+    assert first["camera"]["field_confirmed"] is True and first["camera"]["tracks"]
+    assert first["camera"]["event_id"] == goal["event_id"]
+    assert second["camera"] is None
+    # the title parts as in the app (UX test B15): minute, side, position of the goal
+    assert first["goal"] == {"minute": goal["minute"], "team": goal["team"], "zone": goal["zone"]}
+    assert second["goal"] is None

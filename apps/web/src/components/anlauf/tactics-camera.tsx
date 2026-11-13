@@ -239,7 +239,7 @@ export function TacticsCamera({
         <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-[13px] font-semibold text-court-text">
           <button
             type="button"
-            className="min-h-11 min-w-11 cursor-pointer border-[1.5px] border-[#8d97a1] bg-court-bar px-2.5 font-sans text-[13px] font-bold text-white"
+            className="min-h-11 min-w-11 cursor-pointer border-[1.5px] border-[#8d97a1] bg-court-bar px-2.5 font-sans text-[15px] font-bold text-white"
             aria-pressed={paused}
             onClick={() => setPaused((p) => !p)}
           >
@@ -261,7 +261,7 @@ export function BallLine({ scene, t = 1, notFound, noBall }: { scene: Pick<Camer
   const gap = (flex: number, key: string, word: boolean) => (
     <span
       key={key}
-      className="grid place-items-center text-[13px] font-semibold text-ink-2"
+      className="grid place-items-center text-[15px] font-semibold text-ink-2"
       style={{ flex, background: "repeating-linear-gradient(-60deg, transparent 0 5px, color-mix(in srgb, var(--ink) 14%, transparent) 5px 6px)" }}
     >
       {word ? notFound : ""}
@@ -269,9 +269,9 @@ export function BallLine({ scene, t = 1, notFound, noBall }: { scene: Pick<Camer
   );
   if (!scene.ball.length) {
     return (
-      <div className="relative mt-2 flex h-[30px] gap-0.5 text-[13px] font-bold" data-testid="ball-line">
+      <div className="relative mt-2 flex h-[30px] gap-0.5 text-[15px] font-bold" data-testid="ball-line">
         {gap(1, "all", false)}
-        <span className="absolute inset-0 grid place-items-center text-[13px] font-semibold text-ink-2">{noBall}</span>
+        <span className="absolute inset-0 grid place-items-center text-[15px] font-semibold text-ink-2">{noBall}</span>
       </div>
     );
   }
@@ -296,7 +296,7 @@ export function BallLine({ scene, t = 1, notFound, noBall }: { scene: Pick<Camer
   }
   if (at < scene.duration) parts.push(gap(scene.duration - at, "end", scene.duration - at >= 1.5));
   return (
-    <div className="relative mt-2 flex h-[30px] gap-0.5 text-[13px] font-bold" data-testid="ball-line">
+    <div className="relative mt-2 flex h-[30px] gap-0.5 text-[15px] font-bold" data-testid="ball-line">
       {parts}
       <i aria-hidden className="absolute -top-1 -bottom-1 w-[2.5px] bg-ink" style={{ left: `${t * 100}%` }} />
     </div>

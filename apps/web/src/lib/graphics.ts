@@ -67,3 +67,15 @@ export function useSceneCamera(orgId: string, matchId: string, eventId: string |
     staleTime: 300_000,
   });
 }
+
+/**
+ * The scenes of thing `n` (1 to 3, as in ?thing=n): exactly its goals that have a video time,
+ * in the order of the match, no other goal of the window (UX test B01).
+ */
+export function thingSequence(g: MatchGraphics, n: number, things: { goals: { eventId?: string }[] }[]): MatchGraphics["goals"] {
+  const thing = things[n - 1];
+  if (!thing) return [];
+  const playable = g.goals.filter((x) => (x.has_video || x.source === "demo") && x.t_ms != null);
+  const ids = new Set(thing.goals.map((x) => x.eventId).filter(Boolean));
+  return playable.filter((x) => ids.has(x.event_id)).sort((a, b) => (a.t_ms ?? 0) - (b.t_ms ?? 0));
+}

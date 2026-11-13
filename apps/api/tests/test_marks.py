@@ -126,3 +126,41 @@ async def test_marks_upload_sync_and_list(
     synced = (await api.post(f"/v1/orgs/{org}/matches/{m['id']}/marks/sync")).json()
     assert synced[0]["source"] == "metadata"
     assert synced[0]["offset_ms"] == -round(RECORDED.timestamp() * 1000)
+
+
+async def test_a_mark_uploaded_twice_is_stored_once_per_match(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """UX test N02: an offline mark sent again, also from a second session that a race opened on
+    the same phone, is stored once; the list carries the phone's id to merge with the queue."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    url = f"/v1/orgs/{org}/matches/{m['id']}/mark-sessions"
+    a = (await api.post(url, json={"device": "Phone"})).json()
+    b = (await api.post(url, json={"device": "Phone"})).json()
+    mark = {"client_id": str(uuid.uuid4()), "device_time": RECORDED.isoformat(), "key": "good"}
+    first = await api.post(f"/v1/orgs/{org}/mark-sessions/{a['id']}/marks", json={"marks": [mark]})
+    second = await api.post(f"/v1/orgs/{org}/mark-sessions/{b['id']}/marks", json={"marks": [mark]})
+    assert first.json()["stored"][0]["id"] == second.json()["stored"][0]["id"]
+    assert await owner_conn.fetchval("SELECT count(*) FROM live_tags") == 1
+    listed = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/marks")).json()["marks"]
+    assert [x["client_id"] for x in listed] == [mark["client_id"]]
+
+
+async def test_the_last_mark_can_be_taken_back(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """UX test N14: «Zurücknehmen» removes a mark by the phone's id; a second call is harmless."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    s = (await api.post(f"/v1/orgs/{org}/matches/{m['id']}/mark-sessions", json={})).json()
+    mark = {"client_id": str(uuid.uuid4()), "device_time": RECORDED.isoformat(), "key": "two_min"}
+    await api.post(f"/v1/orgs/{org}/mark-sessions/{s['id']}/marks", json={"marks": [mark]})
+    url = f"/v1/orgs/{org}/matches/{m['id']}/marks/{mark['client_id']}"
+    assert (await api.delete(url)).status_code == 204
+    assert (await api.delete(url)).status_code == 204
+    assert await owner_conn.fetchval("SELECT count(*) FROM live_tags") == 0

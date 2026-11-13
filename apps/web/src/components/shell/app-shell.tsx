@@ -37,7 +37,7 @@ export function AppShell({
   org: ShellOrg;
   orgs: { id: string; name: string }[];
   teams: ShellTeam[];
-  me: { name: string; email: string };
+  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
   savedTeam: string | null;
   banner?: ReactNode;
   children: ReactNode;
@@ -70,6 +70,7 @@ export function AppShell({
   // one action reachable from everywhere for staff (SPEC section 6)
   const upload = mode === "staff" ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
+  const searchHref = mode === "staff" && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
   useEffect(() => {
@@ -95,7 +96,7 @@ export function AppShell({
   // courtside and presentation tools use the whole screen, with one way back
   const tool = /\/(present|remote|live|marks|matchday|check)$/.test(path);
   // Prüfen and the Spieltag keys bring their own top line («Später weiter», «Beenden»)
-  const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") === "marks");
+  const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") !== "detail");
   if (tool) {
     const back = path.replace(/\/[^/]+$/, "");
     return (
@@ -175,14 +176,21 @@ export function AppShell({
                 })}
               </nav>
               <div className="ml-auto flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => setPalette(true)}
-                  className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
-                  data-testid="palette-open"
-                >
-                  {t("search")}
-                </button>
+                {/* «Suchen» is the scene search (SPEC 9); the palette stays on Ctrl+K */}
+                {searchHref ? (
+                  <Link href={searchHref} className="min-h-11 content-center font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="search-open">
+                    {t("search")}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setPalette(true)}
+                    className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
+                    data-testid="palette-open"
+                  >
+                    {t("search")}
+                  </button>
+                )}
                 {upload && (
                   <Link
                     href={upload}
@@ -196,31 +204,40 @@ export function AppShell({
                 <AccountMenu compact />
               </div>
             </div>
-            {/* phone top bar */}
-            <div className="flex h-[60px] items-center gap-3 px-4 lg:hidden">
-              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center gap-2">
-                <AppMark size={28} />
-                <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
+            {/* phone top bar (UX test H06, H09): the crest, the team name kept also with large
+                text, the bell, «Suchen» and «Video» with their words, the account */}
+            <div className="flex h-[60px] items-center gap-2 px-4 lg:hidden">
+              {/* with large text the crest gives way, the team name stays (UX test H09) */}
+              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center max-[359px]:hidden">
+                <ClubMark org={org} className="h-[34px] w-[30px] text-[14px]" />
               </Link>
-              <div className="min-w-0 flex-1">
+              {/* the name keeps room for two lines; the rest of the bar gives way first (UX test A01) */}
+              <div className="min-w-[6.5rem] flex-1">
                 <TeamSwitcher compact />
               </div>
-              <button
-                type="button"
-                aria-label={t("search")}
-                onClick={() => setPalette(true)}
-                className="grid size-11 cursor-pointer place-items-center border-2 border-ink text-ink"
-              >
-                <Search aria-hidden className="size-5" />
-              </button>
+              <NotificationBell orgId={org.id} />
+              {/* «Suchen» with its word on the phone too (SPEC 6, UX test B18/N08) */}
+              {searchHref && (
+                // below 360 px (large text) the magnifier gives way too: «Szenen» in the tab bar
+                // opens the same search with the cursor in it
+                <Link href={searchHref} className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 max-[359px]:hidden" data-testid="search-open-compact">
+                  <Search aria-hidden className="size-4 max-[439px]:size-5" strokeWidth={2.6} />
+                  {/* with very large text the word gives way to the team name, the magnifier stays */}
+                  <span className="max-[439px]:sr-only">{t("search")}</span>
+                </Link>
+              )}
               {upload && (
                 <Link
                   href={upload}
+                  className="flex h-11 shrink-0 items-center justify-center gap-1 border-2 border-ink bg-ink px-2.5 text-[15px] font-bold text-ground no-underline max-[439px]:w-11 max-[439px]:px-0"
                   aria-label={t("upload")}
-                  className="grid size-11 place-items-center border-2 border-ink bg-ink text-ground"
                   data-testid="upload-video-compact"
                 >
-                  <Plus aria-hidden className="size-5" strokeWidth={2.6} />
+                  <Plus aria-hidden className="size-4 max-[439px]:size-5" strokeWidth={2.6} />
+                  {/* first to give way: the word, the plus stays */}
+                  <span aria-hidden className="max-[439px]:hidden">
+                    {t("uploadShort")}
+                  </span>
                 </Link>
               )}
               <AccountMenu compact />
@@ -255,7 +272,8 @@ export function AppShell({
               return (
                 <li key={it.key}>
                   <Link
-                    href={it.href}
+                    // Szenen on the phone opens with the cursor in the search (UX test B18/N08)
+                    href={it.key === "scenes" && searchHref ? searchHref : it.href}
                     aria-current={on ? "page" : undefined}
                     className={cn(navLink(on), "min-h-14 justify-center text-base")}
                   >

@@ -8,8 +8,6 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.getByLabel("Vereinsname").fill("HC Training");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U17");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByRole("button", { name: "Zum Team" }).click();
   // the squad page says the state of the squad, the team sits in the eyebrow above it
   await expect(page.getByRole("heading", { level: 1, name: "Noch niemand im Kader." })).toBeVisible();
@@ -44,6 +42,13 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await expect(own).toContainText("Rückraum · 20 min");
   await expectAccessible(page);
   await expectAccessible(page);
+
+  // tasks are team functions (SPEC 6): without them the pages lead back to Spiele, so switch them on
+  const [, orgId, teamId] = teamUrl.match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  await page.goto(`/app/${orgId}/assignments`);
+  await page.waitForURL(/\/matches/);
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  await page.request.patch(`/v1/orgs/${orgId}/teams/${teamId}`, { headers: { "x-csrf-token": csrf }, data: { settings: { team_features: true } } });
 
   // my assignments: empty
   await page.goto(teamUrl.replace(/\/teams\/.*/, "/assignments"));

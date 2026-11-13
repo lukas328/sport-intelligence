@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { SectionHead } from "@/components/anlauf/blocks";
-import { ShareButton } from "@/components/sharing/share-button";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
-import { CollectionRun } from "./collection-run";
+import { CollectionEditor, CollectionTitle } from "./collection-editor";
+import { ShareBox } from "./share-box";
 
 type Params = { params: Promise<{ orgId: string; collectionId: string }> };
 
@@ -32,7 +32,6 @@ export default async function CollectionPage({ params }: Params) {
   const c = await load(orgId, collectionId);
   if (!c) notFound();
   const t = await getTranslations("collections");
-  const format = await getFormatter();
   const client = await serverApi();
   const [{ data: links = [] }, { data: team }, { data: org }] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/share-links", { params: { path: { org_id: orgId, team_id: c.team_id } } }),
@@ -50,11 +49,10 @@ export default async function CollectionPage({ params }: Params) {
     <div>
       <PageHeader
         eyebrow={[t("title"), c.draft ? t("draft") : null, c.source !== "collection" ? t(`source_${c.source}`) : null].filter(Boolean).join(" · ")}
-        title={c.title}
+        title={<CollectionTitle orgId={orgId} collection={c} />}
         actions={
           <>
-            <ShareButton orgId={orgId} teamId={c.team_id} kind="collection" targetId={c.id} />
-            <Link href={`${base}/collections/${c.id}/present`} className={buttonClass("secondary")}>
+            <Link href={`${base}/collections/${c.id}/present`} className={buttonClass("secondary")} data-testid="present">
               {t("present")}
             </Link>
             {origin && (
@@ -68,7 +66,7 @@ export default async function CollectionPage({ params }: Params) {
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section aria-labelledby="run" className="min-w-0">
           <SectionHead title={<span id="run">{t("run")}</span>} note={summary} />
-          {c.items.length === 0 ? <p className="text-[17px] text-ink-2">{t("empty")}</p> : <CollectionRun orgId={orgId} items={c.items} />}
+          <CollectionEditor orgId={orgId} collection={c} />
           <div className="mt-4 flex flex-wrap gap-2.5">
             <Link href={`${base}/teams/${c.team_id}/scenes`} className={buttonClass("secondary", "sm")}>
               {t("addScene")}
@@ -86,25 +84,15 @@ export default async function CollectionPage({ params }: Params) {
                 <div className="relative h-[150px] overflow-hidden bg-club p-3.5 text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_84%,0_100%)]">
                   <b className="font-slant block max-w-[80%] text-[26px] leading-[.95]">{c.title}</b>
                 </div>
-                <p className="m-0 px-1.5 pt-2 text-[13px]">
+                <p className="m-0 px-1.5 pt-2 text-[15px]">
                   <b className="block text-[15px]">{c.title}</b>
                   {[org?.name, team?.name].filter(Boolean).join(" ")} · {summary}
                 </p>
               </div>
             </div>
-            <p className="mt-2 text-[13px] text-ink-2">{t("chatHint")}</p>
+            <p className="mt-2 text-[15px] text-ink-2">{t("chatHint")}</p>
           </div>
-          <div>
-            <SectionHead as="h2" title={t("opened")} />
-            {link ? (
-              <>
-                <b className="font-num block text-[64px] leading-[.8]">{link.views}</b>
-                <p className="mt-2 text-[15px] text-ink-2">{t("validUntil", { date: format.dateTime(new Date(link.expires_at), { day: "numeric", month: "long" }) })}</p>
-              </>
-            ) : (
-              <p className="text-[15px] text-ink-2">{t("notShared")}</p>
-            )}
-          </div>
+          <ShareBox orgId={orgId} teamId={c.team_id} collectionId={c.id} link={link ?? null} />
         </aside>
       </div>
     </div>
