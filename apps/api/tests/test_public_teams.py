@@ -65,10 +65,11 @@ async def test_public_preview_from_the_federations_data(make_api: Callable[[], A
 async def test_public_endpoints_are_limited_per_ip(make_api: Callable[[], Api]) -> None:
     anon = make_api()
     anon.app.state.rate_limiter = MemoryRateLimiter()
+    # a team view asks twice (the team, then its scorers): 20 a minute, then 429
     codes = [
-        (await anon.get(f"/v1/public/clubs/{CLUB}/teams/{TEAM}")).status_code for _ in range(12)
+        (await anon.get(f"/v1/public/clubs/{CLUB}/teams/{TEAM}")).status_code for _ in range(22)
     ]
-    assert codes[:10] == [200] * 10 and codes[-1] == 429
+    assert codes[:20] == [200] * 20 and codes[-1] == 429
 
 
 async def test_start_makes_an_account_without_password_and_mails_a_link(
