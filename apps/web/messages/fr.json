@@ -3113,7 +3113,8 @@
     "moreGameHint": "Comparaison, buteurs, temps forts, feedback, marques",
     "chatHeading": "Les trois choses",
     "noVideoTitle": "Pas de vidéo",
-    "drawResult": "Match nul"
+    "drawResult": "Match nul",
+    "changeColour": "Changer la couleur de {opponent}"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3343,7 +3344,9 @@
     "fromVideo": "estimé à partir de la vidéo",
     "allNumbers": "Tous les chiffres",
     "allNumbersNote": "Feuille de match, tirs, gardiens en détail, courses",
-    "unknown": "sans nom"
+    "unknown": "sans nom",
+    "confirmed": "Confirmé",
+    "confirmedYes": "tous les buts confirmés"
   },
   "entry": {
     "ask": "Comment s'appelle ton équipe ?",

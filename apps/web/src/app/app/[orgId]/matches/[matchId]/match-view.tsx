@@ -295,6 +295,16 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
         {staff && match.opponent && !match.opponent_colors && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
+        {/* a known colour can be changed right in the head, five shirts (UX test B31) */}
+        {staff && match.opponent && match.opponent_colors && (
+          <details className="mt-2.5 text-sm font-bold" data-testid="change-colour">
+            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
+              <i aria-hidden className="block size-5 border-[1.5px] border-club-ink" style={{ background: match.opponent_colors.color ?? undefined }} />
+              {ta("changeColour", { opponent: oppName(match) })}
+            </summary>
+            <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
+          </details>
+        )}
       </MatchHead>
       {(justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
         <p role="status" className="-mt-4 flex flex-wrap items-center gap-3 text-[15px] font-bold">
@@ -583,7 +593,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "numbers" && (
         <div className="animate-fade">
-          <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []}>
+          <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
           {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} row />}
           {numberParts.length === 0 && (
             <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>

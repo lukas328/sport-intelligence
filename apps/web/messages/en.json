@@ -3113,7 +3113,8 @@
     "moreGameHint": "Comparison, scorers, highlights, feedback, marks",
     "chatHeading": "The three things",
     "noVideoTitle": "No video",
-    "drawResult": "Draw"
+    "drawResult": "Draw",
+    "changeColour": "Change {opponent}'s colour"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3343,7 +3344,9 @@
     "fromVideo": "estimated from the video",
     "allNumbers": "All figures",
     "allNumbersNote": "Match report, shots, goalkeepers in detail, running figures",
-    "unknown": "no name"
+    "unknown": "no name",
+    "confirmed": "Confirmed",
+    "confirmedYes": "all goals confirmed"
   },
   "entry": {
     "ask": "What is your team called?",

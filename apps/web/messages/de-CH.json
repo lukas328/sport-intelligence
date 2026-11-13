@@ -3113,7 +3113,8 @@
     "moreGameHint": "Vergleich, Torschützen, Highlights, Feedback, Marken",
     "chatHeading": "Die drei Dinge",
     "noVideoTitle": "Kein Video",
-    "drawResult": "Unentschieden"
+    "drawResult": "Unentschieden",
+    "changeColour": "Farbe von {opponent} ändern"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3343,7 +3344,9 @@
     "fromVideo": "aus dem Video geschätzt",
     "allNumbers": "Alle Zahlen",
     "allNumbersNote": "Spielbericht, Würfe, Torhüter im Detail, Laufwerte",
-    "unknown": "ohne Namen"
+    "unknown": "ohne Namen",
+    "confirmed": "Bestätigt",
+    "confirmedYes": "alle Tore bestätigt"
   },
   "entry": {
     "ask": "Wie heisst dein Team?",
