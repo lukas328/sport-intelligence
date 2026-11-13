@@ -98,14 +98,18 @@ export default async function ScenesPage({ params, searchParams }: { params: Pro
     return (
       <div>
         <PageHeader title={(await getTranslations("shell"))("scenes")} />
-        <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
-          <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t("noneYet")}</p>
-          {canWrite && (
-            <Link href={`${base}/matches?upload=1`} className={buttonClass("primary")}>
-              {ta("uploadVideo")}
-            </Link>
-          )}
-        </section>
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
+            <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t("noneYet")}</p>
+            {canWrite && (
+              <Link href={`${base}/matches?upload=1`} className={buttonClass("primary")}>
+                {ta("uploadVideo")}
+              </Link>
+            )}
+          </section>
+          {/* Sammlungen, plays and the table stay reachable */}
+          <aside className="flex min-w-0 flex-col gap-8">{side}</aside>
+        </div>
       </div>
     );
   }
