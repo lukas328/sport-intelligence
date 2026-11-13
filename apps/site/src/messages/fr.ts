@@ -15,7 +15,8 @@ const fr: Messages = {
     pricing: "Prix",
     faq: "Questions",
     data: "Données et consentement",
-    about: "Qui sommes-nous, contact",
+    about: "Contact",
+    us: "Qui sommes-nous",
     blog: "Blog",
     guides: "Guides",
     facts: "L'essentiel en bref",
@@ -260,6 +261,7 @@ const fr: Messages = {
     noticeLead: "Dis à l'adversaire et à la salle que tu filmes. Imprime cette affiche et mets-la sur la porte.",
     notice: "Ce match est filmé à des fins d'analyse. Le staff de l'équipe recevante répond aux questions.",
     print: "Imprimer l'affiche",
+    guideLink: "emplacement, hauteur et réglages en détail",
     moreTitle: "Pour aller plus loin",
   },
   demo: {
@@ -413,7 +415,7 @@ const fr: Messages = {
     privacyLink: "Protection des données (projet)",
   },
   about: {
-    title: "Qui sommes-nous, contact",
+    title: "Contact",
     head: "Pose-nous ta question. Nous répondons.",
     contactTitle: "Contact",
     email: "E-mail",
@@ -427,7 +429,7 @@ const fr: Messages = {
       { title: "Seulement ce qui est mesuré", text: "Ce que l'analyse ne mesure pas, nous ne le dessinons pas. L'estimé s'appelle « estimé »." },
     ],
     whoTitle: "Qui nous sommes",
-    who: "Cette section suit avant le lancement.",
+    who: "Ce que nous défendons et où nous allons figure sur la page « Qui sommes-nous ».",
   },
   blog: {
     title: "Blog",
@@ -448,13 +450,14 @@ const fr: Messages = {
     pricing: { title: "Prix pour équipes et clubs", description: "Gratuit sans analyse automatique, Équipe et Club avec analyse. Prix en francs suisses, facture annuelle QR. Les prix ne sont pas encore définitifs." },
     faq: { title: "Questions et réponses", description: "Mon téléphone suffit-il ? L'analyse trouve-t-elle les buts seule ? Que devient la vidéo ? Les questions les plus fréquentes des entraîneurs, en bref." },
     data: { title: "Vidéo au club : données et consentement", description: "Pour les parents et les joueurs : qui voit la vidéo, le consentement par lien, ce qui vaut pour les enfants, où sont les données et quand elles sont effacées." },
-    about: { title: "Qui sommes-nous, contact", description: "Écris-nous, nous répondons en général en un jour ouvrable. Et les principes de l'analyse." },
+    about: { title: "Contact", description: "Écris-nous à l'adresse du support, nous répondons en général en un jour ouvrable." },
     blog: { title: "Blog : depuis l'atelier", description: "Articles sur le tournage au téléphone et sur pourquoi l'analyse montre où elle est incertaine." },
     terms: { title: "CG (projet)", description: "Conditions générales de Handball Intelligence. Projet, pas encore vérifié juridiquement." },
     privacy: { title: "Protection des données (projet)", description: "Comment Handball Intelligence traite les données personnelles. Projet, pas encore vérifié juridiquement." },
     imprint: { title: "Impressum", description: "Informations sur l'exploitant de Handball Intelligence et contact." },
   },
   guides: {
+    homeTitle: "Dans les guides",
     title: "Guides",
     metaTitle: "Guides pour entraîneurs de handball",
     description: "Filmer un match de handball, comprendre ce que l'analyse vidéo apporte, consentement au club : des réponses pratiques pour entraîneuses et entraîneurs.",
@@ -498,6 +501,63 @@ const fr: Messages = {
     quoteTitle: "Citer",
     quote: "Tu peux citer cette page mot pour mot. Indique l'adresse et la date de mise à jour.",
     more: "À lire aussi",
+  },
+  us: {
+    title: "Qui sommes-nous",
+    metaTitle: "Qui sommes-nous : l'analyse vidéo pour les clubs",
+    description: "Nous construisons Handball Intelligence pour que chaque entraîneur de club sache après le match ce qui s'est passé : avec un téléphone, un trépied et quelques minutes.",
+    head: "L'analyse vidéo pour le handball de club.",
+    lead: "Nous construisons Handball Intelligence pour que chaque entraîneuse et chaque entraîneur de club sache, le soir du match, ce qui s'est vraiment passé. Avec un téléphone, un trépied et quelques minutes, pas avec un système de caméras et un analyste.",
+    sections: [
+      {
+        title: "Pourquoi nous existons",
+        text: [
+          "Jusqu'ici, l'analyse vidéo était réservée aux pros. Il fallait un système de caméras dans la salle et quelqu'un qui passe des heures devant l'écran à découper des scènes.",
+          "Dans le handball de club, le samedi soir, une entraîneuse se tient au bord du terrain, et lundi elle retourne au bureau. Elle a vu le match, mais à moitié : elle a coaché, changé, parlé avec l'arbitre. Ce qui s'est passé de l'autre côté, elle ne le sait pas vraiment. C'est pour ce soir-là que nous construisons.",
+        ],
+      },
+      {
+        title: "Pour qui nous le construisons",
+        text: [
+          "Pour les entraîneuses et entraîneurs, des juniors à la 1re ligue, qui le font bénévolement, à côté du travail et de la famille. Beaucoup n'ont pas le temps pour un nouveau programme ni envie de cent chiffres.",
+          "D'où peu d'étapes, de grands boutons et, à la fin, trois points à retenir plutôt qu'un tableau. Les joueuses et joueurs n'ont pas besoin de compte : ce que tu partages s'ouvre avec un lien.",
+        ],
+      },
+      {
+        title: "Honnêtes sur les limites",
+        text: [
+          "Une analyse tirée d'une seule caméra de téléphone fait des erreurs. Nous ne les cachons pas. L'analyse propose, l'humain confirme : elle te montre les moments où un but a pu tomber, et tu dis en quelques minutes ce qui est juste.",
+          "Ce qui est estimé s'appelle « estimé ». L'analyse ne suit pas le ballon aujourd'hui, c'est pourquoi nous ne montrons pas de passes. Ce qu'elle sait faire et ce qu'elle ne sait pas figure ouvertement sur le site, pas en petits caractères.",
+        ],
+      },
+      {
+        title: "La vidéo appartient au club",
+        text: [
+          "La vidéo appartient au club qui la téléverse. Joueuses et joueurs donnent leur consentement par un lien, pour les enfants ce sont les parents. Nous ne vendons pas de données, ne montrons pas de publicité, et ce site n'utilise aucun traceur.",
+          "La communication de l'équipe reste là où elle est, le plus souvent dans le chat de groupe. Nous ne construisons ni chat ni gestion des rendez-vous. Nous faisons l'analyse et livrons quelque chose qui se partage dans le chat.",
+        ],
+      },
+      {
+        title: "De Suisse, d'abord pour le handball de club suisse",
+        text: [
+          "Nous venons de Suisse et construisons d'abord pour le handball de club suisse : en allemand, en français et en anglais, avec les données de handball.ch. Tu trouves ton équipe par son nom, calendrier et résultats sont déjà là.",
+        ],
+      },
+      {
+        title: "Où nous allons",
+        text: [
+          "Nous voulons que l'analyse reconnaisse davantage seule et doive moins te demander, d'abord pour les buts. Tant qu'elle ne le fait pas de manière fiable, elle demande. Chaque nouvelle détection est testée sur de vrais matchs avant de saisir quoi que ce soit automatiquement.",
+        ],
+      },
+    ],
+    pictureCaption: "Comment filmer : un téléphone, en hauteur à la ligne médiane, tout le terrain dans l'image.",
+    shotAlt: "Accueil de l'app avec des données d'exemple : en haut le dernier match dans la couleur du club, avec résultat et évolution du score.",
+    shotCaption: "Image de l'app, avec des données d'exemple (en allemand).",
+    contactTitle: "Écris-nous",
+    contact: "Une question, une critique ou un match où l'analyse bloque : écris-nous à {email}.",
+    homeTitle: "Qui est derrière",
+    homeText: "Nous venons de Suisse et construisons l'analyse vidéo pour les entraîneuses et entraîneurs bénévoles. L'analyse propose, tu confirmes, et la vidéo appartient à ton club.",
+    homeLink: "Qui sommes-nous",
   },
   moved: {
     title: "Cette page a déménagé",

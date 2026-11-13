@@ -2,7 +2,7 @@
 
 Static Next.js site in the app's look «Anlauf» (concept and texts: `docs/site/KONZEPT.md`):
 start, So funktioniert es, Filmen, Demo-Spiel, Preise, Fragen (with the help guides), Daten und
-Einwilligung, Über uns und Kontakt, Ratgeber (guides), Fakten auf einen Blick, blog, terms, privacy, imprint; German (de-CH), French and
+Einwilligung, Über uns und Kontakt, Ratgeber (guides), Fakten auf einen Blick, Über uns, blog, terms, privacy, imprint; German (de-CH), French and
 English under `/de/`, `/fr/`, `/en/`. `/` picks the browser language. `/funktionen/` forwards to
 `/so-funktioniert-es/`.
 
@@ -49,7 +49,7 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 `pnpm build` runs `next build` and then `scripts/redirects.mjs`, which adds to `out/`:
 
 - a small page for every address without a language path (`/aufnahme/`, `/so-funktioniert-es/`,
-  `/demo/`, `/preise/`, `/hilfe/` and every guide, `/ratgeber/` and every guide (German-only guides go to `/de/` in every language), `/fakten/`, `/daten/`, `/kontakt/`, `/blog/` and posts, `/agb/`,
+  `/demo/`, `/preise/`, `/hilfe/` and every guide, `/ratgeber/` and every guide (German-only guides go to `/de/` in every language), `/fakten/`, `/ueber-uns/`, `/daten/`, `/kontakt/`, `/blog/` and posts, `/agb/`,
   `/datenschutz/`, `/impressum/`, `/funktionen/`): it sends the visitor to the same page in the
   browser's language (fr or en, otherwise de), keeping `?query` and `#hash`; without scripts a meta
   refresh goes to `/de/…`. The app links to `/aufnahme/` from its upload, so keep that address.
@@ -66,7 +66,7 @@ second):
 
   ```nginx
   map $http_accept_language $site_lang { default de; ~^fr fr; ~^en en; }
-  location ~ ^/(so-funktioniert-es|aufnahme|demo|preise|hilfe|ratgeber|fakten|daten|kontakt|blog|agb|datenschutz|impressum|funktionen)(/.*)?$ {
+  location ~ ^/(so-funktioniert-es|aufnahme|demo|preise|hilfe|ratgeber|fakten|ueber-uns|daten|kontakt|blog|agb|datenschutz|impressum|funktionen)(/.*)?$ {
     return 302 /$site_lang$request_uri;
   }
   ```
@@ -78,9 +78,9 @@ second):
 ## Build variables
 | variable | default |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | `https://handball-ai.ch` (canonical URLs, hreflang, sitemap, robots, structured data, llms.txt) |
-| `NEXT_PUBLIC_APP_URL` | `https://app.handball-ai.ch` (the team field and «Kostenlos starten» go to `/einstieg?q=…`, «Anmelden» to `/login`; `?lang=` sets the app language) |
-| `NEXT_PUBLIC_SUPPORT_EMAIL` | `support@handball-ai.ch` |
+| `NEXT_PUBLIC_SITE_URL` | `https://handball-intelligence.com` (canonical URLs, hreflang, sitemap, robots, structured data, llms.txt) |
+| `NEXT_PUBLIC_APP_URL` | `https://app.handball-intelligence.com` (the team field and «Kostenlos starten» go to `/einstieg?q=…`, «Anmelden» to `/login`; `?lang=` sets the app language) |
+| `NEXT_PUBLIC_SUPPORT_EMAIL` | `support@handball-intelligence.com` |
 | `NEXT_PUBLIC_STATUS_URL` | empty (link hidden) |
 | `NEXT_PUBLIC_COMPANY_NAME`, `_ADDRESS`, `_UID` | empty (imprint says the details follow) |
 

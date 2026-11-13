@@ -50,6 +50,9 @@ export default async function Filming({ params }: Props) {
             <section aria-labelledby="more">
               <SectionHead id="more" title={t.moreTitle} as="h3" />
               <div className="flex flex-wrap gap-x-8">
+                <Link href={`/${locale}/ratgeber/handballspiel-filmen/`} className="link">
+                  {m.nav.guides}: {m.filming.guideLink}
+                </Link>
                 <Link href={`/${locale}/hilfe/aufnahme/`} className="link">
                   {m.nav.faq}: {m.filming.title}
                 </Link>

@@ -13,7 +13,8 @@ const de = {
     pricing: "Preise",
     faq: "Fragen",
     data: "Daten und Einwilligung",
-    about: "Über uns und Kontakt",
+    about: "Kontakt",
+    us: "Über uns",
     blog: "Blog",
     guides: "Ratgeber",
     facts: "Fakten auf einen Blick",
@@ -258,6 +259,7 @@ const de = {
     noticeLead: "Sag dem Gegner und der Halle, dass gefilmt wird. Druck diesen Aushang aus und häng ihn an die Tür.",
     notice: "Dieses Spiel wird zu Analysezwecken gefilmt. Fragen beantwortet das Trainerteam des Heimteams.",
     print: "Aushang drucken",
+    guideLink: "Standort, Höhe und Einstellungen ausführlich",
     moreTitle: "Mehr dazu",
   },
   demo: {
@@ -411,7 +413,7 @@ const de = {
     privacyLink: "Datenschutzerklärung (Entwurf)",
   },
   about: {
-    title: "Über uns und Kontakt",
+    title: "Kontakt",
     head: "Frag uns. Wir schreiben zurück.",
     contactTitle: "Kontakt",
     email: "E-Mail",
@@ -425,7 +427,7 @@ const de = {
       { title: "Nur, was gemessen ist", text: "Was die Analyse nicht misst, zeichnen wir nicht. Geschätztes heisst «geschätzt»." },
     ],
     whoTitle: "Wer wir sind",
-    who: "Dieser Abschnitt folgt vor dem Start.",
+    who: "Wofür wir stehen und wohin es gehen soll, steht auf der Seite «Über uns».",
   },
   blog: {
     title: "Blog",
@@ -446,13 +448,14 @@ const de = {
     pricing: { title: "Preise für Teams und Vereine", description: "Gratis ohne automatische Analyse, Team und Verein mit Analyse. Preise in Schweizer Franken, Jahresrechnung per QR-Rechnung. Die Preise sind noch nicht endgültig." },
     faq: { title: "Fragen und Antworten", description: "Reicht mein Handy? Erkennt die Analyse die Tore selbst? Was passiert mit dem Video? Die häufigsten Fragen von Trainerinnen und Trainern, kurz beantwortet." },
     data: { title: "Video im Verein: Daten und Einwilligung", description: "Für Eltern, Spielerinnen und Spieler: wer das Video sieht, wie die Einwilligung per Link geht, was für Kinder gilt, wo die Daten liegen und wann sie gelöscht werden." },
-    about: { title: "Über uns und Kontakt", description: "Schreib uns, wir antworten in der Regel innert eines Arbeitstags. Und woran wir uns bei der Analyse halten." },
+    about: { title: "Kontakt", description: "Schreib uns an die Support-Adresse, wir antworten in der Regel innert eines Arbeitstags." },
     blog: { title: "Blog: aus der Werkstatt", description: "Beiträge zum Filmen mit dem Handy und dazu, warum die Analyse zeigt, wo sie unsicher ist." },
     terms: { title: "AGB (Entwurf)", description: "Allgemeine Geschäftsbedingungen von Handball Intelligence. Entwurf, noch nicht rechtlich geprüft." },
     privacy: { title: "Datenschutzerklärung (Entwurf)", description: "Wie Handball Intelligence Personendaten bearbeitet. Entwurf, noch nicht rechtlich geprüft." },
     imprint: { title: "Impressum", description: "Angaben zur Betreiberin von Handball Intelligence und Kontakt." },
   },
   guides: {
+    homeTitle: "Aus dem Ratgeber",
     title: "Ratgeber",
     metaTitle: "Ratgeber für Handballtrainer",
     description: "Ein Handballspiel filmen, in 20 Minuten auswerten, Szenen im Training zeigen, Einwilligung im Verein: praktische Antworten für Trainerinnen und Trainer.",
@@ -496,6 +499,63 @@ const de = {
     quoteTitle: "Zitieren",
     quote: "Du darfst diese Seite wörtlich zitieren. Bitte nenn die Adresse und den Stand.",
     more: "Weiterlesen",
+  },
+  us: {
+    title: "Über uns",
+    metaTitle: "Über uns: Videoanalyse für Vereinshandball",
+    description: "Wir bauen Handball Intelligence, damit jede Trainerin und jeder Trainer im Vereinshandball nach dem Spiel weiss, was passiert ist: mit Handy, Stativ und ein paar Minuten.",
+    head: "Videoanalyse für den Vereinshandball.",
+    lead: "Wir bauen Handball Intelligence, damit jede Trainerin und jeder Trainer im Vereinshandball am Abend nach dem Spiel weiss, was wirklich passiert ist. Mit einem Handy, einem Stativ und ein paar Minuten Zeit, nicht mit einem Kamerasystem und einem Analysten.",
+    sections: [
+      {
+        title: "Warum es uns gibt",
+        text: [
+          "Videoanalyse war bisher etwas für Profis. Wer sie wollte, brauchte ein Kamerasystem in der Halle und jemanden, der Stunden vor dem Bildschirm sitzt und Szenen schneidet.",
+          "Im Vereinshandball steht am Samstagabend eine Trainerin an der Seitenlinie, die am Montag wieder im Büro ist. Sie hat das Spiel gesehen, aber nur halb: Sie hat gecoacht, gewechselt, mit dem Schiedsrichter geredet. Was auf der anderen Seite passiert ist, weiss sie nicht genau. Genau für diesen Abend bauen wir.",
+        ],
+      },
+      {
+        title: "Für wen wir es bauen",
+        text: [
+          "Für Trainerinnen und Trainer von den Junioren bis zur 1. Liga, die das im Ehrenamt machen, neben Beruf und Familie. Viele haben keine Zeit für ein neues Programm und keine Lust auf hundert Zahlen.",
+          "Darum gibt es wenige Schritte, grosse Knöpfe und am Ende drei Dinge zum Mitnehmen statt einer Tabelle. Die Spielerinnen und Spieler brauchen kein Konto: Was du teilst, öffnet sich mit einem Link.",
+        ],
+      },
+      {
+        title: "Ehrlich über Grenzen",
+        text: [
+          "Eine Analyse aus einer einzigen Handykamera macht Fehler. Wir verstecken sie nicht. Die Analyse schlägt vor, der Mensch bestätigt: Sie zeigt dir die Momente, in denen ein Tor gefallen sein könnte, und du sagst in ein paar Minuten, was stimmt.",
+          "Was geschätzt ist, heisst «geschätzt». Den Ball verfolgt die Analyse heute nicht, darum zeigen wir keine Pässe. Was sie kann und was nicht, steht offen auf der Website, nicht im Kleingedruckten.",
+        ],
+      },
+      {
+        title: "Das Video gehört dem Verein",
+        text: [
+          "Das Video gehört dem Verein, der es hochlädt. Spielerinnen und Spieler willigen per Link ein, für Kinder die Eltern. Wir verkaufen keine Daten, zeigen keine Werbung, und diese Website setzt keine Tracker.",
+          "Die Kommunikation im Team bleibt, wo sie ist, meist im Gruppenchat. Wir bauen keinen Chat und keine Terminverwaltung. Wir machen die Analyse und liefern etwas, das sich im Chat teilen lässt.",
+        ],
+      },
+      {
+        title: "Aus der Schweiz, zuerst für den Schweizer Vereinshandball",
+        text: [
+          "Wir kommen aus der Schweiz und bauen zuerst für den Schweizer Vereinshandball: auf Deutsch, Französisch und Englisch, mit den Daten von handball.ch. Dein Team findest du über den Namen, Spielplan und Resultate sind schon da.",
+        ],
+      },
+      {
+        title: "Wohin es gehen soll",
+        text: [
+          "Wir wollen, dass die Analyse mehr selbst erkennt und dich weniger fragen muss, zuerst bei den Toren. Bis sie das zuverlässig kann, fragt sie. Jede neue Erkennung prüfen wir an echten Spielen, bevor sie etwas automatisch einträgt.",
+        ],
+      },
+    ],
+    pictureCaption: "So filmst du: ein Handy, hoch an der Mittellinie, das ganze Feld im Bild.",
+    shotAlt: "Startseite der App mit Beispieldaten: oben das letzte Spiel in der Vereinsfarbe mit Resultat und Verlauf.",
+    shotCaption: "Bild aus der App, mit Beispieldaten.",
+    contactTitle: "Schreib uns",
+    contact: "Fragen, Kritik oder ein Spiel, bei dem die Analyse nicht weiterkommt: Schreib uns an {email}.",
+    homeTitle: "Wer dahinter steht",
+    homeText: "Wir kommen aus der Schweiz und bauen Videoanalyse für Trainerinnen und Trainer, die das im Ehrenamt machen. Die Analyse schlägt vor, du bestätigst, und das Video gehört deinem Verein.",
+    homeLink: "Über uns",
   },
   moved: {
     title: "Diese Seite ist umgezogen",

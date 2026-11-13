@@ -1,7 +1,7 @@
 /** Build-time settings of the static site; all optional with safe defaults. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://handball-ai.ch").replace(/\/$/, "");
-export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://app.handball-ai.ch").replace(/\/$/, "");
-export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@handball-ai.ch";
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://handball-intelligence.com").replace(/\/$/, "");
+export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://app.handball-intelligence.com").replace(/\/$/, "");
+export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@handball-intelligence.com";
 export const STATUS_URL = process.env.NEXT_PUBLIC_STATUS_URL ?? "";
 
 /** The product's name, as it stands in titles, structured data and llms.txt. */

@@ -1,6 +1,6 @@
 // After `next build` (static export): pages without a language path and the 404 page.
 //
-// The app and old links use addresses like https://handball-ai.ch/aufnahme/ (no /de/). A static
+// The app and old links use addresses like https://handball-intelligence.com/aufnahme/ (no /de/). A static
 // export has no server redirects, so this writes a tiny page for each such address that sends the
 // visitor to the same page in the browser's language (fr, en, else de), keeping ?query and #hash,
 // with a meta refresh to /de/ and plain links when scripts are off. It also writes out/404.html in
@@ -15,7 +15,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "out");
 
 const slugsOf = (file) => [...readFileSync(join(root, file), "utf8").matchAll(/slug: "([a-z0-9-]+)"/g)].map((m) => m[1]);
-const PAGES = ["so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum", "funktionen"];
+const PAGES = ["so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "ueber-uns", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum", "funktionen"];
 const paths = [
   ...PAGES,
   ...slugsOf("content/help/index.ts").map((s) => `hilfe/${s}`),
@@ -23,7 +23,7 @@ const paths = [
   ...slugsOf("content/ratgeber/index.ts").map((s) => `ratgeber/${s}`),
 ];
 // absolute addresses for canonical and hreflang (search engines ignore relative ones)
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://handball-ai.ch").replace(/\/$/, "");
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://handball-intelligence.com").replace(/\/$/, "");
 
 // the built stylesheet(s) of the site, so these pages look like the rest without their own CSS
 const home = readFileSync(join(out, "de", "index.html"), "utf8");

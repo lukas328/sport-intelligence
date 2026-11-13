@@ -19,18 +19,18 @@ describe("search engines", () => {
         expect(urls.has(url), url).toBe(true);
       }
     }
-    for (const g of GUIDES) for (const l of g.locales) expect(urls.has(`https://handball-ai.ch/${l}/ratgeber/${g.slug}/`)).toBe(true);
+    for (const g of GUIDES) for (const l of g.locales) expect(urls.has(`https://handball-intelligence.com/${l}/ratgeber/${g.slug}/`)).toBe(true);
   });
 
   it("gives German-only pages only de-CH and x-default", () => {
-    expect(alternates("ratgeber/x", ["de"])).toEqual({ "de-CH": "https://handball-ai.ch/de/ratgeber/x/", "x-default": "https://handball-ai.ch/de/ratgeber/x/" });
+    expect(alternates("ratgeber/x", ["de"])).toEqual({ "de-CH": "https://handball-intelligence.com/de/ratgeber/x/", "x-default": "https://handball-intelligence.com/de/ratgeber/x/" });
   });
 
   it("lets everyone crawl and names the sitemap", () => {
     const r = robots();
     const rules = Array.isArray(r.rules) ? r.rules : [r.rules];
     expect(rules.every((x) => x.allow === "/" && !x.disallow)).toBe(true);
-    expect(r.sitemap).toBe("https://handball-ai.ch/sitemap.xml");
+    expect(r.sitemap).toBe("https://handball-intelligence.com/sitemap.xml");
   });
 
   it("writes llms.txt with the limits and without a price as an offer", () => {

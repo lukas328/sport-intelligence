@@ -13,6 +13,10 @@ import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
 import { SITE_UPDATED } from "@/lib/site";
 import { demoView } from "@/lib/things";
+import { GUIDES } from "../../../content/ratgeber";
+
+/** The three guides that exist in every language, shown on the start page. */
+const FEATURED = ["handballspiel-filmen", "videoanalyse-amateurteam", "video-im-verein-einwilligung"];
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -135,6 +139,30 @@ export default async function Home({ params }: Props) {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section aria-labelledby="guides" className="mt-20">
+          <SectionHead id="guides" title={m.guides.homeTitle} />
+          <ul className="mt-2 grid grid-cols-1 md:grid-cols-3">
+            {FEATURED.map((slug) => GUIDES.find((g) => g.slug === slug)!).map((g) => (
+              <li key={g.slug} className="border-b border-rule py-6 md:border-b-0 md:px-6 md:first:pl-0 md:[&+li]:border-l md:[&+li]:border-l-rule">
+                <Link href={`/${locale}/ratgeber/${g.slug}/`} className="font-slant text-[1.5rem] leading-tight hover:underline">
+                  {g.title[locale] ?? g.title.de}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link href={`/${locale}/ratgeber/`} className="link mt-2">
+            {m.guides.all}
+          </Link>
+        </section>
+
+        <section aria-labelledby="who" className="mt-20">
+          <SectionHead id="who" title={m.us.homeTitle} />
+          <p className="measure mt-4">{m.us.homeText}</p>
+          <Link href={`/${locale}/ueber-uns/`} className="link mt-2">
+            {m.us.homeLink}
+          </Link>
         </section>
 
         <section aria-labelledby="final" className="mt-20 border-t-2 border-ink pt-10">

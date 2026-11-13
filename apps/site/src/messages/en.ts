@@ -15,7 +15,8 @@ const en: Messages = {
     pricing: "Prices",
     faq: "Questions",
     data: "Data and consent",
-    about: "About and contact",
+    about: "Contact",
+    us: "About us",
     blog: "Blog",
     guides: "Guides",
     facts: "Facts at a glance",
@@ -260,6 +261,7 @@ const en: Messages = {
     noticeLead: "Tell the opponent and the hall that you are filming. Print this notice and put it on the door.",
     notice: "This match is filmed for analysis. The home team's coaches answer any questions.",
     print: "Print the notice",
+    guideLink: "position, height and settings in detail",
     moreTitle: "More on this",
   },
   demo: {
@@ -413,7 +415,7 @@ const en: Messages = {
     privacyLink: "Privacy policy (draft)",
   },
   about: {
-    title: "About and contact",
+    title: "Contact",
     head: "Ask us. We write back.",
     contactTitle: "Contact",
     email: "E-mail",
@@ -427,7 +429,7 @@ const en: Messages = {
       { title: "Only what is measured", text: "What the analysis does not measure, we do not draw. Estimated says \"estimated\"." },
     ],
     whoTitle: "Who we are",
-    who: "This section follows before launch.",
+    who: "What we stand for and where we are heading is on the page \"About us\".",
   },
   blog: {
     title: "Blog",
@@ -448,13 +450,14 @@ const en: Messages = {
     pricing: { title: "Prices for teams and clubs", description: "Free without automatic analysis, Team and Club with analysis. Prices in Swiss francs, yearly QR invoice. The prices are not final yet." },
     faq: { title: "Questions and answers", description: "Is my phone good enough? Does the analysis find the goals by itself? What happens to the video? The most common coaches' questions, answered briefly." },
     data: { title: "Video in the club: data and consent", description: "For parents and players: who sees the video, how consent works by link, what applies to children, where the data is stored and when it is deleted." },
-    about: { title: "About and contact", description: "Write to us, we usually reply within one working day. And the principles behind the analysis." },
+    about: { title: "Contact", description: "Write to the support address, we usually reply within one working day." },
     blog: { title: "Blog: from the workshop", description: "Posts on filming with a phone and on why the analysis shows where it is unsure." },
     terms: { title: "Terms (draft)", description: "Terms and conditions of Handball Intelligence. Draft, not yet legally reviewed." },
     privacy: { title: "Privacy policy (draft)", description: "How Handball Intelligence processes personal data. Draft, not yet legally reviewed." },
     imprint: { title: "Imprint", description: "Details of the operator of Handball Intelligence and contact." },
   },
   guides: {
+    homeTitle: "From the guides",
     title: "Guides",
     metaTitle: "Guides for handball coaches",
     description: "Filming a handball match, what video analysis gives an amateur team, consent in the club: practical answers for handball coaches.",
@@ -498,6 +501,63 @@ const en: Messages = {
     quoteTitle: "Quoting",
     quote: "You may quote this page word for word. Please give the address and the date.",
     more: "Read on",
+  },
+  us: {
+    title: "About us",
+    metaTitle: "About us: video analysis for club handball",
+    description: "We build Handball Intelligence so every club handball coach knows after the match what really happened: with a phone, a tripod and a few minutes.",
+    head: "Video analysis for club handball.",
+    lead: "We build Handball Intelligence so that every coach in club handball knows, on the evening after the match, what really happened. With a phone, a tripod and a few minutes, not with a camera system and an analyst.",
+    sections: [
+      {
+        title: "Why we exist",
+        text: [
+          "Until now, video analysis was something for professionals. If you wanted it, you needed a camera system in the hall and someone who spends hours in front of a screen cutting scenes.",
+          "In club handball, a coach stands on the sideline on Saturday evening and is back at the office on Monday. She saw the match, but only half of it: she was coaching, making changes, talking to the referee. What happened on the far side she does not really know. We build for exactly that evening.",
+        ],
+      },
+      {
+        title: "Who we build it for",
+        text: [
+          "For coaches from youth teams up to the regional leagues who do it as volunteers, next to work and family. Many have no time for a new program and no wish for a hundred numbers.",
+          "That is why there are few steps, big buttons and, at the end, three things to take home instead of a table. Players need no account: what you share opens with a link.",
+        ],
+      },
+      {
+        title: "Honest about limits",
+        text: [
+          "An analysis from a single phone camera makes mistakes. We do not hide them. The analysis suggests, a person confirms: it shows you the moments when a goal may have been scored, and in a few minutes you say what is right.",
+          "What is estimated says \"estimated\". Today the analysis does not track the ball, so we show no passes. What it can and cannot do is stated openly on the website, not in the small print.",
+        ],
+      },
+      {
+        title: "The video belongs to the club",
+        text: [
+          "The video belongs to the club that uploads it. Players consent by link, for children the parents. We sell no data, show no ads, and this website uses no trackers.",
+          "Team communication stays where it is, usually in the group chat. We build no chat and no scheduling. We do the analysis and deliver something you can share in the chat.",
+        ],
+      },
+      {
+        title: "From Switzerland, for Swiss club handball first",
+        text: [
+          "We come from Switzerland and build for Swiss club handball first: in German, French and English, with the data from handball.ch. You find your team by its name; fixtures and results are already there.",
+        ],
+      },
+      {
+        title: "Where we are heading",
+        text: [
+          "We want the analysis to recognise more by itself and ask you less, starting with the goals. Until it can do that reliably, it asks. We test every new detection on real matches before it enters anything automatically.",
+        ],
+      },
+    ],
+    pictureCaption: "How to film: one phone, high up at the halfway line, the whole court in the picture.",
+    shotAlt: "Start page of the app with example data: at the top the last match in the club colour with result and run of play.",
+    shotCaption: "Picture from the app, with example data (in German).",
+    contactTitle: "Write to us",
+    contact: "Questions, criticism or a match where the analysis gets stuck: write to us at {email}.",
+    homeTitle: "Who is behind it",
+    homeText: "We come from Switzerland and build video analysis for coaches who do it as volunteers. The analysis suggests, you confirm, and the video belongs to your club.",
+    homeLink: "About us",
   },
   moved: {
     title: "This page has moved",

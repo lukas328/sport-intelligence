@@ -30,6 +30,7 @@ export function Footer({ locale }: { locale: Locale }) {
   const support: [string, string][] = [
     ["hilfe", m.nav.faq],
     ["daten", m.nav.data],
+    ["ueber-uns", m.nav.us],
     ["kontakt", m.nav.about],
     [`mailto:${SUPPORT_EMAIL}`, SUPPORT_EMAIL],
   ];

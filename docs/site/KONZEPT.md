@@ -210,7 +210,7 @@ Geschätztes ist gestrichelt und heisst «geschätzt».
    sie mit «noch nicht endgültig». Torhüter-Modul (CHF 7) nicht gezeigt: ausserhalb des Kerns.
 2. **Dauer der Analyse**: keine Zeit versprochen (CPU etwa zweimal Spiellänge, GPU offen).
 3. **Wer wir sind**: kein Text vorhanden, Platzhalter.
-4. **Domain und Firmenname**: unverändert (`handball-ai.ch`, Handball AI GmbH per Build-Variable).
+4. **Domain und Firmenname**: Domain entschieden am 13. November: `handball-intelligence.com` (siehe `SEO.md`, «Vor dem Livegang»); Firmenname Handball AI GmbH per Build-Variable, offen.
 5. **Rechtliches**: Entwürfe, nicht geprüft (Q-LEGAL-1, Q-ADD-5).
 6. **Speicherort**: App und Datenbank Schweiz, Videos EU (ADR 025, ADR 002); Anbieter werden
    vor dem Start in der Datenschutzerklärung genannt.

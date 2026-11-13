@@ -24,6 +24,7 @@ function pages(locale: Locale): string[] {
     link(m.seo.data.title, pageUrl(locale, "daten"), m.seo.data.description),
     link(m.seo.faq.title, pageUrl(locale, "hilfe"), m.seo.faq.description),
     link(m.seo.demo.title, pageUrl(locale, "demo"), m.seo.demo.description),
+    link(m.us.title, pageUrl(locale, "ueber-uns"), m.us.homeText),
   ];
 }
 
@@ -41,6 +42,8 @@ export function llmsTxt(): string {
     `> ${de.facts.lead}`,
     "",
     `Stand: ${SITE_UPDATED}. Sprachen: Deutsch (de-CH), Französisch (fr-CH), Englisch. Für wen: ${get("Für wen")}`,
+    "",
+    `Wer dahinter steht: ${de.us.homeText}`,
     "",
     "## Kann",
     "",

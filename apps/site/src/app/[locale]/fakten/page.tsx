@@ -34,6 +34,7 @@ export default async function Facts({ params }: Props) {
     ["preise", m.nav.pricing],
     ["daten", m.nav.data],
     ["ratgeber", m.nav.guides],
+    ["ueber-uns", m.nav.us],
     ["hilfe", m.nav.faq],
   ];
   return (
@@ -74,6 +75,14 @@ export default async function Facts({ params }: Props) {
           <div className="mt-8">
             <Honest t={m.honest} />
           </div>
+        </section>
+
+        <section aria-labelledby="wer" className="mt-16">
+          <SectionHead id="wer" title={m.us.homeTitle} />
+          <p className="measure mt-4">{m.us.homeText}</p>
+          <Link href={`/${locale}/ueber-uns/`} className="link mt-2">
+            {m.us.homeLink}
+          </Link>
         </section>
 
         <section aria-labelledby="zitieren" className="mt-16">
