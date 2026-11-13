@@ -146,25 +146,31 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
         ) : (
           <span />
         )}
-        <Input label={`${t("matches.competition")} (${t("common.optional")})`} name="competition" />
-        <Input label={`${t("matches.venue")} (${t("common.optional")})`} name="venue" />
-        <Select label={t("matchForm.format")} name="format" value={chosenFormat} onChange={(e) => setFormat(e.target.value)}>
-          {FORMATS.map((k) => (
-            <option key={k} value={k}>
-              {t(`matchForm.format_${k}`)}
-            </option>
-          ))}
-        </Select>
-        <fieldset className="sm:col-span-2">
-          <legend className="mb-2 block text-[0.8125rem] font-medium">{t("matches.kits")}</legend>
-          <KitFields
-            kits={kits}
-            onChange={(next) => {
-              if (next.opponent !== kits.opponent) setOpponentPicked(true);
-              setKits(next);
-            }}
-          />
-        </fieldset>
+        {/* opponent and date are enough; the rest can be said later (UX test H07) */}
+        <details className="sm:col-span-2">
+          <summary className="min-h-11 cursor-pointer content-center text-[15px] font-semibold">{t("matches.moreDetails")}</summary>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Input label={`${t("matches.competition")} (${t("common.optional")})`} name="competition" />
+            <Input label={`${t("matches.venue")} (${t("common.optional")})`} name="venue" />
+            <Select label={t("matchForm.format")} name="format" value={chosenFormat} onChange={(e) => setFormat(e.target.value)}>
+              {FORMATS.map((k) => (
+                <option key={k} value={k}>
+                  {t(`matchForm.format_${k}`)}
+                </option>
+              ))}
+            </Select>
+            <fieldset className="sm:col-span-2">
+              <legend className="mb-2 block text-[0.8125rem] font-medium">{t("matches.kits")}</legend>
+              <KitFields
+                kits={kits}
+                onChange={(next) => {
+                  if (next.opponent !== kits.opponent) setOpponentPicked(true);
+                  setKits(next);
+                }}
+              />
+            </fieldset>
+          </div>
+        </details>
         <div className="pt-2 sm:col-span-2">
           <Button type="submit" size="lg" loading={busy}>
             {t("matches.create")}

@@ -8426,6 +8426,11 @@ export interface components {
             primary_color: string;
             /** Secondary Color */
             secondary_color: string;
+            /**
+             * Something To Protect
+             * @default false
+             */
+            something_to_protect?: boolean;
             /** Two Factor Required */
             two_factor_required: boolean;
             /**

@@ -509,12 +509,13 @@
     "uploadFor": "Which match is the video from?",
     "uploadOther": "Or create a new match",
     "addReport": "Add match report",
-    "reportFile": "Or as a file:"
+    "reportFile": "Or as a file:",
+    "moreDetails": "More: competition, venue, format, shirts"
   },
   "upload": {
     "title": "Upload video",
-    "drop": "Drop a video here or choose one",
-    "choose": "Choose file",
+    "drop": "Drag the video here",
+    "choose": "or choose a file",
     "role": "Camera",
     "role_main": "Main camera",
     "role_goal_cam_left": "Goal camera left",
@@ -525,7 +526,7 @@
     "pause": "Pause",
     "resume": "Resume",
     "cancel": "Cancel",
-    "done": "Upload complete. Processing starts.",
+    "done": "Uploaded.",
     "failed": "Upload failed. Choose the same file to continue.",
     "paused": "Paused. Choose the same file again to continue.",
     "leaveWarning": "The upload is still running.",
@@ -535,13 +536,20 @@
     "import": "Import",
     "importStarted": "Import started.",
     "tipsTitle": "Filming tips",
-    "tips": "One fixed camera, raised (3 m or more), at the centre line, whole court in view. At least 1080p; in halls with 50 Hz lighting use 50 or 100 fps.",
+    "tips": "Technical: 1080p or more; in halls with 50 Hz light 50 or 100 frames per second.",
     "mobileData": "You are on mobile data. The video is {size}. Upload now or later on Wi-Fi?",
     "slowLink": "The connection is slow. The video is {size}; the upload may take long and continues next time.",
     "uploadAnyway": "Upload now",
     "later": "Later on Wi-Fi",
     "offline": "No connection. The upload continues by itself once the network is back.",
-    "addCamera": "Add another camera (goal camera, second angle)"
+    "addCamera": "Add another camera (goal camera, second angle)",
+    "tip1": "A phone is enough.",
+    "tip2": "On a tripod, high at the centre line, the whole court in the picture.",
+    "tip3": "The whole match in one file (MP4, MOV or MKV).",
+    "guide": "Full filming guide",
+    "chooseVideo": "Choose video",
+    "more": "More: another camera, a link, technical details",
+    "mayClose": "You can close the page. You get an e-mail when the three things are ready."
   },
   "processing": {
     "title": "Processing",
@@ -746,7 +754,7 @@
     "report": "Match report",
     "shots": "Shots",
     "keepers": "Goalkeepers",
-    "physical": "Physical",
+    "physical": "Running (estimated, from the video)",
     "scenes": "Scenes",
     "highlights": "Highlights",
     "analysis": "Analysis",
@@ -1373,7 +1381,8 @@
     "failed": "That did not work. Please try again.",
     "status_invoice_open": "invoice open",
     "status_invoice_paid": "paid by invoice",
-    "current": "Current plan"
+    "current": "Current plan",
+    "trialAfter": "After that the free plan applies until you decide. Nothing is deleted."
   },
   "share": {
     "button": "Share",
@@ -2398,7 +2407,10 @@
     "me": "Me",
     "club": "Club",
     "twoFactorDue": "Set up two-factor sign-in",
-    "uploadShort": "Video"
+    "uploadShort": "Video",
+    "twoFactorLater": "Remind me in seven days",
+    "twoFactorTitle": "Protect the account",
+    "twoFactorWhy": "Now there are videos and people in the club. A second step at sign-in keeps the account safe."
   },
   "palette": {
     "newMatch": "Add a match",
@@ -3002,7 +3014,7 @@
     "colourOpen": "colour open",
     "askColour": "What colour does {opponent} wear?",
     "colourSaved": "Saved",
-    "noVideoBlock": "Upload the video. After about 40 minutes you get the three things and all scenes.",
+    "noVideoBlock": "Upload the video. You get an e-mail when the three things are ready.",
     "chooseVideo": "Choose video",
     "stepDone": "done",
     "stepRunning": "running",
@@ -3233,7 +3245,10 @@
     "editTitle": "Edit squad",
     "back": "Back to the team",
     "empty": "Nobody in the squad yet.",
-    "openSuggestions": "{n, plural, one {One suggestion from handball.ch is waiting} other {# suggestions from handball.ch are waiting}}"
+    "openSuggestions": "{n, plural, one {One suggestion from handball.ch is waiting} other {# suggestions from handball.ch are waiting}}",
+    "fromHandball": "From handball.ch.",
+    "group_all": "Squad",
+    "consentLater": "You need consents only once you share scenes with the team. The link for it is ready."
   },
   "seasonPage": {
     "kick": "{season} · {league} · after {n, plural, one {# match} other {# matches}}",

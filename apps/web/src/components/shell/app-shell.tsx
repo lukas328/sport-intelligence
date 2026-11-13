@@ -207,7 +207,8 @@ export function AppShell({
             {/* phone top bar (UX test H06, H09): the crest, the team name kept also with large
                 text, the bell, «Video» with its word, the account; the search is Szenen */}
             <div className="flex h-[60px] items-center gap-2 px-4 lg:hidden">
-              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center">
+              {/* with large text the crest gives way, the team name stays (UX test H09) */}
+              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center max-[359px]:hidden">
                 <ClubMark org={org} className="h-[34px] w-[30px] text-[11px]" />
               </Link>
               <div className="min-w-0 flex-1">

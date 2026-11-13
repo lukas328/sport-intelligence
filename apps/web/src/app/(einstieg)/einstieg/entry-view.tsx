@@ -181,6 +181,7 @@ function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: numb
       return r.data as Preview;
     },
   });
+  const standing = useStanding(q.data);
   if (q.isLoading) return <p className="text-[17px] text-ink-2" aria-busy="true">…</p>;
   if (!q.data) {
     return (
@@ -195,7 +196,6 @@ function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: numb
   const p = q.data;
   const last = p.last;
   const result = last && last.own != null && last.opp != null ? (last.own > last.opp ? "won" : last.own < last.opp ? "lost" : "draw") : null;
-  const run = p.run && p.run.count >= 2 ? t(p.run.result === "w" ? "runW" : p.run.result === "l" ? "runL" : "runD", { n: p.run.count }) : null;
   return (
     <div className="space-y-10" style={clubStyle(colour, SECOND(colour)) as CSSProperties} data-testid="entry-team">
       <div className="bleed-x -mt-6 sm:-mt-10">
@@ -204,7 +204,7 @@ function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: numb
           title={
             <>
               {p.name}
-              <span className="block text-[0.55em]">{[p.rank != null ? t("rank", { rank: p.rank }) : null, run].filter(Boolean).join(" ")}</span>
+              <span className="block text-[0.55em]">{standing}</span>
             </>
           }
           own={last?.own ?? null}

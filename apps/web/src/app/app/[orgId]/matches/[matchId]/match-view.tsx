@@ -177,7 +177,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   // (the overview says how they come: the match report or marking courtside)
   const counted = (stats.data?.quality.events ?? 0) > 0;
   // Zahlen: the figure sheets stacked, one level; running distance only with a video
-  const numberParts = counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "physical" && main);
+  // running figures only from the tracking of a video, and called estimated (UX test Z5)
+  const numberParts = (counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "physical")).filter((v) => v !== "physical" || main);
   const showPhysical = () => {
     setView("numbers");
     requestAnimationFrame(() => {
@@ -647,6 +648,11 @@ function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: s
     { key: "things", st: state(analysis?.status === "succeeded", followDone && analysis?.status !== "succeeded") },
   ] as const;
   const current = analysis && analysis.status !== "succeeded" ? analysis : (ingest ?? running[0]);
+  // the bar only moves forward (UX test H05: it jumped 10, 15, 70, 5 between the stages): the
+  // whole run counts, ingest the first fifth, the analysis the rest
+  const overall = analysis ? 0.2 + 0.8 * (analysis.status === "succeeded" ? 1 : analysis.progress) : 0.2 * (ingest?.progress ?? 0);
+  const shown = useRef(0);
+  shown.current = Math.max(shown.current, overall);
   const started = current?.started_at ? new Date(current.started_at).getTime() : null;
   const elapsed = started ? (now.getTime() - started) / 1000 : 0;
   const etaMin = current && current.status === "running" && current.progress > 0.05 && elapsed > 20 ? Math.max(1, Math.round(((elapsed / current.progress) * (1 - current.progress)) / 60)) : null;
@@ -671,7 +677,7 @@ function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: s
       <div>
         <h2 className="text-[26px]">{ta("titleRunning")}</h2>
         <div className="mt-3 h-1.5 bg-rule" aria-hidden>
-          <div className="h-full bg-ink transition-all duration-500" style={{ width: `${(current?.progress ?? 0) * 100}%` }} />
+          <div className="h-full bg-ink transition-all duration-500" style={{ width: `${shown.current * 100}%` }} />
         </div>
         <p className="mt-2 text-[15px] font-bold">{etaMin != null ? ta("minutesLeft", { minutes: etaMin }) : t("etaSoon")}</p>
         <ol className="mt-4 m-0 list-none p-0">

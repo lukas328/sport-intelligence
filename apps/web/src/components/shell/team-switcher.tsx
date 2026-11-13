@@ -17,7 +17,7 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
   if (teams.length <= 1 && orgs.length <= 1) {
     return (
       <div className={cn("min-w-0", compact ? "px-1" : "px-2")}>
-        <p className="truncate text-sm font-semibold">{label}</p>
+        <p className={cn("font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight break-words" : "truncate text-sm")}>{label}</p>
         {sub && !compact && <p className="truncate text-xs text-muted">{sub}</p>}
       </div>
     );
@@ -33,7 +33,8 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
         data-testid="team-switcher"
       >
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold">{label}</span>
+          {/* on the phone two lines rather than «H…» (UX test H09) */}
+          <span className={cn("block font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight break-words" : "truncate text-sm")}>{label}</span>
           {sub && !compact && <span className="block truncate text-xs text-muted">{sub}</span>}
         </span>
         <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted" />

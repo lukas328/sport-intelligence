@@ -24,6 +24,8 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await expect(page.getByText("Noch keine Spiele.")).toBeVisible();
   await expectAccessible(page);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
+  // the rest of the match details sits behind «Mehr» (UX test H07)
+  await page.getByText("Mehr: Wettbewerb, Halle, Spielformat, Trikots").click();
   await page.getByLabel("Wettbewerb (optional)").fill("3. Liga");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
@@ -46,7 +48,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await input.setInputFiles(MATCH_VIDEO);
   // resumed: progress starts above zero because part 1 is already stored
   await expect(progress).toContainText(/^[1-9]\d* % hochgeladen/);
-  await expect(page.getByText("Upload fertig. Die Verarbeitung startet.")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("Fertig hochgeladen.")).toBeVisible({ timeout: 60_000 });
 
   // processing runs in the worker; progress arrives via SSE
   await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });

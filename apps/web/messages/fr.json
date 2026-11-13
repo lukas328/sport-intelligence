@@ -509,12 +509,13 @@
     "uploadFor": "De quel match vient la vidéo ?",
     "uploadOther": "Ou créer un nouveau match",
     "addReport": "Ajouter la feuille de match",
-    "reportFile": "Ou comme fichier :"
+    "reportFile": "Ou comme fichier :",
+    "moreDetails": "Plus : compétition, salle, format, maillots"
   },
   "upload": {
     "title": "Téléverser la vidéo",
-    "drop": "Déposez une vidéo ici ou choisissez-en une",
-    "choose": "Choisir un fichier",
+    "drop": "Glisser la vidéo ici",
+    "choose": "ou choisir un fichier",
     "role": "Caméra",
     "role_main": "Caméra principale",
     "role_goal_cam_left": "Caméra de but gauche",
@@ -525,7 +526,7 @@
     "pause": "Pause",
     "resume": "Reprendre",
     "cancel": "Annuler",
-    "done": "Téléversement terminé. Le traitement démarre.",
+    "done": "Chargement terminé.",
     "failed": "Le téléversement a échoué. Choisissez le même fichier pour continuer.",
     "paused": "En pause. Choisissez à nouveau le même fichier pour continuer.",
     "leaveWarning": "Le téléversement est en cours.",
@@ -535,13 +536,20 @@
     "import": "Importer",
     "importStarted": "Import démarré.",
     "tipsTitle": "Conseils de tournage",
-    "tips": "Une caméra fixe, en hauteur (3 m ou plus), au niveau de la ligne médiane, tout le terrain visible. Au moins 1080p ; dans les salles éclairées en 50 Hz, filmer en 50 ou 100 fps.",
+    "tips": "Technique : 1080p ou plus ; dans les salles avec un éclairage 50 Hz, 50 ou 100 images par seconde.",
     "mobileData": "Tu es connecté·e avec des données mobiles. La vidéo fait {size}. Envoyer maintenant ou plus tard en Wi-Fi ?",
     "slowLink": "La connexion est lente. La vidéo fait {size} ; l'envoi peut durer et reprendra la prochaine fois.",
     "uploadAnyway": "Envoyer maintenant",
     "later": "Plus tard en Wi-Fi",
     "offline": "Pas de connexion. L'envoi reprend tout seul dès que le réseau revient.",
-    "addCamera": "Ajouter une caméra (caméra de but, autre angle)"
+    "addCamera": "Ajouter une caméra (caméra de but, autre angle)",
+    "tip1": "Un téléphone suffit.",
+    "tip2": "Sur un trépied, en hauteur à la ligne médiane, tout le terrain dans l'image.",
+    "tip3": "Tout le match dans un fichier (MP4, MOV ou MKV).",
+    "guide": "Guide de tournage complet",
+    "chooseVideo": "Choisir la vidéo",
+    "more": "Plus : autre caméra, lien, technique",
+    "mayClose": "Tu peux fermer la page. Tu reçois un e-mail quand les trois choses sont prêtes."
   },
   "processing": {
     "title": "Traitement",
@@ -746,7 +754,7 @@
     "report": "Feuille de match",
     "shots": "Tirs",
     "keepers": "Gardiens",
-    "physical": "Physique",
+    "physical": "Distance parcourue (estimée, d'après la vidéo)",
     "scenes": "Scènes",
     "highlights": "Highlights",
     "analysis": "Analyse",
@@ -1373,7 +1381,8 @@
     "failed": "Cela n'a pas fonctionné. Réessaie.",
     "status_invoice_open": "facture ouverte",
     "status_invoice_paid": "payé sur facture",
-    "current": "Offre actuelle"
+    "current": "Offre actuelle",
+    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé."
   },
   "share": {
     "button": "Partager",
@@ -2398,7 +2407,10 @@
     "me": "Moi",
     "club": "Club",
     "twoFactorDue": "Activer la double authentification",
-    "uploadShort": "Vidéo"
+    "uploadShort": "Vidéo",
+    "twoFactorLater": "Me le rappeler dans sept jours",
+    "twoFactorTitle": "Protéger le compte",
+    "twoFactorWhy": "Il y a maintenant des vidéos et des personnes dans le club. Une deuxième étape à la connexion protège le compte."
   },
   "palette": {
     "newMatch": "Ajouter un match",
@@ -3002,7 +3014,7 @@
     "colourOpen": "couleur ouverte",
     "askColour": "Quelle couleur porte {opponent} ?",
     "colourSaved": "Enregistré",
-    "noVideoBlock": "Charge la vidéo. Après environ 40 minutes, tu reçois les trois points et toutes les scènes.",
+    "noVideoBlock": "Charge la vidéo. Tu reçois un e-mail quand les trois choses sont prêtes.",
     "chooseVideo": "Choisir la vidéo",
     "stepDone": "terminé",
     "stepRunning": "en cours",
@@ -3233,7 +3245,10 @@
     "editTitle": "Modifier l'effectif",
     "back": "Retour à l'équipe",
     "empty": "Personne dans l'effectif pour l'instant.",
-    "openSuggestions": "{n, plural, one {Une suggestion de handball.ch attend} other {# suggestions de handball.ch attendent}}"
+    "openSuggestions": "{n, plural, one {Une suggestion de handball.ch attend} other {# suggestions de handball.ch attendent}}",
+    "fromHandball": "De handball.ch.",
+    "group_all": "Effectif",
+    "consentLater": "Les consentements ne sont nécessaires qu'au partage de scènes avec l'équipe. Le lien est prêt."
   },
   "seasonPage": {
     "kick": "{season} · {league} · après {n, plural, one {# match} other {# matchs}}",

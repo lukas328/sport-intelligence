@@ -13,6 +13,7 @@ import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/c
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { useShell } from "./context";
+import { useTwoFactorReminder } from "./two-factor-reminder";
 
 export function initials(name: string): string {
   return name
@@ -36,6 +37,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
   const [feedback, setFeedback] = useState(false);
   const cfg = useQuery({ queryKey: ["support-config"], queryFn: async () => (await api.GET("/v1/support/config")).data ?? null, staleTime: 3_600_000 });
   const base = `/app/${org.id}`;
+  const reminder = useTwoFactorReminder();
   return (
     <>
       <MenuRoot>
@@ -49,7 +51,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
         >
           <span aria-hidden className="font-slant relative grid size-9 shrink-0 place-items-center bg-ink text-[13px] text-ground">
             {initials(me.name) || "?"}
-            {me.two_factor_due && <span className="absolute -top-1 -right-1 size-3 border-2 border-ground bg-error" data-testid="account-dot" />}
+            {reminder.due && <span className="absolute -top-1 -right-1 size-3 border-2 border-ground bg-error" data-testid="account-dot" />}
           </span>
           {!compact && (
             <span className="min-w-0">
@@ -62,10 +64,15 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
           <MenuItem href={`${base}/me`} icon={<UserRound />} testId="menu-me">
             {t("me")}
           </MenuItem>
-          {me.two_factor_due && (
-            <MenuItem href={`${base}/me/security`} icon={<ShieldAlert />} testId="menu-two-factor">
-              {t("twoFactorDue")}
-            </MenuItem>
+          {reminder.due && (
+            <>
+              <MenuItem href={`${base}/me/security`} icon={<ShieldAlert />} testId="menu-two-factor">
+                {t("twoFactorDue")}
+              </MenuItem>
+              <MenuItem onSelect={reminder.later} icon={<span className="size-4" />} testId="menu-two-factor-later">
+                {t("twoFactorLater")}
+              </MenuItem>
+            </>
           )}
           {club && (
             <MenuItem href={`${base}/club`} icon={<Settings />} testId="menu-settings">

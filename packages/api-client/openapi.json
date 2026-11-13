@@ -10332,6 +10332,11 @@
             "title": "Secondary Color",
             "type": "string"
           },
+          "something_to_protect": {
+            "default": false,
+            "title": "Something To Protect",
+            "type": "boolean"
+          },
           "two_factor_required": {
             "title": "Two Factor Required",
             "type": "boolean"

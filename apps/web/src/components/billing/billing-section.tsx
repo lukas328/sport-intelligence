@@ -96,10 +96,16 @@ export function BillingSection({ orgId }: { orgId: string }) {
           <p>
             <span className="font-semibold">{t(`plan_${b.plan as "free"}`)}</span>
             {b.status && <span className="ml-2 text-sm text-muted">{t(`status_${b.status as "active"}`)}</span>}
-            {b.trial_ends_at && b.status === "trialing" && (
+            {/* the trial at sign-up has no Stripe status: shown by its end (UX test Z8) */}
+            {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && (
               <span className="ml-2 text-sm">{t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at), { dateStyle: "medium" }) })}</span>
             )}
           </p>
+          {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && !b.status && (
+            <p className="m-0 w-full text-[15px] text-ink-2" data-testid="trial-after">
+              {t("trialAfter")}
+            </p>
+          )}
           {b.plan !== "free" && b.checkout_available && (
             <Button variant="secondary" onClick={() => void go("/v1/orgs/{org_id}/billing/portal")}>
               {t("portal")}

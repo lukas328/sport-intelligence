@@ -41,7 +41,7 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           season_id: x.current_season?.id ?? null,
           team_features: x.settings.team_features ?? false,
         }))}
-        me={{ name: me.name, email: me.email, two_factor_due: Boolean(org.two_factor_required && !me.totp_enabled) }}
+        me={{ name: me.name, email: me.email, two_factor_due: Boolean(org.two_factor_required && !me.totp_enabled && org.something_to_protect) }}
         savedTeam={savedTeam}
         banner={banner}
       >

@@ -509,12 +509,13 @@
     "uploadFor": "Zu welchem Spiel gehört das Video?",
     "uploadOther": "Oder ein neues Spiel anlegen",
     "addReport": "Spielbericht hinzufügen",
-    "reportFile": "Oder als Datei:"
+    "reportFile": "Oder als Datei:",
+    "moreDetails": "Mehr: Wettbewerb, Halle, Spielformat, Trikots"
   },
   "upload": {
     "title": "Video hochladen",
-    "drop": "Video hierher ziehen oder auswählen",
-    "choose": "Datei auswählen",
+    "drop": "Video hierher ziehen",
+    "choose": "oder Datei wählen",
     "role": "Kamera",
     "role_main": "Hauptkamera",
     "role_goal_cam_left": "Torkamera links",
@@ -525,7 +526,7 @@
     "pause": "Pausieren",
     "resume": "Fortsetzen",
     "cancel": "Abbrechen",
-    "done": "Upload fertig. Die Verarbeitung startet.",
+    "done": "Fertig hochgeladen.",
     "failed": "Upload fehlgeschlagen. Du kannst ihn mit derselben Datei fortsetzen.",
     "paused": "Pausiert. Wähle dieselbe Datei erneut, um fortzusetzen.",
     "leaveWarning": "Der Upload läuft noch.",
@@ -535,13 +536,20 @@
     "import": "Importieren",
     "importStarted": "Import gestartet.",
     "tipsTitle": "Aufnahmetipps",
-    "tips": "Eine feste Kamera, erhöht (ab 3 m), auf Höhe der Mittellinie, das ganze Feld im Bild. Mindestens 1080p, in Hallen mit 50-Hz-Licht 50 oder 100 fps.",
+    "tips": "Technik: 1080p oder mehr; in Hallen mit 50-Hz-Licht 50 oder 100 Bilder pro Sekunde.",
     "mobileData": "Du bist mit mobilen Daten verbunden. Das Video hat {size}. Jetzt hochladen oder später im WLAN?",
     "slowLink": "Die Verbindung ist langsam. Das Video hat {size}; der Upload kann lange dauern und läuft beim nächsten Mal weiter.",
     "uploadAnyway": "Jetzt hochladen",
     "later": "Später im WLAN",
     "offline": "Keine Verbindung. Der Upload läuft automatisch weiter, sobald das Netz wieder da ist.",
-    "addCamera": "Weitere Kamera hinzufügen (Torkamera, zweiter Blickwinkel)"
+    "addCamera": "Weitere Kamera hinzufügen (Torkamera, zweiter Blickwinkel)",
+    "tip1": "Ein Handy reicht.",
+    "tip2": "Auf ein Stativ, hoch an der Mittellinie, das ganze Feld im Bild.",
+    "tip3": "Das ganze Spiel in einer Datei (MP4, MOV oder MKV).",
+    "guide": "Ausführliche Filmanleitung",
+    "chooseVideo": "Video wählen",
+    "more": "Mehr: andere Kamera, Link, Technik",
+    "mayClose": "Du kannst die Seite schliessen. Du bekommst eine Mail, wenn die drei Dinge da sind."
   },
   "processing": {
     "title": "Verarbeitung",
@@ -746,7 +754,7 @@
     "report": "Spielbericht",
     "shots": "Würfe",
     "keepers": "Torhüter",
-    "physical": "Laufleistung",
+    "physical": "Laufleistung (geschätzt, aus dem Video)",
     "scenes": "Szenen",
     "highlights": "Highlights",
     "analysis": "Analyse",
@@ -1373,7 +1381,8 @@
     "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
     "status_invoice_open": "Rechnung offen",
     "status_invoice_paid": "per Rechnung bezahlt",
-    "current": "Aktueller Plan"
+    "current": "Aktueller Plan",
+    "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht."
   },
   "share": {
     "button": "Teilen",
@@ -2398,7 +2407,10 @@
     "me": "Ich",
     "club": "Verein",
     "twoFactorDue": "Zwei-Faktor-Anmeldung einrichten",
-    "uploadShort": "Video"
+    "uploadShort": "Video",
+    "twoFactorLater": "In sieben Tagen wieder erinnern",
+    "twoFactorTitle": "Konto schützen",
+    "twoFactorWhy": "Jetzt sind Videos und Personen im Verein. Mit einem zweiten Schritt beim Anmelden bleibt das Konto sicher."
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",
@@ -3002,7 +3014,7 @@
     "colourOpen": "Farbe offen",
     "askColour": "Welche Farbe trägt {opponent}?",
     "colourSaved": "Gespeichert",
-    "noVideoBlock": "Lad das Video hoch. Nach etwa 40 Minuten bekommst du die drei Dinge und alle Szenen.",
+    "noVideoBlock": "Lad das Video hoch. Du bekommst eine Mail, wenn die drei Dinge da sind.",
     "chooseVideo": "Video wählen",
     "stepDone": "fertig",
     "stepRunning": "läuft",
@@ -3233,7 +3245,10 @@
     "editTitle": "Kader bearbeiten",
     "back": "Zurück zum Team",
     "empty": "Noch niemand im Kader.",
-    "openSuggestions": "{n, plural, one {Ein Vorschlag von handball.ch wartet} other {# Vorschläge von handball.ch warten}}"
+    "openSuggestions": "{n, plural, one {Ein Vorschlag von handball.ch wartet} other {# Vorschläge von handball.ch warten}}",
+    "fromHandball": "Von handball.ch.",
+    "group_all": "Kader",
+    "consentLater": "Einwilligungen brauchst du erst, wenn du Szenen mit dem Team teilst. Der Link dazu ist bereit."
   },
   "seasonPage": {
     "kick": "{season} · {league} · nach {n, plural, =1 {einem Spiel} =2 {zwei Spielen} =3 {drei Spielen} =4 {vier Spielen} =5 {fünf Spielen} =6 {sechs Spielen} =7 {sieben Spielen} =8 {acht Spielen} =9 {neun Spielen} =10 {zehn Spielen} other {# Spielen}}",
