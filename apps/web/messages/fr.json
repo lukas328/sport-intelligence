@@ -3046,7 +3046,7 @@
     "colourOpen": "couleur ouverte",
     "askColour": "Quelle couleur porte {opponent} ?",
     "colourSaved": "Enregistré",
-    "noVideoBlock": "Charge la vidéo. Tu reçois un e-mail quand les trois choses sont prêtes.",
+    "noVideoBlock": "Télécharge la vidéo. Tu reçois un e-mail quand l'analyse est terminée.",
     "chooseVideo": "Choisir la vidéo",
     "stepDone": "terminé",
     "stepRunning": "en cours",
