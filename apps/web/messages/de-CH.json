@@ -192,7 +192,8 @@
     "needTerms": "Bitte akzeptiere die Bedingungen.",
     "claim": "Dein Spiel. Und drei Dinge zum Mitnehmen.",
     "toSite": "Was die App kann: {site}",
-    "newLink": "Neuen Link an {email} schicken"
+    "newLink": "Neuen Link an {email} schicken",
+    "backToTeam": "Zurück zur Teamwahl"
   },
   "invite": {
     "title": "Einladung",

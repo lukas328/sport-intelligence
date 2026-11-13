@@ -192,7 +192,8 @@
     "needTerms": "Merci d'accepter les conditions.",
     "claim": "Ton match. Et trois choses à retenir.",
     "toSite": "Ce que fait l'app : {site}",
-    "newLink": "Envoyer un nouveau lien à {email}"
+    "newLink": "Envoyer un nouveau lien à {email}",
+    "backToTeam": "Retour au choix de l'équipe"
   },
   "invite": {
     "title": "Invitation",

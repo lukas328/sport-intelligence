@@ -192,7 +192,8 @@
     "needTerms": "Please accept the terms.",
     "claim": "Your match. And three things to take away.",
     "toSite": "What the app does: {site}",
-    "newLink": "Send a new link to {email}"
+    "newLink": "Send a new link to {email}",
+    "backToTeam": "Back to choosing the team"
   },
   "invite": {
     "title": "Invitation",

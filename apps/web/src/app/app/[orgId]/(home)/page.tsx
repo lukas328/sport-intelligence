@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { serverApi } from "@/lib/api";
 import { modeFor, startHref } from "@/lib/nav-model";
-import { TodayView } from "./today-view";
+import { TodayView } from "../today-view";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("shell"))("today") };
