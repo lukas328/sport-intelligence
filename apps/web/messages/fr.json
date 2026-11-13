@@ -2436,7 +2436,8 @@
     "twoFactorLater": "Me le rappeler dans sept jours",
     "twoFactorTitle": "Protéger le compte",
     "twoFactorWhy": "Il y a maintenant des vidéos et des personnes dans le club. Une deuxième étape à la connexion protège le compte.",
-    "olderArea": "Une partie de l'ancienne version de l'app. Tout reste ici; les nouveautés arrivent sous Scènes et Matchs."
+    "olderArea": "Une partie de l'ancienne version de l'app. Tout reste ici; les nouveautés arrivent sous Scènes et Matchs.",
+    "scenesAndSearch": "Scènes et recherche"
   },
   "palette": {
     "newMatch": "Ajouter un match",

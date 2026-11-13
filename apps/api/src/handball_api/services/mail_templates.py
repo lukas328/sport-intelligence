@@ -81,17 +81,17 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
         "de-CH": (
             "Die Analyse gegen {opponent} ist fertig",
             "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Sie hat "
-            "noch keine Tore gefunden. {questions} an dich helfen ihr weiter:\n\n{link}",
+            "noch keine Tore gefunden. {questions_sentence}\n\n{link}",
         ),
         "en": (
             "The analysis against {opponent} is done",
             "Hello {name}\n\nThe analysis of {team} against {opponent} is done. It found no "
-            "goals yet. {questions} for you help it on:\n\n{link}",
+            "goals yet. {questions_sentence}\n\n{link}",
         ),
         "fr": (
             "L'analyse contre {opponent} est terminée",
             "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Elle "
-            "n'a pas encore trouvé de but. {questions} pour toi l'aident à avancer :\n\n{link}",
+            "n'a pas encore trouvé de but. {questions_sentence}\n\n{link}",
         ),
     },
     "analysis_no_goals": {
@@ -270,7 +270,12 @@ def render(template: str, locale: str, to: str, **values: object) -> Email:
         values = {**values, "name": ""}
     # «1 Frage», «2 Fragen»: the count with the right word (UX test A02)
     if isinstance(values.get("questions"), int):
-        values = {**values, "questions": questions(int(values["questions"]), locale)}
+        n = int(values["questions"])
+        values = {
+            **values,
+            "questions": questions(n, locale),
+            "questions_sentence": questions_sentence(n, locale),
+        }
     text = body.format(**values)
     first, _, rest = text.partition("\n")
     return Email(to=to, subject=subject.format(**values), text=f"{first.rstrip()}\n{rest}")
@@ -284,6 +289,19 @@ def questions(n: int, locale: str) -> str:
         "fr": ("question", "questions"),
     }.get(locale, ("Frage", "Fragen"))
     return f"{n} {one if n == 1 else many}"
+
+
+def questions_sentence(n: int, locale: str) -> str:
+    """The whole sentence about the open questions, singular and plural each written out."""
+    one, many = {
+        "de-CH": ("Eine Frage an dich hilft ihr weiter:", "{n} Fragen an dich helfen ihr weiter:"),
+        "en": ("One question for you helps it on:", "{n} questions for you help it on:"),
+        "fr": (
+            "Une question pour toi l'aide à avancer :",
+            "{n} questions pour toi l'aident à avancer :",
+        ),
+    }.get(locale, ("Eine Frage an dich hilft ihr weiter:", "{n} Fragen an dich helfen ihr weiter:"))
+    return one if n == 1 else many.format(n=n)
 
 
 def validity(minutes: int, locale: str) -> str:
