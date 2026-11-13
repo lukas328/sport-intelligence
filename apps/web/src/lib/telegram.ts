@@ -49,13 +49,14 @@ interface ScorerRow {
   seven_m_goals: number;
 }
 
-/** Our best scorers, «Brunner 7» or «Graf 5/2» (of them from seven metres). */
-export function topScorers(players: ScorerRow[], names: Record<string, string>, n = 3): string[] {
+/** Our best scorers, «Brunner 7» or «Graf 5 (2 vom 7-m)»: the seven metres in words, «5/2» read
+ * as a fraction (UX test N25). */
+export function topScorers(players: ScorerRow[], names: Record<string, string>, n = 3, seven: (k: number) => string = (k) => `/${k}`): string[] {
   return players
     .filter((p) => p.side === "own" && p.goals > 0)
     .sort((a, b) => b.goals - a.goals || (a.number ?? 99) - (b.number ?? 99))
     .slice(0, n)
-    .map((p) => `${shortName(p.player_id ? names[p.player_id] : undefined, p.number)} ${p.goals}${p.seven_m_goals ? `/${p.seven_m_goals}` : ""}`);
+    .map((p) => `${shortName(p.player_id ? names[p.player_id] : undefined, p.number)} ${p.goals}${p.seven_m_goals ? seven(p.seven_m_goals) : ""}`);
 }
 
 interface KeeperRow {

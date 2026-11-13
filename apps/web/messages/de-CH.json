@@ -556,7 +556,8 @@
     "guide": "Ausführliche Filmanleitung",
     "chooseVideo": "Video wählen",
     "more": "Mehr: andere Kamera, Link, Technik",
-    "mayClose": "Du kannst die Seite schliessen. Du bekommst eine Mail, wenn die drei Dinge da sind."
+    "mayClose": "Du kannst die Seite schliessen. Wir schicken dir eine Mail, wenn die Analyse fertig ist.",
+    "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy."
   },
   "processing": {
     "title": "Verarbeitung",
@@ -585,7 +586,7 @@
     "stage_analysis_calibration": "Spielfeld finden",
     "stage_analysis_tracking": "Laufwege berechnen",
     "stage_analysis_upload": "Speichern",
-    "analysisHint": "Läuft im Hintergrund. Du kannst die Seite schliessen, wir melden uns, wenn es fertig ist.",
+    "analysisHint": "Du kannst die Seite schliessen. Wir schicken dir eine Mail, wenn die Analyse fertig ist.",
     "failedTitle": "Das Video liess sich nicht lesen.",
     "failedText": "Diese Datei ist kein Video, das wir lesen können (MP4, MOV, MKV). Der Spielbericht und alles, was du schon erfasst hast, bleiben.",
     "otherFile": "Andere Datei wählen",
@@ -3148,7 +3149,11 @@
     "nextStepChecks": "{n, plural, one {Eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
     "nextStepReport": "Im Video wurden keine Tore gefunden. Mit dem Spielbericht kommen die Tore und ihre Zeiten dazu.",
     "nextStepNoGoals": "Im Video wurden keine Tore gefunden. Die Tore aus dem Spielbericht stehen im Spiel.",
-    "nextStepAddReport": "Spielbericht hinzufügen"
+    "nextStepAddReport": "Spielbericht hinzufügen",
+    "beforeTitle": "Vor dem Spiel",
+    "beforeText": "Am Spieltag merkst du mit grossen Tasten, was passiert. Das Video lädst du nach dem Spiel hoch.",
+    "tgSeven": "({n} vom 7-m)",
+    "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3172,7 +3177,7 @@
     "count": "{n, plural, one {1 Frage} other {# Fragen}}",
     "questionOf": "Frage {n} von {total}",
     "personQuestion": "Wer ist das?",
-    "personWhy": "Die Personen mit der längsten Zeit im Bild kommen zuerst. Jede Antwort ist sofort gespeichert und macht die Zahlen genauer.",
+    "personWhy": "Jede Antwort ist sofort gespeichert.",
     "personCaption": "Video {video} · {s} Sekunden im Bild, {read, select, none {Nummer nie gelesen} other {Nummer {read} gelesen}}",
     "personOther": "Andere",
     "personPick": "Andere aus dem Kader",

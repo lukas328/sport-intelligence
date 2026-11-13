@@ -31,6 +31,7 @@ describe("telegram", () => {
       { side: "opponent" as const, player_id: null, number: 3, goals: 9, seven_m_goals: 0 },
     ];
     expect(topScorers(players, { a: "Lea Brunner", b: "Mia Graf" })).toEqual(["Brunner 7", "Graf 5/2"]);
+    expect(topScorers(players, { a: "Lea Brunner", b: "Mia Graf" }, 3, (k) => ` (${k} vom 7-m)`)).toEqual(["Brunner 7", "Graf 5 (2 vom 7-m)"]);
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 11 }], { k: "Nora Meier" })).toEqual({ name: "Meier", saves: 11 });
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 0 }], {})).toBeNull();
   });

@@ -556,7 +556,8 @@
     "guide": "Guide de tournage complet",
     "chooseVideo": "Choisir la vidéo",
     "more": "Plus : autre caméra, lien, technique",
-    "mayClose": "Tu peux fermer la page. Tu reçois un e-mail quand les trois choses sont prêtes."
+    "mayClose": "Tu peux fermer la page. Nous t'envoyons un e-mail quand l'analyse est terminée.",
+    "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone."
   },
   "processing": {
     "title": "Traitement",
@@ -585,7 +586,7 @@
     "stage_analysis_calibration": "Recherche du terrain",
     "stage_analysis_tracking": "Calcul des déplacements",
     "stage_analysis_upload": "Enregistrement",
-    "analysisHint": "Tourne en arrière-plan. Tu peux fermer la page, nous te prévenons quand c'est prêt.",
+    "analysisHint": "Tu peux fermer la page. Nous t'envoyons un e-mail quand l'analyse est terminée.",
     "failedTitle": "La vidéo n'a pas pu être lue.",
     "failedText": "Ce fichier n'est pas une vidéo lisible (MP4, MOV, MKV). La feuille de match et tout ce que tu as saisi restent.",
     "otherFile": "Choisir un autre fichier",
@@ -3148,7 +3149,11 @@
     "nextStepChecks": "{n, plural, one {Une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
     "nextStepReport": "Aucun but trouvé dans la vidéo. Avec la feuille de match, les buts et leurs temps arrivent.",
     "nextStepNoGoals": "Aucun but trouvé dans la vidéo. Les buts de la feuille de match sont dans le match.",
-    "nextStepAddReport": "Ajouter la feuille de match"
+    "nextStepAddReport": "Ajouter la feuille de match",
+    "beforeTitle": "Avant le match",
+    "beforeText": "Le jour du match, tu notes ce qui se passe avec de grandes touches. Tu télécharges la vidéo après le match.",
+    "tgSeven": "({n} sur 7 m)",
+    "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3172,7 +3177,7 @@
     "count": "{n, plural, one {1 question} other {# questions}}",
     "questionOf": "Question {n} sur {total}",
     "personQuestion": "Qui est-ce ?",
-    "personWhy": "Les personnes le plus longtemps à l'image viennent en premier. Chaque réponse est enregistrée tout de suite et rend les chiffres plus précis.",
+    "personWhy": "Chaque réponse est enregistrée tout de suite.",
     "personCaption": "Vidéo {video} · {s} secondes à l'image, {read, select, none {numéro jamais lu} other {numéro {read} lu}}",
     "personOther": "Autres",
     "personPick": "Autres de l'effectif",

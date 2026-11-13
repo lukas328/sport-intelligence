@@ -556,7 +556,8 @@
     "guide": "Full filming guide",
     "chooseVideo": "Choose video",
     "more": "More: another camera, a link, technical details",
-    "mayClose": "You can close the page. You get an e-mail when the three things are ready."
+    "mayClose": "You can close the page. We send you an e-mail when the analysis is done.",
+    "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone."
   },
   "processing": {
     "title": "Processing",
@@ -585,7 +586,7 @@
     "stage_analysis_calibration": "Finding the court",
     "stage_analysis_tracking": "Computing paths",
     "stage_analysis_upload": "Saving",
-    "analysisHint": "Runs in the background. You can close this page; we will let you know when it is done.",
+    "analysisHint": "You can close the page. We send you an e-mail when the analysis is done.",
     "failedTitle": "The video could not be read.",
     "failedText": "This file is not a video we can read (MP4, MOV, MKV). The match report and everything you have entered stay.",
     "otherFile": "Choose another file",
@@ -3148,7 +3149,11 @@
     "nextStepChecks": "{n, plural, one {One question} other {# questions}} in Check, then it shows more.",
     "nextStepReport": "No goals were found in the video. With the match report the goals and their times come in.",
     "nextStepNoGoals": "No goals were found in the video. The goals from the report are in the match.",
-    "nextStepAddReport": "Add the match report"
+    "nextStepAddReport": "Add the match report",
+    "beforeTitle": "Before the match",
+    "beforeText": "On match day you note what happens with big keys. You upload the video after the match.",
+    "tgSeven": "({n} from 7 m)",
+    "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3172,7 +3177,7 @@
     "count": "{n, plural, one {1 question} other {# questions}}",
     "questionOf": "Question {n} of {total}",
     "personQuestion": "Who is this?",
-    "personWhy": "The people longest in view come first. Every answer is saved at once and makes the numbers more precise.",
+    "personWhy": "Every answer is saved at once.",
     "personCaption": "Video {video} · {s} seconds in view, {read, select, none {number never read} other {number {read} read}}",
     "personOther": "Others",
     "personPick": "Others from the squad",

@@ -2,6 +2,7 @@
 
 import { track } from "@/lib/analytics";
 import { useLocale, useTranslations } from "next-intl";
+import { looksLikeVideo } from "@/lib/video-file";
 import { sitePage, useSiteConfig } from "@/lib/site-config";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,9 @@ type State =
   | { kind: "confirm"; file: File; hint: "mobile" | "slow" }
   | { kind: "offline"; file: File }
   | { kind: "done" }
-  | { kind: "error"; error: ErrorKey | "upload"; file?: File };
+  | { kind: "error"; error: ErrorKey | "upload" | "notVideo"; file?: File };
+
+
 
 export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; matchId: string; onUploaded: () => void }) {
   const t = useTranslations();
@@ -97,6 +100,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
   }
 
   async function start(file: File, confirmed = false) {
+    if (!looksLikeVideo(file)) return setState({ kind: "error", error: "notVideo" });
     if (!confirmed) return ask(file);
     ctrl.current = new AbortController();
     setState({ kind: "uploading", file, done: 0, resumed: false });
@@ -226,7 +230,14 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
       )}
       {state.kind === "error" && (
         <Alert>
-          <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
+          {state.error === "notVideo" ? (
+            <>
+              <span className="block font-bold">{t("processing.failedTitle")}</span>
+              <span className="block">{t("upload.notVideo")}</span>
+            </>
+          ) : (
+            <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
+          )}
           {state.file && (
             <Button variant="secondary" className="mt-2" onClick={() => void start(state.file!, true)}>
               {t("upload.resume")}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRef, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { courtPolylines, fitHomography, type Pt } from "@/lib/court-calibration";
 import { CORNER_NAMES as NAMES, CORNERS } from "@/lib/field-corners";
 
@@ -24,7 +24,19 @@ export function FieldCheck({ src, alt, size, corners, onChange }: { src: string;
   const pad = Math.round(Math.max(w, h) * 0.06);
   const fit = fitHomography([...CORNERS], corners);
   const lines = fit ? courtPolylines(fit) : [];
-  const r = Math.max(w, h) / 70;
+  // handles in screen pixels, whatever the image's size: 44 px to touch, 16 px to see (UX test N17)
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const el = svg.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setShown(el.getBoundingClientRect().width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const perPx = shown > 0 ? (w + 2 * pad) / shown : Math.max(w, h) / 900;
+  const r = 8 * perPx;
+  const touch = 22 * perPx;
+  const [active, setActive] = useState<number | null>(null);
 
   function at(e: PointerEvent): Pt | null {
     const el = svg.current;
@@ -56,8 +68,8 @@ export function FieldCheck({ src, alt, size, corners, onChange }: { src: string;
           const p = at(e);
           if (p) move(drag.current, p);
         }}
-        onPointerUp={() => (drag.current = null)}
-        onPointerLeave={() => (drag.current = null)}
+        onPointerUp={() => ((drag.current = null), setActive(null))}
+        onPointerLeave={() => ((drag.current = null), setActive(null))}
       >
         <image href={src} x={0} y={0} width={w} height={h} preserveAspectRatio="none">
           <title>{alt}</title>
@@ -77,13 +89,21 @@ export function FieldCheck({ src, alt, size, corners, onChange }: { src: string;
             className="cursor-grab outline-none focus-visible:[&>circle:last-child]:stroke-ink"
             onPointerDown={(e) => {
               drag.current = i;
+              setActive(i);
               (e.currentTarget as Element).closest("svg")?.setPointerCapture(e.pointerId);
             }}
             onKeyDown={(e) => key(i, e)}
             data-testid={`corner-${i}`}
           >
             {/* the touch target is larger than the drawn handle */}
-            <circle cx={x} cy={y} r={r * 2.4} fill="transparent" />
+            <circle cx={x} cy={y} r={touch} fill="transparent" />
+            {/* while dragging: lines through the corner, visible beside the finger */}
+            {active === i && (
+              <>
+                <line x1={x - 6 * touch} y1={y} x2={x + 6 * touch} y2={y} stroke="var(--attn)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+                <line x1={x} y1={y - 6 * touch} x2={x} y2={y + 6 * touch} stroke="var(--attn)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+              </>
+            )}
             <circle cx={x} cy={y} r={r} fill="var(--attn)" stroke="var(--ink)" strokeWidth={3} vectorEffect="non-scaling-stroke" />
           </g>
         ))}

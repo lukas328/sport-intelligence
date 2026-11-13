@@ -287,7 +287,7 @@ function EntryHead(props: ComponentProps<typeof WurfHead>) {
 
 /** Table excerpt, scorers and next game of a team from the federation's data (also on Spiele
  * before the first video, UX test H02). */
-export function TeamFacts({ p }: { p: Preview }) {
+export function TeamFacts({ p, hideNext = false }: { p: Preview; hideNext?: boolean }) {
   const t = useTranslations("entry");
   const format = useFormatter();
   const ownRow = p.table.findIndex((r) => r.own);
@@ -296,7 +296,7 @@ export function TeamFacts({ p }: { p: Preview }) {
       <div className="grid gap-10 md:grid-cols-2">
       {rows.length > 0 && (
         <section>
-          <SectionHead title={t("table")} note={p.group_name ?? p.league ?? undefined} />
+          <SectionHead title={t("table")} note={p.league ?? p.group_name ?? undefined} />
           <table className="w-full border-collapse text-[17px]" data-testid="entry-table">
             <thead>
               <tr className="border-b-2 border-ink text-[15px] text-ink-2">
@@ -335,7 +335,7 @@ export function TeamFacts({ p }: { p: Preview }) {
             </ol>
           </section>
         )}
-        {p.next && (
+        {p.next && !hideNext && (
           <section>
             <SectionHead title={t("nextGame")} />
             <p className="m-0 text-[19px] font-bold">{p.next.opponent}</p>

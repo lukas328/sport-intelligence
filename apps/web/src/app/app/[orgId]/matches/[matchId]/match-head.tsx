@@ -33,7 +33,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
       {format.dateTime(kickoff, { hour: "2-digit", minute: "2-digit" })}
     </>
   ) : undefined;
-  const colourOpen = !match.opponent_colors && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
+  const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
       {scoreText && (

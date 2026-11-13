@@ -123,7 +123,7 @@ export function telegramText(t: T, m: TelegramMatch, stats: Stats | null, names:
       stats.opponent.suspensions ? t("tgPenalty", { n: stats.opponent.suspensions, team: m.opp }) : null,
     ].filter(Boolean);
     if (pens.length) parts.push(t("tgPenalties", { list: pens.join(", ") }));
-    const scorers = topScorers(Object.values(stats.players), names);
+    const scorers = topScorers(Object.values(stats.players), names, 3, (k) => ` ${t("tgSeven", { n: k })}`);
     if (scorers.length) parts.push(t("tgScorers", { list: scorers.join(", ") }));
     const keeper = mainKeeper(Object.values(stats.goalkeepers ?? {}), names);
     if (keeper) parts.push(t("tgKeeper", { name: keeper.name, saves: keeper.saves }));
