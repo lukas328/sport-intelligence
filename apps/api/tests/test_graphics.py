@@ -297,7 +297,7 @@ async def test_one_question_per_moment_and_the_rest_offered(
     await upload(api, ids, m["id"], b"v" * 100)
     jobs: MemoryJobQueue = api.app.state.jobs
     await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
-    found = {**FOUND, "candidates": [*list(FOUND["candidates"]), _cand(70_000, 2)]}  # type: ignore[call-overload]
+    found = {**FOUND, "candidates": [*list(FOUND["candidates"]), _cand(66_000, 2)]}  # type: ignore[call-overload]
     await _finish(
         api,
         jobs.jobs[-1][2],
@@ -306,11 +306,12 @@ async def test_one_question_per_moment_and_the_rest_offered(
     rows = {r["t_ms"]: r for r in (await api.get(f"{base}/goal-candidates")).json()["candidates"]}
     g = (await api.get(f"{base}/graphics")).json()
     goals = [c["id"] for c in g["checks"] if c["kind"] == "goal"]
-    # 63 s and 70 s overlap: one question (the stronger, rate 1); 200 s (rate 4) is offered
+    # 63 s and 66 s are 3 s apart: one goal, one question (the stronger, rate 1); 200 s (rate 4)
+    # is offered
     assert goals == [rows[63_000]["id"], rows[150_000]["id"], rows[305_000]["id"]]
     assert [c["id"] for c in g["more_checks"]] == [rows[200_000]["id"]]
     assert {c["kind"] for c in g["checks"]} <= {"field", "kickoff", "goal"}
-    # once the goal at 63 s is confirmed, the overlapping 70 s is not asked again
+    # once the goal at 63 s is confirmed, the same goal at 66 s is not asked again
     r = await api.put(
         f"{base}/goal-candidates/{rows[63_000]['id']}/review",
         json={"status": "confirmed", "side": "own"},
@@ -318,5 +319,54 @@ async def test_one_question_per_moment_and_the_rest_offered(
     assert r.status_code == 200, r.text
     g = (await api.get(f"{base}/graphics")).json()
     asked = {c["id"] for c in g["checks"]} | {c["id"] for c in g["more_checks"]}
-    assert rows[70_000]["id"] not in asked and rows[63_000]["id"] not in asked
+    assert rows[66_000]["id"] not in asked and rows[63_000]["id"] not in asked
     assert g["analysis"] == "ready"
+
+
+def test_goals_twelve_seconds_apart_are_two_goals() -> None:
+    """Real-video test F4: the eight goals of clip 1, with 14 s clips that overlap their
+    neighbours. Each is its own moment; two candidates are one goal only within 5 s and for the
+    same side, and no chain of neighbours merges goals."""
+    import uuid as _uuid
+
+    from handball_api.models import GoalCandidate
+    from handball_api.services.graphics import _windows
+
+    goals = [
+        (47.9, "opponent"),
+        (61.1, "own"),
+        (92.7, "opponent"),
+        (134.5, "opponent"),
+        (161.5, "own"),
+        (212.5, "opponent"),
+        (229.3, "own"),
+        (241.1, "opponent"),
+    ]
+
+    def cand(s: float, side: str | None) -> GoalCandidate:
+        ms = round(s * 1000)
+        return GoalCandidate(
+            id=_uuid.uuid4(),
+            kind="goal",
+            goal_ms=ms,
+            t_ms=ms + 1500,
+            start_ms=ms - 8500,
+            end_ms=ms + 5500,
+            score=2.0,
+            rate=1,
+            rank=0,
+            suggested_side=side,
+            status="open",
+        )
+
+    rows = [cand(s, side) for s, side in goals]
+    # a chain of neighbours from 126.1 to 171.9 s, and a second look at 47.9 s two seconds later
+    rows += [cand(s, None) for s in (126.1, 140.0, 150.0, 171.9)]
+    rows.append(cand(49.9, "opponent"))
+    groups = _windows(rows)
+    firsts = {round(g[0].goal_ms / 1000, 1) for g in groups}
+    assert all(s in firsts for s, _ in goals)
+    # the second look at 47.9 s is the same goal; 61.1 s (other side, 13 s later) is not
+    assert next(g for g in groups if g[0].goal_ms == 47_900)[1:][0].goal_ms == 49_900
+    # without a suggested side the same rule holds: different times stay apart
+    assert len(_windows([cand(229.3, None), cand(241.1, None)])) == 2

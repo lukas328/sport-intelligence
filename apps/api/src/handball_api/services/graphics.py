@@ -511,15 +511,29 @@ async def open_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
     return await _open_checks(ctx, match, asset, tracking, await _field_confirmed(ctx, asset))
 
 
+SAME_MOMENT_MS = 5000  # two candidates this close, for the same side, are one goal
+
+
 def _windows(rows: list[GoalCandidate]) -> list[list[GoalCandidate]]:
-    """Candidates whose clips overlap are one moment (real-video test E12): grouped, so a goal
-    is asked once and counted once."""
+    """Candidates of one goal: their goal times lie within SAME_MOMENT_MS and they suggest the
+    same side (real-video test E12, F4). Overlapping clips alone are not enough: two goals 12 s
+    apart (goal, throw-off, fast break) are normal. Each group is measured against its first
+    candidate, so no chain of neighbours merges several goals."""
     groups: list[list[GoalCandidate]] = []
-    for c in sorted(rows, key=lambda c: c.start_ms):
-        if groups and c.start_ms <= max(x.end_ms for x in groups[-1]):
-            groups[-1].append(c)
-        else:
+    for c in sorted(rows, key=lambda c: c.goal_ms):
+        home = next(
+            (
+                g
+                for g in groups
+                if abs(c.goal_ms - g[0].goal_ms) < SAME_MOMENT_MS
+                and c.suggested_side == g[0].suggested_side
+            ),
+            None,
+        )
+        if home is None:
             groups.append([c])
+        else:
+            home.append(c)
     return groups
 
 
