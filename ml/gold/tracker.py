@@ -35,8 +35,9 @@ class Params:
     vmax: float = 70.0  # px per frame at 30 fps, 1280 px wide
     gap: int = 2
     merge: float = 8.0
-    static_frac: float = 0.8
+    static_frac: float = 0.5
     static_px: float = 5.0
+    static_keep: float = 0.6  # share of the reward a static spot keeps (a ball held still is static too)
     fill: bool = True
     extra: dict = field(default_factory=dict)
 
@@ -63,23 +64,27 @@ def candidates(c: dict, p: Params) -> list[list[Cand]]:
             else:
                 cs.append(Cand(o[0], o[1], owl=o[4]))
         frames.append(cs)
-    # static spots: a position that holds a candidate in most frames
-    n = len(frames)
+    # static spots: a position that holds a candidate of a detector in most frames that detector
+    # ran on (OWLv2 runs on every 2nd frame only)
     cell = p.static_px
-    hold: dict[tuple[int, int], set[int]] = {}
+    holds: dict[str, dict[tuple[int, int], set[int]]] = {"net": {}, "owl": {}}
+    ran = {"net": len(frames), "owl": sum("owl" in r for r in c["pre"])}
     for k, cs in enumerate(frames):
         for q in cs:
             gx, gy = int(q.x // cell), int(q.y // cell)
-            for dx in (-1, 0, 1):
-                for dy in (-1, 0, 1):
-                    hold.setdefault((gx + dx, gy + dy), set()).add(k)
+            for src in ("net", "owl"):
+                if getattr(q, src):
+                    for dx in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            holds[src].setdefault((gx + dx, gy + dy), set()).add(k)
     for cs in frames:
         for q in cs:
-            static = len(hold[(int(q.x // cell), int(q.y // cell))]) > p.static_frac * n
-            q.r = (
-                0.0
-                if static
-                else p.w_net * q.net + p.w_owl * q.owl + (p.both if q.net and q.owl else 0.0)
+            g = (int(q.x // cell), int(q.y // cell))
+            static = any(
+                len(holds[src].get(g, ())) > p.static_frac * max(1, ran[src]) for src in holds
+            )
+            q.r = (p.static_keep if static else 1.0) * (
+                p.w_net * q.net + p.w_owl * q.owl + (p.both if q.net and q.owl else 0.0)
             )
     return frames
 
