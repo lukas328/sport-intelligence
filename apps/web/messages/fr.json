@@ -3172,7 +3172,8 @@
     "tgSeven": "({n} sur 7 m)",
     "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image",
     "rowChecks": "Analyse terminée, {n, plural, one {1 question ouverte} other {# questions ouvertes}}",
-    "rowNoGoals": "Analyse terminée, pas encore de but trouvé"
+    "rowNoGoals": "Analyse terminée, pas encore de but trouvé",
+    "titleLast": "Le dernier match."
   },
   "check": {
     "top": "Vérifier · {opponent}",

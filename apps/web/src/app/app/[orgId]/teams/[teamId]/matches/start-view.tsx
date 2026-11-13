@@ -213,7 +213,8 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     ? t("titleRunning")
     : !m.has_video
       ? t("titleNoVideo")
-      : `${t(result === "win" ? "titleWon" : result === "loss" ? "titleLost" : "titleDraw")}${things.length ? ` ${t("titleThings", { count: things.length })}` : ""}`;
+      : // without a result no «Unentschieden»: the last match, plainly
+        `${t(result === "win" ? "titleWon" : result === "loss" ? "titleLost" : result === "draw" ? "titleDraw" : "titleLast")}${things.length ? ` ${t("titleThings", { count: things.length })}` : ""}`;
   return {
     kick: t("kickVs", { when: format.dateTime(new Date(m.kickoff_at), { weekday: "long" }), opponent: m.opponent_name }),
     title,

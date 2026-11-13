@@ -3172,7 +3172,8 @@
     "tgSeven": "({n} from 7 m)",
     "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture",
     "rowChecks": "Analysis done, {n, plural, one {1 question} other {# questions}} open",
-    "rowNoGoals": "Analysis done, no goals found yet"
+    "rowNoGoals": "Analysis done, no goals found yet",
+    "titleLast": "The last match."
   },
   "check": {
     "top": "Check · {opponent}",

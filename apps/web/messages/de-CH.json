@@ -3172,7 +3172,8 @@
     "tgSeven": "({n} vom 7-m)",
     "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild",
     "rowChecks": "Analyse fertig, {n, plural, one {1 Frage} other {# Fragen}} offen",
-    "rowNoGoals": "Analyse fertig, noch keine Tore erkannt"
+    "rowNoGoals": "Analyse fertig, noch keine Tore erkannt",
+    "titleLast": "Das letzte Spiel."
   },
   "check": {
     "top": "Prüfen · {opponent}",
