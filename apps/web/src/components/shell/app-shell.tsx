@@ -205,7 +205,7 @@ export function AppShell({
               </div>
             </div>
             {/* phone top bar (UX test H06, H09): the crest, the team name kept also with large
-                text, the bell, «Video» with its word, the account; the search is Szenen */}
+                text, the bell, «Suchen» and «Video» with their words, the account */}
             <div className="flex h-[60px] items-center gap-2 px-4 lg:hidden">
               {/* with large text the crest gives way, the team name stays (UX test H09) */}
               <Link href={home} aria-label={org.name} className="flex shrink-0 items-center max-[359px]:hidden">
@@ -215,6 +215,14 @@ export function AppShell({
                 <TeamSwitcher compact />
               </div>
               <NotificationBell orgId={org.id} />
+              {/* «Suchen» with its word on the phone too (SPEC 6, UX test B18/N08) */}
+              {searchHref && (
+                <Link href={searchHref} className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="search-open-compact">
+                  <Search aria-hidden className="size-4 max-[439px]:size-5" strokeWidth={2.6} />
+                  {/* with very large text the word gives way to the team name, the magnifier stays */}
+                  <span className="max-[439px]:sr-only">{t("search")}</span>
+                </Link>
+              )}
               {upload && (
                 <Link
                   href={upload}
@@ -257,7 +265,8 @@ export function AppShell({
               return (
                 <li key={it.key}>
                   <Link
-                    href={it.href}
+                    // Szenen on the phone opens with the cursor in the search (UX test B18/N08)
+                    href={it.key === "scenes" && searchHref ? searchHref : it.href}
                     aria-current={on ? "page" : undefined}
                     className={cn(navLink(on), "min-h-14 justify-center text-base")}
                   >

@@ -92,9 +92,10 @@ export function ThreeThingsView({
       </ol>
       <LineKey
         className="mt-3"
+        // only what is drawn: without a run (no confirmed court) no «Weg zum Wurf» in the key
         items={[
-          { label: t("keyConfirmed") },
-          { label: t("keyEstimated"), estimated: true },
+          ...(things.some((x) => x.goals.some((g) => g.run.length > 1 && g.confirmed)) ? [{ label: t("keyConfirmed") }] : []),
+          ...(things.some((x) => x.goals.some((g) => g.run.length > 1 && !g.confirmed)) ? [{ label: t("keyEstimated"), estimated: true }] : []),
           { label: t("keyToGoal") },
         ]}
       />

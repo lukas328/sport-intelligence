@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { type CSSProperties, type FormEvent, useEffect, useState } from "react";
+import { type ComponentProps, type CSSProperties, type FormEvent, useEffect, useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
 import { Bundle } from "@/components/anlauf/bundle";
-import { WurfHead } from "@/components/anlauf/heads";
+import { Breakable, WurfHead } from "@/components/anlauf/heads";
 import { useThingText } from "@/components/anlauf/three-things-view";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
@@ -16,6 +16,8 @@ import { clubStyle, SHIRTS } from "@/lib/color";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
+import { sitePage, useSiteConfig } from "@/lib/site-config";
+import { ENTRY_EMAIL, remember } from "@/lib/offline";
 
 type Hit = Schemas["PublicTeamHit"];
 type Preview = Schemas["PublicTeamPreview"];
@@ -56,8 +58,8 @@ export function EntryView() {
     router.push(`/einstieg?${u.toString()}`);
   };
   if (step === "mail" && (team || name)) return <SaveStep club={club} team={team} name={name} colour={colour} onBack={() => go({ step: null })} />;
-  if (club && team) return <TeamStep club={club} team={team} colour={colour} onColour={setColour} onSave={() => go({ step: "mail" })} onBack={() => go({ club: null, team: null })} />;
-  return <SearchStep initial={params.get("q") ?? ""} onPick={(h, q) => go({ club: String(h.club.id), team: String(h.official_id), q })} onName={(n) => go({ name: n, step: "mail", q: null })} />;
+  if (club && team) return <TeamStep club={club} team={team} known={{ name: params.get("n"), league: params.get("l") }} colour={colour} onColour={setColour} onSave={() => go({ step: "mail" })} onBack={() => go({ club: null, team: null })} />;
+  return <SearchStep initial={params.get("q") ?? ""} onPick={(h, q) => go({ club: String(h.club.id), team: String(h.official_id), q, n: h.name, l: h.league ?? null })} onName={(n) => go({ name: n, step: "mail", q: null })} />;
 }
 
 function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: Hit, q: string) => void; onName: (name: string) => void }) {
@@ -107,8 +109,10 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
         </p>
       </form>
       {hits.isFetching && <p className="text-[17px] text-ink-2" aria-busy="true">…</p>}
-      {hits.error && <p className="text-[17px]">{t("unavailable")}</p>}
+      {hits.error && <p className="text-[17px]">{(hits.error as { status?: number }).status === 429 ? t("tooMany") : t("unavailable")}</p>}
       {hits.data && hits.data.length === 0 && <p className="text-[17px]">{t("none", { q })}</p>}
+      {/* found only with a letter's difference: say so (UX test N10) */}
+      {hits.data && hits.data.length > 0 && hits.data.every((h) => h.fuzzy) && <p className="m-0 text-[17px]" data-testid="entry-fuzzy">{t("fuzzy", { q })}</p>}
       {hits.data && hits.data.length > 0 && (
         <ul className="m-0 list-none border-t-2 border-ink p-0" data-testid="entry-hits">
           {hits.data.map((h) => (
@@ -168,28 +172,54 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
   );
 }
 
-function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: number; team: number; colour: string; onColour: (c: string) => void; onSave: () => void; onBack: () => void }) {
+function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { club: number; team: number; known: { name: string | null; league: string | null }; colour: string; onColour: (c: string) => void; onSave: () => void; onBack: () => void }) {
   const t = useTranslations("entry");
   const tc = useTranslations("onboarding");
   const format = useFormatter();
-  const q = useQuery({
-    queryKey: ["public-team", club, team],
-    retry: false,
-    queryFn: async () => {
-      const r = await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club, official_id: team } } });
-      if (r.error) throw r.error;
-      return r.data as Preview;
-    },
-  });
+  // the team first (one request less per played game), the scorers fill in afterwards (UX test N03)
+  const fetchPreview = async (scorers: boolean) => {
+    const r = await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club, official_id: team }, query: { scorers } } });
+    if (r.error) throw Object.assign(new Error("preview"), { status: r.response.status });
+    return r.data as Preview;
+  };
+  const q = useQuery({ queryKey: ["public-team", club, team], retry: false, staleTime: 600_000, queryFn: () => fetchPreview(false) });
+  const full = useQuery({ queryKey: ["public-team-scorers", club, team], retry: false, staleTime: 600_000, enabled: q.isSuccess, queryFn: () => fetchPreview(true) });
   const standing = useStanding(q.data);
-  if (q.isLoading) return <p className="text-[17px] text-ink-2" aria-busy="true">…</p>;
-  if (!q.data) {
+  // a slow federation: after eight seconds say so and offer to save anyway
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!q.isLoading) return;
+    const id = window.setTimeout(() => setSlow(true), 8000);
+    return () => window.clearTimeout(id);
+  }, [q.isLoading]);
+  const saveAnyway = (
+    <div className="flex flex-wrap items-center gap-4">
+      <button type="button" className={buttonClass("primary")} onClick={onSave} data-testid="entry-save-anyway">
+        {t("saveAnyway")}
+      </button>
+      <button type="button" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" onClick={onBack}>
+        {t("back")}
+      </button>
+    </div>
+  );
+  if (q.isLoading || !q.data) {
+    // what is known from the list is drawn at once: name and league, the sentence what happens
     return (
-      <div className="space-y-4">
-        <p className="text-[17px]">{t("unavailable")}</p>
-        <button type="button" className={buttonClass("secondary")} onClick={onBack}>
-          {t("back")}
-        </button>
+      <div className="space-y-8" style={clubStyle(colour, SECOND(colour)) as CSSProperties} data-testid="entry-loading">
+        <div className="bleed-x -mt-6 sm:-mt-10">
+          <EntryHead kick={known.league ?? undefined} title={known.name ? <Breakable text={known.name} /> : "…"} own={null} opp={null} ownName={known.name ?? ""} oppName="" waiting />
+        </div>
+        <p className="m-0 max-w-[50ch] text-[19px]" aria-live="polite" aria-busy={q.isLoading}>
+          {q.isLoading ? (slow ? t("slow") : t("fetching")) : t("unavailableTeam")}
+        </p>
+        {q.isLoading && !slow && (
+          <div aria-hidden className="space-y-3">
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="block h-6 animate-pulse bg-rule" style={{ width: `${80 - i * 12}%` }} />
+            ))}
+          </div>
+        )}
+        {(slow || !q.isLoading) && saveAnyway}
       </div>
     );
   }
@@ -199,11 +229,11 @@ function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: numb
   return (
     <div className="space-y-10" style={clubStyle(colour, SECOND(colour)) as CSSProperties} data-testid="entry-team">
       <div className="bleed-x -mt-6 sm:-mt-10">
-        <WurfHead
+        <EntryHead
           kick={last ? `${t("lastResult")} · ${t("vs", { opponent: last.opponent })} · ${format.dateTime(new Date(last.kickoff_at), { day: "numeric", month: "long" })}` : p.season}
           title={
             <>
-              {p.name}
+              <Breakable text={p.name} />
               <span className="block text-[0.55em]">{standing}</span>
             </>
           }
@@ -225,11 +255,18 @@ function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: numb
         </div>
         <p className="mt-2 mb-0 text-[15px] text-ink-2">{t("colourHint")}</p>
       </fieldset>
+      {/* a team already in the app: saving asks its administrators (UX test N09) */}
+      {p.in_app && (
+        <p className="m-0 max-w-[60ch] border-l-4 border-attn pl-4 text-[17px]" data-testid="entry-in-app">
+          {t("inAppPreview")}
+        </p>
+      )}
       {/* the one action right where the coach has seen his team; again at the end */}
       <button type="button" className={buttonClass("primary", "lg")} onClick={onSave}>
         {t("save")}
       </button>
-      <TeamFacts p={p} />
+      <TeamFacts p={full.data ? { ...p, scorers: full.data.scorers, scorer_games: full.data.scorer_games } : p} />
+      {full.isLoading && <p className="m-0 text-[15px] text-ink-2" aria-live="polite">{t("scorersLoading")}</p>}
       <p className="text-[15px] text-ink-2">{t("source")}</p>
       <Example />
       <div className="space-y-2 border-t-2 border-ink pt-5">
@@ -246,9 +283,14 @@ function TeamStep({ club, team, colour, onColour, onSave, onBack }: { club: numb
   );
 }
 
+/** One head for the team step, while loading (what the list knew) and loaded (one head per screen). */
+function EntryHead(props: ComponentProps<typeof WurfHead>) {
+  return <WurfHead {...props} />;
+}
+
 /** Table excerpt, scorers and next game of a team from the federation's data (also on Spiele
  * before the first video, UX test H02). */
-export function TeamFacts({ p }: { p: Preview }) {
+export function TeamFacts({ p, hideNext = false }: { p: Preview; hideNext?: boolean }) {
   const t = useTranslations("entry");
   const format = useFormatter();
   const ownRow = p.table.findIndex((r) => r.own);
@@ -257,7 +299,7 @@ export function TeamFacts({ p }: { p: Preview }) {
       <div className="grid gap-10 md:grid-cols-2">
       {rows.length > 0 && (
         <section>
-          <SectionHead title={t("table")} note={p.group_name ?? p.league ?? undefined} />
+          <SectionHead title={t("table")} note={p.league ?? p.group_name ?? undefined} />
           <table className="w-full border-collapse text-[17px]" data-testid="entry-table">
             <thead>
               <tr className="border-b-2 border-ink text-[15px] text-ink-2">
@@ -296,7 +338,7 @@ export function TeamFacts({ p }: { p: Preview }) {
             </ol>
           </section>
         )}
-        {p.next && (
+        {p.next && !hideNext && (
           <section>
             <SectionHead title={t("nextGame")} />
             <p className="m-0 text-[19px] font-bold">{p.next.opponent}</p>
@@ -357,10 +399,15 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const farbe = WORD_OF[colour] ?? "blau";
-  const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}&farbe=${farbe}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}&farbe=${farbe}`;
-  const legal = (page: string) => `https://handball-ai.ch${locale === "de-CH" ? "" : `/${locale}`}/${page}`;
+  // the team's name travels along: an occupied team's page names it and offers a club of one's own
+  const teamName = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("n");
+  const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}&farbe=${farbe}${teamName ? `&n=${encodeURIComponent(teamName)}` : ""}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}&farbe=${farbe}`;
+  // the legal pages on the website, its address from the configuration
+  const site = useSiteConfig();
+  const legal = (page: string) => sitePage(site?.site_url ?? "", locale, page);
   async function send(email: string) {
     setBusy(true);
+    remember(ENTRY_EMAIL, email);
     const r = await api.POST("/v1/auth/start", { body: { email, locale: (["de-CH", "fr", "en"].includes(locale) ? locale : "de-CH") as "de-CH", next } });
     setBusy(false);
     if (r.error) return setError(t("needEmail"));
@@ -369,7 +416,7 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
   useEffect(() => setError(null), [sent]);
   if (sent) {
     return (
-      <section className="mx-auto max-w-xl space-y-4" role="status" data-testid="entry-sent">
+      <section className="mx-auto max-w-xl space-y-4 [overflow-wrap:anywhere]" role="status" data-testid="entry-sent">
         <h1 className="font-slant text-[34px] leading-tight md:text-[44px]">{t("sent")}</h1>
         <p className="text-[17px]">{t("sentText", { email: sent })}</p>
         <button type="button" className={buttonClass("secondary")} disabled={busy} onClick={() => void send(sent)}>

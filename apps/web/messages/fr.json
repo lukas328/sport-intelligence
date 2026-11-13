@@ -6,7 +6,7 @@
   },
   "nav": {
     "home": "Accueil",
-    "status": "État du système",
+    "status": "Tout fonctionne ? Pannes",
     "app": "Ouvrir l'app",
     "login": "Connexion",
     "assignments": "Tâches",
@@ -191,7 +191,8 @@
     "needPassword": "Le mot de passe doit compter au moins 10 caractères.",
     "needTerms": "Merci d'accepter les conditions.",
     "claim": "Ton match. Et trois choses à retenir.",
-    "toSite": "Ce que fait l'app : handball-ai.ch"
+    "toSite": "Ce que fait l'app : {site}",
+    "newLink": "Envoyer un nouveau lien à {email}"
   },
   "invite": {
     "title": "Invitation",
@@ -552,11 +553,12 @@
     "addCamera": "Ajouter une caméra (caméra de but, autre angle)",
     "tip1": "Un téléphone suffit.",
     "tip2": "Sur un trépied, en hauteur à la ligne médiane, tout le terrain dans l'image.",
-    "tip3": "Tout le match dans un fichier (MP4, MOV ou MKV).",
+    "tip3": "Idéalement tout le match dans un seul fichier (MP4, MOV ou MKV). Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et lisible, mais seul le premier est analysé.",
     "guide": "Guide de tournage complet",
     "chooseVideo": "Choisir la vidéo",
     "more": "Plus : autre caméra, lien, technique",
-    "mayClose": "Tu peux fermer la page. Tu reçois un e-mail quand les trois choses sont prêtes."
+    "mayClose": "Tu peux fermer la page. Nous t'envoyons un e-mail quand l'analyse est terminée.",
+    "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone."
   },
   "processing": {
     "title": "Traitement",
@@ -578,14 +580,14 @@
     "videoStatus_processing": "Traitement",
     "videoStatus_ready": "Prête",
     "videoStatus_failed": "Erreur",
-    "done": "Analyse terminée. Statistiques et scènes sont prêtes.",
+    "done": "L'analyse est terminée.",
     "titleAnalysis": "Analyse du match",
     "stage_analysis_download": "Chargement de la vidéo",
     "stage_analysis_observe": "Caméra et joueurs",
     "stage_analysis_calibration": "Recherche du terrain",
     "stage_analysis_tracking": "Calcul des déplacements",
     "stage_analysis_upload": "Enregistrement",
-    "analysisHint": "Tourne en arrière-plan. Tu peux fermer la page, nous te prévenons quand c'est prêt.",
+    "analysisHint": "Tu peux fermer la page. Nous t'envoyons un e-mail quand l'analyse est terminée.",
     "failedTitle": "La vidéo n'a pas pu être lue.",
     "failedText": "Ce fichier n'est pas une vidéo lisible (MP4, MOV, MKV). La feuille de match et tout ce que tu as saisi restent.",
     "otherFile": "Choisir un autre fichier",
@@ -1241,7 +1243,11 @@
     "analysis_ready_match": "Les trois choses contre {opponent} sont prêtes.",
     "analysis_failed_match": "La vidéo contre {opponent} n'a pas pu être analysée. Elle reste, tu peux en charger une autre.",
     "video_failed": "Une vidéo n'a pas pu être lue.",
-    "video_failed_match": "La vidéo contre {opponent} n'a pas pu être lue. Choisis un autre fichier."
+    "video_failed_match": "La vidéo contre {opponent} n'a pas pu être lue. Choisis un autre fichier.",
+    "analysis_questions": "L'analyse est terminée. Quelques questions pour toi, ensuite elle en montre plus.",
+    "analysis_questions_match": "L'analyse contre {opponent} est terminée. {questions} questions pour toi, ensuite elle en montre plus.",
+    "analysis_no_goals": "L'analyse est terminée. Elle n'a trouvé aucun but.",
+    "analysis_no_goals_match": "L'analyse contre {opponent} est terminée. Elle n'a trouvé aucun but."
   },
   "assignments": {
     "title": "Tâches",
@@ -1940,7 +1946,7 @@
     "historyNone": "Pas encore de conversation."
   },
   "exchange": {
-    "title": "Échanger des données",
+    "title": "Données du match en fichier",
     "sportscode": "Télécharger le XML Sportscode",
     "csv": "Événements en CSV",
     "exportHint": "Le fichier XML contient tous les événements avec un temps vidéo et toutes les scènes avec leurs tags. Il s'ouvre dans Sportscode et les programmes compatibles.",
@@ -2215,7 +2221,16 @@
     "subLater": "plus tard dans la vidéo",
     "perPlayer": "Saisir par joueuse",
     "sofarTitle": "Jusqu'ici",
-    "newestFirst": "le plus récent d'abord"
+    "newestFirst": "le plus récent d'abord",
+    "clockLabel": "Temps de jeu",
+    "clockStart": "Démarrer",
+    "clockPause": "Pause",
+    "clockGo": "Reprendre",
+    "takeBack": "Annuler",
+    "key_two_min": "2 minutes",
+    "key_timeout": "Temps mort",
+    "shareLink": "Partager le lien",
+    "copied": "Lien copié"
   },
   "profile": {
     "title": "Profil public",
@@ -2821,7 +2836,7 @@
     "home": "contre {opponent}",
     "away": "à l'extérieur chez {opponent}",
     "noMatches": "Pas encore de match cette saison.",
-    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies.",
+    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
     "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie.",
     "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, impliqué dans {involved}",
     "number": "Numéro"
@@ -2911,7 +2926,11 @@
     "fullscreen": "Plein écran",
     "prev": "Retour",
     "next": "Suivant",
-    "close": "Fermer"
+    "close": "Fermer",
+    "showTitle": "À l'écran",
+    "noteHere": "Note après",
+    "removed": "Retiré.",
+    "undo": "Annuler"
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",
@@ -3134,7 +3153,21 @@
     "tableRank": "Rang",
     "tableTeam": "Équipe",
     "tableGames": "Matchs",
-    "tablePoints": "Points"
+    "tablePoints": "Points",
+    "plainChecks": "L'analyse est terminée. Pas encore de buts : {n, plural, one {une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
+    "plainNoGoals": "L'analyse est terminée. Elle n'a trouvé aucun but dans cette vidéo.",
+    "plainToCheck": "Répondre aux questions",
+    "plainBench": "Événements et commentaires à la main",
+    "plainComments": "Commentaires sur la vidéo",
+    "nextStepTitle": "L'analyse est terminée, pas encore de trois choses.",
+    "nextStepChecks": "{n, plural, one {Une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
+    "nextStepReport": "Aucun but trouvé dans la vidéo. Avec la feuille de match, les buts et leurs temps arrivent.",
+    "nextStepNoGoals": "Aucun but trouvé dans la vidéo. Les buts de la feuille de match sont dans le match.",
+    "nextStepAddReport": "Ajouter la feuille de match",
+    "beforeTitle": "Avant le match",
+    "beforeText": "Le jour du match, tu notes ce qui se passe avec de grandes touches. Tu télécharges la vidéo après le match.",
+    "tgSeven": "({n} sur 7 m)",
+    "checksThenPeople": "{count, plural, one {1 question ouverte} other {# questions ouvertes}}, puis des questions sur les personnes à l'image"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3158,7 +3191,7 @@
     "count": "{n, plural, one {1 question} other {# questions}}",
     "questionOf": "Question {n} sur {total}",
     "personQuestion": "Qui est-ce ?",
-    "personWhy": "Les personnes le plus longtemps à l'image viennent en premier. Chaque réponse est enregistrée tout de suite et rend les chiffres plus précis.",
+    "personWhy": "Chaque réponse est enregistrée tout de suite.",
     "personCaption": "Vidéo {video} · {s} secondes à l'image, {read, select, none {numéro jamais lu} other {numéro {read} lu}}",
     "personOther": "Autres",
     "personPick": "Autres de l'effectif",
@@ -3244,7 +3277,9 @@
     "colNumber": "Numéro",
     "noHighlightsYet": "Pas encore de temps forts du match contre {opponent}.",
     "makeHighlights": "Les créer dans le match",
-    "noneYet": "Les scènes arrivent avec la première vidéo."
+    "noneYet": "Les scènes arrivent avec la première vidéo.",
+    "chipAgainst": "contre {opponent}",
+    "chipNumber": "Numéro {n}"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3424,7 +3459,7 @@
     "trial": "30 jours tout gratuit. Ensuite tu décides.",
     "send": "Enregistrer",
     "sent": "Regarde ta boîte mail.",
-    "sentText": "Nous avons envoyé le lien à {email}. Il est valable 15 minutes.",
+    "sentText": "Nous avons envoyé le lien à {email}. Il est valable 24 heures et fonctionne une fois.",
     "resend": "Renvoyer",
     "needEmail": "Ce n'est pas une adresse e-mail.",
     "haveAccount": "Déjà un compte ?",
@@ -3432,6 +3467,22 @@
     "saving": "Nous créons ton équipe et récupérons matchs, effectif et classement sur handball.ch. Cela prend environ 15 secondes.",
     "savedAccess": "Demande envoyée. Les gens du club répondront dans l'app.",
     "savingFailed": "Cela n'a pas fonctionné.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "ownerLink": "Cette équipe est la mienne, mais quelqu'un d'autre l'a déjà",
+    "ownerSubject": "Notre équipe est déjà prise",
+    "ownerBody": "Bonjour le support\n\nL'équipe (numéro handball.ch {team}) est la nôtre mais a été créée par quelqu'un d'autre. Je suis :\n\nNom :\nFonction au club :\n",
+    "fetching": "Nous récupérons les matchs sur handball.ch. Cela prend un moment.",
+    "slow": "handball.ch répond lentement aujourd'hui. Tu peux attendre ou enregistrer ton équipe quand même : les chiffres arrivent plus tard.",
+    "unavailableTeam": "handball.ch ne répond pas pour le moment. Tu peux enregistrer ton équipe quand même : les chiffres arrivent dès que la fédération répond.",
+    "saveAnyway": "Enregistrer quand même",
+    "scorersLoading": "Les buteurs arrivent.",
+    "tooMany": "Beaucoup de recherches en peu de temps. Attends une minute, puis continue.",
+    "inAppPreview": "Cette équipe utilise déjà Handball Intelligence. Enregistrer envoie une demande aux personnes qui la gèrent.",
+    "accessTitle": "Demande envoyée.",
+    "accessText": "{team} est déjà dans l'app. Les personnes qui gèrent l'équipe voient ta demande dans l'app. Si elles acceptent, tu es dans l'équipe à ta prochaine connexion.",
+    "accessTeam": "Cette équipe",
+    "accessOwnClub": "En attendant, commencer avec ta propre équipe",
+    "accessOther": "Choisir une autre équipe",
+    "fuzzy": "Aucune équipe exactement comme «{q}». Voulais-tu dire l'une de celles-ci ?"
   }
 }

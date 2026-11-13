@@ -29,7 +29,7 @@ async def test_public_search_needs_no_account_and_shows_no_app_data(
     first = next(h for h in r.json() if h["official_id"] == TEAM)
     assert first["club"] == {"id": CLUB, "name": "TV Thalwil", "city": "Thalwil"}
     # only the federation's data and whether the team is in the app: no ids of the app
-    assert set(first) == {"official_id", "name", "league", "group_name", "club", "in_app"}
+    assert set(first) == {"official_id", "name", "league", "group_name", "club", "in_app", "fuzzy"}
     assert first["in_app"] is False
     r = await anon.get("/v1/public/teams", params={"q": "th"})
     assert r.status_code == 422
@@ -65,10 +65,11 @@ async def test_public_preview_from_the_federations_data(make_api: Callable[[], A
 async def test_public_endpoints_are_limited_per_ip(make_api: Callable[[], Api]) -> None:
     anon = make_api()
     anon.app.state.rate_limiter = MemoryRateLimiter()
+    # a team view asks twice (the team, then its scorers): 20 a minute, then 429
     codes = [
-        (await anon.get(f"/v1/public/clubs/{CLUB}/teams/{TEAM}")).status_code for _ in range(12)
+        (await anon.get(f"/v1/public/clubs/{CLUB}/teams/{TEAM}")).status_code for _ in range(22)
     ]
-    assert codes[:10] == [200] * 10 and codes[-1] == 429
+    assert codes[:20] == [200] * 20 and codes[-1] == 429
 
 
 async def test_start_makes_an_account_without_password_and_mails_a_link(
@@ -106,3 +107,32 @@ def test_scorer_names_in_reading_order() -> None:
     assert display_name("SIGG Jean-Claude") == "Jean-Claude Sigg"
     assert display_name("MÜLLER-HUBER Tim") == "Tim Müller-Huber"
     assert display_name("Anna Muster") == "Anna Muster"
+
+
+async def test_public_config_gives_the_website_and_support_addresses(
+    make_api: Callable[[], Api],
+) -> None:
+    """The upload guide and the legal links take the website's address from the configuration."""
+    r = await make_api().get("/v1/public/config")
+    assert r.status_code == 200
+    assert r.json() == {
+        "site_url": "https://handball-ai.ch",
+        "support_email": "support@handball-ai.ch",
+    }
+
+
+def test_a_typo_is_a_letter_away() -> None:
+    """UX test N10: «Wädenswill» and «Thalwill» find their clubs."""
+    from handball_api.services.public_teams import _near
+
+    assert _near("wadenswill", "wadenswil") and _near("thalwill", "thalwil")
+    assert _near("staefa", "stafa") is False or _near("stafa", "stafa")
+    assert not _near("uster", "zuerich")
+
+
+def test_team_words_do_not_hide_the_club() -> None:
+    """UX test N27: «Wädenswil Herren 1» searches the club by «Wädenswil»."""
+    from handball_api.services.public_teams import TEAM_WORD
+
+    assert all(TEAM_WORD.fullmatch(w) for w in ("herren", "1", "u15", "damen"))
+    assert not TEAM_WORD.fullmatch("wadenswil")

@@ -8,6 +8,7 @@ import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import { SHIRTS } from "@/lib/color";
 import { FARBE } from "../entry-view";
+import { ownershipMail, useSiteConfig } from "@/lib/site-config";
 
 type Suggestion = Schemas["SuggestionOut"];
 const num = (v: unknown) => (typeof v === "number" ? v : null);
@@ -19,6 +20,7 @@ const num = (v: unknown) => (typeof v === "number" ? v : null);
  */
 export function SaveTeam() {
   const t = useTranslations("entry");
+  const site = useSiteConfig();
   const params = useSearchParams();
   const router = useRouter();
   const [state, setState] = useState<"saving" | "access" | "failed">("saving");
@@ -55,11 +57,13 @@ export function SaveTeam() {
       return;
     }
     if (name) {
-      const o = await api.POST("/v1/orgs", { body: { name, country: "CH", primary_color: colour, secondary_color: second } });
-      if (o.error || !o.data) return setState("failed");
-      const tm = await api.POST("/v1/orgs/{org_id}/teams", { params: { path: { org_id: o.data.id } }, body: { name, gender: "mixed" } });
+      // the same address saves a second team into its club, not into a second club (UX test N21)
+      const own = me.data.organizations.filter((o) => o.role === "org_admin");
+      const orgId = own.length === 1 ? own[0]!.id : (await api.POST("/v1/orgs", { body: { name, country: "CH", primary_color: colour, secondary_color: second } })).data?.id;
+      if (!orgId) return setState("failed");
+      const tm = await api.POST("/v1/orgs/{org_id}/teams", { params: { path: { org_id: orgId } }, body: { name, gender: "mixed" } });
       if (tm.error || !tm.data) return setState("failed");
-      router.replace(`/app/${o.data.id}/teams/${tm.data.id}/matches`);
+      router.replace(`/app/${orgId}/teams/${tm.data.id}/matches`);
       return;
     }
     router.replace("/einstieg");
@@ -74,7 +78,31 @@ export function SaveTeam() {
   return (
     <section className="mx-auto max-w-xl space-y-4" aria-live="polite" data-testid="entry-saving">
       {state === "saving" && <p className="text-[19px]">{t("saving")}</p>}
-      {state === "access" && <p className="text-[19px]">{t("savedAccess")}</p>}
+      {state === "access" && (
+        <>
+          <h1 className="font-slant text-[34px] leading-tight">{t("accessTitle")}</h1>
+          <p className="text-[19px]">{t("accessText", { team: params.get("n") ?? t("accessTeam") })}</p>
+          {/* not a dead end: another team, or a club of one's own by the team's name */}
+          <div className="flex flex-wrap gap-3" data-testid="entry-access-ways">
+            {params.get("n") && (
+              <a href={`/einstieg/speichern?name=${encodeURIComponent(params.get("n")!)}&farbe=${params.get("farbe") ?? "blau"}`} className={buttonClass("primary")}>
+                {t("accessOwnClub")}
+              </a>
+            )}
+            <a href="/einstieg" className={buttonClass(params.get("n") ? "secondary" : "primary")}>
+              {t("accessOther")}
+            </a>
+          </div>
+          {/* the minimum until it is decided how ownership is checked (OPEN_QUESTIONS Q-AUTH-OWNER) */}
+          {site && (
+            <p className="text-[17px]">
+              <a href={ownershipMail(site.support_email, t("ownerSubject"), t("ownerBody", { team: params.get("team") ?? params.get("name") ?? "" }))} className="font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="entry-owner">
+                {t("ownerLink")}
+              </a>
+            </p>
+          )}
+        </>
+      )}
       {state === "failed" && (
         <>
           <p className="text-[19px] font-bold">{t("savingFailed")}</p>

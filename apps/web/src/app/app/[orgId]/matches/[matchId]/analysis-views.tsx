@@ -117,7 +117,8 @@ export function N({ value, onClick, label }: { value: string | number; onClick?:
   if (value === 0 || value === "0") return <span className="tabular-nums text-muted">{value}</span>;
   if (!onClick) return <span className="tabular-nums">{value}</span>;
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="tabular-nums font-semibold underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-accent hover:decoration-solid">
+    // a 44 px target in the tables too (UX test B44): the row grows a little, the figure stays
+    <button type="button" onClick={onClick} aria-label={label} className="inline-flex min-h-11 min-w-11 items-center justify-end tabular-nums font-semibold underline decoration-foreground/35 decoration-dotted underline-offset-4 hover:decoration-accent hover:decoration-solid">
       {value}
     </button>
   );
@@ -155,7 +156,12 @@ export function Drill({ drill, orgId, matchId, onPlay, names, close }: { drill: 
   );
 }
 
-export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false, videoNote = null }: ViewProps & { videoNote?: string | null }) {
+type OverviewPart = "basis" | "decided" | "insights" | "timeline" | "comparison" | "scorers";
+const ALL_PARTS: OverviewPart[] = ["basis", "decided", "insights", "timeline", "comparison", "scorers"];
+
+/** The old overview in parts: «Mehr zum Spiel» takes the course, Zahlen the comparison (UX test B08). */
+export function OverviewView({ orgId, match, teamName, stats, onPlay, names, staff = false, videoNote = null, parts = ALL_PARTS }: ViewProps & { videoNote?: string | null; parts?: OverviewPart[] }) {
+  const has = (p: OverviewPart) => parts.includes(p);
   const t = useTranslations("stats");
   const te = useTranslations("events");
   const oppName = useOpponentName();
@@ -234,7 +240,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
   const who = (p: (typeof scorers)[number]) => (p.player_id && names[p.player_id]) || `#${p.number ?? "?"}`;
   return (
     <div className="space-y-10">
-      <div className="space-y-1 text-sm" data-testid="analysis-basis">
+      {has("basis") && <div className="space-y-1 text-sm" data-testid="analysis-basis">
         <p>
           {t("basis", { list: sources })}
           {videoNote && ` ${videoNote}`}
@@ -244,8 +250,8 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             {t("scoreMismatch", { events: `${stats.own.goals}:${stats.opponent.goals}`, score: `${match.score_own}:${match.score_opponent}` })}
           </p>
         )}
-      </div>
-      {decision && (
+      </div>}
+      {decision && has("decided") && (
         // the one statement of the tab: what decided the match, from the head-to-head figures
         <p className="max-w-3xl font-display text-2xl leading-tight sm:text-3xl" data-testid="decided">
           {t(decision.side === "own" ? "decidedOwn" : "decidedOpp", {
@@ -253,7 +259,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           })}
         </p>
       )}
-      {decision && (
+      {decision && has("decided") && (
         // the statement leads to its scenes
         <p className="-mt-6 flex flex-wrap gap-x-4 text-sm">
           {decision.edges.map((e) => (
@@ -263,7 +269,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           ))}
         </p>
       )}
-      <InsightsCard
+      {has("insights") && <InsightsCard
         noSignal={decision != null}
         orgId={orgId}
         matchId={match.id}
@@ -271,9 +277,9 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
         staff={staff}
         onEvidence={open}
         won={match.score_own != null && match.score_opponent != null && match.score_own > match.score_opponent}
-      />
+      />}
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
-        {stats.timeline.timed !== false && stats.timeline.score.length > 1 && (
+        {has("timeline") && stats.timeline.timed !== false && stats.timeline.score.length > 1 && (
         <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("timeline")}</h2>
           <ScoreChart
@@ -291,7 +297,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           </ul>
         </Sheet>
         )}
-        <Sheet className="space-y-3">
+        {has("comparison") && <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("comparison")}</h2>
           <table className="w-full text-sm" data-testid="comparison">
             <thead className="text-muted">
@@ -321,9 +327,9 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             </tbody>
           </table>
           {stats.possessions_source === "tracking" && <p className="text-xs text-muted">{t("possessionsTracked")}</p>}
-        </Sheet>
+        </Sheet>}
       </div>
-      {scorers.length > 0 && (
+      {has("scorers") && scorers.length > 0 && (
         <Sheet className="space-y-3">
           <h2 className="font-semibold">{t("scorers")}</h2>
           <ul className="grid gap-x-10 sm:grid-cols-2">

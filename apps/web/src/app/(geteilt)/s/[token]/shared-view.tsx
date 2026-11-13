@@ -15,6 +15,8 @@ import type { Schemas } from "@handball/api-client";
 import { CameraFrame, TacticsCamera } from "@/components/anlauf/tactics-camera";
 import { VIEWS } from "@/components/anlauf/geometry";
 import { cameraScene } from "@/lib/graphics";
+import { MINI } from "@/lib/mini-field";
+import { clockOf } from "@/components/anlauf/three-things-view";
 
 export interface Shared {
   kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection";
@@ -47,7 +49,7 @@ interface SharedRun {
     kind: "scene" | "play" | "note";
     text: string | null;
     play: { id: string; name: string } | null;
-    scene: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null; camera?: Schemas["SceneCameraOut"] | null } | null;
+    scene: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null; camera?: Schemas["SceneCameraOut"] | null; goal?: { minute: number | null; team: "own" | "opp"; zone: string | null } | null } | null;
   }[];
 }
 
@@ -197,6 +199,13 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
   const cur = scenes[k];
   const next = () => setK((x) => Math.min(x + 1, scenes.length - 1));
   // the positions before a goal, where the court was confirmed (UX test B15)
+  // the title as in the app: minute, goal or goal against, the position (UX test B15)
+  const tc = useTranslations("collections");
+  const titleOf = (sc: NonNullable<SharedRun["items"][number]["scene"]>) => {
+    const g = sc.goal;
+    if (!g) return sc.title ?? t("scene");
+    return `${g.minute != null ? `${clockOf(g.minute)} ` : ""}${g.team === "opp" ? tc("goalAgainst") : tc("goalFor")}${g.zone ? ` ${ta(`zoneFrom.${g.zone}` as "zoneFrom.la")}` : ""}`;
+  };
   const camOf = (i: (typeof scenes)[number] | undefined) => (i?.scene?.camera ? cameraScene(i.scene.camera, i.scene.title) : null);
   const cam = camOf(cur);
   const shown = cam ? mode : "video";
@@ -230,7 +239,7 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
               view="halfB"
               width={900}
               dot={17}
-              text={{ label: ta("cameraLabel", { label: cur?.scene?.title ?? t("scene") }), pause: ta("pause"), play: ta("play"), notFound: ta("ballNotFound"), noBall: ta("noBall"), caption: null }}
+              text={{ label: ta("cameraLabel", { label: cur?.scene ? titleOf(cur.scene) : t("scene") }), pause: ta("pause"), play: ta("play"), notFound: ta("ballNotFound"), noBall: ta("noBall"), caption: null }}
             />
           </div>
         )}
@@ -265,14 +274,14 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
                     // the Minifeld: the last frame of the positions, or the empty field
                     return c ? (
                       <svg aria-hidden viewBox={VIEWS.halfB.box.join(" ")} className="block w-14 bg-court" data-testid="shared-mini">
-                        <CameraFrame scene={c} view="halfB" width={56} dot={22} t={1} />
+                        <CameraFrame scene={c} view={MINI.view} width={MINI.width} dot={MINI.dot} t={1} />
                       </svg>
                     ) : (
                       <EmptyField />
                     );
                   })()}
                   <span className="min-w-0 text-[15px] leading-snug font-semibold">
-                    {i.scene!.title ?? t("scene")}
+                    {titleOf(i.scene!)}
                     <small className={cn("block text-[15px] font-normal", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : n < k ? t("seen") : ""}</small>
                   </span>
                   <span className="font-mono text-[13px]">{duration(len)}</span>

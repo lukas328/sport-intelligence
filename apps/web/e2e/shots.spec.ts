@@ -61,10 +61,12 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
   await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
-  await expect(page.getByTestId("player")).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByTestId("player").filter({ visible: true })).toBeVisible({ timeout: 180_000 });
 
   // court from the hall: one look at the orange lines, "Passt", and on to the next open step
   // the setup by hand sits behind one toggle; its questions are asked in Prüfen (UX test B10)
+  // without goals on the stage the video tab shows the plain video first (UX test N04)
+  if (await page.getByTestId("open-bench").isVisible()) await page.getByTestId("open-bench").click();
   await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
   await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Seefeld). Liegen die orangen Linien")).toBeVisible();

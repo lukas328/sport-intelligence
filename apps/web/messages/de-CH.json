@@ -6,7 +6,7 @@
   },
   "nav": {
     "home": "Start",
-    "status": "Status der App",
+    "status": "Läuft alles? Störungen",
     "app": "Zur App",
     "login": "Anmelden",
     "assignments": "Aufgaben",
@@ -22,7 +22,7 @@
     "f1Title": "Automatisch zuerst",
     "f2Title": "Jede Zahl führt zum Video",
     "f3Title": "Für Amateurteams gemacht",
-    "f2": "Ein Klick auf eine Statistik zeigt die Szenen dahinter.",
+    "f2": "Ein Klick auf eine Zahl zeigt die Szenen dahinter.",
     "login": "Ich habe schon ein Konto",
     "f1": "Video hochladen, den Rest erledigt die Analyse: Würfe, Tore, Torhüter, Laufwege."
   },
@@ -191,7 +191,8 @@
     "needPassword": "Das Passwort braucht mindestens 10 Zeichen.",
     "needTerms": "Bitte akzeptiere die Bedingungen.",
     "claim": "Dein Spiel. Und drei Dinge zum Mitnehmen.",
-    "toSite": "Was die App kann: handball-ai.ch"
+    "toSite": "Was die App kann: {site}",
+    "newLink": "Neuen Link an {email} schicken"
   },
   "invite": {
     "title": "Einladung",
@@ -552,11 +553,12 @@
     "addCamera": "Weitere Kamera hinzufügen (Torkamera, zweiter Blickwinkel)",
     "tip1": "Ein Handy reicht.",
     "tip2": "Auf ein Stativ, hoch an der Mittellinie, das ganze Feld im Bild.",
-    "tip3": "Das ganze Spiel in einer Datei (MP4, MOV oder MKV).",
+    "tip3": "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste.",
     "guide": "Ausführliche Filmanleitung",
     "chooseVideo": "Video wählen",
     "more": "Mehr: andere Kamera, Link, Technik",
-    "mayClose": "Du kannst die Seite schliessen. Du bekommst eine Mail, wenn die drei Dinge da sind."
+    "mayClose": "Du kannst die Seite schliessen. Wir schicken dir eine Mail, wenn die Analyse fertig ist.",
+    "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy."
   },
   "processing": {
     "title": "Verarbeitung",
@@ -578,14 +580,14 @@
     "videoStatus_processing": "Wird verarbeitet",
     "videoStatus_ready": "Bereit",
     "videoStatus_failed": "Fehler",
-    "done": "Analyse fertig. Statistik und Szenen stehen bereit.",
+    "done": "Die Analyse ist fertig.",
     "titleAnalysis": "Spielanalyse",
     "stage_analysis_download": "Video laden",
     "stage_analysis_observe": "Kamera und Spieler erkennen",
     "stage_analysis_calibration": "Spielfeld finden",
     "stage_analysis_tracking": "Laufwege berechnen",
     "stage_analysis_upload": "Speichern",
-    "analysisHint": "Läuft im Hintergrund. Du kannst die Seite schliessen, wir melden uns, wenn es fertig ist.",
+    "analysisHint": "Du kannst die Seite schliessen. Wir schicken dir eine Mail, wenn die Analyse fertig ist.",
     "failedTitle": "Das Video liess sich nicht lesen.",
     "failedText": "Diese Datei ist kein Video, das wir lesen können (MP4, MOV, MKV). Der Spielbericht und alles, was du schon erfasst hast, bleiben.",
     "otherFile": "Andere Datei wählen",
@@ -1241,7 +1243,11 @@
     "analysis_ready_match": "Die drei Dinge gegen {opponent} sind da.",
     "analysis_failed_match": "Das Video gegen {opponent} liess sich nicht auswerten. Das Video bleibt, du kannst ein anderes hochladen.",
     "video_failed": "Ein Video liess sich nicht lesen.",
-    "video_failed_match": "Das Video gegen {opponent} liess sich nicht lesen. Wähl eine andere Datei."
+    "video_failed_match": "Das Video gegen {opponent} liess sich nicht lesen. Wähl eine andere Datei.",
+    "analysis_questions": "Die Analyse ist fertig. Ein paar Fragen an dich, dann zeigt sie mehr.",
+    "analysis_questions_match": "Die Analyse gegen {opponent} ist fertig. {questions} Fragen an dich, dann zeigt sie mehr.",
+    "analysis_no_goals": "Die Analyse ist fertig. Sie hat keine Tore gefunden.",
+    "analysis_no_goals_match": "Die Analyse gegen {opponent} ist fertig. Sie hat keine Tore gefunden."
   },
   "assignments": {
     "title": "Aufgaben",
@@ -1561,13 +1567,13 @@
   "search": {
     "title": "Szenen suchen",
     "nav": "Szenen",
-    "tagSets": "Eigene Tags",
+    "tagSets": "Eigene Stichwörter",
     "newSet": "Neues Tag-Set",
     "newSetPlaceholder": "z. B. Abwehr",
     "newTag": "Neuer Tag",
     "add": "Hinzufügen",
     "addTagTo": "Tag zu {set} hinzufügen",
-    "ownTagsHint": "Eigene Tags ergänzen die automatischen Ereignisse. Sie verändern keine Kennzahlen.",
+    "ownTagsHint": "Eigene Stichwörter ergänzen die automatischen Ereignisse. Sie verändern keine Zahlen.",
     "smart": "gespeicherte Suchen",
     "smartNone": "Noch keine gespeicherten Filter.",
     "smartName": "Name der gespeicherten Suche",
@@ -1586,7 +1592,7 @@
     "none": "Keine Szenen für diesen Filter.",
     "clip": "Eigene Szene",
     "watch": "Ansehen",
-    "tagsOf": "Tags dieser Szene",
+    "tagsOf": "Stichwörter dieser Szene",
     "truncated": "Die ersten {n} Szenen werden angezeigt.",
     "type_timeout": "Timeout",
     "shirt": "Nr. {n}",
@@ -1940,14 +1946,14 @@
     "historyNone": "Noch keine Gespräche."
   },
   "exchange": {
-    "title": "Daten exportieren und importieren",
+    "title": "Spieldaten als Datei",
     "sportscode": "Sportscode-XML herunterladen",
     "csv": "Ereignisse als CSV",
     "exportHint": "Die XML-Datei enthält alle Ereignisse mit Videozeit und alle Szenen mit ihren Tags. Sie lässt sich in Sportscode und kompatiblen Programmen öffnen.",
     "importLabel": "Sportscode-XML importieren",
     "importHint": "Jede Instanz wird eine Szene; Code und Labels werden eigene Tags. Ereignisse und Kennzahlen bleiben unverändert.",
     "import": "Importieren",
-    "imported": "{clips} Szenen importiert, {tags} neue Tags."
+    "imported": "{clips} Szenen importiert, {tags} neue Stichwörter."
   },
   "officialReport": {
     "label": "Offiziellen Spielbericht importieren",
@@ -2215,7 +2221,16 @@
     "subLater": "später im Video",
     "perPlayer": "Pro Spielerin erfassen",
     "sofarTitle": "Bisher",
-    "newestFirst": "neueste zuerst"
+    "newestFirst": "neueste zuerst",
+    "clockLabel": "Spielzeit",
+    "clockStart": "Uhr starten",
+    "clockPause": "Pause",
+    "clockGo": "Weiter",
+    "takeBack": "Zurücknehmen",
+    "key_two_min": "2 Minuten",
+    "key_timeout": "Time-out",
+    "shareLink": "Link teilen",
+    "copied": "Link kopiert"
   },
   "profile": {
     "title": "Öffentliches Profil",
@@ -2326,7 +2341,7 @@
     "existingAuto": "Automatisch gefunden. Liegt das orange Feld auf den Hallenlinien und stehen die Tore richtig? Dann bestätigen, sonst Punkte setzen."
   },
   "today": {
-    "uploadHint": "Lade das Video hoch. Statistik, Szenen und drei Dinge entstehen danach automatisch.",
+    "uploadHint": "Lade das Video hoch. Zahlen, Szenen und drei Dinge entstehen danach von selbst.",
     "myTasks": "Zu erledigen",
     "prepare": "Vorbereiten",
     "inDays": "{n, plural, =0 {Heute} =1 {Morgen} other {In # Tagen}}",
@@ -2442,7 +2457,7 @@
     "playlistsHint": "Szenen sammeln und mit dem Team teilen.",
     "playsHint": "Auf dem Taktikboard zeichnen, aus dem Video übernehmen.",
     "back": "Zurück zu {name}",
-    "searchHint": "Alle Szenen der Saison nach Spieler, Aktion und Zone filtern, eigene Tags setzen und Suchen speichern.",
+    "searchHint": "Alle Szenen der Saison nach Spieler, Aktion und Zone filtern, eigene Stichwörter setzen und Suchen speichern.",
     "presentationsHint": "Für die Teamsitzung, mit Fernbedienung vom Handy.",
     "search": "Szenen",
     "title": "Sammlungen",
@@ -2692,7 +2707,7 @@
     "nothingOpen": "Nichts offen. Neue Vorschläge kommen nach jedem Spiel.",
     "squad": "Team bestätigen",
     "squadHint": "Spieler/innen aus den offiziellen Spielberichten. Nummer prüfen, wer nicht dazugehört, abwählen.",
-    "showStats": "Statistik anzeigen",
+    "showStats": "Zahlen aus dem Spielbericht zeigen",
     "take": "Übernehmen",
     "takePlayer": "{name} übernehmen",
     "name": "Name",
@@ -2703,7 +2718,7 @@
     "sevenM": "7 m",
     "twoMin": "2'",
     "saves": "Paraden",
-    "noStatsYet": "Noch keine Spiele mit Statistik in dieser Saison.",
+    "noStatsYet": "Noch keine Spiele mit Zahlen in dieser Saison.",
     "takeSquad": "{n, plural, one {# Spieler/in übernehmen} other {# Spieler/innen übernehmen}}",
     "numberInvalid": "Rückennummern von 0 bis 99, oder leer lassen.",
     "squadTaken": "{n, plural, one {# Spieler/in im Team.} other {# Spieler/innen im Team.}}",
@@ -2821,7 +2836,7 @@
     "home": "gegen {opponent}",
     "away": "auswärts bei {opponent}",
     "noMatches": "Noch keine Spiele in dieser Saison.",
-    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Spielminuten werden nicht erfasst.",
+    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Spielminuten werden nicht erfasst. Würfe ohne geblockte.",
     "noMatchesYet": "Noch kein gespieltes Spiel in dieser Saison. Die Zahlen erscheinen nach dem ersten Spiel mit Spielbericht oder Erfassung.",
     "summaryPlayed": "{matches, plural, one {1 Spiel} other {# Spiele}}, an {involved} beteiligt",
     "number": "Nummer"
@@ -2911,7 +2926,11 @@
     "fullscreen": "Vollbild",
     "prev": "Zurück",
     "next": "Weiter",
-    "close": "Schliessen"
+    "close": "Schliessen",
+    "showTitle": "Am Bildschirm",
+    "noteHere": "Notiz danach",
+    "removed": "Entfernt.",
+    "undo": "Rückgängig"
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",
@@ -3134,7 +3153,21 @@
     "tableRank": "Rang",
     "tableTeam": "Team",
     "tableGames": "Spiele",
-    "tablePoints": "Punkte"
+    "tablePoints": "Punkte",
+    "plainChecks": "Die Analyse ist fertig. Noch keine Tore gefunden: {n, plural, one {eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
+    "plainNoGoals": "Die Analyse ist fertig. Sie hat in diesem Video keine Tore gefunden.",
+    "plainToCheck": "Fragen beantworten",
+    "plainBench": "Ereignisse und Kommentare von Hand",
+    "plainComments": "Kommentare zum Video",
+    "nextStepTitle": "Die Analyse ist fertig, noch ohne drei Dinge.",
+    "nextStepChecks": "{n, plural, one {Eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
+    "nextStepReport": "Im Video wurden keine Tore gefunden. Mit dem Spielbericht kommen die Tore und ihre Zeiten dazu.",
+    "nextStepNoGoals": "Im Video wurden keine Tore gefunden. Die Tore aus dem Spielbericht stehen im Spiel.",
+    "nextStepAddReport": "Spielbericht hinzufügen",
+    "beforeTitle": "Vor dem Spiel",
+    "beforeText": "Am Spieltag merkst du mit grossen Tasten, was passiert. Das Video lädst du nach dem Spiel hoch.",
+    "tgSeven": "({n} vom 7-m)",
+    "checksThenPeople": "{count, plural, one {1 Frage offen} other {# Fragen offen}}, danach Fragen zu den Personen im Bild"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3158,7 +3191,7 @@
     "count": "{n, plural, one {1 Frage} other {# Fragen}}",
     "questionOf": "Frage {n} von {total}",
     "personQuestion": "Wer ist das?",
-    "personWhy": "Die Personen mit der längsten Zeit im Bild kommen zuerst. Jede Antwort ist sofort gespeichert und macht die Zahlen genauer.",
+    "personWhy": "Jede Antwort ist sofort gespeichert.",
     "personCaption": "Video {video} · {s} Sekunden im Bild, {read, select, none {Nummer nie gelesen} other {Nummer {read} gelesen}}",
     "personOther": "Andere",
     "personPick": "Andere aus dem Kader",
@@ -3213,7 +3246,7 @@
     "highlightsNote": "nach jedem Spiel",
     "open": "Öffnen",
     "share": "Teilen",
-    "moreTools": "Mehr: Ereignisliste, gespeicherte Suchen, eigene Tags",
+    "moreTools": "Mehr: alle Ereignisse, gespeicherte Suchen, eigene Stichwörter",
     "highlightLine": "{n, plural, one {1 Szene} other {# Szenen}} · {format}",
     "noHighlights": "Nach dem nächsten Spiel mit Video.",
     "plural": {
@@ -3244,7 +3277,9 @@
     "colNumber": "Nummer",
     "noHighlightsYet": "Vom Spiel gegen {opponent} gibt es noch keine Highlights.",
     "makeHighlights": "Im Spiel erstellen",
-    "noneYet": "Szenen gibt es nach dem ersten Video."
+    "noneYet": "Szenen gibt es nach dem ersten Video.",
+    "chipAgainst": "gegen {opponent}",
+    "chipNumber": "Nummer {n}"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3424,7 +3459,7 @@
     "trial": "30 Tage alles gratis. Danach entscheidest du.",
     "send": "Speichern",
     "sent": "Schau in dein Postfach.",
-    "sentText": "Wir haben den Link an {email} geschickt. Er ist 15 Minuten gültig.",
+    "sentText": "Wir haben den Link an {email} geschickt. Er ist 24 Stunden gültig und funktioniert einmal.",
     "resend": "Nochmals schicken",
     "needEmail": "Das ist keine E-Mail-Adresse.",
     "haveAccount": "Schon ein Konto?",
@@ -3432,6 +3467,22 @@
     "saving": "Wir legen dein Team an und holen Spiele, Kader und Tabelle von handball.ch. Das dauert etwa 15 Sekunden.",
     "savedAccess": "Anfrage gesendet. Die Leute im Verein melden sich in der App.",
     "savingFailed": "Das hat nicht geklappt.",
-    "retry": "Nochmals versuchen"
+    "retry": "Nochmals versuchen",
+    "ownerLink": "Dieses Team gehört mir, aber jemand anderes hat es schon",
+    "ownerSubject": "Unser Team ist schon belegt",
+    "ownerBody": "Hallo Support\n\nDas Team (handball.ch-Nummer {team}) gehört zu uns, ist aber schon von jemand anderem angelegt. Ich bin:\n\nName:\nFunktion im Verein:\n",
+    "fetching": "Wir holen die Spiele von handball.ch. Das dauert einen Moment.",
+    "slow": "handball.ch antwortet heute langsam. Du kannst warten oder dein Team trotzdem speichern: Die Zahlen kommen später dazu.",
+    "unavailableTeam": "handball.ch antwortet gerade nicht. Du kannst dein Team trotzdem speichern: Die Zahlen kommen dazu, sobald der Verband wieder antwortet.",
+    "saveAnyway": "Trotzdem speichern",
+    "scorersLoading": "Die Torschützen kommen gleich.",
+    "tooMany": "Das waren viele Suchen in kurzer Zeit. Warte eine Minute, dann geht es weiter.",
+    "inAppPreview": "Dieses Team nutzt Handball Intelligence schon. Speichern schickt eine Anfrage an die Leute, die es dort verwalten.",
+    "accessTitle": "Anfrage gesendet.",
+    "accessText": "{team} ist schon in der App. Die Leute, die das Team dort verwalten, sehen deine Anfrage in der App. Stimmen sie zu, bist du beim nächsten Anmelden im Team.",
+    "accessTeam": "Dieses Team",
+    "accessOwnClub": "Bis dahin mit eigenem Team starten",
+    "accessOther": "Anderes Team wählen",
+    "fuzzy": "Kein Team genau wie «{q}». Meintest du eines von diesen?"
   }
 }

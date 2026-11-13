@@ -323,6 +323,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 "team": _team(e.side),
                 "minute": minute_of(e),
                 "number": e.number,
+                "player_id": e.player_id,
                 "zone": zone_of(e),
                 "run": run,
                 "shot": shot,

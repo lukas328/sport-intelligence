@@ -6,7 +6,7 @@
   },
   "nav": {
     "home": "Home",
-    "status": "System status",
+    "status": "Is everything running? Outages",
     "app": "Open app",
     "login": "Sign in",
     "assignments": "Assignments",
@@ -191,7 +191,8 @@
     "needPassword": "The password needs at least 10 characters.",
     "needTerms": "Please accept the terms.",
     "claim": "Your match. And three things to take away.",
-    "toSite": "What the app does: handball-ai.ch"
+    "toSite": "What the app does: {site}",
+    "newLink": "Send a new link to {email}"
   },
   "invite": {
     "title": "Invitation",
@@ -552,11 +553,12 @@
     "addCamera": "Add another camera (goal camera, second angle)",
     "tip1": "A phone is enough.",
     "tip2": "On a tripod, high at the centre line, the whole court in the picture.",
-    "tip3": "The whole match in one file (MP4, MOV or MKV).",
+    "tip3": "Best the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and plays, but only the first one is analysed.",
     "guide": "Full filming guide",
     "chooseVideo": "Choose video",
     "more": "More: another camera, a link, technical details",
-    "mayClose": "You can close the page. You get an e-mail when the three things are ready."
+    "mayClose": "You can close the page. We send you an e-mail when the analysis is done.",
+    "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone."
   },
   "processing": {
     "title": "Processing",
@@ -578,14 +580,14 @@
     "videoStatus_processing": "Processing",
     "videoStatus_ready": "Ready",
     "videoStatus_failed": "Error",
-    "done": "Analysis done. Stats and scenes are ready.",
+    "done": "The analysis is done.",
     "titleAnalysis": "Match analysis",
     "stage_analysis_download": "Loading the video",
     "stage_analysis_observe": "Finding camera and players",
     "stage_analysis_calibration": "Finding the court",
     "stage_analysis_tracking": "Computing paths",
     "stage_analysis_upload": "Saving",
-    "analysisHint": "Runs in the background. You can close this page; we will let you know when it is done.",
+    "analysisHint": "You can close the page. We send you an e-mail when the analysis is done.",
     "failedTitle": "The video could not be read.",
     "failedText": "This file is not a video we can read (MP4, MOV, MKV). The match report and everything you have entered stay.",
     "otherFile": "Choose another file",
@@ -1241,7 +1243,11 @@
     "analysis_ready_match": "The three things against {opponent} are ready.",
     "analysis_failed_match": "The video against {opponent} could not be analysed. The video stays; you can upload another.",
     "video_failed": "A video could not be read.",
-    "video_failed_match": "The video against {opponent} could not be read. Choose another file."
+    "video_failed_match": "The video against {opponent} could not be read. Choose another file.",
+    "analysis_questions": "The analysis is done. A few questions for you, then it shows more.",
+    "analysis_questions_match": "The analysis against {opponent} is done. {questions} questions for you, then it shows more.",
+    "analysis_no_goals": "The analysis is done. It found no goals.",
+    "analysis_no_goals_match": "The analysis against {opponent} is done. It found no goals."
   },
   "assignments": {
     "title": "Assignments",
@@ -1940,7 +1946,7 @@
     "historyNone": "No conversations yet."
   },
   "exchange": {
-    "title": "Exchange data",
+    "title": "Match data as a file",
     "sportscode": "Download Sportscode XML",
     "csv": "Events as CSV",
     "exportHint": "The XML file contains every event with video time and every scene with its tags. It opens in Sportscode and compatible programs.",
@@ -2215,7 +2221,16 @@
     "subLater": "later in the video",
     "perPlayer": "Capture per player",
     "sofarTitle": "So far",
-    "newestFirst": "newest first"
+    "newestFirst": "newest first",
+    "clockLabel": "Match time",
+    "clockStart": "Start clock",
+    "clockPause": "Pause",
+    "clockGo": "Resume",
+    "takeBack": "Take back",
+    "key_two_min": "2 minutes",
+    "key_timeout": "Time-out",
+    "shareLink": "Share link",
+    "copied": "Link copied"
   },
   "profile": {
     "title": "Public profile",
@@ -2821,7 +2836,7 @@
     "home": "vs {opponent}",
     "away": "away at {opponent}",
     "noMatches": "No matches this season yet.",
-    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded.",
+    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded. Shots without blocked ones.",
     "noMatchesYet": "No match played this season yet. The figures appear after the first match with a match report or tagging.",
     "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, involved in {involved}",
     "number": "Number"
@@ -2911,7 +2926,11 @@
     "fullscreen": "Full screen",
     "prev": "Back",
     "next": "Next",
-    "close": "Close"
+    "close": "Close",
+    "showTitle": "On screen",
+    "noteHere": "Note after",
+    "removed": "Removed.",
+    "undo": "Undo"
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
@@ -3134,7 +3153,21 @@
     "tableRank": "Rank",
     "tableTeam": "Team",
     "tableGames": "Games",
-    "tablePoints": "Points"
+    "tablePoints": "Points",
+    "plainChecks": "The analysis is done. No goals found yet: {n, plural, one {one question} other {# questions}} in Check, then it shows more.",
+    "plainNoGoals": "The analysis is done. It found no goals in this video.",
+    "plainToCheck": "Answer the questions",
+    "plainBench": "Events and comments by hand",
+    "plainComments": "Comments on the video",
+    "nextStepTitle": "The analysis is done, no three things yet.",
+    "nextStepChecks": "{n, plural, one {One question} other {# questions}} in Check, then it shows more.",
+    "nextStepReport": "No goals were found in the video. With the match report the goals and their times come in.",
+    "nextStepNoGoals": "No goals were found in the video. The goals from the report are in the match.",
+    "nextStepAddReport": "Add the match report",
+    "beforeTitle": "Before the match",
+    "beforeText": "On match day you note what happens with big keys. You upload the video after the match.",
+    "tgSeven": "({n} from 7 m)",
+    "checksThenPeople": "{count, plural, one {1 question open} other {# questions open}}, then questions about the people in the picture"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3158,7 +3191,7 @@
     "count": "{n, plural, one {1 question} other {# questions}}",
     "questionOf": "Question {n} of {total}",
     "personQuestion": "Who is this?",
-    "personWhy": "The people longest in view come first. Every answer is saved at once and makes the numbers more precise.",
+    "personWhy": "Every answer is saved at once.",
     "personCaption": "Video {video} · {s} seconds in view, {read, select, none {number never read} other {number {read} read}}",
     "personOther": "Others",
     "personPick": "Others from the squad",
@@ -3244,7 +3277,9 @@
     "colNumber": "Number",
     "noHighlightsYet": "There are no highlights of the match against {opponent} yet.",
     "makeHighlights": "Make them in the match",
-    "noneYet": "Scenes come with the first video."
+    "noneYet": "Scenes come with the first video.",
+    "chipAgainst": "against {opponent}",
+    "chipNumber": "Number {n}"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3424,7 +3459,7 @@
     "trial": "30 days all free. Then you decide.",
     "send": "Save",
     "sent": "Check your inbox.",
-    "sentText": "We sent the link to {email}. It is valid for 15 minutes.",
+    "sentText": "We sent the link to {email}. It is valid for 24 hours and works once.",
     "resend": "Send again",
     "needEmail": "That is not an e-mail address.",
     "haveAccount": "Already have an account?",
@@ -3432,6 +3467,22 @@
     "saving": "We are creating your team and fetching matches, squad and table from handball.ch. This takes about 15 seconds.",
     "savedAccess": "Request sent. The people of the club will answer in the app.",
     "savingFailed": "That did not work.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "ownerLink": "This team is mine, but someone else already has it",
+    "ownerSubject": "Our team is already taken",
+    "ownerBody": "Hello support\n\nThe team (handball.ch number {team}) is ours but was set up by someone else. I am:\n\nName:\nRole in the club:\n",
+    "fetching": "We are fetching the games from handball.ch. This takes a moment.",
+    "slow": "handball.ch is slow today. You can wait or save your team anyway: the figures come in later.",
+    "unavailableTeam": "handball.ch is not answering right now. You can save your team anyway: the figures come in once the federation answers again.",
+    "saveAnyway": "Save anyway",
+    "scorersLoading": "The scorers are on their way.",
+    "tooMany": "That was a lot of searches in a short time. Wait a minute, then go on.",
+    "inAppPreview": "This team already uses Handball Intelligence. Saving sends a request to the people who manage it there.",
+    "accessTitle": "Request sent.",
+    "accessText": "{team} is already in the app. The people who manage it see your request in the app. Once they agree, you are in the team the next time you sign in.",
+    "accessTeam": "This team",
+    "accessOwnClub": "Start with a team of your own meanwhile",
+    "accessOther": "Choose another team",
+    "fuzzy": "No team exactly like «{q}». Did you mean one of these?"
   }
 }

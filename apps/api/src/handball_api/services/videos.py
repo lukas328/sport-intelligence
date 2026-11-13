@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import PurePosixPath
 from typing import Any
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
 from handball_api.core.colors import analysis_kits
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
@@ -22,6 +22,8 @@ from handball_api.core.net import UnsafeUrlError, check_public_https_url
 from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     CameraCalibration,
+    Event,
+    GoalCandidate,
     Match,
     Opponent,
     OpponentPlayer,
@@ -131,6 +133,9 @@ async def get_asset(
     return asset
 
 
+THREE_THINGS_MIN_GOALS = 3  # fewer goals in the video carry no three things
+
+
 async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) -> None:
     """A note in the bell and an e-mail to the team's coaches and analysts, naming the match
     (UX test H06, B29): on the phone the bell alone is easy to miss."""
@@ -159,10 +164,35 @@ async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) 
                 team=team.name if team else "",
                 opponent=opponent,
                 link=f"{ctx.settings.web_base_url}{link}",
+                **{k: v for k, v in extra.items() if k == "questions"},
             ),
             kind,
             user_id=str(u.id),
         )
+
+
+async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
+    """What the mail may promise after the analysis (UX test N05): the three things only with
+    goals placed in the video; otherwise that the analysis is done and how many questions wait."""
+    goals = await ctx.db.scalar(
+        select(func.count())
+        .select_from(Event)
+        .where(
+            Event.match_id == match.id,
+            Event.type == "shot",
+            Event.outcome == "goal",
+            Event.t_ms.is_not(None),
+        )
+    )
+    if (goals or 0) >= THREE_THINGS_MIN_GOALS:
+        return "analysis_ready", {}
+    questions = await ctx.db.scalar(
+        select(func.count())
+        .select_from(GoalCandidate)
+        .where(GoalCandidate.match_id == match.id, GoalCandidate.status == "open")
+    )
+    questions = (questions or 0) + (1 if (match.kickoff_ms or {}).get("1") is None else 0)
+    return ("analysis_questions" if questions else "analysis_no_goals"), {"questions": questions}
 
 
 def _uploading(asset: VideoAsset) -> str:
@@ -555,7 +585,8 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
             await _sync_after_ingest(ctx, asset)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "analysis" and data.result:
             on_timeline = await _apply_analysis_result(ctx, asset, job, data.result)
-            await _tell_staff(ctx, match, "analysis_ready", {})
+            kind, extra = await _ready_note(ctx, match)
+            await _tell_staff(ctx, match, kind, extra)
             if on_timeline:
                 await feed.generate(ctx, match)  # "Deine Szenen" right after the analysis (4.7)
                 from handball_api.services import highlights  # imports this module (media paths)

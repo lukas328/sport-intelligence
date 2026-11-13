@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     status_page_push_url: str | None = None  # provider webhook for component status
     status_page_token: SecretStr | None = None
     help_base_url: str = "https://handball-ai.ch/hilfe"
+    # the public website (apps/site): legal pages and guides such as /aufnahme/ link there; one
+    # setting, so a change of domain does not break links in the app
+    site_url: str = "https://handball-ai.ch"
     raw_video_days: int = 90  # originals reduced to the compressed version after this
     alert_cost_chf_per_match: float = 2.0
     alert_analysis_minutes: float = 45.0
@@ -95,7 +98,8 @@ class Settings(BaseSettings):
     csrf_cookie: str = "hb_csrf"
     session_ttl_hours: int = 24 * 14
     cookie_secure: bool = False
-    magic_link_ttl_minutes: int = 15
+    # the first sign-in from the entry is often read hours later (UX test N15): a day, once only
+    magic_link_ttl_minutes: int = 24 * 60
     invitation_ttl_days: int = 14
     org_admin_2fa_required: bool = True
     org_admin_2fa_grace_days: int = 14

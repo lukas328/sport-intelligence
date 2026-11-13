@@ -2179,6 +2179,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/marks/{client_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Take Back
+         * @description «Zurücknehmen» on the Spieltag: the mark with this phone id is removed (UX test N14).
+         */
+        delete: operations["take_back_v1_orgs__org_id__matches__match_id__marks__client_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
         parameters: {
             query?: never;
@@ -4766,9 +4786,31 @@ export interface paths {
         };
         /**
          * Team Preview
-         * @description Last result, rank and table, form, scorers and next game of a team.
+         * @description Last result, rank and table, form, scorers and next game of a team; `scorers=false`
+         *     answers fast without the scorers (the entry asks for them afterwards).
          */
         get: operations["team_preview_v1_public_clubs__club_id__teams__official_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Public Config
+         * @description Addresses the pages link to (website, support), from the configuration: also before
+         *     sign-in, for the entry and its legal links.
+         */
+        get: operations["public_config_v1_public_config_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6757,6 +6799,8 @@ export interface components {
             minute: number | null;
             /** Number */
             number: number | null;
+            /** Player Id */
+            player_id?: string | null;
             /**
              * Run
              * @description the scorer's way before the shot, half court (goal at the top, metres); empty without tracking
@@ -7334,6 +7378,8 @@ export interface components {
         };
         /** MarkOut */
         MarkOut: {
+            /** Client Id */
+            client_id?: string | null;
             /**
              * Device Time
              * Format: date-time
@@ -9131,6 +9177,13 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** PublicConfig */
+        PublicConfig: {
+            /** Site Url */
+            site_url: string;
+            /** Support Email */
+            support_email: string;
+        };
         /** PublicConsentPage */
         PublicConsentPage: {
             /** Club */
@@ -9242,6 +9295,11 @@ export interface components {
         /** PublicTeamHit */
         PublicTeamHit: {
             club: components["schemas"]["PublicClub"];
+            /**
+             * Fuzzy
+             * @default false
+             */
+            fuzzy?: boolean;
             /** Group Name */
             group_name: string | null;
             /** In App */
@@ -9260,6 +9318,11 @@ export interface components {
             form: ("w" | "d" | "l")[];
             /** Group Name */
             group_name: string | null;
+            /**
+             * In App
+             * @default false
+             */
+            in_app?: boolean;
             last: components["schemas"]["PublicGame"] | null;
             /** League */
             league: string | null;
@@ -15410,6 +15473,37 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["handball_api__schemas__marks__SyncOut"][];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    take_back_v1_orgs__org_id__matches__match_id__marks__client_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                client_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -21658,7 +21752,9 @@ export interface operations {
     };
     team_preview_v1_public_clubs__club_id__teams__official_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                scorers?: boolean;
+            };
             header?: never;
             path: {
                 club_id: number;
@@ -21684,6 +21780,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_config_v1_public_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicConfig"];
                 };
             };
         };

@@ -96,8 +96,10 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   const entries: Entry[] = roster.data ?? [];
   const players = ((stats.data as unknown as { players?: { player_id: string; goals: number; saves: number }[] } | undefined)?.players ?? []).reduce<Record<string, { goals: number; saves: number }>>((m, p) => ((m[p.player_id] = p), m), {});
   // what is missing: the consent is staff business, the number everyone sees
-  const consentOpen = (p: Entry) => firstVideo && staff && !p.consent_complete;
-  const missing = firstVideo ? entries.filter((p) => consentOpen(p) || p.jersey_number == null).length : 0;
+  // after the first video the consents stand once, at the side (count and the link to ask for
+  // them), not as a badge in every row and not in the title (UX test H04: no alarm right after
+  // the first success); a missing number stays a badge, everyone sees it
+  const missing = firstVideo ? entries.filter((p) => p.jersey_number == null).length : 0;
   const consents = entries.filter((p) => p.consent_complete).length;
   const title =
     entries.length === 0
@@ -165,7 +167,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                           )}
                         </span>
                         <span className="mt-1 flex flex-wrap items-center gap-1.5 text-[15px] text-ink-2">
-                          {consentOpen(p) ? <AttnTag>{t("consentMissing")}</AttnTag> : firstVideo && p.jersey_number == null ? <AttnTag>{t("numberMissing")}</AttnTag> : fig}
+                          {firstVideo && p.jersey_number == null ? <AttnTag>{t("numberMissing")}</AttnTag> : fig}
                           {p.status && <span>{t("out")}</span>}
                         </span>
                       </span>

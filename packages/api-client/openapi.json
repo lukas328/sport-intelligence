@@ -5369,6 +5369,18 @@
             ],
             "title": "Number"
           },
+          "player_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
           "run": {
             "description": "the scorer's way before the shot, half court (goal at the top, metres); empty without tracking",
             "items": {
@@ -7100,6 +7112,18 @@
       },
       "MarkOut": {
         "properties": {
+          "client_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
           "device_time": {
             "format": "date-time",
             "title": "Device Time",
@@ -12165,6 +12189,24 @@
         "title": "PublicClub",
         "type": "object"
       },
+      "PublicConfig": {
+        "properties": {
+          "site_url": {
+            "title": "Site Url",
+            "type": "string"
+          },
+          "support_email": {
+            "title": "Support Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_url",
+          "support_email"
+        ],
+        "title": "PublicConfig",
+        "type": "object"
+      },
       "PublicConsentPage": {
         "properties": {
           "club": {
@@ -12523,6 +12565,11 @@
           "club": {
             "$ref": "#/components/schemas/PublicClub"
           },
+          "fuzzy": {
+            "default": false,
+            "title": "Fuzzy",
+            "type": "boolean"
+          },
           "group_name": {
             "anyOf": [
               {
@@ -12596,6 +12643,11 @@
               }
             ],
             "title": "Group Name"
+          },
+          "in_app": {
+            "default": false,
+            "title": "In App",
+            "type": "boolean"
           },
           "last": {
             "anyOf": [
@@ -24517,6 +24569,63 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/matches/{match_id}/marks/{client_id}": {
+      "delete": {
+        "description": "\u00abZur\u00fccknehmen\u00bb on the Spieltag: the mark with this phone id is removed (UX test N14).",
+        "operationId": "take_back_v1_orgs__org_id__matches__match_id__marks__client_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Client Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Take Back",
+        "tags": [
+          "marks"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/matches/{match_id}/official-report": {
       "post": {
         "description": "Official match report (handball.ch match centre, DHB press report, nuLiga game report of the\nGerman associations on nuLiga and Austria, HLA report) as events: goals with scorer and shirt\nnumber, 7-metres, suspensions, time-outs. A re-import replaces the previous\none; automatic goals from the video within 20 s are merged with the official goal.",
@@ -35467,7 +35576,7 @@
     },
     "/v1/public/clubs/{club_id}/teams/{official_id}": {
       "get": {
-        "description": "Last result, rank and table, form, scorers and next game of a team.",
+        "description": "Last result, rank and table, form, scorers and next game of a team; `scorers=false`\nanswers fast without the scorers (the entry asks for them afterwards).",
         "operationId": "team_preview_v1_public_clubs__club_id__teams__official_id__get",
         "parameters": [
           {
@@ -35486,6 +35595,16 @@
             "schema": {
               "title": "Official Id",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scorers",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Scorers",
+              "type": "boolean"
             }
           }
         ],
@@ -35512,6 +35631,28 @@
           }
         },
         "summary": "Team Preview",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/v1/public/config": {
+      "get": {
+        "description": "Addresses the pages link to (website, support), from the configuration: also before\nsign-in, for the entry and its legal links.",
+        "operationId": "public_config_v1_public_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicConfig"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Public Config",
         "tags": [
           "public"
         ]

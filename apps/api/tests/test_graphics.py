@@ -162,3 +162,35 @@ async def test_prufen_asks_for_the_throw_off_until_it_is_set(make_api: Callable[
     assert r.status_code < 300, r.text
     g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
     assert all(c["kind"] != "kickoff" for c in g["checks"])
+
+
+async def test_a_goal_names_its_scorer_for_the_confirmed_column(
+    make_api: Callable[[], Api],
+) -> None:
+    """UX test N12: the column «Bestätigt» in Zahlen follows the goals of a person; a goal knows
+    its scorer by person, not only by shirt number."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    team = (await api.get(f"/v1/orgs/{org}/teams/{ids['team']}")).json()
+    player = (
+        await api.post(
+            f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{team['current_season']['id']}/roster",
+            json={"first_name": "Tim", "last_name": "Baumann", "jersey_number": 11},
+        )
+    ).json()
+    m = await new_match(api, ids)
+    await event(
+        api,
+        org,
+        m["id"],
+        type="shot",
+        side="own",
+        outcome="goal",
+        clock_s=95,
+        x=38.5,
+        y=18.5,
+        player_id=player["player_id"],
+    )
+    g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
+    assert [x["player_id"] for x in g["goals"]] == [player["player_id"]]

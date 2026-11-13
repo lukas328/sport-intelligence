@@ -76,6 +76,42 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
             "trois choses et les scènes t'attendent :\n\n{link}",
         ),
     },
+    # the analysis is done, but there are no three things yet (UX test N05): say what is there
+    "analysis_questions": {
+        "de-CH": (
+            "Die Analyse gegen {opponent} ist fertig",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. "
+            "{questions} Fragen an dich, dann zeigt sie mehr:\n\n{link}",
+        ),
+        "en": (
+            "The analysis against {opponent} is done",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. {questions} "
+            "questions for you, then it shows more:\n\n{link}",
+        ),
+        "fr": (
+            "L'analyse contre {opponent} est terminée",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. "
+            "{questions} questions pour toi, ensuite elle en montre plus :\n\n{link}",
+        ),
+    },
+    "analysis_no_goals": {
+        "de-CH": (
+            "Die Analyse gegen {opponent} ist fertig",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Sie hat "
+            "im Video keine Tore gefunden. Das Video und die Szenen von Hand sind da:\n\n{link}",
+        ),
+        "en": (
+            "The analysis against {opponent} is done",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. It found no goals "
+            "in the video. The video and the scenes by hand are there:\n\n{link}",
+        ),
+        "fr": (
+            "L'analyse contre {opponent} est terminée",
+            "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Elle "
+            "n'a trouvé aucun but dans la vidéo. La vidéo et les scènes à la main sont là :"
+            "\n\n{link}",
+        ),
+    },
     "analysis_failed": {
         "de-CH": (
             "Das Video gegen {opponent} liess sich nicht auswerten",
@@ -119,19 +155,19 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "magic_link": {
         "de-CH": (
             "Dein Anmeldelink",
-            "Hallo {name}\n\nMit diesem Link meldest du dich an. Er ist {minutes} Minuten gültig "
+            "Hallo {name}\n\nMit diesem Link meldest du dich an. Er ist {valid} gültig "
             "und funktioniert nur einmal:\n\n{link}\n\nFalls du das nicht angefordert hast, "
             "kannst du diese E-Mail ignorieren.",
         ),
         "en": (
             "Your sign-in link",
-            "Hello {name}\n\nUse this link to sign in. It is valid for {minutes} minutes and "
+            "Hello {name}\n\nUse this link to sign in. It is valid for {valid} and "
             "works once:\n\n{link}\n\nIf you did not request it, ignore this e-mail.",
         ),
         "fr": (
             "Votre lien de connexion",
-            "Bonjour {name}\n\nUtilisez ce lien pour vous connecter. Il est valable {minutes} "
-            "minutes et ne fonctionne qu'une fois :\n\n{link}\n\nSi vous ne l'avez pas demandé, "
+            "Bonjour {name}\n\nUtilisez ce lien pour vous connecter. Il est valable {valid} "
+            "et ne fonctionne qu'une fois :\n\n{link}\n\nSi vous ne l'avez pas demandé, "
             "ignorez cet e-mail.",
         ),
     },
@@ -228,4 +264,21 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
 def render(template: str, locale: str, to: str, **values: object) -> Email:
     texts = _T[template]
     subject, body = texts.get(locale, texts["de-CH"])
-    return Email(to=to, subject=subject.format(**values), text=body.format(**values))
+    # an account from the entry has no name yet, only the part before the @: then just «Hallo»
+    # (UX test N20)
+    if values.get("name") and str(values["name"]) == to.split("@", 1)[0][:120]:
+        values = {**values, "name": ""}
+    text = body.format(**values)
+    first, _, rest = text.partition("\n")
+    return Email(to=to, subject=subject.format(**values), text=f"{first.rstrip()}\n{rest}")
+
+
+def validity(minutes: int, locale: str) -> str:
+    """«24 Stunden» or «15 Minuten» in the reader's language, for the links' validity."""
+    hours = minutes // 60 if minutes >= 120 and minutes % 60 == 0 else None
+    words = {
+        "de-CH": ("Stunden", "Minuten"),
+        "en": ("hours", "minutes"),
+        "fr": ("heures", "minutes"),
+    }.get(locale, ("Stunden", "Minuten"))
+    return f"{hours} {words[0]}" if hours else f"{minutes} {words[1]}"

@@ -34,6 +34,7 @@ export default async function MatchdayPage({
       opp={match?.opponent?.name ?? ""}
       kickoffAt={match?.kickoff_at ?? null}
       oppColor={match?.opponent_colors?.color ?? null}
+      periodS={match?.period_s ?? 1800}
     />
   );
 }

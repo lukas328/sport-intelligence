@@ -1,7 +1,9 @@
 "use client";
 
 import { track } from "@/lib/analytics";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { looksLikeVideo } from "@/lib/video-file";
+import { sitePage, useSiteConfig } from "@/lib/site-config";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
@@ -58,7 +60,9 @@ type State =
   | { kind: "confirm"; file: File; hint: "mobile" | "slow" }
   | { kind: "offline"; file: File }
   | { kind: "done" }
-  | { kind: "error"; error: ErrorKey | "upload"; file?: File };
+  | { kind: "error"; error: ErrorKey | "upload" | "notVideo"; file?: File };
+
+
 
 export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; matchId: string; onUploaded: () => void }) {
   const t = useTranslations();
@@ -96,6 +100,7 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
   }
 
   async function start(file: File, confirmed = false) {
+    if (!looksLikeVideo(file)) return setState({ kind: "error", error: "notVideo" });
     if (!confirmed) return ask(file);
     ctrl.current = new AbortController();
     setState({ kind: "uploading", file, done: 0, resumed: false });
@@ -138,6 +143,8 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
     onUploaded();
   }
 
+  const site = useSiteConfig();
+  const locale = useLocale();
   const pct = state.kind === "uploading" ? Math.floor((state.done / state.file.size) * 100) : 0;
   return (
     <div className="space-y-5">
@@ -147,9 +154,10 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
         <li>{t("upload.tip2")}</li>
         <li>{t("upload.tip3")}</li>
       </ul>
-      <a href="https://handball-ai.ch/aufnahme/" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+      {/* the guide on the website, its address from the configuration */}
+      {site && <a href={sitePage(site.site_url, locale, "aufnahme/")} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
         {t("upload.guide")}
-      </a>
+      </a>}
       <label
         onDragOver={(e) => {
           e.preventDefault();
@@ -222,7 +230,14 @@ export function UploadPanel({ orgId, matchId, onUploaded }: { orgId: string; mat
       )}
       {state.kind === "error" && (
         <Alert>
-          <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
+          {state.error === "notVideo" ? (
+            <>
+              <span className="block font-bold">{t("processing.failedTitle")}</span>
+              <span className="block">{t("upload.notVideo")}</span>
+            </>
+          ) : (
+            <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
+          )}
           {state.file && (
             <Button variant="secondary" className="mt-2" onClick={() => void start(state.file!, true)}>
               {t("upload.resume")}

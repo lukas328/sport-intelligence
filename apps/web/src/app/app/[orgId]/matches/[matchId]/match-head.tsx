@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
-import { Strip, WurfHead } from "@/components/anlauf/heads";
+import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
 import { reportGoals, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
@@ -33,7 +33,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
       {format.dateTime(kickoff, { hour: "2-digit", minute: "2-digit" })}
     </>
   ) : undefined;
-  const colourOpen = !match.opponent_colors && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
+  const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
       {scoreText && (
@@ -44,7 +44,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
       {view === "game" ? (
         <WurfHead
           kick={kick}
-          title={title}
+          title={<Breakable text={title} />}
           own={match.score_own}
           opp={match.score_opponent}
           pending={pending}
@@ -65,7 +65,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <Strip
           name={
             <h1 className="m-0 text-[length:inherit] leading-[inherit]">
-              {ownName}
+              <Breakable text={ownName} />
               {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
             </h1>
           }

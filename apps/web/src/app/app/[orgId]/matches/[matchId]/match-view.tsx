@@ -19,6 +19,7 @@ import { ownName } from "@/lib/own-name";
 import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-view";
 import { EmptyField } from "@/components/anlauf/bundle";
 import { MatchHead } from "./match-head";
+import { NextOpponent } from "@/app/app/[orgId]/teams/[teamId]/matches/start-view";
 import { AskColour } from "./ask-colour";
 import { MatchZones } from "./match-graphics";
 import { VideoStage } from "./video-stage";
@@ -30,10 +31,10 @@ import { useConfirm } from "@/components/ui/confirm";
 import { Dialog } from "@/components/ui/dialog";
 import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { Segmented } from "@/components/ui/tabs";
-import type { PlayerHandle } from "@/components/video/player";
+import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { GameActions, PointOpen, Telegram, ThreeFigures, chatPicture } from "./game-tab";
-import { ConcededByPosition, OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
+import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import { KeepersView, PhysicalView } from "./m5-views";
 import { NumbersView } from "./numbers-view";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -45,10 +46,9 @@ import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
-import { FeedbackSummary, MyScenesLine, TeamFeedView } from "./feed-views";
+import { MyScenesLine, TeamFeedView } from "./feed-views";
 import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
-import { VideoOverview } from "./video-overview";
 import { MarksPanel } from "./marks-panel";
 import { HighlightsView, PartsPanel } from "./highlight-views";
 
@@ -142,7 +142,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     q.delete("t");
     window.history.pushState(null, "", `${window.location.pathname}?${q.toString()}`);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const [askPane, setAskPane] = useState<{ pane: "feedback" } | null>(null);
+  const [askPane] = useState<{ pane: "feedback" } | null>(null);
   const player = useRef<PlayerHandle | null>(null);
   // deep links (?t=ms), e.g. from a play drawn on a video moment
   useEffect(() => {
@@ -179,22 +179,22 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   // Zahlen: the figure sheets stacked, one level; running distance only with a video
   // running figures only from the tracking of a video, and called estimated (UX test Z5)
   const numberParts = (counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "physical")).filter((v) => v !== "physical" || main);
-  const showPhysical = () => {
-    setView("numbers");
-    requestAnimationFrame(() => {
-      document.querySelector("[data-testid=numbers-more]")?.setAttribute("open", "");
-      document.getElementById("numbers-physical")?.scrollIntoView({ block: "start" });
-    });
-  };
   // a match opens on Spiel; one without video and events on Video, where the upload is
+  const teamMatches = useQuery({
+    queryKey: ["matches", match.team_id],
+    enabled: Date.parse(match.kickoff_at) > Date.now(),
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", { params: { path: { org_id: orgId, team_id: match.team_id } } })).data ?? [],
+  });
   const opened = useRef(false);
   const hasEvents = (stats.data?.own.shots ?? 0) + (stats.data?.opponent.shots ?? 0) > 0;
   useEffect(() => {
     if (opened.current || !stats.data) return;
     opened.current = true;
-    // without video and without events the upload is the only thing to do: it sits on Video
-    if (!linkedView.current && !new URLSearchParams(window.location.search).get("t")) setViewState(main || hasEvents ? "game" : "video");
-  }, [stats.data, main, hasEvents]);
+    // without video and without events the upload is the only thing to do: it sits on Video; a
+    // match still to be played opens on Spiel with the opponent and «Spieltag starten» (UX test N16)
+    const ahead = new Date(match.kickoff_at).getTime() > Date.now();
+    if (!linkedView.current && !new URLSearchParams(window.location.search).get("t")) setViewState(main || hasEvents || ahead ? "game" : "video");
+  }, [stats.data, main, hasEvents, match.kickoff_at]);
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
   const kickoff = new Date(match.kickoff_at);
   const result = match.opponent && match.score_own != null && match.score_opponent != null ? (match.score_own > match.score_opponent ? "won" : match.score_own < match.score_opponent ? "lost" : "draw") : null;
@@ -294,9 +294,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   return (
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
-        {staff && match.opponent && !match.opponent_colors && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
+        {staff && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
         {/* a known colour can be changed right in the head, five shirts (UX test B31) */}
-        {staff && match.opponent && match.opponent_colors && (
+        {staff && match.opponent && match.opponent_colors?.color && (
           <details className="mt-2.5 text-sm font-bold" data-testid="change-colour">
             <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
               <i aria-hidden className="block size-5 border-[1.5px] border-club-ink" style={{ background: match.opponent_colors.color ?? undefined }} />
@@ -348,7 +348,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 {t("live.open")}
               </Link>
             )}
-            {uploadFirst && view !== "video" && (
+            {uploadFirst && view !== "video" && Date.parse(match.kickoff_at) <= Date.now() && (
               <Button onClick={() => (setView("video"), document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" }))}>
                 <Upload aria-hidden />
                 {t("upload.title")}
@@ -452,11 +452,31 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             onBench={() => setBench(true)}
           />
         )}
+        {main && !stage && !bench && (
+          // without goals on the stage: the video, one sentence, the way on; never the old capture
+          // workbench by default (UX test N04), it opens with one tap
+          <section className="space-y-4" data-testid="plain-stage">
+            <VideoPlayer src={`/v1/orgs/${orgId}/videos/${main.id}/media/hls/master.m3u8`} />
+            <p className="m-0 max-w-[60ch] text-[17px]">{staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
+            <div className="flex flex-wrap gap-3">
+              {staff && checks > 0 && (
+                <Link href={`${base}/check`} className={buttonClass("primary")}>
+                  {ta("plainToCheck")}
+                </Link>
+              )}
+              {(
+                <button type="button" onClick={() => setBench(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="open-bench">
+                  {staff ? ta("plainBench") : ta("plainComments")}
+                </button>
+              )}
+            </div>
+          </section>
+        )}
         {main ? (
-          // with the stage, the workbench (events, defence systems, comments, feedback) is behind
-          // «Mehr»; it stays mounted, so jumps from the other tabs still reach its player
-          <section hidden={stage && !bench} aria-labelledby="bench-title" className={cn(stage && "border-t-2 border-ink pt-6")}>
-            {stage && (
+          // the workbench (events, defence systems, comments, feedback) is behind one tap, with or
+          // without the stage; it stays mounted, so jumps from the other tabs still reach its player
+          <section hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
+            {(
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 id="bench-title" className="text-[26px]">
                   {ta("bench")}
@@ -483,8 +503,24 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       {view === "game" && (
         <div className="animate-fade space-y-10">
+          {/* before the match: the opponent's facts and «Spieltag starten»; the video comes after (UX test N16) */}
+          {!main && Date.parse(match.kickoff_at) > Date.now() && match.opponent && (
+            <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_340px]" data-testid="before-match">
+              <div className="space-y-3">
+                <h2 className="text-[26px]">{ta("beforeTitle")}</h2>
+                <p className="m-0 max-w-[60ch] text-[17px]">{ta("beforeText")}</p>
+                {staff && (
+                  <Link href={`${base}/matchday`} className={buttonClass("primary")} data-testid="before-matchday">
+                    <Radio aria-hidden />
+                    {t("live.open")}
+                  </Link>
+                )}
+              </div>
+              <NextOpponent orgId={orgId} teamId={match.team_id} next={{ id: match.id, kickoff_at: match.kickoff_at, opponent_name: oppName(match), is_home: match.is_home } as Schemas["MatchSummary"]} played={(teamMatches.data ?? []).filter((m) => m.score_own != null)} />
+            </section>
+          )}
           {/* a match without video: the report's facts below, the way to the video on top */}
-          {!main && staff && (
+          {!main && staff && Date.parse(match.kickoff_at) <= Date.now() && (
             <section className="space-y-3 border-2 border-dashed border-ink/40 p-4 md:p-6" data-testid="no-video">
               <h2 className="text-[26px]">{ta("noVideoTitle")}</h2>
               <p className="m-0 max-w-[60ch] text-[17px]">{ta("noVideoBlock")}</p>
@@ -537,54 +573,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               <span className="text-[15px] text-ink-2 group-open:hidden">{ta("moreGameHint")}</span>
             </summary>
             <div className="mt-8 space-y-10">
-          {stats.data && stats.data.quality.events > 0 ? (
-            <div className="space-y-10">
-              <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} />
-              <ConcededByPosition stats={stats.data} />
-              {/* what the video itself shows (possession, attacks) belongs to the match too */}
-              {main && (
-                <VideoOverview
-                  orgId={orgId}
-                  matchId={match.id}
-                  teamId={match.team_id}
-                  ownName={own}
-                  oppName={oppName(match)}
-                  durationMs={main.duration_s ? main.duration_s * 1000 : null}
-                  kickoff={match.kickoff_ms}
-                  periodS={match.period_s}
-                  onPlay={onPlay}
-                  onPhysical={showPhysical}
-                  staff={false}
-                  compact
-                />
-              )}
-            </div>
-          ) : stats.isLoading ? (
-            <Skeleton className="h-64" />
-          ) : main ? (
-            <VideoOverview
-              orgId={orgId}
-              matchId={match.id}
-              teamId={match.team_id}
-              ownName={own}
-              oppName={oppName(match)}
-              durationMs={main.duration_s ? main.duration_s * 1000 : null}
-              kickoff={match.kickoff_ms}
-              periodS={match.period_s}
-              onPlay={onPlay}
-              onPhysical={showPhysical}
-              staff={staff}
-            />
-          ) : (
-            <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
-              {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
-            </EmptyState>
-          )}
+          {/* only what the data carries and what is in scope (UX test B08): the course of the
+              match; the comparison sits in Zahlen, the three things above, possession and attacks
+              estimated from the video are not shown */}
+          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} />}
           <div className="space-y-8">
-            {staff && main && (
-              // feedback on the players' scenes happens beside the player in the video tab
-              <FeedbackSummary orgId={orgId} matchId={match.id} onOpen={() => (setView("video"), setAskPane({ pane: "feedback" }))} />
-            )}
             <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} /></div>
             {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
             {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
@@ -598,6 +591,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         <div className="animate-fade">
           <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
           {graphics.data && graphics.data.goals.length > 0 && <MatchZones graphics={graphics.data} row />}
+          {stats.data && stats.data.quality.events > 0 && (
+            <section id="numbers-overview" className="scroll-mt-24">
+              <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />
+            </section>
+          )}
           {numberParts.length === 0 && (
             <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
               {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
@@ -691,6 +689,8 @@ function Processing({ jobs, orgId, staff, onOtherFile }: { jobs: Job[]; orgId: s
     <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" aria-live="polite" data-testid="job" data-orgid={orgId} data-staff={staff || undefined}>
       <div>
         <h2 className="text-[26px]">{ta("titleRunning")}</h2>
+        {/* stays for the whole analysis, not four seconds (UX test N24, H05) */}
+        <p className="m-0 mt-1 max-w-[60ch] text-[17px]" data-testid="may-close">{t("analysisHint")}</p>
         <div className="mt-3 h-1.5 bg-rule" aria-hidden>
           <div className="h-full bg-ink transition-all duration-500" style={{ width: `${shown.current * 100}%` }} />
         </div>

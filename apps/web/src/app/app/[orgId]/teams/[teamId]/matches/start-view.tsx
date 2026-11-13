@@ -108,20 +108,40 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
           <span className="flex items-center gap-2.5">
             <AttnTag>{t("check")}</AttnTag>
             <Link href={`${base}/check`} className={linkClass}>
-              {t("checksOpen", { count: checks, minutes: Math.max(1, Math.round(checks / 3)) })}
+              {/* after the court come the people in the picture: say so instead of «1 Minute» (UX test N13) */}
+              {g.data?.checks.some((c) => c.kind === "field") ? t("checksThenPeople", { count: checks }) : t("checksOpen", { count: checks, minutes: Math.max(1, Math.round(checks / 3)) })}
             </Link>
           </span>
         )}
       </div>
       {/* before the first video: what the federation's data already says (UX test H02) */}
-      {!m?.has_video && m && <FromReport orgId={orgId} teamId={m.team_id} />}
+      {!m?.has_video && m && <FromReport orgId={orgId} teamId={m.team_id} hideNext={next != null} />}
+      {/* the analysis is done without three things: say so and name the next step (UX test N05) */}
+      {m?.has_video && g.data && base && !["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) && threeThings(goalRuns(g.data)).length === 0 && (
+        <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="start-next-step">
+          <p className="m-0 text-[19px] font-bold">{t("nextStepTitle")}</p>
+          <p className="m-0 text-[17px]">{checks > 0 ? t("nextStepChecks", { n: checks }) : g.data.report_goals.length === 0 ? t("nextStepReport") : t("nextStepNoGoals")}</p>
+          <div className="flex flex-wrap gap-3">
+            {canWrite && checks > 0 && (
+              <Link href={`${base}/check`} className={buttonClass("primary")}>
+                {t("plainToCheck")}
+              </Link>
+            )}
+            {canWrite && g.data.report_goals.length === 0 && (
+              <Link href={`/app/${orgId}/teams/${m.team_id}/matches?report=1`} className={buttonClass(checks > 0 ? "secondary" : "primary")}>
+                {t("nextStepAddReport")}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
       {m?.has_video && g.data && base && <ThreeThingsView orgId={orgId} matchId={m.id} graphics={g.data} oppName={m.opponent_name} hrefScenes={(_, n) => `${base}?tab=video&thing=${n}`} />}
     </div>
   );
 }
 
 /** Rank, form, table excerpt, scorers and next game from handball.ch for a linked team. */
-function FromReport({ orgId, teamId }: { orgId: string; teamId: string }) {
+function FromReport({ orgId, teamId, hideNext }: { orgId: string; teamId: string; hideNext: boolean }) {
   const t = useTranslations("entry");
   const link = useQuery({
     queryKey: ["official", teamId],
@@ -141,7 +161,8 @@ function FromReport({ orgId, teamId }: { orgId: string; teamId: string }) {
   return (
     <section className="space-y-6" data-testid="start-from-report">
       {standing && <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{standing}</p>}
-      <TeamFacts p={preview.data} />
+      {/* the next opponent stands once, at the side (UX test B40) */}
+      <TeamFacts p={preview.data} hideNext={hideNext} />
       <p className="m-0 text-[15px] text-ink-2">{t("source")}</p>
     </section>
   );
@@ -296,7 +317,7 @@ const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u
  * last duel, the table underneath. Without a table and without a duel there is nothing to say:
  * then only the name and the date, no empty field.
  */
-function NextOpponent({ orgId, teamId, next, played }: { orgId: string; teamId?: string; next: Match; played: Match[] }) {
+export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; teamId?: string; next: Match; played: Match[] }) {
   const t = useTranslations("anlauf");
   const format = useFormatter();
   const date = new Date(next.kickoff_at);
@@ -351,7 +372,7 @@ function NextOpponent({ orgId, teamId, next, played }: { orgId: string; teamId?:
       )}
       {around.length > 0 && (
         <table className="mt-4 w-full border-collapse text-[15px]" data-testid="next-table">
-          <caption className="mb-1 text-left text-[15px] font-semibold text-ink-2">{link.data?.group_name || link.data?.league || t("table")}</caption>
+          <caption className="mb-1 text-left text-[15px] font-semibold text-ink-2">{link.data?.league || link.data?.group_name || t("table")}</caption>
           <thead className="sr-only">
             <tr>
               <th scope="col">{t("tableRank")}</th>

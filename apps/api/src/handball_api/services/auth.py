@@ -34,7 +34,7 @@ from handball_api.models.enums import TokenPurpose
 from handball_api.schemas.auth import LoginIn, MeUpdate, RegisterIn
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.mail_templates import render
+from handball_api.services.mail_templates import render, validity
 
 LAST_SEEN_RESOLUTION = timedelta(minutes=5)
 
@@ -332,7 +332,7 @@ async def request_magic_link(ctx: Ctx, email: str, next_path: str | None = None)
             to=user.email,
             name=user.name,
             link=link,
-            minutes=ctx.settings.magic_link_ttl_minutes,
+            valid=validity(ctx.settings.magic_link_ttl_minutes, user.locale),
         ),
         "magic_link",
         user_id=str(user.id),

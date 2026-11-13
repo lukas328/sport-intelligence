@@ -170,3 +170,36 @@ async def test_search_hits_outside_the_video_have_no_window(make_api: Callable[[
         else:
             assert (h["start_ms"], h["end_ms"]) == (None, None), h
     assert {h["start_ms"] is None for h in hits} == {True, False}
+
+
+async def test_a_shirt_number_finds_the_events_of_that_player(make_api: Callable[[], Api]) -> None:
+    """UX test B19: «Tore von Nummer 11» also finds goals that name the person, not the number."""
+    from .test_graphics import event
+
+    api = make_api()
+    ids = await setup_club(api)
+    org, team_id = ids["org"], ids["team"]
+    team = (await api.get(f"/v1/orgs/{org}/teams/{team_id}")).json()
+    p = (
+        await api.post(
+            f"/v1/orgs/{org}/teams/{team_id}/seasons/{team['current_season']['id']}/roster",
+            json={"first_name": "Elf", "last_name": "Muster", "jersey_number": 11},
+        )
+    ).json()
+    m = await new_match(api, ids)
+    await event(
+        api,
+        org,
+        m["id"],
+        type="shot",
+        side="own",
+        outcome="goal",
+        clock_s=60,
+        player_id=p["player_id"],
+    )
+    await event(api, org, m["id"], type="shot", side="own", outcome="goal", clock_s=90, number=4)
+    r = await api.post(
+        f"/v1/orgs/{org}/teams/{team_id}/search",
+        json={"numbers": [11], "types": ["shot"], "include_clips": False},
+    )
+    assert [h["kind"] for h in r.json()["hits"]] == ["event"]

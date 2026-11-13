@@ -284,3 +284,18 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   (Q-AUTH-2). Only the reminder moved: no banner on every page; it appears once there is
   something to protect (a first video uploaded or a second person invited), as a quiet task on
   the team page and an entry with a dot in the account menu, dismissible for seven days.
+- **Q-AUTH-OWNER Who does a team belong to? (Lukas to decide).** Saving a team from the public
+  entry with one e-mail address makes that person its first administrator. That keeps the entry
+  short, but a stranger could take a team before its real coach. A team that is already in the
+  app is not handed over: saving sends an access request to its administrators. Options to check
+  ownership: (a) «Das ist nicht dein Team?» with a hand-over by the support, (b) confirmation via
+  the address the federation has on file for the team or club, (c) a second person of the club
+  confirms. Built for now, the minimum only: on the «already in the app» answer a visible link
+  «Dieses Team gehört mir, aber jemand anderes hat es schon» opens a prepared mail to the support
+  (address from the configuration), next to the access request to the existing administrators.
+  No new verification procedure.
+- **Q-AUTH-LINK Sign-in link valid for a day (Lukas to confirm).** The e-mail link from the
+  entry and from «Link schicken» was valid for 15 minutes; coaches read such mails hours later and
+  then had to start over (UX test round 2, N15). Now 24 hours, still single use and void once
+  used (setting `magic_link_ttl_minutes`). Trade-off: a mailbox someone else can read stays a way
+  in for longer. Alternative if that is too long: a six-digit code next to the link.

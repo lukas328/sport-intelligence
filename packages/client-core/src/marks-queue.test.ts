@@ -30,3 +30,16 @@ describe("marks queue", () => {
     expect(await flush(s, "other", async () => ({ ok: true }))).toBe(0);
   });
 });
+
+describe("taking a mark back", () => {
+  it("removes a queued mark before it goes out (UX test N14)", async () => {
+    const { forget } = await import("./marks-queue");
+    const data: Record<string, string> = {};
+    const store = { getItem: (k: string) => data[k] ?? null, setItem: (k: string, v: string) => void (data[k] = v) };
+    const a = mark(store, "m1", "good");
+    mark(store, "m1", "goal_own");
+    expect(forget(store, "m1", a.client_id)).toBe(true);
+    expect(pending(store, "m1").map((x) => x.key)).toEqual(["goal_own"]);
+    expect(forget(store, "m1", a.client_id)).toBe(false);
+  });
+});

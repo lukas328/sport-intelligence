@@ -7,6 +7,7 @@ is shown except whether a team is already in the app (so saving asks the club in
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Any
@@ -27,6 +28,10 @@ from handball_api.services.official import (
     _unavailable,
 )
 
+TEAM_WORD = re.compile(
+    r"\d+|u\d+|herren|damen|manner|frauen|junioren|juniorinnen|jugend|mixed|men|women|hommes|femmes|"
+    r"team|equipe|mannschaft|liga|ligue|league"
+)
 SCORER_GAMES = 12  # the scorers from at most the last twelve played games (one request each)
 
 
@@ -35,6 +40,10 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
     tokens = _tokens(q)
     if len("".join(tokens)) < MIN_QUERY:
         raise ProblemError(422, "query-too-short", "Type at least three letters")
+    # «Wädenswil Herren 1»: the team's words are not in the club's name; search the club by the
+    # rest (UX test N27), the team list of the club follows anyway
+    club_words = [t for t in tokens if not TEAM_WORD.fullmatch(t)]
+    tokens = club_words or tokens
     try:
         season = await ch.current_season(ctx.db)
         found = []
@@ -42,6 +51,14 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
             text = ch.fold(f"{c.name} {c.city or ''}")
             if all(t in text for t in tokens):
                 found.append((not ch.fold(c.name).startswith(tokens[0]), c.name, c))
+        fuzzy = False
+        if not found:
+            # a typo («Wädenswill», «Thalwill»): words one letter apart (UX test N10)
+            for c in await ch.clubs(ctx.db):
+                words = ch.fold(f"{c.name} {c.city or ''}").replace("/", " ").split()
+                if all(any(_near(t, w) for w in words) for t in tokens):
+                    found.append((not ch.fold(c.name).startswith(tokens[0][:3]), c.name, c))
+            fuzzy = bool(found)
         found.sort(key=lambda x: (x[0], x[1]))
         hits: list[dict[str, Any]] = []
         for _, _, c in found[:MAX_CLUBS]:
@@ -55,6 +72,7 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
                         "group_name": t.group_name,
                         "club": {"id": c.id, "name": c.name, "city": c.city},
                         "in_app": False,
+                        "fuzzy": fuzzy,
                     }
                 )
     except ch.UpstreamUnavailableError as exc:
@@ -77,6 +95,18 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
         for h in hits:
             h["in_app"] = h["official_id"] in linked
     return hits
+
+
+def _near(a: str, b: str) -> bool:
+    """One letter added, missing or different, for words of four letters or more."""
+    if a in b:
+        return True
+    if len(a) < 4 or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        return sum(x != y for x, y in zip(a, b, strict=True)) <= 1
+    short, long = (a, b) if len(a) < len(b) else (b, a)
+    return any(long[:i] + long[i + 1 :] == short for i in range(len(long)))
 
 
 def display_name(official: str) -> str:
@@ -103,9 +133,12 @@ def _result(own: int | None, opp: int | None) -> str | None:
     return "w" if own > opp else "l" if own < opp else "d"
 
 
-async def preview(ctx: Ctx, club_id: int, official_id: int) -> dict[str, Any]:
+async def preview(
+    ctx: Ctx, club_id: int, official_id: int, with_scorers: bool = True
+) -> dict[str, Any]:
     """The team as the federation shows it: last result, rank and table, the form, the scorers,
-    the next game."""
+    the next game. Without the scorers it answers in a fraction of the time (one request per
+    played game less): the entry shows the team first and fills the scorers in (UX test N03)."""
     season, detail, team = await _official_team(ctx, club_id, official_id)
     try:
         games = await ch.team_games(ctx.db, team.id)
@@ -140,7 +173,7 @@ async def preview(ctx: Ctx, club_id: int, official_id: int) -> dict[str, Any]:
     names: dict[int, str] = {}
     counted = 0
     try:
-        for g in played[-SCORER_GAMES:]:
+        for g in played[-SCORER_GAMES:] if with_scorers else []:
             for p in await ch.game_players(ctx.db, g.id):
                 if p.team_id == team.id and p.goals:
                     goals[p.player_id] += p.goals
@@ -154,6 +187,18 @@ async def preview(ctx: Ctx, club_id: int, official_id: int) -> dict[str, Any]:
         if names[pid]
     ]
     rank = next((r.get("rank") for r in table if r.get("teamId") == team.id), None)
+    # a team already in the app: saving asks its administrators, say so before (UX test N09)
+    await enable_system_access(ctx.db, reason="public team preview: is the team in the app")
+    try:
+        in_app = (
+            await ctx.db.scalar(
+                select(Team.id)
+                .where(Team.official_provider == PROVIDER, Team.official_team_id == team.id)
+                .limit(1)
+            )
+        ) is not None
+    finally:
+        await disable_system_access(ctx.db)
     return {
         "official_id": team.id,
         "name": team.name,
@@ -180,4 +225,5 @@ async def preview(ctx: Ctx, club_id: int, official_id: int) -> dict[str, Any]:
         "played": len(played),
         "scorers": scorers,
         "scorer_games": counted,
+        "in_app": in_app,
     }
