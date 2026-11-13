@@ -27,13 +27,16 @@ def main() -> None:
     if len(sys.argv) > 5:
         d = json.loads(Path(sys.argv[5]).read_text())
         doc |= d.get("data", d)
-    labels = {k: v for k, v in doc["labels"].items() if not v.get("p")}
+    # keep the owner's rough points and own precise clicks; earlier llm labels are replaced
+    labels = {k: v for k, v in doc["labels"].items() if v.get("src") != "llm"}
     n = 0
     for r in meta:
         a = ans.get(str(r["row"]), "?").strip()
         if a == "?":
             continue
         f = str(r["frame"])
+        if labels.get(f, {}).get("p"):
+            continue  # the owner clicked this frame precisely
         if a == "-":
             labels[f] = {"s": "out", "p": 1, "src": "llm"}
             n += 1
