@@ -297,3 +297,24 @@ round 7 (3.7 h of training on Kaggle). Kept as `ball_r8.pt` in `handball-ball-mo
   through the net, peaks linked with balltrack, fixed and background-glued spots dropped, tracklet
   tiles saved for review.
 Kaggle allows two GPU jobs at a time; a small queue script pushes the next kernel when a slot frees.
+
+## Round 9: Claude's training clip labels (2026-11-14)
+`kaggle/train_r9_push.py` over round 8: the owner's 1000 peaks plus 834 ball points Claude placed in
+46 training clips without the owner's rough track (`ml/gold/export_train.py`, tiers sure / track;
+on 8 pilot gold clips 98 % of such points lay within 12 px) and 741 hard negatives (the net's
+strongest peak >= 0.3 at least 40 px from the labelled ball, `ml/gold/train_labels_r9.py`).
+Started from round 8. Measured on the gold standard (42 clips, 1555 points, 12 px; OWLv2 boxes
+taken from the round-8 gold run so only the net differs; `ml/gold/eval_ball.py`):
+
+| Gold v1 | round 8 | round 9 | only r9 / only r8 hits | sign test p |
+|---|---|---|---|---|
+| Net top peak on the ball | 49.7 % | 51.5 % | 124 / 96 | 0.07 |
+| Ball among the net's top 5 | 77.2 % | 78.5 % | 83 / 62 | 0.10 |
+| Tracker v2 (net + OWLv2) | 69.0 % | 71.3 % | 70 / 35 | 0.001 |
+| Product ball path (balltrack) | 32.1 % | 35.8 % | | |
+
+- The first gain since round 7, small on the net alone and clear through the tracker (its
+  parameters were tuned on round-8 output, so the round-9 number is if anything conservative).
+  Points within a clip are not independent, so the p values are optimistic.
+- Next: more clips and the owner's ball-or-not review of the unconfirmed (fast) points, then
+  round 10; re-tune the tracker on round-9 output.
