@@ -264,13 +264,27 @@ Durchlauf» («Von wo?»). Fixed with tests but not seen in the browser again: P
 | P7 | Parts list while uploading | fixed (a15bf6f) |
 | P8 | Reel title card without umlauts | fixed (8af403f) |
 | P9 | Recording split within a half: no change of ends under 60 s gap, switch per part | built (4fcc7de, a15bf6f, migration 0045) |
-| V1 | «Weiss nicht» kept the estimate, counted as a place and into a thing | shown and counted right (2d6c862); things from the coach's taps only: in work |
-| V2 | The suggested place misleads | decided: no suggestion in the court, in work |
+| V1 | «Weiss nicht» kept the estimate, counted as a place and into a thing | shown and counted right (2d6c862); things from the coach's taps only (shot-zone, confirmed in the seventh test) |
+| V2 | The suggested place misleads | no suggestion in the court (confirmed in the seventh test) |
 | V3 | Start head lost the video match after Prüfen | fixed (2d6c862) |
-| V4 | No «Wurfort ändern» in a thing's scene; goal list hidden once a thing exists | in work |
-| V5 | «Beantwortet» empty after reload | in work |
-| V6 | Scenes of goal moments start too late | in work |
-| V7 | Still frame of «Von wo?» shows the other end; court as the camera sees it | in work |
+| V4 | No «Wurfort ändern» in a thing's scene; goal list hidden once a thing exists | fixed (shot-zone) |
+| V5 | «Beantwortet» empty after reload | fixed, confirmed in the seventh test |
+| V6 | Scenes of goal moments start too late | fixed: 12 s before to 5 s after |
+| V7 | Still frame of «Von wo?» shows the other end; court as the camera sees it | fixed, confirmed in the seventh test (8 of 9, W1) |
+
+## Seventh real-video test (W1 to W4): «Von wo?» in its final form
+
+Report: docs/ux-test/echttest/BERICHT.md, «Siebter Durchlauf». V1 to V7 of the sixth test are
+confirmed on the real video (things from the coach's taps only, no suggestion, the court as the
+camera sees it, the clip in a loop, scenes that hold the shot, «Wurfort ändern», «Beantwortet»
+after a reload).
+
+| # | Finding | Status |
+|---|---|---|
+| W1 | The court lay the wrong way round for a fast break | fixed (96751ca), not seen on the real video again |
+| W2 | A goal moment's scene could end before the shot | fixed (96751ca) |
+| W3 | The sentence without a thing led nowhere | fixed (96751ca) |
+| W4 | The count over the zone graphic includes estimated places, the dots do not | open |
 
 ## Tests
 

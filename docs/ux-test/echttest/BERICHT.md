@@ -337,17 +337,64 @@ Die Wurforte sind aus Einzelbildern bei 720p bestimmt und bleiben unsicher.
 
 | # | Schwere | Befund | Stand |
 |---|---|---|---|
-| V1 | falsch | «Weiss nicht» liess die Schätzung stehen; sie zählte als Wurfort und ins Ding | Anzeige und Zählung behoben (2d6c862); Entscheid: Dinge nur aus getippten Wurforten, in Arbeit |
-| V2 | stört | Der Vorschlag führt eher in die Irre | Entscheid: kein Vorschlag mehr im Feld, in Arbeit |
+| V1 | falsch | «Weiss nicht» liess die Schätzung stehen; sie zählte als Wurfort und ins Ding | behoben: Dinge und Zählungen nur aus getippten Wurforten (im siebten Durchlauf bestätigt) |
+| V2 | stört | Der Vorschlag führt eher in die Irre | behoben: kein Vorschlag mehr im Feld (im siebten Durchlauf bestätigt) |
 | V3 | stört | Nach dem Prüfen zeigte der Start-Kopf ein älteres Spiel ohne Video | behoben (2d6c862), nicht im Browser gesehen |
-| V4 | stört | In der Szene eines Dings fehlt «Wurfort ändern»; die Torliste verschwindet, sobald es ein Ding gibt | in Arbeit |
-| V5 | Kleinigkeit | «Beantwortet» ist nach Neuladen leer | in Arbeit |
-| V6 | stört | Szenen beginnen zu spät: Die Szene des ersten Tors enthielt den Wurf nicht | in Arbeit: Szenen aus Tor-Momenten beginnen 12 s vor der Kandidatenzeit |
-| V7 | Kleinigkeit | Das Standbild bei «Von wo?» zeigt oft schon die andere Hallenseite | in Arbeit: Ausschnitt läuft in Schleife |
-| links/rechts | stört | Beim Angriff aufs linke Tor ist «links» die kameranahe Seite | Entscheid: Minifeld so gedreht, wie die Kamera das Feld sieht, in Arbeit |
+| V4 | stört | In der Szene eines Dings fehlt «Wurfort ändern»; die Torliste verschwindet, sobald es ein Ding gibt | behoben |
+| V5 | Kleinigkeit | «Beantwortet» ist nach Neuladen leer | behoben (im siebten Durchlauf bestätigt) |
+| V6 | stört | Szenen beginnen zu spät: Die Szene des ersten Tors enthielt den Wurf nicht | behoben: Szenen aus Tor-Momenten von 12 s vor bis 5 s nach der Kandidatenzeit |
+| V7 | Kleinigkeit | Das Standbild bei «Von wo?» zeigt oft schon die andere Hallenseite | behoben: Ausschnitt läuft in Schleife (im siebten Durchlauf bestätigt) |
+| links/rechts | stört | Beim Angriff aufs linke Tor ist «links» die kameranahe Seite | behoben: Minifeld so gedreht, wie die Kamera das Feld sieht (im siebten Durchlauf bei 8 von 9 Toren richtig, siehe W1) |
 
 ## Grenzen
 
 Nach einem Neustart des Containers waren Stack und Video weg; die Behebungen dieses Durchlaufs
 sind mit Tests geprüft, aber nicht im Browser angesehen. «Nochmal ansehen» spielte im kopflosen
 Browser nur bei einem von drei Versuchen; ob das am Browser lag, ist offen.
+
+---
+
+# Siebter Durchlauf (14. November 2026): «Von wo?» in der Endfassung
+
+Clip 1 als eine Datei auf dem Stand ff1210c, Prüfen am Handy (390 × 844, Touch): das Feld
+bestätigt, Anwurf nicht im Video, 8:15, dann 22 Fragen. Analyse 20:41. Prüfen 6:56 gestoppt
+(darin neun Sekunden Messpause je Wurfort, ohne sie rund 5:35); die App kündigt zweimal vier
+Minuten an.
+
+## Urteil
+
+Bei acht von neun Toren liegt das kleine Feld so wie im Video, und an der Stelle, an der der Wurf
+im Bild war, steht das richtige Wort; Umdenken war nicht nötig. Kein Vorschlag mehr, der Ausschnitt
+läuft in Schleife, alles passt ohne Scrollen auf den Bildschirm. «Weiss nicht» zählt als fehlend
+und lässt sich nachtragen, Geschätztes zählt nirgends. Beim Gegenstoss lag das Feld verkehrt; das
+ist nach dem Durchlauf behoben, aber nicht mehr am echten Video nachgeprüft.
+
+## Die neun Prüfpunkte
+
+| # | Urteil | Gesehen |
+|---|---|---|
+| Feld wie im Video | 8 von 9 | Beim Gegenstoss (2:09) zeigte es «das Tor rechts», im Video läuft der Angriff nach links. |
+| Zuordnung beim Tippen | geht | In allen sechs getippten Fällen lag an der Bildstelle die richtige Fläche. |
+| Kein Vorschlag | geht | Keine gelbe Fläche, kein «Bisher», kein «geschätzt» im Schritt. |
+| Schleife, Anhalten, ein Bildschirm | geht | Die Zeit läuft und springt an den Anfang zurück; «Anhalten» hält; Seitenhöhe 844 bei 844. |
+| «Weiss nicht» | geht | «7 von 9 Toren mit Wurfort. Bei 2 Toren fehlt, von wo geworfen wurde.» mit «In einer Minute nachtragen»; danach «9 von 9». |
+| Dinge | ehrlich | «9 von 9 Toren mit Wurfort. Noch kommt keine Ecke auf drei Tore. Ein Ding entsteht, sobald drei Tore aus derselben Ecke kommen.» Jedes Tor mit «Wurfort ändern» und «Szene zeigen». |
+| Szenen enthalten den Wurf | 2 von 3 | Erstes Tor und 3:45 ja; beim Gegenstoss endete die Szene wohl vor dem Abschluss. |
+| Start-Kopf, «Beantwortet» | geht | Kopf zeigt das Spiel mit 4:5; «Beantwortet» ist nach Neuladen da. |
+| Dauer | geht | Die Ankündigung ist eher grosszügig. |
+
+## Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| W1 | stört | Torseite beim Gegenstoss falsch: Sie kam aus dem Standort der Angreifer in den zehn Sekunden davor, und die standen noch am Tor, das sie verteidigten | behoben (96751ca): Die Seite kommt aus den Enden, die die Analyse für die Halbzeit gefunden hat (Torhüter), der Standort ist nur Rückfall; mit Test, nicht am echten Video nachgeprüft |
+| W2 | Kleinigkeit | Die Szene eines Tor-Moments endete zwei Sekunden nach der Kandidatenzeit und konnte den Wurf verpassen | behoben (96751ca): fünf Sekunden Nachlauf |
+| W3 | Kleinigkeit | Der Satz ohne Ding führte nicht weiter | behoben (96751ca): «In der Saison zählen die Tore aller Spiele mit Video zusammen.» |
+| W4 | Kleinigkeit | Vor dem Nachtragen stand über der Grafik «nach Position, 5», gezeichnet waren vier Punkte (Geschätztes zählt zu Recht nicht, die Titelzahl zählte es mit) | offen |
+
+## Grenzen
+
+Ein Ausschnitt von fünf Minuten mit neun Toren. Ob aus einem ganzen Spiel drei Dinge entstehen
+und wie lange das Prüfen bei 50 bis 60 Toren dauert, ist nicht gemessen. Die Wurforte sind aus
+Standbildern bestimmt und unsicher. W1 bis W3 sind nach dem Durchlauf behoben und nur mit Tests
+geprüft.

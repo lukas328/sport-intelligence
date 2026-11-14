@@ -389,10 +389,15 @@ Weaknesses of the recognition, recorded here and not fixed in the interface work
   the attacked goal's side in the picture from the attackers' direction and the court-to-image
   homography (any long side, any panning; null without a confirmed court or tracks, then the goal
   is at the top). The clip loops during the step. Scenes of goals from candidates run from 12 s
-  before to 2 s after (`matches.scene_window`, one rule for every view). *Left:* the side comes
-  from the attackers' mean position in the 10 s before the candidate time; in a fast break that
-  window can still hold the other half (then the court lies the wrong way round); the estimate
-  waits for better recognition (Q-REC-CANDTIME, Q-REC-OFFCOURT).
+  before to 5 s after (`matches.scene_window`, one rule for every view).
+  *Seventh real-video test (final form, nine goals):* the court lay as in the video for 8 of 9
+  goals and the tapped place carried the right word every time; for the fast break it lay the
+  wrong way round, because the scorers had stood at the goal they defended. Since then the side
+  comes from the ends the analysis found for the half (`shot_positions.goal_by_sides`, the
+  goalkeepers), the attackers' places only without them. *Left:* that fix is tested but not seen
+  on the real clip again; where the analysis flips the ends (Q-REC-SIDES) the court lies wrong
+  for that stretch; the estimate waits for better recognition (Q-REC-CANDTIME, Q-REC-OFFCOURT);
+  a whole match is not measured (do three things appear, how long does Prüfen take).
 - **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
   error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
   interface never treats the court as sure and always asks for it (done, E03).
