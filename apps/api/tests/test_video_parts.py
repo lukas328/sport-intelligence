@@ -478,3 +478,70 @@ async def test_the_player_plays_both_halves(make_api: Callable[[], Api]) -> None
         "videos", f"{ids['org']}/{match_id}/{second}/hls/720p/seg_00000.m4s", b"seg", "x"
     )
     assert (await api.http.get(seg_url)).content == b"seg"
+
+
+async def test_swap_and_swap_back_gives_the_same_times(make_api: Callable[[], Api]) -> None:
+    """Moving the rows with the parts is exact: swapped and swapped back, every time is where it
+    was (events, candidates, possessions, clips, the throw-offs)."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    match_id, first, second = await _two_halves(api, ids)
+    base = f"/v1/orgs/{org}/matches/{match_id}"
+    await _analyse(api, second, events=SECOND, goal_candidates={"candidates": [_cand(52_000, 1)]})
+    await api.post(
+        f"/v1/orgs/{org}/clips",
+        json={"match_id": match_id, "start_ms": HALF + 10_000, "end_ms": HALF + 20_000},
+    )
+
+    async def times() -> dict[str, Any]:
+        return {
+            "events": sorted(
+                (e["id"], e["t_ms"]) for e in (await api.get(f"{base}/events")).json()
+            ),
+            "cands": sorted(
+                (c["id"], c["t_ms"], c["goal_ms"])
+                for c in (await api.get(f"{base}/goal-candidates")).json()["candidates"]
+            ),
+            "phases": sorted(
+                (p["start_ms"], p["end_ms"])
+                for p in (await api.get(f"{base}/possessions")).json()["phases"]
+            ),
+            "clips": sorted(
+                (c["start_ms"], c["end_ms"]) for c in (await api.get(f"{base}/clips")).json()
+            ),
+            "kickoff": (await api.get(base)).json()["kickoff_ms"],
+        }
+
+    before = await times()
+    url = f"{base}/parts"
+    await api.put(url, json={"video_ids": [second, first]})
+    swapped = await times()
+    assert swapped != before
+    await api.put(url, json={"video_ids": [first, second]})
+    assert await times() == before
+    # the same order again changes nothing
+    await api.put(url, json={"video_ids": [first, second]})
+    assert await times() == before
+
+
+async def test_a_reel_cuts_each_scene_from_its_own_half(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    match_id, first, second = await _two_halves(api, ids)
+    await _analyse(api, second, events=SECOND)
+    org = ids["org"]
+    base = f"/v1/orgs/{org}/matches/{match_id}"
+    for t in (20_000, 200_000, HALF + 30_000, HALF + 300_000):
+        await api.post(
+            f"{base}/events", json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": t}
+        )
+    r = await api.post(f"{base}/highlights", json={"format": "16x9"})
+    assert r.status_code == 202, r.text
+    job = [j for j in _jobs(api).jobs if j[1] == "handball_worker.reels.run_highlight_reel"][-1]
+    payload = job[3]["payload"]
+    assert len(payload["sources"]) == 2
+    assert payload["sources"][0]["proxy_key"].endswith(f"{first}/proxy.mp4")
+    assert payload["sources"][1]["proxy_key"].endswith(f"{second}/proxy.mp4")
+    later = [c for c in payload["clips"] if c["source"] == 1]
+    assert later and all(0 <= c["in_ms"] < HALF for c in later)

@@ -168,9 +168,9 @@ async def apply_moves(ctx: Ctx, match: Match, ms: list[Move]) -> None:
             match.kickoff_ms = kept or None
     await ctx.db.flush()
     # rows of these tables already loaded in the session would hide the new times
-    moved = (Event, Possession, GoalCandidate, Clip, Comment, Annotation)
+    stale = (Event, Possession, GoalCandidate, Clip, Comment, Annotation)
     for obj in list(ctx.db.identity_map.values()):
-        if isinstance(obj, moved):
+        if isinstance(obj, stale):
             ctx.db.expire(obj)
 
 
@@ -251,7 +251,7 @@ async def side_hint_for(ctx: Ctx, asset: VideoAsset) -> str | None:
             VideoAsset.id.in_([p.video_id for p in parts[: part.position]])
         )
     )
-    return side_hint(parts, part, dict(rows.tuples().all()))
+    return side_hint(parts, part, {vid: meta for vid, meta in rows.all()})
 
 
 # ---- the joined player playlist ----------------------------------------------------------------

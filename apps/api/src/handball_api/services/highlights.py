@@ -15,6 +15,7 @@ import uuid
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import select
 
@@ -30,9 +31,10 @@ from handball_api.models import (
     RosterEntry,
     Team,
     Track,
+    VideoAsset,
 )
 from handball_api.models.enums import ConsentKind, ReelFormat, ReelStatus
-from handball_api.services import audit
+from handball_api.services import audit, timeline
 from handball_api.services.context import Ctx
 from handball_api.services.feed import _close_events, _importance, in_video
 from handball_api.services.matches import (
@@ -121,6 +123,55 @@ async def _names(ctx: Ctx, match: Match) -> dict[uuid.UUID, str]:
     return {pid: (f"#{n} {first}" if n is not None else first) for pid, first, n in rows}
 
 
+async def _source(ctx: Ctx, asset: VideoAsset) -> tuple[dict[str, Any], dict[uuid.UUID, int]]:
+    """What the reel worker needs of one file: its proxy, tracks and court; and the spotlight
+    track of each identified player in it."""
+    cal = await ctx.db.scalar(
+        select(CameraCalibration)
+        .where(CameraCalibration.video_asset_id == asset.id)
+        .order_by(CameraCalibration.created_at.desc())
+        .limit(1)
+    )
+    tracks = (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
+    analysis = asset.analysis or {}
+    return {
+        "proxy_key": asset.proxy_key,
+        "chunks_prefix": media_prefix(asset) + "analysis/",
+        "chunk_ms": analysis.get("chunk_ms"),
+        "homography": cal.homography if cal else None,
+        "image_size": cal.image_size if cal else None,
+        "player_tracks": [t.track_no for t in tracks if t.team and t.team != "referee"],
+    }, {t.player_id: t.track_no for t in tracks if t.player_id}
+
+
+def _clip(
+    s: Scene,
+    files: timeline.Files,
+    video: VideoAsset,
+    index: dict[uuid.UUID, int],
+    spots: dict[uuid.UUID, dict[uuid.UUID, int]],
+    names: dict[uuid.UUID, str],
+    duration: int | None,
+) -> dict[str, Any]:
+    """One scene: its window in the file of its part (one file: the match time as it is)."""
+    t = s.event.t_ms or 0
+    hit = files.at(t) if len(files.parts) > 1 else None
+    if hit is not None and hit[0].proxy_key:
+        asset, local = hit
+        length = round(asset.duration_s * 1000) if asset.duration_s else None
+    else:
+        asset, local, length = video, t, duration
+    out = local + POST_MS if length is None else min(length, local + POST_MS)
+    spot = spots.get(asset.id, {})
+    return {
+        "in_ms": max(0, local - PRE_MS),
+        "out_ms": out,
+        "label": names.get(s.player_id, "") if s.player_id else "",
+        "spotlight_track": spot.get(s.player_id) if s.player_id else None,
+        "source": index.get(asset.id, 0),
+    }
+
+
 async def build(
     ctx: Ctx, match: Match, fmt: ReelFormat, player_id: uuid.UUID | None = None
 ) -> HighlightReel | None:
@@ -167,16 +218,19 @@ async def build(
     )
     ctx.db.add(reel)
     await ctx.db.flush()
-    cal = await ctx.db.scalar(
-        select(CameraCalibration)
-        .where(CameraCalibration.video_asset_id == video.id)
-        .order_by(CameraCalibration.created_at.desc())
-        .limit(1)
-    )
-    tracks = (await ctx.db.scalars(select(Track).where(Track.video_asset_id == video.id))).all()
-    player_tracks = [t.track_no for t in tracks if t.team and t.team != "referee"]
-    spot = {t.player_id: t.track_no for t in tracks if t.player_id}
-    analysis = video.analysis or {}
+    # each scene from the file of its part of the match, at its time in that file (Q-VIDEO-PARTS)
+    files = await timeline.Files.of(ctx, match.id)
+    sources: list[dict[str, Any]] = []
+    index: dict[uuid.UUID, int] = {}
+    spots: dict[uuid.UUID, dict[uuid.UUID, int]] = {}
+    for s in chosen:
+        hit = files.at(s.event.t_ms or 0)
+        asset = hit[0] if hit is not None and hit[0].proxy_key else video
+        if asset.id in index:
+            continue
+        index[asset.id] = len(sources)
+        source, spots[asset.id] = await _source(ctx, asset)
+        sources.append(source)
     home, away = (
         (team.name, opp.name if opp else "")
         if match.is_home
@@ -204,27 +258,13 @@ async def build(
                 "format": fmt.value,
                 "bucket_videos": ctx.settings.s3_bucket_videos,
                 "bucket_artifacts": ctx.settings.s3_bucket_artifacts,
-                "proxy_key": video.proxy_key,
                 "out_key": f"{match.organization_id}/highlights/{reel.id}.mp4",
                 "logo_key": org.logo_key,
                 "colour": org.primary_color,
                 "intro": [x for x in title if x],
-                "chunks_prefix": media_prefix(video) + "analysis/",
-                "chunk_ms": analysis.get("chunk_ms"),
-                "homography": cal.homography if cal else None,
-                "image_size": cal.image_size if cal else None,
-                "player_tracks": player_tracks,
-                "clips": [
-                    {
-                        "in_ms": max(0, (s.event.t_ms or 0) - PRE_MS),
-                        "out_ms": (s.event.t_ms or 0) + POST_MS
-                        if duration is None
-                        else min(duration, (s.event.t_ms or 0) + POST_MS),
-                        "label": names.get(s.player_id, "") if s.player_id else "",
-                        "spotlight_track": spot.get(s.player_id) if s.player_id else None,
-                    }
-                    for s in chosen
-                ],
+                **sources[0],
+                **({"sources": sources} if len(sources) > 1 else {}),
+                "clips": [_clip(s, files, video, index, spots, names, duration) for s in chosen],
             }
         },
     )

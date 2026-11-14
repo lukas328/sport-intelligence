@@ -296,16 +296,13 @@ def run_highlight_reel(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def render_reel(settings: WorkerSettings, payload: dict[str, Any], work: Path, s3: Any) -> Path:
+    """A match in several files (the two halves): `sources` holds each file's proxy, tracks and
+    court, and every clip names its `source` with times in that file."""
+    if payload.get("sources"):
+        return _render_parts(settings, payload, work, s3)
     src = work / "proxy.mp4"
     s3.download_file(payload["bucket_videos"], payload["proxy_key"], str(src))
-    logo = None
-    if payload.get("logo_key"):
-        try:
-            buf = io.BytesIO()
-            s3.download_fileobj(payload["bucket_artifacts"], payload["logo_key"], buf)
-            logo = buf.getvalue()
-        except Exception:
-            logo = None
+    logo = _logo(s3, payload)
     rows = _rows(
         s3,
         payload["bucket_artifacts"],
@@ -317,6 +314,39 @@ def render_reel(settings: WorkerSettings, payload: dict[str, Any], work: Path, s
     return render_local(settings, payload, src, rows, logo, work)
 
 
+def _logo(s3: Any, payload: dict[str, Any]) -> bytes | None:
+    if not payload.get("logo_key"):
+        return None
+    try:
+        buf = io.BytesIO()
+        s3.download_fileobj(payload["bucket_artifacts"], payload["logo_key"], buf)
+        return buf.getvalue()
+    except Exception:
+        return None
+
+
+def _render_parts(settings: WorkerSettings, payload: dict[str, Any], work: Path, s3: Any) -> Path:
+    files: list[tuple[Path, NDArray[np.float32], dict[str, Any]]] = []
+    for i, source in enumerate(payload["sources"]):
+        src = work / f"proxy_{i}.mp4"
+        s3.download_file(payload["bucket_videos"], source["proxy_key"], str(src))
+        mine = [c for c in payload["clips"] if int(c.get("source", 0)) == i]
+        sub = work / f"part_{i}"
+        sub.mkdir()
+        rows = _rows(
+            s3,
+            payload["bucket_artifacts"],
+            source["chunks_prefix"],
+            source.get("chunk_ms"),
+            mine,
+            sub,
+        )
+        files.append((src, rows, {**payload, **source}))
+    return render_local(
+        settings, payload, files[0][0], files[0][1], _logo(s3, payload), work, files
+    )
+
+
 def render_local(
     settings: WorkerSettings,
     payload: dict[str, Any],
@@ -324,7 +354,10 @@ def render_local(
     rows: NDArray[np.float32],
     logo: bytes | None,
     work: Path,
+    files: list[tuple[Path, NDArray[np.float32], dict[str, Any]]] | None = None,
 ) -> Path:
+    """`files`: per source of a match in several files, its proxy, rows and settings (court,
+    tracks); each clip's `source` picks one."""
     size = (720, 1280) if payload["format"] == "9x16" else (1280, 720)
     parts: list[Path] = []
     card = work / "intro.png"
@@ -352,7 +385,11 @@ def render_local(
     parts.append(intro)
     for i, clip in enumerate(payload["clips"], start=1):
         out = work / f"p{i:03d}.mp4"
-        render_clip(settings, src, clip, rows, payload, out)
+        if files:
+            f_src, f_rows, f_ctx = files[min(int(clip.get("source", 0)), len(files) - 1)]
+            render_clip(settings, f_src, clip, f_rows, f_ctx, out)
+        else:
+            render_clip(settings, src, clip, rows, payload, out)
         parts.append(out)
     lst = work / "list.txt"
     lst.write_text("".join(f"file '{p.name}'\n" for p in parts))
