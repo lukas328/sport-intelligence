@@ -378,12 +378,44 @@
   margin: 12mm;
 }
 @media print {
-  .sheet {
+  body {
+    min-height: 0 !important;
+  }
+  main,
+  .wrap {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  .print-sheet {
     margin: 0;
     border: 0;
     padding: 0;
     background: #fff;
-    font-size: 11pt;
+    font-size: 12.5pt;
+    line-height: 1.45;
+  }
+  .print-sheet h2 {
+    font-size: 20pt;
+  }
+  .print-sheet h3 {
+    font-size: 15pt;
+  }
+  .notice-sheet {
+    margin: 0;
+    height: 268mm;
+    justify-content: center;
+    padding: 18mm 14mm;
+    background: #fff;
+    break-inside: avoid;
+  }
+  .notice-text {
+    font-size: 50pt;
+    line-height: 1.12;
+  }
+  .notice-ask {
+    margin-top: 40mm;
+    font-size: 16pt;
   }
   header,
   footer,

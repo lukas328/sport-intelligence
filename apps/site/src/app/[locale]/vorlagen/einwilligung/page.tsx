@@ -29,23 +29,25 @@ export default async function ConsentTemplate({ params }: Props) {
     >
       <Sheet>
         <h2 className="text-[1.75rem] md:text-[2rem]">{t.sheetTitle}</h2>
+        <WriteLine label={t.team} />
         <p className="measure mt-4 leading-[1.6]">{t.intro}</p>
         <p className="mt-6 font-bold">{t.agree}</p>
         <ul className="mt-2">
           {t.items.map((x) => (
-            <li key={x} className="flex gap-3 py-2 leading-[1.5]">
-              <span aria-hidden className="mt-1 size-5 shrink-0 border-2 border-ink" />
+            <li key={x} className="flex gap-3 py-2 leading-[1.5] print:py-[3mm]">
+              <span aria-hidden className="mt-1 size-5 shrink-0 border-2 border-ink print:size-[7mm] print:mt-0" />
               <span>{x}</span>
             </li>
           ))}
         </ul>
         <p className="measure mt-4 leading-[1.6]">{t.change}</p>
-        <div className="grid grid-cols-1 gap-x-10 md:grid-cols-2">
+        <p className="measure mt-3 leading-[1.6]">{t.withdraw}</p>
+        <div className="grid grid-cols-1 gap-x-10 md:grid-cols-2 print:grid-cols-2">
           <WriteLine label={t.name} />
           <WriteLine label={t.date} />
         </div>
         <WriteLine label={t.sign} />
-        <p className="mt-8 text-base">{t.contact}</p>
+        <p className="mt-8 text-base print:mt-[10mm] print:text-[12.5pt]">{t.contact}</p>
       </Sheet>
       <PrintButton label={m.tools.print} />
       <p className="no-print mt-2 text-base text-ink-2">{m.tools.printNote}</p>

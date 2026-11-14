@@ -63,14 +63,18 @@ export default async function Filming({ params }: Props) {
           </div>
         </div>
 
-        <section className="mt-16" aria-labelledby="notice">
+        <section className="mt-16 print:mt-0" aria-labelledby="notice">
           <div className="no-print">
             <SectionHead id="notice" title={t.noticeTitle} />
             <p className="measure mt-3">{t.noticeLead}</p>
           </div>
-          <div className="mt-6 border-4 border-ink bg-paper px-6 py-12 text-center md:px-16 md:py-20">
-            <img src="/brand/wortmarke-quer-einfarbig.svg" alt="Handball Intelligence" width={2150} height={512} className="mx-auto h-10 w-auto" />
-            <p className="font-slant mx-auto mt-8 max-w-[36rem] text-[2rem] leading-tight hyphens-auto md:text-[2.75rem]">{t.notice}</p>
+          {/* the notice: readable from three metres, one A4 page, no hyphenation, a line to fill in by hand */}
+          <div className="notice-sheet mt-6 flex flex-col border-4 border-ink bg-paper px-6 py-12 md:px-16 md:py-20">
+            <p className="font-slant notice-text text-[2.25rem] leading-[1.1] [hyphens:none] [overflow-wrap:normal] [text-wrap:balance] md:text-[3.5rem]">{t.notice}</p>
+            <p className="notice-ask mt-12 flex items-end gap-3 text-[1.25rem] font-bold">
+              <span className="shrink-0">{t.noticeAsk}</span>
+              <span aria-hidden className="h-8 flex-1 border-b-2 border-ink" />
+            </p>
           </div>
           <PrintButton label={t.print} />
         </section>

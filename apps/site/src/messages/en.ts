@@ -269,6 +269,7 @@ const en: Messages = {
     noticeTitle: "Notice for the hall",
     noticeLead: "Tell the opponent and the hall that you are filming. Print this notice and put it on the door.",
     notice: "This match is filmed for analysis. The home team's coaches answer any questions.",
+    noticeAsk: "Questions to:",
     print: "Print the notice",
     pause: "Keep filming through half time. If you stop, a second file is made, and the second half is not analysed.",
     pauseMulti: "Best let the recording run through half time. If you stopped, simply upload all files to the same match.",
@@ -608,7 +609,9 @@ const en: Messages = {
       name: "Name of the player",
       date: "Place and date",
       sign: "Signature (for children: parents)",
-      contact: "Questions to: [name, phone or e-mail of the coaching staff]",
+      contact: "Withdrawal and questions to: [name, phone or e-mail of the coaching staff]",
+      team: "Team / club",
+      withdraw: "To withdraw: a short message to the coaching staff is enough, spoken or written. From then on they show no new scenes with you, and scenes with you are no longer shared.",
       more: "What applies in Switzerland when filming in a club",
     },
     tally: {

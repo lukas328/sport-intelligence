@@ -65,15 +65,15 @@ export function ToolPage({
 
 /** A sheet that prints alone on A4: ink on white, no colour needed. */
 export function Sheet({ children }: { children: ReactNode }) {
-  return <div className="sheet mt-10 border-2 border-ink bg-paper p-6 md:p-10">{children}</div>;
+  return <div className="print-sheet mt-10 border-2 border-ink bg-paper p-6 md:p-10">{children}</div>;
 }
 
 /** A line to write on, with its label underneath. */
 export function WriteLine({ label }: { label: string }) {
   return (
     <div className="mt-8">
-      <div className="h-8 border-b-2 border-ink" />
-      <p className="mt-1 text-base text-ink-2">{label}</p>
+      <div className="h-8 border-b-2 border-ink print:h-[11mm]" />
+      <p className="mt-1 text-base text-ink-2 print:text-[11pt]">{label}</p>
     </div>
   );
 }

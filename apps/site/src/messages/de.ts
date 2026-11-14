@@ -267,6 +267,7 @@ const de = {
     noticeTitle: "Aushang für die Halle",
     noticeLead: "Sag dem Gegner und der Halle, dass gefilmt wird. Druck diesen Aushang aus und häng ihn an die Tür.",
     notice: "Dieses Spiel wird zu Analysezwecken gefilmt. Fragen beantwortet das Trainerteam des Heimteams.",
+    noticeAsk: "Fragen an:",
     print: "Aushang drucken",
     pause: "Film in der Pause weiter. Wenn du stoppst, entsteht eine zweite Datei, und die zweite Halbzeit wird nicht ausgewertet.",
     pauseMulti: "Lass die Aufnahme in der Pause am besten weiterlaufen. Hast du gestoppt, lädst du einfach alle Dateien zum selben Spiel hoch.",
@@ -606,7 +607,9 @@ const de = {
       name: "Name der Spielerin oder des Spielers",
       date: "Ort und Datum",
       sign: "Unterschrift (bei Kindern: Eltern)",
-      contact: "Fragen an: [Name, Telefon oder E-Mail des Trainerteams]",
+      contact: "Widerruf und Fragen an: [Name, Telefon oder E-Mail des Trainerteams]",
+      team: "Team / Verein",
+      withdraw: "Widerrufen: Eine kurze Nachricht an das Trainerteam genügt, mündlich oder schriftlich. Ab dann zeigt es keine neuen Szenen mit dir, und Szenen mit dir werden nicht mehr geteilt.",
       more: "Was in der Schweiz beim Filmen im Verein gilt",
     },
     tally: {

@@ -269,6 +269,7 @@ const fr: Messages = {
     noticeTitle: "Affiche pour la salle",
     noticeLead: "Dis à l'adversaire et à la salle que tu filmes. Imprime cette affiche et mets-la sur la porte.",
     notice: "Ce match est filmé à des fins d'analyse. Le staff de l'équipe recevante répond aux questions.",
+    noticeAsk: "Questions à :",
     print: "Imprimer l'affiche",
     pause: "Continue à filmer pendant la pause. Si tu arrêtes, un deuxième fichier se crée, et la deuxième mi-temps n'est pas analysée.",
     pauseMulti: "Le mieux est de laisser tourner pendant la pause. Si tu as arrêté, téléverse simplement tous les fichiers dans le même match.",
@@ -608,7 +609,9 @@ const fr: Messages = {
       name: "Nom de la joueuse ou du joueur",
       date: "Lieu et date",
       sign: "Signature (pour les enfants : les parents)",
-      contact: "Questions à : [nom, téléphone ou e-mail du staff]",
+      contact: "Retrait et questions à : [nom, téléphone ou e-mail du staff]",
+      team: "Équipe / club",
+      withdraw: "Retirer son accord : un court message au staff suffit, oralement ou par écrit. Dès lors, il ne montre plus de nouvelles scènes où tu figures, et ces scènes ne sont plus partagées.",
       more: "Ce qui vaut en Suisse quand on filme au club",
     },
     tally: {

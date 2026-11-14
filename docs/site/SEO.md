@@ -296,6 +296,12 @@ mit Aushang (Titel «Spiel filmen: Checkliste und Aushang»), der Ratgeber die a
   KlipDraw (keine Herstellerquelle erreichbar), asport (laut Suchergebnissen eingestellt, nicht belegt).
 - **Vorlagen zum Drucken** (de, fr, en): `/vorlagen/einwilligung/`, `/vorlagen/strichliste/`,
   `/vorlagen/spieltag/`, je ein A4-Blatt mit `@media print`; der Aushang bleibt auf `/aufnahme/`.
+- **Druck nachgemessen:** `apps/site/scripts/check-print.mjs` druckt die drei Vorlagen und den Aushang
+  je Sprache mit Chromium als PDF (A4 aus `@page`) und prüft: genau eine Seite. Läuft von Hand nach
+  dem Build (`node scripts/check-print.mjs`), weil Playwright keine Abhängigkeit der Website ist;
+  Stand: 12 von 12 Seiten passen. Im Druck mindestens 12 pt, Kästchen 6,5 bis 7 mm, Blatt gefüllt;
+  der Aushang ist ganzseitig, 50 pt, ohne Silbentrennung, mit «Fragen an: ____»; die Einwilligung
+  hat eine Zeile «Team / Verein» und einen Satz zum Widerruf (an wen).
 - **Rechner** (de, fr, en): `/rechner/wurfquote/` (Wurf- und Torhüterquote mit Satz und Basis zum
   Kopieren) und `/rechner/speicher/` (Minuten mal Einstellung); Formeln und eine Tabelle stehen ohne
   JavaScript auf der Seite. Nichts verlässt den Browser.
