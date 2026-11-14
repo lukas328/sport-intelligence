@@ -21,10 +21,9 @@ export const SITE_UPDATED = "2026-11-13";
 export const PRICES_FINAL = false;
 
 /**
- * Whether the analysis uses every file of a match (OPEN_QUESTIONS Q-VIDEO-PARTS; being built on
- * claude/video-parts). While false, the site says that only the first file is analysed and advises
- * to keep filming through half-time. Switch to true once that branch is merged and checked: the
- * filming page, the questions, the facts, llms.txt, the guide and the help articles follow.
+ * Whether the analysis uses every file of a match (OPEN_QUESTIONS Q-VIDEO-PARTS). True since the
+ * app analyses all parts of a match: the filming page, the questions, the facts, llms.txt, the
+ * guide and the help articles follow this switch.
  */
 export const MULTI_FILE = true;
 
