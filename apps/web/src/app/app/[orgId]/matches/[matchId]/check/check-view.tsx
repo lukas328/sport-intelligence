@@ -643,7 +643,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               </section>
             ) : (
               <>
-            <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? (current.part && current.part > 1 ? t("fieldQuestionPart", { name: tParts(partName(current.part, parts.length).key, { n: current.part }) }) : t("fieldQuestion")) : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
+            <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? (current.part && current.part > 1 ? t("fieldQuestionPart", { name: tParts(partName(current.part, parts).key, { n: current.part }) }) : t("fieldQuestion")) : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
                 <p className="mt-4 max-w-[54ch] text-[17px] text-ink-2">
                   {current.kind === "field" ? (current.copyFrom ? t("fieldWhyPart") : t("fieldWhy")) : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : earlier ? t("sameGoalWhy", { time: clock(earlier.t_ms! / 1000) }) : t("goalWhy")}
                 </p>

@@ -12,6 +12,8 @@ export interface PartVideo {
   duration_s: number | null;
   part?: number | null;
   part_start_ms?: number | null;
+  /** the half this part is (two halves with a side change between them); null: «Teil n» */
+  half?: number | null;
   duplicate_of?: string | null;
   error?: string | null;
 }
@@ -67,11 +69,22 @@ export function partAt<V extends PartVideo>(videos: V[], ms: number): { video: V
   return { video: hit, local_ms: ms - (hit.part_start_ms ?? 0) };
 }
 
-/** How a part is called: «1. Halbzeit» and «2. Halbzeit» for two, «Teil 3» for more. */
+/** How a part is called: «1. Halbzeit» and «2. Halbzeit» when the API says the match is two
+ * halves (two parts with a side change between them, a short part started by mistake not
+ * counted), otherwise «Teil n» (a recording the phone split, more parts). */
 export type PartName = { key: "half" | "part"; n: number };
 
-export function partName(n: number, total: number): PartName {
-  return total === 2 ? { key: "half", n } : { key: "part", n };
+export function partName(n: number, videos: PartVideo[]): PartName {
+  const v = partsOf(videos).find((p) => p.part === n);
+  return v?.half != null ? { key: "half", n: v.half } : { key: "part", n };
+}
+
+/** The two parts that can be swapped: the parts that are not a few seconds started by mistake,
+ * when there are exactly two of them. */
+export function swappable<V extends PartVideo>(videos: V[]): [V, V] | null {
+  const parts = partsOf(videos);
+  const real = parts.filter((p) => !isShort(p, parts));
+  return real.length === 2 ? [real[0]!, real[1]!] : null;
 }
 
 export type PartState =

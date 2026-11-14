@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isShort, latestJobs, mainFiles, partAt, partName, partStarts, partState, partsOf, recordingOrder, timelineVideo, type PartVideo } from "./video-parts";
+import { isShort, latestJobs, mainFiles, partAt, partName, swappable, partStarts, partState, partsOf, recordingOrder, timelineVideo, type PartVideo } from "./video-parts";
 
 const v = (id: string, extra: Partial<PartVideo> = {}): PartVideo => ({ id, role: "main", status: "ready", filename: `${id}.mp4`, duration_s: 1800, part: null, part_start_ms: null, ...extra });
 
@@ -32,8 +32,18 @@ describe("a match in several files (Q-VIDEO-PARTS)", () => {
   });
 
   it("calls two parts halves and more parts parts", () => {
-    expect(partName(2, 2)).toEqual({ key: "half", n: 2 });
-    expect(partName(3, 4)).toEqual({ key: "part", n: 3 });
+    // the API says which parts are halves (a side change between them)
+    const a = v("a", { part: 1, part_start_ms: 0, half: 1 });
+    const b = v("b", { part: 2, part_start_ms: 1_800_000, half: 2 });
+    expect(partName(2, [a, b])).toEqual({ key: "half", n: 2 });
+    // a recording the phone split: no side change, «Teil 1 / Teil 2» (Echtlauf 5 P9)
+    expect(partName(2, [{ ...a, half: null }, { ...b, half: null }])).toEqual({ key: "part", n: 2 });
+    // a short third file does not make the halves «Teil n», nor hide the swap (P6)
+    const c = v("c", { part: 3, part_start_ms: 3_550_000, duration_s: 5 });
+    expect(partName(2, [a, b, c])).toEqual({ key: "half", n: 2 });
+    expect(partName(3, [a, b, c])).toEqual({ key: "part", n: 3 });
+    expect(swappable([a, b, c])?.map((x) => x.id)).toEqual(["a", "b"]);
+    expect(swappable([a, b, { ...c, duration_s: 1200 }])).toBeNull();
   });
 
   it("says what each file is doing from its newest jobs", () => {
