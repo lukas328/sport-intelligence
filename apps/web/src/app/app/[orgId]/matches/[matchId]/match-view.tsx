@@ -36,8 +36,7 @@ import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { GameActions, PointOpen, Telegram, ThreeFigures, chatPicture } from "./game-tab";
 import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
-import { KeepersView, PhysicalView } from "./m5-views";
-import { NumbersView } from "./numbers-view";
+import dynamic from "next/dynamic";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
@@ -48,12 +47,19 @@ import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
 import { MyScenesLine, TeamFeedView } from "./feed-views";
-import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
-import { MarksPanel } from "./marks-panel";
-import { HighlightsView } from "./highlight-views";
 import { PartsLine, PartsPanel, usePartMarkers } from "./parts-panel";
 import { latestJobs, partName, partsOf, partState, timelineVideo } from "@/lib/video-parts";
+
+// Loaded when shown, so the match page stays within the bundle budget (scripts/check-bundle.mjs).
+// Keepers and running distances sit deep in the Zahlen tab.
+const KeepersView = dynamic(() => import("./m5-views").then((m) => m.KeepersView));
+const PhysicalView = dynamic(() => import("./m5-views").then((m) => m.PhysicalView));
+// the Zahlen tab, the highlights, the match-day marks and the exchange: not on the first screen
+const NumbersView = dynamic(() => import("./numbers-view").then((m) => m.NumbersView));
+const HighlightsView = dynamic(() => import("./highlight-views").then((m) => m.HighlightsView));
+const MarksPanel = dynamic(() => import("./marks-panel").then((m) => m.MarksPanel));
+const ExchangePanel = dynamic(() => import("./exchange-panel").then((m) => m.ExchangePanel));
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
