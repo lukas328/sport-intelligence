@@ -146,10 +146,11 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await expect(page.getByTestId("rail-span")).toBeVisible();
   await expect(page.getByTestId("rail-span")).not.toContainText("60");
 
-  // opened and answered: the head goes back to the newer match
+  // opened and answered: the newer match has neither a result nor a video, so the head keeps the
+  // match with video (Echtlauf 6: it jumped to a match without anything to show)
   await page.goto(`/app/${org}/teams/${team}/matches`);
-  await expect(page.locator("[data-zone=wurf]")).toContainText("TV Neuer");
-  await expect(page.locator("[data-zone=wurf]")).not.toContainText("TV Kandidat");
+  await expect(page.locator("[data-zone=wurf]")).toContainText("TV Kandidat");
+  await expect(page.locator("[data-zone=wurf]")).not.toContainText("TV Neuer");
 });
 
 /**

@@ -232,7 +232,8 @@ def _homography(
         rows.append([0, 0, 0, x, y, 1, -v * x, -v * y, -v])
     _, _, vt = np.linalg.svd(np.array(rows, dtype=float))
     h = vt[-1].reshape(3, 3)
-    return (h / h[2, 2]).tolist()
+    out: list[list[float]] = (h / h[2, 2]).tolist()
+    return out
 
 
 CORNERS = [(0.0, 0.0), (40.0, 0.0), (40.0, 20.0), (0.0, 20.0)]
