@@ -327,7 +327,7 @@ def _logo(s3: Any, payload: dict[str, Any]) -> bytes | None:
 
 def _render_parts(settings: WorkerSettings, payload: dict[str, Any], work: Path, s3: Any) -> Path:
     files: list[tuple[Path, NDArray[np.float32], dict[str, Any]]] = []
-    for i, source in enumerate(payload["sources"]):
+    for i, source in enumerate(payload.get("sources") or []):
         src = work / f"proxy_{i}.mp4"
         s3.download_file(payload["bucket_videos"], source["proxy_key"], str(src))
         mine = [c for c in payload["clips"] if int(c.get("source", 0)) == i]
