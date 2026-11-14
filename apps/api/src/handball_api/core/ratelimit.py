@@ -7,6 +7,8 @@ from typing import Protocol
 
 from redis.asyncio import Redis
 
+from handball_api.core.jobs import REDIS_OPTS
+
 
 def parse_rate(rate: str) -> tuple[int, int]:
     count, _, seconds = rate.partition("/")
@@ -38,7 +40,7 @@ class MemoryRateLimiter:
 
 class RedisRateLimiter:
     def __init__(self, url: str) -> None:
-        self._redis = Redis.from_url(url)
+        self._redis = Redis.from_url(url, **REDIS_OPTS)
 
     async def hit(self, key: str, limit: int, window_s: int) -> bool:
         bucket = f"rl:{key}:{int(time.time()) // window_s}"
