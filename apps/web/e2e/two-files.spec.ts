@@ -76,7 +76,7 @@ test("two halves in two files: one match, both analysed, one video", async ({ pa
   await expect(list).toContainText("Reihenfolge von dir festgelegt");
 
   // the same file again: said, nothing stored twice
-  await page.getByTestId("add-file").locator("summary").click();
+  await page.getByTestId("add-file").locator("> summary").click();
   await page.getByTestId("video-file").last().setInputFiles(HALF_1);
   await expect(page.getByTestId("upload-same")).toBeVisible({ timeout: 60_000 });
 
