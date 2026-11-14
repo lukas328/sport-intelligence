@@ -78,6 +78,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates", { params: { path, query: { kind: "goal" } } })).data ?? null,
   });
   const [done, setDone] = useState<string[]>([]);
+  // the courts a person confirmed in this round
+  const [fieldsConfirmed, setFieldsConfirmed] = useState<string[]>([]);
   // one source for the questions: the server's list, as the mail and the start count them (E07);
   // taken once when the screen opens, so answering does not shuffle the count
   const graphics = useMatchGraphics(orgId, match.id);
@@ -140,13 +142,17 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       list.flatMap((c): Question[] => {
         // the court of each part of the match (the second half asked only when it was not
         // carried over from the first); the first half's court can be taken over
+        // a first half confirmed in this round can be taken over at once (the list was taken
+        // when the screen opened, before it was confirmed)
         if (c.kind === "field")
-          return main ? [{ kind: "field", videoId: c.id, part: parts.find((p) => p.id === c.id)?.part ?? null, copyFrom: c.copy_from ?? null }] : [];
+          return main
+            ? [{ kind: "field", videoId: c.id, part: parts.find((p) => p.id === c.id)?.part ?? null, copyFrom: c.copy_from ?? (c.id !== main.id && fieldsConfirmed.includes(main.id) ? main.id : null) }]
+            : [];
         if (c.kind === "kickoff") return [{ kind: "kickoff", period: c.frame_ref }];
         const cand = candidates.data?.candidates.find((x) => x.id === c.id && x.status === "open");
         return cand ? [{ kind: "goal", c: cand }] : [];
       }),
-    [candidates.data, main, parts],
+    [candidates.data, main, parts, fieldsConfirmed],
   );
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
@@ -258,6 +264,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               } else {
                 must(await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", vid));
               }
+              setFieldsConfirmed((f) => [...f, current.videoId]);
               const wasMoved = Boolean(moved && panoSize);
               setMoved(null);
               void qc.invalidateQueries({ queryKey: ["analysis"] });
