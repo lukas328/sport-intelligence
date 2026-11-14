@@ -439,7 +439,7 @@ const en: Messages = {
     principlesTitle: "What we stick to",
     principles: [
       { title: "Result before machine", text: "You see what came out. Where the analysis is unsure, it asks you instead of hiding it." },
-      { title: "No manual work", text: "Every page is useful even if you have typed nothing." },
+      { title: "Little manual work", text: "A few minutes of confirming instead of hours of cutting. No typing." },
       { title: "Only what is measured", text: "What the analysis does not measure, we do not draw. Estimated says \"estimated\"." },
     ],
     whoTitle: "Who we are",

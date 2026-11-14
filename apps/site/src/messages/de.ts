@@ -437,7 +437,7 @@ const de = {
     principlesTitle: "Woran wir uns halten",
     principles: [
       { title: "Ergebnis vor Technik", text: "Du siehst, was herauskommt. Wo die Analyse unsicher ist, fragt sie dich, statt es zu verstecken." },
-      { title: "Ohne Handarbeit", text: "Jede Seite ist nützlich, auch wenn du nichts eingetippt hast." },
+      { title: "Wenig Handarbeit", text: "Ein paar Minuten bestätigen statt Stunden schneiden. Eintippen musst du nichts." },
       { title: "Nur, was gemessen ist", text: "Was die Analyse nicht misst, zeichnen wir nicht. Geschätztes heisst «geschätzt»." },
     ],
     whoTitle: "Wer wir sind",

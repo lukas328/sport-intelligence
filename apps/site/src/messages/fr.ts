@@ -439,7 +439,7 @@ const fr: Messages = {
     principlesTitle: "Ce à quoi nous tenons",
     principles: [
       { title: "Le résultat avant la technique", text: "Tu vois ce qui en ressort. Là où l'analyse hésite, elle te le demande au lieu de le cacher." },
-      { title: "Sans travail manuel", text: "Chaque page est utile, même si tu n'as rien saisi." },
+      { title: "Peu de travail manuel", text: "Quelques minutes pour confirmer au lieu d'heures de découpage. Rien à taper." },
       { title: "Seulement ce qui est mesuré", text: "Ce que l'analyse ne mesure pas, nous ne le dessinons pas. L'estimé s'appelle « estimé »." },
     ],
     whoTitle: "Qui nous sommes",
