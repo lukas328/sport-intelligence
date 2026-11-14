@@ -106,7 +106,8 @@ async def preview(token: str, ctx: CtxDep) -> dict[str, Any]:
 )
 async def public_media(token: str, video_id: uuid.UUID, path: str, ctx: CtxDep) -> Response:
     data, ctype = await service.public_media(ctx, token, video_id, path)
-    return Response(data, media_type=ctype, headers={"cache-control": "private, max-age=60"})
+    cache = "private, no-cache" if path.endswith((".m3u8", ".vtt")) else "private, max-age=60"
+    return Response(data, media_type=ctype, headers={"cache-control": cache})
 
 
 @router.get(

@@ -205,7 +205,12 @@ async def delete_video(video_id: uuid.UUID, scope: OrgDep) -> None:
 )
 async def media_file(video_id: uuid.UUID, path: str, scope: OrgDep) -> Response:
     data, ctype = await videos.read_media(scope.ctx, video_id, path)
-    cache = "private, max-age=60" if path.endswith(".m3u8") else "private, max-age=86400, immutable"
+    # playlists and previews change when a part of the match is added or swapped (Q-VIDEO-PARTS)
+    cache = (
+        "private, no-cache"
+        if path.endswith((".m3u8", ".vtt"))
+        else "private, max-age=86400, immutable"
+    )
     return Response(data, media_type=ctype, headers={"cache-control": cache})
 
 
@@ -522,4 +527,6 @@ public_media = APIRouter(prefix="/v1/media", tags=["videos"])
 )
 async def signed_media(video_id: uuid.UUID, token: str, path: str, ctx: CtxDep) -> Response:
     data, ctype = await videos.read_signed_media(ctx, video_id, token, path)
-    return Response(data, media_type=ctype, headers={"cache-control": "private, max-age=600"})
+    fresh = path.endswith((".m3u8", ".vtt"))  # joined over the match's parts: never stale
+    cache = "private, no-cache" if fresh else "private, max-age=600"
+    return Response(data, media_type=ctype, headers={"cache-control": cache})
