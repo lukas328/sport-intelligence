@@ -528,3 +528,11 @@ pro Tor dazugibt; keine neue Zahl. Mit `MULTI_FILE = true` nennen die Texte: all
 auswählen oder die zweite Halbzeit später nachreichen, Seitenwechsel bei zwei Dateien, Bestätigtes
 bleibt. «Das noch nicht» neu: Wurfort-Vorschlag ist eine Schätzung und oft leer. check-out 0 Probleme,
 check-print 12/12, Vitest 31 grün.
+
+**Nachtrag 14. November 2026 (sechster Durchlauf):** Der Wurfort-Vorschlag ist aus allen Texten
+gestrichen («Nach jedem bestätigten Tor tippst du an, von wo geworfen wurde.»); drei Dinge zählen nur
+getippte Wurforte. «Das noch nicht»: «Den Wurfort selbst erkennen. Du tippst ihn an, ein Tipp pro
+Tor.» Prüfzeit neu gemessen mit Wurfort (22 Fragen in sechs bis neun Minuten für neun Tore, Ausschnitt
+von fünf Minuten). Zwei Dateien: Seitenwechsel nur nach einer Pause, nicht bei direkt anschliessenden
+Aufnahmen, umstellbar in der Liste der Teile. Spieltag-Checkliste mit kurzer Pausenzeile, damit sie
+auf einer Seite bleibt. check-out 0 Probleme, check-print 12/12, Vitest 31 grün.
