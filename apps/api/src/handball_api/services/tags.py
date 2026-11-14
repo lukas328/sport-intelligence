@@ -41,18 +41,16 @@ from handball_api.schemas.tags import (
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.matches import (
-    clip_window,
     duration_ms,
     get_match,
     in_video,
+    scene_window,
     timeline_videos,
 )
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 
 # video window around an event: the build-up matters more than the aftermath
-EVENT_PRE_MS = 6000
-EVENT_POST_MS = 3000
 
 
 # ---- tag sets ------------------------------------------------------------------------------
@@ -330,9 +328,7 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
         # an event before or after the video (official report on a clip) has no moment to show
         length = duration_ms(timeline.get(e.match_id))
         window = (
-            clip_window(e.t_ms, EVENT_PRE_MS, EVENT_POST_MS, length)
-            if in_video(e.t_ms, length) and e.t_ms is not None
-            else None
+            scene_window(e, length) if in_video(e.t_ms, length) and e.t_ms is not None else None
         )
         hits.append(
             SearchHit(

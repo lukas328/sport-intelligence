@@ -52,9 +52,9 @@ async def test_collection_of_scenes_plays_and_notes(make_api: Callable[[], Api])
     c = r.json()
     assert (c["source"], c["editable"], c["draft"]) == ("collection", True, False)
     assert [i["kind"] for i in c["items"]] == ["note", "scene", "scene", "play"]
-    # a scene from an event is a window around its moment
+    # a scene from an event is a window around its moment, as long as in Szenen (V6)
     assert (c["items"][1]["scene"]["start_ms"], c["items"][1]["scene"]["end_ms"]) == (
-        60_000,
+        59_000,
         68_000,
     )
     assert c["items"][1]["text"] == "Hier zu spät"

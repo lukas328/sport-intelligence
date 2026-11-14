@@ -3607,12 +3607,10 @@
       "ra": "Aussen|rechts",
       "kr": "Kreis"
     },
-    "suggested": "Vorschlag",
     "current": "Bisher",
     "unknown": "Weiss nicht",
     "replay": "Nochmal ansehen",
     "saved": "{goal} ist gespeichert.",
-    "suggestedWhy": "Gelb ist unser Vorschlag.",
     "estimated": "geschätzt",
     "missing": "Wurfort fehlt",
     "of": "Wurfort: {zone}",
@@ -3634,6 +3632,11 @@
     "soFar": "{n, plural, one {Ein Ding bisher.} other {# Dinge bisher.}}",
     "dialogTitle": "Von wo wurde dieses Tor geworfen?",
     "close": "Schliessen",
-    "sideNote": "Tor oben. Links und rechts aus Sicht des Angriffs."
+    "sideNote": "Tor oben. Links und rechts aus Sicht des Angriffs.",
+    "courtLabelVideo": "Angegriffene Hälfte so wie im Video, das Tor {side, select, left {links} other {rechts}}. Die Namen gelten aus Sicht des Angriffs.",
+    "sideVideoLeft": "So wie im Video: das Tor links.",
+    "sideVideoRight": "So wie im Video: das Tor rechts.",
+    "pause": "Anhalten",
+    "play": "Abspielen"
   }
 }

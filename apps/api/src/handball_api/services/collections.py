@@ -31,12 +31,12 @@ from handball_api.models.enums import ClipSource, SlideType
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.insights import insights
+from handball_api.services.matches import scene_window
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 
 Source = Literal["collection", "playlist", "presentation", "assignment"]
 # a scene made from an event: a little before the moment and a little after
-BEFORE_MS, AFTER_MS = 5_000, 3_000
 MAX_ITEMS = 200
 
 
@@ -313,7 +313,8 @@ async def _scene_clip(ctx: Ctx, team_id: uuid.UUID, item: dict[str, Any]) -> uui
     if event is not None:
         if event.t_ms is None:
             raise ProblemError(422, "invalid-item", "This event has no place in the video")
-        start, end = max(0, event.t_ms - BEFORE_MS), event.t_ms + AFTER_MS
+        # the same scene as in Szenen, the same length (V6)
+        start, end = scene_window(event, None)
         source = ClipSource.EVENT
     else:
         given_start, given_end = item.get("start_ms"), item.get("end_ms")

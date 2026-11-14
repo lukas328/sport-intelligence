@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Strip } from "@/components/anlauf/heads";
 import { ShotSpotPicker } from "@/components/anlauf/shot-spot-picker";
-import { useSaveSpot } from "@/components/anlauf/spot-parts";
+import { useGoalView, useSaveSpot } from "@/components/anlauf/spot-parts";
 import { clockOf } from "@/components/anlauf/three-things-view";
 import { useShell } from "@/components/shell/context";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
@@ -54,9 +54,28 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
   const player = useRef<PlayerHandle>(null);
   const back = `/app/${orgId}/matches/${match.id}`;
   const goal = list?.[at] ?? null;
+  const view = useGoalView(orgId, match.id, goal?.event_id ?? null);
   const total = list?.length ?? 0;
   const who = (g: Goal) => t("fillGoal", { team: g.team === "own" ? own : oppName });
   const when = (g: Goal) => (g.minute != null ? `${clockOf(g.minute)} · ${tc("videoAt", { video: formatClock(g.t_ms ?? 0) })}` : tc("videoAt", { video: formatClock(g.t_ms ?? 0) }));
+  // the clip loops while the coach taps (real-clip test V7); «Anhalten» holds it
+  const [paused, setPaused] = useState(false);
+  const toggle = () => {
+    const v = player.current?.video();
+    if (!v) return;
+    if (paused) {
+      setPaused(false);
+      if (v.readyState >= 3) void v.play().catch(() => undefined);
+      else player.current?.restart?.();
+    } else {
+      setPaused(true);
+      v.pause();
+    }
+  };
+  useEffect(() => {
+    setPaused(false);
+    player.current?.restart?.();
+  }, [goal?.event_id]);
   // keyboard and screen reader: each goal's question takes the focus
   useEffect(() => {
     if (at === 0) return;
@@ -90,14 +109,14 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
       ) : (
         <div className="grid gap-2 py-2 md:grid-cols-[minmax(0,1fr)_420px] md:gap-14 md:py-10">
           <figure className="relative m-0 self-start bg-court-bar">
-            {media && goal.t_ms != null && <VideoPlayer ref={player} key={goal.event_id} src={media} window={goalWindow({ t_ms: goal.t_ms })} autoPlay bare />}
+            {media && goal.t_ms != null && <VideoPlayer ref={player} key={goal.event_id} src={media} window={goalWindow({ t_ms: goal.t_ms })} autoPlay bare loop />}
             <figcaption className="flex flex-wrap max-md:hidden items-center justify-between gap-x-3 gap-y-1 bg-court-bar px-3 py-1.5 text-court-text">
               <span className="font-mono text-[13px] font-semibold">{when(goal)}</span>
               <button
                 type="button"
                 onClick={() => {
-                  player.current?.seek(goalWindow({ t_ms: goal.t_ms ?? 0 }).start_ms);
-                  player.current?.play();
+                  setPaused(false);
+                  player.current?.restart?.();
                 }}
                 className="min-h-11 cursor-pointer border-[1.5px] border-court-text bg-transparent px-3 text-[15px] font-bold text-white"
                 data-testid="check-replay"
@@ -114,16 +133,8 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
               <h1 id="spot-fill-question" tabIndex={-1} className="mt-1 mb-0 text-[32px] leading-[.95] outline-none md:mt-2 md:text-[58px]">
                 {t("question")}
               </h1>
-              <button
-                type="button"
-                onClick={() => {
-                  player.current?.seek(goalWindow({ t_ms: goal.t_ms ?? 0 }).start_ms);
-                  player.current?.play();
-                }}
-                className="min-h-11 shrink-0 cursor-pointer border-2 border-ink bg-transparent px-3 text-[15px] font-bold text-ink md:hidden"
-                data-testid="spot-replay"
-              >
-                {t("replay")}
+              <button type="button" onClick={toggle} aria-pressed={paused} className="min-h-11 shrink-0 cursor-pointer border-2 border-ink bg-transparent px-3 text-[15px] font-bold text-ink" data-testid="spot-pause">
+                {paused ? t("play") : t("pause")}
               </button>
             </div>
             <p className="mt-1 mb-0 max-w-[54ch] text-[15px] text-ink-2 md:mt-3 md:text-[17px]">
@@ -137,9 +148,10 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
             <div className="mt-2 md:mt-4">
               <ShotSpotPicker
                 key={goal.event_id}
-                disabled={busy}
-                // the estimate from the tracks is no suggestion (real-clip test V2: wrong in 4 of 7); only what the coach said before
-                suggestion={goal.zone && goal.by_coach ? { zone: goal.zone as SpotZone, kind: "current" } : null}
+                disabled={busy || !view.ready}
+                orientation={view.orientation}
+                // the estimate from the tracks is no suggestion (real-clip test V2); only what the coach said before
+                current={goal.zone && goal.by_coach ? (goal.zone as SpotZone) : null}
                 onPick={(spot, point) => {
                   setBusy(true);
                   setFailed(null);

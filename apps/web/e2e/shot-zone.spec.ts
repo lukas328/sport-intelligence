@@ -52,8 +52,13 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
     const step = page.getByTestId("spot-step");
     await expect(step).toContainText("Tor HC Wurfort ist gespeichert.");
     await expect(step.getByRole("heading", { name: "Von wo?" })).toBeVisible();
-    // on a phone «Nochmal ansehen» sits beside «Von wo?»
-    await expect(page.getByTestId("spot-replay")).toBeVisible();
+    // the clip runs on in a loop while the coach taps, with «Anhalten» beside «Von wo?» (V7)
+    await expect(page.getByTestId("spot-pause")).toHaveText("Anhalten");
+    const at = () => page.getByTestId("video").evaluate((v: HTMLVideoElement) => v.currentTime);
+    const t0 = await at();
+    await expect.poll(at, { timeout: 15_000 }).toBeGreaterThan(t0 + 0.5);
+    // no estimate is offered as a suggestion (V2)
+    await expect(page.getByTestId("spot-picker")).not.toContainText("Vorschlag");
     if (n === 0) {
       // one screen on a phone: the bottom of the video and «Weiss nicht» are in view together, no scrolling
       for (const size of [{ width: 390, height: 844 }, { width: 360, height: 740 }]) {

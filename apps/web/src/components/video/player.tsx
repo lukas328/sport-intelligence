@@ -35,6 +35,8 @@ export interface PlayerHandle {
   pause(): void;
   time(): number;
   video(): HTMLVideoElement | null;
+  /** from the window's start, muted, once the picture can play (a play() right after a tap is not lost) */
+  restart?(): void;
 }
 
 interface Props {
@@ -55,12 +57,14 @@ interface Props {
   clock?: (ms: number) => string;
   /** on a phone without the control bar under the picture (Prüfen «Von wo?»: one screen); from tablets up the bar floats over it */
   bare?: boolean;
+  /** the window plays in a loop instead of stopping at its end (Prüfen «Von wo?») */
+  loop?: boolean;
 }
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
 
 export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
-  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock, bare },
+  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock, bare, loop },
   ref,
 ) {
   const t = useTranslations("player");
@@ -88,6 +92,16 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
     pause: () => videoRef.current?.pause(),
     time: () => (videoRef.current?.currentTime ?? 0) * 1000,
     video: () => videoRef.current,
+    restart: () => {
+      const v = videoRef.current;
+      if (!v) return;
+      v.muted = true;
+      setMuted(true);
+      v.currentTime = (win?.start_ms ?? 0) / 1000;
+      const go = () => void v.play().catch(() => undefined);
+      if (v.readyState >= 3) go();
+      else v.addEventListener("canplay", go, { once: true });
+    },
   }));
 
   // HLS: native in Safari/iOS, hls.js elsewhere (loaded only here to keep other routes light)
@@ -220,8 +234,14 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         setTime(ms);
         onTime?.(ms);
         if (win && ms >= win.end_ms) {
-          v.pause();
-          onWindowEnd?.();
+          if (loop) {
+            // in a loop: back to the window's start, still playing (muted, it may play alone)
+            v.currentTime = win.start_ms / 1000;
+            if (v.paused) void v.play().catch(() => undefined);
+          } else {
+            v.pause();
+            onWindowEnd?.();
+          }
         }
       }
       renderOverlay();
@@ -229,7 +249,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [renderOverlay, onTime, win, onWindowEnd]);
+  }, [renderOverlay, onTime, win, onWindowEnd, loop]);
 
   const seekBy = (s: number) => {
     const v = videoRef.current;

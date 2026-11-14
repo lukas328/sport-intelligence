@@ -562,6 +562,11 @@ class GoalRunOut(ApiModel):
         description="who gave the zone: the coach, an estimate from the tracks, the coach did "
         "not know (unknown); null: nobody yet",
     )
+    scene: tuple[int, int] | None = Field(
+        default=None,
+        description="the goal's scene on the match timeline (ms): 8 s before to 2 s after, a "
+        "goal from a goal candidate 12 s before to 2 s after",
+    )
     by_coach: bool = Field(
         default=False,
         description="the zone was given by a person; only these make the three things and count "

@@ -508,6 +508,38 @@ def in_video(t_ms: int | None, duration: int | None) -> bool:
     return duration is None or t_ms <= duration
 
 
+# The scene of an event, one rule for Szenen, Sammlung, Zusammenschnitt, the player's feed, the
+# tactics camera and the Video tab (real-clip test of «Von wo?», V6): 6 s before to 3 s after; a
+# goal confirmed from a goal candidate from 12 s before its time to 2 s after, because candidate
+# times lie 4 to 7 s after the goal (Q-REC-CANDTIME). Report goals and goals marked by hand keep
+# 6 s and 3 s.
+SCENE_PRE_MS, SCENE_POST_MS = 6_000, 3_000
+CANDIDATE_PRE_MS, CANDIDATE_POST_MS = 12_000, 2_000
+
+
+def from_candidate(e: Any) -> bool:
+    """The event's video time is a goal candidate's (confirmed in Prüfen, or a report entry pinned
+    to a candidate)."""
+    if getattr(e, "source", None) == "goal_candidate":
+        return True
+    video = (getattr(e, "attributes", None) or {}).get("video")
+    return isinstance(video, dict) and video.get("source") == "goal_candidate"
+
+
+def scene_lead(e: Any, usual: tuple[int, int] = (SCENE_PRE_MS, SCENE_POST_MS)) -> tuple[int, int]:
+    """How long the scene of `e` runs before and after its time (see SCENE_PRE_MS); `usual` for
+    a view with its own lead for other events (the tactics camera: 8 s and 2 s)."""
+    if from_candidate(e):
+        return CANDIDATE_PRE_MS, CANDIDATE_POST_MS
+    return usual
+
+
+def scene_window(e: Any, duration: int | None) -> tuple[int, int]:
+    """The scene of an event with a video time, cut at the video's start and end."""
+    pre, post = scene_lead(e)
+    return clip_window(int(e.t_ms), pre, post, duration)
+
+
 def clip_window(t_ms: int, pre_ms: int, post_ms: int, duration: int | None) -> tuple[int, int]:
     """Clip around a time inside the video, cut at its start and end."""
     end = t_ms + post_ms if duration is None else min(duration, t_ms + post_ms)

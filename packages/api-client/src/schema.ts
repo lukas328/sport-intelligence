@@ -6898,6 +6898,14 @@ export interface components {
                 number
             ][];
             /**
+             * Scene
+             * @description the goal's scene on the match timeline (ms): 8 s before to 2 s after, a goal from a goal candidate 12 s before to 2 s after
+             */
+            scene?: [
+                number,
+                number
+            ] | null;
+            /**
              * Shot
              * @description the shot spot, half court; null for a goal without a known spot
              */

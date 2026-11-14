@@ -289,11 +289,13 @@ async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
     # every event of the video has its clock now, the scene too
     camera = (await api.get(f"{base}/scenes/{g['goals'][0]['event_id']}/camera")).json()
     assert camera["clock_s"] is not None and camera["video_s"] is not None
-    # the scene lies before the goal, from 8 s before it to 2 s after (G3), not the way back
+    # the scene lies before the goal, not the way back (G3): a goal confirmed from a candidate
+    # from 12 s before its time to 2 s after, because candidate times come late (V6)
     first = min(g["goals"], key=lambda x: x["t_ms"])
     camera = (await api.get(f"{base}/scenes/{first['event_id']}/camera")).json()
-    assert camera["duration_s"] == 10.0
-    assert camera["video_s"] == (first["t_ms"] - 8000) / 1000
+    assert camera["duration_s"] == 14.0
+    assert camera["video_s"] == (first["t_ms"] - 12_000) / 1000
+    assert first["scene"] == [first["t_ms"] - 12_000, first["t_ms"] + 2000]
 
 
 def test_a_corner_outside_the_picture_is_accepted() -> None:

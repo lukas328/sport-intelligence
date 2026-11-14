@@ -3607,12 +3607,10 @@
       "ra": "Right|wing",
       "kr": "Pivot"
     },
-    "suggested": "Suggestion",
     "current": "So far",
     "unknown": "Don't know",
     "replay": "Watch again",
     "saved": "{goal} is saved.",
-    "suggestedWhy": "Yellow is our suggestion.",
     "estimated": "estimated",
     "missing": "No shot spot",
     "of": "Shot from: {zone}",
@@ -3634,6 +3632,11 @@
     "soFar": "{n, plural, one {One thing so far.} other {# things so far.}}",
     "dialogTitle": "Where was this goal thrown from?",
     "close": "Close",
-    "sideNote": "Goal at the top. Left and right as the attack sees them."
+    "sideNote": "Goal at the top. Left and right as the attack sees them.",
+    "courtLabelVideo": "Attacked half as in the video, the goal on the {side, select, left {left} other {right}}. The names are as the attack sees them.",
+    "sideVideoLeft": "As in the video: the goal on the left.",
+    "sideVideoRight": "As in the video: the goal on the right.",
+    "pause": "Pause",
+    "play": "Play"
   }
 }

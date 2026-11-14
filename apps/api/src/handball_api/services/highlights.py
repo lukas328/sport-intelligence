@@ -40,6 +40,7 @@ from handball_api.services.feed import _close_events, _importance, in_video
 from handball_api.services.matches import (
     get_match,
     opponent_of,
+    scene_lead,
     timeline_duration_ms,
     timeline_video,
 )
@@ -161,10 +162,11 @@ def _clip(
         length = round(asset.duration_s * 1000) if asset.duration_s else None
     else:
         asset, local, length = video, t, duration
-    out = local + POST_MS if length is None else min(length, local + POST_MS)
+    pre, post = scene_lead(s.event)
+    out = local + post if length is None else min(length, local + post)
     spot = spots.get(asset.id, {})
     return {
-        "in_ms": max(0, local - PRE_MS),
+        "in_ms": max(0, local - pre),
         "out_ms": out,
         "label": names.get(s.player_id, "") if s.player_id else "",
         "spotlight_track": spot.get(s.player_id) if s.player_id else None,

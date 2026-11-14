@@ -5506,6 +5506,28 @@
             "title": "Run",
             "type": "array"
           },
+          "scene": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the goal's scene on the match timeline (ms): 8 s before to 2 s after, a goal from a goal candidate 12 s before to 2 s after",
+            "title": "Scene"
+          },
           "shot": {
             "anyOf": [
               {

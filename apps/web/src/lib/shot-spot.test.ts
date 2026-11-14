@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ZONE_AT } from "@/components/anlauf/geometry";
 import { goalRuns, type MatchGraphics } from "./graphics";
-import { checkMinutes, COURT_ZONES, goalsWithoutSpot, halfToCourt, nineAt, spotCounts, ZONE_AREA, ZONE_LABEL_AT, zoneAtHalf } from "./shot-spot";
+import { checkMinutes, COURT_ZONES, fromPicture, goalsWithoutSpot, halfToCourt, nineAt, spotCounts, toPicture, ZONE_AREA, ZONE_LABEL_AT, ZONE_LABEL_SIDE, zoneAtHalf, zoneAtPicture } from "./shot-spot";
 import { threeThings } from "./three-things";
 
 /** point in polygon (even-odd) */
@@ -94,5 +94,55 @@ describe("places for the three things", () => {
     const g = graphics([goal("a", "own", "la"), goal("b", "opp", null, { t_ms: 9000 }), goal("c", "own", null, { t_ms: 2000 }), goal("d", "own", null, { spot_missing: false, zone_source: "unknown" })]);
     expect(goalsWithoutSpot(g).map((x) => x.event_id)).toEqual(["c", "b"]);
     expect(spotCounts(g)).toEqual({ placed: 1, missing: 2, total: 4 });
+  });
+});
+
+describe("the small court as the camera sees it (real-clip test of «Von wo?»)", () => {
+  // the zone of a court point by the attacker's view (attacked goal at x = gx; zones.json, API to_half)
+  const zoneByRule = (x: number, y: number, gx: 0 | 40) => {
+    const [nx, ny] = gx === 40 ? [x, y] : [40 - x, 20 - y];
+    return zoneAtHalf([20 - ny, 40 - nx]);
+  };
+  // where the end x = 0 stands in the picture: on the left with the camera on the long side y = 0
+  const lagen = [
+    { camera: "y0", far: 20, leftEnd: 0 },
+    { camera: "y20", far: 0, leftEnd: 40 },
+  ] as const;
+
+  for (const l of lagen) {
+    for (const gx of [0, 40] as const) {
+      it(`camera on ${l.camera}, attack on x = ${gx}: each place is where the video shows it`, () => {
+        const side = gx === l.leftEnd ? "left" : "right";
+        let checked = 0;
+        for (let d = 0.5; d < 16; d += 1.5) {
+          for (let f = 0.5; f < 20; f += 1.5) {
+            // the court point d metres from the goal line, f metres from the far sideline
+            const x = gx === 40 ? 40 - d : d;
+            const y = l.far === 20 ? 20 - f : f;
+            // the camera's picture: the goal on its side, the far sideline at the top
+            const q: [number, number] = side === "right" ? [16 - d, f] : [d, f];
+            expect(zoneAtPicture(side, q)).toBe(zoneByRule(x, y, gx));
+            checked++;
+          }
+        }
+        expect(checked).toBeGreaterThan(100);
+      });
+    }
+  }
+
+  it("turns the half court and back without loss; the goal at the top stays as it was", () => {
+    for (const o of ["top", "left", "right"] as const) {
+      for (const p of [[1.5, 1.5], [10, 9], [17, 14]] as [number, number][]) expect(fromPicture(o, toPicture(o, p))).toEqual(p);
+    }
+    expect(toPicture("top", [3, 4])).toEqual([3, 4]);
+    // facing the goal on the right, the attacker's left wing is at the top by the goal
+    expect(zoneAtPicture("right", [15, 1])).toBe("la");
+    expect(zoneAtPicture("left", [1, 1])).toBe("ra");
+  });
+});
+
+describe("names on the turned court", () => {
+  it("stand inside their own places", () => {
+    for (const z of COURT_ZONES) expect(zoneAtHalf(ZONE_LABEL_SIDE[z])).toBe(z);
   });
 });

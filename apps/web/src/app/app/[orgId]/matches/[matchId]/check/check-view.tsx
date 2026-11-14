@@ -26,7 +26,7 @@ import { openMoments, useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
 import { partName, partsOf, partStarts, timelineVideo } from "@/lib/video-parts";
 import { ShotSpotPicker } from "@/components/anlauf/shot-spot-picker";
-import { useSaveSpot } from "@/components/anlauf/spot-parts";
+import { useGoalView, useSaveSpot } from "@/components/anlauf/spot-parts";
 import { checkMinutes, type SpotAnswer, type SpotZone } from "@/lib/shot-spot";
 import type { Pt as HalfPt } from "@/components/anlauf/geometry";
 
@@ -171,6 +171,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   // the second step of a goal question: where the shot came from, one tap (H7)
   const [spotStep, setSpotStep] = useState<SpotStep | null>(null);
   const saveSpot = useSaveSpot(orgId, match.id);
+  // the court as the camera sees it, the attacked goal where the video shows it
+  const spotView = useGoalView(orgId, match.id, spotStep?.eventId ?? null);
   const lastReview = useRef<Candidate | null>(null);
   const current = spotStep?.q ?? (revisit != null ? (answered[revisit]?.q ?? null) : (open[0] ?? null));
   const total = questions.length;
@@ -379,12 +381,28 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     if (!spotStep) return;
     // video and court on one screen: from the top, wherever the answer key was
     window.scrollTo({ top: 0 });
+    // the clip runs on in a loop from its start while the coach taps (real-clip test V7)
+    setSpotPaused(false);
+    player.current?.restart?.();
     document.getElementById("spot-question")?.focus({ preventScroll: true });
   }, [spotStep]);
   const replay = () => {
     if (current?.kind !== "goal") return;
-    player.current?.seek(goalWindow(current.c).start_ms);
-    player.current?.play();
+    setSpotPaused(false);
+    player.current?.restart?.();
+  };
+  const [spotPaused, setSpotPaused] = useState(false);
+  const toggleSpotVideo = () => {
+    const v = player.current?.video();
+    if (!v) return;
+    if (spotPaused) {
+      setSpotPaused(false);
+      if (v.readyState >= 3) void v.play().catch(() => undefined);
+      else player.current?.restart?.();
+    } else {
+      setSpotPaused(true);
+      v.pause();
+    }
   };
   const skip = (q: Question) => {
     if (spotStep) return void pickSpot(spotStep, "unknown");
@@ -572,7 +590,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               // the second half's throw-off: the player starts where the second half's file starts
               <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} />
             ) : current.kind === "goal" && media ? (
-              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} />
+              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} loop={spotStep != null} />
             ) : null}
             {current.kind === "person" && (
               <figcaption className="bg-[rgb(10_13_17/0.9)] px-3 py-2 font-mono text-[13px] font-semibold text-[#eef2f5]">
@@ -625,8 +643,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                     {ts("question")}
                   </h1>
                   {/* on a phone the caption under the video gives way: the replay sits here */}
-                  <button type="button" onClick={replay} className="min-h-11 shrink-0 cursor-pointer border-2 border-ink bg-transparent px-3 text-[15px] font-bold text-ink md:hidden" data-testid="spot-replay">
-                    {ts("replay")}
+                  {/* the clip loops; one key to hold it still and go on */}
+                  <button type="button" onClick={toggleSpotVideo} aria-pressed={spotPaused} className="min-h-11 shrink-0 cursor-pointer border-2 border-ink bg-transparent px-3 text-[15px] font-bold text-ink" data-testid="spot-pause">
+                    {spotPaused ? ts("play") : ts("pause")}
                   </button>
                 </div>
                 <p className="mt-1 mb-0 max-w-[54ch] text-[15px] text-ink-2 md:mt-3 md:text-[17px]">
@@ -638,7 +657,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   </p>
                 )}
                 <div className="mt-2 md:mt-4">
-                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} suggestion={spotStep.suggestion} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} />
+                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.zone ?? null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} />
                 </div>
               </section>
             ) : (

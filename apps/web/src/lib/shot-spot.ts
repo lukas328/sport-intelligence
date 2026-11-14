@@ -98,3 +98,52 @@ export function checkMinutes(goalQuestions: number, otherQuestions: number, plac
   const s = goalQuestions * 23 + otherQuestions * 18 + placesOnly * 7;
   return Math.max(1, Math.round(s / 60));
 }
+
+/**
+ * How the small court of «Von wo?» lies (real-clip test of «Von wo?»): with the goal at the top
+ * (no confirmed court), or as the camera sees it: the attacked goal on the left or the right as in
+ * the video, the far sideline at the top. Facing the goal on the right, the attacker's left is the
+ * top of the picture; facing the goal on the left, it is the bottom. So the side of the goal in the
+ * video is all it takes, whichever long side the camera stands on.
+ */
+export type SpotOrientation = "top" | "left" | "right";
+
+/** half court (u, v) to the picture, as an SVG matrix [a, b, c, d, e, f] */
+export function orientationMatrix(o: SpotOrientation): [number, number, number, number, number, number] {
+  if (o === "right") return [0, 1, -1, 0, 16, 0]; // x = 16 - v, y = u
+  if (o === "left") return [0, -1, 1, 0, 0, 20]; // x = v, y = 20 - u
+  return [1, 0, 0, 1, 0, 0];
+}
+
+/** the visible box of the picture: the half court and the goal behind its line */
+export function orientationBox(o: SpotOrientation): [number, number, number, number] {
+  if (o === "right") return [-0.6, -0.6, 17.9, 21.2];
+  if (o === "left") return [-1.3, -0.6, 17.9, 21.2];
+  return [-0.6, -1.2, 21.2, 17.4];
+}
+
+export function toPicture(o: SpotOrientation, p: Pt): Pt {
+  const [a, b, c, d, e, f] = orientationMatrix(o);
+  return [a * p[0] + c * p[1] + e, b * p[0] + d * p[1] + f];
+}
+
+export function fromPicture(o: SpotOrientation, q: Pt): Pt {
+  if (o === "right") return [q[1], 16 - q[0]];
+  if (o === "left") return [20 - q[1], q[0]];
+  return q;
+}
+
+/** Which place a point of the picture lies in, in any orientation. */
+export function zoneAtPicture(o: SpotOrientation, q: Pt): (typeof COURT_ZONES)[number] {
+  return zoneAtHalf(fromPicture(o, q));
+}
+
+/** where a place's name stands when the court lies on its side (centres of the areas) */
+export const ZONE_LABEL_SIDE: Record<(typeof COURT_ZONES)[number], Pt> = {
+  la: [2, 4.5],
+  ra: [18, 4.5],
+  kr: [10, 3.6],
+  rl: [3.5, 12.6],
+  rm: [10, 12.6],
+  rr: [16.5, 12.6],
+};

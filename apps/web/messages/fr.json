@@ -3607,12 +3607,10 @@
       "ra": "Aile|droite",
       "kr": "Pivot"
     },
-    "suggested": "Proposition",
     "current": "Jusqu'ici",
     "unknown": "Je ne sais pas",
     "replay": "Revoir",
     "saved": "{goal} est enregistré.",
-    "suggestedWhy": "En jaune, notre proposition.",
     "estimated": "estimé",
     "missing": "Lieu du tir manquant",
     "of": "Lieu du tir: {zone}",
@@ -3634,6 +3632,11 @@
     "soFar": "{n, plural, one {Un point pour l'instant.} other {# points pour l'instant.}}",
     "dialogTitle": "D'où ce but a-t-il été tiré?",
     "close": "Fermer",
-    "sideNote": "But en haut. Gauche et droite vues par l'attaque."
+    "sideNote": "But en haut. Gauche et droite vues par l'attaque.",
+    "courtLabelVideo": "Demi-terrain attaqué comme dans la vidéo, le but à {side, select, left {gauche} other {droite}}. Les noms sont vus par l'attaque.",
+    "sideVideoLeft": "Comme dans la vidéo : le but à gauche.",
+    "sideVideoRight": "Comme dans la vidéo : le but à droite.",
+    "pause": "Pause",
+    "play": "Lecture"
   }
 }

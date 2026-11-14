@@ -1,6 +1,6 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { DialogContent, DialogRoot, DialogTrigger } from "@/components/ui/dialog
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import type { MatchGraphics } from "@/lib/graphics";
-import { checkMinutes, goalsWithoutSpot, type SpotAnswer, type SpotZone, spotCounts } from "@/lib/shot-spot";
+import { checkMinutes, goalsWithoutSpot, type SpotAnswer, type SpotOrientation, type SpotZone, spotCounts } from "@/lib/shot-spot";
 import type { Pt } from "./geometry";
 import { ShotSpotPicker } from "./shot-spot-picker";
 
@@ -31,6 +31,21 @@ export function useSaveSpot(orgId: string, matchId: string) {
   };
 }
 
+/**
+ * How the small court of «Von wo?» lies for a goal: as the camera sees it (the attacked goal left
+ * or right as in the video) when the API knows it, else with the goal at the top. `ready` is false
+ * while it is asked, so the court does not turn under the coach's thumb.
+ */
+export function useGoalView(orgId: string, matchId: string, eventId: string | null): { orientation: SpotOrientation; ready: boolean } {
+  const q = useQuery({
+    queryKey: ["goal-view", matchId, eventId],
+    enabled: eventId != null,
+    staleTime: 300_000,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/goals/{event_id}/view", { params: { path: { org_id: orgId, match_id: matchId, event_id: eventId! } } })).data ?? null,
+  });
+  return { orientation: q.data?.goal_in_video ?? "top", ready: eventId == null || !q.isLoading };
+}
+
 /** The place of a goal in words: «Rückraum links», «… , geschätzt», or «Wurfort fehlt». */
 export function useSpotText() {
   const t = useTranslations("spot");
@@ -50,6 +65,7 @@ export function SpotChange({ orgId, matchId, goal, label }: { orgId: string; mat
   const [failed, setFailed] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const zone = goal.zone as SpotZone | null;
+  const view = useGoalView(orgId, matchId, open ? goal.event_id : null);
   return (
     <DialogRoot open={open} onOpenChange={(v) => (setOpen(v), setFailed(null))}>
       <DialogTrigger className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="spot-change">
@@ -57,9 +73,10 @@ export function SpotChange({ orgId, matchId, goal, label }: { orgId: string; mat
       </DialogTrigger>
       <DialogContent title={t("dialogTitle")} description={label}>
         <ShotSpotPicker
-          disabled={busy}
+          disabled={busy || !view.ready}
+          orientation={view.orientation}
           // an estimate is never marked (V2); the coach's own earlier answer reads «Bisher»
-          suggestion={zone && goal.by_coach ? { zone, kind: "current" } : null}
+          current={zone && goal.by_coach ? zone : null}
           onPick={(answer, point) => {
             setBusy(true);
             setFailed(null);

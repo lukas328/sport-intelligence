@@ -286,3 +286,25 @@ async def test_the_court_of_von_wo_turns_as_the_camera_sees_it(
     assert (await api.get(view)).json() == {"event_id": row["event_id"], "goal_in_video": "left"}
     await court(NEAR_Y20)
     assert (await api.get(view)).json()["goal_in_video"] == "right"
+
+
+def test_one_scene_window_for_every_view() -> None:
+    """V6: a goal from a candidate gets 12 s before its time and 2 s after (candidate times lie
+    4 to 7 s after the goal); a report goal or one marked by hand keeps the usual window, the
+    same length in Szenen and Sammlung."""
+    from handball_api.services.matches import scene_lead, scene_window
+
+    cand = Event(t_ms=20_000, source="goal_candidate", attributes={})
+    pinned = Event(
+        t_ms=20_000,
+        source="official_report",
+        attributes={"video": {"source": "goal_candidate", "t_ms": 20_000}},
+    )
+    report = Event(t_ms=20_000, source="official_report", attributes={})
+    hand = Event(t_ms=20_000, source="user_correction", attributes={})
+    assert scene_window(cand, None) == (8_000, 22_000)
+    assert scene_window(pinned, None) == (8_000, 22_000)
+    assert scene_window(report, None) == scene_window(hand, None) == (14_000, 23_000)
+    assert scene_window(cand, 21_000) == (8_000, 21_000)  # cut at the video's end
+    assert scene_lead(hand, (8_000, 2_000)) == (8_000, 2_000)  # the camera's own lead
+    assert scene_lead(cand, (8_000, 2_000)) == (12_000, 2_000)
