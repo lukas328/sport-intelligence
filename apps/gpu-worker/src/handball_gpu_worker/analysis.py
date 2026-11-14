@@ -111,9 +111,10 @@ def write_chunks(result: AnalysisResult, out: Path) -> int:
     return count
 
 
-def events_payload(result: AnalysisResult) -> dict[str, Any]:
-    """Automatic events and possession phases (addendum 01, A3) for the API."""
-    found = result.detect_events()
+def events_payload(result: AnalysisResult, side_hint: str | None = None) -> dict[str, Any]:
+    """Automatic events and possession phases (addendum 01, A3) for the API. `side_hint`: the
+    side the home team defends at the start, known beforehand (a second half in its own file)."""
+    found = result.detect_events(side_hint)
     return {
         "events": [
             {
@@ -194,12 +195,15 @@ def run_analysis(
     own_is_home: bool = True,
     rosters: dict[str, list[int]] | None = None,
     hall_references: list[dict[str, Any]] | None = None,
+    side_hint: str | None = None,
 ) -> dict[str, Any]:
-    """`rosters` (kit label "home"/"away" -> shirt numbers, optional in the job payload) keeps
-    the voted shirt numbers on the teams' rosters (learned path only). `hall_references` (earlier
-    videos of the same hall with a court a person clicked or confirmed: `video_id`,
-    `panorama_key` in the artifacts bucket, `homography` court -> that hall image) are tried
-    before the automatic court (learned path only)."""
+    """`side_hint` ("left"/"right", optional): the side the home team defends at the start of
+    this file when the API knows it (the second half in a file of its own). `rosters` (kit label
+    "home"/"away" -> shirt numbers, optional in the job payload) keeps the voted shirt numbers on
+    the teams' rosters (learned path only). `hall_references` (earlier videos of the same hall
+    with a court a person clicked or confirmed: `video_id`, `panorama_key` in the artifacts
+    bucket, `homography` court -> that hall image) are tried before the automatic court (learned
+    path only)."""
     settings = settings or JobSettings()
     detector = load_detector(settings)
     rep = reporter or Reporter(
@@ -224,6 +228,7 @@ def run_analysis(
             own_is_home,
             rosters,
             hall_references,
+            side_hint,
         )
         if learned_result is not None:
             return learned_result
@@ -323,7 +328,7 @@ def run_analysis(
             "elapsed_s": round(elapsed, 1),
             "stats": result.extra,
             "formations": detect_formations(result),
-            "events": events_payload(result),
+            "events": events_payload(result, side_hint),
             "scoreboard": None,
         }
         rep.succeed(payload)
@@ -543,6 +548,7 @@ def _run_learned(
     own_is_home: bool = True,
     rosters: dict[str, list[int]] | None = None,
     hall_references: list[dict[str, Any]] | None = None,
+    side_hint: str | None = None,
 ) -> dict[str, Any] | None:
     """Learned detector path (ADR 025): one observation pass, automatic calibration, tracking.
     A re-run with clicked points reuses the stored observations and takes seconds. Returns None
@@ -729,7 +735,7 @@ def _run_learned(
             "elapsed_s": round(time.perf_counter() - started, 1),
             "stats": result.extra,
             "formations": detect_formations(result),
-            "events": events_payload(result),
+            "events": events_payload(result, side_hint),
             "scoreboard": overlay,
             "goal_candidates": goals,
         }

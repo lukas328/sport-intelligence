@@ -1,0 +1,125 @@
+import { MULTI_FILE } from "@/lib/site";
+
+export const howto = {
+  name: "Filmer un match de handball avec un téléphone",
+  description: "De l'installation au chargement : comment obtenir un enregistrement qu'on peut analyser.",
+  totalTime: "PT15M",
+  tools: ["Téléphone avec grand-angle qui filme en Full HD (1080p)", "Trépied ou place en hauteur", "Batterie externe avec câble"],
+  steps: [
+    { name: "Arriver tôt", text: "Viens 20 minutes avant le coup d'envoi. Demande au concierge ou à l'équipe qui reçoit où tu peux filmer, et affiche l'avis sur la porte." },
+    { name: "Trouver la place", text: "À hauteur de la ligne médiane, le plus haut possible et quelques mètres derrière la ligne de touche : tribune, galerie, balustrade ou grand trépied. Jamais dans une issue de secours." },
+    { name: "Régler le téléphone", text: "Grand-angle (0,5× ou « Ultra grand-angle »), 1080p, si possible 50 ou 60 images par seconde. Mode avion activé, verrouillage de l'écran désactivé, batterie externe branchée." },
+    { name: "Vérifier l'image", text: "Téléphone à l'horizontale. Les deux buts et les deux surfaces de but doivent être entièrement dans l'image, les lignes de côté autant que possible. S'il manque les deux coins proches, ce n'est pas grave. Pas de zoom." },
+    { name: "Démarrer avant le coup d'envoi", text: "Lance l'enregistrement quand les équipes entrent sur le terrain, puis ne touche plus au téléphone." },
+    {
+      name: "Laisser tourner à la pause",
+      text: MULTI_FILE
+        ? "Le mieux est de laisser tourner à la mi-temps. Un match dans un seul fichier, c'est le plus simple ; deux fichiers marchent aussi."
+        : "N'arrête pas l'enregistrement à la mi-temps. Sinon un deuxième fichier se crée, et certains programmes, Handball Intelligence compris, n'analysent que le premier.",
+    },
+    { name: "Arrêter après le coup de sifflet final", text: "Arrête l'enregistrement, vérifie que le fichier est complet et charge-le à la maison, en wifi." },
+  ],
+};
+
+export const faq = [
+  { q: "Quel trépied me faut-il ?", a: "Un trépied stable qui monte à au moins 2,5 ou 3 mètres, par exemple un pied d'éclairage avec un support pour téléphone. Un petit trépied de table ne suffit que si tu as une place haute dans la tribune." },
+  { q: "Ai-je besoin du grand-angle ?", a: "Le plus souvent, oui. Depuis la ligne médiane, l'objectif normal ne voit guère plus d'une moitié du terrain. Avec le grand-angle (0,5× ou « Ultra grand-angle »), les deux buts entrent dans l'image." },
+  { q: "Un vieux téléphone suffit-il ?", a: "Le plus souvent, oui, s'il a un grand-angle. Il doit filmer en Full HD (1080p), avoir assez de mémoire et tenir 90 minutes d'affilée, idéalement branché sur une batterie externe." },
+  {
+    q: "Dois-je arrêter à la pause ?",
+    a: MULTI_FILE
+      ? "Non. Le mieux est de laisser tourner ; si tu as arrêté, choisis les deux fichiers ensemble ou ajoute la deuxième mi-temps plus tard. Après une pause, l'app suppose un changement de côté ; tu peux le changer dans la liste des parties."
+      : "Non, laisse tourner. Deux fichiers compliquent l'analyse, et certains programmes, Handball Intelligence compris, n'analysent que le premier fichier d'un match.",
+  },
+  { q: "Puis-je filmer derrière le but ?", a: "Pour les séquences d'un but, oui ; pour analyser le match, non : l'autre moitié du terrain devient trop petite, et les positions sont presque impossibles à estimer." },
+  { q: "Portrait ou paysage ?", a: "Toujours à l'horizontale. Le terrain est deux fois plus long que large ; en portrait, les buts manquent." },
+];
+
+## Pourquoi l'emplacement compte plus que la caméra
+
+Sur une bonne vidéo de match, on voit à tout moment les deux buts, les deux surfaces de but et si possible les douze joueurs de champ. N'importe quel téléphone avec grand-angle y arrive s'il est au bon endroit. S'il est trop bas ou dans un coin, même une caméra chère n'y change rien : les joueurs se cachent les uns les autres, et la moitié du terrain est loin.
+
+<HallCamera
+  label="Plan de la salle vu d'en haut : la caméra est en hauteur à la ligne médiane, quelques mètres derrière la ligne de touche. Avec le grand-angle, elle voit les deux buts et les surfaces de but ; les deux coins proches sont hors de l'image."
+  camera="Caméra en hauteur, grand-angle"
+  field="les deux buts et surfaces de but dans l'image"
+  corner="manque"
+  caption="Dessiné à l'échelle, avec un grand-angle d'environ 120 degrés. Les deux buts et les surfaces de but sont dans l'image, les deux coins proches non. C'est normal et ça va."
+/>
+
+## Où placer la caméra ?
+
+**À hauteur de la ligne médiane, sur le grand côté du terrain, quelques mètres derrière la ligne de touche.** De là, les deux buts sont à la même distance, et tu n'as jamais besoin de faire de panoramique. Quelques mètres à côté de la ligne médiane, ça va aussi, mais le centre reste le mieux.
+
+Les bonnes places : la tribune, une galerie, une balustrade à l'étage ou un grand trépied derrière le banc. Moins bonnes : les coins et derrière le but.
+
+## À quelle hauteur ?
+
+**Le plus haut possible, à partir d'environ 3 mètres.** Plus la caméra est haute, moins les joueurs se cachent, et mieux tu vois les distances dans la défense. À hauteur des yeux, tu vois surtout le dos des joueurs les plus proches.
+
+<CameraSide
+  label="Deux vues de la salle de côté. À gauche une caméra basse : les joueurs les plus proches cachent les autres. À droite une caméra haute dans la tribune : elle voit par-dessus les joueurs jusqu'à l'autre ligne de touche."
+  low="Bas, à hauteur des yeux : les joueurs les plus proches cachent les autres."
+  high="Haut, dès 3 mètres : le regard passe par-dessus les joueurs jusqu'à l'autre côté."
+/>
+
+Sans tribune, un grand trépied aide. Place-le là où personne ne trébuche et sans bloquer d'issue de secours, et demande d'abord au concierge.
+
+## Le geste le plus important : le grand-angle
+
+Un terrain de handball mesure 40 mètres. Depuis la ligne médiane, l'objectif normal ne voit guère plus d'une moitié. Presque tous les téléphones récents ont un deuxième angle, plus large : dans l'app appareil photo, il s'appelle **« 0,5× »** ou **« Ultra grand-angle »**. Avec lui, les deux buts entrent dans l'image.
+
+- **Ce qui doit être dans l'image :** les deux buts et les deux surfaces de but en entier, les lignes de côté autant que possible. S'il manque les deux coins proches, ce n'est pas grave.
+- **Si ça ne rentre toujours pas :** plus haut, quelques mètres plus en arrière, ou les deux. Mieux vaut les deux buts avec un peu de marge que proche et net.
+- **Déformation sur les bords :** un grand-angle courbe légèrement les lignes droites au bord de l'image. Beaucoup de téléphones le corrigent eux-mêmes, sur iPhone par exemple avec le réglage « Correction de l'objectif ». Laisse-le activé.
+
+Pourquoi les deux surfaces de but ? L'analyse a besoin des lignes des deux surfaces de but pour trouver le terrain. S'il en manque, elle te pose la question pendant la vérification.
+
+## Ce qu'il te faut et les réglages
+
+<Check
+  items={[
+    "Un téléphone avec grand-angle (0,5×) qui filme en Full HD (1080p). Pas besoin d'un modèle récent.",
+    "Un trépied avec support pour téléphone, ou une place fixe en hauteur. À défaut, une pince sur la balustrade.",
+    "Une batterie externe et un câble assez long.",
+    "Assez de mémoire libre : plutôt 10 Go que 5 Go.",
+    "L'avis pour la salle, pour que chacun sache qu'on filme.",
+  ]}
+/>
+
+La place nécessaire dépend du téléphone. Beaucoup de téléphones indiquent dans les réglages de l'appareil photo combien pèse une minute de vidéo. En 1080p, c'est environ 40 à 100 Mo par minute selon le réglage, donc vite 5 à 9 Go pour un match avec la pause. Tu peux le calculer avec le [calculateur de mémoire](../rechner/speicher).
+
+**Réglages :**
+
+- **Grand-angle :** « 0,5× » ou « Ultra grand-angle ».
+- **Résolution :** 1080p (Full HD). La 4K n'apporte presque rien à l'analyse et remplit la mémoire quatre fois plus vite.
+- **Images par seconde :** 50 ou 60 si le téléphone le permet. Les tirs rapides sont alors moins flous. 25 ou 30, ça va aussi.
+- **Mode avion activé :** sinon un appel peut arrêter l'enregistrement.
+- **Verrouillage de l'écran désactivé,** luminosité au minimum. Ça économise la batterie.
+- **Pas de zoom, pas de format portrait.**
+
+## Le jour du match, étape par étape
+
+<Steps items={howto.steps} />
+
+La liste du jour de match existe aussi [à imprimer](../vorlagen/spieltag).
+
+## Erreurs fréquentes
+
+<Check
+  items={[
+    "Filmé avec l'objectif normal au lieu du grand-angle : un but manque dans l'image.",
+    "Enregistrement arrêté à la pause, puis oublié de relancer.",
+    "Filmé trop bas : les joueurs se cachent, l'autre moitié du terrain se voit à peine.",
+    "Pivoté ou zoomé : la vidéo bouge, et une analyse automatique trouve le terrain plus difficilement.",
+    "Une surface de but manque dans l'image, parce que le téléphone est trop près de la ligne de touche.",
+    "Batterie vide en deuxième mi-temps.",
+    "Contre-jour par de grandes fenêtres : si possible, choisir le côté qui a les fenêtres dans le dos.",
+  ]}
+/>
+
+## Ai-je le droit de filmer ?
+
+En bref : avant le match, préviens l'adversaire, les arbitres et la salle, et affiche l'[avis](../aufnahme) sur la porte. Ce qui vaut pour ton équipe, pour les enfants et pour la publication se trouve à un seul endroit : dans le guide [Filmer au club : que faut-il savoir ?](video-im-verein-einwilligung), avec un [modèle à imprimer](../vorlagen/einwilligung).
+
+Pour analyser la vidéo en peu de temps : [Analyser un match en 20 minutes](spiel-auswerten-20-minuten).

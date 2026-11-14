@@ -4,15 +4,24 @@ import { HallPlan } from "@/components/hall-plan";
 import { KitScope } from "@/components/kit";
 import { PrintButton } from "@/components/print-button";
 import { PageHead, SectionHead } from "@/components/wurf-head";
-import { messages, type Locale } from "@/lib/i18n";
+import { fileVars } from "@/lib/files";
+import { fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).filming;
-  return pageMeta(locale, "aufnahme", t.title, t.lead);
+  return pageMeta(locale, "aufnahme", messages(locale).seo.filming.title, messages(locale).seo.filming.description);
+}
+
+/** Fixed line breaks: each line of the text on its own line, so the notice breaks the same in print. */
+function lines(text: string) {
+  return text.split("\n").map((l) => (
+    <span key={l} className="block">
+      {l}
+    </span>
+  ));
 }
 
 /** The filming guide with a plan of the hall and the printable notice (addendum 01, 8). */
@@ -20,6 +29,7 @@ export default async function Filming({ params }: Props) {
   const { locale } = await params;
   const m = messages(locale);
   const t = m.filming;
+  const files = fileVars(m);
   return (
     <KitScope>
       <div className="no-print">
@@ -29,7 +39,7 @@ export default async function Filming({ params }: Props) {
         <div className="no-print mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
           <div className="lg:order-2">
             <div className="lg:sticky lg:top-6">
-              <HallPlan label={t.planLabel} camera={t.planCamera} field={t.planField} />
+              <HallPlan label={t.planLabel} camera={t.planCamera} field={t.planField} corner={t.planCorner} />
             </div>
           </div>
           <div>
@@ -42,7 +52,7 @@ export default async function Filming({ params }: Props) {
                   {s.items.map((x) => (
                     <li key={x} className="flex gap-4 border-b border-rule py-4">
                       <i aria-hidden className="mark-band mt-[.45em] h-2.5 w-4 shrink-0" />
-                      <span>{x}</span>
+                      <span>{fmt(x, files)}</span>
                     </li>
                   ))}
                 </ul>
@@ -51,25 +61,32 @@ export default async function Filming({ params }: Props) {
             <section aria-labelledby="more">
               <SectionHead id="more" title={t.moreTitle} as="h3" />
               <div className="flex flex-wrap gap-x-8">
+                <Link href={`/${locale}/ratgeber/handballspiel-filmen/`} className="link">
+                  {m.nav.guides}: {m.filming.guideLink}
+                </Link>
                 <Link href={`/${locale}/hilfe/aufnahme/`} className="link">
                   {m.nav.faq}: {m.filming.title}
-                </Link>
-                <Link href={`/${locale}/blog/spiele-filmen-mit-dem-handy/`} className="link">
-                  {m.nav.blog}
                 </Link>
               </div>
             </section>
           </div>
         </div>
 
-        <section className="mt-16" aria-labelledby="notice">
+        <section className="mt-16 print:mt-0" aria-labelledby="notice">
           <div className="no-print">
             <SectionHead id="notice" title={t.noticeTitle} />
             <p className="measure mt-3">{t.noticeLead}</p>
           </div>
-          <div className="mt-6 border-4 border-ink bg-paper px-6 py-12 text-center md:px-16 md:py-20">
-            <img src="/brand/wortmarke-quer-einfarbig.svg" alt="Handball Intelligence" width={2150} height={512} className="mx-auto h-10 w-auto" />
-            <p className="font-slant mx-auto mt-8 max-w-[36rem] text-[2rem] leading-tight hyphens-auto md:text-[2.75rem]">{t.notice}</p>
+          {/* the notice: readable from three metres, one A4 page, no hyphenation, a line to fill in by hand */}
+          <div className="notice-sheet mt-6 flex flex-col border-4 border-ink bg-paper px-6 py-12 md:px-16 md:py-20">
+            <p className="font-slant notice-text text-[2.25rem] leading-[1.1] [hyphens:none] [overflow-wrap:normal] md:text-[3.5rem]">
+              {lines(t.notice)}
+            </p>
+            <p className="notice-sub mt-8 text-[1.5rem] leading-[1.25] font-bold [hyphens:none] [overflow-wrap:normal] md:text-[2.25rem]">{lines(t.noticeSub)}</p>
+            <p className="notice-ask mt-12 flex items-end gap-3 text-[1.25rem] font-bold">
+              <span className="shrink-0">{t.noticeAsk}</span>
+              <span aria-hidden className="h-8 flex-1 border-b-2 border-ink" />
+            </p>
           </div>
           <PrintButton label={t.print} />
         </section>

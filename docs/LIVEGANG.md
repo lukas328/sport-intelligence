@@ -14,7 +14,7 @@ Legende: 🔴 blockiert den Livegang · 🟡 vor dem Pilot nötig · ⚪ kann wa
 
 | | Frage | Empfehlung | Warum es zählt |
 |---|---|---|---|
-| ☑ 🔴 | **Produktname** (Q-PROD-1) | Entschieden: «Handball Intelligence», Logo «Taktik» (docs/design/brand2/taktik). Offen: Domain und Markenrecherche | Domain, App-IDs (`ch.handballai.app`), E-Mail-Absender (`noreply@`, `support@handball-ai.ch`) hängen an der Domain und bleiben bis dahin |
+| ☑ 🔴 | **Produktname** (Q-PROD-1) | Entschieden: «Handball Intelligence», Logo «Taktik» (docs/design/brand2/taktik). Domain entschieden: `handball-intelligence.com` (App unter `app.`, `support@handball-intelligence.com`), in allen Vorgaben gesetzt. Offen: Markenrecherche | DNS, Mail-Versand (SPF, DKIM, DMARC) und App-Link-Dateien einrichten (docs/site/SEO.md, «Vor dem Livegang»); App-IDs (`ch.handballai.app`) bleiben bis zum Entscheid |
 | ☐ 🔴 | **Firma** (GmbH, Einzelfirma?), MWST, Währungen CHF/EUR (Q-PROD-3, Q-ADD-3) | Firma vor dem ersten zahlenden Verein; Treuhand für MWST fragen | Impressum, Verträge, Stripe, QR-Rechnung (IBAN), Apple-Konto brauchen eine Firma |
 | ✅ | Hosting | Azure West Europe für App, Datenbank, Secrets, Monitoring; Cloudflare R2 (EU) für Videos (ADR 002) | |
 | ☐ 🟡 | **E-Mail-Anbieter** (Q-INFRA-3) | **Azure Communication Services** (alles in Azure, Daten in Europa, Kosten fast null) statt Postmark | Login-Links und Einladungen |
@@ -70,7 +70,7 @@ In dieser Reihenfolge. Nichts davon braucht eine Entscheidung von dir, ausser wo
 | ☐ 🔴 | **Videos direkt aus R2 ausliefern** (ADR 002 Punkt 7). Heute liefert der API-Server jedes Videosegment aus | Sonst bezahlst du den Video-Traffic doch bei Azure, und der Server wird zum Engpass |
 | ☐ 🔴 | **R2-Anbindung für die App** (Buckets, CORS, `region=auto`, Prüfsummen-Einstellung für boto3) | Bisher nur für Testvideos benutzt |
 | ☐ 🟡 | **E-Mail über Azure Communication Services** (SMTP-Konfiguration, DNS-Einträge SPF, DKIM und DMARC) | Entscheidung oben |
-| ☐ 🟡 | **Platzhalter ersetzen**: Firmenname, Adresse und Beispiel-IBAN in `apps/api/src/handball_api/core/config.py`, Domain `handball-ai.ch` (web, site, mobile, Support-Adresse) | Braucht Name, Firma und Domain von dir |
+| ☐ 🟡 | **Platzhalter ersetzen**: Firmenname, Adresse und Beispiel-IBAN in `apps/api/src/handball_api/core/config.py`, die Domain ist gesetzt (`handball-intelligence.com`) | Braucht Firma und Adresse von dir |
 | ☐ 🟡 | **Backups ausser Haus** (R2-Bucket mit Objektsperre), monatlicher Wiederherstellungstest, Alarme in Azure Monitor nach `infra/monitoring/alerts.md` | Backups der Datenbank sind in Azure eingebaut, die Kopie ausser Haus fehlt |
 | ☐ 🟡 | **Marketing-Website** (`apps/site`, statisch) auf Cloudflare Pages oder Azure Static Web Apps (beide gratis) | |
 | ☐ 🟡 | **Analyse-Worker** skaliert nur bei Arbeit hoch (pro Spiel bezahlen statt dauernd) | Kosten |

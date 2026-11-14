@@ -1,5 +1,6 @@
 "use client";
 
+import { ownDrought } from "@/lib/drought";
 import type { Schemas } from "@handball/api-client";
 import { ZONE_LABELS } from "@handball/court";
 import { useQuery } from "@tanstack/react-query";
@@ -238,6 +239,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
     .sort((a, b) => b.goals - a.goals || (a.number ?? 99) - (b.number ?? 99))
     .slice(0, 8);
   const who = (p: (typeof scorers)[number]) => (p.player_id && names[p.player_id]) || `#${p.number ?? "?"}`;
+  const drought = stats.timeline ? ownDrought(stats.timeline.score, span, stats.timeline.longest_own_drought_s.seconds) : 0;
   return (
     <div className="space-y-10">
       {has("basis") && <div className="space-y-1 text-sm" data-testid="analysis-basis">
@@ -292,9 +294,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
           />
           <ul className="text-sm text-muted">
             {run && run.goals > 1 && <li>{t("bestRun", { goals: run.goals })}</li>}
-            {stats.timeline.longest_own_drought_s.seconds > 0 && (
-              <li>{t("drought", { minutes: Math.round(stats.timeline.longest_own_drought_s.seconds / 60) })}</li>
-            )}
+            {drought > 0 && <li>{t("drought", { minutes: Math.round(drought / 60) })}</li>}
           </ul>
         </Sheet>
         )}

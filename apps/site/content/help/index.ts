@@ -17,9 +17,9 @@ export const HELP: HelpEntry[] = [
     group: "start",
     title: { de: "Erste Schritte", fr: "Premiers pas", en: "Getting started" },
     summary: {
-      de: "Vom Konto bis zu den ersten drei Dingen.",
-      fr: "Du compte aux trois premiers points.",
-      en: "From your account to your first three things.",
+      de: "Vom Konto bis zur ersten Auswertung.",
+      fr: "Du compte à la première analyse.",
+      en: "From your account to your first analysis.",
     },
     keywords: { de: "start konto team anmelden demo", fr: "début compte équipe inscription démo", en: "start account team sign up demo" },
   },
@@ -61,9 +61,9 @@ export const HELP: HelpEntry[] = [
     group: "work",
     title: { de: "Highlights", fr: "Temps forts", en: "Highlights" },
     summary: {
-      de: "Automatische Highlights, quer und hoch, mit Einwilligung.",
-      fr: "Temps forts automatiques, en paysage et portrait, avec consentement.",
-      en: "Automatic highlights, landscape and portrait, with consent.",
+      de: "Highlights aus den bestätigten Toren, quer und hoch, mit Einwilligung.",
+      fr: "Temps forts tirés des buts confirmés, en paysage et portrait, avec consentement.",
+      en: "Highlights from the confirmed goals, landscape and portrait, with consent.",
     },
     keywords: { de: "highlights reel social media", fr: "temps forts réseaux sociaux", en: "reel social media clips" },
   },
@@ -104,13 +104,13 @@ export const HELP: HelpEntry[] = [
   {
     slug: "tags-und-filter",
     group: "work",
-    title: { de: "Szenen suchen", fr: "Chercher des scènes", en: "Searching scenes" },
+    title: { de: "Szenen suchen", fr: "Chercher des séquences", en: "Searching scenes" },
     summary: {
       de: "Suchen über alle Spiele, die Antwort mit Basis, Sammlungen.",
       fr: "Chercher dans tous les matchs, la réponse avec sa base, sélections.",
       en: "Search across all matches, the answer with its base, collections.",
     },
-    keywords: { de: "szenen suchen filter sammlung", fr: "scènes chercher filtre sélection", en: "scenes search filter collection" },
+    keywords: { de: "szenen suchen filter sammlung", fr: "séquences chercher filtre sélection", en: "scenes search filter collection" },
   },
   {
     slug: "praesentation",
@@ -128,7 +128,7 @@ export const HELP: HelpEntry[] = [
     slug: "deine-szenen",
     group: "work",
     listed: false,
-    title: { de: "Meine Szenen", fr: "Mes scènes", en: "My scenes" },
+    title: { de: "Meine Szenen", fr: "Mes séquences", en: "My scenes" },
     summary: {
       de: "Was Spielerinnen und Spieler sehen und wie sie kommentieren.",
       fr: "Ce que voient les joueurs et comment ils commentent.",

@@ -73,10 +73,19 @@ def _bins(
     return out
 
 
+PRIOR_SHARE = 0.6  # a stretch that disagrees with the prior needs this share of the votes
+
+
 def _sides(
-    bins: dict[int, dict[str, list[tuple[float, float]]]], window_bins: int = 100
+    bins: dict[int, dict[str, list[tuple[float, float]]]],
+    window_bins: int = 100,
+    prior: str | None = None,
 ) -> list[tuple[int, str]]:
-    """Side the home team defends over time, from both goalkeepers (majority over ~20 s)."""
+    """Side the home team defends over time, from both goalkeepers (majority over ~20 s).
+
+    `prior`: the side the home team is known to defend at the start, e.g. in a file of its own
+    for the second half (the teams changed ends at half-time). Without goalkeeper sightings the
+    prior holds; a stretch that contradicts it must be clear (PRIOR_SHARE of its votes)."""
     votes: list[tuple[int, int]] = []  # (bin, +1 home defends left / -1 right)
     for b in sorted(bins):
         g = bins[b]
@@ -88,7 +97,7 @@ def _sides(
         if v:
             votes.append((b, 1 if v > 0 else -1))
     if not votes:
-        return []
+        return [(min(bins) * BIN_MS if bins else 0, prior)] if prior else []
     raw: list[tuple[int, str]] = []
     cur: str | None = None
     for i, (b, _) in enumerate(votes):
@@ -109,7 +118,17 @@ def _sides(
     ]
     if not kept:  # a short clip: the majority side
         total = sum(v for _, v in votes)
-        return [(votes[0][0] * BIN_MS, "left" if total >= 0 else "right")]
+        side = "left" if total >= 0 else "right"
+        if prior and side != prior and abs(total) < (2 * PRIOR_SHARE - 1) * len(votes):
+            side = prior
+        return [(votes[0][0] * BIN_MS, side)]
+    if prior and kept[0][1] != prior:
+        # the first stretch against the prior: only when its goalkeepers say so clearly
+        end = kept[1][0] if len(kept) > 1 else votes[-1][0] * BIN_MS + 1
+        mine = [v for b, v in votes if b * BIN_MS < end]
+        agree = sum(1 for v in mine if (v > 0) == (kept[0][1] == "left"))
+        if mine and agree < PRIOR_SHARE * len(mine):
+            kept[0] = (kept[0][0], prior)
     out: list[tuple[int, str]] = [(votes[0][0] * BIN_MS, kept[0][1])]
     for t, side in kept[1:]:
         if side != out[-1][1]:
@@ -152,11 +171,17 @@ def _pauses(
     return out
 
 
-def detect(points: list[tuple[int, int, float, float]], teams: dict[int, str]) -> EventResult:
-    """points: (t_ms, track_id, x, y) in court metres; teams: track_id -> home, home_gk, away, ..."""
+def detect(
+    points: list[tuple[int, int, float, float]],
+    teams: dict[int, str],
+    side_hint: str | None = None,
+) -> EventResult:
+    """points: (t_ms, track_id, x, y) in court metres; teams: track_id -> home, home_gk, away, ...
+    side_hint: the side the home team defends at the start when it is known beforehand (a file of
+    its own for the second half: the other side than at the end of the first one)."""
     bins = _bins(points, teams)
     missing: list[str] = []
-    sides = _sides(bins)
+    sides = _sides(bins, prior=side_hint if side_hint in ("left", "right") else None)
     if not sides:
         return EventResult([], [], [], ["goalkeepers"])
     ordered = sorted(bins)

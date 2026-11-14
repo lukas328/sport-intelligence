@@ -16,6 +16,7 @@ import { api } from "@/lib/client";
 import { chipsFromText, extrasFromText } from "@/lib/scene-words";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
+import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { PresentView } from "../../../collections/[collectionId]/present/present-view";
 import { threeThings } from "@/lib/three-things";
@@ -331,7 +332,9 @@ function SceneRow({ hit: h, match: m, orgId }: { hit: Hit; match: Match | undefi
   const ts = useTranslations("search");
   const format = useFormatter();
   const g = useMatchGraphics(orgId, h.match_id);
-  const goal = g.data && h.kind === "event" ? goalRuns(g.data).find((x) => x.eventId === h.id) : undefined;
+  // the match clock of any goal, also one without a spot (fourth real-video test H8)
+  const goal = g.data && h.kind === "event" ? g.data.goals.find((x) => x.event_id === h.id) : undefined;
+  const video = h.t_ms ?? h.start_ms ?? 0;
   return (
     <tr className="border-b border-rule">
       <td className="py-2.5">
@@ -339,8 +342,9 @@ function SceneRow({ hit: h, match: m, orgId }: { hit: Hit; match: Match | undefi
       </td>
       <td className="py-2.5 tabular-nums">
         <Link href={`/app/${orgId}/matches/${h.match_id}?tab=video&t=${h.start_ms ?? h.t_ms ?? 0}`} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-[1.5px] underline-offset-4">
-          {goal?.minute != null ? clockOf(goal.minute) : t("videoAt", { time: ms(h.t_ms ?? h.start_ms ?? 0) })}
+          {goal?.minute != null ? clockOf(goal.minute) : h.clock_s != null ? clockOf(h.clock_s / 60) : t("videoAt", { time: ms(video) })}
         </Link>
+        {(goal?.minute != null || h.clock_s != null) && <span className="ml-2 text-[15px] text-ink-2">{t("videoAt", { time: ms(video) })}</span>}
       </td>
       <td className="py-2.5">{h.type === "shot" ? (h.outcome === "goal" ? t("goal") : h.outcome === "save" ? t("save") : t("shot")) : h.type === "turnover" ? t("turnover") : (h.title ?? (h.type ? ts(`type_${h.type}` as "type_shot") : ""))}</td>
       <td className="py-2.5 text-right tabular-nums">{h.number ?? ""}</td>
@@ -348,7 +352,7 @@ function SceneRow({ hit: h, match: m, orgId }: { hit: Hit; match: Match | undefi
   );
 }
 
-const ms = (v: number) => `${Math.floor(v / 60000)}:${String(Math.round((v % 60000) / 1000)).padStart(2, "0")}`;
+const ms = formatClock;
 
 /** One scene: the Minifeld with its run (goals) or empty, time, match, one line, length. */
 function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Match | undefined }) {
@@ -358,6 +362,8 @@ function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Matc
   const { org } = useShell();
   const g = useMatchGraphics(orgId, hit.match_id);
   const goal = g.data && hit.kind === "event" ? goalRuns(g.data).find((x) => x.eventId === hit.id) : undefined;
+  // the match clock of any goal, also one without a spot; the video time small beside it (H8)
+  const minute = (g.data && hit.kind === "event" ? g.data.goals.find((x) => x.event_id === hit.id)?.minute : undefined) ?? (hit.clock_s != null ? hit.clock_s / 60 : undefined);
   const opp = (match?.opponent_name ?? hit.match_label).split(/[\s-]/).find((w) => w.length > 3) ?? hit.match_label;
   const kind = hit.type === "shot" ? (hit.outcome === "goal" ? t("goal") : hit.outcome === "save" ? t("save") : t("shot")) : hit.type === "turnover" ? t("turnover") : (hit.title ?? (hit.type ? ts(`type_${hit.type}` as "type_shot") : ""));
   const what = `${kind}${hit.number != null ? `, ${t("numberRead", { n: hit.number })}` : ""}${goal && !goal.confirmed ? `, ${t("spotEstimated")}` : ""}`;
@@ -369,7 +375,14 @@ function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Matc
     >
       {goal ? <Bundle goals={[goal]} width={200} label={what ?? ""} /> : <EmptyField />}
       {/* the match clock where the analysis knows it; otherwise the place in the video */}
-      {goal?.minute != null ? <b className="font-num text-[17px] md:text-xl">{clockOf(goal.minute)}</b> : <b className="text-[15px] font-bold">{t("videoAt", { time: ms(hit.t_ms ?? hit.start_ms ?? 0) })}</b>}
+      {minute != null ? (
+        <span className="flex items-baseline gap-2">
+          <b className="font-num text-[17px] md:text-xl">{clockOf(minute)}</b>
+          <span className="text-[15px] text-ink-2">{t("videoAt", { time: ms(hit.t_ms ?? hit.start_ms ?? 0) })}</span>
+        </span>
+      ) : (
+        <b className="text-[15px] font-bold">{t("videoAt", { time: ms(hit.t_ms ?? hit.start_ms ?? 0) })}</b>
+      )}
       <span className="text-[15px] leading-snug text-ink-2 md:text-[15px]">
         {format.dateTime(new Date(hit.kickoff_at), { day: "numeric", month: "numeric" })} {opp} · {what}
       </span>

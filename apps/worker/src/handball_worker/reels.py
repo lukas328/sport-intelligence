@@ -76,6 +76,21 @@ def spotlight_at(
     return float(p[0] * SRC_W / size[0]), float(p[1] * SRC_H / size[1])
 
 
+# the app's own typeface (Hanken Grotesk, SIL OFL, licence beside it), shipped with the worker:
+# Pillow's built-in font has no umlauts («W?denswil», Echtlauf 5 P8) and the image has no fonts
+FONT = Path(__file__).parent / "fonts" / "HankenGrotesk-wght.ttf"
+
+
+def font(px: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    try:
+        f = ImageFont.truetype(str(FONT), px)
+        with contextlib.suppress(OSError, AttributeError):
+            f.set_variation_by_axes([700 if bold else 500])
+        return f
+    except OSError:  # pragma: no cover - the file ships with the package
+        return ImageFont.load_default(size=px)
+
+
 def intro_card(
     lines: list[str], colour: str, logo: bytes | None, size: tuple[int, int]
 ) -> Image.Image:
@@ -94,9 +109,9 @@ def intro_card(
             pass
     for i, line in enumerate(lines[:5]):
         px = max(18, w // (18 if i == 0 else 26))
-        font = ImageFont.load_default(size=px)
-        tw = d.textlength(line, font=font)
-        d.text(((w - tw) / 2, y), line, fill=(255, 255, 255), font=font)
+        face = font(px, bold=i == 0)
+        tw = d.textlength(line, font=face)
+        d.text(((w - tw) / 2, y), line, fill=(255, 255, 255), font=face)
         y += int(px * 1.6)
     return img
 
@@ -115,11 +130,11 @@ def draw_overlay(
         )
     if label and show_label:
         px = max(18, w // 30)
-        font = ImageFont.load_default(size=px)
-        tw = d.textlength(label, font=font)
+        face = font(px, bold=True)
+        tw = d.textlength(label, font=face)
         y = frame.size[1] - px * 3
         d.rectangle((24, y - 8, 24 + tw + 24, y + px + 8), fill=(17, 24, 39))
-        d.text((36, y), label, fill=(255, 255, 255), font=font)
+        d.text((36, y), label, fill=(255, 255, 255), font=face)
     return frame
 
 
@@ -296,16 +311,13 @@ def run_highlight_reel(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def render_reel(settings: WorkerSettings, payload: dict[str, Any], work: Path, s3: Any) -> Path:
+    """A match in several files (the two halves): `sources` holds each file's proxy, tracks and
+    court, and every clip names its `source` with times in that file."""
+    if payload.get("sources"):
+        return _render_parts(settings, payload, work, s3)
     src = work / "proxy.mp4"
     s3.download_file(payload["bucket_videos"], payload["proxy_key"], str(src))
-    logo = None
-    if payload.get("logo_key"):
-        try:
-            buf = io.BytesIO()
-            s3.download_fileobj(payload["bucket_artifacts"], payload["logo_key"], buf)
-            logo = buf.getvalue()
-        except Exception:
-            logo = None
+    logo = _logo(s3, payload)
     rows = _rows(
         s3,
         payload["bucket_artifacts"],
@@ -317,6 +329,39 @@ def render_reel(settings: WorkerSettings, payload: dict[str, Any], work: Path, s
     return render_local(settings, payload, src, rows, logo, work)
 
 
+def _logo(s3: Any, payload: dict[str, Any]) -> bytes | None:
+    if not payload.get("logo_key"):
+        return None
+    try:
+        buf = io.BytesIO()
+        s3.download_fileobj(payload["bucket_artifacts"], payload["logo_key"], buf)
+        return buf.getvalue()
+    except Exception:
+        return None
+
+
+def _render_parts(settings: WorkerSettings, payload: dict[str, Any], work: Path, s3: Any) -> Path:
+    files: list[tuple[Path, NDArray[np.float32], dict[str, Any]]] = []
+    for i, source in enumerate(payload.get("sources") or []):
+        src = work / f"proxy_{i}.mp4"
+        s3.download_file(payload["bucket_videos"], source["proxy_key"], str(src))
+        mine = [c for c in payload["clips"] if int(c.get("source", 0)) == i]
+        sub = work / f"part_{i}"
+        sub.mkdir()
+        rows = _rows(
+            s3,
+            payload["bucket_artifacts"],
+            source["chunks_prefix"],
+            source.get("chunk_ms"),
+            mine,
+            sub,
+        )
+        files.append((src, rows, {**payload, **source}))
+    return render_local(
+        settings, payload, files[0][0], files[0][1], _logo(s3, payload), work, files
+    )
+
+
 def render_local(
     settings: WorkerSettings,
     payload: dict[str, Any],
@@ -324,7 +369,10 @@ def render_local(
     rows: NDArray[np.float32],
     logo: bytes | None,
     work: Path,
+    files: list[tuple[Path, NDArray[np.float32], dict[str, Any]]] | None = None,
 ) -> Path:
+    """`files`: per source of a match in several files, its proxy, rows and settings (court,
+    tracks); each clip's `source` picks one."""
     size = (720, 1280) if payload["format"] == "9x16" else (1280, 720)
     parts: list[Path] = []
     card = work / "intro.png"
@@ -352,7 +400,11 @@ def render_local(
     parts.append(intro)
     for i, clip in enumerate(payload["clips"], start=1):
         out = work / f"p{i:03d}.mp4"
-        render_clip(settings, src, clip, rows, payload, out)
+        if files:
+            f_src, f_rows, f_ctx = files[min(int(clip.get("source", 0)), len(files) - 1)]
+            render_clip(settings, f_src, clip, f_rows, f_ctx, out)
+        else:
+            render_clip(settings, src, clip, rows, payload, out)
         parts.append(out)
     lst = work / "list.txt"
     lst.write_text("".join(f"file '{p.name}'\n" for p in parts))

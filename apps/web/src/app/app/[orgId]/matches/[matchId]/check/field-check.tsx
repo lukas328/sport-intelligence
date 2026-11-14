@@ -78,13 +78,15 @@ export function FieldCheck({
 
   return (
     <div className="relative" data-testid="field-check">
-      {/* on a phone the picture can be enlarged and moved; the handles stay 44 px */}
-      <div className="overflow-auto">
+      {/* on a phone the picture can be enlarged and moved with a finger; only the handles take
+          the finger for themselves (touch-action on them), so a swipe beside them moves the
+          picture and never loses a corner (fourth real-video test, G9) */}
+      <div className="overflow-auto overscroll-x-contain" data-testid="field-frame">
         <svg
           ref={svg}
           viewBox={`${-pad} ${-pad} ${w + 2 * pad} ${h + 2 * pad}`}
           style={{ width: `${zoom * 100}%` }}
-          className="block max-w-none touch-none select-none"
+          className="block max-w-none touch-pan-x touch-pan-y select-none"
           role="group"
           aria-label={t("fieldHandles")}
           onPointerMove={(e) => {
@@ -135,6 +137,7 @@ export function FieldCheck({
                 }
                 aria-valuetext={`${Math.round(x)}, ${Math.round(y)}`}
                 aria-valuenow={Math.round(x)}
+                style={{ touchAction: "none" }}
                 className="cursor-grab outline-none focus-visible:[&>circle:last-child]:stroke-ink"
                 onPointerDown={(e) => {
                   const p = at(e);
@@ -185,14 +188,18 @@ export function FieldCheck({
           })}
         </svg>
       </div>
-      <button
-        type="button"
-        onClick={() => setZoom((z) => (z === 1 ? 2 : 1))}
-        className="absolute top-2 right-2 min-h-11 cursor-pointer border-2 border-ink bg-ground px-3 text-[15px] font-bold text-ink"
-        data-testid="field-zoom"
-      >
-        {zoom === 1 ? t("zoomIn") : t("zoomOut")}
-      </button>
+      {/* under the picture, never over it: a button on the picture hid a corner's handle on a
+          phone (fourth real-video test, G9) */}
+      <div className="flex justify-end bg-[rgb(10_13_17/0.9)] px-3 pt-2">
+        <button
+          type="button"
+          onClick={() => setZoom((z) => (z === 1 ? 2 : 1))}
+          className="min-h-11 cursor-pointer border-2 border-ink bg-ground px-3 text-[15px] font-bold text-ink"
+          data-testid="field-zoom"
+        >
+          {zoom === 1 ? t("zoomIn") : t("zoomOut")}
+        </button>
+      </div>
     </div>
   );
 }

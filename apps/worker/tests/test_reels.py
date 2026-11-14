@@ -12,6 +12,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from PIL import ImageFont
 
 from handball_worker import reels
 from handball_worker.config import WorkerSettings
@@ -119,3 +120,76 @@ def test_reel_ffmpeg_calls_have_a_timeout(tmp_path: Path, monkeypatch: pytest.Mo
         WorkerSettings(), payload, tmp_path / "in.mp4", np.zeros((0, 4), np.float32), None, tmp_path
     )
     assert timeouts == [FFMPEG_TIMEOUT_S, FFMPEG_TIMEOUT_S]
+
+
+@pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="needs ffmpeg")
+def test_reel_of_a_match_in_two_files(tmp_path: Path) -> None:
+    """Each clip is cut from the file of its half, at its time in that file (Q-VIDEO-PARTS)."""
+    first, second = tmp_path / "a.mp4", tmp_path / "b.mp4"
+    for path, dur in ((first, 4), (second, 6)):
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                f"testsrc2=size=1280x720:rate=25:duration={dur}",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "ultrafast",
+                str(path),
+            ],
+            check=True,
+        )
+    rows = np.zeros((0, 4), np.float32)
+    payload: dict[str, Any] = {
+        "format": "16x9",
+        "intro": ["HC Test"],
+        "colour": "#0b6bcb",
+        "player_tracks": [],
+        "clips": [
+            {"in_ms": 0, "out_ms": 2000, "label": "", "spotlight_track": None, "source": 0},
+            # 4.5 s into the second file: past the end of the first one
+            {"in_ms": 4500, "out_ms": 5500, "label": "", "spotlight_track": None, "source": 1},
+        ],
+    }
+    files = [(first, rows, {**payload, "player_tracks": []}), (second, rows, {**payload})]
+    out = reels.render_local(
+        WorkerSettings(ffmpeg="ffmpeg"), payload, first, rows, None, tmp_path, files
+    )
+    duration = float(
+        subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "csv=p=0",
+                str(out),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    )
+    assert 5.5 < duration < 6.6  # 3 s intro + 2 s + 1 s
+
+
+def test_title_card_writes_umlauts() -> None:
+    """Echtlauf 5 P8: «SG Wädenswil/Horgen - Lakers Stäfa» came out as «W?denswil … St?fa»
+    (Pillow's built-in font has no umlauts). The card uses the app's own typeface, shipped with
+    the worker."""
+    face = reels.font(40)
+    assert reels.FONT.is_file() and isinstance(face, ImageFont.FreeTypeFont)
+    missing = face.getmask("￿").getbbox()  # what a glyph the font lacks looks like
+    for ch in "äöüéÄÖÜè":
+        assert face.getmask(ch).getbbox() != missing, ch
+    card = reels.intro_card(["SG Wädenswil/Horgen - Lakers Stäfa"], "#d3202e", None, (640, 360))
+    assert card.size == (640, 360)

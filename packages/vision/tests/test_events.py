@@ -116,3 +116,25 @@ def test_demo_flow_has_few_fast_breaks() -> None:
     fast = [p for p in r.possessions if p.phase == "fast_break"]
     lost = sum(o == "lost" for o in m.outcomes[: int(cfg.seconds // cfg.phase_s)])
     assert len(fast) <= lost < len(r.possessions)
+
+
+def test_side_hint_holds_without_goalkeepers() -> None:
+    """A second half in a file of its own (Q-VIDEO-PARTS): the API knows the home team defends
+    the other side than at the end of the first half. Without goalkeepers in view the hint holds
+    instead of nothing being found."""
+    cfg = SyntheticConfig(seconds=60, restarts=True, phase_s=20)
+    _, pts, teams = _positions(cfg)
+    no_gk = {k: v for k, v in teams.items() if not v.endswith("_gk")}
+    r = detect([p for p in pts if p[1] in no_gk], no_gk, side_hint="left")
+    assert [s for _, s in r.sides] == ["left"]
+    assert r.missing != ["goalkeepers"]
+    assert any(e.type == "throw_off" for e in r.events)
+
+
+def test_clear_goalkeepers_win_over_the_side_hint() -> None:
+    cfg = SyntheticConfig(seconds=60, restarts=True, phase_s=20)
+    _, pts, teams = _positions(cfg)
+    assert [s for _, s in detect(pts, teams).sides] == ["left"]
+    # a wrong hint (the order of the files was wrong) does not overrule what the keepers show
+    assert [s for _, s in detect(pts, teams, side_hint="right").sides] == ["left"]
+    assert [s for _, s in detect(pts, teams, side_hint="nonsense").sides] == ["left"]

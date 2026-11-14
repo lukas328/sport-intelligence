@@ -21,6 +21,7 @@ import { checkCount, goalRuns, openMoments, reportGoals, useMatchGraphics, video
 import { freshMatch, openedMatches } from "@/lib/fresh-match";
 import { matchState } from "@/lib/match-state";
 import { threeThings } from "@/lib/three-things";
+import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 
 type Match = Schemas["MatchSummary"];
@@ -45,9 +46,11 @@ export function StartView({
   // the team's name in the head, the same as in the top bar (UX test H11: one club, one name)
   const { org, team } = useShell();
   // a freshly analysed match stands in the head until opened, or while it has open questions
-  // (real-video test, second round); otherwise the last match with a result
+  // (real-video test, second round); otherwise the last match with a result or a video (a video
+  // match has no result of its own, its goals are in the video: Echtlauf 6, after Prüfen the head
+  // jumped back to an older match without video)
   const fresh = useFreshMatch(orgId, played);
-  const last = played.find((m) => m.id === fresh) ?? played.find((m) => m.kind !== "training" && m.score_own != null) ?? played[0] ?? null;
+  const last = played.find((m) => m.id === fresh) ?? played.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? played[0] ?? null;
   const next = upcoming.find((m) => m.kind !== "training") ?? null;
   const withoutVideo = played.filter((m) => !m.has_video).length;
   return (
@@ -143,7 +146,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
             <AttnTag>{t("check")}</AttnTag>
             <Link href={`${base}/check`} className={linkClass}>
               {/* after the court come the people in the picture: say so instead of «1 Minute» (UX test N13) */}
-              {t("checksOpen", { count: checks, minutes: Math.max(1, Math.round(checks / 3)) })}
+              {t("checksOpen", { count: checks, minutes: g.data ? checkMinutes(g.data.checks.filter((c) => c.kind === "goal").length, checks - g.data.checks.filter((c) => c.kind === "goal").length) : 1 })}
             </Link>
           </span>
         )}
@@ -297,7 +300,12 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)
   if (things.length === 0 && g.data.analysis !== "ready") return <>{t("rowVideoOnly")}</>;
   if (things.length === 0 && !g.data.goals.some((x) => x.has_video)) return <>{checkCount(g.data) > 0 ? t("rowChecks", { n: checkCount(g.data) }) : t("rowNoGoals")}</>;
-  if (things.length === 0) return <>{t("rowGoals", { n: g.data.goals.filter((x) => x.has_video).length })}</>;
+  // while goal moments are open the count is an interim one, also in the list (fourth real-video test)
+  if (things.length === 0) {
+    const n = g.data.goals.filter((x) => x.has_video).length;
+    const open = openMoments(g.data);
+    return <>{open > 0 ? t("rowGoalsOpen", { n, open }) : t("rowGoals", { n })}</>;
+  }
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }
 

@@ -765,3 +765,22 @@ def test_stored_clock_play_reaches_tracking(
             reporter=rep,
         )
     assert seen["play"] == [(1000, 9000), (12_000, 20_000)]
+
+
+def test_side_hint_reaches_the_event_baseline() -> None:
+    """The second half in a file of its own: the side the API knows goes to the event baseline
+    (Q-VIDEO-PARTS)."""
+    from handball_vision.events import EventResult
+
+    seen: list[str | None] = []
+
+    class Result:
+        def detect_events(self, side_hint: str | None = None) -> EventResult:
+            seen.append(side_hint)
+            return EventResult([], [], [(0, side_hint or "left")], [])
+
+    payload = analysis.events_payload(Result(), "right")  # type: ignore[arg-type]
+    assert seen == ["right"]
+    assert payload["sides"] == [{"from_ms": 0, "home_defends": "right"}]
+    analysis.events_payload(Result())  # type: ignore[arg-type]
+    assert seen == ["right", None]

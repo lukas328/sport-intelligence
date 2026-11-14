@@ -18,8 +18,8 @@ describe("season line figures", () => {
 describe("website links", () => {
   it("always carry the language path (UX test N06)", async () => {
     const { sitePage } = await import("./site");
-    expect(sitePage("https://handball-ai.ch", "de-CH", "aufnahme/")).toBe("https://handball-ai.ch/de/aufnahme/");
-    expect(sitePage("https://handball-ai.ch/", "fr", "agb")).toBe("https://handball-ai.ch/fr/agb");
+    expect(sitePage("https://handball-intelligence.com", "de-CH", "aufnahme/")).toBe("https://handball-intelligence.com/de/aufnahme/");
+    expect(sitePage("https://handball-intelligence.com/", "fr", "agb")).toBe("https://handball-intelligence.com/fr/agb");
     expect(sitePage("https://example.org", "en")).toBe("https://example.org/en/");
   });
 });

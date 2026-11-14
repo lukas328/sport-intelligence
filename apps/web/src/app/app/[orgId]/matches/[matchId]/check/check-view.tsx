@@ -2,6 +2,7 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -17,24 +18,34 @@ import { ownName } from "@/lib/own-name";
 import { api } from "@/lib/client";
 import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
+import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/ui/button";
 import { goalWindow, sameGoal } from "@/lib/goal-window";
 import { openMoments, useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
+import { partName, partsOf, partStarts, timelineVideo } from "@/lib/video-parts";
+import { ShotSpotPicker } from "@/components/anlauf/shot-spot-picker";
+import { useGoalView, useSaveSpot } from "@/components/anlauf/spot-parts";
+import { checkMinutes, type SpotAnswer, type SpotZone } from "@/lib/shot-spot";
+import type { Pt as HalfPt } from "@/components/anlauf/geometry";
 
 type Match = Schemas["MatchOut"];
 type Candidate = Schemas["GoalCandidateRow"];
 
 type Track = Schemas["TrackOut"];
-type Question = { kind: "field"; videoId: string } | { kind: "kickoff"; period: number } | { kind: "goal"; c: Candidate } | { kind: "person"; tr: Track; at: number };
+type Question = { kind: "field"; videoId: string; part: number | null; copyFrom: string | null } | { kind: "kickoff"; period: number } | { kind: "goal"; c: Candidate } | { kind: "person"; tr: Track; at: number };
 
 // a person question: own tracks without a name, long enough to recognise someone, at most six
 const PERSON_MIN_MS = 5000;
 const PERSON_MAX = 6;
 type Answer = { key: string; label: string; first?: boolean; numeral?: string; run: () => Promise<void> };
+/** «Von wo?» after a confirmed goal (fourth real-video test H7): the goal's event, the place to mark */
+type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "current" } | null; index: number; fromList?: boolean };
+type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer };
 
-const clock = (s: number | null | undefined) => (s == null ? "" : `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`);
+// one rounding on every screen: full seconds, as the scoreboard (fourth real-video test H8)
+const clock = (s: number | null | undefined) => (s == null ? "" : formatClock(s * 1000 + 1));
 
 /**
  * Prüfen (SPEC 7.5): the questions the analysis cannot answer itself, one at a time. The court
@@ -45,14 +56,17 @@ const clock = (s: number | null | undefined) => (s == null ? "" : `${Math.floor(
  */
 export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const t = useTranslations("check");
+  const ts = useTranslations("spot");
   const ta = useTranslations("anlauf");
+  const tParts = useTranslations("parts");
   const qc = useQueryClient();
   const router = useRouter();
   const { org, teams } = useShell();
   // our side as everywhere else: the team's own name, the club's for «Herren 1» (UX test A06)
   const own = ownName(teams.find((x) => x.id === match.team_id)?.name, org.name);
   const oppName = useOpponentName()(match);
-  const main = match.videos.find((v) => v.role === "main" && v.status === "ready") ?? null;
+  const main = timelineVideo(match.videos) ?? null;
+  const parts = partsOf(match.videos);
   const path = { org_id: orgId, match_id: match.id };
   const analysis = useQuery({
     queryKey: ["analysis", main?.id],
@@ -64,6 +78,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates", { params: { path, query: { kind: "goal" } } })).data ?? null,
   });
   const [done, setDone] = useState<string[]>([]);
+  // the courts a person confirmed in this round
+  const [fieldsConfirmed, setFieldsConfirmed] = useState<string[]>([]);
   // one source for the questions: the server's list, as the mail and the start count them (E07);
   // taken once when the screen opens, so answering does not shuffle the count
   const graphics = useMatchGraphics(orgId, match.id);
@@ -79,7 +95,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const [verified, setVerified] = useState(false);
   // questions left with «Weiss nicht»: not asked again in this round
   const skipped = useRef(new Set<string>());
-  const keyOf = (c: Schemas["CheckOut"]) => (c.kind === "field" ? (main ? `field:${main.id}` : "field") : c.kind === "kickoff" ? `kickoff:${c.frame_ref}` : c.id);
+  const keyOf = (c: Schemas["CheckOut"]) => (c.kind === "field" ? `field:${c.id}` : c.kind === "kickoff" ? `kickoff:${c.frame_ref}` : c.id);
   const fetchChecks = useCallback(async () => {
     const r = await api.GET("/v1/orgs/{org_id}/matches/{match_id}/graphics", { params: { path: { org_id: orgId, match_id: match.id } } });
     return r.data ?? null;
@@ -107,7 +123,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         setReloading(false);
       }
     },
-    [fetchChecks, qc, match.id], // eslint-disable-line react-hooks/exhaustive-deps
+    [fetchChecks, qc, match.id],
   );
   const cal0 = analysis.data?.calibration;
   // a person box needs the homography of the very frame: with a panning camera only the hall
@@ -124,12 +140,19 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const toQuestions = useCallback(
     (list: Schemas["CheckOut"][]): Question[] =>
       list.flatMap((c): Question[] => {
-        if (c.kind === "field") return main ? [{ kind: "field", videoId: main.id }] : [];
+        // the court of each part of the match (the second half asked only when it was not
+        // carried over from the first); the first half's court can be taken over
+        // a first half confirmed in this round can be taken over at once (the list was taken
+        // when the screen opened, before it was confirmed)
+        if (c.kind === "field")
+          return main
+            ? [{ kind: "field", videoId: c.id, part: parts.find((p) => p.id === c.id)?.part ?? null, copyFrom: c.copy_from ?? (c.id !== main.id && fieldsConfirmed.includes(main.id) ? main.id : null) }]
+            : [];
         if (c.kind === "kickoff") return [{ kind: "kickoff", period: c.frame_ref }];
         const cand = candidates.data?.candidates.find((x) => x.id === c.id && x.status === "open");
         return cand ? [{ kind: "goal", c: cand }] : [];
       }),
-    [candidates.data, main],
+    [candidates.data, main, parts, fieldsConfirmed],
   );
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
@@ -143,16 +166,46 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const stillOpen = graphics.data ? openMoments(graphics.data) : 0;
   const open = questions.filter((q) => !done.includes(id(q)));
   // what was answered in this round, to look at again and change (UX test H12)
-  const [answered, setAnswered] = useState<{ q: Question; label: string }[]>([]);
+  const [answered, setAnswered] = useState<Answered[]>([]);
   const [revisit, setRevisit] = useState<number | null>(null);
-  const current = revisit != null ? (answered[revisit]?.q ?? null) : (open[0] ?? null);
+  // the second step of a goal question: where the shot came from, one tap (H7)
+  const [spotStep, setSpotStep] = useState<SpotStep | null>(null);
+  const saveSpot = useSaveSpot(orgId, match.id);
+  // the court as the camera sees it, the attacked goal where the video shows it
+  const spotView = useGoalView(orgId, match.id, spotStep?.eventId ?? null);
+  const lastReview = useRef<Candidate | null>(null);
+  const current = spotStep?.q ?? (revisit != null ? (answered[revisit]?.q ?? null) : (open[0] ?? null));
+  // «Beantwortet» from the saved answers, also after a reload (V5): the goal moments already
+  // answered, with their place, ahead of what this round adds
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current || !candidates.data || !graphics.data) return;
+    restored.current = true;
+    const saved = candidates.data.candidates
+      .filter((c) => c.status !== "open")
+      .map((c): Answered => {
+        const goal = c.event_id ? graphics.data!.goals.find((x) => x.event_id === c.event_id) : undefined;
+        const label = c.status === "rejected" ? t("noGoal") : t("goalOf", { team: c.side === "own" ? own : oppName });
+        const spot: SpotAnswer | undefined = goal?.spot_by_coach && goal.zone ? (goal.zone as SpotZone) : goal?.zone_source === "unknown" ? "unknown" : undefined;
+        return { q: { kind: "goal", c }, label, ...(c.status === "confirmed" && c.outcome === "goal" && c.event_id ? { eventId: c.event_id } : {}), ...(spot ? { spot } : {}) };
+      });
+    if (saved.length) setAnswered((list) => [...saved.filter((s) => !list.some((x) => id(x.q) === id(s.q))), ...list]);
+  }, [candidates.data, graphics.data, t, own, oppName]);
   const total = questions.length;
   const next = useCallback((q: Question) => setDone((d) => [...d, id(q)]), []);
 
-  // the court on the hall image: the stored court projected back, four handles (UX test B13, B14)
-  const pano = analysis.data?.panorama ?? null;
+  // the court on the hall image: the stored court projected back, four handles (UX test B13, B14);
+  // a further part of the match has its own hall image and court
+  const fieldVideo = current?.kind === "field" ? current.videoId : (main?.id ?? null);
+  const partField = useQuery({
+    queryKey: ["analysis", fieldVideo],
+    enabled: fieldVideo != null && fieldVideo !== main?.id,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/videos/{video_id}/analysis", { params: { path: { org_id: orgId, video_id: fieldVideo! } } })).data ?? null,
+  });
+  const fieldData = fieldVideo != null && fieldVideo !== main?.id ? partField.data : analysis.data;
+  const pano = fieldData?.panorama ?? null;
   const panoSize: [number, number] | null = pano ? [pano.width, pano.height] : null;
-  const cal = analysis.data?.calibration;
+  const cal = fieldData?.calibration;
   const inPano = cal && panoSize && cal.image_size[0] === panoSize[0] && cal.image_size[1] === panoSize[1];
   const startCorners = panoSize ? cornersOf(inPano ? (cal.homography as Homography) : null, panoSize) : null;
   const [moved, setMoved] = useState<Pt[] | null>(null);
@@ -168,7 +221,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const [failed, setFailed] = useState<string | null>(null);
   // «Der Anwurf ist nicht im Video» and, if known, the minute the video's start shows (G8)
   const [absent, setAbsent] = useState(false);
+  // minute and second, as the scoreboard shows «8:15» (fourth real-video test H10)
   const [startMinute, setStartMinute] = useState("");
+  const [startSecond, setStartSecond] = useState("");
   const must = (r: { error?: unknown; response: Response }) => {
     if (r.error || !r.response.ok) {
       const p = r.error as { detail?: string; title?: string } | undefined;
@@ -227,6 +282,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               } else {
                 must(await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", vid));
               }
+              setFieldsConfirmed((f) => [...f, current.videoId]);
               const wasMoved = Boolean(moved && panoSize);
               setMoved(null);
               void qc.invalidateQueries({ queryKey: ["analysis"] });
@@ -235,6 +291,24 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               if (wasMoved) await reload(true);
             },
           },
+          ...(current.copyFrom
+            ? [
+                {
+                  key: "2",
+                  label: t("fieldTakeOver"),
+                  run: async () => {
+                    must(
+                      await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/from/{source_id}", {
+                        params: { path: { org_id: orgId, video_id: current.videoId, source_id: current.copyFrom! } },
+                      }),
+                    );
+                    setMoved(null);
+                    // this part is analysed again with the first half's court: then the rest
+                    await reload(true);
+                  },
+                },
+              ]
+            : []),
         ]
       : earlier
       ? [
@@ -266,12 +340,15 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         ];
 
   async function review(c: Candidate, body: Schemas["GoalCandidateReviewIn"]) {
-    must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review", { params: { path: { ...path, candidate_id: c.id } }, body }));
+    const r = await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review", { params: { path: { ...path, candidate_id: c.id } }, body });
+    must(r);
+    lastReview.current = r.data ?? null;
     void qc.invalidateQueries({ queryKey: ["graphics", match.id] });
   }
 
   async function answer(a: Answer) {
     if (!current) return;
+    lastReview.current = null;
     try {
       setFailed(null);
       await a.run();
@@ -279,15 +356,72 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       setFailed(e instanceof Error ? e.message : String(e));
       return;
     }
+    // a confirmed goal: saved; then «Von wo?» in the same question, the video stays (H7)
+    const row = lastReview.current as Candidate | null;
+    const goal = current.kind === "goal" && row?.status === "confirmed" && row.outcome === "goal" && row.event_id ? row.event_id : null;
+    const index = revisit ?? answered.length;
+    const entry: Answered = { q: current, label: a.label, ...(goal ? { eventId: goal } : {}) };
+    setAnswered((list) => (revisit != null ? list.map((x, i) => (i === revisit ? entry : x)) : [...list, entry]));
+    if (goal && row) {
+      const zone = row.shot_zone as SpotZone | null | undefined;
+      setSpotStep({ q: current, eventId: goal, goal: a.label, index, suggestion: zone && row.zone_source === "coach" ? { zone, kind: "current" } : null });
+      return;
+    }
     if (revisit != null) {
-      setAnswered((list) => list.map((x, i) => (i === revisit ? { ...x, label: a.label } : x)));
       setRevisit(null);
       return;
     }
-    setAnswered((list) => [...list, { q: current, label: a.label }]);
     next(current);
   }
+
+  /** The place of the goal: saved at once, then the next question (no «Weiter»). */
+  async function pickSpot(step: SpotStep, spot: SpotAnswer, point?: HalfPt) {
+    try {
+      setFailed(null);
+      await saveSpot(step.eventId, spot, point);
+    } catch (e) {
+      setFailed(e instanceof Error ? e.message : String(e));
+      return;
+    }
+    setAnswered((list) => list.map((x, i) => (i === step.index ? { ...x, spot } : x)));
+    setSpotStep(null);
+    if (step.fromList) return;
+    if (revisit != null) {
+      setRevisit(null);
+      return;
+    }
+    next(step.q);
+  }
+  // keyboard and screen reader: the question «Von wo?» takes the focus when it appears
+  useEffect(() => {
+    if (!spotStep) return;
+    // video and court on one screen: from the top, wherever the answer key was
+    window.scrollTo({ top: 0 });
+    // the clip runs on in a loop from its start while the coach taps (real-clip test V7)
+    setSpotPaused(false);
+    player.current?.restart?.();
+    document.getElementById("spot-question")?.focus({ preventScroll: true });
+  }, [spotStep]);
+  const replay = () => {
+    if (current?.kind !== "goal") return;
+    setSpotPaused(false);
+    player.current?.restart?.();
+  };
+  const [spotPaused, setSpotPaused] = useState(false);
+  const toggleSpotVideo = () => {
+    const v = player.current?.video();
+    if (!v) return;
+    if (spotPaused) {
+      setSpotPaused(false);
+      if (v.readyState >= 3) void v.play().catch(() => undefined);
+      else player.current?.restart?.();
+    } else {
+      setSpotPaused(true);
+      v.pause();
+    }
+  };
   const skip = (q: Question) => {
+    if (spotStep) return void pickSpot(spotStep, "unknown");
     if (revisit != null) return setRevisit(null);
     skipped.current.add(id(q));
     next(q);
@@ -298,7 +432,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const typed = useRef<{ digits: string; timer: number | null }>({ digits: "", timer: null });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!current || e.metaKey || e.ctrlKey || (e.target as HTMLElement)?.closest("input, textarea, select")) return;
+      if (!current || spotStep || e.metaKey || e.ctrlKey || (e.target as HTMLElement)?.closest("input, textarea, select")) return;
       if (current.kind === "person") {
         if (e.key === " ") return (e.preventDefault(), skip(current));
         if (!/^\d$/.test(e.key)) return;
@@ -321,10 +455,19 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   });
 
   const media = main ? `/v1/orgs/${orgId}/videos/${main.id}/media` : null;
+  // where a half's file starts in the match video: the throw-off of the second half is near there
+  const kickoffFrom = (period: number) => {
+    const start = period > 1 ? partStarts(match.videos).find((p) => p.part === period)?.start_ms : undefined;
+    return start != null ? { start_ms: start, end_ms: Number.MAX_SAFE_INTEGER } : undefined;
+  };
   const back = `/app/${orgId}/matches/${match.id}`;
   const loading = candidates.isLoading || graphics.isLoading || !asked || (main != null && analysis.isLoading);
   // the list of this round is done: ask the server whether anything is left before saying so
   const ended = !loading && !current;
+  // what is left, said honestly in the strip: the questions and about how long (H7: with «Von wo?»)
+  const left = open.length;
+  const leftGoals = open.filter((q) => q.kind === "goal").length;
+  const leftMinutes = checkMinutes(leftGoals, left - leftGoals);
   useEffect(() => {
     if (ended && !verified && !reloading) void reload(false);
   }, [ended, verified, reloading, reload]);
@@ -337,8 +480,14 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           {t("later")}
         </Link>
       </div>
-      <div className="bleed-x">
-        <Strip name={own} sub={`${ta("vsShort")} ${oppName} · ${t("count", { n: total })}`} own={match.score_own} opp={match.score_opponent} />
+      {/* «Von wo?» on a phone: video and court on one screen, the strip gives way */}
+      <div className={cn("bleed-x", spotStep && "max-md:hidden")}>
+        <Strip
+          name={own}
+          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : t("count", { n: total > 0 || wantMore ? total : moreGoals })}`}
+          own={match.score_own}
+          opp={match.score_opponent}
+        />
       </div>
       {loading ? (
         <p className="py-10 text-ink-2">{t("loading")}</p>
@@ -351,7 +500,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           {!wantMore && moreGoals > 0 ? (
             <div className="space-y-4" data-testid="check-main-done">
               <h1 className="text-[40px] md:text-[58px]">{t("mainDone")}</h1>
-              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals })}</p>
+              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals, minutes: checkMinutes(moreGoals, 0) })}</p>
               <div className="flex flex-wrap items-center gap-4">
                 <button
                   type="button"
@@ -392,13 +541,30 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               <h2 id="answered" className="text-[22px]">{t("answered")}</h2>
               <ul className="m-0 list-none border-t-2 border-ink p-0">
                 {answered.map((x, i) => (
-                  <li key={id(x.q)} className="flex min-h-12 items-center justify-between gap-3 border-b border-rule text-[17px]">
-                    <span>
+                  <li key={id(x.q)} className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-rule py-1.5 text-[17px]" data-testid="check-answered-row">
+                    <span className="min-w-0">
+                      {/* the match clock per goal moment, the video time small beside it: five «Tor Lakers Stäfa» in a row are told apart (H3, H8) */}
+                      {x.q.kind === "goal" && (
+                        <span className="mr-2 font-mono text-[15px] font-semibold text-ink-2">{x.q.c.clock_s != null ? `${clock(x.q.c.clock_s)} · ${t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}` : t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}</span>
+                      )}
                       {x.q.kind === "field" ? t("fieldQuestion") : x.q.kind === "kickoff" ? t("kickoffQuestion", { n: x.q.period }) : x.q.kind === "person" ? t("personQuestion") : t("goalQuestion")} <b>{x.label}</b>
+                      {x.eventId && <span className="block text-[15px] text-ink-2">{x.spot && x.spot !== "unknown" ? ts("of", { zone: ts(`zone.${x.spot}` as "zone.la") }) : ts("missing")}</span>}
                     </span>
-                    <button type="button" onClick={() => setRevisit(i)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4">
-                      {t("change")}
-                    </button>
+                    <span className="flex flex-wrap gap-x-4">
+                      {x.eventId && (
+                        <button
+                          type="button"
+                          onClick={() => setSpotStep({ q: x.q, eventId: x.eventId!, goal: x.label, index: i, fromList: true, suggestion: x.spot && x.spot !== "unknown" ? { zone: x.spot, kind: "current" } : null })}
+                          className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4"
+                          data-testid="check-spot-change"
+                        >
+                          {ts("change")}
+                        </button>
+                      )}
+                      <button type="button" onClick={() => setRevisit(i)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4">
+                        {t("change")}
+                      </button>
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -410,13 +576,13 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         </div>
       ) : (
         // the court gets the whole width: the hall image as large as possible (E04)
-        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
+        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", spotStep && "max-md:gap-2 max-md:py-2", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
           <figure className="relative m-0 self-start bg-[#1d2125]">
             {current.kind === "field" && main && panoSize && corners ? (
-              <FieldCheck src={`/v1/orgs/${orgId}/videos/${main.id}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
+              <FieldCheck key={current.videoId} src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
             ) : current.kind === "field" && main ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/v1/orgs/${orgId}/videos/${main.id}/panorama`} alt={t("fieldAlt")} className="block w-full outline-[3.5px] outline-attn outline-dashed -outline-offset-8" />
+              <img src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} className="block w-full outline-[3.5px] outline-attn outline-dashed -outline-offset-8" />
             ) : current.kind === "person" && media && analysis.data?.calibration ? (
               <VideoPlayer
                 ref={player}
@@ -437,9 +603,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 }
               />
             ) : current.kind === "kickoff" && media ? (
-              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} />
+              // the second half's throw-off: the player starts where the second half's file starts
+              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} />
             ) : current.kind === "goal" && media ? (
-              <VideoPlayer key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay />
+              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} loop={spotStep != null} />
             ) : null}
             {current.kind === "person" && (
               <figcaption className="bg-[rgb(10_13_17/0.9)] px-3 py-2 font-mono text-[13px] font-semibold text-[#eef2f5]">
@@ -455,125 +622,195 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               </figcaption>
             )}
             {current.kind === "goal" && (
-              <figcaption className="bg-[rgb(10_13_17/0.9)] px-3 py-2 font-mono text-[13px] font-semibold text-[#eef2f5]">
-                {t("goalCaption", { clock: clock(current.c.clock_s), video: clock(current.c.goal_ms / 1000) })}
+              <figcaption className={cn("flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-[rgb(10_13_17/0.9)] px-3 py-1.5 text-[#eef2f5]", spotStep && "max-md:hidden")}>
+                <span className="font-mono text-[13px] font-semibold">{current.c.clock_s != null ? t("goalCaption", { clock: clock(current.c.clock_s), video: clock(current.c.goal_ms / 1000) }) : t("videoAt", { video: clock(current.c.goal_ms / 1000) })}</span>
+                {/* the coach sees the throw again while answering «Von wo?» (H7) */}
+                <button type="button" onClick={replay} className="min-h-11 cursor-pointer border-[1.5px] border-[#8d97a1] bg-transparent px-3 text-[15px] font-bold text-white" data-testid="check-replay">
+                  {ts("replay")}
+                </button>
               </figcaption>
             )}
           </figure>
           <div>
-            <p className="m-0 flex flex-wrap items-center justify-between gap-3 text-[15px] font-semibold text-ink-2">
-              <span>{revisit != null ? t("changing", { answer: answered[revisit]?.label ?? "" }) : t("questionOf", { n: total - open.length + 1, total })}</span>
-              {answered.length > 0 && (revisit ?? answered.length) > 0 && (
+            <p className={cn("m-0 flex flex-wrap items-center justify-between gap-3 text-[15px] font-semibold text-ink-2", spotStep && "max-md:hidden")}>
+              <span>{spotStep?.fromList ? `${ts("change")} · ${spotStep.goal}` : revisit != null ? t("changing", { answer: answered[revisit]?.label ?? "" }) : t("questionOf", { n: total - open.length + 1, total })}</span>
+              {/* «Zurück» only where there is a question before this one (fourth real-video test H10) */}
+              {!spotStep && answered.length > 0 && (revisit != null ? revisit > 0 : total - open.length > 0) && (
                 <button type="button" onClick={() => setRevisit((revisit ?? answered.length) - 1)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline underline-offset-4" data-testid="check-back">
                   {t("back")}
                 </button>
               )}
             </p>
-            <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? t("fieldQuestion") : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
-            <p className="mt-4 max-w-[54ch] text-[17px] text-ink-2">
-              {current.kind === "field" ? t("fieldWhy") : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : earlier ? t("sameGoalWhy", { time: clock(earlier.t_ms! / 1000) }) : t("goalWhy")}
-            </p>
-
-            {failed && (
-              <p role="alert" className="mt-4 max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
-                {t("saveFailed")} <span className="block text-[15px] font-normal text-ink-2">{failed}</span>
-              </p>
-            )}
-            <div className="mt-6 grid grid-cols-2 gap-2.5">
-              {answers.map((a) => (
-                <button
-                  key={a.key}
-                  type="button"
-                  onClick={() => void answer(a)}
-                  className={cn(
-                    "flex min-h-14 cursor-pointer items-center gap-3.5 border-2 border-ink px-4 text-left text-[17px] font-semibold md:min-h-16",
-                    a.first ? "bg-ink text-ground" : "bg-transparent text-ink",
-                    answers.length <= 2 && "col-span-2",
+            {spotStep ? (
+              // «Von wo?»: the goal is saved; one tap on the court saves the place and goes on (H7)
+              <section aria-labelledby="spot-question" data-testid="spot-step">
+                <p role="status" className="m-0 text-[15px] font-semibold md:mt-2 md:text-[17px]">
+                  {spotStep.fromList ? (
+                    `${ts("change")} · ${spotStep.goal}`
+                  ) : (
+                    <>
+                      <Check aria-hidden className="mr-1.5 inline size-5 align-[-3px] text-win" strokeWidth={3} />
+                      {ts("saved", { goal: spotStep.goal })}
+                    </>
                   )}
-                >
-                  {a.numeral && <b className={cn("font-num min-w-9 text-[28px] leading-none md:text-[34px]", a.first ? "text-ground" : "text-club-text")}>{a.numeral}</b>}
-                  {a.label}
-                </button>
-              ))}
-              {current.kind === "kickoff" && !absent && (
-                <button type="button" onClick={() => setAbsent(true)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-semibold" data-testid="kickoff-absent">
-                  {t("kickoffAbsent")}
-                </button>
-              )}
-              {current.kind === "kickoff" && absent && (
-                <form
-                  className="col-span-2 space-y-2 border-2 border-ink p-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const minute = startMinute.trim() === "" ? null : Number(startMinute);
-                    const period = current.period;
-                    void answer({
-                      key: "absent",
-                      label: t("kickoffAbsent"),
-                      run: async () => {
-                        const clock_s = minute != null && Number.isFinite(minute) ? (period - 1) * match.period_s + minute * 60 : undefined;
-                        must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period, t_ms: 0, absent: true, ...(clock_s != null ? { clock_s } : {}) } }));
-                        for (const key of ["match", "events", "stats", "official-goals", "goal-candidates", "graphics"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
-                        setAbsent(false);
-                        setStartMinute("");
-                        router.refresh();
-                      },
-                    });
-                  }}
-                >
-                  <label className="block">
-                    <span className="mb-1 block text-[17px] font-semibold">{t("kickoffStartMinute")}</span>
-                    <span className="mb-2 block text-[15px] text-ink-2">{t("kickoffStartMinuteHint")}</span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={Math.round((match.period_s * match.periods) / 60)}
-                      inputMode="numeric"
-                      value={startMinute}
-                      onChange={(e) => setStartMinute(e.target.value)}
-                      className="min-h-12 w-32 border-2 border-ink bg-transparent px-3 text-[17px]"
-                      data-testid="kickoff-start-minute"
-                    />
-                  </label>
-                  <button type="submit" className={buttonClass("primary")} data-testid="kickoff-absent-save">
-                    {t("kickoffAbsentSave")}
+                </p>
+                <div className="flex items-end justify-between gap-3">
+                  <h1 id="spot-question" tabIndex={-1} className="mt-1 mb-0 text-[32px] leading-[.95] outline-none md:mt-2 md:text-[58px]">
+                    {ts("question")}
+                  </h1>
+                  {/* on a phone the caption under the video gives way: the replay sits here */}
+                  {/* the clip loops; one key to hold it still and go on */}
+                  <button type="button" onClick={toggleSpotVideo} aria-pressed={spotPaused} className="min-h-11 shrink-0 cursor-pointer border-2 border-ink bg-transparent px-3 text-[15px] font-bold text-ink" data-testid="spot-pause">
+                    {spotPaused ? ts("play") : ts("pause")}
                   </button>
-                </form>
-              )}
-              {current.kind === "person" && (
-                <label className="col-span-2 block">
-                  <span className="mb-1 block text-[15px] font-semibold text-ink-2">{read ? t("personOther") : t("personPick")}</span>
-                  <select
-                    value=""
-                    onChange={(e) => {
-                      const id = e.target.value;
-                      if (id) void identify(current.tr, id).then(() => next(current));
-                    }}
-                    className="min-h-14 w-full border-2 border-ink bg-transparent px-3 text-[17px] font-semibold"
-                    data-testid="person-pick"
-                  >
-                    <option value="">{t("personPick")}</option>
-                    {players.map((r) => (
-                      <option key={r.player_id} value={r.player_id}>
-                        {r.jersey_number != null ? `${r.jersey_number} ` : ""}
-                        {r.first_name} {r.last_name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              {/* aligned like the other answers (UX test B45) */}
-              <button type="button" onClick={() => skip(current)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-bold">
-                {t("dontKnow")}
-              </button>
-            </div>
+                </div>
+                <p className="mt-1 mb-0 max-w-[54ch] text-[15px] text-ink-2 md:mt-3 md:text-[17px]">
+                  {ts("why")}
+                </p>
+                {failed && (
+                  <p role="alert" className="mt-4 max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
+                    {t("saveFailed")} <span className="block text-[15px] font-normal text-ink-2">{failed}</span>
+                  </p>
+                )}
+                <div className="mt-2 md:mt-4">
+                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.zone ?? null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} />
+                </div>
+              </section>
+            ) : (
+              <>
+            <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? (current.part && current.part > 1 ? t("fieldQuestionPart", { name: tParts(partName(current.part, parts).key, { n: current.part }) }) : t("fieldQuestion")) : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
+                <p className="mt-4 max-w-[54ch] text-[17px] text-ink-2">
+                  {current.kind === "field" ? (current.copyFrom ? t("fieldWhyPart") : t("fieldWhy")) : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : earlier ? t("sameGoalWhy", { time: clock(earlier.t_ms! / 1000) }) : t("goalWhy")}
+                </p>
+
+                {failed && (
+                  <p role="alert" className="mt-4 max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
+                    {t("saveFailed")} <span className="block text-[15px] font-normal text-ink-2">{failed}</span>
+                  </p>
+                )}
+                <div className="mt-6 grid grid-cols-2 gap-2.5">
+                  {answers.map((a) => (
+                    <button
+                      key={a.key}
+                      type="button"
+                      onClick={() => void answer(a)}
+                      className={cn(
+                        "flex min-h-14 cursor-pointer items-center gap-3.5 border-2 border-ink px-4 text-left text-[17px] font-semibold md:min-h-16",
+                        a.first ? "bg-ink text-ground" : "bg-transparent text-ink",
+                        answers.length <= 2 && "col-span-2",
+                      )}
+                    >
+                      {a.numeral && <b className={cn("font-num min-w-9 text-[28px] leading-none md:text-[34px]", a.first ? "text-ground" : "text-club-text")}>{a.numeral}</b>}
+                      {a.label}
+                    </button>
+                  ))}
+                  {current.kind === "kickoff" && !absent && (
+                    <button type="button" onClick={() => setAbsent(true)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-semibold" data-testid="kickoff-absent">
+                      {t("kickoffAbsent")}
+                    </button>
+                  )}
+                  {current.kind === "kickoff" && absent && (
+                    <form
+                      className="col-span-2 space-y-2 border-2 border-ink p-4"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const minute = startMinute.trim() === "" ? null : Number(startMinute) + (startSecond.trim() === "" ? 0 : Math.min(59, Number(startSecond)) / 60);
+                        const period = current.period;
+                        void answer({
+                          key: "absent",
+                          label: t("kickoffAbsent"),
+                          run: async () => {
+                            const clock_s = minute != null && Number.isFinite(minute) ? (period - 1) * match.period_s + minute * 60 : undefined;
+                            must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period, t_ms: 0, absent: true, ...(clock_s != null ? { clock_s } : {}) } }));
+                            for (const key of ["match", "events", "stats", "official-goals", "goal-candidates", "graphics"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
+                            setAbsent(false);
+                            setStartMinute("");
+                            setStartSecond("");
+                            router.refresh();
+                          },
+                        });
+                      }}
+                    >
+                      <fieldset className="m-0 mb-4 border-0 p-0">
+                        <legend className="mb-1 block p-0 text-[17px] font-semibold">{t("kickoffStartMinute")}</legend>
+                        <span className="mb-2 block text-[15px] text-ink-2">{t("kickoffStartMinuteHint")}</span>
+                        <span className="flex items-end gap-2">
+                          <label className="block">
+                            <span className="mb-1 block text-[15px] font-semibold">{t("kickoffMinute")}</span>
+                            <input
+                              type="number"
+                              min={0}
+                              max={Math.round((match.period_s * match.periods) / 60)}
+                              inputMode="numeric"
+                              value={startMinute}
+                              onChange={(e) => setStartMinute(e.target.value)}
+                              className="min-h-12 w-24 border-2 border-ink bg-transparent px-3 text-[17px]"
+                              data-testid="kickoff-start-minute"
+                            />
+                          </label>
+                          <b aria-hidden className="pb-2.5 text-[22px]">
+                            :
+                          </b>
+                          <label className="block">
+                            <span className="mb-1 block text-[15px] font-semibold">{t("kickoffSecond")}</span>
+                            <input
+                              type="number"
+                              min={0}
+                              max={59}
+                              inputMode="numeric"
+                              value={startSecond}
+                              onChange={(e) => setStartSecond(e.target.value)}
+                              className="min-h-12 w-24 border-2 border-ink bg-transparent px-3 text-[17px]"
+                              data-testid="kickoff-start-second"
+                            />
+                          </label>
+                        </span>
+                      </fieldset>
+                      <button type="submit" className={buttonClass("primary")} data-testid="kickoff-absent-save">
+                        {t("kickoffAbsentSave")}
+                      </button>
+                    </form>
+                  )}
+                  {current.kind === "person" && (
+                    <label className="col-span-2 block">
+                      <span className="mb-1 block text-[15px] font-semibold text-ink-2">{read ? t("personOther") : t("personPick")}</span>
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          const id = e.target.value;
+                          if (id) void identify(current.tr, id).then(() => next(current));
+                        }}
+                        className="min-h-14 w-full border-2 border-ink bg-transparent px-3 text-[17px] font-semibold"
+                        data-testid="person-pick"
+                      >
+                        <option value="">{t("personPick")}</option>
+                        {players.map((r) => (
+                          <option key={r.player_id} value={r.player_id}>
+                            {r.jersey_number != null ? `${r.jersey_number} ` : ""}
+                            {r.first_name} {r.last_name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                  {/* aligned like the other answers (UX test B45) */}
+                  <button type="button" onClick={() => skip(current)} className="col-span-2 min-h-[52px] cursor-pointer border-2 border-ink bg-transparent px-4 text-left text-[17px] font-bold">
+                    {t("dontKnow")}
+                  </button>
+                </div>
+              </>
+            )}
             {current.kind === "person" && <p className="mt-4 text-[15px] text-ink-2 max-md:hidden">{t("personKeys")}</p>}
+            {!spotStep?.fromList && (
+            <>
             <div className="mt-7 flex gap-[3px]" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={total - open.length} aria-label={t("progress", { done: total - open.length, total })}>
               {questions.map((q, i) => (
                 <i key={i} className={cn("block h-1.5 flex-1", done.includes(id(q)) ? "bg-ink" : "bg-rule")} />
               ))}
             </div>
             <p className="mt-2 text-[15px] text-ink-2">{t("progress", { done: total - open.length, total })}</p>
+            </>
+            )}
           </div>
         </div>
       )}

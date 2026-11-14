@@ -6,15 +6,17 @@ import { type ReactNode, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { cameraScene, goalRuns, useSceneCamera, type MatchGraphics } from "@/lib/graphics";
 import { threeThings, type Thing } from "@/lib/three-things";
+import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { LineKey } from "./blocks";
 import { Bundle, EmptyField } from "./bundle";
+import { SceneSpot, SpotChange, SpotStatus, useSpotText } from "./spot-parts";
 import { TacticsCamera } from "./tactics-camera";
 
+/** The match clock of a minute, to the full second as a scoreboard shows it: one rounding on every screen (fourth real-video test H8). */
 export function clockOf(minute: number | null | undefined): string {
   if (minute == null) return "";
-  const s = Math.round(minute * 60);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  return formatClock(minute * 60_000 + 1);
 }
 
 /** The sentence of a thing, e.g. "Gegentore über rechts aussen". */
@@ -81,7 +83,7 @@ export function ThreeThingsView({
             </p>
             <h3 className="m-0 text-[17px] leading-[1.22] font-bold md:text-xl">{text(x)}</h3>
             <div className={cn(things.length === 1 && "md:col-start-2 md:row-span-6 md:row-start-1")}>
-              {i === 0 ? <FirstThing orgId={orgId} matchId={matchId} thing={x} label={text(x)} oppName={oppName} /> : <ThingBundle thing={x} label={text(x)} />}
+              {i === 0 ? <FirstThing orgId={orgId} matchId={matchId} graphics={graphics} thing={x} label={text(x)} oppName={oppName} /> : <ThingBundle thing={x} label={text(x)} />}
             </div>
             {(onScenes || hrefScenes) &&
               (hrefScenes ? (
@@ -96,6 +98,15 @@ export function ThreeThingsView({
           </li>
         ))}
       </ol>
+      {/* goals still without their place: how many, and the way to add them (H7) */}
+      <SpotStatus orgId={orgId} matchId={matchId} graphics={graphics} things={things.length} compact />
+      {/* every goal stays reachable, also while there are things (V4): folded under them */}
+      {graphics.goals.some((x) => x.has_video) && (
+        <details className="mt-4 border-t border-rule pt-2" data-testid="all-goals">
+          <summary className="min-h-11 cursor-pointer content-center font-bold underline decoration-[1.5px] underline-offset-4">{t("allGoals", { n: graphics.goals.filter((x) => x.has_video).length })}</summary>
+          <VideoGoals orgId={orgId} matchId={matchId} graphics={graphics} oppName={oppName} onScene={onScene} folded />
+        </details>
+      )}
       <LineKey
         className="mt-3"
         // only what is drawn: without a run (no confirmed court) no «Weg zum Wurf» in the key
@@ -120,7 +131,7 @@ function ThingBundle({ thing, label, width = 360 }: { thing: Thing; label: strin
 }
 
 /** Punkt 1: all its goals as a bundle, or one of them on the tactics camera. */
-function FirstThing({ orgId, matchId, thing, label, oppName }: { orgId: string; matchId: string; thing: Thing; label: string; oppName: string }) {
+function FirstThing({ orgId, matchId, graphics, thing, label, oppName }: { orgId: string; matchId: string; graphics: MatchGraphics; thing: Thing; label: string; oppName: string }) {
   const t = useTranslations("anlauf");
   const [scene, setScene] = useState<string | null>(null);
   const first = thing.goals.find((g) => g.eventId)?.eventId ?? null;
@@ -148,7 +159,10 @@ function FirstThing({ orgId, matchId, thing, label, oppName }: { orgId: string; 
         )}
       </div>
       {scene ? (
-        <SceneCamera orgId={orgId} matchId={matchId} eventId={scene} label={t("goalOf", { team: thing.team === "opp" ? oppName : t("us"), clock: clockOf(goal?.minute) })} />
+        <>
+          <SceneCamera orgId={orgId} matchId={matchId} eventId={scene} label={t("goalOf", { team: thing.team === "opp" ? oppName : t("us"), clock: clockOf(goal?.minute) })} />
+          <SceneSpot orgId={orgId} matchId={matchId} graphics={graphics} eventId={scene} label={t("goalOf", { team: thing.team === "opp" ? oppName : t("us"), clock: clockOf(goal?.minute) })} />
+        </>
       ) : (
         <ThingBundle thing={thing} label={label} />
       )}
@@ -223,24 +237,27 @@ export function SceneCamera({
   );
 }
 
-const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
+const mmss = formatClock;
 
 /**
  * The goals of a match without three things yet: each with its time (match clock, else the place
- * in the video), the team, «ohne Position» where no spot is known, and the scene on the tactics
+ * in the video), the team, the place of the shot («Wurfort fehlt», «Wurfort ändern»), and the scene on the tactics
  * camera (E01, E02).
  */
-export function VideoGoals({ orgId, matchId, graphics, oppName, onScene }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string; onScene?: (eventId: string) => void }) {
+export function VideoGoals({ orgId, matchId, graphics, oppName, onScene, folded }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string; onScene?: (eventId: string) => void; folded?: boolean }) {
   const t = useTranslations("anlauf");
   const goals = graphics.goals.filter((x) => x.has_video).sort((a, b) => (a.minute ?? Infinity) - (b.minute ?? Infinity) || (a.t_ms ?? 0) - (b.t_ms ?? 0));
   const playable = goals.filter((g) => g.has_video && g.t_ms != null);
-  const [open, setOpen] = useState<string | null>(playable[0]?.event_id ?? null);
+  // folded under the things nothing plays until a goal is chosen
+  const [open, setOpen] = useState<string | null>(folded ? null : (playable[0]?.event_id ?? null));
   const shown = goals.find((g) => g.event_id === open);
   const when = (g: (typeof goals)[number]) => (g.minute != null ? clockOf(g.minute) : g.t_ms != null ? t("atVideo", { time: mmss(g.t_ms) }) : "");
   const who = (g: (typeof goals)[number]) => (g.team === "own" ? t("us") : oppName);
+  const spotText = useSpotText();
   return (
-    <section className="border-t-2 border-ink pt-4" data-testid="video-goals">
-      <p className="m-0 max-w-[60ch] text-[17px] text-ink-2">{t("noThingsGoals", { n: goals.length })}</p>
+    <section className={folded ? "pt-2" : "border-t-2 border-ink pt-4"} data-testid="video-goals">
+      {/* honest and with a way: how many goals have a place, what is missing, «nachtragen» (H7) */}
+      {!folded && <SpotStatus orgId={orgId} matchId={matchId} graphics={graphics} things={0} />}
       <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
         <ol className="m-0 list-none p-0" aria-label={t("videoGoalsTitle")}>
           {goals.map((g) => (
@@ -250,7 +267,11 @@ export function VideoGoals({ orgId, matchId, graphics, oppName, onScene }: { org
               <span className="min-w-0 flex-1">
                 {t("goalBy", { team: who(g) })}
                 {g.number != null && ` · #${g.number}`}
-                {g.shot == null && <span className="ml-2 text-[15px] text-ink-2">{t("noSpot")}</span>}
+                {/* the place and its change on their own line: on a phone the row stays readable */}
+                <span className="flex flex-wrap items-center gap-x-3 text-[15px] text-ink-2">
+                  <span data-testid="video-goal-spot">{spotText(g)}</span>
+                  <SpotChange orgId={orgId} matchId={matchId} goal={g} label={`${t("goalBy", { team: who(g) })} · ${when(g)}`} />
+                </span>
               </span>
               {g.has_video && g.t_ms != null && (
                 <button type="button" onClick={() => (onScene ? onScene(g.event_id) : setOpen(g.event_id))} aria-pressed={onScene ? undefined : open === g.event_id} data-testid="scene-show" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">

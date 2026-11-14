@@ -24,7 +24,7 @@ from handball_api.services import audit, roster
 from handball_api.services.auto_events import CANDIDATE, OFFICIAL, OVERLAY
 from handball_api.services.context import Ctx
 from handball_api.services.events import shown_attributes
-from handball_api.services.matches import duration_ms, get_match, timeline_video
+from handball_api.services.matches import get_match, timeline_duration_ms, timeline_video
 from handball_api.services.policies import Action
 
 SOURCE = OFFICIAL
@@ -94,7 +94,11 @@ async def comparison(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     An official goal the video did not find whose time (from the match clock) lies before or after
     the main video is "outside": a clip of a few minutes is not missing the rest of the game."""
     match = await get_match(ctx, match_id)
-    length_ms = duration_ms(await timeline_video(ctx, match.id, ready=True))
+    length_ms = (
+        await timeline_duration_ms(ctx, match.id)
+        if await timeline_video(ctx, match.id, ready=True) is not None
+        else None
+    )
     goals = (
         await ctx.db.scalars(
             select(Event)

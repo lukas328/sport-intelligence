@@ -24,6 +24,10 @@ EventType = Literal[
 ]
 Side = Literal["own", "opponent"]
 GoalZone = Literal["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"]
+# where a goal's shot came from: the zones of the three things (left and right from the
+# attacker's view), m7 Siebenmeter, gs Gegenstoss
+SpotZone = Literal["la", "rl", "rm", "rr", "ra", "kr", "m7", "gs"]
+ZoneSource = Literal["coach", "estimated", "unknown"]
 
 
 class EventIn(ApiModel):
@@ -304,6 +308,9 @@ class GoalCandidateRow(ApiModel):
     # shot candidates with an official report: the report shot at this moment; confirming
     # without a side takes it (one key)
     suggestion: OfficialShot | None = None
+    # confirmed goals: where the shot came from (zone of the three things) and who said it
+    shot_zone: SpotZone | None = None
+    zone_source: ZoneSource | None = None
 
 
 class GoalCandidateCounts(ApiModel):
@@ -346,6 +353,39 @@ class GoalCandidateList(ApiModel):
     official: OfficialShots | None = None  # shot candidates: the report's shots on the video
 
 
+class ShotSpotIn(ApiModel):
+    """Where a goal's shot came from, as the coach tapped it in Prüfen (fourth real-video test
+    H7): a zone of the three things (left and right from the attacker's view; m7 Siebenmeter, gs
+    Gegenstoss) or "unknown" (Weiss nicht: the estimate from the tracks stands), and the tapped
+    point in court metres with the attacked goal at x = 40, when there is one."""
+
+    shot_zone: SpotZone | Literal["unknown"]
+    x: float | None = Field(default=None, ge=-2, le=42)
+    y: float | None = Field(default=None, ge=-2, le=22)
+
+    @model_validator(mode="after")
+    def _both(self) -> ShotSpotIn:
+        if (self.x is None) != (self.y is None):
+            raise ValueError("give both x and y")
+        return self
+
+
+class ShotSpotOut(ApiModel):
+    event_id: uuid.UUID
+    shot_zone: SpotZone | None = Field(description="zone of the three things; null: none known")
+    zone_source: ZoneSource | None
+    x: float | None
+    y: float | None
+
+
+class GoalViewOut(ApiModel):
+    event_id: uuid.UUID
+    goal_in_video: Literal["left", "right"] | None = Field(
+        description="where the goal the shot went at stands in the video; null without a court a "
+        "person confirmed or without tracks (the small court is drawn with the goal at the top)"
+    )
+
+
 class GoalCandidateReviewIn(ApiModel):
     status: Literal["confirmed", "rejected"] | None  # null: back to open (undo)
     # to confirm: whose shot and its outcome (goal candidates: default goal); a shot candidate
@@ -355,6 +395,19 @@ class GoalCandidateReviewIn(ApiModel):
     official_event_id: uuid.UUID | None = None  # pin this report entry to the candidate
     number: int | None = Field(default=None, ge=0, le=99)  # scorer, when no report entry
     player_id: uuid.UUID | None = None
+    # a confirmed goal: where the shot came from (see ShotSpotIn); without it the estimate from
+    # the tracks is the fallback, and a zone given before stays
+    shot_zone: SpotZone | Literal["unknown"] | None = None
+    x: float | None = Field(default=None, ge=-2, le=42)
+    y: float | None = Field(default=None, ge=-2, le=22)
+
+    @model_validator(mode="after")
+    def _spot(self) -> GoalCandidateReviewIn:
+        if (self.x is None) != (self.y is None):
+            raise ValueError("give both x and y")
+        if self.x is not None and self.shot_zone is None:
+            raise ValueError("a point needs its zone")
+        return self
 
 
 class FeedImportResult(ApiModel):

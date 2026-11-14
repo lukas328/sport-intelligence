@@ -179,3 +179,222 @@ automatische Tests abgesichert, nicht mehr mit den echten Clips.
 - handball.ch lieferte am Testtag ein Zertifikat ohne Zwischenzertifikat; die Teamsuche im
   Einstieg antwortete mit 503, bis das Zwischenzertifikat lokal ergänzt wurde. Die Prüfung der
   Zertifikate blieb eingeschaltet.
+
+---
+
+# Vierter Durchlauf (14. November 2026): Nachprüfung von G1 bis G9 am echten Video
+
+Geprüft mit Clip 1 (SG Horgen gegen Lakers Stäfa, fünf Minuten, neun Tore, wahres Resultat im
+Ausschnitt 4:5), als neuer Trainer am Handy (390 px) und am Desktop. Clip 2 wurde in diesem
+Durchlauf nicht noch einmal ausgewertet, nur seine Anzeigetafel angesehen. Analyse 20 bis 21
+Minuten, Prüfen 22 Fragen (12 Pflicht, 10 freiwillig) in rund 6 bis 7 Minuten.
+
+## Urteil
+
+G1 bis G8 sind am echten Video bestätigt behoben. Bei G9 war die Feldfrage am Handy nicht behoben
+(ein Eckgriff lag unter dem Knopf «Bild vergrössern», das vergrösserte Bild liess sich nicht
+verschieben); das ist in diesem Durchlauf behoben. Nach allen 22 Antworten steht 4:5, das wahre
+Resultat. **Drei Dinge entstehen aber nie:** Kein bestätigtes Tor bekommt eine Wurfposition (H7).
+Damit fehlt dem Trainer genau das, was Start und Website als Erstes versprechen.
+
+## G1 bis G9
+
+| # | Urteil | Gesehen |
+|---|---|---|
+| G1 | behoben | Nach dem Pflichtteil «Die wichtigsten Momente sind geprüft. 10 weitere könnten Tore sein.»; Start, Spiel und Video zeigen 2:5 mit «bisher bestätigt · 10 Momente offen»; «Alles geprüft» erst nach allen Antworten, dann 4:5. |
+| G2 | behoben | Kein Pflicht-Ausschnitt zeigt ein bestätigtes Tor zweimal; bei 2:23 «In diesem Ausschnitt liegt das Tor von 2:15» mit «Nein, dasselbe Tor». Die genannte Zeit ist die späte Kandidatenzeit, das Tor fiel um 2:09. |
+| G3 | behoben | Taktikkamera zeichnet das Tor auf der Seite, die das Video zeigt; die Szene enthält den Wurf; höchstens ein bis zwei Punkte zu viel. |
+| G4 | behoben | Nach dem gespeicherten Feld keine zweite Mail, eine Mitteilung. |
+| G5 | behoben | Die gemerkte Gegnerfarbe geht ohne neue Frage in die Analyse. |
+| G6 | behoben | Saison und Start zeigen dieselben Torschützen. |
+| G7 | behoben | Die Gegnerfarbe bleibt leer, bis sie gewählt ist. |
+| G8 | behoben | «Der Anwurf ist nicht im Video» führt zur Spielminute des Anfangs; die Spielzeiten stimmen danach. |
+| G9 | Feldfrage am Handy war nicht behoben, jetzt behoben | Zoom-Knopf unter dem Bild, Ziehen nur auf den Griffen, das vergrösserte Bild lässt sich mit einem Finger verschieben. |
+
+## Neue Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| H1 | stört | Eckgriff unter dem Zoom-Knopf, Vergrösserung nicht verschiebbar (390 px) | behoben |
+| H2 | falsch | Jede Torfrage sagte «die Anzeigetafel sagt es nicht sicher», obwohl keine Tafel gelesen wurde | behoben |
+| H3 | stört | Liste «Beantwortet» ohne Zeiten | behoben |
+| H4 | Kleinigkeit | Prüfen-Kopf «0 Fragen» bei offenen Momenten; Listenzeile «7 Tore im Video» ohne offene Momente | behoben |
+| H5 | falsche Zahl | «Längste Phase ohne eigenes Tor: 8 min» ab Anpfiff gezählt, obwohl das Video in Minute 8 beginnt | behoben |
+| H6 | falsch | Zahlen-Tab nennt den Spielbericht, obwohl es keinen gibt | behoben |
+| H7 | blockiert die drei Dinge | Bestätigte Tor-Momente bekommen keine Wurfposition: `shot_positions.fill` läuft nur am Ende der Analyse, nicht bei der Bestätigung, und setzt nur x/y, während `zone_of()` in graphics.py nur shot_zone und shot_type liest. Prüfen fragt nie nach dem Wurfort. Der Trainer liest «Für drei Dinge braucht es mehr Tore mit Position» und hat keinen Weg dorthin. | offen, Entscheid: Tipp «Von wo?» bei der Tor-Bestätigung |
+| H8 | Kleinigkeit | Dieselbe Szene heisst 8:15 (Spiel), 8:14 (Sammlung) und «Video 0:15» (Szenen) | offen |
+| H9 | Kleinigkeit | Saison: «nach 12 Spielen» (mit Cup und Freundschaftsspielen), Tabelle 8, Verlauf zeigt die letzten 10, ohne es zu sagen | offen |
+| H10 | Kleinigkeit | «Welche Spielminute zeigt der Anfang?» ist bei 8:15 mehrdeutig; «Zurück» steht schon bei Frage 1 | offen |
+
+## Anzeigetafel der Halle (gemessen)
+
+Clip 1: Die Tafel hängt links oben an der Wand und ist rund 100 von 300 Sekunden im Bild, immer
+wenn die Kamera nach links schwenkt. Im 720p-Bild ist sie etwa 100 × 70 Pixel gross, die Ziffern
+12 bis 15 Pixel hoch, für das Auge gut lesbar (7:7, 8:7, 8:8, 9:8, 10:10, 11:11; Spieluhr =
+Videozeit + 8:15). Die Analyse liest trotzdem nichts: Die Texterkennung gibt die Uhr ohne
+Doppelpunkt zurück («849» statt 8:49), darum greift die Uhr-Regel in `hallboard.py` nie, und die
+einzelnen Leuchtziffern des Spielstands findet sie gar nicht. Ansatz: drei- und vierstellige
+Uhrfelder als mm:ss gelten lassen, die Tafel über Rot auf Schwarz finden, eine eigene Erkennung für
+Sieben-Segment-Ziffern. Clip 2: Tafel angeschnitten und dunkel, keine Quelle.
+
+## Erkennung, beobachtet
+
+Tor-Momente liegen weiter 4 bis 7 Sekunden nach dem Tor; das Fenster der Frage (10 s davor bis 2 s
+danach) fängt es meist auf, schneidet aber einzelne Tore ab. In den zwei geprüften Szenen höchstens
+ein bis zwei Personen zu viel, ein Schiedsrichter fehlt meist. Die Seite kippte in Clip 1 nicht.
+
+## Grenzen
+
+Ein Ausschnitt von fünf Minuten, kein ganzes Spiel: Wie lange das Prüfen bei 50 bis 60 Toren
+dauert, ist nicht gemessen. Kein Spielbericht zu diesen Spielen: Der Weg «Tore aus dem
+Spielbericht» ist weiter nur mit automatischen Tests geprüft. Clip 2 nicht noch einmal
+ausgewertet. Die Wurforte der neun Tore sind am Standbild nur unsicher zu bestimmen.
+
+---
+
+# Fünfter Durchlauf (14. November 2026): ein Spiel aus zwei Videodateien
+
+Clip 1 ohne Neu-Kodieren bei 2:21,6 in zwei Dateien geteilt (zwischen dem fünften und sechsten
+Tor), dazu eine Datei von fünf Sekunden. Zwei Wege: die zweite Hälfte nachreichen, und beide
+Dateien zusammen wählen. Analyse je Teil 10 bis 15 Minuten, Prüfen je Teil rund zwei Minuten.
+
+## Urteil
+
+Es funktioniert: Beide Teile werden ausgewertet, am Ende steht 4:5 mit durchlaufender Spielzeit,
+und die Tore des ersten Teils sind nach dem Nachreichen unverändert. Das Video spielt am Desktop
+und am Handy über die Grenze (kurzes Warten von einer halben Sekunde, kein Hänger). Der
+Zusammenschnitt schneidet jede Szene aus der richtigen Datei.
+
+## Die acht Prüfpunkte
+
+| | Urteil | Gesehen |
+|---|---|---|
+| Liste der Teile | geht | «Das Spiel in 2 Teilen», Längen, Zustand je Teil, «Pause 9:59 davor», Tauschen. |
+| Video über die Grenze | geht | Im Browser abgespielt, 1280 und 390 mit Touch. |
+| Szenen und Momente | geht | Tore aus beiden Teilen, Spielzeit 8:15 bis 12:02 durchlaufend; ein Moment mit Fenster über die Grenze. |
+| Bestätigtes bleibt | geht | Fünf Tore des ersten Teils unverändert nach dem zweiten. |
+| Feld des zweiten Teils | geht | Beim Nachreichen übernommen ohne Frage; «Ecken der 1. Halbzeit übernehmen» erschien erst nach Neuladen (behoben). |
+| Seite im zweiten Teil | geht, mit Frage | Die App nahm einen Seitenwechsel an; die Torhüter-Erkennung hat ihn überstimmt. |
+| Zusammenschnitt | geht | Szenen beider Teile, aus der richtigen Datei. |
+| Dateien | geht | Dieselbe Datei zweimal: «schon dabei»; fünf Sekunden: Hinweis; Entfernen lässt die Tore stehen. |
+
+## Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| P1 | stört | Tauschen und Zurücktauschen verschob den Anwurf vor dem Video, die Uhr ging fünf Minuten falsch | behoben (4fcc7de) |
+| P2 | stört | «Zur 2. Halbzeit» fehlte, sobald das Spiel Tore hat, und in der Werkbank | behoben (a15bf6f), nicht im Browser gesehen |
+| P3 | stört | Beide Dateien zusammen: Teil 2 bekam keinen Seiten-Hinweis, weil Teil 1 noch lief | behoben (4fcc7de): Teil 2 wartet auf Teil 1 |
+| P4 | Kleinigkeit | Der Anwurf der 2. Halbzeit wird nur bei Videos über 65 Minuten gefragt | offen |
+| P5 | falsch | «4 von 9 Toren von dir bestätigt», obwohl alle bestätigt waren | behoben (4fcc7de, a15bf6f) |
+| P6 | Kleinigkeit | Eine versehentliche kurze Datei änderte Namen und liess «Tauschen» verschwinden | behoben (a15bf6f) |
+| P7 | Kleinigkeit | Liste beim Hochladen: zugeklappt, falscher Fortschritt, «Hauptkamera \| Hauptkamera» | behoben (a15bf6f), nicht im Browser gesehen |
+| P8 | Kleinigkeit | Titelkarte des Highlight-Films ohne Umlaute | behoben (8af403f) |
+| P9 | Entscheid | Seitenwechsel bei einer mitten in der Halbzeit geteilten Aufnahme: Liegen die Aufnahmezeiten weniger als 60 Sekunden auseinander, nimmt die App keinen Seitenwechsel an und nennt die Teile «Teil 1 / Teil 2»; je späterem Teil «Seitenwechsel vor diesem Teil: ja / nein» | gebaut (4fcc7de, a15bf6f, Migration 0045), nicht im Browser gesehen |
+
+Schon im Durchlauf behoben: kein Ton-Abgleich zwischen zwei Hälften, Szenen-Links öffnen den
+Spieler, Spielzeit bei Toren ohne Wurfort, «Ecken übernehmen» sofort (528c806, fa5ee52).
+
+## Grenzen
+
+Kein iPhone und kein Safari, keine Datei ohne Ton, kein Hochformat neben Querformat. Die Behebungen
+P2, P7 und P9 sind mit Tests geprüft, aber nicht mehr im Browser angesehen.
+
+---
+
+# Sechster Durchlauf (14. November 2026): «Von wo?» am echten Video
+
+Clip 1 als eine Datei, Prüfen am Handy (390 × 844, Touch). Analyse 21:40. 22 Fragen mit Wurfort
+in 6:05 gestoppt, mit dem Zögern eines Trainers geschätzt 8 bis 9 Minuten; die App kündigte
+zusammen 8 Minuten an.
+
+## Urteil
+
+Der Schritt ist schnell und passt auf einen Bildschirm, und mit eigenen Tipps stimmen Zahlen und
+Bündel. Er trägt die drei Dinge aber erst, wenn drei Dinge behoben sind: «Weiss nicht» wurde
+stillschweigend durch eine Schätzung ersetzt, der gelbe Vorschlag lag bei vier von sieben
+erkennbaren Toren falsch (sechsmal von neun «Kreis»), und links und rechts verlangt beim Angriff
+aufs linke Tor Umdenken. Mit den wahren Wurforten der neun Tore entsteht in diesem Ausschnitt
+kein Ding (keine Ecke kommt auf drei Tore); das ist richtig so.
+
+## Die neun Tore
+
+| Tor | getippt | Vorschlag der App | stimmt |
+|---|---|---|---|
+| 0:08 Horgen | Aussen links | Aussen links | ja |
+| 0:41 Stäfa | Rückraum Mitte | Kreis | nein |
+| 0:55 Horgen | Aussen rechts | Kreis | nein |
+| 1:28 Stäfa | Weiss nicht, später Kreis | Kreis | offen |
+| 2:09 Stäfa | Gegenstoss | Kreis | nein |
+| 2:37 Horgen | Weiss nicht, später Rückraum Mitte | Aussen rechts | offen |
+| 3:27 Stäfa | Kreis | Kreis | ja |
+| 3:45 Horgen | Aussen links | Aussen links | ja |
+| 3:55 Stäfa | Aussen links | Kreis | nein |
+
+Die Wurforte sind aus Einzelbildern bei 720p bestimmt und bleiben unsicher.
+
+## Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| V1 | falsch | «Weiss nicht» liess die Schätzung stehen; sie zählte als Wurfort und ins Ding | behoben: Dinge und Zählungen nur aus getippten Wurforten (im siebten Durchlauf bestätigt) |
+| V2 | stört | Der Vorschlag führt eher in die Irre | behoben: kein Vorschlag mehr im Feld (im siebten Durchlauf bestätigt) |
+| V3 | stört | Nach dem Prüfen zeigte der Start-Kopf ein älteres Spiel ohne Video | behoben (2d6c862), nicht im Browser gesehen |
+| V4 | stört | In der Szene eines Dings fehlt «Wurfort ändern»; die Torliste verschwindet, sobald es ein Ding gibt | behoben |
+| V5 | Kleinigkeit | «Beantwortet» ist nach Neuladen leer | behoben (im siebten Durchlauf bestätigt) |
+| V6 | stört | Szenen beginnen zu spät: Die Szene des ersten Tors enthielt den Wurf nicht | behoben: Szenen aus Tor-Momenten von 12 s vor bis 5 s nach der Kandidatenzeit |
+| V7 | Kleinigkeit | Das Standbild bei «Von wo?» zeigt oft schon die andere Hallenseite | behoben: Ausschnitt läuft in Schleife (im siebten Durchlauf bestätigt) |
+| links/rechts | stört | Beim Angriff aufs linke Tor ist «links» die kameranahe Seite | behoben: Minifeld so gedreht, wie die Kamera das Feld sieht (im siebten Durchlauf bei 8 von 9 Toren richtig, siehe W1) |
+
+## Grenzen
+
+Nach einem Neustart des Containers waren Stack und Video weg; die Behebungen dieses Durchlaufs
+sind mit Tests geprüft, aber nicht im Browser angesehen. «Nochmal ansehen» spielte im kopflosen
+Browser nur bei einem von drei Versuchen; ob das am Browser lag, ist offen.
+
+---
+
+# Siebter Durchlauf (14. November 2026): «Von wo?» in der Endfassung
+
+Clip 1 als eine Datei auf dem Stand ff1210c, Prüfen am Handy (390 × 844, Touch): das Feld
+bestätigt, Anwurf nicht im Video, 8:15, dann 22 Fragen. Analyse 20:41. Prüfen 6:56 gestoppt
+(darin neun Sekunden Messpause je Wurfort, ohne sie rund 5:35); die App kündigt zweimal vier
+Minuten an.
+
+## Urteil
+
+Bei acht von neun Toren liegt das kleine Feld so wie im Video, und an der Stelle, an der der Wurf
+im Bild war, steht das richtige Wort; Umdenken war nicht nötig. Kein Vorschlag mehr, der Ausschnitt
+läuft in Schleife, alles passt ohne Scrollen auf den Bildschirm. «Weiss nicht» zählt als fehlend
+und lässt sich nachtragen, Geschätztes zählt nirgends. Beim Gegenstoss lag das Feld verkehrt; das
+ist nach dem Durchlauf behoben, aber nicht mehr am echten Video nachgeprüft.
+
+## Die neun Prüfpunkte
+
+| # | Urteil | Gesehen |
+|---|---|---|
+| Feld wie im Video | 8 von 9 | Beim Gegenstoss (2:09) zeigte es «das Tor rechts», im Video läuft der Angriff nach links. |
+| Zuordnung beim Tippen | geht | In allen sechs getippten Fällen lag an der Bildstelle die richtige Fläche. |
+| Kein Vorschlag | geht | Keine gelbe Fläche, kein «Bisher», kein «geschätzt» im Schritt. |
+| Schleife, Anhalten, ein Bildschirm | geht | Die Zeit läuft und springt an den Anfang zurück; «Anhalten» hält; Seitenhöhe 844 bei 844. |
+| «Weiss nicht» | geht | «7 von 9 Toren mit Wurfort. Bei 2 Toren fehlt, von wo geworfen wurde.» mit «In einer Minute nachtragen»; danach «9 von 9». |
+| Dinge | ehrlich | «9 von 9 Toren mit Wurfort. Noch kommt keine Ecke auf drei Tore. Ein Ding entsteht, sobald drei Tore aus derselben Ecke kommen.» Jedes Tor mit «Wurfort ändern» und «Szene zeigen». |
+| Szenen enthalten den Wurf | 2 von 3 | Erstes Tor und 3:45 ja; beim Gegenstoss endete die Szene wohl vor dem Abschluss. |
+| Start-Kopf, «Beantwortet» | geht | Kopf zeigt das Spiel mit 4:5; «Beantwortet» ist nach Neuladen da. |
+| Dauer | geht | Die Ankündigung ist eher grosszügig. |
+
+## Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| W1 | stört | Torseite beim Gegenstoss falsch: Sie kam aus dem Standort der Angreifer in den zehn Sekunden davor, und die standen noch am Tor, das sie verteidigten | behoben (96751ca): Die Seite kommt aus den Enden, die die Analyse für die Halbzeit gefunden hat (Torhüter), der Standort ist nur Rückfall; mit Test, nicht am echten Video nachgeprüft |
+| W2 | Kleinigkeit | Die Szene eines Tor-Moments endete zwei Sekunden nach der Kandidatenzeit und konnte den Wurf verpassen | behoben (96751ca): fünf Sekunden Nachlauf |
+| W3 | Kleinigkeit | Der Satz ohne Ding führte nicht weiter | behoben (96751ca): «In der Saison zählen die Tore aller Spiele mit Video zusammen.» |
+| W4 | Kleinigkeit | Vor dem Nachtragen stand über der Grafik «nach Position, 5», gezeichnet waren vier Punkte (Geschätztes zählt zu Recht nicht, die Titelzahl zählte es mit) | offen |
+
+## Grenzen
+
+Ein Ausschnitt von fünf Minuten mit neun Toren. Ob aus einem ganzen Spiel drei Dinge entstehen
+und wie lange das Prüfen bei 50 bis 60 Toren dauert, ist nicht gemessen. Die Wurforte sind aus
+Standbildern bestimmt und unsicher. W1 bis W3 sind nach dem Durchlauf behoben und nur mit Tests
+geprüft.

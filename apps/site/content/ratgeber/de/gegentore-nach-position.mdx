@@ -1,0 +1,64 @@
+export const faq = [
+  { q: "Ab wann ist eine Häufung ein Muster?", a: "Wenn sie in mehreren Spielen auftaucht. In einem Spiel können 4 von 20 Gegentoren von aussen Zufall sein. In drei Spielen hintereinander ist es ein Thema." },
+  { q: "Zähle ich Siebenmeter und Gegenstösse mit?", a: "Ja, aber getrennt. Sie entstehen anders als Tore aus dem Positionsangriff und haben andere Ursachen." },
+  { q: "Liegt es dann an der Abwehr oder am Torhüter?", a: "Das sagt dir die Zahl nicht. Erst die Szene zeigt, ob der Werfer frei stand oder ob ein haltbarer Ball durchging." },
+];
+
+## Die Positionen
+
+Im Angriff stehen sechs Feldspieler, meist so: links und rechts aussen, im Rückraum links, Mitte und rechts, und am Kreis. Für die Auswertung zählst du jedes Gegentor zu der Position, von der aus geworfen wurde. Dazu kommen Siebenmeter und Tore nach Gegenstoss als eigene Gruppen.
+
+<CourtPositions
+  label="Halbes Feld, Tor oben: die Angriffspositionen links aussen, Rückraum links, Rückraum Mitte, Rückraum rechts, rechts aussen und Kreis, dazu der Torhüter."
+  names={{ la: "LA", rl: "RL", rm: "RM", rr: "RR", ra: "RA", kr: "KM", tw: "TH" }}
+  caption="Die Angriffspositionen aus Sicht der Angreifer: LA links aussen, RL Rückraum links, RM Rückraum Mitte, RR Rückraum rechts, RA rechts aussen, KM Kreis, TH Torhüter."
+/>
+
+Achtung bei «links» und «rechts»: Gemeint ist die Sicht der Angreifer. Der Rückraum rechts des Gegners steht deiner linken Abwehrseite gegenüber.
+
+## So zählst du
+
+1. Spring im Video zu jedem Gegentor und schau die 15 Sekunden davor.
+2. Notier die Wurfposition, nicht die Position des Spielers auf dem Papier. Läuft der Rückraum rechts in die Mitte und wirft dort, zählt «Rückraum Mitte».
+3. Mach Gruppen für Siebenmeter und Gegenstösse.
+4. Schreib am Schluss die Zahl mit Basis auf: «7 von 24 Gegentoren aus dem Rückraum rechts».
+
+Eine Vorlage für die Strichliste findest du in [Ein Spiel in 20 Minuten auswerten](spiel-auswerten-20-minuten).
+
+<ZoneCounts
+  label="Erfundenes Beispiel: Gegentore nach Wurfposition auf dem halben Feld. Rückraum rechts 7, Rückraum Mitte 4, links aussen 3, Kreis 3, rechts aussen 2, Rückraum links 1, Siebenmeter 2."
+  counts={{ la: 3, rl: 1, rm: 4, rr: 7, ra: 2, kr: 3, m7: 2 }}
+  names={{ la: "LA", rl: "RL", rm: "RM", rr: "RR", ra: "RA", kr: "KM", m7: "7 m" }}
+  caption="Erfundenes Beispiel mit 22 Gegentoren aus dem Positionsangriff und vom Siebenmeter, dazu 2 nach Gegenstoss. Der Rückraum rechts fällt auf."
+/>
+
+## Was eine Häufung bedeuten kann
+
+Die Zahl zeigt dir, wo du hinschauen sollst. Die Ursache steckt in den Szenen. Typische Muster:
+
+- **Viele Tore aus dem Rückraum:** Die Abwehr steht zu tief oder tritt nicht heraus, oder der Werfer bekommt nach einer Kreuzung zu viel Platz. Achte auf den Abstand zum Werfer im Moment des Wurfs.
+- **Viele Tore von aussen:** Die Abwehr zieht sich zur Mitte zusammen, und aussen entsteht eine Lücke. Oder der Torhüter steht im Winkel nicht gut. Achte auf die Halbposition neben dem Aussen.
+- **Viele Tore vom Kreis:** Der Kreisläufer wird nach einer Sperre frei, oder die Absprache zwischen zwei Abwehrspielern fehlt. Achte darauf, wer den Kreis übernimmt.
+- **Viele Siebenmeter:** Fouls in Wurfposition, oft am Kreis oder nach einem Durchbruch. Schau, was vor dem Foul passiert ist.
+- **Viele Tore nach Gegenstoss:** Meist liegt die Ursache vorne, bei Ballverlusten oder überhasteten Würfen. Mehr dazu in [Gegenstösse und Ballverluste auswerten](gegenstoss-und-ballverluste).
+
+## Vorsicht mit kleinen Zahlen
+
+«50 % der Gegentore von aussen» klingt dramatisch. Wenn es 2 von 4 sind, ist es nichts. Schreib deshalb immer die Basis dazu und schau über mehrere Spiele. Zwei, drei Spiele mit derselben Häufung sind ein besseres Zeichen als ein einziges mit einer hohen Prozentzahl.
+
+## Und die Abwehr?
+
+Wie sich Gegentore verteilen, hängt auch vom Abwehrsystem ab. In einer 6:0-Abwehr stehen alle sechs nahe am Torraum; Würfe aus dem Rückraum sind dann eher frei. In einer 5:1-Abwehr stört ein vorgezogener Spieler den Rückraum Mitte, dafür wird es am Kreis enger. Eine 3:2:1-Abwehr greift weit vorne an und ist anfällig für schnelle Pässe hinter die erste Reihe.
+
+<CourtPositions
+  label="Halbes Feld mit einer 5:1-Abwehr: fünf Abwehrspieler nahe am Torraum, einer vorgezogen gegen den Rückraum Mitte. Dazu die sechs Angreifer."
+  names={{ la: "LA", rl: "RL", rm: "RM", rr: "RR", ra: "RA", kr: "KM", tw: "TH" }}
+  defence="5:1"
+  defenceLabel="Leere Kreise: eine 5:1-Abwehr"
+/>
+
+## Mit Handball Intelligence
+
+Die App zählt das für dich, wenn du ihr den Wurfort sagst: Nach jedem bestätigten Tor tippst du an, von wo geworfen wurde. Ab drei Toren aus derselben Zone (gezählt werden nur getippte Wurforte) zeigt sie die Häufung als eines der drei Dinge, mit der Basis dazu und den Szenen. Du kannst den Wurfort später nachtragen oder ändern.
+
+Die Begriffe findest du kurz erklärt unter [Handball-Begriffe](handball-begriffe).

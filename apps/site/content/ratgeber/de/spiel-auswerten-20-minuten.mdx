@@ -1,0 +1,68 @@
+export const howto = {
+  name: "Ein Handballspiel in 20 Minuten auswerten",
+  description: "Eine Frage, die Tore und Gegentore, eine Strichliste und drei Szenen für das Team.",
+  totalTime: "PT20M",
+  tools: ["Video des Spiels", "Spielbericht", "Zettel und Stift"],
+  steps: [
+    { name: "Eine Frage wählen (2 Minuten)", text: "Nimm dir eine einzige Frage vor, zum Beispiel: Woher kommen unsere Gegentore? Alles andere bleibt für heute liegen." },
+    { name: "Den Spielverlauf lesen (3 Minuten)", text: "Schau im Spielbericht, wann Tore gefallen sind. Wo hatte ein Team eine Serie von drei oder mehr Toren? Diese Phasen schaust du zuerst an." },
+    { name: "Zu jedem Gegentor springen (8 Minuten)", text: "Spring zu jedem Gegentor und schau die 15 bis 20 Sekunden davor. Schreib pro Tor auf, von wo geworfen wurde und ob es nach einem Gegenstoss kam." },
+    { name: "Eine Strichliste führen (laufend)", text: "Mach für jede Position und für Gegenstösse einen Strich. Nach dem letzten Gegentor siehst du, wo es sich häuft." },
+    { name: "Die eigenen Tore überfliegen (4 Minuten)", text: "Schau kurz, wie eure Tore entstanden sind. Eine gute Szene brauchst du gleich für das Team." },
+    { name: "Drei Szenen auswählen (3 Minuten)", text: "Wähle zwei Szenen, die das Muster zeigen, und eine gute. Notier dir die Spielzeit, damit du sie wiederfindest." },
+  ],
+};
+
+export const faq = [
+  { q: "Warum nicht das ganze Spiel schauen?", a: "Weil es über eine Stunde dauert und du danach selten mehr weisst. Mit einer Frage und den Toren als Einstieg findest du das Wichtige in einem Drittel der Zeit." },
+  { q: "Und wenn ich keinen Spielbericht habe?", a: "Dann spulst du schneller durch und achtest auf den Anwurf nach jedem Tor. Er zeigt dir, dass gerade ein Tor gefallen ist." },
+  { q: "Welche Fragen eignen sich?", a: "Woher kommen die Gegentore? Wie viele Tore fielen nach Gegenstoss, auf beiden Seiten? Was passierte in den Minuten mit Zeitstrafe? Wann verloren wir die Führung?" },
+];
+
+## Warum mit einer Frage anfangen?
+
+Wer ein Video «einfach einmal anschaut», sieht viel und behält wenig. Mit einer Frage weisst du, worauf du achtest, und du kannst zu den richtigen Stellen springen. In 20 Minuten schaffst du so eine Frage gründlich. Das reicht für eine Trainingswoche.
+
+## So gehst du vor
+
+<Steps items={howto.steps} />
+
+## Die Strichliste
+
+Mehr als Zettel und Stift brauchst du nicht. Eine leere Strichliste gibt es [zum Ausdrucken](../vorlagen/strichliste). So kann sie ausgefüllt aussehen, hier mit erfundenen Zahlen:
+
+| Gegentor von | Erste Halbzeit | Zweite Halbzeit | Total |
+|---|---|---|---|
+| Aussen links | II | I | 3 |
+| Rückraum links | I | | 1 |
+| Rückraum Mitte | II | II | 4 |
+| Rückraum rechts | IIII | III | 7 |
+| Aussen rechts | I | I | 2 |
+| Kreis | II | I | 3 |
+| Siebenmeter | | II | 2 |
+| Gegenstoss | I | I | 2 |
+| **Total** | 13 | 11 | **24** |
+
+In diesem Beispiel fällt der Rückraum rechts auf: 7 von 24 Gegentoren. Ob das an der Abwehr, am Torhüter oder an Ballverlusten liegt, zeigen dir die sieben Szenen. Wie du so eine Häufung liest, steht in [Gegentore nach Position lesen](gegentore-nach-position).
+
+## Den Spielverlauf lesen
+
+Ein Spiel hat Phasen. Oft entscheiden fünf Minuten, in denen ein Team drei oder vier Tore in Folge wirft. Diese Phasen findest du im Spielbericht, bevor du das Video öffnest.
+
+<MatchTimeline
+  label="Ein erfundenes Spiel auf einer Linie von 60 Minuten: eigene Tore nach oben, Gegentore nach unten. Zwischen der 41. und der 46. Minute fallen vier Gegentore hintereinander."
+  above={[2, 6, 9, 13, 17, 21, 24, 28, 33, 36, 39, 49, 52, 55, 58]}
+  below={[4, 8, 11, 15, 19, 23, 27, 31, 35, 41, 43, 44, 46, 51, 54]}
+  aboveLabel="eigene Tore"
+  belowLabel="Gegentore"
+  half="Pause"
+  caption="Erfundenes Beispiel: Zwischen der 41. und der 46. Minute fallen vier Gegentore in Folge. Diese fünf Minuten schaust du zuerst an."
+/>
+
+## Was du am Ende hast
+
+- Eine Antwort auf deine Frage, mit Zahl und Basis: «7 von 24 Gegentoren aus dem Rückraum rechts».
+- Drei Szenen mit Spielzeit für die nächste Videositzung. Wie du sie zeigst: [Szenen im Training zeigen](szenen-im-training-zeigen).
+- Eine Idee für die Übung im nächsten Training.
+
+Schreib die Antwort auf. Nach drei oder vier Spielen siehst du, ob es ein Muster ist oder Zufall.

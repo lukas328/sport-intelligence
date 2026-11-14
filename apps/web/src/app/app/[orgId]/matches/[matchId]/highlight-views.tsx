@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowUp } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ShareButton } from "@/components/sharing/share-button";
 import { Button } from "@/components/ui/button";
-import { Alert, Card, EmptyState } from "@/components/ui/card";
+import { Alert, EmptyState } from "@/components/ui/card";
 import { Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -123,65 +122,5 @@ export function HighlightsView({
         ))}
       </div>
     </section>
-  );
-}
-
-/** Several files of one match (order, gaps) and suggested match boundaries (addendum 01, 4.8). */
-export function PartsPanel({ orgId, matchId, staff }: { orgId: string; matchId: string; staff: boolean }) {
-  const t = useTranslations("parts");
-  const qc = useQueryClient();
-  const path = { org_id: orgId, match_id: matchId };
-  const parts = useQuery({
-    queryKey: ["parts", matchId],
-    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/parts", { params: { path } })).data ?? [],
-  });
-  const bounds = useQuery({
-    queryKey: ["boundaries", matchId],
-    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/boundaries", { params: { path } })).data ?? [],
-  });
-  const order = useMutation({
-    mutationFn: async (ids: string[]) => api.PUT("/v1/orgs/{org_id}/matches/{match_id}/parts", { params: { path }, body: { video_ids: ids } }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["parts", matchId] }),
-  });
-  const list = parts.data ?? [];
-  const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
-  if (list.length < 2 && (bounds.data ?? []).length === 0) return null;
-  return (
-    <Card className="space-y-2" data-testid="parts">
-      {list.length > 1 && (
-        <>
-          <h2 className="font-semibold">{t("title")}</h2>
-          <ol className="space-y-1 text-sm">
-            {list.map((p, i) => (
-              <li key={p.video_id} className="flex flex-wrap items-center gap-2">
-                <span className="w-6 tabular-nums text-muted">{i + 1}</span>
-                <span className="flex-1">{p.filename}</span>
-                {p.gap_before_ms != null && p.gap_before_ms > 5000 && <span className="text-accent">{t("gap", { time: mmss(p.gap_before_ms) })}</span>}
-                {staff && i > 0 && (
-                  <Button
-                    variant="ghost"
-                    className="min-h-8 px-2 py-1"
-                    aria-label={t("up")}
-                    onClick={() => {
-                      const ids = list.map((x) => x.video_id);
-                      [ids[i - 1], ids[i]] = [ids[i]!, ids[i - 1]!];
-                      order.mutate(ids);
-                    }}
-                  >
-                    <ArrowUp aria-hidden />
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ol>
-          <p className="text-xs text-muted">{list.every((p) => p.confirmed) ? t("confirmed") : t("auto")}</p>
-        </>
-      )}
-      {(bounds.data ?? []).map((b) => (
-        <Alert key={`${b.video_id}-${b.t_ms}`} kind="info">
-          {t("boundary", { time: mmss(b.t_ms), pause: Math.round((b.pause_ms ?? 0) / 60000) })}
-        </Alert>
-      ))}
-    </Card>
   );
 }

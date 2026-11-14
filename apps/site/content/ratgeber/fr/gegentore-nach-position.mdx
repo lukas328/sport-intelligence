@@ -1,0 +1,64 @@
+export const faq = [
+  { q: "À partir de quand une accumulation est-elle une tendance ?", a: "Quand elle revient sur plusieurs matchs. Sur un match, 4 buts encaissés sur 20 depuis l'aile peuvent être un hasard. Trois matchs de suite, c'est un thème." },
+  { q: "Est-ce que je compte les jets de 7 mètres et les contre-attaques ?", a: "Oui, mais à part. Ils naissent autrement que les buts en attaque placée et ont d'autres causes." },
+  { q: "Alors, c'est la défense ou le gardien ?", a: "Le chiffre ne te le dit pas. Seule la séquence montre si le tireur était libre ou si un ballon arrêtable est passé." },
+];
+
+## Les postes
+
+En attaque, il y a six joueurs de champ, le plus souvent ainsi : ailier gauche et ailier droit, arrière gauche, demi-centre et arrière droit, et le pivot. Pour l'analyse, tu comptes chaque but encaissé au poste d'où le tir est parti. Les jets de 7 mètres et les buts sur contre-attaque forment des groupes à part.
+
+<CourtPositions
+  label="Demi-terrain, but en haut : les postes d'attaque ailier gauche, arrière gauche, demi-centre, arrière droit, ailier droit et pivot, plus le gardien."
+  names={{ la: "AG", rl: "ARG", rm: "DC", rr: "ARD", ra: "AD", kr: "PIV", tw: "GB" }}
+  caption="Les postes d'attaque vus par les attaquants : AG ailier gauche, ARG arrière gauche, DC demi-centre, ARD arrière droit, AD ailier droit, PIV pivot, GB gardien de but."
+/>
+
+Attention à « gauche » et « droite » : on parle du point de vue des attaquants. L'arrière droit adverse fait face au côté gauche de ta défense.
+
+## Comment compter
+
+1. Dans la vidéo, saute à chaque but encaissé et regarde les 15 secondes d'avant.
+2. Note la position du tir, pas le poste du joueur sur le papier. Si l'arrière droit rentre au centre et tire de là, ça compte « demi-centre ».
+3. Fais des groupes pour les jets de 7 mètres et les contre-attaques.
+4. À la fin, écris le chiffre avec sa base : « 7 buts encaissés sur 24 depuis l'arrière droit ».
+
+Tu trouves un modèle de feuille de pointage dans [Analyser un match en 20 minutes](spiel-auswerten-20-minuten).
+
+<ZoneCounts
+  label="Exemple inventé : buts encaissés selon la position du tir sur le demi-terrain. Arrière droit 7, demi-centre 4, ailier gauche 3, pivot 3, ailier droit 2, arrière gauche 1, jet de 7 mètres 2."
+  counts={{ la: 3, rl: 1, rm: 4, rr: 7, ra: 2, kr: 3, m7: 2 }}
+  names={{ la: "AG", rl: "ARG", rm: "DC", rr: "ARD", ra: "AD", kr: "PIV", m7: "7 m" }}
+  caption="Exemple inventé avec 22 buts encaissés en attaque placée et sur jet de 7 mètres, plus 2 sur contre-attaque. L'arrière droit ressort. AG ailier gauche, ARG arrière gauche, DC demi-centre, ARD arrière droit, AD ailier droit, PIV pivot, 7 m jet de 7 mètres."
+/>
+
+## Ce qu'une accumulation peut vouloir dire
+
+Le chiffre te montre où regarder. La cause est dans les séquences. Tendances typiques :
+
+- **Beaucoup de buts des arrières :** la défense reste trop basse ou ne sort pas, ou le tireur a trop d'espace après un croisement. Regarde la distance au tireur au moment du tir.
+- **Beaucoup de buts des ailes :** la défense se resserre au centre et un trou s'ouvre sur l'aile. Ou le gardien est mal placé dans l'angle. Regarde le défenseur à côté de l'ailier.
+- **Beaucoup de buts du pivot :** le pivot se libère après un écran, ou deux défenseurs ne se parlent pas. Regarde qui prend le pivot.
+- **Beaucoup de jets de 7 mètres :** des fautes en position de tir, souvent sur le pivot ou après une percée. Regarde ce qui s'est passé avant la faute.
+- **Beaucoup de buts sur contre-attaque :** la cause est le plus souvent devant, dans les pertes de balle ou les tirs précipités. Plus à ce sujet : [Analyser contre-attaques et pertes de balle](gegenstoss-und-ballverluste).
+
+## Prudence avec les petits chiffres
+
+« 50 % des buts encaissés depuis l'aile », ça sonne dramatique. Si c'est 2 sur 4, ça ne veut rien dire. Écris donc toujours la base et regarde sur plusieurs matchs. Deux ou trois matchs avec la même accumulation sont un meilleur signe qu'un seul match avec un pourcentage élevé.
+
+## Et la défense ?
+
+La répartition des buts encaissés dépend aussi du système défensif. En défense 6-0, les six défenseurs sont près de la zone ; les tirs des arrières sont alors plus libres. En défense 5-1, un joueur avancé gêne le demi-centre, mais ça devient plus serré au pivot. Une défense 3-2-1 attaque loin devant et souffre des passes rapides derrière la première ligne.
+
+<CourtPositions
+  label="Demi-terrain avec une défense 5-1 : cinq défenseurs près de la zone, un avancé face au demi-centre. Plus les six attaquants."
+  names={{ la: "AG", rl: "ARG", rm: "DC", rr: "ARD", ra: "AD", kr: "PIV", tw: "GB" }}
+  defence="5:1"
+  defenceLabel="Cercles vides : une défense 5-1"
+/>
+
+## Avec Handball Intelligence
+
+L'app fait ce comptage pour toi si tu lui indiques le lieu de tir : après chaque but confirmé, tu indiques d'un toucher d'où le tir est parti. Dès trois buts depuis la même zone (seuls les lieux de tir indiqués comptent), elle montre cette accumulation comme l'un des trois points, avec la base et les séquences. Tu peux ajouter ou modifier le lieu de tir plus tard.
+
+Tu trouves les termes expliqués en bref dans [Les termes du handball](handball-begriffe).

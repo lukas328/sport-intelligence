@@ -1,17 +1,34 @@
 import type { MetadataRoute } from "next";
 import { LOCALES } from "@/lib/i18n";
-import { pageUrl } from "@/lib/site";
+import { alternates } from "@/lib/seo";
+import { SITE_UPDATED, pageUrl } from "@/lib/site";
 import { BLOG } from "../../content/blog";
+import { GUIDES } from "../../content/ratgeber";
 import { HELP } from "../../content/help";
 
 export const dynamic = "force-static";
 
-export const PAGES = ["", "so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum"];
+/** Pages that exist in all three languages, without the legal drafts' own dates. */
+export const PAGES = ["", "so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "vorlagen", "vorlagen/einwilligung", "vorlagen/strichliste", "vorlagen/spieltag", "rechner/wurfquote", "rechner/speicher", "ueber-uns", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum"];
 
+type Entry = { path: string; available: readonly (typeof LOCALES)[number][]; modified: string };
+
+export function sitemapEntries(): Entry[] {
+  return [
+    ...PAGES.map((path) => ({ path, available: LOCALES, modified: SITE_UPDATED })),
+    ...HELP.filter((h) => h.listed !== false).map((h) => ({ path: `hilfe/${h.slug}`, available: LOCALES, modified: SITE_UPDATED })),
+    ...BLOG.filter((p) => !p.movedTo).map((p) => ({ path: `blog/${p.slug}`, available: LOCALES, modified: p.updated ?? p.date })),
+    ...GUIDES.map((g) => ({ path: `ratgeber/${g.slug}`, available: g.locales, modified: g.updated })),
+  ];
+}
+
+/** Every page in every language it exists in, each with all its alternates (hreflang) and x-default. */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = [...PAGES, ...HELP.filter((h) => h.listed !== false).map((h) => `hilfe/${h.slug}`), ...BLOG.map((p) => `blog/${p.slug}`)];
-  return paths.map((path) => ({
-    url: pageUrl("de", path),
-    alternates: { languages: Object.fromEntries(LOCALES.map((l) => [l === "de" ? "de-CH" : l, pageUrl(l, path)])) },
-  }));
+  return sitemapEntries().flatMap(({ path, available, modified }) =>
+    available.map((locale) => ({
+      url: pageUrl(locale, path),
+      lastModified: modified,
+      alternates: { languages: alternates(path, available) },
+    })),
+  );
 }

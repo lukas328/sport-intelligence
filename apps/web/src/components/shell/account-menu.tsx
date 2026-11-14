@@ -85,7 +85,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
             </MenuItem>
           )}
           <MenuSeparator />
-          <MenuItem href={helpUrl(cfg.data?.help_url ?? "https://handball-ai.ch/hilfe", locale, path)} external icon={<HelpCircle />} testId="help-link">
+          <MenuItem href={helpUrl(cfg.data?.help_url ?? "https://handball-intelligence.com/hilfe", locale, path)} external icon={<HelpCircle />} testId="help-link">
             {t("help")}
           </MenuItem>
           <MenuItem onSelect={() => setFeedback(true)} icon={<MessageSquare />}>

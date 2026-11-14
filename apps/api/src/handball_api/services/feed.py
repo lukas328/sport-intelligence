@@ -32,9 +32,9 @@ from handball_api.models.enums import ClipSource, ConsentKind
 from handball_api.services import audit, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import (
-    clip_window,
     get_match,
     opponent_of,
+    scene_window,
     timeline_video,
     video_duration_ms,
 )
@@ -43,8 +43,6 @@ from handball_api.services.policies import Action
 from handball_api.services.roster import consented
 
 SCENES = 5
-PRE_MS = 6000
-POST_MS = 3000
 
 
 @dataclass
@@ -245,7 +243,7 @@ def _clip_for(ctx: Ctx, match: Match, e: Event, duration: int | None) -> Clip:
     """A clip around the event (saved with the next flush; the caller read the video length
     once, not per clip)."""
     assert e.t_ms is not None and e.t_ms >= 0
-    start, end = clip_window(e.t_ms, PRE_MS, POST_MS, duration)
+    start, end = scene_window(e, duration)
     clip = Clip(
         id=uuid.uuid4(),
         organization_id=match.organization_id,

@@ -26,7 +26,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import VideoRole
 from handball_api.schemas.events import EventIn, EventOut, EventPatch
-from handball_api.services import audit, roster
+from handball_api.services import audit, roster, timeline
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
@@ -427,6 +427,8 @@ async def set_kickoff(
             raise ProblemError(422, "invalid-clock", "The clock time is not in this half")
         t_ms = round(t_ms - (clock_s - half_start) * 1000)
     match.kickoff_ms = {**(match.kickoff_ms or {}), str(period): t_ms}
+    if period == 1:
+        timeline.forget_lead(match)
     events = (
         await ctx.db.scalars(
             select(Event).where(

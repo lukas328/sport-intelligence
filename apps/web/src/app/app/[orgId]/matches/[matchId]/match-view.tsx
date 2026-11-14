@@ -36,8 +36,7 @@ import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { GameActions, PointOpen, Telegram, ThreeFigures, chatPicture } from "./game-tab";
 import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
-import { KeepersView, PhysicalView } from "./m5-views";
-import { NumbersView } from "./numbers-view";
+import dynamic from "next/dynamic";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
@@ -48,10 +47,19 @@ import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
 import { MyScenesLine, TeamFeedView } from "./feed-views";
-import { ExchangePanel } from "./exchange-panel";
 import { officialGoalsKey } from "./official-goals";
-import { MarksPanel } from "./marks-panel";
-import { HighlightsView, PartsPanel } from "./highlight-views";
+import { PartsLine, PartsPanel, usePartMarkers } from "./parts-panel";
+import { latestJobs, partName, partsOf, partState, timelineVideo } from "@/lib/video-parts";
+
+// Loaded when shown, so the match page stays within the bundle budget (scripts/check-bundle.mjs).
+// Keepers and running distances sit deep in the Zahlen tab.
+const KeepersView = dynamic(() => import("./m5-views").then((m) => m.KeepersView));
+const PhysicalView = dynamic(() => import("./m5-views").then((m) => m.PhysicalView));
+// the Zahlen tab, the highlights, the match-day marks and the exchange: not on the first screen
+const NumbersView = dynamic(() => import("./numbers-view").then((m) => m.NumbersView));
+const HighlightsView = dynamic(() => import("./highlight-views").then((m) => m.HighlightsView));
+const MarksPanel = dynamic(() => import("./marks-panel").then((m) => m.MarksPanel));
+const ExchangePanel = dynamic(() => import("./exchange-panel").then((m) => m.ExchangePanel));
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
@@ -157,24 +165,33 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [askPane] = useState<{ pane: "feedback" } | null>(null);
   const player = useRef<PlayerHandle | null>(null);
-  // deep links (?t=ms), e.g. from a play drawn on a video moment
-  useEffect(() => {
-    const t0 = Number(new URLSearchParams(window.location.search).get("t"));
-    if (!Number.isFinite(t0) || t0 <= 0) return;
+  const stats = useStats(orgId, initial.id);
+  const graphics = useMatchGraphics(orgId, initial.id);
+  const [bench, setBench] = useState(false);
+  // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
+  // plays in the full player, so it opens (behind the stage it would seek out of sight)
+  // a moment in the full player: it opens, and the moment is sought once the video can
+  const benchAt = useCallback((t0: number, play = false) => {
+    setBench(true);
     const id = window.setInterval(() => {
       const v = player.current?.video();
       if (v && v.readyState >= 1) {
         player.current?.seek(t0);
+        if (play) player.current?.play();
         window.clearInterval(id);
       }
     }, 300);
     const stop = window.setTimeout(() => window.clearInterval(id), 30_000);
     return () => (window.clearInterval(id), window.clearTimeout(stop));
   }, []);
-  const stats = useStats(orgId, initial.id);
-  const graphics = useMatchGraphics(orgId, initial.id);
-  const [bench, setBench] = useState(false);
+  useEffect(() => {
+    const t0 = Number(new URLSearchParams(window.location.search).get("t"));
+    if (!Number.isFinite(t0) || t0 <= 0) return;
+    return benchAt(t0);
+  }, [benchAt]);
   const ta = useTranslations("anlauf");
+  const tParts = useTranslations("parts");
+  const plainPlayer = useRef<PlayerHandle>(null);
   const thingText = useThingText();
   const own = ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
@@ -184,8 +201,11 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     [roster.data],
   );
 
-  const jobs = match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job);
-  const main = match.videos.find((v) => v.role === "main" && v.status === "ready");
+  const jobs = latestJobs(match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job));
+  // the video the match plays: its first part, as long as all parts together (Q-VIDEO-PARTS)
+  const main = timelineVideo(match.videos);
+  const parts = partsOf(match.videos);
+  const partMarkers = usePartMarkers(match.videos);
   // without counted events the record, shots and goalkeepers have nothing to show: no dead tabs
   // (the overview says how they come: the match report or marking courtside)
   const counted = (stats.data?.quality.events ?? 0) > 0;
@@ -216,7 +236,23 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const soon = kickoff.getTime() > Date.now() - 3 * 3600_000;
   const liveFirst = staff && match.score_own == null && !main && soon && match.source !== "paper_report";
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
-  const running = jobs.filter((j) => j.status !== "succeeded");
+  // a further part whose analysis failed is said in the list of parts, with «Erneut versuchen»;
+  // the match itself stays usable (the big failure box is for a match without a usable video)
+  const partFailed = (j: Job) => parts.length > 1 && j.kind === "analysis" && j.status === "failed" && parts.some((p) => p.id === j.video_asset_id);
+  const shownJobs = jobs.filter((j) => !partFailed(j));
+  const running = shownJobs.filter((j) => j.status !== "succeeded");
+  // a further file on its way or being analysed: the progress shows its own steps (not the done
+  // steps of the first half), under its name once it is a part
+  const newcomer = parts.length >= 1 ? match.videos.find((v) => v.role === "main" && v.part == null && v.status === "processing") : undefined;
+  const runningPart = parts.length > 1 ? (parts.find((p) => ["processing", "analysing"].includes(partState(p, jobs).kind)) ?? newcomer) : newcomer;
+  const runningName = runningPart?.part != null ? partName(runningPart.part, parts) : null;
+  const runningPartName = runningName ? tParts(runningName.key, { n: runningName.n }) : runningPart ? runningPart.filename : undefined;
+  // the «Weitere Datei» box stays open after the upload (with «Fertig hochgeladen») until closed
+  const [addOpen, setAddOpen] = useState(false);
+  const adding = pendingVideos.some((v) => v.status === "processing" || v.status === "uploading");
+  useEffect(() => {
+    if (adding) setAddOpen(true);
+  }, [adding]);
   // RSVP belongs to "Teamfunktionen" (ADR 029): hidden while the team has them off
   const teamFeatures = shell?.teams.find((x) => x.id === match.team_id)?.team_features ?? false;
 
@@ -282,17 +318,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const setup = main ? (
     <>
       {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
-      {staff && match.source !== "paper_report" && (
-        <details id="upload" className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
-          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
-            <Plus aria-hidden className="size-4" />
-            {t("upload.addCamera")}
-          </summary>
-          <div className="pt-3">
-            <UploadPanel orgId={orgId} matchId={match.id} hasMain onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
-          </div>
-        </details>
-      )}
     </>
   ) : null;
   const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
@@ -300,11 +325,17 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const checks = graphics.data ? checkCount(graphics.data) : 0;
   // the stage of the tab Video (SPEC 7.3) once there are goals to show on it
   const stage = Boolean(main && graphics.data && graphics.data.goals.some((g) => g.has_video || g.source === "demo"));
-  const confirmedGoals = graphics.data?.goals.filter((g) => g.confirmed).length ?? 0;
+  // «von dir bestätigt»: the goals a person confirmed (Prüfen, by hand), and of those how many have
+  // their place («Von wo?»); not the estimated shot spot (Echtlauf 5 P5)
+  const coachGoals = graphics.data?.goals.filter((g) => g.by_coach) ?? [];
+  const placedGoals = coachGoals.filter((g) => g.zone != null && g.zone_source !== "unknown").length;
+  const totalGoals = graphics.data?.goals.length ?? 0;
   const sourceParts = [
     main ? ta("sourceVideo") : null,
     graphics.data?.has_report ? ta("sourceReport") : null,
-    graphics.data && graphics.data.goals.length > 0 ? ta("sourceMarked", { n: confirmedGoals, total: graphics.data.goals.length }) : null,
+    coachGoals.length > 0
+      ? `${coachGoals.length === totalGoals ? ta("sourceMarkedAll", { n: coachGoals.length }) : ta("sourceMarked", { n: coachGoals.length, total: totalGoals })}${ta("sourcePlaced", { n: placedGoals })}`
+      : null,
   ].filter(Boolean);
   return (
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
@@ -448,7 +479,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </div>
         </details>
       )}
-      {running.length > 0 && <Processing jobs={jobs} orgId={orgId} staff={staff} hasReport={graphics.data?.has_report ?? false} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
+      {running.length > 0 && <Processing jobs={runningPart ? shownJobs.filter((j) => j.video_asset_id === runningPart.id) : shownJobs} part={runningPartName} orgId={orgId} staff={staff} hasReport={graphics.data?.has_report ?? false} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
@@ -468,11 +499,15 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             onBench={() => setBench(true)}
           />
         )}
+        {/* the jump to the second half also with goals on the stage: it plays in the full player
+            (the stage plays scenes only) */}
+        {stage && main && graphics.data && !bench && <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />}
         {main && !stage && !bench && (
           // without goals on the stage: the video, one sentence, the way on; never the old capture
           // workbench by default (UX test N04), it opens with one tap
           <section className="space-y-4" data-testid="plain-stage">
-            <VideoPlayer src={`/v1/orgs/${orgId}/videos/${main.id}/media/hls/master.m3u8`} />
+            <VideoPlayer ref={plainPlayer} src={`/v1/orgs/${orgId}/videos/${main.id}/media/hls/master.m3u8`} markers={partMarkers} />
+            <PartsLine videos={match.videos} onJump={(ms) => (plainPlayer.current?.seek(ms), plainPlayer.current?.play())} />
             {/* «fertig» only once the analysis is done, never while it runs (E06) */}
             <p className="m-0 max-w-[60ch] text-[17px]">{graphics.data?.analysis === "running" ? ta("plainRunning") : graphics.data?.analysis !== "ready" ? ta("plainVideoOnly") : staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
             <div className="flex flex-wrap gap-3">
@@ -503,6 +538,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 </Button>
               </div>
             )}
+            <div className="mb-3">
+              <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />
+            </div>
             <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={false} />
           </section>
         ) : !staff ? (
@@ -522,7 +560,21 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </section>
         )}
-        <PartsPanel orgId={orgId} matchId={match.id} staff={staff} />
+        <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
+        {/* a further file (the second half, another camera): right in the Video tab, not only
+            in the workbench (Q-VIDEO-PARTS) */}
+        {main && staff && match.source !== "paper_report" && (
+          <details id="upload" className="group" open={addOpen} onToggle={(e) => setAddOpen(e.currentTarget.open)} data-testid="add-file">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
+              <Plus aria-hidden className="size-4" />
+              {t("upload.addCamera")}
+            </summary>
+            <div className="pt-3">
+              <UploadPanel orgId={orgId} matchId={match.id} hasMain onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            </div>
+          </details>
+        )}
+        {main && staff && parts.length === 1 && !adding && <p className="m-0 max-w-[60ch] text-[15px] text-ink-2">{tParts("later")}</p>}
         {!main && match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
       </div>
 
@@ -681,7 +733,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   );
 }
 
-function Processing({ jobs, orgId, staff, onOtherFile, hasReport = false }: { jobs: Job[]; orgId: string; staff: boolean; onOtherFile?: () => void; hasReport?: boolean }) {
+function Processing({ jobs, orgId, staff, onOtherFile, hasReport = false, part }: { jobs: Job[]; orgId: string; staff: boolean; onOtherFile?: () => void; hasReport?: boolean; part?: string | undefined }) {
   const t = useTranslations("processing");
   const ta = useTranslations("anlauf");
   const now = useNow({ updateInterval: 5000 });
@@ -731,7 +783,8 @@ function Processing({ jobs, orgId, staff, onOtherFile, hasReport = false }: { jo
     // something useful meanwhile and the three fields that will fill
     <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" aria-live="polite" data-testid="job" data-orgid={orgId} data-staff={staff || undefined}>
       <div>
-        <h2 className="text-[26px]">{ta("titleRunning")}</h2>
+        {/* a match in several files: which part is on its way (the others are done) */}
+        <h2 className="text-[26px]">{part ? t("titlePart", { name: part }) : ta("titleRunning")}</h2>
         {/* stays for the whole analysis, not four seconds (UX test N24, H05) */}
         <p className="m-0 mt-1 max-w-[60ch] text-[17px]" data-testid="may-close">{t("analysisHint")}</p>
         <div className="mt-3 h-1.5 bg-rule" aria-hidden>

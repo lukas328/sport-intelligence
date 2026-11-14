@@ -17,7 +17,8 @@ import { drawShapes, type Shape } from "./shapes";
 
 export interface Marker {
   t_ms: number;
-  kind: "comment" | "clip" | "drawing" | "event";
+  /** "part": where the next file of the match starts (the second half), a line across the bar */
+  kind: "comment" | "clip" | "drawing" | "event" | "part";
   label?: string;
 }
 
@@ -34,6 +35,8 @@ export interface PlayerHandle {
   pause(): void;
   time(): number;
   video(): HTMLVideoElement | null;
+  /** from the window's start, muted, once the picture can play (a play() right after a tap is not lost) */
+  restart?(): void;
 }
 
 interface Props {
@@ -52,12 +55,16 @@ interface Props {
   autoPlay?: boolean;
   /** how times read in the controls, e.g. the match clock ("1. HZ 12:55"); video time by default */
   clock?: (ms: number) => string;
+  /** on a phone without the control bar under the picture (Prüfen «Von wo?»: one screen); from tablets up the bar floats over it */
+  bare?: boolean;
+  /** the window plays in a loop instead of stopping at its end (Prüfen «Von wo?») */
+  loop?: boolean;
 }
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
 
 export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
-  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock },
+  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock, bare, loop },
   ref,
 ) {
   const t = useTranslations("player");
@@ -73,6 +80,9 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
   const [thumbs, setThumbs] = useState<ThumbCue[]>([]);
   const [hover, setHover] = useState<{ x: number; t: number } | null>(null);
   const frame = 1 / (fps && fps > 0 ? fps : 25);
+  // where the further files of a match start: a stall near there loads again
+  const partStarts = useRef<number[]>([]);
+  partStarts.current = markers.filter((m) => m.kind === "part").map((m) => m.t_ms);
 
   useImperativeHandle(ref, () => ({
     seek: (ms) => {
@@ -82,6 +92,16 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
     pause: () => videoRef.current?.pause(),
     time: () => (videoRef.current?.currentTime ?? 0) * 1000,
     video: () => videoRef.current,
+    restart: () => {
+      const v = videoRef.current;
+      if (!v) return;
+      v.muted = true;
+      setMuted(true);
+      v.currentTime = (win?.start_ms ?? 0) / 1000;
+      const go = () => void v.play().catch(() => undefined);
+      if (v.readyState >= 3) go();
+      else v.addEventListener("canplay", go, { once: true });
+    },
   }));
 
   // HLS: native in Safari/iOS, hls.js elsewhere (loaded only here to keep other routes light)
@@ -90,24 +110,84 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
     if (!video) return;
     let destroy: (() => void) | undefined;
     setError(false);
+    // a match in several files plays as one stream with a break between the files: should a
+    // file not continue cleanly there (another resolution, frame rate or sound), the player loads
+    // again at the same moment instead of hanging (Q-VIDEO-PARTS)
+    let reloads = 0;
+    const reloadAt = (load: () => void) => {
+      if (reloads++ >= 3) return setError(true);
+      const at = video.currentTime;
+      const wasPlaying = !video.paused;
+      load();
+      const back = () => {
+        video.currentTime = at + 0.1;
+        if (wasPlaying) void video.play().catch(() => undefined);
+      };
+      video.addEventListener("loadedmetadata", back, { once: true });
+    };
+    // stuck at the break between two files (waiting, no error): load again there
+    let stall: number | undefined;
+    const onWaiting = () => {
+      window.clearTimeout(stall);
+      const near = partStarts.current.some((t) => Math.abs(video.currentTime * 1000 - t) < 8000);
+      if (near) stall = window.setTimeout(() => !video.paused && reloadAt(reload.current), 6000);
+    };
+    const onPlaying = () => window.clearTimeout(stall);
+    video.addEventListener("waiting", onWaiting);
+    video.addEventListener("playing", onPlaying);
+    const reload = { current: () => {} };
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
+      reload.current = () => {
+        video.src = src;
+        video.load();
+      };
+      const onError = () =>
+        reloadAt(() => {
+          video.src = src;
+          video.load();
+        });
+      video.addEventListener("error", onError);
+      destroy = () => video.removeEventListener("error", onError);
     } else {
       void import("hls.js").then(({ default: Hls }) => {
         if (!Hls.isSupported()) {
           setError(true);
           return;
         }
-        const hls = new Hls({ maxBufferLength: 30, enableWorker: true }); // same origin: cookies are sent
-        hls.on(Hls.Events.ERROR, (_e, data) => {
-          if (data.fatal) setError(true);
-        });
+        let hls = new Hls({ maxBufferLength: 30, enableWorker: true }); // same origin: cookies are sent
+        let recovered = false;
+        const attach = (h: typeof hls) => {
+          h.on(Hls.Events.ERROR, (_e, data) => {
+            if (!data.fatal) return;
+            if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !recovered) {
+              recovered = true;
+              h.recoverMediaError();
+              return;
+            }
+            reloadAt(reload.current);
+          });
+        };
+        reload.current = () => {
+          hls.destroy();
+          hls = new Hls({ maxBufferLength: 30, enableWorker: true });
+          recovered = false;
+          attach(hls);
+          hls.loadSource(src);
+          hls.attachMedia(video);
+        };
+        attach(hls);
         hls.loadSource(src);
         hls.attachMedia(video);
         destroy = () => hls.destroy();
       });
     }
-    return () => destroy?.();
+    return () => {
+      window.clearTimeout(stall);
+      video.removeEventListener("waiting", onWaiting);
+      video.removeEventListener("playing", onPlaying);
+      destroy?.();
+    };
   }, [src]);
 
   useEffect(() => {
@@ -154,8 +234,14 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         setTime(ms);
         onTime?.(ms);
         if (win && ms >= win.end_ms) {
-          v.pause();
-          onWindowEnd?.();
+          if (loop) {
+            // in a loop: back to the window's start, still playing (muted, it may play alone)
+            v.currentTime = win.start_ms / 1000;
+            if (v.paused) void v.play().catch(() => undefined);
+          } else {
+            v.pause();
+            onWindowEnd?.();
+          }
         }
       }
       renderOverlay();
@@ -163,7 +249,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [renderOverlay, onTime, win, onWindowEnd]);
+  }, [renderOverlay, onTime, win, onWindowEnd, loop]);
 
   const seekBy = (s: number) => {
     const v = videoRef.current;
@@ -218,6 +304,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       tabIndex={0}
       onKeyDown={onKeyDown}
       className="group relative overflow-hidden bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      role="group"
       aria-label={t("shortcutsList")}
       data-testid="player"
     >
@@ -259,6 +346,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         className={cn(
           "space-y-0.5 bg-black px-2 pt-1 pb-1 text-white transition-opacity duration-200 sm:absolute sm:inset-x-0 sm:bottom-0 sm:space-y-1 sm:bg-transparent sm:bg-gradient-to-t sm:from-black/85 sm:via-black/45 sm:to-transparent sm:px-3 sm:pt-10 sm:pb-2",
           playing && !hover && "sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
+          bare && "max-sm:hidden",
         )}
       >
         <div
@@ -297,7 +385,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               className={cn(
                 // one ink on the scrubber, told apart by shape: a clip is wider, a drawing shorter
                 "pointer-events-none absolute bottom-0 -translate-x-1/2 bg-white",
-                m.kind === "clip" ? "h-2.5 w-0.5" : m.kind === "drawing" ? "h-1.5 w-0.5" : "h-2 w-0.5",
+                m.kind === "part" ? "h-6 w-1" : m.kind === "clip" ? "h-2.5 w-0.5" : m.kind === "drawing" ? "h-1.5 w-0.5" : "h-2 w-0.5",
               )}
               style={{ left: `${pct(m.t_ms)}%` }}
             />

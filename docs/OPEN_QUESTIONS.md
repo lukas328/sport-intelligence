@@ -5,10 +5,12 @@ Each question has the **assumption** I work with until it is answered. Status: o
 ## Product and business
 - **Q-PROD-1 Product name and domain.** "Handball AI" was very close to the competitor
   *handball.ai* named in the brief. *Decided 2026-11-12:* the product is called **Handball
-  Intelligence**, logo «Taktik» (docs/design/brand2/taktik). *Open:* the domain
-  (`handball-ai.ch` stays in config, mail addresses, deep links and the mobile bundle ids until a
-  new domain is registered), the legal entity name on invoices (`Handball AI GmbH`), and a
-  trademark search (Swissreg, EUIPO, classes 9, 41, 42).
+  Intelligence**, logo «Taktik» (docs/design/brand2/taktik). *Decided 2026-11-13:* the domain is
+  **handball-intelligence.com** (site), `app.handball-intelligence.com` (app, deep links),
+  `support@handball-intelligence.com`; config defaults, mail addresses and deep links use it.
+  *Open:* DNS, mail (SPF, DKIM, DMARC) and the app-link files on the new host (docs/site/SEO.md,
+  «Vor dem Livegang»), the mobile bundle ids (`ch.handballai.app`), the legal entity name on
+  invoices (`Handball AI GmbH`), and a trademark search (Swissreg, EUIPO, classes 9, 41, 42).
 - **Q-PROD-2 Languages.** de-CH ("ss") first. Germany uses "ß". *Assumption:* v1 ships de-CH only, a de-DE
   variant can be added as a separate locale later.
 - **Q-PROD-3 Company entity, VAT and currencies for Stripe** (CHF only, or CHF + EUR). *Assumption:* CHF and EUR prices in config.
@@ -183,7 +185,7 @@ the M11 report.
 ### Q-M11-3 Store accounts and push credentials
 Apple Developer and Google Play accounts of the operating company, an Expo (EAS) project id
 (`app.json` extra.eas.projectId), APNs key and FCM credentials, the domain for app links
-(`app.handball-ai.ch`, apple-app-site-association and assetlinks.json on the web server).
+(`app.handball-intelligence.com`, apple-app-site-association and assetlinks.json on the web server).
 **Default**: prepared in `apps/mobile` (bundle id `ch.handballai.app`); submission once accounts exist.
 
 ### Q-UX-1 Usability test with real coaches, players and parents
@@ -299,16 +301,41 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   then had to start over (UX test round 2, N15). Now 24 hours, still single use and void once
   used (setting `magic_link_ttl_minutes`). Trade-off: a mailbox someone else can read stays a way
   in for longer. Alternative if that is too long: a six-digit code next to the link.
-- **Q-VIDEO-PARTS Two files for one match (Lukas to decide, product).** Many coaches stop the
-  recording at half-time. Today a match takes several main files, all stored and playable, but
-  the match's timeline and the whole analysis (three things, scenes, Prüfen, positions) use only
-  the first one (`timeline_video`): the second half in a second file is not analysed. The app
-  says so where a second file is added and in the upload tips; the website says the same
-  (UX test round 2, N28). To merge two files into one match: effort (one timeline across files
-  with an offset per file, or joining the files before the analysis), order (by upload or by the
-  recording time in the file, with a way to swap), the time axis (the break between the files is
-  unknown: from the throw-off of the second half, which Prüfen already asks for). Until then: one
-  file per match is the recommendation.
+- **Q-VIDEO-PARTS Two files for one match. Decided (2026-11-13), built on `claude/video-parts`.**
+  A match has *parts* in a fixed order (usually the two halves; three or four when a phone splits
+  the recording). The match timeline is the parts one after the other; every event, scene, goal
+  candidate, possession, clip and throw-off time lies on it (`services/matches.parts_of`,
+  `services/timeline.py`). Order: the camera clock in the file's metadata, else upload order
+  (several files chosen at once go up in recording order); «Reihenfolge stimmt nicht? Tauschen»
+  swaps without a new upload. *Way chosen: an offset per file, not joining the files before the
+  analysis.* Each part is analysed on its own and its results are placed at the part's start, so a
+  part added hours later analyses only itself, nothing is re-encoded or stored twice, and the
+  court, the camera and a failure stay per part. For playback the API serves the first part's HLS
+  playlists joined over all parts (segments of each file, a discontinuity between files): every
+  player that plays the match video (Video tab, scenes, Prüfen, share links, the native app) plays
+  across the break without a change. A change of the parts (added, deleted, failed, swapped) moves
+  every match row with its part; the coach's answers are kept. The second half (second of two
+  parts, or after a break of 5 min or more) tells the event baseline which side the home team
+  defends (`side_hint`); its court tries the other part's confirmed court first and is asked in
+  Prüfen only when it was not carried over, with «Ecken der 1. Halbzeit übernehmen». The second
+  half's first throw-off opens half 2 of the match clock (`kickoff_ms["2"]`); without one Prüfen
+  asks for it and starts the player at the second file. Existing matches with several files keep
+  the first uploaded file at the start (migration 0044); their further files were never analysed
+  into the match and show «noch nicht ausgewertet» with «Auswerten». Still open:
+  - **Q-PARTS-MARKS** Courtside marks are synced with one offset per mark session; over a break
+    that is not in any file, the marks of the second half are off by the break. A piecewise sync
+    (one offset per part) is not built.
+  - **Q-PARTS-OVERLAY** The workbench overlays (spotlight, mini court) read the first part's
+    tracks; in the second half they show nothing instead of wrong positions. The tactics camera,
+    the runs of the three things, shot positions and the physical load already read each part.
+  - **Q-PARTS-RENDITIONS** Playback across files: since this change every ingested file gets a
+    sound track (silent when it has none), and the player loads again at the same moment when a
+    file does not continue cleanly at the break (hls.js media error, native error, a stall near a
+    part start). Files ingested *before* without sound next to a file with sound, portrait next
+    to landscape, and native Safari on an iPhone are untested here (no Apple device): Lukas'
+    real test checks them. Reels and the presentation export cut each scene from its own file.
+  - **Q-PARTS-ORDER-RERUN** After a swap the side hint of the part that is now second is not
+    recomputed; «Erneut versuchen» on that part runs it with the new hint.
 
 ## UX test round 3 (2026-11-13)
 
@@ -326,7 +353,51 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
 Weaknesses of the recognition, recorded here and not fixed in the interface work (E01 to E12):
 
 - **Q-REC-SCOREBOARD The hall's scoreboard is not read.** In clip 1 the board (8:7 to 11:11) is
-  readable when the camera points left; the analysis finds no goal by itself.
+  readable when the camera points left (about 100 of 300 s, about 100 x 70 px at 720p, digits 12
+  to 15 px high); the analysis finds no goal by itself. Measured in the fourth test: the text
+  recognition returns the clock without its colon («849» for 8:49), so the clock rule in
+  `hallboard.py` never matches and the board has no anchor, and it does not find the single
+  seven-segment score digits at all. Open: accept three and four digit clock fields as mm:ss,
+  find the board by red on black, a reader of its own for seven-segment digits.
+- **Q-REC-SHOTZONE Confirmed goals have no shot position, so the three things never appear
+  (fourth test, H7).** `shot_positions.fill` runs only at the end of the analysis, not when a
+  goal moment is confirmed, and sets only x/y while `zone_of()` in graphics.py reads only
+  shot_zone and shot_type. *Decided 2026-11-14:* Prüfen asks «Von wo?» with one tap on a small
+  court right after the team of a confirmed goal; an estimate from the tracks is only the
+  fallback. *Built (branch `claude/shot-zone`, not yet on a real clip):* the review takes
+  `shot_zone` (la, rl, rm, rr, ra, kr, m7, gs or unknown) and the tapped point;
+  `PUT …/goals/{event}/spot` changes or adds it for any goal (report goals keep their source);
+  without a tap `shot_positions.fill_one` estimates that goal from its part's tracks and sets
+  shot_zone too; `zone_of` falls back to the zone at x/y; `attributes.zone_source` says coach,
+  estimated or unknown. Left and right are the attacker's (zones.json): on the half court with the
+  goal at the top, «Aussen links» is on the left of the picture. Gegenstoss is shot_type
+  fast_break (zone gs) and replaces the place in the question; an estimated place stays. Goals of
+  the match report are asked in «Wurfort nachtragen» once the throw-off puts them in the video.
+  *Left:* (1) the time of a report goal on the video comes from the clock and the throw-off: the
+  clip of 10 s before to 2 s after can miss the throw where the report's minute is coarse or the
+  clock runs on during breaks; (2) a tap gives a coarse point (thumb on a 20 m wide drawing), good
+  for the bundle, not for distances; (3) how long «Von wo?» adds on a whole match (50 to 60 goals)
+  is not measured, the estimate is 23 s per goal question instead of 18 s; (4) the estimate from
+  the tracks stays weak while candidates come 4 to 7 s late (Q-REC-CANDTIME) and people beside the
+  court are tracked (Q-REC-OFFCOURT).
+  *After the real-clip test of «Von wo?» (nine goals, phone, 22 questions in 6 to 9 minutes):*
+  only places a person gave make the three things and count as «mit Wurfort» (`by_coach`); an
+  estimate is drawn hollow with «geschätzt» and counts nowhere; «Weiss nicht» is missing and asked
+  again in «Wurfort nachtragen». The estimate is no longer offered (it was wrong in 4 of 7
+  recognisable goals, 6 of 9 said «Kreis»); it stays in the data as estimated. With a court a
+  person confirmed, the small court lies as the camera sees it: `GET …/goals/{event}/view` gives
+  the attacked goal's side in the picture from the attackers' direction and the court-to-image
+  homography (any long side, any panning; null without a confirmed court or tracks, then the goal
+  is at the top). The clip loops during the step. Scenes of goals from candidates run from 12 s
+  before to 5 s after (`matches.scene_window`, one rule for every view).
+  *Seventh real-video test (final form, nine goals):* the court lay as in the video for 8 of 9
+  goals and the tapped place carried the right word every time; for the fast break it lay the
+  wrong way round, because the scorers had stood at the goal they defended. Since then the side
+  comes from the ends the analysis found for the half (`shot_positions.goal_by_sides`, the
+  goalkeepers), the attackers' places only without them. *Left:* that fix is tested but not seen
+  on the real clip again; where the analysis flips the ends (Q-REC-SIDES) the court lies wrong
+  for that stretch; the estimate waits for better recognition (Q-REC-CANDTIME, Q-REC-OFFCOURT);
+  a whole match is not measured (do three things appear, how long does Prüfen take).
 - **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
   error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
   interface never treats the court as sure and always asks for it (done, E03).

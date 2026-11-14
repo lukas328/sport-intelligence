@@ -10,15 +10,14 @@ type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).blog;
-  return pageMeta(locale, "blog", t.title, t.head);
+  return pageMeta(locale, "blog", messages(locale).seo.blog.title, messages(locale).seo.blog.description);
 }
 
 export default async function Blog({ params }: Props) {
   const { locale } = await params;
   const t = messages(locale).blog;
   const date = new Intl.DateTimeFormat(HTML_LANG[locale], { dateStyle: "long", timeZone: "Europe/Zurich" });
-  const posts = [...BLOG].sort((a, b) => b.date.localeCompare(a.date));
+  const posts = BLOG.filter((p) => !p.movedTo).sort((a, b) => b.date.localeCompare(a.date));
   return (
     <KitScope>
       <PageHead kick={t.title} title={t.head} />

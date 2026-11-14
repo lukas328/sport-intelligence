@@ -16,9 +16,12 @@ from handball_api.schemas.events import (
     GoalCandidateRow,
     GoalComparison,
     GoalReviewIn,
+    GoalViewOut,
     KickoffIn,
     OfficialReportIn,
     OfficialReportResult,
+    ShotSpotIn,
+    ShotSpotOut,
 )
 from handball_api.schemas.season_line import SeasonLine
 from handball_api.services import events as service
@@ -178,7 +181,27 @@ async def review_goal_candidate(
         data.official_event_id,
         data.number,
         data.player_id,
+        data.shot_zone,
+        data.x,
+        data.y,
     )
+
+
+@router.get("/matches/{match_id}/goals/{event_id}/view", response_model=GoalViewOut)
+async def goal_view(match_id: uuid.UUID, event_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Where the attacked goal of this goal stands in the video («left» or «right»), so «Von wo?»
+    draws the court as the camera sees it; null without a confirmed court or tracks."""
+    return await goal_candidates.view(scope.ctx, match_id, event_id)
+
+
+@router.put("/matches/{match_id}/goals/{event_id}/spot", response_model=ShotSpotOut)
+async def set_shot_spot(
+    match_id: uuid.UUID, event_id: uuid.UUID, data: ShotSpotIn, scope: OrgDep
+) -> dict[str, Any]:
+    """Where a goal's shot came from, as the coach tapped it (Prüfen «Von wo?», the list
+    «Beantwortet», the scene, «Wurfort nachtragen»): a zone of the three things or "unknown",
+    and the tapped point in court metres. Works for any goal of the match, report goals too."""
+    return await goal_candidates.spot(scope.ctx, match_id, event_id, data.shot_zone, data.x, data.y)
 
 
 @router.post(

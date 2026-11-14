@@ -79,7 +79,8 @@ The product is **Handball Intelligence**; the logo is «Taktik» (rules and file
   `wortmarke-quer.svg` on sign-in, onboarding and the website (at least 220 px wide), the app
   icons (web manifest, iOS, Android adaptive and monochrome), the Open Graph image.
 - **On a club colour** always one colour (white on blue, red, black, green; ink on yellow, white).
-- Technical names stay: `handball-ai.ch` (domain, mail, deep links), `ch.handballai.app`, the
+- The domain is `handball-intelligence.com` (site, `app.` for the app, mail, deep links).
+- Technical names stay: `ch.handballai.app`, the
   Expo slug, the Python package `handball_api`, User-Agent strings (Q-PROD-1).
 
 ## Visual language

@@ -330,7 +330,8 @@ ENDPOINTS += [
         MATCH_WRITE,
         lambda a, w: a.post(
             f"/v1/orgs/{w.org}/matches/{w.match}/videos",
-            json={"filename": "a.mp4", "size_bytes": 100},
+            # another file each time: the same file twice in a match is refused (409)
+            json={"filename": f"{uuid.uuid4().hex}.mp4", "size_bytes": 100},
         ),
     ),
     ("GET clips", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/clips")),

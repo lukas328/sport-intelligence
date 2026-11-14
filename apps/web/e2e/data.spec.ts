@@ -90,7 +90,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   // over, its words become chips, nothing ends in «not set up»
   await page.goto(`${page.url().replace(/\/matrix\?pivot=1$/, "")}/assistant?q=${encodeURIComponent("Wie viele Gegentore über rechts aussen in den letzten drei Spielen?")}`);
   await page.waitForURL(/\/scenes\?q=/);
-  for (const chip of ["Gegentor", "rechts aussen", "letzte 3 mit Video"]) await expect(page.getByRole("button", { name: chip, pressed: true })).toBeVisible();
+  for (const chip of ["Gegentor", "aussen rechts", "letzte 3 mit Video"]) await expect(page.getByRole("button", { name: chip, pressed: true })).toBeVisible();
   await expect(page.getByText("Der Assistent ist in dieser Installation nicht eingerichtet.")).toHaveCount(0);
   // the button «Suchen» in the frame leads there too, with the field focused
   await page.getByTestId("search-open").first().click();

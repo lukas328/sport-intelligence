@@ -17,7 +17,7 @@ from handball_api.core.errors import ProblemError
 from handball_api.models import Match, MatchSegment, VideoAsset
 from handball_api.models.enums import VideoRole, VideoStatus
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match
+from handball_api.services.matches import get_match, parts_of, second_half
 from handball_api.services.policies import Action
 
 
@@ -31,27 +31,41 @@ def parse_recorded(value: object) -> datetime | None:
 
 
 async def rebuild(ctx: Ctx, match: Match) -> list[MatchSegment]:
-    """Order of the main-camera files; kept as confirmed when a person reordered them."""
-    videos = list(
-        (
-            await ctx.db.scalars(
-                select(VideoAsset).where(
-                    VideoAsset.match_id == match.id,
-                    VideoAsset.role == VideoRole.MAIN,
-                    VideoAsset.status == VideoStatus.READY,
-                )
-            )
-        ).all()
-    )
+    """Order of the main-camera files (the parts of the match timeline): by the camera clock,
+    else by upload. A file being processed again keeps its place; failed files leave. Once a person
+    swapped the order it is kept, and a file added later comes after the others."""
     old = {
         s.video_id: s
         for s in (
             await ctx.db.scalars(select(MatchSegment).where(MatchSegment.match_id == match.id))
         ).all()
     }
-    if old and all(s.confirmed for s in old.values()) and set(old) == {v.id for v in videos}:
+    videos = [
+        v
+        for v in (
+            await ctx.db.scalars(
+                select(VideoAsset).where(
+                    VideoAsset.match_id == match.id,
+                    VideoAsset.role == VideoRole.MAIN,
+                    VideoAsset.status != VideoStatus.FAILED,
+                )
+            )
+        ).all()
+        if v.status == VideoStatus.READY or v.id in old
+    ]
+    ids = {v.id for v in videos}
+    if old and set(old) == ids and all(s.confirmed for s in old.values()):
         return sorted(old.values(), key=lambda s: s.position)
-    videos.sort(key=lambda v: (v.recorded_at is None, v.recorded_at or v.created_at, v.filename))
+    confirmed = any(s.confirmed for s in old.values())
+
+    def natural(v: VideoAsset) -> tuple[bool, datetime, str]:
+        return (v.recorded_at is None, v.recorded_at or v.created_at, v.filename)
+
+    if confirmed:
+        kept = sorted((v for v in videos if v.id in old), key=lambda v: old[v.id].position)
+        videos = kept + sorted((v for v in videos if v.id not in old), key=natural)
+    else:
+        videos.sort(key=natural)
     await ctx.db.execute(delete(MatchSegment).where(MatchSegment.match_id == match.id))
     out = []
     prev: VideoAsset | None = None
@@ -61,6 +75,7 @@ async def rebuild(ctx: Ctx, match: Match) -> list[MatchSegment]:
             gap = int(
                 (v.recorded_at - prev.recorded_at).total_seconds() * 1000 - prev.duration_s * 1000
             )
+        was = old.get(v.id)
         seg = MatchSegment(
             organization_id=match.organization_id,
             match_id=match.id,
@@ -69,8 +84,10 @@ async def rebuild(ctx: Ctx, match: Match) -> list[MatchSegment]:
             start_ms=0,
             end_ms=int((v.duration_s or 0) * 1000) or None,
             gap_before_ms=gap,
-            source="metadata" if v.recorded_at else "upload_order",
-            confirmed=False,
+            source=was.source
+            if was is not None and was.confirmed
+            else ("metadata" if v.recorded_at else "upload_order"),
+            confirmed=bool(was is not None and was.confirmed) or (confirmed and was is None),
         )
         ctx.db.add(seg)
         out.append(seg)
@@ -81,6 +98,9 @@ async def rebuild(ctx: Ctx, match: Match) -> list[MatchSegment]:
 
 async def parts(ctx: Ctx, match_id: uuid.UUID) -> list[dict[str, Any]]:
     match = await get_match(ctx, match_id)
+    layout = await parts_of(ctx, match.id)
+    offsets = {p.video_id: p.offset_ms for p in layout}
+    turned = {p.video_id for p in layout if second_half(layout, p)}
     rows = (
         await ctx.db.execute(
             select(MatchSegment, VideoAsset)
@@ -94,20 +114,48 @@ async def parts(ctx: Ctx, match_id: uuid.UUID) -> list[dict[str, Any]]:
             "video_id": v.id,
             "filename": v.filename,
             "position": s.position,
+            "start_ms": offsets.get(v.id),
             "duration_s": v.duration_s,
             "recorded_at": v.recorded_at,
             "gap_before_ms": s.gap_before_ms,
             "source": s.source,
             "confirmed": s.confirmed,
+            "side_change": s.side_change,
+            "side_change_assumed": v.id in turned,
         }
         for s, v in rows
     ]
 
 
+async def set_side_change(
+    ctx: Ctx, match_id: uuid.UUID, video_id: uuid.UUID, value: bool | None
+) -> list[dict[str, Any]]:
+    """The coach says whether the teams changed ends before this part (a recording split mid-half
+    has no side change). The part is analysed again with it; that takes some minutes."""
+    from handball_api.services import videos  # imports this module (timeline)
+
+    match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
+    seg = await ctx.db.scalar(
+        select(MatchSegment).where(
+            MatchSegment.match_id == match.id, MatchSegment.video_id == video_id
+        )
+    )
+    if seg is None or seg.position == 0:
+        raise ProblemError(422, "not-a-later-part", "Only a later part can follow a side change")
+    seg.side_change = value
+    await ctx.db.flush()
+    await videos.retry_analysis(ctx, video_id)
+    return await parts(ctx, match_id)
+
+
 async def reorder(
     ctx: Ctx, match_id: uuid.UUID, video_ids: list[uuid.UUID]
 ) -> list[dict[str, Any]]:
+    from handball_api.services import timeline  # imports this module (rebuild)
+
     match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
+    before = await parts_of(ctx, match.id)
+    lead = timeline.lead_part(match, before)
     segs = {
         s.video_id: s
         for s in (
@@ -121,6 +169,14 @@ async def reorder(
         segs[vid].confirmed = True
         segs[vid].source = "user_correction"
         segs[vid].gap_before_ms = None if i == 0 else segs[vid].gap_before_ms
+    await ctx.db.flush()
+    # everything of the match moves with its part (confirmed answers included)
+    after = await parts_of(ctx, match.id)
+    await timeline.apply_moves(ctx, match, timeline.moves(before, after, lead))
+    await ctx.db.refresh(match)
+    k = match.kickoff_ms or {}
+    if "1" in k and "2" in k and int(k["1"]) > int(k["2"]):
+        timeline.swap_halves(match)
     await ctx.db.flush()
     return await parts(ctx, match_id)
 

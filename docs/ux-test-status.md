@@ -134,7 +134,7 @@ the tables above gives the tester's check of round 1 and what was done after it.
 | N25 | Fachwörter «Hauptrunde - M1-01», «Frei 3/1» | behoben (140e4c5): Liga statt Gruppe, «3 (1 vom 7-m)»; Test | Testerin: teilweise («Hauptrunde - M1-01»). Danach: behoben (36b2165, A04): Liga statt Gruppencode in Saison, Onboarding, Eingang und bei neu importierten Spielen; ein Cup behält seinen Namen. Schon gespeicherte Spiele behalten ihren alten Wettbewerb. |
 | N26 | Unbekannte Gegnerfarbe: leeres Kästchen | behoben (140e4c5): Frage mit fünf Trikots, auch wenn das Trikot ohne Farbe gespeichert ist | Testerin: behoben. |
 | N27 | Beispiel der Website findet nichts | Website-Sache (erfundener Demo-Verein im Beispiel, an die Website-Session gemeldet); in der App sucht «Wädenswil Herren 1» jetzt den Verein über den Ort, Teamwörter («Herren», «1», «U15») stören nicht mehr; Test | Testerin: behoben. |
-| N28 | Website und App widersprechen sich bei der Datei | geprüft: Ein Spiel kann mehrere Hauptdateien haben, Zeitleiste und Auswertung (drei Dinge, Szenen, Prüfen) laufen nur über die erste. App sagt das jetzt so; der Satz für die Website ist gemeldet | Testerin: behoben. |
+| N28 | Website und App widersprechen sich bei der Datei | behoben (Q-VIDEO-PARTS entschieden, `claude/video-parts`): ein Spiel nimmt mehrere Dateien als Teile, beide Halbzeiten werden ausgewertet und spielen als ein Video; mehrere Dateien zusammen wählen oder die zweite später nachreichen, Reihenfolge tauschen, Teil entfernen, erneut auswerten. Der Hinweis «nur die erste Datei» ist aus App, Upload-Tipps, Website (de/fr/en) und Hilfe entfernt | Testerin: behoben (Satz); neu zu prüfen mit zwei echten Dateien |
 | N29 | Neue Notiz landet ganz unten | behoben: «Notiz danach» an jedem Eintrag, das Feld öffnet sich dort und speichert an dieser Stelle; e2e | Testerin: behoben. |
 | N30 | «Entfernen» ohne Rückgängig | behoben: «Entfernt. Rückgängig» für sieben Sekunden, «Entfernen» etwas abgesetzt; e2e | Testerin: behoben. |
 | N31 | «eigene Tags» auf der Szenen-Seite | behoben: «Stichwörter» statt «Tags» | Testerin: behoben. |
@@ -229,6 +229,62 @@ the time left, MISSING_MESSAGE, and E01 to E07, E09, E11. Commits: 03cebf8 (G1),
 Open (recognition, not interface): Q-REC-OFFCOURT (people beside the court, goalkeepers in
 another colour), Q-REC-SIDES, Q-REC-CANDTIME, Q-REC-SCOREBOARD, Q-REC-PERSONBOX (see
 OPEN_QUESTIONS.md).
+
+## Fourth real-video test (H1 to H10)
+
+Report: docs/ux-test/echttest/BERICHT.md, «Vierter Durchlauf». G1 to G8 are confirmed on the real
+video; the court question on a phone (part of G9) was not fixed and is fixed now.
+
+| # | Finding | Status |
+|---|---|---|
+| H1 | Corner handle under the zoom button, the enlarged court could not be moved (390 px) | fixed (434799e, 7dd0a09) |
+| H2 | Goal question named the scoreboard although none was read | fixed (434799e) |
+| H3 | «Beantwortet» without times | fixed (434799e) |
+| H4 | Prüfen head «0 Fragen» with open moments; list row without the open moments | fixed (434799e) |
+| H5 | Longest phase without an own goal counted from the whistle, not from the video's start | fixed (bd9fa7a) |
+| H6 | Zahlen intro named a match report that does not exist | fixed (bd9fa7a) |
+| H7 | Confirmed goals get no shot position, the three things never appear | built on `claude/shot-zone`, not yet seen on a real clip: Prüfen asks «Von wo?» right after «Tor [Team]» (one tap on the attacked half, Siebenmeter, Gegenstoss, Weiss nicht; the estimate from the tracks marked «Vorschlag»); without a tap the estimate runs for that goal and sets the zone; «Wurfort ändern» in «Beantwortet» and at the scene; «Wurfort nachtragen» for older and report goals; the place of the three things says how many goals have a place and leads there. API and Playwright tests (`test_shot_spots.py`, `e2e/shot-zone.spec.ts`). Q-REC-SHOTZONE |
+| H8 | One scene with three different times (8:15, 8:14, video 0:15) | built: one rounding (full seconds, as the scoreboard) on every screen, the API's minute with four places; Szenen show the match clock of any goal (also without a spot) large and the video time small beside it |
+| H9 | Season: 12 matches in the head, 8 in the table, the last 10 in the course, unsaid | built: the head adds «8 davon in der Meisterschaft» when the table counts fewer; the course says «die letzten 10 von 12 (am Handy 6)» |
+| H10 | «Welche Spielminute zeigt der Anfang?» is ambiguous at 8:15; «Zurück» at question 1 | built: «Welche Spielzeit zeigt die Tafel am Anfang des Videos?» with Minute and Sekunde; «Zurück» only where a question was answered before this one |
+
+## Fifth and sixth real-video test (P1 to P9, V1 to V7)
+
+Report: docs/ux-test/echttest/BERICHT.md, «Fünfter Durchlauf» (a match in two files) and «Sechster
+Durchlauf» («Von wo?»). Fixed with tests but not seen in the browser again: P2, P7, P9, V3.
+
+| # | Finding | Status |
+|---|---|---|
+| P1 | Swap and swap back moved the throw-off before the video | fixed (4fcc7de) |
+| P2 | «Zur 2. Halbzeit» only without goals | fixed (a15bf6f) |
+| P3 | Two files together: no side hint for the second part | fixed (4fcc7de) |
+| P4 | Throw-off of the second half asked only for long videos | open |
+| P5 | «von dir bestätigt» counted goals with an unestimated spot | fixed (4fcc7de, a15bf6f) |
+| P6 | A short stray file changed the names and hid «Tauschen» | fixed (a15bf6f) |
+| P7 | Parts list while uploading | fixed (a15bf6f) |
+| P8 | Reel title card without umlauts | fixed (8af403f) |
+| P9 | Recording split within a half: no change of ends under 60 s gap, switch per part | built (4fcc7de, a15bf6f, migration 0045) |
+| V1 | «Weiss nicht» kept the estimate, counted as a place and into a thing | shown and counted right (2d6c862); things from the coach's taps only (shot-zone, confirmed in the seventh test) |
+| V2 | The suggested place misleads | no suggestion in the court (confirmed in the seventh test) |
+| V3 | Start head lost the video match after Prüfen | fixed (2d6c862) |
+| V4 | No «Wurfort ändern» in a thing's scene; goal list hidden once a thing exists | fixed (shot-zone) |
+| V5 | «Beantwortet» empty after reload | fixed, confirmed in the seventh test |
+| V6 | Scenes of goal moments start too late | fixed: 12 s before to 5 s after |
+| V7 | Still frame of «Von wo?» shows the other end; court as the camera sees it | fixed, confirmed in the seventh test (8 of 9, W1) |
+
+## Seventh real-video test (W1 to W4): «Von wo?» in its final form
+
+Report: docs/ux-test/echttest/BERICHT.md, «Siebter Durchlauf». V1 to V7 of the sixth test are
+confirmed on the real video (things from the coach's taps only, no suggestion, the court as the
+camera sees it, the clip in a loop, scenes that hold the shot, «Wurfort ändern», «Beantwortet»
+after a reload).
+
+| # | Finding | Status |
+|---|---|---|
+| W1 | The court lay the wrong way round for a fast break | fixed (96751ca), not seen on the real video again |
+| W2 | A goal moment's scene could end before the shot | fixed (96751ca) |
+| W3 | The sentence without a thing led nowhere | fixed (96751ca) |
+| W4 | The count over the zone graphic includes estimated places, the dots do not | open |
 
 ## Tests
 

@@ -2026,6 +2026,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/goals/{event_id}/spot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Shot Spot
+         * @description Where a goal's shot came from, as the coach tapped it (Prüfen «Von wo?», the list
+         *     «Beantwortet», the scene, «Wurfort nachtragen»): a zone of the three things or "unknown",
+         *     and the tapped point in court metres. Works for any goal of the match, report goals too.
+         */
+        put: operations["set_shot_spot_v1_orgs__org_id__matches__match_id__goals__event_id__spot_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/goals/{event_id}/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Goal View
+         * @description Where the attacked goal of this goal stands in the video («left» or «right»), so «Von wo?»
+         *     draws the court as the camera sees it; null without a confirmed court or tracks.
+         */
+        get: operations["goal_view_v1_orgs__org_id__matches__match_id__goals__event_id__view_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/graphics": {
         parameters: {
             query?: never;
@@ -2277,6 +2320,26 @@ export interface paths {
         get: operations["parts_v1_orgs__org_id__matches__match_id__parts_get"];
         /** Reorder */
         put: operations["reorder_v1_orgs__org_id__matches__match_id__parts_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/parts/{video_id}/side-change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Side Change
+         * @description Whether the teams changed ends before this part; the part is analysed again.
+         */
+        put: operations["set_side_change_v1_orgs__org_id__matches__match_id__parts__video_id__side_change_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -4584,7 +4647,11 @@ export interface paths {
         /** Get Analysis */
         get: operations["get_analysis_v1_orgs__org_id__videos__video_id__analysis_get"];
         put?: never;
-        post?: never;
+        /**
+         * Retry Analysis
+         * @description The analysis of this file again (the other parts of the match keep theirs).
+         */
+        post: operations["retry_analysis_v1_orgs__org_id__videos__video_id__analysis_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4622,6 +4689,26 @@ export interface paths {
          * @description The automatic court fits: keep it as confirmed (no re-run).
          */
         post: operations["confirm_calibration_v1_orgs__org_id__videos__video_id__calibration_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/from/{source_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Court From Part
+         * @description The court of the match's other part for this part (camera at the same place).
+         */
+        post: operations["court_from_part_v1_orgs__org_id__videos__video_id__calibration_from__source_id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5533,6 +5620,11 @@ export interface components {
             candidates: {
                 [key: string]: unknown;
             }[];
+            /**
+             * Copy From
+             * @description court question of a further part: the part whose court can be taken over
+             */
+            copy_from?: string | null;
             /**
              * Frame Ref
              * @description video time in ms
@@ -6673,10 +6765,16 @@ export interface components {
             outcome?: ("goal" | "save" | "miss" | "post" | "blocked") | null;
             /** Player Id */
             player_id?: string | null;
+            /** Shot Zone */
+            shot_zone?: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | "unknown" | null;
             /** Side */
             side?: ("own" | "opponent") | null;
             /** Status */
             status: ("confirmed" | "rejected") | null;
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
         };
         /**
          * GoalCandidateRow
@@ -6711,6 +6809,8 @@ export interface components {
             rate: number;
             /** Score */
             score: number;
+            /** Shot Zone */
+            shot_zone?: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | null;
             /** Side */
             side: ("own" | "opponent") | null;
             /** Start Ms */
@@ -6730,6 +6830,8 @@ export interface components {
              * Format: uuid
              */
             video_asset_id: string;
+            /** Zone Source */
+            zone_source?: ("coach" | "estimated" | "unknown") | null;
         };
         /** GoalComparison */
         GoalComparison: {
@@ -6784,6 +6886,12 @@ export interface components {
                 number
             ] | null;
             /**
+             * By Coach
+             * @description the goal itself comes from a person (confirmed in Prüfen, marked by hand), not from the analysis or a match report
+             * @default false
+             */
+            by_coach?: boolean;
+            /**
              * Confirmed
              * @description false: the shot spot is estimated
              */
@@ -6810,6 +6918,14 @@ export interface components {
                 number
             ][];
             /**
+             * Scene
+             * @description the goal's scene on the match timeline (ms): 8 s before to 2 s after, a goal from a goal candidate 12 s before to 2 s after
+             */
+            scene?: [
+                number,
+                number
+            ] | null;
+            /**
              * Shot
              * @description the shot spot, half court; null for a goal without a known spot
              */
@@ -6819,6 +6935,18 @@ export interface components {
             ] | null;
             /** Source */
             source: ("tracking" | "marked" | "demo") | null;
+            /**
+             * Spot By Coach
+             * @description the zone was given by a person; only these make the three things and count as «mit Wurfort» (an estimate does not)
+             * @default false
+             */
+            spot_by_coach?: boolean;
+            /**
+             * Spot Missing
+             * @description a goal in the video whose shot place nobody gave yet (asked in Prüfen)
+             * @default false
+             */
+            spot_missing?: boolean;
             /**
              * T Ms
              * @description video time of the goal
@@ -6834,6 +6962,45 @@ export interface components {
              * @description la, ra, rl, rm, rr, kr, m7 or gs
              */
             zone: string | null;
+            /**
+             * Zone Source
+             * @description who gave the zone: the coach, an estimate from the tracks, the coach did not know (unknown); null: nobody yet
+             */
+            zone_source?: ("coach" | "estimated" | "unknown") | null;
+        };
+        /** GoalViewOut */
+        GoalViewOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /**
+             * Goal In Video
+             * @description where the goal the shot went at stands in the video; null without a court a person confirmed or without tracks (the small court is drawn with the goal at the top)
+             */
+            goal_in_video: ("left" | "right") | null;
+        };
+        /** GraphicsPartOut */
+        GraphicsPartOut: {
+            /**
+             * Analysis
+             * @default none
+             * @enum {string}
+             */
+            analysis?: "none" | "running" | "ready" | "failed";
+            /** Duration Ms */
+            duration_ms: number | null;
+            /**
+             * Start Ms
+             * @description where the part starts on the match timeline
+             */
+            start_ms: number;
+            /**
+             * Video Id
+             * Format: uuid
+             */
+            video_id: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -7607,6 +7774,11 @@ export interface components {
              * @description lower-ranked goal candidates, offered, not counted
              */
             more_checks?: components["schemas"]["CheckOut"][];
+            /**
+             * Parts
+             * @description the files of the match on its timeline (two halves, a split recording)
+             */
+            parts?: components["schemas"]["GraphicsPartOut"][];
             /** Phases */
             phases: components["schemas"]["PhaseOut"][];
             /** Report Goals */
@@ -8668,8 +8840,17 @@ export interface components {
             position: number;
             /** Recorded At */
             recorded_at: string | null;
+            /** Side Change */
+            side_change?: boolean | null;
+            /**
+             * Side Change Assumed
+             * @default false
+             */
+            side_change_assumed?: boolean;
             /** Source */
             source: string;
+            /** Start Ms */
+            start_ms?: number | null;
             /**
              * Video Id
              * Format: uuid
@@ -10257,6 +10438,45 @@ export interface components {
             title: string;
         };
         /**
+         * ShotSpotIn
+         * @description Where a goal's shot came from, as the coach tapped it in Prüfen (fourth real-video test
+         *     H7): a zone of the three things (left and right from the attacker's view; m7 Siebenmeter, gs
+         *     Gegenstoss) or "unknown" (Weiss nicht: the estimate from the tracks stands), and the tapped
+         *     point in court metres with the attacked goal at x = 40, when there is one.
+         */
+        ShotSpotIn: {
+            /** Shot Zone */
+            shot_zone: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | "unknown";
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
+        };
+        /** ShotSpotOut */
+        ShotSpotOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /**
+             * Shot Zone
+             * @description zone of the three things; null: none known
+             */
+            shot_zone: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | null;
+            /** X */
+            x: number | null;
+            /** Y */
+            y: number | null;
+            /** Zone Source */
+            zone_source: ("coach" | "estimated" | "unknown") | null;
+        };
+        /** SideChangeIn */
+        SideChangeIn: {
+            /** Side Change */
+            side_change: boolean | null;
+        };
+        /**
          * SlideIn
          * @description Content per type (addendum 01, 4.1):
          *
@@ -10966,6 +11186,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Duplicate Of */
+            duplicate_of?: string | null;
             /** Duration S */
             duration_s: number | null;
             /** Error */
@@ -10974,6 +11196,8 @@ export interface components {
             filename: string;
             /** Fps */
             fps: number | null;
+            /** Half */
+            half?: number | null;
             /** Has Hls */
             has_hls: boolean;
             /** Has Poster */
@@ -10987,6 +11211,10 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Part */
+            part?: number | null;
+            /** Part Start Ms */
+            part_start_ms?: number | null;
             /** Quality Report */
             quality_report: {
                 [key: string]: unknown;
@@ -15249,6 +15477,76 @@ export interface operations {
             };
         };
     };
+    set_shot_spot_v1_orgs__org_id__matches__match_id__goals__event_id__spot_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShotSpotIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShotSpotOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    goal_view_v1_orgs__org_id__matches__match_id__goals__event_id__view_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalViewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     match_graphics_v1_orgs__org_id__matches__match_id__graphics_get: {
         parameters: {
             query?: never;
@@ -15733,6 +16031,43 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["PartOrder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_side_change_v1_orgs__org_id__matches__match_id__parts__video_id__side_change_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SideChangeIn"];
             };
         };
         responses: {
@@ -21440,6 +21775,40 @@ export interface operations {
             };
         };
     };
+    retry_analysis_v1_orgs__org_id__videos__video_id__analysis_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     calibrate_v1_orgs__org_id__videos__video_id__calibration_post: {
         parameters: {
             query?: never;
@@ -21492,6 +21861,41 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    court_from_part_v1_orgs__org_id__videos__video_id__calibration_from__source_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                source_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };

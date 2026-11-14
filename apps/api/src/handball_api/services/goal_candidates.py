@@ -31,6 +31,11 @@ which list (score, rate) proposed the moment.
   goal candidates), source "goal_candidate", at the estimated time; an automatic throw-off goal
   of that side close to it is superseded. Undo or reject removes the event or unpins the entry.
   Every review goes to the audit log.
+- where the shot of a confirmed goal came from (fourth real-video test H7): the coach's tap
+  (`shot_zone`, optionally the point) is written on the goal's event; without it the estimate from
+  the tracks is the fallback (shot_positions.fill_one), and a zone given before stays. `spot`
+  changes or adds it later for any goal of the match (the list «Beantwortet», the scene, goals of
+  the match report once they lie in the video).
 """
 
 from __future__ import annotations
@@ -45,7 +50,7 @@ from handball_api.core.clock import format_clock
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, GoalCandidate, Match, Possession, VideoAsset
 from handball_api.schemas.events import EventIn
-from handball_api.services import audit, match_clock, roster
+from handball_api.services import audit, match_clock, roster, shot_positions, timeline
 from handball_api.services import events as event_service
 from handball_api.services.auto_events import (
     CANDIDATE,
@@ -56,7 +61,7 @@ from handball_api.services.auto_events import (
 )
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video, video_from_clock
-from handball_api.services.matches import get_match
+from handball_api.services.matches import get_match, timeline_duration_ms
 from handball_api.services.policies import Action
 
 GOAL_SOURCE = CANDIDATE  # shot events confirmed from a candidate
@@ -312,9 +317,14 @@ _OFFICIAL_STATUS = ("confirmed", "suggested", "missing", "outside")
 
 
 def _row(
-    c: GoalCandidate, match: Match, known: Event | None, suggestion: dict[str, Any] | None
+    c: GoalCandidate,
+    match: Match,
+    known: Event | None,
+    suggestion: dict[str, Any] | None,
+    ev: Event | None = None,
 ) -> dict[str, Any]:
     derived = clock_from_video(match, c.goal_ms)
+    goal = ev if ev is not None and c.status == "confirmed" and ev.outcome == "goal" else None
     return {
         "id": c.id,
         "kind": c.kind,
@@ -342,6 +352,8 @@ def _row(
             "outcome": known.outcome,
         },
         "suggestion": suggestion if c.status == "open" and known is None else None,
+        "shot_zone": shot_positions.zone_of(goal) if goal is not None else None,
+        "zone_source": shot_positions.zone_source(goal) if goal is not None else None,
     }
 
 
@@ -354,11 +366,12 @@ async def _assets(ctx: Ctx, cands: list[GoalCandidate]) -> dict[uuid.UUID, Video
 
 
 async def _lengths(ctx: Ctx, cands: list[GoalCandidate]) -> dict[uuid.UUID, int | None]:
-    """Video length (ms) per asset of the candidates, None where unknown."""
-    return {
-        a.id: round(a.duration_s * 1000) if a.duration_s else None
-        for a in (await _assets(ctx, cands)).values()
-    }
+    """Length (ms) of the match timeline per asset of the candidates (their times are on it),
+    None where unknown."""
+    if not cands:
+        return {}
+    length = await timeline_duration_ms(ctx, cands[0].match_id)
+    return dict.fromkeys(await _assets(ctx, cands), length)
 
 
 async def _candidates(ctx: Ctx, match: Match, kind: str) -> list[GoalCandidate]:
@@ -378,13 +391,13 @@ async def _report(
 ) -> tuple[_Report, int | None]:
     """The report's shots and their suggestions for the open, uncovered candidates (`cands`:
     all of a kind; the newest analysed video's overlay clock maps the report)."""
+    # the candidates' times are on the match timeline: its length over all parts (Q-VIDEO-PARTS)
     assets = await _assets(ctx, cands)
-    asset = max(assets.values(), key=lambda a: a.created_at, default=None)
-    rep = _Report(match, asset.analysis if asset is not None else None, shots)
+    rep = _Report(match, await timeline.clock_analysis(ctx, match.id), shots)
     rep.visible = await roster.visible_players(ctx, match.team_id, match.season_id)
-    lengths = {a.id: round(a.duration_s * 1000) if a.duration_s else None for a in assets.values()}
+    length = await timeline_duration_ms(ctx, match.id) if assets else None
+    lengths: dict[uuid.UUID, int | None] = dict.fromkeys(assets, length)
     rep.suggest([c for c in cands if c.status == "open" and _covered(c, shots, lengths) is None])
-    length = round(asset.duration_s * 1000) if asset is not None and asset.duration_s else None
     return rep, length
 
 
@@ -399,8 +412,15 @@ async def listing(ctx: Ctx, match_id: uuid.UUID, kind: str = "goal") -> dict[str
     if kind == "shot":
         rep, length = await _report(ctx, match, cands, shots)
     lengths = await _lengths(ctx, cands)
+    by_id = {e.id: e for e in shots}
     rows = [
-        _row(c, match, _covered(c, shots, lengths), rep.suggestion(c) if rep else None)
+        _row(
+            c,
+            match,
+            _covered(c, shots, lengths),
+            rep.suggestion(c) if rep else None,
+            by_id.get(c.event_id) if c.event_id else None,
+        )
         for c in cands
     ]
     open_rows = [r for r in rows if r["status"] == "open" and r["known"] is None]
@@ -498,9 +518,13 @@ async def review(
     official_event_id: uuid.UUID | None = None,
     number: int | None = None,
     player_id: uuid.UUID | None = None,
+    shot_zone: str | None = None,
+    x: float | None = None,
+    y: float | None = None,
 ) -> dict[str, Any]:
     """Confirm (whose shot and its outcome; a report entry is pinned instead of a new event),
-    reject or reopen (`status` None) a candidate."""
+    reject or reopen (`status` None) a candidate. A confirmed goal gets where the shot came from:
+    `shot_zone` (and the tapped point x/y) as the coach said, else the estimate from the tracks."""
     match = await get_match(ctx, match_id, Action.EVENT_WRITE)
     c = await ctx.db.get(GoalCandidate, candidate_id)
     if c is None or c.match_id != match.id:
@@ -591,6 +615,13 @@ async def review(
                 superseded.append(str(g.id))
                 await ctx.db.delete(g)
         c.status, c.side, c.outcome = "confirmed", side, outcome
+        if outcome == "goal" and c.event_id is not None:
+            goal = await ctx.db.get(Event, c.event_id)
+            if goal is not None:
+                if shot_zone is not None:
+                    await shot_positions.set_spot(ctx, goal, shot_zone, x, y)
+                elif shot_positions.zone_source(goal) is None and goal.x is None:
+                    await shot_positions.fill_one(ctx, goal)
     else:
         removed = await _release(ctx, match, c)
         c.status, c.side, c.outcome = (
@@ -620,6 +651,7 @@ async def review(
             "official_event_id": str(official.id) if official is not None else None,
             "removed_event_id": str(removed) if removed else None,
             "superseded": superseded,
+            "shot_zone": shot_zone,
         },
     )
     shots = await _shots(ctx, match.id)
@@ -627,4 +659,54 @@ async def review(
     if c.kind == "shot" and c.status == "open":
         rep, _ = await _report(ctx, match, await _candidates(ctx, match, c.kind), shots)
         sugg = rep.suggestion(c)
-    return _row(c, match, _covered(c, shots, await _lengths(ctx, [c])), sugg)
+    ev = await ctx.db.get(Event, c.event_id) if c.event_id else None
+    return _row(c, match, _covered(c, shots, await _lengths(ctx, [c])), sugg, ev)
+
+
+async def spot(
+    ctx: Ctx,
+    match_id: uuid.UUID,
+    event_id: uuid.UUID,
+    shot_zone: str,
+    x: float | None = None,
+    y: float | None = None,
+) -> dict[str, Any]:
+    """Where the shot of a goal came from, given or changed by the coach: a goal confirmed in
+    Prüfen, a tagged one or one of the match report (its source stays: the report is still the
+    report)."""
+    match = await get_match(ctx, match_id, Action.EVENT_WRITE)
+    goal = await ctx.db.get(Event, event_id)
+    if goal is None or goal.match_id != match.id or goal.type != "shot":
+        raise ProblemError(404, "not-found", "Goal not found")
+    if goal.outcome != "goal":
+        raise ProblemError(422, "not-a-goal", "Only a goal gets the place of its shot here")
+    before = {"zone": shot_positions.zone_of(goal), "source": shot_positions.zone_source(goal)}
+    await shot_positions.set_spot(ctx, goal, shot_zone, x, y)
+    await ctx.db.flush()
+    await audit.record(
+        ctx,
+        "match.shot_spot_set",
+        target_type="match",
+        target_id=match.id,
+        data={"event_id": str(goal.id), "shot_zone": shot_zone, "before": before},
+    )
+    return spot_row(goal)
+
+
+async def view(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> dict[str, Any]:
+    """Where the attacked goal of a goal stands in the video (see shot_positions.goal_view)."""
+    match = await get_match(ctx, match_id)
+    goal = await ctx.db.get(Event, event_id)
+    if goal is None or goal.match_id != match.id or goal.type != "shot":
+        raise ProblemError(404, "not-found", "Goal not found")
+    return {"event_id": goal.id, "goal_in_video": await shot_positions.goal_view(ctx, goal)}
+
+
+def spot_row(goal: Event) -> dict[str, Any]:
+    return {
+        "event_id": goal.id,
+        "shot_zone": shot_positions.zone_of(goal),
+        "zone_source": shot_positions.zone_source(goal),
+        "x": goal.x,
+        "y": goal.y,
+    }

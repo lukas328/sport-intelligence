@@ -80,6 +80,8 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     if (n < 2) await expect(page.getByText(`Frage ${n + 3} von 5`)).toBeVisible();
     else await expect(page.getByText("Frage 5 von 5")).toBeVisible();
     await page.getByRole("button", { name: who }).click();
+    // then «Von wo?» in the same question (H7): not seen here
+    await page.getByTestId("spot-unknown").click();
   }
   // one moment is still open: nothing looks final (third real-video test G1)
   await expect(page.getByTestId("check-main-done")).toContainText("Die wichtigsten Momente sind geprüft.");
@@ -110,7 +112,8 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await expect(page.locator("[data-zone=wurf] svg").filter({ visible: true }).first()).toBeVisible();
   const goals = page.getByTestId("video-goals");
   await expect(goals.getByTestId("video-goal")).toHaveCount(3);
-  await expect(goals).toContainText("ohne Position");
+  // each goal says where it was thrown from, or that it is missing (H7)
+  await expect(goals.getByTestId("video-goal-spot")).toHaveCount(3);
   await expect(page.getByTestId("match-list")).toContainText("3 Tore im Video");
   // positions on the tactics camera: the court is confirmed and the scene has tracks
   await expect(goals.getByRole("img", { name: /Positionen aus dem Video/ })).toBeVisible({ timeout: 30_000 });
@@ -143,10 +146,11 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await expect(page.getByTestId("rail-span")).toBeVisible();
   await expect(page.getByTestId("rail-span")).not.toContainText("60");
 
-  // opened and answered: the head goes back to the newer match
+  // opened and answered: the newer match has neither a result nor a video, so the head keeps the
+  // match with video (Echtlauf 6: it jumped to a match without anything to show)
   await page.goto(`/app/${org}/teams/${team}/matches`);
-  await expect(page.locator("[data-zone=wurf]")).toContainText("TV Neuer");
-  await expect(page.locator("[data-zone=wurf]")).not.toContainText("TV Kandidat");
+  await expect(page.locator("[data-zone=wurf]")).toContainText("TV Kandidat");
+  await expect(page.locator("[data-zone=wurf]")).not.toContainText("TV Neuer");
 });
 
 /**
@@ -198,9 +202,11 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
   execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status, suggested_side) VALUES ('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', 14000, 12000, 9000, 15000, 3, 1, 0, 'open', 'own')`]);
   // the clip has no throw-off (G8): said so, the minute left empty; no «Prüfen 1» stays
   await page.getByTestId("kickoff-absent").click();
-  await expect(page.getByText("Welche Spielminute zeigt der Anfang?")).toBeVisible();
+  await expect(page.getByText("Welche Spielzeit zeigt die Tafel am Anfang des Videos?")).toBeVisible();
   await page.getByTestId("kickoff-absent-save").click();
   await page.getByRole("button", { name: "Tor HC Ecke" }).click();
+  // «Von wo?» (H7): the place of the shot, one tap
+  await page.getByTestId("spot-zone-kr").click();
   await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
   const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
   expect(g.checks.filter((c: { kind: string }) => c.kind === "kickoff")).toHaveLength(0);
@@ -243,11 +249,14 @@ test("the court question on a phone: the corners can be dragged with a finger", 
   await page.goto(`/app/${org}/matches/${match.id}/check`);
   await expect(page.getByTestId("field-check")).toBeVisible({ timeout: 30_000 });
   const vw = page.viewportSize()!.width;
-  // every handle on the screen, none beyond its edge
+  // every handle on the screen, none beyond its edge and none under a button: a finger on its
+  // centre reaches the handle (fourth real-video test: «Bild vergrössern» covered a corner)
   for (let i = 0; i < 4; i++) {
     const b = (await page.getByTestId(`corner-${i}`).boundingBox())!;
     expect(b.x + b.width / 2).toBeGreaterThanOrEqual(0);
     expect(b.x + b.width / 2).toBeLessThanOrEqual(vw);
+    const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x!, y!)?.closest("[data-testid^=corner-]")?.getAttribute("data-testid") ?? null, [b.x + b.width / 2, b.y + b.height / 2]);
+    expect(hit).toBe(`corner-${i}`);
   }
   await expect(page.getByTestId("field-reset")).toBeDisabled();
   // a finger drags the near left corner (touch events, as on the phone)
@@ -264,5 +273,14 @@ test("the court question on a phone: the corners can be dragged with a finger", 
   await expect(page.getByTestId("field-reset")).toBeEnabled();
   const after = (await corner.boundingBox())!;
   expect(Math.abs(after.x - box.x) + Math.abs(after.y - box.y)).toBeGreaterThan(10);
+  // enlarged, a swipe beside the handles moves the picture, so the far corners can be reached
+  await page.getByTestId("field-zoom").click();
+  const frame = page.getByTestId("field-frame");
+  const fb = (await frame.boundingBox())!;
+  const [sx, sy] = [fb.x + fb.width / 2, fb.y + fb.height - 12];
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: sx, y: sy }] });
+  for (let k = 1; k <= 15; k++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: sx - k * 15, y: sy }] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await expect.poll(() => frame.evaluate((el) => el.scrollLeft)).toBeGreaterThan(50);
   await page.screenshot({ path: info.outputPath("court-phone.png") });
 });

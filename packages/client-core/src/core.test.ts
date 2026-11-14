@@ -44,7 +44,7 @@ describe("recording checks", () => {
 describe("deep links", () => {
   it("opens clips, matches and lists", () => {
     expect(parse(`handball://clip/${MATCH}?t=61000`)).toEqual({ screen: "clip", matchId: MATCH, t: 61000 });
-    expect(parse(`https://app.handball-ai.ch/app/${ORG}/matches/${MATCH}?t=5000`)).toEqual({ screen: "match", orgId: ORG, matchId: MATCH, t: 5000 });
+    expect(parse(`https://app.handball-intelligence.com/app/${ORG}/matches/${MATCH}?t=5000`)).toEqual({ screen: "match", orgId: ORG, matchId: MATCH, t: 5000 });
     expect(parse(`/app/${ORG}/assignments`)).toEqual({ screen: "assignments", orgId: ORG });
     expect(parse(`/app/${ORG}/feed`)).toEqual({ screen: "feed", orgId: ORG });
     expect(parse(`/app/${ORG}/presentations/${MATCH}/present`)).toEqual({ screen: "presentation", orgId: ORG, presentationId: MATCH, key: null });

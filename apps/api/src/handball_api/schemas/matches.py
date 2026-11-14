@@ -153,6 +153,15 @@ class VideoOut(ApiModel):
     quality_report: dict[str, Any] | None
     error: str | None
     created_at: datetime
+    # a part of the match timeline (two halves, a recording the phone split): its number from 1
+    # and where it starts on the match timeline; None for other files and while not placed
+    part: int | None = None
+    part_start_ms: int | None = None
+    # the half this part is when the match is two halves with a side change between them; None:
+    # the parts are named «Teil 1 / Teil 2» (a split recording, more parts, a short one)
+    half: int | None = None
+    # the same file is already in the match (checksum): this copy is not used
+    duplicate_of: uuid.UUID | None = None
 
 
 class JobOut(ApiModel):
@@ -551,6 +560,25 @@ class GoalRunOut(ApiModel):
     number: int | None
     player_id: uuid.UUID | None = None
     zone: str | None = Field(description="la, ra, rl, rm, rr, kr, m7 or gs")
+    zone_source: Literal["coach", "estimated", "unknown"] | None = Field(
+        default=None,
+        description="who gave the zone: the coach, an estimate from the tracks, the coach did "
+        "not know (unknown); null: nobody yet",
+    )
+    scene: tuple[int, int] | None = Field(
+        default=None,
+        description="the goal's scene on the match timeline (ms): 8 s before to 2 s after, a "
+        "goal from a goal candidate 12 s before to 2 s after",
+    )
+    spot_by_coach: bool = Field(
+        default=False,
+        description="the zone was given by a person; only these make the three things and count "
+        "as «mit Wurfort» (an estimate does not)",
+    )
+    spot_missing: bool = Field(
+        default=False,
+        description="a goal in the video whose shot place nobody gave yet (asked in Prüfen)",
+    )
     run: list[tuple[float, float]] = Field(
         description="the scorer's way before the shot, half court (goal at the top, metres); "
         "empty without tracking"
@@ -560,6 +588,11 @@ class GoalRunOut(ApiModel):
     )
     aim: tuple[float, float] | None
     confirmed: bool = Field(description="false: the shot spot is estimated")
+    by_coach: bool = Field(
+        default=False,
+        description="the goal itself comes from a person (confirmed in Prüfen, marked by hand), "
+        "not from the analysis or a match report",
+    )
     source: Literal["tracking", "marked", "demo"] | None
     has_video: bool
     t_ms: int | None = Field(default=None, description="video time of the goal")
@@ -582,6 +615,17 @@ class CheckOut(ApiModel):
     seconds_in_view: float | None
     suggested_side: str | None
     candidates: list[dict[str, Any]]
+    copy_from: uuid.UUID | None = Field(
+        default=None,
+        description="court question of a further part: the part whose court can be taken over",
+    )
+
+
+class GraphicsPartOut(ApiModel):
+    video_id: uuid.UUID
+    start_ms: int = Field(description="where the part starts on the match timeline")
+    duration_ms: int | None
+    analysis: Literal["none", "running", "ready", "failed"] = "none"
 
 
 class MatchGraphicsOut(ApiModel):
@@ -607,6 +651,10 @@ class MatchGraphicsOut(ApiModel):
         default_factory=list, description="lower-ranked goal candidates, offered, not counted"
     )
     source: GraphicsSource
+    parts: list[GraphicsPartOut] = Field(
+        default_factory=list,
+        description="the files of the match on its timeline (two halves, a split recording)",
+    )
 
 
 class SceneTrackOut(ApiModel):

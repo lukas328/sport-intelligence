@@ -36,6 +36,7 @@ import { MatchTimeline } from "./match-timeline";
 import { OfficialGoalsPanel, useOfficialGoals } from "./official-goals";
 import { OfficialReportImport } from "./official-report";
 import { WorkRail, type Pane } from "./work-rail";
+import { usePartMarkers } from "./parts-panel";
 import { useGameTime } from "./game-time";
 import { TeamFeedView } from "./feed-views";
 
@@ -79,7 +80,9 @@ export function Workspace({
   const raw = useRef<PlayerHandle>(null);
   // camera switch (M5): every time in this component is main-video time; other cameras are shifted
   // by their sync offset (time in that video = main time + offset)
-  const cams = match.videos.filter((v) => v.status === "ready" && v.has_hls);
+  // the match video (its first part plays all parts) and the other cameras; the further parts of
+  // the match are not cameras of their own (Echtlauf 5: «Hauptkamera | Hauptkamera»)
+  const cams = match.videos.filter((v) => v.status === "ready" && v.has_hls && (v.id === video.id || v.role !== "main" || v.part == null));
   const [camId, setCamId] = useState(video.id);
   const cam = cams.find((c) => c.id === camId) ?? video;
   const offset = cam.id === video.id ? 0 : cam.time_offset_ms;
@@ -185,13 +188,16 @@ export function Workspace({
         .data ?? [],
   });
 
+  const partMarkers = usePartMarkers(match.videos);
   const markers: Marker[] = useMemo(
     () => [
+      // where the second half (a further file of the match) starts
+      ...partMarkers,
       ...(comments.data ?? []).map((c) => ({ t_ms: c.t_ms, kind: "comment" as const, label: c.body })),
       ...(clips.data ?? []).map((c) => ({ t_ms: c.start_ms, kind: "clip" as const, label: c.title ?? "" })),
       ...(annotations.data ?? []).map((a) => ({ t_ms: a.t_ms, kind: "drawing" as const })),
     ],
-    [comments.data, clips.data, annotations.data],
+    [comments.data, clips.data, annotations.data, partMarkers],
   );
 
   const addComment = useMutation({

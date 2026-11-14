@@ -13,7 +13,9 @@ import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { api } from "@/lib/client";
 import { goalRuns, reportGoals, thingSequence, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
+import { SpotChange, useSpotText } from "@/components/anlauf/spot-parts";
 import { cn } from "@/lib/utils";
+import { usePartMarkers } from "./parts-panel";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
@@ -23,6 +25,9 @@ const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms 
 const PHASE = 3; // minutes around the scene: the phase on the right and on the Rail
 const BEFORE = 8000; // a scene starts 8 s before its goal, as on the tactics camera (G3)
 const AFTER = 2000;
+/** The goal's scene: from the API (a goal from a goal candidate starts 12 s before, V6), else 8 s / 2 s. */
+const sceneOf = (g: { t_ms?: number | null; scene?: [number, number] | null }) =>
+  g.scene ? { start_ms: g.scene[0], end_ms: g.scene[1] } : { start_ms: Math.max(0, (g.t_ms ?? 0) - BEFORE), end_ms: (g.t_ms ?? 0) + AFTER };
 
 /**
  * The tab Video (SPEC 7.3): one stage that switches between the video and the tactics camera,
@@ -60,6 +65,7 @@ export function VideoStage({
   const t = useTranslations("anlauf");
   const tz = useTranslations("seasonPage");
   const text = useThingText();
+  const partMarkers = usePartMarkers(match.videos);
   const goals = graphics.goals.filter((g) => g.has_video || g.source === "demo");
   const things = threeThings(goalRuns(graphics));
   const chosen = thing != null ? (things[thing - 1] ?? null) : null;
@@ -99,6 +105,7 @@ export function VideoStage({
   // without the throw-off the place in the video stands for the clock (G8)
   const when = (g: Goal) => (g.minute != null ? clockOf(g.minute) : g.t_ms != null ? t("atVideo", { time: mmss(g.t_ms) }) : "");
   const label = (g: Goal) => t("goalOf", { team: team(g), clock: when(g) });
+  const spotText = useSpotText();
   const where = (g: Goal) => (!g.zone ? "" : ["la", "ra", "rl", "rm", "rr", "kr"].includes(g.zone) ? tz(`zoneTitle.${g.zone}` as "zoneTitle.ra") : t(`zoneShort.${g.zone}` as "zoneShort.gs"));
   const notes = useQuery({
     queryKey: ["comments", match.id],
@@ -116,7 +123,7 @@ export function VideoStage({
     if (goal?.t_ms == null) return;
     const r = await api.POST("/v1/orgs/{org_id}/clips", {
       params: { path: { org_id: orgId } },
-      body: { match_id: match.id, start_ms: Math.max(0, goal.t_ms - BEFORE), end_ms: goal.t_ms + AFTER, title: label(goal) },
+      body: { match_id: match.id, ...sceneOf(goal), title: label(goal) },
     });
     if (r.response.ok) setKept(goal.event_id);
   }
@@ -150,12 +157,12 @@ export function VideoStage({
               src={`${media}/hls/master.m3u8`}
               poster={video.has_poster ? `${media}/poster.jpg` : undefined}
               fps={video.fps}
-              window={{ start_ms: Math.max(0, goal.t_ms - BEFORE), end_ms: goal.t_ms + AFTER }}
+              window={sceneOf(goal)}
               onWindowEnd={() => (all ? step(1) : undefined)}
               autoPlay={all}
             />
           ) : (
-            <VideoPlayer ref={player} src={`${media}/hls/master.m3u8`} poster={video.has_poster ? `${media}/poster.jpg` : undefined} fps={video.fps} />
+            <VideoPlayer ref={player} src={`${media}/hls/master.m3u8`} poster={video.has_poster ? `${media}/poster.jpg` : undefined} fps={video.fps} markers={partMarkers} />
           )}
           <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-[13px] font-semibold text-court-text">
             {toggle}
@@ -274,6 +281,13 @@ export function VideoStage({
             );
           })}
         </ol>
+        {/* the running scene's place of the shot, changed with two taps (fourth real-video test H7) */}
+        {goal && goal.has_video && (
+          <p className="m-0 flex flex-wrap items-center justify-between gap-x-3 border-t border-rule px-3 py-1.5 text-[15px]" data-testid="stage-spot">
+            <span className="text-ink-2">{spotText(goal)}</span>
+            {staff && <SpotChange orgId={orgId} matchId={match.id} goal={goal} label={label(goal)} />}
+          </p>
+        )}
         {!chosen && things.length > 0 && (
           <div className="mt-6">
             <SectionHead as="h3" title={t("thingsHere")} />

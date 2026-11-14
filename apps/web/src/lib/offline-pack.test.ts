@@ -17,3 +17,25 @@ describe("offline presentation pack", () => {
     ]);
   });
 });
+
+describe("a joined playlist of two files (Q-VIDEO-PARTS)", () => {
+  it("gives each segment the init segment of its file", () => {
+    const text = [
+      "#EXTM3U",
+      '#EXT-X-MAP:URI="init.mp4"',
+      "#EXTINF:4.0,",
+      "seg_00000.m4s",
+      "#EXT-X-DISCONTINUITY",
+      '#EXT-X-MAP:URI="../../../../b/media/hls/720p/init.mp4"',
+      "#EXTINF:6.0,",
+      "../../../../b/media/hls/720p/seg_00000.m4s",
+      "#EXT-X-ENDLIST",
+    ].join("\n");
+    const { init, segments } = parseMediaPlaylist(text);
+    expect(init).toBe("init.mp4");
+    expect(segments.map((s) => [s.start, s.end, s.init])).toEqual([
+      [0, 4, "init.mp4"],
+      [4, 10, "../../../../b/media/hls/720p/init.mp4"],
+    ]);
+  });
+});

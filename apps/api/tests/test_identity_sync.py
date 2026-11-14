@@ -275,3 +275,21 @@ async def test_sync_applied_when_confident(make_api: Callable[[], Api]) -> None:
         if x["id"] == cam2
     )
     assert v2["status"] == "ready" and v2["sync"] is None
+
+
+async def test_no_sound_sync_between_parts(make_api: Callable[[], Api]) -> None:
+    """A second main file is the next part of the match (the second half), placed after the
+    first, not a camera over the same minutes: no sound sync between the two (real test 5)."""
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await upload(api, ids, m["id"], b"v" * 100, name="halbzeit1.mp4")
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    await upload(api, ids, m["id"], b"w" * 100, name="halbzeit2.mp4")
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    assert not [j for j in jobs.jobs if j[1] == "handball_gpu_worker.sync.run_sync"]
+    # a goal cam after the parts is still synced against the main video
+    await upload(api, ids, m["id"], b"g" * 100, name="tor.mp4", role="goal_cam_left")
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
+    assert jobs.jobs[-1][1] == "handball_gpu_worker.sync.run_sync"

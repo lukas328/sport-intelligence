@@ -56,8 +56,8 @@ async def test_graphics_from_the_report_without_video(make_api: Callable[[], Api
     assert g["has_report"] is False  # goals entered by hand are no match report
     # the goal sequence of the report, in order, misses left out
     assert g["report_goals"] == [
-        {"minute": 1.58, "team": "own"},
-        {"minute": 3.33, "team": "opp"},
+        {"minute": 1.5833, "team": "own"},
+        {"minute": 3.3333, "team": "opp"},
         {"minute": 5.5, "team": "own"},
     ]
     # every goal is listed (E01); only the goal with a spot can be drawn: no run without
@@ -67,6 +67,7 @@ async def test_graphics_from_the_report_without_video(make_api: Callable[[], Api
     assert len(drawn) == 1
     goal = drawn[0]
     assert goal["run"] == [] and goal["source"] == "marked" and goal["confirmed"] is True
+    assert all(x["by_coach"] for x in g["goals"])  # entered by hand
     assert goal["zone"] == "la"
     # half court: attacker's left is small u, the goal line is v = 0
     assert goal["shot"] == [1.5, 1.5]
@@ -280,20 +281,22 @@ async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
     g = (await api.get(f"{base}/graphics")).json()
     minutes = sorted(x["minute"] for x in g["goals"])
     assert minutes == [
-        round((61_500 - 20_000) / 60_000, 2),
-        round(128.5 / 60, 2),
-        round(178.5 / 60, 2),
+        round((61_500 - 20_000) / 60_000, 4),
+        round(128.5 / 60, 4),
+        round(178.5 / 60, 4),
     ]
     assert [x["team"] for x in g["report_goals"]] == ["own", "opp", "opp"]
     assert g["span"] == [0.0, round(310 / 60, 2)]
     # every event of the video has its clock now, the scene too
     camera = (await api.get(f"{base}/scenes/{g['goals'][0]['event_id']}/camera")).json()
     assert camera["clock_s"] is not None and camera["video_s"] is not None
-    # the scene lies before the goal, from 8 s before it to 2 s after (G3), not the way back
+    # the scene lies before the goal, not the way back (G3): a goal confirmed from a candidate
+    # from 12 s before its time to 5 s after, because candidate times come late (V6)
     first = min(g["goals"], key=lambda x: x["t_ms"])
     camera = (await api.get(f"{base}/scenes/{first['event_id']}/camera")).json()
-    assert camera["duration_s"] == 10.0
-    assert camera["video_s"] == (first["t_ms"] - 8000) / 1000
+    assert camera["duration_s"] == 17.0
+    assert camera["video_s"] == (first["t_ms"] - 12_000) / 1000
+    assert first["scene"] == [first["t_ms"] - 12_000, first["t_ms"] + 5000]
 
 
 def test_a_corner_outside_the_picture_is_accepted() -> None:
@@ -466,6 +469,8 @@ async def test_answers_survive_a_new_analysis_after_a_moved_court(
     asked = {c["frame_ref"] for c in g["checks"] + g["more_checks"] if c["kind"] == "goal"}
     assert first["goal_ms"] not in asked and len(asked) == 3
     assert len([e for e in g["goals"] if e["has_video"]]) == 1
+    # «von dir bestätigt» counts the goals a person confirmed, whatever their spot (Echtlauf 5 P5)
+    assert [e["by_coach"] for e in g["goals"] if e["has_video"]] == [True]
 
 
 def test_scene_shows_only_the_court_unmirrored() -> None:

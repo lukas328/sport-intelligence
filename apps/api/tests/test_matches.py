@@ -750,8 +750,19 @@ async def test_referee_kit_is_a_user_choice(make_api: Callable[[], Api]) -> None
     jobs: MemoryJobQueue = api.app.state.jobs
     token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
 
+    sent = 0
+
     async def analysis_kits_sent() -> dict[str, str]:
-        await upload(api, ids, m["id"], b"v" * 100)
+        nonlocal sent
+        if sent:
+            # a further part waits for the analysis of the part before it: end that one first
+            await api.http.post(
+                f"/internal/jobs/{jobs.jobs[-1][2]}",
+                headers=token,
+                json={"status": "failed", "progress": 0, "error": "stopped"},
+            )
+        sent += 1  # another file each time (the same file twice is refused)
+        await upload(api, ids, m["id"], b"v" * 100, name=f"spiel{sent}.mp4")
         ingest_id, prefix = jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"]
         await api.http.post(
             f"/internal/jobs/{ingest_id}",

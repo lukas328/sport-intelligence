@@ -43,10 +43,13 @@ def hls_command(
         "-y",
         "-i",
         str(src),
-        "-progress",
-        "pipe:1",
-        "-nostats",
     ]
+    # every file gets a sound track, a silent one when it has none: the files of one match (two
+    # halves) are then built alike and play across the break as one video (Q-VIDEO-PARTS)
+    if not info.has_audio:
+        cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000"]
+    cmd += ["-progress", "pipe:1", "-nostats"]
+    audio = "0:a:0" if info.has_audio else "1:a:0"
     split = f"[0:v]split={len(heights)}" + "".join(f"[v{i}]" for i in range(len(heights)))
     scales = ";".join(f"[v{i}]scale=-2:{h}[v{i}out]" for i, h in enumerate(heights))
     cmd += ["-filter_complex", f"{split};{scales}"]
@@ -64,8 +67,7 @@ def hls_command(
             f"-bufsize:v:{i}",
             rate.replace("k", "") + "0k",
         ]
-        if info.has_audio:
-            cmd += ["-map", "0:a:0"]
+        cmd += ["-map", audio]
     cmd += [
         "-preset",
         preset,
@@ -80,12 +82,10 @@ def hls_command(
         "-sc_threshold",
         "0",
     ]
-    if info.has_audio:
-        cmd += ["-c:a", "aac", "-b:a", "128k", "-ac", "2"]
-    streams = " ".join(
-        f"v:{i},a:{i},name:{h}p" if info.has_audio else f"v:{i},name:{h}p"
-        for i, h in enumerate(heights)
-    )
+    cmd += ["-c:a", "aac", "-b:a", "128k", "-ac", "2"]
+    if not info.has_audio:
+        cmd += ["-shortest"]  # the silent track ends with the picture
+    streams = " ".join(f"v:{i},a:{i},name:{h}p" for i, h in enumerate(heights))
     cmd += [
         "-f",
         "hls",

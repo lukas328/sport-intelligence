@@ -13,6 +13,7 @@ import { connectionHint } from "@/lib/network";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatBytes } from "@/lib/format";
 import { localStore, uploadFile, UploadAbortedError, xhrPutPart, type UploadApi } from "@/lib/upload";
+import { recordingOrder } from "@/lib/video-parts";
 
 const ROLES = ["main", "goal_cam_left", "goal_cam_right", "other"] as const;
 type Role = (typeof ROLES)[number];
@@ -60,7 +61,13 @@ type State =
   | { kind: "confirm"; file: File; hint: "mobile" | "slow" }
   | { kind: "offline"; file: File }
   | { kind: "done" }
+  | { kind: "same" }
   | { kind: "error"; error: ErrorKey | "upload" | "notVideo"; file?: File };
+
+/** One file of several chosen at once (two halves, a recording the phone split): they go up one
+ * after the other, in the order they were recorded (Q-VIDEO-PARTS). */
+type Item = { file: File; status: "waiting" | "uploading" | "done" | "same" | "twice" | "failed"; done: number };
+type Outcome = "done" | "same" | "stopped";
 
 
 
@@ -88,22 +95,29 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
   useEffect(() => {
     if (state.kind !== "offline") return;
     const file = state.file;
-    const resume = () => void start(file, true);
-    window.addEventListener("online", resume, { once: true });
-    return () => window.removeEventListener("online", resume);
+    const go = () => resume(file);
+    window.addEventListener("online", go, { once: true });
+    return () => window.removeEventListener("online", go);
   }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function ask(file: File) {
-    const hint = connectionHint();
-    if (hint) setState({ kind: "confirm", file, hint });
-    else void start(file, true);
-  }
+  const [queue, setQueue] = useState<Item[]>([]);
+  const mark = (file: File, patch: Partial<Item>) => setQueue((q) => q.map((it) => (it.file === file ? { ...it, ...patch } : it)));
 
-  async function start(file: File, confirmed = false) {
-    if (!looksLikeVideo(file)) return setState({ kind: "error", error: "notVideo" });
-    if (!confirmed) return ask(file);
+  async function start(file: File, confirmed = false): Promise<Outcome> {
+    if (!looksLikeVideo(file)) {
+      setState({ kind: "error", error: "notVideo" });
+      return "stopped";
+    }
+    if (!confirmed) {
+      const hint = connectionHint();
+      if (hint) {
+        setState({ kind: "confirm", file, hint });
+        return "stopped";
+      }
+    }
     ctrl.current = new AbortController();
     setState({ kind: "uploading", file, done: 0, resumed: false });
+    mark(file, { status: "uploading" });
     try {
       await uploadFile(file, role, {
         api: apiFor(orgId, matchId),
@@ -111,23 +125,71 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
         putPart: xhrPutPart,
         scope: `${matchId}:${role}`,
         signal: ctrl.current.signal,
-        onProgress: (done) => setState((s) => (s.kind === "uploading" ? { ...s, done } : s)),
+        onProgress: (done) => {
+          setState((s) => (s.kind === "uploading" ? { ...s, done } : s));
+          mark(file, { done });
+        },
       });
-      setState({ kind: "done" });
+      mark(file, { status: "done", done: file.size });
       track("first_upload", { role });
       onUploaded();
+      return "done";
     } catch (e) {
+      const status = e && typeof e === "object" && "status" in e ? (e as { status: number }).status : null;
+      const type = e && typeof e === "object" && "type" in e ? String((e as { type: unknown }).type) : "";
+      if (status === 409 && type.endsWith("same-file")) {
+        // the same file is already in the match: said, nothing stored twice
+        mark(file, { status: "same" });
+        return "same";
+      }
       if (e instanceof UploadAbortedError) setState({ kind: "paused", file });
       else if (!navigator.onLine) setState({ kind: "offline", file });
-      else setState({ kind: "error", error: e && typeof e === "object" && "status" in e ? errorKey(e) : "upload", file });
+      else {
+        setState({ kind: "error", error: status != null ? errorKey(e) : "upload", file });
+        mark(file, { status: "failed" });
+      }
+      return "stopped";
     }
+  }
+
+  /** The chosen files, one after the other; stops where one stops (paused, offline, an error) and
+   * goes on from there when that one goes on. */
+  async function run(items: Item[], confirmed = false) {
+    const open = items.filter((it) => it.status === "waiting" || it.status === "uploading" || it.status === "failed");
+    let sent = items.some((it) => it.status === "done");
+    for (const [i, it] of open.entries()) {
+      const outcome = await start(it.file, confirmed || i > 0);
+      if (outcome === "stopped") return;
+      sent ||= outcome === "done";
+    }
+    // nothing new went up: every chosen file was already in the match
+    setState({ kind: sent ? "done" : "same" });
+  }
+
+  function choose(list: FileList | File[]) {
+    const files = recordingOrder(Array.from(list));
+    if (files.length === 0 || uploading) return;
+    const seen = new Set<string>();
+    const items: Item[] = files.map((file) => {
+      const key = `${file.name}:${file.size}`;
+      const twice = seen.has(key);
+      seen.add(key);
+      return { file, status: twice ? "twice" : "waiting", done: 0 };
+    });
+    setQueue(items);
+    void run(items);
+  }
+
+  // going on after a pause, the connection, an error: the file that stopped, then the rest
+  function resume(file: File) {
+    if (queue.length > 1) void run(queue, true);
+    else void start(file, true).then((o) => o !== "stopped" && setState({ kind: o === "done" ? "done" : "same" }));
   }
 
   function onDrop(e: DragEvent) {
     e.preventDefault();
     setDrag(false);
-    const file = e.dataTransfer.files[0];
-    if (file && !uploading) void start(file);
+    if (!uploading) choose(e.dataTransfer.files);
   }
 
   async function importLink(e: FormEvent<HTMLFormElement>) {
@@ -148,8 +210,8 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
   const pct = state.kind === "uploading" ? Math.floor((state.done / state.file.size) * 100) : 0;
   return (
     <div className="space-y-5">
-      {/* a second main file is stored and plays, but the analysis stays on the first: said right
-          here, before choosing (OPEN_QUESTIONS Q-VIDEO-PARTS) */}
+      {/* a further main file (the second half) comes after the first and is analysed with it:
+          said right here, before choosing (Q-VIDEO-PARTS) */}
       {hasMain && role === "main" && (
         <p className="m-0 max-w-[60ch] border-l-4 border-attn pl-3 text-[17px]" data-testid="second-file-note">
           {t("upload.secondFile")}
@@ -178,19 +240,43 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
         <span className="text-[19px] font-bold sm:hidden">{t("upload.chooseVideo")}</span>
         <span className="hidden text-[17px] font-bold sm:block">{t("upload.drop")}</span>
         <span className="hidden text-[15px] font-semibold underline underline-offset-4 sm:block">{t("upload.choose")}</span>
+        {role === "main" && <span className="text-[15px]">{t("upload.several")}</span>}
         <input
           type="file"
           accept="video/*,.mts,.m2ts,.mkv"
+          multiple={role === "main"}
           className="sr-only"
           data-testid="video-file"
           disabled={uploading}
           onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void start(f);
+            if (e.target.files) choose(e.target.files);
             e.target.value = "";
           }}
         />
       </label>
+      {queue.length > 1 && (
+        <div data-testid="upload-queue">
+          <p className="m-0 mb-1.5 text-[17px] font-bold">{t("upload.queueTitle")}</p>
+          <ol className="m-0 list-none border-t-2 border-ink p-0">
+            {queue.map((it, i) => (
+              <li key={`${it.file.name}-${i}`} className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3 border-b border-rule py-2.5 text-[17px]" data-testid="upload-queue-item" data-status={it.status}>
+                <span className="font-num text-[22px] leading-none">{i + 1}</span>
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold">{it.file.name}</span>
+                  <span className="block text-[15px] text-ink-2">
+                    {formatBytes(it.file.size)} ·{" "}
+                    <span className={it.status === "same" || it.status === "twice" || it.status === "failed" ? "font-bold text-ink" : undefined}>
+                      {it.status === "uploading"
+                        ? t("upload.queueUploading", { percent: Math.floor((it.done / Math.max(1, it.file.size)) * 100) })
+                        : t(`upload.${({ waiting: "queueWaiting", done: "queueDone", same: "queueSame", twice: "queueTwice", failed: "queueFailed" } as const)[it.status]}`)}
+                    </span>
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
       {state.kind === "uploading" && (
         <div className="space-y-2" role="status">
           <div className="h-2 overflow-hidden bg-surface">
@@ -208,7 +294,7 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
         <Alert kind="info">
           <span className="block">{t(state.hint === "mobile" ? "upload.mobileData" : "upload.slowLink", { size: formatBytes(state.file.size) })}</span>
           <span className="mt-2 flex gap-2">
-            <Button onClick={() => void start(state.file, true)}>{t("upload.uploadAnyway")}</Button>
+            <Button onClick={() => (queue.length > 1 ? void run(queue, true) : void start(state.file, true).then((o) => o !== "stopped" && setState({ kind: o === "done" ? "done" : "same" })))}>{t("upload.uploadAnyway")}</Button>
             <Button variant="ghost" onClick={() => setState({ kind: "idle" })}>
               {t("upload.later")}
             </Button>
@@ -223,7 +309,7 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
       {state.kind === "paused" && (
         <Alert kind="info">
           <span className="block">{t("upload.paused")}</span>
-          <Button variant="secondary" className="mt-2" onClick={() => void start(state.file, true)}>
+          <Button variant="secondary" className="mt-2" onClick={() => resume(state.file)}>
             {t("upload.resume")}
           </Button>
         </Alert>
@@ -233,6 +319,11 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
         <Alert kind="success" data-testid="upload-done">
           <span className="block font-bold">{t("upload.done")}</span>
           <span className="block">{t("upload.mayClose")}</span>
+        </Alert>
+      )}
+      {state.kind === "same" && (
+        <Alert kind="info" data-testid="upload-same">
+          {t("upload.queueSame")}
         </Alert>
       )}
       {state.kind === "error" && (
@@ -246,7 +337,7 @@ export function UploadPanel({ orgId, matchId, onUploaded, hasMain = false }: { o
             <span className="block">{state.error === "upload" ? t("upload.failed") : t(`errors.${state.error}`)}</span>
           )}
           {state.file && (
-            <Button variant="secondary" className="mt-2" onClick={() => void start(state.file!, true)}>
+            <Button variant="secondary" className="mt-2" onClick={() => resume(state.file!)}>
               {t("upload.resume")}
             </Button>
           )}

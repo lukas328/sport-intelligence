@@ -34,8 +34,13 @@ TYPES = {
 }
 
 
-def build() -> dict[str, Any]:
-    rnd = random.Random(2026)  # noqa: S311 (seeded demo data, not security)
+# chosen so that the app's rule for the three things (apps/web/src/lib/three-things.ts) gives all
+# three kinds in the demo: goals conceded from one zone, after fast breaks, own goals from one zone
+SEED = 2100
+
+
+def build(seed: int = SEED) -> dict[str, Any]:
+    rnd = random.Random(seed)  # noqa: S311 (seeded demo data, not security)
     events: list[Event] = []
     for period in (1, 2):
         clock = (period - 1) * 1800.0
@@ -44,18 +49,6 @@ def build() -> dict[str, Any]:
             if clock >= period * 1800:
                 break
             side = Side.OWN if rnd.random() < 0.52 else Side.OPPONENT
-            if rnd.random() < 0.18:
-                events.append(
-                    Event(
-                        id=f"e{len(events)}",
-                        type=EventType.TURNOVER,
-                        side=side,
-                        period=period,
-                        clock_s=round(clock),
-                        turnover_type=rnd.choice(["bad_pass", "steps", "catch_error"]),
-                    )
-                )
-                continue
             kind = rnd.choices(list(SPOTS), weights=[18, 45, 15, 12, 10])[0]
             bx, by = rnd.choice(SPOTS[kind])
             x = round(bx + rnd.uniform(-1, 1), 1)
