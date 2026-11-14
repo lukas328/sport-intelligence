@@ -12,6 +12,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from PIL import ImageFont
 
 from handball_worker import reels
 from handball_worker.config import WorkerSettings
@@ -179,3 +180,16 @@ def test_reel_of_a_match_in_two_files(tmp_path: Path) -> None:
         ).stdout
     )
     assert 5.5 < duration < 6.6  # 3 s intro + 2 s + 1 s
+
+
+def test_title_card_writes_umlauts() -> None:
+    """Echtlauf 5 P8: «SG Wädenswil/Horgen - Lakers Stäfa» came out as «W?denswil … St?fa»
+    (Pillow's built-in font has no umlauts). The card uses the app's own typeface, shipped with
+    the worker."""
+    face = reels.font(40)
+    assert reels.FONT.is_file() and isinstance(face, ImageFont.FreeTypeFont)
+    missing = face.getmask("￿").getbbox()  # what a glyph the font lacks looks like
+    for ch in "äöüéÄÖÜè":
+        assert face.getmask(ch).getbbox() != missing, ch
+    card = reels.intro_card(["SG Wädenswil/Horgen - Lakers Stäfa"], "#d3202e", None, (640, 360))
+    assert card.size == (640, 360)

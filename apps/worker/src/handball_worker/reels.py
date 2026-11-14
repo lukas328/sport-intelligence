@@ -76,6 +76,21 @@ def spotlight_at(
     return float(p[0] * SRC_W / size[0]), float(p[1] * SRC_H / size[1])
 
 
+# the app's own typeface (Hanken Grotesk, SIL OFL, licence beside it), shipped with the worker:
+# Pillow's built-in font has no umlauts («W?denswil», Echtlauf 5 P8) and the image has no fonts
+FONT = Path(__file__).parent / "fonts" / "HankenGrotesk-wght.ttf"
+
+
+def font(px: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    try:
+        f = ImageFont.truetype(str(FONT), px)
+        with contextlib.suppress(OSError, AttributeError):
+            f.set_variation_by_axes([700 if bold else 500])
+        return f
+    except OSError:  # pragma: no cover - the file ships with the package
+        return ImageFont.load_default(size=px)
+
+
 def intro_card(
     lines: list[str], colour: str, logo: bytes | None, size: tuple[int, int]
 ) -> Image.Image:
@@ -94,9 +109,9 @@ def intro_card(
             pass
     for i, line in enumerate(lines[:5]):
         px = max(18, w // (18 if i == 0 else 26))
-        font = ImageFont.load_default(size=px)
-        tw = d.textlength(line, font=font)
-        d.text(((w - tw) / 2, y), line, fill=(255, 255, 255), font=font)
+        face = font(px, bold=i == 0)
+        tw = d.textlength(line, font=face)
+        d.text(((w - tw) / 2, y), line, fill=(255, 255, 255), font=face)
         y += int(px * 1.6)
     return img
 
@@ -115,11 +130,11 @@ def draw_overlay(
         )
     if label and show_label:
         px = max(18, w // 30)
-        font = ImageFont.load_default(size=px)
-        tw = d.textlength(label, font=font)
+        face = font(px, bold=True)
+        tw = d.textlength(label, font=face)
         y = frame.size[1] - px * 3
         d.rectangle((24, y - 8, 24 + tw + 24, y + px + 8), fill=(17, 24, 39))
-        d.text((36, y), label, fill=(255, 255, 255), font=font)
+        d.text((36, y), label, fill=(255, 255, 255), font=face)
     return frame
 
 
