@@ -2,9 +2,11 @@ import Link from "next/link";
 import { LangLinks } from "@/components/nav-links";
 import { LOCALE_NAMES, LOCALES, messages, type Locale } from "@/lib/i18n";
 import { STATUS_URL, SUPPORT_EMAIL } from "@/lib/site";
+import { GUIDES } from "../../content/ratgeber";
 
 export function Footer({ locale }: { locale: Locale }) {
   const m = messages(locale);
+  const missing = Object.fromEntries(GUIDES.map((g) => [g.slug, LOCALES.filter((l) => !g.locales.includes(l))]));
   const col = (title: string, items: [string, string][]) => (
     <div>
       <h2 className="font-slant text-[1.375rem]">{title}</h2>
@@ -28,6 +30,7 @@ export function Footer({ locale }: { locale: Locale }) {
   const support: [string, string][] = [
     ["hilfe", m.nav.faq],
     ["daten", m.nav.data],
+    ["ueber-uns", m.nav.us],
     ["kontakt", m.nav.about],
     [`mailto:${SUPPORT_EMAIL}`, SUPPORT_EMAIL],
   ];
@@ -44,6 +47,8 @@ export function Footer({ locale }: { locale: Locale }) {
           ["aufnahme", m.nav.filming],
           ["demo", m.nav.demo],
           ["preise", m.nav.pricing],
+          ["ratgeber", m.nav.guides],
+          ["fakten", m.nav.facts],
           ["blog", m.nav.blog],
         ])}
         {col(m.footer.support, support)}
@@ -55,7 +60,7 @@ export function Footer({ locale }: { locale: Locale }) {
           ])}
           <nav aria-label={m.nav.language} className="mt-6">
             <h2 className="font-slant text-[1.375rem]">{m.nav.language}</h2>
-            <LangLinks locale={locale} names={Object.fromEntries(LOCALES.map((l) => [l, LOCALE_NAMES[l]]))} />
+            <LangLinks locale={locale} names={Object.fromEntries(LOCALES.map((l) => [l, LOCALE_NAMES[l]]))} missing={missing} />
           </nav>
         </div>
       </div>

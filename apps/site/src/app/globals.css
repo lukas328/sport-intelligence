@@ -333,6 +333,27 @@
   text-decoration: underline;
   text-decoration-thickness: 2px;
 }
+.prose .table-scroll {
+  overflow-x: auto;
+  margin: 0.875rem 0;
+}
+.prose .table-scroll table {
+  margin: 0;
+  min-width: 100%;
+}
+.prose td,
+.prose th {
+  overflow-wrap: anywhere;
+}
+.prose blockquote {
+  margin: 1.25rem 0;
+  border-left: 4px solid var(--ink);
+  background: var(--paper);
+  padding: 0.5rem 1rem;
+}
+.prose code {
+  font-size: 0.95em;
+}
 .prose strong {
   font-weight: 700;
 }
@@ -352,7 +373,55 @@
   border-bottom: 2px solid var(--ink);
 }
 
+@page {
+  size: A4;
+  margin: 12mm;
+}
 @media print {
+  body {
+    min-height: 0 !important;
+  }
+  main,
+  .wrap {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  .print-sheet {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: #fff;
+    font-size: 12.5pt;
+    line-height: 1.45;
+  }
+  .print-sheet h2 {
+    font-size: 20pt;
+  }
+  .print-sheet h3 {
+    font-size: 15pt;
+  }
+  .notice-sheet {
+    margin: 0;
+    height: 268mm;
+    justify-content: center;
+    padding: 18mm 14mm;
+    background: #fff;
+    break-inside: avoid;
+  }
+  .notice-text {
+    font-size: 50pt;
+    line-height: 1.12;
+  }
+  .notice-sub {
+    margin-top: 14mm;
+    font-size: 26pt;
+    line-height: 1.25;
+  }
+  .notice-ask {
+    margin-top: 40mm;
+    font-size: 16pt;
+  }
   header,
   footer,
   .no-print {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KitScope } from "@/components/kit";
 import { MailLine } from "@/components/mail-line";
-import { PageHead, SectionHead } from "@/components/wurf-head";
+import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 
@@ -10,8 +10,7 @@ type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = messages(locale).data;
-  return pageMeta(locale, "daten", t.title, `${t.kick}: ${t.head}`);
+  return pageMeta(locale, "daten", messages(locale).seo.data.title, messages(locale).seo.data.description);
 }
 
 /** For parents, players and the board: what happens with the video, how consent works. */
@@ -21,7 +20,9 @@ export default async function Data({ params }: Props) {
   const t = m.data;
   return (
     <KitScope>
-      <PageHead kick={t.kick} title={t.head} />
+      <PageHead kick={t.kick} title={t.head} lead={t.lead}>
+        <Updated locale={locale} />
+      </PageHead>
       <div className="wrap">
         <div className="mt-12 grid grid-cols-1 gap-x-16 md:grid-cols-2">
           {t.sections.map((s) => (

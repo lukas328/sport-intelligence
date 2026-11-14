@@ -147,48 +147,6 @@ export function reportGoals(goals: readonly DemoGoal[]): ReportGoal[] {
   return goals.map((g) => ({ minute: g.minute, team: g.team }));
 }
 
-export interface Turnover {
-  minute: number;
-  clock: string;
-}
-
-export function turnovers(match: DemoMatch, side: "own" | "opponent" = "own"): Turnover[] {
-  return match.events.filter((e) => e.type === "turnover" && e.side === side).map((e) => ({ minute: e.clock_s / 60, clock: clockOf(e.clock_s) }));
-}
-
-/** The three things of the demo, computed from the data (no hand-written figures). */
-export interface DemoThings {
-  /** most frequent position of the goals against (positions only, no 7 m, no fast breaks) */
-  against: { zone: Zone; n: number; total: number; firstHalf: number; goals: DemoGoal[]; rest: DemoGoal[] };
-  /** own goals after a fast break */
-  fastBreak: { n: number; total: number; firstHalf: number; goals: DemoGoal[]; rest: DemoGoal[] };
-  /** own turnovers from the match report: times only */
-  turnovers: { n: number; list: Turnover[]; window: { n: number; from: number; to: number } };
-}
-
-export function demoThings(match: DemoMatch, goals = demoGoals(match)): DemoThings {
-  const opp = goals.filter((g) => g.team === "opp");
-  const own = goals.filter((g) => g.team === "own");
-  const counts = new Map<Zone, number>();
-  for (const g of opp) if (g.zone !== "m7" && g.zone !== "gs") counts.set(g.zone, (counts.get(g.zone) ?? 0) + 1);
-  const zone = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "rm";
-  const against = opp.filter((g) => g.zone === zone);
-  const fb = own.filter((g) => g.zone === "gs");
-  const list = turnovers(match);
-  // the densest stretch of three minutes
-  let window = { n: 0, from: 0, to: 0 };
-  for (const t of list) {
-    const from = Math.floor(t.minute) + 1;
-    const inside = list.filter((x) => Math.floor(x.minute) + 1 >= from && Math.floor(x.minute) + 1 <= from + 2);
-    if (inside.length > window.n) window = { n: inside.length, from, to: Math.floor(inside[inside.length - 1]!.minute) + 1 };
-  }
-  return {
-    against: { zone, n: against.length, total: opp.length, firstHalf: against.filter((g) => g.period === 1).length, goals: against, rest: opp.filter((g) => g.zone !== zone) },
-    fastBreak: { n: fb.length, total: own.length, firstHalf: fb.filter((g) => g.period === 1).length, goals: fb, rest: own.filter((g) => g.zone !== "gs") },
-    turnovers: { n: list.length, list, window },
-  };
-}
-
 /* ---------------------------------------------------------------------------------------------
  * The scene of thing 1 on the tactics camera: the opponent attacks our goal (x = 0). The scorer
  * follows the run of the goal; the others hold a 6:0 defence and a set attack and shift a little
@@ -260,7 +218,6 @@ export function demoFigures(match: DemoMatch) {
   return [
     { key: "goals", source: "report", own: own.goals, opp: opponent.goals },
     { key: "sevenM", source: "report", own: `${own.seven_m_goals}/${own.seven_m_shots}`, opp: `${opponent.seven_m_goals}/${opponent.seven_m_shots}` },
-    { key: "turnovers", source: "report", own: own.turnovers, opp: opponent.turnovers },
     { key: "shots", source: "marked", own: own.shots, opp: opponent.shots },
     { key: "shootingPct", source: "marked", own: pct(own), opp: pct(opponent) },
     { key: "saves", source: "marked", own: own.saves, opp: opponent.saves },

@@ -1,9 +1,11 @@
 import type { Messages } from "@/messages/de";
+import { MULTI_FILE } from "@/lib/site";
 
 /** «Das kann es, das noch nicht»: openly on the page, not in the small print. */
 export function Honest({ t, short = false }: { t: Messages["honest"]; short?: boolean }) {
   const can = short ? t.can.slice(0, 3) : t.can;
-  const not = short ? t.not.slice(0, 3) : t.not;
+  const all = MULTI_FILE ? t.not : [...t.not, t.notFiles];
+  const not = short ? all.slice(0, 3) : all;
   return (
     <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-12">
       <div>

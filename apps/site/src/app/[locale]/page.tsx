@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import plans from "@handball/plans";
 import { DemoCamera } from "@/components/demo-camera";
-import { Honest } from "@/components/honest";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, ShirtPicker } from "@/components/kit";
 import { TeamField } from "@/components/team-field";
@@ -10,8 +9,19 @@ import { Things } from "@/components/things";
 import { SectionHead, WurfHead } from "@/components/wurf-head";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
-import { SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
+import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
+import { PRICES_FINAL, SITE_UPDATED } from "@/lib/site";
 import { demoView } from "@/lib/things";
+import { GUIDES } from "../../../content/ratgeber";
+
+/** The three guides that exist in every language, shown on the start page. */
+const FEATURED = ["handballspiel-filmen", "videoanalyse-amateurteam", "video-im-verein-einwilligung"];
+/** «Für wen»: the guide for each case, in a guide that exists in that language. */
+const FOR_WHO: Record<Locale, string[]> = {
+  de: ["szenen-im-training-zeigen", "spiel-auswerten-20-minuten", "video-im-verein-einwilligung"],
+  fr: ["szenen-im-training-zeigen", "spiel-auswerten-20-minuten", "video-im-verein-einwilligung"],
+  en: ["videoanalyse-amateurteam", "handballspiel-filmen", "video-im-verein-einwilligung"],
+};
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -29,24 +39,22 @@ export default async function Home({ params }: Props) {
   return (
     <KitScope>
       <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@graph": [
-            { "@type": "Organization", name: "Handball Intelligence", url: SITE_URL, email: SUPPORT_EMAIL },
-            {
-              "@type": "SoftwareApplication",
-              name: "Handball Intelligence",
-              applicationCategory: "SportsApplication",
-              operatingSystem: "Web",
-              description: m.meta.description,
-            },
-          ],
-        }}
+        data={graph(
+          organization(),
+          website(locale),
+          softwareApplication(locale, m.meta.description, m.pricing.plans),
+          webPage(locale, "", m.meta.title, m.meta.description, SITE_UPDATED),
+        )}
       />
       <WurfHead
-        kick={m.match.fictional}
+        scoreNote={m.match.fictional}
         title={t.title}
-        lead={t.lead}
+        lead={
+          <>
+            {t.lead} {fmt(t.leadPrice, { price: team.price_chf_month, days: team.trial_days })}
+            {!PRICES_FINAL && <> {m.pricing.draft}</>}
+          </>
+        }
         own={v.final.own}
         opp={v.final.opp}
         ownName={v.own}
@@ -56,6 +64,7 @@ export default async function Home({ params }: Props) {
         flightLabels={{ half: m.match.flightHalf, end: m.match.flightEnd }}
       >
         <TeamField id="team-top" label={t.teamLabel} button={t.teamButton} example={t.teamExample} appLocale={APP_LOCALE[locale]} onClub />
+        <p className="mt-3 max-w-[34rem] text-base">{t.teamAfter}</p>
       </WurfHead>
 
       <div className="wrap">
@@ -72,6 +81,7 @@ export default async function Home({ params }: Props) {
         <section aria-labelledby="things" className="mt-20">
           <SectionHead id="things" title={m.things.title} note={m.things.side} />
           <Things things={v.things} legend={{ solid: m.things.legendSolid, dashed: m.things.legendDashed, thin: m.things.legendThin }} scenesHref={`/${locale}/demo/`} />
+          <p className="measure mt-4 text-ink-2">{m.things.condition}</p>
         </section>
 
         <section aria-labelledby="more" className="mt-20">
@@ -118,13 +128,32 @@ export default async function Home({ params }: Props) {
           </div>
         </section>
 
+        <section aria-labelledby="forwho" className="mt-20">
+          <SectionHead id="forwho" title={t.forWhoTitle} />
+          <ul className="mt-2 grid grid-cols-1 md:grid-cols-3">
+            {t.forWho.map((c, i) => (
+              <li key={c.title} className="border-b border-rule py-6 md:border-b-0 md:px-6 md:first:pl-0 md:[&+li]:border-l md:[&+li]:border-l-rule">
+                <h3 className="font-slant text-[1.5rem]">{c.title}</h3>
+                <p className="mt-1">{c.text}</p>
+                <Link href={`/${locale}/ratgeber/${FOR_WHO[locale][i]}/`} className="link mt-1">
+                  {c.link}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section aria-labelledby="honest" className="mt-20">
           <SectionHead id="honest" title={m.honest.title} />
-          <div className="mt-8">
-            <Honest t={m.honest} short />
-          </div>
-          <Link href={`/${locale}/so-funktioniert-es/#kann`} className="link mt-2">
-            {m.cta.honest}
+          <ul className="measure mt-4">
+            {t.honestLines.map((x) => (
+              <li key={x} className="border-b border-rule py-3">
+                {x}
+              </li>
+            ))}
+          </ul>
+          <Link href={`/${locale}/fakten/`} className="link mt-2">
+            {t.honestLink}
           </Link>
         </section>
 
@@ -141,6 +170,30 @@ export default async function Home({ params }: Props) {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section aria-labelledby="guides" className="mt-20">
+          <SectionHead id="guides" title={m.guides.homeTitle} />
+          <ul className="mt-2 grid grid-cols-1 md:grid-cols-3">
+            {FEATURED.map((slug) => GUIDES.find((g) => g.slug === slug)!).map((g) => (
+              <li key={g.slug} className="border-b border-rule py-6 md:border-b-0 md:px-6 md:first:pl-0 md:[&+li]:border-l md:[&+li]:border-l-rule">
+                <Link href={`/${locale}/ratgeber/${g.slug}/`} className="font-slant text-[1.5rem] leading-tight hover:underline">
+                  {g.title[locale] ?? g.title.de}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link href={`/${locale}/ratgeber/`} className="link mt-2">
+            {m.guides.all}
+          </Link>
+        </section>
+
+        <section aria-labelledby="who" className="mt-20">
+          <SectionHead id="who" title={m.us.homeTitle} />
+          <p className="measure mt-4">{m.us.homeText}</p>
+          <Link href={`/${locale}/ueber-uns/`} className="link mt-2">
+            {m.us.homeLink}
+          </Link>
         </section>
 
         <section aria-labelledby="final" className="mt-20 border-t-2 border-ink pt-10">
