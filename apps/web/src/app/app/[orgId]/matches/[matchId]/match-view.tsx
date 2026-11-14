@@ -159,10 +159,15 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [askPane] = useState<{ pane: "feedback" } | null>(null);
   const player = useRef<PlayerHandle | null>(null);
-  // deep links (?t=ms), e.g. from a play drawn on a video moment
+  const stats = useStats(orgId, initial.id);
+  const graphics = useMatchGraphics(orgId, initial.id);
+  const [bench, setBench] = useState(false);
+  // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
+  // plays in the full player, so it opens (behind the stage it would seek out of sight)
   useEffect(() => {
     const t0 = Number(new URLSearchParams(window.location.search).get("t"));
     if (!Number.isFinite(t0) || t0 <= 0) return;
+    setBench(true);
     const id = window.setInterval(() => {
       const v = player.current?.video();
       if (v && v.readyState >= 1) {
@@ -173,9 +178,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     const stop = window.setTimeout(() => window.clearInterval(id), 30_000);
     return () => (window.clearInterval(id), window.clearTimeout(stop));
   }, []);
-  const stats = useStats(orgId, initial.id);
-  const graphics = useMatchGraphics(orgId, initial.id);
-  const [bench, setBench] = useState(false);
   const ta = useTranslations("anlauf");
   const tParts = useTranslations("parts");
   const plainPlayer = useRef<PlayerHandle>(null);

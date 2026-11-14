@@ -342,9 +342,9 @@ function SceneRow({ hit: h, match: m, orgId }: { hit: Hit; match: Match | undefi
       </td>
       <td className="py-2.5 tabular-nums">
         <Link href={`/app/${orgId}/matches/${h.match_id}?tab=video&t=${h.start_ms ?? h.t_ms ?? 0}`} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-[1.5px] underline-offset-4">
-          {goal?.minute != null ? clockOf(goal.minute) : t("videoAt", { time: ms(video) })}
+          {goal?.minute != null ? clockOf(goal.minute) : h.clock_s != null ? clockOf(h.clock_s / 60) : t("videoAt", { time: ms(video) })}
         </Link>
-        {goal?.minute != null && <span className="ml-2 text-[15px] text-ink-2">{t("videoAt", { time: ms(video) })}</span>}
+        {(goal?.minute != null || h.clock_s != null) && <span className="ml-2 text-[15px] text-ink-2">{t("videoAt", { time: ms(video) })}</span>}
       </td>
       <td className="py-2.5">{h.type === "shot" ? (h.outcome === "goal" ? t("goal") : h.outcome === "save" ? t("save") : t("shot")) : h.type === "turnover" ? t("turnover") : (h.title ?? (h.type ? ts(`type_${h.type}` as "type_shot") : ""))}</td>
       <td className="py-2.5 text-right tabular-nums">{h.number ?? ""}</td>
@@ -363,7 +363,7 @@ function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Matc
   const g = useMatchGraphics(orgId, hit.match_id);
   const goal = g.data && hit.kind === "event" ? goalRuns(g.data).find((x) => x.eventId === hit.id) : undefined;
   // the match clock of any goal, also one without a spot; the video time small beside it (H8)
-  const minute = g.data && hit.kind === "event" ? g.data.goals.find((x) => x.event_id === hit.id)?.minute : undefined;
+  const minute = (g.data && hit.kind === "event" ? g.data.goals.find((x) => x.event_id === hit.id)?.minute : undefined) ?? (hit.clock_s != null ? hit.clock_s / 60 : undefined);
   const opp = (match?.opponent_name ?? hit.match_label).split(/[\s-]/).find((w) => w.length > 3) ?? hit.match_label;
   const kind = hit.type === "shot" ? (hit.outcome === "goal" ? t("goal") : hit.outcome === "save" ? t("save") : t("shot")) : hit.type === "turnover" ? t("turnover") : (hit.title ?? (hit.type ? ts(`type_${hit.type}` as "type_shot") : ""));
   const what = `${kind}${hit.number != null ? `, ${t("numberRead", { n: hit.number })}` : ""}${goal && !goal.confirmed ? `, ${t("spotEstimated")}` : ""}`;

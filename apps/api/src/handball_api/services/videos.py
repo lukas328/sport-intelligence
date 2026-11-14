@@ -447,8 +447,11 @@ async def _sync_after_ingest(ctx: Ctx, asset: VideoAsset) -> None:
         )
     ).all()
     if asset.role == VideoRole.MAIN:
+        # another main file is a further part of the match (Q-VIDEO-PARTS), placed one after the
+        # other, not a second camera of the same minutes: no sound sync between them
         for other in others:
-            await start_sync(ctx, asset, other)
+            if other.role != VideoRole.MAIN:
+                await start_sync(ctx, asset, other)
     else:
         main = next((v for v in others if v.role == VideoRole.MAIN), None)
         if main is not None:
